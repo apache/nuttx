@@ -34,6 +34,10 @@ endif
 
 endif
 
+ifeq ($(CONFIG_ESP32C3_SPIFLASH),y)
+CSRCS += esp32c3_spiflash.c
+endif
+
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32c3_gpio.c
 endif

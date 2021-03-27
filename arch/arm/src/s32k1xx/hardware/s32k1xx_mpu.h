@@ -1,56 +1,41 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_mpu.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_MPU_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_MPU_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define S32K1XX_MPU_NSLAVE_PORTS 5
 #define S32K1XX_MPU_NREGIONS     16
 
-/* MPU Register Offsets *****************************************************************************/
+/* MPU Register Offsets *****************************************************/
 
 #define S32K1XX_MPU_CESR_OFFSET         0x000                 /* Control/Error Status Register */
 #define S32K1XX_MPU_SLAVEPORT_OFFSET(s) (0x0010 + ((s) << 3)) /* Slave port s offset, s=0..4 */
@@ -63,7 +48,7 @@
 #  define S32K1XX_MPU_RGD_WORD3_OFFSET  0x000c                /* Region n descriptor word 3 */
 #define S32K1XX_MPU_RGDAAC_OFFSET(r)    (0x0800 + ((r) << 2)) /* Region n descriptor alternate access control */
 
-/* MPU Register Addresses ***************************************************************************/
+/* MPU Register Addresses ***************************************************/
 
 #define S32K1XX_MPU_CESR                (S32K1XX_MPU_BASE + S32K1XX_MPU_CESR_OFFSET)
 #define S32K1XX_MPU_SLAVEPORT_BASE(s)   (S32K1XX_MPU_BASE + S32K1XX_MPU_SLAVEPORT_OFFSET(s))
@@ -76,7 +61,7 @@
 #  define S32K1XX_MPU_RGD_WORD3(r)      (S32K1XX_MPU_RGD_BASE(r) + S32K1XX_MPU_RGD_WORD3_OFFSET)
 #define S32K1XX_MPU_RGDAAC(r)           (S32K1XX_MPU_BASE + S32K1XX_MPU_RGDAAC_OFFSET(r))
 
-/* MPU Register Bitfield Definitions ****************************************************************/
+/* MPU Register Bitfield Definitions ****************************************/
 
 /* Control/Error Status Register */
 
@@ -86,6 +71,7 @@
 #  define MPU_CESR_NRGD_8               (0 << MPU_CESR_NRGD_SHIFT) /* 8 region descriptors */
 #  define MPU_CESR_NRGD_12              (1 << MPU_CESR_NRGD_SHIFT) /* 12 region descriptors */
 #  define MPU_CESR_NRGD_16              (2 << MPU_CESR_NRGD_SHIFT) /* 16 region descriptors */
+
 #define MPU_CESR_NSP_SHIFT              (12)      /* Bits 12-15: Number Of Slave Ports */
 #define MPU_CESR_NSP_MASK               (15 << MPU_CESR_NSP_SHIFT)
 #define MPU_CESR_HRL_SHIFT              (16)      /* Bits 16-19: Hardware Revision Level */
@@ -109,6 +95,7 @@
 #  define MPU_EDR_EATTR_DUSER           (1 << MPU_EDR_EATTR_SHIFT) /* User mode, data access */
 #  define MPU_EDR_EATTR_ISUPER          (2 << MPU_EDR_EATTR_SHIFT) /* Supervisor mode, instruction access */
 #  define MPU_EDR_EATTR_DSUPER          (3 << MPU_EDR_EATTR_SHIFT) /* Supervisor mode, data access */
+
 #define MPU_EDR_EMN_SHIFT               (4)       /* Bits 4-7: Error Master Number */
 #define MPU_EDR_EMN_MASK                (15 << MPU_EDR_EMN_SHIFT)
 #define MPU_EDR_EPID_SHIFT              (8)       /* Bits 8-15: Error Process Identification */
@@ -137,41 +124,48 @@
 #  define MPU_RGD_WORD2_M0SM_RX         (1 << MPU_RGD_WORD2_M0SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGD_WORD2_M0SM_RW         (2 << MPU_RGD_WORD2_M0SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGD_WORD2_M0SM_M0UM       (3 << MPU_RGD_WORD2_M0SM_SHIFT) /* Same as User mode defined in M0UM */
+
 #define MPU_RGD_WORD2_M0PE              (1 << 5)  /* Bit 5:  Bus Master 0 Process Identifier enable */
 #define MPU_RGD_WORD2_M1UM_SHIFT        (6)       /* Bits 6-8: Bus Master 1 User Mode Access Control */
 #define MPU_RGD_WORD2_M1UM_MASK         (7 << MPU_RGD_WORD2_M1UM_SHIFT)
 #  define MPU_RGD_WORD2_M1UM_XACCESS    (1 << MPU_RGD_WORD2_M1UM_SHIFT)
 #  define MPU_RGD_WORD2_M1UM_WACCESS    (2 << MPU_RGD_WORD2_M1UM_SHIFT)
 #  define MPU_RGD_WORD2_M1UM_RACCESS    (4 << MPU_RGD_WORD2_M1UM_SHIFT)
+
 #define MPU_RGD_WORD2_M1SM_SHIFT        (9)       /* Bits 9-10: Bus Master 1 Supervisor Mode Access Control */
 #define MPU_RGD_WORD2_M1SM_MASK         (3 << MPU_RGD_WORD2_M1SM_SHIFT)
 #  define MPU_RGD_WORD2_M1SM_RWX        (0 << MPU_RGD_WORD2_M1SM_SHIFT) /* Read, write and execute allowed */
 #  define MPU_RGD_WORD2_M1SM_RX         (1 << MPU_RGD_WORD2_M1SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGD_WORD2_M1SM_RW         (2 << MPU_RGD_WORD2_M1SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGD_WORD2_M1SM_M1UM       (3 << MPU_RGD_WORD2_M1SM_SHIFT) /* Same as User mode defined in M1UM */
+
 #define MPU_RGD_WORD2_M1PE              (1 << 11) /* Bit 11: Bus Master 1 Process Identifier enable */
 #define MPU_RGD_WORD2_M2UM_SHIFT        (12)      /* Bits 12-14: Bus Master 2 User Mode Access control */
 #define MPU_RGD_WORD2_M2UM_MASK         (7 << MPU_RGD_WORD2_M2UM_SHIFT)
 #  define MPU_RGD_WORD2_M2UM_XACCESS    (1 << MPU_RGD_WORD2_M2UM_SHIFT)
 #  define MPU_RGD_WORD2_M2UM_WACCESS    (2 << MPU_RGD_WORD2_M2UM_SHIFT)
 #  define MPU_RGD_WORD2_M2UM_RACCESS    (4 << MPU_RGD_WORD2_M2UM_SHIFT)
+
 #define MPU_RGD_WORD2_M2SM_SHIFT        (15)      /* Bits 15-16: Bus Master 2 Supervisor Mode Access Control */
 #define MPU_RGD_WORD2_M2SM_MASK         (3 << MPU_RGD_WORD2_M2SM_SHIFT)
 #  define MPU_RGD_WORD2_M2SM_RWX        (0 << MPU_RGD_WORD2_M2SM_SHIFT) /* Read, write and execute allowed */
 #  define MPU_RGD_WORD2_M2SM_RX         (1 << MPU_RGD_WORD2_M2SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGD_WORD2_M2SM_RW         (2 << MPU_RGD_WORD2_M2SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGD_WORD2_M2SM_M2UM       (3 << MPU_RGD_WORD2_M2SM_SHIFT) /* Same as User mode defined in M2UM */
+
 #define MPU_RGD_WORD2_M3UM_SHIFT        (18)      /* Bits 18-20: Bus Master 3 User Mode Access Control */
 #define MPU_RGD_WORD2_M3UM_MASK         (7 << MPU_RGD_WORD2_M3UM_SHIFT)
 #  define MPU_RGD_WORD2_M3UM_XACCESS    (1 << MPU_RGD_WORD2_M3UM_SHIFT)
 #  define MPU_RGD_WORD2_M3UM_WACCESS    (2 << MPU_RGD_WORD2_M3UM_SHIFT)
 #  define MPU_RGD_WORD2_M3UM_RACCESS    (4 << MPU_RGD_WORD2_M3UM_SHIFT)
+
 #define MPU_RGD_WORD2_M3SM_SHIFT        (21)      /* Bits 21-22: Bus Master 3 Supervisor Mode Access Control */
 #define MPU_RGD_WORD2_M3SM_MASK         (3 << MPU_RGD_WORD2_M3SM_SHIFT)
 #  define MPU_RGD_WORD2_M3SM_RWX        (0 << MPU_RGD_WORD2_M3SM_SHIFT) /* Read, write and execute allowed */
 #  define MPU_RGD_WORD2_M3SM_RX         (1 << MPU_RGD_WORD2_M3SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGD_WORD2_M3SM_RW         (2 << MPU_RGD_WORD2_M3SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGD_WORD2_M3SM_M3UM       (3 << MPU_RGD_WORD2_M3SM_SHIFT) /* Same as User mode defined in M3UM */
+
 #define MPU_RGD_WORD2_M4WE              (1 << 24) /* Bit 24: Bus Master 4 Write Enable */
 #define MPU_RGD_WORD2_M4RE              (1 << 25) /* Bit 25: Bus Master 4 Read Enable */
 #define MPU_RGD_WORD2_M5RE              (1 << 27) /* Bit 27: Bus Master 5 Read Enable */
@@ -204,6 +198,7 @@
 #  define MPU_RGDAAC_M0SM_RX         (1 << MPU_RGDAAC_M0SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGDAAC_M0SM_RW         (2 << MPU_RGDAAC_M0SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGDAAC_M0SM_M0UM       (3 << MPU_RGDAAC_M0SM_SHIFT) /* Same as User mode defined in M0UM */
+
 #define MPU_RGDAAC_M0PE              (1 << 5)  /* Bit 5:  Bus Master 0 Process Identifier enable */
 #define MPU_RGDAAC_M1UM_SHIFT        (6)       /* Bits 6-8: Bus Master 1 User Mode Access Control */
 #define MPU_RGDAAC_M1UM_MASK         (7 << MPU_RGDAAC_M1UM_SHIFT)
@@ -216,29 +211,34 @@
 #  define MPU_RGDAAC_M1SM_RX         (1 << MPU_RGDAAC_M1SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGDAAC_M1SM_RW         (2 << MPU_RGDAAC_M1SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGDAAC_M1SM_M1UM       (3 << MPU_RGDAAC_M1SM_SHIFT) /* Same as User mode defined in M1UM */
+
 #define MPU_RGDAAC_M1PE              (1 << 11) /* Bit 11: Bus Master 1 Process Identifier enable */
 #define MPU_RGDAAC_M2UM_SHIFT        (12)      /* Bits 12-14: Bus Master 2 User Mode Access control */
 #define MPU_RGDAAC_M2UM_MASK         (7 << MPU_RGDAAC_M2UM_SHIFT)
 #  define MPU_RGDAAC_M2UM_XACCESS    (1 << MPU_RGDAAC_M2UM_SHIFT)
 #  define MPU_RGDAAC_M2UM_WACCESS    (2 << MPU_RGDAAC_M2UM_SHIFT)
 #  define MPU_RGDAAC_M2UM_RACCESS    (4 << MPU_RGDAAC_M2UM_SHIFT)
+
 #define MPU_RGDAAC_M2SM_SHIFT        (15)      /* Bits 15-16: Bus Master 2 Supervisor Mode Access Control */
 #define MPU_RGDAAC_M2SM_MASK         (3 << MPU_RGDAAC_M2SM_SHIFT)
 #  define MPU_RGDAAC_M2SM_RWX        (0 << MPU_RGDAAC_M2SM_SHIFT) /* Read, write and execute allowed */
 #  define MPU_RGDAAC_M2SM_RX         (1 << MPU_RGDAAC_M2SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGDAAC_M2SM_RW         (2 << MPU_RGDAAC_M2SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGDAAC_M2SM_M2UM       (3 << MPU_RGDAAC_M2SM_SHIFT) /* Same as User mode defined in M2UM */
+
 #define MPU_RGDAAC_M3UM_SHIFT        (18)      /* Bits 18-20: Bus Master 3 User Mode Access Control */
 #define MPU_RGDAAC_M3UM_MASK         (7 << MPU_RGDAAC_M3UM_SHIFT)
 #  define MPU_RGDAAC_M3UM_XACCESS    (1 << MPU_RGDAAC_M3UM_SHIFT)
 #  define MPU_RGDAAC_M3UM_WACCESS    (2 << MPU_RGDAAC_M3UM_SHIFT)
 #  define MPU_RGDAAC_M3UM_RACCESS    (4 << MPU_RGDAAC_M3UM_SHIFT)
+
 #define MPU_RGDAAC_M3SM_SHIFT        (21)      /* Bits 21-22: Bus Master 3 Supervisor Mode Access Control */
 #define MPU_RGDAAC_M3SM_MASK         (3 << MPU_RGDAAC_M3SM_SHIFT)
 #  define MPU_RGDAAC_M3SM_RWX        (0 << MPU_RGDAAC_M3SM_SHIFT) /* Read, write and execute allowed */
 #  define MPU_RGDAAC_M3SM_RX         (1 << MPU_RGDAAC_M3SM_SHIFT) /* Read and execute allowed */
 #  define MPU_RGDAAC_M3SM_RW         (2 << MPU_RGDAAC_M3SM_SHIFT) /* Read and write allowed */
 #  define MPU_RGDAAC_M3SM_M3UM       (3 << MPU_RGDAAC_M3SM_SHIFT) /* Same as User mode defined in M3UM */
+
 #define MPU_RGDAAC_M4WE              (1 << 24) /* Bit 24: Bus Master 4 Write Enable */
 #define MPU_RGDAAC_M4RE              (1 << 25) /* Bit 25: Bus Master 4 Read Enable */
 #define MPU_RGDAAC_M5RE              (1 << 27) /* Bit 27: Bus Master 5 Read Enable */

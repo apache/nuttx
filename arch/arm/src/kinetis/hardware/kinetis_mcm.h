@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_mcm.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MCM_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MCM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_MCM_PLASC_OFFSET    0x0008 /* Crossbar switch (AXBS) slave configuration */
 #define KINETIS_MCM_PLAMC_OFFSET    0x000a /* Crossbar switch (AXBS) master configuration */
@@ -61,7 +46,7 @@
 #  define KINETIS_MCM_PID_OFFSET    0x0030 /* Process ID register */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_MCM_PLASC           (KINETIS_MCM_BASE+KINETIS_MCM_PLASC_OFFSET)
 #define KINETIS_MCM_PLAMC           (KINETIS_MCM_BASE+KINETIS_MCM_PLAMC_OFFSET)
@@ -74,7 +59,7 @@
 #  define KINETIS_MCM_PID           (KINETIS_MCM_BASE+KINETIS_MCM_PID_OFFSET)
 #endif
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Crossbar switch (AXBS) slave configuration */
 
@@ -96,6 +81,7 @@
                                               /* Bits 8-15: Reserved */
 
 /* SRAM arbitration and protection */
+
                                               /* Bits 0-23: Reserved */
 #define MCM_SRAMAP_SRAMUAP_SHIFT    (24)      /* Bits 24-25: SRAM_U arbitration priority */
 #define MCM_SRAMAP_SRAMUAP_MASK     (3 << MCM_SRAMAP_SRAMUAP_SHIFT)
@@ -103,6 +89,7 @@
 #  define MCM_SRAMAP_SRAMUAP_SRR    (1 << MCM_SRAMAP_SRAMUAP_SHIFT) /* Special round robin */
 #  define MCM_SRAMAP_SRAMUAP_FIXED1 (2 << MCM_SRAMAP_SRAMUAP_SHIFT) /* Fixed pri. Proc highest/backdoor lowest */
 #  define MCM_SRAMAP_SRAMUAP_FIXED2 (3 << MCM_SRAMAP_SRAMUAP_SHIFT) /* Fixed pri. Backdoor highest/proc lowest */
+
 #define MCM_SRAMAP_SRAMUWP          (1 << 26) /* Bit 26: SRAM_U write protect */
                                               /* Bit 27: Reserved */
 #define MCM_SRAMAP_SRAMLAP_SHIFT    (28)      /* Bits 28-29: SRAM_L arbitration priority */
@@ -111,13 +98,17 @@
 #  define MCM_SRAMAP_SRAMLAP_SRR    (1 << MCM_SRAMAP_SRAMLAP_SHIFT) /* Special round robin */
 #  define MCM_SRAMAP_SRAMLAP_FIXED1 (2 << MCM_SRAMAP_SRAMLAP_SHIFT) /* Fixed pri. Proc highest/backdoor lowest */
 #  define MCM_SRAMAP_SRAMLAP_FIXED2 (3 << MCM_SRAMAP_SRAMLAP_SHIFT) /* Fixed pri. Backdoor highest/proc lowest */
+
 #define MCM_SRAMAP_SRAMLWP          (1 << 30) /* Bit 30: SRAM_L write protect */
                                               /* Bit 31: Reserved */
+
 /* Interrupt status register */
+
                                               /* Bit 0: Reserved */
 #define MCM_ISR_IRQ                 (1 << 1)  /* Bit 1:  Normal interrupt pending */
 #define MCM_ISR_NMI                 (1 << 2)  /* Bit 2:  Non-maskable interrupt pending */
                                               /* Bits 3-31: Reserved */
+
 /* ETB counter control register */
 
 #define MCM_ETBCC_CNTEN             (1 << 0)  /* Bit 0:  Counter enable */
@@ -127,31 +118,34 @@
 #  define MCM_ETBCC_RSPT_INT        (1 << MCM_ETBCC_RSPT_SHIFT) /* Normal interrupt when ETB count expires */
 #  define MCM_ETBCC_RSPT_NMI        (2 << MCM_ETBCC_RSPT_SHIFT) /* NMI when ETB count expires */
 #  define MCM_ETBCC_RSPT_HALT       (3 << MCM_ETBCC_RSPT_SHIFT) /* Debug halt when ETB count expires */
+
 #define MCM_ETBCC_RLRQ              (1 << 3)  /* Bit 3:  Reload request */
 #define MCM_ETBCC_ETDIS             (1 << 4)  /* Bit 4:  ETM-to-TPIU disable */
 #define MCM_ETBCC_ITDIS             (1 << 5)  /* Bit 5:  ITM-to-TPIU disable */
                                               /* Bits 6-31: Reserved */
+
 /* ETB reload register */
 
 #define MCM_ETBRL_RELOAD_SHIFT      (0)       /* Bits 0-10: Byte count reload value */
 #define MCM_ETBRL_RELOAD_MASK       (0x7ff << MCM_ETBRL_RELOAD_SHIFT)
                                               /* Bits 11-31: Reserved */
+
 /* ETB counter value register */
 
 #define MCM_ETBCNT_COUNTER_SHIFT    (0)       /* Bits 0-10: Byte count counter value */
 #define MCM_ETBCNT_COUNTER_MASK     (0x7ff << MCM_ETBCNT_COUNTER_SHIFT)
                                               /* Bits 11-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MCM_H */

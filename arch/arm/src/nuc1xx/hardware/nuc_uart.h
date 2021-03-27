@@ -1,53 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/nuc1xx/hardware/nuc_uart.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_UART_H
 #define __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_UART_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register offsets *********************************************************/
 
 #define NUC_UART_RBR_OFFSET        0x0000 /* UART receive buffer register */
 #define NUC_UART_THR_OFFSET        0x0000 /* UART transmit holding register */
@@ -64,7 +50,7 @@
 #define NUC_UART_ALT_CSR_OFFSET    0x002c /* UART alternate control/status register */
 #define NUC_UART_FUN_SEL_OFFSET    0x0030 /* UART function select register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define NUC_UART0_RBR              (NUC_UART0_BASE+NUC_UART_RBR_OFFSET)
 #define NUC_UART0_THR              (NUC_UART0_BASE+NUC_UART_THR_OFFSET)
@@ -111,7 +97,7 @@
 #define NUC_UART2_ALT_CSR          (NUC_UART2_BASE+NUC_UART_ALT_CSR_OFFSET)
 #define NUC_UART2_FUN_SEL          (NUC_UART2_BASE+NUC_UART_FUN_SEL_OFFSET)
 
-/* Register bit-field definitions ***********************************************************/
+/* Register bit-field definitions *******************************************/
 
 /* UART receive buffer register */
 
@@ -152,6 +138,7 @@
 #  define UART_FCR_RFITL_30        (4 << UART_FCR_RFITL_SHIFT) /* High speed */
 #  define UART_FCR_RFITL_46        (5 << UART_FCR_RFITL_SHIFT) /* High speed */
 #  define UART_FCR_RFITL_62        (6 << UART_FCR_RFITL_SHIFT) /* High speed */
+
 #define UART_FCR_RX_DIS            (1 << 8)  /* Bit 8:  Receive disable register */
 #define UART_FCR_RTS_TRI_LEV_SHIFT (16)      /* Bits 16-19: RTS trigger level for auto flow control */
 #define UART_FCR_RTS_TRI_LEV_MASK  (15 << UART_FCR_RTS_TRI_LEV_SHIFT)
@@ -275,16 +262,16 @@
 #  define UART_FUN_SEL_IRDA        (2 << UART_FUN_SEL_SHIFT)
 #  define UART_FUN_SEL_RS485       (3 << UART_FUN_SEL_SHIFT) /* Low density only */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_NUC1XX_HARDWARE_NUC_UART_H */

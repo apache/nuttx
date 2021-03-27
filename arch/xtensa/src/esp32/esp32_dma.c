@@ -24,13 +24,8 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <debug.h>
-#include <errno.h>
 #include <assert.h>
 #include <sys/types.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/irq.h>
 
 #include "hardware/esp32_dma.h"
 #include "esp32_dma.h"
@@ -41,6 +36,10 @@
 
 #ifndef MIN
 #  define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef ALIGN_UP
+#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 #endif
 
 /****************************************************************************
@@ -82,11 +81,9 @@ uint32_t esp32_dma_init(struct esp32_dmadesc_s *dmadesc, uint32_t num,
     {
       data_len = MIN(bytes, ESP32_DMA_DATALEN_MAX);
 
-      /* Round the number of bytes to the nearest word, since the buffer
-       * length must be word-aligned.
-       */
+      /* Buffer length must be rounded to next 32-bit boundary. */
 
-      buf_len = (data_len + sizeof(uintptr_t) - 1) / sizeof(uintptr_t);
+      buf_len = ALIGN_UP(data_len, sizeof(uintptr_t));
 
       dmadesc[i].ctrl = (data_len << DMA_CTRL_DATALEN_S) |
                         (buf_len << DMA_CTRL_BUFLEN_S) |

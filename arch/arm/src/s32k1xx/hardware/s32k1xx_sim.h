@@ -1,53 +1,38 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_sim.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_SIM_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_SIM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* SIM Register Offsets *****************************************************************************/
+/* SIM Register Offsets *****************************************************/
 
 #define S32K1XX_SIM_CHIPCTL_OFFSET              0x0004  /* Chip Control register */
 #define S32K1XX_SIM_FTMOPT0_OFFSET              0x000c  /* FTM Option Register 0 */
@@ -65,7 +50,7 @@
 #define S32K1XX_SIM_CLKDIV4_OFFSET              0x0068  /* System Clock Divider Register 4 */
 #define S32K1XX_SIM_MISCTRL1_OFFSET             0x006c  /* Miscellaneous Control register 1 */
 
-/* SIM Register Addresses ***************************************************************************/
+/* SIM Register Addresses ***************************************************/
 
 #define S32K1XX_SIM_CHIPCTL                     (S32K1XX_SIM_BASE + S32K1XX_SIM_CHIPCTL_OFFSET)
 #define S32K1XX_SIM_FTMOPT0                     (S32K1XX_SIM_BASE + S32K1XX_SIM_FTMOPT0_OFFSET)
@@ -83,7 +68,7 @@
 #define S32K1XX_SIM_CLKDIV4                     (S32K1XX_SIM_BASE + S32K1XX_SIM_CLKDIV4_OFFSET)
 #define S32K1XX_SIM_MISCTRL1                    (S32K1XX_SIM_BASE + S32K1XX_SIM_MISCTRL1_OFFSET)
 
-/* SIM Register Bitfield Definitions ****************************************************************/
+/* SIM Register Bitfield Definitions ****************************************/
 
 /* Chip Control register */
 
@@ -110,9 +95,11 @@
 #  define SIM_CHIPCTL_CLKOUTSEL_QSPI_SFIF_CLK   (13 << SIM_CHIPCTL_CLKOUTSEL_SHIFT) /* (S32K148) */
 #  define SIM_CHIPCTL_CLKOUTSEL_RTC_CLK         (14 << SIM_CHIPCTL_CLKOUTSEL_SHIFT)
 #  define SIM_CHIPCTL_CLKOUTSEL_QSPI_2xSFIF_CLK (15 << SIM_CHIPCTL_CLKOUTSEL_SHIFT) /* S32K148) */
+
 #define SIM_CHIPCTL_CLKOUTDIV_SHIFT             (8)       /* Bits 8-10:  CLKOUT Divide Ratio */
 #define SIM_CHIPCTL_CLKOUTDIV_MASK              (7 << SIM_CHIPCTL_CLKOUTDIV_SHIFT)
 #  define SIM_CHIPCTL_CLKOUTDIV(n)              ((uint32_t)((n) - 1) << SIM_CHIPCTL_CLKOUTDIV_SHIFT) /* n=1..8 */
+
 #define SIM_CHIPCTL_CLKOUTEN                    (1 << 11) /* Bit 11: CLKOUT enable */
 #define SIM_CHIPCTL_TRACECLK_SEL                (1 << 12) /* Bit 12: Debug trace clock select */
 #define SIM_CHIPCTL_PDB_BB_SEL                  (1 << 13) /* Bit 13: PDB back-to-back select */
@@ -124,6 +111,7 @@
 #  define SIM_CHIPCTL_ADC_SUPPLY_VDD_3V         (3 << SIM_CHIPCTL_ADC_SUPPLY_SHIFT) /* 3.3V Oscillator Regulator Output */
 #  define SIM_CHIPCTL_ADC_SUPPLY_VDD_FLASH_3V   (4 << SIM_CHIPCTL_ADC_SUPPLY_SHIFT) /* 3.3V flash regulator output */
 #  define SIM_CHIPCTL_ADC_SUPPLY_VDD_LV         (5 << SIM_CHIPCTL_ADC_SUPPLY_SHIFT) /* 1.2V core regulator output */
+
 #define SIM_CHIPCTL_ADC_SUPPLYEN                (1 << 19) /* Bit 19:  Enable supply montorign ADC0 channel 0 */
 #define SIM_CHIPCTL_SRAMU_RETEN                 (1 << 20) /* Bit 20: SRAMU retention */
 #define SIM_CHIPCTL_SRAML_RETEN                 (1 << 21) /* Bit 21: SRAML retention */
@@ -134,14 +122,17 @@
 #define SIM_FTMOPT0_FTM0FLTxSEL_MASK            (7 << SIM_FTMOPT0_FTM0FLTxSEL_SHIFT)
 #  define SIM_FTMOPT0_FTM0FLTxSEL_FTM0_FLTx     (0 << SIM_FTMOPT0_FTM0FLTxSEL_SHIFT) /* FTM0_FLTx pin */
 #  define SIM_FTMOPT0_FTM0FLTxSEL_TRGMUX_FTM0   (1 << SIM_FTMOPT0_FTM0FLTxSEL_SHIFT) /* TRGMUX_FTM0 out */
+
 #define SIM_FTMOPT0_FTM1FLTxSEL_SHIFT           (4)       /* Bits 4-6: FTM1 Fault X Select */
 #define SIM_FTMOPT0_FTM1FLTxSEL_MASK            (7 << SIM_FTMOPT0_FTM1FLTxSEL_SHIFT)
 #  define SIM_FTMOPT0_FTM1FLTxSEL_FTM1_FLTx     (0 << SIM_FTMOPT0_FTM1FLTxSEL_SHIFT) /* FTM1_FLTx pin */
 #  define SIM_FTMOPT0_FTM1FLTxSEL_TRGMUX_FTM1   (1 << SIM_FTMOPT0_FTM1FLTxSEL_SHIFT) /* TRGMUX_FTM1 out */
+
 #define SIM_FTMOPT0_FTM2FLTxSEL_SHIFT           (8)       /* Bits 8-10: FTM2 Fault X Select */
 #define SIM_FTMOPT0_FTM2FLTxSEL_MASK            (7 << SIM_FTMOPT0_FTM2FLTxSEL_SHIFT)
 #  define SIM_FTMOPT0_FTM2FLTxSEL_FTM2_FLTx     (0 << SIM_FTMOPT0_FTM2FLTxSEL_SHIFT) /* FTM2_FLTx pin */
 #  define SIM_FTMOPT0_FTM2FLTxSEL_TRGMUX_FTM2   (1 << SIM_FTMOPT0_FTM2FLTxSEL_SHIFT) /* TRGMUX_FTM2 out */
+
 #define SIM_FTMOPT0_FTM3FLTxSEL_SHIFT           (0)       /* Bits 0-2: FTM3 Fault X Select */
 #define SIM_FTMOPT0_FTM3FLTxSEL_MASK            (7 << SIM_FTMOPT0_FTM3FLTxSEL_SHIFT)
 #  define SIM_FTMOPT0_FTM3FLTxSEL_FTM3_FLTx     (0 << SIM_FTMOPT0_FTM3FLTxSEL_SHIFT) /* FTM3_FLTx pin */
@@ -187,6 +178,7 @@
 #  define SIM_LPOCLKS_LPOCLKSEL_NO_CLOCK        (1 << SIM_LPOCLKS_LPOCLKSEL_SHIFT) /* No clock */
 #  define SIM_LPOCLKS_LPOCLKSEL_32KHz_LPO_CLK   (2 << SIM_LPOCLKS_LPOCLKSEL_SHIFT) /* 32kHz LPO_CLK derived from 128 kHz LPO_CLK */
 #  define SIM_LPOCLKS_LPOCLKSEL_1KHz_LPO_CLK    (3 << SIM_LPOCLKS_LPOCLKSEL_SHIFT) /* 1kHz LPO_CLK derived from 128 kHz LPO_CLK */
+
 #define SIM_LPOCLKS_RTCCLKSEL_SHIFT             (4)       /* Bits 4-5: 32kHz clock source select */
 #define SIM_LPOCLKS_RTCCLKSEL_MASK              (3 << SIM_LPOCLKS_RTCCLKSEL_SHIFT)
 #  define SIM_LPOCLKS_RTCCLKSEL(n)              ((uint32_t)(n) << SIM_LPOCLKS_RTCCLKSEL_SHIFT)
@@ -207,11 +199,13 @@
 #  define SIM_ADCOPT_ADC0SWPRETRG_SWPRETRG1     (5 << SIM_ADCOPT_ADC0SWPRETRG_SHIFT) /* Software pretrigger 1 */
 #  define SIM_ADCOPT_ADC0SWPRETRG_SWPRETRG2     (6 << SIM_ADCOPT_ADC0SWPRETRG_SHIFT) /* Software pretrigger 2 */
 #  define SIM_ADCOPT_ADC0SWPRETRG_SWPRETRG3     (7 << SIM_ADCOPT_ADC0SWPRETRG_SHIFT) /* Software pretrigger 3 */
+
 #define SIM_ADCOPT_ADC0PRETRGSEL_SHIFT          (4)       /* Bits 4-5:  ADC0 pretrigger source select */
 #define SIM_ADCOPT_ADC0PRETRGSEL_MASK           (3 << SIM_ADCOPT_ADC0PRETRGSEL_SHIFT)
 #  define SIM_ADCOPT_ADC0PRETRGSEL_PDB          (0 << SIM_ADCOPT_ADC0PRETRGSEL_SHIFT) /* PDB pretrigger */
 #  define SIM_ADCOPT_ADC0PRETRGSEL_TRGMUX       (1 << SIM_ADCOPT_ADC0PRETRGSEL_SHIFT) /* TRGMUX pretrigger */
 #  define SIM_ADCOPT_ADC0PRETRGSEL_SW           (2 << SIM_ADCOPT_ADC0PRETRGSEL_SHIFT) /* Software pretrigger */
+
 #define SIM_ADCOPT_ADC1TRGSEL                   (1 << 8)  /* Bit 8:  ADC1 trigger source select */
 # define SIM_ADCOPT_ADC1TRGSEL_PDB              (0)       /*         PDB output */
 # define SIM_ADCOPT_ADC1TRGSEL_TRGMUX           (1 << 8)  /*         TRGMUX output */
@@ -222,6 +216,7 @@
 #  define SIM_ADCOPT_ADC1SWPRETRG_SWPRETRG1     (5 << SIM_ADCOPT_ADC1SWPRETRG_SHIFT) /* Software pretrigger 1 */
 #  define SIM_ADCOPT_ADC1SWPRETRG_SWPRETRG2     (6 << SIM_ADCOPT_ADC1SWPRETRG_SHIFT) /* Software pretrigger 2 */
 #  define SIM_ADCOPT_ADC1SWPRETRG_SWPRETRG3     (7 << SIM_ADCOPT_ADC1SWPRETRG_SHIFT) /* Software pretrigger 3 */
+
 #define SIM_ADCOPT_ADC1PRETRGSEL_SHIFT          (12)      /* Bits 12-13:  ADC1 pretrigger source select */
 #define SIM_ADCOPT_ADC1PRETRGSEL_MASK           (3 << SIM_ADCOPT_ADC1PRETRGSEL_SHIFT)
 #  define SIM_ADCOPT_ADC1PRETRGSEL_PDB          (0 << SIM_ADCOPT_ADC1PRETRGSEL_SHIFT) /* PDB pretrigger */
@@ -238,10 +233,12 @@
 #define SIM_FTMOPT1_FTM1CH0SEL_MASK             (3 << SIM_FTMOPT1_FTM1CH0SEL_SHIFT)
 #  define SIM_FTMOPT1_FTM1CH0SEL_FTM1_CH0       (0 << SIM_FTMOPT1_FTM1CH0SEL_SHIFT) /* FTM1_CH0 input */
 #  define SIM_FTMOPT1_FTM1CH0SEL_CMP0           (1 << SIM_FTMOPT1_FTM1CH0SEL_SHIFT) /* CMP0 output */
+
 #define SIM_FTMOPT1_FTM2CH0SEL_SHIFT            (6)       /* Bits 6-7: FTM2 CH0 Select */
 #define SIM_FTMOPT1_FTM2CH0SEL_MASK             (3 << SIM_FTMOPT1_FTM2CH0SEL_SHIFT)
 #  define SIM_FTMOPT1_FTM1CH0SEL_FTM2_CH0       (0 << SIM_FTMOPT1_FTM1CH0SEL_SHIFT) /* FTM2_CH0 input */
 #  define SIM_FTMOPT1_FTM1CH0SEL_CMP0           (1 << SIM_FTMOPT1_FTM1CH0SEL_SHIFT) /* CMP0 output */
+
 #define SIM_FTMOPT1_FTM2CH1SEL                  (1 << 8)  /* Bit 8:  FTM2 CH1 Select */
 #define SIM_FTMOPT1_FTM4SYNCBIT                 (1 << 11) /* Bit 11: FTM4 Sync Bit */
 #define SIM_FTMOPT1_FTM5SYNCBIT                 (1 << 12) /* Bit 12: FTM5 Sync Bit */
@@ -258,6 +255,7 @@
 #  define SIM_FTMOPT1_FTM0_OUTSEL_CHAN5         (32 << SIM_FTMOPT1_FTM0_OUTSEL_SHIFT)  /* Modulation with FTM1_CH5 */
 #  define SIM_FTMOPT1_FTM0_OUTSEL_CHAN6         (64 << SIM_FTMOPT1_FTM0_OUTSEL_SHIFT)  /* Modulation with FTM1_CH6 */
 #  define SIM_FTMOPT1_FTM0_OUTSEL_CHAN7         (128 << SIM_FTMOPT1_FTM0_OUTSEL_SHIFT) /* Modulation with FTM1_CH7 */
+
 #define SIM_FTMOPT1_FTM3_OUTSEL_SHIFT           (16)      /* Bits 16-23: FTM3 channel modulation select with FTM2_CH1 */
 #define SIM_FTMOPT1_FTM3_OUTSEL_MASK            (0xff << SIM_FTMOPT1_FTM3_OUTSEL_SHIFT)
 #  define SIM_FTMOPT1_FTM3_OUTSEL_CHAN0         (1 << SIM_FTMOPT1_FTM3_OUTSEL_SHIFT)   /* Modulation with FTM2_CH0 */
@@ -297,7 +295,7 @@
 #  define SIM_SDID_FEATURES_FLEXIO              (1 << 5) /* Bit 5: FlexIO */
 #  define SIM_SDID_FEATURES_ISO_CANFD           (1 << 6) /* Bit 6: ISO CAN-FD */
 #  define SIM_SDID_FEATURES_SECURITY            (1 << 7) /* Bit 7: Security */
-#define SIM_SDID_PACKAGE_SHIFT                  (8)       /* Bits 8-11: Package */
+#define SIM_SDID_PACKAGE_SHIFT                  (8)      /* Bits 8-11: Package */
 #define SIM_SDID_PACKAGE_MASK                   (15 << SIM_SDID_PACKAGE_SHIFT)
 #  define SIM_SDID_PACKAGE_32QFN                (1 << SIM_SDID_PACKAGE_SHIFT) /* 32 QFN */
 #  define SIM_SDID_PACKAGE_48LQFP               (2 << SIM_SDID_PACKAGE_SHIFT) /* 48 LQFP */
@@ -306,6 +304,7 @@
 #  define SIM_SDID_PACKAGE_144LQFP              (6 << SIM_SDID_PACKAGE_SHIFT) /* 144 LQFP */
 #  define SIM_SDID_PACKAGE_176LQFP              (7 << SIM_SDID_PACKAGE_SHIFT) /* 176 LQFP */
 #  define SIM_SDID_PACKAGE_100MAPBGA            (8 << SIM_SDID_PACKAGE_SHIFT) /* 100 MAP BGA */
+
 #define SIM_SDID_REVID_SHIFT                    (12)      /* Bits 12-15:  Device revision number */
 #define SIM_SDID_REVID_MASK                     (15 << SIM_SDID_REVID_SHIFT)
 #define SIM_SDID_RAMSIZE_SHIFT                  (16)      /* Bits 16-19:  RAM size */
@@ -320,6 +319,7 @@
 #  define SIM_SDID_RAMSIZE_192KB                (11 << SIM_SDID_RAMSIZE_SHIFT) /* S32K148 */
 #  define SIM_SDID_RAMSIZE_256KB                (15 << SIM_SDID_RAMSIZE_SHIFT) /* S32K148 */
 #  define SIM_SDID_RAMSIZE_256KB                (15 << SIM_SDID_RAMSIZE_SHIFT) /* S32K148 */
+
 #define SIM_SDID_DERIVATE_SHIFT                 (20)      /* Bits 20-23: Derivate */
 #define SIM_SDID_DERIVATE_MASK                  (15 << SIM_SDID_DERIVATE_SHIFT)
 #define SIM_SDID_SUBSERIES_SHIFT                (24)      /* Bits 24-27: Subseries */
@@ -352,10 +352,12 @@
 #  define SIM_FCFG1_EEERAMSIZE_32B              (9 << SIM_FCFG1_EEERAMSIZE_SHIFT)  /* 32 Bytes */
 #  define SIM_FCFG1_EEERAMSIZE_0B               (15 << SIM_FCFG1_EEERAMSIZE_SHIFT) /*  0 Bytes */
 
-
 /* Unique Identification Register High (32-bit UIDH[96-127]) */
+
 /* Unique Identification Register Mid-High (32-bit UIDH[64-95]) */
+
 /* Unique Identification Register Mid Low (32-bit UIDH[32-63]) */
+
 /* Unique Identification Register Low (32-bit UIDH[0-31]) */
 
 /* System Clock Divider Register 4 */
@@ -364,6 +366,7 @@
 #define SIM_CLKDIV4_TRACEDIV_SHIFT              (1)       /* Bits 1-3:  Trace Clock Divider value */
 #define SIM_CLKDIV4_TRACEDIV_MASK               (7 << SIM_CLKDIV4_TRACEDIV_SHIFT)
 #  define SIM_CLKDIV4_TRACEDIV(n)               ((uint32_t)((n) - 1) << SIM_CLKDIV4_TRACEDIV_SHIFT) /* n=1..8 */
+
 #define SIM_CLKDIV4_TRACEDIVEN                  (1 << 28) /* Bit 28: Debug Trace Divider control */
 
 /* Miscellaneous Control register 1 */

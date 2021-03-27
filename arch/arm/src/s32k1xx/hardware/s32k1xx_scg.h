@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_scg.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_SCG_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_SCG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* SCG Register Offsets *************************************************************/
+/* SCG Register Offsets *****************************************************/
 
 #define S32K1XX_SCG_VERID_OFFSET       0x0000  /* Version ID Register */
 #define S32K1XX_SCG_PARAM_OFFSET       0x0004  /* Parameter Register */
@@ -69,7 +54,7 @@
 #define S32K1XX_SCG_SPLLDIV_OFFSET     0x0604  /* System PLL Divide Register */
 #define S32K1XX_SCG_SPLLCFG_OFFSET     0x0608  /* System PLL Configuration Register */
 
-/* SCG Register Addresses ***********************************************************/
+/* SCG Register Addresses ***************************************************/
 
 #define S32K1XX_SCG_VERID              (S32K1XX_SCG_BASE + S32K1XX_SCG_VERID_OFFSET)
 #define S32K1XX_SCG_PARAM              (S32K1XX_SCG_BASE + S32K1XX_SCG_PARAM_OFFSET)
@@ -91,7 +76,7 @@
 #define S32K1XX_SCG_SPLLDIV            (S32K1XX_SCG_BASE + S32K1XX_SCG_SPLLDIV_OFFSET)
 #define S32K1XX_SCG_SPLLCFG            (S32K1XX_SCG_BASE + S32K1XX_SCG_SPLLCFG_OFFSET)
 
-/* SCG Register Bitfield Definitions ************************************************/
+/* SCG Register Bitfield Definitions ****************************************/
 
 /* Version ID Register (32-bit version number) */
 
@@ -110,12 +95,15 @@
 #define SCG_CSR_DIVSLOW_SHIFT          (0)       /* Bits 0-3:  Slow Clock Divide Ratio */
 #define SCG_CSR_DIVSLOW_MASK           (15 << SCG_CSR_DIVSLOW_SHIFT)
 #  define SCG_CSR_DIVSLOW(n)           ((uint32_t)((n) - 1) << SCG_CSR_DIVSLOW_SHIFT) /* n=1-8 */
+
 #define SCG_CSR_DIVBUS_SHIFT           (4)       /* Bits 4-7:  Bus Clock Divide Ratio */
 #define SCG_CSR_DIVBUS_MASK            (15 << SCG_CSR_DIVBUS_SHIFT)
 #  define SCG_CSR_DIVBUS(n)            ((uint32_t)((n) - 1) << SCG_CSR_DIVBUS_SHIFT) /* n=1-16 */
+
 #define SCG_CSR_DIVCORE_SHIFT          (16)      /* Bits 16-19:  Core Clock Divide Ratio */
 #define SCG_CSR_DIVCORE_MASK           (15 << SCG_CSR_DIVCORE_SHIFT)
 #  define SCG_CSR_DIVCORE(n)           ((uint32_t)((n) - 1) << SCG_CSR_DIVCORE_SHIFT) /* n=1-16 */
+
 #define SCG_CSR_SCS_SHIFT              (24)      /* Bits 24-27:  System clock source */
 #define SCG_CSR_SCS_MASK               (15 << SCG_CSR_SCS_SHIFT)
 #  define SCG_CSR_SCS_SOSC             (1 << SCG_CSR_SCS_SHIFT)  /* System OSC (SOSC_CLK) */
@@ -128,12 +116,15 @@
 #define SCG_RCCR_DIVSLOW_SHIFT         (0)       /* Bits 0-3:  Slow Clock Divide Ratio */
 #define SCG_RCCR_DIVSLOW_MASK          (15 << SCG_RCCR_DIVSLOW_SHIFT)
 #  define SCG_RCCR_DIVSLOW(n)          ((uint32_t)((n) - 1) << SCG_RCCR_DIVSLOW_SHIFT) /* n=1-8 */
+
 #define SCG_RCCR_DIVBUS_SHIFT          (4)       /* Bits 4-7:  Bus Clock Divide Ratio */
 #define SCG_RCCR_DIVBUS_MASK           (15 << SCG_RCCR_DIVBUS_SHIFT)
 #  define SCG_RCCR_DIVBUS(n)           ((uint32_t)((n) - 1) << SCG_RCCR_DIVBUS_SHIFT) /* n=1-16 */
+
 #define SCG_RCCR_DIVCORE_SHIFT         (16)      /* Bits 16-19:  Core Clock Divide Ratio */
 #define SCG_RCCR_DIVCORE_MASK          (15 << SCG_RCCR_DIVCORE_SHIFT)
 #  define SCG_RCCR_DIVCORE(n)          ((uint32_t)((n) - 1) << SCG_RCCR_DIVCORE_SHIFT) /* n=1-16 */
+
 #define SCG_RCCR_SCS_SHIFT             (24)      /* Bits 24-27:  System clock source */
 #define SCG_RCCR_SCS_MASK              (15 << SCG_RCCR_SCS_SHIFT)
 #  define SCG_RCCR_SCS_SOSC            (1 << SCG_RCCR_SCS_SHIFT)  /* System OSC (SOSC_CLK) */
@@ -146,12 +137,15 @@
 #define SCG_VCCR_DIVSLOW_SHIFT         (0)       /* Bits 0-3:  Slow Clock Divide Ratio */
 #define SCG_VCCR_DIVSLOW_MASK          (15 << SCG_VCCR_DIVSLOW_SHIFT)
 #  define SCG_VCCR_DIVSLOW(n)          ((uint32_t)((n) - 1) << SCG_VCCR_DIVSLOW_SHIFT) /* n=1-8 */
+
 #define SCG_VCCR_DIVBUS_SHIFT          (4)       /* Bits 4-7:  Bus Clock Divide Ratio */
 #define SCG_VCCR_DIVBUS_MASK           (15 << SCG_VCCR_DIVBUS_SHIFT)
 #  define SCG_VCCR_DIVBUS(n)           ((uint32_t)((n) - 1) << SCG_VCCR_DIVBUS_SHIFT) /* n=1-16 */
+
 #define SCG_VCCR_DIVCORE_SHIFT         (16)      /* Bits 16-19:  Core Clock Divide Ratio */
 #define SCG_VCCR_DIVCORE_MASK          (15 << SCG_VCCR_DIVCORE_SHIFT)
 #  define SCG_VCCR_DIVCORE(n)          ((uint32_t)((n) - 1) << SCG_VCCR_DIVCORE_SHIFT) /* n=1-16 */
+
 #define SCG_VCCR_SCS_SHIFT             (24)      /* Bits 24-27:  System clock source */
 #define SCG_VCCR_SCS_MASK              (15 << SCG_VCCR_SCS_SHIFT)
 #  define SCG_VCCR_SCS_SIRC            (2 << SCG_VCCR_SCS_SHIFT)  /* Slow IRC (SIRC_CLK) */
@@ -161,12 +155,15 @@
 #define SCG_HCCR_DIVSLOW_SHIFT         (0)       /* Bits 0-3:  Slow Clock Divide Ratio */
 #define SCG_HCCR_DIVSLOW_MASK          (15 << SCG_HCCR_DIVSLOW_SHIFT)
 #  define SCG_HCCR_DIVSLOW(n)          ((uint32_t)((n) - 1) << SCG_HCCR_DIVSLOW_SHIFT) /* n=1-8 */
+
 #define SCG_HCCR_DIVBUS_SHIFT          (4)       /* Bits 4-7:  Bus Clock Divide Ratio */
 #define SCG_HCCR_DIVBUS_MASK           (15 << SCG_HCCR_DIVBUS_SHIFT)
 #  define SCG_HCCR_DIVBUS(n)           ((uint32_t)((n) - 1) << SCG_HCCR_DIVBUS_SHIFT) /* n=1-16 */
+
 #define SCG_HCCR_DIVCORE_SHIFT         (16)      /* Bits 16-19:  Core Clock Divide Ratio */
 #define SCG_HCCR_DIVCORE_MASK          (15 << SCG_HCCR_DIVCORE_SHIFT)
 #  define SCG_HCCR_DIVCORE(n)          ((uint32_t)((n) - 1) << SCG_HCCR_DIVCORE_SHIFT) /* n=1-16 */
+
 #define SCG_HCCR_SCS_SHIFT             (24)      /* Bits 24-27:  System clock source */
 #define SCG_HCCR_SCS_MASK              (15 << SCG_HCCR_SCS_SHIFT)
 #  define SCG_HCCR_SCS_FIRC            (3 << SCG_HCCR_SCS_SHIFT)  /* Fast IRC (FIRC_CLK) */
@@ -205,6 +202,7 @@
 #  define SCG_SOSCDIV_SOSCDIV1_DIV16   (5 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Divide by 16 */
 #  define SCG_SOSCDIV_SOSCDIV1_DIV32   (6 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Divide by 32 */
 #  define SCG_SOSCDIV_SOSCDIV1_DIV64   (7 << SCG_SOSCDIV_SOSCDIV1_SHIFT)  /* Divide by 64 */
+
 #define SCG_SOSCDIV_SOSCDIV2_SHIFT     (8)       /* Bits 8-10:  System OSC Clock Divide 2 */
 #define SCG_SOSCDIV_SOSCDIV2_MASK      (7 << SCG_SOSCDIV_SOSCDIV2_SHIFT)
 #  define SCG_SOSCDIV_SOSCDIV2(n)      ((uint32_t)(n) << SCG_SOSCDIV_SOSCDIV2_SHIFT)
@@ -250,6 +248,7 @@
 #  define SCG_SIRCDIV_SIRCDIV1_DIV16   (5 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Divide by 16 */
 #  define SCG_SIRCDIV_SIRCDIV1_DIV32   (6 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Divide by 32 */
 #  define SCG_SIRCDIV_SIRCDIV1_DIV64   (7 << SCG_SIRCDIV_SIRCDIV1_SHIFT)  /* Divide by 64 */
+
 #define SCG_SIRCDIV_SIRCDIV2_SHIFT     (8)       /* Bits 8-10:  Slow IRC Clock Divide 2 */
 #define SCG_SIRCDIV_SIRCDIV2_MASK      (7 << SCG_SIRCDIV_SIRCDIV2_SHIFT)
 #  define SCG_SIRCDIV_SIRCDIV2(n)      ((uint32_t)(n) << SCG_SIRCDIV_SIRCDIV2_SHIFT)
@@ -290,6 +289,7 @@
 #  define SCG_FIRCDIV_FIRCDIV1_DIV16   (5 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Divide by 16 */
 #  define SCG_FIRCDIV_FIRCDIV1_DIV32   (6 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Divide by 32 */
 #  define SCG_FIRCDIV_FIRCDIV1_DIV64   (7 << SCG_FIRCDIV_FIRCDIV1_SHIFT)  /* Divide by 64 */
+
 #define SCG_FIRCDIV_FIRCDIV2_SHIFT     (8)       /* Bits 8-10:  Fast IRC Clock Divide 2 */
 #define SCG_FIRCDIV_FIRCDIV2_MASK      (7 << SCG_FIRCDIV_FIRCDIV2_SHIFT)
 #  define SCG_FIRCDIV_FIRCDIV2(n)      ((uint32_t)(n) << SCG_FIRCDIV_FIRCDIV2_SHIFT)
@@ -330,6 +330,7 @@
 #  define SCG_SPLLDIV_SPLLDIV1_DIV16   (5 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Divide by 16 */
 #  define SCG_SPLLDIV_SPLLDIV1_DIV32   (6 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Divide by 32 */
 #  define SCG_SPLLDIV_SPLLDIV1_DIV64   (7 << SCG_SPLLDIV_SPLLDIV1_SHIFT)  /* Divide by 64 */
+
 #define SCG_SPLLDIV_SPLLDIV2_SHIFT     (8)       /* Bits 8-10:  System PLL Clock Divide 2 */
 #define SCG_SPLLDIV_SPLLDIV2_MASK      (7 << SCG_SPLLDIV_SPLLDIV2_SHIFT)
 #  define SCG_SPLLDIV_SPLLDIV2(n)      ((uint32_t)(n) << SCG_SPLLDIV_SPLLDIV2_SHIFT)
@@ -347,6 +348,7 @@
 #define SCG_SPLLCFG_PREDIV_SHIFT       (8)     /* Bits 8-10:  PLL Reference Clock Divider */
 #define SCG_SPLLCFG_PREDIV_MASK        (7 << SCG_SPLLCFG_PREDIV_SHIFT)
 #  define SCG_SPLLCFG_PREDIV(n)        ((uint32_t)((n) - 1) << SCG_SPLLCFG_PREDIV_SHIFT) /* n=1..8 */
+
 #define SCG_SPLLCFG_MULT_SHIFT         (16)     /* Bits 16-20:  System PLL Multiplier */
 #define SCG_SPLLCFG_MULT_MASK          (31 << SCG_SPLLCFG_MULT_SHIFT)
 #  define SCG_SPLLCFG_MULT(n)          ((uint32_t)((n) - 16) << SCG_SPLLCFG_MULT_SHIFT) /* n=16..47 */

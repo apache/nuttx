@@ -163,8 +163,10 @@ static const uint8_t g_tmp_sysclk[TMP_SYS_CLK_NO][TMP_SYS_DIV_NO] =
 
 /* The maximum clock frequencies of system clocks in all power modes */
 
+/* SYS_CLK      BUS_CLK      SLOW_CLK */
+
 static const uint32_t g_vlpr_maxsysclks[MODES_MAX_NO][SYS_CLK_MAX_NO] =
-{/* SYS_CLK      BUS_CLK      SLOW_CLK */
+{
   {         0ul,       0ul,         0ul },  /* Invalid entry */
   {   4000000ul, 4000000ul,   1000000ul },  /* Maximum frequencies when system clock is SOSC */
   {   4000000ul, 4000000ul,   1000000ul },  /* Maximum frequencies when system clock is SIRC */
@@ -174,8 +176,10 @@ static const uint32_t g_vlpr_maxsysclks[MODES_MAX_NO][SYS_CLK_MAX_NO] =
   {   4000000ul, 4000000ul,   1000000ul },  /* Maximum frequencies when system clock is SPLL */
 };
 
+/* SYS_CLK      BUS_CLK      SLOW_CLK */
+
 static const uint32_t g_run_maxsysclks[MODES_MAX_NO][SYS_CLK_MAX_NO] =
-{/* SYS_CLK      BUS_CLK      SLOW_CLK */
+{
   {         0ul,        0ul,         0ul }, /* Invalid entry */
   {  80000000ul, 48000000ul,  26670000ul }, /* Maximum frequencies when system clock is SOSC */
   {  80000000ul, 48000000ul,  26670000ul }, /* Maximum frequencies when system clock is SIRC */
@@ -185,8 +189,11 @@ static const uint32_t g_run_maxsysclks[MODES_MAX_NO][SYS_CLK_MAX_NO] =
   {  80000000ul, 40000000ul,  26670000ul }, /* Maximum frequencies when system clock is SPLL */
 };
 #ifdef CONFIG_S32K1XX_HAVE_HSRUN
+
+/* SYS_CLK      BUS_CLK      SLOW_CLK */
+
 static const uint32_t g_hsrun_maxsysclks[MODES_MAX_NO][SYS_CLK_MAX_NO] =
-{/* SYS_CLK      BUS_CLK      SLOW_CLK */
+{
   {         0ul,        0ul,         0ul },  /* Invalid entry */
   { 112000000ul, 56000000ul,  28000000ul },  /* Maximum frequencies when system clock is SOSC */
   { 112000000ul, 56000000ul,  28000000ul },  /* Maximum frequencies when system clock is SIRC */
@@ -225,7 +232,8 @@ static uint32_t g_tclkfreq[NUMBER_OF_TCLK_INPUTS];  /* TCLKx clocks */
 
 static inline uint32_t s32k1xx_get_scgclk_source(void)
 {
-  return ((getreg32(S32K1XX_SCG_CSR) & SCG_CSR_SCS_MASK) >> SCG_CSR_SCS_SHIFT);
+  return ((getreg32(S32K1XX_SCG_CSR) & SCG_CSR_SCS_MASK) >>
+           SCG_CSR_SCS_SHIFT);
 }
 
 /****************************************************************************
@@ -400,8 +408,10 @@ static uint32_t s32k1xx_get_spllfreq(void)
       if (freq != 0)
         {
           regval = getreg32(S32K1XX_SCG_SPLLCFG);
-          prediv = ((regval & SCG_SPLLCFG_PREDIV_MASK) >> SCG_SPLLCFG_PREDIV_SHIFT) + 1;
-          mult   = ((regval & SCG_SPLLCFG_MULT_MASK) >> SCG_SPLLCFG_MULT_SHIFT) + 16;
+          prediv = ((regval & SCG_SPLLCFG_PREDIV_MASK) >>
+                     SCG_SPLLCFG_PREDIV_SHIFT) + 1;
+          mult   = ((regval & SCG_SPLLCFG_MULT_MASK) >>
+                     SCG_SPLLCFG_MULT_SHIFT) + 16;
 
           freq  /= prediv;
           freq  *= mult;
@@ -463,7 +473,7 @@ static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
 }
 
 /****************************************************************************
- * Name: s32k1xx_set_sysclk_configuration
+ * Name: s32k1xx_set_sysclk_cfg
  *
  * Description:
  *   This function sets the system configuration for the specified mode.
@@ -479,13 +489,15 @@ static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
  ****************************************************************************/
 
 static int
-s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
-                                 const struct scg_system_clock_config_s *config)
+s32k1xx_set_sysclk_cfg(enum scg_system_clock_mode_e mode,
+                             const struct scg_system_clock_config_s *config)
 {
   uint32_t srcfreq      = 0;
   uint32_t sysfreq_mul  = (uint32_t)config->divcore;
-  uint32_t busfreq_mul  = (uint32_t)config->divcore * (uint32_t)config->divbus;
-  uint32_t slowfreq_mul = (uint32_t)config->divcore * (uint32_t)config->divslow;
+  uint32_t busfreq_mul  = (uint32_t)config->divcore *
+                          (uint32_t)config->divbus;
+  uint32_t slowfreq_mul = (uint32_t)config->divcore *
+                          (uint32_t)config->divslow;
   uint32_t regval;
   int ret               = OK;
 
@@ -496,16 +508,22 @@ s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
   switch (mode)
     {
       case SCG_SYSTEM_CLOCK_MODE_RUN:    /* Run mode */
+
         /* Verify the frequencies of sys, bus and slow clocks. */
 
-          if ((srcfreq >
-                (sysfreq_mul * (g_run_maxsysclks[(uint32_t)config->src][CORE_CLK_INDEX] >> 4))) ||
-              (srcfreq >
-                (busfreq_mul * (g_run_maxsysclks[(uint32_t)config->src][BUS_CLK_INDEX] >> 4))) ||
-              (srcfreq >
-                (slowfreq_mul * (g_run_maxsysclks[(uint32_t)config->src][SLOW_CLK_INDEX] >> 4))))
+          if ((srcfreq > (sysfreq_mul *
+                (g_run_maxsysclks[(uint32_t)config->src][CORE_CLK_INDEX] >>
+                 4))) ||
+              (srcfreq > (busfreq_mul *
+                (g_run_maxsysclks[(uint32_t)config->src][BUS_CLK_INDEX] >>
+                 4))) ||
+              (srcfreq > (slowfreq_mul *
+                (g_run_maxsysclks[(uint32_t)config->src][SLOW_CLK_INDEX] >>
+                 4))))
             {
-              /* Configuration for the next system clock source is not valid. */
+              /* Configuration for the next system clock source is not
+               * valid.
+               */
 
               ret = -EINVAL;
             }
@@ -524,14 +542,19 @@ s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
 
           /* Verify the frequencies of sys, bus and slow clocks. */
 
-          if ((srcfreq >
-                (sysfreq_mul * (g_vlpr_maxsysclks[(uint32_t)config->src][CORE_CLK_INDEX] >> 4))) ||
-              (srcfreq >
-                (busfreq_mul * (g_vlpr_maxsysclks[(uint32_t)config->src][BUS_CLK_INDEX] >> 4))) ||
-              (srcfreq >
-                (slowfreq_mul * (g_vlpr_maxsysclks[(uint32_t)config->src][SLOW_CLK_INDEX] >> 4))))
+          if ((srcfreq > (sysfreq_mul *
+              (g_vlpr_maxsysclks[(uint32_t)config->src][CORE_CLK_INDEX] >>
+                4))) ||
+              (srcfreq > (busfreq_mul *
+              (g_vlpr_maxsysclks[(uint32_t)config->src][BUS_CLK_INDEX] >>
+                4))) ||
+              (srcfreq > (slowfreq_mul *
+              (g_vlpr_maxsysclks[(uint32_t)config->src][SLOW_CLK_INDEX] >>
+                4))))
             {
-              /* Configuration for the next system clock source is not valid. */
+              /* Configuration for the next system clock source is not
+               * valid.
+               */
 
               ret = -EINVAL;
             }
@@ -552,14 +575,19 @@ s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
 
           /* Verify the frequencies of sys, bus and slow clocks. */
 
-          if ((srcfreq >
-               (sysfreq_mul * (g_hsrun_maxsysclks[(uint32_t)config->src][CORE_CLK_INDEX] >> 4))) ||
-              (srcfreq >
-                (busfreq_mul * (g_hsrun_maxsysclks[(uint32_t)config->src][BUS_CLK_INDEX] >> 4))) ||
-              (srcfreq >
-                (slowfreq_mul * (g_hsrun_maxsysclks[(uint32_t)config->src][SLOW_CLK_INDEX] >> 4))))
+          if ((srcfreq > (sysfreq_mul *
+              (g_hsrun_maxsysclks[(uint32_t)config->src][CORE_CLK_INDEX] >>
+                4))) ||
+              (srcfreq > (busfreq_mul *
+              (g_hsrun_maxsysclks[(uint32_t)config->src][BUS_CLK_INDEX] >>
+                4))) ||
+              (srcfreq > (slowfreq_mul *
+              (g_hsrun_maxsysclks[(uint32_t)config->src][SLOW_CLK_INDEX] >>
+                4))))
             {
-              /* Configuration for the next system clock source is not valid. */
+              /* Configuration for the next system clock source is not
+               * valid.
+               */
 
               ret = -EINVAL;
             }
@@ -618,7 +646,7 @@ s32k1xx_transition_systemclock(const struct scg_system_clock_config_s *cfg)
 
   /* Update run mode configuration */
 
-  ret = s32k1xx_set_sysclk_configuration(run_mode, cfg);
+  ret = s32k1xx_set_sysclk_cfg(run_mode, cfg);
   if (ret == OK)
     {
       /* Wait for system clock to transition.
@@ -1106,7 +1134,8 @@ static int s32k1xx_spll_config(bool enable,
       /* Pre-divider checking. */
 
       srcfreq /= spllcfg->prediv;
-      DEBUGASSERT(srcfreq >= SCG_SPLL_REF_MIN && srcfreq <= SCG_SPLL_REF_MAX);
+      DEBUGASSERT(srcfreq >= SCG_SPLL_REF_MIN &&
+                  srcfreq <= SCG_SPLL_REF_MAX);
 
       /* Now start to set up PLL clock. */
 
@@ -1120,7 +1149,9 @@ static int s32k1xx_spll_config(bool enable,
                SCG_SPLLCFG_MULT(spllcfg->mult);
       putreg32(regval, S32K1XX_SCG_SPLLCFG);
 
-      /* Step 3. Enable clock, configure monitor, lock register. */
+      /* Step 3.
+       * Enable clock, configure monitor, lock register.
+       */
 
       regval = SCG_SPLLCSR_SPLLEN;
 
@@ -1272,7 +1303,9 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
             }
 #endif
 
-          /* SOSC is enabled and SPLL configuration for system clock source is not valid */
+          /* SOSC is enabled and SPLL configuration for system clock source
+           * is not valid
+           */
 
           if (scgcfg->sosc.initialize && (ret == -ENOENT))
             {
@@ -1283,7 +1316,9 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
               ret               = s32k1xx_transition_systemclock(&sysclkcfg);
             }
 
-            /* SIRC is enabled and SOSC configuration for system clock source is not valid */
+            /* SIRC is enabled and SOSC configuration for system clock
+             * source is not valid
+             */
 
           if (scgcfg->sirc.initialize && (ret == -ENOENT))
             {
@@ -1310,7 +1345,7 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
                   sysclkcfg.divcore = next->divcore;
                   sysclkcfg.divbus  = next->divbus;
                   sysclkcfg.divslow = next->divslow;
-                  ret               = s32k1xx_transition_systemclock(&sysclkcfg);
+                  ret = s32k1xx_transition_systemclock(&sysclkcfg);
                 }
             }
         }
@@ -1400,19 +1435,19 @@ static int s32k1xx_scg_config(const struct scg_config_s *scgcfg)
         {
           /* Configure SCG clock modes */
 
-          ret = s32k1xx_set_sysclk_configuration(SCG_SYSTEM_CLOCK_MODE_RUN,
-                                                 &scgcfg->clockmode.rccr);
+          ret = s32k1xx_set_sysclk_cfg(SCG_SYSTEM_CLOCK_MODE_RUN,
+                                       &scgcfg->clockmode.rccr);
           if (ret == OK)
             {
-              ret = s32k1xx_set_sysclk_configuration(SCG_SYSTEM_CLOCK_MODE_VLPR,
-                                                     &scgcfg->clockmode.vccr);
+              ret = s32k1xx_set_sysclk_cfg(SCG_SYSTEM_CLOCK_MODE_VLPR,
+                                           &scgcfg->clockmode.vccr);
             }
 
 #ifdef CONFIG_S32K1XX_HAVE_HSRUN
           if (ret == OK)
             {
-              ret = s32k1xx_set_sysclk_configuration(SCG_SYSTEM_CLOCK_MODE_HSRUN,
-                                                     &scgcfg->clockmode.hccr);
+              ret = s32k1xx_set_sysclk_cfg(SCG_SYSTEM_CLOCK_MODE_HSRUN,
+                                           &scgcfg->clockmode.hccr);
             }
 #endif
         }
@@ -1743,11 +1778,14 @@ uint32_t s32k1xx_get_coreclk(void)
 
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
       case SCG_CSR_SPLL_FIRC:  /* System PLL */
+
         /* Coreclock = Fxtal * mult / (2 * prediv) */
 
         regval  = getreg32(S32K1XX_SCG_SPLLCFG);
-        prediv  = ((regval & SCG_SPLLCFG_PREDIV_MASK) >> SCG_SPLLCFG_PREDIV_SHIFT) + 1;
-        mult    = ((regval & SCG_SPLLCFG_MULT_MASK) >> SCG_SPLLCFG_MULT_SHIFT) + 16;
+        prediv  = ((regval & SCG_SPLLCFG_PREDIV_MASK) >>
+                    SCG_SPLLCFG_PREDIV_SHIFT) + 1;
+        mult    = ((regval & SCG_SPLLCFG_MULT_MASK) >>
+                    SCG_SPLLCFG_MULT_SHIFT) + 16;
 
         coreclk = ((BOARD_XTAL_FREQUENCY / 2) * mult) / prediv;
         break;
@@ -1802,12 +1840,14 @@ uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type)
         break;
 
       case SCG_SYSTEM_CLOCK_BUS:
-        divider = ((regval & SCG_CSR_DIVBUS_MASK) >> SCG_CSR_DIVBUS_SHIFT) + 1;
+        divider = ((regval & SCG_CSR_DIVBUS_MASK) >>
+                    SCG_CSR_DIVBUS_SHIFT) + 1;
         freq   /= divider;
         break;
 
       case SCG_SYSTEM_CLOCK_SLOW:
-        divider = ((regval & SCG_CSR_DIVSLOW_MASK) >> SCG_CSR_DIVSLOW_SHIFT) + 1;
+        divider = ((regval & SCG_CSR_DIVSLOW_MASK) >>
+                    SCG_CSR_DIVSLOW_SHIFT) + 1;
         freq   /= divider;
         break;
 
@@ -1851,7 +1891,8 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq   = s32k1xx_get_fircfreq();
                   regval = getreg32(S32K1XX_SCG_FIRCDIV);
-                  div    = (regval & SCG_FIRCDIV_FIRCDIV1_MASK) >> SCG_FIRCDIV_FIRCDIV1_SHIFT;
+                  div    = (regval & SCG_FIRCDIV_FIRCDIV1_MASK) >>
+                            SCG_FIRCDIV_FIRCDIV1_SHIFT;
                 }
                 break;
 
@@ -1859,7 +1900,8 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq   = s32k1xx_get_sircfreq();
                   regval = getreg32(S32K1XX_SCG_SIRCDIV);
-                  div    = (regval & SCG_SIRCDIV_SIRCDIV1_MASK) >> SCG_SIRCDIV_SIRCDIV1_SHIFT;
+                  div    = (regval & SCG_SIRCDIV_SIRCDIV1_MASK) >>
+                            SCG_SIRCDIV_SIRCDIV1_SHIFT;
                 }
                 break;
 
@@ -1867,7 +1909,8 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq   = s32k1xx_get_soscfreq();
                   regval = getreg32(S32K1XX_SCG_SOSCDIV);
-                  div    = (regval & SCG_SOSCDIV_SOSCDIV1_MASK) >> SCG_SOSCDIV_SOSCDIV1_SHIFT;
+                  div    = (regval & SCG_SOSCDIV_SOSCDIV1_MASK) >>
+                            SCG_SOSCDIV_SOSCDIV1_SHIFT;
                 }
                 break;
 
@@ -1876,7 +1919,8 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq   = s32k1xx_get_spllfreq();
                   regval = getreg32(S32K1XX_SCG_SPLLDIV);
-                  div    = (regval & SCG_SPLLDIV_SPLLDIV1_MASK) >> SCG_SPLLDIV_SPLLDIV1_SHIFT;
+                  div    = (regval & SCG_SPLLDIV_SPLLDIV1_MASK) >>
+                            SCG_SPLLDIV_SPLLDIV1_SHIFT;
                 }
                 break;
 #endif
@@ -1901,7 +1945,8 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq   = s32k1xx_get_fircfreq();
                   regval = getreg32(S32K1XX_SCG_FIRCDIV);
-                  div    = (regval & SCG_FIRCDIV_FIRCDIV2_MASK) >> SCG_FIRCDIV_FIRCDIV2_SHIFT;
+                  div    = (regval & SCG_FIRCDIV_FIRCDIV2_MASK) >>
+                            SCG_FIRCDIV_FIRCDIV2_SHIFT;
                 }
                 break;
 
@@ -1909,14 +1954,16 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq   = s32k1xx_get_sircfreq();
                   regval = getreg32(S32K1XX_SCG_SIRCDIV);
-                  div    = (regval & SCG_SIRCDIV_SIRCDIV2_MASK) >> SCG_SIRCDIV_SIRCDIV2_SHIFT;
+                  div    = (regval & SCG_SIRCDIV_SIRCDIV2_MASK) >>
+                            SCG_SIRCDIV_SIRCDIV2_SHIFT;
                 }
                 break;
               case SOSC_CLK:
                 {
                   freq   = s32k1xx_get_soscfreq();
                   regval = getreg32(S32K1XX_SCG_SOSCDIV);
-                  div    = (regval & SCG_SOSCDIV_SOSCDIV2_MASK) >> SCG_SOSCDIV_SOSCDIV2_SHIFT;
+                  div    = (regval & SCG_SOSCDIV_SOSCDIV2_MASK) >>
+                            SCG_SOSCDIV_SOSCDIV2_SHIFT;
                 }
                 break;
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
@@ -1924,7 +1971,8 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
                 {
                   freq = s32k1xx_get_spllfreq();
                   regval = getreg32(S32K1XX_SCG_SPLLDIV);
-                  div    = (regval & SCG_SPLLDIV_SPLLDIV2_MASK) >> SCG_SPLLDIV_SPLLDIV2_SHIFT;
+                  div    = (regval & SCG_SPLLDIV_SPLLDIV2_MASK) >>
+                            SCG_SPLLDIV_SPLLDIV2_SHIFT;
                 }
                 break;
 #endif

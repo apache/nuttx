@@ -135,5 +135,16 @@ int board_tim_init(void);
 int board_bmp180_initialize(int devno, int busno);
 #endif
 
+/****************************************************************************
+ * Name: esp32c3_spiflash_init
+ *
+ * Description:
+ *   Initialize the SPIFLASH and register the MTD device.
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPIFLASH
+int esp32c3_spiflash_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */

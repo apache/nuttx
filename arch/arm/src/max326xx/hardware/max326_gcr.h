@@ -1,60 +1,44 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max326_gcr.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX326_GCR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_GCR_SCON_OFFSET      0x0000  /* System Control Register */
 #define MAX326_GCR_RST0_OFFSET      0x0004  /* Reset Register 0 */
@@ -70,7 +54,7 @@
 #define MAX326_GCR_REV_OFFSET       0x0050  /* Revision Register */
 #define MAX326_GCR_SYSIE_OFFSET     0x0054  /* System Status Interrupt Enable */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_GCR_SCON             (MAX326_GCR_BASE + MAX326_GCR_SCON_OFFSET)
 #define MAX326_GCR_RST0             (MAX326_GCR_BASE + MAX326_GCR_RST0_OFFSET)
@@ -86,7 +70,7 @@
 #define MAX326_GCR_REV              (MAX326_GCR_BASE + MAX326_GCR_REV_OFFSET)
 #define MAX326_GCR_SYSIE            (MAX326_GCR_BASE + MAX326_GCR_SYSIE_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* System Control Register */
 
@@ -122,6 +106,7 @@
 #  define GCR_CLKCTRL_CLKSEL_HIRC   (0 << GCR_CLKCTRL_CLKSEL_SHIFT) /* High-Frequency Internal Oscillator (HFIO) */
 #  define GCR_CLKCTRL_CLKSEL_LIRC8K (3 << GCR_CLKCTRL_CLKSEL_SHIFT) /* 8kHz Low-Frequency Internal Oscillator */
 #  define GCR_CLKCTRL_CLKSEL_X32K   (6 << GCR_CLKCTRL_CLKSEL_SHIFT) /* 32.768kHz External Oscillator */
+
 #define GCR_CLKCTRL_CLKRDY          (1 << 13) /* Bit 13: System Oscillator Clock Source Ready */
 #define GCR_CLKCTRL_X32KEN          (1 << 17) /* Bit 17: 32.768kHz External Oscillator Enable */
 #define GCR_CLKCTRL_HIRCEN          (1 << 18) /* Bit 18: High-Frequency Internal Oscillator (HFIO) Enable */
@@ -136,6 +121,7 @@
 #  define GCR_PM_MODE_ACTIVE        (0 << GCR_PM_MODE_SHIFT) /* Active mode */
 #  define GCR_PM_MODE_BACKUP        (4 << GCR_PM_MODE_SHIFT) /* Backup Low Power Mode */
 #  define GCR_PM_MODE_SHUTDOWN      (6 << GCR_PM_MODE_SHIFT) /* Shutdown Mode */
+
 #define GCR_PM_GPIOWKEN             (1 << 4)  /* Bit 4:  GPIO Wakeup Enable */
 #define GCR_PM_RTCWKEN              (1 << 5)  /* Bit 5:  RTC Alarm Wakeup Enable */
 #define GCR_PM_HFIOPD               (1 << 15) /* Bit 15: HFIO DEEPSLEEP Auto Off */

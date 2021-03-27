@@ -21,7 +21,7 @@
 /* Make content wider */
 
 .wy-nav-content {
-    max-width: 1200px !important;
+    max-width: 1000px !important;
 }
 
 /* Make links inside C definitions more visible */

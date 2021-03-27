@@ -88,6 +88,25 @@ int esp32c3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32C3_SPIFLASH
+  ret = esp32c3_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_PARTITION
+  ret = esp32c3_partition_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize partition error=%d\n",
+             ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_DEV_GPIO
   ret = esp32c3_gpio_init();
   if (ret < 0)

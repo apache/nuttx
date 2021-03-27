@@ -1,65 +1,50 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_crc.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_CRC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_CRC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* CRC Register Offsets *************************************************************/
+/* CRC Register Offsets *****************************************************/
 
 #define S32K1XX_CRC_DATA_OFFSET     0x0000  /* CRC Data register */
 #define S32K1XX_CRC_GPOLY_OFFSET    0x0004  /* CRC Polynomial register */
 #define S32K1XX_CRC_CTRL_OFFSET     0x0008  /* CRC Control register */
 
-/* CRC Register Addresses ***********************************************************/
+/* CRC Register Addresses ***************************************************/
 
 #define S32K1XX_CRC_DATA            (S32K1XX_CRC_BASE + S32K1XX_CRC_DATA_OFFSET)
 #define S32K1XX_CRC_GPOLY           (S32K1XX_CRC_BASE + S32K1XX_CRC_GPOLY_OFFSET)
 #define S32K1XX_CRC_CTRL            (S32K1XX_CRC_BASE + S32K1XX_CRC_CTRL_OFFSET)
 
-/* CRC Register Bitfield Definitions ************************************************/
+/* CRC Register Bitfield Definitions ****************************************/
 
 /* CRC Data register */
 
@@ -98,6 +83,7 @@
 #  define CRC_CTRL_TOTR_BITS        (1 << CRC_CTRL_TOTR_SHIFT) /* Bits in bytes are transposed */
 #  define CRC_CTRL_TOTR_BOTH        (2 << CRC_CTRL_TOTR_SHIFT) /* Both bits in bytes and bytes transposed */
 #  define CRC_CTRL_TOTR_BYTES       (3 << CRC_CTRL_TOTR_SHIFT) /* Bytes are transposed */
+
 #define CRC_CTRL_TOT_SHIFT          (30)      /* Bits 30-31: Type Of Transpose For Writes */
 #define CRC_CTRL_TOT_MASK           (3 << CRC_CTRL_TOT_SHIFT)
 #  define CRC_CTRL_TOT_NONE         (0 << CRC_CTRL_TOT_SHIFT)  /* No transposition */

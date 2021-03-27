@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_pinirq.c
  *
- *   Copyright (C) 2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -58,10 +43,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
-/* The Kinetis port interrupt logic is very flexible and will program interrupts on
- * most all pin events.  In order to keep the memory usage to a minimum, the NuttX
- * port supports enabling interrupts on a per-port basis.
+
+/* The Kinetis port interrupt logic is very flexible and will program
+ * interrupts on most all pin events.  In order to keep the memory usage to
+ * a minimum, the NuttX port supports enabling interrupts on a per-port
+ * basis.
  */
 
 #if defined (CONFIG_KINETIS_PORTAINTS) || defined (CONFIG_KINETIS_PORTBINTS) || \
@@ -76,13 +64,14 @@
 
 struct kinetis_pinirq_s
 {
-   xcpt_t handler;
-   void *arg;
+  xcpt_t handler;
+  void *arg;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Per pin port interrupt vectors.  NOTE:  Not all pins in each port
  * correspond to externally available GPIOs.  However, I believe that the
  * Kinesis will support interrupts even if the pin is not available as
@@ -120,7 +109,8 @@ static struct kinetis_pinirq_s g_porteisrs[32];
 
 #ifdef HAVE_PORTINTS
 static int kinetis_portinterrupt(int irq, FAR void *context,
-                                uintptr_t addr, struct kinetis_pinirq_s *isrtab)
+                                 uintptr_t addr,
+                                 struct kinetis_pinirq_s *isrtab)
 {
   uint32_t isfr = getreg32(addr);
   int i;
@@ -181,31 +171,40 @@ static int kinetis_portinterrupt(int irq, FAR void *context,
 #ifdef CONFIG_KINETIS_PORTAINTS
 static int kinetis_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTA_ISFR, g_portaisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTA_ISFR, g_portaisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTBINTS
 static int kinetis_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTB_ISFR, g_portbisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTB_ISFR, g_portbisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTCINTS
 static int kinetis_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTC_ISFR, g_portcisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTC_ISFR, g_portcisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTDINTS
 static int kinetis_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTD_ISFR, g_portdisrs);
+  return kinetis_portinterrupt(irq, context,
+                                   KINETIS_PORTD_ISFR, g_portdisrs);
 }
 #endif
+
 #ifdef CONFIG_KINETIS_PORTEINTS
 static int kinetis_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return kinetis_portinterrupt(irq, context, KINETIS_PORTE_ISFR, g_porteisrs);
+  return kinetis_portinterrupt(irq, context,
+                               KINETIS_PORTE_ISFR, g_porteisrs);
 }
 #endif
 
@@ -257,21 +256,23 @@ void kinetis_pinirqinitialize(void)
  * Description:
  *   Attach a pin interrupt handler.  The normal initialization sequence is:
  *
- *   1. Call kinetis_pinconfig() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call kinetis_pinirqattach() to attach the pin interrupt handling function.
+ *   1. Call kinetis_pinconfig() to configure the interrupting pin (pin
+ *      interrupts will be disabled.
+ *   2. Call kinetis_pinirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call kinetis_pinirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
  *   pinset - Pin configuration
  *   pinisr - Pin interrupt service routine
- *   arg    - An argument that will be provided to the interrupt service routine.
+ *   arg    - An argument that will be provided to the interrupt service
+ *            routine.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on any
- *   failure to indicate the nature of the failure.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
@@ -281,8 +282,8 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
   unsigned int port;
   unsigned int pin;
 
-  /* It only makes sense to call this function for input pins that are configured
-   * as interrupts.
+  /* It only makes sense to call this function for input pins that are
+   * configured as interrupts.
    */
 
   DEBUGASSERT((pinset & _PIN_INTDMA_MASK) == _PIN_INTERRUPT);
@@ -329,27 +330,27 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
         return -EINVAL;
     }
 
-   /* Get the old PIN ISR and set the new PIN ISR */
+  /* Get the old PIN ISR and set the new PIN ISR */
 
-   isrtab[pin].handler = pinisr;
-   isrtab[pin].arg     = arg;
+  isrtab[pin].handler = pinisr;
+  isrtab[pin].arg     = arg;
 
-   /* And return the old PIN isr address */
+  /* And return the old PIN isr address */
 
-   leave_critical_section(flags);
-   return OK;
+  leave_critical_section(flags);
+  return OK;
 #else
-   return -ENOSYS;
+  return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pinirqenable(uint32_t pinset)
 {
@@ -421,13 +422,13 @@ void kinetis_pinirqenable(uint32_t pinset)
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kinetis_pinirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kinetis_pinirqdisable(uint32_t pinset)
 {

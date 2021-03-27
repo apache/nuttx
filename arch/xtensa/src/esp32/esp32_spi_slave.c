@@ -763,9 +763,8 @@ static int esp32_spislv_interrupt(int irq, void *context, FAR void *arg)
 
   if (priv->dma_chan)
     {
-      esp32_spi_set_reg(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
-      esp32_spi_reset_regbits(priv, SPI_DMA_CONF_OFFSET,
-                              SPI_DMA_RESET_MASK);
+      esp32_spi_set_regbits(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
+      esp32_spi_reset_regbits(priv, SPI_DMA_CONF_OFFSET, SPI_DMA_RESET_MASK);
     }
 
   if (priv->process == false)

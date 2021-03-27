@@ -1,55 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_spi.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_SPI_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define MAX326_SPI_FIFO_DEPTH       32
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_SPI_DATA_OFFSET      0x0000  /* SPI FIFO Data Register */
 #define MAX326_SPI_CTRL0_OFFSET     0x0004  /* SPI Master Signals Control Register */
@@ -64,7 +49,7 @@
 #define MAX326_SPI_WAKEEN_OFFSET    0x002c  /* SPI Wakeup Enable Register */
 #define MAX326_SPI_STAT_OFFSET      0x0030  /* SPI Active Status Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_SPI0_DATA            (MAX326_SPI0_BASE + MAX326_SPI_DATA_OFFSET)
 #define MAX326_SPI0_CTRL0           (MAX326_SPI0_BASE + MAX326_SPI_CTRL0_OFFSET)
@@ -79,7 +64,7 @@
 #define MAX326_SPI0_WAKEEN          (MAX326_SPI0_BASE + MAX326_SPI_WAKEEN_OFFSET)
 #define MAX326_SPI0_STAT            (MAX326_SPI0_BASE + MAX326_SPI_STAT_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* SPI FIFO Data Register (SPI data up to 32-bits wide) */
 
@@ -90,6 +75,7 @@
 #define SPI_CTRL0_SSIO              (1 << 4)  /* Bit 4:  Slave Select Output (master) */
 #define SPI_CTRL0_START             (1 << 5)  /* Bit 5:  Start Data Transmission (master) */
 #define SPI_CTRL0_SSCTRL            (1 << 8)  /* Bit 8:  Slave Select Control (master) */
+
 #define SPI_CTRL0_SSSEL(n)          (1 << ((n) + 16)) /* Bits 16-19: Slave Select n
                                                        *             Enable, n=0 */
 
@@ -113,6 +99,7 @@
 #define SPI_CTRL2_DATWIDTH_MASK     (3 << SPI_CTRL2_DATWIDTH_SHIFT)
 #  define SPI_CTRL2_DATWIDTH_SINGLE (0 << SPI_CTRL2_DATWIDTH_SHIFT) /* MOSI */
 #  define SPI_CTRL2_DATWIDTH_DUAL   (1 << SPI_CTRL2_DATWIDTH_SHIFT) /* MOSI/MISO */
+
 #define SPI_CTRL2_3WIRE             (1 << 15) /* Bit 15: Three-Wire Mode Enable */
 #define SPI_CTRL2_SSPOL             (1 << 16) /* Bit 16: Slave Select Polarity */
 
