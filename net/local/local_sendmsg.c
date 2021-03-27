@@ -166,8 +166,7 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
-  ssize_t nsent;
-  int ret;
+  ssize_t ret;
 
   /* Verify that a valid address has been provided */
 
@@ -246,22 +245,15 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
       nerr("ERROR: Failed to open FIFO for %s: %d\n",
            unaddr->sun_path, ret);
 
-      nsent = ret;
       goto errout_with_halfduplex;
     }
 
   /* Send the packet */
 
-  nsent = local_send_packet(&conn->lc_outfile, buf, len);
-  if (nsent < 0)
+  ret = local_send_packet(&conn->lc_outfile, buf, len);
+  if (ret < 0)
     {
       nerr("ERROR: Failed to send the packet: %d\n", ret);
-    }
-  else
-    {
-      /* local_send_packet returns 0 if all 'len' bytes were sent */
-
-      nsent = len;
     }
 
   /* Now we can close the write-only socket descriptor */
@@ -276,10 +268,10 @@ errout_with_halfduplex:
   local_release_halfduplex(conn);
 
 #else
-  nsent = -EISCONN;
+  ret = -EISCONN;
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
-  return nsent;
+  return ret;
 }
 
 /****************************************************************************
