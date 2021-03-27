@@ -353,6 +353,18 @@
      asm volatile("csrc " CSR_STR(reg) ", %0" :: "rK"(bits)); \
   })
 
+/* In pmpcfg (PMP configuration) register */
+
+#define PMPCFG_R        (1 << 0)  /* readable ? */
+#define PMPCFG_W        (1 << 1)  /* writeable ? */
+#define PMPCFG_X        (1 << 2)  /* excutable ? */
+#define PMPCFG_A_OFF    (0 << 3)  /* null region (disabled) */
+#define PMPCFG_A_TOR    (1 << 3)  /* top of range */
+#define PMPCFG_A_NA4    (2 << 3)  /* naturally aligned four-byte region */
+#define PMPCFG_A_NAPOT  (3 << 3)  /* naturally aligned power-of-two region */
+#define PMPCFG_A_MASK   (3 << 3)  /* address-matching mode mask */
+#define PMPCFG_L        (1 << 7)  /* locked ? */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

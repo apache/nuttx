@@ -26,6 +26,16 @@ OUTPUT_ARCH("riscv")
 
 SECTIONS
 {
+    /* section info */
+
+    __ld_uflash_start = ORIGIN(uflash);
+    __ld_uflash_end = ORIGIN(uflash)+ LENGTH(uflash);
+    __ld_uflash_size = LENGTH(uflash);
+
+    __ld_usram_start = ORIGIN(usram);
+    __ld_usram_end = ORIGIN(usram)+ LENGTH(usram);
+    __ld_usram_size = LENGTH(usram);
+
     .userspace : {
         *(.userspace)
     } > uflash

@@ -43,7 +43,7 @@
 #  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#if CONFIG_NUTTX_USERSPACE != 0x00080000
+#if CONFIG_NUTTX_USERSPACE != 0x00001000
 #  error "CONFIG_NUTTX_USERSPACE must match the value in memory.ld"
 #endif
 
@@ -71,6 +71,8 @@ extern uint32_t _edata;           /* End+1 of .data */
 extern uint32_t _sbss;            /* Start of .bss */
 extern uint32_t _ebss;            /* End+1 of .bss */
 
+extern uintptr_t *__ld_usram_end; /* End+1 of user ram section */
+
 /* This is the user space entry point */
 
 int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
@@ -87,6 +89,8 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
   .us_dataend       = (uintptr_t)&_edata,
   .us_bssstart      = (uintptr_t)&_sbss,
   .us_bssend        = (uintptr_t)&_ebss,
+
+  .us_heapend       = (uintptr_t)&__ld_usram_end,
 
   /* Memory manager heap structure */
 

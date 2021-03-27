@@ -203,6 +203,11 @@ void riscv_restorefpu(const uint32_t *regs);
 #  define riscv_restorefpu(regs)
 #endif
 
+/* RISC-V PMP Config ********************************************************/
+
+void riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
+                             uintptr_t base, uintptr_t size);
+
 /* Power management *********************************************************/
 
 #ifdef CONFIG_PM
