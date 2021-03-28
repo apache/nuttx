@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_rng.c
+ * arch/risc-v/src/esp32c3/esp32c3_rng.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,14 +36,12 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 
-#include <arch/xtensa/core_macros.h>
-
-#include "xtensa.h"
-#include "xtensa_attr.h"
+#include "riscv_arch.h"
+#include "esp32c3_attr.h"
 #include "hardware/wdev_reg.h"
-#include "esp32_clockconfig.h"
+#include "esp32c3_clockconfig.h"
 
-#if defined(CONFIG_ESP32_RNG)
+#if defined(CONFIG_ESP32C3_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
@@ -58,10 +56,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int esp32_rng_initialize(void);
-static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
-                              size_t buflen);
-static int esp32_rng_open(FAR struct file *filep);
+static int esp32c3_rng_initialize(void);
+static ssize_t esp32c3_rng_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen);
+static int esp32c3_rng_open(FAR struct file *filep);
 
 /****************************************************************************
  * Private Types
@@ -81,8 +79,8 @@ static struct rng_dev_s g_rngdev;
 
 static const struct file_operations g_rngops =
 {
-  .open  = esp32_rng_open,       /* open */
-  .read  = esp32_rng_read,       /* read */
+  .open  = esp32c3_rng_open,       /* open */
+  .read  = esp32c3_rng_read,       /* read */
 };
 
 /****************************************************************************
@@ -90,7 +88,7 @@ static const struct file_operations g_rngops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_random
+ * Name: esp32c3_random
  ****************************************************************************/
 
 uint32_t IRAM_ATTR esp_random(void)
@@ -108,7 +106,8 @@ uint32_t IRAM_ATTR esp_random(void)
    * WDEV_RND_REG reads while waiting.
    */
 
-  uint32_t cpu_to_apb_freq_ratio = esp_clk_cpu_freq() / esp_clk_apb_freq();
+  uint32_t cpu_to_apb_freq_ratio = esp32c3_clk_cpu_freq() /
+                                   esp32c3_clk_apb_freq();
 
   static uint32_t last_ccount = 0;
   uint32_t ccount;
@@ -116,7 +115,7 @@ uint32_t IRAM_ATTR esp_random(void)
 
   do
     {
-      ccount = XTHAL_GET_CCOUNT();
+      ccount = esp32c3_cpu_cycle_count();
       result ^= getreg32(WDEV_RND_REG);
     }
   while (ccount - last_ccount < cpu_to_apb_freq_ratio * 16);
@@ -126,30 +125,29 @@ uint32_t IRAM_ATTR esp_random(void)
 }
 
 /****************************************************************************
- * Name: esp32_rng_open
+ * Name: esp32c3_rng_start
  ****************************************************************************/
 
-static void esp32_rng_start(void)
+static void esp32c3_rng_start(void)
 {
   /* Nothing to do, bootloader already did it */
 }
 
-static void esp32_rng_stop(void)
+/****************************************************************************
+ * Name: esp32c3_rng_stop
+ ****************************************************************************/
+
+static void esp32c3_rng_stop(void)
 {
   /* Nothing to do */
 }
 
-static int esp32_rng_initialize(void)
+/****************************************************************************
+ * Name: esp32c3_rng_initialize
+ ****************************************************************************/
+
+static int esp32c3_rng_initialize(void)
 {
-  static bool first_flag = true;
-
-  if (false == first_flag)
-    {
-      return OK;
-    }
-
-  first_flag = false;
-
   _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
@@ -157,22 +155,22 @@ static int esp32_rng_initialize(void)
   nxsem_init(&g_rngdev.rd_sem, 0, 1);
   nxsem_set_protocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
 
-  esp32_rng_stop();
+  esp32c3_rng_stop();
 
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_rng_open
+ * Name: esp32c3_rng_open
  ****************************************************************************/
 
-static int esp32_rng_open(FAR struct file *filep)
+static int esp32c3_rng_open(FAR struct file *filep)
 {
   /* O_NONBLOCK is not supported */
 
   if (filep->f_oflags & O_NONBLOCK)
     {
-      _err("ESP32 RNG didn't support O_NONBLOCK mode.\n");
+      _err("ESP32-C3 RNG doesn't support O_NONBLOCK mode.\n");
       return -EPERM;
     }
 
@@ -180,10 +178,10 @@ static int esp32_rng_open(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: esp32_rng_read
+ * Name: esp32c3_rng_read
  ****************************************************************************/
 
-static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t esp32c3_rng_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen)
 {
   FAR struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
@@ -197,9 +195,11 @@ static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
 
   read_len = buflen;
 
-  /* start RNG and Wait until the buffer is filled */
+  /* start RNG and wait until the buffer is filled */
 
-  esp32_rng_start();
+  esp32c3_rng_start();
+
+  /* Now, got data */
 
   while (buflen > 0)
     {
@@ -240,8 +240,8 @@ static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_DEV_RANDOM
 void devrandom_register(void)
 {
-  esp32_rng_initialize();
-  register_driver("/dev/random", FAR & g_rngops, 0444, NULL);
+  esp32c3_rng_initialize();
+  register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
 
@@ -263,11 +263,11 @@ void devrandom_register(void)
 void devurandom_register(void)
 {
 #ifndef CONFIG_DEV_RANDOM
-  esp32_rng_initialize();
+  esp32c3_rng_initialize();
 #endif
-  register_driver("dev/urandom", FAR & g_rngops, 0444, NULL);
+  register_driver("dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 
 #endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
-#endif /* CONFIG_ESP32_RNG */
+#endif /* CONFIG_ESP32C3_RNG */

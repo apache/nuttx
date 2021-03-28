@@ -59,6 +59,10 @@ ifeq ($(CONFIG_ESP32C3_UART),y)
 CHIP_CSRCS += esp32c3_serial.c
 endif
 
+ifeq ($(CONFIG_ESP32C3_RNG),y)
+CHIP_CSRCS += esp32c3_rng.c
+endif
+
 ifeq ($(CONFIG_ESP32C3_I2C),y)
 CHIP_CSRCS += esp32c3_i2c.c
 endif

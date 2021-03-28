@@ -159,6 +159,19 @@ void esp32c3_clockconfig(void)
 }
 
 /****************************************************************************
+ * Name:  esp32c3_clk_cpu_freq
+ *
+ * Description:
+ *   Get CPU frequency in Hz.
+ *
+ ****************************************************************************/
+
+int esp32c3_clk_cpu_freq(void)
+{
+  return CONFIG_ESP32C3_CPU_FREQ_MHZ * 1000000;
+}
+
+/****************************************************************************
  * Name: esp32c3_clk_apb_freq
  *
  * Description:
@@ -196,3 +209,19 @@ int esp32c3_clk_crypto_freq(void)
   return (cpufreq == 40) ? (40 * 1000000) : (160 * 1000000);
 }
 
+/****************************************************************************
+ * Name: esp32c3_cpu_cycle_count
+ *
+ * Description:
+ *   Get the current value of the internal counter that increments
+ *   every processor-clock cycle.
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32c3_cpu_cycle_count(void)
+{
+  uint32_t result;
+
+  result = READ_CSR(CSR_PCCR_MACHINE);
+  return result;
+}
