@@ -31,6 +31,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Performance Counter */
+
+#define CSR_PCER_MACHINE    0x7e0
+#define CSR_PCMR_MACHINE    0x7e1
+#define CSR_PCCR_MACHINE    0x7e2
+
 #define SYSTEM_CPU_PERI_CLK_EN_REG          (DR_REG_SYSTEM_BASE + 0x000)
 
 /* SYSTEM_CLK_EN_DEDICATED_GPIO : R/W [7] : 1'b0 ; */

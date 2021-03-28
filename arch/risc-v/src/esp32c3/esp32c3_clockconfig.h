@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include "esp32c3_attr.h"
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -52,6 +54,16 @@ extern "C"
 void esp32c3_clockconfig(void);
 
 /****************************************************************************
+ * Name: esp32c3_clk_cpu_freq
+ *
+ * Description:
+ *   Returns CPU frequency in Hz.
+ *
+ ****************************************************************************/
+
+int esp32c3_clk_cpu_freq(void);
+
+/****************************************************************************
  * Name: esp32c3_clk_apb_freq
  *
  * Description:
@@ -70,6 +82,17 @@ int esp32c3_clk_apb_freq(void);
  ****************************************************************************/
 
 int esp32c3_clk_crypto_freq(void);
+
+/****************************************************************************
+ * Name: esp32c3_cpu_cycle_count
+ *
+ * Description:
+ *   Get the current value of the internal counter that increments
+ *   every processor-clock cycle.
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32c3_cpu_cycle_count(void);
 
 #if defined(__cplusplus)
 }

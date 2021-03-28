@@ -202,6 +202,13 @@ config ESP32C3_I2C0
 	default n
 	select ESP32C3_I2C
 
+config ESP32C3_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		ESP32-C3 supports an RNG that passed on Dieharder test suite.
+
 config ESP32C3_TIMER0
 	bool "54-bit Timer 0 (Group 0 Timer 0)"
 	default n
