@@ -155,7 +155,7 @@ void sercom_coreclk_configure(int sercom, int coregen, bool wrlock)
 
   DEBUGASSERT((unsigned)sercom < SAMD5E5_NSERCOM);
 
-  /* Set up the SERCOMn_GCLK_ID_CORE clock */
+  /* Set up the SERCOMN_GCLK_ID_CORE clock */
 
   corechan = g_corclk_channel[sercom];
   sam_gclk_chan_enable(corechan, coregen, wrlock);
@@ -179,7 +179,7 @@ void sercom_slowclk_configure(int sercom, int slowgen)
 {
   DEBUGASSERT((unsigned)sercom < SAMD5E5_NSERCOM);
 
-  /* Setup the SERCOMn_GCLK channel. */
+  /* Setup the SERCOMN_GCLK channel. */
 
   if (!g_slowclk_configured)
     {
@@ -187,7 +187,7 @@ void sercom_slowclk_configure(int sercom, int slowgen)
        * of SERCOM modules and, hence, only need to configured once.
        */
 
-      sam_gclk_chan_enable(GCLK_CHAN_SERCOMn_SLOW, slowgen,
+      sam_gclk_chan_enable(GCLK_CHAN_SERCOMN_SLOW, slowgen,
                            BOARD_SERCOM_SLOWLOCK);
 
       /* The slow clock is now configured and should not be re=configured

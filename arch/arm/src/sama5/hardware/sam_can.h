@@ -52,7 +52,7 @@
 #define SAM_CAN_WPMR_OFFSET      0x00e4 /* Write Protect Mode Register */
 #define SAM_CAN_WPSR_OFFSET      0x00e8 /* Write Protect Status Register */
 
-#define SAM_CAN_MBn_OFFSET(n)    (0x0200 + ((n) << 5))
+#define SAM_CAN_MBN_OFFSET(n)    (0x0200 + ((n) << 5))
 #define SAM_CAN_MMR_OFFSET       0x0000 /* Mailbox Mode Register */
 #define SAM_CAN_MAM_OFFSET       0x0004 /* Mailbox Acceptance Mask Register */
 #define SAM_CAN_MID_OFFSET       0x0008 /* Mailbox ID Register */
@@ -62,14 +62,14 @@
 #define SAM_CAN_MDH_OFFSET       0x0018 /* Mailbox Data High Register */
 #define SAM_CAN_MCR_OFFSET       0x001c /* Mailbox Control Register */
 
-#define SAM_CAN_MnMR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MMR_OFFSET)
-#define SAM_CAN_MnAM_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MAM_OFFSET)
-#define SAM_CAN_MnID_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MID_OFFSET)
-#define SAM_CAN_MnFID_OFFSET(n)  (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MFID_OFFSET)
-#define SAM_CAN_MnSR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MSR_OFFSET)
-#define SAM_CAN_MnDL_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MDL_OFFSET)
-#define SAM_CAN_MnDH_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MDH_OFFSET)
-#define SAM_CAN_MnCR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MCR_OFFSET)
+#define SAM_CAN_MNMR_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MMR_OFFSET)
+#define SAM_CAN_MNAM_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MAM_OFFSET)
+#define SAM_CAN_MNID_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MID_OFFSET)
+#define SAM_CAN_MNFID_OFFSET(n)  (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MFID_OFFSET)
+#define SAM_CAN_MNSR_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MSR_OFFSET)
+#define SAM_CAN_MNDL_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MDL_OFFSET)
+#define SAM_CAN_MNDH_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MDH_OFFSET)
+#define SAM_CAN_MNCR_OFFSET(n)   (SAM_CAN_MBN_OFFSET(n)+SAM_CAN_MCR_OFFSET)
 
 /* CAN Register Addresses ***************************************************/
 
@@ -88,15 +88,15 @@
 #define SAM_CAN0_WPMR            (SAM_CAN0_VBASE+SAM_CAN_WPMR_OFFSET)
 #define SAM_CAN0_WPSR            (SAM_CAN0_VBASE+SAM_CAN_WPSR_OFFSET)
 
-#define SAM_CAN0_MB_BASE(n)      (SAM_CAN0_VBASE+SAM_CAN_MBn_OFFSET(n))
-#define SAM_CAN0_MMR(n)          (SAM_CAN0_VBASE+SAM_CAN_MnMR_OFFSET(n))
-#define SAM_CAN0_MAM(n)          (SAM_CAN0_VBASE+SAM_CAN_MnAM_OFFSET(n))
-#define SAM_CAN0_MID(n)          (SAM_CAN0_VBASE+SAM_CAN_MnID_OFFSET(n))
-#define SAM_CAN0_MFID(n)         (SAM_CAN0_VBASE+SAM_CAN_MnFID_OFFSET(n))
-#define SAM_CAN0_MSR(n)          (SAM_CAN0_VBASE+SAM_CAN_MnSR_OFFSET(n))
-#define SAM_CAN0_MDL(n)          (SAM_CAN0_VBASE+SAM_CAN_MnDL_OFFSET(n))
-#define SAM_CAN0_MDH(n)          (SAM_CAN0_VBASE+SAM_CAN_MnDH_OFFSET(n))
-#define SAM_CAN0_MCR(n)          (SAM_CAN0_VBASE+SAM_CAN_MnCR_OFFSET(n))
+#define SAM_CAN0_MB_BASE(n)      (SAM_CAN0_VBASE+SAM_CAN_MBN_OFFSET(n))
+#define SAM_CAN0_MMR(n)          (SAM_CAN0_VBASE+SAM_CAN_MNMR_OFFSET(n))
+#define SAM_CAN0_MAM(n)          (SAM_CAN0_VBASE+SAM_CAN_MNAM_OFFSET(n))
+#define SAM_CAN0_MID(n)          (SAM_CAN0_VBASE+SAM_CAN_MNID_OFFSET(n))
+#define SAM_CAN0_MFID(n)         (SAM_CAN0_VBASE+SAM_CAN_MNFID_OFFSET(n))
+#define SAM_CAN0_MSR(n)          (SAM_CAN0_VBASE+SAM_CAN_MNSR_OFFSET(n))
+#define SAM_CAN0_MDL(n)          (SAM_CAN0_VBASE+SAM_CAN_MNDL_OFFSET(n))
+#define SAM_CAN0_MDH(n)          (SAM_CAN0_VBASE+SAM_CAN_MNDH_OFFSET(n))
+#define SAM_CAN0_MCR(n)          (SAM_CAN0_VBASE+SAM_CAN_MNCR_OFFSET(n))
 
 #define SAM_CAN1_MR              (SAM_CAN1_VBASE+SAM_CAN_MR_OFFSET)
 #define SAM_CAN1_IER             (SAM_CAN1_VBASE+SAM_CAN_IER_OFFSET)
@@ -113,15 +113,15 @@
 #define SAM_CAN1_WPMR            (SAM_CAN1_VBASE+SAM_CAN_WPMR_OFFSET)
 #define SAM_CAN1_WPSR            (SAM_CAN1_VBASE+SAM_CAN_WPSR_OFFSET)
 
-#define SAM_CAN1_MB_BASE(n)      (SAM_CAN1_VBASE+SAM_CAN_MBn_OFFSET(n))
-#define SAM_CAN1_MMR(n)          (SAM_CAN1_VBASE+SAM_CAN_MnMR_OFFSET(n))
-#define SAM_CAN1_MAM(n)          (SAM_CAN1_VBASE+SAM_CAN_MnAM_OFFSET(n))
-#define SAM_CAN1_MID(n)          (SAM_CAN1_VBASE+SAM_CAN_MnID_OFFSET(n))
-#define SAM_CAN1_MFID(n)         (SAM_CAN1_VBASE+SAM_CAN_MnFID_OFFSET(n))
-#define SAM_CAN1_MSR(n)          (SAM_CAN1_VBASE+SAM_CAN_MnSR_OFFSET(n))
-#define SAM_CAN1_MDL(n)          (SAM_CAN1_VBASE+SAM_CAN_MnDL_OFFSET(n))
-#define SAM_CAN1_MDH(n)          (SAM_CAN1_VBASE+SAM_CAN_MnDH_OFFSET(n))
-#define SAM_CAN1_MCR(n)          (SAM_CAN1_VBASE+SAM_CAN_MnCR_OFFSET(n))
+#define SAM_CAN1_MB_BASE(n)      (SAM_CAN1_VBASE+SAM_CAN_MBN_OFFSET(n))
+#define SAM_CAN1_MMR(n)          (SAM_CAN1_VBASE+SAM_CAN_MNMR_OFFSET(n))
+#define SAM_CAN1_MAM(n)          (SAM_CAN1_VBASE+SAM_CAN_MNAM_OFFSET(n))
+#define SAM_CAN1_MID(n)          (SAM_CAN1_VBASE+SAM_CAN_MNID_OFFSET(n))
+#define SAM_CAN1_MFID(n)         (SAM_CAN1_VBASE+SAM_CAN_MNFID_OFFSET(n))
+#define SAM_CAN1_MSR(n)          (SAM_CAN1_VBASE+SAM_CAN_MNSR_OFFSET(n))
+#define SAM_CAN1_MDL(n)          (SAM_CAN1_VBASE+SAM_CAN_MNDL_OFFSET(n))
+#define SAM_CAN1_MDH(n)          (SAM_CAN1_VBASE+SAM_CAN_MNDH_OFFSET(n))
+#define SAM_CAN1_MCR(n)          (SAM_CAN1_VBASE+SAM_CAN_MNCR_OFFSET(n))
 
 /* CAN Register Bit Definitions *********************************************/
 
