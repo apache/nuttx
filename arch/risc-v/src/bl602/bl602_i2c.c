@@ -264,7 +264,7 @@ static void bl602_i2c_clear_status(int i2cx)
     }
   else
     {
-      i2cerr("port error\r\n");
+      i2cerr("port error\n");
     }
 }
 
@@ -684,14 +684,14 @@ static int bl602_i2c_transfer(FAR struct i2c_master_s *dev,
 
   if (count <= 0)
     {
-      i2cerr("count is error\r\n");
+      i2cerr("count is error\n");
       return -1;
     }
 
   ret = nxsem_wait_uninterruptible(&priv->sem_excl);
   if (ret < 0)
     {
-      i2cerr("take sem_excl error\r\n");
+      i2cerr("take sem_excl error\n");
       return ret;
     }
 
@@ -699,7 +699,7 @@ static int bl602_i2c_transfer(FAR struct i2c_master_s *dev,
 
   if (ret < 0)
     {
-      i2cerr("take sem_irq error\r\n");
+      i2cerr("take sem_irq error\n");
       return ret;
     }
 
@@ -742,17 +742,17 @@ static int bl602_i2c_transfer(FAR struct i2c_master_s *dev,
 
       if (ret < 0)
         {
-          i2cerr("transter error\r\n");
+          i2cerr("transter error\n");
           return ret;
         }
 
       if (priv->i2cstate == EV_I2C_END_INT)
         {
-          i2cinfo("i2c transfer success\r\n");
+          i2cinfo("i2c transfer success\n");
         }
       else
         {
-          i2cerr("i2c transfer error, event = %d \r\n", priv->i2cstate);
+          i2cerr("i2c transfer error, event = %d \n", priv->i2cstate);
         }
 
       nxsem_post(&priv->sem_isr);
@@ -936,7 +936,7 @@ static int bl602_i2c_irq(int cpuint, void *context, FAR void *arg)
     }
   else
     {
-      i2cerr("other interrupt \r\n");
+      i2cerr("other interrupt \n");
       priv->i2cstate = EV_I2C_UNKNOW_INT;
       bl602_i2c_callback(priv);
       return -1;

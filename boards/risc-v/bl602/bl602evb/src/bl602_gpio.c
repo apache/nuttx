@@ -288,7 +288,7 @@ static int bl602_gpio_interrupt(int irq, void *context, void *arg)
       while ((1 == bl602_gpio_get_intstatus(gpio_pin)) && time_out);
       if (!time_out)
         {
-          printf("WARNING: Clear GPIO interrupt status fail.\r\n");
+          gpiowarn("WARNING: Clear GPIO interrupt status fail.\n");
         }
 
       /* if time_out==0, GPIO interrupt status not cleared */
@@ -341,7 +341,7 @@ static int gpio_setpintype(FAR struct gpio_dev_s *dev,
     }
   else
     {
-      printf("pintype error\r\n");
+      gpioerr("pintype error\n");
       return -1;
     }
 

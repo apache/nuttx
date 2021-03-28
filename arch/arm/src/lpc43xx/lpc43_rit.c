@@ -202,7 +202,7 @@ void up_timer_initialize(void)
       mask_bits++;
     }
 
-  tmrinfo("mask_bits = %d, mask = %X, ticks_per_int = %d\r\n",
+  tmrinfo("mask_bits = %d, mask = %X, ticks_per_int = %d\n",
           mask_bits, (0xffffffff << (32 - mask_bits)), ticks_per_int);
 
   /* Set the mask and compare value so we get interrupts every

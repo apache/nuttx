@@ -428,7 +428,9 @@ static int lsm6dsl_sensor_start(FAR struct lsm6dsl_dev_s *priv)
 
   sninfo("Starting....");
 
-  /* Accelerometer config registers Turn on the accelerometer: 833Hz, +- 16g */
+  /* Accelerometer config registers:
+   * Turn on the accelerometer: 833Hz, +- 16g
+   */
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL1_XL, 0x74);
   g_accelerofactor = 0.488;
@@ -1046,7 +1048,7 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
 
 static int lsm6dsl_open(FAR struct file *filep)
 {
-  sninfo("Device LSM6DSL opened!!\r\n");
+  sninfo("Device LSM6DSL opened!!\n");
   return OK;
 }
 

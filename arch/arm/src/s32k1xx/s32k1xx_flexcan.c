@@ -636,7 +636,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   if (mbi == TXMBCOUNT)
     {
-      nwarn("No TX MB available mbi %" PRIi32 "\r\n", mbi);
+      nwarn("No TX MB available mbi %" PRIi32 "\n", mbi);
       NETDEV_TXERRORS(&priv->dev);
       return 0;       /* No transmission for you! */
     }
@@ -1578,7 +1578,7 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
   s32k1xx_setfreeze(priv->base, 1);
   if (!s32k1xx_waitfreezeack_change(priv->base, 1))
     {
-      ninfo("FLEXCAN: freeze fail\r\n");
+      ninfo("FLEXCAN: freeze fail\n");
       return -1;
     }
 
@@ -1658,7 +1658,7 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
 
   for (i = 0; i < RXMBCOUNT; i++)
     {
-      ninfo("Set MB%" PRIi32 " to receive %p\r\n", i, &priv->rx[i]);
+      ninfo("Set MB%" PRIi32 " to receive %p\n", i, &priv->rx[i]);
       priv->rx[i].cs.edl = 0x1;
       priv->rx[i].cs.brs = 0x1;
       priv->rx[i].cs.esi = 0x0;
@@ -1676,7 +1676,7 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
   s32k1xx_setfreeze(priv->base, 0);
   if (!s32k1xx_waitfreezeack_change(priv->base, 0))
     {
-      ninfo("FLEXCAN: unfreeze fail\r\n");
+      ninfo("FLEXCAN: unfreeze fail\n");
       return -1;
     }
 
@@ -1722,8 +1722,8 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
 
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
-      ninfo("MB %" PRIi32 " %p\r\n", i, &priv->rx[i]);
-      ninfo("MB %" PRIi32 " %p\r\n", i, &priv->rx[i].id.w);
+      ninfo("MB %" PRIi32 " %p\n", i, &priv->rx[i]);
+      ninfo("MB %" PRIi32 " %p\n", i, &priv->rx[i].id.w);
       priv->rx[i].cs.cs = 0x0;
       priv->rx[i].id.w = 0x0;
       priv->rx[i].data[0].w00 = 0x0;
@@ -1927,7 +1927,7 @@ int s32k1xx_caninitialize(int intf)
    * the device and/or calling s32k1xx_ifdown().
    */
 
-  ninfo("callbacks done\r\n");
+  ninfo("callbacks done\n");
 
   s32k1xx_initialize(priv);
 

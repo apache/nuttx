@@ -112,7 +112,7 @@ static int nsh_waiter(int argc, char *argv[])
 {
   struct usbhost_hubport_s *hport;
 
-  syslog(LOG_INFO, "nsh_waiter: Running\n\r");
+  syslog(LOG_INFO, "nsh_waiter: Running\n");
   for (; ; )
     {
       /* Wait for the device to change state */
@@ -153,12 +153,12 @@ static int nsh_usbhostinitialize(void)
    * that we care about:
    */
 
-  syslog(LOG_INFO, "Register class drivers\n\r");
+  syslog(LOG_INFO, "Register class drivers\n");
 
 #ifdef CONFIG_USBHOST_MSC
   /* Register the USB host Mass Storage Class */
 
-        printf ("USB Host MSC\n\r");
+        printf ("USB Host MSC\n");
   ret = usbhost_msc_initialize();
   if (ret != OK)
     {
@@ -170,7 +170,7 @@ static int nsh_usbhostinitialize(void)
 #ifdef CONFIG_USBHOST_CDCACM
   /* Register the CDC/ACM serial class */
 
-  printf ("USB Host CDCACM \n\r");
+  printf ("USB Host CDCACM \n");
   ret = usbhost_kbdinit();
   if (ret != OK)
     {
@@ -207,12 +207,12 @@ static int nsh_usbhostinitialize(void)
     {
       /* Start a thread to handle device connection. */
 
-      syslog(LOG_INFO, "Start nsh_waiter\n\r");
+      syslog(LOG_INFO, "Start nsh_waiter\n");
 
       pid = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                            CONFIG_USBHOST_STACKSIZE,
                            (main_t)nsh_waiter, (FAR char * const *)NULL);
-      syslog(LOG_INFO, "USBHost: Created pid = %d\n\r", pid);
+      syslog(LOG_INFO, "USBHost: Created pid = %d\n", pid);
       return pid < 0 ? -ENOEXEC : OK;
     }
 
@@ -393,7 +393,7 @@ int rx65n_bringup(void)
 
 #if defined(CONFIG_USBHOST)
   ret = nsh_usbhostinitialize();
-  printf ("USB Initialization done!!! with return value = %d\n\r", ret);
+  printf ("USB Initialization done!!! with return value = %d\n", ret);
 #endif
 
 #if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
