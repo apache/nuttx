@@ -49,6 +49,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <fcntl.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 
@@ -245,7 +246,8 @@ ssize_t spiffs_fobj_flush(FAR struct spiffs_s *fs,
 
       if (fobj->cache_page)
         {
-          spiffs_cacheinfo("Flushing cache page %d for objid=%d offset=%d size=%d\n",
+          spiffs_cacheinfo("Flushing cache page %d for objid=%d "
+                           "offset=%" PRIu32 " size=%d\n",
                            fobj->cache_page->cpndx, fobj->objid,
                            fobj->cache_page->offset, fobj->cache_page->size);
 
@@ -253,7 +255,7 @@ ssize_t spiffs_fobj_flush(FAR struct spiffs_s *fs,
             spiffs_fobj_write(fs, fobj,
                               spiffs_get_cache_page(fs, spiffs_get_cache(fs),
                                                     fobj->cache_page->cpndx),
-                              fobj->cache_page->offset, fobj->cache_page->size);
+                           fobj->cache_page->offset, fobj->cache_page->size);
           if (nwritten < 0)
             {
               ferr("ERROR: spiffs_fobj_write failed %d\n", (int)nwritten);
