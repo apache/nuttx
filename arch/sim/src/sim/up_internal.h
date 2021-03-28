@@ -214,6 +214,10 @@ void up_copyfullstate(uint32_t *dest, uint32_t *src);
 
 void *up_doirq(int irq, void *regs);
 
+/* up_head.c ****************************************************************/
+
+void host_abort(int status);
+
 /* up_setjmp32.S ************************************************************/
 
 int  up_setjmp(void *jb);

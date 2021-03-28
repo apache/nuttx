@@ -100,35 +100,20 @@ int main(int argc, char **argv, char **envp)
 }
 
 /****************************************************************************
- * Name: up_assert
+ * Name: host_abort
  *
  * Description:
- *   Called to terminate the simulation abnormally in the event of a failed
- *   assertion.
+ *   Abort the simulation
  *
+ * Input Parameters:
+ *   status - Exit status to set
  ****************************************************************************/
 
-void up_assert(const char *filename, int line)
+void host_abort(int status)
 {
-  /* Show the location of the failed assertion */
+  /* Save the return code and exit the simulation */
 
-#ifdef CONFIG_SMP
-  syslog(LOG_ERR, "CPU%d: Assertion failed at file:%s line: %d\n",
-          up_cpu_index(), filename, line);
-#else
-  syslog(LOG_ERR, "Assertion failed at file:%s line: %d\n",
-          filename, line);
-#endif
-
-  /* Allow for any board/configuration specific crash information */
-
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(sim_getsp(), this_task(), filename, line);
-#endif
-
-  /* Exit the simulation */
-
-  g_exitcode = EXIT_FAILURE;
+  g_exitcode = status;
   longjmp(g_simabort, 1);
 }
 
@@ -152,9 +137,12 @@ void up_assert(const char *filename, int line)
 #ifdef CONFIG_BOARDCTL_POWEROFF
 int board_power_off(int status)
 {
-  /* Save the return code and exit the simulation */
+  /* Abort simulator */
 
-  g_exitcode = status;
-  longjmp(g_simabort, 1);
+  host_abort(status);
+
+  /* Does not really return */
+
+  return 0;
 }
 #endif
