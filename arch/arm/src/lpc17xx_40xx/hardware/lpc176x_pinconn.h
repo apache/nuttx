@@ -1,55 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc176x_pinconn.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC176X_PINCONN_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC176X_PINCONN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_PINCONN_PINSEL0_OFFSET     0x0000 /* Pin function select register 0 */
 #define LPC17_40_PINCONN_PINSEL1_OFFSET     0x0004 /* Pin function select register 1 */
@@ -76,7 +61,7 @@
 #define LPC17_40_PINCONN_ODMODE4_OFFSET     0x0078 /* Open drain mode control register 4 */
 #define LPC17_40_PINCONN_I2CPADCFG_OFFSET   0x007c /* I2C Pin Configuration register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_PINCONN_PINSEL0            (LPC17_40_PINCONN_BASE+LPC17_40_PINCONN_PINSEL0_OFFSET)
 #define LPC17_40_PINCONN_PINSEL1            (LPC17_40_PINCONN_BASE+LPC17_40_PINCONN_PINSEL1_OFFSET)
@@ -103,7 +88,8 @@
 #define LPC17_40_PINCONN_ODMODE4            (LPC17_40_PINCONN_BASE+LPC17_40_PINCONN_ODMODE4_OFFSET)
 #define LPC17_40_PINCONN_I2CPADCFG          (LPC17_40_PINCONN_BASE+LPC17_40_PINCONN_I2CPADCFG_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* Pin Function Select register 0 (PINSEL0: 0x4002c000) */
 
 #define PINCONN_PINSEL_GPIO                 (0)
@@ -184,6 +170,7 @@
 #define PINCONN_PINSEL1_P0p30_SHIFT         (28)      /* Bits 28-29: P0.30 00=GPIO 01=USB_D- 10=Reserved 11=Reserved */
 #define PINCONN_PINSEL1_P0p30_MASK          (3 << PINCONN_PINSEL1_P0p30_SHIFT)
                                                       /* Bits 30-31: Reserved */
+
 /* Pin Function Select register 2 (PINSEL2: 0x4002c008) */
 
 #define PINCONN_PINSEL2_P1_SHIFT(n)         PINCONN_PINSELL_SHIFT(n) /* n=0,1,..,15 */
@@ -281,12 +268,13 @@
 #define PINCONN_PINSEL4_P2p13_SHIFT         (26)       /* Bits 26-27: P2.13 00=GPIO 01=EINT3 10=Reserved 11=I2STX_SDA */
 #define PINCONN_PINSEL4_P2p13_MASK          (3 << PINCONN_PINSEL4_P2p13_SHIFT)
                                                        /* Bits 28-31: Reserved */
+
 /* Pin Function Select Register 7 (PINSEL7: 0x4002c01c) */
 
 #define PINCONN_PINSEL7_P3_SHIFT(n)         PINCONN_PINSELH_SHIFT(n) /* n=16,17,..31 */
 #define PINCONN_PINSEL7_P3_MASK(n)          PINCONN_PINSELH_MASK(n)  /* n=16,17,..31 */
 
-                                                       /* Bits 0-17: Reserved */
+                                                   /* Bits 0-17: Reserved */
 #define PINCONN_PINSEL7_P3p25_SHIFT         (18)       /* Bits 18-19: P3.25 00=GPIO 01=Reserved 10=MAT0.0 11=PWM1.2 */
 #define PINCONN_PINSEL7_P3p25_MASK          (3 << PINCONN_PINSEL7_P3p25_SHIFT)
 #define PINCONN_PINSEL7_P3p26_SHIFT         (20)       /* Bits 20-21: P3.26 00=GPIO 01=STCLK 10=MAT0.1 11=PWM1.3 */
@@ -294,6 +282,7 @@
                                                        /* Bits 22-31: Reserved */
 
 /* Pin Function Select Register 8 (PINSEL8: 0x4002c020) */
+
 /* No description of bits -- Does this register exist? */
 
 /* Pin Function Select Register 9 (PINSEL9: 0x4002c024) */
@@ -301,16 +290,19 @@
 #define PINCONN_PINSEL9_P4_SHIFT(n)         PINCONN_PINSELH_SHIFT(n) /* n=16,17,..31 */
 #define PINCONN_PINSEL9_P4_MASK(n)          PINCONN_PINSELH_MASK(n)  /* n=16,17,..31 */
 
-                                                      /* Bits 0-23: Reserved */
+                                                   /* Bits 0-23: Reserved */
 #define PINCONN_PINSEL9_P4p28_SHIFT         (24)       /* Bits 24-25: P4.28 00=GPIO 01=RX_MCLK 10=MAT2.0 11=TXD3 */
 #define PINCONN_PINSEL9_P4p28_MASK          (3 << PINCONN_PINSEL9_P4p28_SHIFT)
 #define PINCONN_PINSEL9_P4p29_SHIFT         (26)       /* Bits 26-27: P4.29 00=GPIO 01=TX_MCLK 10=MAT2.1 11=RXD3 */
 #define PINCONN_PINSEL9_P4p29_MASK          (3 << PINCONN_PINSEL9_P4p29_SHIFT)
                                                        /* Bits 28-31: Reserved */
+
 /* Pin Function Select Register 10 (PINSEL10: 0x4002c028) */
-                                                       /* Bits 0-2: Reserved */
+
+                                                   /* Bits 0-2: Reserved */
 #define PINCONN_PINSEL10_TPIU               (1 << 3)   /* Bit 3: 0=TPIU interface disabled; 1=TPIU interface enabled */
                                                        /* Bits 4-31: Reserved */
+
 /* Pin Mode select register 0 (PINMODE0: 0x4002c040) */
 
 #define PINCONN_PINMODE_PU                  (0)       /* 00: pin has a pull-up resistor enabled */
@@ -481,6 +473,7 @@
 #define PINCONN_PINMODE4_P2p13_SHIFT        (26)      /* Bits 26-27: P2.13 mode control */
 #define PINCONN_PINMODE4_P2p13_MASK         (3 << PINCONN_PINMODE4_P2p13_SHIFT)
                                                       /* Bits 28-31: Reserved */
+
 /* Pin Mode select register 5 (PINMODE5: 0x4002c054)
  * Pin Mode select register 6 (PINMODE6: 0x4002c058)
  * No bit definitions -- do these registers exist?
@@ -496,22 +489,26 @@
 
 #define PINCONN_PINMODE7_P3_SHIFT(n)        PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
 #define PINCONN_PINMODE7_P3_MASK(n)         PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
-                                                      /* Bits 0-17: Reserved */
+
+                                                  /* Bits 0-17: Reserved */
 #define PINCONN_PINMODE7_P3p25_SHIFT        (18)      /* Bits 18-19: P3.25 mode control */
 #define PINCONN_PINMODE7_P3p25_MASK         (3 << PINCONN_PINMODE7_P3p25_SHIFT)
 #define PINCONN_PINMODE7_P3p26_SHIFT        (20)      /* Bits 20-21: P3.26 mode control */
 #define PINCONN_PINMODE7_P3p26_MASK         (3 << PINCONN_PINMODE7_P3p26_SHIFT)
                                                       /* Bits 22-31: Reserved */
+
 /* Pin Mode select register 9 (PINMODE9: 0x4002c064) */
 
 #define PINCONN_PINMODE9_P4_SHIFT(n)        PINCONN_PINMODEH_SHIFT(n) /* n=16,17,..31 */
 #define PINCONN_PINMODE9_P4_MASK(n)         PINCONN_PINMODEH_MASK(n)  /* n=16,17,..31 */
-                                                      /* Bits 0-23: Reserved */
+
+                                                  /* Bits 0-23: Reserved */
 #define PINCONN_PINMODE9_P4p28_SHIFT        (24)      /* Bits 24-25: P4.28 mode control */
 #define PINCONN_PINMODE9_P4p28_MASK         (3 << PINCONN_PINMODE9_P4p28_SHIFT)
 #define PINCONN_PINMODE9_P4p29_SHIFT        (26)      /* Bits 26-27: P4.29 mode control */
 #define PINCONN_PINMODE9_P4p29_MASK         (3 << PINCONN_PINMODE9_P4p29_SHIFT)
                                                       /* Bits 28-31: Reserved */
+
 /* Open Drain Pin Mode select register 0 (PINMODE_OD0: 0x4002c068) */
 
 #define PINCONN_ODMODE0_P0(n)               (1 << (n))
@@ -545,6 +542,7 @@
 #define PINCONN_ODMODE0_P0p29               (1 << 29) /* Bit 29: P0.29 open drain mode */
 #define PINCONN_ODMODE0_P0p30               (1 << 30) /* Bit 30: P0.30 open drain mode */
                                                       /* Bit 31: Reserved */
+
 /* Open Drain Pin Mode select register 1 (PINMODE_OD1: 0x4002c06c) */
 
 #define PINCONN_ODMODE1_P1(n)               (1 << (n))
@@ -596,20 +594,23 @@
 #define PINCONN_ODMODE2_P2p12               (1 << 12) /* Bit 12: P2.12 open drain mode */
 #define PINCONN_ODMODE2_P2p13               (1 << 13) /* Bit 13: P2.13 open drain mode */
                                                       /* Bits 14-31: Reserved */
+
 /* Open Drain Pin Mode select register 3 (PINMODE_OD3: 0x4002c074) */
 
 #define PINCONN_ODMODE3_P3(n)               (1 << (n))
-                                                      /* Bits 0-24: Reserved */
+                                                  /* Bits 0-24: Reserved */
 #define PINCONN_ODMODE3_P3p25               (1 << 25) /* Bit 25: P3.25 open drain mode */
 #define PINCONN_ODMODE3_P3p26               (1 << 25) /* Bit 26: P3.26 open drain mode */
                                                       /* Bits 17-31: Reserved */
+
 /* Open Drain Pin Mode select register 4 (PINMODE_OD4: 0x4002c078) */
 
 #define PINCONN_ODMODE4_P4(n)               (1 << (n))
-                                                      /* Bits 0-27: Reserved */
+                                                  /* Bits 0-27: Reserved */
 #define PINCONN_ODMODE4_P4p28               (1 << 28) /* Bit 28: P4.28 open drain mode */
 #define PINCONN_ODMODE4_P4p29               (1 << 29) /* Bit 29: P4.29 open drain mode */
                                                       /* Bits 30-31: Reserved */
+
 /* I2C Pin Configuration register (I2CPADCFG: 0x4002c07c) */
 
 #define PINCONN_I2CPADCFG_SDADRV0           (1 << 0)    /* Bit 0: SDA0 pin, P0.27 in Fast Mode Plus */
@@ -620,16 +621,16 @@
                                                          * filtering/slew rate control */
                                                         /* Bits 4-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC176X_PINCONN_H */

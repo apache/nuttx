@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -69,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ***************************************************************/
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE
 #  define CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE 64
@@ -88,8 +73,9 @@
 #  define USB_FAST_INT 0
 #endif
 
-/* Enable reading SOF from interrupt handler vs. simply reading on demand.  Probably
- * a bad idea... Unless there is some issue with sampling the SOF from hardware
+/* Enable reading SOF from interrupt handler vs. simply reading on demand.
+ * Probably a bad idea...
+ * Unless there is some issue with sampling the SOF from hardware
  * asynchronously.
  */
 
@@ -137,7 +123,7 @@
 #  endif
 #endif
 
-/* Debug ***********************************************************************/
+/* Debug ********************************************************************/
 
 /* Trace error codes */
 
@@ -209,7 +195,7 @@
 #define LPC17_40_TRACEINTID_SUSPENDCHG         0x0020
 #define LPC17_40_TRACEINTID_SYNCHFRAME         0x0021
 
-/* Hardware interface **********************************************************/
+/* Hardware interface *******************************************************/
 
 /* Macros for testing the device status response */
 
@@ -226,7 +212,7 @@
 #define LPC17_40_READOVERRUN_BIT (0x80000000)
 #define LPC17_40_READOVERRUN(s)  (((s) & LPC17_40_READOVERRUN_BIT) != 0)
 
-/* Endpoints ******************************************************************/
+/* Endpoints ****************************************************************/
 
 /* Number of endpoints */
 
@@ -261,7 +247,8 @@
  * simple state machine is required to handle the various transfer complete
  * interrupt responses.  The following values are the various states:
  */
-                                                   /*** INTERRUPT CAUSE ***/
+
+                                                    /* INTERRUPT CAUSE */
 #define LPC17_40_EP0REQUEST           (0)           /* Normal request handling */
 #define LPC17_40_EP0STATUSIN          (1)           /* Status sent */
 #define LPC17_40_EP0STATUSOUT         (2)           /* Status received */
@@ -270,7 +257,7 @@
 #define LPC17_40_EP0SETADDRESS        (5)           /* Set address received */
 #define LPC17_40_EP0WRITEREQUEST      (6)           /* EP0 write request sent */
 
-/* Request queue operations ****************************************************/
+/* Request queue operations *************************************************/
 
 #define lpc17_40_rqempty(ep)          ((ep)->head == NULL)
 #define lpc17_40_rqpeek(ep)           ((ep)->head)
@@ -283,7 +270,7 @@
 
 struct lpc17_40_req_s
 {
-  struct usbdev_req_s    req;           /* Standard USB request */
+  struct usbdev_req_s    req;            /* Standard USB request */
   struct lpc17_40_req_s  *flink;         /* Supports a singly linked list */
 };
 
@@ -300,8 +287,8 @@ struct lpc17_40_ep_s
 
   /* LPC17xx/LPC40xx-specific fields */
 
-  struct lpc17_40_usbdev_s *dev;          /* Reference to private driver data */
-  struct lpc17_40_req_s    *head;         /* Request list for this endpoint */
+  struct lpc17_40_usbdev_s *dev;         /* Reference to private driver data */
+  struct lpc17_40_req_s    *head;        /* Request list for this endpoint */
   struct lpc17_40_req_s    *tail;
   uint8_t                 epphy;         /* Physical EP address */
   uint8_t                 stalled:1;     /* 1: Endpoint is stalled */
@@ -371,7 +358,7 @@ struct lpc17_40_usbdev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations ******************************************************/
 
 #ifdef CONFIG_LPC17_40_USBDEV_REGDEBUG
 static void lpc17_40_printreg(uint32_t addr, uint32_t val, bool iswrite);
@@ -383,33 +370,37 @@ static void lpc17_40_putreg(uint32_t val, uint32_t addr);
 # define lpc17_40_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Command operations **********************************************************/
+/* Command operations *******************************************************/
 
 static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data);
 
-/* Request queue operations ****************************************************/
+/* Request queue operations *************************************************/
 
-static FAR struct lpc17_40_req_s *lpc17_40_rqdequeue(FAR struct lpc17_40_ep_s *privep);
+static FAR
+struct lpc17_40_req_s *lpc17_40_rqdequeue(FAR struct lpc17_40_ep_s *privep);
 static void lpc17_40_rqenqueue(FAR struct lpc17_40_ep_s *privep,
               FAR struct lpc17_40_req_s *req);
 
-/* Low level data transfers and request operations *****************************/
+/* Low level data transfers and request operations **************************/
 
-static void lpc17_40_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes);
+static void lpc17_40_epwrite(uint8_t epphy,
+                             const uint8_t *data, uint32_t nbytes);
 static int  lpc17_40_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes);
 static inline void lpc17_40_abortrequest(struct lpc17_40_ep_s *privep,
               struct lpc17_40_req_s *privreq, int16_t result);
-static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep, int16_t result);
+static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep,
+                                 int16_t result);
 static int  lpc17_40_wrrequest(struct lpc17_40_ep_s *privep);
 static int  lpc17_40_rdrequest(struct lpc17_40_ep_s *privep);
 static void lpc17_40_cancelrequests(struct lpc17_40_ep_s *privep);
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling *******************************************************/
 
-static struct lpc17_40_ep_s *lpc17_40_epfindbyaddr(struct lpc17_40_usbdev_s *priv,
-              uint16_t eplog);
+static struct
+lpc17_40_ep_s *lpc17_40_epfindbyaddr(struct lpc17_40_usbdev_s *priv,
+                                     uint16_t eplog);
 static void lpc17_40_eprealize(struct lpc17_40_ep_s *privep, bool prio,
-              uint32_t packetsize);
+                               uint32_t packetsize);
 static uint8_t lpc17_40_epclrinterrupt(uint8_t epphy);
 static inline void lpc17_40_ep0configure(struct lpc17_40_usbdev_s *priv);
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
@@ -419,8 +410,10 @@ static void lpc17_40_usbreset(struct lpc17_40_usbdev_s *priv);
 static void lpc17_40_dispatchrequest(struct lpc17_40_usbdev_s *priv,
               const struct usb_ctrlreq_s *ctrl);
 static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv);
-static inline void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv);
-static inline void lpc17_40_ep0dataininterrupt(struct lpc17_40_usbdev_s *priv);
+static inline
+void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv);
+static inline
+void lpc17_40_ep0dataininterrupt(struct lpc17_40_usbdev_s *priv);
 static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg);
 
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
@@ -431,12 +424,13 @@ static void lpc17_40_dmarestart(uint8_t epphy, uint32_t descndx);
 static void lpc17_40_dmadisable(uint8_t epphy);
 #endif /* CONFIG_LPC17_40_USBDEV_DMA */
 
-/* Endpoint operations *********************************************************/
+/* Endpoint operations ******************************************************/
 
 static int  lpc17_40_epconfigure(FAR struct usbdev_ep_s *ep,
               const struct usb_epdesc_s *desc, bool last);
 static int  lpc17_40_epdisable(FAR struct usbdev_ep_s *ep);
-static FAR struct usbdev_req_s *lpc17_40_epallocreq(FAR struct usbdev_ep_s *ep);
+static FAR
+struct usbdev_req_s *lpc17_40_epallocreq(FAR struct usbdev_ep_s *ep);
 static void lpc17_40_epfreereq(FAR struct usbdev_ep_s *ep,
               FAR struct usbdev_req_s *);
 #ifdef CONFIG_USBDEV_DMA
@@ -450,11 +444,12 @@ static int  lpc17_40_epcancel(FAR struct usbdev_ep_s *ep,
               struct usbdev_req_s *req);
 static int  lpc17_40_epstall(FAR struct usbdev_ep_s *ep, bool resume);
 
-/* USB device controller operations ********************************************/
+/* USB device controller operations *****************************************/
 
 static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev,
               uint8_t epno, bool in, uint8_t eptype);
-static void lpc17_40_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
+static void lpc17_40_freeep(FAR struct usbdev_s *dev,
+                            FAR struct usbdev_ep_s *ep);
 static int  lpc17_40_getframe(struct usbdev_s *dev);
 static int  lpc17_40_wakeup(struct usbdev_s *dev);
 static int  lpc17_40_selfpowered(struct usbdev_s *dev, bool selfpowered);
@@ -495,24 +490,27 @@ static const struct usbdev_ops_s g_devops =
   .pullup      = lpc17_40_pullup,
 };
 
-/* USB Device Communication Area ***********************************************
+/* USB Device Communication Area ********************************************
  *
- * The CPU and DMA controller communicate through a common area of memory, called
- * the USB Device Communication Area, or UDCA. The UDCA is a 32-word array of DMA
- * Descriptor Pointers (DDPs), each of which corresponds to a physical endpoint.
- * Each DDP points to the start address of a DMA Descriptor, if one is defined for
- * the endpoint. DDPs for unrealized endpoints and endpoints disabled for DMA
- * operation are ignored and can be set to a NULL (0x0) value.
+ * The CPU and DMA controller communicate through a common area of memory,
+ * called the USB Device Communication Area, or UDCA. The UDCA is a 32-word
+ * array of DMA Descriptor Pointers (DDPs), each of which corresponds to a
+ * physical endpoint. Each DDP points to the start address of a DMA
+ * Descriptor, if one is defined for the endpoint. DDPs for unrealized
+ * endpoints and endpoints disabled for DMA operation are ignored and can
+ * be set to a NULL (0x0) value.
  *
- * The start address of the UDCA is stored in the USBUDCAH register. The UDCA can
- * reside at any 128-byte boundary of RAM that is accessible to both the CPU and DMA
- * controller (on other MCU's like the LPC2148, the UDCA lies in a specialized
- * 8Kb memory region).
+ * The start address of the UDCA is stored in the USBUDCAH register. The UDCA
+ * can reside at any 128-byte boundary of RAM that is accessible to both the
+ * CPU and DMA controller (on other MCU's like the LPC2148, the UDCA lies in
+ * a specialized 8Kb memory region).
  */
 
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
-static uint32_t                g_udca[LPC17_40_NPHYSENDPOINTS] __attribute__ ((aligned (128)));
-static struct lpc17_40_dmadesc_s  g_usbddesc[CONFIG_LPC17_40_USBDEV_NDMADESCRIPTORS];
+static uint32_t
+g_udca[LPC17_40_NPHYSENDPOINTS] __attribute__ ((aligned (128)));
+static struct
+lpc17_40_dmadesc_s  g_usbddesc[CONFIG_LPC17_40_USBDEV_NDMADESCRIPTORS];
 #endif
 
 /****************************************************************************
@@ -554,8 +552,8 @@ static void lpc17_40_checkreg(uint32_t addr, uint32_t val, bool iswrite)
   static uint32_t count = 0;
   static bool     prevwrite = false;
 
-  /* Is this the same value that we read from/wrote to the same register last time?
-   * Are we polling the register?  If so, suppress the output.
+  /* Is this the same value that we read from/wrote to the same register
+   * last time? Are we polling the register?  If so, suppress the output.
    */
 
   if (addr == prevaddr && val == preval && prevwrite == iswrite)
@@ -663,7 +661,8 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
   /* Disable interrupt and clear CDFULL and CCEMPTY interrupt status */
 
   flags = enter_critical_section();
-  lpc17_40_putreg(USBDEV_INT_CDFULL | USBDEV_INT_CCEMPTY, LPC17_40_USBDEV_INTCLR);
+  lpc17_40_putreg(USBDEV_INT_CDFULL | USBDEV_INT_CCEMPTY,
+                  LPC17_40_USBDEV_INTCLR);
 
   /* Shift the command in position and mask out extra bits */
 
@@ -673,9 +672,12 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
 
   lpc17_40_putreg(cmd32 | CMD_USBDEV_CMDWR, LPC17_40_USBDEV_CMDCODE);
 
-  /* Wait until the command register is empty (CCEMPTY != 0, command is accepted) */
+  /* Wait until the command register is empty
+   * (CCEMPTY != 0, command is accepted)
+   */
 
-  while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CCEMPTY) == 0);
+  while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+          USBDEV_INT_CCEMPTY) == 0);
 
   /* Clear command register empty (CCEMPTY) interrupt */
 
@@ -695,8 +697,10 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
         /* Send data + WR and wait for CCEMPTY */
 
         data32 = (uint32_t)data << CMD_USBDEV_WDATASHIFT;
-        lpc17_40_putreg(data32 | CMD_USBDEV_DATAWR, LPC17_40_USBDEV_CMDCODE);
-        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CCEMPTY) == 0);
+        lpc17_40_putreg(data32 | CMD_USBDEV_DATAWR,
+                        LPC17_40_USBDEV_CMDCODE);
+        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+                USBDEV_INT_CCEMPTY) == 0);
       }
       break;
 
@@ -707,8 +711,10 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
       {
         /* Send command code + RD and wait for CDFULL */
 
-        lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_40_USBDEV_CMDCODE);
-        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
+        lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD,
+                        LPC17_40_USBDEV_CMDCODE);
+        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+                USBDEV_INT_CDFULL) == 0);
 
         /* Clear CDFULL and read LS data */
 
@@ -717,8 +723,10 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
 
         /* Send command code + RD and wait for CDFULL */
 
-        lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_40_USBDEV_CMDCODE);
-        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
+        lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD,
+                        LPC17_40_USBDEV_CMDCODE);
+        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+                USBDEV_INT_CDFULL) == 0);
 
         /* Read MS data */
 
@@ -735,8 +743,10 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
       {
         /* Send command code + RD and wait for CDFULL */
 
-        lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_40_USBDEV_CMDCODE);
-        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
+        lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD,
+                        LPC17_40_USBDEV_CMDCODE);
+        while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+                USBDEV_INT_CDFULL) == 0);
 
         /* Read data */
 
@@ -757,8 +767,10 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
           {
             /* Send command code + RD and wait for CDFULL */
 
-            lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD, LPC17_40_USBDEV_CMDCODE);
-            while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CDFULL) == 0);
+            lpc17_40_putreg(cmd32 | CMD_USBDEV_DATARD,
+                            LPC17_40_USBDEV_CMDCODE);
+            while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+                    USBDEV_INT_CDFULL) == 0);
 
             /* Read data */
 
@@ -771,8 +783,10 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
             /* Send data + RD and wait for CCEMPTY */
 
             data32 = (uint32_t)data << CMD_USBDEV_WDATASHIFT;
-            lpc17_40_putreg(data32 | CMD_USBDEV_DATAWR, LPC17_40_USBDEV_CMDCODE);
-            while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_CCEMPTY) == 0);
+            lpc17_40_putreg(data32 | CMD_USBDEV_DATAWR,
+                            LPC17_40_USBDEV_CMDCODE);
+            while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+                    USBDEV_INT_CCEMPTY) == 0);
           }
           break;
 
@@ -797,7 +811,8 @@ static uint32_t lpc17_40_usbcmd(uint16_t cmd, uint8_t data)
  *
  ****************************************************************************/
 
-static FAR struct lpc17_40_req_s *lpc17_40_rqdequeue(FAR struct lpc17_40_ep_s *privep)
+static FAR
+struct lpc17_40_req_s *lpc17_40_rqdequeue(FAR struct lpc17_40_ep_s *privep)
 {
   FAR struct lpc17_40_req_s *ret = privep->head;
 
@@ -847,7 +862,8 @@ static void lpc17_40_rqenqueue(FAR struct lpc17_40_ep_s *privep,
  *
  ****************************************************************************/
 
-static void lpc17_40_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes)
+static void
+lpc17_40_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes)
 {
   uint32_t value;
   bool aligned = (((uint32_t)data & 3) == 0);
@@ -856,8 +872,8 @@ static void lpc17_40_epwrite(uint8_t epphy, const uint8_t *data, uint32_t nbytes
    * the logical endpoint number (0-15)
    */
 
-  lpc17_40_putreg(((epphy << 1) & USBDEV_CTRL_LOGEP_MASK) | USBDEV_CTRL_WREN,
-                 LPC17_40_USBDEV_CTRL);
+  lpc17_40_putreg(((epphy << 1) & USBDEV_CTRL_LOGEP_MASK) |
+                 USBDEV_CTRL_WREN, LPC17_40_USBDEV_CTRL);
 
   /* Set the transmit packet length (nbytes must be less than 2048) */
 
@@ -936,12 +952,13 @@ static int lpc17_40_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
    * the logical endpoint number (0-15).
    */
 
-  lpc17_40_putreg(((epphy << 1) & USBDEV_CTRL_LOGEP_MASK) | USBDEV_CTRL_RDEN,
-                 LPC17_40_USBDEV_CTRL);
+  lpc17_40_putreg(((epphy << 1) & USBDEV_CTRL_LOGEP_MASK) |
+                 USBDEV_CTRL_RDEN, LPC17_40_USBDEV_CTRL);
 
   /* Wait for packet buffer ready for reading */
 
-  while ((lpc17_40_getreg(LPC17_40_USBDEV_RXPLEN) & USBDEV_RXPLEN_PKTRDY) == 0);
+  while ((lpc17_40_getreg(LPC17_40_USBDEV_RXPLEN) &
+         USBDEV_RXPLEN_PKTRDY) == 0);
 
   /* Get the number of bytes of data to be read */
 
@@ -973,8 +990,8 @@ static int lpc17_40_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
   result = lpc17_40_usbcmd(CMD_USBDEV_EPCLRBUFFER, 0);
 
   /* The packet overrun bit in the clear buffer response is applicable only
-   * on EP0 transfers.  If set it means that the received packet was overwritten
-   * by a later setup packet.
+   * on EP0 transfers.  If set it means that the received packet was
+   * overwritten by a later setup packet.
    */
 
   if (epphy == LPC17_40_EP0_OUT && (result & CMD_USBDEV_CLRBUFFER_PO) != 0)
@@ -983,6 +1000,7 @@ static int lpc17_40_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
 
       pktlen |= LPC17_40_READOVERRUN_BIT;
     }
+
   return pktlen;
 }
 
@@ -998,7 +1016,8 @@ static inline void lpc17_40_abortrequest(struct lpc17_40_ep_s *privep,
                                         struct lpc17_40_req_s *privreq,
                                         int16_t result)
 {
-  usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_REQABORTED), (uint16_t)privep->epphy);
+  usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_REQABORTED),
+           (uint16_t)privep->epphy);
 
   /* Save the result in the request structure */
 
@@ -1013,11 +1032,13 @@ static inline void lpc17_40_abortrequest(struct lpc17_40_ep_s *privep,
  * Name: lpc17_40_reqcomplete
  *
  * Description:
- *   Handle termination of the request at the head of the endpoint request queue.
+ *   Handle termination of the request at the head of the endpoint request
+ *   queue.
  *
  ****************************************************************************/
 
-static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep, int16_t result)
+static void lpc17_40_reqcomplete(struct lpc17_40_ep_s *privep,
+                                 int16_t result)
 {
   struct lpc17_40_req_s *privreq;
   int stalled = privep->stalled;
@@ -1218,7 +1239,8 @@ static int lpc17_40_rdrequest(struct lpc17_40_ep_s *privep)
    */
 
   privreq->req.xfrd += nbytesread;
-  if (privreq->req.xfrd >= privreq->req.len || nbytesread < privep->ep.maxpacket)
+  if (privreq->req.xfrd >= privreq->req.len ||
+      nbytesread < privep->ep.maxpacket)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
       lpc17_40_reqcomplete(privep, OK);
@@ -1254,8 +1276,9 @@ static void lpc17_40_cancelrequests(struct lpc17_40_ep_s *privep)
  *
  ****************************************************************************/
 
-static struct lpc17_40_ep_s *lpc17_40_epfindbyaddr(struct lpc17_40_usbdev_s *priv,
-              uint16_t eplog)
+static struct
+lpc17_40_ep_s *lpc17_40_epfindbyaddr(struct lpc17_40_usbdev_s *priv,
+                                     uint16_t eplog)
 {
   struct lpc17_40_ep_s *privep;
   int i;
@@ -1296,7 +1319,8 @@ static struct lpc17_40_ep_s *lpc17_40_epfindbyaddr(struct lpc17_40_usbdev_s *pri
  *
  ****************************************************************************/
 
-static void lpc17_40_eprealize(struct lpc17_40_ep_s *privep, bool prio, uint32_t packetsize)
+static void lpc17_40_eprealize(struct lpc17_40_ep_s *privep,
+                               bool prio, uint32_t packetsize)
 {
   struct lpc17_40_usbdev_s *priv = privep->dev;
   uint32_t mask;
@@ -1331,7 +1355,8 @@ static void lpc17_40_eprealize(struct lpc17_40_ep_s *privep, bool prio, uint32_t
 
   /* Wait for Realize complete */
 
-  while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) & USBDEV_INT_EPRLZED) == 0);
+  while ((lpc17_40_getreg(LPC17_40_USBDEV_INTST) &
+          USBDEV_INT_EPRLZED) == 0);
 
   /* Clear realize interrupt bit */
 
@@ -1375,8 +1400,10 @@ static inline void lpc17_40_ep0configure(struct lpc17_40_usbdev_s *priv)
 
   /* EndPoint 0 initialization */
 
-  lpc17_40_eprealize(&priv->eplist[LPC17_40_CTRLEP_OUT], 0, CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
-  lpc17_40_eprealize(&priv->eplist[LPC17_40_CTRLEP_IN], 1, CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
+  lpc17_40_eprealize(&priv->eplist[LPC17_40_CTRLEP_OUT],
+                     0, CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
+  lpc17_40_eprealize(&priv->eplist[LPC17_40_CTRLEP_IN],
+                     1, CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
 
   /* Enable EP0 interrupts (not DMA) */
 
@@ -1509,8 +1536,8 @@ static void lpc17_40_usbreset(struct lpc17_40_usbdev_s *priv)
  * Name: lpc17_40_dispatchrequest
  *
  * Description:
- *   Provide unhandled setup actions to the class driver. This is logically part
- *   of the USB interrupt handler.
+ *   Provide unhandled setup actions to the class driver.
+ *   This is logically part of the USB interrupt handler.
  *
  ****************************************************************************/
 
@@ -1585,7 +1612,8 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
 
   /* Read EP0 data */
 
-  ret = lpc17_40_epread(LPC17_40_EP0_OUT, (uint8_t *)&ctrl, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_40_epread(LPC17_40_EP0_OUT,
+                        (uint8_t *)&ctrl, USB_SIZEOF_CTRLREQ);
   if (ret <= 0)
     {
       return;
@@ -1634,16 +1662,19 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
               {
               case USB_REQ_RECIPIENT_ENDPOINT:
                 {
-                  usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EPGETSTATUS), 0);
+                  usbtrace(TRACE_INTDECODE(
+                           LPC17_40_TRACEINTID_EPGETSTATUS), 0);
                   privep = lpc17_40_epfindbyaddr(priv, index);
                   if (!privep)
                     {
-                      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADEPGETSTATUS), 0);
+                      usbtrace(TRACE_DEVERROR(
+                               LPC17_40_TRACEERR_BADEPGETSTATUS), 0);
                       priv->stalled = 1;
                     }
                   else
                     {
-                       if ((lpc17_40_usbcmd(CMD_USBDEV_EPSELECT | privep->epphy, 0) &
+                       if ((lpc17_40_usbcmd(CMD_USBDEV_EPSELECT |
+                                            privep->epphy, 0) &
                             CMD_EPSELECT_ST) != 0)
                          {
                            response[0] = 1; /* Stalled */
@@ -1652,6 +1683,7 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
                          {
                            response[0] = 0; /* Not stalled */
                          }
+
                       response[1] = 0;
                       lpc17_40_epwrite(LPC17_40_EP0_IN, response, 2);
                       priv->ep0state = LPC17_40_EP0SHORTWRITE;
@@ -1663,11 +1695,13 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
                 {
                   if (index == 0)
                     {
-                      usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_DEVGETSTATUS), 0);
+                      usbtrace(TRACE_INTDECODE(
+                               LPC17_40_TRACEINTID_DEVGETSTATUS), 0);
 
                       /* Features:  Remote Wakeup=YES; selfpowered=? */
 
-                      response[0] = (priv->selfpowered << USB_FEATURE_SELFPOWERED) |
+                      response[0] = (priv->selfpowered <<
+                                     USB_FEATURE_SELFPOWERED) |
                                     (1 << USB_FEATURE_REMOTEWAKEUP);
                       response[1] = 0;
                       lpc17_40_epwrite(LPC17_40_EP0_IN, response, 2);
@@ -1675,7 +1709,8 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
                     }
                   else
                     {
-                      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADDEVGETSTATUS), 0);
+                      usbtrace(TRACE_DEVERROR(
+                               LPC17_40_TRACEERR_BADDEVGETSTATUS), 0);
                       priv->stalled = 1;
                     }
                 }
@@ -1683,7 +1718,8 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
 
               case USB_REQ_RECIPIENT_INTERFACE:
                 {
-                  usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_IFGETSTATUS), 0);
+                  usbtrace(TRACE_INTDECODE(
+                           LPC17_40_TRACEINTID_IFGETSTATUS), 0);
                   response[0] = 0;
                   response[1] = 0;
                   lpc17_40_epwrite(LPC17_40_EP0_IN, response, 2);
@@ -1693,7 +1729,8 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
 
               default:
                 {
-                  usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADGETSTATUS), 0);
+                  usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADGETSTATUS),
+                           0);
                   priv->stalled = 1;
                 }
                 break;
@@ -1711,11 +1748,14 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
          */
 
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_CLEARFEATURE), 0);
-        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) !=
+              USB_REQ_RECIPIENT_ENDPOINT)
           {
             lpc17_40_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
+        else if (priv->paddrset != 0 &&
+                 value == USB_FEATURE_ENDPOINTHALT &&
+                 len == 0 &&
                  (privep = lpc17_40_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 0;
@@ -1740,16 +1780,19 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
          */
 
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_SETFEATURE), 0);
-        if (((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE) &&
+        if (((ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE) &&
             value == USB_FEATURE_TESTMODE)
           {
             uinfo("test mode: %d\n", index);
           }
-        else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_ENDPOINT)
+        else if ((ctrl.type & USB_REQ_RECIPIENT_MASK) !=
+                  USB_REQ_RECIPIENT_ENDPOINT)
           {
            lpc17_40_dispatchrequest(priv, &ctrl);
           }
-        else if (priv->paddrset != 0 && value == USB_FEATURE_ENDPOINTHALT && len == 0 &&
+        else if (priv->paddrset != 0 && value ==
+                 USB_FEATURE_ENDPOINTHALT && len == 0 &&
                  (privep = lpc17_40_epfindbyaddr(priv, index)) != NULL)
           {
             privep->halted = 1;
@@ -1772,25 +1815,28 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0SETUPSETADDRESS), value);
-        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
-            index  == 0 && len == 0 && value < 128)
+        usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0SETUPSETADDRESS),
+                                 value);
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+              USB_REQ_RECIPIENT_DEVICE &&
+              index  == 0 && len == 0 && value < 128)
           {
-            /* Save the address.  We cannot actually change to the next address until
-             * the completion of the status phase.
+            /* Save the address.  We cannot actually change to the next
+             * address until the completion of the status phase.
              */
 
             priv->paddr = ctrl.value[0];
 
-            /* Note that if we send the SETADDRESS command twice, that will force the
-             * address change.  Otherwise, the hardware will automatically set the
-             * address at the end of the status phase.
+            /* Note that if we send the SETADDRESS command twice, that will
+             * force the address change.  Otherwise, the hardware will
+             * automatically set the address at the end of the status phase.
              */
 
-            lpc17_40_usbcmd(CMD_USBDEV_SETADDRESS, CMD_USBDEV_SETADDRESS_DEVEN | priv->paddr);
+            lpc17_40_usbcmd(CMD_USBDEV_SETADDRESS,
+                            CMD_USBDEV_SETADDRESS_DEVEN | priv->paddr);
 
-            /* Send a NULL packet. The status phase completes when the null packet has
-             * been sent successfully.
+            /* Send a NULL packet. The status phase completes when the null
+             * packet has been sent successfully.
              */
 
             lpc17_40_epwrite(LPC17_40_EP0_IN, NULL, 0);
@@ -1810,12 +1856,14 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
        * index: 0 or language ID;
        * len:   descriptor len; data = descriptor
        */
+
     case USB_REQ_SETDESCRIPTOR:
       /* type:  host-to-device; recipient = device
        * value: descriptor type and index
        * index: 0 or language ID;
        * len:   descriptor len; data = descriptor
        */
+
       {
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_GETSETDESC), 0);
         if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
@@ -1836,9 +1884,11 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
        * index: 0;
        * len:   1; data = configuration value
        */
+
       {
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_GETCONFIG), 0);
-        if (priv->paddrset && (ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
+        if (priv->paddrset && (ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+            USB_REQ_RECIPIENT_DEVICE &&
             value == 0 && index == 0 && len == 1)
           {
             lpc17_40_dispatchrequest(priv, &ctrl);
@@ -1857,9 +1907,11 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
        * index: 0;
        * len:   0; data = none
        */
+
       {
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_SETCONFIG), 0);
-        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE &&
+        if ((ctrl.type & USB_REQ_RECIPIENT_MASK) ==
+             USB_REQ_RECIPIENT_DEVICE &&
             index == 0 && len == 0)
           {
             lpc17_40_dispatchrequest(priv, &ctrl);
@@ -1878,12 +1930,14 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
        * index: interface;
        * len:   1; data = alt interface
        */
+
     case USB_REQ_SETINTERFACE:
       /* type:  host-to-device; recipient = interface
        * value: alternate setting
        * index: interface;
        * len:   0; data = none
        */
+
       {
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_GETSETIF), 0);
         lpc17_40_dispatchrequest(priv, &ctrl);
@@ -1896,6 +1950,7 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
        * index: endpoint;
        * len:   2; data = frame number
        */
+
       {
         usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_SYNCHFRAME), 0);
       }
@@ -1911,7 +1966,8 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_EP0SETUPSTALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_EP0SETUPSTALLED),
+                              priv->ep0state);
       lpc17_40_epstall(&priv->eplist[LPC17_40_EP0_IN].ep, false);
       lpc17_40_epstall(&priv->eplist[LPC17_40_EP0_OUT].ep, false);
     }
@@ -1927,7 +1983,8 @@ static inline void lpc17_40_ep0setup(struct lpc17_40_usbdev_s *priv)
  *
  ****************************************************************************/
 
-static inline void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv)
+static inline
+void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv)
 {
   uint32_t pktlen;
 
@@ -1938,7 +1995,8 @@ static inline void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv)
     case LPC17_40_EP0SHORTWRITE:
       {
         priv->ep0state = LPC17_40_EP0STATUSOUT;
-        pktlen = lpc17_40_epread(LPC17_40_EP0_OUT, NULL, CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
+        pktlen = lpc17_40_epread(LPC17_40_EP0_OUT, NULL,
+                                 CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
         if (LPC17_40_READOVERRUN(pktlen))
           {
             lpc17_40_ep0setup(priv);
@@ -1949,7 +2007,8 @@ static inline void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv)
     case LPC17_40_EP0SHORTWRSENT:
       {
         priv->ep0state = LPC17_40_EP0REQUEST;
-        pktlen = lpc17_40_epread(LPC17_40_EP0_OUT, NULL, CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
+        pktlen = lpc17_40_epread(LPC17_40_EP0_OUT, NULL,
+                                 CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE);
         if (LPC17_40_READOVERRUN(pktlen))
           {
             lpc17_40_ep0setup(priv);
@@ -1972,7 +2031,8 @@ static inline void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_EP0OUTSTALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_EP0OUTSTALLED),
+                              priv->ep0state);
       lpc17_40_epstall(&priv->eplist[LPC17_40_EP0_IN].ep, false);
       lpc17_40_epstall(&priv->eplist[LPC17_40_EP0_OUT].ep, false);
     }
@@ -1984,12 +2044,13 @@ static inline void lpc17_40_ep0dataoutinterrupt(struct lpc17_40_usbdev_s *priv)
  * Description:
  *   USB Ctrl EP Data IN Event. This is logically part of the USB interrupt
  *   handler.  All non-isochronous IN endpoints give this interrupt when a
- *   packet is successfully transmitted (OR a NAK handshake is sent on the bus
- *   provided that the interrupt on NAK feature is enabled).
+ *   packet is successfully transmitted (OR a NAK handshake is sent on the
+ *   bus provided that the interrupt on NAK feature is enabled).
  *
  ****************************************************************************/
 
-static inline void lpc17_40_ep0dataininterrupt(struct lpc17_40_usbdev_s *priv)
+static inline
+void lpc17_40_ep0dataininterrupt(struct lpc17_40_usbdev_s *priv)
 {
   struct lpc17_40_ep_s *ep0;
 
@@ -2006,11 +2067,14 @@ static inline void lpc17_40_ep0dataininterrupt(struct lpc17_40_usbdev_s *priv)
 
     case LPC17_40_EP0SETADDRESS:
       {
-        /* If the address was set to a non-zero value, then thiscompletes the
-         * default phase, and begins the address phase (still not fully configured)
+        /* If the address was set to a non-zero value, then
+         * thiscompletes the default phase,
+         * and begins the address phase
+         * (still not fully configured)
          */
 
-        usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0INSETADDRESS), (uint16_t)priv->paddr);
+        usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0INSETADDRESS),
+                                (uint16_t)priv->paddr);
         lpc17_40_usbcmd(CMD_USBDEV_CONFIG, 0);
         if (priv->paddr)
           {
@@ -2037,7 +2101,8 @@ static inline void lpc17_40_ep0dataininterrupt(struct lpc17_40_usbdev_s *priv)
 
   if (priv->stalled)
     {
-      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_EP0INSTALLED), priv->ep0state);
+      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_EP0INSTALLED),
+                              priv->ep0state);
       lpc17_40_epstall(&priv->eplist[LPC17_40_EP0_IN].ep, false);
       lpc17_40_epstall(&priv->eplist[LPC17_40_EP0_OUT].ep, false);
     }
@@ -2070,13 +2135,15 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
   /* Read the device interrupt status register */
 
   devintstatus = lpc17_40_getreg(LPC17_40_USBDEV_INTST);
-  usbtrace(TRACE_INTENTRY(LPC17_40_TRACEINTID_USB), (uint16_t)devintstatus);
+  usbtrace(TRACE_INTENTRY(LPC17_40_TRACEINTID_USB),
+                         (uint16_t)devintstatus);
 
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
   /* Check for low priority and high priority (non-DMA) interrupts */
 
   usbintstatus = lpc17_40_getreg(LPC17_40_SYSCON_USBINTST);
-  if ((usbintstatus & (SYSCON_USBINTST_REQLP | SYSCON_USBINTST_REQHP)) != 0)
+  if ((usbintstatus &
+      (SYSCON_USBINTST_REQLP | SYSCON_USBINTST_REQHP)) != 0)
     {
 #endif
 #ifdef CONFIG_LPC17_40_USBDEV_EPFAST_INTERRUPT
@@ -2107,8 +2174,10 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 
           /* And show what error occurred */
 
-          errcode  = (uint8_t)lpc17_40_usbcmd(CMD_USBDEV_READERRORSTATUS, 0) & CMD_READERRORSTATUS_ALLERRS;
-          usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_ERRINT), (uint16_t)errcode);
+          errcode = (uint8_t)lpc17_40_usbcmd(CMD_USBDEV_READERRORSTATUS, 0) &
+                     CMD_READERRORSTATUS_ALLERRS;
+          usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_ERRINT),
+                                  (uint16_t)errcode);
         }
 #endif
 
@@ -2138,8 +2207,10 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 
           /* Get device status */
 
-          g_usbdev.devstatus = (uint8_t)lpc17_40_usbcmd(CMD_USBDEV_GETSTATUS, 0);
-          usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_DEVSTAT), (uint16_t)g_usbdev.devstatus);
+          g_usbdev.devstatus = (uint8_t)lpc17_40_usbcmd(
+                                        CMD_USBDEV_GETSTATUS, 0);
+          usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_DEVSTAT),
+                  (uint16_t)g_usbdev.devstatus);
 
           /* Device connection status */
 
@@ -2155,7 +2226,8 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                     {
                       /* We have a transition from unattached to attached */
 
-                      usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_CONNECTED),
+                      usbtrace(TRACE_INTDECODE(
+                               LPC17_40_TRACEINTID_CONNECTED),
                                (uint16_t)g_usbdev.devstatus);
                       priv->usbdev.speed = USB_SPEED_UNKNOWN;
                       lpc17_40_usbcmd(CMD_USBDEV_CONFIG, 0);
@@ -2247,15 +2319,20 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                     {
                       /* Clear the endpoint interrupt */
 
-                      uint32_t result = lpc17_40_epclrinterrupt(LPC17_40_CTRLEP_OUT);
+                      uint32_t result = lpc17_40_epclrinterrupt(
+                                               LPC17_40_CTRLEP_OUT);
                       if (result & CMD_EPSELECT_STP)
                         {
-                          usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0SETUP), (uint16_t)result);
+                          usbtrace(TRACE_INTDECODE(
+                                    LPC17_40_TRACEINTID_EP0SETUP),
+                                    (uint16_t)result);
                           lpc17_40_ep0setup(priv);
                         }
                       else
                         {
-                          usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0OUT), priv->ep0state);
+                          usbtrace(TRACE_INTDECODE(
+                                     LPC17_40_TRACEINTID_EP0OUT),
+                                       priv->ep0state);
                           lpc17_40_ep0dataoutinterrupt(priv);
                         }
                       break;
@@ -2267,10 +2344,12 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                     {
                       /* Clear the endpoint interrupt */
 
-                      usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0IN), priv->ep0state);
+                      usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EP0IN),
+                               priv->ep0state);
                       lpc17_40_epclrinterrupt(LPC17_40_CTRLEP_IN);
                       lpc17_40_ep0dataininterrupt(priv);
                     }
+
                   pending >>= 2;
 
                   /* All other endpoints EP 1-31 */
@@ -2285,28 +2364,32 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 
                           lpc17_40_epclrinterrupt(epphy);
 
-                          /* Get the endpoint structure corresponding to the physical
-                           * endpoint number.
+                          /* Get the endpoint structure corresponding to the
+                           * physical endpoint number.
                            */
 
                           privep =  &priv->eplist[epphy];
 
-                          /* Check for complete on IN or OUT endpoint.  Odd physical
-                           * endpoint addresses are IN endpoints.
+                          /* Check for complete on IN or OUT endpoint.  Odd
+                           * physical endpoint addresses are IN endpoints.
                            */
 
                           if ((epphy & 1) != 0)
                             {
                               /* IN: device-to-host */
 
-                              usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EPOUT), (uint16_t)epphy);
+                              usbtrace(TRACE_INTDECODE(
+                                       LPC17_40_TRACEINTID_EPOUT),
+                                       (uint16_t)epphy);
                               if (priv->usbdev.speed == USB_SPEED_UNKNOWN)
                                 {
                                   priv->usbdev.speed = USB_SPEED_FULL;
                                   lpc17_40_usbcmd(CMD_USBDEV_CONFIG, 1);
                                 }
 
-                              /* Write host data from the current write request (if any) */
+                              /* Write host data from the current write
+                               * request (if any)
+                               */
 
                               privep->txbusy = 0;
                               lpc17_40_wrrequest(privep);
@@ -2315,9 +2398,13 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                             {
                               /* OUT: host-to-device */
 
-                              usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EPIN), (uint16_t)epphy);
+                              usbtrace(TRACE_INTDECODE(
+                                       LPC17_40_TRACEINTID_EPIN),
+                                       (uint16_t)epphy);
 
-                              /* Read host data into the current read request */
+                              /* Read host data into the current read
+                               * request
+                               */
 
                               if (!lpc17_40_rqempty(privep))
                                 {
@@ -2341,7 +2428,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Check for DMA interrupts */
 
-  if (usbintstatus & SYSCON_USBINTST_REQDMA) != 0)
+  if ((usbintstatus & SYSCON_USBINTST_REQDMA) != 0)
     {
       /* First Software High priority and then low priority */
 
@@ -2355,6 +2442,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
         {
           dmaintstatus |= tmp;
         }
+
       lpc17_40_putreg(tmp, LPC17_40_USBDEV_EOTINTCLR);
 
       tmp = lpc17_40_getreg(LPC17_40_USBDEV_NDDRINTST);
@@ -2362,6 +2450,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
         {
           dmaintstatus |= tmp;
         }
+
       lpc17_40_putreg(tmp, LPC17_40_USBDEV_NDDRINTCLR);
 
       tmp = lpc17_40_getreg(LPC17_40_USBDEV_SYSERRINTST);
@@ -2369,6 +2458,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
         {
           dmaintstatus |= tmp;
         }
+
       lpc17_40_putreg(tmp, LPC17_40_USBDEV_SYSERRINTCLR);
 
       /* Loop twice:  Process software high priority interrupts on the
@@ -2390,13 +2480,15 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
             {
               if ((pending & 1) != 0)
                 {
-                  usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EPDMA), (uint16_t)epphy);
+                  usbtrace(TRACE_INTDECODE(LPC17_40_TRACEINTID_EPDMA),
+                          (uint16_t)epphy);
 #warning DO WHAT?
                 }
             }
         }
     }
 #endif
+
   usbtrace(TRACE_INTEXIT(LPC17_40_TRACEINTID_USB), 0);
   return OK;
 }
@@ -2410,9 +2502,11 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
-static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv, uint8_t epphy,
-                            uint32_t epmaxsize, uint32_t nbytes, uint32_t *isocpacket,
-                            bool isochronous);
+static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv,
+                             uint8_t epphy,
+                             uint32_t epmaxsize, uint32_t nbytes,
+                             uint32_t *isocpacket,
+                             bool isochronous);
 {
   struct lpc17_40_dmadesc_s *dmadesc = priv;
   uint32_t regval;
@@ -2425,7 +2519,7 @@ static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv, uint8_t epphy,
     }
 #endif
 
-  /* Check if a DMA descriptor has been assigned.  If not, than that indicates
+  /* Check if a DMA descriptor has been assigned. If not, than that indicates
    * that we will have to do parallel I/O
    */
 
@@ -2437,7 +2531,8 @@ static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv, uint8_t epphy,
 
   /* Verify that the DMA descriptor is available */
 
-  if ((dmadesc->status & USB_DMADESC_STATUS_MASK) == USB_DMADESC_BEINGSERVICED)
+  if ((dmadesc->status & USB_DMADESC_STATUS_MASK) ==
+       USB_DMADESC_BEINGSERVICED)
     {
       usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_DMABUSY), 0);
       return -EBUSY; /* Shouldn't happen */
@@ -2447,8 +2542,10 @@ static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv, uint8_t epphy,
 
   dmadesc->nexdesc = 0;
   dmadesc->config  = USB_DMADESC_MODENORMAL |
-                     ((epmaxsize << USB_DMADESC_PKTSIZE_SHIFT) & USB_DMADESC_PKTSIZE_MASK) |
-                     ((nbytes << USB_DMADESC_BUFLEN_SHIFT) & USB_DMADESC_BUFLEN_MASK);
+                     ((epmaxsize << USB_DMADESC_PKTSIZE_SHIFT) &
+                      USB_DMADESC_PKTSIZE_MASK) |
+                     ((nbytes << USB_DMADESC_BUFLEN_SHIFT) &
+                      USB_DMADESC_BUFLEN_MASK);
 
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
   if (isochronous)
@@ -2477,7 +2574,8 @@ static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv, uint8_t epphy,
     {
       /* DMA should be "being serviced" */
 
-      if ((dmadesc->status & USB_DMADESC_STATUS_MASK) != USB_DMADESC_BEINGSERVICED))
+      if ((dmadesc->status & USB_DMADESC_STATUS_MASK) !=
+           USB_DMADESC_BEINGSERVICED)
         {
           /* Re-trigger the DMA Transfer */
 
@@ -2485,6 +2583,7 @@ static int lpc17_40_dmasetup(struct lpc17_40_usbdev_s *priv, uint8_t epphy,
           putreq32(1 << epphy, LPC17_40_USBDEV_EPDMAEN);
         }
     }
+
   return OK;
 }
 #endif /* CONFIG_LPC17_40_USBDEV_DMA */
@@ -2580,7 +2679,7 @@ static int lpc17_40_epconfigure(FAR struct usbdev_ep_s *ep,
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
   /* Enable DMA Ep interrupt (WO) */
 
-   lpc17_40_putreg(1 << privep->epphy, LPC17_40_USBDEV_EPDMAEN);
+  lpc17_40_putreg(1 << privep->epphy, LPC17_40_USBDEV_EPDMAEN);
 #else
   /* Enable Ep interrupt (R/W) */
 
@@ -2589,8 +2688,8 @@ static int lpc17_40_epconfigure(FAR struct usbdev_ep_s *ep,
   lpc17_40_putreg(inten, LPC17_40_USBDEV_EPINTEN);
 #endif
 
-  /* If all of the endpoints have been configured, then tell the USB controller
-   * to enable normal activity on all realized endpoints.
+  /* If all of the endpoints have been configured, then tell the USB
+   * controller to enable normal activity on all realized endpoints.
    */
 
   if (last)
@@ -2655,7 +2754,8 @@ static int lpc17_40_epdisable(FAR struct usbdev_ep_s *ep)
  *
  ****************************************************************************/
 
-static FAR struct usbdev_req_s *lpc17_40_epallocreq(FAR struct usbdev_ep_s *ep)
+static FAR
+struct usbdev_req_s *lpc17_40_epallocreq(FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc17_40_req_s *privreq;
 
@@ -2669,7 +2769,8 @@ static FAR struct usbdev_req_s *lpc17_40_epallocreq(FAR struct usbdev_ep_s *ep)
 
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct lpc17_40_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct lpc17_40_req_s *)kmm_malloc(sizeof(struct lpc17_40_req_s));
+  privreq = (FAR struct lpc17_40_req_s *)
+                   kmm_malloc(sizeof(struct lpc17_40_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_ALLOCFAIL), 0);
@@ -2688,7 +2789,8 @@ static FAR struct usbdev_req_s *lpc17_40_epallocreq(FAR struct usbdev_ep_s *ep)
  *
  ****************************************************************************/
 
-static void lpc17_40_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
+static void lpc17_40_epfreereq(FAR struct usbdev_ep_s *ep,
+                               FAR struct usbdev_req_s *req)
 {
   FAR struct lpc17_40_req_s *privreq = (FAR struct lpc17_40_req_s *)req;
 
@@ -2714,7 +2816,8 @@ static void lpc17_40_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static FAR void *lpc17_40_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nbytes)
+static FAR void *lpc17_40_epallocbuffer(FAR struct usbdev_ep_s *ep,
+                                        uint16_t nbytes)
 {
 #if defined(CONFIG_LPC17_40_USBDEV_DMA)
 
@@ -2755,7 +2858,8 @@ static FAR void *lpc17_40_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nby
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DMA
-static void lpc17_40_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
+static void lpc17_40_epfreebuffer(FAR struct usbdev_ep_s *ep,
+                                  FAR void *buf)
 {
 #if defined(CONFIG_LPC17_40_USBDEV_DMA)
 
@@ -2763,7 +2867,9 @@ static void lpc17_40_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 
   usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
 
-  /* Indicate that there is no DMA descriptor associated with this endpoint  */
+  /* Indicate that there is no DMA descriptor associated with this
+   * endpoint
+   */
 
   g_udca[privep->epphy] = NULL;
 
@@ -2793,7 +2899,8 @@ static void lpc17_40_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
  *
  ****************************************************************************/
 
-static int lpc17_40_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
+static int lpc17_40_epsubmit(FAR struct usbdev_ep_s *ep,
+                             FAR struct usbdev_req_s *req)
 {
   FAR struct lpc17_40_req_s *privreq = (FAR struct lpc17_40_req_s *)req;
   FAR struct lpc17_40_ep_s *privep = (FAR struct lpc17_40_ep_s *)ep;
@@ -2816,7 +2923,8 @@ static int lpc17_40_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
 
   if (!priv->driver || priv->usbdev.speed == USB_SPEED_UNKNOWN)
     {
-      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_NOTCONFIGURED), priv->usbdev.speed);
+      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_NOTCONFIGURED),
+               priv->usbdev.speed);
       return -ESHUTDOWN;
     }
 
@@ -2882,7 +2990,8 @@ static int lpc17_40_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s
  *
  ****************************************************************************/
 
-static int lpc17_40_epcancel(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
+static int lpc17_40_epcancel(FAR struct usbdev_ep_s *ep,
+                             FAR struct usbdev_req_s *req)
 {
   FAR struct lpc17_40_ep_s *privep = (FAR struct lpc17_40_ep_s *)ep;
   irqstate_t flags;
@@ -2920,7 +3029,8 @@ static int lpc17_40_epstall(FAR struct usbdev_ep_s *ep, bool resume)
 
   flags = enter_critical_section();
   usbtrace(resume ? TRACE_EPRESUME : TRACE_EPSTALL, privep->epphy);
-  lpc17_40_usbcmd(CMD_USBDEV_EPSETSTATUS | privep->epphy, (resume ? 0 : CMD_SETSTAUS_ST));
+  lpc17_40_usbcmd(CMD_USBDEV_EPSETSTATUS | privep->epphy,
+                 (resume ? 0 : CMD_SETSTAUS_ST));
 
   /* If the endpoint of was resumed, then restart any queue write requests */
 
@@ -2928,6 +3038,7 @@ static int lpc17_40_epstall(FAR struct usbdev_ep_s *ep, bool resume)
     {
       lpc17_40_wrrequest(privep);
     }
+
   leave_critical_section(flags);
   return OK;
 }
@@ -2943,17 +3054,19 @@ static int lpc17_40_epstall(FAR struct usbdev_ep_s *ep, bool resume)
  *   Allocate an endpoint matching the parameters.
  *
  * Input Parameters:
- *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero means
- *            that any endpoint matching the other requirements will suffice.  The
- *            assigned endpoint can be found in the eplog field.
+ *   eplog  - 7-bit logical endpoint number (direction bit ignored).  Zero
+ *            means that any endpoint matching the other requirements will
+ *            suffice.  The assigned endpoint can be found in the eplog
+ *            field.
  *   in     - true: IN (device-to-host) endpoint requested
- *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
- *            USB_EP_ATTR_XFER_INT}
+ *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC,
+ *            USB_EP_ATTR_XFER_BULK, USB_EP_ATTR_XFER_INT}
  *
  ****************************************************************************/
 
-static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev, uint8_t eplog,
-                                               bool in, uint8_t eptype)
+static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev,
+                                                uint8_t eplog,
+                                                bool in, uint8_t eptype)
 {
   FAR struct lpc17_40_usbdev_s *priv = (FAR struct lpc17_40_usbdev_s *)dev;
   uint32_t epset = LPC17_40_EPALLSET & ~LPC17_40_EPCTRLSET;
@@ -2970,16 +3083,18 @@ static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev, uint8_
 
   if (eplog > 0)
     {
-      /* Otherwise, we will return the endpoint structure only for the requested
-       * 'logical' endpoint.  All of the other checks will still be performed.
+      /* Otherwise, we will return the endpoint structure only for the
+       * requested 'logical' endpoint.  All of the other checks will
+       * still be performed.
        *
-       * First, verify that the logical endpoint is in the range supported by
-       * by the hardware.
+       * First, verify that the logical endpoint is in the range
+       * supported by by the hardware.
        */
 
       if (eplog >= LPC17_40_NLOGENDPOINTS)
         {
-          usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADEPNO), (uint16_t)eplog);
+          usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADEPNO),
+                  (uint16_t)eplog);
           return NULL;
         }
 
@@ -3020,7 +3135,8 @@ static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev, uint8_
 
     case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint -- not a valid choice */
     default:
-      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADEPTYPE), (uint16_t)eptype);
+      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BADEPTYPE),
+              (uint16_t)eptype);
       return NULL;
     }
 
@@ -3034,7 +3150,9 @@ static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev, uint8_
       epset &= priv->epavail;
       if (epset)
         {
-          /* Select the lowest bit in the set of matching, available endpoints */
+          /* Select the lowest bit in the set of matching, available
+           * endpoints
+           */
 
           for (epndx = 2; epndx < LPC17_40_NPHYSENDPOINTS; epndx++)
             {
@@ -3046,13 +3164,17 @@ static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev, uint8_
                   priv->epavail &= ~(3 << (epndx & ~1));
                   leave_critical_section(flags);
 
-                  /* And return the pointer to the standard endpoint structure */
+                  /* And return the pointer to the standard endpoint
+                   * structure
+                   */
 
                   return &priv->eplist[epndx].ep;
                 }
             }
+
           /* Shouldn't get here */
         }
+
       leave_critical_section(flags);
     }
 
@@ -3068,7 +3190,8 @@ static FAR struct usbdev_ep_s *lpc17_40_allocep(FAR struct usbdev_s *dev, uint8_
  *
  ****************************************************************************/
 
-static void lpc17_40_freeep(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
+static void lpc17_40_freeep(FAR struct usbdev_s *dev,
+                            FAR struct usbdev_ep_s *ep)
 {
   FAR struct lpc17_40_usbdev_s *priv = (FAR struct lpc17_40_usbdev_s *)dev;
   FAR struct lpc17_40_ep_s *privep = (FAR struct lpc17_40_ep_s *)ep;
@@ -3176,7 +3299,8 @@ static int lpc17_40_pullup(struct usbdev_s *dev, bool enable)
   usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
 
   /* The CMD_STATUS_CONNECT bit in the CMD_USBDEV_SETSTATUS command
-   * controls the LPC17xx/LPC40xx SoftConnect_N output pin that is used for SoftConnect.
+   * controls the LPC17xx/LPC40xx SoftConnect_N output pin that is used for
+   * SoftConnect.
    */
 
   lpc17_40_usbcmd(CMD_USBDEV_SETSTATUS, (enable ? CMD_STATUS_CONNECT : 0));
@@ -3194,8 +3318,8 @@ static int lpc17_40_pullup(struct usbdev_s *dev, bool enable)
  *   Initialize USB hardware.
  *
  * Assumptions:
- *   This function is called very early in the initialization sequence in order
- *   to initialize the USB device functionality.
+ *   This function is called very early in the initialization sequence in
+ *   order to initialize the USB device functionality.
  *
  ****************************************************************************/
 
@@ -3269,6 +3393,7 @@ void arm_usbinitialize(void)
        * the physical endpoint number (which is just the index to the
        * endpoint).
        */
+
       priv->eplist[i].ep.ops       = &g_epops;
       priv->eplist[i].dev          = priv;
 
@@ -3404,8 +3529,8 @@ void arm_usbuninitialize(void)
  * Name: usbdev_register
  *
  * Description:
- *   Register a USB device class driver. The class driver's bind() method will be
- *   called to bind it to a USB device driver.
+ *   Register a USB device class driver. The class driver's bind() method
+ *   will be called to bind it to a USB device driver.
  *
  ****************************************************************************/
 
@@ -3439,7 +3564,8 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   ret = CLASS_BIND(driver, &g_usbdev.usbdev);
   if (ret)
     {
-      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BINDFAILED), (uint16_t)-ret);
+      usbtrace(TRACE_DEVERROR(LPC17_40_TRACEERR_BINDFAILED),
+              (uint16_t) - ret);
       g_usbdev.driver = NULL;
     }
   else
@@ -3448,6 +3574,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       up_enable_irq(LPC17_40_IRQ_USB);
     }
+
   return ret;
 }
 
@@ -3455,9 +3582,10 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
  * Name: usbdev_unregister
  *
  * Description:
- *   Un-register usbdev class driver.If the USB device is connected to a USB host,
- *   it will first disconnect().  The driver is also requested to unbind() and clean
- *   up any device state, before this procedure finally returns.
+ *   Un-register usbdev class driver.If the USB device is connected to a
+ *   USB host, it will first disconnect().  The driver is also requested
+ *   to unbind() and clean up any device state, before this procedure
+ *   finally returns.
  *
  ****************************************************************************/
 

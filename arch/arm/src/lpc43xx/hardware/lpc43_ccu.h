@@ -1,55 +1,40 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_ccu.h
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_CCU_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_CCU_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
-#define LPC43_CCU1_PM_OFFSET                 0x0000 /* CCU1 power mode register */
-#define LPC43_CCU1_BASE_STAT_OFFSET          0x0004 /* CCU1 base clock status register */
+#define LPC43_CCU1_PM_OFFSET                 0x0000  /* CCU1 power mode register */
+#define LPC43_CCU1_BASE_STAT_OFFSET          0x0004  /* CCU1 base clock status register */
 #define LPC43_CCU1_APB3_BUS_CFG_OFFSET       0x0100  /* CLK_APB3_BUS clock configuration register */
 #define LPC43_CCU1_APB3_BUS_STAT_OFFSET      0x0104  /* CLK_APB3_BUS clock status register */
 #define LPC43_CCU1_APB3_I2C1_CFG_OFFSET      0x0108  /* CLK_APB3_I2C1 configuration register */
@@ -156,8 +141,8 @@
 #define LPC43_CCU1_VADC_CFG_OFFSET           0x0b00  /* CLK_VADC configuration register */
 #define LPC43_CCU1_VADC_STAT_OFFSET          0x0b04  /* CLK_VADC status register */
 
-#define LPC43_CCU2_PM_OFFSET                 0x0000 /* CCU2 power mode register */
-#define LPC43_CCU2_BASE_STAT_OFFSET          0x0004 /* CCU2 base clocks status register */
+#define LPC43_CCU2_PM_OFFSET                 0x0000  /* CCU2 power mode register */
+#define LPC43_CCU2_BASE_STAT_OFFSET          0x0004  /* CCU2 base clocks status register */
 #define LPC43_CCU2_APLL_CFG_OFFSET           0x0100  /* CLK_APLL configuration register */
 #define LPC43_CCU2_APLL_STAT_OFFSET          0x0104  /* CLK_APLL status register */
 #define LPC43_CCU2_APB2_USART3_CFG_OFFSET    0x0200  /* CLK_APB2_USART3 configuration register */
@@ -175,7 +160,7 @@
 #define LPC43_CCU2_SDIO_CFG_OFFSET           0x0800  /* CLK_SDIO configuration register (for SD/MMC) */
 #define LPC43_CCU2_SDIO_STAT_OFFSET          0x0804  /* CLK_SDIO status register (for SD/MMC) */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_CCU1_PM                        (LPC43_CCU1_BASE+LPC43_CCU1_PM_OFFSET)
 #define LPC43_CCU1_BASE_STAT                 (LPC43_CCU1_BASE+LPC43_CCU1_BASE_STAT_OFFSET)
@@ -304,12 +289,13 @@
 #define LPC43_CCU2_SDIO_CFG                  (LPC43_CCU2_BASE+LPC43_CCU2_SDIO_CFG_OFFSET)
 #define LPC43_CCU2_SDIO_STAT                 (LPC43_CCU2_BASE+LPC43_CCU2_SDIO_STAT_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* CCU1/2 Power Mode Register */
 
 #define CCU_PM_PD                            (1 << 0)  /* Bit 0: Initiate power-down mode */
                                                        /* Bits 1-31:  Reserved */
+
 /* CCU1 Base Clock Status Register */
 
 #define CCU1_BASE_STAT_AB3                   (1 << 0)  /* Bit 0:  Base clock indicator for BASE_APB3_CLK */
@@ -322,7 +308,9 @@
 #define CCU1_BASE_STAT_USB1                  (1 << 8)  /* Bit 8:  Base clock indicator for BASE_USB1_CLK */
 #define CCU1_BASE_STAT_SPI                   (1 << 9)  /* Bit 9:  Base clock indicator for BASE_SPI_CLK */
                                                        /* Bits 10-31:  Reserved */
+
 /* CCU2 Base Clock Status Register */
+
                                                        /* Bit 0:  Reserved */
 #define CCU2_BASE_STAT_USART3                (1 << 1)  /* Bit 1:  Base clock indicator for BASE_USART3_CLK */
 #define CCU2_BASE_STAT_USART2                (1 << 2)  /* Bit 2:  Base clock indicator for BASE_USART2_CLK */
@@ -331,12 +319,14 @@
 #define CCU2_BASE_STAT_SSP1                  (1 << 5)  /* Bit 5:  Base clock indicator for BASE_SSP1_CLK */
 #define CCU2_BASE_STAT_SSP0                  (1 << 6)  /* Bit 6:  Base clock indicator for BASE_SSP0_CLK */
                                                        /* Bits 7-31:  Reserved */
+
 /* CCU1/2 Branch Clock Configuration/Status Registers */
 
 #define CCU_CLK_CFG_RUN                      (1 << 0)  /* Bit 0:  Run enable */
 #define CCU_CLK_CFG_AUTO                     (1 << 1)  /* Bit 1:  Auto (AHB disable mechanism) enable */
 #define CCU_CLK_CFG_WAKEUP                   (1 << 2)  /* Bit 2:  Wake-up mechanism enable */
                                                        /* Bits 3-31:  Reserved */
+
 /* CCU1/2 Branch Clock Status Registers */
 
 #define CCU_CLK_STAT_RUN                     (1 << 0)  /* Bit 0:  Run enable status */
@@ -350,27 +340,30 @@
 #define CCU_CLK_EMCDIV_CFG_AUTO              (1 << 1)  /* Bit 1: Auto (AHB disable mechanism) enable */
 #define CCU_CLK_EMCDIV_CFG_WAKEUP            (1 << 2)  /* Bit 2: Wake-up mechanism enable */
                                                        /* Bits 3-4: Reserved */
-#define CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT       (5)                                         /* Bits 5-7: Clock divider */
+
+#define CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT       (5)                                   /* Bits 5-7: Clock divider */
 #define CCU_CLK_EMCDIV_CLOCK_DIV_MASK        (7 << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT)
 #  define CCU_CLK_EMCDIV_CFG_DIV_FUNC(n)     ((n) << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT)
 #  define CCU_CLK_EMCDIV_CFG_DIV_NODIV       (0 << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT) /* Bit 5-7: No division */
 #  define CCU_CLK_EMCDIV_CFG_DIV_BY2         (1 << CCU_CLK_EMCDIV_CLOCK_DIV_SHIFT) /* Bit 5-7: Division by 2 */
-                                                       /* Bits 8-26: Reserved */
-#define CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT   (27)                                        /* Bits 27-29: Clock divider status */
+
+                                                   /* Bits 8-26: Reserved */
+
+#define CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT   (27)                                      /* Bits 27-29: Clock divider status */
 #define CCU_CLK_EMCDIV_CLOCK_DIVSTAT_MASK    (7 << CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT)
 #  define CCU_CLK_EMCDIV_CFG_DIVSTAT_NODIV   (0 << CCU_CLK_EMCDIV_CLOCK_DIVSTAT_SHIFT) /* Bit 27-29: No division */
 #  define CCU_CLK_EMCDIV_CFG_DIVSTAT_BY2     (1 << CCU_CLK_EMCDIV_CLOCK_DIVSTAT_MASK)  /* Bit 26-29: Divistion by 2 */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_CCU_H */

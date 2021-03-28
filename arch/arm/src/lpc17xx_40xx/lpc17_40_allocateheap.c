@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_allocateheap.c
  *
- *   Copyright (C) 2010-2011, 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -63,6 +48,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* The configured RAM start address must be the beginning of CPU SRAM */
 
 #if CONFIG_RAM_START != LPC17_40_SRAM_BASE
@@ -104,48 +90,48 @@
 
 #ifdef LPC17_40_HAVE_BANK0
 
-  /* We have BANK0 (and, hence, possibly Bank1).  Is Bank0 all used for
-   * Ethernet packet buffering?  Or is there any part of Bank0 available for
-   * the heap.
-   */
+/* We have BANK0 (and, hence, possibly Bank1).  Is Bank0 all used for
+ * Ethernet packet buffering?  Or is there any part of Bank0 available for
+ * the heap.
+ */
 
 #  ifdef LPC17_40_BANK0_HEAPSIZE
 
-     /* Some or all of Bank0 is available for the heap.  The heap will begin
-      * in bank 1.
-      */
+/* Some or all of Bank0 is available for the heap.  The heap will begin
+ * in bank 1.
+ */
 
 #     define LPC17_40_AHB_HEAPBASE LPC17_40_BANK0_HEAPBASE
 
-     /* Is Bank1 present? Has there available heap memory in Bank 1? */
+/* Is Bank1 present? Has there available heap memory in Bank 1? */
 
 #    if defined(LPC17_40_HAVE_BANK1) && defined(LPC17_40_BANK1_HEAPSIZE)
 
-       /* Yes... the heap space available is the unused memory at the end
-        * of Bank0 plus the unused memory at the beginning of Bank 1.
-        */
+/* Yes... the heap space available is the unused memory at the end
+ * of Bank0 plus the unused memory at the beginning of Bank 1.
+ */
 
 #       define LPC17_40_AHB_HEAPSIZE (LPC17_40_BANK0_HEAPSIZE + LPC17_40_BANK1_HEAPSIZE)
 #    else
 
-        /* No... the heap space available is only the unused memory at the
-         * end of Bank 0.
-         */
+/* No... the heap space available is only the unused memory at the
+ * end of Bank 0.
+ */
 
 #       define LPC17_40_AHB_HEAPSIZE LPC17_40_BANK0_HEAPSIZE
 
 #    endif /* LPC17_40_HAVE_BANK1 && LPC17_40_BANK1_HEAPSIZE */
 #  else /* !LPC17_40_BANK0_HEAPSIZE */
 
-     /* We have Bank 0, but no memory is available for the heap there.
-      * Do we have Bank 1? Is any heap memory available in Bank 1?
-      */
+/* We have Bank 0, but no memory is available for the heap there.
+ * Do we have Bank 1? Is any heap memory available in Bank 1?
+ */
 
 #    if defined(LPC17_40_HAVE_BANK1) && defined(LPC17_40_BANK1_HEAPSIZE)
 
-       /* Yes... the heap space available is the unused memory at the
-        * beginning of Bank1.
-        */
+/* Yes... the heap space available is the unused memory at the
+ * beginning of Bank1.
+ */
 
 #      define LPC17_40_AHB_HEAPBASE LPC17_40_BANK1_HEAPBASE
 #      define LPC17_40_AHB_HEAPSIZE LPC17_40_BANK1_HEAPSIZE
@@ -206,7 +192,8 @@
  *
  *     Kernel .data region.  Size determined at link time.
  *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Kernel IDLE thread stack.  Size determined by
+ *            CONFIG_IDLETHREAD_STACKSIZE.
  *     Padding for alignment
  *     User .data region.  Size determined at link time.
  *     User .bss region  Size determined at link time.
@@ -223,7 +210,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                     CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
@@ -248,7 +236,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-   lpc17_40_mpu_uheap((uintptr_t)ubase, usize);
+  lpc17_40_mpu_uheap((uintptr_t)ubase, usize);
 
 #elif CONFIG_MM_REGIONS >= 3 && defined(CONFIG_LPC17_40_EXTDRAM) && \
     defined(CONFIG_LPC17_40_EXTDRAMHEAP)
@@ -257,25 +245,25 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * and the IDLE stack reside in SDRAM.
    */
 
-    uintptr_t sram_start = CONFIG_RAM_START;
+  uintptr_t sram_start = CONFIG_RAM_START;
 
-    /* Is SRAM the primary RAM? I.e., do .data, .bss, and the IDLE thread
-     * stack lie in SRAM?
-     */
+  /* Is SRAM the primary RAM? I.e., do .data, .bss, and the IDLE thread
+   * stack lie in SRAM?
+   */
 
-    if (g_idle_topstack >= CONFIG_RAM_START &&
-        g_idle_topstack < CONFIG_RAM_END)
-      {
-        /* Yes, then the SRAM heap starts in SRAM after the IDLE stack */
+  if (g_idle_topstack >= CONFIG_RAM_START &&
+      g_idle_topstack < CONFIG_RAM_END)
+    {
+      /* Yes, then the SRAM heap starts in SRAM after the IDLE stack */
 
-        sram_start = g_idle_topstack;
-      }
-    else
-      {
-        /* Use the entire SRAM for heap */
+      sram_start = g_idle_topstack;
+    }
+  else
+    {
+      /* Use the entire SRAM for heap */
 
-        sram_start = CONFIG_RAM_START;
-      }
+      sram_start = CONFIG_RAM_START;
+    }
 
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void *)sram_start;
@@ -314,7 +302,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                    CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
@@ -370,11 +359,13 @@ void arm_addregion(void)
   /* Yes.. allow user-mode access to the AHB SRAM user heap memory */
 
 #if defined(LPC17_40_BANK0_HEAPBASE) && defined(LPC17_40_BANK0_HEAPSIZE)
-  lpc17_40_mpu_uheap((uintptr_t)LPC17_40_BANK0_HEAPBASE, LPC17_40_BANK0_HEAPSIZE);
+  lpc17_40_mpu_uheap((uintptr_t)LPC17_40_BANK0_HEAPBASE,
+                     LPC17_40_BANK0_HEAPSIZE);
 #endif
 
 #if defined(LPC17_40_BANK1_HEAPBASE) && defined(LPC17_40_BANK1_HEAPSIZE)
-  lpc17_40_mpu_uheap((uintptr_t)LPC17_40_BANK1_HEAPBASE, LPC17_40_BANK1_HEAPSIZE);
+  lpc17_40_mpu_uheap((uintptr_t)LPC17_40_BANK1_HEAPBASE,
+                      LPC17_40_BANK1_HEAPSIZE);
 #endif
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_MM_KERNEL_HEAP */
@@ -386,56 +377,58 @@ void arm_addregion(void)
 
 #if CONFIG_MM_REGIONS >= 3
 #if defined(CONFIG_LPC17_40_EXTDRAM) && defined(CONFIG_LPC17_40_EXTDRAMHEAP)
-  {
-    /* Memory may be reserved at the beginning of DRAM for other purposes
-     * (for example for video framebuffers).  Memory can similar be
-     * reserved at the end of DRAM using LPC17_40_EXTDRAMSIZE.  The amount to
-     * be added to the heap will be from DRAM_BASE + LPC17_40_EXTDRAMHEAP_OFFSET
-     * through DRAM_BASE + LPC17_40_EXTDRAMSIZE where (DRAM_BASE is the base
-     * address of CS0).
-     */
+    {
+      /* Memory may be reserved at the beginning of DRAM for other purposes
+       * (for example for video framebuffers).  Memory can similar be
+       * reserved at the end of DRAM using LPC17_40_EXTDRAMSIZE.  The amount
+       * to be added to the heap will be from DRAM_BASE +
+       * LPC17_40_EXTDRAMHEAP_OFFSET through DRAM_BASE + LPC17_40_EXTDRAMSIZE
+       * where (DRAM_BASE is the base address of CS0).
+       */
 
-    uintptr_t dram_end = LPC17_40_EXTDRAM_CS0 + CONFIG_LPC17_40_EXTDRAMSIZE;
-    uintptr_t dram_start;
-    uintptr_t heap_size;
+      uintptr_t dram_end = LPC17_40_EXTDRAM_CS0 +
+                           CONFIG_LPC17_40_EXTDRAMSIZE;
+      uintptr_t dram_start;
+      uintptr_t heap_size;
 
-    /* Is SDRAM the primary RAM? I.e., do .data, .bss, and the IDLE thread
-     * stack lie in SDRAM?
-     */
+      /* Is SDRAM the primary RAM? I.e., do .data, .bss, and the IDLE thread
+       * stack lie in SDRAM?
+       */
 
-    if (g_idle_topstack >= LPC17_40_EXTDRAM_CS0 &&
-        g_idle_topstack < dram_end)
-      {
-        /* Yes, then the SDRAM heap starts in SDRAM after the IDLE stack */
+      if (g_idle_topstack >= LPC17_40_EXTDRAM_CS0 &&
+          g_idle_topstack < dram_end)
+        {
+          /* Yes, then the SDRAM heap starts in SDRAM after the IDLE stack */
 
-        dram_start = g_idle_topstack;
-      }
-    else
-      {
-        /* Use the entire SDRAM for heap (possible reserving a portion at
-         * the beginning of DRAM).
-         */
+          dram_start = g_idle_topstack;
+        }
+      else
+        {
+          /* Use the entire SDRAM for heap (possible reserving a portion at
+           * the beginning of DRAM).
+           */
 
-        dram_start = LPC17_40_EXTDRAM_CS0 + CONFIG_LPC17_40_EXTDRAMHEAP_OFFSET;
-      }
+          dram_start = LPC17_40_EXTDRAM_CS0 +
+                       CONFIG_LPC17_40_EXTDRAMHEAP_OFFSET;
+        }
 
-    heap_size = dram_end - dram_start;
+      heap_size = dram_end - dram_start;
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-    /* Allow user-mode access to the external DRAM heap memory.
-     *
-     * REVISIT:  In PROTECTED mode, it would be necessary to align
-     * dram_start to an address that is easily spanned by an MPU
-     * region if dram_start is not at the beginning of CS0.
-     */
+      /* Allow user-mode access to the external DRAM heap memory.
+       *
+       * REVISIT:  In PROTECTED mode, it would be necessary to align
+       * dram_start to an address that is easily spanned by an MPU
+       * region if dram_start is not at the beginning of CS0.
+       */
 
-    lpc17_40_mpu_uheap(dram_start, heap_size);
+      lpc17_40_mpu_uheap(dram_start, heap_size);
 #endif
 
-    /* Add external DRAM heap memory to the user heap */
+      /* Add external DRAM heap memory to the user heap */
 
-    kumm_addregion((FAR void *)dram_start, heap_size);
-  }
+      kumm_addregion((FAR void *)dram_start, heap_size);
+    }
 #endif
 
 #if !defined(CONFIG_LPC17_40_EXTDRAMHEAP) || (CONFIG_MM_REGIONS >= 4)
@@ -443,12 +436,14 @@ void arm_addregion(void)
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to external SRAM heap memory */
 
-  lpc17_40_mpu_uheap((uintptr_t)LPC17_40_EXTSRAM_CS0, CONFIG_LPC17_40_EXTSRAM0SIZE);
+  lpc17_40_mpu_uheap((uintptr_t)LPC17_40_EXTSRAM_CS0,
+                      CONFIG_LPC17_40_EXTSRAM0SIZE);
 
 #endif
   /* Add external SRAM heap memory to the user heap */
 
-  kumm_addregion((FAR void *)LPC17_40_EXTSRAM_CS0, CONFIG_LPC17_40_EXTSRAM0SIZE);
+  kumm_addregion((FAR void *)LPC17_40_EXTSRAM_CS0,
+                  CONFIG_LPC17_40_EXTSRAM0SIZE);
 #endif
 #endif
 #endif /* CONFIG_MM_REGIONS >= 3 */

@@ -1,55 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_uart.h
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_UART_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_UART_RBR_OFFSET        0x0000 /* (DLAB =0) Receiver Buffer Register (all) */
 #define LPC17_40_UART_THR_OFFSET        0x0000 /* (DLAB =0) Transmit Holding Register (all) */
@@ -78,7 +63,7 @@
 #  define LPC17_40_UART_SYNCCTRL_OFFSET 0x0058 /* Synchronous Mode  Register (UART4 only) */
 #endif
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_UART0_RBR              (LPC17_40_UART0_BASE+LPC17_40_UART_RBR_OFFSET)
 #define LPC17_40_UART0_THR              (LPC17_40_UART0_BASE+LPC17_40_UART_THR_OFFSET)
@@ -193,7 +178,7 @@
 #  define LPC17_40_UART4_SYNCCTRL       (LPC17_40_UART4_BASE+LPC17_40_UART4_SYNCCTRL_OFFSET)
 #endif
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* RBR (DLAB =0) Receiver Buffer Register (all) */
 
@@ -238,12 +223,14 @@
 #  define UART_IIR_INTID_RDA            (2 << UART_IIR_INTID_SHIFT) /* 2a - Receive Data Available (RDA) */
 #  define UART_IIR_INTID_RLS            (3 << UART_IIR_INTID_SHIFT) /* 1 - Receive Line Status (RLS) */
 #  define UART_IIR_INTID_CTI            (6 << UART_IIR_INTID_SHIFT) /* 2b - Character Time-out Indicator (CTI) */
+
                                                   /* Bits 4-5: Reserved */
 #define UART_IIR_FIFOEN_SHIFT           (6)       /* Bits 6-7: Copies of FCR bit 0 */
 #define UART_IIR_FIFOEN_MASK            (3 << UART_IIR_FIFOEN_SHIFT)
 #define UART_IIR_ABEOINT                (1 << 8)  /* Bit 8:  End of auto-baud interrupt */
 #define UART_IIR_ABTOINT                (1 << 9)  /* Bit 9:  Auto-baud time-out interrupt */
                                                   /* Bits 10-31: Reserved */
+
 /* FCR FIFO Control Register (all) */
 
 #define UART_FCR_FIFOEN                 (1 << 0)  /* Bit 0:  Enable FIFOs */
@@ -257,7 +244,9 @@
 #  define UART_FCR_RXTRIGGER_4          (1 << UART_FCR_RXTRIGGER_SHIFT) /* Trigger level 1 (4 characters) */
 #  define UART_FCR_RXTRIGGER_8          (2 << UART_FCR_RXTRIGGER_SHIFT) /* Trigger level 2 (8 characters) */
 #  define UART_FCR_RXTRIGGER_14         (3 << UART_FCR_RXTRIGGER_SHIFT) /* Trigger level 3 (14 characters) */
+
                                                   /* Bits 8-31: Reserved */
+
 /* LCR Line Control Register (all) */
 
 #define UART_LCR_WLS_SHIFT              (0)       /* Bit 0-1: Word Length Select */
@@ -274,9 +263,11 @@
 #  define UART_LCR_PS_EVEN              (1 << UART_LCR_PS_SHIFT) /* Even Parity */
 #  define UART_LCR_PS_STICK1            (2 << UART_LCR_PS_SHIFT) /* Forced "1" stick parity */
 #  define UART_LCR_PS_STICK0            (3 << UART_LCR_PS_SHIFT) /* Forced "0" stick parity */
+
 #define UART_LCR_BRK                    (1 << 6)  /* Bit 6: Break Control */
 #define UART_LCR_DLAB                   (1 << 7)  /* Bit 7: Divisor Latch Access Bit (DLAB) */
                                                   /* Bits 8-31: Reserved */
+
 /* MCR Modem Control Register (UART1 only) */
 
 #define UART_MCR_DTR                    (1 << 0)  /* Bit 0:  DTR Control Source for DTR output */
@@ -287,6 +278,7 @@
 #define UART_MCR_RTSEN                  (1 << 6)  /* Bit 6:  Enable auto-rts flow control */
 #define UART_MCR_CTSEN                  (1 << 7)  /* Bit 7:  Enable auto-cts flow control */
                                                   /* Bits 8-31: Reserved */
+
 /* LSR Line Status Register (all) */
 
 #define UART_LSR_RDR                    (1 << 0)  /* Bit 0:  Receiver Data Ready */
@@ -298,6 +290,7 @@
 #define UART_LSR_TEMT                   (1 << 6)  /* Bit 6:  Transmitter Empty */
 #define UART_LSR_RXFE                   (1 << 7)  /* Bit 7:  Error in RX FIFO (RXFE) */
                                                   /* Bits 8-31: Reserved */
+
 /* MSR Modem Status Register (UART1 only) */
 
 #define UART_MSR_DELTACTS               (1 << 0)  /* Bit 0:  CTS state change */
@@ -309,10 +302,12 @@
 #define UART_MSR_RI                     (1 << 6)  /* Bit 6:  Ring Indicator State */
 #define UART_MSR_DCD                    (1 << 7)  /* Bit 7:  Data Carrier Detect State */
                                                   /* Bits 8-31: Reserved */
+
 /* SCR Scratch Pad Register (all) */
 
 #define UART_SCR_MASK                   (0xff)    /* Bits 0-7: SCR data */
                                                   /* Bits 8-31: Reserved */
+
 /* ACR Auto-baud Control Register (all) */
 
 #define UART_ACR_START                  (1 << 0)  /* Bit 0:  Auto-baud start/running*/
@@ -322,6 +317,7 @@
 #define UART_ACR_ABEOINTCLR             (1 << 8)  /* Bit 8:  End of auto-baud interrupt clear */
 #define UART_ACR_ABTOINTCLRT            (1 << 9)  /* Bit 9:  Auto-baud time-out interrupt clear */
                                                   /* Bits 10-31: Reserved */
+
 /* ICA IrDA Control Register (UART0,2,3 only) */
 
 #define UART_ICR_IRDAEN                 (1 << 0)  /* Bit 0:  Enable IrDA mode */
@@ -337,7 +333,9 @@
 #  define UART_ICR_PULSEDIV_64TPCLK     (5 << UART_ICR_PULSEDIV_SHIFT) /* 64 x TPCLK */
 #  define UART_ICR_PULSEDIV_128TPCLK    (6 << UART_ICR_PULSEDIV_SHIFT) /* 128 x TPCLK */
 #  define UART_ICR_PULSEDIV_256TPCLK    (7 << UART_ICR_PULSEDIV_SHIFT) /* 246 x TPCLK */
+
                                                   /* Bits 6-31: Reserved */
+
 /* FDR Fractional Divider Register (all) */
 
 #define UART_FDR_DIVADDVAL_SHIFT        (0)       /* Bits 0-3: Baud-rate generation pre-scaler divisor value */
@@ -345,10 +343,13 @@
 #define UART_FDR_MULVAL_SHIFT           (4)       /* Bits 4-7 Baud-rate pre-scaler multiplier value */
 #define UART_FDR_MULVAL_MASK            (15 << UART_FDR_MULVAL_SHIFT)
                                                   /* Bits 8-31: Reserved */
+
 /* TER Transmit Enable Register (all) */
+
                                                   /* Bits 0-6: Reserved */
 #define UART_TER_TXEN                   (1 << 7)  /* Bit 7:  TX Enable */
                                                   /* Bits 8-31: Reserved */
+
 /* RS-485/EIA-485 Control (UART1 only) */
 
 #define UART_RS485CTRL_NMMEN            (1 << 0)  /* Bit 0: RS-485/EIA-485 Normal Multidrop Mode (NMM) enabled */
@@ -358,14 +359,17 @@
 #define UART_RS485CTRL_DCTRL            (1 << 4)  /* Bit 4: Enable Auto Direction Control */
 #define UART_RS485CTRL_OINV             (1 << 5)  /* Bit 5: Polarity of the direction control signal on RTS/DTR */
                                                   /* Bits 6-31: Reserved */
+
 /* RS-485/EIA-485 address match (UART1 only) */
 
 #define UART_ADRMATCH_MASK              (0xff)    /* Bits 0-7: Address match value */
                                                   /* Bits 8-31: Reserved */
+
 /* RS-485/EIA-485 direction control delay (UART1 only) */
 
 #define UART_RS485DLY_MASK              (0xff)    /* Bits 0-7: Direction control (RTS/DTR) delay */
                                                   /* Bits 8-31: Reserved */
+
 /* FIFOLVL FIFO Level register (all) */
 
 #define UART_FIFOLVL_RX_SHIFT           (0)       /* Bits 0-3: Current level of the UART RX FIFO */
@@ -399,16 +403,16 @@
                                                   /* Bits 15-31: Reserved */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_UART_H */

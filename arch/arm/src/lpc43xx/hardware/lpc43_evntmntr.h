@@ -1,51 +1,37 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_evntmntr.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_EVNTMNTR_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_EVNTMNTR_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_EMR_CONTROL_OFFSET       0x0004 /* Event Monitor/Recorder Control register */
 #define LPC43_EMR_STATUS_OFFSET        0x0000 /* Event Monitor/Recorder Status register */
@@ -61,7 +47,7 @@
 #define LPC43_EMR_LASTSTAMP1_OFFSET    0x0024 /* Event Monitor/Recorder Last Stamp register Ch1 */
 #define LPC43_EMR_LASTSTAMP2_OFFSET    0x0028 /* Event Monitor/Recorder Last Stamp register Ch2 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_EMR_CONTROL              (LPC43_EVNTMNTR_BASE+LPC43_EMR_CONTROL_OFFSET)
 #define LPC43_EMR_STATUS               (LPC43_EVNTMNTR_BASE+LPC43_EMR_STATUS_OFFSET)
@@ -77,7 +63,7 @@
 #define LPC43_EMR_LASTSTAMP1           (LPC43_EVNTMNTR_BASE+LPC43_EMR_LASTSTAMP1_OFFSET)
 #define LPC43_EMR_LASTSTAMP2           (LPC43_EVNTMNTR_BASE+LPC43_EMR_LASTSTAMP2_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Event Monitor/Recorder Control register */
 
@@ -123,6 +109,7 @@
 #define EMR_COUNTERS_COUNTER2_SHIFT    (16)      /* Bits 16-18: Value of the counter for event 2 */
 #define EMR_COUNTERS_COUNTER2_MASK     (7 << EMR_COUNTERS_COUNTER2_SHIFT)
                                                  /* Bits 19-31: Reserved */
+
 /* Event Monitor/Recorder First/Last Stamp registers */
 
 #define EMR_STAMP_SEC_SHIFT            (0)       /* Bits 0-5: Seconds value 0-59 */
@@ -135,16 +122,16 @@
 #define EMR_STAMP_DOY_MASK             (511 << EMR_STAMP_DOY_SHIFT)
                                                  /* Bits 26-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_EVNTMNTR_H */

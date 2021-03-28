@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/chip.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_CHIP_H
 #define __ARCH_ARM_SRC_LPC43XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,23 +31,25 @@
 
 #include <arch/lpc43xx/chip.h>
 
-/* For each chip supported in chip.h, the following are provided to customize the
- * environment for the specific LPC43XX chip:
+/* For each chip supported in chip.h, the following are provided to customize
+ * the environment for the specific LPC43XX chip:
  *
- * Define ARMV7M_PERIPHERAL_INTERRUPTS - This is needed by common/arm_vectors.c.
- *   This definition provides the number of "external" interrupt vectors supported
- *   by the specific LPC43 chip.
+ * Define ARMV7M_PERIPHERAL_INTERRUPTS - This is needed by
+ *   common/arm_vectors.c.
+ *   This definition provides the number of "external" interrupt vectors
+ *   supported by the specific LPC43 chip.
  *
  *   For the Cortex-M3 core, this should always be equal to the value
- *   LPC43M4_IRQ_NEXTINT defined in include/lpc43xx/irq.h.  For the Cortex-M0
- *   core, this should always be equal to the value LPC43M0_IRQ_NEXTINT defined
- *   in include/lpc43xx/irq.h (At present, only the Cortex-M4 core is supported)
+ *   LPC43M4_IRQ_NEXTINT defined in include/lpc43xx/irq.h.  For the
+ *   Cortex-M0 core, this should always be equal to the value
+ *   LPC43M0_IRQ_NEXTINT defined in include/lpc43xx/irq.h (At present,
+ *   only the Cortex-M4 core is supported)
  *
  * Include the chip-specific memory map header file, and
  * Include the chip-specific pin configuration.
  *
- * These header files may or may not be shared between different chips.  That
- * decision depends on the similarity of the chip peripheral.
+ * These header files may or may not be shared between different chips.
+ * That decision depends on the similarity of the chip peripheral.
  */
 
 #if defined(CONFIG_ARCH_CHIP_LPC4310FBD144)
@@ -138,20 +140,20 @@
 #  error "Unsupported LPC43xx chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_CHIP_H */

@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_usbdev.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -55,12 +40,12 @@
 #define LPC214X_USBDEV_PINSEL        (0x80004000)  /* PINSEL1 value for USB */
 #define LPC214X_USBDEV_PINMASK       (0xc000c000)  /* PINSEL1 mask for USB */
 
-/* USB RAM  ********************************************************************/
+/* USB RAM  *****************************************************************/
 
 #define LPC214X_USBDEV_RAMBASE       (0x7fd00000)
 #define LPC214X_USBDEV_RAMSIZE       (8*1024)
 
-/* USB register address definitions ********************************************/
+/* USB register address definitions *****************************************/
 
 #define LPC214X_USBDEV_PLLCON        (0xe01fc0a0)
 #define LPC214X_USBDEV_PLLCFG        (0xe01fc0a4)
@@ -110,7 +95,7 @@
 #define LPC214X_USBDEV_SYSERRINTCLR  (0xe00900bc)
 #define LPC214X_USBDEV_SYSERRINTSET  (0xe00900c0)
 
-/* USB register bit definitions ************************************************/
+/* USB register bit definitions *********************************************/
 
 /* INTST bit definitions */
 
@@ -188,7 +173,7 @@
 #define LPC214X_USBCTRL_WREN         (0x00000002) /* Bit 0=1: Write is enabled */
 #define LPC214X_USBCTRL_EPMASK       (0x0000003c) /* Bits 2:5: Logical endpoint 0-15 */
 
-/* Endpoints *******************************************************************/
+/* Endpoints ****************************************************************/
 
 #define LPC214X_EP0_OUT                0
 #define LPC214X_EP0_IN                 1
@@ -226,7 +211,7 @@
 #define LPC214X_EP15_IN               31
 #define LPC214X_NUMEPS                32
 
-/* Commands ********************************************************************/
+/* Commands *****************************************************************/
 
 /* USB Command Code Register -- Command phase values */
 
@@ -254,13 +239,13 @@
 #define CMD_USB_EP_CLRBUFFER         (0x00f2)
 #define CMD_USB_EP_VALIDATEBUFFER    (0x00fa)
 
-/* Command Data ****************************************************************/
+/* Command Data *************************************************************/
 
 /* DEV SETADDRESS command bits */
 
 #define CMD_USB_SETADDRESS_DEVEN     (0x80)
 
-/* Command Responses ***********************************************************/
+/* Command Responses ********************************************************/
 
 /* Device Status Bits (8-bits) */
 
@@ -284,7 +269,7 @@
 
 #define CMD_USB_CLRBUFFER_PO         (0x00000001)
 
-/* DMA *************************************************************************/
+/* DMA **********************************************************************/
 
 /* The DMA descriptor */
 
@@ -330,9 +315,8 @@
 #define USB_DMAPKTSIZE_FRAMENOMASK   (0xfffe0000) /* Bit 17-31: Frame number */
 #define USB_DMAPKTSIZE_FRAMENOSHIFT  (17)         /* Bit 17-31: Frame number */
 
-
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -340,7 +324,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC214X_LPC214X_USBDEV_H */

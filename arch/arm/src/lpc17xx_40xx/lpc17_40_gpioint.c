@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_gpioint.c
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -157,7 +142,8 @@ static void lpc17_40_setintedge(uint32_t intbase, unsigned int pin,
  * Name: lpc17_40_irq2port
  *
  * Description:
- *  Given an IRQ number, return the GPIO port number (0 or 2) of the interrupt.
+ *  Given an IRQ number, return the GPIO port number (0 or 2) of the
+ *  interrupt.
  *
  ****************************************************************************/
 
@@ -301,8 +287,8 @@ static int lpc17_40_irq2pin(int irq)
   /* Set 3:
    *   LPC18x: 16 interrupts p2.16-p2.31
    *
-   * LPC17_40_VALID_SHIFT2L    16   - Bit 16 is the first bit in a group of 16
-   *                               interrupts
+   * LPC17_40_VALID_SHIFT2L    16   - Bit 16 is the first bit in a group
+   *                                  of 16 interrupts
    * LPC17_40_VALID_FIRST2L    irq  - IRQ number associated with p2.0
    * LPC17_40_VALID_NIRQS2L    16   - 16 interrupt bits in the group
    */
@@ -346,8 +332,8 @@ static void lpc17_40_gpiodemux(uint32_t intbase, uint32_t intmask,
   intstatf &= getreg32(intbase + LPC17_40_GPIOINT_INTENF_OFFSET);
 
   /* And get the OR of the enabled interrupt sources.  We do not make any
-   * distinction between rising and falling edges (but the hardware does support
-   * the ability to handle them differently if needed).
+   * distinction between rising and falling edges (but the hardware does
+   * support the ability to handle them differently if needed).
    */
 
   intstatus = intstatr | intstatf;
@@ -364,8 +350,8 @@ static void lpc17_40_gpiodemux(uint32_t intbase, uint32_t intmask,
 
       if ((intmask & bit) != 0)
         {
-          /* This pin can support an interrupt.  Is there an interrupt pending
-           * and enabled?
+          /* This pin can support an interrupt.  Is there an interrupt
+           * pending and enabled?
            */
 
           if ((intstatus & bit) != 0)
@@ -497,8 +483,8 @@ void lpc17_40_gpioirqenable(int irq)
   int port = lpc17_40_irq2port(irq);
   if (port >= 0)
     {
-      /* The IRQ number does correspond to an interrupt port.  Now get the base
-       * address of the GPIOINT registers for the port.
+      /* The IRQ number does correspond to an interrupt port.  Now get the
+       * base address of the GPIOINT registers for the port.
        */
 
       uint32_t intbase = g_intbase[port];
@@ -528,8 +514,8 @@ void lpc17_40_gpioirqdisable(int irq)
   int port = lpc17_40_irq2port(irq);
   if (port >= 0)
     {
-      /* The IRQ number does correspond to an interrupt port.  Now get the base
-       * address of the GPIOINT registers for the port.
+      /* The IRQ number does correspond to an interrupt port.  Now get the
+       * base address of the GPIOINT registers for the port.
        */
 
       uint32_t intbase = g_intbase[port];

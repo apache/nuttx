@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_mcpwm.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -69,7 +54,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* PWM/Timer Definitions ****************************************************/
+
 /* The following definitions are used to identify the various time types */
 
 #define TIMTYPE_BASIC      0  /* Basic timers: TIM6-7 */
@@ -91,6 +78,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one PWM timer */
 
 struct lpc17_40_mcpwmtimer_s
@@ -108,13 +96,16 @@ struct lpc17_40_mcpwmtimer_s
 /****************************************************************************
  * Static Function Prototypes
  ****************************************************************************/
+
 /* Register access */
 
 static uint32_t mcpwm_getreg(struct lpc17_40_mcpwmtimer_s *priv, int offset);
-static void mcpwm_putreg(struct lpc17_40_mcpwmtimer_s *priv, int offset, uint32_t value);
+static void mcpwm_putreg(struct lpc17_40_mcpwmtimer_s *priv,
+                         int offset, uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void mcpwm_dumpregs(struct lpc17_40_mcpwmtimer_s *priv, FAR const char *msg);
+static void mcpwm_dumpregs(struct lpc17_40_mcpwmtimer_s *priv,
+                           FAR const char *msg);
 #else
 #  define mcpwm_dumpregs(priv,msg)
 #endif
@@ -139,6 +130,7 @@ static int mcpwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This is the list of lower half PWM driver methods used by the upper half
  * driver
  */
@@ -204,7 +196,8 @@ static uint32_t mcpwm_getreg(struct lpc17_40_mcpwmtimer_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void mcpwm_putreg(struct lpc17_40_mcpwmtimer_s *priv, int offset, uint32_t value)
+static void mcpwm_putreg(struct lpc17_40_mcpwmtimer_s *priv,
+                         int offset, uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
@@ -349,7 +342,8 @@ static int mcpwm_tim1interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static void mcpwm_set_apb_clock(FAR struct lpc17_40_mcpwmtimer_s *priv, bool on)
+static void mcpwm_set_apb_clock(FAR struct lpc17_40_mcpwmtimer_s *priv,
+                                bool on)
 {
   uint32_t en_bit;
   uint32_t regaddr;
@@ -401,7 +395,8 @@ static void mcpwm_set_apb_clock(FAR struct lpc17_40_mcpwmtimer_s *priv, bool on)
 
 static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct lpc17_40_mcpwmtimer_s *priv = (FAR struct lpc17_40_mcpwmtimer_s *)dev;
+  FAR struct lpc17_40_mcpwmtimer_s *priv =
+                                   (FAR struct lpc17_40_mcpwmtimer_s *)dev;
   irqstate_t flags;
   uint32_t regval;
 
@@ -432,7 +427,7 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
   putreg32((1 << 9),  LPC17_40_MCPWM_INTENCLR);  /* Disable IMAT2 interrupt */
   putreg32((1 << 10), LPC17_40_MCPWM_INTENCLR);  /* Disable ICAP2 interrupt */
 
-  putreg32((0xFFFFFFFF), LPC17_40_MCPWM_CAPCLR); /* Clear all event capture */
+  putreg32((0xffffffff), LPC17_40_MCPWM_CAPCLR); /* Clear all event capture */
 
   /* Configure the output pins */
 
@@ -471,7 +466,7 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
   putreg32((1 << 9),  LPC17_40_MCPWM_CONCLR);    /* Channel 1 edge aligned */
   putreg32((1 << 17), LPC17_40_MCPWM_CONCLR);    /* Channel 2 edge aligned */
 
-  putreg32((0xFFFFFFFF), LPC17_40_MCPWM_CNTCONCLR); /* All channels in counter mode on PCLK */
+  putreg32((0xffffffff), LPC17_40_MCPWM_CNTCONCLR); /* All channels in counter mode on PCLK */
 
   putreg32((1 << 0), LPC17_40_MCPWM_CONSET);     /* Start MCPWM timer0 */
 
@@ -498,7 +493,8 @@ static int mcpwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
 static int mcpwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct lpc17_40_mcpwmtimer_s *priv = (FAR struct lpc17_40_mcpwmtimer_s *)dev;
+  FAR struct lpc17_40_mcpwmtimer_s *priv =
+                                     (FAR struct lpc17_40_mcpwmtimer_s *)dev;
   uint32_t pincfg;
 
   pwminfo("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
@@ -526,7 +522,8 @@ static int mcpwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 static int mcpwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
-  FAR struct lpc17_40_mcpwmtimer_s *priv = (FAR struct lpc17_40_mcpwmtimer_s *)dev;
+  FAR struct lpc17_40_mcpwmtimer_s *priv =
+                                   (FAR struct lpc17_40_mcpwmtimer_s *)dev;
   return mcpwm_timer(priv, info);
 }
 
@@ -551,7 +548,8 @@ static int mcpwm_start(FAR struct pwm_lowerhalf_s *dev,
 
 static int mcpwm_stop(FAR struct pwm_lowerhalf_s *dev)
 {
-  FAR struct lpc17_40_mcpwmtimer_s *priv = (FAR struct lpc17_40_mcpwmtimer_s *)dev;
+  FAR struct lpc17_40_mcpwmtimer_s *priv =
+                                   (FAR struct lpc17_40_mcpwmtimer_s *)dev;
   uint32_t resetbit;
   uint32_t regaddr;
   uint32_t regval;
@@ -604,10 +602,12 @@ static int mcpwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int mcpwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg)
+static int mcpwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+                       int cmd, unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
-  FAR struct lpc17_40_mcpwmtimer_s *priv = (FAR struct lpc17_40_mcpwmtimer_s *)dev;
+  FAR struct lpc17_40_mcpwmtimer_s *priv =
+                                   (FAR struct lpc17_40_mcpwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 

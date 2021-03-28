@@ -1,4 +1,4 @@
-/********************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_decodeirq.c
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
@@ -36,11 +36,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,31 +57,33 @@
 #include "lpc2378.h"
 #include "lpc23xx_vic.h"
 
-/********************************************************************************
+/****************************************************************************
  * Public Functions
- ********************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************
+/****************************************************************************
  * arm_decodeirq() and/or lpc23xx_decodeirq()
  *
  * Description:
- *   The vectored interrupt controller (VIC) takes 32 interrupt request inputs
- *   and pro grammatically assigns them into 2 categories:  FIQ, vectored IRQ.
+ *   The vectored interrupt controller (VIC) takes 32 interrupt request
+ *   inputs and pro grammatically assigns them into 2 categories:  FIQ,
+ *   vectored IRQ.
  *
- *   - FIQs have the highest priority.  There is a single FIQ vector, but multiple
- *     interrupt sources can be ORed to this FIQ vector.
+ *   - FIQs have the highest priority.  There is a single FIQ vector, but
+ *     multiple interrupt sources can be ORed to this FIQ vector.
  *
- *   - Vectored IRQs have the middle priority.  Any of the 32 interrupt sources
- *     can be assigned to vectored IRQs.
+ *   - Vectored IRQs have the middle priority.  Any of the 32 interrupt
+ *     sources can be assigned to vectored IRQs.
  *
  *   - Non-vectored IRQs have the lowest priority.
  *
  *   The general flow of IRQ processing is to simply read the VICAddress
- *   and jump to the address of the vector provided in the register.  The VIC will
- *   provide the address of the highest priority vectored IRQ.  If a non-vectored
- *   IRQ is requesting, the address of a default handler is provided.
+ *   and jump to the address of the vector provided in the register.  The
+ *   VIC will provide the address of the highest priority vectored IRQ.
+ *   If a non-vectored IRQ is requesting, the address of a default handler
+ *   is provided.
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
 uint32_t *arm_decodeirq(uint32_t *regs)
@@ -98,7 +100,7 @@ static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
 
   /* Check which IRQ fires */
 
-  uint32_t irqbits = vic_getreg(VIC_IRQSTATUS_OFFSET) & 0xFFFFFFFF;
+  uint32_t irqbits = vic_getreg(VIC_IRQSTATUS_OFFSET) & 0xffffffff;
   unsigned int irq;
 
   for (irq = 0; irq < NR_IRQS; irq++)
@@ -115,8 +117,9 @@ static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
     {
        uint32_t *savestate;
 
-      /* Current regs non-zero indicates that we are processing an interrupt;
-       * CURRENT_REGS is also used to manage interrupt level context switches.
+      /* Current regs non-zero indicates that we are processing an
+       * interrupt; CURRENT_REGS is also used to manage interrupt level
+       * context switches.
        */
 
       savestate    = (uint32_t *)CURRENT_REGS;
@@ -130,9 +133,9 @@ static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
+      /* Restore the previous value of CURRENT_REGS.
+       * NULL would indicate that we are no longer in an interrupt handler.
+       * It will be non-NULL if we are returning from a nested interrupt.
        */
 
       CURRENT_REGS = savestate;

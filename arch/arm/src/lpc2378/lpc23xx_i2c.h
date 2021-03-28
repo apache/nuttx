@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_i2c.h
  *
  *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
@@ -36,23 +36,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC2378_LPC23XX_I2C_H
 #define __ARCH_ARM_SRC_LPC2378_LPC23XX_I2C_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* I2C Pin Configuration ************************************************************/
+ ****************************************************************************/
+
+/* I2C Pin Configuration ****************************************************/
 
 #define I2C0_PCLKSEL_MASK    (0x03 << 14)
 #define I2C1_PCLKSEL_MASK    (0x03 << 6)
@@ -68,7 +69,7 @@
 #define I2C1_PINSEL          (0x0f)
 #define I2C2_PINSEL          (0x0a << 22)
 
-/* I2C Register addresses ***********************************************************/
+/* I2C Register addresses ***************************************************/
 
 #define I2C0_CONSET          (I2C0_BASE_ADDR+I2C_CONSET_OFFSET)
 #define I2C0_STAT            (I2C0_BASE_ADDR+I2C_STAT_OFFSET)
@@ -94,7 +95,8 @@
 #define I2C2_SCLL            (I2C2_BASE_ADDR+I2C_SCLL_OFFSET)
 #define I2C2_CONCLR          (I2C2_BASE_ADDR+I2C_CONCLR_OFFSET)
 
-/* I2C Register bit definitions *****************************************************/
+/* I2C Register bit definitions *********************************************/
+
 /* I2C Control Set Register */
 
                                        /* Bits 0-1: Reserved */
@@ -104,7 +106,9 @@
 #define I2C_CONSET_STA       (1 << 5)  /* Bit 5:  START flag */
 #define I2C_CONSET_I2EN      (1 << 6)  /* Bit 6:  I2C interface enable */
                                        /* Bits 7-31: Reserved */
+
 /* I2C Control Clear Register */
+
                                        /* Bits 0-1: Reserved */
 #define I2C_CONCLR_AAC       (1 << 2)  /* Bit 2:  Assert acknowledge Clear bit */
 #define I2C_CONCLR_SIC       (1 << 3)  /* Bit 3:  I2C interrupt Clear bit */
@@ -112,15 +116,17 @@
 #define I2C_CONCLR_STAC      (1 << 5)  /* Bit 5:  START flag Clear bit */
 #define I2C_CONCLRT_I2ENC    (1 << 6)  /* Bit 6:  I2C interface Disable bit */
                                        /* Bits 7-31: Reserved */
+
 /* I2C Status Register
  *
- *   See tables 399-402 in the "LPC17xx User Manual" (UM10360), Rev. 01, 4 January
- *   2010, NXP for definitions of status codes.
+ *   See tables 399-402 in the "LPC17xx User Manual" (UM10360),
+ *   Rev. 01, 4 January 2010, NXP for definitions of status codes.
  */
 
 #define I2C_STAT_MASK        (0xff)    /* Bits 0-7: I2C interface status
                                         *           Bits 0-1 always zero */
                                        /* Bits 8-31: Reserved */
+
 /* I2C Data Register */
 
 #define I2C_DAT_MASK         (0xff)    /* Bits 0-7: I2C data */
@@ -130,6 +136,7 @@
 #define I2C_ADR_ADDR_SHIFT   (1)       /* Bits 1-7: I2C slave address */
 #define I2C_ADR_ADDR_MASK    (0x7f << I2C_ADR_ADDR_SHIFT)
                                        /* Bits 8-31: Reserved */
+
 /* I2C Slave address mask registers:
  *
  *   I2C Slave address mask register 0
@@ -137,24 +144,27 @@
  *   I2C Slave address mask register 2
  *   I2C Slave address mask register 3
  */
+
                                        /* Bit 0: Reserved */
 #define I2C_MASK_SHIFT       (1)       /* Bits 1-7: I2C mask bits */
 #define I2C_MASK_MASK        (0x7f << I2C_ADR_ADDR_SHIFT)
                                        /* Bits 8-31: Reserved */
+
 /* SCH Duty Cycle Register High Half Word */
 
 #define I2C_SCLH_MASK        (0xffff)  /* Bit 0-15: Count for SCL HIGH time period selection */
                                        /* Bits 16-31: Reserved */
+
 /* SCL Duty Cycle Register Low Half Word */
 
 #define I2C_SCLL_MASK        (0xffff)  /* Bit 0-15: Count for SCL LOW time period selection */
                                        /* Bits 16-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc2378_i2cbus_initialize
  *
  * Description:
@@ -169,11 +179,11 @@
  * Returned Value:
  *   Valid I2C device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct i2c_master_s *lpc2378_i2cbus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc2378_i2cbus_uninitialize
  *
  * Description:
@@ -186,7 +196,7 @@ FAR struct i2c_master_s *lpc2378_i2cbus_initialize(int port);
  *   OK on success, ERROR when internal reference count mismatch or dev
  *   points to invalid hardware device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc2378_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 

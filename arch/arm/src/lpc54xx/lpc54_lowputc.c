@@ -1,11 +1,11 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_lowputc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Parts of this file were adapted from sample code provided for the LPC54xx
- * family from NXP which has a compatible BSD license.
+ * Parts of this file were adapted from sample code provided for the
+ * LPC54xx family from NXP which has a compatible BSD license.
  *
  *   Copyright (c) 2016, Freescale Semiconductor, Inc.
  *   Copyright (c) 2016 - 2017 , NXP
@@ -38,11 +38,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -65,9 +65,9 @@
 
 #include <arch/board/board.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define CONSOLE_BASE        LPC54_FLEXCOMM0_BASE
@@ -241,14 +241,14 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USART_CONSOLE
 /* USART console configuration */
 
-static const struct uart_config_s g_console_config=
+static const struct uart_config_s g_console_config =
 {
   .baud      = CONSOLE_BAUD,
   .fclk      = CONSOLE_FCLK,
@@ -266,20 +266,21 @@ static const struct uart_config_s g_console_config=
 };
 #endif /* HAVE_USART_CONSOLE */
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_setbaud
  *
  * Description:
  *   Configure the USART BAUD.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
-static void lpc54_setbaud(uintptr_t base, FAR const struct uart_config_s *config)
+static void lpc54_setbaud(uintptr_t base,
+                          FAR const struct uart_config_s *config)
 {
   uint32_t bestdiff = (uint32_t)-1;
   uint32_t bestosr  = 15;
@@ -291,8 +292,9 @@ static void lpc54_setbaud(uintptr_t base, FAR const struct uart_config_s *config
   uint32_t diff;
   uint32_t baud;
 
-  /* Smaller values of OSR can make the sampling position within a data bit less
-   * accurate and may potentially cause more noise errors or incorrect data.
+  /* Smaller values of OSR can make the sampling position within a data bit
+   * less accurate and may potentially cause more noise errors or incorrect
+   * data.
    */
 
   for (osr = bestosr; osr >= 8; osr--)
@@ -337,20 +339,20 @@ static void lpc54_setbaud(uintptr_t base, FAR const struct uart_config_s *config
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console USART.  This USART initialization is done
- *   early so that the serial console is available for debugging very early in
- *   the boot sequence.
+ *   Called at the very beginning of _start.
+ *   Performs low level initialization including setup of the console USART.
+ *   This USART initialization is done early so that the serial console is
+ *   available for debugging very early in the boot sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc54_lowsetup(void)
 {
@@ -363,7 +365,8 @@ void lpc54_lowsetup(void)
   putreg32(SYSCON_AHBCLKCTRL2_GPIO4 | SYSCON_AHBCLKCTRL2_GPIO5,
            LPC54_SYSCON_AHBCLKCTRLSET2);
 
-  /* TODO: Configure Fractional Rate Generator in case it is selected as a Flexcomm
+  /* TODO:
+   * Configure Fractional Rate Generator in case it is selected as a Flexcomm
    * clock source.
    */
 
@@ -373,12 +376,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm0_enableclk();
 
-  /* Set FLEXCOMM0 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM0 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM0_PSELID);
 
-   /* Configure USART0 pins (defined in board.h) */
+  /* Configure USART0 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART0_RXD);
   lpc54_gpio_config(GPIO_USART0_TXD);
@@ -399,12 +404,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm1_enableclk();
 
-  /* Set FLEXCOMM1 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM1 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM1_PSELID);
 
-   /* Configure USART1 pins (defined in board.h) */
+  /* Configure USART1 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART1_RXD);
   lpc54_gpio_config(GPIO_USART1_TXD);
@@ -425,12 +432,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm2_enableclk();
 
-  /* Set FLEXCOMM2 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM2 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM2_PSELID);
 
-   /* Configure USART2 pins (defined in board.h) */
+  /* Configure USART2 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART2_RXD);
   lpc54_gpio_config(GPIO_USART2_TXD);
@@ -451,12 +460,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm3_enableclk();
 
-  /* Set FLEXCOMM3 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM3 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM3_PSELID);
 
-   /* Configure USART3 pins (defined in board.h) */
+  /* Configure USART3 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART3_RXD);
   lpc54_gpio_config(GPIO_USART3_TXD);
@@ -477,12 +488,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm4_enableclk();
 
-  /* Set FLEXCOMM4 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM4 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
          LPC54_FLEXCOMM4_PSELID);
 
-   /* Configure USART4 pins (defined in board.h) */
+  /* Configure USART4 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART4_RXD);
   lpc54_gpio_config(GPIO_USART4_TXD);
@@ -503,12 +516,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm5_enableclk();
 
-  /* Set FLEXCOMM5 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM5 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM5_PSELID);
 
-   /* Configure USART5 pins (defined in board.h) */
+  /* Configure USART5 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART5_RXD);
   lpc54_gpio_config(GPIO_USART5_TXD);
@@ -529,12 +544,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm6_enableclk();
 
-  /* Set FLEXCOMM6 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM6 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM6_PSELID);
 
-   /* Configure USART6 pins (defined in board.h) */
+  /* Configure USART6 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART6_RXD);
   lpc54_gpio_config(GPIO_USART6_TXD);
@@ -555,12 +572,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm7_enableclk();
 
-  /* Set FLEXCOMM7 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM7 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM7_PSELID);
 
-   /* Configure USART7 pins (defined in board.h) */
+  /* Configure USART7 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART7_RXD);
   lpc54_gpio_config(GPIO_USART7_TXD);
@@ -581,12 +600,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm8_enableclk();
 
-  /* Set FLEXCOMM8 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM8 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM8_PSELID);
 
-   /* Configure USART8 pins (defined in board.h) */
+  /* Configure USART8 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART8_RXD);
   lpc54_gpio_config(GPIO_USART8_TXD);
@@ -607,12 +628,14 @@ void lpc54_lowsetup(void)
 
   lpc54_flexcomm9_enableclk();
 
-  /* Set FLEXCOMM9 to the USART peripheral, locking that configuration in place. */
+  /* Set FLEXCOMM9 to the USART peripheral,
+   * locking that configuration in place.
+   */
 
   putreg32(FLEXCOMM_PSELID_PERSEL_USART | FLEXCOMM_PSELID_LOCK,
            LPC54_FLEXCOMM9_PSELID);
 
-   /* Configure USART9 pins (defined in board.h) */
+  /* Configure USART9 pins (defined in board.h) */
 
   lpc54_gpio_config(GPIO_USART9_RXD);
   lpc54_gpio_config(GPIO_USART9_TXD);
@@ -638,16 +661,17 @@ void lpc54_lowsetup(void)
 #endif /* HAVE_USART_DEVICE */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_usart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USART_DEVICE
-void lpc54_usart_configure(uintptr_t base, FAR const struct uart_config_s *config)
+void lpc54_usart_configure(uintptr_t base,
+                           FAR const struct uart_config_s *config)
 {
   uint32_t regval;
 
@@ -656,6 +680,7 @@ void lpc54_usart_configure(uintptr_t base, FAR const struct uart_config_s *confi
   lpc54_setbaud(base, config);
 
   /* Configure RX and TX FIFOs */
+
   /* Empty and enable FIFOs */
 
   regval  = getreg32(base + LPC54_USART_FIFOCFG_OFFSET);

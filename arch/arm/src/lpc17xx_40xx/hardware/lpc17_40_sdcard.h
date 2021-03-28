@@ -1,46 +1,31 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_sdcard.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_SDCARD_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_SDCARD_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define LPC17_40_SDCARD_PWR_OFFSET        0x0000 /* SD card power control register */
 #define LPC17_40_SDCARD_CLOCK_OFFSET      0x0004 /* SD card clock control register */
@@ -62,7 +47,7 @@
 #define LPC17_40_SDCARD_FIFOCNT_OFFSET    0x0048 /* SD card FIFO counter register */
 #define LPC17_40_SDCARD_FIFO_OFFSET       0x0080 /* SD card data FIFO register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC17_40_SDCARD_PWR               (LPC17_40_MCI_BASE+LPC17_40_SDCARD_PWR_OFFSET)
 #define LPC17_40_SDCARD_CLOCK             (LPC17_40_MCI_BASE+LPC17_40_SDCARD_CLOCK_OFFSET)
@@ -84,15 +69,16 @@
 #define LPC17_40_SDCARD_FIFOCNT           (LPC17_40_MCI_BASE+LPC17_40_SDCARD_FIFOCNT_OFFSET)
 #define LPC17_40_SDCARD_FIFO              (LPC17_40_MCI_BASE+LPC17_40_SDCARD_FIFO_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
-/* MCI Power Control Registers - PWR - 0x400c 0000*/
+/* MCI Power Control Registers - PWR - 0x400c 0000 */
 
 #define SDCARD_PWR_CTRL_SHIFT             (0)       /* Bits 0-1: Power supply control bits */
 #define SDCARD_PWR_CTRL_MASK              (3 << SDCARD_PWR_CTRL_SHIFT)
 #  define SDCARD_PWR_CTRL_OFF             (0 << SDCARD_PWR_CTRL_SHIFT) /* 00: Power-off: card clock stopped */
 #  define SDCARD_PWR_CTRL_PWRUP           (2 << SDCARD_PWR_CTRL_SHIFT) /* 10: Reserved power-up */
 #  define SDCARD_PWR_CTRL_ON              (3 << SDCARD_PWR_CTRL_SHIFT) /* 11: Power-on: card is clocked */
+
                                                     /* Bits 2-5 Reserved */
 #define SDCARD_PWR_OPENDRAIN              (1 << 6)  /* SD_CMD Output Control */
 #define SDCARD_PWR_ROD                    (1 << 7)  /* Rod Control */
@@ -108,7 +94,9 @@
 #define SDCARD_CLOCK_BYPASS               (1 << 10) /* Bit 10: Clock divider bypass enable bit */
 #define SDCARD_CLOCK_WIDBUS               (1 << 11) /* Bit 11: Wide bus mode enable bit */
 #  define SDCARD_CLOCK_WIDBUS_D1          (0)       /* 0: Default (SDIO_D0) */
+
 #  define SDCARD_CLOCK_WIDBUS_D4          (SDCARD_CLOCK_WIDBUS) /* 1: 4-wide (SDIO_D[3:0]) */
+
                                                     /* Bits 12-31: Reserved */
 
 #define SDCARD_CLOCK_RESET                (0)       /* Reset value */
@@ -126,6 +114,7 @@
 #  define SDCARD_CMD_NORESPONSE           (0 << SDCARD_CMD_WAITRESP_SHIFT) /* 00/01: No response */
 #  define SDCARD_CMD_SHORTRESPONSE        (1 << SDCARD_CMD_WAITRESP_SHIFT) /* 10: Short response */
 #  define SDCARD_CMD_LONGRESPONSE         (3 << SDCARD_CMD_WAITRESP_SHIFT) /* 11: Long response */
+
 #define SDCARD_CMD_WAITINT                (1 << 8)  /* Bit 8: CPSM waits for interrupt request */
 #define SDCARD_CMD_WAITPEND               (1 << 9)  /* Bit 9: CPSM Waits for ends of data transfer */
 #define SDCARD_CMD_CPSMEN                 (1 << 10) /* Bit 10: Command path state machine enable */
@@ -140,10 +129,11 @@
                                                     /* Bits 6-31: Reserved */
 
 /* MCI Response Registers RESPONSE0-3 - 0x400c 0014, 0x400c 0018,
-   No bitfields                         0x400c 001c, 0x400c 0020 */
-
+ * No bitfields                         0x400c 001c, 0x400c 0020
+ */
 
 /* MCI - Data Timer Register DATATIMER - 0x400c 0024 */
+
 /* No bitfields */
 
 #define SDCARD_DTIMER_RESET               (0)       /* Reset value */
@@ -184,7 +174,7 @@
 
 #define SDCARD_DATACOUNT_SHIFT            (0)        /* Bits 0-15: Remaining data */
 #define SDCARD_DATACOUNT_MASK             (0xffff << SDCARD_DATACOUNT_SHIFT)
-                                                    /* Bits 16-31: Reserved */
+                                                     /* Bits 16-31: Reserved */
 
 /* MCI - Status Register -Status - 0x400c 0034 */
 
@@ -264,7 +254,9 @@
                                                     /* Bits 15-31: Reserved */
 
 /* MCI - Data FIFO Register - FIFO - 0x400c 0080 to 0x400c 00bc */
-/* The receive and transmit FIFOs can be read or written as 32 bit wide registers.
+
+/* The receive and transmit FIFOs can be read or written as 32 bit wide
+ * registers.
  * The FIFOs contain 16 entries on 16 sequential addresses.
  */
 

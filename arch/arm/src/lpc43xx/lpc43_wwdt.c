@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_wwdt.c
  *
- *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -57,6 +42,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Clocking *****************************************************************/
 
 #define WWDT_FREQ              3000000  /* Watchdog clock is IRC 12MHz, but
@@ -86,6 +72,7 @@
 struct lpc43_lowerhalf_wwdt_s
 {
   FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
+
   xcpt_t   handler;  /* Current watchdog interrupt handler */
   uint32_t timeout;  /* The actual timeout value */
   bool     started;  /* The timer has been started */
@@ -189,9 +176,9 @@ static void lpc43_setwarning(uint32_t warning)
 {
   /* WWDT warning maximum value limiting */
 
-  if (warning > 0x3FF)
+  if (warning > 0x3ff)
     {
-        warning = 0x3FF;
+        warning = 0x3ff;
     }
 
   putreg32(warning, LPC43_WWDT_WARNINT);
@@ -278,7 +265,7 @@ static int lpc43_start(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Feed the watchdog to enable it */
 
-  putreg32(0xAA, LPC43_WWDT_FEED);
+  putreg32(0xaa, LPC43_WWDT_FEED);
   putreg32(0x55, LPC43_WWDT_FEED);
 
   priv->started = true;
@@ -292,8 +279,8 @@ static int lpc43_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -302,11 +289,10 @@ static int lpc43_start(FAR struct watchdog_lowerhalf_s *lower)
 
 static int lpc43_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
-
   /* The watchdog is always disabled after a reset. It is enabled by setting
-  * the WDEN bit in the WDMOD register, then it cannot be disabled again
-  * except by a reset.
-  */
+   * the WDEN bit in the WDMOD register, then it cannot be disabled again
+   * except by a reset.
+   */
 
   wdinfo("Entry\n");
   return -ENOSYS;
@@ -321,13 +307,13 @@ static int lpc43_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the watchdog timer or "feeding the dog".
  *
  *   The application program must write in the FEED register at regular
- *   intervals during normal operation to prevent an MCU reset. This operation
- *   must occur only when the counter value is lower than the window register
- *   value.
+ *   intervals during normal operation to prevent an MCU reset. This
+ *   operation must occur only when the counter value is lower than the
+ *   window register value.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -344,7 +330,7 @@ static int lpc43_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Feed the watchdog */
 
-  putreg32(0xAA, LPC43_WWDT_FEED);
+  putreg32(0xaa, LPC43_WWDT_FEED);
   putreg32(0x55, LPC43_WWDT_FEED);
 
   return OK;
@@ -357,8 +343,8 @@ static int lpc43_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of the
+ *            "lower-half" driver state structure.
  *   status - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -395,7 +381,6 @@ static int lpc43_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   status->timeout = priv->timeout;
 
   /* Get the time remaining until the watchdog expires (in milliseconds) */
-
 
   reload  = getreg32(LPC43_WWDT_TC);
   elapsed = priv->reload - reload;
@@ -446,7 +431,7 @@ static int lpc43_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Determine timeout value */
 
-  reload = WWDT_FREQ/1000;
+  reload = WWDT_FREQ / 1000;
   reload = timeout * reload;
 
   /* Make sure that the final reload value is within range */
@@ -456,7 +441,7 @@ static int lpc43_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       reload = LPC43_MAX_WWDT_TC;
     }
 
-  /* Save the actual timeout value in milliseconds*/
+  /* Save the actual timeout value in milliseconds */
 
   priv->timeout = timeout;
 
@@ -488,8 +473,8 @@ static int lpc43_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   behavior.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
+ *   lower      - A pointer the publicly visible representation of the
+ *                "lower-half" driver state structure.
  *   newhandler - The new watchdog expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
@@ -520,7 +505,7 @@ static xcpt_t lpc43_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Save the new handler */
 
-   priv->handler = handler;
+  priv->handler = handler;
 
   /* Are we attaching or detaching the handler? */
 
@@ -556,8 +541,8 @@ static xcpt_t lpc43_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   are forwarded to the lower half driver through this method.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *   cmd   - The ioctl command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular
@@ -594,9 +579,9 @@ static int lpc43_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
       ret = -EINVAL;
       if (mintime < priv->timeout)
         {
-          uint32_t window = mintime*WWDT_FREQ/1000;
+          uint32_t window = mintime*WWDT_FREQ / 1000;
           DEBUGASSERT(window < priv->reload);
-          lpc43_setwindow( window );
+          lpc43_setwindow(window);
           ret = OK;
         }
     }
@@ -612,8 +597,8 @@ static int lpc43_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  * Name: lpc43_wwdtinitialize
  *
  * Description:
- *   Initialize the WWDT watchdog timer.  The watchdog timer is initialized and
- *   registers as 'devpath.  The initial state of the watchdog time is
+ *   Initialize the WWDT watchdog timer.  The watchdog timer is initialized
+ *   and registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
  * Input Parameters:

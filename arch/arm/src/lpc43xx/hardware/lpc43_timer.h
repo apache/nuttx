@@ -1,56 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_timer.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_TIMER_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define TMR_RVALUE_MASK            (0xffffffff)
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC43_TMR_IR_OFFSET       0x0000 /* Interrupt Register */
 #define LPC43_TMR_TCR_OFFSET      0x0004 /* Timer Control Register */
@@ -70,7 +55,7 @@
 #define LPC43_TMR_EMR_OFFSET      0x003c /* External Match Register */
 #define LPC43_TMR_CTCR_OFFSET     0x0070 /* Count Control Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC43_TMR0_IR             (LPC43_TIMER0_BASE+LPC43_TMR_IR_OFFSET)
 #define LPC43_TMR0_TCR            (LPC43_TIMER0_BASE+LPC43_TMR_TCR_OFFSET)
@@ -144,7 +129,8 @@
 #define LPC43_TMR3_EMR            (LPC43_TIMER3_BASE+LPC43_TMR_EMR_OFFSET)
 #define LPC43_TMR3_CTCR           (LPC43_TIMER3_BASE+LPC43_TMR_CTCR_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* Registers holding 32-bit numeric values (no bit field definitions):
  *
  *   Timer Counter (TC)
@@ -171,11 +157,13 @@
 #define TMR_IR_CR2                (1 << 6)  /* Bit 6:  Capture channel 2 interrupt */
 #define TMR_IR_CR3                (1 << 7)  /* Bit 7:  Capture channel 3 interrupt */
                                             /* Bits 8-31: Reserved */
+
 /* Timer Control Register */
 
 #define TMR_TCR_EN                (1 << 0)  /* Bit 0:  Counter Enable */
 #define TMR_TCR_RESET             (1 << 1)  /* Bit 1:  Counter Reset */
                                             /* Bits 2-31: Reserved */
+
 /* Match Control Register */
 
 #define TMR_MCR_MR0I              (1 << 0)  /* Bit 0:  Interrupt on MR0 */
@@ -191,6 +179,7 @@
 #define TMR_MCR_MR3R              (1 << 10) /* Bit 10: Reset on MR3 */
 #define TMR_MCR_MR3S              (1 << 11) /* Bit 11: Stop on MR3 */
                                             /* Bits 12-31: Reserved */
+
 /* Capture Control Register */
 
 #define TMR_CCR_CAP0RE            (1 << 0)  /* Bit 0:  Capture on CAPn.0 rising edge */
@@ -206,6 +195,7 @@
 #define TMR_CCR_CAP3FE            (1 << 10) /* Bit 10: Capture on CAPn.3 falling edg3 */
 #define TMR_CCR_CAP3I             (1 << 11) /* Bit 11: Interrupt on CAPn.3 */
                                             /* Bits 12-31: Reserved */
+
 /* External Match Register */
 
 #define TMR_EMR_NOTHING           (0)       /* Do Nothing */
@@ -242,6 +232,7 @@
 #  define TMR_EMR_EMC3_SET        (TMR_EMR_SET << TMR_EMR_EMC3_SHIFT)
 #  define TMR_EMR_EMC3_TOGGLE     (TMR_EMR_TOGGLE << TMR_EMR_EMC3_SHIFT)
                                             /* Bits 12-31: Reserved */
+
 /* Count Control Register */
 
 #define TMR_CTCR_MODE_SHIFT       (0)       /* Bits 0-1: Counter/Timer Mode */
@@ -250,24 +241,26 @@
 #  define TMR_CTCR_MODE_CNTRRE    (1 << TMR_CTCR_MODE_SHIFT) /* Counter Mode, CAP rising edge */
 #  define TMR_CTCR_MODE_CNTRFE    (2 << TMR_CTCR_MODE_SHIFT) /* Counter Mode, CAP falling edge */
 #  define TMR_CTCR_MODE_CNTRBE    (3 << TMR_CTCR_MODE_SHIFT) /* Counter Mode, CAP both edges */
+
 #define TMR_CTCR_INSEL_SHIFT      (2)       /* Bits 2-3: Count Input Select */
 #define TMR_CTCR_INSEL_MASK       (3 << TMR_CTCR_INSEL_SHIFT)
 #  define TMR_CTCR_INSEL_CAPNp0   (0 << TMR_CTCR_INSEL_SHIFT) /* CAPn.0 for TIMERn */
 #  define TMR_CTCR_INSEL_CAPNp1   (1 << TMR_CTCR_INSEL_SHIFT) /* CAPn.1 for TIMERn */
 #  define TMR_CTCR_INSEL_CAPNp2   (2 << TMR_CTCR_INSEL_SHIFT) /* CAPn.2 for TIMERn */
 #  define TMR_CTCR_INSEL_CAPNp3   (3 << TMR_CTCR_INSEL_SHIFT) /* CAPn.3 for TIMERn */
+
                                             /* Bits 4-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_TIMER_H */

@@ -1,51 +1,36 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_memorymap.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_MEMORYMAP_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* LPC31XX Physical (unmapped) Memory Map */
 
@@ -108,9 +93,11 @@
 
 #define LPC31_APB2_PCM_OFFSET        0x00000000 /* PCM */
 #define LPC31_APB2_LCD_OFFSET        0x00000400 /* LCD */
+
                                   /* 0x00000800    Reserved */
 #define LPC31_APB2_UART_OFFSET       0x00001000 /* UART */
 #define LPC31_APB2_SPI_OFFSET        0x00002000 /* SPI */
+
                                   /* 0x00003000    Reserved */
 
 #define LPC31_APB3_I2SCONFIG_OFFSET  0x00000000 /* I2S System Configuration */
@@ -118,10 +105,12 @@
 #define LPC31_APB3_I2STX1_OFFSET     0x00000100 /* I2S TX1 */
 #define LPC31_APB3_I2SRX0_OFFSET     0x00000180 /* I2S RX0 */
 #define LPC31_APB3_I2SRX1_OFFSET     0x00000200 /* I2S RX1 */
+
                                   /* 0x00000280    Reserved */
 
 #define LPC31_APB4_DMA_OFFSET        0x00000000 /* DMA */
 #define LPC31_APB4_NAND_OFFSET       0x00000800 /* NAND FLASH Controller */
+
                                   /* 0x00001000    Reserved */
 
 /* Sizes of memory regions in bytes */
@@ -197,8 +186,8 @@
 #define LPC31_NAND_MMUFLAGS          MMU_IOFLAGS
 
 /* board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it depends
- * on some the virtual address definitions provided above.
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
  */
 
 #include <arch/board/board_memorymap.h>
@@ -259,13 +248,13 @@
 #  define NUTTX_START_PADDR            LPC31_INTSRAM0_PADDR
 #endif
 
-/* Determine the address of the MMU page table.  We will try to place that page
- * table at the beginng of ISRAM0 if the vectors are at the high address, 0xffff:0000
- * or at the end of ISRAM1 (or ISRAM0 if ISRAM1 is not available in this architecture)
- * if the vectors are at 0x0000:0000
+/* Determine the address of the MMU page table.  We will try to place that
+ * page table at the beginng of ISRAM0 if the vectors are at the high
+ * address, 0xffff:0000 or at the end of ISRAM1 (or ISRAM0 if ISRAM1 is
+ * not available in this architecture) if the vectors are at 0x0000:0000
  *
- * Or... the user may specify the address of the page table explicitly be defining
- * PGTABLE_BASE_VADDR and PGTABLE_BASE_PADDR in the board.h file.
+ * Or... the user may specify the address of the page table explicitly be
+ * defining PGTABLE_BASE_VADDR and PGTABLE_BASE_PADDR in the board.h file.
  */
 
 #undef PGTABLE_IN_HIGHSRAM
@@ -273,47 +262,46 @@
 
 #if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
 
-  /* Sanity check.. if one is undefined, both should be undefined */
+/* Sanity check.. if one is undefined, both should be undefined */
 
 #  if defined(PGTABLE_BASE_PADDR) || defined(PGTABLE_BASE_VADDR)
 #    error "Only one of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
 #  endif
 
-  /* A sanity check, if the configuration says that the page table is read-only
-   * and pre-initialized (maybe ROM), then it should have also defined both of
-   * the page table base addresses.
-   */
+/* A sanity check, if the configuration says that the page table is read-only
+ * and pre-initialized (maybe ROM), then it should have also defined both of
+ * the page table base addresses.
+ */
 
 #  ifdef CONFIG_ARCH_ROMPGTABLE
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  else
 
-     /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
-      * map probably do not apply because paging logic will probably partition
-      * the SRAM section differently.  In particular, if the page table is located
-      * at the end of SRAM, then the virtual page table address defined below
-      * will probably be in error.
-      *
-      * We work around this header file interdependency by (1) insisting that
-      * pg_macros.h be included AFTER this header file, then (2) allowing the
-      * pg_macros.h header file to redefine PGTABLE_BASE_VADDR.
-      */
+/* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
+ * map probably do not apply because paging logic will probably partition
+ * the SRAM section differently.  In particular, if the page table is located
+ * at the end of SRAM, then the virtual page table address defined below
+ * will probably be in error.
+ *
+ * We work around this header file interdependency by (1) insisting that
+ * pg_macros.h be included AFTER this header file, then (2) allowing the
+ * pg_macros.h header file to redefine PGTABLE_BASE_VADDR.
+ */
 
 #    if defined(CONFIG_PAGING) && defined(__ARCH_ARM_SRC_ARM_PG_MACROS_H)
 #       error "pg_macros.h must be included AFTER this header file"
 #    endif
 
-
-     /* We must declare the page table in ISRAM0 or 1.  We decide depending upon
-      * where the vector table was place.
-      */
+/* We must declare the page table in ISRAM0 or 1.  We decide depending upon
+ * where the vector table was place.
+ */
 
 #    ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 
-       /* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
-        * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a ISRAM1 is
-        * not available in this architecture)
-        */
+/* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
+ * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a ISRAM1 is
+ * not available in this architecture)
+ */
 
 #      ifdef HAVE_INTSRAM1
 #          define PGTABLE_BASE_PADDR (LPC31_INTSRAM1_PADDR+LPC31_INTSRAM1_SIZE-PGTABLE_SIZE)
@@ -324,20 +312,20 @@
 #      endif
 #      define PGTABLE_IN_HIGHSRAM    1
 
-       /* If CONFIG_PAGING is defined, insist that pg_macros.h assign the virtual
-        * address of the page table.
-        */
+/* If CONFIG_PAGING is defined, insist that pg_macros.h assign the virtual
+ * address of the page table.
+ */
 
 #      ifdef CONFIG_PAGING
 #        undef PGTABLE_BASE_VADDR
 #      endif
 #    else
 
-       /* Otherwise, ISRAM1 (or ISRAM0 for the is ISRAM1 is not available in this
-        * architecture) will be mapped so that the end of the SRAM region will
-        * provide memory for the vectors.  The page table will then be places at
-        * the first 16Kb of ISRAM0 (which will be in the shadow memory region).
-        */
+/* Otherwise, ISRAM1 (or ISRAM0 for the is ISRAM1 is not available in this
+ * architecture) will be mapped so that the end of the SRAM region will
+ * provide memory for the vectors.  The page table will then be places at
+ * the first 16Kb of ISRAM0 (which will be in the shadow memory region).
+ */
 
 #      define PGTABLE_BASE_PADDR     LPC31_SHADOWSPACE_PSECTION
 #      define PGTABLE_BASE_VADDR     LPC31_SHADOWSPACE_VSECTION
@@ -348,9 +336,10 @@
 
 /* Page table start addresses:
  *
- * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
- * portion of this table is not accessible in the virtual address space (for
- * normal operation). We will reuse this memory for coarse page tables as follows:
+ * 16Kb of memory is reserved hold the page table for the virtual mappings.
+ * A portion of this table is not accessible in the virtual address space
+ * (for normal operation). We will reuse this memory for coarse page tables
+ * as follows:
  *
  * NOTE: If CONFIG_PAGING is defined, pg_macros.h will re-assign the virtual
  * address of the page table.
@@ -383,7 +372,8 @@
  *
  *   LPC31_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   LPC31_VECTOR_VSRAM - Virtual address of vector table in SRAM
- *   LPC31_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ *   LPC31_VECTOR_VADDR - Virtual address of vector table
+ *                         (0x00000000 or 0xffff0000)
  */
 
 #define VECTOR_TABLE_SIZE           0x00010000
@@ -404,16 +394,16 @@
 #  define LPC31_VECTOR_VCOARSE    0xfff00000
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_MEMORYMAP_H */

@@ -1,56 +1,44 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_gpdma.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_GPDMA_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_GPDMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register offsets *****************************************************************/
+ ****************************************************************************/
 
-/* General registers (see also LPC17_40_SYSCON_DMAREQSEL_OFFSET in lpc17_40_syscon.h) */
+/* Register offsets *********************************************************/
+
+/* General registers
+ * (see also LPC17_40_SYSCON_DMAREQSEL_OFFSET in lpc17_40_syscon.h)
+ */
 
 #define LPC17_40_DMA_INTST_OFFSET         0x0000 /* DMA Interrupt Status Register */
 #define LPC17_40_DMA_INTTCST_OFFSET       0x0004 /* DMA Interrupt Terminal Count Request Status Register */
@@ -70,6 +58,7 @@
 /* Channel Registers */
 
 #define LPC17_40_NDMACH                   8      /* Eight DMA channels */
+
 #define LPC17_40_DMA_CHAN_OFFSET(n)       (0x0100 + ((n) << 5)) /* n=0,1,...,(LPC17_40_NDMACH-1) */
 
 #define LPC17_40_DMACH_SRCADDR_OFFSET     0x0000 /* DMA Channel Source Address Register */
@@ -126,8 +115,11 @@
 #define LPC17_40_DMACH7_CONTROL_OFFSET    (0x1e0+LPC17_40_DMACH_CONTROL_OFFSET)
 #define LPC17_40_DMACH7_CONFIG_OFFSET     (0x1e0+LPC17_40_DMACH_CONFIG_OFFSET)
 
-/* Register addresses ***************************************************************/
-/* General registers (see also LPC17_40_SYSCON_DMAREQSEL in lpc17_40_syscon.h) */
+/* Register addresses *******************************************************/
+
+/* General registers
+ * (see also LPC17_40_SYSCON_DMAREQSEL in lpc17_40_syscon.h)
+ */
 
 #define LPC17_40_DMA_INTST                (LPC17_40_GPDMA_BASE+LPC17_40_DMA_INTST_OFFSET)
 #define LPC17_40_DMA_INTTCST              (LPC17_40_GPDMA_BASE+LPC17_40_DMA_INTTCST_OFFSET)
@@ -202,8 +194,9 @@
 #define LPC17_40_DMACH7_CONTROL           (LPC17_40_GPDMA_BASE+LPC17_40_DMACH7_CONTROL_OFFSET)
 #define LPC17_40_DMACH7_CONFIG            (LPC17_40_GPDMA_BASE+LPC17_40_DMACH7_CONFIG_OFFSET)
 
-/* Register bit definitions *********************************************************/
-/* DMA Request Connections **********************************************************/
+/* Register bit definitions *************************************************/
+
+/* DMA Request Connections **************************************************/
 
 #define LPC17_40_NDMAREQ                  (16) /* The number of DMA requests */
 #if defined(LPC176x)
@@ -274,6 +267,7 @@
 #  define DMA_DMASEL_MAT3p1               (1)
 
 #elif defined(LPC178x_40xx)
+
 /* Request Numbers */
 
 #  define DMA_REQ_SDCARD                  (1)  /* DMASEL01=0 */
@@ -349,7 +343,10 @@
 #  define DMA_DMASEL_UART4RX              (1)
 #endif
 
-/* General registers (see also LPC17_40_SYSCON_DMAREQSEL in lpc17_40_syscon.h) */
+/* General registers
+ * (see also LPC17_40_SYSCON_DMAREQSEL in lpc17_40_syscon.h)
+ */
+
 /* Fach of the following registers, bits 0-7 controls DMA channels 9-7,
  * respectively.  Bits 8-31 are reserved.
  *
@@ -445,12 +442,21 @@
 #define DMA_CONFIG_E                      (1 << 0)  /* Bit 0:  DMA Controller enable */
 #define DMA_CONFIG_M                      (1 << 1)  /* Bit 1:  AHB Master endianness configuration */
                                                     /* Bits 2-31: Reserved */
+
 /* Channel Registers */
 
-/* DMA Channel Source Address Register (Bits 0-31: Source Address) */
-/* DMA Channel Destination Address Register Bits 0-31: Destination Address) */
-/* DMA Channel Linked List Item Register (Bits 0-31: Address of next link list
- * item.  Bits 0-1 must be zero.
+/* DMA Channel Source Address Register
+ * (Bits 0-31: Source Address)
+ */
+
+/* DMA Channel Destination Address Register
+ * (Bits 0-31: Destination Address)
+ */
+
+/* DMA Channel Linked List Item Register
+ * (Bits 0-31: Address of next link list item.
+ *  Bits 0-1 must be zero.
+ *
  */
 
 /* DMA Channel Control Register */
@@ -478,16 +484,19 @@
 #  define DMACH_CONTROL_DBSIZE_64         (5 << DMACH_CONTROL_DBSIZE_SHIFT)
 #  define DMACH_CONTROL_DBSIZE_128        (6 << DMACH_CONTROL_DBSIZE_SHIFT)
 #  define DMACH_CONTROL_DBSIZE_256        (7 << DMACH_CONTROL_DBSIZE_SHIFT)
+
 #define DMACH_CONTROL_SWIDTH_SHIFT        (18)      /* Bits 18-20: Source transfer width */
 #define DMACH_CONTROL_SWIDTH_MASK         (7 << DMACH_CONTROL_SWIDTH_SHIFT)
 #  define DMACH_CONTROL_SWIDTH_8BIT       (0 << DMACH_CONTROL_SWIDTH_SHIFT) /* Byte (8-bit) */
 #  define DMACH_CONTROL_SWIDTH_16BIT      (1 << DMACH_CONTROL_SWIDTH_SHIFT) /* Halfword (16-bit) */
 #  define DMACH_CONTROL_SWIDTH_32BIT      (2 << DMACH_CONTROL_SWIDTH_SHIFT) /* Word (32-bit) */
+
 #define DMACH_CONTROL_DWIDTH_SHIFT        (21)      /* Bits 21-23: Destination transfer width */
 #define DMACH_CONTROL_DWIDTH_MASK         (7 << DMACH_CONTROL_DWIDTH_SHIFT)
 #  define DMACH_CONTROL_DWIDTH_8BIT       (0 << DMACH_CONTROL_DWIDTH_SHIFT) /* Byte (8-bit) */
 #  define DMACH_CONTROL_DWIDTH_16BIT      (1 << DMACH_CONTROL_DWIDTH_SHIFT) /* Halfword (16-bit) */
 #  define DMACH_CONTROL_DWIDTH_32BIT      (2 << DMACH_CONTROL_DWIDTH_SHIFT) /* Word (32-bit) */
+
 #define DMACH_CONTROL_SI                  (1 << 26) /* Bit 26: Source increment */
 #define DMACH_CONTROL_DI                  (1 << 27) /* Bit 27: Destination increment */
 #define DMACH_CONTROL_PROT1               (1 << 28) /* Bit 28: User/privileged mode */
@@ -582,16 +591,16 @@
 #define DMACH_CONFIG_H                    (1 << 18) /* Bit 18: Halt */
                                                     /* Bits 19-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_GPDMA_H */

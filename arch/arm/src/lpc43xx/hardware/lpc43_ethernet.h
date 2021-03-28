@@ -1,51 +1,38 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_ethernet.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ETHERNET_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ETHERNET_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
+
 /* MAC Registers */
 
 #define LPC43_ETH_MACCFG_OFFSET      0x0000 /* MAC configuration register */
@@ -95,7 +82,8 @@
 #define LPC43_ETH_DMACHTXBUF_OFFSET  0x1050 /* DMA current host transmit buffer address register */
 #define LPC43_ETH_DMACHRXBUF_OFFSET  0x1054 /* DMA current host receive buffer address register */
 
-/* Register Base Addresses **************************************************************************/
+/* Register Base Addresses **************************************************/
+
 /* MAC Registers */
 
 #define LPC43_ETH_MACCR              (LPC43_ETHERNET_BASE+LPC43_ETH_MACCFG_OFFSET)
@@ -145,10 +133,12 @@
 #define LPC43_ETH_DMACHTXBUF         (LPC43_ETHERNET_BASE+LPC43_ETH_DMACHTXBUF_OFFSET)
 #define LPC43_ETH_DMACHRXBUF         (LPC43_ETHERNET_BASE+LPC43_ETH_DMACHRXBUF_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
+
 /* MAC Registers */
 
 /* MAC configuration register */
+
                                                /* Bits 0-1:  Reserved */
 #define ETH_MACCFG_RE                (1 << 2)  /* Bit 2:  Receiver enable */
 #define ETH_MACCFG_TE                (1 << 3)  /* Bit 3:  Transmitter enable */
@@ -159,6 +149,7 @@
 #  define ETH_MACCFG_BL_8            (1 << ETH_MACCFG_BL_SHIFT) /* 01: k = min (n, 8) */
 #  define ETH_MACCFG_BL_4            (2 << ETH_MACCFG_BL_SHIFT) /* 10: k = min (n, 4) */
 #  define ETH_MACCFG_BL_1            (3 << ETH_MACCFG_BL_SHIFT) /* 11: k = min (n, 1) */
+
 #define ETH_MACCFG_ACS               (1 << 7)  /* Bit 7:  Automatic pad/CRC stripping */
 #define ETH_MACCFG_LUD               (1 << 8)  /* Bit 8:  Link up/down */
 #define ETH_MACCFG_RD                (1 << 9)  /* Bit 9:  Disable Retry */
@@ -172,12 +163,14 @@
 #define ETH_MACCFG_IFG_SHIFT         (17)      /* Bits 17-19: Interframe gap */
 #define ETH_MACCFG_IFG_MASK          (7 << ETH_MACCFG_IFG_SHIFT)
 #  define ETH_MACCFG_IFG(n)          ((12-((n) >> 3)) << ETH_MACCFG_IFG_SHIFT) /* n bit times, n=40,48,..96 */
+
 #define ETH_MACCFG_JE                (1 << 20) /* Bit 20: Jumbo frame enable */
                                                /* Bit 21: Reserved */
 #define ETH_MACCFG_JD                (1 << 22) /* Bit 22: Jabber disable */
 #define ETH_MACCFG_WD                (1 << 23) /* Bit 23: Watchdog disable */
 #define ETH_MACCFG_CSTF              (1 << 25) /* Bits 25: CRC stripping for Type frames */
                                                /* Bots 24-31: Reserved */
+
 /* MAC frame filter register */
 
 #define ETH_MACFFLT_PR               (1 << 0)  /* Bit 0: Promiscuous mode */
@@ -192,7 +185,8 @@
 #  define ETH_MACFFLT_PCF_PAUSE      (1 << ETH_MACFFLT_PCF_SHIFT) /* Prevents all except Pause control frames */
 #  define ETH_MACFFLT_PCF_ALL        (2 << ETH_MACFFLT_PCF_SHIFT) /* Forwards all control frames */
 #  define ETH_MACFFLT_PCF_FILTER     (3 << ETH_MACFFLT_PCF_SHIFT) /* Forwards all that pass address filter */
-											   /* Bit 8-9: Reserved */
+
+                                               /* Bit 8-9: Reserved */
 #define ETH_MACFFLT_HPF              (1 << 10) /* Bit 10: Hash or perfect filter */
                                                /* Bits 11-30: Reserved */
 #define ETH_MACFFLT_RA               (1 << 31) /* Bit 31: Receive all */
@@ -219,11 +213,13 @@
 #  define ETH_MACMIIA_CR_DIV124      (13 << ETH_MACMIIA_CR_SHIFT) /* 250 - 300 MHz CLK_M4_ETHERNET/124 */
 #  define ETH_MACMIIA_CR_DIV42_2     (14 << ETH_MACMIIA_CR_SHIFT) /* 60-100  MHz CLK_M4_ETHERNET/42 */
 #  define ETH_MACMIIA_CR_DIV62_2     (15 << ETH_MACMIIA_CR_SHIFT) /* 100-150 MHz CLK_M4_ETHERNET/62 */
+
 #define ETH_MACMIIA_MR_SHIFT         (6)       /* Bits 6-10: MII register */
 #define ETH_MACMIIA_MR_MASK          (31 << ETH_MACMIIA_MR_SHIFT)
 #define ETH_MACMIIA_PA_SHIFT         (11)      /* Bits 11-15: PHY address */
 #define ETH_MACMIIA_PA_MASK          (31 << ETH_MACMIIA_PA_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* MAC MII data register */
 
 #define ETH_MACMIID_MASK             (0xffff)
@@ -261,6 +257,7 @@
 #  define ETH_MACDBG_RFS_RFRAME      (1 << ETH_MACDBG_RFS_SHIFT) /* 01: Reading frame data */
 #  define ETH_MACDBG_RFS_RSTATUS     (2 << ETH_MACDBG_RFS_SHIFT) /* 10: Reading frame status (or time-stamp) */
 #  define ETH_MACDBG_RFS_FLUSHING    (3 << ETH_MACDBG_RFS_SHIFT) /* 11: Flushing the frame data and status */
+
                                                /* Bit 7:  Reserved */
 #define ETH_MACDBG_RFFL_SHIFT        (8)       /* Bits 8-9: Rx FIFO fill level */
 #define ETH_MACDBG_RFFL_MASK         (3 << ETH_MACDBG_RFFL_SHIFT)
@@ -268,7 +265,8 @@
 #  define ETH_MACDBG_RFFL_DEACT      (1 << ETH_MACDBG_RFFL_SHIFT) /* 01: RxFIFO fill-level below flow-control de-activate threshold */
 #  define ETH_MACDBG_RFFL_ACTIV      (2 << ETH_MACDBG_RFFL_SHIFT) /* 10: RxFIFO fill-level above flow-control activate threshold */
 #  define ETH_MACDBG_RFFL_FULL       (3 << ETH_MACDBG_RFFL_SHIFT) /* 11: RxFIFO full */
-                                              /* Bits 10-15: Reserved */
+
+                                               /* Bits 10-15: Reserved */
 #define ETH_MACDBG_TXACTIVE          (1 << 16) /* Bit 16: MAC MII transmit engine active */
 #define ETH_MACDBG_TXSTAT_SHIFT      (17)      /* Bits 17-18: State of the MAC transmit frame controller module */
 #define ETH_MACDBG_TXSTAT_MASK       (3 << ETH_MACDBG_TXSTAT_SHIFT)
@@ -276,6 +274,7 @@
 #  define ETH_MACDBG_TXSTAT_WAITING  (1 << ETH_MACDBG_TXSTAT_SHIFT) /* 01: Waiting for Status of previous frame or IFG/backoff period to be over */
 #  define ETH_MACDBG_TXSTAT_PAUSE    (2 << ETH_MACDBG_TXSTAT_SHIFT) /* 10: Generating and transmitting a Pause control frame */
 #  define ETH_MACDBG_TXSTAT_FRAME    (3 << ETH_MACDBG_TXSTAT_SHIFT) /* 11: Transferring input frame for transmission */
+
 #define ETH_MACDBG_PAUSE             (1 << 19) /* Bit 19: MAC transmitter in pause */
 #define ETH_MACDBG_TFRS_SHIFT        (20)      /* Bits 20-21: State of the TxFIFO read Controller */
 #define ETH_MACDBG_TFRS_MASK         (3 << ETH_MACDBG_TFRS_SHIFT)
@@ -283,13 +282,16 @@
 #  define ETH_MACDBG_TFRS_READ       (1 << ETH_MACDBG_TFRS_SHIFT) /* 01: Read state */
 #  define ETH_MACDBG_TFRS_WAITING    (2 << ETH_MACDBG_TFRS_SHIFT) /* 10: Waiting for TxStatus from MAC transmitter */
 #  define ETH_MACDBG_TFRS_WRITING    (3 << ETH_MACDBG_TFRS_SHIFT) /* 11: Writing the received TxStatus or flushing the TxFIFO */
+
 #define ETH_MACDBG_TFS1              (1 << 22) /* Bit 22: Tx FIFO write active */
                                                /* Bit 23: Reserved */
 #define ETH_MACDBG_TFNE              (1 << 24) /* Bit 24: Tx FIFO not empty */
 #define ETH_MACDBG_TFF               (1 << 25) /* Bit 25: Tx FIFO full */
                                                /* Bits 26-31: Reserved */
 
-/* MAC remote wakeup frame filter reg.  Provides 32-bit access to remote remote wake-up filters. */
+/* MAC remote wakeup frame filter reg.
+ * Provides 32-bit access to remote remote wake-up filters.
+ */
 
 /* MAC PMT control and status register */
 
@@ -304,12 +306,15 @@
 #define ETH_MACPMTCS_WFFRPR          (1 << 31) /* Bit 31: Wake-up Frame Filter Register Pointer Reset */
 
 /* MAC interrupt status register */
+
                                                /* Bits 0-2: Reserved */
 #define ETH_MACINTR_PMT              (1 << 3)  /* Bit 3: PMT status */
                                                /* Bits 4-8: Reserved */
 #define ETH_MACINTR_TS               (1 << 9)  /* Bit 9: Time stamp trigger status */
                                                /* Bits 10-31: Reserved */
+
 /* MAC interrupt mask register */
+
                                                /* Bits 0-2: Reserved */
 #define ETH_MACIM_PMTIM              (1 << 3)  /* Bit 3: PMT interrupt mask */
                                                /* Bits 4-8: Reserved */
@@ -349,12 +354,15 @@
 #  define ETH_TSCTRL_TSCNT_BOUNDARY  (1 << ETH_TSCTRL_TSCNT_SHIFT) /* 01: Boundary clock */
 #  define ETH_TSCTRL_TSCNT_E2E       (2 << ETH_TSCTRL_TSCNT_SHIFT) /* 10: End-to-end transparent clock */
 #  define ETH_TSCTRL_TSCNT_P2P       (3 << ETH_TSCTRL_TSCNT_SHIFT) /* 11: Peer-to-peer transparent clock */
+
 #define ETH_TSCTRL_TSENMACADDR       (1 << 18) /* Bit 18: Enable MAC address for PTP frame filtering */
                                                /* Bits 19-31: Reserved */
+
 /* Sub-second increment register */
 
 #define ETH_SSINCR_MASK              (0xff)    /* Bits 0-7: Sub-second increment value */
                                                /* Bits 8-31: Reserved */
+
 /* System time seconds register (32-bit) */
 
 /* System time nanoseconds register */
@@ -370,11 +378,14 @@
 #define ETH_NSECUPD_ADDSUB           (1 << 31)    /* Bit 31: Add or subtract time */
 
 /* Time stamp addend register  (32-bit) */
+
 /* Target time seconds register (32-bit) */
+
 /* Target time nanoseconds register (32-bit) */
 
 #define ETH_TGTNSEC_MASK             (0x7fffffff) /* Bits 0-30: Target time stamp low */
                                                   /* Bit 31: Reserved */
+
 /* System time higher words seconds register */
 
 #define ETH_HIGHWORD_MASK            (0x0000ffff) /* Bits 0-15:Time stamp higher word */
@@ -385,6 +396,7 @@
 #define ETH_TSSTAT_TSSOVF            (1 << 0)  /* Bit 0: Time stamp second overflow */
 #define ETH_TSSTAT_TSTARGT           (1 << 1)  /* Bit 1: Time stamp target time reached */
                                                /* Bits 2-31: Reserved */
+
 /* DMA Registers */
 
 /* DMA bus mode register */
@@ -398,29 +410,36 @@
 #define ETH_DMABMODE_PBL_SHIFT        (8)       /* Bits 8-13: Programmable burst length */
 #define ETH_DMABMODE_PBL_MASK         (0x3f << ETH_DMABMODE_PBL_SHIFT)
 #  define ETH_DMABMODE_PBL(n)         ((n) << ETH_DMABMODE_PBL_SHIFT) /* n=1, 2, 4, 8, 16, 32 */
+
 #define ETH_DMABMODE_PR_SHIFT         (14)      /* Bits 14-15: Rx-to-Tx priority ratio */
 #define ETH_DMABMODE_PR_MASK          (3 << ETH_DMABMODE_PR_SHIFT)
 #  define ETH_DMABMODE_PR_1TO1        (0 << ETH_DMABMODE_PR_SHIFT) /* 00: 1-to-1 */
 #  define ETH_DMABMODE_PR_2TO1        (1 << ETH_DMABMODE_PR_SHIFT) /* 01: 2-to-1 */
 #  define ETH_DMABMODE_PR_3TO1        (2 << ETH_DMABMODE_PR_SHIFT) /* 10: 3-to-1 */
 #  define ETH_DMABMODE_PR_4TO1        (3 << ETH_DMABMODE_PR_SHIFT) /* 11: 4-to-1 */
+
 #define ETH_DMABMODE_FB               (1 << 16) /* Bit 16: Fixed burst */
 #define ETH_DMABMODE_RPBL_SHIFT       (17)      /* Bits 17-22: RxDMA PBL */
 #define ETH_DMABMODE_RPBL_MASK        (0x3f << ETH_DMABMODE_RPBL_SHIFT)
 #  define ETH_DMABMODE_RPBL(n)        ((n) << ETH_DMABMODE_RPBL_SHIFT) /* n=1, 2, 4, 8, 16, 32 */
+
 #define ETH_DMABMODE_USP              (1 << 23) /* Bit 23: Use separate PBL */
 #define ETH_DMABMODE_PBL8X            (1 << 24) /* Bit 24: 8 x PBL mode */
 #define ETH_DMABMODE_AAL              (1 << 25) /* Bit 25: Address-aligned beats */
 #define ETH_DMABMODE_MB               (1 << 26) /* Bit 26: Mixed burst */
 #define ETH_DMABMODE_TXPR             (1 << 27) /* Bit 27: Tx DMA has higher priority than Rx DMA */
                                                 /* Bits 28-31: Reserved */
+
 /* DMA transmit poll demand register (32-bit) */
+
 /* DMA receive poll demand register (32-bit) */
+
 /* DMA receive descriptor list address register (32-bit address) */
+
 /* DMA transmit descriptor list address register (32-bit address) */
 
-/* Interrupt bit definitions common between the DMA status register (DMASTAT) and
- * the DMA interrupt enable register (DMAINTEN).
+/* Interrupt bit definitions common between the DMA status register (DMASTAT)
+ * and the DMA interrupt enable register (DMAINTEN).
  */
 
 #define ETH_DMAINT_TI                (1 << 0)  /* Bit 0:  Transmit interrupt */
@@ -442,6 +461,7 @@
                                                /* Bits 17-31: Reserved */
 
 /* DMA operation mode register */
+
                                                /* Bit 0:  Reserved */
 #define ETH_DMAOPMODE_SR             (1 << 1)  /* Bit 1:  Start/stop receive */
 #define ETH_DMAOPMODE_OSF            (1 << 2)  /* Bit 2:  Operate on second frame */
@@ -481,16 +501,22 @@
 #define ETH_DMAMFBO_FMA_MASK        (0x7ff << ETH_DMAMFBO_FMA_SHIFT)
 #define ETH_DMAMFBO_OF              (1 << 28) /* Bit 28: Overflow bit for FIFO overflow counter */
                                               /* Bits 29-31: Reserved */
+
 /* DMA receive status watchdog timer register */
 
 #define ETH_DMARXWDT_MASK            (0xff)   /* Bits 9-6: RI watchdog timeout */
                                               /* Bits 8-31: Reserved */
+
 /* DMA current host transmit descriptor register (32-bit address) */
+
 /* DMA current host receive descriptor register (32-bit address) */
+
 /* DMA current host transmit buffer address register (32-bit address) */
+
 /* DMA current host receive buffer address register (32-bit address) */
 
-/* DMA Descriptors **********************************************************************************/
+/* DMA Descriptors **********************************************************/
+
 /* TDES0: Transmit descriptor Word0 */
 
 #define ETH_TDES0_DB                 (1 << 0)  /* Bit 0:  Deferred bit */
@@ -523,14 +549,17 @@
 
 /* TDES1: Transmit descriptor Word1 */
 
-#define ETH_TDES1_TBS1_SHIFT         (0)  /* Bits 0-12: Transmit buffer 1 size */
+#define ETH_TDES1_TBS1_SHIFT         (0)   /* Bits 0-12: Transmit buffer 1 size */
 #define ETH_TDES1_TBS1_MASK          (0x1fff << ETH_TDES1_TBS1_SHIFT)
 #define ETH_TDES1_TBS2_SHIFT         (16)  /* Bits 16-28: Transmit buffer 2 size */
 #define ETH_TDES1_TBS2_MASK          (0x1fff << ETH_TDES1_TBS2_SHIFT)
 
 /* TDES2: Transmit descriptor Word2 (32-bit address) */
+
 /* TDES3: Transmit descriptor Word3 (32-bit address) */
+
 /* TDES6: Transmit descriptor Word6 (32-bit time stamp) */
+
 /* TDES7: Transmit descriptor Word7 (32-bit time stamp) */
 
 /* RDES0: Receive descriptor Word0 */
@@ -566,7 +595,9 @@
 #define ETH_RDES1_RBS2_SHIFT         (16)      /* Bits 16-28: Receive buffer 2 size */
 #define ETH_RDES1_RBS2_MASK          (0x1fff << ETH_RDES1_RBS2_SHIFT)
                                                /* Bit 29-31: Reserved */
+
 /* RDES2: Receive descriptor Word2 (32-bit address) */
+
 /* RDES3: Receive descriptor Word3 (32-bit address) */
 
 /* RDES4: Receive descriptor Word4 */
@@ -590,22 +621,26 @@
 #  define ETH_RDES4_MT_ANNOUNCE      (8 << ETH_RDES4_MT_SHIFT)  /* Announce */
 #  define ETH_RDES4_MT_MANAGEMENT    (9 << ETH_RDES4_MT_SHIFT)  /* Management */
 #  define ETH_RDES4_MT_SIGNALING     (10 << ETH_RDES4_MT_SHIFT) /* Signaling */
-#  define ETH_RDES4_MT_PTP		     (15 << ETH_RDES4_MT_SHIFT) /* PTP packet with Reserved message type */
+#  define ETH_RDES4_MT_PTP           (15 << ETH_RDES4_MT_SHIFT) /* PTP packet with Reserved message type */
+
 #define ETH_RDES4_PTPTYPE            (1 << 12) /* Bit 12: PTP frame type */
 #define ETH_RDES4_PTPVERSION         (1 << 13) /* Bit 13: PTP version */
                                                /* Bits 14-31:  Reserved */
 
 /* RDES5: Receive descriptor Word5 - Reserved */
+
 /* RDES6: Receive descriptor Word6 (32-bit time stamp) */
+
 /* RDES7: Receive descriptor Word7 (32-bit time stamp) */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* Ethernet TX DMA Descriptor.  Descriptor size can be 4 DWORDS (16 bytes) or 8 DWORDS (32 bytes)
+/* Ethernet TX DMA Descriptor.
+ * Descriptor size can be 4 DWORDS (16 bytes) or 8 DWORDS (32 bytes)
  * depending on the setting of the ATDS bit in the DMA Bus Mode register.
  */
 
@@ -628,7 +663,8 @@ struct eth_txdesc_s
 #endif
 };
 
-/* Ethernet RX DMA Descriptor.  Descriptor size can be 4 DWORDS (16 bytes) or 8 DWORDS (32 bytes)
+/* Ethernet RX DMA Descriptor.
+ * Descriptor size can be 4 DWORDS (16 bytes) or 8 DWORDS (32 bytes)
  * depending on the setting of the ATDS bit in the DMA Bus Mode register.
  */
 
@@ -649,9 +685,9 @@ struct eth_rxdesc_s
 #endif
 };
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ETHERNET_H */

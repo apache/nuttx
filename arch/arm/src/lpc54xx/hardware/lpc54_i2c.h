@@ -1,53 +1,38 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_i2c.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_I2C_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_I2C_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 /* Shared I2C registers */
 
@@ -83,7 +68,7 @@
 
 #define LPC54_I2C_ID_OFFSET         0x0ffc  /* I2C module Identification */
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_I2C0_CFG              (LPC54_FLEXCOMM0_BASE + LPC54_I2C_CFG_OFFSET)
 #define LPC54_I2C0_STAT             (LPC54_FLEXCOMM0_BASE + LPC54_I2C_STAT_OFFSET)
@@ -285,7 +270,7 @@
 #define LPC54_I2C9_MONRXDAT         (LPC54_FLEXCOMM9_BASE + LPC54_I2C_MONRXDAT_OFFSET)
 #define LPC54_I2C9_ID               (LPC54_FLEXCOMM9_BASE + LPC54_I2C_ID_OFFSET
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Configuration for shared functions */
 
@@ -299,6 +284,7 @@
 #define I2C_CFG_ALLENABLES          0x1f
 
 /* Status, set and write, and clear register for shared functions */
+
 /* Master function state codes (MSTSTATE) */
 
 #define I2C_MASTER_STATE_IDLE       (0)       /* Idle */
@@ -323,6 +309,7 @@
 #  define I2C_STAT_MSTSTATE_TXOK    (2 << I2C_STAT_MSTSTATE_SHIFT) /* Transmit ready */
 #  define I2C_STAT_MSTSTATE_ADDRNAK (3 << I2C_STAT_MSTSTATE_SHIFT) /* NACK Address */
 #  define I2C_STAT_MSTSTATE_DATANAK (4 << I2C_STAT_MSTSTATE_SHIFT) /* NACK Data */
+
 #define I2C_INT_MSTARBLOSS          (1 << 4)  /* Bit 4:  Master Arbitration Loss interrupt */
 #define I2C_INT_MSTSTSTPERR         (1 << 6)  /* Bit 6:  Master Start/Stop Error interrupt */
 #define I2C_INT_SLVPENDING          (1 << 8)  /* Bit 8:  Slave Pending interrupt */
@@ -331,6 +318,7 @@
 #  define I2C_STAT_SLVSTATE_ADDR    (0 << I2C_STAT_SLVSTATE_SHIFT) /* Slave address */
 #  define I2C_STAT_SLVSTATE_RXAVAIL (1 << I2C_STAT_SLVSTATE_SHIFT) /* Slave receive */
 #  define I2C_STAT_SLVSTATE_TXOK    (2 << I2C_STAT_SLVSTATE_SHIFT) /* Slave transmit */
+
 #define I2C_INT_SLVNOTSTR           (1 << 11) /* Bit 11: Slave Not Stretching interrupt */
 #define I2C_STAT_SLVIDX_SHIFT       (12)      /* Bits 12-13: Slave address match Index (status only) */
 #define I2C_STAT_SLVIDX_MASK        (3 << I2C_STAT_SLVIDX_SHIFT)
@@ -338,6 +326,7 @@
 #  define I2C_STAT_SLVIDX_ADDR1     (1 << I2C_STAT_SLVIDX_SHIFT) /* Slave address 1 was matched */
 #  define I2C_STAT_SLVIDX_ADDR2     (2 << I2C_STAT_SLVIDX_SHIFT) /* Slave address 2 was matched */
 #  define I2C_STAT_SLVIDX_ADDR3     (3 << I2C_STAT_SLVIDX_SHIFT) /* Slave address 3 was matched */
+
 #define I2C_STAT_SLVSEL             (1 << 14) /* Bit 14: Slave selected flag (Slave only) */
 #define I2C_INT_SLVDESEL            (1 << 15) /* Bit 15: Slave Deselect interrupt */
 #define I2C_INT_MONRDY              (1 << 16) /* Bit 16: Monitor data Ready interrupt */
@@ -398,20 +387,28 @@
 
 /* Slave control */
 #define I2C_SLVCTL_
+
 /* Combined Slave receiver and transmitter data */
 #define I2C_SLVDAT_
+
 /* Slave address 0 */
 #define I2C_SLVADR0_
+
 /* Slave address 1 */
 #define I2C_SLVADR1_
+
 /* Slave address 2 */
 #define I2C_SLVADR2_
+
 /* Slave address 3 */
 #define I2C_SLVADR3_
+
 /* Slave qualification for address 0 */
 #define I2C_SLVQUAL0_
+
 /* Monitor receiver data */
 #define I2C_MONRXDAT_
+
 /* I2C module Identification */
 #define I2C_ID_
 

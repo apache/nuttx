@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_ssp.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_SSP_H
 #define __ARCH_ARM_SRC_LPC43XX_SSP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
@@ -46,33 +31,37 @@
 
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* This header file defines interfaces to common SSP logic.  To use this common SSP
- * logic on your board:
+ ****************************************************************************/
+
+/* This header file defines interfaces to common SSP logic.
+ * To use this common SSP logic on your board:
  *
- * 1. Provide logic in lpc43_boardinitialize() to configure SSP chip select pins.
+ * 1. Provide logic in lpc43_boardinitialize() to configure SSP chip select
+ *    pins.
  * 2. Provide lpc43_ssp0/1select() and lpc43_ssp0/1status() functions in your
  *    board-specific logic.  These functions will perform chip selection
  *    and status operations using GPIOs in the way your board is configured.
  * 3. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *    lpc43_ssp0/1cmddata() functions in your board-specific logic.  These
- *    functions will perform cmd/data selection operations using GPIOs in the
- *    way your board is configured.
- * 4. Your low level board initialization logic should call lpc43_sspbus_initialize.
- * 5. The handle returned by lpc43_sspbus_initialize() may then be used to bind the
- *    SSP driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
- *    for example, will bind the SPI driver to the SPI MMC/SD driver).
+ *    functions will perform cmd/data selection operations using GPIOs in
+ *    the way your board is configured.
+ * 4. Your low level board initialization logic should call
+ *    lpc43_sspbus_initialize.
+ * 5. The handle returned by lpc43_sspbus_initialize() may then be used to
+ *    bind the SSP driver to higher level logic (e.g., calling
+ *    mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *    the SPI MMC/SD driver).
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -85,9 +74,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: lpc43_sspbus_initialize
@@ -105,23 +94,25 @@ extern "C"
 
 FAR struct spi_dev_s *lpc43_sspbus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  lpc43_ssp0/1select, lpc43_ssp0/1status, and lpc43_ssp0/1cmddata
  *
  * Description:
  *   These functions must be provided in your board-specific logic.  The
  *   lpc43_ssp0/1select functions will perform chip selection and the
- *   lpc43_ssp0/1status will perform status operations using GPIOs in the way your
- *   board is configured.
+ *   lpc43_ssp0/1status will perform status operations using GPIOs in the
+ *   way your board is configured.
  *
  *   If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, then
- *   lpc43_ssp0/1cmddata must also be provided.  This functions performs cmd/data
- *   selection operations using GPIOs in the way your board is configured.
+ *   lpc43_ssp0/1cmddata must also be provided.  This functions performs
+ *   cmd/data selection operations using GPIOs in the way your board is
+ *   configured.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC43_SSP0
-void  lpc43_ssp0select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  lpc43_ssp0select(FAR struct spi_dev_s *dev,
+                       uint32_t devid, bool selected);
 uint8_t lpc43_ssp0status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
@@ -129,7 +120,8 @@ int lpc43_ssp0cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_LPC43_SSP1
-void  lpc43_ssp1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  lpc43_ssp1select(FAR struct spi_dev_s *dev,
+                       uint32_t devid, bool selected);
 uint8_t lpc43_ssp1status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int lpc43_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);

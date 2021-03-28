@@ -1,56 +1,41 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc54xx/hardware/lpc54_dma.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_DMA_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_DMA_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define LPC54_DMA_NCHANNELS         30      /* Channels 0..29 */
 #define LPC54_DMA_MAXXFRS           1024    /* Maximum number of transfers per DMA */
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 /* Global control and status registers */
 
@@ -80,7 +65,7 @@
 #define LPC54_DMA_CTLSTAT_OFFSET    0x0004  /* Control and status register for DMA channel n */
 #define LPC54_DMA_XFERCFG_OFFSET    0x0008  /* Transfer configuration register for DMA channel n */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 /* Global control and status registers */
 
@@ -110,7 +95,7 @@
 #define LPC54_DMA_CTLSTAT(n)        (LPC54_DMA_CHAN_BASE(n) + LPC54_DMA_CTLSTAT_OFFSET)
 #define LPC54_DMA_XFERCFG(n)        (LPC54_DMA_CHAN_BASE(n) + LPC54_DMA_XFERCFG_OFFSET)
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* DMA control */
 
@@ -125,8 +110,8 @@
 
 #define DMA_SRAMBASE_MASK           0xfffffe00
 
-/* The remaining shared registers are all 32 bit encoded fieldss with bit n corresponding to
- * Channel n.
+/* The remaining shared registers are all 32 bit encoded fieldss with bit n
+ * corresponding to Channel n.
  */
 
 #define DMA_CHANNEL(n)              (1 << (n))
@@ -149,17 +134,18 @@
 #define DMA_CFG_TRIGBURST           (1 << 6)  /* Bit 6:  Trigger Burst */
 #define DMA_CFG_BURSTPOWER_SHIFT    (8)       /* Bits 8-11: Burst Power */
 #define DMA_CFG_BURSTPOWER_MASK     (15 << DMA_CFG_BURSTPOWER_SHIFT)
-# define DMA_CFG_BURSTPOWER_1       (0 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 1 (2^0) */
-# define DMA_CFG_BURSTPOWER_2       (1 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 2 (2^1) */
-# define DMA_CFG_BURSTPOWER_3       (2 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 4 (2^2) */
-# define DMA_CFG_BURSTPOWER_8       (3 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 8 (2^2) */
-# define DMA_CFG_BURSTPOWER_16      (4 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 16 (2^2) */
-# define DMA_CFG_BURSTPOWER_32      (5 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 32 (2^2) */
-# define DMA_CFG_BURSTPOWER_64      (6 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 64 (2^2) */
-# define DMA_CFG_BURSTPOWER_128     (7 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 128 (2^2) */
-# define DMA_CFG_BURSTPOWER_256     (8 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 256 (2^2) */
-# define DMA_CFG_BURSTPOWER_512     (9 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 256 (2^2) */
+# define DMA_CFG_BURSTPOWER_1       (0 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 1 (2^0) */
+# define DMA_CFG_BURSTPOWER_2       (1 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 2 (2^1) */
+# define DMA_CFG_BURSTPOWER_3       (2 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 4 (2^2) */
+# define DMA_CFG_BURSTPOWER_8       (3 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 8 (2^2) */
+# define DMA_CFG_BURSTPOWER_16      (4 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 16 (2^2) */
+# define DMA_CFG_BURSTPOWER_32      (5 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 32 (2^2) */
+# define DMA_CFG_BURSTPOWER_64      (6 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 64 (2^2) */
+# define DMA_CFG_BURSTPOWER_128     (7 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 128 (2^2) */
+# define DMA_CFG_BURSTPOWER_256     (8 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 256 (2^2) */
+# define DMA_CFG_BURSTPOWER_512     (9 << DMA_CFG_BURSTPOWER_SHIFT)  /* Burst size = 256 (2^2) */
 # define DMA_CFG_BURSTPOWER_1024    (10 << DMA_CFG_BURSTPOWER_SHIFT) /* Burst size = 1024 (2^10) */
+
 #define DMA_CFG_SRCBURSTWRAP        (1 << 14) /* Bit 14: Source Burst Wrap */
 #define DMA_CFG_DSTBURSTWRAP        (1 << 15) /* Bit 15: Destination Burst Wrap */
 #define DMA_CFG_CHPRIORITY_SHIFT    (16)      /* Bits 16-18: Priority of this channel */
@@ -186,30 +172,36 @@
 #  define DMA_XFERCFG_WIDTH_8BIT    (0 << DMA_XFERCFG_WIDTH_SHIFT) /* 8-bit transfers */
 #  define DMA_XFERCFG_WIDTH_16BIT   (1 << DMA_XFERCFG_WIDTH_SHIFT) /* 16-bit transfers */
 #  define DMA_XFERCFG_WIDTH_32BIT   (2 << DMA_XFERCFG_WIDTH_SHIFT) /* 32-bit transfers */
+
 #define DMA_XFERCFG_SRCINC_SHIFT    (12)      /* Bits 12-13: Source address increment */
 #define DMA_XFERCFG_SRCINC_MASK     (3 << DMA_XFERCFG_SRCINC_SHIFT)
 #  define DMA_XFERCFG_SRCINC_NONE   (0 << DMA_XFERCFG_SRCINC_SHIFT) /* No increment */
 #  define DMA_XFERCFG_SRCINC_1X     (1 << DMA_XFERCFG_SRCINC_SHIFT) /* 1 x width */
 #  define DMA_XFERCFG_SRCINC_2X     (2 << DMA_XFERCFG_SRCINC_SHIFT) /* 2 x width */
 #  define DMA_XFERCFG_SRCINC_4X     (3 << DMA_XFERCFG_SRCINC_SHIFT) /* 4 x width */
+
 #define DMA_XFERCFG_DSTINC_SHIFT    (14)      /* Bits 14-15: Destination address increment */
 #define DMA_XFERCFG_DSTINC_MASK     (3 << DMA_XFERCFG_DSTINC_SHIFT)
 #  define DMA_XFERCFG_DSTINC_NONE   (0 << DMA_XFERCFG_DSTINC_SHIFT) /* No increment */
 #  define DMA_XFERCFG_DSTINC_1X     (1 << DMA_XFERCFG_DSTINC_SHIFT) /* 1 x width */
 #  define DMA_XFERCFG_DSTINC_2X     (2 << DMA_XFERCFG_DSTINC_SHIFT) /* 2 x width */
 #  define DMA_XFERCFG_DSTINC_4X     (3 << DMA_XFERCFG_DSTINC_SHIFT) /* 4 x width */
+
 #define DMA_XFERCFG_XFERCOUNT_SHIFT (16)      /* Bits 16-25: Total number of transfers to be performed */
 #define DMA_XFERCFG_XFERCOUNT_MASK  (0x3ff << DMA_XFERCFG_XFERCOUNT_SHIFT)
 #  define DMA_XFERCFG_XFERCOUNT(n)  ((uint32_t)((n)-1) << DMA_XFERCFG_XFERCOUNT_SHIFT)
 
-/* DMA requests *****************************************************************************/
-/* DMA requests are directly connected to the peripherals. Each channel supports one DMA
- * request line and one trigger input. Some DMA requests allow a selection of requests
- * sources. DMA triggers are selected from many possible input sources.
+/* DMA requests *************************************************************/
+
+/* DMA requests are directly connected to the peripherals. Each channel
+ * supports one DMA request line and one trigger input. Some DMA requests
+ * allow a selection of requests sources.
+ * DMA triggers are selected from many possible input sources.
  */
 
-/* Peripheral request inputs to DMA channel.  For DMA channel 'n', the corresponding DMA
- * trigger input is provided by the setting of the INPUT MUX register DMA_ITRIG_INMUXn
+/* Peripheral request inputs to DMA channel.  For DMA channel 'n', the
+ * corresponding DMA trigger input is provided by the setting of the INPUT
+ * MUX register DMA_ITRIG_INMUXn
  */
 
 #define FLEXCOMM0_RX_DMACHAN        (0)       /* Flexcomm Interface 0 RX */
@@ -261,9 +253,9 @@
 #define SMARTCARD1_RX_DMACHAN       (26)      /* SMARTCARD1_RX */
 #define SMARTCARD1_TX_DMACHAN       (27)      /* SMARTCARD1_TX */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* DMA channel descriptor */
 

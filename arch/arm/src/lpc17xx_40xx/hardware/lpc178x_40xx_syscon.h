@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc178x_40xx_syscon.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -32,25 +32,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_SYSCON_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_SYSCON_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
+
 /* Flash accelerator module */
 
 #define LPC17_40_SYSCON_FLASHCFG_OFFSET     0x0000 /* Flash Accelerator Configuration Register */
@@ -110,7 +111,9 @@
 #define LPC17_40_SYSCON_SPIFICLKSEL_OFFSET  0x01b4 /* SPIFI Clock Selection Register */
 #define LPC17_40_SYSCON_LCDCFG_OFFSET       0x01b8 /* LCD Clock Configuration Register */
 
-/* Device Interrupt Registers (Might be a error in the User Manual, might be at 0x5000c1c0) */
+/* Device Interrupt Registers
+ * (Might be a error in the User Manual, might be at 0x5000c1c0)
+ */
 
 #define LPC17_40_SYSCON_USBINTST_OFFSET     0x01c0 /* USB Interrupt Status  */
 
@@ -132,8 +135,8 @@
 #define LPC17_40_SYSCON_EMCDLYCTL_OFFSET    0x01dc /* Programmable Delays for SDRAM Operation */
 #define LPC17_40_SYSCON_EMCCAL_OFFSET       0x01e0 /* Calibration Counter for EMCDLYCTL */
 
+/* Register addresses *******************************************************/
 
-/* Register addresses *******************************************************************************/
 /* Flash accelerator module */
 
 #define LPC17_40_SYSCON_FLASHCFG            (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_FLASHCFG_OFFSET)
@@ -194,7 +197,9 @@
 #define LPC17_40_SYSCON_SPIFICLKSEL         (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_SPIFICLKSEL_OFFSET)
 #define LPC17_40_SYSCON_LCDCFG              (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_LCDCFG_OFFSET)
 
-/* Device Interrupt Registers (Might be a error in the User Manual, might be at 0x5000c1c0) */
+/* Device Interrupt Registers
+ * (Might be a error in the User Manual, might be at 0x5000c1c0)
+ */
 
 #define LPC17_40_SYSCON_USBINTST            (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_USBINTST_OFFSET)
 
@@ -206,7 +211,6 @@
 
 #define LPC17_40_SYSCON_CLKOUTCFG           (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_CLKOUTCFG_OFFSET)
 
-
 /* Peripheral Reset Control */
 
 #define LPC17_40_SYSCON_RSTCON0             (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_RSTCON0_OFFSET)
@@ -217,9 +221,11 @@
 #define LPC17_40_SYSCON_EMCDLYCTL           (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_EMCDLYCTL_OFFSET)
 #define LPC17_40_SYSCON_EMCCAL              (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_EMCCAL_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
+
 /* Flash accelerator module */
-                                                         /* Bits 0-11:  Reserved */
+
+                                                 /* Bits 0-11:  Reserved */
 #define SYSCON_FLASHCFG_TIM_SHIFT           (12)         /* Bits 12-15: FLASHTIM Flash access time */
 #define SYSCON_FLASHCFG_TIM_MASK            (15 << SYSCON_FLASHCFG_TIM_SHIFT)
 #  define SYSCON_FLASHCFG_TIM_0             (0)                              /* 1 CPU clock <= 20 MHz CPU clock */
@@ -229,25 +235,32 @@
 #  define SYSCON_FLASHCFG_TIM_4             (4 << SYSCON_FLASHCFG_TIM_SHIFT) /* 5 CPU clock <= 100 MHz CPU clock
                                                                               * (Up to 120 MHz for LPC1788x) */
 #  define SYSCON_FLASHCFG_TIM_5             (5 << SYSCON_FLASHCFG_TIM_SHIFT) /* "safe" setting for any conditions */
-                                                      /* Bits 16-31:  Reserved */
+
+                                              /* Bits 16-31:  Reserved */
+
 /* Memory Mapping Control register (MEMMAP - 0x400F C040) */
 
 #define SYSCON_MEMMAP_MAP                   (1 << 0)  /* Bit 0:
                                                        * 0:Boot mode. A portion of the Boot ROM is mapped to address 0.
                                                        * 1:User mode. The on-chip Flash memory is mapped to address 0 */
                                                       /* Bits 1-31:  Reserved */
+
 /* Clocking and power control -- Clock source selection */
 
 #define SYSCON_CLKSRCSEL_SHIFT              (0)       /* Bits 0: Clock selection */
 #define SYSCON_CLKSRCSEL_MASK               (1 << SYSCON_CLKSRCSEL_SHIFT)
 #  define SYSCON_CLKSRCSEL_INTRC            (0 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = internal RC oscillator */
 #  define SYSCON_CLKSRCSEL_MAIN             (1 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = main oscillator */
-                                                      /* Bits 1-31:  Reserved */
+
+                                              /* Bits 1-31:  Reserved */
+
 /* Clocking and power control - Phase locked loops */
+
 /* PLL0/1 Control register */
 
 #define SYSCON_PLLCON_PLLE                  (1 << 0)  /* Bit 0: PLL Enable */
                                                       /* Bits 1-31:  Reserved */
+
 /* PLL0/1 Configuration register */
 
 #define SYSCON_PLLCFG_MSEL_SHIFT            (0)       /* Bit 0-4: PLL Multiplier value */
@@ -266,11 +279,13 @@
 #define SYSCON_PLLSTAT_PLLC                 (1 << 9)  /* Bit 9: PLL connect readback */
 #define SYSCON_PLLSTAT_PLOCK                (1 << 10) /* Bit 10: PLL lock status */
                                                       /* Bits 11-31:  Reserved */
+
 /* PLL0/1 Feed register */
 
 #define SYSCON_PLLFEED_SHIFT                (0)       /* Bit 0-7: PLL0/1 feed sequence */
 #define SYSCON_PLLFEED_MASK                 (0xff << SYSCON_PLLFEED_SHIFT)
                                                       /* Bits 8-31:  Reserved */
+
 /* Clocking and power control -- Clock dividers */
 
 /* EMC Clock Selection Register */
@@ -279,6 +294,7 @@
                                                       /* 0: EMC uses same clock as CPU */
                                                       /* 1: EMC uses half the rate of CPU */
                                                       /* Bits 1-31: Reserved */
+
 /* EMC Clock Selection Register */
 
 #define SYSCON_EMCCLKSEL_CCLK_DIV2          (1 << 0) /* Bit 0: 1=EMC used CPU clock / 2 */
@@ -289,11 +305,13 @@
 #define SYSCON_CCLKSEL_CCLKDIV_SHIFT        (0)       /* 0-4: Divide value for CPU clock (CCLK) */
 #define SYSCON_CCLKSEL_CCLKDIV_MASK         (0x1f << SYSCON_CCLKSEL_CCLKDIV_SHIFT)
 #  define SYSCON_CCLKSEL_CCLKDIV(n)         ((n-1) << SYSCON_CCLKSEL_CCLKDIV_SHIFT) /* n = 2 - 31 */
-                                                      /* Bits 5-7:  Reserved */
+
+                                                  /* Bits 5-7:  Reserved */
 #define SYSCON_CCLKSEL_CCLKSEL              (1 << 8)  /* Bit 8: Select input clock to CPU clock divider */
                                                       /* 0: Sysclk used as input to CCLKDIV */
                                                       /* 1: Main PLL used as input to CCLKDIV */
                                                       /* Bits 9-31:  Reserved */
+
 /* USB Clock Selection register */
 
 #define SYSCON_USBCLKSEL_USBDIV_SHIFT       (0)       /* Bits 0-4: PLL0/1 divide value USB clock */
@@ -301,38 +319,64 @@
 #  define SYSCON_USBCLKSEL_USBDIV_DIV1      (1 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 48MHz */
 #  define SYSCON_USBCLKSEL_USBDIV_DIV2      (2 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 96MHz */
 #  define SYSCON_USBCLKSEL_USBDIV_DIV3      (3 << SYSCON_USBCLKSEL_USBDIV_SHIFT) /* PLL0/1 output must be 144MHz */
-                                                      /* Bits 5-7:  Reserved */
+
+                                                  /* Bits 5-7:  Reserved */
 #define SYSCON_USBCLKSEL_USBSEL_SHIFT       (8)       /* Bits 8-9: Input clock to USBDIV */
 #define SYSCON_USBCLKSEL_USBSEL_MASK        (3 << SYSCON_USBCLKSEL_USBSEL_SHIFT)
 #define SYSCON_USBCLKSEL_USBSEL_PLL0        (1 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 01: PLL0 is used as input clock to USBDIV */
 #define SYSCON_USBCLKSEL_USBSEL_PLL1        (2 << SYSCON_USBCLKSEL_USBSEL_SHIFT)  /* 10: PLL1 is used as input clock to USBDIV */
                                                                                   /* 11: unused */
-                                                      /* Bits 10-31:  Reserved */
+
+                                              /* Bits 10-31:  Reserved */
+
 /* CAN0/1 Sleep Clear Register */
+
                                                       /* Bit 0: Reserved */
 #define SYSCON_CANSLEEPCLR_SHIFT            (1)       /* Bits 1-2: CAN0/1 Sleep Status and Control */
+
 #define SYSCON_CANSLEEPCLR_MASK             (3 << SYSCON_CANSLEEPCLR_SHIFT) /*  */
 #define SYSCON_CANSLEEPCLR_CAN1             (1 << SYSCON_CANSLEEPCLR_SHIFT) /* CAN1 Sleep Status */
 #define SYSCON_CANSLEEPCLR_CAN2             (2 << SYSCON_CANSLEEPCLR_SHIFT) /* CAN2 Sleep Status */
-                                                      /* Read 1: CAN channel in sleep mode */
-                                                      /* Write 1: CAN channel clocks restored */
-                                                      /* Bits 3-31: Reserved */
+
+/*                                               Read 1: CAN channel in sleep
+ *                                                        mode
+ */
+
+/*                                               Write 1: CAN channel clocks
+ *                                                          restored
+ */
+
+                                                /* Bits 3-31: Reserved */
+
 /* CAN0/1 WakeUp Flags Register */
+
                                                       /* Bit 0: Reserved */
 #define SYSCON_CANWAKEFLAGS_SHIFT           (1)       /* Bits 1-2: CAN0/1 WakeUp Status */
+
 #define SYSCON_CANWAKEFLAGS_MASK            (3 << SYSCON_CANWAKEFLAGS_SHIFT) /*  */
 #define SYSCON_CANWAKEFLAGS_CAN1            (1 << SYSCON_CANWAKEFLAGS_SHIFT) /* CAN1 WakeUp Status */
 #define SYSCON_CANWAKEFLAGS_CAN2            (2 << SYSCON_CANWAKEFLAGS_SHIFT) /* CAN2 WakeUp Status */
-                                                      /* Read 1: CAN channel falling edge occur on receive line */
-                                                      /* Write 1: CAN channel clears wakeup flag bit */
-                                                      /* Bits 3-31: Reserved */
+
+/*                                               Read 1: CAN channel falling
+ *                                                 edge occur on receive line
+ */
+
+/*                                              Write 1: CAN channel clears
+ *                                                       wakeup flag bit
+ */
+
+                                              /* Bits 3-31: Reserved */
+
 /* Peripheral Clock Selection register */
+
 /* PCLK is common to all peripheral */
 
 #define SYSCON_PCLKSEL_PCLKDIV_SHIFT        (0)       /* Bits 0-4: Clock divide value for all APB peripherals */
 #define SYSCON_PCLKSEL_PCLKDIV_MASK         (0x1f << SYSCON_PCLKSEL_PCLKDIV_SHIFT)
 #  define SYSCON_PCLKSEL_PCLKDIV(n)         ((n) & SYSCON_PCLKSEL_PCLKDIV_MASK) /* n = 1 - 31 */
-                                                      /* Bits 5-31: Reserved */
+
+                                                  /* Bits 5-31: Reserved */
+
 /* Power Boost Control Register */
 
 #define SYSCON_PBOOST_BOOST_SHIFT           (0)       /* Bits 0-1: Boost control bits */
@@ -340,25 +384,33 @@
 #define SYSCON_PBOOST_BOOST_OFF             (0)       /* Boost OFF, operation must be below 100MHz */
 #define SYSCON_PBOOST_BOOST_ON              (3)       /* Boost ON, operation up to 120MHz allowed */
                                                       /* Bits 2-31: Reserved */
+
 /* SPIFI Clock Selection Register */
 
 #define SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT   (0)     /* Bits 0-4: divide value for SPIFI clock  */
 #define SYSCON_SPIFICLKSEL_SPIFIDIV_MASK    (0x1f << SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT)
 # define SYSCON_SPIFICLKSEL_SPIFIDIV(n)     ((n-1) << SYSCON_SPIFICLKSEL_SPIFIDIV_SHIFT) /* n = 2 - 31 */
+
                                                     /* Bits 5-7: Reserved */
 #define SYSCON_SPIFICLKSEL_SPIFISEL_SHIFT   (8)     /* Bits 8-9: Selects input clock for SPIFI clock divider */
 #define SYSCON_SPIFICLKSEL_SPIFISEL_MASK    (3 << SYSCON_SPIFICLKSEL_SPIFISEL_SHIFT)
 #define SYSCON_SPIFICLKSEL_SPIFISEL_SYSCLK  (0)     /* Sysclk used as input to SPIFIDIV  */
+
 #define SYSCON_SPIFICLKSEL_SPIFISEL_PLL0    (1 << SYSCON_SPIFICLKSEL_SPIFISEL_SHIFT) /* Main PLL used as input to SPIFIDIV */
 #define SYSCON_SPIFICLKSEL_SPIFISEL_PLL1    (2 << SYSCON_SPIFICLKSEL_SPIFISEL_SHIFT) /* Alt PLL used as input to SPIFIDIV */
+
                                                     /* Bits 10-31: Reserved */
+
 /* LCD Configuration Register  */
 
 #define SYSCON_LCDCFG_CLKDIV_SHIFT          (0) /* Bits 0-4: LCD Panel clock prescaler  */
 #define SYSCON_LCDCFG_CLKDIV_MASK           (0x1f << SYSCON_LCDCFG_CLKDIV_SHIFT)
 #define SYSCON_LCDCFG_CLKDIV(n)             ((n-1) << SYSCON_LCDCFG_CLKDIV_SHIFT) /* n = 1 - 32 */
+
                                                 /* Bits 5-31: Reserved */
+
 /* Clocking and power control - Peripheral power control registers */
+
 /* Power Control Register */
 
 #define SYSCON_PCON_PM0                     (1 << 0)  /* Bit 0:  Power mode control bit 0 */
@@ -372,6 +424,7 @@
 #define SYSCON_PCON_PDFLAG                  (1 << 10) /* Bit 10: Power-down entry flag */
 #define SYSCON_PCON_DPDFLAG                 (1 << 11) /* Bit 11:  Deep Power-down entry flag */
                                                       /* Bits 12-31:  Reserved */
+
 /* Power Control for Peripherals Register */
 
 #define SYSCON_PCONP_PCLCD                  (1 << 0)  /* Bit 0:  LCD power/clock control */
@@ -423,13 +476,17 @@
 #  define SYSCON_CLKOUTCFG_SEL_USB          (3 << SYSCON_CLKOUTCFG_SEL_SHIFT) /* CLKOUT source=USB clock */
 #  define SYSCON_CLKOUTCFG_SEL_RTC          (4 << SYSCON_CLKOUTCFG_SEL_SHIFT) /* CLKOUT source=RTC osc */
 #  define SYSCON_CLKOUTCFG_SEL_SPIFI        (5 << SYSCON_CLKOUTCFG_SEL_SHIFT) /* CLKOUT source=SPIFI osc */
+
 #define SYSCON_CLKOUTCFG_DIV_SHIFT          (4)       /* Bits 4-7:  CLKOUT divisor */
 #define SYSCON_CLKOUTCFG_DIV_MASK           (15 << SYSCON_CLKOUTCFG_DIV_SHIFT)
 #  define SYSCON_CLKOUTCFG_DIV(n)           ((n-1) << SYSCON_CLKOUTCFG_DIV_SHIFT) /* n=1..16 */
+
 #define SYSCON_CLKOUTCFG_EN                 (1 << 8)  /* Bit 8:  CLKOUT enable control */
 #define SYSCON_CLKOUTCFG_ACT                (1 << 9)  /* Bit 9:  CLKOUT activity indication */
                                                       /* Bits 10-31: Reserved */
+
 /* System control registers -- External Interrupts */
+
 /* External Interrupt Flag register */
 
 #define SYSCON_EXTINT_EINT0                 (1 << 0)  /* Bit 0:  EINT0 */
@@ -437,6 +494,7 @@
 #define SYSCON_EXTINT_EINT2                 (1 << 2)  /* Bit 2:  EINT2 */
 #define SYSCON_EXTINT_EINT3                 (1 << 3)  /* Bit 3:  EINT3 */
                                                       /* Bits 4-31: Reserved */
+
 /* External Interrupt Mode register */
 
 #define SYSCON_EXTMODE_EINT0                (1 << 0)  /* Bit 0:  1=EINT0 edge sensitive */
@@ -444,6 +502,7 @@
 #define SYSCON_EXTMODE_EINT2                (1 << 2)  /* Bit 2:  1=EINT2 edge sensitive */
 #define SYSCON_EXTMODE_EINT3                (1 << 3)  /* Bit 3:  1=EINT3 edge sensitive */
                                                       /* Bits 4-31: Reserved */
+
 /* External Interrupt Polarity register */
 
 #define SYSCON_EXTPOLAR_EINT0               (1 << 0)  /* Bit 0:  1=EINT0 high active/rising edge */
@@ -451,7 +510,9 @@
 #define SYSCON_EXTPOLAR_EINT2               (1 << 2)  /* Bit 2:  1=EINT2 high active/rising edge */
 #define SYSCON_EXTPOLAR_EINT3               (1 << 3)  /* Bit 3:  1=EINT3 high active/rising edge */
                                                       /* Bits 4-31: Reserved */
+
 /* System control registers -- Reset */
+
 /* Reset Source Identification Register */
 
 #define SYSCON_RSID_POR                     (1 << 0)  /* Bit 0:  Power on reset */
@@ -461,6 +522,7 @@
 #define SYSCON_RSID_SYSRESET                (1 << 4)  /* Bit 4:  System Reset */
 #define SYSCON_RSID_LOCKUP                  (1 << 5)  /* Bit 5:  Lockup Reset */
                                                       /* Bits 6-31: Reserved */
+
 /* System control registers -- Matrix Arbitration Priorities */
 
 # define SYSCON_MATRIXARB_PRI_LOWEST        (0)
@@ -506,7 +568,9 @@
 #define SYSCON_SCS_OSCEN                    (1 << 5)  /* Bit 5:  Main oscillator enable */
 #define SYSCON_SCS_OSCSTAT                  (1 << 6)  /* Bit 6:  Main oscillator status */
                                                       /* Bits 7-31: Reserved */
+
 /* Device Interrupt Registers */
+
 /* USB Interrupt Status register */
 
 #define SYSCON_USBINTST_REQLP               (1 << 0)  /* Bit 0:  Low priority interrupt line status */
@@ -539,6 +603,7 @@
 #define SYSCON_DMAREQSEL_INP14              (1 << 14) /* Bit 14:  Input 14 0=UART2 TX 1=Timer 3 match 0 */
 #define SYSCON_DMAREQSEL_INP15              (1 << 15) /* Bit 15:  Input 15 0=UART2 RX 1=Timer 3 match 1 */
                                                       /* Bits 16-31: Reserved */
+
 /* Reset Control Register 0 */
 
 #define SYSCON_RSTCON0_RSTLCD               (1 << 0)  /* LCD controller reset control bit */
@@ -587,24 +652,31 @@
 #define SYSCON_RSTCON1_RSTDAC               (1 << 1) /* D/A converter (DAC) reset control bit */
 #define SYSCON_RSTCON1_RSTCANACC            (1 << 2) /* CAN acceptance filter reset control bit */
                                                      /* Bits 3-31: Reserved */
+
 /* Delay Control Register - EMC */
-                                                    /* Delay values multiplied by 250 picoseconds */
+
+                            /* Delay values multiplied by 250 picoseconds */
 #define SYSCON_EMCDLYCTL_CMDDLY_SHIFT       (0)     /* Bits 0-4: Delay value for EMC outputs in command delayed mode */
 #define SYSCON_EMCDLYCTL_CMDDLY_MASK        (0x1f << SYSCON_EMCDLYCTL_CMDDLY_SHIFT)
 # define SYSCON_EMCDLYCTL_CMDDLY(n)         ((n-1) << SYSCON_EMCDLYCTL_CMDDLY_SHIFT) /* n = 3 - 32 */
+
                                                     /* Bits 5-7: Reserved */
 #define SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT     (8)     /* Bits 8-12: Delay value for the feedback clock that controls input data sampling */
 #define SYSCON_EMCDLYCTL_FBCLKDLY_MASK      (0x1f << SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT)
 #define SYSCON_EMCDLYCTL_FBCLKDLY(n)        ((n-1)<< SYSCON_EMCDLYCTL_FBCLKDLY_SHIFT) /* n = 3 - 32 */
+
                                                     /* Bits 13-15: Reserved */
 #define SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT   (16)    /* Bits 16-20: Delay value for the CLKOUT0 output */
 #define SYSCON_EMCDLYCTL_CLKOUT0DLY_MASK    (0x1f << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT)
 # define SYSCON_EMCDLYCTL_CLKOUT0DLY(n)     ((n-1) << SYSCON_EMCDLYCTL_CLKOUT0DLY_SHIFT) /* n = 3 - 32 */
+
                                                     /* Bits 21-23: Reserved */
 #define SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT   (24)    /* Bits 24-28: Delay value for the CLKOUT1 output */
 #define SYSCON_EMCDLYCTL_CLKOUT1DLY_MASK    (0x1f << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT)
 # define SYSCON_EMCDLYCTL_CLKOUT1DLY(n)     ((n-1) << SYSCON_EMCDLYCTL_CLKOUT1DLY_SHIFT) /* n = 3 - 32 */
+
                                                     /* Bits 29-31: Reserved */
+
 /* Calibration Register - EMC */
 
 #define SYSCON_EMCCAL_CALVALUE_SHIFT        (0)      /* Bits 0-7: Ring oscillator count during 32 clocks of Internal RC */
@@ -618,8 +690,11 @@
                                                      /* Automatically cleared when START bit is set */
                                                      /* Bits 16-31: Reserved */
 
-/* Compatibility Definitions ************************************************************************/
-/* Need in lpc17_40_clockconfig.h for compatibility with the LPC176x family: */
+/* Compatibility Definitions ************************************************/
+
+/* Need in lpc17_40_clockconfig.h
+ * for compatibility with the LPC176x family:
+ */
 
 #define SYSCON_PLLCON_PLLC                  (0)                  /* Bit does not exist in LPC178x/40xx family */
 #define SYSCON_PLL0STAT_PLLE                SYSCON_PLLSTAT_PLLE  /* PLL enable readback */
@@ -629,16 +704,16 @@
 #define SYSCON_PLL1STAT_PLLC                SYSCON_PLLSTAT_PLLC  /* PLL connect readback */
 #define SYSCON_PLL1STAT_PLOCK               SYSCON_PLLSTAT_PLOCK /* PLL lock status */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_SYSCON_H */

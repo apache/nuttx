@@ -1470,11 +1470,15 @@ static inline int lpc54_reminted(struct lpc54_usbhost_s *priv,
   DEBUGASSERT(curr != NULL);
   if (curr != NULL)
     {
-      /* Clear all current entries in the interrupt table for this direction */
+      /* Clear all current entries in the interrupt table for this
+       * direction
+       */
 
       lpc54_setinttab(0, 2, offset);
 
-      /* Remove the ED from the list..  Is this ED the first on in the list? */
+      /* Remove the ED from the list..
+       *  Is this ED the first on in the list?
+       */
 
       if (prev == NULL)
         {
@@ -1893,7 +1897,9 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
                           priv->rhport.hport.devclass = NULL;
                         }
 
-                      /* Notify any waiters for the Root Hub Status change event */
+                      /* Notify any waiters for the Root Hub Status change
+                       * event
+                       */
 
                       if (priv->pscwait)
                         {
@@ -2215,7 +2221,9 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
 
   nxsig_usleep(100 * 1000);
 
-  /* Put RH port 1 in reset (the LPC546x supports only a single downstream port) */
+  /* Put RH port 1 in reset
+   * (the LPC546x supports only a single downstream port)
+   */
 
   lpc54_putreg(OHCI_RHPORTST_PRS, LPC54_OHCI_RHPORTST1);
 
@@ -3581,7 +3589,9 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
               ctrl  = lpc54_getreg(LPC54_OHCI_CTRL);
               lpc54_putreg(ctrl & ~OHCI_CTRL_BLE, LPC54_OHCI_CTRL);
 
-              /* Remove the TDs attached to the ED, keeping the ED in the list */
+              /* Remove the TDs attached to the ED,
+               * keeping the ED in the list
+               */
 
               td           = (struct lpc54_gtd_s *)
                              (ed->hw.headp & ED_HEADP_ADDR_MASK);
@@ -3595,7 +3605,9 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
             }
           else
             {
-              /* Remove the TDs attached to the ED, keeping the Ed in the list */
+              /* Remove the TDs attached to the ED,
+               * keeping the Ed in the list
+               */
 
               td           = (struct lpc54_gtd_s *)
                              (ed->hw.headp & ED_HEADP_ADDR_MASK);
@@ -3641,7 +3653,9 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 #ifdef CONFIG_OHCI_ASYNCH
           else
             {
-              /* Otherwise, perform the callback and free the transfer structure */
+              /* Otherwise,
+               * perform the callback and free the transfer structure
+               */
 
               lpc54_asynch_completion(priv, ed);
             }
