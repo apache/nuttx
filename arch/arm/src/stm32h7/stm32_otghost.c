@@ -5545,33 +5545,4 @@ FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
   return &g_usbconn;
 }
 
-#if defined(CONFIG_USBHOST_TRACE) || defined(CONFIG_DEBUG_USB)
-/****************************************************************************
- * Name: usbhost_trformat1 and usbhost_trformat2
- *
- * Description:
- *   This interface must be provided by platform specific logic that knows
- *   the HCDs encoding of USB trace data.
- *
- *   Given an 9-bit index, return a format string suitable for use with, say,
- *   printf.  The returned format is expected to handle two unsigned integer
- *   values.
- *
- ****************************************************************************/
-
-FAR const char *usbhost_trformat1(uint16_t id)
-{
-  /* TODO: */
-
-  return NULL;
-}
-
-FAR const char *usbhost_trformat2(uint16_t id)
-{
-  /* TODO: */
-
-  return NULL;
-}
-#endif /* CONFIG_USBHOST_TRACE && CONFIG_DEBUG_USB */
-
 #endif /* CONFIG_USBHOST && CONFIG_STM32H7_OTGFS */
