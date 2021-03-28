@@ -145,11 +145,11 @@ struct sam_pmecc_s
 
 /* This is the type of the ROM detection/correction function
  *
- * REVISIT:  Where are the types Pmecc and Pmerrloc?
+ * REVISIT:  Where are the types pmecc and pmerrloc?
  */
 
 #ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
-typedef uint32_t (*pmecc_correctionalgo_t)(Pmecc *, Pmerrloc *,
+typedef uint32_t (*pmecc_correctionalgo_t)(pmecc *, pmerrloc *,
                                            struct pmecc_desc_s *desc,
                                            uint32_t isr, uintptr_t data);
 #endif
@@ -1328,7 +1328,7 @@ void pmecc_unlock(void)
 int pmecc_correction(uint32_t isr, uintptr_t data)
 {
 #ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
-  /* REVISIT:  Whare are the types Pmecc and Pmerrloc?
+  /* REVISIT:  Whare are the types pmecc and pmerrloc?
    * REVISIT:  Check returned value
    */
 

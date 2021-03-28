@@ -407,7 +407,7 @@
 
 /* The SERCOM bus clock (CLK_SERCOMx_APB) can be enabled and disabled in the
  * Main Clock Controller. The SERCOM uses two generic clocks:
- * GCLK_SERCOMn_CORE and GCLK_SERCOM_SLOW.
+ * GCLK_SERCOMN_CORE and GCLK_SERCOM_SLOW.
  * The core clock (GCLK_SERCOMx_CORE) is required to clock the SERCOM while
  * working as a master.  The slow clock (GCLK_SERCOM_SLOW) is only  required
  * for certain functions and is common to all SERCOM modules.

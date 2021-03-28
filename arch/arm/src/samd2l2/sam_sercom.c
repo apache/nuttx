@@ -81,12 +81,12 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
   uint16_t regval;
   uint8_t gclkcore;
 
-  /* Set up the SERCOMn_GCLK_ID_CORE clock */
+  /* Set up the SERCOMN_GCLK_ID_CORE clock */
 
   gclkcore = (uint8_t)SERCOM_GCLK_ID_CORE(sercom);
   regval   = ((uint16_t)gclkcore << GCLK_CLKCTRL_ID_SHIFT);
 
-  /* Select and disable the SERCOMn_GCLK_ID_CORE generic clock */
+  /* Select and disable the SERCOMN_GCLK_ID_CORE generic clock */
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
@@ -94,7 +94,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 
   while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
 
-  /* Select the SERCOMn_GCLK_ID_CORE source clock generator */
+  /* Select the SERCOMN_GCLK_ID_CORE source clock generator */
 
   regval |= (uint16_t)gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
 
@@ -102,7 +102,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
-  /* Enable the SERCOMn_GCLK_ID_CORE generic clock, optionally locking
+  /* Enable the SERCOMN_GCLK_ID_CORE generic clock, optionally locking
    * further writes to this GCLK.
    */
 
@@ -149,7 +149,7 @@ void sercom_slowclk_configure(int sercom, int gclkgen)
 #endif
 #endif
 
-  /* Setup the SERCOMn_GCLK channel.  SERCOM0-4 use a common channel, but
+  /* Setup the SERCOMN_GCLK channel.  SERCOM0-4 use a common channel, but
    * SERCOM5 uses a different channel.  Configuration should be done only
    * once.
    */
