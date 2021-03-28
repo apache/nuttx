@@ -1813,7 +1813,7 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
       /* STD2 - STD0 */
 
-      regval |= (msg->cm_hdr.ch_id & 0x1c0000) >> 18;
+      regval |= (msg->cm_hdr.ch_id & 0x1c0000) >> 13;
       TXREGVAL(MCP2515_TXB0SIDL) = regval;
 
       /* STD10 - STD3 */
