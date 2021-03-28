@@ -5918,7 +5918,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
       country_code = (char *)iwr->u.data.pointer;
       if (strlen(country_code) != 2)
         {
-          wlerr("ERROR: Invalid input arguments\r\n");
+          wlerr("ERROR: Invalid input arguments\n");
           return -EINVAL;
         }
 

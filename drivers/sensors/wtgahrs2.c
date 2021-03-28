@@ -201,7 +201,7 @@ static void wtgahrs2_accel_data(FAR struct wtgahrs2_dev_s *rtdata,
   accel.temperature = (short)(buffer[7] << 8 | buffer[6]) / 100.0f;
 
   lower->push_event(lower->priv, &accel, sizeof(accel));
-  sninfo("Accel: %.3fm/s^2 %.3fm/s^2 %.3fm/s^2, t:%.1f\r\n",
+  sninfo("Accel: %.3fm/s^2 %.3fm/s^2 %.3fm/s^2, t:%.1f\n",
          accel.x, accel.y, accel.z, accel.temperature);
 }
 
@@ -227,7 +227,7 @@ static void wtgahrs2_gyro_data(FAR struct wtgahrs2_dev_s *rtdata,
   gyro.temperature = (short)(buffer[7] << 8 | buffer[6]) / 100.0f;
 
   lower->push_event(lower->priv, &gyro, sizeof(gyro));
-  sninfo("Gyro: %.3frad/s %.3frad/s %.3frad/s, t:%.1f\r\n",
+  sninfo("Gyro: %.3frad/s %.3frad/s %.3frad/s, t:%.1f\n",
           gyro.x, gyro.y, gyro.z, gyro.temperature);
 }
 
@@ -253,7 +253,7 @@ static void wtgahrs2_mag_data(FAR struct wtgahrs2_dev_s *rtdata,
   mag.temperature = (short)(buffer[7] << 8 | buffer[6]) / 100.0f;
 
   lower->push_event(lower->priv, &mag, sizeof(mag));
-  sninfo("Mag: %.3fuT %.3fuT %.3fuT, t:%.1f\r\n",
+  sninfo("Mag: %.3fuT %.3fuT %.3fuT, t:%.1f\n",
          mag.x, mag.y, mag.z, mag.temperature);
 }
 
@@ -278,7 +278,7 @@ static void wtgahrs2_baro_data(FAR struct wtgahrs2_dev_s *rtdata,
   baro.temperature = NAN;
 
   lower->push_event(lower->priv, &baro, sizeof(baro));
-  sninfo("Pressure : %.3fhPa\r\n", baro.pressure);
+  sninfo("Pressure : %.3fhPa\n", baro.pressure);
 }
 
 static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
@@ -336,12 +336,12 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
     {
       rtdata->gps_mask = 0;
       lower->push_event(lower->priv, &rtdata->gps, sizeof(rtdata->gps));
-      sninfo("Time : %d/%d/%d-%d:%d:%d\r\n", rtdata->gps.year,
+      sninfo("Time : %d/%d/%d-%d:%d:%d\n", rtdata->gps.year,
               rtdata->gps.month, rtdata->gps.day, rtdata->gps.hour,
               rtdata->gps.min, rtdata->gps.sec);
-      sninfo("GPS longitude : %fdegree, latitude:%fdegree\r\n",
+      sninfo("GPS longitude : %fdegree, latitude:%fdegree\n",
               rtdata->gps.longitude, rtdata->gps.latitude);
-      sninfo("GPS speed: %fm/s, yaw:%fdegrees, height:%fm \r\n",
+      sninfo("GPS speed: %fm/s, yaw:%fdegrees, height:%fm \n",
               rtdata->gps.speed, rtdata->gps.yaw, rtdata->gps.height);
     }
 }

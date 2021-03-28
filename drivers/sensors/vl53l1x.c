@@ -266,7 +266,8 @@ static const struct file_operations g_vl53l1xfops =
  * Name: vl53l1x_SensorInit
  *
  * Description:
- *  This function loads the 135 bytes default values to initialize the sensor.
+ *  This function loads the 135 bytes default values to initialize the
+ *  sensor.
  *
  ****************************************************************************/
 
@@ -842,7 +843,7 @@ static uint16_t vl53l1x_getreg16(FAR struct vl53l1x_dev_s *priv,
 
   /* Register to read */
 
-  sninfo("Reg %02x % \r\n", reg_addr_aux[0], reg_addr_aux[1]);
+  sninfo("Reg %02x % \n", reg_addr_aux[0], reg_addr_aux[1]);
   ret = i2c_write(priv->i2c, &config, (uint8_t *)&reg_addr_aux, 2);
   if (ret < 0)
     {
@@ -967,8 +968,8 @@ static void vl53l1x_putreg8(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
  *
  ****************************************************************************/
 
-static void vl53l1x_putreg16(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
-                             uint16_t regval)
+static void vl53l1x_putreg16(FAR struct vl53l1x_dev_s *priv,
+                             uint16_t regaddr, uint16_t regval)
 {
   struct i2c_config_s config;
   uint8_t data[4];
@@ -1005,8 +1006,8 @@ static void vl53l1x_putreg16(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
  *
  ****************************************************************************/
 
-static void vl53l1x_putreg32(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
-                             uint32_t regval)
+static void vl53l1x_putreg32(FAR struct vl53l1x_dev_s *priv,
+                             uint16_t regaddr, uint32_t regval)
 {
   struct i2c_config_s config;
   uint8_t data[7];
@@ -1160,7 +1161,8 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Initialize the vl53l1x device structure */
 
-  priv = (FAR struct vl53l1x_dev_s *)kmm_malloc(sizeof(struct vl53l1x_dev_s));
+  priv = (FAR struct vl53l1x_dev_s *)kmm_malloc(
+    sizeof(struct vl53l1x_dev_s));
   if (!priv)
     {
       snerr("ERROR: Failed to allocate instance\n");

@@ -1425,7 +1425,7 @@ static int esp32c3_net_initialize(unsigned int devno)
 
   memcpy(priv->dev.d_mac.ether.ether_addr_octet, eth_mac, sizeof(eth_mac));
 
-  ninfo("%02X:%02X:%02X:%02X:%02X:%02X \r\n",
+  ninfo("%02X:%02X:%02X:%02X:%02X:%02X \n",
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
 

@@ -917,7 +917,7 @@ void hw_usb_hmodule_init (void)
     case RX65N_USB_SYSSTS0_LNST_LS_JSTS :
     case RX65N_USB_SYSSTS0_LNST_FS_JSTS : /* USB device already connected */
 
-    syslog (LOG_INFO, "USB Device already connected\n\r");
+    syslog (LOG_INFO, "USB Device already connected\n");
     rx65n_usbhost_setbit (RX65N_USB_DVSTCTR0, RX65N_USB_DVSTCTR0_USBRST);
     up_mdelay(20);                        /* Need to wait greater equal 10ms in USB spec */
     rx65n_usbhost_clearbit (RX65N_USB_DVSTCTR0,
@@ -3049,7 +3049,7 @@ uint16_t usb_hstd_chk_attach (void)
         }
       else if (RX65N_USB_SYSSTS0_LNST_SE0 == (buf[0] & 3))
         {
-          syslog (LOG_INFO, "Debug: Detach device\n\r");
+          syslog (LOG_INFO, "Debug: Detach device\n");
         }
       else
         {
@@ -3058,7 +3058,7 @@ uint16_t usb_hstd_chk_attach (void)
     }
   else
     {
-      syslog (LOG_INFO, "Already device attached\n\r");
+      syslog (LOG_INFO, "Already device attached\n");
       return 0;
     }
 
@@ -4897,7 +4897,7 @@ static void rx65n_usbhost_checkreg(uint32_t addr, uint32_t val, bool iswrite)
             {
               /* No.. More than one. */
 
-              uinfo("[repeats %d more times]\n\r", count);
+              uinfo("[repeats %d more times]\n", count);
             }
         }
 
@@ -5457,7 +5457,7 @@ static inline int rx65n_usbhost_addinted(struct rx65n_usbhost_s *priv,
   interval     = rx65n_usbhost_getinterval(epdesc->interval);
 
   ed->interval = interval;
-  uinfo("interval: %d->%d\n\r", epdesc->interval, interval);
+  uinfo("interval: %d->%d\n", epdesc->interval, interval);
 
   /* Get the offset associated with the ED direction. IN EDs get the even
    * entries, OUT EDs get the odd entries.
@@ -5492,7 +5492,7 @@ static inline int rx65n_usbhost_addinted(struct rx65n_usbhost_s *priv,
         }
     }
 
-  uinfo("min interval: %d offset: %d\n\r", interval, offset);
+  uinfo("min interval: %d offset: %d\n", interval, offset);
 
   /* Get value for Interval Error Detection Interval  */
 
@@ -5556,7 +5556,7 @@ static inline int rx65n_usbhost_addinted(struct rx65n_usbhost_s *priv,
   if (xfrinfo == NULL)
     {
       rx65n_usbhost_free_xfrinfo(xfrinfo);
-      uerr("ERROR: rx65n_usbhost_alloc_xfrinfo failed\n\r");
+      uerr("ERROR: rx65n_usbhost_alloc_xfrinfo failed\n");
       return -ENOMEM;
     }
 
@@ -5592,7 +5592,7 @@ static inline int rx65n_usbhost_addinted(struct rx65n_usbhost_s *priv,
 
   ed->hw.nexted = head;
   rx65n_usbhost_setinttab((uint32_t)ed, interval, offset);
-  uinfo("head: %08x next: %08x\n\r", ed, head);
+  uinfo("head: %08x next: %08x\n", ed, head);
 
   return OK;
 #else
@@ -5645,7 +5645,7 @@ static inline int rx65n_usbhost_addisoced(struct rx65n_usbhost_s *priv,
                                   struct rx65n_usbhost_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
-  printf("Isochronous endpoints not yet supported\n\r");
+  printf("Isochronous endpoints not yet supported\n");
 #endif
   return -ENOSYS;
 }
@@ -5662,7 +5662,7 @@ static inline int rx65n_usbhost_remisoced(struct rx65n_usbhost_s *priv,
                                   struct rx65n_usbhost_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
-  printf("Isochronous endpoints not yet supported\n\r");
+  printf("Isochronous endpoints not yet supported\n");
 #endif
   return -ENOSYS;
 }
@@ -5792,7 +5792,7 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
   xfrinfo = rx65n_usbhost_alloc_xfrinfo();
   if (xfrinfo == NULL)
     {
-      uerr("ERROR: rx65n_usbhost_alloc_xfrinfo failed\n\r");
+      uerr("ERROR: rx65n_usbhost_alloc_xfrinfo failed\n");
       return -ENOMEM;
     }
 
@@ -5819,7 +5819,7 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
       ret = rx65n_usbhost_wdhwait(priv, ed);
       if (ret < 0)
         {
-          syslog(LOG_INFO, "ERROR: Device disconnected\n\r");
+          syslog(LOG_INFO, "ERROR: Device disconnected\n");
           goto errout_with_xfrinfo;
         }
     }
@@ -5956,7 +5956,7 @@ static int rx65n_usbhost_ctrltd(struct rx65n_usbhost_s *priv,
         }
       else
         {
-          uerr("ERROR: Bad TD completion status: %d\n\r", xfrinfo->tdstatus);
+          uerr("ERROR: Bad TD completion status: %d\n", xfrinfo->tdstatus);
           ret = xfrinfo->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
@@ -6156,7 +6156,7 @@ static int rx65n_usbhost_usbinterrupt(int irq, void *context, FAR void *arg)
   else
     {
       syslog (LOG_INFO, "Unhandled interrupt. INTENB0 = 0x%x, \
-      INTENB1 = 0x%x, INTSTS0 = 0x%x and INTSTS1 = 0x%x\n\r",
+      INTENB1 = 0x%x, INTSTS0 = 0x%x and INTSTS1 = 0x%x\n",
       intenb0, intenb1, intsts0, intsts1);
     }
 
@@ -8069,7 +8069,7 @@ static int rx65n_usbhost_connect(FAR struct usbhost_driver_s *drvr,
 
   if (ret >= 0)
     {
-      syslog (LOG_INFO, "Hub Port device enumerated\n\r");
+      syslog (LOG_INFO, "Hub Port device enumerated\n");
     }
 
   return OK;
@@ -8135,7 +8135,7 @@ static void rx65n_usbhost_disconnect(struct usbhost_driver_s *drvr,
 
           g_kbdpipe = 0;
           g_hubkbd = false;
-          syslog (LOG_INFO, "KBD Device Disconnected from Hub\n\r");
+          syslog (LOG_INFO, "KBD Device Disconnected from Hub\n");
         }
 
       if (hport->speed == USB_SPEED_FULL)
@@ -8149,7 +8149,7 @@ static void rx65n_usbhost_disconnect(struct usbhost_driver_s *drvr,
                 }
             }
 
-          syslog (LOG_INFO, "MSC Device Disconnected from Hub\n\r");
+          syslog (LOG_INFO, "MSC Device Disconnected from Hub\n");
         }
     }
 
@@ -8536,7 +8536,7 @@ struct usbhost_connection_s *rx65n_usbhost_initialize(int controller)
 
   IEN(PERIB, INTB185) = 1U;
 
-  syslog (LOG_INFO, "Debug:USB host Initialized, Device connected:%s\n\r",
+  syslog (LOG_INFO, "Debug:USB host Initialized, Device connected:%s\n",
           priv->connected ? "YES" : "NO");
 
   return &g_usbconn;

@@ -608,7 +608,7 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
 
   if (mbi == TOTALMBCOUNT)
     {
-      nwarn("No TX MB available mbi %" PRIi32 "\r\n", mbi);
+      nwarn("No TX MB available mbi %" PRIi32 "\n", mbi);
       NETDEV_TXERRORS(&priv->dev);
       return 0;       /* No transmission for you! */
     }
@@ -1590,7 +1590,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
   imxrt_setfreeze(priv->base, 1);
   if (!imxrt_waitfreezeack_change(priv->base, 1))
     {
-      ninfo("FLEXCAN: freeze fail\r\n");
+      ninfo("FLEXCAN: freeze fail\n");
       return -1;
     }
 
@@ -1684,7 +1684,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
   for (i = 0; i < RXMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
-      ninfo("Set MB%" PRIi32 " to receive %p\r\n", i, rx);
+      ninfo("Set MB%" PRIi32 " to receive %p\n", i, rx);
       rx->cs.edl = 0x1;
       rx->cs.brs = 0x1;
       rx->cs.esi = 0x0;
@@ -1702,7 +1702,7 @@ static int imxrt_initialize(struct imxrt_driver_s *priv)
   imxrt_setfreeze(priv->base, 0);
   if (!imxrt_waitfreezeack_change(priv->base, 0))
     {
-      ninfo("FLEXCAN: unfreeze fail\r\n");
+      ninfo("FLEXCAN: unfreeze fail\n");
       return -1;
     }
 
@@ -1749,8 +1749,8 @@ static void imxrt_reset(struct imxrt_driver_s *priv)
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
       struct mb_s *rx = flexcan_get_mb(priv, i);
-      ninfo("MB %" PRIi32 " %p\r\n", i, rx);
-      ninfo("MB %" PRIi32 " %p\r\n", i, &rx->id.w);
+      ninfo("MB %" PRIi32 " %p\n", i, rx);
+      ninfo("MB %" PRIi32 " %p\n", i, &rx->id.w);
       rx->cs.cs = 0x0;
       rx->id.w = 0x0;
       rx->data[0].w00 = 0x0;
@@ -1931,7 +1931,7 @@ int imxrt_caninitialize(int intf)
    * the device and/or calling imxrt_ifdown().
    */
 
-  ninfo("callbacks done\r\n");
+  ninfo("callbacks done\n");
 
   imxrt_ifdown(&priv->dev);
 

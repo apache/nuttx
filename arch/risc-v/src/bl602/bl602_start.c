@@ -128,13 +128,13 @@ __cyg_profile_func_enter(void *this_fn, void *call_site)
       rtcb = running_task();
 
       syslog(LOG_EMERG,
-             "task %s stack overflow detected! base:0x%x >= sp:0x%x\r\n",
+             "task %s stack overflow detected! base:0x%x >= sp:0x%x\n",
              rtcb->name,
              stack_base,
              sp);
 #else
       syslog(LOG_EMERG,
-             "stack overflow detected! base:0x%x >= sp:0x%x\r\n",
+             "stack overflow detected! base:0x%x >= sp:0x%x\n",
              stack_base,
              sp);
 #endif
