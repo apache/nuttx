@@ -62,13 +62,21 @@
 #  undef HAVE_USBHOST
 #endif
 
-/* Check if we need to support the USB monitor */
+/* Check if we should enable the USB monitor before starting NSH */
+
+#ifndef CONFIG_USBMONITOR
+#  undef HAVE_USBMONITOR
+#endif
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
 
 #ifndef HAVE_USBHOST
 #  undef CONFIG_USBHOST_TRACE
 #endif
 
-#if !defined(CONFIG_USBMONITOR) || !defined(CONFIG_USBHOST_TRACE)
+#if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
 #  undef HAVE_USBMONITOR
 #endif
 

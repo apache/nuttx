@@ -130,15 +130,21 @@
 
 /* USB Monitor */
 
-/* Can't support USB device monitor if USB device is not enabled */
+/* Check if we should enable the USB monitor before starting NSH */
 
-#ifndef CONFIG_USBDEV
+#ifndef CONFIG_USBMONITOR
 #  undef NSH_HAVE_USBMONITOR
 #endif
 
-/* Check if we should enable the USB monitor before starting NSH */
+#ifndef NSH_HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_USBMONITOR)
+#ifndef NSH_HAVE_USBHOST
+#  undef CONFIG_USBHOST_TRACE
+#endif
+
+#if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
 #  undef NSH_HAVE_USBMONITOR
 #endif
 
