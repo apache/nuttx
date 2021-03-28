@@ -66,6 +66,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/usbhost_trace.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #if (defined(CONFIG_STM32H7_OTGFS) || defined(CONFIG_STM32H7_OTGHS)) && \
