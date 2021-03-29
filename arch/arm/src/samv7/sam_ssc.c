@@ -419,9 +419,7 @@ struct sam_ssc_s
   uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive access to SSC */
   uint8_t datalen;             /* Data width (8, 16, or 32) */
-#ifdef CONFIG_DEBUG_FEATURES
   uint8_t align;               /* Log2 of data width (0, 1, or 3) */
-#endif
   uint8_t pid;                 /* Peripheral ID */
   uint8_t rxfslen;             /* RX frame sync length */
   uint8_t txfslen;             /* TX frame sync length */
@@ -2001,21 +1999,15 @@ static int ssc_checkwidth(struct sam_ssc_s *priv, int bits)
   switch (bits)
     {
     case 8:
-#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 0;
-#endif
       break;
 
     case 16:
-#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 1;
-#endif
       break;
 
     case 32:
-#ifdef CONFIG_DEBUG_FEATURES
       priv->align = 3;
-#endif
       break;
 
     default:
@@ -3198,9 +3190,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC0_BASE;
   priv->datalen = CONFIG_SAMV7_SSC0_DATALEN;
-#ifdef CONFIG_DEBUG_FEATURES
   priv->align   = SAMV7_SSC0_DATAMASK;
-#endif
   priv->pid     = SAM_PID_SSC0;
 }
 #endif
@@ -3339,9 +3329,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC1_BASE;
   priv->datalen = CONFIG_SAMV7_SSC1_DATALEN;
-#ifdef CONFIG_DEBUG_FEATURES
   priv->align   = SAMV7_SSC1_DATAMASK;
-#endif
   priv->pid     = SAM_PID_SSC1;
 }
 #endif

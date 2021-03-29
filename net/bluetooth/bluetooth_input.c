@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_ASSERTIONS) && CONFIG_NET_BLUETOOTH_BACKLOG > 0
+#if CONFIG_NET_BLUETOOTH_BACKLOG > 0
 static int bluetooth_count_frames(FAR struct bluetooth_conn_s *conn)
 {
   FAR struct bluetooth_container_s *container;

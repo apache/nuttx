@@ -75,7 +75,7 @@
 #  define DEBUGVERIFY(f) VERIFY(f)
 #else
 #  define DEBUGPANIC()
-#  define DEBUGASSERT(f)
+#  define DEBUGASSERT(f) UNUSED(f)
 #  define DEBUGVERIFY(f) ((void)(f))
 #endif
 
@@ -85,7 +85,7 @@
  */
 
 #ifdef NDEBUG
-#  define assert(f)
+#  define assert(f) UNUSED(f)
 #else
 #  define assert(f) ASSERT(f)
 #endif

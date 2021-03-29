@@ -195,7 +195,7 @@ static void sim_process_tick(sq_entry_t *entry)
 static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                          FAR struct timespec *ts)
 {
-  DEBUGASSERT(lower != NULL && ts != NULL);
+  DEBUGASSERT(ts != NULL);
 
   ts->tv_sec  = UINT_MAX;
   ts->tv_nsec = NSEC_PER_SEC - 1;
@@ -301,12 +301,7 @@ static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
 static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
                        FAR struct timespec *ts)
 {
-#ifdef CONFIG_DEBUG_ASSERTIONS
-  FAR struct sim_oneshot_lowerhalf_s *priv =
-    (FAR struct sim_oneshot_lowerhalf_s *)lower;
-#endif
-
-  DEBUGASSERT(priv != NULL && ts != NULL);
+  DEBUGASSERT(ts != NULL);
 
   *ts = g_current;
   return OK;

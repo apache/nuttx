@@ -465,7 +465,7 @@ static int gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
     (FAR struct bl602_gpint_dev_s *)dev;
 
   DEBUGASSERT(bl602xgpint != NULL && value != NULL);
-  DEBUGASSERT(bl602xgpint->bl602xgpio.id < BOARD_NGPIOINT);
+  DEBUGASSERT(bl602xgpint->bl602gpio.id < BOARD_NGPIOINT);
   gpioinfo("Reading int pin...\n");
 
   *value = bl602_gpioread(g_gpiointinputs[bl602xgpint->bl602gpio.id]);
