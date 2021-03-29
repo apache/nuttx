@@ -1193,9 +1193,11 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             {
               if (TCP_WBPKTLEN(wrb) > 0)
                 {
-                  ninfo("INFO: Allocated part of the requested data\n");
                   DEBUGASSERT(TCP_WBPKTLEN(wrb) >= off);
                   chunk_result = TCP_WBPKTLEN(wrb) - off;
+                  ninfo("INFO: Allocated part of the requested data "
+                        "%zd/%zu\n",
+                        chunk_result, chunk_len);
 
                   /* Note: chunk_result here can be 0 if we are trying
                    * to coalesce into the existing buffer and we failed
