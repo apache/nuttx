@@ -1376,8 +1376,6 @@ int mac802154netdev_register(MACHANDLE mac)
 
   nxsem_init(&priv->md_exclsem, 0, 1);
 
-  DEBUGASSERT(priv->md_txpoll != NULL);
-
   /* Set the network mask. */
 
   macnet_netmask(dev);

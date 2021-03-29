@@ -1241,10 +1241,6 @@ int apds9960_register(FAR const char *devpath,
 {
   int ret;
 
-  /* Sanity check */
-
-  DEBUGASSERT(i2c != NULL);
-
   /* Initialize the APDS9960 device structure */
 
   FAR struct apds9960_dev_s *priv =

@@ -368,7 +368,6 @@ static inline unsigned int noteram_next(unsigned int ndx,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
 static unsigned int noteram_length(void)
 {
   unsigned int head = g_noteram_info.ni_head;
@@ -381,7 +380,6 @@ static unsigned int noteram_length(void)
 
   return head - tail;
 }
-#endif
 
 /****************************************************************************
  * Name: noteram_unread_length

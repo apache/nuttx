@@ -506,10 +506,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
   size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the SRAM1_END
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
    * is aligned to the MPU requirement.
    */
 

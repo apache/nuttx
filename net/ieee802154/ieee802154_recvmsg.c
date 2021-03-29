@@ -80,7 +80,7 @@ struct ieee802154_recvfrom_s
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_ASSERTIONS) && CONFIG_NET_IEEE802154_BACKLOG > 0
+#if CONFIG_NET_IEEE802154_BACKLOG > 0
 static int ieee802154_count_frames(FAR struct ieee802154_conn_s *conn)
 {
   FAR struct ieee802154_container_s *container;
