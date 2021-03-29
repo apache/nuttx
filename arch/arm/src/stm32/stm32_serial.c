@@ -513,7 +513,7 @@ static struct up_dev_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-#if defined(CONFIG_STM32_STM32F33XX)
+#if defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F302)
   .apbclock      = STM32_PCLK1_FREQUENCY, /* Errata 2.5.1 */
 #else
   .apbclock      = STM32_PCLK2_FREQUENCY,
