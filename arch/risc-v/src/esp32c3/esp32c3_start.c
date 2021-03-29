@@ -75,6 +75,12 @@ void __esp32c3_start(void)
 
   esp32c3_lowsetup();
 
+#ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization */
+
+  riscv_earlyserialinit();
+#endif
+
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

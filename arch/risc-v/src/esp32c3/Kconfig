@@ -307,11 +307,11 @@ if ESP32C3_UART1
 
 config ESP32C3_UART1_TXPIN
 	int "UART1 TX Pin"
-	default 18
+	default 6
 
 config ESP32C3_UART1_RXPIN
 	int "UART1 RX Pin"
-	default 19
+	default 7
 
 endif # ESP32C3_UART1
 
