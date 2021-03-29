@@ -49,7 +49,7 @@
 
 /* Indicate that a local variable is not used */
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 /* Built-in functions */
 
@@ -301,7 +301,7 @@
 
 /* Indicate that a local variable is not used */
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 /* SDCC-specific definitions ************************************************/
 
@@ -394,7 +394,7 @@
 
 /* Indicate that a local variable is not used */
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 /* It is assumed that the system is build using the small
  * data model with storage defaulting to internal RAM.
@@ -447,7 +447,7 @@
 
 /* Indicate that a local variable is not used */
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 /* Zilog-specific definitions ***********************************************/
 
@@ -578,7 +578,7 @@
 
 /* Indicate that a local variable is not used */
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 /* ICCARM-specific definitions **********************************************/
 
@@ -590,7 +590,7 @@
 
 /* Indicate that a local variable is not used */
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 #  define weak_alias(name, aliasname)
 #  define weak_data            __weak
@@ -686,7 +686,7 @@
 #  undef  CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
-#  define UNUSED(a) ((void)(a))
+#  define UNUSED(a) ((void)(1 || (a)))
 
 #endif
 
