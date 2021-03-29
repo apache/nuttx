@@ -882,7 +882,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       rp = (uint8_t *)rxbuffer;
     }
 
-  if (!tp)
+  if (tp == NULL)
     {
       tp = rp;
     }
@@ -890,7 +890,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
   esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
 
-  while (bytes)
+  while (bytes != 0)
     {
       esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET, 0);
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET, 0);
@@ -913,7 +913,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
 
       tp += n;
 
-      if (rp)
+      if (rp != NULL)
         {
           esp32_dma_init(s_dma_rxdesc[priv->config->dma_chan - 1],
                          SPI_DMADESC_NUM, rp, bytes);
@@ -1053,7 +1053,7 @@ static void esp32_spi_poll_exchange(FAR struct esp32_spi_priv_s *priv,
       uint32_t w_wd = 0xffff;
       uint32_t r_wd;
 
-      if (txbuffer)
+      if (txbuffer != NULL)
         {
           if (priv->nbits == 8)
             {
@@ -1067,7 +1067,7 @@ static void esp32_spi_poll_exchange(FAR struct esp32_spi_priv_s *priv,
 
       r_wd = esp32_spi_poll_send(priv, w_wd);
 
-      if (rxbuffer)
+      if (rxbuffer != NULL)
         {
           if (priv->nbits == 8)
             {
@@ -1474,7 +1474,7 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev)
 
   flags = enter_critical_section();
 
-  if (--priv->refs)
+  if (--priv->refs != 0)
     {
       leave_critical_section(flags);
       return OK;
