@@ -1381,8 +1381,6 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   nxsem_init(&priv->xd_exclsem, 0, 1);
 
-  DEBUGASSERT(priv->xd_txpoll != NULL);
-
   /* Set the network mask. */
 
   xbeenet_netmask(dev);
