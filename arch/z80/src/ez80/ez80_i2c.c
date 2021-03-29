@@ -579,7 +579,9 @@ static int ez80_i2c_read_transfer(FAR struct ez80_i2cdev_s *priv,
 
           else if (regval == I2C_SR_MDATARDNAK)
             {
-              /* Since we just NACKed the incoming byte, it must be the last */
+              /* Since we just NACKed the incoming byte, it must be the
+               * last
+               */
 
               DEBUGASSERT(count <= 1);
 
@@ -925,7 +927,9 @@ FAR struct i2c_master_s *ez80_i2cbus_initialize(int port)
       ccr = ez80_i2c_getccr(100 * 1000);
       ez80_i2c_setccr(ccr);
 
-      /* No GPIO setup is required -- I2C pints, SCL/SDA are not multiplexed */
+      /* No GPIO setup is required -- I2C pints,
+       * SCL/SDA are not multiplexed
+       */
 
       /* This semaphore enforces serialized access for I2C transfers */
 

@@ -34,6 +34,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Verify that selected features match the capability of the selected CPU */
 
 #ifndef HAVE_Z8X181
@@ -111,9 +112,9 @@
 #  undef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
 #  undef CONFIG_Z180_ESCCB_SERIAL_CONSOLE
 
-   /* If we are not using the serial driver, then the serial console is all
-    * that we will support.
-    */
+/* If we are not using the serial driver, then the serial console is all
+ * that we will support.
+ */
 
 #  ifndef USE_SERIALDRIVER
 #    undef CONFIG_Z180_UART1
@@ -126,15 +127,15 @@
 #  define HAVE_UART_CONSOLE 1
 #  define HAVE_SERIAL_CONSOLE 1
 
-  /* Disable other console selections */
+/* Disable other console selections */
 
 #  undef CONFIG_Z180_SCC_SERIAL_CONSOLE
 #  undef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
 #  undef CONFIG_Z180_ESCCB_SERIAL_CONSOLE
 
-   /* If we are not using the serial driver, then the serial console is all
-    * that we will support.
-    */
+/* If we are not using the serial driver, then the serial console is all
+ * that we will support.
+ */
 
 #  ifndef USE_SERIALDRIVER
 #    undef CONFIG_Z180_UART0
@@ -147,14 +148,14 @@
 #  define HAVE_SCC_CONSOLE 1
 #  define HAVE_SERIAL_CONSOLE 1
 
-  /* Disable other console selections */
+/* Disable other console selections */
 
 #  undef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
 #  undef CONFIG_Z180_ESCCB_SERIAL_CONSOLE
 
-   /* If we are not using the serial driver, then the serial console is all
-    * that we will support.
-    */
+/* If we are not using the serial driver, then the serial console is all
+ * that we will support.
+ */
 
 #  ifndef USE_SERIALDRIVER
 #    undef CONFIG_Z180_UART0
@@ -167,13 +168,13 @@
 #  define HAVE_SCC_CONSOLE 1
 #  define HAVE_SERIAL_CONSOLE 1
 
-  /* Disable other console selections */
+/* Disable other console selections */
 
 #  undef CONFIG_Z180_ESCCB_SERIAL_CONSOLE
 
-   /* If we are not using the serial driver, then the serial console is all
-    * that we will support.
-    */
+/* If we are not using the serial driver, then the serial console is all
+ * that we will support.
+ */
 
 #  ifndef USE_SERIALDRIVER
 #    undef CONFIG_Z180_UART0
@@ -182,17 +183,17 @@
 #    undef CONFIG_Z180_ESCCB
 #  endif
 
-   /* If we are not using the serial driver, then the serial console is all
-    * that we will support.
-    */
+/* If we are not using the serial driver, then the serial console is all
+ * that we will support.
+ */
 
 #elif defined(CONFIG_Z180_ESCCB_SERIAL_CONSOLE)
 #  define HAVE_SCC_CONSOLE 1
 #  define HAVE_SERIAL_CONSOLE 1
 
-   /* If we are not using the serial driver, then the serial console is all
-    * that we will support.
-    */
+/* If we are not using the serial driver, then the serial console is all
+ * that we will support.
+ */
 
 #  ifndef USE_SERIALDRIVER
 #    undef CONFIG_Z180_UART0
@@ -212,7 +213,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #endif /* __ARCH_Z80_SRC_Z180_Z180_CONFIG_H */

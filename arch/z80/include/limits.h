@@ -22,7 +22,7 @@
 #define __ARCH_Z80_INCLUDE_LIMITS_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
 #include <arch/chip/limits.h>

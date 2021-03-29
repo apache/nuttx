@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 /* Z180 Interrupts */
+
 /* Resets */
+
                                 /* RST 0 is the power-up interrupt vector */
 #define Z180_RST1          (0)  /* RST 1 */
 #define Z180_RST2          (1)  /* RST 2 */

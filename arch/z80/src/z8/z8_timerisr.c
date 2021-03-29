@@ -87,7 +87,7 @@ void up_timer_initialize(void)
    * divide by 4.
    */
 
-  putreg8((Z8_TIMERCTL_DIV4|Z8_TIMERCTL_CONT), T0CTL);
+  putreg8((Z8_TIMERCTL_DIV4 | Z8_TIMERCTL_CONT), T0CTL);
 
   /* Write to the timer high and low byte registers to set a starting
    * count value (this effects only the first pass in continuous mode)
@@ -109,14 +109,14 @@ void up_timer_initialize(void)
    *   reload_value = system_clock_frequency / 400
    */
 
-   reload = get_freq() / 400;
-   putreg16((uint16_t)reload, T0R);
+  reload = get_freq() / 400;
+  putreg16((uint16_t)reload, T0R);
 
   /* Write to the timer control register to enable the timer and to
    * initiate counting
    */
 
-  putreg8((getreg8(T0CTL)|Z8_TIMERCTL_TEN), T0CTL);
+  putreg8((getreg8(T0CTL) | Z8_TIMERCTL_TEN), T0CTL);
 
   /* Set the timer priority */
 

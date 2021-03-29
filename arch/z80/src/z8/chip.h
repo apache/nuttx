@@ -85,7 +85,7 @@
 #define Z8_TIMERCTL_GATED    _HX(06)
 #define Z8_TIMERCTL_CAPCMP   _HX(07)
 
-/* UART Register Offsets *************************************************************/
+/* UART Register Offsets ************************************************************/
 
 #define Z8_UART_TXD          _HX(00)        /*  8-bits: UART Transmit Data */
 #define Z8_UART_RXD          _HX(00)        /*  8-bits: UART Receive Data */

@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* This file should never be included directly but, rather, only indirectly
-* through sys/types.h
+ * through sys/types.h
  */
 
 #ifndef __ARCH_Z80_INCLUDE_TYPES_H

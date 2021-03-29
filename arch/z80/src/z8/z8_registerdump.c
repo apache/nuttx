@@ -76,10 +76,11 @@ void z8_registerdump(void)
   switch (g_z8irqstate.state)
     {
       case Z8_IRQSTATE_ENTRY:
+
         /* Calculate the source address based on the saved RP value */
 
         rp   = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
-        regs = (FAR uint16_t*)(rp & 0xf0);
+        regs = (FAR uint16_t *)(rp & 0xf0);
 
         /* Then dump the register values */
 
