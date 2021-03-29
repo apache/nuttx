@@ -263,6 +263,13 @@ static const char *g_white_list[] =
   "ASCII_y",
   "ASCII_z",
 
+/* Ref:
+ * nuttx/compiler.h
+ */
+
+  "_Far",
+  "_Erom",
+
   NULL
 };
 
