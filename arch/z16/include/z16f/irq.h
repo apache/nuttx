@@ -37,7 +37,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Interrupt Vectors (excluding reset and sysexec which are handled differently) */
+/* Interrupt Vectors
+ * (excluding reset and sysexec which are handled differently)
+ */
 
 #define Z16F_IRQ_IRQ0     ( 0) /* First of 8 IRQs controlled by IRQ0 registers */
 #define Z16F_IRQ_ADC      ( 0) /*   Vector: 0x2C IRQ0.0 ADC */
@@ -228,7 +230,7 @@ extern "C"
 intrinsic void EI(void);
 intrinsic void DI(void);
 intrinsic void RI(unsigned short);
-intrinsic void SET_VECTOR(int,void (* func) (void));
+intrinsic void SET_VECTOR(int, void (* func) (void));
 intrinsic unsigned short TDI(void);
 
 #ifndef __ZILOG__
