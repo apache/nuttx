@@ -1259,6 +1259,11 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       if (chunk_result == 0)
         {
           DEBUGASSERT(nonblock);
+          if (result == 0)
+            {
+              result = -EAGAIN;
+            }
+
           break;
         }
 
