@@ -786,11 +786,6 @@ static void esp32_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   spiinfo("nbits=%d\n", nbits);
 
   priv->nbits = nbits;
-
-  esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
-                    (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
-  esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET,
-                    (priv->nbits - 1) << SPI_USR_MOSI_DBITLEN_S);
 }
 
 /****************************************************************************
@@ -982,6 +977,9 @@ static uint32_t esp32_spi_poll_send(FAR struct esp32_spi_priv_s *priv,
                                     uint32_t wd)
 {
   uint32_t val;
+
+  esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, (priv->nbits - 1));
+  esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, (priv->nbits - 1));
 
   esp32_spi_set_reg(priv, SPI_W0_OFFSET, wd);
 
