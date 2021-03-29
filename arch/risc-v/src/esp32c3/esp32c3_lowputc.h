@@ -81,6 +81,11 @@ enum uart_stop_length
 #define UART_TX_FIFO_SIZE 128
 #define UART_RX_FIFO_SIZE 128
 
+/* Maximum serial clock divisor for integer part */
+
+#define MAX_UART_CLKDIV (BIT(12) - 1)
+#define DIV_UP(a, b)    (((a) + (b) - 1) / (b))
+
 /* Struct used to store uart driver information and to
  * manipulate uart driver
  */
@@ -101,6 +106,9 @@ struct esp32c3_uart_s
   uint8_t   rxpin;          /* RX pin */
   uint8_t   rxsig;          /* RX signal */
 };
+
+extern struct esp32c3_uart_s g_uart0_config;
+extern struct esp32c3_uart_s g_uart1_config;
 
 /****************************************************************************
  * Public Function Prototypes
