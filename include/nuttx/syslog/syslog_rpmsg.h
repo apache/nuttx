@@ -44,9 +44,10 @@ void syslog_rpmsg_init_early(FAR const char *cpu_name, FAR void *buffer,
                              size_t size);
 int syslog_rpmsg_init(void);
 
-int syslog_rpmsg_putc(int ch);
-int syslog_rpmsg_flush(void);
-ssize_t syslog_rpmsg_write(FAR const char *buffer, size_t buflen);
+int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch);
+int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel);
+ssize_t syslog_rpmsg_write(FAR struct syslog_channel_s *channel,
+                           FAR const char *buffer, size_t buflen);
 #endif
 
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER

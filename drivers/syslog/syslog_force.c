@@ -72,11 +72,11 @@ int syslog_force(int ch)
           break;
         }
 
-      DEBUGASSERT(g_syslog_channel[i]->sc_force != NULL);
+      DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
 
       /* Then send the character to the emergency channel */
 
-      g_syslog_channel[i]->sc_force(ch);
+      g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i], ch);
     }
 
   return ch;

@@ -48,7 +48,7 @@ extern "C"
  */
 
 struct syslog_channel_s; /* Forward reference */
-EXTERN FAR const struct syslog_channel_s *g_syslog_channel
+EXTERN FAR struct syslog_channel_s *g_syslog_channel
                                                 [CONFIG_SYSLOG_MAX_CHANNELS];
 
 /****************************************************************************
@@ -73,16 +73,16 @@ EXTERN FAR const struct syslog_channel_s *g_syslog_channel
  *
  * Input Parameters:
  *   devpath - The full path to the character device to be used.
- *   oflags  - File open flags
- *   mode    - File open mode (only if oflags include O_CREAT)
+ *   oflags  - File open flags.
+ *   mode    - File open mode (only if oflags include O_CREAT).
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   Returns a newly created SYSLOG channel, or NULL in case of any failure.
  *
  ****************************************************************************/
 
-int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
+FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
+                                                   int oflags, int mode);
 
 /****************************************************************************
  * Name: syslog_dev_uninitialize
@@ -92,7 +92,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  *   a different SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
  *
  * Input Parameters:
- *   None
+ *   channel    - Handle to syslog channel to be used.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -104,9 +104,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_FILE
-void syslog_dev_uninitialize(void);
-#endif /* CONFIG_SYSLOG_FILE */
+void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
 
 /****************************************************************************
  * Name: syslog_dev_channel
@@ -294,8 +292,9 @@ int syslog_force(int ch);
  *   for the character driver interface.
  *
  * Input Parameters:
- *   buffer - The buffer containing the data to be output
- *   buflen - The number of bytes in the buffer
+ *   channel    - Handle to syslog channel to be used.
+ *   buffer     - The buffer containing the data to be output.
+ *   buflen     - The number of bytes in the buffer.
  *
  * Returned Value:
  *   On success, the character is echoed back to the caller. A negated errno
@@ -303,7 +302,8 @@ int syslog_force(int ch);
  *
  ****************************************************************************/
 
-ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen);
+ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
+                         FAR const char *buffer, size_t buflen);
 
 /****************************************************************************
  * Name: syslog_dev_putc
@@ -313,7 +313,8 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen);
  *   character driver interface.
  *
  * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
+ *   channel    - Handle to syslog channel to be used.
+ *   ch         - The character to add to the SYSLOG (must be positive).
  *
  * Returned Value:
  *   On success, the character is echoed back to the caller.  A negated
@@ -321,7 +322,7 @@ ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen);
  *
  ****************************************************************************/
 
-int syslog_dev_putc(int ch);
+int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch);
 
 /****************************************************************************
  * Name: syslog_dev_flush
@@ -330,14 +331,14 @@ int syslog_dev_putc(int ch);
  *   Flush any buffer data in the file system to media.
  *
  * Input Parameters:
- *   None
+ *   channel    - Handle to syslog channel to be used.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int syslog_dev_flush(void);
+int syslog_dev_flush(FAR struct syslog_channel_s *channel);
 
 #undef EXTERN
 #ifdef __cplusplus

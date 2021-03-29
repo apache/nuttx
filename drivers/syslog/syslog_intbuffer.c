@@ -307,10 +307,10 @@ int syslog_flush_intbuffer(bool force)
 
           /* Select which putc function to use for this flush */
 
-          putfunc = force ? g_syslog_channel[i]->sc_putc :
-                    g_syslog_channel[i]->sc_force;
+          putfunc = force ? g_syslog_channel[i]->sc_ops->sc_putc :
+                    g_syslog_channel[i]->sc_ops->sc_force;
 
-          putfunc(ch);
+          putfunc(g_syslog_channel[i], ch);
         }
     }
   while (ch != EOF);

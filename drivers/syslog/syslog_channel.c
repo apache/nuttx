@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/compiler.h>
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
@@ -44,9 +45,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_LOWPUTC)
-#  define HAVE_LOWPUTC
-#elif !defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_RPMSG)
+#if !defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_RPMSG)
 #  define NEED_LOWPUTC
 #endif
 
@@ -55,7 +54,8 @@
  ****************************************************************************/
 
 #ifdef NEED_LOWPUTC
-static int syslog_default_putc(int ch);
+static int syslog_default_putc(FAR struct syslog_channel_s *channel,
+                               int ch);
 #endif
 
 /****************************************************************************
@@ -63,36 +63,35 @@ static int syslog_default_putc(int ch);
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
-static const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   ramlog_putc,
-  ramlog_putc,
+  ramlog_putc
 };
 #elif defined(CONFIG_SYSLOG_RPMSG)
-static const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_rpmsg_putc,
   syslog_rpmsg_putc,
   syslog_rpmsg_flush,
   syslog_rpmsg_write
 };
-#elif defined(HAVE_LOWPUTC)
-static const struct syslog_channel_s g_default_channel =
-{
-  up_putc,
-  up_putc,
-};
 #else
-static const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_default_putc,
-  syslog_default_putc,
+  syslog_default_putc
 };
 #endif
 
+static struct syslog_channel_s g_default_channel =
+{
+  &g_default_channel_ops
+};
+
 /* This is the current syslog channel in use */
 
-FAR const struct syslog_channel_s
+FAR struct syslog_channel_s
 *g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 {
   &g_default_channel
@@ -106,13 +105,20 @@ FAR const struct syslog_channel_s
  * Name: syslog_default_putc and syslog_default_flush
  *
  * Description:
- *   Dummy, no-nothing channel interface methods
+ *   If the arch supports a low-level putc function, output will be
+ *   redirected there. Else acts as a dummy, no-nothing channel.
  *
  ****************************************************************************/
 
 #ifdef NEED_LOWPUTC
-static int syslog_default_putc(int ch)
+static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 {
+  UNUSED(channel);
+
+#if defined(CONFIG_ARCH_LOWPUTC)
+  return up_putc(ch);
+#endif
+
   return ch;
 }
 #endif
@@ -137,7 +143,7 @@ static int syslog_default_putc(int ch)
  *
  ****************************************************************************/
 
-int syslog_channel(FAR const struct syslog_channel_s *channel)
+int syslog_channel(FAR struct syslog_channel_s *channel)
 {
 #if (CONFIG_SYSLOG_MAX_CHANNELS != 1)
   int i;
@@ -147,7 +153,8 @@ int syslog_channel(FAR const struct syslog_channel_s *channel)
 
   if (channel != NULL)
     {
-      DEBUGASSERT(channel->sc_putc != NULL && channel->sc_force != NULL);
+      DEBUGASSERT(channel->sc_ops->sc_putc != NULL &&
+                  channel->sc_ops->sc_force != NULL);
 
 #if (CONFIG_SYSLOG_MAX_CHANNELS == 1)
       g_syslog_channel[0] = channel;
@@ -187,7 +194,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-int syslog_channel_remove(FAR const struct syslog_channel_s *channel)
+int syslog_channel_remove(FAR struct syslog_channel_s *channel)
 {
   int i;
 

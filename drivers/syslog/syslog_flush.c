@@ -83,9 +83,9 @@ int syslog_flush(void)
 
       /* Then flush all of the buffered output to the SYSLOG device */
 
-      if (g_syslog_channel[i]->sc_flush != NULL)
+      if (g_syslog_channel[i]->sc_ops->sc_flush != NULL)
         {
-          g_syslog_channel[i]->sc_flush();
+          g_syslog_channel[i]->sc_ops->sc_flush(g_syslog_channel[i]);
         }
     }
 
