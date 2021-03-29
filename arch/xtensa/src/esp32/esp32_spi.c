@@ -908,7 +908,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
                SPI_OUTLINK_ADDR_V;
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET,
                         regval | SPI_OUTLINK_START_M);
-      esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, bytes * 8 - 1);
+      esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, n * 8 - 1);
       esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
 
       tp += n;
@@ -922,7 +922,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
                    SPI_INLINK_ADDR_V;
           esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET,
                             regval | SPI_INLINK_START_M);
-          esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, bytes * 8 - 1);
+          esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, n * 8 - 1);
           esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MISO_M);
 
           rp += n;
