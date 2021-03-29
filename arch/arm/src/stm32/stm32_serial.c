@@ -65,7 +65,7 @@
 
 #ifdef SERIAL_HAVE_RXDMA
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
 
@@ -87,16 +87,16 @@
  * lack of testing - RS-485 support was developed on STM32F1x
  */
 
-#  if (defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_RS485)) || \
-      (defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_RS485)) || \
-      (defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_RS485)) || \
-      (defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_RS485)) || \
-      (defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_RS485)) || \
-      (defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_RS485)) || \
-      (defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_RS485)) || \
-      (defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_RS485))
-#    error "RXDMA and RS-485 cannot be enabled at the same time for the same U[S]ART"
-#  endif
+#    if (defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_RS485)) || \
+        (defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_RS485)) || \
+        (defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_RS485)) || \
+        (defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_RS485)) || \
+        (defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_RS485)) || \
+        (defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_RS485)) || \
+        (defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_RS485)) || \
+        (defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_RS485))
+#      error "RXDMA and RS-485 cannot be enabled at the same time for the same U[S]ART"
+#    endif
 
 /* For the F4, there are alternate DMA channels for USART1 and 6.
  * Logic in the board.h file make the DMA channel selection by defining
@@ -135,9 +135,7 @@
 #      error "UART8 DMA channel not defined (DMAMAP_UART8_RX)"
 #    endif
 
-#  elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 
 #    if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
       defined(CONFIG_USART3_RXDMA)
@@ -179,23 +177,19 @@
 /* DMA priority */
 
 #  ifndef CONFIG_USART_RXDMAPRIO
-#    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#    if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #      define CONFIG_USART_RXDMAPRIO  DMA_CCR_PRIMED
-#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#    elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #      define CONFIG_USART_RXDMAPRIO  DMA_SCR_PRIMED
 #    else
 #      error "Unknown STM32 DMA"
 #    endif
 #  endif
-#    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #    if (CONFIG_USART_RXDMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #    endif
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    if (CONFIG_USART_RXDMAPRIO & ~DMA_SCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_RXDMAPRIO"
 #    endif
@@ -205,7 +199,7 @@
 
 /* DMA control word */
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SERIAL_RXDMA_CONTROL_WORD     \
                 (DMA_SCR_DIR_P2M        | \
                  DMA_SCR_CIRC           | \
@@ -228,7 +222,7 @@
 
 #ifdef SERIAL_HAVE_TXDMA
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 
 /* Verify that DMA has been enabled and the DMA channel has been defined.
  */
@@ -294,9 +288,7 @@
 #      error "UART8 DMA channel not defined (DMAMAP_UART8_TX)"
 #    endif
 
-#  elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 
 #    if defined(CONFIG_USART1_TXDMA) || defined(CONFIG_USART2_TXDMA) || \
       defined(CONFIG_USART3_TXDMA)
@@ -322,23 +314,19 @@
 /* DMA priority */
 
 #  ifndef CONFIG_USART_TXDMAPRIO
-#    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#    if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #      define CONFIG_USART_TXDMAPRIO  DMA_CCR_PRIMED
-#    elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#    elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #      define CONFIG_USART_TXDMAPRIO  DMA_SCR_PRIMED
 #    else
 #      error "Unknown STM32 DMA"
 #    endif
 #  endif
-#    if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-        defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #    if (CONFIG_USART_TXDMAPRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_TXDMAPRIO"
 #    endif
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    if (CONFIG_USART_TXDMAPRIO & ~DMA_SCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_USART_TXDMAPRIO"
 #    endif
@@ -348,7 +336,7 @@
 
 /* DMA control word */
 
-#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define SERIAL_TXDMA_CONTROL_WORD                         \
                 (DMA_SCR_DIR_M2P        |                     \
                  DMA_SCR_MINC           |                     \
@@ -357,23 +345,23 @@
                  CONFIG_USART_TXDMAPRIO |                     \
                  DMA_SCR_PBURST_SINGLE  |                     \
                  DMA_SCR_MBURST_SINGLE)
-#  else
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #    define SERIAL_TXDMA_CONTROL_WORD                         \
                 (DMA_CCR_DIR           |                      \
                  DMA_CCR_MINC          |                      \
                  DMA_CCR_PSIZE_8BITS   |                      \
                  DMA_CCR_MSIZE_8BITS   |                      \
                  CONFIG_USART_TXDMAPRIO)
-# endif
+#  else
+#    error "Unknown STM32 DMA"
+#  endif
 
 /* DMA ISR status */
 
-#  if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
-      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 #    define DMA_ISR_HTIF_BIT DMA_CHAN_HTIF_BIT
 #    define DMA_ISR_TCIF_BIT DMA_CHAN_TCIF_BIT
-#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#  elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #    define DMA_ISR_HTIF_BIT DMA_STREAM_HTIF_BIT
 #    define DMA_ISR_TCIF_BIT DMA_STREAM_TCIF_BIT
 #  else
