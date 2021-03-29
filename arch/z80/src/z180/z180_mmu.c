@@ -41,6 +41,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARCH_ADDRENV
@@ -66,7 +67,8 @@ static struct z180_cbr_s g_cbrs[CONFIG_MAX_TASKS];
  * Name: z180_mmu_alloccbr
  *
  * Description:
- *   Find an unused structure in g_cbrs (i.e., one with reference count == 0).
+ *   Find an unused structure in g_cbrs
+ *   (i.e., one with reference count == 0).
  *   If a structure is found, its reference count is set to one and a pointer
  *   to the structure is returned.
  *
@@ -150,9 +152,9 @@ int z80_mmu_initialize(void)
    * say that 1 page is 1 byte.
    */
 
-g_physhandle = gran_initialize((FAR void *)Z180_PHYSHEAP_STARTPAGE,
+  g_physhandle = gran_initialize((FAR void *)Z180_PHYSHEAP_STARTPAGE,
                                Z180_PHYSHEAP_NPAGES, 0, 0);
-return g_physhandle ? OK : -ENOMEM;
+  return g_physhandle ? OK : -ENOMEM;
 }
 
 /****************************************************************************
@@ -187,6 +189,7 @@ return g_physhandle ? OK : -ENOMEM;
  *                         environment when a task/thread exits.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Name: up_addrenv_create
  *

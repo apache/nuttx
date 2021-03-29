@@ -182,33 +182,33 @@ static const struct z180_dev_s g_escca_priv =
 
 static uart_dev_t g_escca_port =
 {
-  0,                           /* open_count */
-  false,                       /* xmitwaiting */
-  false,                       /* recvwaiting */
+  0,                             /* open_count */
+  false,                         /* xmitwaiting */
+  false,                         /* recvwaiting */
 #ifdef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
-  true,                        /* isconsole */
+  true,                          /* isconsole */
 #else
-  false,                       /* isconsole */
+  false,                         /* isconsole */
 #endif
-  { 0 },                       /* closesem */
-  { 0 },                       /* xmitsem */
-  { 0 },                       /* recvsem */
+  { 0 },                         /* closesem */
+  { 0 },                         /* xmitsem */
+  { 0 },                         /* recvsem */
   {
-    { 0 },                     /* xmit.sem */
-    0,                         /* xmit.head */
-    0,                         /* xmit.tail */
+    { 0 },                       /* xmit.sem */
+    0,                           /* xmit.head */
+    0,                           /* xmit.tail */
     CONFIG_Z180_ESCCA_TXBUFSIZE, /* xmit.size */
-    g_escca_txbuffer,          /* xmit.buffer */
+    g_escca_txbuffer,            /* xmit.buffer */
   },
   {
-    { 0 },                     /* recv.sem */
-    0,                         /* recv.head */
-    0,                         /* recv.tail */
+    { 0 },                       /* recv.sem */
+    0,                           /* recv.head */
+    0,                           /* recv.tail */
     CONFIG_Z180_ESCCA_RXBUFSIZE, /* recv.size */
-    g_escca_rxbuffer,          /* recv.buffer */
+    g_escca_rxbuffer,            /* recv.buffer */
   },
-  &g_uart_ops,                 /* ops */
-  &g_escca_priv,               /* priv */
+  &g_uart_ops,                   /* ops */
+  &g_escca_priv,                 /* priv */
 };
 #endif
 
@@ -240,26 +240,26 @@ static uart_dev_t g_escca_port =
   { 0 },                       /* xmitsem */
   { 0 },                       /* recvsem */
   {
-    { 0 },                     /* xmit.sem */
-    0,                         /* xmit.head */
-    0,                         /* xmit.tail */
+    { 0 },                       /* xmit.sem */
+    0,                           /* xmit.head */
+    0,                           /* xmit.tail */
     CONFIG_Z180_ESCCA_TXBUFSIZE, /* xmit.size */
-    g_escca_txbuffer,          /* xmit.buffer */
+    g_escca_txbuffer,            /* xmit.buffer */
   },
   {
-    { 0 },                     /* recv.sem */
-    0,                         /* recv.head */
-    0,                         /* recv.tail */
+    { 0 },                       /* recv.sem */
+    0,                           /* recv.head */
+    0,                           /* recv.tail */
     CONFIG_Z180_ESCCA_RXBUFSIZE, /* recv.size */
-    g_escca_rxbuffer,          /* recv.buffer */
+    g_escca_rxbuffer,            /* recv.buffer */
   },
   &g_uart_ops,                 /* ops */
   &g_escca_priv,               /* priv */
 };
 #endif
 
-/* Now, which one with be tty0/console and which tty1? NOTE: SCC and ESCCA/B and
- * mutually exclusive.
+/* Now, which one with be tty0/console and which tty1? NOTE: SCC and ESCCA/B
+ * and mutually exclusive.
  */
 
 #undef CONSOLE_DEV
@@ -389,14 +389,15 @@ static void z180_shutdown(struct uart_dev_s *dev)
  * Name: z180_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -410,8 +411,8 @@ static int z180_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 

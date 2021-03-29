@@ -78,10 +78,12 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
       /* Calculate the source address based on the saved RP value */
 
       uint16_t       rp  = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
-      FAR chipreg_t *src = (FAR uint16_t*)(rp & 0xf0);
+      FAR chipreg_t *src = (FAR uint16_t *)(rp & 0xf0);
       FAR chipreg_t *dest = &regs[XCPT_RR0];
 
-      /* Copy the interrupted tasks register into the TCB register save area. */
+      /* Copy the interrupted tasks register into the TCB register save
+       * area.
+       */
 
       int i;
       for (i = 0; i < XCPTCONTEXT_REGS; i++)
@@ -89,7 +91,9 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
           *dest++ = *src++;
         }
 
-      /* Since the task was interrupted, we know that interrupts were enabled */
+      /* Since the task was interrupted, we know that interrupts were
+       * enabled
+       */
 
       regs[XCPT_IRQCTL] = 0x0080; /* IRQE bit will enable interrupts */
 
@@ -107,8 +111,8 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
       regs[XCPT_RPFLAGS] = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS];
       regs[XCPT_PC]      = g_z8irqstate.regs[Z8_IRQSAVE_PC];
 
-      /* Now update the IRQ save area so that we will know that we have already
-       * done this.
+      /* Now update the IRQ save area so that we will know that we have
+       * already done this.
        */
 
       g_z8irqstate.state = Z8_IRQSTATE_SAVED;

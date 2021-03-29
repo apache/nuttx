@@ -36,7 +36,9 @@
  * Public Data
  ****************************************************************************/
 
-/* This structure holds information about the current interrupt processing state */
+/* This structure holds information about the current interrupt processing
+ * state
+ */
 
 struct z8_irqstate_s g_z8irqstate;
 

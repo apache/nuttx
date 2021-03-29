@@ -39,7 +39,8 @@
 /* Z8_IRQSTATE_* definitions ********************************************************
  * These are used in the state field of 'struct z8_irqstate_s' structure to define
  * the current state of the interrupt handling.  These definition support "lazy"
- * interrupt context saving. See comments below associated with s'truct z8_irqstate_s'.
+ * interrupt context saving. See comments below associated with s'truct
+ * z8_irqstate_s'.
  */
 
 #define Z8_IRQSTATE_NONE  0 /* Not handling an interrupt */
@@ -228,7 +229,8 @@ void z8_restorecontext(FAR chipreg_t *regs);
 
 /* Defined in z8_sigsetup.c */
 
-void z8_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver, FAR chipreg_t *regs);
+void z8_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
+                 FAR chipreg_t *regs);
 
 /* Defined in z8_registerdump.c */
 

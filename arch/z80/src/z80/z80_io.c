@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+
 /* #include <nuttx/irq.h> */
 
 #include "z80_internal.h"
@@ -60,7 +61,6 @@ void outp(char p, char c)
 	out	(c), a
   __endasm;
 }
-
 
 /****************************************************************************
  * Name: inpb
