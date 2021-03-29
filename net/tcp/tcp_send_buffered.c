@@ -1271,6 +1271,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         }
 
       DEBUGASSERT(chunk_result <= len);
+      DEBUGASSERT(chunk_result <= chunk_len);
       DEBUGASSERT(result >= 0);
       cp += chunk_result;
       len -= chunk_result;
