@@ -130,3 +130,4 @@ source drivers/syslog/Kconfig
 source drivers/platform/Kconfig
 source drivers/rf/Kconfig
 source drivers/rc/Kconfig
+source drivers/motor/Kconfig

@@ -1,0 +1,14 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig MOTOR
+	bool "Motor control drivers"
+	default n
+
+if MOTOR
+
+source "drivers/motor/foc/Kconfig"
+
+endif # MOTOR
