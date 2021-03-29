@@ -1287,11 +1287,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
   /* Return the number of bytes actually sent */
 
   return result;
