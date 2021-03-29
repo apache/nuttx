@@ -43,6 +43,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/syslog/ramlog.h>
+#include <nuttx/compiler.h>
 
 #include <nuttx/irq.h>
 
@@ -719,11 +720,13 @@ void ramlog_syslog_register(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_putc(int ch)
+int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
   int readers_waken = 0;
   int ret;
+
+  UNUSED(channel);
 
 #ifdef CONFIG_RAMLOG_CRLF
   /* Ignore carriage returns.  But return success. */

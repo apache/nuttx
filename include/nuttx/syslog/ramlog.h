@@ -137,7 +137,7 @@ void ramlog_syslog_register(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_putc(int ch);
+int ramlog_putc(FAR struct syslog_channel_s *channel, int ch);
 #endif
 
 #undef EXTERN

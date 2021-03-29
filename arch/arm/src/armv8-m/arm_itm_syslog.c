@@ -44,6 +44,7 @@
 #include <stdio.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/compiler.h>
 
 #include "nvic.h"
 #include "itm.h"
@@ -78,20 +79,27 @@
 
 /* SYSLOG channel methods */
 
-static int itm_putc(int ch);
-static int itm_flush(void);
+static int itm_putc(FAR struct syslog_channel_s *channel, int ch);
+static int itm_flush(FAR struct syslog_channel_s *channel);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the ITM SYSLOG channel */
+/* This structure describes the ITM SYSLOG channel operations */
 
-static const struct syslog_channel_s g_itm_channel =
+static const struct syslog_channel_ops_s g_itm_channel_ops =
 {
   .sc_putc  = itm_putc,
   .sc_force = itm_putc,
   .sc_flush = itm_flush,
+};
+
+/* This structure describes the ITM SYSLOG channel */
+
+static const struct syslog_channel_s g_itm_channel =
+{
+  .sc_ops   = &g_itm_channel_ops
 };
 
 /****************************************************************************
@@ -106,8 +114,10 @@ static const struct syslog_channel_s g_itm_channel =
  *
  ****************************************************************************/
 
-static int itm_putc(int ch)
+static int itm_putc(FAR struct syslog_channel_s *channel, int ch)
 {
+  UNUSED(channel);
+
   /* ITM enabled */
 
   if ((getreg32(ITM_TCR) & ITM_TCR_ITMENA_MASK) == 0)
@@ -134,8 +144,9 @@ static int itm_putc(int ch)
  *
  ****************************************************************************/
 
-static int itm_flush(void)
+static int itm_flush(FAR struct syslog_channel_s *channel)
 {
+  UNUSED(channel);
   return OK;
 }
 

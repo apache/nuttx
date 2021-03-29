@@ -27,8 +27,10 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/compiler.h>
 
 #include "syslog.h"
 
@@ -47,15 +49,15 @@
 
 /* SYSLOG channel methods */
 
-static int syslog_file_force(int ch);
+static int syslog_file_force(FAR struct syslog_channel_s *channel, int ch);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the SYSLOG channel */
+/* This structure describes the channel's operations. */
 
-static const struct syslog_channel_s g_syslog_file_channel =
+static const struct syslog_channel_ops_s g_syslog_ops =
 {
   syslog_dev_putc,
   syslog_file_force,
@@ -64,6 +66,10 @@ static const struct syslog_channel_s g_syslog_file_channel =
   syslog_dev_write,
 #endif
 };
+
+/* Handle to the SYSLOG channel */
+
+FAR static struct syslog_channel_s *g_syslog_file_channel;
 
 /****************************************************************************
  * Private Functions
@@ -77,8 +83,9 @@ static const struct syslog_channel_s g_syslog_file_channel =
  *
  ****************************************************************************/
 
-static int syslog_file_force(int ch)
+static int syslog_file_force(FAR struct syslog_channel_s *channel, int ch)
 {
+  UNUSED(channel);
   return ch;
 }
 
@@ -138,21 +145,30 @@ int syslog_file_channel(FAR const char *devpath)
 
   /* Uninitialize any driver interface that may have been in place */
 
-  syslog_dev_uninitialize();
+  if (g_syslog_file_channel != NULL)
+    {
+      syslog_dev_uninitialize(g_syslog_file_channel);
+    }
 
   /* Then initialize the file interface */
 
-  ret = syslog_dev_initialize(devpath, OPEN_FLAGS, OPEN_MODE);
-  if (ret < 0)
+  g_syslog_file_channel = syslog_dev_initialize(devpath, OPEN_FLAGS,
+                                                OPEN_MODE);
+  if (g_syslog_file_channel == NULL)
     {
+      ret = -ENOMEM;
       goto errout_with_lock;
     }
+
+  /* Register the channel operations */
+
+  g_syslog_file_channel->sc_ops = &g_syslog_ops;
 
   /* Use the file as the SYSLOG channel. If this fails we are pretty much
    * screwed.
    */
 
-  ret = syslog_channel(&g_syslog_file_channel);
+  ret = syslog_channel(g_syslog_file_channel);
 
 errout_with_lock:
   sched_unlock();
