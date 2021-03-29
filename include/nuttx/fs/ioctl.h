@@ -86,6 +86,7 @@
 #define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
 #define _HIMEMBASE      (0x2f00) /* Himem device ioctl commands*/
 #define _EFUSEBASE      (0x3000) /* Efuse device ioctl commands*/
+#define _MTRIOBASE      (0x3100) /* Motor device ioctl commands*/
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -540,6 +541,11 @@
 
 #define _EFUSEIOCVALID(c)   (_IOC_TYPE(c) == _EFUSEBASE)
 #define _EFUSEIOC(nr)       _IOC(_EFUSEBASE, nr)
+
+/* Motor drivers ************************************************************/
+
+#define _MTRIOCVALID(c)     (_IOC_TYPE(c) == _MTRIOBASE)
+#define _MTRIOC(nr)         _IOC(_MTRIOBASE, nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 
