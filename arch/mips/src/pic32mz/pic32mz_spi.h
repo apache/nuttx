@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,31 +16,31 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_SPI_H
 #define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -51,9 +51,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
 
@@ -73,33 +73,34 @@ struct spi_dev_s;  /* Forward reference */
 
 FAR struct spi_dev_s *pic32mz_spibus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  pic32mz_spiNselect, pic32mz_spiNstatus, and pic32mz_spiNcmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including pic32mz_spibus_initialize()) are provided by common PIC32MZ logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.  They
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods including pic32mz_spibus_initialize()) are provided by
+ *   common PIC32MZ logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mz_boardinitialize() to configure SPI/SSP chip select
- *      pins.
+ *   1. Provide logic in pic32mz_boardinitialize() to configure SPI/SSP chip
+ *      select pins.
  *   2. Provide pic32mz_spiNselect() and pic32mz_spiNstatus() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      pic32mz_spiNcmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to pic32mz_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by pic32mz_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   3. Add a call to pic32mz_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by pic32mz_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI1
 void pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
@@ -177,32 +178,38 @@ int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_PIC32MZ_SPI1
-int pic32mz_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi1register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI2
-int pic32mz_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi2register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI3
-int pic32mz_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi3register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI4
-int pic32mz_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi4register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI5
-int pic32mz_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi5register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI6
-int pic32mz_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi6register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 #endif /* CONFIG_SPI_CALLBACK */

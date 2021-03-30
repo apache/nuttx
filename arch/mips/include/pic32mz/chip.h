@@ -31,9 +31,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Available in 64/100/124/144 pin packages.  Description here is specifically
- * for the 144 pin package (PIC32MZ2048ECH144) and should be reviewed for
- * other parts.
+/* Available in 64/100/124/144 pin packages.  Description here is
+ * specifically for the 144 pin package (PIC32MZ2048ECH144) and should be
+ * reviewed for other parts.
  */
 
 #if defined(CONFIG_ARCH_CHIP_PIC32MZ2048ECH)
@@ -66,9 +66,9 @@
 #  define CHIP_NJTAG        1    /* Has JTAG */
 #  define CHIP_NTRACE       1    /* Has trace capability */
 
-/* Available in 64/100/124/144 pin packages.  Description here is specifically
- * for the 144 pin package (PIC32MZ2048ECM144) and should be reviewed for
- * other parts.
+/* Available in 64/100/124/144 pin packages.  Description here is
+ * specifically for the 144 pin package (PIC32MZ2048ECM144) and should
+ * be reviewed for other parts.
  */
 
 #elif defined(CONFIG_ARCH_CHIP_PIC32MZ2048ECM)
@@ -101,11 +101,11 @@
 #  define CHIP_NJTAG        1    /* Has JTAG */
 #  define CHIP_NTRACE       1    /* Has trace capability */
 
-/* Available in 64/100/124/144 pin packages.  Description here is specifically
- * for the 124 and 144 pin packages (PIC32MZ2048EFH1100, and
+/* Available in 64/100/124/144 pin packages.  Description here is
+ * specifically for the 124 and 144 pin packages (PIC32MZ2048EFH1100, and
  * PIC32MZ2048EFH144).  The PIC32MZ2048EFH1100 differs in that it has only
- * 40 ADC channels.  The PIC32MZ2048EFH1064 differs in that it has only 24 ADC
- * channels, two fewer SPI/I2S, one fewer I2C, and no EBI.  There are
+ * 40 ADC channels.  The PIC32MZ2048EFH1064 differs in that it has only 24
+ * ADC channels, two fewer SPI/I2S, one fewer I2C, and no EBI.  There are
  * additional differences between all family members in the number of pins
  * how they may be mapped.
  */
@@ -140,8 +140,8 @@
 #  define CHIP_NJTAG        1    /* Has JTAG */
 #  define CHIP_NTRACE       1    /* Has trace capability */
 
-/* Available in 64/100/124/144 pin packages.  Description here is specifically
- * for the 124, and 144 pin packages (PIC32MZ2048EFM124, and
+/* Available in 64/100/124/144 pin packages.  Description here is
+ * specifically for the 124, and 144 pin packages (PIC32MZ2048EFM124, and
  * PIC32MZ2048EFH144).  The PIC32MZ2048EFM100 differs in that it has only 40
  * ADC channels.  The PIC32MZ2048EFM064 differs in that it has only 24 ADC
  * channels, two fewer SPI/I2S, one fewer I2C, and no EBI.  There are
@@ -183,7 +183,8 @@
 #  error "Unrecognized PIC32MZ device"
 #endif
 
-/* IPL priority levels *****************************************************/
+/* IPL priority levels ******************************************************/
+
 /* These priorities will be used by the core to properly disable/mask
  * interrupts.
  */

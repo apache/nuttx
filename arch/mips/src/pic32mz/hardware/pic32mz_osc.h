@@ -47,6 +47,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Register Offsets *********************************************************/
 
 #define PIC32MZ_OSCCON_OFFSET     0x0000 /* Oscillator control register offset */
@@ -111,6 +112,7 @@
 #  define OSCCON_NOSC_SOSC        (4 << OSCCON_NOSC_SHIFT) /* Secondary oscillator */
 #  define OSCCON_NOSC_LPRC        (5 << OSCCON_NOSC_SHIFT) /* Internal low power RC oscillator */
 #  define OSCCON_NOSC_FRCDIV      (7 << OSCCON_NOSC_SHIFT) /* Internal fast RC / FRCDIV */
+
 #define OSCCON_COSC_SHIFT         (12)      /* Bits 12-14: Current oscillator selection */
 #define OSCCON_COSC_MASK          (7 << OSCCON_COSC_SHIFT)
 #  define OSCCON_COSC_FRC         (0 << OSCCON_COSC_SHIFT) /* Internal fast RC oscillator / FRCDIV */
@@ -120,6 +122,7 @@
 #  define OSCCON_COSC_LPRC        (5 << OSCCON_COSC_SHIFT) /* Internal low power RC oscillator */
 #  define OSCCON_COSC_BFRC        (5 << OSCCON_COSC_SHIFT) /* Back-up Fast RC Oscillator */
 #  define OSCCON_COSC_FRCDIV      (7 << OSCCON_COSC_SHIFT) /* Internal fast RC / FRCDIV */
+
 #define OSCCON_SOSCRDY            (1 << 22) /* Bit 22: Secondary oscillator ready */
 #define OSCCON_DRMEN              (1 << 23) /* Bit 23: Dream mode enable */
 #define OSCCON_FRCDIV_SHIFT       (24)      /* Bits 24-26: FRC oscillator divider */
@@ -152,13 +155,16 @@
 #  define SPLLCON_PLLRANGE_13_26MHZ (3 << SPLLCON_PLLRANGE_SHIFT) /* 13-26 MHz */
 #  define SPLLCON_PLLRANGE_21_42MHZ (4 << SPLLCON_PLLRANGE_SHIFT) /* 21-42 MHz */
 #  define SPLLCON_PLLRANGE_34_64MHZ (5 << SPLLCON_PLLRANGE_SHIFT) /* 34-64 MHz */
+
 #define SPLLCON_PLLICLK          (1 << 7)  /* Bit 7:  System PLL Input Clock Source bit */
 #define SPLLCON_PLLIDIV_SHIFT    (8)       /* Bits 8-10: System PLL Input Clock Divider bits */
 #define SPLLCON_PLLIDIV_MASK     (7 << SPLLCON_PLLIDIV_SHIFT)
 #  define SPLLCON_PLLIDIV(n)     ((uint32_t)((n)-1) << SPLLCON_PLLIDIV_SHIFT) /* Divide by n, n=1..8 */
+
 #define SPLLCON_PLLMULT_SHIFT    (16)      /* Bits 16-22 <6:0>: System PLL Multiplier bits */
 #define SPLLCON_PLLMULT_MASK     (0x7f << SPLLCON_PLLMULT_SHIFT)
 #  define SPLLCON_PLLMULT(n)     ((uint32_t)((n)-1) << SPLLCON_PLLMULT_SHIFT) /* Muliply by n, n=1..128 */
+
 #define SPLLCON_PLLODIV_SHIFT    (24)      /* Bits 24-26: System PLL Output Clock Divider bits */
 #define SPLLCON_PLLODIV_MASK     (7 << SPLLCON_PLLODIV_SHIFT)
 #  define SPLLCON_PLLODIV_2      (1 << SPLLCON_PLLODIV_SHIFT) /* PLL Divide by 2 */
@@ -180,6 +186,7 @@
 #  define REFOCON_ROSEL_SPLL     (7 << REFOCON_ROSEL_SHIFT) /* System PLL output */
 #  define REFOCON_ROSEL_REFCLKI  (8 << REFOCON_ROSEL_SHIFT) /* REFCLKIx */
 #  define REFOCON_ROSEL_BFRC     (9 << REFOCON_ROSEL_SHIFT) /* BFRC */
+
 #define REFOCON_ACTIVE           (1 << 8)  /* Bit 8:  Reference Clock Request Status bit */
 #define REFOCON_DIVSWEN          (1 << 9)  /* Bit 9:  Divider Switch Enable bit */
 #define REFOCON_RSLP             (1 << 11) /* Bit 11: Reference Oscillator Module Run in Sleep bit */
@@ -200,6 +207,7 @@
 #define PBDIV_SHIFT              (0)       /* Bits 0-6: Peripheral Bus Clock Divisor Control bits */
 #define PBDIV_MASK               (0x7f << PBDIV_SHIFT)
 #  define PBDIV(n)               ((uint32_t)((n)-1) << PBDIV_SHIFT) /* PBCLK = SYSLCK/n, n=1..128 */
+
 #define PBDIV_PBDIVRDY           (1 << 11) /* Bit 11: Peripheral Bus Clock Divisor Ready bit */
 #define PBDIV_ON                 (1 << 15) /* Bit 15: Peripheral Bus Output Clock Enable bit */
 

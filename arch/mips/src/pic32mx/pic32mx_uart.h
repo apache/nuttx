@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_uart.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_UART_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "pic32mx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_UART_MODE_OFFSET    0x0000 /* UARTx mode register */
 #define PIC32MX_UART_MODECLR_OFFSET 0x0004 /* UARTx mode clear register */
@@ -50,7 +51,7 @@
 #define PIC32MX_UART_BRGSET_OFFSET  0x0048 /* UARTx baud rate set register */
 #define PIC32MX_UART_BRGINV_OFFSET  0x004c /* UARTx baud rate invert register */
 
-/* Register Addresses ****************************************************************/
+/* Register Addresses *******************************************************/
 
 #if CHIP_NUARTS > 0
 #  define PIC32MX_UART1_MODE        (PIC32MX_UART1_K1BASE+PIC32MX_UART_MODE_OFFSET)
@@ -154,7 +155,7 @@
 #  define PIC32MX_UART6_BRGINV      (PIC32MX_UART6_K1BASE+PIC32MX_UART_BRGINV_OFFSET)
 #endif
 
-/* Register Bit-Field Definitions ****************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* UARTx mode register */
 
@@ -165,6 +166,7 @@
 #  define UART_MODE_PDSEL_8EVEN     (1 << UART_MODE_PDSEL_SHIFT) /* 8-bit data, even parity */
 #  define UART_MODE_PDSEL_8ODD      (2 << UART_MODE_PDSEL_SHIFT) /* 8-bit data, odd parity */
 #  define UART_MODE_PDSEL_9NONE     (3 << UART_MODE_PDSEL_SHIFT) /* 9-bit data, no parity */
+
 #define UART_MODE_BRGH              (1 << 3)  /* Bit 3:  High baud rate enable */
 #define UART_MODE_RXINV             (1 << 4)  /* Bit 4:  Receive polarity inversion */
 #define UART_MODE_ABAUD             (1 << 5)  /* Bit 5:  Auto-baud enable */
@@ -176,6 +178,7 @@
 #  define UART_MODE_UEN_ENR_CPORT   (1 << UART_MODE_UEN_SHIFT) /* UxRTS=enabled; UxCTS=PORTx register */
 #  define UART_MODE_UEN_ENCR        (2 << UART_MODE_UEN_SHIFT) /* UxCTS+UxRTS=enabled */
 #  define UART_MODE_UEN_CPORT       (3 << UART_MODE_UEN_SHIFT) /* UxCTS=PORTx register */
+
 #define UART_MODE_RTSMD             (1 << 11) /* Bit 11: Mode selection for ~UxRTS pin */
 #define UART_MODE_IREN              (1 << 12) /* Bit 12: IrDA encoder and decoder enable */
 #define UART_MODE_SIDL              (1 << 13) /* Bit 13: Stop in idle mode */
@@ -216,6 +219,7 @@
 #  define UART_STA_UTXISEL_TXBNF    (0 << UART_STA_UTXISEL_SHIFT) /* TX buffer not full */
 #  define UART_STA_UTXISEL_DRAINED  (1 << UART_STA_UTXISEL_SHIFT) /* All characters sent */
 #  define UART_STA_UTXISEL_TXBE     (2 << UART_STA_UTXISEL_SHIFT) /* TX buffer empty */
+
 #define UART_STA_ADDR_SHIFT         (16)      /* Bits:16-23: Automatic address mask */
 #define UART_STA_ADDR_MASK          (0xff << UART_STA_ADDR_SHIFT)
 #define UART_STA_ADM_EN             (1 << 24) /* Bit 24: Automatic address detect mode enable */
@@ -232,19 +236,19 @@
 
 #define UART_BRG_MASK               0xffff
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

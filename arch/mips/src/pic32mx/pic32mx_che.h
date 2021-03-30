@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_che.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CHE_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CHE_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_CHE_CON_OFFSET    0x0000 /* Pre-fetch cache control register */
 #define PIC32MX_CHE_CONCLR_OFFSET 0x0004 /* Pre-fetch cache control clear register */
@@ -59,7 +60,7 @@
 #define PIC32MX_CHE_MIS_OFFSET    0x00a0 /* Cache miss statistics register */
 #define PIC32MX_CHE_PFABT_OFFSET  0x00c0 /* Pre-fetch cache abort statistics register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_CHE_CON           (PIC32MX_CHE_K1BASE+PIC32MX_CHE_CON_OFFSET)
 #define PIC32MX_CHE_CONCLR        (PIC32MX_CHE_K1BASE+PIC32MX_CHE_CONCLR_OFFSET)
@@ -86,25 +87,28 @@
 #define PIC32MX_CHE_MIS           (PIC32MX_CHE_K1BASE+PIC32MX_CHE_MIS_OFFSET)
 #define PIC32MX_CHE_PFABT         (PIC32MX_CHE_K1BASE+PIC32MX_CHE_PFABT_OFFSET)
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Pre-fetch cache control register */
 
 #define CHE_CON_PFMWS_SHIFT       (0)       /* Bits 0-2: PFM access time (SYSCLK wait states) */
 #define CHE_CON_PFMWS_MASK        (7 << CHE_CON_PFMWS_SHIFT)
 #  define CHE_CON_PFMWS(n)        ((n) << CHE_CON_PFMWS_SHIFT) /* n wait states, n=0-7 */
+
 #define CHE_CON_PREFEN_SHIFT      (4)       /* Bits 4-5: Predictive pre-fetch cache enable */
 #define CHE_CON_PREFEN_MASK       (3 << CHE_CON_PREFEN_SHIFT)
 #  define CHE_CON_PREFEN_DISABLE  (0 << CHE_CON_PREFEN_SHIFT) /* Disable predictive pre-fetch cache */
 #  define CHE_CON_PREFEN_CACHE    (1 << CHE_CON_PREFEN_SHIFT) /* Enable for cacheable regions only */
 #  define CHE_CON_PREFEN_NONCACHE (2 << CHE_CON_PREFEN_SHIFT) /* Enable for non-cacheable regions only */
 #  define CHE_CON_PREFEN_ALL      (3 << CHE_CON_PREFEN_SHIFT) /* Enable for both regions */
+
 #define CHE_CON_DCSZ_SHIFT        (8)       /* Bits 8-9: Data cache size (lines) */
 #define CHE_CON_DCSZ_MASK         (3 << CHE_CON_DCSZ_SHIFT)
 #  define CHE_CON_DCSZ_DISABLE    (0 << CHE_CON_DCSZ_SHIFT) /* Disable data caching */
 #  define CHE_CON_DCSZ_1LINE      (1 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 1 line */
 #  define CHE_CON_DCSZ_2LINES     (2 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 2 lines */
 #  define CHE_CON_DCSZ_4LINES     (3 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 4 lines */
+
 #define CHE_CON_CHECOH            (1 << 16) /* Bit 16: Cache coherency setting */
 
 /* Pre-fetch cache access register */
@@ -139,19 +143,19 @@
 
 /* Pre-fetch cache abort statistics register -- 32 bit counter value */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

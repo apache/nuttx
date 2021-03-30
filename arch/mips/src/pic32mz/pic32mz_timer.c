@@ -173,7 +173,8 @@ static void pic32mz_timer_start(FAR struct pic32mz_timer_dev_s *dev);
 static void pic32mz_timer_stop(FAR struct pic32mz_timer_dev_s *dev);
 static void pic32mz_timer_setperiod(FAR struct pic32mz_timer_dev_s *dev,
                                     uint32_t period);
-static uint32_t pic32mz_timer_getcounter(FAR struct pic32mz_timer_dev_s *dev);
+static
+uint32_t pic32mz_timer_getcounter(FAR struct pic32mz_timer_dev_s *dev);
 static void pic32mz_timer_setcounter(FAR struct pic32mz_timer_dev_s *dev,
                                      uint32_t count);
 static uint32_t pic32mz_timer_getfreq(FAR struct pic32mz_timer_dev_s *dev);

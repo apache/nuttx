@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_ethernet.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ETHERNET_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ETHERNET_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 /* Controller and DMA Engine Configuration/Status Registers */
 
@@ -208,7 +209,7 @@
 #define PIC32MX_EMAC1_MINDSET_OFFSET   0x02d8
 #define PIC32MX_EMAC1_MINDINV_OFFSET   0x02dc
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Controller and DMA Engine Configuration/Status Registers */
 
@@ -381,9 +382,10 @@
 #define PIC32MX_EMAC1_MINDSET          (PIC32MX_ETHERNET_K1BASE+PIC32MX_EMAC1_MINDSET_OFFSET)
 #define PIC32MX_EMAC1_MINDINV          (PIC32MX_ETHERNET_K1BASE+PIC32MX_EMAC1_MINDINV_OFFSET)
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Controller and DMA Engine Configuration/Status Registers */
+
 /* Ethernet Controller Control 1 Register */
 
 #define ETH_CON1_BUFCDEC               (1 << 0)  /* Bit 0: : Descriptor Buffer Count Decrement bit */
@@ -401,16 +403,24 @@
 #define ETH_CON1_PTV_MASK              (0xffff << ETH_CON1_PTV_SHIFT)
 
 /* Ethernet Controller Control 2 Register */
+
                                                  /* Bits 0-3: Reserved */
 #define ETH_CON2_RXBUFSZ_SHIFT         (4)       /* Bits 4-10: RX Data Buffer Size for All RX Descriptors */
 #define ETH_CON2_RXBUFSZ_MASK          (0x7f << ETH_CON2_RXBUFSZ_SHIFT)
 #  define ETH_CON2_RXBUFSZ(n)          (((n) >> 4) << ETH_CON2_RXBUFSZ_SHIFT) /* n=16, 32, 48, ... 2032 */
+
                                                  /* Bits 11-31: Reserved */
 
-/* Ethernet Controller TX Packet Descriptor Start Address Register (32-bit address) */
-/* Ethernet Controller RX Packet Descriptor Start Address Register (32-bit address) */
+/* Ethernet Controller TX Packet Descriptor Start Address Register
+ * (32-bit address)
+ */
+
+/* Ethernet Controller RX Packet Descriptor Start Address Register
+ * (32-bit address)
+ */
 
 /* Ethernet Controller Interrupt Enable Register */
+
 /* Ethernet Controller Interrupt Request Register */
 
 #define ETH_INT_RXOVFLW                (1 << 0)  /* Bit 0:  Receive FIFO overflow interrupt */
@@ -441,6 +451,7 @@
                                                  /* Bits 24-31: Reserved */
 
 /* RX Filtering Configuration Registers */
+
 /* Ethernet Controller Receive Filter Configuration Register */
 
 #define ETH_RXFC_BCEN                  (1 << 0)  /* Bit 0:  Broadcast filter enable */
@@ -456,18 +467,30 @@
 #  define ETH_RXFC_PMMODE_DISABLED     (0 << ETH_RXFC_PMMODE_SHIFT) /* Pattern match is always unsuccessful */
 #  define ETH_RXFC_PMMODE_PMCKSUM      (1 << ETH_RXFC_PMMODE_SHIFT) /* PM checksum matches */
 #  define ETH_RXFC_PMMODE_DASTA        (2 << ETH_RXFC_PMMODE_SHIFT) /* PM checksum matches & DA==STA */
-/* #define ETH_RXFC_PMMODE_DASTA       (3 << ETH_RXFC_PMMODE_SHIFT)    PM checksum matches & DA==STA */
+
+/* #define ETH_RXFC_PMMODE_DASTA       (3 << ETH_RXFC_PMMODE_SHIFT)
+ *    PM checksum matches & DA==STA
+ */
 #  define ETH_RXFC_PMMODE_DAUCAST      (4 << ETH_RXFC_PMMODE_SHIFT) /* PM checksum matches & DA==Unicast address */
-/* #define ETH_RXFC_PMMODE_DAUCAST     (5 << ETH_RXFC_PMMODE_SHIFT)    PM checksum matches & DA==Unicast address */
+
+/* #define ETH_RXFC_PMMODE_DAUCAST     (5 << ETH_RXFC_PMMODE_SHIFT)
+ *    PM checksum matches & DA==Unicast address
+ */
+
 #  define ETH_RXFC_PMMODE_DABCAST      (6 << ETH_RXFC_PMMODE_SHIFT) /* PM checksum matches & DA==Broadcast address */
-/* #define ETH_RXFC_PMMODE_DABCAST     (7 << ETH_RXFC_PMMODE_SHIFT)    PM checksum matches & DA==Broadcast address */
+
+/* #define ETH_RXFC_PMMODE_DABCAST     (7 << ETH_RXFC_PMMODE_SHIFT)
+ *    PM checksum matches & DA==Broadcast address
+ */
 #  define ETH_RXFC_PMMODE_HASH         (8 << ETH_RXFC_PMMODE_SHIFT) /* PM checksum matches & Hash Table Filter match */
 #  define ETH_RXFC_PMMODE_MAGIC        (9 << ETH_RXFC_PMMODE_SHIFT) /* PM checksum matches & Packet = Magic Packet */
+
 #define ETH_RXFC_NOTPM                 (1 << 12) /* Bit 12: Pattern match inversion */
                                                  /* Bit 13: Reserved */
 #define ETH_RXFC_MPEN                  (1 << 14) /* Bit 14: Magic packet enable */
 #define ETH_RXFC_HTEN                  (1 << 15) /* Bit 15: Hash table filtering enable */
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller Hash Table 0 Register */
 
 #define ETH_HT0_BYTE0_SHIFT            (0)       /* Bits 0-7: Hash table byte 0, HT[0-7] */
@@ -524,6 +547,7 @@
 #define ETH_PMO_MASK                   (0xffff)
 
 /* Flow Control Configuring Register */
+
 /* Ethernet Controller Receive Watermarks Register */
 
 #define ETH_RXWM_RXEWM_SHIFT           (0)       /* Bits 0-7: Receive empty watermark bits */
@@ -532,6 +556,7 @@
 #define ETH_RXWM_RXFWM_MASK            (0xff << ETH_RXWM_RXFWM_SHIFT)
 
 /* Ethernet Statistics Registers */
+
 /* Ethernet Controller Receive Overflow Statistics Register */
 
 #define ETH_RXOVFLOW_MASK              (0xffff)
@@ -561,6 +586,7 @@
 #define ETH_ALGNERR_MASK               (0xffff)
 
 /* MAC Configuration Registers */
+
 /* Ethernet Controller MAC Configuration 1 Register */
 
 #define EMAC1_CFG1_RXEN                (1 << 0)  /* Bit 0:  MAC Receive enable */
@@ -577,6 +603,7 @@
 #define EMAC1_CFG1_SIMRST              (1 << 14) /* Bit 14: Simulation reset */
 #define EMAC1_CFG1_SOFTRST             (1 << 15) /* Bit 15: Soft reset */
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller MAC Configuration 2 Register */
 
 #define EMAC1_CFG2_FULLDPLX            (1 << 0)  /* Bit 0:  Full duplex operation */
@@ -594,11 +621,13 @@
 #define EMAC1_CFG2_BPNOBKOFF           (1 << 13) /* Bit 13: Back pressure/no backoff */
 #define EMAC1_CFG2_EXCESSDFR           (1 << 14) /* Bit 14: Excess defer */
                                                  /* Bits 15-31: Reserved */
+
 /* Ethernet Controller MAC Back-to-Back Interpacket Gap Register */
 
 #define EMAC1_IPGT_SHIFT               (0)       /* Bits 0-6 */
 #define EMAC1_IPGT_MASK                (0x7f << EMAC1_IPGT_SHIFT)
                                                  /* Bits 7-31: Reserved */
+
 /* Ethernet Controller MAC Non-Back-to-Back Interpacket Gap Register */
 
 #define EMAC1_IPGR_GAP2_SHIFT          (0)       /* Bits 0-6: Gap part 2 */
@@ -607,6 +636,7 @@
 #define EMAC1_IPGR_GAP1_SHIFT          (8)       /* Bits 8-18: Gap part 1 */
 #define EMAC1_IPGR_GAP1_MASK           (0x7f << EMAC1_IPGR_GAP2_SHIFT)
                                                  /* Bits 15-31: Reserved */
+
 /* Ethernet Controller MAC Collision Window/Retry Limit Register */
 
 #define EMAC1_CLRT_RETX_SHIFT          (0)       /* Bits 0-3: Retransmission maximum */
@@ -615,23 +645,28 @@
 #define EMAC1_CLRT_CWINDOW_SHIFT       (8)       /* Bits 8-13: Collision window */
 #define EMAC1_CLRT_CWINDOW_MASK        (0x3f << EMAC1_CLRT_CWINDOW_SHIFT)
                                                  /* Bits 14-31: Reserved */
+
 /* Ethernet Controller MAC Maximum Frame Length Register */
 
 #define EMAC1_MAXF_SHIFT               (0)       /* Bits 0-15 */
 #define EMAC1_MAXF_MASK                (0xffff << EMAC1_MAXF_SHIFT)
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller MAC PHY Support Register */
+
                                                  /* Bits 0-7: Reserved */
 #define EMAC1_SUPP_SPEEDRMII           (1 << 8)  /* Bit 8:  RMII Speed0=10Bps 1=100Bps */
                                                  /* Bits 9-10: Reserved */
 #define EMAC1_SUPP_RESETRMII           (1 << 11) /* Bit 11: Reset RMII Logic */
                                                  /* Bits 12-31: Reserved */
+
 /* Ethernet Controller MAC Test Register */
 
 #define EMAC1_TEST_SHRTQNTA            (1 << 0)  /* Bit 0:  Shortcut pause quanta */
 #define EMAC1_TEST_TESTPAUSE           (1 << 1)  /* Bit 1:  Test pause */
 #define EMAC1_TEST_TESTBP              (1 << 2)  /* Bit 2:  Test packpressure */
                                                  /* Bits 3-31: Reserved */
+
 /* Ethernet Controller MAC Station Address 0 Register */
 
 #define EMAC1_SA0_STNADDR6_SHIFT       (0)       /* Bits 0-7: Station address 5th octet */
@@ -639,6 +674,7 @@
 #define EMAC1_SA0_STNADDR5_SHIFT       (8)       /* Bits 8-15: Station address 6th octet */
 #define EMAC1_SA0_STNADDR5_MASK        (0xff << EMAC1_SA0_STNADDR5_SHIFT)
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller MAC Station Address 1 Register */
 
 #define EMAC1_SA1_STNADDR4_SHIFT       (0)       /* Bits 0-7: Station address 4th octet */
@@ -646,6 +682,7 @@
 #define EMAC1_SA1_STNADDR3_SHIFT       (8)       /* Bits 8-15: Station address 3rd octet */
 #define EMAC1_SA1_STNADDR3_MASK        (0xff << EMAC1_SA0_STNADDR3_SHIFT)
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller MAC Station Address 2 Register */
 
 #define EMAC1_SA2_STNADDR2_SHIFT       (0)       /* Bits 0-7: Station address 2nd octet */
@@ -653,6 +690,7 @@
 #define EMAC1_SA2_STNADDR1_SHIFT       (8)       /* Bits 8-15: Station address 1st octet */
 #define EMAC1_SA2_STNADDR1_MASK        (0xff << EMAC1_SA2_STNADDR1_SHIFT)
                                                  /* Bits 16-31: Reserved */
+
 /* MII Management Registers */
 
 /* Ethernet Controller MAC MII Management Configuration Register */
@@ -687,16 +725,19 @@
 #define EMAC1_MADR_PHYADDR_SHIFT       (8)       /* Bits 8-12: PHY address */
 #define EMAC1_MADR_PHYADDR_MASK        (31 << EMAC1_MADR_PHYADDR_SHIFT)
                                                  /* Bits 13-31: Reserved */
+
 /* Ethernet Controller MAC MII Management Write Data Register */
 
 #define EMAC1_MWTD_SHIFT               (0)       /* Bits 0-15 */
 #define EMAC1_MWTD_MASK                (0xffff << EMAC1_MWTD_SHIFT)
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller MAC MII Management Read Data Register */
 
 #define EMAC1_MRDD_SHIFT               (0)       /* Bits 0-15 */
 #define EMAC1_MRDD_MASK                (0xffff << EMAC1_MRDD_SHIFT)
                                                  /* Bits 16-31: Reserved */
+
 /* Ethernet Controller MAC MII Management Indicators Register */
 
 #define EMAC1_MIND_MIIMBUSY            (1 << 0)  /* Bit 0:  Busy */
@@ -705,7 +746,7 @@
 #define EMAC1_MIND_LINKFAIL            (1 << 3)  /* Bit 3:  MII link fail */
                                                  /* Bits 4-31: Reserved */
 
-/* Descriptors Offsets **********************************************************************/
+/* Descriptors Offsets ******************************************************/
 
 /* Tx descriptor offsets.  The NEXTED field is only present if NPV=1 */
 
@@ -751,8 +792,10 @@
 #define RXDESC_NEXTED                  4         /* Next Ethernet Descriptor (ED) */
 #define RXLINKED_SIZE                  5         /* Size in 32-bit words of one linked Rx descriptor */
 
-/* Descriptor Bit Definitions ***************************************************************/
+/* Descriptor Bit Definitions ***********************************************/
+
 /* Tx descriptor status bit definitions */
+
                                                  /* Bits 0-6: Reserved */
 #define TXDESC_STATUS_EOWN             (1 << 7)  /* Bit 7:  1=Ethernet controller owns  */
 #define TXDESC_STATUS_SOWN             (0)       /*         0=Software owns  */
@@ -796,6 +839,7 @@
 #define TXDESC_TSV2_TXUR               (1 << 31) /* Bit 31: TSV31 Transmit Under-run */
 
 /* Rx descriptor status bit definitions */
+
                                                  /* Bits 0-6: Reserved */
 #define RXDESC_STATUS_EOWN             (1 << 7)  /* Bit 7:  1=Ethernet controller owns  */
 #define RXDESC_STATUS_SOWN             (0)       /*         0=Software owns  */
@@ -841,9 +885,9 @@
 #define RXDESC_RSV2_VLAN               (1 << 30) /* Bit 30: RSV30 Receive VLAN Type Detected */
                                                  /* Bit 31: RSV31 Reserved */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -891,13 +935,13 @@ struct pic32mx_rxdesc_s
   uint32_t nexted;                               /* Next Ethernet Descriptor (ED) */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

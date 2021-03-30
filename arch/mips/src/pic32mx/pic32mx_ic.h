@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_ic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_IC_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_IC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,10 +32,11 @@
 
 #if CHIP_NIC > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_IC_CON_OFFSET      0x0000 /* Input Capture X Control Register */
 #define PIC32MX_IC_CONCLR_OFFSET   0x0004 /* Input Capture X Control Set Register */
@@ -43,7 +44,7 @@
 #define PIC32MX_IC_CONINV_OFFSET   0x000c /* Input Capture X Control Invert Register */
 #define PIC32MX_IC_BUF_OFFSET      0x0010 /* Input Capture X Buffer Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_IC_CON(n)          (PIC32MX_IC_K1BASE(n)+PIC32MX_IC_CON_OFFSET)
 #define PIC32MX_IC_CONCLR(n)       (PIC32MX_IC_K1BASE(n)+PIC32MX_IC_CONCLR_OFFSET)
@@ -89,7 +90,7 @@
 #  define PIC32MX_IC5_BUF          (PIC32MX_IC5_K1BASE+PIC32MX_IC_BUF_OFFSET)
 #endif
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Input Capture X Control Register */
 
@@ -103,6 +104,7 @@
 #  define IC_CON_ICM_16th          (5 << IC_CON_ICM_SHIFT) /* Every sixteenth rising edge */
 #  define IC_CON_ICM_TRIGGER       (6 << IC_CON_ICM_SHIFT) /* Specified edge first and every edge thereafter */
 #  define IC_CON_ICM_INTERRUPT     (7 << IC_CON_ICM_SHIFT) /* Interrupt-only mode */
+
 #define IC_CON_ICBNE               (1 << 3)  /* Bit 3:  Input Capture Buffer Not Empty Status */
 #define IC_CON_ICOV                (1 << 4)  /* Bit 4:  Input Capture */
 #define IC_CON_ICI_SHIFT           (5)       /* Bits 5-6: Interrupt Control */
@@ -111,6 +113,7 @@
 #  define IC_CON_ICI_2ND           (1 << IC_CON_ICI_SHIFT) /* Interrupt every 2nd capture event */
 #  define IC_CON_ICI_3RD           (2 << IC_CON_ICI_SHIFT) /* Interrupt every 3rd capture event */
 #  define IC_CON_ICI_4TH           (3 << IC_CON_ICI_SHIFT) /* Interrupt every 4th capture event */
+
 #define IC_CON_ICTMR               (1 << 7)  /* Bit 7:  Timer Select */
 #define IC_CON_C32                 (1 << 8)  /* Bit 8:  32-bit Capture Select */
 #define IC_CON_FEDGE               (1 << 9)  /* Bit 9:  First Capture Edge Select */
@@ -120,19 +123,19 @@
 
 /* Input Capture X Buffer Register -- 32-bit capture value */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
