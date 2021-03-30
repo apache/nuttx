@@ -215,6 +215,7 @@ static inline irqstate_t up_irq_save(void)
   mfspr(SPR_SYS_SR, flags);
 
   /* Disable IRQs */
+
   x = flags & ~(SPR_SR_IEE | SPR_SR_TEE);
   mtspr(SPR_SYS_SR, x);
 
