@@ -1678,7 +1678,6 @@ config STM32_STM32F412
 	select STM32_HAVE_SPI1
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
-	select STM32_HAVE_ADC1
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_I2SPLL
 
@@ -2324,6 +2323,10 @@ config STM32_HAVE_TIM20
 config STM32_HAVE_TSC
 	bool
 	default n
+
+config STM32_HAVE_ADC1
+	bool
+	default y
 
 config STM32_HAVE_ADC2
 	bool
@@ -8151,6 +8154,17 @@ config STM32_ADC5_RESOLUTION
 	---help---
 		ADC5 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
 
+config STM32_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interfece to update the sampling time is available
+		for all supported devices, the user can change the default
+		vaules in the board initialization logic and avoid ADC overrun.
+
 config STM32_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
 	default n
@@ -8185,6 +8199,12 @@ config STM32_ADC1_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC1_SCAN
+	bool "ADC1 scan mode"
+	depends on STM32_ADC1 && STM32_HAVE_IP_ADC_V1
+	default y if STM32_ADC1_DMA
+	default n
+
 config STM32_ADC1_DMA_CFG
 	int "ADC1 DMA configuration"
 	depends on STM32_ADC1_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
@@ -8192,6 +8212,16 @@ config STM32_ADC1_DMA_CFG
 	default 0
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+config STM32_ADC1_ANIOC_TRIGGER
+	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC1
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
 
 config STM32_ADC2_DMA
 	bool "ADC2 DMA"
@@ -8202,6 +8232,12 @@ config STM32_ADC2_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC2_SCAN
+	bool "ADC2 scan mode"
+	depends on STM32_ADC2 && STM32_HAVE_IP_ADC_V1
+	default y if STM32_ADC2_DMA
+	default n
+
 config STM32_ADC2_DMA_CFG
 	int "ADC2 DMA configuration"
 	depends on STM32_ADC2_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
@@ -8209,6 +8245,16 @@ config STM32_ADC2_DMA_CFG
 	default 0
 	---help---
 		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+config STM32_ADC2_ANIOC_TRIGGER
+	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC2
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
 
 config STM32_ADC3_DMA
 	bool "ADC3 DMA"
@@ -8219,6 +8265,12 @@ config STM32_ADC3_DMA
 		DMA transfer, which is necessary if multiple channels are read
 		or if very high trigger frequencies are used.
 
+config STM32_ADC3_SCAN
+	bool "ADC3 scan mode"
+	depends on STM32_ADC3 && STM32_HAVE_IP_ADC_V1
+	default y if STM32_ADC3_DMA
+	default n
+
 config STM32_ADC3_DMA_CFG
 	int "ADC3 DMA configuration"
 	depends on STM32_ADC3_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
@@ -8226,6 +8278,16 @@ config STM32_ADC3_DMA_CFG
 	default 0
 	---help---
 		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
+
+config STM32_ADC3_ANIOC_TRIGGER
+	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC3
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
 
 config STM32_ADC4_DMA
 	bool "ADC4 DMA"
@@ -8243,6 +8305,16 @@ config STM32_ADC4_DMA_CFG
 	default 0
 	---help---
 		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
+
+config STM32_ADC4_ANIOC_TRIGGER
+	int "ADC4 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC4
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
 
 config STM32_ADC5_DMA
 	bool "ADC5 DMA"
@@ -10416,12 +10488,12 @@ config STM32_DMA2D_REGDEBUG
 endmenu
 endif # STM32_DMA2D
 
-menu "QEncoder Driver"
+menu "STM32 QEncoder Driver"
 	depends on SENSORS_QENCODER
 	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
 
 config STM32_TIM1_QE
-	bool "TIM1"
+	bool "TIM1 QE"
 	default n
 	depends on STM32_TIM1
 	---help---
@@ -10430,7 +10502,7 @@ config STM32_TIM1_QE
 if STM32_TIM1_QE
 
 config STM32_TIM1_QEPSC
-	int "TIM1 pulse prescaler"
+	int "TIM1 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10439,7 +10511,7 @@ config STM32_TIM1_QEPSC
 endif
 
 config STM32_TIM2_QE
-	bool "TIM2"
+	bool "TIM2 QE"
 	default n
 	depends on STM32_TIM2
 	---help---
@@ -10448,7 +10520,7 @@ config STM32_TIM2_QE
 if STM32_TIM2_QE
 
 config STM32_TIM2_QEPSC
-	int "TIM2 pulse prescaler"
+	int "TIM2 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10457,7 +10529,7 @@ config STM32_TIM2_QEPSC
 endif
 
 config STM32_TIM3_QE
-	bool "TIM3"
+	bool "TIM3 QE"
 	default n
 	depends on STM32_TIM3
 	---help---
@@ -10466,7 +10538,7 @@ config STM32_TIM3_QE
 if STM32_TIM3_QE
 
 config STM32_TIM3_QEPSC
-	int "TIM3 pulse prescaler"
+	int "TIM3 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10475,7 +10547,7 @@ config STM32_TIM3_QEPSC
 endif
 
 config STM32_TIM4_QE
-	bool "TIM4"
+	bool "TIM4 QE"
 	default n
 	depends on STM32_TIM4
 	---help---
@@ -10484,7 +10556,7 @@ config STM32_TIM4_QE
 if STM32_TIM4_QE
 
 config STM32_TIM4_QEPSC
-	int "TIM4 pulse prescaler"
+	int "TIM4 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10493,7 +10565,7 @@ config STM32_TIM4_QEPSC
 endif
 
 config STM32_TIM5_QE
-	bool "TIM5"
+	bool "TIM5 QE"
 	default n
 	depends on STM32_TIM5
 	---help---
@@ -10502,7 +10574,7 @@ config STM32_TIM5_QE
 if STM32_TIM5_QE
 
 config STM32_TIM5_QEPSC
-	int "TIM5 pulse prescaler"
+	int "TIM5 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,
@@ -10511,7 +10583,7 @@ config STM32_TIM5_QEPSC
 endif
 
 config STM32_TIM8_QE
-	bool "TIM8"
+	bool "TIM8 QE"
 	default n
 	depends on STM32_TIM8
 	---help---
@@ -10520,7 +10592,7 @@ config STM32_TIM8_QE
 if STM32_TIM8_QE
 
 config STM32_TIM8_QEPSC
-	int "TIM8 pulse prescaler"
+	int "TIM8 QE pulse prescaler"
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses,

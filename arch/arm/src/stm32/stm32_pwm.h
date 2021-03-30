@@ -919,6 +919,14 @@
         (dev)->llops->arr_update((FAR struct pwm_lowerhalf_s *)dev, arr)
 #define PWM_ARR_GET(dev)                                                           \
         (dev)->llops->arr_get((FAR struct pwm_lowerhalf_s *)dev)
+#define PWM_RCR_UPDATE(dev, rcr)                                                   \
+        (dev)->llops->rcr_update((FAR struct pwm_lowerhalf_s *)dev, rcr)
+#define PWM_RCR_GET(dev)                                                           \
+        (dev)->llops->rcr_get((FAR struct pwm_lowerhalf_s *)dev)
+#ifdef CONFIG_STM32_PWM_TRGO
+#  define PWM_TRGO_SET(dev, trgo)                                                  \
+        (dev)->llops->trgo_set((FAR struct pwm_lowerhalf_s *)dev, trgo)
+#endif
 #define PWM_OUTPUTS_ENABLE(dev, out, state)                                        \
         (dev)->llops->outputs_enable((FAR struct pwm_lowerhalf_s *)dev, out, state)
 #define PWM_SOFT_UPDATE(dev)                                                       \
@@ -1078,6 +1086,20 @@ struct stm32_pwm_ops_s
   /* Get ARR register */
 
   uint32_t (*arr_get)(FAR struct pwm_lowerhalf_s *dev);
+
+  /* Update RCR register */
+
+  int (*rcr_update)(FAR struct pwm_lowerhalf_s *dev, uint16_t rcr);
+
+  /* Get RCR register */
+
+  uint16_t (*rcr_get)(FAR struct pwm_lowerhalf_s *dev);
+
+#ifdef CONFIG_STM32_PWM_TRGO
+  /* Set TRGO/TRGO2 register */
+
+  int (*trgo_set)(FAR struct pwm_lowerhalf_s *dev, uint8_t trgo);
+#endif
 
   /* Enable outputs */
 

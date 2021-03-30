@@ -168,6 +168,8 @@ SECTIONS
     *(COMMON)
   } > ram_tcm
 
+  . = ALIGN(4);
+
   PROVIDE( _heap_start = . );
   PROVIDE( _heap_size = ADDR(.stack) - _heap_start );
 

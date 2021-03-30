@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
@@ -785,11 +786,6 @@ static void esp32_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   spiinfo("nbits=%d\n", nbits);
 
   priv->nbits = nbits;
-
-  esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET,
-                    (priv->nbits - 1) << SPI_USR_MISO_DBITLEN_S);
-  esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET,
-                    (priv->nbits - 1) << SPI_USR_MOSI_DBITLEN_S);
 }
 
 /****************************************************************************
@@ -855,6 +851,8 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   uint8_t *allocrp;
 #endif
 
+  DEBUGASSERT((txbuffer != NULL) || (rxbuffer != NULL));
+
   /* If the buffer comes from PSRAM, allocate a new one from DRAM */
 
 #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
@@ -884,7 +882,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       rp = (uint8_t *)rxbuffer;
     }
 
-  if (!tp)
+  if (tp == NULL)
     {
       tp = rp;
     }
@@ -892,7 +890,7 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
   esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
 
-  while (bytes)
+  while (bytes != 0)
     {
       esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET, 0);
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET, 0);
@@ -910,17 +908,12 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
                SPI_OUTLINK_ADDR_V;
       esp32_spi_set_reg(priv, SPI_DMA_OUT_LINK_OFFSET,
                         regval | SPI_OUTLINK_START_M);
-      esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, bytes * 8 - 1);
-      if (tp)
-        {
-          esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
-        }
-      else
-        {
-          esp32_spi_reset_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
-        }
+      esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, n * 8 - 1);
+      esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MOSI_M);
 
-      if (rp)
+      tp += n;
+
+      if (rp != NULL)
         {
           esp32_dma_init(s_dma_rxdesc[priv->config->dma_chan - 1],
                          SPI_DMADESC_NUM, rp, bytes);
@@ -929,8 +922,10 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
                    SPI_INLINK_ADDR_V;
           esp32_spi_set_reg(priv, SPI_DMA_IN_LINK_OFFSET,
                             regval | SPI_INLINK_START_M);
-          esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, bytes * 8 - 1);
+          esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, n * 8 - 1);
           esp32_spi_set_regbits(priv, SPI_USER_OFFSET, SPI_USR_MISO_M);
+
+          rp += n;
         }
       else
         {
@@ -942,8 +937,6 @@ static void esp32_spi_dma_exchange(FAR struct esp32_spi_priv_s *priv,
       esp32_spi_sem_waitdone(priv);
 
       bytes -= n;
-      tp += n;
-      rp += n;
     }
 
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
@@ -984,6 +977,9 @@ static uint32_t esp32_spi_poll_send(FAR struct esp32_spi_priv_s *priv,
                                     uint32_t wd)
 {
   uint32_t val;
+
+  esp32_spi_set_reg(priv, SPI_MISO_DLEN_OFFSET, (priv->nbits - 1));
+  esp32_spi_set_reg(priv, SPI_MOSI_DLEN_OFFSET, (priv->nbits - 1));
 
   esp32_spi_set_reg(priv, SPI_W0_OFFSET, wd);
 
@@ -1057,7 +1053,7 @@ static void esp32_spi_poll_exchange(FAR struct esp32_spi_priv_s *priv,
       uint32_t w_wd = 0xffff;
       uint32_t r_wd;
 
-      if (txbuffer)
+      if (txbuffer != NULL)
         {
           if (priv->nbits == 8)
             {
@@ -1071,7 +1067,7 @@ static void esp32_spi_poll_exchange(FAR struct esp32_spi_priv_s *priv,
 
       r_wd = esp32_spi_poll_send(priv, w_wd);
 
-      if (rxbuffer)
+      if (rxbuffer != NULL)
         {
           if (priv->nbits == 8)
             {
@@ -1478,7 +1474,7 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev)
 
   flags = enter_critical_section();
 
-  if (--priv->refs)
+  if (--priv->refs != 0)
     {
       leave_critical_section(flags);
       return OK;

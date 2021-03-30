@@ -143,7 +143,7 @@ enum usbhost_trace1codes_e
 
 #  define TRACE1_FIRST     ((int)__TRACE1_BASEVALUE + 1)
 #  define TRACE1_INDEX(id) ((int)(id) - TRACE1_FIRST)
-#  define TRACE1_NSTRINGS  TRACE1_INDEX(__TRACE1_NSTRINGS)
+#  define TRACE1_NSTRINGS  TRACE1_INDEX(__TRACE1_NSTRINGS + 1)
 
 #  define TRACE2_FIRST     ((int)__TRACE1_NSTRINGS + 1)
 #  define TRACE2_INDEX(id) ((int)(id) - TRACE2_FIRST)
