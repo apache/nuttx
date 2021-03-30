@@ -113,7 +113,7 @@
  *  Get maximum voltage for SVM3 without overmodulation
  *
  *  Notes:
- *   max possible phase voltage for 3-phase power inwerter:
+ *   max possible phase voltage for 3-phase power inverter:
  *     Vd = (2/3)*Vdc
  *   max phase reference voltage according to SVM modulation diagram:
  *     Vrefmax = Vd * cos(30*) = SQRT3_BY_2 * Vd
