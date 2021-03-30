@@ -5360,7 +5360,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("\nINFO: WiFi station ssid=%s len=%d\n", buf, len);
+  wlinfo("WiFi station ssid=%s len=%d\n", buf, len);
 #endif
 
   return OK;
