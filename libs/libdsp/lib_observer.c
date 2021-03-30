@@ -110,7 +110,7 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
 
   /* Store inverted err_max to avoid division */
 
-  smo->one_by_err_max = (1.0f/err_max);
+  smo->one_by_err_max = (1.0f / err_max);
 }
 
 /****************************************************************************
