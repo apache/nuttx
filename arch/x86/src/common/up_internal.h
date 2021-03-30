@@ -96,9 +96,9 @@ typedef void (*up_vector_t)(void);
 
 extern volatile uint32_t *g_current_regs;
 
-/* This is the beginning of heap as provided from up_head.S. This is the first
- * address in DRAM after the loaded program+bss+idle stack.  The end of the
- * heap is CONFIG_RAM_END
+/* This is the beginning of heap as provided from up_head.S. This is the
+ * first address in DRAM after the loaded program+bss+idle stack.  The end
+ * of the heap is CONFIG_RAM_END
  */
 
 extern uint32_t g_idle_topstack;
@@ -109,14 +109,14 @@ extern uint32_t g_idle_topstack;
 extern uint32_t g_intstackbase;
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.  They
+ * are not actual uint32_t storage locations! They are only used meaningfully
+ * in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data
+ *    (it is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -135,7 +135,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

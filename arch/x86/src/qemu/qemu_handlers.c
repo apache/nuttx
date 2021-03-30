@@ -101,7 +101,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t*)g_current_regs);
+      up_restorefpu((uint32_t *)g_current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -122,7 +122,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t*)g_current_regs;
+  regs = (uint32_t *)g_current_regs;
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
@@ -149,8 +149,8 @@ uint32_t *isr_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  PANIC(); /* Doesn't return */
-  return regs;               /* To keep the compiler happy */
+  PANIC();      /* Doesn't return */
+  return regs;  /* To keep the compiler happy */
 #else
   uint32_t *ret;
 
@@ -175,8 +175,8 @@ uint32_t *irq_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  PANIC(); /* Doesn't return */
-  return regs;               /* To keep the compiler happy */
+  PANIC();      /* Doesn't return */
+  return regs;  /* To keep the compiler happy */
 #else
   uint32_t *ret;
   int irq;

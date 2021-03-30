@@ -90,7 +90,7 @@ static void up_gdtinit(void)
 
   gdt_ptr.limit = (sizeof(struct gdt_entry_s) * 5) - 1;
   gdt_ptr.base  = (uint32_t)gdt_entries;
-  gdt_flush((uint32_t )&gdt_ptr);
+  gdt_flush((uint32_t)&gdt_ptr);
 }
 
 /****************************************************************************

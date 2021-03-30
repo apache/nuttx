@@ -58,10 +58,10 @@
  *   Fpit = The desired interrupt frequency.
  *   Fin  = PIT input frequency (PIT_CLOCK provided in board.h)
  *
- * The desired timer interrupt frequency is provided by the definition CLK_TCK
- * (see include/time.h).  CLK_TCK defines the desired number of system clock
- * ticks per second.  That value is a user configurable setting that defaults
- * to 100 (100 ticks per second = 10 MS interval).
+ * The desired timer interrupt frequency is provided by the definition
+ * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
+ * system clock ticks per second.  That value is a user configurable setting
+ * that defaults to 100 (100 ticks per second = 10 MS interval).
  */
 
 #define PIT_DIVISOR  ((uint32_t)PIT_CLOCK/(uint32_t)CLK_TCK)
@@ -113,7 +113,8 @@ void up_timer_initialize(void)
 
   /* Send the command byte to configure counter 0 */
 
-  outb(PIT_OCW_MODE_SQUARE|PIT_OCW_RL_DATA|PIT_OCW_COUNTER_0, PIT_REG_COMMAND);
+  outb(PIT_OCW_MODE_SQUARE | PIT_OCW_RL_DATA |
+       PIT_OCW_COUNTER_0, PIT_REG_COMMAND);
 
   /* Set the PIT input frequency divisor */
 

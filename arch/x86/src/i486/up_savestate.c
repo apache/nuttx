@@ -46,6 +46,7 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: up_savestate
  *
@@ -65,7 +66,7 @@ void up_savestate(uint32_t *regs)
 
   /* First, just copy all of the registers */
 
-  up_copystate(regs, (uint32_t*)g_current_regs);
+  up_copystate(regs, (uint32_t *)g_current_regs);
 
   /* The RES_SP and REG_SS values will not be saved by the interrupt handling
    * logic if there is no change in privilege level.  In that case, we will
@@ -84,8 +85,8 @@ void up_savestate(uint32_t *regs)
     {
       /* No priority change, SP and SS are not present in the stack frame.
        *
-       * The value saved in the REG_ESP will be the stackpointer value prior to
-       * the execution of the PUSHA.  It will point at REG_IRQNO.
+       * The value saved in the REG_ESP will be the stackpointer value prior
+       * to the execution of the PUSHA.  It will point at REG_IRQNO.
        */
 
       regs[REG_SP] = g_current_regs[REG_ESP] + 4*BOTTOM_NOPRIO;

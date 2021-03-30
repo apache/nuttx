@@ -171,7 +171,7 @@ struct xcptcontext
 
   /* Register save area */
 
-   uint32_t regs[XCPTCONTEXT_REGS];
+  uint32_t regs[XCPTCONTEXT_REGS];
 };
 #endif
 
@@ -254,7 +254,7 @@ static inline void up_irq_restore(irqstate_t flags)
 }
 
 static inline void system_call3(unsigned int nbr, uintptr_t parm1,
-			                    uintptr_t parm2, uintptr_t parm3)
+                                uintptr_t parm2, uintptr_t parm3)
 {
   /* To be provided */
 }
