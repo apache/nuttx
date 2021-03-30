@@ -85,6 +85,7 @@ void up_udelay(useconds_t microseconds)
       for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
         {
         }
+
       microseconds -= 1000;
     }
 
@@ -93,6 +94,7 @@ void up_udelay(useconds_t microseconds)
       for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
         {
         }
+
       microseconds -= 100;
     }
 
@@ -101,6 +103,7 @@ void up_udelay(useconds_t microseconds)
       for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
         {
         }
+
       microseconds -= 10;
     }
 
@@ -109,6 +112,7 @@ void up_udelay(useconds_t microseconds)
       for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
         {
         }
+
       microseconds--;
     }
 }

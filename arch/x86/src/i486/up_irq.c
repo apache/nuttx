@@ -96,25 +96,27 @@ static void up_remappic(void)
   idt_outb(PIC1_IMR_ALL, PIC1_IMR);
   idt_outb(PIC2_IMR_ALL, PIC2_IMR);
 
-  /* If the PIC has been reset, it must be initialized with 2 to 4 Initialization
-   * Command Words (ICW) before it will accept and process Interrupt Requests. The
-   * following outlines the four possible Initialization Command Words.
+  /* If the PIC has been reset, it must be initialized with 2 to 4
+   * Initialization Command Words (ICW) before it will accept and process
+   * Interrupt Requests. The following outlines the four possible
+   * Initialization Command Words.
    */
 
   /* Remap the irq table for primary:
    *
    * ICW1 - We will be sending ICW4
    * ICW2 - Address
-   * ICW3    */
+   * ICW3
+   */
 
-  idt_outb(PIC_ICW1_ICW4|PIC_ICW1_ICW1, PIC1_ICW1);
+  idt_outb(PIC_ICW1_ICW4 | PIC_ICW1_ICW1, PIC1_ICW1);
   idt_outb(0x20,                        PIC1_ICW2);
   idt_outb(PIC1_ICW3_IRQ2,              PIC1_ICW3);
   idt_outb(PIC_ICW4_808xMODE,           PIC1_ICW4);
 
   /* Remap irq for slave */
 
-  idt_outb(PIC_ICW1_ICW4|PIC_ICW1_ICW1, PIC2_ICW1);
+  idt_outb(PIC_ICW1_ICW4 | PIC_ICW1_ICW1, PIC2_ICW1);
   idt_outb(0x28,                        PIC2_ICW2);
   idt_outb(PIC_ICW3_SID2,               PIC2_ICW3);
   idt_outb(PIC_ICW4_808xMODE,           PIC2_ICW4);
@@ -144,8 +146,8 @@ static void up_idtentry(unsigned int index, uint32_t base, uint16_t sel,
   entry->sel    = sel;
   entry->zero   = 0;
 
-  /* We must uncomment the OR below when we get to using user-mode. It sets the
-   * interrupt gate's privilege level to 3.
+  /* We must uncomment the OR below when we get to using user-mode. It sets
+   * the interrupt gate's privilege level to 3.
    */
 
   entry->flags  = flags /* | 0x60 */;

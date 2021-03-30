@@ -56,7 +56,8 @@ uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset)
   return inb(base + offset);
 }
 
-void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value)
+void uart_putreg(uart_addrwidth_t base,
+                 unsigned int offset, uart_datawidth_t value)
 {
   outb(value, base + offset);
 }
