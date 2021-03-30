@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 /* Is there a serial console? */
 
@@ -104,7 +104,7 @@
 
 #define SH1_SMR_VALUE (SH1_SMR_MODE|SH1_SMR_PARITY|SH1_SMR_STOP)
 
-/* Clocking ***************************************************************/
+/* Clocking *****************************************************************/
 
 /* The calculation of the BRR to achieve the desired BAUD is given by the
  * following formula:
@@ -163,7 +163,8 @@ static inline int up_txready(void)
 {
   /* Check the TDRE bit in the SSR.  1=TDR is empty */
 
-  return ((getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) & SH1_SCISSR_TDRE) != 0);
+  return ((getreg8(SH1_SCI_BASE + SH1_SCI_SSR_OFFSET) &
+           SH1_SCISSR_TDRE) != 0);
 }
 #endif
 

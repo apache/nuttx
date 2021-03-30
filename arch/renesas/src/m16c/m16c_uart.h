@@ -111,6 +111,7 @@
 #define UART_CON_CLKMD1     0x20       /* Bit 5: CLK/CLKS select bit  */
 #define UART_CON_RCSP       0x40       /* Bit 6: Separate CTS/RTS bit */
                                        /* Bit 7: Reserved */
+
 /* UART2 special mode register 1 (to be provided) */
 
 /* UART2 special mode register 2 (to be provided) */

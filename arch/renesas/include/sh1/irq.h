@@ -274,6 +274,7 @@
 #define SH1_NMI_VNDX       (11)  /* 11: NMI */
 #define SH1_USRBRK_VNDX    (12)  /* 12: User break */
                                  /* 13-31: Reserved for system */
+
 /* Trap instruction */
 
 #define SH1_TRAP_VNDX      (32)  /* 32-63: TRAPA instruction (user break) */
@@ -343,6 +344,7 @@
 #define SH1_DMAC3_VNDX     (78)  /* 78-79: DMAC3 */
 #define SH1_DEI3_VNDX      (78)  /* 78: DMAC3 DEI3 */
                                  /* 79: Reserved */
+
 /* ITU */
 
 #define SH1_IMIA0_VNDX     (80)  /* 80: ITU0 IMIA0 */
@@ -365,6 +367,7 @@
 #define SH1_IMIB4_VNDX     (97)  /* 97:      IMIB4 */
 #define SH1_OVI4_VNDX      (98)  /* 98:      OVI4 */
                                  /* 99:      Reserved */
+
 /* SCI */
 
 #define SH1_ERI0_VNDX      (100) /* 100: SCI0 ERI0 */
@@ -383,14 +386,15 @@
 #define SH1_WDTITI_VNDX    (112) /* 112: WDT ITI */
 #define SH1_CMI_VNDX       (113) /* 113: REF CMI */
                                  /* 114-115: Reserved */
+
 /* 116-255 reserved */
 #endif
 
 #define SH1_LAST_VNDX      (255)
 #define SH1_NVECTORS       (256)
 
-/* IRQ Stack Frame Format.  The SH-1 has a push down stack.  The PC
- * and SR are pushed by hardware at the time an IRQ is taken.
+/* IRQ Stack Frame Format.  The SH-1 has a push down stack.
+ * The PC and SR are pushed by hardware at the time an IRQ is taken.
  */
 
 /* Saved to the stacked by up_vector */
@@ -544,7 +548,7 @@ static inline void up_irq_restore(irqstate_t flags)
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #undef EXTERN

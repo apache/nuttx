@@ -51,6 +51,7 @@
 #define TABSR_TB2S         0x80       /* Bit 7: Timer B2 count start */
 
 /* Clock Prescaler Reset Flag Register */
+
                                       /* Bits 0-6: Not used */
 #define CPSRF_CPSR         0x80       /* Bit 7: 1=Prescaler is reset */
 
@@ -107,7 +108,8 @@
  */
 
 /* Timer B Registers (16-bit access), simple value range 0000-ffff
- *                                    (except in Pulse period/pulse width measurement mode)
+ *                                    (except in Pulse period/pulse
+ *                                            width measurement mode)
  */
 
 /* Timer A Mode Register (8-bit access) */

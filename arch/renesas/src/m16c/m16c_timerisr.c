@@ -41,6 +41,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration */
 
 #ifndef M16C_TA0_PRIO              /* Timer A0 interrupt priority */
@@ -54,21 +55,24 @@
  *
  *  20,000,000 / 100 = 200,000
  *
- * The ideal prescaler value would be the one, then that drops this to exactly
- * 66535:
+ * The ideal prescaler value would be the one, then that drops this to
+ * exactly 66535:
  *
  *  M16C_IDEAL_PRESCALER = 200,000 / 65535 = 3.05
  *
- * And any value greater than 3.05 would also work with less and less precision.
- * The following calculation will produce the ideal prescaler as the next integer
- * value above any fractional values:
+ * And any value greater than 3.05 would also work with less and less
+ * precision.
+ * The following calculation will produce the ideal prescaler as the next
+ * integer value above any fractional values:
  */
 
 #define M16C_DIVISOR (65535 * CLK_TCK)
 #define M16C_IDEAL_PRESCALER \
   ((M16C_XIN_FREQ + M16C_DIVISOR - 1) / M16C_DIVISOR)
 
-/* Now, given this idel prescaler value, pick between available choices: 1, 8, and 32 */
+/* Now, given this idel prescaler value,
+ * pick between available choices: 1, 8, and 32
+ */
 
 #if M16C_IDEAL_PRESCALER > 8
 #  define M16C_PRESCALE_VALUE 32
@@ -141,7 +145,9 @@ void up_timer_initialize(void)
   putreg8(0, M16C_TB1IC);
   putreg8(0, M16C_TB2IC);
 
-  /* Set up timer 0 mode register for timer mode with the calculated prescaler value */
+  /* Set up timer 0 mode register for timer mode with the calculated
+   * prescaler value
+   */
 
   putreg8(M16C_TA0MODE_CONFIG, M16C_TA0MR);
 

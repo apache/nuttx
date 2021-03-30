@@ -222,6 +222,7 @@
 /************************************************************************************
  * Public Types
  ************************************************************************************/
+
 /* This struct defines the way the registers are stored.  We need to save: */
 
 #ifndef __ASSEMBLY__
@@ -323,7 +324,7 @@ static inline irqstate_t up_irq_enable(void)
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #undef EXTERN
