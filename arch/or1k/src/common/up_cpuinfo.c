@@ -68,8 +68,10 @@ int or1k_print_cpuinfo(void)
   if ((vr & SPR_VR_UVRP) != 0)
     {
       mfspr(SPR_SYS_VR2, vr2);
-      syslog(LOG_INFO, "  CPUID:             %d\n", (vr2 & SPR_VR2_CPUID_MASK) >> SPR_VR2_CPUID_SHIFT);
-      syslog(LOG_INFO, "  V2.VER:            0x%x\n", (vr2 & SPR_VR2_VER_MASK) >> SPR_VR2_VER_SHIFT);
+      syslog(LOG_INFO, "  CPUID:             %d\n",
+            (vr2 & SPR_VR2_CPUID_MASK) >> SPR_VR2_CPUID_SHIFT);
+      syslog(LOG_INFO, "  V2.VER:            0x%x\n",
+            (vr2 & SPR_VR2_VER_MASK) >> SPR_VR2_VER_SHIFT);
     }
 
   syslog(LOG_INFO, "  AVR/VR2:           %s\n",

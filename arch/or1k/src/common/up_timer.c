@@ -73,7 +73,9 @@
 static int or1k_timer_isr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t ttmr = TTMR_LOAD;
+
   /* Clear the TTMR interrupt */
+
   mtspr(SPR_TICK_TTMR, ttmr);
 
   nxsched_process_timer();
