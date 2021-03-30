@@ -196,8 +196,6 @@ void dq_saturate_b16(FAR dq_frame_b16_t *dq, b16_t max)
  * Description:
  *   Fast sin calculation
  *
- *   Reference: http://lab.polygonal.de/?p=205
- *
  * Input Parameters:
  *   angle - (in)
  *
@@ -261,12 +259,11 @@ b16_t fast_cos_b16(b16_t angle)
  * Name: fast_sin2_b16
  *
  * Description:
- *   Fast sin calculation with better accuracy
- *
- *   Reference: http://lab.polygonal.de/?p=205
+ *   Fast sin calculation with better accuracy (quadratic curve
+ *   approximation)
  *
  * Input Parameters:
- *   angle
+ *   angle - (in)
  *
  * Returned Value:
  *   Return estimated sine value
@@ -282,7 +279,8 @@ b16_t fast_sin2_b16(b16_t angle)
  * Name:fast_cos2_b16
  *
  * Description:
- *   Fast cos calculation with better accuracy
+ *   Fast cos calculation with better accuracy (quadratic curve
+ *   approximation)
  *
  * Input Parameters:
  *   angle - (in)
