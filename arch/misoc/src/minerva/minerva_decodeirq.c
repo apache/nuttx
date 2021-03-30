@@ -40,7 +40,8 @@
  * Name: minerva_decodeirq
  *
  * Description:
- *   This function is called from the IRQ vector handler in minerva_vectors.S.
+ *   This function is called from the IRQ vector handler in
+ *   minerva_vectors.S.
  *   At this point, the interrupt has been taken and the registers have
  *   been saved on the stack.  This function simply needs to determine the
  *   the irq number of the interrupt and then to call minerva_doirq to
