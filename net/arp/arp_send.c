@@ -341,6 +341,7 @@ int arp_send(in_addr_t ipaddr)
                                               CONFIG_ARP_SEND_DELAYMSEC);
           if (ret == -ETIMEDOUT)
             {
+              arp_wait_cancel(&notify);
               goto timeout;
             }
         }
@@ -354,6 +355,7 @@ int arp_send(in_addr_t ipaddr)
           /* Break out on a send failure */
 
           nerr("ERROR: Send failed: %d\n", ret);
+          arp_wait_cancel(&notify);
           break;
         }
 
