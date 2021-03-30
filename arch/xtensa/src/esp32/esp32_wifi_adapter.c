@@ -732,7 +732,7 @@ static int esp_wifi_lock(bool lock)
       ret = nxsem_wait_uninterruptible(&g_wifiexcl_sem);
       if (ret < 0)
         {
-          wlinfo("INFO: Failed to lock WiFi ret=%d\n", ret);
+          wlinfo("Failed to lock WiFi ret=%d\n", ret);
         }
     }
   else
@@ -740,7 +740,7 @@ static int esp_wifi_lock(bool lock)
       ret = nxsem_post(&g_wifiexcl_sem);
       if (ret < 0)
         {
-          wlinfo("INFO: Failed to unlock WiFi ret=%d\n", ret);
+          wlinfo("Failed to unlock WiFi ret=%d\n", ret);
         }
     }
 
@@ -770,12 +770,12 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   struct irq_adpt *adapter;
   int irq = n + XTENSA_IRQ_FIRSTPERIPH;
 
-  wlinfo("INFO: n=%d f=%p arg=%p irq=%d\n", n, f, arg, irq);
+  wlinfo("n=%d f=%p arg=%p irq=%d\n", n, f, arg, irq);
 
   if (g_irqvector[irq].handler &&
       g_irqvector[irq].handler != irq_unexpected_isr)
     {
-      wlinfo("INFO: irq=%d has been set handler=%p\n", irq,
+      wlinfo("irq=%d has been set handler=%p\n", irq,
              g_irqvector[irq].handler);
       return ;
     }
@@ -784,7 +784,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   adapter = kmm_malloc(tmp);
   if (!adapter)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %d memory\n", tmp);
       assert(0);
       return ;
     }
@@ -795,7 +795,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
   ret = irq_attach(irq, esp_int_adpt_cb, adapter);
   if (ret)
     {
-      wlerr("ERROR: Failed to attach IRQ %d\n", irq);
+      wlerr("Failed to attach IRQ %d\n", irq);
       assert(0);
       return ;
     }
@@ -890,7 +890,7 @@ static void *esp_spin_lock_create(void)
   lock = kmm_malloc(tmp);
   if (!lock)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %d memory\n", tmp);
       DEBUGASSERT(0);
     }
 
@@ -1026,14 +1026,14 @@ static void *esp_semphr_create(uint32_t max, uint32_t init)
   sem = kmm_malloc(tmp);
   if (!sem)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %d memory\n", tmp);
       return NULL;
     }
 
   ret = nxsem_init(sem, 0, init);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
+      wlerr("Failed to initialize sem error=%d\n", ret);
       kmm_free(sem);
       return NULL;
     }
@@ -1089,7 +1089,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
       ret = nxsem_wait(sem);
       if (ret)
         {
-          wlerr("ERROR: Failed to wait sem\n");
+          wlerr("Failed to wait sem\n");
         }
     }
   else
@@ -1097,7 +1097,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
       ret = clock_gettime(CLOCK_REALTIME, &timeout);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to get time\n");
+          wlerr("Failed to get time\n");
           return false;
         }
 
@@ -1109,7 +1109,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
       ret = nxsem_timedwait(sem, &timeout);
       if (ret)
         {
-          wlerr("ERROR: Failed to wait sem in %d ticks\n", ticks);
+          wlerr("Failed to wait sem in %d ticks\n", ticks);
         }
     }
 
@@ -1138,7 +1138,7 @@ static int32_t esp_semphr_give(void *semphr)
   ret = nxsem_post(sem);
   if (ret)
     {
-      wlerr("ERROR: Failed to post sem error=%d\n", ret);
+      wlerr("Failed to post sem error=%d\n", ret);
     }
 
   return osi_errno_trans(ret);
@@ -1168,7 +1168,7 @@ static void *esp_thread_semphr_get(void)
     ret = pthread_key_create(&g_wifi_thread_key, esp_thread_semphr_free);
     if (ret)
       {
-        wlerr("ERROR: Failed to create pthread key\n");
+        wlerr("Failed to create pthread key\n");
         return NULL;
       }
 
@@ -1181,14 +1181,14 @@ static void *esp_thread_semphr_get(void)
       sem = esp_semphr_create(1, 0);
       if (!sem)
         {
-          wlerr("ERROR: Failed to create semaphore\n");
+          wlerr("Failed to create semaphore\n");
           return NULL;
         }
 
       ret = pthread_setspecific(g_wifi_thread_key, sem);
       if (ret)
         {
-          wlerr("ERROR: Failed to set specific\n");
+          wlerr("Failed to set specific\n");
           esp_semphr_delete(sem);
           return NULL;
         }
@@ -1221,14 +1221,14 @@ static void *esp_mutex_create(void)
   mutex = kmm_malloc(tmp);
   if (!mutex)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %d memory\n", tmp);
       return NULL;
     }
 
   ret = pthread_mutex_init(mutex, NULL);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize mutex error=%d\n", ret);
+      wlerr("Failed to initialize mutex error=%d\n", ret);
       kmm_free(mutex);
       return NULL;
     }
@@ -1260,14 +1260,14 @@ static void *esp_recursive_mutex_create(void)
   ret = pthread_mutexattr_init(&attr);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize attr error=%d\n", ret);
+      wlerr("Failed to initialize attr error=%d\n", ret);
       return NULL;
     }
 
   ret = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
   if (ret)
     {
-      wlerr("ERROR: Failed to set attr type error=%d\n", ret);
+      wlerr("Failed to set attr type error=%d\n", ret);
       return NULL;
     }
 
@@ -1275,14 +1275,14 @@ static void *esp_recursive_mutex_create(void)
   mutex = kmm_malloc(tmp);
   if (!mutex)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %d memory\n", tmp);
       return NULL;
     }
 
   ret = pthread_mutex_init(mutex, &attr);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize mutex error=%d\n", ret);
+      wlerr("Failed to initialize mutex error=%d\n", ret);
       kmm_free(mutex);
       return NULL;
     }
@@ -1334,7 +1334,7 @@ static int32_t esp_mutex_lock(void *mutex_data)
   ret = pthread_mutex_lock(mutex);
   if (ret)
     {
-      wlerr("ERROR: Failed to lock mutex error=%d\n", ret);
+      wlerr("Failed to lock mutex error=%d\n", ret);
     }
 
   return osi_errno_trans(ret);
@@ -1362,7 +1362,7 @@ static int32_t esp_mutex_unlock(void *mutex_data)
   ret = pthread_mutex_unlock(mutex);
   if (ret)
     {
-      wlerr("ERROR: Failed to unlock mutex error=%d\n", ret);
+      wlerr("Failed to unlock mutex error=%d\n", ret);
     }
 
   return osi_errno_trans(ret);
@@ -1392,7 +1392,7 @@ static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
   mq_adpt = kmm_malloc(sizeof(struct mq_adpt));
   if (!mq_adpt)
     {
-      wlerr("ERROR: Failed to kmm_malloc\n");
+      wlerr("Failed to kmm_malloc\n");
       return NULL;
     }
 
@@ -1408,7 +1408,7 @@ static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
                      O_RDWR | O_CREAT, 0644, &attr);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to create mqueue\n");
+      wlerr("Failed to create mqueue\n");
       kmm_free(mq_adpt);
       return NULL;
     }
@@ -1476,7 +1476,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
                          mq_adpt->msgsize, prio);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to send message to mqueue error=%d\n",
+          wlerr("Failed to send message to mqueue error=%d\n",
                ret);
         }
     }
@@ -1485,7 +1485,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
       ret = clock_gettime(CLOCK_REALTIME, &timeout);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to get time\n");
+          wlerr("Failed to get time\n");
           return false;
         }
 
@@ -1498,7 +1498,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
                               mq_adpt->msgsize, prio, &timeout);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to timedsend message to mqueue error=%d\n",
+          wlerr("Failed to timedsend message to mqueue error=%d\n",
                ret);
         }
     }
@@ -1626,7 +1626,7 @@ static int32_t esp_queue_recv(void *queue, void *item, uint32_t ticks)
                             mq_adpt->msgsize, &prio);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to receive from mqueue error=%d\n", ret);
+          wlerr("Failed to receive from mqueue error=%d\n", ret);
         }
     }
   else
@@ -1634,7 +1634,7 @@ static int32_t esp_queue_recv(void *queue, void *item, uint32_t ticks)
       ret = clock_gettime(CLOCK_REALTIME, &timeout);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to get time\n");
+          wlerr("Failed to get time\n");
           return false;
         }
 
@@ -1647,7 +1647,7 @@ static int32_t esp_queue_recv(void *queue, void *item, uint32_t ticks)
                                  mq_adpt->msgsize, &prio, &timeout);
       if (ret < 0)
         {
-          wlerr("ERROR: Failed to timedreceive from mqueue error=%d\n",
+          wlerr("Failed to timedreceive from mqueue error=%d\n",
                ret);
         }
     }
@@ -1678,7 +1678,7 @@ static uint32_t esp_queue_msg_waiting(void *queue)
   ret = file_mq_getattr(&mq_adpt->mq, &attr);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to get attr from mqueue error=%d\n", ret);
+      wlerr("Failed to get attr from mqueue error=%d\n", ret);
       return 0;
     }
 
@@ -1812,7 +1812,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
           ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
           if (ret)
             {
-              wlerr("ERROR: Failed to set affinity error=%d\n", ret);
+              wlerr("Failed to set affinity error=%d\n", ret);
               return false;
             }
         }
@@ -1820,7 +1820,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
     }
   else
     {
-      wlerr("ERROR: Failed to create task\n");
+      wlerr("Failed to create task\n");
     }
 
   return pid > 0 ? true : false;
@@ -2096,35 +2096,35 @@ static void esp_evt_work_cb(FAR void *arg)
 
 #ifdef ESP32_WLAN_HAS_STA
           case WIFI_ADPT_EVT_STA_START:
-            wlinfo("INFO: WiFi sta start\n");
+            wlinfo("WiFi sta start\n");
             g_sta_connected = false;
             ret = esp_wifi_set_ps(WIFI_PS_NONE);
             if (ret)
               {
-                wlerr("ERROR: Failed to close PS\n");
+                wlerr("Failed to close PS\n");
               }
             break;
 
           case WIFI_ADPT_EVT_STA_CONNECT:
-            wlinfo("INFO: WiFi sta connect\n");
+            wlinfo("WiFi sta connect\n");
             g_sta_connected = true;
             break;
 
           case WIFI_ADPT_EVT_STA_DISCONNECT:
-            wlinfo("INFO: WiFi sta disconnect\n");
+            wlinfo("WiFi sta disconnect\n");
             g_sta_connected = false;
             if (g_sta_reconnect)
               {
                 ret = esp_wifi_connect();
                 if (ret)
                   {
-                    wlerr("ERROR: Failed to connect AP error=%d\n", ret);
+                    wlerr("Failed to connect AP error=%d\n", ret);
                   }
               }
             break;
 
           case WIFI_ADPT_EVT_STA_STOP:
-            wlinfo("INFO: WiFi sta stop\n");
+            wlinfo("WiFi sta stop\n");
             g_sta_connected = false;
             break;
 #endif
@@ -2141,7 +2141,7 @@ static void esp_evt_work_cb(FAR void *arg)
                                    SI_QUEUE, &notify->work);
           if (ret < 0)
             {
-              wlwarn("ERROR: nxsig_notification event ID=%d failed: %d\n",
+              wlwarn("nxsig_notification event ID=%d failed: %d\n",
                      evt_adpt->id, ret);
             }
         }
@@ -2245,7 +2245,7 @@ int32_t esp_event_post(esp_event_base_t event_base,
   id = esp_event_id_map(event_id);
   if (id < 0)
     {
-      wlinfo("INFO: No process event %d\n", event_id);
+      wlinfo("No process event %d\n", event_id);
       return -1;
     }
 
@@ -2253,7 +2253,7 @@ int32_t esp_event_post(esp_event_base_t event_base,
   evt_adpt = kmm_malloc(size);
   if (!evt_adpt)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", size);
+      wlerr("Failed to alloc %d memory\n", size);
       return -1;
     }
 
@@ -2291,7 +2291,7 @@ uint32_t esp_get_free_heap_size(void)
   ret = mm_mallinfo(&g_mmheap, &info);
   if (ret)
     {
-      wlerr("ERROR: Failed to create task\n");
+      wlerr("Failed to create task\n");
       return 0;
     }
 
@@ -2453,7 +2453,7 @@ static void wifi_phy_enable(void)
   cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
   if (!cal_data)
     {
-      wlerr("ERROR: Failed to kmm_zalloc");
+      wlerr("Failed to kmm_zalloc");
       DEBUGASSERT(0);
     }
 
@@ -2581,7 +2581,7 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
 
   if (type > ESP_MAC_WIFI_SOFTAP)
     {
-      wlerr("ERROR: Input type is error=%d\n", type);
+      wlerr("Input type is error=%d\n", type);
       return -1;
     }
 
@@ -2596,7 +2596,7 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
 
   if (crc != esp_crc8(mac, 6))
     {
-      wlerr("ERROR: Failed to check MAC address CRC\n");
+      wlerr("Failed to check MAC address CRC\n");
       return -1;
     }
 
@@ -2616,7 +2616,7 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
 
       if (i >= 64)
         {
-          wlerr("ERROR: Failed to generate SoftAP MAC\n");
+          wlerr("Failed to generate SoftAP MAC\n");
           return -1;
         }
     }
@@ -2757,7 +2757,7 @@ static void esp_timer_setfn(void *ptimer, void *pfunction, void *parg)
       ret = esp_timer_create(&create_args, &esp_timer);
       if (ret)
         {
-          wlerr("ERROR: Failed to create ets_timer error=%d\n", ret);
+          wlerr("Failed to create ets_timer error=%d\n", ret);
         }
       else
         {
@@ -2803,7 +2803,7 @@ static void esp_timer_arm_us(void *ptimer, uint32_t us, bool repeat)
 
       if (ret)
         {
-          wlerr("ERROR: Fail to start %s timer error%d\n",
+          wlerr("Fail to start %s timer error%d\n",
                 repeat ? "periodic" : "once",
                 ret);
         }
@@ -3121,14 +3121,14 @@ static int32_t esp_nvs_open(const char *name,
   nvs_adpt = kmm_malloc(tmp);
   if (!nvs_adpt)
     {
-      wlerr("ERROR: Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %d memory\n", tmp);
       return -1;
     }
 
   ret = asprintf(&index_name, "%s", name);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to create NVS index_name string\n");
+      wlerr("Failed to create NVS index_name string\n");
       kmm_free(nvs_adpt);
       return -1;
     }
@@ -3215,7 +3215,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
   ret = asprintf(&dir, NVS_DIR_BASE"%s.%s", index_name, key);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to create NVS dir string\n");
+      wlerr("Failed to create NVS dir string\n");
       return -1;
     }
 
@@ -3224,7 +3224,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
     {
       if (ret != -ENOENT)
         {
-          wlerr("ERROR: Failed to unlink %s error=%d\n", dir, ret);
+          wlerr("Failed to unlink %s error=%d\n", dir, ret);
           kmm_free(dir);
           return -1;
         }
@@ -3233,7 +3233,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
   ret = file_open(&file, dir, O_WRONLY | O_CREAT, NVS_FILE_MODE);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to set open %s\n", dir);
+      wlerr("Failed to set open %s\n", dir);
       kmm_free(dir);
       return -1;
     }
@@ -3241,7 +3241,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
   ret = file_write(&file, value, length);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to write to %s\n", dir);
+      wlerr("Failed to write to %s\n", dir);
       kmm_free(dir);
       file_close(&file);
       return -1;
@@ -3290,7 +3290,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
   ret = asprintf(&dir, NVS_DIR_BASE"%s.%s", index_name, key);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to create NVS dir string\n");
+      wlerr("Failed to create NVS dir string\n");
       return -1;
     }
 
@@ -3299,11 +3299,11 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
     {
       if (ret == -ENOENT)
         {
-          wlinfo("INFO: No file %s\n", dir);
+          wlinfo("No file %s\n", dir);
           kmm_free(dir);
           return ESP_ERR_NVS_NOT_FOUND;
         }
-      wlerr("ERROR: Failed to get open %s\n", dir);
+      wlerr("Failed to get open %s\n", dir);
       kmm_free(dir);
       return -1;
     }
@@ -3311,7 +3311,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
   ret = file_read(&file, out_value, *length);
   if (ret <= 0)
     {
-      wlerr("ERROR: Failed to write to %s\n", dir);
+      wlerr("Failed to write to %s\n", dir);
       kmm_free(dir);
       file_close(&file);
       return -1;
@@ -3358,14 +3358,14 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
   ret = asprintf(&dir, NVS_DIR_BASE"%s.%s", index_name, key);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to create NVS dir string\n");
+      wlerr("Failed to create NVS dir string\n");
       return -1;
     }
 
   ret = nx_unlink(dir);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to delete NVS file %s\n", dir);
+      wlerr("Failed to delete NVS file %s\n", dir);
       kmm_free(dir);
       return -1;
     }
@@ -3462,7 +3462,7 @@ static int32_t esp_get_time(void *t)
     }
   else
     {
-      wlerr("ERROR: Failed to get time of day\n");
+      wlerr("Failed to get time of day\n");
     }
 
   return ret;
@@ -3815,14 +3815,14 @@ static void *esp_wifi_create_queue(int32_t queue_len, int32_t item_size)
   wifi_queue = kmm_malloc(sizeof(wifi_static_queue_t));
   if (!wifi_queue)
     {
-      wlerr("ERROR: Failed to kmm_malloc\n");
+      wlerr("Failed to kmm_malloc\n");
       return NULL;
     }
 
   wifi_queue->handle = esp_queue_create(queue_len, item_size);
   if (!wifi_queue->handle)
     {
-      wlerr("ERROR: Failed to create queue\n");
+      wlerr("Failed to create queue\n");
       kmm_free(wifi_queue);
       return NULL;
     }
@@ -4121,7 +4121,7 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
                                           uint16_t *len, bool txstatus)
 {
 #if 0
-  wlinfo("INFO: ifidx=%d data=%p *len=%p txstatus=%d\n",
+  wlinfo("ifidx=%d data=%p *len=%p txstatus=%d\n",
          ifidx, data, len, txstatus);
 #endif
 
@@ -4146,7 +4146,7 @@ static IRAM_ATTR void esp_wifi_tx_done_cb(uint8_t ifidx, uint8_t *data,
   else
 #endif
     {
-      wlerr("ERROR: ifidx=%d is error\n", ifidx);
+      wlerr("ifidx=%d is error\n", ifidx);
     }
 }
 
@@ -4184,7 +4184,7 @@ static int esp_wifi_auth_trans(uint32_t wifi_auth)
         break;
 
       default:
-        wlerr("ERROR: Failed to transfer wireless authmode: %d", wifi_auth);
+        wlerr("Failed to transfer wireless authmode: %d", wifi_auth);
         break;
     }
 
@@ -4237,7 +4237,7 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
         break;
 
       default:
-        wlerr("ERROR: Failed to transfer wireless authmode: %d",
+        wlerr("Failed to transfer wireless authmode: %d",
                wifi_cipher);
         break;
     }
@@ -4494,7 +4494,7 @@ int32_t esp_timer_create(const esp_timer_create_args_t *create_args,
   ret = rt_timer_create(&rt_timer_args, &rt_timer);
   if (ret)
     {
-      wlerr("ERROR: Failed to create rt_timer error=%d\n", ret);
+      wlerr("Failed to create rt_timer error=%d\n", ret);
       return ret;
     }
 
@@ -4617,7 +4617,7 @@ int32_t esp_timer_delete(esp_timer_handle_t timer)
 void __assert_func(const char *file, int line,
                    const char *func, const char *expr)
 {
-  wlerr("ERROR: Assert failed in %s, %s:%d (%s)",
+  wlerr("Assert failed in %s, %s:%d (%s)",
         func, file, line, expr);
   abort();
 }
@@ -4679,14 +4679,14 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
   ret = esp_wifi_init_internal(config);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize WiFi error=%d\n", ret);
+      wlerr("Failed to initialize WiFi error=%d\n", ret);
       return ret;
     }
 
   ret = esp_supplicant_init();
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize WPA supplicant error=%d\n", ret);
+      wlerr("Failed to initialize WPA supplicant error=%d\n", ret);
       esp_wifi_deinit_internal();
       return ret;
     }
@@ -4715,14 +4715,14 @@ int32_t esp_wifi_deinit(void)
   ret = esp_supplicant_deinit();
   if (ret)
     {
-      wlerr("ERROR: Failed to deinitialize supplicant\n");
+      wlerr("Failed to deinitialize supplicant\n");
       return ret;
     }
 
   ret = esp_wifi_deinit_internal();
   if (ret != 0)
     {
-      wlerr("ERROR: Failed to deinitialize WiFi\n");
+      wlerr("Failed to deinitialize WiFi\n");
       return ret;
     }
 
@@ -4778,7 +4778,7 @@ int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
       id = esp_event_id_map(event->sigev_signo);
       if (id < 0)
         {
-          wlerr("ERROR: No process event %d\n", event->sigev_signo);
+          wlerr("No process event %d\n", event->sigev_signo);
         }
       else
         {
@@ -4786,7 +4786,7 @@ int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
 
           if (notify->assigned)
             {
-              wlerr("ERROR: sigev_signo %d has subscribed\n",
+              wlerr("sigev_signo %d has subscribed\n",
                     event->sigev_signo);
             }
           else
@@ -4810,7 +4810,7 @@ int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
       id = esp_event_id_map(event->sigev_signo);
       if (id < 0)
         {
-          wlerr("ERROR: No process event %d\n", event->sigev_signo);
+          wlerr("No process event %d\n", event->sigev_signo);
         }
       else
         {
@@ -4818,7 +4818,7 @@ int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
 
           if (!notify->assigned)
             {
-              wlerr("ERROR: sigev_signo %d has not subscribed\n",
+              wlerr("sigev_signo %d has not subscribed\n",
                     event->sigev_signo);
             }
           else
@@ -4831,7 +4831,7 @@ int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
     }
   else
     {
-      wlerr("ERROR: sigev_notify %d is invalid\n", event->sigev_signo);
+      wlerr("sigev_notify %d is invalid\n", event->sigev_signo);
     }
 
   esp_wifi_lock(false);
@@ -4862,7 +4862,7 @@ int esp_wifi_adapter_init(void)
 
   if (g_wifi_ref)
     {
-      wlinfo("INFO: WiFi adapter is already initialized\n");
+      wlinfo("WiFi adapter is already initialized\n");
       g_wifi_ref++;
       esp_wifi_lock(false);
       return OK;
@@ -4871,7 +4871,7 @@ int esp_wifi_adapter_init(void)
   ret = esp32_rt_timer_init();
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to initialize RT timer error=%d\n", ret);
+      wlerr("Failed to initialize RT timer error=%d\n", ret);
       goto errout_init_timer;
     }
 
@@ -4903,7 +4903,7 @@ int esp_wifi_adapter_init(void)
   ret = esp_wifi_init(&wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize WiFi error=%d\n", ret);
+      wlerr("Failed to initialize WiFi error=%d\n", ret);
       ret = wifi_errno_trans(ret);
       goto errout_init_wifi;
     }
@@ -4911,14 +4911,14 @@ int esp_wifi_adapter_init(void)
   ret = esp_wifi_set_tx_done_cb(esp_wifi_tx_done_cb);
   if (ret)
     {
-      wlerr("ERROR: Failed to register TX done callback ret=%d\n", ret);
+      wlerr("Failed to register TX done callback ret=%d\n", ret);
       ret = wifi_errno_trans(ret);
       goto errout_init_txdone;
     }
 
   g_wifi_ref++;
 
-  wlinfo("INFO: OK to initialize WiFi adapter\n");
+  wlinfo("OK to initialize WiFi adapter\n");
 
   esp_wifi_lock(false);
 
@@ -4964,7 +4964,7 @@ int esp_wifi_sta_start(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("INFO: Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop WiFi ret=%d\n", ret);
     }
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
@@ -4979,7 +4979,7 @@ int esp_wifi_sta_start(void)
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
-      wlerr("ERROR: Failed to set WiFi mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to set WiFi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
@@ -4987,14 +4987,14 @@ int esp_wifi_sta_start(void)
   ret = esp_wifi_start();
   if (ret)
     {
-      wlerr("ERROR: Failed to start WiFi with mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to start WiFi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
 
   g_sta_started = true;
 
-  wlinfo("INFO: OK to start WiFi station\n");
+  wlinfo("OK to start WiFi station\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -5028,7 +5028,7 @@ int esp_wifi_sta_stop(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("INFO: Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop WiFi ret=%d\n", ret);
     }
 
   g_sta_started = false;
@@ -5039,7 +5039,7 @@ int esp_wifi_sta_stop(void)
       ret = esp_wifi_set_mode(WIFI_MODE_AP);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi AP mode ret=%d\n", ret);
+          wlerr("Failed to set WiFi AP mode ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
@@ -5047,14 +5047,14 @@ int esp_wifi_sta_stop(void)
       ret = esp_wifi_start();
       if (ret)
         {
-          wlerr("ERROR: Failed to start WiFi AP ret=%d\n", ret);
+          wlerr("Failed to start WiFi AP ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
     }
 #endif
 
-  wlinfo("INFO: OK to stop WiFi station\n");
+  wlinfo("OK to stop WiFi station\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -5196,7 +5196,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get WiFi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -5209,7 +5209,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5233,7 +5233,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
           ret = esp_wifi_sta_get_ap_info(&ap_info);
           if (ret)
             {
-              wlerr("ERROR: Failed to get AP record ret=%d", ret);
+              wlerr("Failed to get AP record ret=%d", ret);
               return wifi_errno_trans(ret);
             }
 
@@ -5262,7 +5262,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
                 break;
 
               default:
-                wlerr("ERROR: Failed to transfer wireless authmode: %d",
+                wlerr("Failed to transfer wireless authmode: %d",
                       ap_info.pairwise_cipher);
                 return -EIO;
             }
@@ -5272,7 +5272,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("INFO: WiFi station password=%s len=%d\n", buf, len);
+  wlinfo("WiFi station password=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -5319,7 +5319,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get WiFi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -5330,7 +5330,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5392,7 +5392,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get WiFi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -5407,7 +5407,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5443,7 +5443,7 @@ int esp_wifi_sta_connect(void)
 
   if (g_sta_connected)
     {
-      wlinfo("INFO: WiFi has connected AP\n");
+      wlinfo("WiFi has connected AP\n");
       esp_wifi_lock(false);
       return OK;
     }
@@ -5453,7 +5453,7 @@ int esp_wifi_sta_connect(void)
   ret = esp_wifi_connect();
   if (ret)
     {
-      wlerr("ERROR: Failed to connect ret=%d\n", ret);
+      wlerr("Failed to connect ret=%d\n", ret);
       ret = wifi_errno_trans(ret);
       goto errout_wifi_connect;
     }
@@ -5475,7 +5475,7 @@ int esp_wifi_sta_connect(void)
   if (!g_sta_connected)
     {
       g_sta_reconnect = false;
-      wlinfo("INFO: Failed to connect to AP\n");
+      wlinfo("Failed to connect to AP\n");
       return -1;
     }
 
@@ -5513,12 +5513,12 @@ int esp_wifi_sta_disconnect(void)
   ret = esp_wifi_disconnect();
   if (ret)
     {
-      wlerr("ERROR: Failed to disconnect ret=%d\n", ret);
+      wlerr("Failed to disconnect ret=%d\n", ret);
       ret = wifi_errno_trans(ret);
     }
   else
     {
-      wlinfo("INFO: OK to disconnect WiFi station\n");
+      wlinfo("OK to disconnect WiFi station\n");
     }
 
   esp_wifi_lock(false);
@@ -5587,7 +5587,7 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
       ret = esp_wifi_sta_get_ap_info(&ap_info);
       if (ret)
         {
-          wlerr("ERROR: Failed to get AP record ret=%d\n", ret);
+          wlerr("Failed to get AP record ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -5616,7 +5616,7 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
           case IW_AUTH_ROAMING_CONTROL:
           case IW_AUTH_PRIVACY_INVOKED:
           default:
-            wlerr("ERROR: Unknown cmd %d\n", cmd);
+            wlerr("Unknown cmd %d\n", cmd);
             return -ENOSYS;
         }
     }
@@ -5650,7 +5650,7 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
       ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+          wlerr("Failed to get WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -5658,7 +5658,7 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5671,7 +5671,7 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
           ret = esp_wifi_sta_get_ap_info(&ap_info);
           if (ret)
             {
-              wlerr("ERROR: Failed to get AP record ret=%d\n", ret);
+              wlerr("Failed to get AP record ret=%d\n", ret);
               return wifi_errno_trans(ret);
             }
 
@@ -5726,7 +5726,7 @@ int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set)
       ret = esp_wifi_sta_get_ap_info(&ap_info);
       if (ret)
         {
-          wlerr("ERROR: Failed to get AP record ret=%d\n", ret);
+          wlerr("Failed to get AP record ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -5814,7 +5814,7 @@ int esp_wifi_sta_txpower(struct iwreq *iwr, bool set)
 
       if (power < 8 || power > 84)
         {
-          wlerr("ERROR: Failed to set transmit power =%d\n", power);
+          wlerr("Failed to set transmit power =%d\n", power);
           return -ENOSYS;
         }
 
@@ -5826,7 +5826,7 @@ int esp_wifi_sta_txpower(struct iwreq *iwr, bool set)
       ret = esp_wifi_get_max_tx_power(&power);
       if (ret)
         {
-          wlerr("ERROR: Failed to get transmit power ret=%d\n", ret);
+          wlerr("Failed to get transmit power ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -5870,7 +5870,7 @@ int esp_wifi_sta_channel(struct iwreq *iwr, bool set)
       ret = esp_wifi_get_country(&country);
       if (ret)
         {
-          wlerr("ERROR: Failed to get country info ret=%d\n", ret);
+          wlerr("Failed to get country info ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -5918,7 +5918,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
       country_code = (char *)iwr->u.data.pointer;
       if (strlen(country_code) != 2)
         {
-          wlerr("ERROR: Invalid input arguments\n");
+          wlerr("Invalid input arguments\n");
           return -EINVAL;
         }
 
@@ -5940,7 +5940,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_country(&country);
       if (ret)
         {
-          wlerr("ERROR: Failed to  Configure country ret=%d\n", ret);
+          wlerr("Failed to  Configure country ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5988,7 +5988,7 @@ int esp_wifi_sta_rssi(struct iwreq *iwr, bool set)
       ret = esp_wifi_sta_get_ap_info(&ap_info);
       if (ret)
         {
-          wlerr("ERROR: Failed to get AP record ret=%d\n", ret);
+          wlerr("Failed to get AP record ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -6030,7 +6030,7 @@ int esp_wifi_softap_start(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("INFO: Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop WiFi ret=%d\n", ret);
     }
 
 #ifdef ESP32_WLAN_HAS_STA
@@ -6045,7 +6045,7 @@ int esp_wifi_softap_start(void)
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
-      wlerr("ERROR: Failed to set WiFi mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to set WiFi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
@@ -6053,14 +6053,14 @@ int esp_wifi_softap_start(void)
   ret = esp_wifi_start();
   if (ret)
     {
-      wlerr("ERROR: Failed to start WiFi with mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to start WiFi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
 
   g_softap_started = true;
 
-  wlinfo("INFO: OK to start WiFi SoftAP\n");
+  wlinfo("OK to start WiFi SoftAP\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -6094,7 +6094,7 @@ int esp_wifi_softap_stop(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("INFO: Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop WiFi ret=%d\n", ret);
     }
 
   g_softap_started = false;
@@ -6105,7 +6105,7 @@ int esp_wifi_softap_stop(void)
       ret = esp_wifi_set_mode(WIFI_MODE_STA);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi AP mode ret=%d\n", ret);
+          wlerr("Failed to set WiFi AP mode ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
@@ -6113,14 +6113,14 @@ int esp_wifi_softap_stop(void)
       ret = esp_wifi_start();
       if (ret)
         {
-          wlerr("ERROR: Failed to start WiFi AP ret=%d\n", ret);
+          wlerr("Failed to start WiFi AP ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
     }
 #endif
 
-  wlinfo("INFO: OK to stop WiFi SoftAP\n");
+  wlinfo("OK to stop WiFi SoftAP\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -6262,7 +6262,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get WiFi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -6277,7 +6277,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6298,7 +6298,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("INFO: WiFi SoftAP password=%s len=%d\n", buf, len);
+  wlinfo("WiFi SoftAP password=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -6345,7 +6345,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get WiFi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -6356,7 +6356,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6377,7 +6377,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("INFO: WiFi SoftAP ssid=%s len=%d\n", buf, len);
+  wlinfo("WiFi SoftAP ssid=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -6496,7 +6496,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
       ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+          wlerr("Failed to get WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -6520,7 +6520,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
                     break;
 
                   default:
-                    wlerr("ERROR: Invalid wpa version %" PRId32 "\n",
+                    wlerr("Invalid wpa version %" PRId32 "\n",
                           iwr->u.param.value);
                     return -EINVAL;
                 }
@@ -6551,7 +6551,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
                     break;
 
                   default:
-                    wlerr("ERROR: Invalid cipher mode %" PRId32 "\n",
+                    wlerr("Invalid cipher mode %" PRId32 "\n",
                           iwr->u.param.value);
                     return -EINVAL;
                 }
@@ -6567,14 +6567,14 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
           case IW_AUTH_ROAMING_CONTROL:
           case IW_AUTH_PRIVACY_INVOKED:
           default:
-            wlerr("ERROR: Unknown cmd %d\n", cmd);
+            wlerr("Unknown cmd %d\n", cmd);
             return -EINVAL;
         }
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6610,7 +6610,7 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
   if (ret)
     {
-      wlerr("ERROR: Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get WiFi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -6623,7 +6623,7 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("ERROR: Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set WiFi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
