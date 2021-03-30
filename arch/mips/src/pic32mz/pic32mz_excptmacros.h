@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_excptmacros.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_EXCPTMACROS_H
 #define __ARCH_MIPS_SRC_PIC32MZ_EXCPTMACROS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,13 +32,13 @@
 
 #ifdef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Symbols
- ********************************************************************************************/
+ ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.global		g_intstackbase
@@ -47,45 +47,48 @@
 #endif
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Assembly Language Macros
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * General Usage Example:
  *
  * my_exception:
- *		EXCPT_PROLOGUE t0			- Save registers on stack, enable nested interrupts
- *		move a0, sp					- Pass register save structure as the parameter 1
- *		USE_INTSTACK t0, t1, t2, t3	- Switch to the interrupt stack
- *		jal	handler					- Handle the exception IN=old regs OUT=new regs
- *		di							- Disable interrupts
- *		RESTORE_STACK t0, t1		- Undo the operations of USE_STACK
- *		EXCPT_EPILOGUE v0			- Return to the context returned by handler()
+ * EXCPT_PROLOGUE t0 - Save registers on stack, enable nested interrupts
+ * move a0, sp       - Pass register save structure as the parameter 1
+ * USE_INTSTACK t0, t1, t2, t3 - Switch to the interrupt stack
+ * jal handler       - Handle the exception IN=old regs OUT=new regs
+ * di                - Disable interrupts
+ * RESTORE_STACK t0, t1  - Undo the operations of USE_STACK
+ * EXCPT_EPILOGUE v0 - Return to the context returned by handler()
  *
- ********************************************************************************************/
-/********************************************************************************************
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: EXCPT_PROLOGUE
  *
  * Description:
- *   Provides the "prologue" logic that should appear at the beginning of every exception
- *   handler.
+ *   Provides the "prologue" logic that should appear at the beginning of
+ *   every exception handler.
  *
  * On Entry:
  *   sp - Points to the top of the stack
- *   tmp - Is a register the can be modified for scratch usage (after it has been saved)
- *   k0 and k1 - Since we are in an exception handler, these are available for use
+ *   tmp - Is a register the can be modified for scratch usage
+ *          (after it has been saved)
+ *   k0 and k1 - Since we are in an exception handler, these are available
+ *               for use
  *
  * At completion:
- *   Register state is saved on the stack; All registers are available for usage except sp
- *   and k1:
+ *   Register state is saved on the stack; All registers are available for
+ *   usage except sp and k1:
  *
  *   - sp points the beginning of the register save area
  *   - k1 holds the value of the STATUS register
  *
  *   The following registers are modified: k0, k1, sp, a0
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 	.macro	EXCPT_PROLOGUE, tmp
 	.set	noat
@@ -226,30 +229,32 @@
 
 	sw		ra, REG_RA(sp)
 
-	/* $29 = sp:  The value of the stack pointer on return from the exception.  a0 is
-	 * used as a temporary
+	/* $29 = sp:  The value of the stack pointer on return from the exception.
+	 *  a0 is used as a temporary
 	 */
 
 	addiu	\tmp, sp, XCPTCONTEXT_SIZE
 	sw		\tmp, REG_SP(sp)
 	.endm
 
-/********************************************************************************************
+/****************************************************************************
  * Name: EXCPT_EPILOGUE
  *
  * Description:
- *   Provides the "epilogue" logic that should appear at the end of every exception handler.
+ *   Provides the "epilogue" logic that should appear at the end of every
+ *   exception handler.
  *
  * On input:
- *   regs - points to the register save structure.  NOTE:  This *may not* be an address
- *          lying in a stack!  It might be an address in a TCB!
+ *   regs - points to the register save structure.
+ *          NOTE:  This *may not* be an address lying in a stack!
+ *          It might be an address in a TCB!
  *   Interrupts are disabled (via 'di')
  *
  * On completion:
  *   All registers restored
  *	 eret is executed to return from the exception
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 	.macro	EXCPT_EPILOGUE, regs
 	.set	noat
@@ -345,7 +350,7 @@
 	nop
 	.endm
 
-/********************************************************************************************
+/****************************************************************************
  * Name: USE_INTSTACK
  *
  * Description:
@@ -361,7 +366,7 @@
  *   interrupt stack and sp points to the interrupt stack.
  *   The values of tmp1, tmp2, tmp3, and sp have been altered
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 	.macro	USE_INTSTACK, tmp1, tmp2, tmp3, tmp4
 
@@ -397,12 +402,13 @@
 #endif
 	.endm
 
-/********************************************************************************************
+/****************************************************************************
  * Name: RESTORE_STACK
  *
  * Description:
- *   Restore the user stack.  Not really.. actually only decrements the nesting level.  We
- *   always get the new stack pointer for the register save array.
+ *   Restore the user stack.  Not really.. actually only decrements the
+ *   nesting level.  We always get the new stack pointer for the register
+ *   save array.
  *
  * On Entry:
  *   tmp1 and tmp2 are registers that can be used temporarily.
@@ -412,7 +418,7 @@
  *   Current nesting level is decremented
  *   The values of tmp1 and  tmp2 have been altered
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 	.macro		RESTORE_STACK, tmp1, tmp2
 

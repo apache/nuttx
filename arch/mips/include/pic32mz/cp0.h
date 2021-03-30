@@ -32,6 +32,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* CP0 Register Addresses ***************************************************/
 
 #ifdef __ASSEMBLY__
@@ -191,11 +192,14 @@
  *   NOTES:
  *   1. The following are reserved bits in the PIC32MZ:
  *      CP0_STATUS_UX   Bit 5: Enables 64-bit user address space (Not MIPS32)
- *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space (Not MIPS32)
- *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space (Not MIPS32)
+ *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space
+ *                               (Not MIPS32)
+ *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space
+ *                               (Not MIPS32)
  *      CP0_STATUS_IMPL Bits 16-17: Implementation dependent
  *      CP0_STATUS_PX   Bit 23: Enables 64-bit operations (Not MIPS32)
- *      CP0_STATUS_FR   Bit 26: Controls the floating point register mode (Not MIPS32)
+ *      CP0_STATUS_FR   Bit 26: Controls the floating point register mode
+ *                               (Not MIPS32)
  *      CP0_STATUS_MX   Bit 24: Enables MDMX (Not MIPS32)
  *      CP0_STATUS_CU1  Bit 29: Controls access to coprocessor 1
  *      CP0_STATUS_CU2  Bit 30: Controls access to coprocessor 2
@@ -357,6 +361,7 @@
 #define CP0_CONFIG_MM_MASK          (3 << CP0_CONFIG_MM_SHIFT)
 #  define CP0_CONFIG_MM_PROHIBITED  (0 << CP0_CONFIG_MM_SHIFT) /* Merging is not allowed */
 #  define CP0_CONFIG_MM_ALLOWED     (2 << CP0_CONFIG_MM_SHIFT) /* Merging is allowed */
+
 #define CP0_CONFIG_MDU              (1 << 20) /* Multipley/Divide unit bit */
 #define CP0_CONFIG_SB               (1 << 21) /* Bit 32: Simple BE bus mode bit */
 #define CP0_CONFIG_UDI              (1 << 22) /* Bit 22: User defined bit */

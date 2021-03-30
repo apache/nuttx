@@ -32,6 +32,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* CP0 Register Addresses ***************************************************/
 
 #ifdef __ASSEMBLY__
@@ -107,8 +108,10 @@
  *   NOTES:
  *   1. The following are reserved bits in the PIC32:
  *      CP0_STATUS_UX   Bit 5: Enables 64-bit user address space (Not MIPS32)
- *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space (Not MIPS32)
- *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space (Not MIPS32)
+ *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space
+ *                            (Not MIPS32)
+ *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space
+ *                            (Not MIPS32)
  *      CP0_STATUS_IMPL Bits 16-17: Implementation dependent
  *      CP0_STATUS_TS   Bit 21: TLB detected match on multiple entries
  *      CP0_STATUS_PX   Bit 23: Enables 64-bit operations (Not MIPS32)
@@ -201,7 +204,7 @@
 
 #define CP0_CAUSE_R                 (1 << 26) /* Bit 26: R bit */
 #define CP0_CAUSE_DC                (1 << 27) /* Bit 27: Disable count */
-#define CP0_CAUSE_TI                (1 << 30) /* Bit 30: Timer interrupt bit *.
+#define CP0_CAUSE_TI                (1 << 30) /* Bit 30: Timer interrupt bit */.
 
 /* Register Number: 14 Sel: 0 Name: EPC
  * Function: Program counter at last exception

@@ -42,10 +42,11 @@
 #define SYS_syscall 0x00
 
 /* Configuration ************************************************************/
+
 /* SYS call 1 and 2 are defined for internal use by the PIC32MX port (see
  * arch/mips/include/mips32/syscall.h).  In addition, SYS call 3 is the
- * return from a SYS call in kernel mode.  The first four syscall values must,
- * therefore, be reserved (0 is not used).
+ * return from a SYS call in kernel mode.  The first four syscall values
+ * must, therefore, be reserved (0 is not used).
  */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -57,11 +58,13 @@
 #endif
 
 /* sys_call macros **********************************************************/
+
 /* System calls with 3 parameters and fewer are handled by sys_call0
  * (sys_call1, sys_call2, and sys_call3 are aliases for sys_call0).
  * This is because the parameters are passed in a0-a3.  a0 is reserved for
  * the syscall number leaving up to three additional parameters that can be
- * passed in registers.  The remainder would have to be pushed onto the stack.
+ * passed in registers.  The remainder would have to be pushed onto the
+ * stack.
  *
  * Instead, these macros are provided which handle parameters four, five and
  * six in a non-standard way:  The use s0 ($7), s1 ($8), and s2 ($9) to pass

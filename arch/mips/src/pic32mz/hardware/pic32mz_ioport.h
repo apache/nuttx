@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mz_ioport.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_IOPORT_H
 #define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_IOPORT_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/pic32mz/chip.h>
@@ -31,10 +31,11 @@
 
 #if CHIP_NPORTS > 0
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* IOPort Peripheral Offsets ****************************************************************/
+ ****************************************************************************/
+
+/* IOPort Peripheral Offsets ************************************************/
 
 #define PIC32MZ_IOPORTA                0
 #define PIC32MZ_IOPORTB                1
@@ -59,7 +60,7 @@
 #  define PIC32MZ_IOPORTJ_OFFSET       0x0800
 #  define PIC32MZ_IOPORTK_OFFSET       0x0900
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define PIC32MZ_IOPORT_ANSEL_OFFSET     0x0000 /* Analog select register */
 #define PIC32MZ_IOPORT_ANSELCLR_OFFSET  0x0004 /* Analog select clear register */
@@ -131,7 +132,7 @@
 #define PIC32MZ_IOPORT_SRCON1SET_OFFSET 0x00d8 /* Slew Rate Control1 set register */
 #define PIC32MZ_IOPORT_SRCON1INV_OFFSET 0x00dc /* Slew Rate Control1 invert register */
 
-/* IOPort Peripheral Addresses **************************************************************/
+/* IOPort Peripheral Addresses **********************************************/
 
 #define PIC32MZ_IOPORTn_K1BASE(n)      (PIC32MZ_IOPORT_K1BASE+PIC32MZ_IOPORTn_OFFSET(n))
 #  define PIC32MZ_IOPORTA_K1BASE       (PIC32MZ_IOPORT_K1BASE+PIC32MZ_IOPORTA_OFFSET)
@@ -145,7 +146,7 @@
 #  define PIC32MZ_IOPORTJ_K1BASE       (PIC32MZ_IOPORT_K1BASE+PIC32MZ_IOPORTJ_OFFSET)
 #  define PIC32MZ_IOPORTK_K1BASE       (PIC32MZ_IOPORT_K1BASE+PIC32MZ_IOPORTK_OFFSET)
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MZ_IOPORT_ANSEL(n)         (PIC32MZ_IOPORTn_K1BASE(n)+PIC32MZ_IOPORT_ANSEL_OFFSET)
 #define PIC32MZ_IOPORT_ANSELCLR(n)      (PIC32MZ_IOPORTn_K1BASE(n)+PIC32MZ_IOPORT_ANSELCLR_OFFSET)
@@ -789,7 +790,7 @@
 #  define PIC32MZ_IOPORTK_CNSTATINV     (PIC32MZ_IOPORTK_K1BASE+PIC32MZ_IOPORT_CNSTATINV_OFFSET)
 #endif
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Analog select register */
 
@@ -862,15 +863,15 @@
 #define IOPORT_SRCON1(n)               (1 << (n)) /* Bits 0-15: Slew Rate control pin n */
 #define IOPORT_SRCON1_ALL              0x0000ffff
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -880,9 +881,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

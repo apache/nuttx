@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADC_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_ADC_CON1_OFFSET    0x0000 /* ADC control register 1 */
 #define PIC32MX_ADC_CON1CLR_OFFSET 0x0004 /* ADC control clear register 1 */
@@ -78,7 +78,7 @@
 #define PIC32MX_ADC_BUF14_OFFSET   0x0150 /* ADC result word 14 */
 #define PIC32MX_ADC_BUF15_OFFSET   0x0160 /* ADC result word 15 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_ADC_CON1           (PIC32MX_ADC_K1BASE+PIC32MX_ADC_CON1_OFFSET)
 #define PIC32MX_ADC_CON1CLR        (PIC32MX_ADC_K1BASE+PIC32MX_ADC_CON1CLR_OFFSET)
@@ -123,7 +123,7 @@
 #define PIC32MX_ADC_BUF14          (PIC32MX_ADC_K1BASE+PIC32MX_ADC_BUF14_OFFSET)
 #define PIC32MX_ADC_BUF15          (PIC32MX_ADC_K1BASE+PIC32MX_ADC_BUF15_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* ADC control register 1 */
 
@@ -137,6 +137,7 @@
 #  define ADC_CON1_SSRC_INT0       (1 << ADC_CON1_SSRC_SHIFT) /* INT0 transition starts */
 #  define ADC_CON1_SSRC_TIMER3     (2 << ADC_CON1_SSRC_SHIFT) /* Timer3 match starts */
 #  define ADC_CON1_SSRC_COUNT      (7 << ADC_CON1_SSRC_SHIFT) /* Internal counter starts */
+
 #define ADC_CON1_FORM_SHIFT        (8)       /* Bits 8-10: Data output format */
 #define ADC_CON1_FORM_MASK         (7 << ADC_CON1_FORM_SHIFT)
 #  define ADC_CON1_FORM_UINT16     (0 << ADC_CON1_FORM_SHIFT) /* Integer 16-bit */
@@ -147,6 +148,7 @@
 #  define ADC_CON1_FORM_SINT32     (5 << ADC_CON1_FORM_SHIFT) /* Signed integer 32-bit */
 #  define ADC_CON1_FORM_FRAC32     (6 << ADC_CON1_FORM_SHIFT) /* Fractional 32-bit */
 #  define ADC_CON1_FORM_SFRAC32    (7 << ADC_CON1_FORM_SHIFT) /* Signed fractional 32-bit */
+
 #define ADC_CON1_SIDL              (1 << 13) /* Bit 13: Stop in idle mode */
 #define ADC_CON1_FRZ               (1 << 14) /* Bit 14: Freeze in debug exception mode */
 #define ADC_CON1_ON                (1 << 15) /* Bit 14: ADC operating mode */
@@ -158,6 +160,7 @@
 #define ADC_CON2_SMPI_SHIFT        (2)       /* Bits 2-5: Sample/sequences per interrupt */
 #define ADC_CON2_SMPI_MASK         (15 << ADC_CON2_SMPI_SHIFT)
 #  define ADC_CON2_SMPI(n)         ((n-1) << ADC_CON2_SMPI_SHIFT) /* Interrupt after nth conversion */
+
 #define ADC_CON2_BUFS              (1 << 7)  /* Bit 7:  Buffer fill status */
 #define ADC_CON2_CSCNA             (1 << 10) /* Bit 10: Scan input selections */
 #define ADC_CON2_OFFCAL            (1 << 12) /* Bit 12: Input offset calibration mode select */
@@ -173,9 +176,11 @@
 #define ADC_CON3_ADCS_SHIFT        (0)       /* Bits 0-7: ADC conversion clock select */
 #define ADC_CON3_ADCS_MASK         (0xff << ADC_CON3_ADCS_SHIFT)
 #  define ADC_CON3_ADCS(n)         ((((n)>>1)-1) << ADC_CON3_ADCS_SHIFT) /* n*Tpb = Tad, n=2,4,..,512 */
+
 #define ADC_CON3_SAMC_SHIFT        (8)       /* Bits 8-12: Auto-sample time bits */
 #define ADC_CON3_SAMC_MASK         (31 << ADC_CON3_SAMC_SHIFT)
 #  define ADC_CON3_SAMC(n)         ((n) << ADC_CON3_SAMC_SHIFT) /* Tad = n, n=1..15 */
+
 #define ADC_CON3_ADRC              (1 << 15) /* Bit 15: ADC conversion clock source */
 
 /* ADC input pin selection register */
@@ -183,10 +188,12 @@
 #define ADC_CHS_CH0SA_SHIFT        (16)      /* Bits 16-19: MUX A positive input select */
 #define ADC_CHS_CH0SA_MASK         (15 << ADC_CHS_CH0SA_SHIFT)
 #  define ADC_CHS_CH0SA(n)         ((n) << ADC_CHS_CH0SA_SHIFT) /* Channel 0 positive input ANn, n=0..15 */
+
 #define ADC_CHS_CH0NA              (1 << 23) /* Bit 23: MUX A negative input select */
 #define ADC_CHS_CH0SB_SHIFT        (24)      /* Bits 24-27: MUX B positive input select */
 #define ADC_CHS_CH0SB_MASK         (15 << ADC_CHS_CH0SB_SHIFT)
 #  define ADC_CHS_CH0SB(n)         ((n) << ADC_CHS_CH0SB_SHIFT) /* Channel 0 positive input ANn, n=0..15 */
+
 #define ADC_CHS_CH0NB              (1 << 31) /* Bit 31: MUX B negative input select */
 
 /* ADC sequentially scanned input register */
@@ -199,19 +206,19 @@
 
 /* ADC result word 0-15 -- 32-bits of ADC result data */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

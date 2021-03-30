@@ -32,6 +32,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Register Offsets *********************************************************/
 
 #define PIC32MX_WDT_CON_OFFSET   0x0000 /* Watchdog timer control register */
@@ -70,6 +71,7 @@
 #  define WDT_CON_SWDTPS_262144  (18 << WDT_CON_SWDTPS_SHIFT) /* 1:262144 */
 #  define WDT_CON_SWDTPS_524288  (19 << WDT_CON_SWDTPS_SHIFT) /* 1:524288 */
 #  define WDT_CON_SWDTPS_1048576 (20 << WDT_CON_SWDTPS_SHIFT) /* 1:1048576 */
+
 #define WDT_CON_ON               (1 << 15  /* Bit 15: Watchdog timer enable */
 
 /****************************************************************************

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mzef_memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEF_MEMORYMAP_H
 #define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEF_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "mips32-memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Physical Memory Map **************************************************************/
+ ****************************************************************************/
+
+/* Physical Memory Map ******************************************************/
+
 /* Memory Regions */
 
 #define PIC32MZ_DATAMEM_PBASE     0x00000000 /* Size depends on CHIP_DATAMEM_KB */
@@ -53,7 +55,7 @@
 #define PIC32MZ_BOOT2_PBASE       0x1fc60000 /* Boot flash 2 */
 #define PIC32MZ_SEQCFG2_PBASE     0x1fc6ff00 /* Sequence/configuration space 2 */
 
-/* Virtual Memory Map ***************************************************************/
+/* Virtual Memory Map *******************************************************/
 
 #define PIC32MZ_DATAMEM_K0BASE      (KSEG0_BASE + PIC32MZ_DATAMEM_PBASE)
 #define PIC32MZ_PROGFLASH_K0BASE    (KSEG0_BASE + PIC32MZ_PROGFLASH_PBASE)
@@ -89,7 +91,7 @@
 #define PIC32MZ_BOOT2_K1BASE        (KSEG1_BASE + PIC32MZ_BOOT2_PBASE)
 #define PIC32MZ_SEQCFG2_K1BASE      (KSEG1_BASE + PIC32MZ_SEQCFG2_PBASE)
 
-/* Register Base Addresses **********************************************************/
+/* Register Base Addresses **************************************************/
 
 #define PIC32MZ_CONFIG_K1BASE       (PIC32MZ_SFR_K1BASE + 0x00000000) /* Configuration */
 #define PIC32MZ_FLASHC_K1BASE       (PIC32MZ_SFR_K1BASE + 0x00000600) /* Flash Controller */

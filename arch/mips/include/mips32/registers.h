@@ -91,7 +91,9 @@
 
 #define sp                 $29
 
-/* Register 30 may be either an additional static register or a frame pointer */
+/* Register 30 may be either an additional static register or a frame
+ * pointer
+ */
 
 #define s8                 $30
 #define fp                 $30

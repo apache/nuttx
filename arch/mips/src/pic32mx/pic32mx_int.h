@@ -33,6 +33,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Register Offsets *********************************************************/
 
 #define PIC32MX_INT_INTCON_OFFSET     0x0000 /* Interrupt control register */
@@ -296,6 +297,7 @@
 #  define INT_INTCON_TPC_PRIO5       (5 << INT_INTCON_TPC_SHIFT) /* Int group priority <=5 start TP timer */
 #  define INT_INTCON_TPC_PRIO6       (6 << INT_INTCON_TPC_SHIFT) /* Int group priority <=6 start TP timer */
 #  define INT_INTCON_TPC_PRIO7       (7 << INT_INTCON_TPC_SHIFT) /* Int group priority <=7 start TP timer */
+
 #define INT_INTCON_MVEC              (1 << 12) /* Bit 12: Multi vector configuration */
 
 #if defined(CHIP_PIC32MX3) || defined(CHIP_PIC32MX4) || defined(CHIP_PIC32MX5) || \

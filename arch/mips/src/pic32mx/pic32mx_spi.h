@@ -33,6 +33,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Register Offsets *********************************************************/
 
 #define PIC32MX_SPI_CON_OFFSET     0x0000 /* SPI control register */
@@ -127,6 +128,7 @@
 #    define SPI_CON_RTXISEL_NEMPTY (1 << SPI_CON_RTXISEL_SHIFT) /* Buffer not empty */
 #    define SPI_CON_RTXISEL_HALF   (2 << SPI_CON_RTXISEL_SHIFT) /* Buffer half full or more */
 #    define SPI_CON_RTXISEL_FULL   (3 << SPI_CON_RTXISEL_SHIFT) /* Buffer full */
+
 #  define SPI_CON_STXISEL_SHIFT    (2)       /* Bits 2-3: SPI Transmit Buffer Empty Interrupt Mode */
 #  define SPI_CON_STXISEL_MASK     (3 << SPI_CON_STXISEL_SHIFT)
 #    define SPI_CON_STXISEL_DONE   (0 << SPI_CON_STXISEL_SHIFT) /* Buffer empty (and data shifted out) */
@@ -182,6 +184,7 @@
 #    define SPI_CON_FRMCNT_CHAR8   (3 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 8 chars */
 #    define SPI_CON_FRMCNT_CHAR16  (4 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 16 chars */
 #    define SPI_CON_FRMCNT_CHAR32  (5 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 32 chars */
+
 #  define SPI_CON_FRMSYPW          (1 << 27) /* Bits 27: Frame sync pulse width */
 #  define SPI_CON_MSSEN            (1 << 28) /* Bits 28: Master mode slave select enable */
 #endif
@@ -199,6 +202,7 @@
 #    define SPI2_CON2_AUDMOD_LJ    (1 << SPI2_CON2_AUDMOD_SHIFT) /* Left Justified mode */
 #    define SPI2_CON2_AUDMOD_RJ    (2 << SPI2_CON2_AUDMOD_SHIFT) /* Right Justified mode */
 #    define SPI2_CON2_AUDMOD_PCM   (3 << SPI2_CON2_AUDMOD_SHIFT) /* PCM/DSP mode */
+
                                              /* Bit 2: Reserved */
 #  define SPI2_CON2_AUDMONO        (1 << 3)  /* Bit 3:  Transmit Audio Data Format */
                                              /* Bits 5-6: Reserved */

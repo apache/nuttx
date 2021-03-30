@@ -35,7 +35,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The global pointer (GP) does not need to be saved in the "normal," flat
  * NuttX build.  However, it would be necessary to save the GP if this is
  * a KERNEL build or if NXFLAT is supported.
@@ -46,13 +48,16 @@
 #  define MIPS32_SAVE_GP 1
 #endif
 
-/* If this is a kernel build, how many nested system calls should we support? */
+/* If this is a kernel build,
+ * how many nested system calls should we support?
+ */
 
 #ifndef CONFIG_SYS_NNEST
 #  define CONFIG_SYS_NNEST 2
 #endif
 
 /* Register save state structure ********************************************/
+
 /* Co processor registers */
 
 #define REG_MFLO_NDX        0
@@ -61,7 +66,9 @@
 #define REG_STATUS_NDX      3
 
 /* General pupose registers */
+
 /* $0: Zero register does not need to be saved */
+
 /* $1: at_reg, assembler temporary */
 
 #define REG_R1_NDX          4
@@ -508,7 +515,8 @@ extern "C"
  *
  *   NOTE: This function should never be called from application code and,
  *   as a general rule unless you really know what you are doing, this
- *   function should not be called directly from operation system code either:
+ *   function should not be called directly from operation system code
+ *   either:
  *   Typically, the wrapper functions, enter_critical_section() is probably
  *   what you really want.
  *
@@ -531,7 +539,8 @@ irqstate_t up_irq_save(void);
  *
  *   NOTE: This function should never be called from application code and,
  *   as a general rule unless you really know what you are doing, this
- *   function should not be called directly from operation system code either:
+ *   function should not be called directly from operation system code
+ *   either:
  *   Typically, the wrapper functions, leave_critical_section() is probably
  *   what you really want.
  *

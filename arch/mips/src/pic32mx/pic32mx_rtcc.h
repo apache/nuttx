@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_rtcc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_RTCC_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_RTCC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_RTCC_CON_OFFSET         0x0000 /* RTC Control Register */
 #define PIC32MX_RTCC_CONCLR_OFFSET      0x0004 /* RTC Control Clear Register */
@@ -59,7 +60,7 @@
 #define PIC32MX_RTCC_ALRMDATESET_OFFSET 0x0058 /* Alarm Date Value Set Register */
 #define PIC32MX_RTCC_ALRMDATEINV_OFFSET 0x005c /* Alarm Date Value Invert Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_RTCC_CON                (PIC32MX_RTCC_K1BASE+PIC32MX_RTCC_CON_OFFSET)
 #define PIC32MX_RTCC_CONCLR             (PIC32MX_RTCC_K1BASE+PIC32MX_RTCC_CONCLR_OFFSET)
@@ -86,11 +87,12 @@
 #define PIC32MX_RTCC_ALRMDATESET        (PIC32MX_RTCC_K1BASE+PIC32MX_RTCC_ALRMDATESET_OFFSET)
 #define PIC32MX_RTCC_ALRMDATEINV        (PIC32MX_RTCC_K1BASE+PIC32MX_RTCC_ALRMDATEINV_OFFSET)
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* RTC Control Register */
 
 #define RTCC_CON_CAL_SHIFT              (16)      /* Bits 16-25: RTC drift calibration */
+
 #define RTCC_CON_CAL_MASK               (0x3ff << RTCC_CON_CAL_SHIFT) /* 10-bit 2's complement */
 #  define RTCC_CON_CAL_MAX              (0x1ff << RTCC_CON_CAL_SHIFT)
 #  define RTCC_CON_CAL_CENTER           (0x000 << RTCC_CON_CAL_SHIFT)
@@ -174,19 +176,19 @@
 #define RTCC_ALRMDATE_MONTH01_MASK      (15 << RTCC_ALRMDATE_MONTH01_SHIFT)
 #define RTCC_DATE_MONTH10               (1 << 20) /* Bit 20: BCD month, 10 digits */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

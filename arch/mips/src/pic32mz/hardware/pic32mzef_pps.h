@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mzef_pps.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEF_PPS_H
 #define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEF_PPS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include "pic32mz_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* PPS Register Offsets *********************************************************************/
+ ****************************************************************************/
+
+/* PPS Register Offsets *****************************************************/
 
 /* Peripheral pin select input register map */
 
@@ -164,7 +165,7 @@
 #  define PIC32MZ_RPG8R_OFFSET           0x16a0
 #  define PIC32MZ_RPG9R_OFFSET           0x16a4
 
-/* PPS Register Addresses *******************************************************************/
+/* PPS Register Addresses ***************************************************/
 
 /* Peripheral pin select input register map */
 
@@ -298,10 +299,12 @@
 #  define PIC32MZ_RPG8R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPG8R_OFFSET)
 #  define PIC32MZ_RPG9R                  (PIC32MZ_SFR_K1BASE+PIC32MZ_RPG9R_OFFSET)
 
-/* Input Pin Selection **********************************************************************/
-/* The encoding of the input pin selection is simple.  Since we know the devices, we also
- * can infer the register address so we need only the value for the register which is
- * exactly what is provided by the following definitions.
+/* Input Pin Selection ******************************************************/
+
+/* The encoding of the input pin selection is simple.  Since we know the
+ * devices, we also can infer the register address so we need only the value
+ * for the register which is exactly what is provided by the following
+ * definitions.
  */
 
 #define C1RXR_RPA15                      13
@@ -1031,10 +1034,12 @@
 #define U6RXR_RPF13                      9
 #define U6RXR_RPG9                       1
 
-/* Output Pin Selection *********************************************************************/
-/* The encoding of the output pin selection is a little more complex.  Knowing the device
- * does not provide sufficient information.  So the following definitions include both the
- * register value and the register address.
+/* Output Pin Selection *****************************************************/
+
+/* The encoding of the output pin selection is a little more complex.
+ * Knowing the device does not provide sufficient information.  So the
+ * following definitions include both the register value and the register
+ * address.
  */
 
 #define C1OUT_RPB0R                      14, PI32MZ_RPB0R

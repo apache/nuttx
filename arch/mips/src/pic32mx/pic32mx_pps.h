@@ -34,7 +34,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Register Offsets *********************************************************/
+
 /* Peripheral pin select input registers */
 
 #define PIC32MX_PPS_INT1R_OFFSET    0x0004
@@ -98,6 +100,7 @@
 #define PIC32MX_PPS_RPC9R_OFFSET    0x0090
 
 /* Register Addresses *******************************************************/
+
 /* Peripheral pin select input registers */
 
 #define PIC32MX_PPS_INT1R           (PIC32MX_INSEL_K1BASE+PIC32MX_PPS_INT1R_OFFSET)
@@ -161,6 +164,7 @@
 #define PIC32MX_PPS_RPC9R           (PIC32MX_OUTSEL_K1BASE+PIC32MX_PPS_RPC9R_OFFSET)
 
 /* Register Bit-Field Definitions *******************************************/
+
 /* Peripheral pin select input registers */
 
 #define PPS_INSEL_MASK              0x0000000f
@@ -217,8 +221,9 @@
 #define PPS_OUTSEL_SDO2             4
 #define PPS_OUTSEL_OC2              5
 
-//#define PPS_OUTSEL_SDO1           3
-//#define PPS_OUTSEL_SDO2           4
+/* #define PPS_OUTSEL_SDO1           3 */
+
+/* #define PPS_OUTSEL_SDO2           4 */
 #define PPS_OUTSEL_OC4              5
 #define PPS_OUTSEL_OC5              6
 #define PPS_OUTSEL_REFCLKO          7

@@ -63,7 +63,8 @@
  ****************************************************************************/
 
 static int pic32mz_oneshot_handler(int irg_num, void * context, void *arg);
-static inline int pic32mz_allocate_handler(struct pic32mz_oneshot_s *oneshot);
+static inline
+int pic32mz_allocate_handler(struct pic32mz_oneshot_s *oneshot);
 
 /****************************************************************************
  * Private Data

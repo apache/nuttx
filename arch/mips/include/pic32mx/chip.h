@@ -30,6 +30,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_PIC32MX110F016B)
@@ -2385,7 +2386,8 @@
 #  error "Unrecognized PIC32 device
 #endif
 
-/* IPL priority levels *****************************************************/
+/* IPL priority levels ******************************************************/
+
 /* These priorities will be used by the core to properly disable/mask
  * interrupts.
  */

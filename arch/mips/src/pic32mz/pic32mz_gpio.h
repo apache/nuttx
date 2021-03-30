@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_GPIO_H
 #define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -36,9 +36,10 @@
 #include <nuttx/irq.h>
 #include <arch/pic32mz/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* GPIO settings used in the configport, readport, writeport, etc.
  *
  * General encoding:
@@ -63,6 +64,7 @@
 #  define GPIO_MEDIUM        (1 << GPIO_SR_SHIFT) /* 01: Enabled and set to medium   */
 #  define GPIO_SLOW          (2 << GPIO_SR_SHIFT) /* 10: Enabled and set to slow     */
 #  define GPIO_SLOWEST       (3 << GPIO_SR_SHIFT) /* 11: Enabled and set to slowest  */
+
 #define GPIO_SR_CON0_SHIFT   (0) /* Bit 0: SRCON0x */
 #define GPIO_SR_CON0_MASK    (1 << GPIO_SR_CON0_SHIFT)
 #define GPIO_SR_CON1_SHIFT   (1) /* Bit 1: SRCON1x */
@@ -156,17 +158,17 @@
 #define GPIO_PIN14           (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15           (15 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 typedef uint32_t pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -184,53 +186,53 @@ extern "C"
 
 EXTERN const uintptr_t g_gpiobase[CHIP_NPORTS];
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_configgpio
  *
  * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin (the interrupt
- *   will be configured when pic32mz_attach() is called).
+ *   Configure a GPIO pin based on bit-encoded description of the pin (the
+ *   interrupt will be configured when pic32mz_attach() is called).
  *
  * Returned Value:
  *   OK on success; negated errno on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int pic32mz_configgpio(pinset_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void pic32mz_gpiowrite(pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool pic32mz_gpioread(pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_gpioirqinitialize
  *
  * Description:
  *   Initialize logic to support a GPIO change notification interrupts.  This
- *   function is called internally by the system on power up and should not be
- *   called again.
+ *   function is called internally by the system on power up and should not
+ *   be called again.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
 void pic32mz_gpioirqinitialize(void);
@@ -238,18 +240,19 @@ void pic32mz_gpioirqinitialize(void);
 #  define pic32mz_gpioirqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_gpioattach
  *
  * Description:
  *   Attach an interrupt service routine to a GPIO interrupt.  This will also
- *   reconfigure the pin as an interrupting input.  The change notification number is
- *   associated with all interrupt-capable GPIO pins.  The association could,
- *   however, differ from part to part and must be  provided by the caller.
+ *   reconfigure the pin as an interrupting input.  The change notification
+ *   number is associated with all interrupt-capable GPIO pins.  The
+ *   association could, however, differ from part to part and must be
+ *   provided by the caller.
  *
- *   When an interrupt occurs, it is due to a change on the GPIO input pin.  In that
- *   case, all attached handlers will be called.  Each handler must maintain state
- *   and determine if the underlying GPIO input value changed.
+ *   When an interrupt occurs, it is due to a change on the GPIO input pin.
+ *   In that case, all attached handlers will be called.  Each handler must
+ *   maintain state and determine if the underlying GPIO input value changed.
  *
  *   pinset  - GPIO pin configuration
  *   handler - Interrupt handler (may be NULL to detach)
@@ -267,13 +270,13 @@ int pic32mz_gpioattach(pinset_t pinset, xcpt_t handler, void *arg);
 #  define pic32mz_gpioattach(p,h,a) (0)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
 void pic32mz_gpioirqenable(pinset_t pinset);
@@ -281,13 +284,13 @@ void pic32mz_gpioirqenable(pinset_t pinset);
 #  define pic32mz_gpioirqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: pic32mz_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_GPIOIRQ
 void pic32mz_gpioirqdisable(pinset_t pinset);
@@ -295,13 +298,13 @@ void pic32mz_gpioirqdisable(pinset_t pinset);
 #  define pic32mz_gpioirqdisable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  pic32mz_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 void pic32mz_dumpgpio(pinset_t pinset, const char *msg);

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_usbotg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_USBOTG_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_USBOTG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_USBOTG_IR_OFFSET   0x0040 /* USB OTG Interrupt Flags Register */
 #define PIC32MX_USBOTG_IE_OFFSET   0x0050 /* USB OTG Interrupt Enable Register */
@@ -73,7 +74,7 @@
 #define PIC32MX_USB_EP14_OFFSET    0x03e0 /* USB Endpoint 14 Control Register */
 #define PIC32MX_USB_EP15_OFFSET    0x03f0 /* USB Endpoint 15 Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_USBOTG_IR          (PIC32MX_USB_K1BASE+PIC32MX_USBOTG_IR_OFFSET)
 #define PIC32MX_USBOTG_IE          (PIC32MX_USB_K1BASE+PIC32MX_USBOTG_IE_OFFSET)
@@ -114,9 +115,10 @@
 #define PIC32MX_USB_EP14           (PIC32MX_USB_K1BASE+PIC32MX_USB_EP14_OFFSET)
 #define PIC32MX_USB_EP15           (PIC32MX_USB_K1BASE+PIC32MX_USB_EP15_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* USB OTG Interrupt Flags Register */
+
 /* USB OTG Interrupt Enable Register */
 
 #define USBOTG_INT_VBUSVD          (1 << 0) /* Bit 0: A-Device VBUS Change Indicator */
@@ -157,6 +159,7 @@
 #define USB_PWRC_UACTPND           (1 << 7) /* Bit 7: USB Activity Pending */
 
 /* USB Pending Interrupt Register */
+
 /* USB Interrupt Enable Register */
 
 #define USB_INT_URST               (1 << 0) /* Bit 0: USB Reset Interrupt (Device mode) */
@@ -172,6 +175,7 @@
 #define USB_INT_ALL                0xff
 
 /* USB Pending Error Interrupt Register */
+
 /* USB Interrupt Error Enable Register */
 
 #define USB_EINT_PID               (1 << 0) /* Bit 0: PID Check Failure Flag */
@@ -234,6 +238,7 @@
 #  define USB_TOK_PID_OUT          (1 << USB_TOK_PID_SHIFT)  /* OUT (TX) token type transaction */
 #  define USB_TOK_PID_IN           (9 << USB_TOK_PID_SHIFT)  /* IN (RX) token type transaction */
 #  define USB_TOK_PID_SETUP        (13 << USB_TOK_PID_SHIFT) /* SETUP (TX) token type transaction */
+
 #define USB_TOK_EP_SHIFT           (0)      /* Bits 0-3: Token Command Endpoint Address */
 #define USB_TOK_EP_MASK            (15 << USB_TOK_EP_SHIFT)
 
@@ -278,7 +283,8 @@
 #define USB_EP_RETRYDIS            (1 << 6) /* Bit 6: Retry Disable (Host mode and U1EP0 only) */
 #define USB_EP_LSPD                (1 << 7) /* Bit 7: Low-Speed Direct Connection Enable */
 
-/* Buffer Descriptor Table (BDT) ****************************************************/
+/* Buffer Descriptor Table (BDT) ********************************************/
+
 /* Offset 0: On write (software->hardware) */
 
 #define USB_BDT_STATUS_MASK        0xfc     /* Bits 2-7: Status bits */
@@ -308,9 +314,9 @@
 #define USB_BDT_WORD_SIZE          2        /* Two 32-bit words per BDT */
 #define USB_NBDTS_PER_EP           4        /* Number of BDTS per endpoint: IN/OUT and EVEN/ODD */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -322,13 +328,13 @@ struct usbotg_bdtentry_s
   uint8_t *addr;    /* Buffer address */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

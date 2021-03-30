@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mz_timer.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_TIMER_H
 #define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,10 +32,11 @@
 
 #if CHIP_NTIMERS > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Timer Peripheral Offsets *********************************************************/
+ ****************************************************************************/
+
+/* Timer Peripheral Offsets *************************************************/
 
 #define PIC32MZ_TIMERn_OFFSET(n)   ((n) << 9)
 #  define PIC32MZ_TIMER1_OFFSET    0x0000
@@ -48,7 +49,7 @@
 #  define PIC32MZ_TIMER8_OFFSET    0x0e00
 #  define PIC32MZ_TIMER9_OFFSET    0x1000
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define PIC32MZ_TIMER_CON_OFFSET    0x0000 /* Timer control register */
 #define PIC32MZ_TIMER_CONCLR_OFFSET 0x0004 /* Timer control clear register */
@@ -65,7 +66,7 @@
 #define PIC32MZ_TIMER_PRSET_OFFSET  0x0028 /* Timer period set register */
 #define PIC32MZ_TIMER_PRINV_OFFSET  0x002c /* Timer period invert register */
 
-/* Timer Peripheral Addresses *******************************************************/
+/* Timer Peripheral Addresses ***********************************************/
 
 #define PIC32MZ_TIMERn_K1BASE(n)   (PIC32MZ_TIMER_K1BASE+PIC32MZ_TIMERn_OFFSET(n))
 #  define PIC32MZ_TIMER1_K1BASE    (PIC32MZ_TIMER_K1BASE+PIC32MZ_TIMER1_OFFSET)
@@ -78,7 +79,7 @@
 #  define PIC32MZ_TIMER8_K1BASE    (PIC32MZ_TIMER_K1BASE+PIC32MZ_TIMER8_OFFSET)
 #  define PIC32MZ_TIMER9_K1BASE    (PIC32MZ_TIMER_K1BASE+PIC32MZ_TIMER9_OFFSET)
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MZ_TIMER_CON(n)        (PIC32MZ_TIMERn_K1BASE(n)+PIC32MZ_TIMER_CON_OFFSET)
 #define PIC32MZ_TIMER_CONCLR(n)     (PIC32MZ_TIMERn_K1BASE(n)+PIC32MZ_TIMER_CONCLR_OFFSET)
@@ -226,8 +227,7 @@
 #  define PIC32MZ_TIMER9_PRINV      (PIC32MZ_TIMER9_K1BASE+PIC32MZ_TIMER_PRINV_OFFSET)
 #endif
 
-
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Timer control register */
 
@@ -244,12 +244,14 @@
 #  define TIMER_CON_TCKPS_32        (5 << TIMER_CON_TCKPS_SHIFT) /* 1:32 prescale value */
 #  define TIMER_CON_TCKPS_64        (6 << TIMER_CON_TCKPS_SHIFT) /* 1:64 prescale value */
 #  define TIMER_CON_TCKPS_256       (7 << TIMER_CON_TCKPS_SHIFT) /* 1:256 prescale value */
+
 #define TIMER1_CON_TCKPS_SHIFT      (4)       /* Bits 4-5:  Timer input clock prescale select (timer 1 only) */
 #define TIMER1_CON_TCKPS_MASK       (3 << TIMER1_CON_TCKPS_SHIFT)
 #  define TIMER1_CON_TCKPS_1        (0 << TIMER1_CON_TCKPS_SHIFT) /* 1:1 prescale value */
 #  define TIMER1_CON_TCKPS_8        (1 << TIMER1_CON_TCKPS_SHIFT) /* 1:8 prescale value */
 #  define TIMER1_CON_TCKPS_64       (2 << TIMER1_CON_TCKPS_SHIFT) /* 1:64 prescale value */
 #  define TIMER1_CON_TCKPS_256      (3 << TIMER1_CON_TCKPS_SHIFT) /* 1:256 prescale value */
+
 #define TIMER_CON_TGATE             (1 << 7)  /* Bit 7: Timer gated time accumulation enable (all) */
 #define TIMER1_CON_TWIP             (1 << 11) /* Bit 11: Asynchronous timer write in progress (timer 1 only) */
 #define TIMER1_CON_TWDIS            (1 << 12) /* Bit 12: Asynchronous timer write disable (timer 1 only) */
@@ -264,19 +266,19 @@
 
 #define TIMER_PR_MASK    0xffff /* 16-bit timer period value */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

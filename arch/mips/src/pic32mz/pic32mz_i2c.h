@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_i2c.h
  *
  *   Copyright (C) 2018 Abdelatif Guettouche. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_I2C_H
 #define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_I2C_H

@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_DMA_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_DMA_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -32,10 +32,12 @@
 
 #if CHIP_NDMACH > 0
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
+
 /* Global DMA Registers */
 
 #define PIC32MX_DMA_CON_OFFSET        0x0000  /* DMA Controller Control Register */
@@ -99,7 +101,8 @@
 #define PIC32MX_DMACH_DATSET_OFFSET   0x00b8  /* DMA Channel Pattern Data Set Register */
 #define PIC32MX_DMACH_DATINV_OFFSET   0x00bc  /* DMA Channel Pattern Data Invert Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
+
 /* Global DMA Registers */
 
 #define PIC32MX_DMA_CON               (PIC32MX_DMA_K1BASE+PIC32MX_DMA_CON_OFFSET)
@@ -498,8 +501,10 @@
 #  define PIC32MX_DMACH7_DATINV       (PIC32MX_DMACH7_K1BASE+PIC32MX_DMACH_DATINV_OFFSET)
 #endif
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
+
 /* Global DMA Registers */
+
 /* DMA Controller Control Register */
 
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)
@@ -580,6 +585,7 @@
 /* DMA CRCXOR Enable Register -- 16 or 32-bits of data */
 
 /* Per-Channel DMA Registers */
+
 /* DMA Channel Control Register */
 
 #define DMACH_CON_CHPRI_SHIFT         (0)       /* Bits 0-1: Channel priority */
@@ -607,6 +613,7 @@
 #define DMACH_ECON_CHSIRQ_SHIFT       (8)       /* Bits 8-15: Channel Transfer Start IRQ */
 #define DMACH_ECON_CHSIRQ_MASK        (0xff << DMACH_ECON_CHSIRQ_SHIFT)
 #  define DMACH_ECON_CHSIRQ(n)        ((n) << DMACH_ECON_CHSIRQ_SHIFT) /* Interrupt n will initiate a DMA transfer */
+
 #define DMACH_ECON_CHAIRQ_SHIFT       (16)      /* Bits 16-23: Channel transfer abort irq */
 #define DMACH_ECON_CHAIRQ_MASK        (0xff << DMACH_ECON_CHAIRQ_SHIFT)
 #  define DMACH_ECON_CHAIRQ(n)        ((n) << DMACH_ECON_CHAIRQ_SHIFT) /* Interrupt n will abort any transfers in progress and set CHAIF */
@@ -630,39 +637,57 @@
 #define DMACH_INT_CHSHIE              (1 << 22) /* Bit 22: Channel source half empty interrupt enable */
 #define DMACH_INT_CHSDIE              (1 << 23) /* Bit 23: Channel source done interrupt enable */
 
-/* DMA Channel Source Start Address Register -- This register contains a 32-bit address value */
+/* DMA Channel Source Start Address Register --
+ * This register contains a 32-bit address value
+ */
 
-/* DMA Channel Destination Start Address Register -- This register contains a 32-bit address value */
+/* DMA Channel Destination Start Address Register --
+ * This register contains a 32-bit address value
+ */
 
-/* DMA Channel Source Size Register -- 8 or 16 bits of byte size data */
+/* DMA Channel Source Size Register --
+ * 8 or 16 bits of byte size data
+ */
 
-/* DMA Channel Destination Size Register -- 8 or 16 bits of byte size data */
+/* DMA Channel Destination Size Register --
+ * 8 or 16 bits of byte size data
+ */
 
-/* DMA Channel Source Pointer Register -- 8 or 16 bits of byte index data */
+/* DMA Channel Source Pointer Register --
+ * 8 or 16 bits of byte index data
+ */
 
-/* DMA Channel Destination Pointer Register -- 8 or 16 bits of byte index data */
+/* DMA Channel Destination Pointer Register --
+ * 8 or 16 bits of byte index data
+ */
 
-/* DMA Channel Cell-Size Register -- 8 or 16 bits of byte transferred data */
+/* DMA Channel Cell-Size Register --
+ * 8 or 16 bits of byte transferred data
+ */
 
-/* DMA Channel Cell Pointer Register -- 8 or 16 bits of byte transferred data */
+/* DMA Channel Cell Pointer Register --
+ * 8 or 16 bits of byte transferred data
+ */
 
-/* DMA Channel Pattern Data Register -- 8-bits of pattern data */
+/* DMA Channel Pattern Data Register --
+ * 8-bits of pattern data
+ */
 
 #define DMACH_DAT_MASK                0xff
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

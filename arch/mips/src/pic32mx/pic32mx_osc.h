@@ -32,6 +32,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Register Offsets *********************************************************/
 
 #define PIC32MX_OSCCON_OFFSET    0x0000 /* Oscillator control register offset */
@@ -64,6 +65,7 @@
 #  define OSCCON_NOSC_LPRC      (5 << OSCCON_NOSC_SHIFT) /* Low power RC oscillator */
 #  define OSCCON_NOSC_FRCDIV16  (6 << OSCCON_NOSC_SHIFT) /* FRC divided by 16 */
 #  define OSCCON_NOSC_FRCDIV    (7 << OSCCON_NOSC_SHIFT) /* FRC dived by FRCDIV */
+
 #define OSCCON_COSC_SHIFT       (12)      /* Bits 12-14: Current oscillator selection */
 #define OSCCON_COSC_MASK        (7 << OSCCON_COSC_SHIFT)
 #  define OSCCON_COSC_FRC       (0 << OSCCON_COSC_SHIFT) /* FRC oscillator */
@@ -74,6 +76,7 @@
 #  define OSCCON_COSC_LPRC      (5 << OSCCON_COSC_SHIFT) /* Low power RC oscillator */
 #  define OSCCON_COSC_FRCDIV16  (6 << OSCCON_COSC_SHIFT) /* FRC divided by 16 */
 #  define OSCCON_COSC_FRCDIV    (7 << OSCCON_COSC_SHIFT) /* FRC dived by FRCDIV */
+
 #define OSCCON_PLLMULT_SHIFT    (16)      /* Bits 16-18: PLL multiplier */
 #define OSCCON_PLLMULT_MASK     (7 << OSCCON_PLLMULT_SHIFT)
 #  define OSCCON_PLLMULT_MUL15  (0 << OSCCON_PLLMULT_SHIFT)

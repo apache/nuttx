@@ -1,4 +1,4 @@
- /********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_flash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_FLASH_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_FLASH_H
 
- /********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
- /********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_FLASH_NVMCON_OFFSET     0x0000 /* Programming Control Register */
 #define PIC32MX_FLASH_NVMCONCLR_OFFSET  0x0004 /* Programming Control Clear Register */
@@ -46,7 +47,7 @@
 #define PIC32MX_FLASH_NVMDATA_OFFSET    0x0030 /* Flash Program Data Register */
 #define PIC32MX_FLASH_NVMSRCADDR_OFFSET 0x0040 /* Source Data Address Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_FLASH_NVMCON            (PIC32MX_FLASH_K1BASE+PIC32MX_FLASH_NVMCON_OFFSET)
 #define PIC32MX_FLASH_NVMCONCLR         (PIC32MX_FLASH_K1BASE+PIC32MX_FLASH_NVMCONCLR_OFFSET)
@@ -60,7 +61,7 @@
 #define PIC32MX_FLASH_NVMDATA           (PIC32MX_FLASH_K1BASE+PIC32MX_FLASH_NVMDATA_OFFSET)
 #define PIC32MX_FLASH_NVMSRCADDR        (PIC32MX_FLASH_K1BASE+PIC32MX_FLASH_NVMSRCADDR_OFFSET)
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Programming Control Register */
 
@@ -71,6 +72,7 @@
 #  define FLASH_NVMCON_NVMOP_ROWPROG    (3 << FLASH_NVMCON_NVMOP_SHIFT) /* Row program operation */
 #  define FLASH_NVMCON_NVMOP_PFMERASE   (4 << FLASH_NVMCON_NVMOP_SHIFT) /* Page erase operation */
 #  define FLASH_NVMCON_NVMOP_PFMERASE   (5 << FLASH_NVMCON_NVMOP_SHIFT) /* PFM erase operationxx */
+
 #define FLASH_NVMCON_LVDSTAT            (1 << 11) /* Bit nn: Low-voltage detect status */
 #define FLASH_NVMCON_LVDERR             (1 << 12) /* Bit nn: Low-voltage detect error */
 #define FLASH_NVMCON_WRERR              (1 << 13) /* Bit nn: Write error */
@@ -85,19 +87,19 @@
 
 /* Source Data Address Register -- 32 Bits of data */
 
- /********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
- /********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
- /********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

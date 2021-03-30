@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_cvr.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,39 +16,39 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CVR_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CVR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "pic32mx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_CVR_CON_OFFSET    0x0000 /* Comparator voltage reference control register */
 #define PIC32MX_CVR_CONCLR_OFFSET 0x0004 /* Comparator voltage reference control clear register */
 #define PIC32MX_CVR_CONSET_OFFSET 0x0008 /* Comparator voltage reference control set register */
 #define PIC32MX_CVR_CONINV_OFFSET 0x000c /* Comparator voltage reference control invert register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_CVR_CON           (PIC32MX_CVR_K1BASE+PIC32MX_CVR_CON_OFFSET)
 #define PIC32MX_CVR_CONCLR        (PIC32MX_CVR_K1BASE+PIC32MX_CVR_CONCLR_OFFSET)
 #define PIC32MX_CVR_CONSET        (PIC32MX_CVR_K1BASE+PIC32MX_CVR_CONSET_OFFSET)
 #define PIC32MX_CVR_CONINV        (PIC32MX_CVR_K1BASE+PIC32MX_CVR_CONINV_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Comparator voltage reference control register */
 
@@ -65,23 +65,24 @@
 #    define CVR_CON_BGSEL_0p6V    (1 << CVR_CON_CVR_SHIFT) /* IVREF = 0.6V (nominal) */
 #    define CVR_CON_BGSEL_0p2V    (2 << CVR_CON_CVR_SHIFT) /* IVREF = 0.2V (nominal) */
 #    define CVR_CON_BGSEL_VREF    (3 << CVR_CON_CVR_SHIFT) /* VREF = VREF+ */
+
 #  define CVR_CON_VREFSEL         (1 << 10) /* Bit 10:  Voltage reference select */
 #endif
 #define CVR_CON_ON                (1 << 15) /* Bit 15: Comparator voltage reference on */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

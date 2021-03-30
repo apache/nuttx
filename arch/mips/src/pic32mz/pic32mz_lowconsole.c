@@ -161,7 +161,8 @@ static void pic32mz_uartsetbaud(uintptr_t uart_base, uint32_t baudrate)
   uint32_t brg;
   unsigned int mode;
 
-  /* We want the largest value of BRG divisor possible (for the best accuracy)
+  /* We want the largest value of BRG divisor possible
+   * (for the best accuracy)
    * Subject to BRG <= 65536.
    */
 
