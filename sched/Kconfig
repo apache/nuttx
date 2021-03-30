@@ -1746,6 +1746,13 @@ endmenu # Work Queue Support
 
 menu "Stack and heap information"
 
+config DEFAULT_TASK_STACKSIZE
+	int "The default stack size for tasks"
+	default 65536 if ARCH_SIM
+	default 2048
+	---help---
+		The default stack size for tasks.
+
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"
 	default 1024
