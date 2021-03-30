@@ -26,8 +26,9 @@ config LIBDSP_PRECISION
 	---help---
 		With this option we can select libdsp precision for
 		some of calculations. There are 3 available options:
-		0 - the fastest calculation but the lowest precision
-		1 - a little better precision than above, but slowest
+		0 - the fastest calculation but the lowest precision,
+		1 - increased precision than for option 0 at the expense
+		    of a longer execution time,
 		2 - the most accuracte but the slowest one, use standard math functions.
 
 config LIBDSP_FOC_VABC
