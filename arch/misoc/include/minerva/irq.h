@@ -55,7 +55,9 @@
 
 /* Configuration ************************************************************/
 
-/* If this is a kernel build, how many nested system calls should we support? */
+/* If this is a kernel build, how many nested system calls should we
+ * support?
+ */
 
 #define MINERVA_NINTERRUPTS 32
 #define MINERVA_IRQ_SWINT   32

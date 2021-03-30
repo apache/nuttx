@@ -105,10 +105,10 @@ extern uint32_t g_idle_topstack;
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
-/* Low level initialization provided by board-level logic ******************/
+/* Low level initialization provided by board-level logic *******************/
 
 void minerva_board_initialize(void);
 

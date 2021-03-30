@@ -122,7 +122,7 @@ void up_timer_initialize(void)
 
   timer0_ev_pending_write(timer0_ev_pending_read());
 
-  /* Disable timer*/
+  /* Disable timer */
 
   timer0_en_write(0);
 
