@@ -156,7 +156,7 @@ void up_timer_initialize(void)
 
   /* Set the timer control register.  TCNT cleared by FRA */
 
-  putreg8(SH1_ITUTCR_CGRA|SH1_ITUTCR_DIV, SH1_ITU0_TCR);
+  putreg8(SH1_ITUTCR_CGRA | SH1_ITUTCR_DIV, SH1_ITU0_TCR);
 
   /* Set the timer I/O control register */
 

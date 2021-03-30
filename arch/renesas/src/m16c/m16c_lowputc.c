@@ -38,7 +38,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 #ifndef M16C_XIN_PRESCALER
 #  define M16C_XIN_PRESCALER 1
@@ -138,7 +138,7 @@
 
 #define M16C_MR_VALUE (M16C_MR_SMDBITS|M16C_MR_PARITY|M16C_MR_STOPBITS)
 
-/* Clocking ***************************************************************/
+/* Clocking *****************************************************************/
 
 /* The Bit Rate Generator (BRG) value can be calculated by:
  *
@@ -222,25 +222,27 @@ static inline void up_lowserialsetup(void)
   putreg8(0, M16C_UCON);
 #endif
 
-/* Set interrupt cause=TX complete and continuous receive mode */
+  /* Set interrupt cause=TX complete and continuous receive mode */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
   regval  = getreg8(M16C_UCON);
-  regval |= (UART_CON_U0IRS|UART_CON_U0RRM);
+  regval |= (UART_CON_U0IRS | UART_CON_U0RRM);
   putreg8(regval, M16C_UCON);
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
   regval = getreg8(M16C_UCON);
-  regval |= (UART_CON_U1IRS|UART_CON_U1RRM);
+  regval |= (UART_CON_U1IRS | UART_CON_U1RRM);
   putreg8(regval, M16C_UCON);
 #else
   regval = getreg8(M16C_U2C1);
-  regval |= (UART_C1_U2IRS|UART_C1_U2RRM);
+  regval |= (UART_C1_U2IRS | UART_C1_U2RRM);
   putreg8(regval, M16C_U2C1);
 #endif
 
-  /* Set UART transmit/receive control register 1 to enable transmit and receive */
+  /* Set UART transmit/receive control register 1 to enable transmit and
+   * receive
+   */
 
-  putreg8(UART_C1_TE|UART_C1_RE, M16C_UART_BASE + M16C_UART_C1);
+  putreg8(UART_C1_TE | UART_C1_RE, M16C_UART_BASE + M16C_UART_C1);
 
   /* Set UART transmit/receive mode register data bits, stop bits, parity */
 

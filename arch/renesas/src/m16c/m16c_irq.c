@@ -31,7 +31,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
 /* This holds a references to the current interrupt level register storage
