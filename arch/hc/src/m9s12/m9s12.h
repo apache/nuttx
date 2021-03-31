@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_HC_SRC_M9S12_M9S12_H
 #define __ARCH_HC_SRC_M9S12_M9S12_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -36,13 +36,14 @@
 #include "up_internal.h"
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* GPIO management macros:
  *
- * The GPIO configuration is represented by a 16-bit value encoded as follows:
+ * The GPIO configuration is represented by a 16-bit value encoded as
+ * follows:
  *
  *   xIIO UURV DMGG GPPP
  *    ||| |||| |||    `-Pin number
@@ -180,15 +181,15 @@
 #  define GPIO_PIN_6    (6 << GPIO_PORT_SHIFT)
 #  define GPIO_PIN_7    (7 << GPIO_PORT_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -199,57 +200,58 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_gpioirqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void hcs12_gpioirqinitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int hcs12_configgpio(uint16_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void hcs12_gpiowrite(uint16_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool hcs12_gpioread(uint16_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_HCS12_GPIOIRQ
 void hcs12_gpioirqenable(int irq);
@@ -257,13 +259,13 @@ void hcs12_gpioirqenable(int irq);
 #  define hcs12_gpioirqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: hcs12_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_HCS12_GPIOIRQ
 void hcs12_gpioirqdisable(int irq);
@@ -271,13 +273,14 @@ void hcs12_gpioirqdisable(int irq);
 #  define hcs12_gpioirqdisable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  hcs12_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int hcs12_dumpgpio(uint16_t pinset, const char *msg);
@@ -285,7 +288,7 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg);
 #  define hcs12_dumpgpio(p,m)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function: hcs12_ethinitialize
  *
  * Description:
@@ -302,7 +305,7 @@ int hcs12_dumpgpio(uint16_t pinset, const char *msg);
  *
  * Assumptions:
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if STM32_NTHERNET > 1
 int hcs12_ethinitialize(int intf);
@@ -325,32 +328,34 @@ int hcs12_ethinitialize(int intf);
 struct spi_dev_s;  /* Forward reference */
 FAR struct spi_dev_s *hcs12_spibus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  hcs12_spiselect and hcs12_spistatus
  *
  * Description:
  *   The external functions, hcs12_spiselect and hcs12_spistatus must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including mps12_spibus_initialize())
- *   are provided by common STM32 logic.  To use this common SPI logic on your
- *   board:
+ *   provided by board-specific logic.  They are implementations of the
+ *   select and status methods of the SPI interface defined by struct
+ *   spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including mps12_spibus_initialize()) are provided by
+ *   common STM32 logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in hcs12_boardinitialize() to configure SPI chip select
  *      pins.
  *   2. Provide hcs12_spiselect() and hcs12_spistatus() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to mps12_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by mps12_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a calls to mps12_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by mps12_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-void  hcs12_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  hcs12_spiselect(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected);
 uint8_t hcs12_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 
 #undef EXTERN

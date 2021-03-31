@@ -68,8 +68,8 @@ void up_mdelay(unsigned int milliseconds)
 
   for (i = 0; i < milliseconds; i++)
     {
-        for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-          {
-          }
+      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+        {
+        }
     }
 }

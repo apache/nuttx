@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_flash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_FLASH_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Flash memory map *****************************************************************
+/* Flash memory map *********************************************************
  *
  * 0x4000-0x7fff: 16Kb Fixed FLASH EEPROM (Page 3e)
  * 0x8000-0xbfff: 16Kb Page window
@@ -65,8 +65,8 @@
  *               RxReady: ldaa   SCI0DRL              ;read character into A
  *                        rts                         ;return
  * EraseAllCmd - Use repeated page erase commands to erase all flash
- *               except bootloader in protected block at the end of flash, and mass
- *               erase all EEPROM locations
+ *               except bootloader in protected block at the end of flash,
+ *               and mass erase all EEPROM locations
  * DoOnStack -   Copy to stack and execute from RAM
  * WriteD2IX -   Write the data in D (word) to the address in IX
  *               The location may be RAM, FLASH, EEPROM, or a register
@@ -106,7 +106,7 @@
 
 #define HCS12_VECTOR_BASE  0xff80 /* 0xff80–0xfffe: Actual vector base */
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define HCS12_FLASH_FCLKDIV_OFFSET (HCS12_FLASH_BASE+0x00) /* Flash Clock Divider Register */
 #define HCS12_FLASH_FSEC_OFFSET    (HCS12_FLASH_BASE+0x03) /* Flash Security Register  */
@@ -119,7 +119,7 @@
 #define HCS12_FLASH_FDATAHI_OFFSET (HCS12_FLASH_BASE+0x0a) /* Flash High Data Register */
 #define HCS12_FLASH_FDATALO_OFFSET (HCS12_FLASH_BASE+0x0b) /* Flash Low Data Register (*/
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_FLASH_FCLKDIV        (HCS12_REG_BASE+HCS12_FLASH_FCLKDIV_OFFSET)
 #define HCS12_FLASH_FSEC           (HCS12_REG_BASE+HCS12_FLASH_FSEC_OFFSET)
@@ -132,7 +132,7 @@
 #define HCS12_FLASH_FDATAHI        (HCS12_REG_BASE+HCS12_FLASH_FDATAHI_OFFSET)
 #define HCS12_FLASH_FDATALO        (HCS12_REG_BASE+HCS12_FLASH_FDATALO_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 #define FLASH_FCLKDIV_FDIV_SHIFT   (0)      /* Bits 0-5: Clock Divider Bits */
 #define FLASH_FCLKDIV_FDIV_MASK    (0x3f << FLASH_FCLKDIV_FDIV_SHIFT)
@@ -179,16 +179,16 @@
 
 #define FLASH_FADDRHI_MASK         0x7f
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_FLASH_H */

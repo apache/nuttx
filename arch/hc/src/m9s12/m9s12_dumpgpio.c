@@ -124,15 +124,15 @@ static const struct gpio_piminfo_s piminfo[HCS12_PIM_NPORTS] =
   {HCS12_PIM_PORTG_BASE, 'G', PIMPORT_FORM3}, /* Port G */
   {HCS12_PIM_PORTH_BASE, 'H', PIMPORT_FORM3}, /* Port H */
   {HCS12_PIM_PORTJ_BASE, 'J', PIMPORT_FORM3}, /* Port J */
-  {HCS12_PIM_PORTL_BASE, 'L', PIMPORT_FORM2}  /* Port L */
+  {HCS12_PIM_PORTL_BASE, 'L', PIMPORT_FORM2}, /* Port L */
 };
 
 static const struct gpio_mebiinfo_s mebiinfo[HCS12_MEBI_NPORTS] =
 {
- {HCS12_MEBI_PORTA, HCS12_MEBI_DDRA, 'A', MEBIPORT_AB}, /* Port A */
- {HCS12_MEBI_PORTB, HCS12_MEBI_DDRB, 'B', MEBIPORT_AB}, /* Port B */
- {HCS12_MEBI_PORTE, HCS12_MEBI_DDRE, 'E', MEBIPORT_E},  /* Port E */
- {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK, 'K', MEBIPORT_K}   /* Port K */
+  {HCS12_MEBI_PORTA, HCS12_MEBI_DDRA, 'A', MEBIPORT_AB}, /* Port A */
+  {HCS12_MEBI_PORTB, HCS12_MEBI_DDRB, 'B', MEBIPORT_AB}, /* Port B */
+  {HCS12_MEBI_PORTE, HCS12_MEBI_DDRE, 'E', MEBIPORT_E},  /* Port E */
+  {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK, 'K', MEBIPORT_K},  /* Port K */
 };
 
 /****************************************************************************
@@ -164,32 +164,32 @@ static inline void hcs12_pimdump(uint8_t portndx)
   ptr = &piminfo[portndx];
   gpioinfo(" PIM Port%c:\n", ptr->name);
   gpioinfo("   IO:%02x  INP:%02x DDR:%02x RDR:%02x\n",
-           getreg8(ptr->base+HCS12_PIM_IO_OFFSET),
-           getreg8(ptr->base+HCS12_PIM_INPUT_OFFSET),
-           getreg8(ptr->base+HCS12_PIM_DDR_OFFSET),
-           getreg8(ptr->base+HCS12_PIM_RDR_OFFSET));
+           getreg8(ptr->base + HCS12_PIM_IO_OFFSET),
+           getreg8(ptr->base + HCS12_PIM_INPUT_OFFSET),
+           getreg8(ptr->base + HCS12_PIM_DDR_OFFSET),
+           getreg8(ptr->base + HCS12_PIM_RDR_OFFSET));
 
   switch (ptr->form)
     {
     case PIMPORT_FORM1:
       gpioinfo("  PER:%02x  PS:%02x\n",
-               getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_PS_OFFSET));
+               getreg8(ptr->base + HCS12_PIM_PER_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_PS_OFFSET));
       break;
 
     case PIMPORT_FORM2:
       gpioinfo("  PER:%02x  PS:%02x WOM:%02x\n",
-               getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_PS_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_WOM_OFFSET));
+               getreg8(ptr->base + HCS12_PIM_PER_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_PS_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_WOM_OFFSET));
       break;
 
     case PIMPORT_FORM3:
       gpioinfo("  PER:%02x  PS:%02x  IE:%02x  IF:%02x\n",
-               getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_PS_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_IE_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_IF_OFFSET));
+               getreg8(ptr->base + HCS12_PIM_PER_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_PS_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_IE_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_IF_OFFSET));
       break;
 
     default:
@@ -246,13 +246,14 @@ static inline void hcs12_mebidump(uint8_t portndx)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Function:  hcs12_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int hcs12_dumpgpio(uint16_t pinset, const char *msg)
 {

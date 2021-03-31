@@ -52,5 +52,5 @@
 
 bool up_interrupt_context(void)
 {
-   return g_current_regs != NULL;
+  return g_current_regs != NULL;
 }

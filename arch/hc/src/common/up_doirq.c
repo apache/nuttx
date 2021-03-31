@@ -89,7 +89,7 @@ uint8_t *up_doirq(int irq, uint8_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t*)g_current_regs);
+      up_restorefpu((uint32_t *)g_current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -110,7 +110,7 @@ uint8_t *up_doirq(int irq, uint8_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint8_t*)g_current_regs;
+  regs = (uint8_t *)g_current_regs;
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.

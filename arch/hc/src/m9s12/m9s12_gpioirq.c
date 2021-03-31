@@ -103,6 +103,7 @@ static int hcs12_mapirq(int irq, uint16_t *regaddr, uint8_t *pin)
         }
 #endif
     }
+
   return -EINVAL;
 }
 #endif /* CONFIG_HCS12_GPIOIRQ */
@@ -116,7 +117,8 @@ static int hcs12_mapirq(int irq, uint16_t *regaddr, uint8_t *pin)
  ****************************************************************************/
 
 #ifdef CONFIG_HCS12_GPIOIRQ
-static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context)
+static int hcs12_interrupt(uint16_t base,
+                           int irq0, uint8_t valid, void *context)
 {
   uint8_t pending;
   uint8_t bit;
@@ -124,14 +126,15 @@ static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context
 
   /* Get the set of enabled (unmasked) interrupts pending on this port */
 
-  pending = getreg8(base+HCS12_PIM_IF_OFFSET) && getreg8(base+HCS12_PIM_IE_OFFSET);
+  pending = getreg8(base + HCS12_PIM_IF_OFFSET) &&
+            getreg8(base + HCS12_PIM_IE_OFFSET);
 
   /* Then check each bit in the set of interrupts */
 
   for (bit = 1, irq = irq0; pending != 0; bit <<= 1)
     {
-      /* We may need to skip over some bits in the interrupt register (without
-       * incrementing the irq value.
+      /* We may need to skip over some bits in the interrupt register
+       * (without incrementing the irq value.
        */
 
       if ((valid & bit) != 0)
@@ -146,9 +149,11 @@ static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context
                * flags registers.
                */
 
-              putreg8(bit, base+HCS12_PIM_IF_OFFSET);
+              putreg8(bit, base + HCS12_PIM_IF_OFFSET);
 
-              /* Re-deliver the IRQ (recurses! We got here from irq_dispatch!) */
+              /* Re-deliver the IRQ
+               * (recurses! We got here from irq_dispatch!)
+               */
 
               irq_dispatch(irq, context);
 
@@ -162,6 +167,7 @@ static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context
           irq++;
         }
     }
+
   return OK;
 }
 

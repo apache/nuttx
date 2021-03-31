@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_sci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_SCI_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_SCI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define HCS12_SCI_BDH_OFFSET      0x00 /* SCI Baud Rate Register High */
 #define HCS12_SCI_BDL_OFFSET      0x01 /* SCI Baud Rate Register Low */
@@ -43,7 +43,7 @@
 #define HCS12_SCI_DRH_OFFSET      0x06 /* SCI Data Register High */
 #define HCS12_SCI_DRL_OFFSET      0x07 /* SCI Data Register Low */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_SCI0_BDH            (HCS12_REG_BASE+HCS12_SCI0_BASE+HCS12_SCI_BDH_OFFSET)
 #define HCS12_SCI0_BDL            (HCS12_REG_BASE+HCS12_SCI0_BASE+HCS12_SCI_BDL_OFFSET)
@@ -63,7 +63,7 @@
 #define HCS12_SCI1_DRH            (HCS12_REG_BASE+HCS12_SCI1_BASE+HCS12_SCI_DRH_OFFSET)
 #define HCS12_SCI1_DRL            (HCS12_REG_BASE+HCS12_SCI1_BASE+HCS12_SCI_DRL_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* SCI Baud Rate Register High Bit-Field Definitions */
 
@@ -74,9 +74,11 @@
 #  define SCI_BDH_TNP_132         (0 << SCI_BDH_TNP_SHIFT) /* 1/32 */
 #  define SCI_BDH_TNP_116         (1 << SCI_BDH_TNP_SHIFT) /* 1/16 */
 #  define SCI_BDH_TNP_316         (2 << SCI_BDH_TNP_SHIFT) /* 3/16 */
+
 #define SCI_BDH_IREN              (1 << 7)  /* Bit 7:  Infrared Enable */
 
 /* SCI Baud Rate Register Low Bit-Field Definitions */
+
 /* This register holds the low 7 bits of the baud bits SBR[7:0] */
 
 /* SCI Control Register 1 Bit-Field Definitions */
@@ -125,18 +127,19 @@
 #define SCI_DRH_R8                (1 << 7)  /* Bit 7:  Received Bit 8 */
 
 /* SCI Data Register Low Bit-Field Definitions */
+
 /* Receive/Transmit bits 0-7 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_SCI_H */
