@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_emac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define HCS12_EMAC_NETCTL_OFFSET       0x0000 /* Network Control (8-bit) */
 #define HCS12_EMAC_RXCTS_OFFSET        0x0003 /* Receive Control and Status (8-bit) */
@@ -61,7 +61,7 @@
 #define HCS12_EMAC_MACAD0_OFFSET       0x002c /* MAC Unicast AAddress 0-15 (16-bit) */
 #define HCS12_EMAC_EMISC _OFFSET       0x002e /* Miscellaneous (16-bit) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_EMAC_NETCTL              (HCS12_EMAC_BASE+HCS12_EMAC_NETCTL_OFFSET)
 #define HCS12_EMAC_RXCTS               (HCS12_EMAC_BASE+HCS12_EMAC_RXCTS_OFFSET)
@@ -90,7 +90,7 @@
 #define HCS12_EMAC_MACAD0              (HCS12_EMAC_BASE+HCS12_EMAC_MACAD0_OFFSET)
 #define HCS12_EMAC_EMISC               (HCS12_EMAC_BASE+HCS12_EMAC_EMISC_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Network Control (8-bit) */
 
@@ -130,9 +130,11 @@
 #define EMAC_ETCTL_FPET                (1 << 7)  /* Bit 7: Programmable Ethertype */
 
 /* Programmable Ethertype (16-bit) -- 16-bit Ethernet type data */
+
 /* PAUSE Timer Value and Counter (16-bit) -- 16-bit PAUSER timer value */
 
 /* Interrupt Event (16-bit) */
+
 /* Interrupt Mask (16-bit) */
 
 #define EMAC_INT_TXCI                  (1 << 1)  /* Bit 1:  Frame Transmission Complete Interrupt */
@@ -160,6 +162,7 @@
 #define EMAC_MRADR_MASK                (0x1f)
 
 /* MII Management Write Data (16-bit) -- 16-bit write data */
+
 /* MII Management Read Data (16-bit) -- 16-bit read data */
 
 /* MII Management Command and Status (8-bit) */
@@ -199,12 +202,17 @@
 #define EMAC_TXEFP_MASK                (0x07ff)
 
 /* Multicast Hash Table 48-63 (16-bit) -- 16-bits of MAC address */
+
 /* Multicast Hash Table 32-47 (16-bit) -- 16-bits of MAC address */
+
 /* Multicast Hash Table 16-31 (16-bit) -- 16-bits of MAC address */
+
 /* Multicast Hash Table  0:15 (16-bit) -- 16-bits of MAC address */
 
 /* MAC Unicast Address 32-47 (16-bit) -- 16-bits of address */
+
 /* MAC Unicast AAddress 16-31 (16-bit) -- 16-bits of address */
+
 /* MAC Unicast AAddress 0-15 (16-bit) -- 16-bits of address */
 
 /* Miscellaneous (16-bit) */
@@ -218,16 +226,16 @@
 #  define EMAC_EMISC_INDEX_RETX        (5 << EMAC_EMISC_INDEX_SHIFT) /* Retransmission Counter */
 #  define EMAC_EMISC_INDEX_RANDOM      (6 << EMAC_EMISC_INDEX_SHIFT) /* Backoff Random Number */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H */

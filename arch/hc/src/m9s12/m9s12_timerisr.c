@@ -66,7 +66,8 @@
 
 /* Pick the smallest value of B for which:
  *
- *   OSCCLK/(MAX_MODCNT*(2**(B+9))) >= CLK_TCK >= OSCCLK/(MIN_MODCNT*(2**(B+9)))
+ *   OSCCLK/(MAX_MODCNT*(2**(B+9))) >= CLK_TCK >=
+  *                                            OSCCLK/(MIN_MODCNT*(2**(B+9)))
  */
 
 #if CLK_TCK >= HCS12_OSCCLK/(MAX_MODCNT*1024) && HCS12_OSCCLK/(MIN_MODCNT*1024)
@@ -151,7 +152,8 @@ void up_timer_initialize(void)
    * uint32_t operations).
    */
 
-  tmp = MODCNT_VALUE << CRG_RTICTL_MODCNT_SHIFT | PRER_VALUE << CRG_RTICTL_PRER_SHIFT;
+  tmp = MODCNT_VALUE << CRG_RTICTL_MODCNT_SHIFT |
+                        PRER_VALUE << CRG_RTICTL_PRER_SHIFT;
   putreg8((uint8_t)tmp, HCS12_CRG_RTICTL);
 
   /* Attach the timer interrupt vector */

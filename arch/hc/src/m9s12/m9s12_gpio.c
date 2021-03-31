@@ -40,9 +40,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* GPIO management macros:
  *
- * The GPIO configuration is represented by a 16-bit value encoded as follows:
+ * The GPIO configuration is represented by a 16-bit value encoded as
+ * follows:
  *
  *   xIIO UURV DMGG GPPP
  *    ||| |||| |||    `-Pin number
@@ -136,7 +138,7 @@ static const struct mebi_portaddr_s mebi_portaddr[HCS12_MEBI_NPORTS] =
   {HCS12_MEBI_PORTA, HCS12_MEBI_DDRA}, /* Port A */
   {HCS12_MEBI_PORTB, HCS12_MEBI_DDRB}, /* Port B */
   {HCS12_MEBI_PORTE, HCS12_MEBI_DDRE}, /* Port E */
-  {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK}  /* Port K */
+  {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK}, /* Port K */
 };
 
 static uint8_t mebi_bits[HCS12_MEBI_NPORTS] =
@@ -165,6 +167,7 @@ static inline void gpio_writebit(uint16_t regaddr, uint8_t pin, bool set)
     {
       regval &= ~(1 << pin);
     }
+
   putreg8(regval, regaddr);
 }
 
@@ -192,7 +195,8 @@ static inline void mebi_direction(uint8_t portndx, uint8_t pin, bool output)
 
 /* Write to the Wired-OR register of a PIM port */
 
-static inline void pim_opendrain(uint8_t portndx, uint8_t pin, bool opendrain)
+static inline void pim_opendrain(uint8_t portndx,
+                                 uint8_t pin, bool opendrain)
 {
   DEBUGASSERT(!opendrain || (HCS12_WOM_PORTS & (1 << pin)) != 0);
   gpio_writebit(HCS12_PIM_PORT_WOM(portndx), pin, opendrain);
@@ -231,6 +235,7 @@ static inline void mebi_pullport(uint8_t portndx, uint8_t pull)
     {
       regval &= ~mebi_bits[portndx];
     }
+
   putreg8(regval, HCS12_MEBI_PUCR);
 }
 
@@ -254,6 +259,7 @@ static inline void mebi_rdport(uint8_t portndx, bool rdenable)
     {
       regval &= ~mebi_bits[portndx];
     }
+
   putreg8(regval, HCS12_MEBI_RDRIV);
 }
 
@@ -265,7 +271,8 @@ static inline void pim_interrupt(uint8_t portndx, unsigned pin, uint8_t type)
     {
       DEBUGASSERT((HCS12_IE_PORTS & (1 << pin)) != 0);
       gpio_writebit(HCS12_PIM_PORT_IE(portndx), pin, false);
-      gpio_writebit(HCS12_PIM_PORT_PS(portndx), pin, ((type & GPIO_INT_POLARITY) != 0));
+      gpio_writebit(HCS12_PIM_PORT_PS(portndx), pin,
+                  ((type & GPIO_INT_POLARITY) != 0));
     }
   else if ((HCS12_IE_PORTS & (1 << pin)) != 0)
     {
@@ -281,7 +288,8 @@ static inline void pim_interrupt(uint8_t portndx, unsigned pin, uint8_t type)
  *
  ****************************************************************************/
 
-static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
+static inline void pim_configgpio(uint16_t cfgset,
+                                  uint8_t portndx, uint8_t pin)
 {
   /* Sanity checking -- Check if the pin will be enabled as an interrupt
    * (later)
@@ -329,7 +337,8 @@ static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
  *
  ****************************************************************************/
 
-static inline void mebi_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
+static inline void mebi_configgpio(uint16_t cfgset,
+                                   uint8_t portndx, uint8_t pin)
 {
   DEBUGASSERT(portndx < HCS12_MEBI_NPORTS);
   mebi_direction(portndx, pin, ((cfgset & GPIO_DIRECTION) == GPIO_OUTPUT));
@@ -413,8 +422,10 @@ int hcs12_configgpio(uint16_t cfgset)
 
   if (HCS12_OUTPUT(cfgset))
     {
-      hcs12_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_VALUE) == GPIO_OUTPUT_HIGH);
+      hcs12_gpiowrite(cfgset,
+                     (cfgset & GPIO_OUTPUT_VALUE) == GPIO_OUTPUT_HIGH);
     }
+
   return OK;
 }
 

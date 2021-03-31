@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_atd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_ATD_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_ATD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define HCS12_ATD_CTL0_OFFSET           0x0000 /* ATD control register 0 */
 #define HCS12_ATD_CTL1_OFFSET           0x0001 /* ATD control register 1 */
@@ -85,7 +85,7 @@
 #define HCS12_ATD_DR7H_OFFSET           0x002e /* ATD conversion result register 7 (high) */
 #define HCS12_ATD_DR7L_OFFSET           0x002f /* ATD conversion result register 7 (low) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_ATD_CTL0                  (HCS12_ATD_BASE+HCS12_ATD_CTL0_OFFSET)
 #define HCS12_ATD_CTL1                  (HCS12_ATD_BASE+HCS12_ATD_CTL1_OFFSET)
@@ -136,7 +136,7 @@
 #define HCS12_ATD_DR7H                  (HCS12_ATD_BASE+HCS12_ATD_DR7H_OFFSET)
 #define HCS12_ATD_DR7L                  (HCS12_ATD_BASE+HCS12_ATD_DR7L_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* ATD control register 0 */
 
@@ -211,17 +211,19 @@
 #define ATD_CTL4_PRS_SHIFT              (0)       /* Bits 0-4: ATD Clock Prescaler */
 #define ATD_CTL4_PRS_MASK               (31 << ATD_CTL4_PRS_SHIFT)
 #  define ATD_CTL4_PRS_DIV(n)           ((((n)-2) >> 1) << ATD_CTL4_PRS_SHIFT) /* Divide by n={2,4,6,...,64} */
+
 #define ATD_CTL4_SMP_SHIFT              (5)       /* Bits 5-6: Sample Time Select */
 #define ATD_CTL4_SMP_MASK               (3 << ATD_CTL4_SMP_SHIFT)
 #  define ATD_CTL4_SMP2                 (0 << ATD_CTL4_SMP_SHIFT) /* 2 A/D conversion clock periods */
 #  define ATD_CTL4_SMP4                 (1 << ATD_CTL4_SMP_SHIFT) /* 4 A/D conversion clock periods */
 #  define ATD_CTL4_SMP8                 (2 << ATD_CTL4_SMP_SHIFT) /* 8 A/D conversion clock periods */
 #  define ATD_CTL4_SMP16                (3 << ATD_CTL4_SMP_SHIFT) /* 16 A/D conversion clock periods */
+
 #define ATD_CTL4_SRES8                  (1 << 7)  /* Bit 7: A/D Resolution Select */
 
 /* ATD control register 5 */
 
-#define ATD_CTL5_C_SHIFT                (0)      /* Bits 0-2: Analog Input Channel Select Code */
+#define ATD_CTL5_C_SHIFT                (0)       /* Bits 0-2: Analog Input Channel Select Code */
 #define ATD_CTL5_C_MASK                 (7 << ATD_CTL5_C_SHIFT)
 #  define ATD_CTL5_C_AN(n)              ((n) << ATD_CTL5_C_SHIFT)
 #  define ATD_CTL5_C_AN0                (0 << ATD_CTL5_C_SHIFT)
@@ -246,6 +248,7 @@
 #define ATD_STAT0_SCF                   (1 << 7)  /* Bit 7: Sequence Complete Flag */
 
 /* ATD test register 0 -- 8 MS bits of data written in special mode */
+
 /* ATD test register 1 */
 
 #define ATD_TEST1_SC                    (1 << 0)  /* Bit 0: Enable special conversions */
@@ -254,6 +257,7 @@
 /* ATD status register 1 */
 
 #define ATD_STAT1_CCF(n)                (1 << (n)) /* Bit n: Conversion complete flag channel n */
+
 #define ATD_STAT1_CCF0                  (1 << 0)  /* Bit 0: Conversion complete flag channel 0 */
 #define ATD_STAT1_CCF1                  (1 << 1)  /* Bit 1: Conversion complete flag channel 1 */
 #define ATD_STAT1_CCF2                  (1 << 2)  /* Bit 2: Conversion complete flag channel 2 */
@@ -266,6 +270,7 @@
 /* ATD Input enable register */
 
 #define ATD_IEN(n)                      (1 << (n)) /* Bit n: ATD Digital Input Enable on channel n */
+
 #define ATD_IEN0                        (1 << 0)  /* Bit 0: ATD Digital Input Enable on channel 0 */
 #define ATD_IEN1                        (1 << 1)  /* Bit 1: ATD Digital Input Enable on channel 1 */
 #define ATD_IEN2                        (1 << 2)  /* Bit 2: ATD Digital Input Enable on channel 2 */
@@ -278,6 +283,7 @@
 /* Port data register */
 
 #define ATD_PORTAD(n)                   (1 << (n)) /* Bit n: A/D Channel n (ANn) Digital Input */
+
 #define ATD_PORTAD0                     (1 << 0)  /* Bit 0: A/D Channel 0 (AN0) Digital Input */
 #define ATD_PORTAD1                     (1 << 1)  /* Bit 1: A/D Channel 1 (AN1) Digital Input */
 #define ATD_PORTAD2                     (1 << 2)  /* Bit 2: A/D Channel 2 (AN2) Digital Input */
@@ -292,16 +298,16 @@
 #define ATD_DLL_MASK                    0xc0      /* Bits 6-7: LS bits of left justified data */
 #define ATD_DRH_MASK                    0x03      /* Bits 0-1: MS bits of right justified data */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_ATD_H */

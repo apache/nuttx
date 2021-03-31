@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_tim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_TIM_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_TIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define HCS12_TIM_TIOS_OFFSET         0x0000 /* Timer Input Capture/Output Compare Select */
 #define HCS12_TIM_CFORC_OFFSET        0x0001 /* Timer Compare Force Register */
@@ -62,7 +62,7 @@
 #define HCS12_TIM_PACNTLO_OFFSET      0x0023 /* Pulse Accumulator Count Register */
 #define HCS12_TIM_TIMTST2_OFFSET      0x002d /* Timer Test Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_TIM_TIOS                (HCS12_REG_BASE+HCS12_TIM_BASE+HCS12_TIM_TIOS_OFFSET)
 #define HCS12_TIM_CFORC               (HCS12_REG_BASE+HCS12_TIM_BASE+HCS12_TIM_CFORC_OFFSET)
@@ -92,7 +92,7 @@
 #define HCS12_TIM_PACNTLO             (HCS12_REG_BASE+HCS12_TIM_BASE+HCS12_TIM_TIMTST2_OFFSET)
 #define HCS12_TIM_TIMTST2             (HCS12_REG_BASE+HCS12_TIM_BASE+HCS12_TIM_TIMTST2_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Timer Input Capture/Output Compare Select Bit-Field Definitions */
 
@@ -111,7 +111,10 @@
 #define TIM_OC7D(n)                   (1 << (n)) /* Output Compare 7 Data */
 
 /* Timer Count HI/LO Register Bit-Field Definitions */
-/* These two registers form a 16-bit timer up counter and have no internal bit-fields */
+
+/* These two registers form a 16-bit timer up counter and have no internal
+ * bit-fields
+ */
 
 /* Timer System Control Register 1 Bit-Field Definitions */
 
@@ -169,6 +172,7 @@
 #  define TIM_TSCR2_PR_DIV32         (5 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/32 */
 #  define TIM_TSCR2_PR_DIV64         (6 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/64 */
 #  define TIM_TSCR2_PR_DIV128        (7 << TIM_TSCR2_PR_SHIFT) /* Bus Clock/128 */
+
 #define TIM_TSCR2_TCRE               (1 << 3)  /* Timer Counter Reset Enable */
 #define TIM_TSCR2_TOI                (1 << 7)  /* Timer Overflow Interrupt Enable */
 
@@ -180,8 +184,13 @@
 
 #define TIM_TFLG2_TOF                (1 << 7)   /* Timer Overflow Flag */
 
-/* Timer Input Capture/Output Compare HI/LO Register 4-7 Bit-Field Definitions */
-/* These register pairs form a 16-bit timer compare values and have no internal bit-fields */
+/* Timer Input Capture/Output Compare HI/LO Register 4-7 Bit-Field
+ * Definitions
+ */
+
+/* These register pairs form a 16-bit timer compare values and have no
+ * internal bit-fields
+ */
 
 /* 16-Bit Pulse Accumulator Control Register Bit-Field Definitions */
 
@@ -195,6 +204,7 @@
 #  define TIM_PACTL_PACLK            (1 << TIM_PACTL_CLK_SHIFT) /* Use PACLK as input to timer counter clock */
 #  define TIM_PACTL_DIV256           (2 << TIM_PACTL_CLK_SHIFT) /* Use PACLK/256 as timer counter clock frequency */
 #  define TIM_PACTL_DIV64K           (3 << TIM_PACTL_CLK_SHIFT) /* Use PACLK/65536 as timer counter clock frequency */
+
 #define TIM_PACTL_PIN_SHIFT          (4)          /* Pin action */
 #define TIM_PACTL_PIN_MASK           (3 << TIM_PACTL_PIN_SHIFT)
 #  define TIM_PACTL_PEDGE            (1 << TIM_PACTL_PIN_SHIFT) /* Pulse Accumulator Edge Control */
@@ -203,6 +213,7 @@
 #  define TIM_PACTL_RISING           (1 << TIM_PACTL_PIN_SHIFT) /* Rising edge */
 #  define TIM_PACTL_DIV64HI          (2 << TIM_PACTL_PIN_SHIFT) /* Div. by 64 clock enabled with pin high level */
 #  define TIM_PACTL_DIV64LO          (3 << TIM_PACTL_PIN_SHIFT) /* Div. by 64 clock enabled with pin low level */
+
 #define TIM_PACTL_PAEN               (1 << 6)   /* Pulse Accumulator System Enable */
 
 /* Pulse Accumulator Flag Register Bit-Field Definitions */
@@ -211,21 +222,25 @@
 #define TIM_PAFLG_PAOVF              (1 << 1)   /* Pulse Accumulator Overflow Flag */
 
 /* Pulse Accumulator Count HI/LO Register Bit-Field Definitions */
-/* This register pair forms a 16-bit pulse accumulator value with no internal bit-fields */
+
+/* This register pair forms a 16-bit pulse accumulator value with no internal
+ * bit-fields
+ */
 
 /* Timer Test Register Bit-Field Definitions */
+
 /* Not documented */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_TIM_H */

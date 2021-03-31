@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_mebi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_MEBI_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_MEBI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
+
 /* Offsets relative to CORE1 */
 
 #define HCS12_MEBI_PORTA_OFFSET    0x0000 /* Port A Data Register */
@@ -56,7 +57,7 @@
 #define HCS12_MEBI_PORTK_OFFSET    0x0002 /* Port K Data Register */
 #define HCS12_MEBI_DDRK_OFFSET     0x0003 /* Data Direction Register K */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_MEBI_PORTA           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PORTA_OFFSET)
 #define HCS12_MEBI_PORTB           (HCS12_REG_BASE+HCS12_CORE1_BASE+HCS12_MEBI_PORTB_OFFSET)
@@ -73,15 +74,22 @@
 #define HCS12_MEBI_PORTK           (HCS12_REG_BASE+HCS12_CORE4_BASE+HCS12_MEBI_PORTK_OFFSET)
 #define HCS12_MEBI_DDRK            (HCS12_REG_BASE+HCS12_CORE4_BASE+HCS12_MEBI_DDRK_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Port A Data Register Bit-Field Definitions */
+
 /* Port B Data Register Bit-Field Definitions */
+
 /* Data Direction Register A Bit-Field Definitions */
+
 /* Data Direction Register B Bit-Field Definitions */
+
 /* Port E Data Register Bit-Field Definitions */
+
 /* Data Direction Register E Bit-Field Definitions */
+
 /* Port K Data Register Bit-Field Definitions */
+
 /* Data Direction Register K Bit-Field Definitions */
 
 #define MEBI_PIN(n)                (1 << (n))
@@ -136,16 +144,16 @@
 #define MEBI_IRQCR_IRQEN            (1 << 6)  /* Bit 6:  External IRQ Enable */
 #define MEBI_IRQCR_IRQE             (1 << 7)  /* Bit 7:  IRQ Select Edge Sensitive Only */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_MEBI_H */
