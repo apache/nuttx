@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_pdca.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_PDCA_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_PDCA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* DMA Channel Offsets **************************************************************/
+ ****************************************************************************/
+
+/* DMA Channel Offsets ******************************************************/
 
 #define AVR32_PDCA_CHAN_OFFSET(n) ((n) << 6)
 #define AVR32_PDCA_CHAN0_OFFSET   0x000
@@ -42,7 +43,7 @@
 #define AVR32_PDCA_CHAN6_OFFSET   0x180
 #define AVR32_PDCA_CHAN7_OFFSET   0x1c0
 
-/* Channel Register Offsets *********************************************************/
+/* Channel Register Offsets *************************************************/
 
 #define AVR32_PDCA_MAR_OFFSET     0x000 /* Memory Address Register */
 #define AVR32_PDCA_PSR_OFFSET     0x004 /* Peripheral Select Register */
@@ -57,7 +58,7 @@
 #define AVR32_PDCA_IMR_OFFSET     0x028 /* Interrupt Mask Register */
 #define AVR32_PDCA_ISR_OFFSET     0x02C /* Interrupt Status Register */
 
-/* DMA Channel Base Addresses *******************************************************/
+/* DMA Channel Base Addresses ***********************************************/
 
 #define AVR32_PDCA_CHAN_BASE(n)   (AVR32_PDCA_BASE+AVR32_PDCA_CHAN_OFFSET(n))
 #define AVR32_PDCA_CHAN0_BASE     (AVR32_PDCA_BASE+AVR32_PDCA_CHAN0_OFFSET)
@@ -69,7 +70,7 @@
 #define AVR32_PDCA_CHAN6_BASE     (AVR32_PDCA_BASE+AVR32_PDCA_CHAN6_OFFSET)
 #define AVR32_PDCA_CHAN7_BASE     (AVR32_PDCA_BASE+AVR32_PDCA_CHAN7_OFFSET)
 
-/* Channel Register Addresses *******************************************************/
+/* Channel Register Addresses ***********************************************/
 
 #define AVR32_PDCA_MAR(n)         (AVR32_PDCA_CHAN_BASE(n)+AVR32_PDCA_MAR_OFFSET)
 #define AVR32_PDCA_PSR(n)         (AVR32_PDCA_CHAN_BASE(n)+AVR32_PDCA_PSR_OFFSET)
@@ -188,10 +189,12 @@
 #define AVR32_PDCA_CHAN7_IMR      (AVR32_PDCA_CHAN7_BASE+AVR32_PDCA_IMR_OFFSET)
 #define AVR32_PDCA_CHAN7_ISR      (AVR32_PDCA_CHAN7_BASE+AVR32_PDCA_ISR_OFFSET)
 
-/* Channel Register Bit-field Definitions *******************************************/
+/* Channel Register Bit-field Definitions ***********************************/
 
 /* Memory Address Register Bit-field Definitions */
+
 /* Memory Address Reload Register Bit-field Definitions */
+
 /* These registers hold a 32-bit address and contain no bit-fields */
 
 /* Peripheral Select Register Bit-field Definitions */
@@ -214,6 +217,7 @@
 #  define PDCA_PSR_PID_ABDACTX    (13 << PDCA_PSR_PID_SHIFT) /* ABDAC - TX */
 
 /* Transfer Counter Register Bit-field Definitions */
+
 /* Transfer Counter Reload Register Bit-field Definitions */
 
 #define PDCA_TCV_SHIFT            (0)     /* Bits 0-15: Transfer Counter Value */
@@ -238,24 +242,27 @@
 #define PDCA_SR_TEN               (1 << 0) /* Bit 0: Transfer Enabled */
 
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
+
 /* Interrupt Status Register Bit-field Definitions */
 
 #define PDCA_INT_RCZ              (1 << 0) /* Bit 0: Reload Counter Zero */
 #define PDCA_INT_TRC              (1 << 1) /* Bit 1: Transfer Complete */
 #define PDCA_INT_TERR             (1 << 2) /* Bit 2: Transfer Error */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_PDCA_H */

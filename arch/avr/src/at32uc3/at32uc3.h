@@ -113,7 +113,6 @@
 #define GPIO_ENABLE                (1 << 8)  /* Bit 8:  GPIO enable */
 #define GPIO_PERIPH                (0)
 
-
 /* Port Number
  * .... .... .... .... .... .... PPP. ....
  */
@@ -188,7 +187,8 @@ void usart_reset(uintptr_t usart_base);
  *
  ****************************************************************************/
 
-void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
+void usart_configure(uintptr_t usart_base,
+                     uint32_t baud, unsigned int parity,
                      unsigned int nbits, bool stop2);
 
 /****************************************************************************

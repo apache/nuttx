@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_twi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_TWI_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_TWI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_TWI_CR_OFFSET       0x00 /* Control Register */
 #define AVR32_TWI_MMR_OFFSET      0x04 /* Master Mode Register */
@@ -45,7 +45,7 @@
 #define AVR32_TWI_RHR_OFFSET      0x30 /* Receive Holding Register */
 #define AVR32_TWI_THR_OFFSET      0x34 /* Transmit Holding Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_TWI_CR              (AVR32_TWI_BASE+AVR32_TWI_CR_OFFSET)
 #define AVR32_TWI_MMR             (AVR32_TWI_BASE+AVR32_TWI_MMR_OFFSET)
@@ -59,7 +59,7 @@
 #define AVR32_TWI_RHR             (AVR32_TWI_BASE+AVR32_TWI_RHR_OFFSET)
 #define AVR32_TWI_THR             (AVR32_TWI_BASE+AVR32_TWI_THR_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Control Register Bit-field Definitions */
 
@@ -79,6 +79,7 @@
 #  define TWI_MMR_IADRSZ_1BYTE    (1 << TWI_MMR_IADRSZ_SHIFT) /* One-byte internal device address */
 #  define TWI_MMR_IADRSZ_2BYTES   (2 << TWI_MMR_IADRSZ_SHIFT) /* Two-byte internal device address */
 #  define TWI_MMR_IADRSZ_3BYTES   (3 << TWI_MMR_IADRSZ_SHIFT) /* Three-byte internal device address */
+
 #define TWI_MMR_MREAD             (1 << 12) /* Bit 12: Master Read Direction */
 #define TWI_MMR_DADR_SHIFT        (16)      /* Bits 16-22: Device Address */
 #define TWI_MMR_DADR:_MASK        (0x7f << TWI_MMR_DADR_SHIFT)
@@ -102,8 +103,11 @@
 #define TWI_CWGR_CKDIV:_MASK     (7 << TWI_CWGR_CKDIV_SHIFT)
 
 /* Status Register Bit-field Definitions */
+
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
 
 #define TWI_INT_TXCOMP            (1 << 0)  /* Bit 0:  Transmission Completed (automatically set / reset) */
@@ -130,16 +134,16 @@
 
 #define TWI_THR_MASK              (0xff)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_TWI_H */

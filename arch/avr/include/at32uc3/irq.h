@@ -38,6 +38,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the overall
  * GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
  * CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
@@ -50,6 +51,7 @@
 #endif
 
 /* IRQ numbers **************************************************************/
+
 /* Events.  These exclude:
  *
  * - The Reset event which vectors directly either to 0x8000:0000 (uc3a) or
@@ -90,17 +92,18 @@
  *  interrupts, and a Non-Maskable Interrupt (NMI)."
  *
  * "The INTC supports up to 64 groups of interrupts. Each group can have up
- *  to 32 interrupt request lines, these lines are connected to the peripherals.
- *  Each group has an Interrupt Priority Register (IPR) and an Interrupt Request
- *  Register (IRR). The IPRs are used to assign a priority level and an autovector
- *  to each group, and the IRRs are used to identify the active interrupt request
- *  within each group. If a group has only one interrupt request line, an active
- *  interrupt group uniquely identifies the active interrupt request line, and
- *  the corresponding IRR is not needed. The INTC also provides one Interrupt
- *  Cause Register (ICR) per priority level. These registers identify the group
- *  that has a pending interrupt of the corresponding priority level. If several
- *  groups have a pending interrupt of the same level, the group with the lowest
- *  number takes priority."
+ *  to 32 interrupt request lines, these lines are connected to the
+ *  peripherals.
+ *  Each group has an Interrupt Priority Register (IPR) and an Interrupt
+ *  Request Register (IRR). The IPRs are used to assign a priority level and
+ *  an autovector to each group, and the IRRs are used to identify the active
+ *  interrupt request within each group. If a group has only one interrupt
+ *  request line, an active interrupt group uniquely identifies the active
+ *  interrupt request line, and the corresponding IRR is not needed. The INTC
+ *  also provides one Interrupt Cause Register (ICR) per priority level.
+ *  These registers identify the group that has a pending interrupt of the
+ *  corresponding priority level. If several groups have a pending interrupt
+ *  of the same level, the group with the lowest number takes priority."
  */
 
 /* Only 19 groups (0-18) are used with the AT32UC3A/B: */
@@ -171,6 +174,7 @@
 
 #define AVR32_IRQ_USART0       47 /* 0 Universal Synchronous/Asynchronous
                                    *   Receiver/Transmitter 0 */
+
 /* Group 6 */
 
 #define AVR32_IRQ_BASEIRQGRP6  48
@@ -178,6 +182,7 @@
 
 #define AVR32_IRQ_USART1       48 /* 0 Universal Synchronous/Asynchronous
                                    *   Receiver/Transmitter 1 */
+
 /* Group 7 */
 
 #define AVR32_IRQ_BASEIRQGRP7  49
@@ -259,6 +264,7 @@
 #define NR_IRQS                60
 
 /* GPIO IRQ Numbers *********************************************************/
+
 /* These numbers correspond to GPIO port numbers that have interrupts
  * enabled.  These are all decoded by the AVR32_IRQ_GPIO interrupt handler.
  * A lot of effort was made here to keep the number of IRQs to a minimum
@@ -492,7 +498,6 @@
 #else
 #  define __IRQ_GPIO_PB0      __IRQ_GPIO_PA31
 #endif
-
 
 /* Up to 12 GPIO interrupts in PORTB0-11 */
 

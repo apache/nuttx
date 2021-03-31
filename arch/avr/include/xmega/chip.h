@@ -31,6 +31,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Eventually, we will provide characteristics of the various supported
  * XMega chips here.
  */

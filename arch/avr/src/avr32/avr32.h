@@ -59,9 +59,9 @@
 
 extern volatile uint32_t *g_current_regs;
 
-/* This is the beginning of heap as provided from up_head.S. This is the first
- * address in DRAM after the loaded program+bss+idle stack.  The end of the
- * heap is CONFIG_RAM_END
+/* This is the beginning of heap as provided from up_head.S. This is the
+ * first address in DRAM after the loaded program+bss+idle stack.
+ * The end of the heap is CONFIG_RAM_END
  */
 
 extern uint32_t g_idle_topstack;
@@ -78,44 +78,44 @@ extern uint32_t g_idle_topstack;
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Name:  up_copystate
  *
  * Description:
- *   Copy the contents of a register state save structure from one location to
- *   another.
+ *   Copy the contents of a register state save structure from one location
+ *   to another.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void up_copystate(uint32_t *dest, uint32_t *src);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  up_fullcontextrestore
  *
  * Description:
  *   Restore the full context of a saved thread/task.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 
-/************************************************************************************
+/****************************************************************************
  * Name:  up_switchcontext
  *
  * Description:
  *   Switch from one thread/task context to another.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  up_doirq
  *
  * Description:
  *   Dispatch an interrupt.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 uint32_t *up_doirq(int irq, uint32_t *regs);
 

@@ -95,7 +95,8 @@ static inline void up_enableosc32(void)
 
   regval = getreg32(AVR32_PM_OSCCTRL32);
   regval &= ~PM_OSCCTRL32_STARTUP_MASK;
-  regval |= PM_OSCCTRL32_EN | (AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
+  regval |= PM_OSCCTRL32_EN |
+            (AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
   putreg32(regval, AVR32_PM_OSCCTRL32);
 }
 #endif
@@ -113,12 +114,14 @@ static inline void up_enableosc0(void)
 {
   uint32_t regval;
 
-  /* Enable OSC0 in the correct crystal mode by setting the mode value in OSCCTRL0 */
+  /* Enable OSC0 in the correct crystal mode by setting the mode value in
+   * OSCCTRL0
+   */
 
   regval  = getreg32(AVR32_PM_OSCCTRL0);
   regval &= ~PM_OSCCTRL_MODE_MASK;
 #if AVR32_FOSC0 < 900000
-  regval |= PM_OSCCTRL_MODE_XTALp9;  /* Crystal XIN 0.4-0.9MHz */
+  regval |= PM_OSCCTRL_MODE_XTALP9;  /* Crystal XIN 0.4-0.9MHz */
 #elif AVR32_FOSC0 < 3000000
   regval |= PM_OSCCTRL_MODE_XTAL3;   /* Crystal XIN 0.9-3.0MHz */
 #elif AVR32_FOSC0 < 8000000
@@ -128,8 +131,8 @@ static inline void up_enableosc0(void)
 #endif
   putreg32(regval, AVR32_PM_OSCCTRL0);
 
-  /* Enable OSC0 using the startup time provided in board.h.  This startup time
-   * is critical and depends on the characteristics of the crystal.
+  /* Enable OSC0 using the startup time provided in board.h.  This startup
+   * time is critical and depends on the characteristics of the crystal.
    */
 
   regval  = getreg32(AVR32_PM_OSCCTRL0);
@@ -162,12 +165,14 @@ static inline void up_enableosc1(void)
 {
   uint32_t regval;
 
-  /* Enable OSC1 in the correct crystal mode by setting the mode value in OSCCTRL1 */
+  /* Enable OSC1 in the correct crystal mode by setting the mode value in
+   * OSCCTRL1
+   */
 
   regval  = getreg32(AVR32_PM_OSCCTRL1);
   regval &= ~PM_OSCCTRL_MODE_MASK;
 #if AVR32_FOSC1 < 900000
-  regval |= PM_OSCCTRL_MODE_XTALp9;  /* Crystal XIN 0.4-0.9MHz */
+  regval |= PM_OSCCTRL_MODE_XTALP9;  /* Crystal XIN 0.4-0.9MHz */
 #elif AVR32_FOSC1 < 3000000
   regval |= PM_OSCCTRL_MODE_XTAL3;   /* Crystal XIN 0.9-3.0MHz */
 #elif AVR32_FOSC1 < 8000000
@@ -177,8 +182,8 @@ static inline void up_enableosc1(void)
 #endif
   putreg32(regval, AVR32_PM_OSCCTRL1);
 
-  /* Enable OSC1 using the startup time provided in board.h.  This startup time
-   * is critical and depends on the characteristics of the crystal.
+  /* Enable OSC1 using the startup time provided in board.h.  This startup
+   * time is critical and depends on the characteristics of the crystal.
    */
 
   regval  = getreg32(AVR32_PM_OSCCTRL1);
@@ -211,7 +216,9 @@ static inline void up_enablepll0(void)
 {
   /* Setup PLL0 */
 
-  regval = (AVR32_PLL0_DIV << PM_PLL_PLLDIV_SHIFT) | (AVR32_PLL0_MUL << PM_PLL_PLLMUL_SHIFT) | (16 << PM_PLL_PLLCOUNT_SHIFT)
+  regval = (AVR32_PLL0_DIV << PM_PLL_PLLDIV_SHIFT) |
+           (AVR32_PLL0_MUL << PM_PLL_PLLMUL_SHIFT) |
+           (16 << PM_PLL_PLLCOUNT_SHIFT)
 
   /* Select PLL0/1 oscillator */
 
@@ -261,7 +268,9 @@ static inline void up_enablepll1(void)
 {
   /* Setup PLL1 */
 
-  regval = (AVR32_PLL1_DIV << PM_PLL_PLLDIV_SHIFT) | (AVR32_PLL1_MUL << PM_PLL_PLLMUL_SHIFT) | (16 << PM_PLL_PLLCOUNT_SHIFT)
+  regval = (AVR32_PLL1_DIV << PM_PLL_PLLDIV_SHIFT) |
+           (AVR32_PLL1_MUL << PM_PLL_PLLMUL_SHIFT) |
+           (16 << PM_PLL_PLLCOUNT_SHIFT)
 
   /* Select PLL0/1 oscillator */
 
@@ -358,6 +367,7 @@ static void up_fws(uint32_t cpuclock)
     {
       regval &= ~FLASHC_FCR_FWS;
     }
+
   putreg32(regval, AVR32_FLASHC_FCR);
 }
 
@@ -399,7 +409,6 @@ static inline void up_usbclock(void)
   regval |= PM_GCCTRL_OSCSEL;
 #endif
 #if AVR32_CLOCK_USB_DIV > 0
-
 
   u_avr32_pm_gcctrl.GCCTRL.diven  = diven;
   u_avr32_pm_gcctrl.GCCTRL.div    = div;

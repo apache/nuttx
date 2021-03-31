@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_ADC_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_ADC_CR_OFFSET       0x000 /* Control Register */
 #define AVR32_ADC_MR_OFFSET       0x004 /* Mode Register */
@@ -54,7 +54,7 @@
 #define AVR32_ADC_CDR7_OFFSET     0x04c /* Channel Data Register 7 */
 #define AVR32_ADC_VERSION_OFFSET  0x0fc /* Version Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_ADC_CR              (AVR32_ADC_BASE+AVR32_ADC_CR_OFFSET)
 #define AVR32_ADC_MR              (AVR32_ADC_BASE+AVR32_ADC_MR_OFFSET)
@@ -77,7 +77,7 @@
 #define AVR32_ADC_CDR7            (AVR32_ADC_BASE+AVR32_ADC_CDR7_OFFSET)
 #define AVR32_ADC_VERSION         (AVR32_ADC_BASE+AVR32_ADC_VERSION_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Control Register Bit-field Definitions */
 
@@ -90,6 +90,7 @@
 #define ADC_MR_TRGSEL_SHIFT       (1)       /* Bits 1-3: Trigger Selection */
 #define ADC_MR_TRGSEL_MASK        (7 << ADC_MR_TRGSEL_SHIFT)
 # define ADC_MR_TRGSEL_TRIG(n)    ((n) << ADC_MR_TRGSEL_SHIFT) /* Internal trigger n */
+
 # define ADC_MR_TRGSEL_TRIG0      (0 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 0 */
 # define ADC_MR_TRGSEL_TRIG1      (1 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 1 */
 # define ADC_MR_TRGSEL_TRIG2      (2 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 2 */
@@ -98,6 +99,7 @@
 # define ADC_MR_TRGSEL_TRIG5      (5 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 5 */
 # define ADC_MR_TRGSEL_TRIG6      (6 << ADC_MR_TRGSEL_SHIFT) /* Internal trigger 6 */
 # define ADC_MR_TRGSEL_EXT        (7 << ADC_MR_TRGSEL_SHIFT) /* External trigger */
+
 #define ADC_MR_LOWRES             (1 << 4)  /* Bit 4: Resolution */
 #define ADC_MR_SLEEP              (1 << 5)  /* Bit 5: Sleep Mode */
 #define ADC_MR_PRESCAL_SHIFT      (8)       /* Bits 8-15: Prescaler Rate Selection */
@@ -108,7 +110,9 @@
 #define ADC_MR_SHTIM_MASK         (15 << ADC_MR_SHTIM_SHIFT)
 
 /* Channel Enable Register Bit-field Definitions */
+
 /* Channel Disable Register Bit-field Definitions */
+
 /* Channel Status Register Bit-field Definitions */
 
 #define ADC_CHAN(n)               (1 << (n))
@@ -122,8 +126,11 @@
 #define ADC_CHAN7                 (1 << 7)
 
 /* Status Register Bit-field Definitions */
+
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
 
 #define ADC_INT_EOC(n)            (1 << (n))
@@ -164,16 +171,16 @@
 #define ADC_VERSION_VARIANT_SHIFT (16)      /* Bits 16-19: Variant Number */
 #define ADC_VERSION_VARIANT_MASK  (15 << ADC_VERSION_VARIANT_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_ADC_H */

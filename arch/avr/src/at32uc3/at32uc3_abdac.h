@@ -54,6 +54,7 @@
 /* Register Bit-field Definitions ***************************************************/
 
 /* Sample Data Register Bit-field Definitions */
+
 /* This register contains a 32-bit data and, hence, has no bit-fiels */
 
 /* Control Register Bit-field Definitions */
@@ -62,9 +63,13 @@
 #define ABDAC_CR_EN               (1 << 31) /* Bit 31: Enable Audio Bitstream DAC */
 
 /* Interrupt Mask Register Bit-field Definitions */
+
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Clear Register Bit-field Definitions */
+
 /* Interrupt Status Register Bit-field Definitions */
 
 #define ABDAC_INT_UNDERRUN        (1 << 28)  /* Bit 28:  Underrun Interrupt Status */
@@ -79,7 +84,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_ABDAC_H */

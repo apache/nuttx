@@ -126,7 +126,7 @@ static uart_dev_t g_usart1port =
   {
     .size   = CONFIG_USART1_TXBUFSIZE,
     .buffer = g_usart1txbuffer,
-   },
+  },
   .ops      = &g_uart1_ops,
 };
 
@@ -204,14 +204,15 @@ static void usart1_shutdown(struct uart_dev_s *dev)
  * Name: usart1_attach
  *
  * Description:
- *   Configure the USART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the USART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -224,14 +225,16 @@ static int usart1_attach(struct uart_dev_s *dev)
    * TX:  USART Transmit Complete.  Set when the entire frame in the Transmit
    *      Shift Register has been shifted out and there are no new data
    *      currently present in the transmit buffer.
-   * DRE: USART Data Register Empty.  Indicates if the transmit buffer is ready
-   *      to receive new data: The buffer is empty, and therefore ready to be
-   *      written.
+   * DRE: USART Data Register Empty.  Indicates if the transmit buffer is
+   *      ready to receive new data: The buffer is empty, and therefore ready
+   *      to be written.
    */
 
   irq_attach(AT90USB_IRQ_U1RX, usart1_rxinterrupt, NULL);
   irq_attach(AT90USB_IRQ_U1DRE, usart1_txinterrupt, NULL);
-//(void)irq_attach(AT90USB_IRQ_U1TX, usart1_txinterrupt, NULL);
+
+  /* (void)irq_attach(AT90USB_IRQ_U1TX, usart1_txinterrupt, NULL); */
+
   return OK;
 }
 
@@ -240,8 +243,8 @@ static int usart1_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -255,7 +258,8 @@ static void usart1_detach(struct uart_dev_s *dev)
 
   irq_detach(AT90USB_IRQ_U1RX);
   irq_detach(AT90USB_IRQ_U1DRE);
-//(void)irq_detach(AT90USB_IRQ_U1TX);
+
+  /* (void)irq_detach(AT90USB_IRQ_U1TX); */
 }
 
 /****************************************************************************
@@ -353,7 +357,9 @@ static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status)
 {
-  /* Return status information (error bits will be cleared after reading UDR1) */
+  /* Return status information
+   * (error bits will be cleared after reading UDR1)
+   */
 
   if (status)
     {
@@ -436,9 +442,9 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
    * TX:  USART Transmit Complete.  Set when the entire frame in the Transmit
    *      Shift Register has been shifted out and there are no new data
    *      currently present in the transmit buffer.
-   * DRE: USART Data Register Empty.  Indicates if the transmit buffer is ready
-   *      to receive new data: The buffer is empty, and therefore ready to be
-   *      written.
+   * DRE: USART Data Register Empty.  Indicates if the transmit buffer is
+   *      ready to receive new data: The buffer is empty, and therefore ready
+   *      to be written.
    */
 
   flags = enter_critical_section();
@@ -448,7 +454,8 @@ static void usart1_txint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       UCSR1B |= (1 << UDRIE1);
-//    UCSR1B |= (1 << TXCIE1);
+
+      /* UCSR1B |= (1 << TXCIE1); */
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).

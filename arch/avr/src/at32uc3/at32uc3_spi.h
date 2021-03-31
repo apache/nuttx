@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_SPI_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_SPI_CR_OFFSET       0x000 /* Control Register */
 #define AVR32_SPI_MR_OFFSET       0x004 /* Mode Register */
@@ -47,7 +47,7 @@
 #define AVR32_SPI_CSR3_OFFSET     0x03c /* Chip Select Register 3 */
 #define AVR32_SPI_VERSION_OFFSET  0x0fc /* Version Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_SPI0_CR             (AVR32_SPI0_BASE+AVR32_SPI_CR_OFFSET)
 #define AVR32_SPI0_MR             (AVR32_SPI0_BASE+AVR32_SPI_MR_OFFSET)
@@ -63,7 +63,7 @@
 #define AVR32_SPI0_CSR3           (AVR32_SPI0_BASE+AVR32_SPI_CSR3_OFFSET)
 #define AVR32_SPI0_VERSION        (AVR32_SPI0_BASE+AVR32_SPI_VERSION_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Control Register */
 
@@ -73,7 +73,6 @@
 #define SPI_CR_LASTXFER           (1 << 24) /* Bit 24: Last Transfer */
 
 /* Mode Register */
-
 
 #define SPI_MR_MSTR               (1 << 0)  /* Bit 0:  Master/Slave Mode */
 #define SPI_MR_PS                 (1 << 1)  /* Bit 1:  Peripheral Select */
@@ -94,8 +93,11 @@
 #define SPI_TDR_MASK              (0xffff)
 
 /* Status Register */
+
 /* Interrupt Enable Register */
+
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
 
 #define SPI_INT_DRF               (1 << 0)  /* Bit 0:  Receive Data Register Full */
@@ -131,20 +133,20 @@
 #define SPI_CSR_DLYBCT_SHIFT      (24)     /* Bits 24-31: Delay Between Consecutive Transfers */
 #define SPI_CSR_DLYBCT_MASK       (0xff << SPI_CSR_DLYBCT_SHIFT)
 
-/* Version Register (Values in the Version Register vary with the version of the IP
- * block implementation.)
+/* Version Register (Values in the Version Register vary with the version of
+ * the IP block implementation.)
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_SPI_H */
