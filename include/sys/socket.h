@@ -261,6 +261,12 @@
 #define CMSG_FIRSTHDR(msg) \
   __CMSG_FIRSTHDR((msg)->msg_control, (msg)->msg_controllen)
 
+/* "Socket"-level control message types: */
+
+#define SCM_RIGHTS      0x01    /* rw: access rights (array of int) */
+#define SCM_CREDENTIALS 0x02    /* rw: struct ucred */
+#define SCM_SECURITY    0x03    /* rw: security label */
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
