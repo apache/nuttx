@@ -78,10 +78,6 @@
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -179,6 +175,7 @@ int esp32_bringup(void)
 /* First, register the timer drivers and let timer 1 for oneshot
  * if it is enabled.
  */
+
 #ifdef CONFIG_TIMER
 
 #ifdef CONFIG_ESP32_TIMER0

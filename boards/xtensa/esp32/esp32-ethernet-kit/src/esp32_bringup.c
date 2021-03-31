@@ -69,10 +69,6 @@
 #include "esp32-ethernet-kit.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -170,6 +166,7 @@ int esp32_bringup(void)
 /* First, register the timer drivers and let timer 1 for oneshot
  * if it is enabled.
  */
+
 #ifdef CONFIG_TIMER
 
 #ifdef CONFIG_ESP32_TIMER0
@@ -183,7 +180,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESP32_TIMER1) && !defined(CONFIG_ONESHOT) 
+#if defined(CONFIG_ESP32_TIMER1) && !defined(CONFIG_ONESHOT)
   ret = esp32_timer_initialize("/dev/timer1", TIMER1);
   if (ret < 0)
     {
@@ -205,7 +202,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_TIMER3 
+#ifdef CONFIG_ESP32_TIMER3
   ret = esp32_timer_initialize("/dev/timer3", TIMER3);
   if (ret < 0)
     {
