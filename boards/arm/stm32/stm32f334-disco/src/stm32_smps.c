@@ -205,14 +205,14 @@ struct smps_lower_dev_s
 
 struct smps_priv_s
 {
-  uint8_t           conv_mode;   /* Converter mode */
-  uint16_t          v_in_raw;    /* Voltage input RAW value */
-  uint16_t          v_out_raw;   /* Voltage output RAW value */
-  float             v_in;        /* Voltage input real value in V */
-  float             v_out;       /* Voltage output real value in V  */
-  bool              running;     /* Running flag */
-  pid_controller_t  pid;         /* PID controller */
-  float            *c_limit_tab; /* Current limit tab */
+  uint8_t               conv_mode;   /* Converter mode */
+  uint16_t              v_in_raw;    /* Voltage input RAW value */
+  uint16_t              v_out_raw;   /* Voltage output RAW value */
+  float                 v_in;        /* Voltage input real value in V */
+  float                 v_out;       /* Voltage output real value in V  */
+  bool                  running;     /* Running flag */
+  pid_controller_f32_t  pid;         /* PID controller */
+  float                *c_limit_tab; /* Current limit tab */
 };
 
 /****************************************************************************
