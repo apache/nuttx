@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/execinfo.h
+ * libs/libc/debug/lib_dumpstack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,23 +18,51 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_EXECINFO_H
-#define __INCLUDE_EXECINFO_H
-
 /****************************************************************************
- * Public Function Prototypes
+ * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_EABI_UNWINDER)
+#include <nuttx/config.h>
 
-/* Store up to SIZE return address of the current program state in
- * ARRAY and return the exact number of values stored.
- */
+#include <sys/types.h>
 
-extern int  backtrace(FAR void **buffer, int size);
-extern void dump_stack(void);
-#else
-# define dump_stack()
-#endif
+#include <stdio.h>
+#include <syslog.h>
+#include <execinfo.h>
 
-#endif /* __INCLUDE_EXECINFO_H */
+#define DUMP_FORMAT "%*p"
+#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 3)
+
+#define DUMP_DEPTH  16
+#define DUMP_NITEM  8
+#define DUMP_LINESIZE (DUMP_NITEM * DUMP_WIDTH)
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void dump_stack(void)
+{
+  FAR void *address[DUMP_DEPTH];
+  char line[DUMP_LINESIZE];
+  int ret = 0;
+  int size;
+  int i;
+
+  size = backtrace(address, DUMP_DEPTH);
+  if (size <= 0)
+    {
+      return;
+    }
+
+  for (i = 0; i < size; i++)
+    {
+      ret += snprintf(line + ret, sizeof(line) - ret,
+                      DUMP_FORMAT, DUMP_WIDTH, address[i]);
+      if (i == size - 1 || ret % DUMP_LINESIZE == 0)
+        {
+          syslog(LOG_INFO, "[BackTrace]: %s\n", line);
+          ret = 0;
+        }
+    }
+}
