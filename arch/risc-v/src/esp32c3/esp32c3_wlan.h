@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include "esp32c3_wifi_adapter.h"
+
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -37,6 +39,8 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+#ifdef CONFIG_ESP32C3_WIRELESS
 
 /****************************************************************************
  * Public Function Prototypes
@@ -56,8 +60,29 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef ESP32C3_WLAN_HAS_STA
 int esp32c3_wlan_sta_initialize(void);
+#endif
 
+/****************************************************************************
+ * Name: esp32c3_wlan_softap_initialize
+ *
+ * Description:
+ *   Initialize the ESP32-C3 WLAN softAP netcard driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ESP32C3_WLAN_HAS_SOFTAP
+int esp32c3_wlan_softap_initialize(void);
+#endif
+
+#endif /* CONFIG_ESP32C3_WIRELESS */
 #ifdef __cplusplus
 }
 #endif

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4x5xx_firewall.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X5XX_FIREWALL_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X5XX_FIREWALL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_FIREWALL_CSSA_OFFSET    0x0000
 #define STM32L4_FIREWALL_CSL_OFFSET     0x0004
@@ -44,7 +44,7 @@
 #define STM32L4_FIREWALL_VDSL_OFFSET    0x0014
 #define STM32L4_FIREWALL_CR_OFFSET      0x0020
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_FIREWALL_CSSA           (STM32L4_FIREWALL_BASE+STM32L4_FIREWALL_CSSA_OFFSET)
 #define STM32L4_FIREWALL_CSL            (STM32L4_FIREWALL_BASE+STM32L4_FIREWALL_CSL_OFFSET)
@@ -54,7 +54,7 @@
 #define STM32L4_FIREWALL_VDSL           (STM32L4_FIREWALL_BASE+STM32L4_FIREWALL_VDSL_OFFSET)
 #define STM32L4_FIREWALL_CR             (STM32L4_FIREWALL_BASE+STM32L4_FIREWALL_CR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Code Segment Start Address */
 

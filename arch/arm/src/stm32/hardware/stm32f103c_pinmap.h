@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f103c_pinmap.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -33,24 +33,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * The Medium-density STM32F103Cx is packaged in a LQFP48/UFQFPN48 and does not
- * have the full complement of remapping.
- ************************************************************************************/
+ ****************************************************************************/
+
+/* The Medium-density STM32F103Cx is packaged in a LQFP48/UFQFPN48 and
+ * does not have the full complement of remapping.
+ */
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F103C_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F103C_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Alternate Pin Functions: */
 
@@ -74,7 +76,6 @@
 #  define GPIO_CAN1_RX          (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT|GPIO_PORTA|GPIO_PIN11)
 #  define GPIO_CAN1_TX          (GPIO_ALT|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTA|GPIO_PIN12)
 #endif
-
 
 #if defined(CONFIG_STM32_I2C1_REMAP)
 #  define GPIO_I2C1_SCL         (GPIO_ALT|GPIO_CNF_AFOD|GPIO_MODE_50MHz|GPIO_PORTB|GPIO_PIN8)

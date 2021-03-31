@@ -52,9 +52,9 @@
  * Name: stm32l4_1wireinitialize
  *
  * Description:
- *   Initialize the selected 1-Wire port. And return a unique instance of struct
- *   struct onewire_dev_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a
+ *   Initialize the selected 1-Wire port. And return a unique instance of
+ *   struct struct onewire_dev_s.  This function may be called to obtain
+ *   multiple instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
  * Input Parameters:

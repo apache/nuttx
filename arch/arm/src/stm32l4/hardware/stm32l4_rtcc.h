@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_rtcc.h
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
@@ -31,16 +31,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RTCC_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RTCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_RTC_TR_OFFSET       0x0000 /* RTC time register */
 #define STM32L4_RTC_DR_OFFSET       0x0004 /* RTC date register */
@@ -96,7 +96,7 @@
 #define STM32L4_RTC_BK30R_OFFSET    0x00c8 /* RTC backup register 30 */
 #define STM32L4_RTC_BK31R_OFFSET    0x00cc /* RTC backup register 31 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_RTC_TR              (STM32L4_RTC_BASE+STM32L4_RTC_TR_OFFSET)
 #define STM32L4_RTC_DR              (STM32L4_RTC_BASE+STM32L4_RTC_DR_OFFSET)
@@ -154,7 +154,7 @@
 
 #  define STM32L4_RTC_BKCOUNT       32
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* RTC time register */
 
@@ -207,6 +207,7 @@
 #  define RTC_CR_WUCKSEL_RTCDIV2   (3 << RTC_CR_WUCKSEL_SHIFT) /* 011: RTC/2 clock is selected */
 #  define RTC_CR_WUCKSEL_CKSPRE    (4 << RTC_CR_WUCKSEL_SHIFT) /* 10x: ck_spre clock is selected */
 #  define RTC_CR_WUCKSEL_CKSPREADD (6 << RTC_CR_WUCKSEL_SHIFT) /* 11x: ck_spr clock and 216 added WUT counter */
+
 #define RTC_CR_TSEDGE             (1 << 3)  /* Bit 3:  Timestamp event active edge */
 #define RTC_CR_REFCKON            (1 << 4)  /* Bit 4:  Reference clock detection enable (50 or 60 Hz) */
 #define RTC_CR_BYPSHAD            (1 << 5)  /* Bit 5:  Bypass the shadow registers */
@@ -231,6 +232,7 @@
 #  define RTC_CR_OSEL_ALRMA       (1 << RTC_CR_OSEL_SHIFT) /* 01: Alarm A output enabled */
 #  define RTC_CR_OSEL_ALRMB       (2 << RTC_CR_OSEL_SHIFT) /* 10: Alarm B output enabled */
 #  define RTC_CR_OSEL_WUT         (3 << RTC_CR_OSEL_SHIFT) /* 11: Wakeup output enabled */
+
 #define RTC_CR_COE                (1 << 23) /* Bit 23: Calibration output enable */
 #define RTC_CR_ITSE               (1 << 24) /* Bit 24: Timestamp on internal event enable */
 
@@ -366,6 +368,7 @@
 #  define RTC_TAMPCR_TAMPFREQ_DIV1024  (5 << RTC_TAMPCR_TAMPFREQ_SHIFT) /* RTCCLK / 1024 (32 Hz) */
 #  define RTC_TAMPCR_TAMPFREQ_DIV512   (6 << RTC_TAMPCR_TAMPFREQ_SHIFT) /* RTCCLK / 512 (64 Hz) */
 #  define RTC_TAMPCR_TAMPFREQ_DIV256   (7 << RTC_TAMPCR_TAMPFREQ_SHIFT) /* RTCCLK / 256 (128 Hz) */
+
 #define RTC_TAMPCR_TAMPFLT_SHIFT  (11)        /* Bits 11-12: RTC_TAMPx filter count */
 #define RTC_TAMPCR_TAMPFLT_MASK   (3 << RTC_TAMPCR_TAMPFLT_SHIFT)
 #define RTC_TAMPCR_TAMPPRCH_SHIFT (13)        /* Bits 13-14: RTC_TAMPx precharge duration */
@@ -374,6 +377,7 @@
 #  define RTC_TAMPCR_TAMPPRCH_2CYCLES (1 << RTC_TAMPCR_TAMPPRCH_SHIFT) /* 2 RTCCLK cycles */
 #  define RTC_TAMPCR_TAMPPRCH_4CYCLES (2 << RTC_TAMPCR_TAMPPRCH_SHIFT) /* 4 RTCCLK cycles */
 #  define RTC_TAMPCR_TAMPPRCH_5CYCLES (3 << RTC_TAMPCR_TAMPPRCH_SHIFT) /* 8 RTCCLK cycles */
+
 #define RTC_TAMPCR_TAMPPUDIS      (1 << 15) /* Bit 15: RTC_TAMPx pull-up disable */
 #define RTC_TAMPCR_TAMP1IE        (1 << 16) /* Bit 16:  RTC_TAMP1 interrupt enable */
 #define RTC_TAMPCR_TAMP1NOERASE   (1 << 17) /* Bit 17:  RTC_TAMP1 no erase */
@@ -396,6 +400,5 @@
 
 #define RTC_OR_ALARMTYPE          (1 << 0)  /* Bit 0:  RTC alarm type on PC13/PB14, pushpull/OD */
 #define RTC_OR_OUTRMP             (1 << 1)  /* Bit 1:  remap output to PB14 */
-
 
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RTCC_H */

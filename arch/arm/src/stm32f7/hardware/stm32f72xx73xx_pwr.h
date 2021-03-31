@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_pwr.h
  *
  *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
@@ -33,38 +33,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_PWR_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_PWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_PWR_CR1_OFFSET    0x0000  /* Power control register 1 */
 #define STM32_PWR_CSR1_OFFSET   0x0004  /* Power control/status register 1 */
 #define STM32_PWR_CR2_OFFSET    0x0008  /* Power control register 1 */
 #define STM32_PWR_CSR2_OFFSET   0x000c  /* Power control/status register 1 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_PWR_CR1           (STM32_PWR_BASE+STM32_PWR_CR1_OFFSET)
 #define STM32_PWR_CSR1          (STM32_PWR_BASE+STM32_PWR_CSR1_OFFSET)
 #define STM32_PWR_CR2           (STM32_PWR_BASE+STM32_PWR_CR2_OFFSET)
 #define STM32_PWR_CSR2          (STM32_PWR_BASE+STM32_PWR_CSR2_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Power control register 1 */
 
@@ -82,6 +82,7 @@
 #  define PWR_CR1_2p7V          (5 << PWR_CR1_PLS_SHIFT) /* 101: 2.7V */
 #  define PWR_CR1_2p8V          (6 << PWR_CR1_PLS_SHIFT) /* 110: 2.8V */
 #  define PWR_CR1_2p9V          (7 << PWR_CR1_PLS_SHIFT) /* 111: 2.9V */
+
 #define PWR_CR1_DBP             (1 << 8)  /* Bit 8: Disable Backup Domain write protection */
 #define PWR_CR1_FPDS            (1 << 9)  /* Bit 9: Flash power down in Stop mode */
 #define PWR_CR1_LPUDS           (1 << 10) /* Bit 10: Low-power regulator in deepsleep under-drive mode */
@@ -92,6 +93,7 @@
 #  define PWR_CR1_VOS_SCALE_3   (1 << PWR_CR1_VOS_SHIFT) /* Fmax = 144MHz */
 #  define PWR_CR1_VOS_SCALE_2   (2 << PWR_CR1_VOS_SHIFT) /* Fmax = 168/180MHz */
 #  define PWR_CR1_VOS_SCALE_1   (3 << PWR_CR1_VOS_SHIFT) /* Fmax = 180/216MHz */
+
 #define PWR_CR1_ODEN            (1 << 16) /* Bit 16: Over Drive enable */
 #define PWR_CR1_ODSWEN          (1 << 17) /* Bit 17: Over Drive switch enabled */
 #define PWR_CR1_UDEN_SHIFT      (18)      /* Bits 18-19: Under-drive enable in stop mode */

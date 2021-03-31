@@ -208,9 +208,8 @@ struct winsize
   uint16_t ws_row;
   uint16_t ws_col;
 
-  /* uint16_t ws_xpixel;    unused */
-
-  /* uint16_t ws_ypixel;    unused */
+  uint16_t ws_xpixel; /* unused */
+  uint16_t ws_ypixel; /* unused */
 };
 
 /* Structure used with TIOCSRS485 and TIOCGRS485 (Linux compatible) */

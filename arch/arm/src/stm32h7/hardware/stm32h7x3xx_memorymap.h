@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_memorymap.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,22 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* STM32H7X3XX Address Blocks *******************************************************/
+/* STM32H7X3XX Address Blocks ***********************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb CODE block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb SRAM block */
@@ -63,7 +63,7 @@
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
 #define STM32_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FMC_BANK1)
 
-/* Code Base Addresses **************************************************************/
+/* Code Base Addresses ******************************************************/
 
 #define STM32_ITCM_BASE      0x00000000     /* 0x00000000-0x0000ffff: ITCM */
 #define STM32_FLASH_BANK1    0x08000000     /* 0x08000000-0x080fffff: FLASH memory 1 */
@@ -71,7 +71,7 @@
 #define STM32_FLASH_BASE     STM32_FLASH_BANK1
 #define STM32_SYSMEM_MEM     0x1ff00000     /* 0x1ff00000-0x1ff1ffff: System memory */
 
-/* SRAM Base Addresses **************************************************************/
+/* SRAM Base Addresses ******************************************************/
 
 #define STM32_DTCRAM_BASE    0x20000000     /* 0x20000000-0x2001ffff: DTCM-RAM on TCM interface */
 #define STM32_AXISRAM_BASE   0x24000000     /* 0x24000000-0x247fffff: System AXI SRAM */
@@ -82,7 +82,7 @@
 #define STM32_SRAM4_BASE     0x38000000     /* 0x38000000-0x3800ffff: System SRAM4 */
 #define STM32_BBSRAM_BASE    0x38800000     /* 0x38800000-0x38800fff: System Backup SRAM */
 
-/* Peripheral Base Addresses ********************************************************/
+/* Peripheral Base Addresses ************************************************/
 
 #define STM32_PREGION_MASK   0xff000000
 #define STM32_D2_BASE        0x40000000     /* 0x40000000-0x48022800: D2 domain */
@@ -97,7 +97,7 @@
 #  define STM32_APB4_BASE    0x58000000     /* 0x60000000-0x58006bff: APB4 */
 #  define STM32_AHB4_BASE    0x58020000     /* 0x58020000-0x580267ff: AHB4 */
 
-/* APB1 Base Addresses **************************************************************/
+/* APB1 Base Addresses ******************************************************/
 
 #define STM32_TIM2_BASE        0x40000000     /* 0x40000000-0x400003ff: TIM2 */
 #define STM32_TIM3_BASE        0x40000400     /* 0x40000400-0x400007ff: TIM3 */
@@ -134,7 +134,7 @@
 #define STM32_CANCCU_BASE      0x4000a800     /* 0x4000a800 - 0x4000abff CAN CCU Section */
 #define STM32_CANRAM_BASE      0x4000ac00     /* 0x4000ac00 - 0x4000d3ff CAN Message RAM */
 
-/* APB2 Base Addresses **************************************************************/
+/* APB2 Base Addresses ******************************************************/
 
 #define STM32_TIM1_BASE        0x40010000     /* 0x40010000-0x400103ff TIM1 */
 #define STM32_TIM8_BASE        0x40010400     /* 0x40010400-0x400107ff TIM8 */
@@ -153,7 +153,7 @@
 #define STM32_DFSDM1_BASE      0x40017000     /* 0x40017000-0x400173ff DFSDM1 */
 #define STM32_HRTIM_BASE       0x40017400     /* 0x40017400-0x400177ff HRTIM */
 
-/* AHB1 Base Addresses **************************************************************/
+/* AHB1 Base Addresses ******************************************************/
 
 #define STM32_DMA1_BASE        0x40020000     /* 0x40020000-0x400203ff DMA1 */
 #define STM32_DMA2_BASE        0x40020400     /* 0x40020400-0x400207ff DMA2 */
@@ -163,7 +163,7 @@
 #define STM32_OTGHS_BASE       0x40040000     /* 0x40040000-0x4007ffff USB1 OTG HS/FS */
 #define STM32_OTGFS_BASE       0x40080000     /* 0x40080000-0x400bffff USB2 OTG FS */
 
-/* AHB2 Base Addresses **************************************************************/
+/* AHB2 Base Addresses ******************************************************/
 
 #define STM32_DCMI_BASE        0x48020000     /* 0x48020000-0x480203ff DCMI */
 #define STM32_CRYPTO_BASE      0x48021000     /* 0x48021000-0x480213ff CRYPTO */
@@ -172,12 +172,12 @@
 #define STM32_SDMMC2_BASE      0x48022400     /* 0x48022400-0x480227ff SDMMC2 */
 #define STM32_DLYBSDMMC2_BASE  0x48022800     /* 0x48022800-0x48022bff Delay Block SDMMC2 */
 
-/* APB3 Base Addresses **************************************************************/
+/* APB3 Base Addresses ******************************************************/
 
 #define STM32_LTDC_BASE        0x50001000     /* 0x50001000-0x50001fff LTDC */
 #define STM32_WWDG1_BASE       0x50003000     /* 0x50003000-0x50003fff WWDG1 */
 
-/* AHB3 Base Addresses **************************************************************/
+/* AHB3 Base Addresses ******************************************************/
 
 #define STM32_GPV_BASE         0x51000000     /* 0x51000000-0x510fffff AXI interconnect */
 #define STM32_MDMA_BASE        0x52000000     /* 0x52000000-0x52000fff MDMA */
@@ -193,7 +193,7 @@
 #define STM32_SDMMC1_BASE      0x52007000     /* 0x52007000-0x52007fff SDMMC1 */
 #define STM32_DLYBSDMMC1_BASE  0x52008000     /* 0x52008000-0x52008fff Delay Block SDMMC1 */
 
-/* APB4 Base Addresses **************************************************************/
+/* APB4 Base Addresses ******************************************************/
 
 #define STM32_EXTI_BASE        0x58000000     /* 0x58000000-0x580003ff EXTI */
 #define STM32_SYSCFG_BASE      0x58000400     /* 0x58000400-0x580007ff SYSCFG */
@@ -210,7 +210,7 @@
 #define STM32_IWDG1_BASE       0x58004800     /* 0x58004800-0x58004bff IWDG1 */
 #define STM32_SAI4_BASE        0x58005400     /* 0x58005400-0x580057ff SAI4 */
 
-/* AHB4 Base Addresses **************************************************************/
+/* AHB4 Base Addresses ******************************************************/
 
 #define STM32_GPIOA_BASE       0x58020000     /* 0x58020000-0x580203ff GPIOA */
 #define STM32_GPIOB_BASE       0x58020400     /* 0x58020400-0x580207ff GPIOB */

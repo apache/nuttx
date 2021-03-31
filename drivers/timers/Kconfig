@@ -295,7 +295,6 @@ config RTC_RPMSG
 	bool "Rpmsg RTC Driver"
 	default n
 	depends on OPENAMP
-	depends on RTC_EXTERNAL
 	select ARCH_HAVE_RTC_SUBSECONDS
 
 endif # RTC

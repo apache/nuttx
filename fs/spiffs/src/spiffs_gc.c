@@ -49,6 +49,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include "spiffs.h"
 #include "spiffs_core.h"
@@ -205,7 +206,7 @@ static int spiffs_gc_epage_stats(FAR struct spiffs_s *fs, int16_t blkndx)
       obj_lookup_page++;
     }
 
-  spiffs_gcinfo("Wipe pallo=%d pdele=%d\n", allo,  dele);
+  spiffs_gcinfo("Wipe pallo=%" PRIu32 " pdele=%" PRIu32 "\n", allo,  dele);
 
   fs->alloc_pages   -= allo;
   fs->deleted_pages -= dele;
@@ -372,7 +373,7 @@ static int spiffs_gc_find_candidate(FAR struct spiffs_s *fs,
 
           candndx = 0;
 
-          spiffs_gcinfo("blkndx=%04x del=%d use=%d score=%d\n",
+          spiffs_gcinfo("blkndx=%04x del=%d use=%d score=%" PRIu32 "\n",
                         cur_block, deleted_pages_in_block,
                         used_pages_in_block, score);
 
@@ -1169,7 +1170,8 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
   if ((int32_t)needed_pages > (int32_t)(free_pages + fs->deleted_pages))
     {
-      spiffs_gcinfo("Full freeblk=%d needed=%d free=%d dele=%d\n",
+      spiffs_gcinfo("Full freeblk=%" PRIu32 " needed=%" PRIu32 " "
+                    "free=%" PRIu32 " dele=%" PRIu32 "\n",
                     fs->free_blocks, needed_pages, free_pages,
                     fs->deleted_pages);
       return -ENOSPC;
@@ -1182,8 +1184,9 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
       int16_t cand;
       int32_t prev_free_pages = free_pages;
 
-      spiffs_gcinfo("#%d: run gc free_blocks=%d pfree=%d pallo=%d pdele=%d "
-                    "[%d] len=%d of %d\n",
+      spiffs_gcinfo("#%d: run gc free_blocks=%" PRIu32 " pfree="
+                    "%" PRIu32 " pallo=%" PRIu32 " pdele=%" PRIu32 ""
+                    " [%" PRIu32 "] len=%" PRIu32 " of %" PRIu32 "\n",
                     tries, fs->free_blocks, free_pages,
                     fs->alloc_pages, fs->deleted_pages,
                     (free_pages + fs->alloc_pages + fs->deleted_pages),
@@ -1264,8 +1267,8 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
       ret = -ENOSPC;
     }
 
-  spiffs_gcinfo("Finished, %d dirty, blocks, %d free, %d pages free, "
-                "%d tries, ret=%d\n",
+  spiffs_gcinfo("Finished, %" PRIu32 " dirty, blocks, %" PRIu32 " "
+                "free, %" PRIu32 " pages free, %d tries, ret=%d\n",
                 fs->alloc_pages + fs->deleted_pages,
                 fs->free_blocks, free_pages, tries, ret);
 

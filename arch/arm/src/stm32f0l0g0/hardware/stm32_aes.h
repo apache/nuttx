@@ -1,4 +1,4 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_aes.h
  *
  *   Copyright (C) 2015 Haltian Ltd. All rights reserved.
@@ -31,24 +31,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_AES_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_AES_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* AES register offsets *********************************************************************/
+/* AES register offsets *****************************************************/
 
 #define STM32_AES_CR_OFFSET                0x0000 /* Control Register */
 #define STM32_AES_SR_OFFSET                0x0004 /* Status Register */
@@ -63,7 +63,7 @@
 #define STM32_AES_IVR2_OFFSET              0x0028 /* AES Initialization Vector Register 2 */
 #define STM32_AES_IVR3_OFFSET              0x002C /* AES Initialization Vector Register 3 */
 
-/* AES register addresses *******************************************************************/
+/* AES register addresses ***************************************************/
 
 #define STM32_AES_CR                       (STM32_AES_BASE + STM32_AES_CR_OFFSET)
 #define STM32_AES_SR                       (STM32_AES_BASE + STM32_AES_SR_OFFSET)
@@ -78,7 +78,7 @@
 #define STM32_AES_IVR2                     (STM32_AES_BASE + STM32_AES_IVR2_OFFSET)
 #define STM32_AES_IVR3                     (STM32_AES_BASE + STM32_AES_IVR3_OFFSET)
 
-/* AES register bit definitions *************************************************************/
+/* AES register bit definitions *********************************************/
 
 /* AES_CR register */
 

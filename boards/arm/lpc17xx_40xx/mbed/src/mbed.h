@@ -34,20 +34,19 @@
 
 /* MBED GPIO Pin Definitions ************************************************/
 
-#define MBED_LED1             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN18)
-#define MBED_LED1_OFF          MBED_LED1
-#define MBED_LED1_ON          (MBED_LED1 | GPIO_VALUE_ONE)
-#define MBED_LED2             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN20)
-#define MBED_LED2_OFF          MBED_LED2
-#define MBED_LED2_ON          (MBED_LED2 | GPIO_VALUE_ONE)
-#define MBED_LED3             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN21)
-#define MBED_LED3_OFF          MBED_LED3
-#define MBED_LED3_ON          (MBED_LED3 | GPIO_VALUE_ONE)
-#define MBED_LED4             (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN23)
-#define MBED_LED4_OFF         MBED_LED4
-#define MBED_LED4_ON          (MBED_LED 4| GPIO_VALUE_ONE)
+#define MBED_LED1        (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN18)
+#define MBED_LED2        (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN20)
+#define MBED_LED3        (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN21)
+#define MBED_LED4        (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN23)
+#define MBED_HEARTBEAT   MBED_LED4
 
-#define MBED_HEARTBEAT        MBED_LED4
+/* LED bits for use with board_userled_all() */
+#define MBED_NLEDS      4
+
+#define MBED_LED1_BIT    (1 << 0)
+#define MBED_LED2_BIT    (1 << 1)
+#define MBED_LED3_BIT    (1 << 2)
+#define MBED_LED4_BIT    (1 << 3)
 
 /****************************************************************************
  * Public Types

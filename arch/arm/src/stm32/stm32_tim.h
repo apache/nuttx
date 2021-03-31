@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_tim.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -36,14 +36,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_TIM_H
 #define __ARCH_ARM_SRC_STM32_STM32_TIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,10 +52,11 @@
 
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Helpers **************************************************************************/
+ ****************************************************************************/
+
+/* Helpers ******************************************************************/
 
 #define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
 #define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
@@ -72,9 +73,9 @@
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
 #define STM32_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -112,20 +113,26 @@ typedef enum
   /* One of the following */
 
   STM32_TIM_MODE_CK_INT       = 0x0000,
-//STM32_TIM_MODE_CK_INT_TRIG  = 0x0400,
-//STM32_TIM_MODE_CK_EXT       = 0x0800,
-//STM32_TIM_MODE_CK_EXT_TRIG  = 0x0C00,
+
+  /* STM32_TIM_MODE_CK_INT_TRIG  = 0x0400, */
+
+  /* STM32_TIM_MODE_CK_EXT       = 0x0800, */
+
+  /* STM32_TIM_MODE_CK_EXT_TRIG  = 0x0C00, */
 
   /* Clock sources, OR'ed with CK_EXT */
 
-//STM32_TIM_MODE_CK_CHINVALID = 0x0000,
-//STM32_TIM_MODE_CK_CH1       = 0x0001,
-//STM32_TIM_MODE_CK_CH2       = 0x0002,
-//STM32_TIM_MODE_CK_CH3       = 0x0003,
-//STM32_TIM_MODE_CK_CH4       = 0x0004
+  /* STM32_TIM_MODE_CK_CHINVALID = 0x0000, */
+
+  /* STM32_TIM_MODE_CK_CH1       = 0x0001, */
+
+  /* STM32_TIM_MODE_CK_CH2       = 0x0002, */
+
+  /* STM32_TIM_MODE_CK_CH3       = 0x0003, */
+
+  /* STM32_TIM_MODE_CK_CH4       = 0x0004  */
 
   /* Todo: external trigger block */
-
 } stm32_tim_mode_t;
 
 /* TIM Channel Modes */
@@ -145,14 +152,17 @@ typedef enum
 
   /* Output Compare Modes */
 
-  STM32_TIM_CH_OUTPWM         = 0x04,     /** Enable standard PWM mode, active high when counter < compare */
-//STM32_TIM_CH_OUTCOMPARE     = 0x06,
+  STM32_TIM_CH_OUTPWM         = 0x04,     /* Enable standard PWM mode, active high when counter < compare */
 
-  // TODO other modes ... as PWM capture, ENCODER and Hall Sensor
-//STM32_TIM_CH_INCAPTURE      = 0x10,
-//STM32_TIM_CH_INPWM          = 0x20
-//STM32_TIM_CH_DRIVE_OC   -- open collector mode
+  /* STM32_TIM_CH_OUTCOMPARE     = 0x06, */
 
+  /* TODO other modes ... as PWM capture, ENCODER and Hall Sensor */
+
+  /* STM32_TIM_CH_INCAPTURE      = 0x10, */
+
+  /* STM32_TIM_CH_INPWM          = 0x20  */
+
+  /* STM32_TIM_CH_DRIVE_OC   -- open collector mode */
 } stm32_tim_channel_t;
 
 /* TIM Operations */
@@ -178,16 +188,17 @@ struct stm32_tim_ops_s
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct stm32_tim_dev_s *dev, xcpt_t handler, void * arg, int source);
+  int  (*setisr)(FAR struct stm32_tim_dev_s *dev,
+                  xcpt_t handler, void * arg, int source);
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
   int  (*checkint)(FAR struct stm32_tim_dev_s *dev, int source);
 };
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /* Power-up timer and get its structure */
 
@@ -205,7 +216,8 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
  *   register the timer drivers at 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the timer device. This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.
+ *              This should be of the form /dev/timer0
  *   timer - the timer number.
  *
  * Returned Value:

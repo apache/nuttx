@@ -1,50 +1,36 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4x5xx_dma.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X5XX_DMA_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X5XX_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
+
 /* 14 Channels Total: 7 DMA1 Channels(1-7) and 7 DMA2 channels (1-7) */
 
 #define DMA1 0
 #define DMA2 1
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_DMA_ISR_OFFSET       0x0000 /* DMA interrupt status register */
 #define STM32L4_DMA_IFCR_OFFSET      0x0004 /* DMA interrupt flag clear register */
@@ -102,7 +88,7 @@
 
 #define STM32L4_DMA_CSELR_OFFSET    0x00a8 /* DMA channel selection register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_DMA1_ISRC           (STM32L4_DMA1_BASE+STM32L4_DMA_ISR_OFFSET)
 #define STM32L4_DMA1_IFCR           (STM32L4_DMA1_BASE+STM32L4_DMA_IFCR_OFFSET)
@@ -182,7 +168,7 @@
 #define STM32L4_DMA2_CMAR6          (STM32L4_DMA2_BASE+STM32L4_DMA_CMAR6_OFFSET)
 #define STM32L4_DMA2_CMAR7          (STM32L4_DMA2_BASE+STM32L4_DMA_CMAR7_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define DMA_CHAN_SHIFT(n)         ((n) << 2)
 #define DMA_CHAN_MASK             0x0f
@@ -255,17 +241,20 @@
 #  define DMA_CCR_PSIZE_8BITS     (0 << DMA_CCR_PSIZE_SHIFT) /* 00: 8-bits */
 #  define DMA_CCR_PSIZE_16BITS    (1 << DMA_CCR_PSIZE_SHIFT) /* 01: 16-bits */
 #  define DMA_CCR_PSIZE_32BITS    (2 << DMA_CCR_PSIZE_SHIFT) /* 10: 32-bits */
+
 #define DMA_CCR_MSIZE_SHIFT       (10)      /* Bits 10-11: Memory size */
 #define DMA_CCR_MSIZE_MASK        (3 << DMA_CCR_MSIZE_SHIFT)
 #  define DMA_CCR_MSIZE_8BITS     (0 << DMA_CCR_MSIZE_SHIFT) /* 00: 8-bits */
 #  define DMA_CCR_MSIZE_16BITS    (1 << DMA_CCR_MSIZE_SHIFT) /* 01: 16-bits */
 #  define DMA_CCR_MSIZE_32BITS    (2 << DMA_CCR_MSIZE_SHIFT) /* 10: 32-bits */
+
 #define DMA_CCR_PL_SHIFT          (12)      /* Bits 12-13: Channel Priority level */
 #define DMA_CCR_PL_MASK           (3 << DMA_CCR_PL_SHIFT)
 #  define DMA_CCR_PRILO           (0 << DMA_CCR_PL_SHIFT) /* 00: Low */
 #  define DMA_CCR_PRIMED          (1 << DMA_CCR_PL_SHIFT) /* 01: Medium */
 #  define DMA_CCR_PRIHI           (2 << DMA_CCR_PL_SHIFT) /* 10: High */
 #  define DMA_CCR_PRIVERYHI       (3 << DMA_CCR_PL_SHIFT) /* 11: Very high */
+
 #define DMA_CCR_MEM2MEM           (1 << 14) /* Bit 14: Memory to memory mode */
 
 #define DMA_CCR_ALLINTS           (DMA_CCR_TEIE|DMA_CCR_HTIE|DMA_CCR_TCIE)
@@ -275,14 +264,15 @@
 #define DMA_CNDTR_NDT_SHIFT       (0)       /* Bits 15-0: Number of data to Transfer */
 #define DMA_CNDTR_NDT_MASK        (0xffff << DMA_CNDTR_NDT_SHIFT)
 
-/* DMA Channel mapping.  Each DMA channel has a mapping to one of several
- * possible sources/sinks of data.  The requests from peripherals assigned to a
- * channel are multiplexed together before entering the DMA block. This means
- * that only one request on a given channel can be enabled at once.
+/* DMA Channel mapping.
+ * Each DMA channel has a mapping to one of several possible sources/sinks
+ * of data.  The requests from peripherals assigned to a channel are
+ * multiplexed together before entering the DMA block. This means that only
+ * one request on a given channel can be enabled at once.
  *
- * Alternative DMA channel selections are provided with a numeric suffix like _1,
- * _2, etc.  Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.
+ * Alternative DMA channel selections are provided with a numeric suffix like
+ * _1, _2, etc.  Drivers, however, will use the pin selection without the
+ * numeric suffix. Additional definitions are required in the board.h file.
  */
 
 #define STM32L4_DMA1_CHAN1          (0)

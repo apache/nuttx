@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32_sai.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_SAI_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_SAI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32F7_SAI_GCR_OFFSET     0x0000  /* SAI Global Configuration Register */
 
@@ -63,7 +48,7 @@
 #define STM32F7_SAI_CLRFR_OFFSET   0x0018  /* SAI Clear Flag Register A */
 #define STM32F7_SAI_DR_OFFSET      0x001c  /* SAI Data Register A */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32F7_SAI1_GCR           (STM32_SAI1_BASE+STM32F7_SAI_GCR_OFFSET)
 
@@ -111,7 +96,7 @@
 #define STM32F7_SAI2_BCLRFR        (STM32F7_SAI2_B_BASE+STM32F7_SAI_CLRFR_OFFSET)
 #define STM32F7_SAI2_BDR           (STM32F7_SAI2_B_BASE+STM32F7_SAI_DR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SAI Global Configuration Register */
 
@@ -132,11 +117,13 @@
 #  define SAI_CR1_MODE_MASTER_RX   (1 << SAI_CR1_MODE_SHIFT) /* Master receiver */
 #  define SAI_CR1_MODE_SLAVE_TX    (2 << SAI_CR1_MODE_SHIFT) /* Slave transmitter */
 #  define SAI_CR1_MODE_SLAVE_RX    (3 << SAI_CR1_MODE_SHIFT) /* Slave receiver */
+
 #define SAI_CR1_PRTCFG_SHIFT       (2)       /* Bits 2-3: Protocol configuration */
 #define SAI_CR1_PRTCFG_MASK        (3 << SAI_CR1_PRTCFG_SHIFT)
 #  define SAI_CR1_PRTCFG_FREE      (0 << SAI_CR1_PRTCFG_SHIFT) /* Free protocol */
 #  define SAI_CR1_PRTCFG_SPDIF     (1 << SAI_CR1_PRTCFG_SHIFT) /* SPDIF protocol */
 #  define SAI_CR1_PRTCFG_AC97      (2 << SAI_CR1_PRTCFG_SHIFT) /* AC97 protocol */
+
                                              /* Bit 4: Reserved */
 #define SAI_CR1_DS_SHIFT           (5)       /* Bits 5-7: Data size */
 #define SAI_CR1_DS_MASK            (7 << SAI_CR1_DS_SHIFT)
@@ -146,6 +133,7 @@
 # define SAI_CR1_DS_20BITS         (5 << SAI_CR1_DS_SHIFT) /* 20 bits */
 # define SAI_CR1_DS_24BITS         (6 << SAI_CR1_DS_SHIFT) /* 24 bits */
 # define SAI_CR1_DS_32BITS         (7 << SAI_CR1_DS_SHIFT) /* 32 bits */
+
 #define SAI_CR1_LSBFIRST           (1 << 8)  /* Bit 8:  Least significant bit first */
 #define SAI_CR1_CKSTR              (1 << 9)  /* Bit 9:  Clock strobing edge */
 #define SAI_CR1_SYNCEN_SHIFT       (10)      /* Bits 10-11: Synchronization enable */
@@ -153,6 +141,7 @@
 #  define SAI_CR1_SYNCEN_ASYNCH    (0 << SAI_CR1_SYNCEN_SHIFT) /* Asynchronous mode */
 #  define SAI_CR1_SYNCEN_INTERNAL  (1 << SAI_CR1_SYNCEN_SHIFT) /* Synchronous with other internal sub-block */
 #  define SAI_CR1_SYNCEN_EXTERNAL  (2 << SAI_CR1_SYNCEN_SHIFT) /* Aynchronous with external SAI peripheral */
+
 #define SAI_CR1_MONO               (1 << 12) /* Bit 12: Mono mode */
 #define SAI_CR1_OUTDRIV            (1 << 13) /* Bit 13: Output drive */
                                              /* Bits 14-15: Reserved */
@@ -174,6 +163,7 @@
 #  define SAI_CR2_FTH_HF           (2 << SAI_CR2_FTH_SHIFT) /* 1/2 FIFO */
 #  define SAI_CR2_FTH_3QF          (3 << SAI_CR2_FTH_SHIFT) /* 3/4 FIFO */
 #  define SAI_CR2_FTH_FULL         (4 << SAI_CR2_FTH_SHIFT) /* FIFO full */
+
 #define SAI_CR2_FFLUSH             (1 << 3)  /* Bit 3:  FIFO flush */
 #define SAI_CR2_TRIS               (1 << 4)  /* Bit 4:  Tristate management on data line */
 #define SAI_CR2_MUTE               (1 << 5)  /* Bit 5:  Mute */
@@ -187,6 +177,7 @@
 #  define SAI_CR2_COMP_NONE        (0 << SAI_CR2_COMP_SHIFT) /* No companding algorithm */
 #  define SAI_CR2_COMP_ULAW        (2 << SAI_CR2_COMP_SHIFT) /* μ-Law algorithm */
 #  define SAI_CR2_COMP_ALAW        (3 << SAI_CR2_COMP_SHIFT) /* A-Law algorithm */
+
                                              /* Bits 16-31: Reserved */
 
 /* SAI Frame Configuration Register */
@@ -198,14 +189,20 @@
 #define SAI_FRCR_FSALL_MASK        (0x7f << SAI_FRCR_FSALL_SHIFT)
 #  define SAI_FRCR_FSALL(n)        ((uint32_t)((n) - 1) << SAI_FRCR_FSALL_SHIFT)
 #define SAI_FRCR_FSDEF             (1 << 16) /* Bit 16: Frame synchronization definition */
+
 #  define SAI_FRCR_FSDEF_SF        (0)             /* FS signal is a start frame signal */
 #  define SAI_FRCR_FSDEF_CHID      SAI_FRCR_FSDEF  /* FS signal is a start of frame + channel side ID */
+
 #define SAI_FRCR_FSPOL             (1 << 17) /* Bit 17: Frame synchronization polarity */
+
 #  define SAI_FRCR_FSPOL_LOW       (0)             /* FS is active low */
 #  define SAI_FRCR_FSPOL_HIGH      SAI_FRCR_FSPOL  /* FS is active high */
+
 #define SAI_FRCR_FSOFF             (1 << 18) /* Bit 18: Frame synchronization offset */
+
 #  define SAI_FRCR_FSOFF_FB        (0)             /* FS on first bit of slot 0 */
 #  define SAI_FRCR_FSOFF_BFB       SAI_FRCR_FSOFF  /* FS one bit before first bit of slot 0 */
+
                                              /* Bits 19-31: Reserved */
 
 /* SAI Slot Register */
@@ -219,6 +216,7 @@
 #  define SAI_SLOTR_SLOTSZ_DATA    (0 << SAI_SLOTR_SLOTSZ_SHIFT) /* Same as data size */
 #  define SAI_SLOTR_SLOTSZ_16BIT   (1 << SAI_SLOTR_SLOTSZ_SHIFT) /* 16-bit */
 #  define SAI_SLOTR_SLOTSZ_32BIT   (2 << SAI_SLOTR_SLOTSZ_SHIFT) /* 32-bit */
+
 #define SAI_SLOTR_NBSLOT_SHIFT     (8)       /* Bits 8-11: Number of slots in an audio frame */
 #define SAI_SLOTR_NBSLOT_MASK      (15 << SAI_SLOTR_NBSLOT_SHIFT)
 #  define SAI_SLOTR_NBSLOT(n)      ((uint32_t)((n) - 1) << SAI_SLOTR_NBSLOT_SHIFT)
@@ -243,7 +241,9 @@
 #  define SAI_SLOTR_SLOTEN_14      (1 << 30)  /* Bit 30: Slot 14 Enabled */
 #  define SAI_SLOTR_SLOTEN_15      (1 << 31)  /* Bit 31: Slot 15 Enabled */
 
-/* SAI Interrupt Mask Register 2, SAI Status Register, and SAI Clear Flag Register */
+/* SAI Interrupt Mask Register 2,
+ * SAI Status Register, and SAI Clear Flag Register
+ */
 
 #define SAI_INT_OVRUDR             (1 << 0)  /* Bit 0:  Overrun/underrun interrupt */
 #define SAI_INT_MUTEDET            (1 << 1)  /* Bit 1:  Mute detection interrupt */

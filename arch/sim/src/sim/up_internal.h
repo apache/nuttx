@@ -440,5 +440,13 @@ int sim_i2cbus_uninitialize(struct i2c_master_s *dev);
 void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+/* up_foc.c *****************************************************************/
+
+#ifdef CONFIG_MOTOR_FOC
+struct foc_dev_s;
+FAR struct foc_dev_s *sim_foc_initialize(int inst);
+void sim_foc_update(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_SIM_SRC_UP_INTERNAL_H */

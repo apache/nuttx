@@ -128,7 +128,8 @@
                         DFSDM_FLTISR_JOVRF | DFSDM_FLTISR_ROVRF | \
                         DFSDM_FLTISR_AWDF)
 
-/* DFSDM Channels/DMA ********************************************************/
+/* DFSDM Channels/DMA *******************************************************/
+
 /* The maximum number of channels that can be sampled.  While DMA support is
  * very nice for reliable multi-channel sampling, the STM32L4 can function
  * without, although there is a risk of overrun.
@@ -265,7 +266,8 @@ static void dfsdm_reset(FAR struct adc_dev_s *dev);
 static int  dfsdm_setup(FAR struct adc_dev_s *dev);
 static void dfsdm_shutdown(FAR struct adc_dev_s *dev);
 static void dfsdm_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  dfsdm_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+static int  dfsdm_ioctl(FAR struct adc_dev_s *dev,
+                        int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -465,7 +467,8 @@ static void dfsdm_putreg(FAR struct stm32_dev_s *priv, int offset,
 static void dfsdm_modifyreg(FAR struct stm32_dev_s *priv, int offset,
                             uint32_t clrbits, uint32_t setbits)
 {
-  dfsdm_putreg(priv, offset, (dfsdm_getreg(priv, offset) & ~clrbits) | setbits);
+  dfsdm_putreg(priv, offset,
+              (dfsdm_getreg(priv, offset) & ~clrbits) | setbits);
 }
 
 /****************************************************************************
@@ -761,7 +764,7 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(priv, STM32L4_GTIM_PSC_OFFSET, prescaler-1);
+  tim_putreg(priv, STM32L4_GTIM_PSC_OFFSET, prescaler - 1);
   tim_putreg(priv, STM32L4_GTIM_ARR_OFFSET, reload);
 
   /* Clear the advanced timers repetition counter in TIM1 */
@@ -798,7 +801,8 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR1_OFFSET, (uint16_t)(reload >> 1));
+          tim_putreg(priv, STM32L4_GTIM_CCR1_OFFSET,
+                    (uint16_t)(reload >> 1));
         }
         break;
 
@@ -817,7 +821,8 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR2_OFFSET, (uint16_t)(reload >> 1));
+          tim_putreg(priv, STM32L4_GTIM_CCR2_OFFSET,
+                    (uint16_t)(reload >> 1));
         }
         break;
 
@@ -836,7 +841,8 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR3_OFFSET, (uint16_t)(reload >> 1));
+          tim_putreg(priv, STM32L4_GTIM_CCR3_OFFSET,
+                    (uint16_t)(reload >> 1));
         }
         break;
 
@@ -855,13 +861,15 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET, (uint16_t)(reload >> 1));
+          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET,
+                    (uint16_t)(reload >> 1));
         }
         break;
 
       case 4: /* TimerX TRGO event */
         {
           /* TODO: TRGO support not yet implemented */
+
           /* Set the event TRGO */
 
           ccenable = 0;
@@ -871,7 +879,8 @@ static int dfsdm_timinit(FAR struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET, (uint16_t)(reload >> 1));
+          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET,
+                    (uint16_t)(reload >> 1));
         }
         break;
 
@@ -1016,6 +1025,7 @@ static void dfsdm_startconv(FAR struct stm32_dev_s *priv, bool enable)
 
       regval &= ~DFSDM_FLTCR1_DFEN;
     }
+
   dfsdm_putreg(priv, FLTCR1_OFFSET(priv), regval);
 
   if (enable)
@@ -1377,7 +1387,8 @@ static int dfsdm_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
   regval |= DFSDM_CHCFGR1_DATMPX_ADC;
 #else
   regval |= DFSDM_CHCFGR1_DATMPX_EXT;
-  // regval |= DFSDM_CHCFGR1_DATMPX_DATINR;
+
+  /* regval |= DFSDM_CHCFGR1_DATMPX_DATINR; */
 #endif
   dfsdm_putreg(priv, CHCFGR1_OFFSET(priv), regval);
 
@@ -1498,7 +1509,8 @@ static int dfsdm_interrupt(FAR struct adc_dev_s *dev, uint32_t isr)
     {
       value = dfsdm_getreg(priv, FLTAWSR_OFFSET(priv));
 
-      awarn("WARNING: Analog Watchdog, extreme value on channels (0x%x)!\n", value);
+      awarn("WARNING: Analog Watchdog, extreme value on channels (0x%x)!\n",
+            value);
 
       /* Clear AWD flags */
 
@@ -1538,7 +1550,8 @@ static int dfsdm_interrupt(FAR struct adc_dev_s *dev, uint32_t isr)
        */
 
       value = dfsdm_getreg(priv, FLTRDATAR_OFFSET(priv));
-      value = (value & DFSDM_FLTRDATAR_RDATA_MASK) >> DFSDM_FLTRDATAR_RDATA_SHIFT;
+      value = (value & DFSDM_FLTRDATAR_RDATA_MASK) >>
+               DFSDM_FLTRDATAR_RDATA_SHIFT;
 
       /* Verify that the upper-half driver has bound its callback functions */
 
@@ -1556,7 +1569,9 @@ static int dfsdm_interrupt(FAR struct adc_dev_s *dev, uint32_t isr)
           priv->cb->au_receive(dev, priv->chanlist[priv->current], value);
         }
 
-      /* Set the channel number of the next channel that will complete conversion */
+      /* Set the channel number of the next channel that will complete
+       * conversion
+       */
 
       priv->current++;
 
@@ -1689,7 +1704,8 @@ static int dfsdm_flt3_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef DFSDM_HAVE_DMA
-static void dfsdm_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
+static void dfsdm_dmaconvcallback(DMA_HANDLE handle,
+                                  uint8_t isr, FAR void *arg)
 {
   FAR struct adc_dev_s   *dev  = (FAR struct adc_dev_s *)arg;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
@@ -1705,7 +1721,8 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
       for (i = 0; i < priv->nchannels; i++)
         {
           value = priv->dmabuffer[priv->current];
-          value = (value & DFSDM_FLTRDATAR_RDATA_MASK) >> DFSDM_FLTRDATAR_RDATA_SHIFT;
+          value = (value & DFSDM_FLTRDATAR_RDATA_MASK) >>
+                   DFSDM_FLTRDATAR_RDATA_SHIFT;
 
           priv->cb->au_receive(dev, priv->chanlist[priv->current], value);
           priv->current++;
@@ -1745,7 +1762,8 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32l4_dfsdm_initialize(int intf, FAR const uint8_t *chanlist,
+struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
+                                           FAR const uint8_t *chanlist,
                                            int cchannels)
 {
   FAR struct adc_dev_s   *dev;

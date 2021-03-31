@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_syscfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SYSCFG_CFGR1_OFFSET      0x0000                    /* SYSCFG configuration register 1 */
 #define STM32_SYSCFG_CFGR2_OFFSET      0x0004                    /* SYSCFG configuration register 2 */
@@ -46,7 +46,7 @@
 
 #define STM32_SYSCFG_CFGR3_OFFSET      0x0020                    /* SYSCFG configuration register 3 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_SYSCFG_CFGR1             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR1_OFFSET)
 #define STM32_SYSCFG_CFGR2             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR2_OFFSET)
@@ -60,7 +60,7 @@
 
 #define STM32_SYSCFG_CFGR3             (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR3_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* TODO: SYSCFG configuration register 1 */
 

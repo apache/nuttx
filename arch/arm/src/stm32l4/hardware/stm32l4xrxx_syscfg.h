@@ -1,59 +1,46 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4xrxx_syscfg.h
  *
- *   Copyright (C) 2014-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4XRXX_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4XRXX_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
 #if defined(CONFIG_STM32L4_STM32L4XR)
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L4_SYSCFG_MEMRMP_OFFSET    0x0000 /* SYSCFG memory remap register */
 #define STM32L4_SYSCFG_CFGR1_OFFSET     0x0004 /* SYSCFG configuration register 1 */
+
 #define STM32L4_SYSCFG_EXTICR_OFFSET(p) (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
+
 #define STM32L4_SYSCFG_EXTICR1_OFFSET   0x0008 /* SYSCFG external interrupt configuration register 1 */
 #define STM32L4_SYSCFG_EXTICR2_OFFSET   0x000c /* SYSCFG external interrupt configuration register 2 */
 #define STM32L4_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
@@ -64,7 +51,7 @@
 #define STM32L4_SYSCFG_SKR_OFFSET       0x0024 /* SYSCFG SRAM2 key register */
 #define STM32L4_SYSCFG_SWPR2_OFFSET     0x0028 /* SYSCFG SRAM2 write protection register 2 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_SYSCFG_MEMRMP           (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_MEMRMP_OFFSET)
 #define STM32L4_SYSCFG_CFGR1            (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_CFGR1_OFFSET)
@@ -79,7 +66,7 @@
 #define STM32L4_SYSCFG_SKR              (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_SKR_OFFSET)
 #define STM32L4_SYSCFG_SWPR2            (STM32L4_SYSCFG_BASE+STM32L4_SYSCFG_SWPR2_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SYSCFG memory remap register */
 
@@ -91,6 +78,7 @@
 #  define SYSCFG_MEMRMP_SRAM          (3 << SYSCFG_MEMRMP_SHIFT) /* 011: SRAM1 mapped at 0x0000 0000 */
 #  define SYSCFG_MEMRMP_OCTOSPI1      (4 << SYSCFG_MEMRMP_SHIFT) /* 100: OCTOSPI1 mapped at 0x0000 0000 */
 #  define SYSCFG_MEMRMP_OCTOSPI2      (5 << SYSCFG_MEMRMP_SHIFT) /* 101: OCTOSPI2 mapped at 0x0000 0000 */
+
 #define SYSCFG_FBMODE                 (1 << 8) /* Bit 8: Flash Bank mode selection */
 
 /* SYSCFG configuration register 1 */
@@ -179,6 +167,7 @@
 #define SYSCFG_CFGR2_SPF              (1 <<  8) /* Bit  8: SRAM2 parity error flag */
 
 /* SYSCFG SRAM2 write protection register */
+
 /* There is one bit per SRAM2 page (0 to 31) */
 
 /* SYSCFG SRAM2 key register */
@@ -187,6 +176,7 @@
 #define SYSCFG_SKR_MASK               (0xFF << SYSCFG_SKR_SHIFT)
 
 /* SYSCFG SRAM2 write protection register 2 */
+
 /* There is one bit per SRAM2 page (32 to 63) */
 
 #endif /* CONFIG_STM32L4_STM32L4XR */

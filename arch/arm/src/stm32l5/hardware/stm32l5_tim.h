@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/hardware/stm32l5_tim.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -37,16 +37,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_TIM_H
 #define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_TIM_H
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets **********************************************************/
+/* Register Offsets *********************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
 
@@ -121,7 +121,7 @@
 #define STM32L5_ATIM_OR2_OFFSET     0x0050  /* Timer option register 2 */
 #define STM32L5_ATIM_OR3_OFFSET     0x0050  /* Timer option register 3 */
 
-/* Register Addresses ********************************************************/
+/* Register Addresses *******************************************************/
 
 /* Advanced Timers - TIM1 and TIM8 */
 
@@ -334,7 +334,7 @@
 #define STM32L5_TIM7_PSC            (STM32L5_TIM7_BASE + STM32L5_BTIM_PSC_OFFSET)
 #define STM32L5_TIM7_ARR            (STM32L5_TIM7_BASE + STM32L5_BTIM_ARR_OFFSET)
 
-/* Register Bitfield Definitions *********************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -907,7 +907,9 @@
 #define GTIM_CCMR_MODE_PWM1       (6)       /* 110: PWM mode 1 */
 #define GTIM_CCMR_MODE_PWM2       (7)       /* 111: PWM mode 2 */
 
-/* Capture/compare mode register 1 - Input capture mode (TIM2-5 and TIM9-14) */
+/* Capture/compare mode register 1 - Input capture mode
+ * (TIM2-5 and TIM9-14)
+ */
 
 #define GTIM_CCMR1_IC1PSC_SHIFT   (2)       /* Bits 3-2: Input Capture 1 Prescaler */
 #define GTIM_CCMR1_IC1PSC_MASK    (3 << GTIM_CCMR1_IC1PSC_SHIFT)

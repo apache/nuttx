@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_exti.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_EXTI_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_EXTI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
@@ -50,11 +50,11 @@
 
 #if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X7XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_EXTI_INDEX(n)         ((n) >> 5)
 #define STM32_EXTI_SHIFT(n)         ((n) & 31)
@@ -104,7 +104,7 @@
 #define STM32_EXTI_CPUEMR3_OFFSET   0x00a4  /* EXTI event mask register 3 */
 #define STM32_EXTI_CPUPR3_OFFSET    0x00a8  /* EXTI pending register 3 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_EXTI_RTSR(n)          (STM32_EXTI_BASE + STM32_EXTI_RTSR_OFFSET(n))
 #define STM32_EXTI_FTSR(n)          (STM32_EXTI_BASE + STM32_EXTI_FTSR_OFFSET(n))
@@ -150,12 +150,15 @@
 #define STM32_EXTI_CPUEMR3          (STM32_EXTI_BASE + STM32_EXTI_CPUEMR3_OFFSET)
 #define STM32_EXTI_CPUPR3           (STM32_EXTI_BASE + STM32_EXTI_CPUPR3_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
-/* Rising Trigger selection register 1-3, Falling Trigger selection register 1-3,
- * Software interrupt event register 1-3, and D3 pending mask register 1-3:
+/* Rising Trigger selection register 1-3,
+ * Falling Trigger selection register 1-3,
+ * Software interrupt event register 1-3,
+ * and D3 pending mask register 1-3:
  *
- * Bit encoded, each bit corresponding to one of the input events enumerated below.
+ * Bit encoded, each bit corresponding to one of the input events enumerated
+ * below.
  */
 
 #define EXIT_EVENT(n)               STM32_EXTI_MASK(n)
@@ -183,7 +186,7 @@
 #define EXTI_D3PCRH_MASK(n)         (3 << EXTI_D3PCRL_SHIFT(n))
 #  define EXTI_D3PCRH(n,v)          ((uint32_t)(v) << EXTI_D3PCRL_SHIFT(n))
 
-/* EXTI event input mapping *********************************************************/
+/* EXTI event input mapping *************************************************/
 
 #define EXTI_EVENT_EXTI(n)          (1 << (n) /* 0-15 EXTI[15:0] */
 #define EXTI_EVENT_PVDAVD           16        /* PVD and AVD */

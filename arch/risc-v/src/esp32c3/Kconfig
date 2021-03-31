@@ -337,6 +337,21 @@ endmenu # Real-Time Timer
 menu "Wi-Fi configuration"
 	depends on ESP32C3_WIRELESS
 
+choice
+	prompt "ESP32-C3 Wi-Fi mode"
+	default ESP32C3_WIFI_STATION
+
+config ESP32C3_WIFI_STATION
+	bool "Station mode"
+
+config ESP32C3_WIFI_SOFTAP
+	bool "SoftAP mode"
+
+config ESP32C3_WIFI_STATION_SOFTAP_COEXISTENCE
+	bool "Station + SoftAP coexistence"
+
+endchoice # ESP32-C3 Wi-Fi mode
+
 config ESP32C3_WIFI_STATIC_RXBUF_NUM
 	int "Wi-Fi static RX buffer number"
 	default 10
@@ -361,8 +376,8 @@ config ESP32C3_WIFI_RXBA_AMPDU_WZ
 	int "Wi-Fi RX BA AMPDU windown size"
 	default 6
 
-config ESP32C3_WLAN_RXBUF_NUM
-	int "WLAN netcard RX buffer number"
+config ESP32C3_WLAN_PKTBUF_NUM
+	int "WLAN netcard packet buffer number per netcard"
 	default 16
 
 config ESP32C3_WIFI_CONNECT_TIMEOUT
@@ -370,6 +385,12 @@ config ESP32C3_WIFI_CONNECT_TIMEOUT
 	default 10
 	help
 		Max waiting time of connecting to AP.
+
+config ESP32C3_WIFI_SCAN_RESULT_SIZE
+	int "Scan result buffer"
+	default 4096
+	help
+		Maximum scan result buffer size.
 
 config ESP32C3_WIFI_SAVE_PARAM
 	bool "Save Wi-Fi Parameters"

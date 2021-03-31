@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_gpio.h
  *
  *   Copyright (C) 2005 Gregory Nutt. All rights reserved.
@@ -32,25 +32,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_GPIO_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/stm32f7/chip.h>
 
 #if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_GPIO_MODER_OFFSET    0x0000 /* GPIO port mode register */
 #define STM32_GPIO_OTYPER_OFFSET   0x0004 /* GPIO port output type register */
@@ -63,7 +63,7 @@
 #define STM32_GPIO_AFRL_OFFSET     0x0020 /* GPIO alternate function low register */
 #define STM32_GPIO_AFRH_OFFSET     0x0024 /* GPIO alternate function high register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32F7_NGPIO > 0
 #  define STM32_GPIOA_MODER        (STM32_GPIOA_BASE+STM32_GPIO_MODER_OFFSET)
@@ -208,7 +208,7 @@
 #  define STM32_GPIOK_AFRH         (STM32_GPIOK_BASE+STM32_GPIO_AFRH_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* GPIO port mode register */
 

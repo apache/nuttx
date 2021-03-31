@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_fsmc.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FMSC_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FMSC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FSMC_BCR_OFFSET(n)  (8 * ((n) - 1))
 #define STM32_FSMC_BCR1_OFFSET    0x0000 /* SRAM/NOR-Flash chip-select control registers 1 */
@@ -94,7 +79,7 @@
 #define STM32_FSMC_ECCR2_OFFSET   0x0074 /* ECC result register 2 */
 #define STM32_FSMC_ECCR3_OFFSET   0x0094 /* ECC result register 3 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FSMC_BCR(n)         (STM32_FSMC_BASE + STM32_FSMC_BCR_OFFSET(n))
 #define STM32_FSMC_BCR1           (STM32_FSMC_BASE + STM32_FSMC_BCR1_OFFSET)
@@ -140,7 +125,7 @@
 #define STM32_FSMC_ECCR2          (STM32_FSMC_BASE + STM32_FSMC_ECCR2_OFFSET)
 #define STM32_FSMC_ECCR3          (STM32_FSMC_BASE + STM32_FSMC_ECCR3_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define FSMC_BCR_MBKEN            (1 << 0)   /* Memory bank enable bit */
 #define FSMC_BCR_MUXEN            (1 << 1)   /* Address/data multiplexing enable bit */
@@ -173,21 +158,27 @@
 #define FSMC_BTR_ADDSET_SHIFT     (0)        /* Address setup phase duration */
 #define FSMC_BTR_ADDSET_MASK      (15 << FSMC_BTR_ADDSET_SHIFT)
 #  define FSMC_BTR_ADDSET(n)      ((n-1) << FSMC_BTR_ADDSET_SHIFT)  /* (n)xHCLK n=1..16 */
+
 #define FSMC_BTR_ADDHLD_SHIFT     (4)        /* Address-hold phase duration */
 #define FSMC_BTR_ADDHLD_MASK      (15 << FSMC_BTR_ADDHLD_SHIFT)
 #  define FSMC_BTR_ADDHLD(n)      ((n-1) << FSMC_BTR_ADDHLD_SHIFT)  /* (n)xHCLK n=2..16*/
+
 #define FSMC_BTR_DATAST_SHIFT     (8)        /* Data-phase duration */
 #define FSMC_BTR_DATAST_MASK      (255 << FSMC_BTR_DATAST_SHIFT)
 #  define FSMC_BTR_DATAST(n)      ((n-1) << FSMC_BTR_DATAST_SHIFT)  /* (n)xHCLK n=2..256 */
+
 #define FSMC_BTR_BUSTURN_SHIFT    (16)       /* Bus turnaround phase duration */
 #define FSMC_BTR_BUSTURN_MASK     (15 << FSMC_BTR1_BUSTURN_SHIFT)
 #  define FSMC_BTR_BUSTURN(n)     ((n-1) << FSMC_BTR_BUSTURN_SHIFT) /* (n)xHCLK n=1..16 */
+
 #define FSMC_BTR_CLKDIV_SHIFT     (20)       /* Clock divide ratio */
 #define FSMC_BTR_CLKDIV_MASK      (15 << FSMC_BTR_CLKDIV_SHIFT)
 #  define FSMC_BTR_CLKDIV(n)      ((n-1) << FSMC_BTR_CLKDIV_SHIFT)  /* (n)xHCLK n=2..16 */
+
 #define FSMC_BTR_DATLAT_SHIFT     (24)      /* Data latency */
 #define FSMC_BTR_DATLAT_MASK      (15 << FSMC_BTR_DATLAT_SHIFT)
 #  define FSMC_BTR_DATLAT(n)      ((n-2) << FSMC_BTR_DATLAT_SHIFT)  /* (n)xHCLK n=2..17 */
+
 #define FSMC_BTR_ACCMOD_SHIFT     (28)      /* Access mode */
 #define FSMC_BTR_ACCMOD_MASK      (3 << FSMC_BTR_ACCMOD_SHIFT)
 #  define FSMC_BTR_ACCMODA        (0 << FSMC_BTR_ACCMOD_SHIFT)
@@ -200,18 +191,23 @@
 #define FSMC_BWTR_ADDSET_SHIFT    (0)        /* Address setup phase duration */
 #define FSMC_BWTR_ADDSET_MASK     (15 << FSMC_BWTR_ADDSET_SHIFT)
 #  define FSMC_BWTR_ADDSET(n)     ((n-1) << FSMC_BWTR_ADDSET_SHIFT)  /* (n)xHCLK n=1..16 */
+
 #define FSMC_BWTR_ADDHLD_SHIFT    (4)        /* Address-hold phase duration */
 #define FSMC_BWTR_ADDHLD_MASK     (15 << FSMC_BWTR_ADDHLD_SHIFT)
 #  define FSMC_BWTR_ADDHLD(n)     ((n-1) << FSMC_BWTR_ADDHLD_SHIFT)  /* (n)xHCLK n=2..16*/
+
 #define FSMC_BWTR_DATAST_SHIFT    (8)        /* Data-phase duration */
 #define FSMC_BWTR_DATAST_MASK     (255 << FSMC_BWTR_DATAST_SHIFT)
 #  define FSMC_BWTR_DATAST(n)     ((n-1) << FSMC_BWTR_DATAST_SHIFT)  /* (n)xHCLK n=2..256 */
+
 #define FSMC_BWTR_CLKDIV_SHIFT    (20)       /* Clock divide ratio */
 #define FSMC_BWTR_CLKDIV_MASK     (15 << FSMC_BWTR_CLKDIV_SHIFT)
 #  define FSMC_BWTR_CLKDIV(n)     ((n-1) << FSMC_BWTR_CLKDIV_SHIFT)  /* (n)xHCLK n=2..16 */
+
 #define FSMC_BWTR_DATLAT_SHIFT    (24)      /* Data latency */
 #define FSMC_BWTR_DATLAT_MASK     (15 << FSMC_BWTR_DATLAT_SHIFT)
 #  define FSMC_BWTR_DATLAT(n)     ((n-2) << FSMC_BWTR_DATLAT_SHIFT)  /* (n)xHCLK n=2..17 */
+
 #define FSMC_BWTR_ACCMOD_SHIFT    (28)      /* Access mode */
 #define FSMC_BWTR_ACCMOD_MASK     (3 << FSMC_BWTR_ACCMOD_SHIFT)
 #  define FSMC_BWTR_ACCMODA       (0 << FSMC_BWTR_ACCMOD_SHIFT)
@@ -230,9 +226,11 @@
 #define FSMC_PCR_TCLR_SHIFT       (9)       /* CLE to RE delay */
 #define FSMC_PCR_TCLR_MASK        (15 << FSMC_PCR_TCLR_SHIFT)
 #  define FSMC_PCR_TCLR(n)        ((n-1) << FSMC_PCR_TCLR_SHIFT) /* (n)xHCLK n=1..16 */
+
 #define FSMC_PCR_TAR_SHIFT        (13)      /* ALE to RE delay */
 #define FSMC_PCR_TAR_MASK         (15 <<  FSMC_PCR_TAR_MASK)
 #  define FSMC_PCR_TAR(n)         ((n-1) << FSMC_PCR_TAR_SHIFT)  /* (n)xHCLK n=1..16 */
+
 #define FSMC_PCR_ECCPS_SHIFT      (17)      /* ECC page size */
 #define FSMC_PCR_ECCPS_MASK       (7 << FSMC_PCR_ECCPS_SHIFT)
 #  define FSMC_PCR_ECCPS256       (0 << FSMC_PCR_ECCPS_SHIFT) /* 256 bytes */
@@ -253,12 +251,15 @@
 #define FSMC_PMEM_MEMSET_SHIFT    (0)       /* Common memory setup time */
 #define FSMC_PMEM_MEMSET_MASK     (255 << FSMC_PMEM_MEMSET_SHIFT)
 #  define FSMC_PMEM_MEMSET(n)     ((n-1) << FSMC_PMEM_MEMSET_SHIFT) /* (n)xHCLK n=1..256 */
+
 #define FSMC_PMEM_MEMWAIT_SHIFT   (8)       /* Common memory wait time */
 #define FSMC_PMEM_MEMWAIT_MASK    (255 << FSMC_PMEM_MEMWAIT_SHIFT)
 #  define FSMC_PMEM_MEMWAIT(n)    ((n-1) << FSMC_PMEM_MEMWAIT_SHIFT) /* (n)xHCLK n=2..256 */
+
 #define FSMC_PMEM_MEMHOLD_SHIFT   (16)      /* Common memoryhold time */
 #define FSMC_PMEM_MEMHOLD_MASK    (255 << FSMC_PMEM_MEMHOLD_SHIFT)
 #  define FSMC_PMEM_MEMHOLD(n)    ((n) <<  FSMC_PMEM_MEMHOLD_SHIFT) /* (n)xHCLK n=1..255 */
+
 #define FSMC_PMEM_MEMHIZ_SHIFT    (24)       /* Common memory databus HiZ time */
 #define FSMC_PMEM_MEMHIZ_MASK     (255 << FSMC_PMEM_MEMHIZ_SHIFT)
 #  define FSMC_PMEM_MEMHIZ(n)     ((n) << FSMC_PMEM_MEMHIZ_SHIFT) /* (n)xHCLK n=0..255 */
@@ -266,12 +267,15 @@
 #define FSMC_PATT_ATTSET_SHIFT    (0)       /* Attribute memory setup time */
 #define FSMC_PATT_ATTSET_MASK     (255 << FSMC_PATT_ATTSET_SHIFT)
 #  define FSMC_PATT_ATTSET(n)     ((n-1) << FSMC_PATT_ATTSET_SHIFT) /* (n)xHCLK n=1..256 */
+
 #define FSMC_PATT_ATTWAIT_SHIFT   (8)       /* Attribute memory wait time */
 #define FSMC_PATT_ATTWAIT_MASK    (255 << FSMC_PATT_ATTWAIT_SHIFT)
 #  define FSMC_PATT_ATTWAIT(n)    ((n-1) << FSMC_PATT_ATTWAIT_SHIFT) /* (n)xHCLK n=2..256 */
+
 #define FSMC_PATT_ATTHOLD_SHIFT   (16)      /* Attribute memory hold time */
 #define FSMC_PATT_ATTHOLD_MASK    (255 << FSMC_PATT_ATTHOLD_SHIFT)
 #  define FSMC_PATT_ATTHOLD(n)    ((n) <<  FSMC_PATT_ATTHOLD_SHIFT) /* (n)xHCLK n=1..255 */
+
 #define FSMC_PATT_ATTHIZ_SHIFT    (24)       /* Attribute memory databus HiZ time */
 #define FSMC_PATT_ATTHIZ_MASK     (255 << FSMC_PATT_ATTHIZ_SHIFT)
 #  define FSMC_PATT_ATTHIZ(n)     ((n) << FSMC_PATT_ATTHIZ_SHIFT) /* (n)xHCLK n=0..255 */
@@ -279,12 +283,15 @@
 #define FSMC_PIO4_IOSET_SHIFT     (0)       /* IO memory setup time */
 #define FSMC_PIO4_IOSET_MASK      (255 << FSMC_PIO4_IOSET_SHIFT)
 #  define FSMC_PIO4_IOSET(n)      ((n-1) << FSMC_PIO4_IOSET_SHIFT) /* (n)xHCLK n=1..256 */
+
 #define FSMC_PIO4_IOWAIT_SHIFT    (8)       /* IO memory wait time */
 #define FSMC_PIO4_IOWAIT_MASK     (255 << FSMC_PIO4_IOWAIT_SHIFT)
 #  define FSMC_PIO4_IOWAIT(n)     ((n-1) << FSMC_PIO4_IOWAIT_SHIFT) /* (n)xHCLK n=2..256 */
+
 #define FSMC_PIO4_IOHOLD_SHIFT    (16)      /* IO memory hold time */
 #define FSMC_PIO4_IOHOLD_MASK     (255 << FSMC_PIO4_IOHOLD_SHIFT)
 #  define FSMC_PIO4_IOHOLD(n)     ((n) <<  FSMC_PIO4_IOHOLD_SHIFT) /* (n)xHCLK n=1..255 */
+
 #define FSMC_PIO4_IOHIZ_SHIFT     (24)       /* IO memory databus HiZ time */
 #define FSMC_PIO4_IOHIZ_MASK      (255 << FSMC_PIO4_IOHIZ_SHIFT)
 #  define FSMC_PIO4_IOHIZ(n)      ((n) << FSMC_PIO4_IOHIZ_SHIFT) /* (n)xHCLK n=0..255 */

@@ -83,7 +83,8 @@
 #endif
 
 /* TODO: At the moment there is no implementation
-   for timer and external triggers */
+ * for timer and external triggers
+ */
 
 #if defined(SDADC_HAVE_TIMER)
 #  error "There is no proper implementation for TIMER TRIGGERS at the moment"
@@ -105,7 +106,6 @@
 #define SDADC_ISR_ALLINTS (SDADC_ISR_JEOCF | SDADC_ISR_JOVRF)
 
 /* SDADC Channels/DMA *******************************************************/
-
 
 #define SDADC_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \
                                 DMA_CCR_PSIZE_16BITS | \
@@ -375,7 +375,8 @@ static void sdadc_putreg(FAR struct stm32_dev_s *priv, int offset,
 static void sdadc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
                           uint32_t clrbits, uint32_t setbits)
 {
-  sdadc_putreg(priv, offset, (sdadc_getreg(priv, offset) & ~clrbits) | setbits);
+  sdadc_putreg(priv, offset,
+              (sdadc_getreg(priv, offset) & ~clrbits) | setbits);
 }
 
 /****************************************************************************
@@ -559,7 +560,8 @@ static void sdadc_startconv(FAR struct stm32_dev_s *priv, bool enable)
     {
       /* Wait for a possible conversion to stop */
 
-      while ((sdadc_getreg(priv, STM32_SDADC_ISR_OFFSET) & SDADC_ISR_JCIP) != 0);
+      while ((sdadc_getreg(priv,
+                           STM32_SDADC_ISR_OFFSET) & SDADC_ISR_JCIP) != 0);
     }
 }
 
@@ -633,7 +635,8 @@ static void sdadc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
  *
  * Input Parameters:
  *   priv     - A reference to the SDADC block state
- *   pdi_high - true:  The SDADC is powered down when waiting for a start event
+ *   pdi_high - true:  The SDADC is powered down when waiting for a start
+ *                     event
  *              false: The SDADC is powered up when waiting for a start event
  *
  * Returned Value:
@@ -642,7 +645,8 @@ static void sdadc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
  ****************************************************************************/
 
 #if 0
-static void sdadc_power_down_idle(FAR struct stm32_dev_s *priv, bool pdi_high)
+static void sdadc_power_down_idle(FAR struct stm32_dev_s *priv,
+                                  bool pdi_high)
 {
   uint32_t regval;
 
@@ -709,7 +713,6 @@ static void sdadc_enable(FAR struct stm32_dev_s *priv, bool enable)
       /* Disable the SDADC */
 
       sdadc_putreg(priv, STM32_SDADC_CR2_OFFSET, regval & ~SDADC_CR2_ADON);
-
     }
 }
 
@@ -730,7 +733,8 @@ static void sdadc_enable(FAR struct stm32_dev_s *priv, bool enable)
  ****************************************************************************/
 
 #ifdef SDADC_HAVE_DMA
-static void sdadc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
+static void sdadc_dmaconvcallback(DMA_HANDLE handle,
+                                  uint8_t isr, FAR void *arg)
 {
   FAR struct adc_dev_s   *dev  = (FAR struct adc_dev_s *)arg;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
@@ -830,7 +834,9 @@ static void sdadc_reset(FAR struct adc_dev_s *dev)
 
   /* Wait for the SDADC to be ready */
 
-  while ((sdadc_getreg(priv, STM32_SDADC_ISR_OFFSET) & SDADC_ISR_INITRDY) == 0);
+  while ((sdadc_getreg(priv,
+                       STM32_SDADC_ISR_OFFSET) &
+                       SDADC_ISR_INITRDY) == 0);
 
   /* Load configurations */
 
@@ -863,7 +869,7 @@ static void sdadc_reset(FAR struct adc_dev_s *dev)
 
   /* CR2 ********************************************************************/
 
-  setbits = SDADC_CR2_ADON; // leave it ON !
+  setbits = SDADC_CR2_ADON; /* leave it ON ! */
 
   /* TODO: JEXTEN / JEXTSEL */
 
@@ -885,11 +891,13 @@ static void sdadc_reset(FAR struct adc_dev_s *dev)
 
   /* Wait for the calibration to complete (may take up to 5ms) */
 
-  while ((sdadc_getreg(priv, STM32_SDADC_ISR_OFFSET) & SDADC_ISR_EOCALF) == 0);
+  while ((sdadc_getreg(priv,
+                       STM32_SDADC_ISR_OFFSET) & SDADC_ISR_EOCALF) == 0);
 
   /* Clear this flag */
 
-  sdadc_modifyreg(priv, STM32_SDADC_CLRISR_OFFSET, SDADC_CLRISR_CLREOCALF, 0);
+  sdadc_modifyreg(priv,
+                  STM32_SDADC_CLRISR_OFFSET, SDADC_CLRISR_CLREOCALF, 0);
 
 #ifdef SDADC_HAVE_TIMER
   if (priv->tbase != 0)
@@ -962,6 +970,7 @@ static int sdadc_setup(FAR struct adc_dev_s *dev)
   if (priv->hasdma)
     {
       /* Setup DMA */
+
       /* Stop and free DMA if it was started before */
 
       if (priv->dma != NULL)
@@ -1082,12 +1091,14 @@ static void sdadc_rxint(FAR struct adc_dev_s *dev, bool enable)
 #ifdef SDADC_HAVE_DMA
   if (priv->hasdma)
     {
-      setbits = SDADC_CR1_JDMAEN; // DMA enabled for injected channels group
+      setbits = SDADC_CR1_JDMAEN; /* DMA enabled for injected channels group */
     }
   else
     {
       /* Interrupt enable for injected channel group overrun
-          and end of conversion */
+       *  and end of conversion
+       */
+
       setbits = SDADC_CR1_JOVRIE | SDADC_CR1_JEOCIE;
     }
 #else
@@ -1237,10 +1248,15 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
   if ((regval & SDADC_ISR_JEOCF) != 0)
     {
       /* Read the converted value and clear JEOCF bit
-       * (It is cleared by reading the SDADC_JDATAR) */
+       * (It is cleared by reading the SDADC_JDATAR)
+       */
 
-      data = sdadc_getreg(priv, STM32_SDADC_JDATAR_OFFSET) & SDADC_JDATAR_JDATA_MASK;
-      chan = sdadc_getreg(priv, STM32_SDADC_JDATAR_OFFSET) & SDADC_JDATAR_JDATACH_MASK;
+      data = sdadc_getreg(priv,
+                          STM32_SDADC_JDATAR_OFFSET) &
+                           SDADC_JDATAR_JDATA_MASK;
+      chan = sdadc_getreg(priv,
+                          STM32_SDADC_JDATAR_OFFSET) &
+                          SDADC_JDATAR_JDATACH_MASK;
 
       DEBUGASSERT(priv->chanlist[priv->current] == chan);
 
@@ -1302,9 +1318,9 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
  *   structure and return the corresponding adc device structure.
  *
  *   Each SDADC will convert the channels indicated each
- *   time a conversion is triggered either by software, timer or external event.
- *   Channels are numbered from 0 - 8 and must be given in order (contrarily
- *   to what says ST RM0313 doc !!!).
+ *   time a conversion is triggered either by software, timer or external
+ *   event. Channels are numbered from 0 - 8 and must be given in order
+ *   (contrarily to what says ST RM0313 doc !!!).
  *
  * Input Parameters:
  *   intf      - Could be {1,2,3} for SDADC1, SDADC2, or SDADC3
@@ -1316,7 +1332,8 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32_sdadcinitialize(int intf, FAR const uint8_t *chanlist,
+struct adc_dev_s *stm32_sdadcinitialize(int intf,
+                                        FAR const uint8_t *chanlist,
                                         int cchannels)
 {
   FAR struct adc_dev_s   *dev;
@@ -1355,7 +1372,7 @@ struct adc_dev_s *stm32_sdadcinitialize(int intf, FAR const uint8_t *chanlist,
   DEBUGASSERT((cchannels <= SDADC_MAX_SAMPLES) && (cchannels > 0));
   for (i = 0; i < cchannels - 1; i ++)
     {
-      if (chanlist[i] >= chanlist[i+1])
+      if (chanlist[i] >= chanlist[i + 1])
         {
           aerr("ERROR: SDADC channel list must be given in order\n");
           return NULL;

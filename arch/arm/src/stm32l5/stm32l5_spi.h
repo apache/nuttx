@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/stm32l5_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_STM32L5_SPI_H
 #define __ARCH_ARM_SRC_STM32L5_STM32L5_SPI_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/stm32l5_spi.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -45,17 +45,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_spibus_initialize
  *
  * Description:
@@ -67,11 +67,11 @@ struct spi_dev_s;
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *stm32l5_spibus_initialize(int bus);
 
-/*****************************************************************************
+/****************************************************************************
  * Name:  stm32l5_spi1/2/...select and stm32l5_spi1/2/...status
  *
  * Description:
@@ -87,20 +87,20 @@ FAR struct spi_dev_s *stm32l5_spibus_initialize(int bus);
  *      select pins.
  *   2. Provide stm32l5_spi1/2/...select() and stm32l5_spi1/2/...status()
  *      functions in your board-specific logic.  These functions will perform
- *      chip selection and status operations using GPIOs in the way your board
- *      is configured.
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file,
  *      then provide stm32l5_spi1/2/...cmddata() functions in your
- *      board-specific logic.  These functions will perform cmd/data selection
- *      operations using GPIOs in the way your board is configured.
+ *      board-specific logic.  These functions will perform cmd/data
+ *      selection operations using GPIOs in the way your board is configured.
  *   4. Add a calls to stm32l5_spibus_initialize() in your low level
  *      application initialization logic
- *   5. The handle returned by stm32l5_spibus_initialize() may then be used to
- *      bind the SPI driver to higher level logic (e.g., calling
+ *   5. The handle returned by stm32l5_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32L5_SPI1
 void stm32l5_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
@@ -123,7 +123,7 @@ uint8_t stm32l5_spi3status(FAR struct spi_dev_s *dev, uint32_t devid);
 int stm32l5_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32l5_spi1/2/...register
  *
  * Description:
@@ -141,7 +141,7 @@ int stm32l5_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
  * Returned Value:
  *   0 on success; negated errno on failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_STM32L5_SPI1

@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_lowputc.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -186,7 +171,7 @@
 
 #  define USART_CR1_SETBITS (USART_CR1_M0_VALUE|USART_CR1_M1_VALUE|USART_CR1_PARITY_VALUE)
 
-  /* CR2 settings */
+/* CR2 settings */
 
 #  if STM32L4_CONSOLE_2STOP != 0
 #    define USART_CR2_STOP2_VALUE USART_CR2_STOP2
@@ -203,7 +188,7 @@
 
 #  define USART_CR2_SETBITS USART_CR2_STOP2_VALUE
 
-  /* CR3 settings */
+/* CR3 settings */
 
 #  define USART_CR3_CLRBITS \
     (USART_CR3_EIE | USART_CR3_IREN | USART_CR3_IRLP | USART_CR3_HDSEL | \
@@ -216,26 +201,26 @@
 
 #  undef USE_OVER8
 
-  /* Calculate USART BAUD rate divider */
+/* Calculate USART BAUD rate divider */
 
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud    = fCK / UARTDIV
-   *   UARTDIV = fCK / baud
-   *
-   * In case of oversampling by 8, the equation is:
-   *
-   *   baud    = 2 * fCK / UARTDIV
-   *   UARTDIV = 2 * fCK / baud
-   */
+/* Baud rate for standard USART (SPI mode included):
+ *
+ * In case of oversampling by 16, the equation is:
+ *   baud    = fCK / UARTDIV
+ *   UARTDIV = fCK / baud
+ *
+ * In case of oversampling by 8, the equation is:
+ *
+ *   baud    = 2 * fCK / UARTDIV
+ *   UARTDIV = 2 * fCK / baud
+ */
 
 #  define STM32L4_USARTDIV8 \
       (((STM32L4_APBCLOCK << 1) + (STM32L4_CONSOLE_BAUD >> 1)) / STM32L4_CONSOLE_BAUD)
 #  define STM32L4_USARTDIV16 \
       ((STM32L4_APBCLOCK + (STM32L4_CONSOLE_BAUD >> 1)) / STM32L4_CONSOLE_BAUD)
 
-   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
+/* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
 #  if STM32L4_USARTDIV8 > 100
 #    define STM32L4_BRR_VALUE STM32L4_USARTDIV16
@@ -284,9 +269,11 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX data register is empty */
 
-  while ((getreg32(STM32L4_CONSOLE_BASE + STM32L4_USART_ISR_OFFSET) & USART_ISR_TXE) == 0);
+  while ((getreg32(STM32L4_CONSOLE_BASE + STM32L4_USART_ISR_OFFSET) &
+                   USART_ISR_TXE) == 0);
 #ifdef STM32L4_CONSOLE_RS485_DIR
-  stm32l4_gpiowrite(STM32L4_CONSOLE_RS485_DIR, STM32L4_CONSOLE_RS485_DIR_POLARITY);
+  stm32l4_gpiowrite(STM32L4_CONSOLE_RS485_DIR,
+                    STM32L4_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Then send the character */
@@ -294,8 +281,10 @@ void arm_lowputc(char ch)
   putreg32((uint32_t)ch, STM32L4_CONSOLE_BASE + STM32L4_USART_TDR_OFFSET);
 
 #ifdef STM32L4_CONSOLE_RS485_DIR
-  while ((getreg32(STM32L4_CONSOLE_BASE + STM32L4_USART_ISR_OFFSET) & USART_ISR_TC) == 0);
-  stm32l4_gpiowrite(STM32L4_CONSOLE_RS485_DIR, !STM32L4_CONSOLE_RS485_DIR_POLARITY);
+  while ((getreg32(STM32L4_CONSOLE_BASE + STM32L4_USART_ISR_OFFSET) &
+                   USART_ISR_TC) == 0);
+  stm32l4_gpiowrite(STM32L4_CONSOLE_RS485_DIR,
+                   !STM32L4_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
 #endif /* HAVE_CONSOLE */
@@ -326,7 +315,8 @@ void stm32l4_lowsetup(void)
 
   /* Enable the console USART and configure GPIO pins needed for rx/tx.
    *
-   * NOTE: Clocking for selected U[S]ARTs was already provided in stm32l4_rcc.c
+   * NOTE: Clocking for selected U[S]ARTs was already provided in
+   * stm32l4_rcc.c
    */
 
 #ifdef STM32L4_CONSOLE_TX
@@ -338,7 +328,8 @@ void stm32l4_lowsetup(void)
 
 #ifdef STM32L4_CONSOLE_RS485_DIR
   stm32l4_configgpio(STM32L4_CONSOLE_RS485_DIR);
-  stm32l4_gpiowrite(STM32L4_CONSOLE_RS485_DIR, !STM32L4_CONSOLE_RS485_DIR_POLARITY);
+  stm32l4_gpiowrite(STM32L4_CONSOLE_RS485_DIR,
+                    !STM32L4_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Enable and configure the selected console device */
@@ -367,7 +358,8 @@ void stm32l4_lowsetup(void)
 
   /* Configure the USART Baud Rate */
 
-  putreg32(STM32L4_BRR_VALUE, STM32L4_CONSOLE_BASE + STM32L4_USART_BRR_OFFSET);
+  putreg32(STM32L4_BRR_VALUE,
+           STM32L4_CONSOLE_BASE + STM32L4_USART_BRR_OFFSET);
 
   /* Select oversampling by 8 */
 

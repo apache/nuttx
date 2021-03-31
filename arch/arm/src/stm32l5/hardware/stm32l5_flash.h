@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l5/hardware/stm32l5_flash.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -6,7 +6,8 @@
  *
  * Based on arch/arm/src/stm32l4/hardware/stm32l4_flash.h
  *
- *   Copyright (C) 2009, 2011, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2015, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *            Juha Niskanen <juha.niskanen@haltian.com>
@@ -38,26 +39,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_FLASH_H
 #define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_FLASH_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
 /* Flash size is known from the chip selection:
  *
  *   When CONFIG_STM32L5_FLASH_OVERRIDE_DEFAULT is set the
- *   CONFIG_STM32L5_FLASH_CONFIG_x selects the default FLASH size based on the
- *   chip part number.  This value can be overridden with
+ *   CONFIG_STM32L5_FLASH_CONFIG_x selects the default FLASH size based on
+ *   the chip part number.  This value can be overridden with
  *   CONFIG_STM32L5_FLASH_OVERRIDE_x
  *
  *   Parts STM32L552xC and STM32L562xC have 256Kb of FLASH
@@ -103,7 +104,7 @@
 #  define STM32L5_FLASH_SIZE        (STM32L5_FLASH_NPAGES * STM32L5_FLASH_PAGESIZE)
 #endif
 
-/* Register Offsets **********************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32L5_FLASH_ACR_OFFSET           0x0000
 #define STM32L5_FLASH_PDKEYR_OFFSET        0x0004
@@ -139,7 +140,7 @@
 #define STM32L5_FLASH_SECHDPCR_OFFSET      0x00c0
 #define STM32L5_FLASH_PRIVCFGR_OFFSET      0x00c4
 
-/* Register Addresses ********************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L5_FLASH_ACR           (STM32L5_FLASHIF_BASE + STM32L5_FLASH_ACR_OFFSET)
 #define STM32L5_FLASH_PDKEYR        (STM32L5_FLASHIF_BASE + STM32L5_FLASH_PDKEYR_OFFSET)
@@ -175,7 +176,7 @@
 #define STM32L5_FLASH_SECHDPCR      (STM32L5_FLASHIF_BASE + STM32L5_FLASH_SECHDPCR_OFFSET)
 #define STM32L5_FLASH_PRIVCFGR      (STM32L5_FLASHIF_BASE + STM32L5_FLASH_PRIVCFGR_OFFSET)
 
-/* Register Bitfield Definitions *********************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Flash Access Control Register (ACR) */
 

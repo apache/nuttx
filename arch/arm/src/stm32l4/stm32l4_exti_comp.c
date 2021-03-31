@@ -78,7 +78,7 @@ static const uint32_t g_comp_lines[STM32L4_COMP_NUM] =
 #endif
 };
 
- /****************************************************************************
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -141,9 +141,9 @@ int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
   irqstate_t flags;
   uint32_t ln = g_comp_lines[cmp];
 
- /* Perform the following within a critical section so that the handler gets
-  * installed correctly before the next interrupt is received.
-  */
+  /* Perform the following within a critical section so that the handler gets
+   * installed correctly before the next interrupt is received.
+   */
 
   flags = enter_critical_section();
 
@@ -161,8 +161,10 @@ int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ? 0 : ln, risingedge  ? ln : 0);
-  modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ? 0 : ln, fallingedge ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ?
+              0 : ln, risingedge  ? ln : 0);
+  modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ?
+              0 : ln, fallingedge ? ln : 0);
 
   /* Enable Events and Interrupts */
 

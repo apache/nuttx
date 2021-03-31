@@ -1,46 +1,31 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_rtcc.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_RTCC_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_RTCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_RTC_TR_OFFSET       0x0000 /* RTC time register */
 #define STM32_RTC_DR_OFFSET       0x0004 /* RTC date register */
@@ -102,7 +87,7 @@
 #  define STM32_RTC_BK31R_OFFSET  0x00cc /* RTC backup register 31 */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RTC_TR              (STM32_RTC_BASE+STM32_RTC_TR_OFFSET)
 #define STM32_RTC_DR              (STM32_RTC_BASE+STM32_RTC_DR_OFFSET)
@@ -172,7 +157,7 @@
 #  define STM32_RTC_BKCOUNT       20
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* RTC time register */
 
@@ -225,6 +210,7 @@
 #  define RTC_CR_WUCKSEL_RTCDIV2   (3 << RTC_CR_WUCKSEL_SHIFT) /* 011: RTC/2 clock is selected */
 #  define RTC_CR_WUCKSEL_CKSPRE    (4 << RTC_CR_WUCKSEL_SHIFT) /* 10x: ck_spre clock is selected */
 #  define RTC_CR_WUCKSEL_CKSPREADD (6 << RTC_CR_WUCKSEL_SHIFT) /* 11x: ck_spr clock and 216 added WUT counter */
+
 #define RTC_CR_TSEDGE             (1 << 3)  /* Bit 3:  Timestamp event active edge */
 #define RTC_CR_REFCKON            (1 << 4)  /* Bit 4:  Reference clock detection enable (50 or 60 Hz) */
 #define RTC_CR_BYPSHAD            (1 << 5)  /* Bit 5:  Bypass the shadow registers */
@@ -249,6 +235,7 @@
 #  define RTC_CR_OSEL_ALRMA       (1 << RTC_CR_OSEL_SHIFT) /* 01: Alarm A output enabled */
 #  define RTC_CR_OSEL_ALRMB       (2 << RTC_CR_OSEL_SHIFT) /* 10: Alarm B output enabled */
 #  define RTC_CR_OSEL_WUT         (3 << RTC_CR_OSEL_SHIFT) /* 11: Wakeup output enabled */
+
 #define RTC_CR_COE                (1 << 23) /* Bit 23: Calibration output enable */
 
 /* RTC initialization and status register */
@@ -381,7 +368,7 @@
 #define RTC_TAFCR_TAMP3E          (1 << 5)  /* Bit 5:  RTC_TAMP3 detection enable */
 #define RTC_TAFCR_TAMP3TRG        (1 << 6)  /* Bit 6:  Active level for RTC_TAMP3 input */
 #define RTC_TAFCR_TAMPTS          (1 << 7)  /* Bit 7:  Activate timestamp on tamper detection event */
-#define RTC_TAFCR_TAMPFREQ_SHIFT  (8)        /* Bits 8-10: Tamper sampling frequency */
+#define RTC_TAFCR_TAMPFREQ_SHIFT  (8)       /* Bits 8-10: Tamper sampling frequency */
 #define RTC_TAFCR_TAMPFREQ_MASK   (7 << RTC_TAFCR_TAMPFREQ_SHIFT)
 #  define RTC_TAFCR_TAMPFREQ_DIV32768 (0 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 32768 (1 Hz) */
 #  define RTC_TAFCR_TAMPFREQ_DIV16384 (1 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 16384 (2 Hz) */
@@ -391,6 +378,7 @@
 #  define RTC_TAFCR_TAMPFREQ_DIV1024  (5 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 1024 (32 Hz) */
 #  define RTC_TAFCR_TAMPFREQ_DIV512   (6 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 512 (64 Hz) */
 #  define RTC_TAFCR_TAMPFREQ_DIV256   (7 << RTC_TAFCR_TAMPFREQ_SHIFT) /* RTCCLK / 256 (128 Hz) */
+
 #define RTC_TAFCR_TAMPFLT_SHIFT   (11)        /* Bits 11-12: RTC_TAMPx filter count */
 #define RTC_TAFCR_TAMPFLT_MASK    (3 << RTC_TAFCR_TAMPFLT_SHIFT)
 #define RTC_TAFCR_TAMPPRCH_SHIFT  (13)        /* Bits 13-14: RTC_TAMPx precharge duration */
@@ -399,6 +387,7 @@
 #  define RTC_TAFCR_TAMPPRCH_2CYCLES (1 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 2 RTCCLK cycles */
 #  define RTC_TAFCR_TAMPPRCH_4CYCLES (2 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 4 RTCCLK cycles */
 #  define RTC_TAFCR_TAMPPRCH_5CYCLES (3 << RTC_TAFCR_TAMPPRCH_SHIFT) /* 8 RTCCLK cycles */
+
 #define RTC_TAFCR_TAMPPUDIS       (1 << 15) /* Bit 15: RTC_TAMPx pull-up disable */
 #define RTC_TAFCR_PC13VALUE       (1 << 18) /* Bit 18: RTC_ALARM output type/PC13 value */
 #define RTC_TAFCR_PC13MODE        (1 << 19) /* Bit 19: PC13 mode */

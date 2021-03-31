@@ -764,7 +764,7 @@ int spiffs_erase_block(FAR struct spiffs_s *fs, int16_t blkndx)
 
   while (size > 0)
     {
-      finfo("erase %08lx:%d\n",
+      finfo("erase %08lx:%" PRIu32 "\n",
             (unsigned long)addr, SPIFFS_GEO_EBLOCK_SIZE(fs));
 
       spiffs_mtd_erase(fs, addr, SPIFFS_GEO_EBLOCK_SIZE(fs));
@@ -1542,7 +1542,7 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
   FAR struct spiffs_file_s *next;
   int16_t objid = objid_raw & ~SPIFFS_OBJID_NDXFLAG;
 
-  finfo("Event=%s objid=%04x spndx=%04x npgndx=%04x nsz=%d\n",
+  finfo("Event=%s objid=%04x spndx=%04x npgndx=%04x nsz=%" PRIu32 "\n",
         evname[MIN(ev, 5)], objid_raw, spndx, new_pgndx, new_size);
 
   /* Update index caches in all file descriptors */
@@ -1570,8 +1570,8 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
 
           if (ev != SPIFFS_EV_NDXDEL)
             {
-              finfo("Setting objid=%d (offset=%d) objhdr_pgndx "
-                    "to %04x size=%d\n",
+              finfo("Setting objid=%d (offset=%" PRIu32 ") objhdr_pgndx "
+                    "to %04x size=%" PRIu32 "\n",
                     fobj->objid, fobj->offset, new_pgndx, new_size);
 
               fobj->objhdr_pgndx = new_pgndx;
@@ -2008,7 +2008,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                     }
 
                   finfo("objid=%04x found object index at "
-                        "page=%04x [fobj size=%d]\n",
+                        "page=%04x [fobj size=%" PRIu32 "]\n",
                         fobj->objid, pgndx, fobj->size);
 
                   ret = spiffs_cache_read(fs,
@@ -2924,8 +2924,9 @@ int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
 
                   if (!remove_full)
                     {
-                      finfo("Update objndx hdr page %04x:%04x to size=%d\n",
-                            fobj->objhdr_pgndx, prev_objndx_spndx, cur_size);
+                      finfo("Update objndx hdr page %04x:%04x to"
+                      "size=%" PRIu32 "\n",
+                      fobj->objhdr_pgndx, prev_objndx_spndx, cur_size);
 
                       ret = spiffs_fobj_update_ndxhdr(fs, fobj,
                                                       fobj->objid,
@@ -3064,8 +3065,9 @@ int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
           fobj->size   = cur_size;
           fobj->offset = cur_size;
 
-          finfo("Delete data page %04x for data spndx=%04x, cur_size=%d\n",
-                data_pgndx, data_spndx, cur_size);
+          finfo("Delete data page %04x for data spndx=%04x,"
+          "cur_size=%" PRIu32 "\n",
+          data_pgndx, data_spndx, cur_size);
         }
       else
         {
@@ -3078,8 +3080,8 @@ int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
           bytes_to_remove = SPIFFS_DATA_PAGE_SIZE(fs) -
                             (new_size % SPIFFS_DATA_PAGE_SIZE(fs));
 
-          finfo("Delete %d bytes from data page=%04x for data spndx=%04x, "
-                "cur_size=%d\n",
+          finfo("Delete %" PRIu32 " bytes from data page=%04x for "
+                "data spndx=%04x, cur_size=%" PRIu32 "\n",
                 bytes_to_remove, data_pgndx, data_spndx, cur_size);
 
           ret = spiffs_page_data_check(fs, fobj, data_pgndx, data_spndx);
@@ -3430,7 +3432,7 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
 
       len_to_read = MIN(len_to_read, fobj->size);
 
-      finfo("Read offset=%d rd=%d data spndx=%d is "
+      finfo("Read offset=%" PRIu32 " rd=%" PRIu32 " data spndx=%d is "
             "data_pgndx=%d addr=%" PRIu32 "\n",
             cur_offset, len_to_read, data_spndx, data_pgndx,
             (uint32_t)(SPIFFS_PAGE_TO_PADDR(fs, data_pgndx) +
@@ -3601,8 +3603,8 @@ int spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs, int16_t *objid,
                   return -ENOSPC;
                 }
 
-              finfo("COMP select index=%d min_count=%d min=%04x max=%04x "
-                    "compact:%d\n",
+              finfo("COMP select index=%" PRIu32 " min_count=%d min=%04x "
+                    "max=%04x compact:%" PRIu32 "\n",
                     min_i, min_count, state.min_objid, state.max_objid,
                     state.compaction);
 
@@ -3617,7 +3619,8 @@ int spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs, int16_t *objid,
                 }
               else
                 {
-                  finfo("COMP SEL chunk=%d min=%04x -> %04x\n",
+                  finfo("COMP SEL chunk=%" PRIu32 " min=%04x "
+                        "-> %04" PRIx32 "\n",
                         state.compaction, state.min_objid,
                         state.min_objid + min_i * state.compaction);
 
@@ -3647,7 +3650,7 @@ int spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs, int16_t *objid,
           state.compaction = (state.max_objid - state.min_objid) /
                              ((SPIFFS_GEO_PAGE_SIZE(fs) / sizeof(uint8_t)));
 
-          finfo("COMP min=%04x max=%04x compact=%d\n",
+          finfo("COMP min=%04x max=%04x compact=%" PRIu32 "\n",
                 state.min_objid, state.max_objid, state.compaction);
 
           memset(fs->work, 0, SPIFFS_GEO_PAGE_SIZE(fs));

@@ -20,7 +20,11 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = lpc17_40_boot.c lpc17_40_leds.c lpc17_40_dac.c
+CSRCS = lpc17_40_boot.c lpc17_40_dac.c
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += lpc17_40_leds.c
+endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += lpc17_40_appinit.c
@@ -36,6 +40,10 @@ endif
 
 ifeq ($(CONFIG_ADC),y)
 CSRCS += lpc17_40_adc.c
+endif
+
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += lpc17_40_userleds.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

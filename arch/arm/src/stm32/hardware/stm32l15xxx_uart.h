@@ -1,56 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32l15xxx_uart.h
- * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-based
- * 32-bit MCUs
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32L15XXX_UART_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32L15XXX_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_USART_SR_OFFSET     0x0000  /* Status register (32-bits) */
 #define STM32_USART_DR_OFFSET     0x0004  /* Data register (32-bits) */
@@ -60,7 +43,7 @@
 #define STM32_USART_CR3_OFFSET    0x0014  /* Control register 3 (32-bits) */
 #define STM32_USART_GTPR_OFFSET   0x0018  /* Guard time and prescaler register (32-bits) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NUSART > 0
 #  define STM32_USART1_SR         (STM32_USART1_BASE+STM32_USART_SR_OFFSET)
@@ -110,7 +93,7 @@
 #  define STM32_UART5_CR3         (STM32_UART5_BASE+STM32_USART_CR3_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Status register */
 
@@ -176,6 +159,7 @@
 #  define USART_CR2_STOP0p5       (1 << USART_CR2_STOP_SHIFT) /* 01: 0.5 Stop bit */
 #  define USART_CR2_STOP2         (2 << USART_CR2_STOP_SHIFT) /* 10: 2 Stop bits */
 #  define USART_CR2_STOP1p5       (3 << USART_CR2_STOP_SHIFT) /* 11: 1.5 Stop bit */
+
 #define USART_CR2_LINEN           (1 << 14) /* Bit 14: LIN mode enable */
 
 /* Control register 3 */
@@ -200,22 +184,23 @@
 #define USART_GTPR_GT_SHIFT       (8) /* Bits 8-15: Guard time value */
 #define USART_GTPR_GT_MASK        (0xff <<  USART_GTPR_GT_SHIFT)
 
-/* Compatibility definitions ********************************************************/
+/* Compatibility definitions ************************************************/
+
 /* L15 Transmit/Read registers */
 
 #define STM32_USART_RDR_OFFSET    STM32_USART_DR_OFFSET  /* Receive data register */
 #define STM32_USART_TDR_OFFSET    STM32_USART_DR_OFFSET  /* Transmit data register */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32L15XXX_UART_H */

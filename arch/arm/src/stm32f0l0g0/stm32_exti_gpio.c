@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_exti_gpio.c
  *
- *   Copyright (C) 2009, 2011-2012, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2012, 2015, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Uros Platise <uros.platise@isotel.eu>
@@ -55,9 +56,9 @@
 #include "stm32_gpio.h"
 #include "stm32_exti.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V2)
 #  define STM32_EXTI_FTSR             STM32_EXTI_FTSR1
@@ -196,6 +197,7 @@ static int stm32_exti23_isr(int irq, void *context, void *arg)
 {
   return stm32_exti_multiisr(irq, context, arg, 2, 3);
 }
+
 static int stm32_exti415_isr(int irq, void *context, void *arg)
 {
   return stm32_exti_multiisr(irq, context, arg, 4, 15);
@@ -302,7 +304,6 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     }
 
   stm32_configgpio(pinset);
-
 
   /* Configure rising/falling edges */
 

@@ -1,4 +1,4 @@
-/***************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7xxx_dbgmcu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,24 +16,24 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7XXXDBGMCU_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7XXXDBGMCU_H
 
-/***************************************************************************************************
+/****************************************************************************
  * Included Files
- ***************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/***************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets  *******************************************************************************/
+/* Register Offsets  ********************************************************/
 
 #define STM32_DBGMCU_IDC_OFFSET      0x0000  /* DBGMCU identity code register */
 #define STM32_DBGMCU_CR_OFFSET       0x0004  /* MCU debug */
@@ -42,7 +42,7 @@
 #define STM32_DBGMCU_APB2FZ1_OFFSET  0x004c  /* APB2 peripheral freeze register */
 #define STM32_DBGMCU_APB4LFZ1_OFFSET 0x0054  /* APB4 peripheral freeze register */
 
-/* Register Addresses ******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_DBGMCU_IDC      (STM32_DEBUGMCU_BASE + STM32_DBGMCU_IDC_OFFSET)
 #define STM32_DBGMCU_CR       (STM32_DEBUGMCU_BASE + STM32_DBGMCU_CR_OFFSET)
@@ -51,7 +51,7 @@
 #define STM32_DBGMCU_APB2FZ1  (STM32_DEBUGMCU_BASE + STM32_DBGMCU_APB2FZ1_OFFSET)
 #define STM32_DBGMCU_APB4LFZ1 (STM32_DEBUGMCU_BASE + STM32_DBGMCU_APB4LFZ1_OFFSET)
 
-/* Register Bitfield Definitions *******************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* MCU identifier */
 

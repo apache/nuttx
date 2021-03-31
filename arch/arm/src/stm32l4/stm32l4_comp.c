@@ -308,7 +308,8 @@ static int comp_bind(FAR struct comp_dev_s *dev,
  *
  ****************************************************************************/
 
-static void stm32l4_compenable(FAR struct stm32l4_comp_config_s *cfg, bool en)
+static void stm32l4_compenable(FAR struct stm32l4_comp_config_s *cfg,
+                               bool en)
 {
   uint32_t clearbits = en ? 0 : COMP_CSR_EN;
   uint32_t setbits = en ? COMP_CSR_EN : 0;

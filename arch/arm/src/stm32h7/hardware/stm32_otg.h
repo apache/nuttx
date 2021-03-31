@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_otg.h
  * based on stm32f7/chip/stm32_otg.h
  *
@@ -17,18 +17,18 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_OTG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* General definitions */
 
@@ -43,7 +43,7 @@
 #define OTG_PID_MDATA                 (3) /* Non-control */
 #define OTG_PID_SETUP                 (3) /* Control */
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Core global control and status registers */
 
@@ -136,7 +136,7 @@
 #define STM32_OTG_DFIFO_DEP_OFFSET(n) (0x1000 + ((n) << 12))
 #define STM32_OTG_DFIFO_HCH_OFFSET(n) (0x1000 + ((n) << 12))
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_OTG_GOTGCTL             (STM32_OTG_BASE+STM32_OTG_GOTGCTL_OFFSET)
 #define STM32_OTG_GOTGINT             (STM32_OTG_BASE+STM32_OTG_GOTGINT_OFFSET)
@@ -217,7 +217,7 @@
 #define STM32_OTG_DFIFO_DEP(n)        (STM32_OTG_BASE+STM32_OTG_DFIFO_DEP_OFFSET(n))
 #define STM32_OTG_DFIFO_HCH(n)        (STM32_OTG_BASE+STM32_OTG_DFIFO_HCH_OFFSET(n))
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Core global control and status registers */
 
@@ -372,7 +372,9 @@
 #  define OTG_GRXSTSH_PKTSTS_HALTED   (7 << OTG_GRXSTSH_PKTSTS_SHIFT) /* Channel halted */
                                                                       /* Bits 21-31: Reserved */
 
-/* Receive status debug read/OTG status read and pop registers (device mode) */
+/* Receive status debug read/OTG status read and pop registers
+ * (device mode)
+ */
 
 #define OTG_GRXSTSD_EPNUM_SHIFT         (0)                             /* Bits 0-3: Endpoint number */
 #define OTG_GRXSTSD_EPNUM_MASK          (15 << OTG_GRXSTSD_EPNUM_SHIFT)
@@ -721,7 +723,9 @@
 #define OTG_DOEPMSK_NYET              (1 << 14) /* Bit 14: NYET interrupt mask */
                                                 /* Bits 15-31: Reserved */
 
-/* Device all endpoints interrupt and All endpoints interrupt mask registers */
+/* Device all endpoints interrupt and All endpoints interrupt mask
+ * registers
+ */
 
 #define OTG_DAINT_IEP_SHIFT           (0)      /* Bits 0-15: IN endpoint interrupt bits */
 #define OTG_DAINT_IEP_MASK            (0xffff << OTG_DAINT_IEP_SHIFT)

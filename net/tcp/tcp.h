@@ -324,20 +324,9 @@ struct tcp_backlog_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#  define EXTERN extern "C"
 extern "C"
 {
-#else
-#  define EXTERN extern
 #endif
-
-/* List of registered Ethernet device drivers.  You must have the network
- * locked in order to access this list.
- *
- * NOTE that this duplicates a declaration in net/netdev/netdev.h
- */
-
-EXTERN struct net_driver_s *g_netdevices;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -1812,7 +1801,6 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout);
 #  define tcp_txdrain(conn, timeout) (0)
 #endif
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif

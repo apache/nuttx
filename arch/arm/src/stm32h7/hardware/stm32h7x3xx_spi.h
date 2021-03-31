@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,28 +16,28 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SPI_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32H7_STM32H7X3XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Maximum allowed speed as per data sheet for all SPIs */
 
 #  define STM32_SPI_CLK_MAX      150000000UL
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SPI_CR1_OFFSET      0x0000  /* SPI/I2S Control Register 1 */
 #define STM32_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 */
@@ -54,7 +54,7 @@
 #define STM32_SPI_UDRDR_OFFSET    0x004C  /* SPI/I2S SPI underrun data register */
 #define STM32_SPI_I2SCFGR_OFFSET  0x0050  /* SPI/I2S configuration register*/
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32H7_NSPI > 0
 #  define STM32_SPI1_CR1          (STM32_SPI1_BASE+STM32_SPI_CR1_OFFSET)
@@ -158,7 +158,7 @@
 #  define STM32_SPI6_I2SCFGR      (STM32_SPI6_BASE+STM32_SPI_I2SCFGR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SPI Control Register 1 */
 
@@ -187,6 +187,7 @@
 #define SPI_CFG1_DSIZE_SHIFT      (0) /* Bits 0-4: number of bits in at single SPI data frame */
 #define SPI_CFG1_DSIZE_VAL(n)     ((n-1) << SPI_CFG1_DSIZE_SHIFT)
 #define SPI_CFG1_DSIZE_MASK       (0x1f << SPI_CFG1_DSIZE_SHIFT)
+
                                       /* 00000 - 00010 - not used */
 #  define SPI_CFG1_DSIZE_4BIT     (3 << SPI_CFG1_DSIZE_SHIFT)
 #  define SPI_CFG1_DSIZE_5BIT     (4 << SPI_CFG1_DSIZE_SHIFT)
@@ -240,19 +241,23 @@
 #  define SPI_CFG1_UDRCFG_CONST   (0 << SPI_CFG1_UDRCFG_SHIFT)
 #  define SPI_CFG1_UDRCFG_LASTRX  (1 << SPI_CFG1_UDRCFG_SHIFT)
 #  define SPI_CFG1_UDRCFG_LASTTX  (2 << SPI_CFG1_UDRCFG_SHIFT)
+
                                        /* 11: Reserved */
 #define SPI_CFG1_UDRDET_SHIFT     (11) /* Bits 11-12: detection of underrun condition at slave transmitter */
 #define SPI_CFG1_UDRDET_MASK      (0x3 << SPI_CFG1_UDRDET_SHIFT)
 #  define SPI_CFG1_UDRDET_BEG     (0 << SPI_CFG1_UDRDET_SHIFT)
 #  define SPI_CFG1_UDRDET_END     (1 << SPI_CFG1_UDRDET_SHIFT)
 #  define SPI_CFG1_UDRDET_SS      (2 << SPI_CFG1_UDRDET_SHIFT)
+
                                             /* 11: Reserved */
+
                                             /* Bit 13: Reserved */
 #define SPI_CFG1_RXDMAEN          (1 << 14) /* Bit 14: RX-DMA stream enable */
 #define SPI_CFG1_TXDMAEN          (1 << 15) /* Bit 15: TX-DMA stream enable */
 #define SPI_CFG1_CRCSIZE_SHIFT    (16)      /* Bits 16-20: length of CRC frame to be transacted and compared */
 #define SPI_CFG1_CRCSIZE_VAL(n)   ((n-1) << SPI_CFG1_CRCSIZE_SHIFT)
 #define SPI_CFG1_CRCSIZE_MASK     (0x1f << SPI_CFG1_CRCSIZE_SHIFT)
+
                                        /* 00000-00010: Reserved */
 #  define SPI_CFG1_CRCSIZE_4BIT   (3 << SPI_CFG1_CRCSIZE_SHIFT)
 #  define SPI_CFG1_CRCSIZE_5BIT   (4 << SPI_CFG1_CRCSIZE_SHIFT)
@@ -283,8 +288,10 @@
 #  define SPI_CFG1_CRCSIZE_30BIT  (29 << SPI_CFG1_CRCSIZE_SHIFT)
 #  define SPI_CFG1_CRCSIZE_31BIT  (30 << SPI_CFG1_CRCSIZE_SHIFT)
 #  define SPI_CFG1_CRCSIZE_32BIT  (31 << SPI_CFG1_CRCSIZE_SHIFT)
+
                                             /* Bit 21: Reserved */
 #define SPI_CFG1_CRCEN            (1 << 22) /* Bit 22: hardware CRC computation enable */
+
                                             /* Bits 23-27: Reserved */
 #define SPI_CFG1_MBR_SHIFT        (28)      /* Bits 28-30: master baud rate */
 #define SPI_CFG1_MBR_MASK         (0x7 << SPI_CFG1_MBR_SHIFT)
@@ -296,6 +303,7 @@
 #  define SPI_CFG1_MBR_FPCLKd64   (5 << SPI_CFG1_MBR_SHIFT)
 #  define SPI_CFG1_MBR_FPCLKd128  (6 << SPI_CFG1_MBR_SHIFT)
 #  define SPI_CFG1_MBR_FPCLKd256  (7 << SPI_CFG1_MBR_SHIFT)
+
                                        /* Bit 31: Reserved */
 
 /* SPI configuration register 2 */
@@ -336,8 +344,10 @@
 #  define SPI_CFG2_MIDI_13CLK     (13 << SPI_CFG2_MIDI_SHIFT)
 #  define SPI_CFG2_MIDI_14CLK     (14 << SPI_CFG2_MIDI_SHIFT)
 #  define SPI_CFG2_MIDI_15CLK     (15 << SPI_CFG2_MIDI_SHIFT)
+
                                             /* Bits 8-14: Reserved */
 #define SPI_CFG2_IOSWP            (1 << 15) /* Bit 15: swap functionality of MISO and MOSI pins */
+
                                             /* Bit 16: Reserved */
 #define SPI_CFG2_COMM_SHIFT       (17)      /* Bits 17-18: SPI communication mode */
 #define SPI_CFG2_COMM_MASK        (0x3 << SPI_CFG2_COMM_SHIFT)
@@ -349,6 +359,7 @@
 #define SPI_CFG2_SP_MASK          (0x7 << SPI_CFG2_SP_SHIFT)
 #  define SPI_CFG2_SP_MOTOROLA    (0 << SPI_CFG2_SP_SHIFT)
 #  define SPI_CFG2_SP_TI          (1 << SPI_CFG2_SP_SHIFT)
+
                                             /* 010-111: Reserved */
 #define SPI_CFG2_MASTER           (1 << 22) /* Bit 22: SPI master */
 #define SPI_CFG2_LSBFRST          (1 << 23) /* Bit 23: data frame format */
@@ -395,8 +406,7 @@
 #define SPI_IER_TIFREIE          (1 << 8)  /* Bit 8: TIFRE interrupt enable */
 #define SPI_IER_MODFIE           (1 << 9)  /* Bit 9: mode fault interrupt enable */
 #define SPI_IER_TSERFIE          (1 << 10) /* Bit 10: additional number of transactions
-                                            * reload interrupt enable
-                                            */
+                                            * reload interrupt enable */
 
 /* SPI/I2S interrupt/status flags clear register */
 

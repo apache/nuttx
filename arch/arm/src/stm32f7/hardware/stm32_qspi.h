@@ -36,25 +36,25 @@
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/stm32f7/chip.h>
 
 #include "chip.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* General Characteristics **************************************************************/
+/* General Characteristics **************************************************/
 
 #define STM32F7_QSPI_MINBITS            8         /* Minimum word width */
 #define STM32F7_QSPI_MAXBITS            32        /* Maximum word width */
 
-/* QSPI register offsets ****************************************************************/
+/* QSPI register offsets ****************************************************/
 
 #define STM32_QUADSPI_CR_OFFSET       0x0000    /* Control Register */
 #define STM32_QUADSPI_DCR_OFFSET      0x0004    /* Device Configuration Register */
@@ -70,7 +70,7 @@
 #define STM32_QUADSPI_PIR_OFFSET      0x002c    /* Polling Interval Register */
 #define STM32_QUADSPI_LPTR_OFFSET     0x0030    /* Low-Power Timeout Register */
 
-/* QSPI register addresses **************************************************************/
+/* QSPI register addresses **************************************************/
 
 #define STM32_QUADSPI_CR       (STM32_QUADSPI_BASE+STM32_QUADSPI_CR_OFFSET)    /* Control Register */
 #define STM32_QUADSPI_DCR      (STM32_QUADSPI_BASE+STM32_QUADSPI_DCR_OFFSET)   /* Device Configuration Register */
@@ -86,7 +86,7 @@
 #define STM32_QUADSPI_PIR      (STM32_QUADSPI_BASE+STM32_QUADSPI_PIR_OFFSET)   /* Polling Interval Register */
 #define STM32_QUADSPI_LPTR     (STM32_QUADSPI_BASE+STM32_QUADSPI_LPTR_OFFSET)  /* Low-Power Timeout Register */
 
-/* QSPI register bit definitions ********************************************************/
+/* QSPI register bit definitions ********************************************/
 
 /* Control Register */
 
@@ -224,16 +224,16 @@
 #define QSPI_LPTR_TIMEOUT_SHIFT    (0)        /* Bits 0-15: Timeout period */
 #define QSPI_LPTR_TIMEOUT_MASK     (0xFFff << QSPI_PIR_INTERVAL_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H */

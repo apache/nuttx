@@ -100,7 +100,6 @@ static const struct file_operations g_rngops =
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , 0              /* unlink */
 #endif
-
 };
 
 /****************************************************************************
@@ -196,9 +195,10 @@ static int stm32l4_rnginterrupt(int irq, void *context, FAR void *arg)
   /* As required by the FIPS PUB (Federal Information Processing Standard
    * Publication) 140-2, the first random number generated after setting the
    * RNGEN bit should not be used, but saved for comparison with the next
-   * generated random number. Each subsequent generated random number has to be
-   * compared with the previously generated number. The test fails if any two
-   * compared numbers are equal (continuous random number generator test).
+   * generated random number. Each subsequent generated random number has to
+   * be compared with the previously generated number. The test fails if any
+   * two compared numbers are equal
+   * (continuous random number generator test).
    */
 
   if (g_rngdev.rd_first)
@@ -248,7 +248,8 @@ static int stm32l4_rnginterrupt(int irq, void *context, FAR void *arg)
  * Name: stm32l4_rngread
  ****************************************************************************/
 
-static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t buflen)
+static ssize_t stm32l4_rngread(struct file *filep,
+                               char *buffer, size_t buflen)
 {
   int ret;
 
