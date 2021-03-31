@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_gpio.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,21 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_GPIO_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Port Identifiers *****************************************************************/
+ ****************************************************************************/
+
+/* Port Identifiers *********************************************************/
 
 #define AVR32_GPIO0              0       /* General Purpose Input/Output Port 0 */
 #define AVR32_GPIO1              1       /* General Purpose Input/Output Port 1 */
@@ -38,7 +39,7 @@
 #define AVR32_GPIO3              3       /* General Purpose Input/Output Port 3 */
 #define AVR32_GPIO4              4       /* General Purpose Input/Output Port 4 */
 
-/* Port Offsets *********************************************************************/
+/* Port Offsets *************************************************************/
 
 #define AVR32_GPIOn_OFFSET(n)    ((n) << 8)
 #define AVR32_GPIO0_OFFSET       0x0000   /* General Purpose Input/Output Port 0 */
@@ -47,7 +48,7 @@
 #define AVR32_GPIO3_OFFSET       0x0300   /* General Purpose Input/Output Port 3 */
 #define AVR32_GPIO4_OFFSET       0x0400   /* General Purpose Input/Output Port 4 */
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_GPIO_GPER_OFFSET   0x00     /* GPIO Enable Register */
 #define AVR32_GPIO_GPERS_OFFSET  0x04     /* GPIO Enable Register Set */
@@ -93,7 +94,7 @@
 #define AVR32_GPIO_IFR_OFFSET    0xd0     /* Interrupt Flag Register Read */
 #define AVR32_GPIO_IFRC_OFFSET   0xd8     /* Interrupt Flag Register Clear */
 
-/* Port Base Addresses **************************************************************/
+/* Port Base Addresses ******************************************************/
 
 #define AVR32_GPIOn_BASE(n)      (AVR32_GPIO_BASE+AVR32_GPIO_OFFSET(n))
 #define AVR32_GPIO0_BASE         (AVR32_GPIO_BASE+AVR32_GPIO0_OFFSET)
@@ -108,7 +109,7 @@
 #define AVR32_GPIO0_LBUS_BASE    (AVR32_GPIO_LBUS_BASE+AVR32_GPIO0_OFFSET)
 #define AVR32_GPIO1_LBUS_BASE    (AVR32_GPIO_LBUS_BASE+AVR32_GPIO1_OFFSET)
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_GPIO_GPER(n)       (AVR32_GPIOn_BASE(n)+AVR32_GPIO_GPER_OFFSET)
 #define AVR32_GPIO_GPERS(n)      (AVR32_GPIOn_BASE(n)+AVR32_GPIO_GPERS_OFFSET)
@@ -396,9 +397,11 @@
 #define AVR32_GPIO1_LBUS_OVRT    (AVR32_GPIO1_LBUS_BASE+AVR32_GPIO_OVRT_OFFSET)
 #define AVR32_GPIO1_LBUS_PVR     (AVR32_GPIO1_LBUS_BASE+AVR32_GPIO_PVR_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
-/* For all registers, there are 32 bits, each associated with one pin on the port. */
+/* For all registers, there are 32 bits,
+ * each associated with one pin on the port.
+ */
 
 #define GPIO_PIN(n)              (1 << (n))
 #define GPIO_PIN0                (1 << 0)
@@ -434,16 +437,16 @@
 #define GPIO_PIN30               (1 << 30)
 #define GPIO_PIN31               (1 << 31)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_GPIO_H */

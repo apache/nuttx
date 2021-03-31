@@ -124,14 +124,14 @@
 
 #elif defined(CONFIG_ARCH_CHIP_ATMEGA2560)
 
-#  define ATMEGA_IRQ_INT0        2 /* 0x0002 INT0 External Interrupt Request 0 */
-#  define ATMEGA_IRQ_INT1        3 /* 0x0004 INT1 External Interrupt Request 1 */
-#  define ATMEGA_IRQ_INT2        4 /* 0x0006 INT2 External Interrupt Request 2 */
-#  define ATMEGA_IRQ_INT3        5 /* 0x0008 INT3 External Interrupt Request 3 */
-#  define ATMEGA_IRQ_INT4        6 /* 0x000A INT4 External Interrupt Request 4 */
-#  define ATMEGA_IRQ_INT5        7 /* 0x000C INT5  External Interrupt Request 5 */
-#  define ATMEGA_IRQ_INT6        8 /* 0x000E INT6 External Interrupt Request 6 */
-#  define ATMEGA_IRQ_INT7        9 /* 0x0010 INT7 External Interrupt Request 7 */
+#  define ATMEGA_IRQ_INT0        2  /* 0x0002 INT0 External Interrupt Request 0 */
+#  define ATMEGA_IRQ_INT1        3  /* 0x0004 INT1 External Interrupt Request 1 */
+#  define ATMEGA_IRQ_INT2        4  /* 0x0006 INT2 External Interrupt Request 2 */
+#  define ATMEGA_IRQ_INT3        5  /* 0x0008 INT3 External Interrupt Request 3 */
+#  define ATMEGA_IRQ_INT4        6  /* 0x000A INT4 External Interrupt Request 4 */
+#  define ATMEGA_IRQ_INT5        7  /* 0x000C INT5  External Interrupt Request 5 */
+#  define ATMEGA_IRQ_INT6        8  /* 0x000E INT6 External Interrupt Request 6 */
+#  define ATMEGA_IRQ_INT7        9  /* 0x0010 INT7 External Interrupt Request 7 */
 #  define ATMEGA_IRQ_PCINT0      10 /* 0x0012 PCINT0 Pin Change Interrupt Req 0 */
 #  define ATMEGA_IRQ_PCINT1      11 /* 0x0014 PCINT1 Pin Change Interrupt Req 1 */
 #  define ATMEGA_IRQ_PCINT2      12 /* 0x0016 PCINT2 Pin Change Interrupt Req 2 */

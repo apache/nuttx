@@ -95,7 +95,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
-static inline void usart_putreg(uintptr_t usart_base, unsigned int offset, uint32_t value)
+static inline void usart_putreg(uintptr_t usart_base,
+                                unsigned int offset, uint32_t value)
 {
   putreg32(value, usart_base + offset);
 }
@@ -110,7 +111,8 @@ static inline void usart_putreg(uintptr_t usart_base, unsigned int offset, uint3
  ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
-static inline uint32_t usart_getreg(uintptr_t usart_base, unsigned int offset)
+static inline uint32_t usart_getreg(uintptr_t usart_base,
+                                    unsigned int offset)
 {
   return getreg32(usart_base + offset);
 }
@@ -218,7 +220,8 @@ void usart_reset(uintptr_t usart_base)
  ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
-void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
+void usart_configure(uintptr_t usart_base,
+                     uint32_t baud, unsigned int parity,
                      unsigned int nbits, bool stop2)
 {
   uint32_t regval;
@@ -281,8 +284,8 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the initialization sequence to configure the serial console uart
- *   (only).
+ *   early in the initialization sequence to configure the serial console
+ *   uart (only).
  *
  ****************************************************************************/
 
@@ -291,18 +294,23 @@ void up_consoleinit(void)
   uint32_t pbamask = 0;
   uint32_t regval;
 
-  /* Setup GPIO pins fand enable module clocking or each configured USART/UART */
+  /* Setup GPIO pins fand enable module clocking or each configured
+   * USART/UART
+   */
 
 #ifdef CONFIG_AVR32_USART0_RS232
-  /* PINMUX_USART0_RXD and PINMUX_USART0_TXD must be defined in board.h.  It
-   * must define them be be one of {PINMUX_USART0_RXD_1, PINMUX_USART0_RXD_2}
-   * and {PINMUX_USART_0TXD_1, PINMUX_USART0_TXD_2}, respectively.
+  /* PINMUX_USART0_RXD and PINMUX_USART0_TXD must be defined in board.h.
+   * It must define them be be one of {PINMUX_USART0_RXD_1,
+   * PINMUX_USART0_RXD_2} and {PINMUX_USART_0TXD_1, PINMUX_USART0_TXD_2},
+   * respectively.
    */
 
   at32uc3_configgpio(PINMUX_USART0_RXD);
   at32uc3_configgpio(PINMUX_USART0_TXD);
 
-  /* Enable clocking to USART0 (This should be the default state after reset) */
+  /* Enable clocking to USART0
+   * (This should be the default state after reset)
+   */
 
   pbamask |= PM_PBAMASK_USART0;
 
@@ -317,7 +325,9 @@ void up_consoleinit(void)
   at32uc3_configgpio(PINMUX_USART1_RXD);
   at32uc3_configgpio(PINMUX_USART1_TXD);
 
-  /* Enable clocking to USART1 (This should be the default state after reset) */
+  /* Enable clocking to USART1
+   * (This should be the default state after reset)
+   */
 
   pbamask |= PM_PBAMASK_USART1;
 
@@ -331,7 +341,9 @@ void up_consoleinit(void)
   at32uc3_configgpio(PINMUX_USART2_RXD);
   at32uc3_configgpio(PINMUX_USART2_TXD);
 
-  /* Enable clocking to USART2 (This should be the default state after reset) */
+  /* Enable clocking to USART2
+   * (This should be the default state after reset)
+   */
 
   pbamask |= PM_PBAMASK_USART2;
 
@@ -349,8 +361,9 @@ void up_consoleinit(void)
    */
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(USE_EARLYSERIALINIT)
-  usart_configure(AVR32_CONSOLE_BASE, AVR32_CONSOLE_BAUD, AVR32_CONSOLE_PARITY,
-                  AVR32_CONSOLE_BITS, (bool)AVR32_CONSOLE_2STOP);
+  usart_configure(AVR32_CONSOLE_BASE, AVR32_CONSOLE_BAUD,
+                  AVR32_CONSOLE_PARITY, AVR32_CONSOLE_BITS,
+                 (bool)AVR32_CONSOLE_2STOP);
 #endif
 }
 
@@ -367,7 +380,8 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX to become ready */
 
-  while ((usart_getreg(AVR32_CONSOLE_BASE, AVR32_USART_CSR_OFFSET) & USART_CSR_TXRDY) == 0);
+  while ((usart_getreg(AVR32_CONSOLE_BASE,
+                       AVR32_USART_CSR_OFFSET) & USART_CSR_TXRDY) == 0);
 
   /* Then send the character */
 

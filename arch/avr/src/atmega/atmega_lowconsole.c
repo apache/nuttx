@@ -48,8 +48,8 @@
 #define AVR_DBLSPEED_UBRR0 \
   ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART0_BAUD / 2)) / (CONFIG_USART0_BAUD)) - 1)
 
-/* Select normal or double speed baud settings.  This is a trade-off between the
- * sampling rate and the accuracy of the divisor for high baud rates.
+/* Select normal or double speed baud settings.  This is a trade-off between
+ * the sampling rate and the accuracy of the divisor for high baud rates.
  *
  * As examples, consider:
  *
@@ -110,8 +110,8 @@
 #define AVR_DBLSPEED_UBRR1 \
   ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
 
-/* Select normal or double speed baud settings.  This is a trade-off between the
- * sampling rate and the accuracy of the divisor for high baud rates.
+/* Select normal or double speed baud settings.  This is a trade-off between
+ * the sampling rate and the accuracy of the divisor for high baud rates.
  *
  * As examples, consider:
  *
@@ -401,10 +401,11 @@ void usart1_configure(void)
   /* Pin Configuration: None necessary, Port D bits 2&3 are automatically
    * configured:
    *
-   *   Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1). When
-   *     the USART1 receiver is enabled this pin is configured as an input
-   *     regardless of the value of DDD2. When the USART forces this pin to
-   *     be an input, the pull-up can still be controlled by the PORTD2 bit.
+   *   Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1).
+   *     When the USART1 receiver is enabled this pin is configured as an
+   *     input regardless of the value of DDD2. When the USART forces this
+   *     pin to be an input, the pull-up can still be controlled by the
+   *     PORTD2 bit.
    *   Port D, Bit 3: TXD1, Transmit Data (Data output pin for the USART1).
    *     When the USART1 Transmitter is enabled, this pin is configured as
    *     an output regardless of the value of DDD3.
@@ -425,8 +426,8 @@ void usart1_configure(void)
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the initialization sequence to configure the serial console uart
- *   (only).
+ *   early in the initialization sequence to configure the serial console
+ *   uart (only).
  *
  ****************************************************************************/
 

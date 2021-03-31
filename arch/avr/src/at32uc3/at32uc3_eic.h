@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_eic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_EIC_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_EIC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_EIC_IER_OFFSET     0x000 /* Interrupt Enable Register */
 #define AVR32_EIC_IDR_OFFSET     0x004 /* Interrupt Disable Register */
@@ -49,7 +49,7 @@
 #define AVR32_EIC_DIS_OFFSET     0x034 /* Disable Register */
 #define AVR32_EIC_CTRL_OFFSET    0x038 /* Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_EIC_IER           (AVR32_EIC_BASE+AVR32_EIC_IER_OFFSET)
 #define AVR32_EIC_IDR           (AVR32_EIC_BASE+AVR32_EIC_IDR_OFFSET)
@@ -67,21 +67,34 @@
 #define AVR32_EIC_DIS           (AVR32_EIC_BASE+AVR32_EIC_DIS_OFFSET)
 #define AVR32_EIC_CTRL          (AVR32_EIC_BASE+AVR32_EIC_CTRL_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
+
 /* Interrupt Status Register Bit-field Definitions */
+
 /* Interrupt Clear Register Bit-field Definitions */
+
 /* Mode Register Bit-field Definitions */
+
 /* Edge Register Bit-field Definitions */
+
 /* Level Register Bit-field Definitions */
+
 /* Filter Register Bit-field Definitions */
+
 /* Test Register Bit-field Definitions */
+
 /* Asynchronous Register Bit-field Definitions */
+
 /* Enable Register Bit-field Definitions */
+
 /* Disable Register Bit-field Definitions */
+
 /* Control Register Bit-field Definitions */
 
 #define EIC_INT0                (1 << 0)  /* Bit 0: External interrupt 0 */
@@ -102,16 +115,16 @@
 #define EIC_SCAN_PRESC_MASK     (0x1f << EIC_SCAN_PRESC_SHIFT)
 #define EIC_SCAN_EN             (1 << 0) /* Bit 0: Enable keypad scanning */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_EIC_H */

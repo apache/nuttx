@@ -138,13 +138,13 @@ struct xcptcontext
 static inline irqstate_t getsreg(void)
 {
   irqstate_t sreg;
-  asm volatile ("in %0, __SREG__" : "=r" (sreg) :: );
+  asm volatile ("in %0, __SREG__" : "=r" (sreg) ::);
   return sreg;
 }
 
 static inline void putsreg(irqstate_t sreg)
 {
-  asm volatile ("out __SREG__, %s" : : "r" (sreg) : );
+  asm volatile ("out __SREG__, %s" : : "r" (sreg) :);
 }
 
 /* Interrupt enable/disable */
@@ -177,7 +177,7 @@ static inline irqstate_t up_irq_save(void)
 
 static inline void up_irq_restore(irqstate_t flags)
 {
-  asm volatile ("out __SREG__, %0" : : "r" (flags) : );
+  asm volatile ("out __SREG__, %0" : : "r" (flags) :);
 }
 #endif /* __ASSEMBLY__ */
 

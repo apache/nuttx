@@ -147,6 +147,7 @@ static int up_getgrp(unsigned int irq)
             }
         }
     }
+
   return -EINVAL;
 }
 
@@ -184,10 +185,14 @@ void up_irqinitialize(void)
    */
 
 #if 1 /* REVISIT -- Can we come up with a way to statically initialize? */
-  g_ipr[0] = ((AVR32_INT0_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT0);
-  g_ipr[1] = ((AVR32_INT1_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT1);
-  g_ipr[2] = ((AVR32_INT2_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT2);
-  g_ipr[3] = ((AVR32_INT3_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT3);
+  g_ipr[0] = ((AVR32_INT0_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT0);
+  g_ipr[1] = ((AVR32_INT1_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT1);
+  g_ipr[2] = ((AVR32_INT2_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT2);
+  g_ipr[3] = ((AVR32_INT3_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT3);
 #endif
 
   /* Set the interrupt group priority to a default value.  All are linked to
@@ -305,8 +310,8 @@ unsigned int avr32_intirqno(unsigned int level)
           mask <<= 1;
         }
 
-       _err("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
-       return -ENODEV;
+      _err("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
+      return -ENODEV;
     }
 
   _err("ERROR: Bad group: %d\n", group);

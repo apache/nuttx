@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_usbb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_USBB_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_USBB_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 /* USB Device Registers */
 
@@ -293,7 +293,7 @@
 #define AVR32_USBB_UNAME2_OFFSET      0x0828 /* IP Name Register 2 */
 #define AVR32_USBB_USBFSM_OFFSET      0x082c /* USB Finite State Machine Status Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 /* USB Device Registers */
 
@@ -550,8 +550,10 @@
 #define AVR32_USBB_UNAME2             (AVR32_USB_BASE+AVR32_USBB_UNAME2_OFFSET)
 #define AVR32_USBB_USBFSM             (AVR32_USB_BASE+AVR32_USBB_USBFSM_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
-/* USB Device Registers Bit-field Definitions ***************************************/
+/* Register Bit-field Definitions *******************************************/
+
+/* USB Device Registers Bit-field Definitions *******************************/
+
 /* Device General Control Register Bit-field Definitions */
 
 #define USBB_UDCON_UADD_SHIFT         (0)       /* Bits 0-6: USB Address */
@@ -562,10 +564,15 @@
 #define USBB_UDCON_LS                 (1 << 12) /* Bit 12: Low-Speed Mode Force */
 
 /* Device Global Interrupt Register Bit-field Definitions */
+
 /* Device Global Interrupt Clear Register Bit-field Definitions */
+
 /* Device Global Interrupt Set Register Bit-field Definitions */
+
 /* Device Global Interrupt Enable Register Bit-field Definitions */
+
 /* Device Global Interrupt Enable Clear Register Bit-field Definitions */
+
 /* Device Global Interrupt Enable Set Register Bit-field Definitions */
 
 #define USBB_UDINT_SUSP               (1 << 0)  /* Bit 0:  Suspend Interrupt */
@@ -574,7 +581,9 @@
 #define USBB_UDINT_WAKEUP             (1 << 4)  /* Bit 4:  Wake-Up Interrupt */
 #define USBB_UDINT_EORSM              (1 << 5)  /* Bit 5:  End of Resume Interrupt */
 #define USBB_UDINT_UPRSM              (1 << 6)  /* Bit 6:  Upstream Resume Interrupt */
+
 #define USBB_UDINT_EPINT(n)           (1 << ((n)+12))  /* Endpoint n Interrupt */
+
 #define USBB_UDINT_EP0INT             (1 << 12) /* Bit 12: Endpoint n Interrupt */
 #define USBB_UDINT_EP1INT             (1 << 13) /* Bit 13: Endpoint n Interrupt */
 #define USBB_UDINT_EP2INT             (1 << 14) /* Bit 14: Endpoint n Interrupt */
@@ -582,7 +591,9 @@
 #define USBB_UDINT_EP4INT             (1 << 16) /* Bit 16: Endpoint n Interrupt */
 #define USBB_UDINT_EP5INT             (1 << 17) /* Bit 17: Endpoint n Interrupt */
 #define USBB_UDINT_EP6INT             (1 << 18) /* Bit 18: Endpoint n Interrupt */
+
 #define USBB_UDINT_DMAINT(n)          (1 << ((n)+24)) /* DMA Channel n Interrupt */
+
 #define USBB_UDINT_DMA1INT            (1 << 25) /* Bit 25: DMA Channel n Interrupt */
 #define USBB_UDINT_DMA2INT            (1 << 26) /* Bit 26: DMA Channel 1 Interrupt */
 #define USBB_UDINT_DMA3INT            (1 << 27) /* Bit 27: DMA Channel 2 Interrupt */
@@ -593,6 +604,7 @@
 /* Endpoint Enable/Reset Register Bit-field Definitions */
 
 #define USBB_UERST_EPRST(n)           (1 << ((n)+16))  /* Endpoint n Reset */
+
 #define USBB_UERST_EPRST0             (1 << 16) /* Bit 16: Endpoint 0 Reset */
 #define USBB_UERST_EPRST1             (1 << 17) /* Bit 17: Endpoint 1 Reset */
 #define USBB_UERST_EPRST2             (1 << 18) /* Bit 18: Endpoint 2 Reset */
@@ -623,6 +635,7 @@
 #  define USBB_UECFG_EPBK_1           (0 << USBB_UECFG_EPBK_SHIFT) /* 1 (single-bank endpoint) */
 #  define USBB_UECFG_EPBK_2           (1 << USBB_UECFG_EPBK_SHIFT) /* 2 (double-bank endpoint) */
 #  define USBB_UECFG_EPBK_3           (2 << USBB_UECFG_EPBK_SHIFT) /* 3 (triple-bank endpoint) */
+
 #define USBB_UECFG_EPSIZE_SHIFT       (4)       /* Bits 4-6: Endpoint Size */
 #define USBB_UECFG_EPSIZE_MASK        (7 << USBB_UECFG_EPSIZE_SHIFT)
 #  define USBB_UECFG_EPSIZE_8         (0 << USBB_UECFG_EPSIZE_SHIFT) /* 8 bytes */
@@ -633,6 +646,7 @@
 #  define USBB_UECFG_EPSIZE_256       (5 << USBB_UECFG_EPSIZE_SHIFT) /* 256 bytes */
 #  define USBB_UECFG_EPSIZE_512       (6 << USBB_UECFG_EPSIZE_SHIFT) /* 512 bytes */
 #  define USBB_UECFG_EPSIZE_1024      (7 << USBB_UECFG_EPSIZE_SHIFT) /* 1024 bytes */
+
 #define USBB_UECFG_EPDIR              (1 << 8)  /* Bit 8:  Endpoint Direction */
 #define USBB_UECFG_AUTOSW             (1 << 9)  /* Bit 9:  Automatic Switch */
 #define USBB_UECFG_EPTYPE_SHIFT       (11)      /* Bits 11-12: Endpoint Type */
@@ -643,7 +657,9 @@
 #  define USBB_UECFG_EPTYPE_INTR      (3 << USBB_UECFG_EPTYPE_SHIFT) /* Interrupt */
 
 /* Endpoint Status Register Bit-field Definitions (common fields) */
+
 /* Endpoint Status Clear Register Bit-field Definitions */
+
 /* Endpoint Status Set Register Bit-field Definitions (common fields) */
 
 #define USBB_UESTA_TXINI              (1 << 0)  /* Bit 0:  Transmitted IN Data Interrupt */
@@ -663,21 +679,24 @@
 #define USBB_UESTA_DTSEQ_MASK         (3 << USBB_UESTA_DTSEQ_SHIFT)
 #  define USBB_UESTA_DTSEQ_DATA0      (0 << USBB_UESTA_DTSEQ_SHIFT) /* Data0 */
 #  define USBB_UESTA_DTSEQ_DATA1      (1 << USBB_UESTA_DTSEQ_SHIFT) /* Data1 */
+
 #define USBB_UESTA_NBUSYBK_SHIFT      (12)      /* Bits 12-13: Number of Busy Banks */
 #define USBB_UESTA_NBUSYBK_MASK       (3 << USBB_UESTA_NBUSYBK_SHIFT)
 #  define USBB_UESTA_NBUSYBK_NONE     (0 << USBB_UESTA_NBUSYBK_SHIFT) /* 0 (all banks free) */
 #  define USBB_UESTA_NBUSYBK_1BANK    (1 << USBB_UESTA_NBUSYBK_SHIFT) /* 1 */
 #  define USBB_UESTA_NBUSYBK_2BANKS   (2 << USBB_UESTA_NBUSYBK_SHIFT) /* 2 */
 #  define USBB_UESTA_NBUSYBK_3BANKS   (3 << USBB_UESTA_NBUSYBK_SHIFT) /* 3 */
+
 #define USBB_UESTA_CURRBK_SHIFT       (14)      /* Bits 14-15: Current Bank */
 #define USBB_UESTA_CURRBK_MASK        (3 << USBB_UESTA_CURRBK_SHIFT)
 #  define USBB_UESTA_CURRBK_BANK0     (0 << USBB_UESTA_CURRBK_SHIFT) /* Bank0 */
 #  define USBB_UESTA_CURRBK_BANK1     (1 << USBB_UESTA_CURRBK_SHIFT) /* Bank1 */
 #  define USBB_UESTA_CURRBK_BANK2     (2 << USBB_UESTA_CURRBK_SHIFT) /* Bank2 */
+
 #define USBB_UESTA_RWALL              (1 << 16) /* Bit 16: Read/Write Allowed */
 #define USBB_UESTA_CTRLDIR            (1 << 17) /* Bit 17: Control Direction */
 #define USBB_UESTA_CFGOK              (1 << 18) /* Bit 18: Configuration OK Status */
-#define USBB_UESTA_BYCT_SHIFT         (20)       /* Bits 20-30: Byte Count */
+#define USBB_UESTA_BYCT_SHIFT         (20)      /* Bits 20-30: Byte Count */
 #define USBB_UESTA_BYCT_MASK          (0x7ff << USBB_UESTA_BYCT_SHIFT)
 
 /* Endpoint Status Set Register Bit-field Definitions (only in UESTASET) */
@@ -685,7 +704,9 @@
 #define USBB_UESTASET_NBUSYBKS        (1 << 12)  /* Bit 12 */
 
 /* Endpoint Control Register Bit-field Definitions */
+
 /* Endpoint Control Set Register Bit-field Definitions */
+
 /* Endpoint Control Clear Register Bit-field Definitions */
 
 #define USBB_UECON_TXINE              (1 << 0)  /* Bit 0:  Transmitted IN Data Interrupt Enable */
@@ -705,11 +726,14 @@
 #define USBB_UECON_RSTDT              (1 << 18) /* Bit 18: Reset Data Toggle (SET only) */
 #define USBB_UECON_STALLRQ            (1 << 19) /* Bit 19: STALL Request */
 
-/* Device DMA Channel Next Descriptor Address Register Bit-field Definitions */
+/* Device DMA Channel Next Descriptor Address Register Bit-field
+ * Definitions
+ */
 
 #define UDDMA_NEXTDESC_MASK           (0xfffffff0)
 
 /* Device DMA Channel HSB Address Register Bit-field Definitions */
+
 /* This register holds a 32-bit address with internal bit fields */
 
 /* Device DMA Channel Control Register Bit-field Definitions */
@@ -732,7 +756,7 @@
 #define UDDMA_STATUS_EOTSTA           (1 << 4)  /* Bit 4:  End of USB Transfer Status */
 #define UDDMA_STATUS_EOCHBUFFSTA      (1 << 5)  /* Bit 5:  End of Channel Buffer Status */
 #define UDDMA_STATUS_DESCLDSTA        (1 << 6)  /* Bit 6:  Descriptor Loaded Status */
-#define UDDMA_STATUS_CHBYTECNT_SHIFT  (16)       /* Bits 16-31: Channel Byte Count */
+#define UDDMA_STATUS_CHBYTECNT_SHIFT  (16)      /* Bits 16-31: Channel Byte Count */
 #define UDDMA_STATUS_CHBYTECNT_MASK   (0xffff << UDDMA_STATUS_CHBYTECNT_SHIFT)
 
 /* USB Host Registers Bit-field Definitions *********************************/
@@ -744,10 +768,19 @@
 #define USBB_UHCON_RESUME             (1 << 10) /* Bit 10: Send USB Resume */
 
 /* Host Global Interrupt Register Bit-field Definitions */
-/* Host Global Interrupt Clear Register Bit-field Definitions (Except as noted 1) */
-/* Host Global Interrupt Set Register Bit-field Definitions (Except as noted 2) */
+
+/* Host Global Interrupt Clear Register Bit-field Definitions
+ * (Except as noted 1)
+ */
+
+/* Host Global Interrupt Set Register Bit-field Definitions
+ * (Except as noted 2)
+ */
+
 /* Host Global Interrupt Enable Register Bit-field Definitions */
+
 /* Host Global Interrupt Enable Clear Register Bit-field Definitions */
+
 /* Host Global Interrupt Enable Set Register Bit-field Definitions */
 
 #define USBB_UHINT_DCONNI             (1 << 0)  /* Bit 0:  Device Connection Interrupt (1) */
@@ -827,6 +860,7 @@
 #  define USBB_UPCFG_PBK_1            (0 << USBB_UPCFG_PBK_SHIFT) /* 1 (single-bank pipe) */
 #  define USBB_UPCFG_PBK_2            (1 << USBB_UPCFG_PBK_SHIFT) /* 2 (double-bank pipe) */
 #  define USBB_UPCFG_PBK_3            (2 << USBB_UPCFG_PBK_SHIFT) /* 3 (triple-bank pipe) */
+
 #define USBB_UPCFG_PSIZE_SHIFT        (4)       /* Bits 4-6: Pipe Size */
 #define USBB_UPCFG_PSIZE_MASK         (7 << USBB_UPCFG_PSIZE_SHIFT)
 #  define USBB_UPCFG_PSIZE_8          (0 << USBB_UPCFG_PSIZE_SHIFT) /* 8 bytes */
@@ -837,11 +871,13 @@
 #  define USBB_UPCFG_PSIZE_256        (5 << USBB_UPCFG_PSIZE_SHIFT) /* 256 bytes */
 #  define USBB_UPCFG_PSIZE_512        (6 << USBB_UPCFG_PSIZE_SHIFT) /* 512 bytes */
 #  define USBB_UPCFG_PSIZE_1024       (7 << USBB_UPCFG_PSIZE_SHIFT) /* 1024 bytes */
+
 #define USBB_UPCFG_PTOKEN_SHIFT       (8)       /* Bits 8-9: Pipe Token */
 #define USBB_UPCFG_PTOKEN_MASK        (3 << USBB_UPCFG_PTOKEN_SHIFT)
 #  define USBB_UPCFG_PTOKEN_SETUP     (0 << USBB_UPCFG_PTOKEN_SHIFT) /* SETUP */
 #  define USBB_UPCFG_PTOKEN_IN        (1 << USBB_UPCFG_PTOKEN_SHIFT) /* IN */
 #  define USBB_UPCFG_PTOKEN_OUT       (2 << USBB_UPCFG_PTOKEN_SHIFT) /* OUT */
+
 #define USBB_UPCFG_AUTOSW             (1 << 10) /* Bit 10:  Automatic Switch */
 #define USBB_UPCFG_PTYPE_SHIFT        (11)      /* Bits 11-12: Pipe Type */
 #define USBB_UPCFG_PTYPE_MASK         (3 << USBB_UPCFG_PTYPE_SHIFT)
@@ -849,13 +885,16 @@
 #  define USBB_UPCFG_PTYPE_ISOC       (1 << USBB_UPCFG_PTYPE_SHIFT) /* Isochronous */
 #  define USBB_UPCFG_PTYPE_BULK       (2 << USBB_UPCFG_PTYPE_SHIFT) /* Bulk */
 #  define USBB_UPCFG_PTYPE_INTR       (3 << USBB_UPCFG_PTYPE_SHIFT) /* Interrupt */
+
 #define USBB_UPCFG_PEPNUM_SHIFT       (16)      /* Bits 16-19: Pipe Endpoint Number */
 #define USBB_UPCFG_PEPNUM_MASK        (15 << USBB_UPCFG_PEPNUM_SHIFT)
 #define USBB_UPCFG_INTFRQ_SHIFT       (24)      /* Bits 24-31: Pipe Interrupt Request Frequency */
 #define USBB_UPCFG_INTFRQ_MASK        (0xff << USBB_UPCFG_INTFRQ_SHIFT)
 
 /* Pipe Status Register Bit-field Definitions (common) */
+
 /* Pipe Status Clear Register Bit-field Definitions (common) */
+
 /* Pipe Status Set Register Bit-field Definitions (common) */
 
 #define USBB_UPSTA_RXINI              (1 << 0)  /* Bit 0:  Received IN Data Interrupt */
@@ -875,19 +914,22 @@
 #define USBB_UPSTA_DTSEQ_MASK         (3 << USBB_UPSTA_DTSEQ_SHIFT)
 #  define USBB_UPSTA_DTSEQ_DATA0      (0 << USBB_UPSTA_DTSEQ_SHIFT) /* Data0 */
 #  define USBB_UPSTA_DTSEQ_DATA1      (1 << USBB_UPSTA_DTSEQ_SHIFT) /* Data1 */
+
 #define USBB_UPSTA_NBUSYBK_SHIFT      (12)      /* Bits 12-13: Number of Busy Banks */
 #define USBB_UPSTA_NBUSYBK_MASK       (3 << USBB_UPSTA_NBUSYBK_SHIFT)
 #  define USBB_UPSTA_NBUSYBK_NONE     (0 << USBB_UPSTA_NBUSYBK_SHIFT) /* 0 (all banks free) */
 #  define USBB_UPSTA_NBUSYBK_1BANK    (1 << USBB_UPSTA_NBUSYBK_SHIFT) /* 1 */
 #  define USBB_UPSTA_NBUSYBK_2BANKS   (2 << USBB_UPSTA_NBUSYBK_SHIFT) /* 2 */
+
 #define USBB_UPSTA_CURRBK_SHIFT       (14)      /* Bits 14-15: Current Bank */
 #define USBB_UPSTA_CURRBK_MASK        (3 << USBB_UPSTA_CURRBK_SHIFT)
 #  define USBB_UPSTA_CURRBK_BANK0     (0 << USBB_UPSTA_CURRBK_SHIFT) /* Bank0 */
 #  define USBB_UPSTA_CURRBK_BANK1     (1 << USBB_UPSTA_CURRBK_SHIFT) /* Bank1 */
 #  define USBB_UPSTA_CURRBK_BANK2     (2 << USBB_UPSTA_CURRBK_SHIFT) /* Bank2 */
+
 #define USBB_UPSTA_RWALL              (1 << 16) /* Bit 16: Read/Write Allowed */
 #define USBB_UPSTA_CFGOK              (1 << 18) /* Bit 18: Configuration OK Status */
-#define USBB_UPSTA_PBYCT_SHIFT        (20)       /* Bits 20-30: Pipe Byte Count */
+#define USBB_UPSTA_PBYCT_SHIFT        (20)      /* Bits 20-30: Pipe Byte Count */
 #define USBB_UPSTA_PBYCT_MASK         (0x7ff << USBB_UPSTA_BYCT_SHIFT)
 
 /* Pipe Status Set Register Bit-field Definitions (only in UPSTASET) */
@@ -895,7 +937,9 @@
 #define USBB_UPSTASET_NBUSYBKS        (1 << 12)  /* Bit 12 */
 
 /* Pipe Control Register Bit-field Definitions */
+
 /* Pipe Control Clear Register Bit-field Definitions (except as noted 1) */
+
 /* Pipe Control Set Register Bit-field Definitions (except as noted 2) */
 
 #define USBB_UPCON_RXINE              (1 << 0)  /* Bit 0:  Received IN Data Interrupt Enable */
@@ -935,6 +979,7 @@
 #define UHDMA_NEXTDESC_MASK           (0xfffffff0)
 
 /* Host DMA Channel HSB Address Register Bit-field Definitions */
+
 /* This register holds a 32-bit address with internal bit fields */
 
 /* Host DMA Channel Control Register Bit-field Definitions */
@@ -957,7 +1002,7 @@
 #define UHDMA_STATUS_EOTSTA           (1 << 4)  /* Bit 4:  End of USB Transfer Status */
 #define UHDMA_STATUS_EOCHBUFFSTA      (1 << 5)  /* Bit 5:  End of Channel Buffer Status */
 #define UHDMA_STATUS_DESCLDSTA        (1 << 6)  /* Bit 6:  Descriptor Loaded Status */
-#define UHDMA_STATUS_CHBYTECNT_SHIFT  (16)       /* Bits 16-31: Channel Byte Count */
+#define UHDMA_STATUS_CHBYTECNT_SHIFT  (16)      /* Bits 16-31: Channel Byte Count */
 #define UHDMA_STATUS_CHBYTECNT_MASK   (0xffff << UHDMA_STATUS_CHBYTECNT_SHIFT)
 
 /* USB General Registers Bit-field Definitions ******************************/
@@ -984,7 +1029,9 @@
 #define USBB_USBCON_UIMOD             (1 << 25) /* Bit 25: USBB Mode */
 
 /* General Status Register Bit-field Definitions */
+
 /* General Status Clear Register Bit-field Definitions */
+
 /* General Status Set Register Bit-field Definitions */
 
 #define USBB_USBSTA_IDTI              (1 << 0)  /* Bit 0:  ID Transition Interrupt */
@@ -1013,12 +1060,14 @@
 #define USBB_UFEAT_EPTNBRMAX_SHIFT    (0)       /* Bits 0-3: Maximal Number of Pipes/Endpoints */
 #define USBB_UFEAT_EPTNBRMAX_MASK     (15 << USBB_UFEAT_EPTNBRMAX_SHIFT)
 #  define USBB_UFEAT_EPTNBRMAX_16     (0 << USBB_UFEAT_EPTNBRMAX_SHIFT) /* 16 is a special case */
+
 #define USBB_UFEAT_DMACHANNBR_SHIFT   (4)       /* Bits 4-6: Number of DMA Channels */
 #define USBB_UFEAT_DMACHANNBR_MASK    (7 << USBB_UFEAT_DMACHANNBR_SHIFT)
 #define USBB_UFEAT_DMABUFFERSZ        (1 << 7)  /* Bit 7:  DMA Buffer Size */
 #define USBB_UFEAT_DMAWDDEPTH_SHIFT   (8)       /* Bits 8-11: DMA FIFO Depth in Words */
 #define USBB_UFEAT_DMAWDDEPTH_MASK    (15 << USBB_UFEAT_DMAWDDEPTH_SHIFT)
 #  define USBB_UFEAT_DMAWDDEPTH_16    (0 << USBB_UFEAT_DMAWDDEPTH_SHIFT) /* 16 is a special case */
+
 #define USBB_UFEAT_FIFOMAXSZ_SHIFT    (12)      /* Bits 12-14: Maximal FIFO Size */
 #define USBB_UFEAT_FIFOMAXSZ_MASK     (7 << USBB_UFEAT_FIFOMAXSZ_SHIFT)
 #  define USBB_UFEAT_FIFOMAXSZ_LT256  (0 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 256 bytes */
@@ -1029,10 +1078,13 @@
 #  define USBB_UFEAT_FIFOMAXSZ_LT8K   (5 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 8192 bytes */
 #  define USBB_UFEAT_FIFOMAXSZ_LT16K  (6 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* < 16384 bytes */
 #  define USBB_UFEAT_FIFOMAXSZ_GE16K  (7 << USBB_UFEAT_FIFOMAXSZ_SHIFT) /* >= 16384 bytes */
+
 #define USBB_UFEAT_BWRDPRAM           (1 << 15) /* Bit 15: DPRAM Byte-Write Capability */
 
 /* IP PB Address Size Register Bit-field Definitions */
+
 /* IP Name Register 1 Bit-field Definitions */
+
 /* IP Name Register 2 Bit-field Definitions */
 
 /* These registers contain a 32-value and, hence, have no bit fields */
@@ -1057,7 +1109,7 @@
 #  define USBB_USBFSM_B_HOST          (14)
 #  define USBB_USBFSM_B_SRPINIT       (15)
 
-/* USB HSB Memory Map ***************************************************************/
+/* USB HSB Memory Map *******************************************************/
 
 #define USB_FIFO0_DATA_OFFSET         0x00000 /* Pipe/Endpoint 0 FIFO Data Register */
 #define USB_FIFO1_DATA_OFFSET         0x10000 /* Pipe/Endpoint 1 FIFO Data Register */
@@ -1067,16 +1119,16 @@
 #define USB_FIFO5_DATA_OFFSET         0x50000 /* Pipe/Endpoint 5 FIFO Data Register */
 #define USB_FIFO6_DATA_OFFSET         0x60000 /* Pipe/Endpoint 6 FIFO Data Register */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_USBB_H */
