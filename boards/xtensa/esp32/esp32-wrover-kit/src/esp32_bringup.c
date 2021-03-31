@@ -40,7 +40,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
 
-#include "esp32_wlan.h"
 #include "esp32_spiflash.h"
 #include "esp32_partition.h"
 
@@ -58,6 +57,10 @@
 
 #ifdef CONFIG_WATCHDOG
 #  include "esp32_board_wdt.h"
+#endif
+
+#ifdef CONFIG_ESP32_WIRELESS
+#  include "esp32_board_wlan.h"
 #endif
 
 #ifdef CONFIG_ESP32_I2C
@@ -95,38 +98,6 @@
  *     Called from the NSH library
  *
  ****************************************************************************/
-
-#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
-static int esp32_init_wifi_storage(void)
-{
-  int ret;
-  const char *path = "/dev/mtdblock1";
-  FAR struct mtd_dev_s *mtd_part;
-
-  mtd_part = esp32_spiflash_alloc_mtdpart();
-  if (!mtd_part)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
-      return -1;
-    }
-
-  ret = register_mtddriver(path, mtd_part, 0777, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to regitser MTD: %d\n", ret);
-      return -1;
-    }
-
-  ret = nx_mount(path, CONFIG_ESP32_WIFI_FS_MOUNTPT, "spiffs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
-      return ret;
-    }
-
-  return 0;
-}
-#endif
 
 int esp32_bringup(void)
 {
@@ -196,36 +167,13 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32_WIRELESS
-
-#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
-  ret = esp32_init_wifi_storage();
-  if (ret)
+  ret = board_wlan_init();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi storage\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
+             ret);
       return ret;
     }
-#endif
-
-#ifdef CONFIG_NET
-#ifdef ESP32_WLAN_HAS_STA
-  ret = esp32_wlan_sta_initialize();
-  if (ret)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi station\n");
-      return ret;
-    }
-#endif
-
-#ifdef ESP32_WLAN_HAS_SOFTAP
-  ret = esp32_wlan_softap_initialize();
-  if (ret)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi softAP\n");
-      return ret;
-    }
-#endif
-#endif
-
 #endif
 
 /* First, register the timer drivers and let timer 1 for oneshot
@@ -244,7 +192,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESP32_TIMER1) && !defined(CONFIG_ONESHOT) 
+#if defined(CONFIG_ESP32_TIMER1) && !defined(CONFIG_ONESHOT)
   ret = esp32_timer_initialize("/dev/timer1", TIMER1);
   if (ret < 0)
     {
@@ -266,7 +214,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_TIMER3 
+#ifdef CONFIG_ESP32_TIMER3
   ret = esp32_timer_initialize("/dev/timer3", TIMER3);
   if (ret < 0)
     {
