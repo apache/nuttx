@@ -105,11 +105,6 @@ config SIM_X8664_MICROSOFT
 
 endchoice
 
-config SIM_WALLTIME
-	bool "Run the simulation at a fixed cadence in near real-time"
-	default y
-
-if SIM_WALLTIME
 choice
 	prompt "Simulation at a fixed cadence in near real-time"
 	default SIM_WALLTIME_SLEEP
@@ -117,12 +112,7 @@ choice
 config SIM_WALLTIME_SLEEP
 	bool "Execution the simulation in near real-time using host sleep"
 	---help---
-		NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
-		calls the system timer "interrupt handler" as fast as possible.  As a result, there
-		really are no noticeable delays when a task sleeps.  However, the task really does
-		sleep -- but the time scale is wrong.  If you want behavior that is closer to
-		normal timing, then you can define SIM_WALLTIME=y in your configuration
-		file.  This configuration setting will cause the sim target's IDLE loop to delay
+		NOTE: This configuration setting will cause the sim target's IDLE loop to delay
 		on each call so that the system "timer interrupt" is called at a rate approximately
 		correct for the system timer tick rate.  With this definition in the configuration,
 		sleep() behavior is more or less normal.
@@ -137,14 +127,12 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
-endif
-
 config SIM_NETDEV
 	bool "Simulated Network Device"
 	default y
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
-	depends on (NET_ETHERNET && SIM_WALLTIME)
+	depends on NET_ETHERNET
 	---help---
 		Build in support for a simulated network device.
 
@@ -537,7 +525,7 @@ config SIM_QSPIFLASH_PAGESIZE
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
 	default false
-	depends on (WIRELESS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
+	depends on (WIRELESS_BLUETOOTH && HOST_LINUX)
 	---help---
 		Attached the local bluetooth device to the simulation
 		target via HCI_CHANNEL_USER. This gives NuttX full
