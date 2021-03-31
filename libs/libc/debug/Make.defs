@@ -20,7 +20,7 @@
 
 ifeq ($(CONFIG_EABI_UNWINDER),y)
 
-CSRCS += lib_backtrace.c
+CSRCS += lib_backtrace.c lib_dumpstack.c
 
 endif
 
