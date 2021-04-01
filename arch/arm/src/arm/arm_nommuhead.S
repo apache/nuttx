@@ -68,15 +68,6 @@ __start:
 
 	showprogress	'A'
 
-	/* Clear system BSS section */
-
-	mov		r0, #0
-1:	cmp		r4, r5
-	strcc		r0, [r4], #4
-	bcc		1b
-
-	showprogress	'B'
-
 	/* Copy system .data sections to new home in RAM. */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -84,12 +75,21 @@ __start:
 	adr		r3, .Ldatainit
 	ldmia		r3, {r0, r1, r2}
 
-1:	ldmia		r0!, {r3 - r10}
-	stmia		r1!, {r3 - r10}
+1:	ldmia		r0!, {r3, r6 - r12}
+	stmia		r1!, {r3, r6 - r12}
 	cmp		r1, r2
 	blt		1b
 
 #endif
+
+	showprogress	'B'
+
+	/* Clear system BSS section */
+
+	mov		r0, #0
+1:	cmp		r4, r5
+	strcc		r0, [r4], #4
+	bcc		1b
 
 	/* Perform early serial initialization */
 
