@@ -40,8 +40,6 @@
 #include <nuttx/config.h>
 
 #include "arm.h"
-#include "arm_internal.h"
-#include "arm_arch.h"
 
 /********************************************************************
  * Pre-processor Definitions
@@ -78,7 +76,7 @@ up_restart:
 	 * space.
 	 */
 
-	mksection r0, r4			/* r0=phys. base section */
+	mksection r0, r4		/* r0=phys. base section */
 	ldr	r1, .LCmmuflags		/* FLGS=MMU_MEMFLAGS */
 	add	r3, r1, r0		/* r3=flags + base */
 	str	r3, [r4, r0, lsr #18]	/* identity mapping */
@@ -97,7 +95,7 @@ up_phyrestart:
 
 	mov	r0, #0
 	mcr	p15, 0, r0, c7, c7		/* Invalidate I,D caches */
-	mcr	p15, 0, r0, c7, c10, 4	/* Drain write buffer */
+	mcr	p15, 0, r0, c7, c10, 4		/* Drain write buffer */
 	mcr	p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
 
 	/* Clear bits in control register (see start.h): Disable,

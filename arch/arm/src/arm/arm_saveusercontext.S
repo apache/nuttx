@@ -1,4 +1,4 @@
-/**************************************************************************
+/****************************************************************************
  * arch/arm/src/arm/arm_saveusercontext.S
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
@@ -31,64 +31,60 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************/
+ ****************************************************************************/
 
-#include <nuttx/irq.h>
-#include "arm_internal.h"
+#include <nuttx/config.h>
+#include <arch/irq.h>
 
-/**************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
- * Private Types
- **************************************************************************/
+/****************************************************************************
+ * Public Symbols
+ ****************************************************************************/
 
-/**************************************************************************
- * Private Function Prototypes
- **************************************************************************/
+	.file	"arm_saveusercontext.S"
 
-/**************************************************************************
- * Public Data
- **************************************************************************/
+/****************************************************************************
+ * Macros
+ ****************************************************************************/
 
-/**************************************************************************
- * Private Data
- **************************************************************************/
-
-/**************************************************************************
- * Private Functions
- **************************************************************************/
-
-/**************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Name: arm_saveusercontext
- **************************************************************************/
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  arm_saveusercontext(uint32_t *saveregs);
+ *
+ * Returned Value:
+ *   0: Normal return
+ *   1: Context switch return
+ *
+ ****************************************************************************/
 
-	.text
 	.globl	arm_saveusercontext
 	.type	arm_saveusercontext, function
 arm_saveusercontext:
-	/* On entry, a1 (r0) holds address of struct xcptcontext.
-	 * Offset to the user region.
+
+	/* On entry, a1 (r0) holds address of struct xcptcontext */
+
+	/* Make sure that the return value will be non-zero (the value of the
+	 * other volatile registers don't matter -- r1-r3, ip).  This function
+	 * is called through the normal C calling conventions and the values of
+	 * these registers cannot be assumed at the point of setjmp return.
 	 */
 
-	/* Make sure that the return value will be non-zero (the
-	 * value of the other volatile registers don't matter --
-	 * r1-r3, ip).  This function is called through the
-	 * normal C calling conventions and the values of these
-	 * registers cannot be assumed at the point of setjmp
-	 * return.
-	 */
-
-        mov	ip, #1
+	mov	ip, #1
 	str	ip, [r0, #(4*REG_R0)]
 
 	/* Save the volatile registers (plus r12 which really
@@ -100,19 +96,20 @@ arm_saveusercontext:
 
 	/* Save the current cpsr */
 
-	mrs	r2, cpsr		/* R3 = CPSR value */
+	mrs	r2, cpsr		/* R2 = CPSR value */
 	add	r1, r0, #(4*REG_CPSR)
 	str	r2, [r1]
 
-	/* Finally save the return address as the PC so that we
-	 * return to the exit from this function.
+	/* Save the return address as the PC so that we return to the exit from
+	 * this function.
 	 */
 
-        add	r1, r0, #(4*REG_PC)
+	add	r1, r0, #(4*REG_PC)
 	str	lr, [r1]
 
 	/* Return 0 */
 
 	mov	r0, #0		/* Return value == 0 */
 	mov	pc, lr		/* Return */
-	.size	arm_saveusercontext, . - arm_saveusercontext
+	.size	arm_saveusercontext, .-arm_saveusercontext
+	.end

@@ -43,8 +43,6 @@
  **************************************************************************/
 
 #include <nuttx/config.h>
-#include "arm_internal.h"
-#include "arm_arch.h"
 #include "lpc23xx_pinsel.h"
 #include "lpc23xx_scb.h"
 #include "lpc23xx_uart.h"
@@ -52,6 +50,7 @@
 /**************************************************************************
  * Pre-processor Definitions
  **************************************************************************/
+
 @    //-- Pins
 @    PINSEL0 |= (0x01<<4) |  //-- P0.2  TXD0
 @                (0x01<<6);  //-- P0.3  RXD0
@@ -142,6 +141,7 @@
                            FCR_RX_FIFO_RESET | FCR_FIFO_ENABLE)
 @#define MULVAL (12 << 4)
 @#define DIVADDVAL 3
+
 /**************************************************************************
  * Private Types
  **************************************************************************/
@@ -192,7 +192,7 @@ arm_lowputc:
 
 	/* And return */
 
-	mov     pc, lr
+	mov	pc, lr
 	.size	arm_lowputc, . - arm_lowputc
 
 /* This performs basic initialization of the UART.  This can be called very
@@ -216,14 +216,15 @@ up_lowsetup:
 	str	r1, [r0]
 
 	/* Power Up Uart0 */
-	ldr r0, =UARTxPCLKSEL /* PCLKSEL0 address */
-	ldr r1, [r0]
-	ldr r2, =(~PCLKSEL_MASK)
-	and r1, r2
 
-	ldr r2, =(U0_PCLKSEL)
-	orr r1, r2
-	str r1, [r0]
+	ldr	r0, =UARTxPCLKSEL /* PCLKSEL0 address */
+	ldr	r1, [r0]
+	ldr	r2, =(~PCLKSEL_MASK)
+	and	r1, r2
+
+	ldr	r2, =(U0_PCLKSEL)
+	orr	r1, r2
+	str	r1, [r0]
 
 /* Configure parity, data bits, stop bits and set DLAB=1 */
 
@@ -233,19 +234,19 @@ up_lowsetup:
 
 /* Set the BAUD divisor */
 
-	mov r1, #((MULVAL << 4) | DIVADDVAL)
-	strb r1, [r0, #UART_FDR_OFFSET]
+	mov	r1, #((MULVAL << 4) | DIVADDVAL)
+	strb	r1, [r0, #UART_FDR_OFFSET]
 
-	mov	 r1, #DLMVAL
-	strb r1, [r0, #UART_DLM_OFFSET]
+	mov	r1, #DLMVAL
+	strb	r1, [r0, #UART_DLM_OFFSET]
 
-	mov  r1, #DLLVAL
-	strb r1, [r0, #UART_DLL_OFFSET]
+	mov	r1, #DLLVAL
+	strb	r1, [r0, #UART_DLL_OFFSET]
 
 /* Clear DLAB and Set format 8N1 */
 
-	mov r1, #LCR_VALUE
-	strb r1, [r0, #UART_LCR_OFFSET]
+	mov	r1, #LCR_VALUE
+	strb	r1, [r0, #UART_LCR_OFFSET]
 
 /* Configure the FIFOs */
 

@@ -42,7 +42,6 @@
 
 #include "arm.h"
 #include "chip.h"
-#include "arm_arch.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -92,14 +91,14 @@ g_aborttmp:
 arm_vectorirq:
 	/* On entry, we are in IRQ mode.  We are free to use
 	 * the IRQ mode r13 and r14.
-         *
+	 *
 	 */
 
 	ldr	r13, .Lirqtmp
 	sub	lr, lr, #4
-	str	lr, [r13]			@ save lr_IRQ
+	str	lr, [r13]		/* Save lr_IRQ */
 	mrs	lr, spsr
-	str	lr, [r13, #4]			@ save spsr_IRQ
+	str	lr, [r13, #4]		/* Save spsr_IRQ */
 
 	/* Then switch back to SVC mode */
 
@@ -141,15 +140,15 @@ arm_vectorirq:
 	 */
 #else
 	ldr	r6, =SRC_IRQ_REG
-	ldr     r6, [r6]		/* Get source IRQ reg */
-	mov     r0, #0			/* Assume IRQ0_IRQ set */
+	ldr	r6, [r6]		/* Get source IRQ reg */
+	mov	r0, #0			/* Assume IRQ0_IRQ set */
 .Lmorebits:
-	tst     r6, #1			/* Is IRQ set? */
-	bne     .Lhaveirq		/* Yes... we have the IRQ */
-	add     r0, r0, #1		/* Setup next IRQ */
-	mov     r6, r6, lsr #1		/* Shift right one */
-	cmp     r0, #16			/* Only 16 valid bits */
-	bcc     .Lmorebits		/* Keep until we have looked
+	tst	r6, #1			/* Is IRQ set? */
+	bne	.Lhaveirq		/* Yes... we have the IRQ */
+	add	r0, r0, #1		/* Setup next IRQ */
+	mov	r6, r6, lsr #1		/* Shift right one */
+	cmp	r0, #16			/* Only 16 valid bits */
+	bcc	.Lmorebits		/* Keep until we have looked
 					 * at all bits */
 	b	.Lnoirqset		/* If we get here, there is
 					 * no pending interrupt */

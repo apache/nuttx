@@ -46,8 +46,6 @@
 #include <arch/irq.h>
 #include "exc_return.h"
 
-#include "chip.h"
-
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
@@ -95,7 +93,7 @@ exception_common:
 #ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
-	bmi		1f						/* Test bit 31 */
+	bmi		1f					/* Test bit 31 */
 	mrs		r1, msp					/* R1=The main stack pointer */
 	b		2f
 
@@ -115,13 +113,13 @@ exception_common:
 2:
 	/* Save SP, PRIMASK, and R4-R7 in the context array */
 
-	sub		r1, #SW_XCPT_SIZE		/* R1=Beginning of context array on the stack */
-	mov		r2, #XCPTCONTEXT_SIZE   /* R2=Size of the context array */
+	sub		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
+	mov		r2, #XCPTCONTEXT_SIZE			/* R2=Size of the context array */
 	add		r2, r1					/* R2=MSP/PSP before the interrupt was taken */
-									/* (ignoring the xPSR[9] alignment bit) */
+								/* (ignoring the xPSR[9] alignment bit) */
 	mrs		r3, primask				/* R3=Current PRIMASK setting */
 	mov		r0, r1					/* Copy the context array pointer */
-	stmia	r0!, {r2-r7}			/* Save the SP, PRIMASK, and R4-R7 in the context array */
+	stmia		r0!, {r2-r7}				/* Save the SP, PRIMASK, and R4-R7 in the context array */
 
 	/* Save R8-R11 and the EXEC_RETURN value in the context array */
 
@@ -131,9 +129,9 @@ exception_common:
 	mov		r5, r11
 #ifdef CONFIG_BUILD_PROTECTED
 	mov		r6, r14
-	stmia	r0!, {r2-r6}			/* Save the high registers r8-r11 and r14 */
+	stmia		r0!, {r2-r6}				/* Save the high registers r8-r11 and r14 */
 #else
-	stmia	r0!, {r2-r5}			/* Save the high registers r8-r11 */
+	stmia		r0!, {r2-r5}				/* Save the high registers r8-r11 */
 #endif
 
 	/* Get the exception number in R0=IRQ, R1=register save area on stack */
@@ -152,9 +150,9 @@ exception_common:
 	 */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr		r7, =g_intstackbase		/* R7=Base of the interrupt stack */
+	ldr		r7, =g_intstackbase			/* R7=Base of the interrupt stack */
 	mov		sp, r7					/* Set the new stack point */
-	push	{r1}					/* Save the MSP on the interrupt stack */
+	push		{r1}					/* Save the MSP on the interrupt stack */
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
 	pop		{r1}					/* Recover R1=main stack pointer */
 #else
@@ -163,13 +161,13 @@ exception_common:
 	mrs		r1, msp					/* Recover R1=main stack pointer */
 #endif
 
-	/* On return from arm_doirq, r0 will hold a pointer to register context
+	/* On return from arm_doirq, R0 will hold a pointer to register context
 	 * array to use for the interrupt return.  If that return value is the same
 	 * as current stack pointer, then things are relatively easy.
 	 */
 
 	cmp		r0, r1					/* Context switch? */
-	beq		3f						/* Branch if no context switch */
+	beq		3f					/* Branch if no context switch */
 
 	/* We are returning with a pending context switch.  This case is different
 	 * because in this case, the register save structure does not lie on the
@@ -180,13 +178,13 @@ exception_common:
 	/* Copy the hardware-saved context to the new stack */
 
 	mov		r2, #SW_XCPT_SIZE		/* R2=Size of software-saved portion of the context array */
-	add		r1, r0, r2				/* R1=Address of HW save area in reg array */
-	ldr		r2, [r0, #(4*REG_SP)]	/* R2=Value of SP before the interrupt */
+	add		r1, r0, r2			/* R1=Address of HW save area in reg array */
+	ldr		r2, [r0, #(4*REG_SP)]		/* R2=Value of SP before the interrupt */
 	sub		r2, #HW_XCPT_SIZE		/* R2=Address of HW save area on the return stack */
-	ldmia	r1!, {r4-r7}			/* Fetch four registers from the HW save area */
-	stmia	r2!, {r4-r7}			/* Copy four registers to the return stack */
-	ldmia	r1!, {r4-r7}			/* Fetch four registers from the HW save area */
-	stmia	r2!, {r4-r7}			/* Copy four registers to the return stack */
+	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
+	stmia		r2!, {r4-r7}			/* Copy four registers to the return stack */
+	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
+	stmia		r2!, {r4-r7}			/* Copy four registers to the return stack */
 
 	/* Restore the register contents */
 
@@ -199,17 +197,17 @@ exception_common:
 
 	/* Recover R8-R11 and EXEC_RETURN (5 registers) */
 
-	mov		r2, #(4*REG_R8)			/* R2=Offset to R8 storage */
+	mov		r2, #(4*REG_R8)				/* R2=Offset to R8 storage */
 	add		r0, r1, r2				/* R0=Address of R8 storage */
 #ifdef CONFIG_BUILD_PROTECTED
-	ldmia	r0!, {r2-r6}			/* Recover R8-R11 and R14 (5 registers)*/
+	ldmia		r0!, {r2-r6}				/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
 	mov		r14, r6					/* EXEC_RETURN */
 #else
-	ldmia	r0!, {r2-r5}			/* Recover R8-R11 and R14 (5 registers)*/
+	ldmia		r0!, {r2-r5}				/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
@@ -220,8 +218,8 @@ exception_common:
 	 * the stack pointer as it was on entry to the exception handler.
 	 */
 
-	ldmia	r1!, {r2-r7}			/* Recover R4-R7 + 2 temp values */
-	mov		r1, #HW_XCPT_SIZE		/* R1=Size of hardware-saved portion of the context array */
+	ldmia		r1!, {r2-r7}				/* Recover R4-R7 + 2 temp values */
+	mov		r1, #HW_XCPT_SIZE			/* R1=Size of hardware-saved portion of the context array */
 	sub		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
 
 	/* Restore the stack pointer.  The EXC_RETURN value tells us whether the
@@ -231,7 +229,7 @@ exception_common:
 #ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
-	bmi		5f						/* Test bit 31 */
+	bmi		5f					/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
 	b		6f
 
@@ -241,7 +239,7 @@ exception_common:
 6:
 #else
 	msr		msp, r1					/* R1=The main stack pointer */
-	ldr		r0, =EXC_RETURN_PRIVTHR	/* R0=EXC_RETURN to privileged mode */
+	ldr		r0, =EXC_RETURN_PRIVTHR			/* R0=EXC_RETURN to privileged mode */
 	mov		r14, r0					/* R14=EXC_RETURN to privileged mode */
 #endif
 
@@ -254,7 +252,7 @@ exception_common:
 	 * return to thread mode, and (2) select the correct stack.
 	 */
 
-	bx		r14						/* And return */
+	bx		r14					/* And return */
 
 	.size	exception_common, .-exception_common
 
@@ -269,7 +267,7 @@ exception_common:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.global	g_intstackalloc
-	.global g_intstackbase
+	.global	g_intstackbase
 	.balign	4
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)

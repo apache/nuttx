@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/gnu/arm_setjmp.S
+ * arch/arm/src/armv8-m/arm_setjmp.S
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: David S. Alessio <David@DSA.Consulting>
@@ -33,11 +33,6 @@
  *
  ****************************************************************************/
 
-/* When this file is assembled, it will require the following GCC options:
- *
- * -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -meabi=5 -mthumb
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -52,12 +47,12 @@
  * Public Symbols
  ****************************************************************************/
 
-    .globl      setjmp
-    .globl      longjmp
+	.globl	setjmp
+	.globl	longjmp
 
-    .syntax     unified
-    .thumb
-    .file       "setjmp.S"
+	.syntax	unified
+	.thumb
+	.file	"setjmp.S"
 
 /****************************************************************************
  * Public Functions
@@ -84,33 +79,33 @@
  *
  ****************************************************************************/
 
-    .thumb_func
-    .type   setjmp, function
+	.thumb_func
+	.type	setjmp, function
 setjmp:
 
-    /* Store callee-saved Core registers */
+	/* Store callee-saved Core registers */
 
-    mov     ip, sp                  /* move sp to ip so we can save it */
-    stmia   r0!, {r4-r11, ip, lr}
+	mov		ip, sp				/* Move sp to ip so we can save it */
+	stmia		r0!, {r4-r11, ip, lr}
 
 #ifdef CONFIG_ARCH_FPU
-    vstmia  r0!, {s16-s31}          /* Save the callee-saved FP registers */
+	vstmia		r0!, {s16-s31}			/* Save the callee-saved FP registers */
 
-    /* Store the floating point control and status register.  At the end of the
-     * vstmia, r0 will point to the FPCSR storage location.
-     */
+	/* Store the floating point control and status register.  At the end of the
+	 * vstmia, r0 will point to the FPCSR storage location.
+	 */
 
-    vmrs    r1, fpscr               /* Fetch the FPCSR */
-    str     r1, [r0], #4            /* Save the floating point control and status register */
-                                    /* DSA: don't need to inc r0 */
+	vmrs		r1, fpscr			/* Fetch the FPCSR */
+	str		r1, [r0], #4			/* Save the floating point control and status register */
+							/* DSA: don't need to inc r0 */
 #endif /* CONFIG_ARCH_FPU */
 
-    /* we're done, we're out of here */
+	/* we're done, we're out of here */
 
-    mov     r0, #0
-    bx      lr
+	mov		r0, #0
+	bx		lr
 
-    .size   setjmp, .-setjmp
+	.size	setjmp, .-setjmp
 
 /****************************************************************************
  * Name: longjmp
@@ -134,29 +129,29 @@ setjmp:
  *
  ****************************************************************************/
 
-    .thumb_func
-    .type   longjmp, function
+	.thumb_func
+	.type	longjmp, function
 longjmp:
 
-    /* Load callee-saved Core registers */
+	/* Load callee-saved Core registers */
 
-    ldmia   r0!, {r4-r11, ip, lr}
-    mov     sp, ip                  /* restore sp */
+	ldmia		r0!, {r4-r11, ip, lr}
+	mov		sp, ip				/* Restore sp */
 
 #ifdef CONFIG_ARCH_FPU
-    /* Load callee-saved floating point registers.  */
+	/* Load callee-saved floating point registers.  */
 
-    vldmia  r0!, {s16-s31}          /* Restore FP context */
+	vldmia		r0!, {s16-s31}			/* Restore FP context */
 
-    /* Load the floating point control and status register. */
+	/* Load the floating point control and status register. */
 
-    ldr     r2, [r0], #4            /* Fetch the floating point control and status register */
-                                    /* DSA: don't need to inc r0 */
-    vmsr    fpscr, r2               /* Restore the FPCSR */
+	ldr		r2, [r0], #4			/* Fetch the floating point control and status register */
+							/* DSA: don't need to inc r0 */
+	vmsr		fpscr, r2			/* Restore the FPCSR */
 #endif /* CONFIG_ARCH_FPU */
 
-    mov     r0, r1                  /* return val */
-    bx      lr
+	mov		r0, r1				/* return val */
+	b		lr
 
-    .size   longjmp, .-longjmp
-    .end
+	.size	longjmp, .-longjmp
+	.end

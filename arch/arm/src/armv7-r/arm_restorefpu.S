@@ -54,7 +54,6 @@
 #else
 	.cpu	cortex-r4
 #endif
-	.syntax	unified
 	.file	"arm_restorefpu.S"
 
 /************************************************************************************
@@ -94,14 +93,14 @@ arm_restorefpu:
 	 * s0, s1, ... in increasing address order.
 	 */
 
-	vldmia	r1!, {s0-s31}			/* Restore the full FP context */
+	vldmia		r1!, {s0-s31}			/* Restore the full FP context */
 
 	/* Load the floating point control and status register.   At the end of the
 	 * vstmia, r1 will point to the FPCSR storage location.
 	 */
 
 	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
-	vmsr	fpscr, r2				/* Restore the FPCSR */
+	vmsr		fpscr, r2			/* Restore the FPCSR */
 	bx		lr
 
 	.size	arm_restorefpu, .-arm_restorefpu

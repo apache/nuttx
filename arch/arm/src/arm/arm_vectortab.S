@@ -39,13 +39,18 @@
 
 #include <nuttx/config.h>
 
+	.file	"arm_vectortab.S"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Public Symbols
  ****************************************************************************/
+
+	.globl	_vector_start
+	.globl	_vector_end
 
 /****************************************************************************
  * Assembly Macros
@@ -68,11 +73,11 @@ _vector_start:
 	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
 	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
 	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception */
+	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
 	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
 	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
 
-	.globl   __start
+	.globl	__start
 	.globl	arm_vectorundefinsn
 	.globl	arm_vectorswi
 	.globl	arm_vectorprefetch
@@ -82,7 +87,7 @@ _vector_start:
 	.globl	arm_vectorfiq
 
 .Lresethandler:
-	.long   __start
+	.long	__start
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
 .Lswihandler:
@@ -100,4 +105,5 @@ _vector_start:
 
 	.globl	_vector_end
 _vector_end:
+	.size	_vector_start, . - _vector_start
 	.end

@@ -46,8 +46,6 @@
 #include "lpc214x_pll.h"
 #include "lpc214x_apb.h"
 #include "lpc214x_pinsel.h"
-#include "arm_internal.h"
-#include "arm_arch.h"
 
 /*****************************************************************************
  * Pre-processor Definitions
@@ -472,7 +470,7 @@ _vector_table:
 	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
 	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
 
-	.globl   __start
+	.globl	__start
 	.globl	arm_vectorundefinsn
 	.globl	arm_vectorswi
 	.globl	arm_vectorprefetch
@@ -481,7 +479,7 @@ _vector_table:
 	.globl	arm_vectorfiq
 
 .Lresethandler:
-	.long   __start
+	.long	__start
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
 .Lswihandler:
@@ -506,7 +504,7 @@ _vector_table:
  *
  *****************************************************************************/
 
-	.global __start
+	.global	__start
 	.type	__start, #function
 
 __start:
@@ -546,7 +544,7 @@ __start:
 
 	/* Configure Fast GPIO Port */
 
-	configfastport  r0, r1
+	configfastport	r0, r1
 
 	/* Configure the uart so that we can get debug output as soon
 	 * as possible.  Modifies r0, r1, r2, and r14.
@@ -558,7 +556,7 @@ __start:
 	/* Setup system stack (and get the BSS range) */
 
 	adr	r0, LC0
-	ldmia   r0, {r4, r5, sp}
+	ldmia	r0, {r4, r5, sp}
 
 	/* Clear system BSS section */
 

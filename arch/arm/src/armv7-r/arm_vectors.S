@@ -57,12 +57,15 @@
 g_irqtmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+
 g_undeftmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+
 g_aborttmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+
 #ifdef CONFIG_ARMV7R_DECODEFIQ
 g_fiqtmp:
 	.word	0		/* Saved lr */
@@ -102,31 +105,31 @@ arm_vectorirq:
 
 	ldr		r13, .Lirqtmp
 	sub		lr, lr, #4
-	str		lr, [r13]				/* Save lr_IRQ */
+	str		lr, [r13]			/* Save lr_IRQ */
 	mrs		lr, spsr
 	str		lr, [r13, #4]			/* Save spsr_IRQ */
 
 	/* Then switch back to SVC mode */
 
-	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
 #ifdef CONFIG_ARMV7R_DECODEFIQ
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 #else
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 #endif
-	msr		cpsr_c, lr				/* Switch to SVC mode */
+	msr		cpsr_c, lr			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lirqtmp			/* Points to temp storage */
-	ldmia	r0, {r3, r4}			/* Recover r3=lr_IRQ, r4=spsr_IRQ */
+	ldmia		r0, {r3, r4}			/* Recover r3=lr_IRQ, r4=spsr_IRQ */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -142,9 +145,9 @@ arm_vectorirq:
 	 */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
-	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
-	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
-	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lirqcontinue
 
 .Lirqentersvc:
@@ -158,7 +161,7 @@ arm_vectorirq:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 
 .Lirqcontinue:
 
@@ -171,26 +174,30 @@ arm_vectorirq:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 #endif
 
 	/* Then call the IRQ handler with interrupts disabled. */
 
-	mov		fp, #0					/* Init frame pointer */
-	mov		r0, sp					/* Get r0=xcp */
+	mov		fp, #0				/* Init frame pointer */
+	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_decodeirq() on the interrupt stack */
+
 	ldr		sp, .Lirqstackbase		/* SP = interrupt stack base */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
-	ldr		sp, [r4]				/* Restore the user stack pointer */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
 #else
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	/* Call arm_decodeirq() on the user stack */
+
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
-	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 #endif
 
 	/* Upon return from arm_decodeirq, r0 holds the pointer to the register
@@ -201,7 +208,7 @@ arm_vectorirq:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -217,25 +224,27 @@ arm_vectorirq:
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0					/* (SVC) R13=Register storage area */
-	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
-	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
-	ldmia	r14, {r15}^				/* Return */
+	mov		r13, r0				/* (SVC) R13=Register storage area */
+	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
+	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 .Lirqleavesvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia	r0, {r0-r15}^			/* Return */
+	ldmia		r0, {r0-r15}^			/* Return */
 
 .Lirqtmp:
 	.word	g_irqtmp
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lirqstackbase:
 	.word	g_intstackbase
 #endif
+
 	.size	arm_vectorirq, . - arm_vectorirq
 	.align	5
 
@@ -258,19 +267,19 @@ arm_vectorsvc:
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	mov		r3, r14					/* Save r14 as the PC as well */
-	mrs		r4, spsr				/* Get the saved CPSR */
+	mov		r3, r14				/* Save r14 as the PC as well */
+	mrs		r4, spsr			/* Get the saved CPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r1, #PSR_MODE_USR		/* User mode? */
 	bne		.Lsvcentersvc			/* Branch if not user mode */
 
@@ -279,9 +288,9 @@ arm_vectorsvc:
 	 */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
-	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
-	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
-	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lsvccontinue
 
 .Lsvcentersvc:
@@ -295,7 +304,7 @@ arm_vectorsvc:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 
 .Lsvccontinue:
 
@@ -308,19 +317,19 @@ arm_vectorsvc:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 #endif
 
 	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
 
-	mov		fp, #0					/* Init frame pointer */
-	mov		r0, sp					/* Get r0=xcp */
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
-	bl		arm_syscall				/* Call the handler */
-	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+	mov		fp, #0				/* Init frame pointer */
+	mov		r0, sp				/* Get r0=xcp */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
+	bl		arm_syscall			/* Call the handler */
+	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
 	/* Upon return from arm_syscall, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -330,7 +339,7 @@ arm_vectorsvc:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -338,7 +347,7 @@ arm_vectorsvc:
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r2, r1, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lleavesvcsvc			/* Branch if not user mode */
 
@@ -346,18 +355,18 @@ arm_vectorsvc:
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0					/* (SVC) R13=Register storage area */
-	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
-	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
-	ldmia	r14, {r15}^				/* Return */
+	mov		r13, r0				/* (SVC) R13=Register storage area */
+	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
+	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 .Lleavesvcsvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia	r0, {r0-r15}^			/* Return */
+	ldmia		r0, {r0-r15}^			/* Return */
 
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
@@ -384,35 +393,35 @@ arm_vectordata:
 	 */
 
 	ldr		r13, .Ldaborttmp		/* Points to temp storage */
-	sub		lr, lr, #8				/* Fixup return */
-	str		lr, [r13]				/* Save in temp storage */
-	mrs		lr, spsr				/* Get SPSR */
+	sub		lr, lr, #8			/* Fixup return */
+	str		lr, [r13]			/* Save in temp storage */
+	mrs		lr, spsr			/* Get SPSR */
 	str		lr, [r13, #4]			/* Save in temp storage */
 
 	/* Then switch back to SVC mode */
 
-	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr				/* Switch to SVC mode */
+	msr		cpsr_c, lr			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Ldaborttmp			/* Points to temp storage */
-	ldmia	r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
+	ldmia		r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r1, #PSR_MODE_USR		/* User mode? */
 	bne		.Ldabtentersvc			/* Branch if not user mode */
 
@@ -421,9 +430,9 @@ arm_vectordata:
 	 */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
-	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
-	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
-	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Ldabtcontinue
 
 .Ldabtentersvc:
@@ -437,7 +446,7 @@ arm_vectordata:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 
 .Ldabtcontinue:
 
@@ -450,21 +459,21 @@ arm_vectordata:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 #endif
 
 	/* Then call the data abort handler with interrupts disabled.
 	 * void arm_dataabort(struct xcptcontext *xcp)
 	 */
 
-	mov		fp, #0					/* Init frame pointer */
-	mov		r0, sp					/* Get r0=xcp */
+	mov		fp, #0				/* Init frame pointer */
+	mov		r0, sp				/* Get r0=xcp */
 	mrc		CP15_DFAR(r1)			/* Get R1=DFAR */
 	mrc		CP15_DFSR(r2)			/* Get r2=DFSR */
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_dataabort			/* Call the handler */
-	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
 	/* Upon return from arm_dataabort, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -474,7 +483,7 @@ arm_vectordata:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -482,7 +491,7 @@ arm_vectordata:
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r2, r1, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Ldabtleavesvc			/* Branch if not user mode */
 
@@ -490,18 +499,18 @@ arm_vectordata:
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0					/* (SVC) R13=Register storage area */
-	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
-	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
-	ldmia	r14, {r15}^				/* Return */
+	mov		r13, r0				/* (SVC) R13=Register storage area */
+	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
+	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 .Ldabtleavesvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia	r0, {r1-r15}^			/* Return */
+	ldmia		r0, {r1-r15}^			/* Return */
 
 .Ldaborttmp:
 	.word	g_aborttmp
@@ -530,35 +539,35 @@ arm_vectorprefetch:
 	 */
 
 	ldr		r13, .Lpaborttmp		/* Points to temp storage */
-	sub		lr, lr, #4				/* Fixup return */
-	str		lr, [r13]				/* Save in temp storage */
-	mrs		lr, spsr				/* Get SPSR */
+	sub		lr, lr, #4			/* Fixup return */
+	str		lr, [r13]			/* Save in temp storage */
+	mrs		lr, spsr			/* Get SPSR */
 	str		lr, [r13, #4]			/* Save in temp storage */
 
 	/* Then switch back to SVC mode */
 
-	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr				/* Switch to SVC mode */
+	msr		cpsr_c, lr			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lpaborttmp			/* Points to temp storage */
-	ldmia	r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
+	ldmia		r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r1, #PSR_MODE_USR		/* User mode? */
 	bne		.Lpabtentersvc			/* Branch if not user mode */
 
@@ -567,9 +576,9 @@ arm_vectorprefetch:
 	 */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
-	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
-	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
-	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lpabtcontinue
 
 .Lpabtentersvc:
@@ -583,7 +592,7 @@ arm_vectorprefetch:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 
 .Lpabtcontinue:
 
@@ -596,21 +605,21 @@ arm_vectorprefetch:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 #endif
 
 	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
 	 */
 
-	mov		fp, #0					/* Init frame pointer */
-	mov		r0, sp					/* Get r0=xcp */
+	mov		fp, #0				/* Init frame pointer */
+	mov		r0, sp				/* Get r0=xcp */
 	mrc		CP15_IFAR(r1)			/* Get R1=IFAR */
 	mrc		CP15_IFSR(r2)			/* Get r2=IFSR */
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_prefetchabort		/* Call the handler */
-	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
 	/* Upon return from arm_prefetchabort, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -620,7 +629,7 @@ arm_vectorprefetch:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -628,7 +637,7 @@ arm_vectorprefetch:
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r2, r1, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lpabtleavesvc			/* Branch if not user mode */
 
@@ -636,18 +645,18 @@ arm_vectorprefetch:
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0					/* (SVC) R13=Register storage area */
-	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
-	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
-	ldmia	r14, {r15}^				/* Return */
+	mov		r13, r0				/* (SVC) R13=Register storage area */
+	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
+	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 .Lpabtleavesvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia	r0, {r0-r15}^			/* Return */
+	ldmia		r0, {r0-r15}^			/* Return */
 
 .Lpaborttmp:
 	.word	g_aborttmp
@@ -674,34 +683,34 @@ arm_vectorundefinsn:
 	 */
 
 	ldr		r13, .Lundeftmp			/* Points to temp storage */
-	str		lr, [r13]				/* Save in temp storage */
-	mrs		lr, spsr				/* Get SPSR */
+	str		lr, [r13]			/* Save in temp storage */
+	mrs		lr, spsr			/* Get SPSR */
 	str		lr, [r13, #4]			/* Save in temp storage */
 
 	/* Then switch back to SVC mode */
 
-	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr				/* Switch to SVC mode */
+	msr		cpsr_c, lr			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lundeftmp			/* Points to temp storage */
-	ldmia	r0, {r3, r4}			/* Recover r3=lr_UND, r4=spsr_UND */
+	ldmia		r0, {r3, r4}			/* Recover r3=lr_UND, r4=spsr_UND */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
 	 * USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r1, #PSR_MODE_USR		/* User mode? */
 	bne		.Lundefentersvc			/* Branch if not user mode */
 
@@ -710,9 +719,9 @@ arm_vectorundefinsn:
 	 */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
-	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
-	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
-	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lundefcontinue
 
 .Lundefentersvc:
@@ -726,7 +735,7 @@ arm_vectorundefinsn:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 
 .Lundefcontinue:
 
@@ -739,19 +748,19 @@ arm_vectorundefinsn:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 #endif
 
 	/* Then call the undef insn handler with interrupts disabled.
 	 * void arm_undefinedinsn(struct xcptcontext *xcp)
 	 */
 
-	mov		fp, #0					/* Init frame pointer */
-	mov		r0, sp					/* Get r0=xcp */
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	mov		fp, #0				/* Init frame pointer */
+	mov		r0, sp				/* Get r0=xcp */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_undefinedinsn		/* Call the handler */
-	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
 	/* Upon return from arm_undefinedinsn, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -761,7 +770,7 @@ arm_vectorundefinsn:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -769,7 +778,7 @@ arm_vectorundefinsn:
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r2, r1, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lundefleavesvc			/* Branch if not user mode */
 
@@ -777,18 +786,18 @@ arm_vectorundefinsn:
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0					/* (SVC) R13=Register storage area */
-	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
-	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
-	ldmia	r14, {r15}^				/* Return */
+	mov		r13, r0				/* (SVC) R13=Register storage area */
+	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
+	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 .Lundefleavesvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia	r0, {r0-r15}^			/* Return */
+	ldmia		r0, {r0-r15}^			/* Return */
 
 .Lundeftmp:
 	.word	g_undeftmp
@@ -816,28 +825,28 @@ arm_vectorfiq:
 	/* On entry we are free to use the FIQ mode registers r8 through r14 */
 
 	ldr		r13, .Lfiqtmp			/* Points to temp storage */
-	sub		lr, lr, #4				/* Fixup return */
-	str		lr, [r13]				/* Save in temp storage */
-	mrs		lr, spsr				/* Get SPSR_fiq */
+	sub		lr, lr, #4			/* Fixup return */
+	str		lr, [r13]			/* Save in temp storage */
+	mrs		lr, spsr			/* Get SPSR_fiq */
 	str		lr, [r13, #4]			/* Save in temp storage */
 
 	/* Then switch back to SVC mode */
 
-	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr				/* Switch to SVC mode */
+	msr		cpsr_c, lr			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lfiqtmp			/* Points to temp storage */
-	ldmia	r0, {r3, r4}			/* Recover r3=lr_SVC, r4=spsr_SVC */
+	ldmia		r0, {r3, r4}			/* Recover r3=lr_SVC, r4=spsr_SVC */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -853,9 +862,9 @@ arm_vectorfiq:
 	 */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
-	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
-	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
-	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lfiqcontinue
 
 .Lfiqentersvc:
@@ -869,7 +878,7 @@ arm_vectorfiq:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 
 .Lfiqcontinue:
 
@@ -882,26 +891,26 @@ arm_vectorfiq:
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
-	stmia	r0, {r1-r4}
+	stmia		r0, {r1-r4}
 #endif
 
 	/* Then call the FIQ handler with interrupts disabled. */
 
-	mov		fp, #0					/* Init frame pointer */
-	mov		r0, sp					/* Get r0=xcp */
+	mov		fp, #0				/* Init frame pointer */
+	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	ldr		sp, .Lfiqstackbase		/* SP = interrupt stack base */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
-	ldr		sp, [r4]				/* Restore the user stack pointer */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
 #else
-	mov		r4, sp					/* Save the SP in a preserved register */
-	bic		sp, sp, #7				/* Force 8-byte alignment */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
-	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 #endif
 
 	/* Upon return from arm_decodefiq, r0 holds the pointer to the register
@@ -912,7 +921,7 @@ arm_vectorfiq:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
@@ -928,21 +937,22 @@ arm_vectorfiq:
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0					/* (SVC) R13=Register storage area */
-	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
-	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
-	ldmia	r14, {r15}^				/* Return */
+	mov		r13, r0				/* (SVC) R13=Register storage area */
+	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
+	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 .Lfiqleavesvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia	r0, {r0-r15}^			/* Return */
+	ldmia		r0, {r0-r15}^			/* Return */
 
 .Lfiqtmp:
 	.word	g_fiqtmp
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lfiqstackbase:
 	.word	g_intstackbase
