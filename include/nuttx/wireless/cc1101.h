@@ -530,7 +530,7 @@ uint8_t cc1101_setpower(FAR struct cc1101_dev_s *dev, uint8_t power);
  *
  ****************************************************************************/
 
-int cc1101_calcRSSIdBm(int rssi);
+int cc1101_calc_rssi_dbm(int rssi);
 
 /****************************************************************************
  * Enter receive mode and wait for a packet.
