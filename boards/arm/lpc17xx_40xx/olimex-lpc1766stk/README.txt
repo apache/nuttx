@@ -725,7 +725,7 @@ Configuration Sub-Directories
 
     1. Support for FAT long file names is built-in but can easily be
        removed if you are concerned about Microsoft patent issues (see the
-       section "FAT Long File Names" in the top-level COPYING file).
+       section "FAT Long File Names" in the top-level NOTICE file).
 
        CONFIG_FS_FAT=y
        CONFIG_FAT_LCNAMES=y <-- Long file name support
@@ -827,7 +827,7 @@ Configuration Sub-Directories
        FAT file system support for FAT long file names is built-in but
        can easily be removed if you are concerned about Microsoft patent
        issues (see the section "FAT Long File Names" in the top-level
-       COPYING file).
+       NOTICE file).
 
        CONFIG_FAT_LFN=y                    : Enables long file name support
 

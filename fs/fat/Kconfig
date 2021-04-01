@@ -25,7 +25,7 @@ config FAT_LFN
 	---help---
 		Enable FAT long file names.  NOTE:  Microsoft claims
 		patents on FAT long file name technology.  Please read the
-		disclaimer in the top-level COPYING file and only enable this
+		disclaimer in the top-level NOTICE file and only enable this
 		feature if you understand these issues.
 
 config FAT_MAXFNAME

@@ -107,7 +107,7 @@ Key features of NuttX include:
     and ``rz``). Intel HEX file conversions.
 
     * FAT long file name support may be subject to certain Microsoft patent restrictions if enabled.
-      See the top-level ``COPYING`` file for details.
+      See the top-level ``NOTICE`` file for details.
 
 * **Device Drivers**
 
