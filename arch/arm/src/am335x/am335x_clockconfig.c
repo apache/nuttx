@@ -547,7 +547,8 @@ static void am335x_peripheral_enable(void)
     {
     }
 
-  while ((getreg32(AM335X_CM_PER_OCPWP_L3_CLKSTCTRL) & per_ocpwp_l3) != per_ocpwp_l3)
+  while ((getreg32(AM335X_CM_PER_OCPWP_L3_CLKSTCTRL) & per_ocpwp_l3) !=
+          per_ocpwp_l3)
     {
     }
 

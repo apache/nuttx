@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/*Change Record:
+/* Change Record:
  * bf20171107 Created file. It's identical to stm32f74xx75xx_irq except for
  *             the exclusions noted by this tag, and the addition of the
  *             last IRQ for SDMMC2 (IRQ103).

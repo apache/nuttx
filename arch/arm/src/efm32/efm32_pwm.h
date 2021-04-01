@@ -35,10 +35,6 @@
 
 #include "chip.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
@@ -70,6 +66,10 @@
 
 #include <arch/board/board.h>
 #include "hardware/efm32_timer.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* For each timer that is enabled for PWM usage, we need the following
  * additional configuration settings:
