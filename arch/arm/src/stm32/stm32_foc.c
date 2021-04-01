@@ -964,7 +964,7 @@ static int stm32_foc_start(FAR struct foc_dev_s *dev, bool state)
   ret = stm32_foc_pwm_start(dev, state);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_pwm_start failed %d\n", ret);
+      mtrerr("stm32_foc_pwm_start failed %d\n", ret);
       goto errout;
     }
 
@@ -973,7 +973,7 @@ static int stm32_foc_start(FAR struct foc_dev_s *dev, bool state)
   ret = stm32_foc_adc_start(dev, state);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_adc_start failed %d\n", ret);
+      mtrerr("stm32_foc_adc_start failed %d\n", ret);
       goto errout;
     }
 
@@ -1177,7 +1177,7 @@ static int stm32_foc_configure(FAR struct foc_dev_s *dev,
   ret = stm32_foc_adc_cfg(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_adc_cfg failed %d\n", ret);
+      mtrerr("stm32_foc_adc_cfg failed %d\n", ret);
       goto errout;
     }
 
@@ -1186,7 +1186,7 @@ static int stm32_foc_configure(FAR struct foc_dev_s *dev,
   ret = stm32_foc_pwm_cfg(dev, cfg->pwm_freq);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_pwm_cfg failed %d\n", ret);
+      mtrerr("stm32_foc_pwm_cfg failed %d\n", ret);
       goto errout;
     }
 
@@ -1195,7 +1195,7 @@ static int stm32_foc_configure(FAR struct foc_dev_s *dev,
   ret = stm32_foc_notifier_cfg(dev, cfg->notifier_freq);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_notifier_cfg failed %d\n", ret);
+      mtrerr("stm32_foc_notifier_cfg failed %d\n", ret);
       goto errout;
     }
 
@@ -1263,7 +1263,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   ret = board->ops->setup(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: board->setup failed %d\n", ret);
+      mtrerr("board->setup failed %d\n", ret);
       goto errout;
     }
 
@@ -1325,7 +1325,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   ret = up_prioritize_irq(foc_dev->adc_irq, NVIC_SYSH_PRIORITY_DEFAULT);
   if (ret < 0)
     {
-      pwrerr("ERROR: up_prioritize_irq failed: %d\n", ret);
+      mtrerr("up_prioritize_irq failed: %d\n", ret);
       goto errout;
     }
 
@@ -1334,7 +1334,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   ret = irq_attach(foc_dev->adc_irq, stm32_foc_adc_handler, NULL);
   if (ret < 0)
     {
-      pwrerr("ERROR: irq_attach failed: %d\n", ret);
+      mtrerr("irq_attach failed: %d\n", ret);
       goto errout;
     }
 
@@ -1348,7 +1348,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   ret = stm32_foc_trace_init(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_trace_init failed %d\n", ret);
+      mtrerr("stm32_foc_trace_init failed %d\n", ret);
       goto errout;
     }
 #endif
@@ -1358,7 +1358,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   ret = stm32_foc_calibration_start(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: stm32_foc_calibration_start failed %d\n", ret);
+      mtrerr("stm32_foc_calibration_start failed %d\n", ret);
       goto errout;
     }
 
@@ -1684,7 +1684,7 @@ static int stm32_foc_calibration_start(FAR struct foc_dev_s *dev)
   DEBUGASSERT(pwm);
   DEBUGASSERT(adc);
 
-  pwrinfo("Start ADC offset calibration\n");
+  mtrinfo("Start ADC offset calibration\n");
 
   /* Call board-specific */
 
@@ -1775,7 +1775,7 @@ static int stm32_foc_calibration_start(FAR struct foc_dev_s *dev)
       STM32_ADC_OFFSET_SET(adc, ch, i, priv->data.curr_offset[i]);
     }
 
-  pwrinfo("ADC offset calibration - DONE!\n");
+  mtrinfo("ADC offset calibration - DONE!\n");
 
 errout:
 
@@ -1943,7 +1943,7 @@ static int stm32_foc_bind(FAR struct foc_dev_s *dev,
 
   if (dev->devno > CONFIG_MOTOR_FOC_INST)
     {
-      pwrerr("ERROR: unsupported STM32 FOC instance %d\n", dev->devno);
+      mtrerr("Unsupported STM32 FOC instance %d\n", dev->devno);
       ret = -EINVAL;
       goto errout;
     }
@@ -2114,7 +2114,7 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
 
       default:
         {
-          pwrerr("ERROR: unsupported STM32 FOC instance %d\n", inst);
+          mtrerr("Unsupported STM32 FOC instance %d\n", inst);
           set_errno(EINVAL);
           goto errout;
         }
@@ -2164,7 +2164,7 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
   foc_dev->pwm = (FAR struct stm32_pwm_dev_s *)stm32_pwminitialize(pwm_inst);
   if (foc_dev->pwm == NULL)
     {
-      pwrerr("ERROR: Failed to get PWM%d interface\n", pwm_inst);
+      mtrerr("Failed to get PWM%d interface\n", pwm_inst);
       set_errno(EINVAL);
       goto errout;
     }
@@ -2184,7 +2184,7 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
 
   if (adc_inst != adc_cfg->intf)
     {
-      pwrerr("ERROR: configuration doesn't match %d, %d\n",
+      mtrerr("Configuration doesn't match %d, %d\n",
              adc_inst, adc_cfg->intf);
       set_errno(EINVAL);
       goto errout;
@@ -2197,7 +2197,7 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
                                          adc_cfg->nchan);
   if (foc_dev->adc_dev == NULL)
     {
-      pwrerr("ERROR: Failed to get ADC%d interface\n", adc_cfg->intf);
+      mtrerr("Failed to get ADC%d interface\n", adc_cfg->intf);
       set_errno(EINVAL);
       goto errout;
     }

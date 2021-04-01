@@ -326,7 +326,7 @@ static void board_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
 
       default:
         {
-          pwrerr("ERROR: board_foc_trace type=%d not supported!\n", type);
+          mtrerr("board_foc_trace type=%d not supported!\n", type);
           DEBUGASSERT(0);
         }
     }
@@ -360,7 +360,7 @@ int board_ihm08m1_initialize(FAR struct stm32_foc_adc_s *adc_cfg)
       if (foc == NULL)
         {
           ret = -errno;
-          pwrerr("ERROR: failed to initialize STM32 FOC: %d\n", ret);
+          mtrerr("Failed to initialize STM32 FOC: %d\n", ret);
           goto errout;
         }
 
@@ -371,7 +371,7 @@ int board_ihm08m1_initialize(FAR struct stm32_foc_adc_s *adc_cfg)
       ret = foc_register(FOC_DEVPATH, foc);
       if (ret < 0)
         {
-          printf("ERROR: failed to register FOC device: %d\n", ret);
+          mtrerr("Failed to register FOC device: %d\n", ret);
           goto errout;
         }
 
@@ -405,7 +405,7 @@ int stm32_adc_setup(void)
     {
       if (g_foc_dev == NULL)
         {
-          pwrerr("ERROR: failed to get g_foc_dev device\n");
+          mtrerr("Failed to get g_foc_dev device\n");
           ret = -EACCES;
           goto errout;
         }
@@ -415,14 +415,14 @@ int stm32_adc_setup(void)
       adc = stm32_foc_adcget(g_foc_dev);
       if (adc == NULL)
         {
-          pwrerr("ERROR: failed to get ADC device: %d\n", ret);
+          mtrerr("Failed to get ADC device: %d\n", ret);
           goto errout;
         }
 
       ret = adc_register("/dev/adc0", adc);
       if (ret < 0)
         {
-          pwrerr("ERROR: adc_register failed: %d\n", ret);
+          mtrerr("adc_register failed: %d\n", ret);
           goto errout;
         }
 
