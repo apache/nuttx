@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <getopt.h>
 
 #include <nuttx/lib/getopt.h>
 
@@ -45,6 +46,33 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Preprocessor Definitions
+ ****************************************************************************/
+
+/* Mode bit definitions */
+
+#define GETOPT_LONG_BIT         (1 << 0) /* Long options supported */
+#define GETOPT_LONGONLY_BIT     (1 << 1) /* Long-Only behavior supported */
+
+#define GETOPT_HAVE_LONG(m)     (((m) & GETOPT_LONG_BIT) != 0)
+#define GETOPT_HAVE_LONGONLY(m) (((m) & GETOPT_LONGONLY_BIT) != 0)
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* The mode determines which of getopt(), getopt_long(), and
+ * getopt_long_only() that is being emulated by getopt_common().
+ */
+
+enum getopt_mode_e
+{
+  GETOPT_MODE           = 0,
+  GETOPT_LONG_MODE      = GETOPT_LONG_BIT,
+  GETOPT_LONG_ONLY_MODE = (GETOPT_LONG_BIT | GETOPT_LONGONLY_BIT)
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -57,6 +85,21 @@ extern "C"
  ****************************************************************************/
 
 FAR struct getopt_s *getoptvars(void);
+
+/****************************************************************************
+ * Name: getopt_common
+ *
+ * Description:
+ *   getopt_common() is the common, internal implementation of getopt(),
+ *   getopt_long(), and getopt_long_only().
+ *
+ ****************************************************************************/
+
+int getopt_common(int argc, FAR char * const argv[],
+                  FAR const char *optstring,
+                  FAR const struct option *longopts,
+                  FAR int *longindex,
+                  enum getopt_mode_e mode);
 
 #undef EXTERN
 #if defined(__cplusplus)

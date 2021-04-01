@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/getopt.h
+ * libs/libc/unistd/lib_getopt_long.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,49 +18,16 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_GETOPT_H
-#define __INCLUDE_GETOPT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <unistd.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define no_argument             0
-#define required_argument       1
-#define optional_argument       2
+#include "unistd.h"
 
 /****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-struct option
-{
-  FAR const char *name;
-  int has_arg;
-  FAR int *flag;
-  int val;
-};
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -78,27 +45,8 @@ struct option
 int getopt_long(int argc, FAR char * const argv[],
                 FAR const char *optstring,
                 FAR const struct option *longopts,
-                FAR int *longindex);
-
-/****************************************************************************
- * Name: getopt_long_only
- *
- * Description:
- *   getopt_long_only() is like getopt_long(), but '-' as well as "--" can
- *   indicate a long option. If an option that starts with '-' (not "--")
- *   doesn't match a long option, but does match a short option, it is
- *   parsed as a short option instead.
- *
- ****************************************************************************/
-
-int getopt_long_only(int argc, FAR char * const argv[],
-                     FAR const char *optstring,
-                     FAR const struct option *longopts,
-                     FAR int *longindex);
-
-#undef EXTERN
-#if defined(__cplusplus)
+                FAR int *longindex)
+{
+  return getopt_common(argc, argv, optstring, longopts, longindex,
+                       GETOPT_LONG_MODE);
 }
-#endif
-
-#endif /* __INCLUDE_GETOPT_H */
