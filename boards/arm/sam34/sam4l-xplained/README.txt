@@ -503,7 +503,7 @@ Configuration sub-directories
          CONFIG_FAT_MAXFNAME=32            : Maximum supported file name length
 
          There are issues related to patents that Microsoft holds on FAT long
-         file name technologies.  See the top level COPYING file for further
+         file name technologies.  See the top level NOTICE file for further
          details.
 
        System Type -> Peripherals:

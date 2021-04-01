@@ -45,8 +45,8 @@ license such as the BSD or MIT licenses). If the file does not
 follow Apache 2.0 licensing, then the appropriate license
 information should be provided in the header rather than the
 Apache 2.0 licensing information and a NOTE should be included in
-the top-level ``COPYING`` file to indicate any variations from
-Apache 2.0 licensing.
+the top-level ``LICENSE`` and/or ``NOTICE`` file(s), as appropriate,
+to indicate any variations from Apache 2.0 licensing.
 
 **Grouping**. All like components in a C source or header file are
 grouped together. Definitions do not appear arbitrarily through
