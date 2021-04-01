@@ -51,11 +51,11 @@
 
 /* MLX90393 Sensor Selection Bit Definitions ********************************/
 
-#define MLX90393_T_bm             (1<<0)          /* Temperature Sensor Bitmask  */
-#define MLX90393_X_bm             (1<<1)          /* Magnetometer X-Axis Bitmask */
-#define MLX90393_Y_bm             (1<<2)          /* Magnetometer Y-Axis Bitmask */
-#define MLX90393_Z_bm             (1<<3)          /* Magnetometer Z-Axis Bitmask */
-#define MLX90393_ZYXT_bm          (MLX90393_Z_bm | MLX90393_Y_bm | MLX90393_X_bm | MLX90393_T_bm)
+#define MLX90393_T_BM             (1<<0)          /* Temperature Sensor Bitmask  */
+#define MLX90393_X_BM             (1<<1)          /* Magnetometer X-Axis Bitmask */
+#define MLX90393_Y_BM             (1<<2)          /* Magnetometer Y-Axis Bitmask */
+#define MLX90393_Z_BM             (1<<3)          /* Magnetometer Z-Axis Bitmask */
+#define MLX90393_ZYXT_BM          (MLX90393_Z_BM | MLX90393_Y_BM | MLX90393_X_BM | MLX90393_T_BM)
 
 /* SPI BUS PARAMETERS *******************************************************/
 

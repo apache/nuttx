@@ -370,30 +370,30 @@ static int bmg160_open(FAR struct file *filep)
 
   bmg160_write_register(priv,
                         BMG160_RANGE_REG,
-                        BMG160_RANGE_REG_FIX_VAL_bm |
-                        BMG160_RANGE_REG_FSR_1_bm |
-                        BMG160_RANGE_REG_FSR_0_bm);
+                        BMG160_RANGE_REG_FIX_VAL_BM |
+                        BMG160_RANGE_REG_FSR_1_BM |
+                        BMG160_RANGE_REG_FSR_0_BM);
 
   /* Enable - the fastest data output rate ODR = 2000 Hz -> BW = 230 Hz */
 
-  bmg160_write_register(priv, BMG160_BW_REG, BMG160_BW_REG_ODR_0_bm);
+  bmg160_write_register(priv, BMG160_BW_REG, BMG160_BW_REG_ODR_0_BM);
 
   /* Enable - new data interrupt 1 */
 
   bmg160_write_register(priv,
-                        BMG160_INT_EN_0_REG, BMG160_INT_EN_0_REG_DATA_EN_bm);
+                        BMG160_INT_EN_0_REG, BMG160_INT_EN_0_REG_DATA_EN_BM);
 
   /* Enable - active high level interrupt 1 - push-pull interrupt */
 
   bmg160_write_register(priv,
                         BMG160_INT_EN_1_REG,
-                        BMG160_INT_EN_1_REG_INT1_LVL_bm);
+                        BMG160_INT_EN_1_REG_INT1_LVL_BM);
 
   /* Enable - map new data interrupt to INT1 */
 
   bmg160_write_register(priv,
                         BMG160_INT_MAP_1_REG,
-                        BMG160_INT_MAP_1_REG_INT1_DATA_bm);
+                        BMG160_INT_MAP_1_REG_INT1_DATA_BM);
 
   /* Read measurement data to ensure DRDY is low */
 

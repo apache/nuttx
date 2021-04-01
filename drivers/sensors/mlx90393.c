@@ -138,7 +138,7 @@ static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev)
 
   /* Start Burst Mode (Continuous Measurement on all channels) */
 
-  SPI_SEND(dev->spi, MLX90393_SB | MLX90393_ZYXT_bm);
+  SPI_SEND(dev->spi, MLX90393_SB | MLX90393_ZYXT_BM);
 
   /* Write an idle byte to retrieve the status byte */
 
@@ -173,7 +173,7 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
   /* Issue command to read measurement data on all channels */
 
-  SPI_SEND(dev->spi, MLX90393_RM | MLX90393_ZYXT_bm);
+  SPI_SEND(dev->spi, MLX90393_RM | MLX90393_ZYXT_BM);
 
   /* Write an idle byte to retrieve the status byte */
 

@@ -199,7 +199,7 @@ static void lis3mdl_reset(FAR struct lis3mdl_dev_s *dev)
 {
   lis3mdl_write_register(dev,
                          LIS3MDL_CTRL_REG_2,
-                         LIS3MDL_CTRL_REG_2_SOFT_RST_bm);
+                         LIS3MDL_CTRL_REG_2_SOFT_RST_BM);
 
   up_mdelay(100);
 }
@@ -404,8 +404,8 @@ static int lis3mdl_open(FAR struct file *filep)
 
   lis3mdl_write_register(priv,
                          LIS3MDL_CTRL_REG_2,
-                         LIS3MDL_CTRL_REG_2_FS_1_bm |
-                         LIS3MDL_CTRL_REG_2_FS_0_bm);
+                         LIS3MDL_CTRL_REG_2_FS_1_BM |
+                         LIS3MDL_CTRL_REG_2_FS_0_BM);
 
   /* Enable - temperature sensor - ultra high performance mode (UMP) for X
    * and Y - fast output data rates This results in a output data rate of
@@ -414,10 +414,10 @@ static int lis3mdl_open(FAR struct file *filep)
 
   lis3mdl_write_register(priv,
                          LIS3MDL_CTRL_REG_1,
-                         LIS3MDL_CTRL_REG_1_TEMP_EN_bm |
-                         LIS3MDL_CTRL_REG_1_OM_1_bm |
-                         LIS3MDL_CTRL_REG_1_OM_0_bm |
-                         LIS3MDL_CTRL_REG_1_FAST_ODR_bm);
+                         LIS3MDL_CTRL_REG_1_TEMP_EN_BM |
+                         LIS3MDL_CTRL_REG_1_OM_1_BM |
+                         LIS3MDL_CTRL_REG_1_OM_0_BM |
+                         LIS3MDL_CTRL_REG_1_FAST_ODR_BM);
 
   /* Enable * - ultra high performance mode (UMP) for Z * This should result
    * to the same output data rate as for X and Y.
@@ -425,8 +425,8 @@ static int lis3mdl_open(FAR struct file *filep)
 
   lis3mdl_write_register(priv,
                          LIS3MDL_CTRL_REG_4,
-                         LIS3MDL_CTRL_REG_4_OMZ_1_bm |
-                         LIS3MDL_CTRL_REG_4_OMZ_0_bm);
+                         LIS3MDL_CTRL_REG_4_OMZ_1_BM |
+                         LIS3MDL_CTRL_REG_4_OMZ_0_BM);
 
   /* Enable * - block data update for magnetic sensor data * This should
    * prevent race conditions when reading sensor data.
@@ -434,7 +434,7 @@ static int lis3mdl_open(FAR struct file *filep)
 
   lis3mdl_write_register(priv,
                          LIS3MDL_CTRL_REG_5,
-                         LIS3MDL_CTRL_REG_5_BDU_bm);
+                         LIS3MDL_CTRL_REG_5_BDU_BM);
 
   /* Enable continuous conversion mode - the device starts measuring now. */
 
