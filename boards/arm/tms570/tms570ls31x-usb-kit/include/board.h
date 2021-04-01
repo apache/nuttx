@@ -91,7 +91,7 @@
 #define BOARD_PLL_NR           6   /* REFCLKDIV = 5 */
 #define BOARD_PLL_NF           135 /* PLLMUL = 119 * 256 */
 #define BOARD_PLL_OD           2   /* ODPLL = 1 */
-#define BOARD_PLL_R            1  /* PLLDIV = 1 */
+#define BOARD_PLL_R            1   /* PLLDIV = 1 */
 #define BOARD_PLL_FREQUENCY    180000000
 
 /* Clock Sources / Dividers
@@ -240,8 +240,8 @@
  *
  *  The launchpad has three mechanical buttons.
  *  Two of these are reset buttons:
- *  One button is labeled PORRST performs a power-on reset and one labeled RST
- *  performs an MCU reset.
+ *  One button is labeled PORRST performs a power-on reset and one labeled
+ *  RST performs an MCU reset.
  *  Only one button is available for general software usage.
  *  That button is labeled GIOA7 and is, obviously, sensed on GIOA7.
  *

@@ -48,9 +48,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr);
+static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state,
+                                xcpt_t isr);
 static void hymini_ts_irq_enable(FAR struct ads7843e_config_s *state,
-    bool enable);
+                                 bool enable);
 static void hymini_ts_irq_clear(FAR struct ads7843e_config_s *state);
 static bool hymini_ts_busy(FAR struct ads7843e_config_s *state);
 static bool hymini_ts_pendown(FAR struct ads7843e_config_s *state);
@@ -64,10 +65,10 @@ static FAR struct ads7843e_config_s ts_cfg =
   .frequency = CONFIG_ADS7843E_FREQUENCY,
 
   .attach = hymini_ts_irq_attach,
-  .enable=hymini_ts_irq_enable,
-  .clear=hymini_ts_irq_clear,
+  .enable = hymini_ts_irq_enable,
+  .clear = hymini_ts_irq_clear,
   .busy = hymini_ts_busy,
-  .pendown=hymini_ts_pendown
+  .pendown = hymini_ts_pendown
 };
 
 static xcpt_t tc_isr;
@@ -78,7 +79,8 @@ static xcpt_t tc_isr;
 
 /* Attach the ADS7843E interrupt handler to the GPIO interrupt */
 
-static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
+static int hymini_ts_irq_attach(FAR struct ads7843e_config_s *state,
+                                xcpt_t isr)
 {
   iinfo("hymini_ts_irq_attach\n");
 
@@ -102,10 +104,11 @@ static void hymini_ts_irq_enable(FAR struct ads7843e_config_s *state,
 
 static void hymini_ts_irq_clear(FAR struct ads7843e_config_s *state)
 {
-  // FIXME  Nothing to do ?
+  /* FIXME  Nothing to do ? */
 }
 
 /* As the busy line is not connected, we just wait a little bit here */
+
 static bool hymini_ts_busy(FAR struct ads7843e_config_s *state)
 {
   up_mdelay(50);
@@ -113,6 +116,7 @@ static bool hymini_ts_busy(FAR struct ads7843e_config_s *state)
 }
 
 /* Return the state of the pen down GPIO input */
+
 static bool hymini_ts_pendown(FAR struct ads7843e_config_s *state)
 {
   bool pin_value = stm32_gpioread(GPIO_TS_IRQ);

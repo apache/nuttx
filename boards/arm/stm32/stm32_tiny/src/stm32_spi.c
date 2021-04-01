@@ -46,7 +46,8 @@
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the HY-MiniSTM32 board.
+ *   Called to configure SPI chip select GPIO pins for the HY-MiniSTM32
+ *   board.
  *
  ****************************************************************************/
 
@@ -72,29 +73,31 @@ void stm32_spidev_initialize(void)
  * Name:  stm32_spi1/2select and stm32_spi1/2status
  *
  * Description:
- *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
- *   are provided by common STM32 logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status
+ *   must be provided by board-specific logic.  They are implementations of
+ *   the select and status methods of the SPI interface defined by struct
+ *   spi_ops_s (see include/nuttx/spi/spi.h). All other methods (including
+ *   stm32_spibus_initialize()) are provided by common STM32 logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to stm32_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by stm32_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip
+ *      select pins.
+ *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a calls to stm32_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by stm32_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
 }
 
@@ -105,7 +108,8 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
   switch (devid)
   {
@@ -136,6 +140,7 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
      default:
        break;
    }
+
   return status;
 }
 

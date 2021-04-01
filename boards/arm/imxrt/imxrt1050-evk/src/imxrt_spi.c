@@ -70,12 +70,12 @@ void weak_function imxrt_spidev_initialize(void)
  * Name:  imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status
  *
  * Description:
- *   The external functions, imxrt_lpspi1/2/3select and imxrt_lpspi1/2/3status
- *   must be provided by board-specific logic.
+ *   The external functions, imxrt_lpspi1/2/3select and
+ *   imxrt_lpspi1/2/3status must be provided by board-specific logic.
  *   They are implementations of the select and status methods of the SPI
  *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- *   All other methods (including imxrt_lpspibus_initialize()) are provided by
- *   common STM32 logic.  To use this common SPI logic on your board:
+ *   All other methods (including imxrt_lpspibus_initialize()) are provided
+ *   by common STM32 logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in imxrt_boardinitialize() to configure SPI chip select
  *      pins.
@@ -85,8 +85,8 @@ void weak_function imxrt_spidev_initialize(void)
  *      using GPIOs in the way your board is configured.
  *   3. Add a calls to imxrt_lpspibus_initialize() in your low level
  *      application initialization logic
- *   4. The handle returned by imxrt_lpspibus_initialize() may then be used to
- *      bind the SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by imxrt_lpspibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

@@ -42,28 +42,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The Olimex-STM32-E407 board features a 12MHz crystal and
  * a 32kHz RTC backup crystal.
  *
  * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
+ *   System Clock source     : PLL (HSE)
+ *   SYSCLK(Hz)              : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)                : 168000000    (STM32_RCC_CFGR_HPRE)
+ *   AHB Prescaler           : 1            (STM32_RCC_CFGR_HPRE)
+ *   APB1 Prescaler          : 4            (STM32_RCC_CFGR_PPRE1)
+ *   APB2 Prescaler          : 2            (STM32_RCC_CFGR_PPRE2)
+ *   HSE Frequency(Hz)       : 8000000      (STM32_BOARD_XTAL)
+ *   PLLM                    : 8            (STM32_PLLCFG_PLLM)
+ *   PLLN                    : 336          (STM32_PLLCFG_PLLN)
+ *   PLLP                    : 2            (STM32_PLLCFG_PLLP)
+ *   PLLQ                    : 7            (STM32_PLLCFG_PLLQ)
+ *   Main regulator output
+ *     voltage               : Scale1 mode  Needed for high speed SYSCLK
+ *   Flash Latency(WS)       : 5
+ *   Prefetch Buffer         : OFF
+ *   Instruction cache       : ON
+ *   Data cache              : ON
+ *   Require 48MHz for       : Enabled
+ *     USB OTG FS,
  *   SDIO and RNG clock
  */
 
@@ -157,9 +160,11 @@
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status LED in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status
+ * LED in any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -171,8 +176,9 @@
 
 #define BOARD_LED_STATUS_BIT    (1 << BOARD_LED1)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of the
- * Olimex STM32-E405.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of
+ * the Olimex STM32-E405.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED_STATUS on */
@@ -184,7 +190,8 @@
 #define LED_ASSERTION     6  /* LED_STATUS off */
 #define LED_PANIC         7  /* LED_STATUS blinking */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Olimex STM32-E405 supports one buttons: */
 
 #define BUTTON_BUT     0
@@ -192,7 +199,7 @@
 
 #define BUTTON_BUT_BIT (1 << BUTTON_BUT)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART1 */
 
@@ -225,10 +232,10 @@
 #define GPIO_SPI1_MOSI    GPIO_SPI1_MOSI_2 /* PB5 */
 #define GPIO_SPI1_MISO    GPIO_SPI1_MISO_1 /* PA6 */
 
-/* Ethernet *************************************************************************/
+/* Ethernet *****************************************************************/
 
 #if defined(CONFIG_STM32_ETHMAC)
-/* RMII interface to the LAN8710 PHY (works with LAN8720 driver)*/
+/* RMII interface to the LAN8710 PHY (works with LAN8720 driver) */
 
 #  ifndef CONFIG_STM32_RMII
 #    error CONFIG_STM32_RMII must be defined
@@ -242,9 +249,9 @@
 
 /* Pin disambiguation */
 
-#  define GPIO_ETH_MII_COL    GPIO_ETH_MII_COL_1 /* PA3 */
-#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2 /* PG13 */
-#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2 /* PG14 */
+#  define GPIO_ETH_MII_COL    GPIO_ETH_MII_COL_1    /* PA3 */
+#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2  /* PG13 */
+#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2  /* PG14 */
 #  define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_2 /* PG11 */
 
 #endif

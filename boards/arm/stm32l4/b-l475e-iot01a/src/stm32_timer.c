@@ -123,6 +123,7 @@ int stm32l4_timer_driver_setup(void)
       syslog(LOG_ERR, "ERROR: Failed to setup TIM8 at /dev/timer7: %d\n",
     }
 #endif
+
 #ifdef CONFIG_STM32L4_TIM15
   ret = stm32l4_timer_initialize("/dev/timer8", 15);
   if (ret < 0)

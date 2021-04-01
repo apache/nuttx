@@ -78,7 +78,7 @@
  *
  *      SYMBOL            Value Meaning                       LED state
  *                                                          LED0 LED1 LED2
- *      ----------------- ----- -----------------------  ---- ---- ---------*
+ *      ----------------- ----- -----------------------  ---- ---- ---------
  */
 
 #define LED_STARTED         0   /* NuttX has been started   ON   OFF  OFF */
@@ -90,7 +90,7 @@
 #define LED_ASSERTION       3   /* An assertion failed      N/C  N/C  Soft glow */
 #define LED_PANIC           3   /* The system has crashed   N/C  N/C  2Hz Flashing */
 
-/*      LED_IDLE           ---  /* MCU is is sleep mode         Not used
+/*      LED_IDLE           ---     MCU is is sleep mode         Not used
  *
  * After booting, LED0 and 1 are not longer used by the system and can be
  * used for other purposes by the application (Of course, all LEDs are
@@ -107,12 +107,12 @@
  *
  * 1. UART0 is available on FT2232H USB to Serial Adapter.
  *
- *    FT2232H BDBUS1 Pin     UART0-RXD  UART0_RXD/SPI1_CS0/DCAN0_TX/I2C2_SDA/
- *                                      eCAP2_IN_PWM2_OUT/PR1_PRU1_PRU_R30_14/
- *                                      PR1_PRU1_PRU_R31_14/GPIO1_10
- *    FT2232H BDBUS0 Pin     UART0-TXD  UART0_TXD/SPI1_CS1/DCAN0_RX/I2C2_SCL/
- *                                      eCAP1_IN_PWM1_OUT/PR1_PRU1_PRU_R30_15/
- *                                      PR1_PRU1_PRU_R31_15/GPIO1_11
+ *    FT2232H BDBUS1 Pin    UART0-RXD  UART0_RXD/SPI1_CS0/DCAN0_TX/I2C2_SDA/
+ *                                     eCAP2_IN_PWM2_OUT/PR1_PRU1_PRU_R30_14/
+ *                                     PR1_PRU1_PRU_R31_14/GPIO1_10
+ *    FT2232H BDBUS0 Pin    UART0-TXD  UART0_TXD/SPI1_CS1/DCAN0_RX/I2C2_SCL/
+ *                                     eCAP1_IN_PWM1_OUT/PR1_PRU1_PRU_R30_15/
+ *                                     PR1_PRU1_PRU_R31_15/GPIO1_11
  */
 
 /* I2Cs *********************************************************************/
