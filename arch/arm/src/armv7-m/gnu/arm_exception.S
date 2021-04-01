@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/gnu/arm_exception.S
  *
- *   Copyright (C) 2009-2013, 2015-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013, 2015-2016, 2018 Gregory Nutt.
+ *   All rights reserved.
  *   Copyright (C) 2012 Michael Smith. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -49,10 +50,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ********************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-  /* In kernel mode without an interrupt stack, this interrupt handler will set the
+  /* In protected mode without an interrupt stack, this interrupt handler will set the
    * MSP to the stack pointer of the interrupted thread.  If the interrupted thread
    * was a privileged thread, that will be the MSP otherwise it will be the PSP.  If
    * the PSP is used, then the value of the MSP will be invalid when the interrupt
@@ -68,7 +70,7 @@
    */
 
 #  if defined(CONFIG_BUILD_PROTECTED) && CONFIG_ARCH_INTERRUPTSTACK < 8
-#    error Interrupt stack must be used with high priority interrupts in kernel mode
+#    error Interrupt stack must be used with high priority interrupts in protected mode
 #  endif
 
   /* Use the BASEPRI to control interrupts is required if nested, high
@@ -135,8 +137,8 @@
  */
 
 	.text
-	.type	exception_common, function
 	.thumb_func
+	.type	exception_common, function
 exception_common:
 
 	mrs		r0, ipsr				/* R0=exception number */
@@ -145,15 +147,14 @@ exception_common:
 
 	/* The EXC_RETURN value tells us whether the context is on the MSP or PSP */
 
-	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
-	beq		1f						/* Branch if context already on the MSP */
+	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
+	beq		1f					/* Branch if context already on the MSP */
 	mrs		r1, psp					/* R1=The process stack pointer (PSP) */
-	mov     sp, r1					/* Set the MSP to the PSP */
-
+	mov		sp, r1					/* Set the MSP to the PSP */
 1:
 	mov		r2, sp					/* R2=Copy of the main/process stack pointer */
-	add		r2, #HW_XCPT_SIZE		/* R2=MSP/PSP before the interrupt was taken */
-									/* (ignoring the xPSR[9] alignment bit) */
+	add		r2, #HW_XCPT_SIZE			/* R2=MSP/PSP before the interrupt was taken */
+								/* (ignoring the xPSR[9] alignment bit) */
 #ifdef CONFIG_ARMV7M_USEBASEPRI
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
 #else
@@ -173,11 +174,11 @@ exception_common:
 	 * where to put the registers.
 	 */
 
-	vstmdb	sp!, {s16-s31}			/* Save the non-volatile FP context */
+	vstmdb		sp!, {s16-s31}			/* Save the non-volatile FP context */
 
 #endif
 
-	stmdb	sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
+	stmdb		sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
 
 	/* There are two arguments to arm_doirq:
 	 *
@@ -197,7 +198,7 @@ exception_common:
 	 * here prohibits nested interrupts without some additional logic!
 	 */
 
-	setintstack	r2, r3				/* SP = IRQ stack top */
+	setintstack	r2, r3			/* SP = IRQ stack top */
 
 #else
 	/* Otherwise, we will re-use the interrupted thread's stack.  That may
@@ -219,7 +220,7 @@ exception_common:
 	 */
 
 	cmp		r0, r1					/* Context switch? */
-	beq		2f						/* Branch if no context switch */
+	beq		2f					/* Branch if no context switch */
 
 	/* We are returning with a pending context switch.  This case is different
 	 * because in this case, the register save structure does not lie on the
@@ -236,32 +237,32 @@ exception_common:
 	 */
 
 	add		r1, r0, #SW_XCPT_SIZE 	/* R1=Address of HW save area in reg array */
-	ldmia	r1!, {r4-r11}			/* Fetch eight registers in HW save area */
+	ldmia		r1!, {r4-r11}		/* Fetch eight registers in HW save area */
 #ifdef CONFIG_ARCH_FPU
-	vldmia	r1!, {s0-s15}			/* Fetch sixteen FP registers in HW save area */
-	ldmia	r1, {r2-r3}				/* Fetch FPSCR and Reserved in HW save area */
+	vldmia		r1!, {s0-s15}		/* Fetch sixteen FP registers in HW save area */
+	ldmia		r1, {r2-r3}		/* Fetch FPSCR and Reserved in HW save area */
 #endif
 	ldr		r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
 #ifdef CONFIG_ARCH_FPU
-	stmdb	r1!, {r2-r3}			/* Store FPSCR and Reserved on the return stack */
-	vstmdb	r1!, {s0-s15}			/* Store sixteen FP registers on the return stack */
+	stmdb		r1!, {r2-r3}		/* Store FPSCR and Reserved on the return stack */
+	vstmdb		r1!, {s0-s15}		/* Store sixteen FP registers on the return stack */
 #endif
-	stmdb	r1!, {r4-r11}			/* Store eight registers on the return stack */
-	ldmia	r0!, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
+	stmdb		r1!, {r4-r11}		/* Store eight registers on the return stack */
+	ldmia		r0!, {r2-r11,r14}	/* Recover R4-R11, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
-	vldmia	r0, {s16-s31}			/* Recover S16-S31 */
+	vldmia		r0, {s16-s31}		/* Recover S16-S31 */
 #endif
 
-	b		3f						/* Re-join common logic */
+	b		3f			/* Re-join common logic */
 
 2:
 	/* We are returning with no context switch.  We simply need to "unwind"
 	 * the same stack frame that we created at entry.
 	 */
 
-	ldmia	r1!, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
+	ldmia		r1!, {r2-r11,r14}	/* Recover R4-R11, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
-	vldmia  r1!, {s16-s31}			/* Recover S16-S31 */
+	vldmia		r1!, {s16-s31}		/* Recover S16-S31 */
 #endif
 
 3:
@@ -275,8 +276,8 @@ exception_common:
 	 */
 
 	mrs		r2, control				/* R2=Contents of the control register */
-	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
-	beq		4f						/* Branch if privileged */
+	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
+	beq		4f					/* Branch if privileged */
 
 	orr		r2, r2, #1				/* Unprivileged mode */
 	msr		psp, r1					/* R1=The process stack pointer */
@@ -287,10 +288,10 @@ exception_common:
 5:
 	msr		control, r2				/* Save the updated control register */
 #else
-	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
-	ite		eq						/* next two instructions conditional */
-	msreq	msp, r1					/* R1=The main stack pointer */
-	msrne	psp, r1					/* R1=The process stack pointer */
+	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
+	ite		eq					/* Next two instructions conditional */
+	msreq		msp, r1					/* R1=The main stack pointer */
+	msrne		psp, r1					/* R1=The process stack pointer */
 #endif
 
 	/* Restore the interrupt state */
@@ -305,7 +306,7 @@ exception_common:
 	 * return to thread mode, and (2) select the correct stack.
 	 */
 
-	bx		r14						/* And return */
+	bx		r14					/* And return */
 
 	.size	exception_common, .-exception_common
 

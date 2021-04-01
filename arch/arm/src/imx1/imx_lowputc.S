@@ -25,8 +25,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "arm_internal.h"
-#include "arm_arch.h"
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -95,9 +93,9 @@ arm_lowputc:
 	 * then send a carriage return as well.
 	 */
 
-	teq     r0, #'\n'
-	moveq   r0, #'\r'
-	beq     1b
+	teq	r0, #'\n'
+	moveq	r0, #'\r'
+	beq	1b
 
 	/* Wait for the tranmsit register to be emptied. When the bit is
 	 * non-zero, the TX Buffer FIFO is empty.
@@ -109,5 +107,5 @@ arm_lowputc:
 
 	/* Then return */
 
-	mov     pc, lr
+	mov	pc, lr
 	.end

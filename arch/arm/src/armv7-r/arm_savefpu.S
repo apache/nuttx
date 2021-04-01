@@ -76,13 +76,13 @@ arm_savefpu:
 	 * s0, s1, ... in increasing address order.
 	 */
 
-	vstmia	r1!, {s0-s31}			/* Save the full FP context */
+	vstmia		r1!, {s0-s31}			/* Save the full FP context */
 
 	/* Store the floating point control and status register.  At the end of the
 	 * vstmia, r1 will point to the FPCSR storage location.
 	 */
 
-	vmrs	r2, fpscr				/* Fetch the FPCSR */
+	vmrs		r2, fpscr			/* Fetch the FPCSR */
 	str		r2, [r1], #4			/* Save the floating point control and status register */
 	bx		lr
 

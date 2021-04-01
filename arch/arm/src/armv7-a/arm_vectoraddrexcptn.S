@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
-#include "arm_arch.h"
 
 	.file	"arm_vectoraddrexcptn.S"
 
@@ -59,8 +58,8 @@
  *
  * Description:
  *   Shouldn't happen.  This exception handler is in a separate file from
- *   other vector handlers because some processors (e.g., Cortex-A5) do not
- *   support the Address Exception vector.
+ *   other vector handlers because some processors do not support the
+ *   Address Exception vector.
  *
  ****************************************************************************/
 

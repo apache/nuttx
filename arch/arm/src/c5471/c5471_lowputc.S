@@ -1,5 +1,5 @@
 /**************************************************************************
- * c5471/c5471_lowputc.S
+ * arch/arm/src/c5471/c5471_lowputc.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,8 +25,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-#include "arm_internal.h"
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -89,25 +87,25 @@ arm_lowputc:
 	 * register.
 	 */
 
-	str     r0, [r2, #UART_THR_OFFS]
+	str	r0, [r2, #UART_THR_OFFS]
 
 	/* Wait for the tranmsit holding register (THR) to be
 	 * emptied. This is determined when bit 6 of the LSR
 	 * is set.
 	 */
 
-2:	ldr     r1, [r2, #UART_LSR_OFFS]
-	tst     r1, #0x00000020
-	beq     2b
+2:	ldr	r1, [r2, #UART_LSR_OFFS]
+	tst	r1, #0x00000020
+	beq	2b
 
 	/* If the character that we just sent was a linefeed,
 	 * then send a carriage return as well.
 	 */
 
-	teq     r0, #'\n'
-	moveq   r0, #'\r'
-	beq     1b
+	teq	r0, #'\n'
+	moveq	r0, #'\r'
+	beq	1b
 
 	/* And return */
 
-	mov     pc, lr
+	mov	pc, lr

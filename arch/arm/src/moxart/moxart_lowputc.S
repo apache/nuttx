@@ -40,8 +40,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-#include "arm_internal.h"
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -100,25 +98,25 @@ arm_lowputc:
 	 * register.
 	 */
 
-	strb     r0, [r2, #UART_THR]
+	strb	r0, [r2, #UART_THR]
 
 	/* Wait for the tranmsit holding register (THR) to be
 	 * emptied. This is determined when bit 6 of the LSR
 	 * is set.
 	 */
 
-2:	ldrb     r1, [r2, #UART_LSR]
-	tst     r1, #UART_LSR_THRE
-	beq     2b
+2:	ldrb	r1, [r2, #UART_LSR]
+	tst	r1, #UART_LSR_THRE
+	beq	2b
 
 	/* If the character that we just sent was a linefeed,
 	 * then send a carriage return as well.
 	 */
 
-	teq     r0, #'\n'
-	moveq   r0, #'\r'
-	beq     1b
+	teq	r0, #'\n'
+	moveq	r0, #'\r'
+	beq	1b
 
 	/* And return */
 
-	mov     pc, lr
+	mov	pc, lr

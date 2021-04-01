@@ -47,7 +47,6 @@
 
 #include "arm.h"
 #include "lpc2378.h"
-#include "arm_arch.h"
 #include "lpc23xx_uart.h"
 #include "lpc23xx_scb.h"
 #include "lpc23xx_pinsel.h"
@@ -95,11 +94,11 @@ _vector_table:
 	ldr	pc, .Lswihandler		/* 0x08: Software interrupt */
 	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
 	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
-	.long	0xB8A06F58				/* 0x14: Vector checksum */
+	.long	0xB8A06F58			/* 0x14: Vector checksum */
 	ldr	pc, .Lirqhandler		/* 0x18: IRQ */
 	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
 
-	.globl   __start
+	.globl	__start
 	.globl	arm_vectorundefinsn
 	.globl	arm_vectorswi
 	.globl	arm_vectorprefetch
@@ -108,7 +107,7 @@ _vector_table:
 	.globl	arm_vectorfiq
 
 .Lresethandler:
-	.long   __start
+	.long	__start
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
 .Lswihandler:
@@ -132,7 +131,7 @@ _vector_table:
  * below.
  */
 	.text
-    .globl __start
+	.globl __start
 	.type	__start, #function
 __start:
 
@@ -158,7 +157,7 @@ __start:
 	/* Setup system stack (and get the BSS range) */
 
 	adr	r0, LC0
-	ldmia   r0, {r4, r5, sp}
+	ldmia	r0, {r4, r5, sp}
 
 	/* Clear system BSS section (Initialize with 0) */
 
