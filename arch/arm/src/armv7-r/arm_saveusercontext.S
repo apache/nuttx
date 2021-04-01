@@ -22,36 +22,48 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/irq.h>
-#include "arm_internal.h"
+#include <nuttx/config.h>
+#include <arch/irq.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
-
-	.globl	arm_saveusercontext
 
 #ifdef CONFIG_ARCH_FPU
 	.cpu	cortex-r4f
 #else
 	.cpu	cortex-r4
 #endif
-	.syntax	unified
 	.file	"arm_saveusercontext.S"
+
+/****************************************************************************
+ * Macros
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-	.text
-
 /****************************************************************************
  * Name: arm_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context.  Full prototype is:
+ *
+ *   int  arm_saveusercontext(uint32_t *saveregs);
+ *
+ * Returned Value:
+ *   0: Normal return
+ *   1: Context switch return
+ *
  ****************************************************************************/
 
 	.globl	arm_saveusercontext
 	.type	arm_saveusercontext, function
-
 arm_saveusercontext:
 
 	/* On entry, a1 (r0) holds address of struct xcptcontext */
@@ -70,11 +82,11 @@ arm_saveusercontext:
 	 */
 
 	add		r1, r0, #(4*REG_R4)
-	stmia	r1, {r4-r14}
+	stmia		r1, {r4-r14}
 
 	/* Save the current cpsr */
 
-	mrs		r2, cpsr		/* R3 = CPSR value */
+	mrs		r2, cpsr		/* R2 = CPSR value */
 	add		r1, r0, #(4*REG_CPSR)
 	str		r2, [r1]
 
@@ -93,25 +105,25 @@ arm_saveusercontext:
 	 */
 
 #ifdef CONFIG_ARCH_FPU
-	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	add		r1, r0, #(4*REG_S0)	/* R1=Address of FP register storage */
 
 	/* Store all floating point registers.  Registers are stored in numeric order,
 	 * s0, s1, ... in increasing address order.
 	 */
 
-	vstmia	r1!, {s0-s31}			/* Save the full FP context */
+	vstmia		r1!, {s0-s31}		/* Save the full FP context */
 
 	/* Store the floating point control and status register.  At the end of the
 	 * vstmia, r1 will point to the FPCSR storage location.
 	 */
 
-	vmrs	r2, fpscr				/* Fetch the FPCSR */
-	str		r2, [r1], #4			/* Save the floating point control and status register */
+	vmrs		r2, fpscr		/* Fetch the FPCSR */
+	str		r2, [r1], #4		/* Save the floating point control and status register */
 #endif
 
 	/* Return 0 now indicating that this return is not a context switch */
 
 	mov		r0, #0			/* Return value == 0 */
 	mov		pc, lr			/* Return */
-	.size	arm_saveusercontext, . - arm_saveusercontext
+	.size	arm_saveusercontext, .-arm_saveusercontext
 	.end

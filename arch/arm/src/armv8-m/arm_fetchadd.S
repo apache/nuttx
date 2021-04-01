@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/gnu/arm_fetchadd.S
+ * arch/arm/src/armv8-m/arm_fetchadd.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,7 +26,7 @@
 
 	.syntax		unified
 	.thumb
-	.file	"arm_fetchadd.S"
+	.file		"arm_fetchadd.S"
 
 /****************************************************************************
  * Public Functions
@@ -57,15 +57,15 @@
 up_fetchadd32:
 
 1:
-	ldrex	r2, [r0]			/* Fetch the value to be incremented */
+	ldrex		r2, [r0]			/* Fetch the value to be incremented */
 	add		r2, r2, r1			/* Add the addend */
 
-	strex	r3, r2, [r0]		/* Attempt to save the result */
+	strex		r3, r2, [r0]			/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strex failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		1b				/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
-	bx		lr					/* Successful! */
+	bx		lr				/* Successful! */
 	.size	up_fetchadd32, . - up_fetchadd32
 
 /****************************************************************************
@@ -91,15 +91,15 @@ up_fetchadd32:
 up_fetchsub32:
 
 1:
-	ldrex	r2, [r0]			/* Fetch the value to be decremented */
+	ldrex		r2, [r0]			/* Fetch the value to be decremented */
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
-	strex	r3, r2, [r0]		/* Attempt to save the result */
+	strex		r3, r2, [r0]			/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strex failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		1b				/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
-	bx		lr					/* Successful! */
+	bx		lr				/* Successful! */
 	.size	up_fetchsub32, . - up_fetchsub32
 
 /****************************************************************************
@@ -125,15 +125,15 @@ up_fetchsub32:
 up_fetchadd16:
 
 1:
-	ldrexh	r2, [r0]			/* Fetch the value to be incremented */
+	ldrexh		r2, [r0]			/* Fetch the value to be incremented */
 	add		r2, r2, r1			/* Add the addend */
 
-	strexh	r3, r2, [r0]		/* Attempt to save the result */
+	strexh		r3, r2, [r0]			/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexh failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		1b				/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
-	bx		lr					/* Successful! */
+	bx		lr				/* Successful! */
 	.size	up_fetchadd16, . - up_fetchadd16
 
 /****************************************************************************
@@ -159,17 +159,17 @@ up_fetchadd16:
 up_fetchsub16:
 
 1:
-	ldrexh	r2, [r0]			/* Fetch the value to be decremented */
+	ldrexh		r2, [r0]			/* Fetch the value to be decremented */
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
 	/* Attempt to save the decremented value */
 
-	strexh	r3, r2, [r0]		/* Attempt to save the result */
+	strexh		r3, r2, [r0]			/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexh failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		1b				/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
-	bx		lr					/* Successful! */
+	bx		lr				/* Successful! */
 	.size	up_fetchsub16, . - up_fetchsub16
 
 /****************************************************************************
@@ -195,15 +195,15 @@ up_fetchsub16:
 up_fetchadd8:
 
 1:
-	ldrexb	r2, [r0]			/* Fetch the value to be incremented */
+	ldrexb		r2, [r0]			/* Fetch the value to be incremented */
 	add		r2, r2, r1			/* Add the addend */
 
-	strexb	r3, r2, [r0]		/* Attempt to save the result */
+	strexb		r3, r2, [r0]			/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexb failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		1b				/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
-	bx		lr					/* Successful! */
+	bx		lr				/* Successful! */
 	.size	up_fetchadd8, . - up_fetchadd8
 
 /****************************************************************************
@@ -229,14 +229,14 @@ up_fetchadd8:
 up_fetchsub8:
 
 1:
-	ldrexb	r2, [r0]			/* Fetch the value to be decremented */
+	ldrexb		r2, [r0]			/* Fetch the value to be decremented */
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
-	strexb	r3, r2, [r0]		/* Attempt to save the result */
+	strexb		r3, r2, [r0]			/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexb failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		1b				/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
-	bx		lr					/* Successful! */
+	bx		lr				/* Successful! */
 	.size	up_fetchsub8, . - up_fetchsub8
 	.end

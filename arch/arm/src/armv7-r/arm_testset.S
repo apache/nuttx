@@ -81,19 +81,19 @@ up_testset:
 	/* Test if the spinlock is locked or not */
 
 1:
-	ldrexb	r2, [r0]			/* Test if spinlock is locked or not */
+	ldrexb		r2, [r0]			/* Test if spinlock is locked or not */
 	cmp		r2, r1				/* Already locked? */
-	beq		2f					/* If already locked, return SP_LOCKED */
+	beq		2f				/* If already locked, return SP_LOCKED */
 
 	/* Not locked ... attempt to lock it */
 
-	strexb	r2, r1, [r0]		/* Attempt to set the locked state */
+	strexb		r2, r1, [r0]			/* Attempt to set the locked state */
 	cmp		r2, r1				/* r2 will be 1 is strexb failed */
-	beq		1b					/* Failed to lock... try again */
+	beq		1b				/* Failed to lock... try again */
 
 	/* Lock acquired -- return SP_UNLOCKED */
 
-	dmb							/* Required before accessing protected resource */
+	dmb						/* Required before accessing protected resource */
 	mov		r0, #SP_UNLOCKED
 	bx		lr
 

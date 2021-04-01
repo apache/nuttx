@@ -23,18 +23,24 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include "arm_internal.h"
+#include <arch/irq.h>
+
 #include "svcall.h"
 #include "arm.h"
 
-	.file	"arm_fullcontextrestore.S"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
-	.globl	arm_fullcontextrestore
+	.file	"arm_fullcontextrestore.S"
+
+/****************************************************************************
+ * Macros
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -44,9 +50,9 @@
  * Name: arm_fullcontextrestore
  *
  * Description:
- *   Restore the specified task context. Full prototype is:
+ *   Restore the current thread context.  Full prototype is:
  *
- *     void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *   void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  *
  * Returned Value:
  *   None
@@ -55,7 +61,6 @@
 
 	.globl	arm_fullcontextrestore
 	.type	arm_fullcontextrestore, function
-
 arm_fullcontextrestore:
 
 	/* On entry, a1 (r0) holds address of the register save area.  All other
@@ -74,14 +79,14 @@ arm_fullcontextrestore:
 	 * s0, s1, ... in increasing address order.
 	 */
 
-	vldmia	r1!, {s0-s31}			/* Restore the full FP context */
+	vldmia		r1!, {s0-s31}			/* Restore the full FP context */
 
 	/* Load the floating point control and status register.   At the end of the
 	 * vstmia, r1 will point to the FPCSR storage location.
 	 */
 
 	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
-	vmsr	fpscr, r2				/* Restore the FPCSR */
+	vmsr		fpscr, r2			/* Restore the FPCSR */
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -93,13 +98,13 @@ arm_fullcontextrestore:
 
 	/* Perform the System call with R0=SYS_context_restore, R1=restoreregs */
 
-	mov		r1, r0					/* R1: restoreregs */
+	mov		r1, r0				/* R1: restoreregs */
 	mov		r0, #SYS_context_restore	/* R0: SYS_context_restore syscall */
-	svc		#0x900001				/* Perform the system call */
+	svc		#0x900001			/* Perform the system call */
 
 	/* This call should not return */
 
-	bx		lr						/* Unnecessary ... will not return */
+	bx		lr				/* Unnecessary ... will not return */
 
 #else
 	/* For a flat build, we can do all of this here... Just think of this as
@@ -109,22 +114,22 @@ arm_fullcontextrestore:
 	/* Recover all registers except for r0, r1, r2, R15, and CPSR */
 
 	add		r1, r0, #(4*REG_R3)		/* Offset to REG_R3 storage */
-	ldmia	r1, {r3-r14}			/* Recover registers */
+	ldmia		r1, {r3-r14}			/* Recover registers */
 
-	ldr		r2, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
+	ldr		r2, [r0, #(4*REG_CPSR)]		/* Fetch the stored CPSR value */
 
 	/* Create a stack frame to hold the some registers */
 
 	sub		sp, sp, #(4*4)			/* Frame for four registers */
-	ldr		r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
-	str		r1, [sp]				/* Save it at the top of the stack */
-	ldr		r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
+	ldr		r1, [r0, #(4*REG_R0)]		/* Fetch the stored r0 value */
+	str		r1, [sp]			/* Save it at the top of the stack */
+	ldr		r1, [r0, #(4*REG_R1)]		/* Fetch the stored r1 value */
 	str		r1, [sp, #4]			/* Save it in the stack */
-	ldr		r1, [r0, #(4*REG_R2)]	/* Fetch the stored r2 value */
+	ldr		r1, [r0, #(4*REG_R2)]		/* Fetch the stored r2 value */
 	str		r1, [sp, #8]			/* Save it in the stack */
-	ldr		r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
+	ldr		r1, [r0, #(4*REG_PC)]		/* Fetch the stored pc value */
 	tst		r2, #PSR_T_BIT
-	orrne	r1, r1, #1
+	orrne		r1, r1, #1
 	str		r1, [sp, #12]			/* Save it at the bottom of the frame */
 
 	/* Now we can restore the CPSR.  We wait until we are completely
@@ -134,12 +139,12 @@ arm_fullcontextrestore:
 	 * disabled.
 	 */
 
-	msr		cpsr, r2				/* Set the CPSR */
+	msr		cpsr, r2			/* Set the CPSR */
 
 	/* Now recover r0 r1 r2 and R15 */
 
 	pop		{r0-r2, pc}
-
 #endif
 
-	.size arm_fullcontextrestore, . - arm_fullcontextrestore
+	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
+	.end

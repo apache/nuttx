@@ -25,13 +25,10 @@
 #include <nuttx/config.h>
 #include <nuttx/page.h>
 
-#include <arch/board/board.h>
-
 #include "arm.h"
 #include "cp15.h"
 #include "sctlr.h"
 #include "mmu.h"
-
 #include "chip.h"
 #include "arm_internal.h"
 
@@ -61,7 +58,7 @@
  * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM,
+ *    - Configure SDRAM (if present),
  *    - Initialize the .data section in RAM, and
  *    - Clear .bss section
  */
@@ -80,13 +77,13 @@
 #    define CONFIG_IDENTITY_TEXTMAP 1
 #  endif
 
-/* 2. We boot in FLASH but copy ourselves to DRAM from better performance.
+/* 2. We boot in FLASH but copy ourselves to SDRAM from better performance.
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM,
+ *    - Configure SDRAM (if present),
  *    - Copy ourself to DRAM (after mapping it), and
- *    - Clear .bss section
+ *    - Clear .bss section (data should be fully initialized)
  *
  *   In this case, we assume that the logic within this file executes from FLASH.
  */
@@ -107,11 +104,11 @@
 #    define CONFIG_IDENTITY_TEXTMAP 1
 #  endif
 
-/* 3. There is bootloader that copies us to DRAM (but probably not to the beginning)
+/* 3. There is bootloader that copies us to SDRAM (but probably not to the beginning)
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case SDRAM
  *    was initialized by the boot loader, and this boot logic must:
  *
- *    - Clear .bss section
+ *    - Clear .bss section (data should be fully initialized)
  */
 
 #else
@@ -152,11 +149,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* RX_NSECTIONS determines the number of 1Mb sections to map for the
- * Read/eXecute address region.  This is based on NUTTX_TEXT_SIZE.
+/* WR_NSECTIONS determines the number of 1Mb sections to map for the
+ * Write/Read/eXecute address region.  This is based on NUTTX_TEXT_SIZE.
  */
 
-#define RX_NSECTIONS ((NUTTX_TEXT_SIZE+0x000fffff) >> 20)
 #define WR_NSECTIONS ((NUTTX_RAM_SIZE+0x000fffff) >> 20)
 
 /****************************************************************************
@@ -194,6 +190,11 @@
 /****************************************************************************
  * Name: __start
  ****************************************************************************/
+
+/* We assume the bootloader has already initialized most of the h/w for
+ * us and that only leaves us having to do some os specific things
+ * below.
+ */
 
 	.text
 	.global	__start
@@ -236,12 +237,12 @@ __start:
 	 */
 
 	adr		r0, .LCptinfo			/* Address of page table description */
-	ldmia	r0, {r1, r2, r3}		/* Load the page table description */
+	ldmia		r0, {r1, r2, r3}		/* Load the page table description */
 
 	/* A single page is sufficient to map the page table */
 
-	orr		r0, r1, r3				/* OR MMU flags into physical address */
-	str		r0, [r5, r2, lsr #18]	/* Map using the virtual address as an index */
+	orr		r0, r1, r3			/* OR MMU flags into physical address */
+	str		r0, [r5, r2, lsr #18]		/* Map using the virtual address as an index */
 #endif
 
 #ifndef CONFIG_IDENTITY_TEXTMAP
@@ -254,8 +255,8 @@ __start:
 
 	ldr		r0, .LCptextbase		/* r0=phys. base address of .text section */
 	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
-	orr		r3, r1, r0				/* r3=flags + base */
-	str		r3, [r4, r0, lsr #18]	/* identity mapping */
+	orr		r3, r1, r0			/* r3=flags + base */
+	str		r3, [r4, r0, lsr #18]		/* identity mapping */
 #endif
 
 	/* Map the read-only .text region in place.  This must be done
@@ -272,28 +273,28 @@ __start:
 	 */
 
 	adr		r0, .Ltxtspan
-	ldmia	r0, {r0, r1, r2, r3, r5}
-	pg_l1span r0, r1, r2, r3, r5, r6
+	ldmia		r0, {r0, r1, r2, r3, r5}
+	pg_l1span	r0, r1, r2, r3, r5, r6
 
 	/* Then populate the L2 table for the locked text region only. */
 
 	adr		r0, .Ltxtmap
-	ldmia	r0, {r0, r1, r2, r3}
-	pg_l2map r0, r1, r2, r3, r5
+	ldmia		r0, {r0, r1, r2, r3}
+	pg_l2map	r0, r1, r2, r3, r5
 
 	/* Make sure that the page table is itself mapped and and read/write-able.
 	 * First, populate the L1 table:
 	 */
 
 	adr		r0, .Lptabspan
-	ldmia	r0, {r0, r1, r2, r3, r5}
-	pg_l1span r0, r1, r2, r3, r5, r6
+	ldmia		r0, {r0, r1, r2, r3, r5}
+	pg_l1span	r0, r1, r2, r3, r5, r6
 
 	/* Then populate the L2 table. */
 
 	adr		r0, .Lptabmap
-	ldmia	r0, {r0, r1, r2, r3}
-	pg_l2map r0, r1, r2, r3, r5
+	ldmia		r0, {r0, r1, r2, r3}
+	pg_l2map	r0, r1, r2, r3, r5
 
 	/* The following logic will set up the ARMv7-A for normal operation.
 	 *
@@ -423,7 +424,7 @@ __start:
 
 	/* In SMP configurations, the data cache will not be enabled until later
 	 * after SMP cache coherency has been setup.
-	*/
+	 */
 
 #if !defined(CPU_DCACHE_DISABLE) && !defined(CONFIG_SMP)
 	/* Dcache enable
@@ -467,7 +468,7 @@ __start:
 	/* Then write the configured control register */
 
 	mcr		CP15_SCTLR(r0)			/* Write control reg */
-	.rept	12						/* Cortex A8 wants lots of NOPs here */
+	.rept		12				/* Cortex A8 wants lots of NOPs here */
 	nop
 	.endr
 
@@ -499,7 +500,7 @@ __start:
 .LCptinfo:
 	.long	(PGTABLE_BASE_PADDR & 0xfff00000)	/* Physical base address */
 	.long	(PGTABLE_BASE_VADDR & 0xfff00000)	/* Virtual base address */
-	.long	MMU_MEMFLAGS						/* MMU flags for text section in RAM */
+	.long	MMU_MEMFLAGS				/* MMU flags for text section in RAM */
 	.size	.LCptinfo, . -.LCptinfo
 #endif
 
@@ -555,7 +556,7 @@ __start:
 .Ltxtmap:
 	.long	PG_L2_LOCKED_PADDR		/* Physical address in the L2 table */
 	.long	PG_LOCKED_PBASE			/* Physical address of locked base memory */
-	.long	CONFIG_PAGING_NLOCKED	/* Number of pages in the locked region */
+	.long	CONFIG_PAGING_NLOCKED		/* Number of pages in the locked region */
 	.long	MMU_L2_TEXTFLAGS		/* L2 MMU flags to use */
 	.size	.Ltxtmap, . -.Ltxtmap
 
@@ -564,7 +565,7 @@ __start:
 	.long	PG_L1_PGTABLE_PADDR		/* Physical address in the L1 table */
 	.long	PG_L2_PGTABLE_PBASE		/* Physical address of the start of the L2 page table */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
-	.long	PG_L2_PGTABLE_NPAGE1	/* The number of text pages in the first page table */
+	.long	PG_L2_PGTABLE_NPAGE1		/* The number of text pages in the first page table */
 	.long	MMU_L1_PGTABFLAGS		/* L1 MMU flags to use */
 	.size	.Lptabspan, . -.Lptabspan
 
@@ -599,28 +600,28 @@ __start:
 
 	ldr		r4, .LCvpgtable			/* r4=virtual page table base address */
 	ldr		r3, .LCvtextbase		/* r0=virtual base address of .text section */
-	mov		r0, #0					/* flags + base = 0 */
-	str		r3, [r4, r3, lsr #18]	/* identity mapping */
+	mov		r0, #0				/* flags + base = 0 */
+	str		r3, [r4, r3, lsr #18]		/* identity mapping */
 #endif
 
 	/* Populate the L1 table for the data region */
 
 	adr		r0, .Ldataspan
-	ldmia	r0, {r0, r1, r2, r3, r4}
-	pg_l1span r0, r1, r2, r3, r4, r5
+	ldmia		r0, {r0, r1, r2, r3, r4}
+	pg_l1span	r0, r1, r2, r3, r4, r5
 
 	/* Populate the L2 table for the data region */
 
 	adr		r0, .Ldatamap
-	ldmia	r0, {r0, r1, r2, r3}
-	pg_l2map r0, r1, r2, r3, r4
+	ldmia		r0, {r0, r1, r2, r3}
+	pg_l2map	r0, r1, r2, r3, r4
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	/* Get R3 = Value of RAM L1 page table entry */
 
 	ldr		r3, .LCprambase			/* r3=Aligned NuttX RAM address (physical) */
 	ldr		r1, .LCramflags			/* R1=.bss/.data section MMU flags */
-	add		r3, r3, r1				/* r3=flags + base */
+	add		r3, r3, r1			/* r3=flags + base */
 
 	/* Now setup the page tables for our normal mapped RAM region.
 	 * We round NUTTX_RAM_VADDR down to the nearest megabyte boundary.
@@ -633,7 +634,7 @@ __start:
 	 * region.
 	 */
 
-	.rept	WR_NSECTIONS-1
+	.rept		WR_NSECTIONS-1
 	add		r3, r3, #SECTION_SIZE
 	str		r3, [r0], #4
 	.endr
@@ -648,7 +649,7 @@ __start:
 	/* Set up the stack pointer and clear the frame pointer */
 
 	ldr		sp, .Lstackpointer
-	bic		sp, sp, #7	/* Get the stack pointer with 8-byte alignment */
+	bic		sp, sp, #7			/* Get the stack pointer with 8-byte alignment */
 	mov		fp, #0
 
 #ifndef CONFIG_BOOT_SDRAM_DATA
@@ -673,13 +674,13 @@ __start:
 	 */
 
 	adr		r3, .Lstkinit
-	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
+	ldmia		r3, {r0, r1, r2}		/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
 
-1:								/* Top of the loop */
+1:							/* Top of the loop */
 	sub		r1, r1, #1			/* R1 = Number of words remaining */
 	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4		/* Save stack color word, increment stack address */
-	bne		1b					/* Bottom of the loop */
+	str		r2, [r0], #4			/* Save stack color word, increment stack address */
+	bne		1b				/* Bottom of the loop */
 #endif
 
 	/* Finally branch to the OS entry point */
@@ -701,12 +702,12 @@ arm_data_initialize:
 	/* Zero BSS */
 
 	adr		r0, .Linitparms
-	ldmia	r0, {r0, r1}
+	ldmia		r0, {r0, r1}
 
-	mov     r2, #0
+	mov		r2, #0
 1:
 	cmp		r0, r1				/* Clear up to _bss_end_ */
-	strcc	r2, [r0],#4
+	strcc		r2, [r0], #4
 	bcc		1b
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -720,7 +721,7 @@ arm_data_initialize:
 	 */
 
 	adr		r3, .Ldatainit
-	ldmia	r3, {r0, r1, r2}
+	ldmia		r3, {r0, r1, r2}
 
 2:
 	ldr		r3, [r0], #4
@@ -740,9 +741,10 @@ arm_data_initialize:
 
 	/* Text-section constants:
 	 *
-	 *   _sbss is the start of the BSS region (see ld.script)
-	 *   _ebss is the end of the BSS region (see ld.script)
+	 *   _sbss is the start of the BSS region (see linker script)
+	 *   _ebss is the end of the BSS region (see linker script)
 	 *
+	 * Typical Configuration:
 	 * The idle task stack usually starts at the end of BSS and is of size
 	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the
 	 * end of memory.  See g_idle_topstack below.
@@ -794,7 +796,7 @@ arm_data_initialize:
 	.type	.Lstkinit, %object
 .Lstkinit:
 #ifdef CONFIG_BOOT_SDRAM_DATA
-	.long	IDLE_STACK_VBASE		/* Beginning of the IDLE stack, then words of IDLE stack */
+	.long	IDLE_STACK_VBASE			/* Beginning of the IDLE stack, then words of IDLE stack */
 #else
 	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
 #endif
@@ -808,7 +810,7 @@ arm_data_initialize:
  ***************************************************************************/
 
 	/* This global variable is unsigned long g_idle_topstack and is
-	 * exported from here only because of its coupling to .Linitparms
+	 * exported from here only because of its coupling to .Lstackpointer
 	 * above.
 	 */
 
@@ -825,5 +827,5 @@ g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 #endif
 	.size	g_idle_topstack, .-g_idle_topstack
-#endif
 	.end
+#endif

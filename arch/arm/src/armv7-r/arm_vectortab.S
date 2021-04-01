@@ -54,16 +54,16 @@
 /* These will be relocated to VECTOR_BASE. */
 
 _vector_start:
-	ldr		pc, .Lresethandler			/* 0x00: Reset */
+	ldr		pc, .Lresethandler		/* 0x00: Reset */
 	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lsvchandler			/* 0x08: Software interrupt */
+	ldr		pc, .Lsvchandler		/* 0x08: Software interrupt */
 	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
 	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
 	ldr		pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
-	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
-	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
+	ldr		pc, .Lirqhandler		/* 0x18: IRQ */
+	ldr		pc, .Lfiqhandler		/* 0x1c: FIQ */
 
-	.globl   __start
+	.globl	__start
 	.globl	arm_vectorundefinsn
 	.globl	arm_vectorsvc
 	.globl	arm_vectorprefetch

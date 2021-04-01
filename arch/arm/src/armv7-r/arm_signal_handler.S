@@ -32,13 +32,12 @@
  * File info
  ****************************************************************************/
 
+	.file		"arm_signal_handler.S"
 #ifdef CONFIG_ARCH_FPU
 	.cpu	cortex-r4f
 #else
 	.cpu	cortex-r4
 #endif
-	.syntax	unified
-	.file	"arm_signal_handler.S"
 
 /****************************************************************************
  * Private Functions
@@ -47,8 +46,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-	.text
 
 /****************************************************************************
  * Name: up_signal_handler
@@ -73,13 +70,14 @@
  *
  ****************************************************************************/
 
+	.text
 	.globl	up_signal_handler
 	.type	up_signal_handler, function
 up_signal_handler:
 
 	/* Save some register */
 
-	push	{lr}			/* Save LR on the stack */
+	push		{lr}			/* Save LR on the stack */
 
 	/* Call the signal handler */
 
@@ -87,7 +85,7 @@ up_signal_handler:
 	mov		r0, r1			/* R0=signo */
 	mov		r1, r2			/* R1=info */
 	mov		r2, r3			/* R2=ucontext */
-	blx		ip				/* Call the signal handler */
+	blx		ip			/* Call the signal handler */
 
 	/* Restore the registers */
 

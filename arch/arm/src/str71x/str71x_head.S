@@ -23,12 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>		/* NuttX configuration settings */
-#include <arch/board/board.h>	/* Board-specific settings */
 
-#include "arm.h"				/* ARM-specific settings */
-#include "chip.h"				/* Chip-specific settings */
-#include "arm_internal.h"
-#include "arm_arch.h"
+#include "arm.h"			/* ARM-specific settings */
+#include "chip.h"			/* Chip-specific settings */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -45,17 +42,17 @@
  ****************************************************************************/
 
 	.globl	str71x_prccuinit			/* Clock initialization */
-	.globl	up_lowsetup					/* Early initialization of UART */
+	.globl	up_lowsetup				/* Early initialization of UART */
 #ifdef USE_EARLYSERIALINIT
 	.globl	arm_earlyserialinit			/* Early initialization of serial driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
-	.globl	board_autoled_initialize	/* Boot LED setup */
+	.globl	board_autoled_initialize		/* Boot LED setup */
 #endif
 #ifdef CONFIG_DEBUG_FEATURES
-	.globl	arm_lowputc					/* Low-level debug output */
+	.globl	arm_lowputc				/* Low-level debug output */
 #endif
-	.globl	nx_start					/* NuttX entry point */
+	.globl	nx_start				/* NuttX entry point */
 
 /****************************************************************************
  * Macros
@@ -104,7 +101,7 @@
 #  define EXTMEM_GPIO_BITSET 0x0000000f		/* P2.0-3 */
 #endif
 
-	ldr		\base, =STR71X_GPIO_BASE		; Configure P2.0 to P2.3/7 in AF_PP mode
+	ldr		\base, =STR71X_GPIO_BASE		/* Configure P2.0 to P2.3/7 in AF_PP mode */
 	ldr		\value, [\base, #STR71X_GPIO_PC0_OFFSET]
 	orr		\value, \value, #EXTMEM_GPIO_BITSET
 	str		\value, [\base, #STR71X_GPIO_PC0_OFFSET]
@@ -346,12 +343,12 @@ eicloop:
 	/* Disable all APB1 peripherals */
 
 	ldr		\value, =STR71X_APB1_APB1ALL
-	strh	\value, [\base1, #STR71X_APB_CKDIS_OFFSET]
+	strh		\value, [\base1, #STR71X_APB_CKDIS_OFFSET]
 
 	/* Disable all(or most) APB2 peripherals */
 
 	ldr		\value, =(STR71X_APB2_APB2ALL & ~STR71X_APB2_EIC)
-	strh	\value, [\base2, #STR71X_APB_CKDIS_OFFSET]
+	strh		\value, [\base2, #STR71X_APB_CKDIS_OFFSET]
 
 	/* Allow EMI and USB */
 
@@ -361,7 +358,7 @@ eicloop:
 #else
 	ldr		\value, =STR71X_RCCUPER_EMI
 #endif
-	strh	\value, [\base1, #STR71X_RCCU_PER_OFFSET]
+	strh		\value, [\base1, #STR71X_RCCU_PER_OFFSET]
 #endif
 	.endm
 
@@ -381,7 +378,7 @@ eicloop:
 	/* Read the PCU BOOTCR register */
 
 	ldr		\base, =STR71X_PCU_BASE
-	ldrh	\value, [\base, #STR71X_PCU_BOOTCR_OFFSET]
+	ldrh		\value, [\base, #STR71X_PCU_BOOTCR_OFFSET]
 
 	/* Mask out the old boot mode bits and set the boot mode to FLASH */
 
@@ -390,7 +387,7 @@ eicloop:
 
 	/* Save the modified BOOTCR register */
 
-	strh	\value, [\base, #STR71X_PCU_BOOTCR_OFFSET]
+	strh		\value, [\base, #STR71X_PCU_BOOTCR_OFFSET]
 	.endm
 
 /****************************************************************************
@@ -413,14 +410,14 @@ eicloop:
 	.globl	_vector_table
 	.type	_vector_table, %function
 _vector_table:
-	ldr		pc, .Lresethandler			/* 0x00: Reset */
+	ldr		pc, .Lresethandler		/* 0x00: Reset */
 	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
+	ldr		pc, .Lswihandler		/* 0x08: Software interrupt */
 	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
 	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
-	.long	0							/* 0x14: Reserved vector */
-	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
-	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
+	.long	0					/* 0x14: Reserved vector */
+	ldr		pc, .Lirqhandler		/* 0x18: IRQ */
+	ldr		pc, .Lfiqhandler		/* 0x1c: FIQ */
 
 	.globl	__start
 	.globl	arm_vectorundefinsn
@@ -478,11 +475,11 @@ __flashstart:
 
 	/* Initialize the external memory interface (EMI) */
 
-	emiinit	r0, r1
+	emiinit		r0, r1
 
 	/* Initialize the enhanced interrupt controller (EIC) */
 
-	eicinit	r0, r1, r2, r3
+	eicinit		r0, r1, r2, r3
 
 	/* Disable all peripherals except EIC */
 
@@ -490,27 +487,27 @@ __flashstart:
 
 	/* Map memory appropriately for configuration */
 
-	remap	r0, r1
+	remap		r0, r1
 
 	/* Setup system stack (and get the BSS range) */
 
 	adr		r0, LC0
-	ldmia	r0, {r4, r5, sp}
+	ldmia		r0, {r4, r5, sp}
 
 	/* Clear system BSS section */
 
 	mov		r0, #0
 1:	cmp		r4, r5
-	strcc	r0, [r4], #4
+	strcc		r0, [r4], #4
 	bcc		1b
 
 	/* Copy system .data sections from FLASH to new home in RAM. */
 
 	adr		r3, LC2
-	ldmia	r3, {r0, r1, r2}
+	ldmia		r3, {r0, r1, r2}
 
-2:	ldmia	r0!, {r3 - r10}
-	stmia	r1!, {r3 - r10}
+2:	ldmia		r0!, {r3 - r10}
+	stmia		r1!, {r3 - r10}
 	cmp		r1, r2
 	blt		2b
 
@@ -523,7 +520,7 @@ __flashstart:
 	 */
 
 	bl		up_lowsetup
-	showprogress 'A'
+	showprogress	'A'
 
 	/* Perform early serial initialization */
 
@@ -532,7 +529,7 @@ __flashstart:
 	bl		arm_earlyserialinit
 #endif
 
-	showprogress 'B'
+	showprogress	'B'
 
 	/* Call C++ constructors */
 
@@ -543,16 +540,16 @@ ctor_loop:
 	cmp		r0, r1
 	beq		ctor_end
 	ldr		r2, [r0], #4
-	stmfd	sp!, {r0-r1}
+	stmfd		sp!, {r0-r1}
 	mov		lr, pc
 	mov		pc, r2
-	ldmfd	sp!, {r0-r1}
+	ldmfd		sp!, {r0-r1}
 	b		ctor_loop
 ctor_end:
 
-	showprogress 'C'
+	showprogress	'C'
 #endif
-	showprogress '\n'
+	showprogress	'\n'
 
 	/* Initialize onboard LEDs */
 
@@ -573,10 +570,10 @@ dtor_loop:
 	cmp		r0, r1
 	beq		dtor_end
 	ldr		r2, [r0], #4
-	stmfd	sp!, {r0-r1}
+	stmfd		sp!, {r0-r1}
 	mov		lr, pc
 	mov		pc, r2
-	ldmfd	sp!, {r0-r1}
+	ldmfd		sp!, {r0-r1}
 	b		dtor_loop
 dtor_end:
 #endif

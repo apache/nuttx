@@ -76,7 +76,7 @@ up_signal_handler:
 
 	/* Save some register */
 
-	push	{lr}			/* Save LR on the stack */
+	push		{lr}			/* Save LR on the stack */
 
 	/* Call the signal handler */
 
@@ -84,7 +84,7 @@ up_signal_handler:
 	mov		r0, r1			/* R0=signo */
 	mov		r1, r2			/* R1=info */
 	mov		r2, r3			/* R2=ucontext */
-	blx		ip				/* Call the signal handler */
+	blx		ip			/* Call the signal handler */
 
 	/* Restore the registers */
 
