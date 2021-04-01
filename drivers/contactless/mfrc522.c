@@ -173,7 +173,7 @@ static inline void mfrc522_deselect(struct mfrc522_dev_s *dev)
 uint8_t mfrc522_readu8(FAR struct mfrc522_dev_s *dev, uint8_t regaddr)
 {
   uint8_t regval;
-  uint8_t address = (0x80 | (regaddr & 0x7E));
+  uint8_t address = (0x80 | (regaddr & 0x7e));
 
   mfrc522_lock(dev->spi);
   mfrc522_select(dev);
@@ -203,7 +203,7 @@ void mfrc522_writeu8(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
 {
   mfrc522_lock(dev->spi);
   mfrc522_select(dev);
-  SPI_SEND(dev->spi, regaddr & 0x7E);
+  SPI_SEND(dev->spi, regaddr & 0x7e);
   SPI_SEND(dev->spi, regval);
   mfrc522_deselect(dev);
   mfrc522_unlock(dev->spi);
@@ -215,8 +215,8 @@ void mfrc522_writeu8(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
  * Name: mfrc522_readblk
  *
  * Description:
- *   Read a block of bytes from a register address. Align the bit positions of
- * regval[0] from rxalign..7.
+ *   Read a block of bytes from a register address. Align the bit positions
+ *   of regval[0] from rxalign..7.
  *
  * Input Parameters:
  *
@@ -228,7 +228,7 @@ void mfrc522_readblk(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
                      FAR uint8_t *regval, int length, uint8_t rxalign)
 {
   uint8_t i = 0;
-  uint8_t address = (0x80 | (regaddr & 0x7E));
+  uint8_t address = (0x80 | (regaddr & 0x7e));
 
   mfrc522_lock(dev->spi);
   mfrc522_select(dev);
@@ -264,10 +264,13 @@ void mfrc522_readblk(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
 
           regval[i] = SPI_SEND(dev->spi, address);
         }
+
       i++;
     }
 
-  /* Read the last byte. Send 0 to stop reading (it maybe wrong, 1 byte out) */
+  /* Read the last byte.
+   * Send 0 to stop reading (it maybe wrong, 1 byte out)
+   */
 
   regval[i] = SPI_SEND(dev->spi, 0);
 
@@ -292,7 +295,7 @@ void mfrc522_readblk(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
 void mfrc522_writeblk(FAR struct mfrc522_dev_s *dev, uint8_t regaddr,
                       uint8_t *regval, int length)
 {
-  uint8_t address = (regaddr & 0x7E);
+  uint8_t address = (regaddr & 0x7e);
 
   mfrc522_lock(dev->spi);
   mfrc522_select(dev);
@@ -493,7 +496,8 @@ int mfrc522_comm_picc(FAR struct mfrc522_dev_s *dev, uint8_t command,
 
       clock_gettime(CLOCK_REALTIME, &tend);
 
-      if ((tend.tv_sec > tstart.tv_sec) && (tend.tv_nsec > tstart.tv_nsec))
+      if ((tend.tv_sec > tstart.tv_sec) &&
+          (tend.tv_nsec > tstart.tv_nsec))
         {
           return -ETIMEDOUT;
         }
@@ -545,7 +549,8 @@ int mfrc522_comm_picc(FAR struct mfrc522_dev_s *dev, uint8_t command,
 
       /* Read the data from FIFO */
 
-      mfrc522_readblk(dev, MFRC522_FIFO_DATA_REG, back_data, nbytes, rxalign);
+      mfrc522_readblk(dev,
+                      MFRC522_FIFO_DATA_REG, back_data, nbytes, rxalign);
 
       /* RxLastBits[2:0] indicates the number of valid bits received */
 
@@ -608,15 +613,17 @@ int mfrc522_comm_picc(FAR struct mfrc522_dev_s *dev, uint8_t command,
  *
  ****************************************************************************/
 
-int mfrc522_transcv_data(FAR struct mfrc522_dev_s *dev, uint8_t *senddata,
-                         uint8_t sendlen, uint8_t *backdata, uint8_t *backlen,
-                         uint8_t *validbits, uint8_t rxalign, bool check_crc)
+int mfrc522_transcv_data(FAR struct mfrc522_dev_s *dev,
+                         uint8_t *senddata, uint8_t sendlen,
+                         uint8_t *backdata, uint8_t *backlen,
+                         uint8_t *validbits, uint8_t rxalign,
+                         bool check_crc)
 {
   uint8_t waitirq = MFRC522_RX_IRQ | MFRC522_IDLE_IRQ;
 
   return mfrc522_comm_picc(dev, MFRC522_TRANSCV_CMD, waitirq, senddata,
-                           sendlen, backdata, backlen, validbits, rxalign,
-                           check_crc);
+                           sendlen, backdata, backlen,
+                           validbits, rxalign, check_crc);
 }
 
 /****************************************************************************
@@ -649,8 +656,8 @@ int mfrc522_picc_reqa_wupa(FAR struct mfrc522_dev_s *dev, uint8_t command,
   mfrc522_writeu8(dev, MFRC522_COLL_REG, value & MFRC522_VALUES_AFTER_COLL);
 
   validbits = 7;
-  status = mfrc522_transcv_data(dev, &command, 1, buffer, &length, &validbits,
-                                0, false);
+  status = mfrc522_transcv_data(dev, &command, 1, buffer,
+                                &length, &validbits, 0, false);
 
   /* For REQA and WUPA we need to transmit only 7 bits */
 
@@ -674,8 +681,8 @@ int mfrc522_picc_reqa_wupa(FAR struct mfrc522_dev_s *dev, uint8_t command,
  * Name: mfrc522_picc_request_a
  *
  * Description:
- *   Transmits a REQuest command, Type A. Invites PICCs in state IDLE to go to
- * READY and prepare for anticollision or selection.
+ *   Transmits a REQuest command, Type A. Invites PICCs in state IDLE to go
+ *   to READY and prepare for anticollision or selection.
  *
  * Input Parameters:
  *
@@ -737,7 +744,9 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
   uint8_t value;
   uint8_t count;
 
-  /* The first index in uid->data[] that is used in the current Cascade Level */
+  /* The first index in uid->data[] that is used in the current Cascade
+   * Level
+   */
 
   uint8_t uid_index;
 
@@ -774,7 +783,8 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
   /* Force clear of received bits if a collision is detected */
 
   value = mfrc522_readu8(dev, MFRC522_COLL_REG);
-  mfrc522_writeu8(dev, MFRC522_COLL_REG, value & MFRC522_VALUES_AFTER_COLL);
+  mfrc522_writeu8(dev,
+                  MFRC522_COLL_REG, value & MFRC522_VALUES_AFTER_COLL);
 
   /* Repeat cascade level loop until we have a complete UID */
 
@@ -783,8 +793,8 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
     {
       uint8_t bytes_to_copy;
 
-      /* Set the Cascade Level in the SEL byte, find out if we need to use the
-       * Cascade Tag in byte 2.
+      /* Set the Cascade Level in the SEL byte, find out if we need to use
+       * the Cascade Tag in byte 2.
        */
 
       switch (cascade_level)
@@ -857,8 +867,8 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
             }
         }
 
-      /* Now that the data has been copied we need to include the 8 bits in CT
-       * in curr_level_known_bits.
+      /* Now that the data has been copied we need to include the 8 bits in
+       * CT in curr_level_known_bits.
        */
 
       if (use_cascade_tag)
@@ -900,8 +910,8 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
               txlastbits = 0;   /* 0 => All 8 bits are valid. */
               buffer_used = 9;
 
-              /* Store response in the last 3 bytes of buffer (BCC and CRC_A -
-               * not needed after tx).
+              /* Store response in the last 3 bytes of buffer
+               * (BCC and CRC_A - not needed after tx).
                */
 
               resp_buf = &buffer[6];
@@ -937,9 +947,9 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
 
           /* Transmit the buffer and receive the response */
 
-          result = mfrc522_transcv_data(dev, buffer, buffer_used, resp_buf,
-                                        &resp_len, &txlastbits, rxalign,
-                                        false);
+          result = mfrc522_transcv_data(dev, buffer, buffer_used,
+                                        resp_buf, &resp_len,
+                                        &txlastbits, rxalign, false);
 
           /* More than one PICC in the field => collision */
 
@@ -957,7 +967,7 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
                   return -EBUSY;
                 }
 
-              coll_pos = coll_reg & 0x1F; /* Values 0-31, 0 means bit 32. */
+              coll_pos = coll_reg & 0x1f; /* Values 0-31, 0 means bit 32. */
               if (coll_pos == 0)
                 {
                   coll_pos = 32;
@@ -1191,8 +1201,10 @@ void mfrc522_setantennagain(FAR struct mfrc522_dev_s *dev, uint8_t mask)
 
   if ((value = mfrc522_getantennagain(dev)) != mask)
     {
-      mfrc522_writeu8(dev, MFRC522_RF_CFG_REG, value & ~MFRC522_RX_GAIN_MASK);
-      mfrc522_writeu8(dev, MFRC522_RF_CFG_REG, mask & MFRC522_RX_GAIN_MASK);
+      mfrc522_writeu8(dev,
+                      MFRC522_RF_CFG_REG, value & ~MFRC522_RX_GAIN_MASK);
+      mfrc522_writeu8(dev,
+                      MFRC522_RF_CFG_REG, mask & MFRC522_RX_GAIN_MASK);
     }
 }
 
@@ -1274,12 +1286,12 @@ void mfrc522_init(FAR struct mfrc522_dev_s *dev)
    * f_timer=40kHz, then the timer period will be 25us.
    */
 
-  mfrc522_writeu8(dev, MFRC522_TPRESCALER_REG, 0xA9);
+  mfrc522_writeu8(dev, MFRC522_TPRESCALER_REG, 0xa9);
 
   /* Reload timer with 0x3E8 = 1000, ie 25ms before timeout. */
 
   mfrc522_writeu8(dev, MFRC522_TRELOAD_REGH, 0x06);
-  mfrc522_writeu8(dev, MFRC522_TRELOAD_REGL, 0xE8);
+  mfrc522_writeu8(dev, MFRC522_TRELOAD_REGL, 0xe8);
 
   /* Force 100% ASK modulation independent of the ModGsPReg setting */
 
@@ -1287,7 +1299,7 @@ void mfrc522_init(FAR struct mfrc522_dev_s *dev)
 
   /* Set the preset value for the CRC to 0x6363 (ISO 14443-3 part 6.2.4) */
 
-  mfrc522_writeu8(dev, MFRC522_MODE_REG, 0x3D);
+  mfrc522_writeu8(dev, MFRC522_MODE_REG, 0x3d);
 
   /* Enable the Antenna pins */
 
@@ -1316,6 +1328,7 @@ int mfrc522_selftest(FAR struct mfrc522_dev_s *dev)
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0
   };
+
   char outbuf[3 * 8 + 1];
   uint8_t result[64];
   int i;
@@ -1560,12 +1573,14 @@ static int mfrc522_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case CLIOC_READ_MIFARE_DATA:
         {
-          FAR struct mifare_tag_data_s *data = (struct mifare_tag_data_s *)arg;
+          FAR struct mifare_tag_data_s *data =
+                                       (struct mifare_tag_data_s *)arg;
 
           /* We assume that tag is selected!
            *
            * TODO: authentication for MIFARE Classic.
-           * Without authentication this will works only for MIFARE Ultralight.
+           * Without authentication this will works only for MIFARE
+           *  Ultralight.
            */
 
           ret = mfrc522_mifare_read(dev, data);

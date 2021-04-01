@@ -55,7 +55,7 @@
 
 static void             greedy_governor_initialize(void);
 static void             greedy_governor_statechanged(int domain,
-                                                     enum pm_state_e newstate);
+                                                enum pm_state_e newstate);
 static enum pm_state_e  greedy_governor_checkstate(int domain);
 
 /****************************************************************************
@@ -95,7 +95,8 @@ static void greedy_governor_initialize(void)
  * Name: greedy_governor_statechanged
  ****************************************************************************/
 
-static void greedy_governor_statechanged(int domain, enum pm_state_e newstate)
+static void greedy_governor_statechanged(int domain,
+                                         enum pm_state_e newstate)
 {
   /* no need to react to state changes */
 

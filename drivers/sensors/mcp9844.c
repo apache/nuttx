@@ -267,11 +267,16 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               raw_temperature &= 0x0fff; /* 0x0fff = 0b 0000 1111 1111 1111 */
 
-              /* The post comma temperature value is encoded in BIT3 to BIT0 */
+              /* The post comma temperature value is encoded in BIT3 to
+               * BIT0
+               */
 
-              temp_result->temp_post_comma = (uint8_t)(raw_temperature & 0x000f);
+              temp_result->temp_post_comma =
+                                  (uint8_t)(raw_temperature & 0x000f);
 
-              /* The pre comma temperature value is encoded in BIT11 to BIT4 */
+              /* The pre comma temperature value is encoded in BIT11 to
+               * BIT4
+               */
 
               temp_result->temp_pre_comma = (int8_t)(raw_temperature >> 4);
             }
@@ -365,7 +370,8 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/temp0"
- *   i2c - An instance of the I2C interface to use to communicate with MCP9844
+ *   i2c - An instance of the I2C interface to use to communicate with
+ *         MCP9844
  *   addr - The I2C address of the MCP9844.
  *
  * Returned Value:

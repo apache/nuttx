@@ -44,9 +44,9 @@
  *
  * Description:
  *   This function is called by a device driver to indicate that it is
- *   performing meaningful activities (non-idle).  This increments an activity
- *   count and/or will restart a idle timer and prevent entering reduced
- *   power states.
+ *   performing meaningful activities (non-idle).  This increments an
+ *   activity count and/or will restart a idle timer and prevent entering
+ *   reduced power states.
  *
  * Input Parameters:
  *   domain - The domain of the PM activity
@@ -54,8 +54,9 @@
  *     higher priorities.  Higher priority activity can prevent the system
  *     from entering reduced power states for a longer period of time.
  *
- *     As an example, a button press might be higher priority activity because
- *     it means that the user is actively interacting with the device.
+ *     As an example, a button press might be higher priority activity
+ *     because it means that the user is actively interacting with the
+ *     device.
  *
  * Returned Value:
  *   None.
@@ -86,7 +87,7 @@ void pm_activity(int domain, int priority)
  *   domain - The domain of the PM activity
  *   state - The state want to stay.
  *
- *     As an example, media player might stay in normal state during playback.
+ *   As an example, media player might stay in normal state during playback.
  *
  * Returned Value:
  *   None.
