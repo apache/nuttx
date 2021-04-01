@@ -272,7 +272,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_start(dev);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_START failed %d\n", ret);
+              mtrerr("MTRIOC_START failed %d\n", ret);
             }
 
           break;
@@ -285,7 +285,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_stop(dev);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_STOP failed %d\n", ret);
+              mtrerr("MTRIOC_STOP failed %d\n", ret);
             }
 
           break;
@@ -302,7 +302,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_state_get(dev, state);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_GET_STATE failed %d\n", ret);
+              mtrerr("MTRIOC_GET_STATE failed %d\n", ret);
             }
 
           break;
@@ -317,7 +317,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_fault_clear(dev);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_CLEAR_FAULT failed %d\n", ret);
+              mtrerr("MTRIOC_CLEAR_FAULT failed %d\n", ret);
             }
 
           break;
@@ -334,7 +334,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_params_set(dev, params);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_SET_PARAMS failed %d\n", ret);
+              mtrerr("MTRIOC_SET_PARAMS failed %d\n", ret);
             }
 
           break;
@@ -351,7 +351,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_cfg_set(dev, cfg);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_SET_CONFIG failed %d\n", ret);
+              mtrerr("MTRIOC_SET_CONFIG failed %d\n", ret);
             }
 
           break;
@@ -368,7 +368,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = foc_info_get(dev, info);
           if (ret != OK)
             {
-              pwrerr("ERROR: MTRIOC_GET_INFO failed %d\n", ret);
+              mtrerr("MTRIOC_GET_INFO failed %d\n", ret);
             }
 
           break;
@@ -378,7 +378,7 @@ static int foc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       default:
         {
-          pwrinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+          mtrinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
 
           /* Call lower-half logic */
 
@@ -449,7 +449,7 @@ static int foc_setup(FAR struct foc_dev_s *dev)
 
   DEBUGASSERT(dev);
 
-  pwrinfo("FOC SETUP\n");
+  mtrinfo("FOC SETUP\n");
 
   /* Reset device data */
 
@@ -461,7 +461,7 @@ static int foc_setup(FAR struct foc_dev_s *dev)
   ret = foc_lower_bind(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: foc_lower_bind failed %d\n", ret);
+      mtrerr("foc_lower_bind failed %d\n", ret);
       set_errno(EINVAL);
       goto errout;
     }
@@ -471,7 +471,7 @@ static int foc_setup(FAR struct foc_dev_s *dev)
   ret = FOC_OPS_SETUP(dev);
   if (ret < 0)
     {
-      pwrerr("FOC_OPS_SETUP failed %d\n", ret);
+      mtrerr("FOC_OPS_SETUP failed %d\n", ret);
       goto errout;
     }
 
@@ -493,7 +493,7 @@ int foc_shutdown(FAR struct foc_dev_s *dev)
 
   DEBUGASSERT(dev);
 
-  pwrinfo("FOC SHUTDOWN\n");
+  mtrinfo("FOC SHUTDOWN\n");
 
   /* Call the lower-half shutdown */
 
@@ -516,14 +516,14 @@ static int foc_start(FAR struct foc_dev_s *dev)
 
   DEBUGASSERT(dev);
 
-  pwrinfo("FOC START\n");
+  mtrinfo("FOC START\n");
 
   /* Reset the notifier semaphore */
 
   ret = nxsem_reset(&dev->statesem, 0);
   if (ret < 0)
     {
-      pwrerr("ERROR: nxsem_reset failed %d\n", ret);
+      mtrerr("nxsem_reset failed %d\n", ret);
       goto errout;
     }
 
@@ -532,7 +532,7 @@ static int foc_start(FAR struct foc_dev_s *dev)
   ret = FOC_OPS_START(dev, true);
   if (ret < 0)
     {
-      pwrerr("ERROR: FOC_OPS_START failed %d !\n", ret);
+      mtrerr("FOC_OPS_START failed %d !\n", ret);
       goto errout;
     }
 
@@ -555,7 +555,7 @@ static int foc_stop(FAR struct foc_dev_s *dev)
 
   DEBUGASSERT(dev);
 
-  pwrinfo("FOC STOP\n");
+  mtrinfo("FOC STOP\n");
 
   /* Zero duty cycle */
 
@@ -566,7 +566,7 @@ static int foc_stop(FAR struct foc_dev_s *dev)
   ret = FOC_OPS_DUTY(dev, d_zero);
   if (ret < 0)
     {
-      pwrerr("ERROR: FOC_OPS_DUTY failed %d\n", ret);
+      mtrerr("FOC_OPS_DUTY failed %d\n", ret);
     }
 
   /* Stop the FOC */
@@ -574,7 +574,7 @@ static int foc_stop(FAR struct foc_dev_s *dev)
   ret = FOC_OPS_START(dev, false);
   if (ret < 0)
     {
-      pwrerr("ERROR: FOC_OPS_START failed %d\n", ret);
+      mtrerr("FOC_OPS_START failed %d\n", ret);
     }
 
   /* Reset device data */
@@ -606,7 +606,7 @@ static int foc_cfg_set(FAR struct foc_dev_s *dev, FAR struct foc_cfg_s *cfg)
 
   memcpy(&dev->cfg, cfg, sizeof(struct foc_cfg_s));
 
-  pwrinfo("FOC %" PRIu8 " PWM=%" PRIu32 " notifier=%" PRIu32 "\n",
+  mtrinfo("FOC %" PRIu8 " PWM=%" PRIu32 " notifier=%" PRIu32 "\n",
           dev->devno, dev->cfg.pwm_freq, dev->cfg.notifier_freq);
 
   /* Call arch configuration */
@@ -614,7 +614,7 @@ static int foc_cfg_set(FAR struct foc_dev_s *dev, FAR struct foc_cfg_s *cfg)
   ret = FOC_OPS_CONFIGURE(dev, &dev->cfg);
   if (ret < 0)
     {
-      pwrerr("FOC_OPS_CONFIGURE failed %d\n", ret);
+      mtrerr("FOC_OPS_CONFIGURE failed %d\n", ret);
       goto errout;
     }
 
@@ -681,7 +681,7 @@ static int foc_fault_clear(FAR struct foc_dev_s *dev)
   ret = FOC_OPS_FAULT_CLEAR(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: FOC_OPS_FAULT_CLEAR failed %d\n", ret);
+      mtrerr("FOC_OPS_FAULT_CLEAR failed %d\n", ret);
       goto errout;
     }
 
@@ -861,7 +861,7 @@ int foc_register(FAR const char *path, FAR struct foc_dev_s *dev)
 
   if (dev->devno > CONFIG_MOTOR_FOC_INST)
     {
-      pwrerr("ERROR: unsupported foc devno %d\n\n", dev->devno);
+      mtrerr("Unsupported foc devno %d\n\n", dev->devno);
       set_errno(EINVAL);
       ret = ERROR;
       goto errout;
