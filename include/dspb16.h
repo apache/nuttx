@@ -242,6 +242,14 @@ struct svm3_state_b16_s
   b16_t     d_w;             /* Duty cycle for phase W */
 };
 
+/* Motor open-loop control data */
+
+struct openloop_data_b16_s
+{
+  b16_t angle;         /* Open-loop current angle normalized to <0.0, 2PI> */
+  b16_t per;           /* Open-loop control execution period */
+};
+
 /* FOC initialize data */
 
 struct foc_initdata_b16_s
@@ -440,6 +448,13 @@ void foc_current_control_b16(FAR struct foc_data_b16_s *foc,
 void foc_vabmod_get_b16(FAR struct foc_data_b16_s *foc,
                         FAR ab_frame_b16_t *v_ab_mod);
 void foc_vdq_mag_max_get_b16(FAR struct foc_data_b16_s *foc, FAR b16_t *max);
+
+/* Motor openloop control */
+
+void motor_openloop_init_b16(FAR struct openloop_data_b16_s *op, b16_t per);
+void motor_openloop_b16(FAR struct openloop_data_b16_s *op, b16_t speed,
+                        b16_t dir);
+b16_t motor_openloop_angle_get_b16(FAR struct openloop_data_b16_s *op);
 
 /* Motor angle */
 
