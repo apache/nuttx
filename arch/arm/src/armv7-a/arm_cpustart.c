@@ -38,6 +38,28 @@
 #ifdef CONFIG_SMP
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define MODE_FIQ    0x11
+#define MODE_IRQ    0x12
+#define MODE_ABORT  0x17
+#define MODE_UNDEF  0x1B
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The following variables are allocated in arm_vectors.S */
+
+extern uint32_t g_irqtmp;
+extern uint32_t g_undeftmp;
+extern uint32_t g_aborttmp;
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+extern uint32_t g_fiqtmp;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -69,6 +91,24 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 #endif
 
 /****************************************************************************
+ * Name: set_stack
+ ****************************************************************************/
+
+static void set_stack(uint32_t mode, uintptr_t stack)
+{
+  uint32_t reg = 0x0;
+
+  asm volatile (
+    "mrs %0, cpsr \n"     /* Save cpsr */
+    "msr cpsr_c, %2 \n"   /* Switch to IRQ mode */
+    "mov r13, %1 \n"      /* Set the IRQ mode stack */
+    "msr cpsr, %0 \n"     /* Restore cpsr */
+    : "+r" (reg)
+    : "r" (stack), "r" (mode)
+    : "memory");
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -91,8 +131,18 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
 int arm_start_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct tcb_s *tcb = this_task();
+  int cpu = this_cpu();
 
-  sinfo("CPU%d Started\n", this_cpu());
+  sinfo("CPU%d Started\n", cpu);
+
+  /* Set stack for each mode on this CPU */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+  set_stack(MODE_FIQ, (uintptr_t)&g_fiqtmp + (8  * cpu));
+#endif
+  set_stack(MODE_IRQ, (uintptr_t)&g_irqtmp + (8  * cpu));
+  set_stack(MODE_ABORT, (uintptr_t)&g_aborttmp + (8  * cpu));
+  set_stack(MODE_UNDEF, (uintptr_t)&g_undeftmp + (8  * cpu));
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */

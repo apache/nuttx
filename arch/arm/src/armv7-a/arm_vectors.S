@@ -40,22 +40,55 @@
  ****************************************************************************/
 
 	.data
+
+	.globl	g_irqtmp
 g_irqtmp:
+#ifdef CONFIG_SMP
+	.rept	CONFIG_SMP_NCPUS
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+	.endr
+#else
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+#endif
 
+	.globl	g_undeftmp
 g_undeftmp:
+#ifdef CONFIG_SMP
+	.rept	CONFIG_SMP_NCPUS
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+	.endr
+#else
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+#endif
 
+	.globl	g_aborttmp
 g_aborttmp:
+#ifdef CONFIG_SMP
+	.rept	CONFIG_SMP_NCPUS
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+	.endr
+#else
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+#endif
 
 #ifdef CONFIG_ARMV7A_DECODEFIQ
+	.globl	g_fiqtmp
 g_fiqtmp:
+#ifdef CONFIG_SMP
+	.rept	CONFIG_SMP_NCPUS
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+	.endr
+#else
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+#endif
 #endif
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7 && defined(CONFIG_ARMV7A_HAVE_GICv2)
@@ -147,7 +180,11 @@ arm_vectorirq:
 	 * and r14.
 	 */
 
-	ldr		r13, .Lirqtmp
+	cmp		r13, #0				/* IRQ stack is set? */
+	bne		.Lirqstackset
+	ldr		r13, .Lirqtmp			/* Set IRQ stack to irqtmp */
+
+.Lirqstackset:
 	sub		lr, lr, #4
 	str		lr, [r13]			/* Save lr_IRQ */
 	mrs		lr, spsr
@@ -173,6 +210,13 @@ arm_vectorirq:
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lirqtmp			/* Points to temp storage */
+
+#ifdef CONFIG_SMP
+	cpuindex	r1				/* r1 = cpuindex */
+	lsls		r1, r1, #3			/* r1 = (cpuindex * 8) */
+	add		r0, r0, r1			/* r0 = g_irqtmp + (8 * cpuindex) */
+#endif
+
 	ldmia		r0, {r3, r4}			/* Recover r3=lr_IRQ, r4=spsr_IRQ */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -630,7 +674,11 @@ arm_vectorprefetch:
 	 * r13 and r14
 	 */
 
+	cmp		r13, #0				/* ABORT stack is set? */
+	bne		.Labortstackset
 	ldr		r13, .Lpaborttmp		/* Points to temp storage */
+
+.Labortstackset:
 	sub		lr, lr, #4			/* Fixup return */
 	str		lr, [r13]			/* Save in temp storage */
 	mrs		lr, spsr			/* Get SPSR */
@@ -652,6 +700,13 @@ arm_vectorprefetch:
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lpaborttmp			/* Points to temp storage */
+
+#ifdef CONFIG_SMP
+	cpuindex	r1				/* r1 = cpuindex */
+	lsls		r1, r1, #3			/* r1 = (cpuindex * 8) */
+	add		r0, r0, r1			/* r0 = g_aborttmp + (8 * cpuindex) */
+#endif
+
 	ldmia		r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -774,7 +829,12 @@ arm_vectorundefinsn:
 	 * r13 and r14
 	 */
 
+	cmp		r13, #0				/* UNDEF stack is set? */
+	bne		.Lundefstackset
 	ldr		r13, .Lundeftmp			/* Points to temp storage */
+
+.Lundefstackset:
+	sub		lr, lr, #4			/* Fixup return */
 	str		lr, [r13]			/* Save in temp storage */
 	mrs		lr, spsr			/* Get SPSR */
 	str		lr, [r13, #4]			/* Save in temp storage */
@@ -795,6 +855,13 @@ arm_vectorundefinsn:
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lundeftmp			/* Points to temp storage */
+
+#ifdef CONFIG_SMP
+	cpuindex	r1				/* r1 = cpuindex */
+	lsls		r1, r1, #3			/* r1 = (cpuindex * 8) */
+	add		r0, r0, r1			/* r0 = g_undeftmp + (8 * cpuindex) */
+#endif
+
 	ldmia		r0, {r3, r4}			/* Recover r3=lr_UND, r4=spsr_UND */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -916,7 +983,11 @@ arm_vectorfiq:
 #ifdef CONFIG_ARMV7A_DECODEFIQ
 	/* On entry we are free to use the FIQ mode registers r8 through r14 */
 
+	cmp		r13, #0				/* FIQ stack is set? */
+	bne		.Lfiqstackset
 	ldr		r13, .Lfiqtmp			/* Points to temp storage */
+
+.Lfiqstackset:
 	sub		lr, lr, #4			/* Fixup return */
 	str		lr, [r13]			/* Save in temp storage */
 	mrs		lr, spsr			/* Get SPSR_fiq */
@@ -938,6 +1009,13 @@ arm_vectorfiq:
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
 	ldr		r0, .Lfiqtmp			/* Points to temp storage */
+
+#ifdef CONFIG_SMP
+	cpuindex	r1				/* r1 = cpuindex */
+	lsls		r1, r1, #3			/* r1 = (cpuindex * 8) */
+	add		r0, r0, r1			/* r0 = g_fiqtmp + (8 * cpuindex) */
+#endif
+
 	ldmia		r0, {r3, r4}			/* Recover r3=lr_SVC, r4=spsr_SVC */
 
 #ifdef CONFIG_BUILD_KERNEL
