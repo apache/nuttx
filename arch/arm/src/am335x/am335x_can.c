@@ -103,10 +103,10 @@
 
 struct up_dev_s
 {
-  uint8_t port; /* CAN port number */
+  uint8_t port;  /* CAN port number */
   uint32_t baud; /* Configured baud */
   uint32_t base; /* CAN register base address */
-  uint8_t irq; /* IRQ associated with this CAN */
+  uint8_t irq;   /* IRQ associated with this CAN */
 };
 
 /****************************************************************************
@@ -474,9 +474,9 @@ static void can_shutdown(FAR struct can_dev_s *dev)
  *
  * Description:
  *   Call to enable or disable RX interrupts.
- *   This function is called two times: from can_open and can_close. Therefore
- *   this function enables and disables not only RX interrupts but all message
- *   objects.
+ *   This function is called two times: from can_open and can_close.
+ *   Therefore this function enables and disables not only RX interrupts
+ *   but all message objects.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -627,8 +627,9 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   can_putreg(priv, AM335X_DCAN_IF1MSK_OFFSET, 0xffff);
 
-  regval = ((dlc & DCAN_IFMCTL_DLC_MASK) | DCAN_IFMCTL_EOB | DCAN_IFMCTL_TX_RQST
-                      | DCAN_IFMCTL_TX_IE);
+  regval = ((dlc & DCAN_IFMCTL_DLC_MASK) |
+             DCAN_IFMCTL_EOB | DCAN_IFMCTL_TX_RQST |
+             DCAN_IFMCTL_TX_IE);
   can_putreg(priv, AM335X_DCAN_IF1MCTL_OFFSET, regval);
 
   /* Write data to IF1 data registers */
@@ -642,18 +643,24 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   can_putreg(priv, AM335X_DCAN_IF1DATB_OFFSET, regval);
 
 #ifdef CONFIG_CAN_EXTID
-  can_putreg(priv, AM335X_DCAN_IF1ARB_OFFSET, DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL
-                   | DCAN_IFARB_XTD | (id << DCAN_IFARB_ID_SHIFT));
+  can_putreg(priv,
+             AM335X_DCAN_IF1ARB_OFFSET,
+             DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL |
+             DCAN_IFARB_XTD | (id << DCAN_IFARB_ID_SHIFT));
 #else
-  can_putreg(priv, AM335X_DCAN_IF1ARB_OFFSET, DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL
-                   | (id << DCAN_IFARB_ID_SHIFT));
+  can_putreg(priv,
+             AM335X_DCAN_IF1ARB_OFFSET,
+             DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL |
+             (id << DCAN_IFARB_ID_SHIFT));
 #endif
 
   /* Write to Message RAM */
 
-  regval = (DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK | DCAN_IFCMD_ARB | DCAN_IFCMD_CTL
-                   | DCAN_IFCMD_CLR_INTPND | DCAN_IFCMD_TX_RQST_NEWDAT
-                   | DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB | DCAN_IFCMD_MSG_NUM(txobj));
+  regval = (DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK |
+            DCAN_IFCMD_ARB | DCAN_IFCMD_CTL |
+            DCAN_IFCMD_CLR_INTPND | DCAN_IFCMD_TX_RQST_NEWDAT |
+            DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB |
+            DCAN_IFCMD_MSG_NUM(txobj));
   can_putreg(priv, AM335X_DCAN_IF1CMD_OFFSET, regval);
 
 #ifdef CONFIG_CAN_TXREADY
@@ -748,7 +755,8 @@ static int can_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Read CAN interrupt register */
 
-  uint32_t interrupt = can_getreg(priv, AM335X_DCAN_INT_OFFSET) & DCAN_INT_LINE0_MASK;
+  uint32_t interrupt = can_getreg(priv, AM335X_DCAN_INT_OFFSET) &
+                                  DCAN_INT_LINE0_MASK;
 
   /* Read CAN status register */
 
@@ -869,7 +877,8 @@ static void can_readobj(struct up_dev_s *priv, uint32_t index)
 {
   while (can_getreg(priv, AM335X_DCAN_IF2CMD_OFFSET) & DCAN_IFCMD_BUSY);
 
-  can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET, DCAN_IFCMD_MASK | DCAN_IFCMD_ARB |
+  can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET,
+             DCAN_IFCMD_MASK | DCAN_IFCMD_ARB |
              DCAN_IFCMD_CTL | DCAN_IFCMD_CLR_INTPND | DCAN_IFCMD_DATAA |
              DCAN_IFCMD_DATAB | DCAN_IFCMD_MSG_NUM(index));
 }
@@ -922,12 +931,14 @@ static void can_setuprxobj(struct up_dev_s *priv)
 
   while (can_getreg(priv, AM335X_DCAN_IF2CMD_OFFSET) & DCAN_IFCMD_BUSY);
 
-  can_putreg(priv, AM335X_DCAN_IF2MSK_OFFSET, DCAN_IFMSK_MXTD | DCAN_IFMSK_MDIR);
+  can_putreg(priv, AM335X_DCAN_IF2MSK_OFFSET,
+             DCAN_IFMSK_MXTD | DCAN_IFMSK_MDIR);
   can_putreg(priv, AM335X_DCAN_IF2MCTL_OFFSET, DCAN_IFMCTL_DLC_MASK |
              DCAN_IFMCTL_EOB | DCAN_IFMCTL_RX_IE | DCAN_IFMCTL_UMASK);
 
 #ifdef CONFIG_CAN_EXTID
-  can_putreg(priv, AM335X_DCAN_IF2ARB_OFFSET, DCAN_IFARB_MSG_VAL | DCAN_IFARB_XTD);
+  can_putreg(priv, AM335X_DCAN_IF2ARB_OFFSET,
+             DCAN_IFARB_MSG_VAL | DCAN_IFARB_XTD);
 #else
   can_putreg(priv, AM335X_DCAN_IF2ARB_OFFSET, DCAN_IFARB_MSG_VAL);
 #endif
@@ -935,9 +946,12 @@ static void can_setuprxobj(struct up_dev_s *priv)
   for (i = CAN_RX_OBJ_FIRST; i <= CAN_RX_OBJ_LAST; ++i)
     {
       while (can_getreg(priv, AM335X_DCAN_IF2CMD_OFFSET) & DCAN_IFCMD_BUSY);
-      can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET, DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK |
-                 DCAN_IFCMD_ARB | DCAN_IFCMD_CTL | DCAN_IFCMD_CLR_INTPND |
-                 DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB | DCAN_IFCMD_MSG_NUM(i));
+      can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET,
+                 DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK |
+                 DCAN_IFCMD_ARB | DCAN_IFCMD_CTL |
+                 DCAN_IFCMD_CLR_INTPND |
+                 DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB |
+                 DCAN_IFCMD_MSG_NUM(i));
     }
 }
 

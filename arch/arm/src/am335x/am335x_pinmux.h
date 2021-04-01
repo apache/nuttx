@@ -30,6 +30,12 @@
 #include "hardware/am335x_scm.h"
 #include "hardware/am335x_pinmux.h"
 
+#ifndef __ASSEMBLY__
+
+#include <stdint.h>
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -93,9 +99,7 @@
 
 #ifndef __ASSEMBLY__
 
-#include <stdint.h>
-
- /* The smallest integer type that can hold the PINMUX encoding */
+/* The smallest integer type that can hold the PINMUX encoding */
 
 typedef uint8_t pinmux_pinset_t;
 

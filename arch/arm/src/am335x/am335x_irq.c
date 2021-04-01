@@ -116,6 +116,7 @@ void up_irqinitialize(void)
   for (i = 0; i < AM335X_IRQ_NINT; i += 32)
     {
       putreg32(0xffffffff, AM335X_INTC_MIR_SET(i)); /* 1 masks corresponding interrupt */
+
       getreg32(AM335X_INTC_PEND_IRQ(i));   /* Reading status clears pending interrupts */
       getreg32(AM335X_INTC_PEND_FIQ(i));   /* Reading status clears pending interrupts */
     }

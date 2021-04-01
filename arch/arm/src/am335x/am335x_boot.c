@@ -204,7 +204,9 @@ static inline void am335x_remap(void)
      defined(CONFIG_PAGING)
 static void am335x_vectorpermissions(uint32_t mmuflags)
 {
-  /* The PTE for the beginning of OCMC0 RAM is at the base of the L2 page table */
+  /* The PTE for the beginning of OCMC0 RAM is at the base of the L2 page
+   * table
+   */
 
   uint32_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
 
@@ -303,8 +305,8 @@ static void am335x_vectormapping(void)
  * Description:
  *   Copy the interrupt block to its final destination.  Vectors are already
  *   positioned at the beginning of the text region and only need to be
- *   copied in the case where we are using high vectors or where the beginning
- *   of the text region cannot be remapped to address zero.
+ *   copied in the case where we are using high vectors or where the
+ *   beginning of the text region cannot be remapped to address zero.
  *
  ****************************************************************************/
 
@@ -322,10 +324,11 @@ static void am335x_copyvectorblock(void)
   am335x_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
-  /* Copy the vectors into OCMC0 RAM at the address that will be mapped to the vector
-   * address:
+  /* Copy the vectors into OCMC0 RAM at the address that will be mapped to
+   * the vector  address:
    *
-   *   AM335X_VECTOR_PADDR - Unmapped, physical address of vector table in OCMC0 RAM
+   *   AM335X_VECTOR_PADDR - Unmapped, physical address of vector table in
+   *                         OCMC0 RAM
    *   AM335X_VECTOR_VSRAM - Virtual address of vector table in OCMC0 RAM
    *   AM335X_VECTOR_VADDR - Virtual address of vector table (0x00000000 or
    *                         0xffff0000)
@@ -377,14 +380,14 @@ static void am335x_copyvectorblock(void)
 void arm_boot(void)
 {
 #ifndef CONFIG_ARCH_ROMPGTABLE
-  /* __start provided the basic MMU mappings for OCMC0 RAM.  Now provide mappings
-   * for all IO regions (Including the vector region).
+  /* __start provided the basic MMU mappings for OCMC0 RAM.  Now provide
+   * mappings for all IO regions (Including the vector region).
    */
 
   am335x_setupmappings();
 
-  /* Provide a special mapping for the OCMC0 RAM interrupt vector positioned in
-   * high memory.
+  /* Provide a special mapping for the OCMC0 RAM interrupt vector positioned
+   * in high memory.
    */
 
   am335x_vectormapping();
@@ -431,10 +434,10 @@ void arm_boot(void)
 #endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
-  /* This setting is inappropriate for the AM335x because the code is *always*
-   * executing from SDRAM.  If CONFIG_BOOT_SDRAM_DATA happens to be set,
-   * let's try to do the right thing and initialize the .data and .bss
-   * sections.
+  /* This setting is inappropriate for the AM335x because the code is
+   * *always* executing from SDRAM.  If CONFIG_BOOT_SDRAM_DATA happens
+   * to be set, let's try to do the right thing and initialize the
+   * .data and .bss sections.
    */
 
   arm_data_initialize();
