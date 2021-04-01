@@ -447,14 +447,14 @@
 #define I2C_BBPLL                   0x66
 #define I2C_BBPLL_HOSTID            4
 
-extern int rom_i2c_writeReg(int block, int block_id, int reg_add,
+extern int rom_i2c_writereg(int block, int block_id, int reg_add,
                             int indata);
 
 #define I2C_WRITEREG_RTC(block, reg_add, indata) \
-      rom_i2c_writeReg(block, block##_HOSTID,  reg_add, indata)
+      rom_i2c_writereg(block, block##_HOSTID,  reg_add, indata)
 
 #define I2C_READREG_RTC(block, reg_add) \
-      rom_i2c_readReg(block, block##_HOSTID,  reg_add)
+      rom_i2c_readreg(block, block##_HOSTID,  reg_add)
 
 /* BBPLL configuration values */
 
