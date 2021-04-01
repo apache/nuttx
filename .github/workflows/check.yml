@@ -54,4 +54,4 @@ jobs:
           script: |
             const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
             github.issues.createComment({ issue_number, owner, repo,
-              body: format('This PR failed the check step. The following problems were found:\n{0}\nFor guidance on NuttX C Coding Standard, follow [this link](https://nuttx.apache.org/docs/latest/contributing/coding_style.html)', env.checkresult) });
+              body: 'This PR failed the check step. The following problems were found:\n```\n' + process.env.checkresult + '```\nFor guidance on NuttX C Coding Standard, follow [this link](https://nuttx.apache.org/docs/latest/contributing/coding_style.html' });
