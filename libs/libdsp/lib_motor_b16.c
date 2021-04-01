@@ -35,6 +35,97 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: motor_openloop_init_b16
+ *
+ * Description:
+ *  Initialize open-loop data
+ *
+ * Input Parameters:
+ *   op  - (in/out) pointer to the openloop data structure
+ *   per - (in) period of the open-loop control
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void motor_openloop_init_b16(FAR struct openloop_data_b16_s *op, b16_t per)
+{
+  LIBDSP_DEBUGASSERT(op != NULL);
+  LIBDSP_DEBUGASSERT(per > 0);
+
+  /* Reset openloop structure */
+
+  memset(op, 0, sizeof(struct openloop_data_b16_s));
+
+  /* Initialize data */
+
+  op->per = per;
+}
+
+/****************************************************************************
+ * Name: motor_openloop_b16
+ *
+ * Description:
+ *   One step of the open-loop control
+ *
+ * Input Parameters:
+ *   op    - (in/out) pointer to the open-loop data structure
+ *   speed - (in) open-loop speed
+ *   dir   - (in) rotation direction
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void motor_openloop_b16(FAR struct openloop_data_b16_s *op, b16_t speed,
+                        b16_t dir)
+{
+  LIBDSP_DEBUGASSERT(op != NULL);
+  LIBDSP_DEBUGASSERT(speed >= 0);
+  LIBDSP_DEBUGASSERT(dir == DIR_CW_B16 || dir == DIR_CCW_B16);
+
+  b16_t phase_step = 0;
+  b16_t tmp = 0;
+
+  /* Get phase step */
+
+  tmp = b16mulb16(dir, speed);
+  phase_step =  b16mulb16(tmp, op->per);
+
+  /* Update open-loop angle */
+
+  op->angle += phase_step;
+
+  /* Normalize the open-loop angle to 0.0 - 2PI range */
+
+  angle_norm_2pi_b16(&op->angle, MOTOR_ANGLE_E_MIN_B16,
+                     MOTOR_ANGLE_E_MAX_B16);
+}
+
+/****************************************************************************
+ * Name: motor_openloop_angle_get_b16
+ *
+ * Description:
+ *   Get angle from open-loop controller
+ *
+ * Input Parameters:
+ *   op    - (in/out) pointer to the open-loop data structure
+ *
+ * Returned Value:
+ *   Return angle from open-loop controller
+ *
+ ****************************************************************************/
+
+b16_t motor_openloop_angle_get_b16(FAR struct openloop_data_b16_s *op)
+{
+  LIBDSP_DEBUGASSERT(op != NULL);
+
+  return op->angle;
+}
+
+/****************************************************************************
  * Name: motor_angle_e_update_b16
  *
  * Description:
