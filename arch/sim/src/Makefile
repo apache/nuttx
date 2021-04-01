@@ -59,6 +59,7 @@ CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
 CSRCS += up_heap.c up_uart.c up_assert.c
 CSRCS += up_copyfullstate.c
+CSRCS += up_sigdeliver.c
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)

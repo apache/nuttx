@@ -156,6 +156,10 @@ void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
 int host_settimer(int *irq);
 
+/* up_sigdeliver.c **********************************************************/
+
+void sim_sigdeliver(void);
+
 /* up_simsmp.c **************************************************************/
 
 #ifdef CONFIG_SMP
@@ -171,7 +175,6 @@ struct tcb_s *up_this_task(void);
 int up_cpu_set_pause_handler(int irq);
 void sim_send_ipi(int cpu);
 void sim_timer_handler(void);
-void sim_sigdeliver(void);
 #endif
 
 /* up_oneshot.c *************************************************************/
