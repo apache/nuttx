@@ -61,12 +61,12 @@ __start:
 	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
 	msr		cpsr, r0
 
-	showprogress	'A'
-
 	/* Setup system stack (and get the BSS range) */
 
 	adr		r0, .Lbssinit
 	ldmia		r0, {r4, r5, sp}
+
+	showprogress	'A'
 
 	/* Clear system BSS section */
 
