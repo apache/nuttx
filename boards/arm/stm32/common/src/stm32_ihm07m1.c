@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
