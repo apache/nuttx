@@ -60,29 +60,29 @@
 
 /* LIS3MDL CTRL_REG_1 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_1_TEMP_EN_bm      (1<<7)   /* Enable the temperature sensor */
-#define LIS3MDL_CTRL_REG_1_OM_1_bm         (1<<6)   /* Select the operating mode of X and Y axis bit 1 */
-#define LIS3MDL_CTRL_REG_1_OM_0_bm         (1<<5)   /* Select the operating mode of X and Y axis bit 0 */
-#define LIS3MDL_CTRL_REG_1_DO2_bm          (1<<4)   /* Output data rate selection bit 2 */
-#define LIS3MDL_CTRL_REG_1_DO1_bm          (1<<3)   /* Output data rate selection bit 1 */
-#define LIS3MDL_CTRL_REG_1_DO0_bm          (1<<2)   /* Output data rate selection bit 2 */
-#define LIS3MDL_CTRL_REG_1_FAST_ODR_bm     (1<<1)   /* Enable higher output data rates */
+#define LIS3MDL_CTRL_REG_1_TEMP_EN_BM      (1<<7)   /* Enable the temperature sensor */
+#define LIS3MDL_CTRL_REG_1_OM_1_BM         (1<<6)   /* Select the operating mode of X and Y axis bit 1 */
+#define LIS3MDL_CTRL_REG_1_OM_0_BM         (1<<5)   /* Select the operating mode of X and Y axis bit 0 */
+#define LIS3MDL_CTRL_REG_1_DO2_BM          (1<<4)   /* Output data rate selection bit 2 */
+#define LIS3MDL_CTRL_REG_1_DO1_BM          (1<<3)   /* Output data rate selection bit 1 */
+#define LIS3MDL_CTRL_REG_1_DO0_BM          (1<<2)   /* Output data rate selection bit 2 */
+#define LIS3MDL_CTRL_REG_1_FAST_ODR_BM     (1<<1)   /* Enable higher output data rates */
 
 /* LIS3MDL CTRL_REG_2 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_2_FS_1_bm         (1<<6)   /* Full scale selection bit 1 */
-#define LIS3MDL_CTRL_REG_2_FS_0_bm         (1<<5)   /* Full scale selection bit 0 */
-#define LIS3MDL_CTRL_REG_2_REBOOT_bm       (1<<3)   /* Reboot Memory Content */
-#define LIS3MDL_CTRL_REG_2_SOFT_RST_bm     (1<<2)   /* Soft Reset */
+#define LIS3MDL_CTRL_REG_2_FS_1_BM         (1<<6)   /* Full scale selection bit 1 */
+#define LIS3MDL_CTRL_REG_2_FS_0_BM         (1<<5)   /* Full scale selection bit 0 */
+#define LIS3MDL_CTRL_REG_2_REBOOT_BM       (1<<3)   /* Reboot Memory Content */
+#define LIS3MDL_CTRL_REG_2_SOFT_RST_BM     (1<<2)   /* Soft Reset */
 
 /* LIS3MDL CTRL_REG_4 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_4_OMZ_1_bm        (1<<3)   /* Select the operating mode of Z axis bit 1 */
-#define LIS3MDL_CTRL_REG_4_OMZ_0_bm        (1<<2)   /* Select the operating mode of Z axis bit 0 */
+#define LIS3MDL_CTRL_REG_4_OMZ_1_BM        (1<<3)   /* Select the operating mode of Z axis bit 1 */
+#define LIS3MDL_CTRL_REG_4_OMZ_0_BM        (1<<2)   /* Select the operating mode of Z axis bit 0 */
 
 /* LIS3MDL CTRL_REG_5 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_5_BDU_bm          (1<<6)   /* Enable block data update for magnetic data (prevent race conditions while reading) */
+#define LIS3MDL_CTRL_REG_5_BDU_BM          (1<<6)   /* Enable block data update for magnetic data (prevent race conditions while reading) */
 
 /* SPI BUS PARAMETERS *******************************************************/
 
