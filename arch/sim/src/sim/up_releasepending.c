@@ -103,13 +103,7 @@ void up_release_pending(void)
            * interrupt driven environment.
            */
 
-          rtcb = this_task();
-          if (rtcb->xcp.sigdeliver)
-            {
-              sinfo("Delivering signals TCB=%p\n", rtcb);
-              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-              rtcb->xcp.sigdeliver = NULL;
-            }
+          sim_sigdeliver();
         }
     }
 }
