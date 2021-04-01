@@ -1709,6 +1709,31 @@ config DEBUG_WATCHDOG_INFO
 		Enable watchdog time informational output to SYSLOG.
 
 endif # DEBUG_WATCHDOG
+
+if DEBUG_MOTOR
+
+config DEBUG_MOTOR_ERROR
+	bool "Motor Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable motor error output to SYSLOG.
+
+config DEBUG_MOTOR_WARN
+	bool "Motor Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable motor warning output to SYSLOG.
+
+config DEBUG_MOTOR_INFO
+	bool "Motor Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable motor informational output to SYSLOG.
+
+endif # DEBUG_MOTOR
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
