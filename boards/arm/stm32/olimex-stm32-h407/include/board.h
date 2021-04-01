@@ -48,24 +48,26 @@
  * a 32kHz RTC backup crystal.
  *
  * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
- *   SDIO and RNG clock
+ *   System Clock source       : PLL (HSE)
+ *   SYSCLK(Hz)                : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)                  : 168000000    (STM32_RCC_CFGR_HPRE)
+ *   AHB Prescaler             : 1            (STM32_RCC_CFGR_HPRE)
+ *   APB1 Prescaler            : 4            (STM32_RCC_CFGR_PPRE1)
+ *   APB2 Prescaler            : 2            (STM32_RCC_CFGR_PPRE2)
+ *   HSE Frequency(Hz)         : 8000000      (STM32_BOARD_XTAL)
+ *   PLLM                      : 8            (STM32_PLLCFG_PLLM)
+ *   PLLN                      : 336          (STM32_PLLCFG_PLLN)
+ *   PLLP                      : 2            (STM32_PLLCFG_PLLP)
+ *   PLLQ                      : 7            (STM32_PLLCFG_PLLQ)
+ *   Main regulator output
+ *              voltage        : Scale1 mode  Needed for high speed SYSCLK
+ *   Flash Latency(WS)         : 5
+ *   Prefetch Buffer           : OFF
+ *   Instruction cache         : ON
+ *   Data cache                : ON
+ *   Require 48MHz for
+ *   USB OTG FS,
+ *   SDIO and RNG clock        : Enabled
  */
 
 /* HSI - 16 MHz RC factory-trimmed
@@ -188,9 +190,11 @@
 #  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status LED in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status
+ * LED in any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -202,8 +206,9 @@
 
 #define BOARD_LED_STATUS_BIT  (1 << BOARD_LED_STATUS)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of the
- * Olimex STM32-H405.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of
+ * the Olimex STM32-H405.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED_STATUS on */
@@ -215,7 +220,8 @@
 #define LED_ASSERTION     6  /* LED_STATUS off */
 #define LED_PANIC         7  /* LED_STATUS blinking */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Olimex STM32-H405 supports one buttons: */
 
 #define BUTTON_BUT     0
@@ -223,7 +229,7 @@
 
 #define BUTTON_BUT_BIT (1 << BUTTON_BUT)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART3: */
 
@@ -255,9 +261,10 @@
 #define GPIO_CAN2_RX      GPIO_CAN1_RX_2    /* PB5 */
 #define GPIO_CAN2_TX      GPIO_CAN1_TX_2    /* PB6 */
 
-/* DMA Channel/Stream Selections *****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDIO_1 = Channel 4, Stream 3

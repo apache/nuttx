@@ -96,7 +96,8 @@ static int isl29023_read_reg(FAR struct isl29023_dev_s *dev,
                       const uint8_t regaddr, uint8_t *buffer, size_t buflen);
 static int isl29023_read_lux(FAR struct isl29023_dev_s *dev,
                               FAR struct isl29023_data_s *data);
-static int isl29023_set_op_mode(FAR struct isl29023_dev_s *dev, uint8_t mode);
+static int isl29023_set_op_mode(FAR struct isl29023_dev_s *dev,
+                                uint8_t mode);
 static int isl29023_set_resolution(FAR struct isl29023_dev_s *dev,
                                     uint8_t res_mode);
 static int isl29023_set_range(FAR struct isl29023_dev_s *dev,
@@ -106,11 +107,14 @@ static int isl29023_set_range(FAR struct isl29023_dev_s *dev,
 
 static int isl29023_open(FAR struct file *filep);
 static int isl29023_close(FAR struct file *filep);
-static ssize_t isl29023_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t isl29023_read(FAR struct file *filep,
+                             FAR char *buffer,
                              size_t buflen);
-static ssize_t isl29023_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t isl29023_write(FAR struct file *filep,
+                              FAR const char *buffer,
                               size_t buflen);
-static int isl29023_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int isl29023_ioctl(FAR struct file *filep,
+                          int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -196,7 +200,8 @@ static int isl29023_i2c_read(FAR struct isl29023_dev_s *dev,
  ****************************************************************************/
 
 static int isl29023_read_reg(FAR struct isl29023_dev_s *dev,
-                        const uint8_t regaddr, uint8_t *buffer, size_t buflen)
+                             const uint8_t regaddr, uint8_t *buffer,
+                             size_t buflen)
 {
   int ret;
 
@@ -462,7 +467,8 @@ int isl29023_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   FAR struct isl29023_dev_s *priv;
   int ret;
 
-  priv = (FAR struct isl29023_dev_s *)kmm_malloc(sizeof(struct isl29023_dev_s));
+  priv = (FAR struct isl29023_dev_s *)
+              kmm_malloc(sizeof(struct isl29023_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

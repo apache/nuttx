@@ -138,7 +138,9 @@ static struct bmg160_dev_s *g_bmg160_list = NULL;
 static void bmg160_read_register(FAR struct bmg160_dev_s *dev,
                                  uint8_t const reg_addr, uint8_t * reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -173,7 +175,9 @@ static void bmg160_write_register(FAR struct bmg160_dev_s *dev,
                                   uint8_t const reg_addr,
                                   uint8_t const reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -257,7 +261,9 @@ static void bmg160_read_gyroscope_data(FAR struct bmg160_dev_s *dev,
                                        uint16_t * x_gyr, uint16_t * y_gyr,
                                        uint16_t * z_gyr)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -311,8 +317,8 @@ static int bmg160_interrupt_handler(int irq, FAR void *context)
   DEBUGASSERT(priv != NULL);
 
   /* Task the worker with retrieving the latest sensor data. We should not do
-   * this in a interrupt since it might take too long. Also we cannot lock the
-   * SPI bus from within an interrupt.
+   * this in a interrupt since it might take too long. Also we cannot lock
+   * the SPI bus from within an interrupt.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
@@ -364,7 +370,8 @@ static int bmg160_open(FAR struct file *filep)
 
   bmg160_write_register(priv,
                         BMG160_RANGE_REG,
-                        BMG160_RANGE_REG_FIX_VAL_bm | BMG160_RANGE_REG_FSR_1_bm |
+                        BMG160_RANGE_REG_FIX_VAL_bm |
+                        BMG160_RANGE_REG_FSR_1_bm |
                         BMG160_RANGE_REG_FSR_0_bm);
 
   /* Enable - the fastest data output rate ODR = 2000 Hz -> BW = 230 Hz */
@@ -379,7 +386,8 @@ static int bmg160_open(FAR struct file *filep)
   /* Enable - active high level interrupt 1 - push-pull interrupt */
 
   bmg160_write_register(priv,
-                        BMG160_INT_EN_1_REG, BMG160_INT_EN_1_REG_INT1_LVL_bm);
+                        BMG160_INT_EN_1_REG,
+                        BMG160_INT_EN_1_REG_INT1_LVL_bm);
 
   /* Enable - map new data interrupt to INT1 */
 
@@ -450,7 +458,8 @@ static ssize_t bmg160_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct bmg160_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: "
+            "Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 

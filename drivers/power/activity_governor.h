@@ -33,9 +33,9 @@
  ****************************************************************************/
 
 /* CONFIG_PM_GOVERNOR_SLICEMS. The activity based governor collects activity
- * counts in time slices.  At the end of the time slice, the count accumulated
- * during that interval is applied to an averaging algorithm to determine
- * the activity level.
+ * counts in time slices.  At the end of the time slice, the count
+ * accumulated during that interval is applied to an averaging algorithm to
+ * determine the activity level.
  *
  * CONFIG_PM_GOVERNOR_SLICEMS provides the duration of that time slice in
  * milliseconds.  Default: 100 Milliseconds
@@ -51,8 +51,8 @@
 
 /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
  * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
- * weight applied to each value, and X is the current activity.  These weights
- * may be negative and a limited to the range of int16_t.
+ * weight applied to each value, and X is the current activity.  These
+ * weights may be negative and a limited to the range of int16_t.
  *
  * CONFIG_PM_GOVERNOR_MEMORY:
  *  provides the memory for the algorithm.  Default: 2

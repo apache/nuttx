@@ -243,13 +243,15 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
 
   if (lis331dl_access(dev, ST_LIS331DL_WHOAMI, &retval, 1) > 0)
     {
-      /* Check chip identification, in the future several more compatible parts
-       * may be added here.
+      /* Check chip identification, in the future several more compatible
+       * parts may be added here.
        */
 
       if (retval == ST_LIS331DL_WHOAMI_VALUE)
         {
-          /* Copy LIS331DL registers to our private structure and power-up device */
+          /* Copy LIS331DL registers to our private structure and power-up
+           * device
+           */
 
           if (lis331dl_readregs(dev) == OK && lis331dl_powerup(dev) == OK)
             {
@@ -321,7 +323,8 @@ int lis331dl_powerdown(FAR struct lis331dl_dev_s * dev)
  * Name: lis331dl_setconversion
  ****************************************************************************/
 
-int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev, bool full, bool fast)
+int lis331dl_setconversion(FAR struct lis331dl_dev_s * dev,
+                           bool full, bool fast)
 {
   dev->cr1 = ST_LIS331DL_CR1_PD |
     (full ? ST_LIS331DL_CR1_FS : 0) | (fast ? ST_LIS331DL_CR1_DR : 0) |

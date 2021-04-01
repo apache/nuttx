@@ -70,7 +70,8 @@ struct lis3mdl_dev_s
  ****************************************************************************/
 
 static void lis3mdl_read_register(FAR struct lis3mdl_dev_s *dev,
-                                  uint8_t const reg_addr, uint8_t * reg_data);
+                                  uint8_t const reg_addr,
+                                  uint8_t * reg_data);
 static void lis3mdl_write_register(FAR struct lis3mdl_dev_s *dev,
                                    uint8_t const reg_addr,
                                    uint8_t const reg_data);
@@ -87,9 +88,11 @@ static void lis3mdl_worker(FAR void *arg);
 static int lis3mdl_open(FAR struct file *filep);
 static int lis3mdl_close(FAR struct file *filep);
 static ssize_t lis3mdl_read(FAR struct file *, FAR char *, size_t);
-static ssize_t lis3mdl_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t lis3mdl_write(FAR struct file *filep,
+                             FAR const char *buffer,
                              size_t buflen);
-static int lis3mdl_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int lis3mdl_ioctl(FAR struct file *filep,
+                         int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -124,7 +127,9 @@ static struct lis3mdl_dev_s *g_lis3mdl_list = 0;
 static void lis3mdl_read_register(FAR struct lis3mdl_dev_s *dev,
                                   uint8_t const reg_addr, uint8_t * reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -132,8 +137,8 @@ static void lis3mdl_read_register(FAR struct lis3mdl_dev_s *dev,
 
   SPI_SELECT(dev->spi, dev->config->spi_devid, true);
 
-  /* Transmit the register address from where we want to read - the MSB needs
-   * to be set to indicate the read indication.
+  /* Transmit the register address from where we want to read - the MSB
+   * needs to be set to indicate the read indication.
    */
 
   SPI_SEND(dev->spi, reg_addr | 0x80);
@@ -159,7 +164,9 @@ static void lis3mdl_write_register(FAR struct lis3mdl_dev_s *dev,
                                    uint8_t const reg_addr,
                                    uint8_t const reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -191,7 +198,8 @@ static void lis3mdl_write_register(FAR struct lis3mdl_dev_s *dev,
 static void lis3mdl_reset(FAR struct lis3mdl_dev_s *dev)
 {
   lis3mdl_write_register(dev,
-                         LIS3MDL_CTRL_REG_2, LIS3MDL_CTRL_REG_2_SOFT_RST_bm);
+                         LIS3MDL_CTRL_REG_2,
+                         LIS3MDL_CTRL_REG_2_SOFT_RST_bm);
 
   up_mdelay(100);
 }
@@ -250,7 +258,9 @@ static void lis3mdl_read_magnetic_data(FAR struct lis3mdl_dev_s *dev,
                                        uint16_t * x_mag, uint16_t * y_mag,
                                        uint16_t * z_mag)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -258,9 +268,9 @@ static void lis3mdl_read_magnetic_data(FAR struct lis3mdl_dev_s *dev,
 
   SPI_SELECT(dev->spi, dev->config->spi_devid, true);
 
-  /* Transmit the register address from where we want to start reading 0x80 ->
-   * MSB is set -> Read Indication 0x40 -> MSB-1 (MS-Bit) is set -> auto
-   * increment of address when reading multiple bytes.
+  /* Transmit the register address from where we want to start reading
+   * 0x80 -> MSB is set -> Read Indication 0x40 -> MSB-1 (MS-Bit) is
+   * set -> auto increment of address when reading multiple bytes.
    */
 
   SPI_SEND(dev->spi, (LIS3MDL_OUT_X_L_REG | 0x80 | 0x40)); /* RX */
@@ -289,7 +299,9 @@ static void lis3mdl_read_magnetic_data(FAR struct lis3mdl_dev_s *dev,
 static void lis3mdl_read_temperature(FAR struct lis3mdl_dev_s *dev,
                                      uint16_t * temperature)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -297,9 +309,9 @@ static void lis3mdl_read_temperature(FAR struct lis3mdl_dev_s *dev,
 
   SPI_SELECT(dev->spi, dev->config->spi_devid, true);
 
-  /* Transmit the register address from where we want to start reading 0x80 ->
-   * MSB is set -> Read Indication 0x40 -> MSB-1 (MS-Bit) is set -> auto
-   * increment of address when reading multiple bytes.
+  /* Transmit the register address from where we want to start reading
+   * 0x80 -> MSB is set -> Read Indication 0x40 -> MSB-1 (MS-Bit) is
+   * set -> auto increment of address when reading multiple bytes.
    */
 
   SPI_SEND(dev->spi, (LIS3MDL_TEMP_OUT_L_REG | 0x80 | 0x40));
@@ -324,8 +336,8 @@ static void lis3mdl_read_temperature(FAR struct lis3mdl_dev_s *dev,
 
 static int lis3mdl_interrupt_handler(int irq, FAR void *context)
 {
-  /* This function should be called upon a rising edge on the LIS3MDL DRDY pin
-   * since it signals that new data has been measured.
+  /* This function should be called upon a rising edge on the LIS3MDL DRDY
+   * pin since it signals that new data has been measured.
    */
 
   FAR struct lis3mdl_dev_s *priv = 0;
@@ -338,8 +350,8 @@ static int lis3mdl_interrupt_handler(int irq, FAR void *context)
   DEBUGASSERT(priv != NULL);
 
   /* Task the worker with retrieving the latest sensor data. We should not do
-   * this in a interrupt since it might take too long. Also we cannot lock the
-   * SPI bus from within an interrupt.
+   * this in a interrupt since it might take too long. Also we cannot lock
+   * the SPI bus from within an interrupt.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
@@ -395,19 +407,20 @@ static int lis3mdl_open(FAR struct file *filep)
                          LIS3MDL_CTRL_REG_2_FS_1_bm |
                          LIS3MDL_CTRL_REG_2_FS_0_bm);
 
-  /* Enable - temperature sensor - ultra high performance mode (UMP) for X and
-   * Y - fast output data rates This results in a output data rate of 155 Hz
-   * for X and Y.
+  /* Enable - temperature sensor - ultra high performance mode (UMP) for X
+   * and Y - fast output data rates This results in a output data rate of
+   * 155 Hz for X and Y.
    */
 
   lis3mdl_write_register(priv,
                          LIS3MDL_CTRL_REG_1,
                          LIS3MDL_CTRL_REG_1_TEMP_EN_bm |
-                         LIS3MDL_CTRL_REG_1_OM_1_bm | LIS3MDL_CTRL_REG_1_OM_0_bm
-                         | LIS3MDL_CTRL_REG_1_FAST_ODR_bm);
+                         LIS3MDL_CTRL_REG_1_OM_1_bm |
+                         LIS3MDL_CTRL_REG_1_OM_0_bm |
+                         LIS3MDL_CTRL_REG_1_FAST_ODR_bm);
 
-  /* Enable * - ultra high performance mode (UMP) for Z * This should result to
-   * the same output data rate as for X and Y.
+  /* Enable * - ultra high performance mode (UMP) for Z * This should result
+   * to the same output data rate as for X and Y.
    */
 
   lis3mdl_write_register(priv,
@@ -419,7 +432,9 @@ static int lis3mdl_open(FAR struct file *filep)
    * prevent race conditions when reading sensor data.
    */
 
-  lis3mdl_write_register(priv, LIS3MDL_CTRL_REG_5, LIS3MDL_CTRL_REG_5_BDU_bm);
+  lis3mdl_write_register(priv,
+                         LIS3MDL_CTRL_REG_5,
+                         LIS3MDL_CTRL_REG_5_BDU_bm);
 
   /* Enable continuous conversion mode - the device starts measuring now. */
 
@@ -482,7 +497,8 @@ static ssize_t lis3mdl_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct lis3mdl_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: "
+            "Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 
@@ -578,7 +594,8 @@ int lis3mdl_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the LIS3MDL device structure */
 
-  priv = (FAR struct lis3mdl_dev_s *)kmm_malloc(sizeof(struct lis3mdl_dev_s));
+  priv = (FAR struct lis3mdl_dev_s *)
+                       kmm_malloc(sizeof(struct lis3mdl_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

@@ -43,11 +43,11 @@
  *
  * Description:
  *   This function is called from the MCU-specific IDLE loop to monitor the
- *   the power management conditions.  This function returns the "recommended"
- *   power management state based on the PM policy applied by the currently
- *   chosen governor. The IDLE loop must call pm_changestate() in order to
- *   make the state change, which will interact with all drivers registered
- *   with the PM system.
+ *   the power management conditions.  This function returns the
+ *   "recommended" power management state based on the PM policy applied by
+ *   the currently chosen governor. The IDLE loop must call pm_changestate()
+ *   in order to make the state change, which will interact with all drivers
+ *   registered with the PM system.
  *
  *   These two steps are separated because the plaform-specific IDLE loop may
  *   have additional situational information that is not available to the

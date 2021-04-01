@@ -75,7 +75,8 @@ struct mlx90393_dev_s
 static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev);
 static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev);
 static void mlx90393_read_register(FAR struct mlx90393_dev_s *dev,
-                                   uint8_t const reg_addr, uint16_t *reg_data);
+                                   uint8_t const reg_addr,
+                                   uint16_t *reg_data);
 static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
                                     uint8_t const reg_addr,
                                     uint16_t const reg_data);
@@ -86,9 +87,12 @@ static void mlx90393_worker(FAR void *arg);
 static int mlx90393_open(FAR struct file *filep);
 static int mlx90393_close(FAR struct file *filep);
 static ssize_t mlx90393_read(FAR struct file *, FAR char *, size_t);
-static ssize_t mlx90393_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t mlx90393_write(FAR struct file *filep,
+                              FAR const char *buffer,
                               size_t buflen);
-static int mlx90393_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int mlx90393_ioctl(FAR struct file *filep,
+                          int cmd,
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -122,7 +126,9 @@ static struct mlx90393_dev_s *g_mlx90393_list = NULL;
 
 static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -155,7 +161,9 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 {
   int ret;
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -227,7 +235,9 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
 static void mlx90393_reset(FAR struct mlx90393_dev_s *dev)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -261,9 +271,12 @@ static void mlx90393_reset(FAR struct mlx90393_dev_s *dev)
  ****************************************************************************/
 
 static void mlx90393_read_register(FAR struct mlx90393_dev_s *dev,
-                                   uint8_t const reg_addr, uint16_t *reg_data)
+                                   uint8_t const reg_addr,
+                                   uint16_t *reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -303,7 +316,9 @@ static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
                                     uint8_t const reg_addr,
                                     uint16_t const reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -346,8 +361,8 @@ static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
 
 static int mlx90393_interrupt_handler(int irq, FAR void *context)
 {
-  /* This function should be called upon a rising edge on the MLX90393 INT pin
-   * since it signals that new data has been measured. (INT = DRDY).
+  /* This function should be called upon a rising edge on the MLX90393 INT
+   * pin since it signals that new data has been measured. (INT = DRDY).
    */
 
   FAR struct mlx90393_dev_s *priv = 0;
@@ -360,8 +375,8 @@ static int mlx90393_interrupt_handler(int irq, FAR void *context)
   DEBUGASSERT(priv != NULL);
 
   /* Task the worker with retrieving the latest sensor data. We should not do
-   * this in a interrupt since it might take too long. Also we cannot lock the
-   * SPI bus from within an interrupt.
+   * this in a interrupt since it might take too long. Also we cannot lock
+   * the SPI bus from within an interrupt.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
@@ -462,7 +477,8 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct mlx90393_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: "
+            "Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 
@@ -557,7 +573,8 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the MLX90393 device structure */
 
-  priv = (FAR struct mlx90393_dev_s *)kmm_malloc(sizeof(struct mlx90393_dev_s));
+  priv = (FAR struct mlx90393_dev_s *)
+                      kmm_malloc(sizeof(struct mlx90393_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");
@@ -597,8 +614,8 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
       return -ENODEV;
     }
 
-  /* Since we support multiple MLX90393 devices are supported, we will need to
-   * add this new instance to a list of device instances so that it can be
+  /* Since we support multiple MLX90393 devices are supported, we will need
+   * to add this new instance to a list of device instances so that it can be
    * found by the interrupt handler based on the received IRQ number.
    */
 
