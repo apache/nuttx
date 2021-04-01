@@ -53,27 +53,40 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Identifying number of each ADC channel. */
 
 #ifdef CONFIG_STM32_ADC1_DMA
 /* ADC_IN0 and ADC_IN1 */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {9, 8};
+static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
+{
+  9, 8
+};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN9, GPIO_ADC1_IN8};
+static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN9, GPIO_ADC1_IN8
+};
 
 #else
 /* Without DMA, only a single channel can be supported */
 
 /* ADC_IN0 */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] = {9};
+static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
+{
+  9
+};
 
 /* Configurations of pins used byte each ADC channels */
 
-static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC1_IN9};
+static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC1_IN9
+};
 
 #endif /* CONFIG_STM32_ADC1_DMA */
 
@@ -96,6 +109,7 @@ int stm32_adc_setup(void)
   int i;
 
   /* Configure the pins as analog inputs for the selected channels */
+
   syslog(LOG_ERR, "stm32_adc_setup configuration: %d\n", ADC1_NCHANNELS);
 
   for (i = 0; i < ADC1_NCHANNELS; i++)

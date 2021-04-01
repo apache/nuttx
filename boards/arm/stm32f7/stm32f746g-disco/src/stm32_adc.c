@@ -57,6 +57,7 @@
 #endif
 
 /* The number of ADC channels in the conversion list */
+
 /* TODO DMA */
 
 /****************************************************************************
@@ -99,52 +100,52 @@ static const uint32_t g_pinlist[6]  =
  *
  ****************************************************************************/
 
- int stm32_adc_setup(void)
- {
- #ifdef CONFIG_STM32F7_ADC3
-   static bool initialized = false;
-   struct adc_dev_s *adc;
-   int ret;
-   int i;
+int stm32_adc_setup(void)
+{
+#ifdef CONFIG_STM32F7_ADC3
+  static bool initialized = false;
+  struct adc_dev_s *adc;
+  int ret;
+  int i;
 
-   /* Check if we have already initialized */
+  /* Check if we have already initialized */
 
-   if (!initialized)
-     {
-       /* Configure the pins as analog inputs for the selected channels */
+  if (!initialized)
+    {
+      /* Configure the pins as analog inputs for the selected channels */
 
-       for (i = 0; i < ADC3_NCHANNELS; i++)
-         {
-           stm32_configgpio(g_pinlist[i]);
-         }
+      for (i = 0; i < ADC3_NCHANNELS; i++)
+        {
+          stm32_configgpio(g_pinlist[i]);
+        }
 
-       /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-       adc = stm32_adc_initialize(3, g_chanlist, ADC3_NCHANNELS);
-       if (adc == NULL)
-         {
-           aerr("ERROR: Failed to get ADC interface\n");
-           return -ENODEV;
-         }
+      adc = stm32_adc_initialize(3, g_chanlist, ADC3_NCHANNELS);
+      if (adc == NULL)
+        {
+          aerr("ERROR: Failed to get ADC interface\n");
+          return -ENODEV;
+        }
 
-       /* Register the ADC driver at "/dev/adc0" */
+      /* Register the ADC driver at "/dev/adc0" */
 
-       ret = adc_register("/dev/adc3", adc);
-       if (ret < 0)
-         {
-           aerr("ERROR: adc_register failed: %d\n", ret);
-           return ret;
-         }
+      ret = adc_register("/dev/adc3", adc);
+      if (ret < 0)
+        {
+          aerr("ERROR: adc_register failed: %d\n", ret);
+          return ret;
+        }
 
-       /* Now we are initialized */
+      /* Now we are initialized */
 
-       initialized = true;
-     }
+      initialized = true;
+    }
 
-   return OK;
- #else
-   return -ENOSYS;
- #endif
- }
+  return OK;
+#else
+  return -ENOSYS;
+#endif
+}
 
 #endif /* (CONFIG_ADC) && (CONFIG_STM32F7_ADC3) */

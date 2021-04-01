@@ -59,6 +59,7 @@ static inline void set_led(bool v)
 void board_autoled_initialize(void)
 {
   /* Configure LED GPIO for output */
+
   stm32_configgpio(GPIO_LED);
 }
 
@@ -68,16 +69,21 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  ledinfo("board_autoled_on(%d)\n",led);
+  ledinfo("board_autoled_on(%d)\n", led);
   switch (led)
     {
     case LED_STARTED:
     case LED_HEAPALLOCATE:
-      /* As the board provides only one soft controllable LED, we simply turn it on when the board boots */
+      /* As the board provides only one soft controllable LED,
+       * we simply turn it on when the board boots
+       */
+
       set_led(true);
       break;
     case LED_PANIC:
+
       /* For panic state, the LED is blinking */
+
       set_led(true);
       break;
     }
@@ -92,7 +98,9 @@ void board_autoled_off(int led)
   switch (led)
     {
     case LED_PANIC:
+
       /* For panic state, the LED is blinking */
+
       set_led(false);
       break;
     }

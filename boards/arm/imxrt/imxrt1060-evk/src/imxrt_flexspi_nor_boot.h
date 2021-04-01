@@ -61,7 +61,9 @@
 #define FLASH_BASE                  0x60000000
 #define FLASH_END                   0x7f7fffff
 
-/* This needs to take into account  the memory configuration at boot bootloader */
+/* This needs to take into account  the memory configuration at boot
+ * bootloader
+ */
 
 #define ROM_BOOTLOADER_OCRAM_RES    0x8000
 #define OCRAM_BASE                  (0x20200000 + ROM_BOOTLOADER_OCRAM_RES)

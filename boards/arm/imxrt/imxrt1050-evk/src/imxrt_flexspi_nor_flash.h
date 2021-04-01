@@ -140,7 +140,9 @@
 
 #define NOR_CMD_LUT_SEQ_IDX_READSTATUS CMD_LUT_SEQ_IDX_READSTATUS
 
-/* 2  Read status DPI/QPI/OPI sequence id in lookupTable stored in config block */
+/* 2  Read status DPI/QPI/OPI sequence id in lookupTable stored in config
+ * block
+ */
 
 #define NOR_CMD_LUT_SEQ_IDX_READSTATUS_XPI 2
 
@@ -148,7 +150,9 @@
 
 #define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE CMD_LUT_SEQ_IDX_WRITEENABLE
 
-/* 4  Write Enable DPI/QPI/OPI sequence id in lookupTable stored in config block */
+/* 4  Write Enable DPI/QPI/OPI sequence id in lookupTable stored in config
+ * block
+ */
 
 #define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE_XPI 4
 
@@ -172,11 +176,15 @@
 
 #define NOR_CMD_LUT_SEQ_IDX_READ_SFDP 13
 
-/* 14 Restore 0-4-4/0-8-8 mode sequence id in lookupTable stored in config block */
+/* 14 Restore 0-4-4/0-8-8 mode sequence id in lookupTable stored in config
+ * block
+ */
 
 #define NOR_CMD_LUT_SEQ_IDX_RESTORE_NOCMD 14
 
-/* 15 Exit 0-4-4/0-8-8 mode sequence id in lookupTable stored in config blobk */
+/* 15 Exit 0-4-4/0-8-8 mode sequence id in lookupTable stored in config
+ * blobk
+ */
 
 #define NOR_CMD_LUT_SEQ_IDX_EXIT_NOCMD 15
 
@@ -326,17 +334,17 @@ struct flexspi_mem_config_s
 struct flexspi_nor_config_s
 {
   struct flexspi_mem_config_s mem_config; /* Common memory configuration info via FlexSPI */
-  uint32_t page_size;                  /* Page size of Serial NOR */
-  uint32_t sector_size;                /* Sector size of Serial NOR */
-  uint8_t ipcmd_serial_clkfreq;        /* Clock frequency for IP command */
-  uint8_t is_uniform_blocksize;        /* Sector/Block size is the same */
-  uint8_t reserved0[2];                /* Reserved for future use */
-  uint8_t serial_nor_type;             /* Serial NOR Flash type: 0/1/2/3 */
-  uint8_t need_exit_nocmdmode;         /* Need to exit NoCmd mode before other IP command */
-  uint8_t halfclk_for_nonreadcmd;      /* Half the Serial Clock for non-read command: true/false */
-  uint8_t need_restore_nocmdmode;      /* Need to Restore NoCmd mode after IP command execution */
-  uint32_t blocksize;                  /* Block size */
-  uint32_t reserve2[11];               /* Reserved for future use */
+  uint32_t page_size;                     /* Page size of Serial NOR */
+  uint32_t sector_size;                   /* Sector size of Serial NOR */
+  uint8_t ipcmd_serial_clkfreq;           /* Clock frequency for IP command */
+  uint8_t is_uniform_blocksize;           /* Sector/Block size is the same */
+  uint8_t reserved0[2];                   /* Reserved for future use */
+  uint8_t serial_nor_type;                /* Serial NOR Flash type: 0/1/2/3 */
+  uint8_t need_exit_nocmdmode;            /* Need to exit NoCmd mode before other IP command */
+  uint8_t halfclk_for_nonreadcmd;         /* Half the Serial Clock for non-read command: true/false */
+  uint8_t need_restore_nocmdmode;         /* Need to Restore NoCmd mode after IP command execution */
+  uint32_t blocksize;                     /* Block size */
+  uint32_t reserve2[11];                  /* Reserved for future use */
 };
 
 #endif /* __BOARDS_ARM_IMXRT_IMXRT1050_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H */
