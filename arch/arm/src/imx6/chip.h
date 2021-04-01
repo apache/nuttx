@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if defined(CONFIG_SMP)
   .macro  cpuindex, index
   mrc  p15, 0, \index, c0, c0, 5  /* Read the MPIDR */
   and  \index, \index, #3         /* Bits 0-1=CPU ID */
