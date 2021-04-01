@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/getopt.h
+ * libs/libc/unistd/lib_getopt_longonly.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,67 +18,17 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_GETOPT_H
-#define __INCLUDE_GETOPT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <unistd.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define no_argument             0
-#define required_argument       1
-#define optional_argument       2
+#include "unistd.h"
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Functions
  ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-struct option
-{
-  FAR const char *name;
-  int has_arg;
-  FAR int *flag;
-  int val;
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: getopt_long
- *
- * Description:
- *   The getopt_long() function works like getopt() except that it also
- *   accepts long options, started with two dashes. (If the program accepts
- *   only long options, then optstring should be specified as an empty
- *   string (""), not NULL.) Long option names may be abbreviated if the
- *   abbreviation is unique or is an exact match for some defined option
- *
- ****************************************************************************/
-
-int getopt_long(int argc, FAR char * const argv[],
-                FAR const char *optstring,
-                FAR const struct option *longopts,
-                FAR int *longindex);
 
 /****************************************************************************
  * Name: getopt_long_only
@@ -94,11 +44,8 @@ int getopt_long(int argc, FAR char * const argv[],
 int getopt_long_only(int argc, FAR char * const argv[],
                      FAR const char *optstring,
                      FAR const struct option *longopts,
-                     FAR int *longindex);
-
-#undef EXTERN
-#if defined(__cplusplus)
+                     FAR int *longindex)
+{
+  return getopt_common(argc, argv, optstring, longopts, longindex,
+                       GETOPT_LONG_ONLY_MODE);
 }
-#endif
-
-#endif /* __INCLUDE_GETOPT_H */
