@@ -119,6 +119,6 @@ vfork:
 
 	ldr		lr, [sp, #VFORK_LR_OFFSET]
 	add		sp, sp, #VFORK_SIZEOF
-	mov		pc, lr
+	bx		lr
 	.size	vfork, .-vfork
 	.end
