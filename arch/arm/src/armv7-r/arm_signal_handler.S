@@ -33,11 +33,6 @@
  ****************************************************************************/
 
 	.file		"arm_signal_handler.S"
-#ifdef CONFIG_ARCH_FPU
-	.cpu	cortex-r4f
-#else
-	.cpu	cortex-r4
-#endif
 
 /****************************************************************************
  * Private Functions
