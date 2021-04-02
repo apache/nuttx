@@ -136,7 +136,7 @@ longjmp:
 #endif /* CONFIG_ARCH_FPU */
 
 	mov		r0, r1				/* return val */
-	b		lr
+	bx		lr
 
 	.size	longjmp, .-longjmp
 	.end
