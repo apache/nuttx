@@ -19,27 +19,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * IMXRT USB Device Driver
- *
- *   Authors: Thomas Axelsson <thomas.axelsson@actia.se>
- *            Simon Åström <simon.astrom@actia.se>
- *
- * Part of the NuttX OS and based, mostly, on the LPC43xx USB driver:
- *
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Which, in turn, was based on the LPC31xx USB driver:
- *
- *   Authors: David Hewson
- *            Gregory Nutt <gnutt@nuttx.org>
- *
- * Which, in turn, was based on the LPC2148 USB driver:
- *
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
