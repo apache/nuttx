@@ -69,7 +69,7 @@ static int getopt_long_option(FAR struct getopt_s *go,
    * The last element of the option arry must be filled with zeroes.
    */
 
-  for (ndx = 0; longopts[ndx].name[0] != '\0'; ndx++)
+  for (ndx = 0; longopts[ndx].name != NULL; ndx++)
     {
       if (strcmp(go->go_optptr, longopts[ndx].name) == 0)
         {
@@ -99,6 +99,7 @@ static int getopt_long_option(FAR struct getopt_s *go,
                 if (next == NULL || next[0] == '-')
                   {
                     go->go_optptr = NULL;
+                    go->go_optarg = NULL;
                     go->go_optind++;
                     break;
                   }
@@ -168,7 +169,6 @@ static int getopt_long_option(FAR struct getopt_s *go,
   /* This option is not in the list of valid options */
 
   go->go_optopt = *go->go_optptr;
-  go->go_optptr++;
   return '?';
 
 errout:
@@ -251,6 +251,8 @@ int getopt_common(int argc, FAR char * const argv[],
                   FAR int *longindex,
                   enum getopt_mode_e mode)
 {
+  int ret;
+
   /* Get thread-specific getopt() variables */
 
   FAR struct getopt_s *go = getoptvars();
@@ -360,19 +362,22 @@ int getopt_common(int argc, FAR char * const argv[],
       /* go->go_optptr now points at the next option and it is not something
        * crazy.  Possibilities:
        *
-       *  -o
-       *  -o reqarg
-       *  -option
-       *  -option reqarg
-       *  -option optarg
-       *  --option reqarg
-       *  --option optarg
+       *  FORM              APPLICABILITY
+       *  -o                getopt(), getopt_long_only()
+       *  -o reqarg         getopt(), getopt_long_only()
+       *  -o optarg         getopt_long_only()
+       *  -option           getopt_long_only()
+       *  -option reqarg    getopt_long_only()
+       *  -option optarg    getopt_long_only()
+       *  --option          getopt_long(), getopt_long_only()
+       *  --option reqarg   getopt_long(), getopt_long_only()
+       *  --option optarg   getopt_long(), getopt_long_only()
        *
        * Where:
-       *   o      - Some short option
-       *   option - Some long option
-       *   reqarg - A required argument
-       *   optarg - An optional argument
+       *  o      - Some short option
+       *  option - Some long option
+       *  reqarg - A required argument
+       *  optarg - An optional argument
        */
 
       /* Check for --option forms or -option forms */
@@ -396,14 +401,25 @@ int getopt_common(int argc, FAR char * const argv[],
            * must be distinguished from the -o case forms.
            */
 
-          if (GETOPT_HAVE_LONGONLY(mode) && *(go->go_optptr + 1) != '\0')
+          else if (GETOPT_HAVE_LONGONLY(mode))
             {
-              return getopt_long_option(go, argv, longopts, longindex);
+              /* A special case is that the option is of a form like
+               * -o but is represented as a single character long option.
+               * In that case, getopt_long_option() will fail with '?' and,
+               * if it is a single character option, we can just fall
+               * through to the short option logic.
+               */
+
+              ret = getopt_long_option(go, argv, longopts, longindex);
+              if (ret != '?' ||  *(go->go_optptr + 1) != '\0')
+                {
+                  return ret;
+                }
             }
         }
 
       /* Check if the option is in the list of valid short options.
-       * In long option modes, opstring may be NULL. However, but that is
+       * In long option modes, opstring may be NULL. However, that is
        * an error in any case here because we have not found any
        * long options.
        */
@@ -435,8 +451,8 @@ int getopt_common(int argc, FAR char * const argv[],
           return *optchar;
         }
 
-      /* Yes, it has a required argument.  Is the required argument
-       * immediately after the command in this same argument?
+      /* Yes, it may have an argument.  Is the argument immediately after
+       * the command in this same argument?
        */
 
       if (go->go_optptr[1] != '\0')
@@ -449,7 +465,7 @@ int getopt_common(int argc, FAR char * const argv[],
           return *optchar;
         }
 
-      /* No.. is the optional argument the next argument in argv[] ? */
+      /* No.. is there an argument in the next value of argv[] ? */
 
       if (argv[go->go_optind + 1] && *argv[go->go_optind + 1] != '-')
         {
@@ -467,7 +483,10 @@ int getopt_common(int argc, FAR char * const argv[],
       go->go_optarg = NULL;
       go->go_optopt = *optchar;
       go->go_optind++;
-      return noarg_ret;
+
+      /* Two colons means that the argument is optional. */
+
+      return (optchar[2] == ':') ? *optchar : noarg_ret;
     }
 
 errout:
