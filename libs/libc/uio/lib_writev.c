@@ -54,8 +54,8 @@
  *   operation will fail and no data will be transferred.
  *
  * Input Parameters:
- *   filedes - The open file descriptor for the file to be read
- *   iov     - Array of read buffer descriptors
+ *   filedes - The open file descriptor for the file to be write
+ *   iov     - Array of write buffer descriptors
  *   iovcnt  - Number of elements in iov[]
  *
  * Returned Value:
@@ -63,7 +63,7 @@
  *   actually written. Otherwise, it shall return a value of -1, the file-
  *   pointer shall remain unchanged, and errno shall be set to indicate an
  *   error. See write for the list of returned errno values. In addition,
- *   the readv() function will fail if:
+ *   the writev() function will fail if:
  *
  *    EINVAL.
  *      The sum of the iov_len values in the iov array overflowed an ssize_t
