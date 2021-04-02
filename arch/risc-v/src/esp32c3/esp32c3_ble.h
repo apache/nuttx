@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_wlan.h
+ * arch/risc-v/src/esp32c3/esp32c3_ble.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H
-#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_BLE_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_BLE_H
 
 /****************************************************************************
  * Included Files
@@ -27,66 +27,24 @@
 
 #include <nuttx/config.h>
 
-#include "esp32c3_wifi_adapter.h"
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-#ifdef CONFIG_ESP32C3_WIFI
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_wlan_sta_initialize
+ * Name: esp32c3_ble_initialize
  *
  * Description:
- *   Initialize the ESP32-C3 WLAN station netcard driver
+ *   Init BT controller
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   success or fail
  *
  ****************************************************************************/
 
-#ifdef ESP32C3_WLAN_HAS_STA
-int esp32c3_wlan_sta_initialize(void);
-#endif
+int esp32c3_ble_initialize(void);
 
-/****************************************************************************
- * Name: esp32c3_wlan_softap_initialize
- *
- * Description:
- *   Initialize the ESP32-C3 WLAN softAP netcard driver
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- ****************************************************************************/
-
-#ifdef ESP32C3_WLAN_HAS_SOFTAP
-int esp32c3_wlan_softap_initialize(void);
-#endif
-
-#endif /* CONFIG_ESP32C3_WIFI */
-#ifdef __cplusplus
-}
-#endif
-#undef EXTERN
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WLAN_H */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_BLE_H */

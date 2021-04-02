@@ -133,6 +133,8 @@
 /* Reserved CPU interrupt for specific drivers */
 
 #define ESP32C3_CPUINT_WMAC            1  /* Wi-Fi MAC */
+#define ESP32C3_CPUINT_BT_BB           5  /* BT BB */
+#define ESP32C3_CPUINT_RWBLE           8  /* RW BLE */
 
 /* IRQ numbers. */
 
