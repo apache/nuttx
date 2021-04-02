@@ -81,8 +81,8 @@ void weak_function k66_spidev_initialize(void)
  *      is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      kinetis_spi[n]cmddata() functions in your board-specific logic.
- *      These functions will perform cmd/data selection operations using GPIOs
- *      in the way your board is configured.
+ *      These functions will perform cmd/data selection operations using
+ *      GPIOs in the way your board is configured.
  *   3. Add a call to kinetis_spibus_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by kinetis_spibus_initialize() may then be used

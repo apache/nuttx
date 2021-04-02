@@ -64,7 +64,9 @@ struct zc_upperhalf_s
   FAR struct zc_open_s *zu_open;
 };
 
-/* This structure describes the state of one open zero cross driver instance */
+/* This structure describes the state of one open zero cross driver
+ * instance
+ */
 
 struct zc_open_s
 {

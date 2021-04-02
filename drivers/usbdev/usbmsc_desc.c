@@ -324,78 +324,79 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
    */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
-  {
-    /* Configuration descriptor  If the USB mass storage device is configured as part
-     * of a composite device, then the configuration descriptor will be provided
-     * by the composite device logic.
-     */
+    {
+      /* Configuration descriptor  If the USB mass storage device is
+       * configured as part of a composite device, then the configuration
+       * descriptor will be provided by the composite device logic.
+       */
 
-    FAR struct usb_cfgdesc_s *dest = (FAR struct usb_cfgdesc_s *)buf;
+      FAR struct usb_cfgdesc_s *dest = (FAR struct usb_cfgdesc_s *)buf;
 
-    dest->len         = USB_SIZEOF_CFGDESC;               /* Descriptor length */
+      dest->len         = USB_SIZEOF_CFGDESC;               /* Descriptor length */
 #ifdef CONFIG_USBDEV_DUALSPEED
-    dest->type        = type;                             /* Descriptor type */
+      dest->type        = type;                             /* Descriptor type */
 #else
-    dest->type        = USB_DESC_TYPE_CONFIG;             /* Descriptor type */
+      dest->type        = USB_DESC_TYPE_CONFIG;             /* Descriptor type */
 #endif
-    dest->totallen[0] = LSBYTE(SIZEOF_USBMSC_CFGDESC);    /* LS Total length */
-    dest->totallen[1] = MSBYTE(SIZEOF_USBMSC_CFGDESC);    /* MS Total length */
-    dest->ninterfaces = USBMSC_NINTERFACES;               /* Number of interfaces */
-    dest->cfgvalue    = USBMSC_CONFIGID;                  /* Configuration value */
-    dest->icfg        = USBMSC_CONFIGSTRID;               /* Configuration */
-    dest->attr        = USB_CONFIG_ATTR_ONE |             /* Attributes */
+      dest->totallen[0] = LSBYTE(SIZEOF_USBMSC_CFGDESC);    /* LS Total length */
+      dest->totallen[1] = MSBYTE(SIZEOF_USBMSC_CFGDESC);    /* MS Total length */
+      dest->ninterfaces = USBMSC_NINTERFACES;               /* Number of interfaces */
+      dest->cfgvalue    = USBMSC_CONFIGID;                  /* Configuration value */
+      dest->icfg        = USBMSC_CONFIGSTRID;               /* Configuration */
+      dest->attr        = USB_CONFIG_ATTR_ONE |             /* Attributes */
                         USBMSC_SELFPOWERED |
                         USBMSC_REMOTEWAKEUP;
-    dest->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
+      dest->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
 
-    buf    += sizeof(struct usb_cfgdesc_s);
-    length += sizeof(struct usb_cfgdesc_s);
-  }
+      buf    += sizeof(struct usb_cfgdesc_s);
+      length += sizeof(struct usb_cfgdesc_s);
+    }
 #endif
 
   /* Copy the canned interface descriptor */
 
-  {
-    /* Single interface descriptor */
+    {
+      /* Single interface descriptor */
 
-    FAR struct usb_ifdesc_s * dest = (struct usb_ifdesc_s *)buf;
+      FAR struct usb_ifdesc_s * dest = (struct usb_ifdesc_s *)buf;
 
-    dest->len      = USB_SIZEOF_IFDESC;                        /* Descriptor length */
-    dest->type     = USB_DESC_TYPE_INTERFACE;                  /* Descriptor type */
-    dest->ifno     = devinfo->ifnobase;                        /* Interface number */
-    dest->alt      = USBMSC_ALTINTERFACEID;                    /* Alternate setting */
-    dest->neps     = USBMSC_NENDPOINTS;                        /* Number of endpoints */
-    dest->classid  = USB_CLASS_MASS_STORAGE;                   /* Interface class */
-    dest->subclass = USBMSC_SUBCLASS_SCSI;                     /* Interface sub-class */
-    dest->protocol = USBMSC_PROTO_BULKONLY;                    /* Interface protocol */
-    dest->iif      = devinfo->strbase + USBMSC_INTERFACESTRID; /* iInterface */
+      dest->len      = USB_SIZEOF_IFDESC;                        /* Descriptor length */
+      dest->type     = USB_DESC_TYPE_INTERFACE;                  /* Descriptor type */
+      dest->ifno     = devinfo->ifnobase;                        /* Interface number */
+      dest->alt      = USBMSC_ALTINTERFACEID;                    /* Alternate setting */
+      dest->neps     = USBMSC_NENDPOINTS;                        /* Number of endpoints */
+      dest->classid  = USB_CLASS_MASS_STORAGE;                   /* Interface class */
+      dest->subclass = USBMSC_SUBCLASS_SCSI;                     /* Interface sub-class */
+      dest->protocol = USBMSC_PROTO_BULKONLY;                    /* Interface protocol */
+      dest->iif      = devinfo->strbase + USBMSC_INTERFACESTRID; /* iInterface */
 
-    buf    += sizeof(struct usb_ifdesc_s);
-    length += sizeof(struct usb_ifdesc_s);
-  }
+      buf    += sizeof(struct usb_ifdesc_s);
+      length += sizeof(struct usb_ifdesc_s);
+    }
 
   /* Make the two endpoint configurations */
 
   /* Bulk IN endpoint descriptor */
 
-  {
-    int len = usbmsc_copy_epdesc(USBMSC_EPBULKIN, (FAR struct usb_epdesc_s *)buf,
-                                 devinfo, hispeed);
+    {
+      int len = usbmsc_copy_epdesc(USBMSC_EPBULKIN,
+                                  (FAR struct usb_epdesc_s *)buf,
+                                   devinfo, hispeed);
 
-    buf += len;
-    length += len;
-  }
+      buf += len;
+      length += len;
+    }
 
   /* Bulk OUT endpoint descriptor */
 
-  {
-    int len = usbmsc_copy_epdesc(USBMSC_EPBULKOUT,
-                                 (FAR struct usb_epdesc_s *)buf, devinfo,
-                                 hispeed);
+    {
+      int len = usbmsc_copy_epdesc(USBMSC_EPBULKOUT,
+                                  (FAR struct usb_epdesc_s *)buf, devinfo,
+                                   hispeed);
 
-    buf += len;
-    length += len;
-  }
+      buf += len;
+      length += len;
+    }
 
   return SIZEOF_USBMSC_CFGDESC;
 }
