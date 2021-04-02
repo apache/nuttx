@@ -117,7 +117,9 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
   udpiplen = iplen + UDP_HDRLEN;
 
-  /* Get the size of the link layer header, the IP header, and the UDP header */
+  /* Get the size of the link layer header, the IP header, and the UDP
+   * header
+   */
 
   hdrlen = udpiplen + NET_LL_HDRLEN(dev);
 
