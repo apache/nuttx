@@ -77,7 +77,8 @@ double erf(double x)
 
   z = fabs(x);
   t = 1.0 / (1.0 + P * z);
-  t = 1.0 - (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * exp(-z * z);
+  t = 1.0 -
+      (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * exp(-z * z);
   return copysign(t, x);
 }
 

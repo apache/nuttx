@@ -188,18 +188,19 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
 
       path = envpath->next;
       if (*path == '\0')
-       {
-          /* If it points to a NULL it means that either (1) the PATH varialbe
-           * is empty, or (2) we have already examined all of the paths in the
-           * path variable.
+        {
+          /* If it points to a NULL it means that either (1) the PATH
+           * varialbe is empty, or (2) we have already examined all of the
+           * paths in the path variable.
            */
 
           return (FAR char *)NULL;
-       }
+        }
 
-      /* Okay... 'path' points to the beginning of the string.  The string may
-       * be terminated either with (1) ':' which separates the path from the
-       * next path in the list, or (2) NUL which marks the end of the list.
+      /* Okay... 'path' points to the beginning of the string.  The string
+       * may be terminated either with (1) ':' which separates the path from
+       * the next path in the list, or (2) NUL which marks the end of the
+       * list.
        */
 
       endptr = strchr(path, ':');

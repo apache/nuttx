@@ -71,7 +71,7 @@
 
 static inline int is_real(double x)
 {
-  const double infinite = 1.0/0.0;
+  const double infinite = 1.0 / 0.0;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -97,7 +97,7 @@ double strtod(FAR const char *str, FAR char **endptr)
   int n;
   int num_digits;
   int num_decimals;
-  const double infinite = 1.0/0.0;
+  const double infinite = 1.0 / 0.0;
 
   /* Skip leading whitespace */
 
@@ -113,10 +113,14 @@ double strtod(FAR const char *str, FAR char **endptr)
     {
     case '-':
       negative = 1; /* Fall through to increment position */
+
       /* FALLTHROUGH */
+
     case '+':
       p++;
+
       /* FALLTHROUGH */
+
     default:
       break;
     }
@@ -177,10 +181,14 @@ double strtod(FAR const char *str, FAR char **endptr)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */
+
           /* FALLTHROUGH */
+
         case '+':
           p++;
+
           /* FALLTHROUGH */
+
         default:
           break;
         }

@@ -52,7 +52,10 @@
 FAR char *itoa(int val, FAR char *str, int base)
 {
   static FAR const char *digits = "0123456789abcdefghijklmnopqrstuvwxyz";
-  int intval = abs(val), digit, pos, len;
+  int intval = abs(val);
+  int digit;
+  int pos;
+  int len;
   FAR char *buf = str;
   char swap;
 

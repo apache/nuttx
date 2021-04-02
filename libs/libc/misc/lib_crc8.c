@@ -52,7 +52,7 @@
 /****************************************************************************
  * CRC8 table generated with:
  *
- *   #define POLY 0xB2   // ((uint8_t) 0x14D) ^ 0xFF
+ *   #define POLY 0xB2    ((uint8_t) 0x14D) ^ 0xFF
  *
  *   printf("    ");
  *   for (y = 0; y < 256; y++)

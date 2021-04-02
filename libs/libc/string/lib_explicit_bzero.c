@@ -41,7 +41,7 @@
 #include <string.h>
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /* memset that must not be optimized away by compiler (not even with LTO). */

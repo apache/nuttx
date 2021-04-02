@@ -53,7 +53,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Indices, counts, helper macros ******************************************/
+/* Indices, counts, helper macros *******************************************/
 
 #define NDX_ESC        0
 #define NDX_BRACKET    1
@@ -134,11 +134,11 @@ static enum slcdret_e slcd_reget(FAR struct slcdstate_s *state,
   *pch = state->buf[state->ndx];
   *parg = 0;
 
-   /* Bump up the indices and return false (meaning a normal character) */
+  /* Bump up the indices and return false (meaning a normal character) */
 
-   state->ndx++;
-   state->nch--;
-   return SLCDRET_CHAR;
+  state->ndx++;
+  state->nch--;
+  return SLCDRET_CHAR;
 }
 
 /****************************************************************************
@@ -173,7 +173,6 @@ static enum slcdret_e slcd_reget(FAR struct slcdstate_s *state,
 enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
                            FAR struct slcdstate_s *state, FAR uint8_t *pch,
                            FAR uint8_t *parg)
-
 {
   enum slcdcode_e code;
   uint8_t count;
