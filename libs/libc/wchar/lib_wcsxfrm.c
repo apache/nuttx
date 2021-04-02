@@ -48,10 +48,10 @@
  * Name: wcsxfrm
  *
  * Description:
- *   The wcsxfrm() transforms the wide-character string pointed to by b to the
- *   wide-character string pointed to by a, comparing two transformed wide
- *   strings with wcscmp() should return the same result as comparing the
- *   original strings with wcscoll().
+ *   The wcsxfrm() transforms the wide-character string pointed to by b to
+ *   the wide-character string pointed to by a, comparing two transformed
+ *   wide strings with wcscmp() should return the same result as comparing
+ *   the original strings with wcscoll().
  *   No more than n wide characters are transformed, including the trailing
  *   null character. The current implementation of wcsxfrm() simply uses
  *   wcslcpy() and does not support any language-specific transformations.

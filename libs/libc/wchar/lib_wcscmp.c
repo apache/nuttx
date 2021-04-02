@@ -49,10 +49,11 @@
  *
  * Description:
  *   The wcscmp() function returns zero if the wide-character strings at s1
- *   and s2 are equal. It returns an integer greater than zero if at the first
- *   differing position i, the corresponding wide-character s1[i] is greater
- *   than s2[i].  It returns an integer less than zero if at the first differ-
- *   ing position i, the corresponding wide-character s1[i] is less than s2[i]
+ *   and s2 are equal. It returns an integer greater than zero if at the
+ *   first differing position i, the corresponding wide-character s1[i] is
+ *   greater than s2[i].  It returns an integer less than zero if at the
+ *   first differing position i, the corresponding wide-character s1[i] is
+ *   less than s2[i]
  *
  ****************************************************************************/
 

@@ -47,8 +47,9 @@
  * Name: wcstoull
  *
  * Description:
- *   The wcstoull() function is the wide-character equivalent of the strtoull()
- *   function. It converts a wchar string to unsigned long long value.
+ *   The wcstoull() function is the wide-character equivalent of the
+ *   strtoull() function. It converts a wchar string to unsigned long long
+ *   value.
  *
  ****************************************************************************/
 

@@ -133,7 +133,6 @@ FAR char *strtok_r(FAR char *str, FAR const char *delim, FAR char **saveptr)
        *pend && strchr(delim, *pend) == NULL;
        pend++);
 
-
   /* pend either points to the end of the string or to
    * the first delimiter after the string.
    */
@@ -153,5 +152,6 @@ FAR char *strtok_r(FAR char *str, FAR const char *delim, FAR char **saveptr)
     {
       *saveptr = pend;
     }
+
   return pbegin;
 }

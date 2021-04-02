@@ -115,7 +115,8 @@ double __cos(double x, double y)
   z = x * x;
   w = z * z;
   r =
-    z * (g_c1 + z * (g_c2 + z * g_c3)) + w * w * (g_c4 + z * (g_c5 + z * g_c6));
+    z * (g_c1 + z * (g_c2 + z * g_c3)) +
+         w * w * (g_c4 + z * (g_c5 + z * g_c6));
   hz = 0.5 * z;
   w = 1.0 - hz;
 

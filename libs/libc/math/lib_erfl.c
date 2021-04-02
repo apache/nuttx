@@ -61,11 +61,13 @@ long double erfl(long double x)
    * erf comes from formula 7.1.26
    */
 
-  long double t, z;
+  long double t;
+  long double z;
 
   z = fabsl(x);
   t = 1.0 / (1.0 + P * z);
-  t = 1.0 - (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * expl(-z * z);
+  t = 1.0 -
+      (((((A5 * t + A4) * t) + A3) * t + A2) * t + A1) * t * expl(-z * z);
   return copysignl(t, x);
 }
 #endif

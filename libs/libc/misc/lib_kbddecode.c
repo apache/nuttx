@@ -94,9 +94,9 @@ static int kbd_reget(FAR struct kbd_getstate_s *state, FAR uint8_t *pch)
   /* Return the next character */
 
   *pch = state->buf[state->ndx];
-   state->ndx++;
-   state->nch--;
-   return KBD_PRESS;
+  state->ndx++;
+  state->nch--;
+  return KBD_PRESS;
 }
 
 /****************************************************************************
@@ -169,7 +169,9 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
       if (ch != ASCII_ESC)
         {
-          /* Not the beginning of an escape sequence.  Return the character. */
+          /* Not the beginning of an escape sequence.
+           *  Return the character.
+           */
 
           return kbd_reget(state, pch);
         }

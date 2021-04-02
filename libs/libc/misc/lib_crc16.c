@@ -6,19 +6,14 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *
- *   crc16_tab calculated by Mark G. Mendel, Network Systems Corporation.
- *   crc16part() logic derived from article Copyright (C) 1986 Stephen Satchell.
- *
  * "Programmers may incorporate any or all code into their programs,
  *  giving proper credit within the source. Publication of the
  *  source routines is permitted so long as proper credit is given
  *  to Stephen Satchell, Satchell Evaluations and Chuck Forsberg,
  *  Omen Technology."
  *
- * Re-released under the Modified BSD license which, I believe, is consistent with the
- * original authors' intent:
+ * Re-released under the Modified BSD license which, I believe, is
+ * consistent with the original authors' intent:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,6 +43,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ************************************************************************************************/
+
+/* References:
+ *
+ *   crc16_tab calculated by Mark G. Mendel, Network Systems Corporation.
+ *   crc16part() logic derived from article Copyright (C) 1986 Stephen
+ *    Satchell.
+ */
 
 /************************************************************************************************
  * Included Files
@@ -102,6 +104,7 @@ static uint16_t crc16_tab[256] =
 /************************************************************************************************
  * Public Functions
  ************************************************************************************************/
+
 /************************************************************************************************
  * Name: crc16part
  *
@@ -116,7 +119,8 @@ uint16_t crc16part(FAR const uint8_t *src, size_t len, uint16_t crc16val)
 
   for (i = 0; i < len; i++)
     {
-      crc16val = crc16_tab[((crc16val >> 8) & 0xff) ^ src[i]] ^ (crc16val << 8);
+      crc16val = crc16_tab[((crc16val >> 8) & 0xff) ^
+                 src[i]] ^ (crc16val << 8);
     }
 
   return crc16val;
