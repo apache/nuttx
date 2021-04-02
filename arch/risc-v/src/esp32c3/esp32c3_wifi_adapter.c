@@ -354,6 +354,14 @@ static int wifi_coex_set_schm_curr_phase_idx(int idx);
 static int wifi_coex_get_schm_curr_phase_idx(void);
 
 /****************************************************************************
+ * Extern Functions declaration
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_BLE
+extern void coex_pti_v2(void);
+#endif
+
+/****************************************************************************
  * Public Functions declaration
  ****************************************************************************/
 
@@ -2456,6 +2464,9 @@ static void wifi_phy_enable(void)
       esp_phy_enable_clock();
       phy_set_wifi_mode_only(0);
       register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
+#ifdef CONFIG_ESP32C3_BLE
+      coex_pti_v2();
+#endif
     }
 
   g_phy_access_ref++;

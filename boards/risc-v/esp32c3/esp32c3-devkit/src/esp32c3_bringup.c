@@ -67,6 +67,10 @@
 #  include "esp32c3_rtc_lowerhalf.h"
 #endif
 
+#ifdef CONFIG_ESP32C3_BLE
+#  include "esp32c3_ble.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -303,10 +307,20 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+      return ret;
     }
 #endif
 
-#ifdef CONFIG_ESP32C3_WIRELESS
+#ifdef CONFIG_ESP32C3_BLE
+  ret = esp32c3_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_WIFI
 
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   ret = esp32c3_init_wifi_storage();

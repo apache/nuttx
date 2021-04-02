@@ -88,10 +88,19 @@ void up_irqinitialize(void)
    *   Object  |  CPU INT  |  Peripheral
    *           |           |
    *    Wi-Fi  |     1     |      1
+   *    BT BB  |     5     |      5
+   *    RW BLE |     8     |      8
    */
 
 #ifdef CONFIG_ESP32C3_WIRELESS
+#  ifdef CONFIG_ESP32C3_WIFI
   g_cpuint_map[ESP32C3_CPUINT_WMAC] = ESP32C3_PERIPH_WIFI_MAC_NMI;
+#  endif
+
+#  ifdef CONFIG_ESP32C3_BLE
+  g_cpuint_map[ESP32C3_CPUINT_BT_BB] = ESP32C3_PERIPH_BT_BB;
+  g_cpuint_map[ESP32C3_CPUINT_RWBLE] = ESP32C3_PERIPH_RWBLE_IRQ;
+#  endif
 #endif
 
   /* Clear all peripheral interrupts from "bootloader" */
