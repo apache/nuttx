@@ -60,7 +60,8 @@ void k66_usbinitialize(void)
  *   If USB is supported and the board supports a pullup via GPIO (for USB
  *   software connect and disconnect), then the board software must provide
  *   kinetis_usbpullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
+ *   See include/nuttx/usb/usbdev.h for additional description of this
+ *   method.
  *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined
  *   to be NULL.
  *

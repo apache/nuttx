@@ -18,10 +18,10 @@
  *
  ****************************************************************************/
 
-/* A micro Secure Digital (SD) card slot is available on the FRDM-K66F connected to
- * the SD Host Controller (SDHC) signals of the MCU. This slot will accept micro
- * format SD memory cards. The SD card detect pin (PTD10) is an open switch that
- * shorts with VDD when card is inserted.
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K66F
+ * connected to the SD Host Controller (SDHC) signals of the MCU. This slot
+ * will accept micro format SD memory cards. The SD card detect pin (PTD10)
+ * is an open switch that shorts with VDD when card is inserted.
  *
  *   ------------ ------------- --------
  *    SD Card Slot Board Signal  K66F Pin
@@ -66,6 +66,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure holds static information unique to one SDHC peripheral */
 
 struct k66_sdhc_state_s
@@ -107,7 +108,9 @@ static void k66_mediachange(void)
     {
       mcinfo("Media change: %d->%d\n",  g_sdhc.inserted, inserted);
 
-      /* Yes.. perform the appropriate action (this might need some debounce). */
+      /* Yes.. perform the appropriate action
+       * (this might need some debounce).
+       */
 
       g_sdhc.inserted = inserted;
       sdhc_mediachange(g_sdhc.sdhc, inserted);
@@ -159,6 +162,7 @@ int k66_sdhc_initialize(void)
   /* Configure the write protect GPIO -- None */
 
   /* Mount the SDHC-based MMC/SD block driver */
+
   /* First, get an instance of the SDHC interface */
 
   mcinfo("Initializing SDHC slot %d\n", MMCSD_SLOTNO);
@@ -177,7 +181,8 @@ int k66_sdhc_initialize(void)
   ret = mmcsd_slotinitialize(MMSCD_MINOR, g_sdhc.sdhc);
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SDHC to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
@@ -205,8 +210,8 @@ bool k66_cardinserted(void)
 {
   bool inserted;
 
-  /* Get the current value of the card detect pin.  This pin is pulled to VDD on
-   * insert.  So high means that a card is present.
+  /* Get the current value of the card detect pin.  This pin is pulled to VDD
+   * on insert.  So high means that a card is present.
    */
 
   inserted = kinetis_gpioread(GPIO_SD_CARDDETECT);
