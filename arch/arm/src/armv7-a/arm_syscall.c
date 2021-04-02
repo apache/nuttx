@@ -27,7 +27,6 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
-#include <syscall.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -219,19 +218,19 @@ uint32_t *arm_syscall(uint32_t *regs)
         }
         break;
 
-      /* R0=SYS_context_restore:  Restore task context
+      /* R0=SYS_restore_context:  Restore task context
        *
        * void arm_fullcontextrestore(uint32_t *restoreregs)
        *   noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = SYS_context_restore
+       *   R0 = SYS_restore_context
        *   R1 = restoreregs
        */
 
 #ifdef CONFIG_BUILD_KERNEL
-      case SYS_context_restore:
+      case SYS_restore_context:
         {
           /* Replace 'regs' with the pointer to the register set in
            * regs[REG_R1].  On return from the system call, that register

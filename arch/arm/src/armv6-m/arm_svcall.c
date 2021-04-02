@@ -33,10 +33,6 @@
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_LIB_SYSCALL
-#  include <syscall.h>
-#endif
-
 #include "signal/signal.h"
 #include "svcall.h"
 #include "exc_return.h"

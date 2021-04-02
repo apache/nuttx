@@ -70,7 +70,7 @@ arm_fullcontextrestore:
 
 	mov		r1, r0				/* R1: regs */
 	mov		r0, #SYS_restore_context	/* R0: restore context */
-	svc		0				/* Force synchronous SVCall (or Hard Fault) */
+	svc		#SYS_syscall			/* Force synchronous SVCall (or Hard Fault) */
 
 	/* This call should not return */
 
