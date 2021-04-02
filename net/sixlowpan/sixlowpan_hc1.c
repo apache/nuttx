@@ -210,7 +210,8 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
              * 15
              */
 
-            ninfo("local/remote port %04x/%04x\n", udp->srcport, udp->destport);
+            ninfo("local/remote port %04x/%04x\n",
+                   udp->srcport, udp->destport);
 
             if (ntohs(udp->srcport)  >=  CONFIG_NET_6LOWPAN_MINPORT &&
                 ntohs(udp->srcport)  <  (CONFIG_NET_6LOWPAN_MINPORT + 16) &&
@@ -233,7 +234,8 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
                   (uint8_t)((ntohs(udp->destport) -
                             CONFIG_NET_6LOWPAN_MINPORT));
 
-                memcpy(&hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
+                memcpy(&hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM],
+                       &udp->udpchksum, 2);
 
                 g_frame_hdrlen  += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
                 g_uncomp_hdrlen += UDP_HDRLEN;
@@ -341,7 +343,8 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
 #ifdef CONFIG_NET_UDP
     case SIXLOWPAN_HC1_NH_UDP:
       {
-        FAR struct udp_hdr_s *udp = (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
+        FAR struct udp_hdr_s *udp =
+                         (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
         FAR uint8_t *hcudp = fptr + g_frame_hdrlen;
 
         ipv6->proto = IP_PROTO_UDP;
@@ -355,7 +358,8 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
             if (hcudp[SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING] !=
                 SIXLOWPAN_HC_UDP_ALL_C)
               {
-                nwarn("WARNING: sixlowpan (uncompress_hdr), packet not supported");
+                nwarn("WARNING: "
+                      "sixlowpan (uncompress_hdr), packet not supported");
                 return -EOPNOTSUPP;
               }
 
@@ -372,9 +376,11 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
               htons(CONFIG_NET_6LOWPAN_MINPORT +
                     (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] & 0x0f));
 
-            ninfo("UDP srcport=%04x destport=%04x\n", udp->srcport, udp->destport);
+            ninfo("UDP srcport=%04x destport=%04x\n",
+                   udp->srcport, udp->destport);
 
-            memcpy(&udp->udpchksum, &hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], 2);
+            memcpy(&udp->udpchksum,
+                   &hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], 2);
 
             g_uncomp_hdrlen += UDP_HDRLEN;
             g_frame_hdrlen  += SIXLOWPAN_HC1_HC_UDP_HDR_LEN;
@@ -474,7 +480,8 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
 
   if (ipv6->proto == IP_PROTO_UDP)
     {
-      FAR struct udp_hdr_s *udp = (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
+      FAR struct udp_hdr_s *udp =
+                           (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
       memcpy(&udp->udplen, &ipv6->len[0], 2);
 
       ninfo("IPv6 len=%04x\n", udp->udplen);
