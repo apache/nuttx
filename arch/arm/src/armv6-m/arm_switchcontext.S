@@ -73,7 +73,7 @@ arm_switchcontext:
 	mov		r2, r1					/* R2: restoreregs */
 	mov		r1, r0					/* R1: saveregs */
 	mov		r0, #SYS_switch_context			/* R0: context switch */
-	svc		0					/* Force synchronous SVCall (or Hard Fault) */
+	svc		#SYS_syscall				/* Force synchronous SVCall (or Hard Fault) */
 
 	/* We will get here only after the rerturn from the context switch */
 
