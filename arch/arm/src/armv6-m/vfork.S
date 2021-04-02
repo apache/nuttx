@@ -34,7 +34,6 @@
  * Public Symbols
  ****************************************************************************/
 
-	.cpu	cortex-m0
 	.file	"vfork.S"
 	.globl	up_vfork
 

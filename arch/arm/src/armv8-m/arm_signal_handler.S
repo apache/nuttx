@@ -34,7 +34,6 @@
 
 	.syntax		unified
 	.thumb
-	.cpu		cortex-m3
 	.file		"arm_signal_handler.S"
 
 /****************************************************************************
