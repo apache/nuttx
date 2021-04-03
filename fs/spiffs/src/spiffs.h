@@ -102,7 +102,9 @@ typedef int32_t(*spiffs_read_t)(uint32_t addr, uint32_t size, uint8_t * dst);
 
 /* spi write call function type */
 
-typedef int32_t(*spiffs_write_t)(uint32_t addr, uint32_t size, uint8_t * src);
+typedef int32_t(*spiffs_write_t)(uint32_t addr,
+                                 uint32_t size,
+                                 uint8_t * src);
 
 /* spi erase call function type */
 
