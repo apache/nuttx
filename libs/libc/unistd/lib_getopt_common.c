@@ -281,16 +281,6 @@ int getopt_common(int argc, FAR char * const argv[],
           go->go_binitialized = true;  /* Now we are initialized */
         }
 
-      /* If the first character of opstring s ':', then ':' is in the event
-       * of a missing argument. Otherwise '?' is returned.
-       */
-
-      if (*optstring == ':')
-        {
-           noarg_ret = ':';
-           optstring++;
-        }
-
       /* Are we resuming in the middle, or at the end of a string of
        * arguments? optptr == NULL means that we are started at the
        * beginning of argv[optind]; *optptr == \0 means that we are
@@ -426,8 +416,42 @@ int getopt_common(int argc, FAR char * const argv[],
 
       if (optstring == NULL)
         {
-          goto errout;
+          /* Not an error with getopt_long() */
+
+          if (GETOPT_HAVE_LONG(mode))
+            {
+              /* Return '?'.  optptr is reset to the next argv entry,
+               * discarding everything else that follows in the argv string
+               * (which could be another single character command).
+               */
+
+              go->go_optopt = *go->go_optptr;
+              go->go_optptr = NULL;
+              go->go_optind++;
+              return '?';
+            }
+          else
+            {
+              /* Restore the initial, uninitialized state, and return an
+               * error.
+               */
+
+              go->go_binitialized = false;
+              return ERROR;
+            }
         }
+
+      /* If the first character of opstring s ':', then ':' is in the event
+       * of a missing argument. Otherwise '?' is returned.
+       */
+
+      if (*optstring == ':')
+        {
+          noarg_ret = ':';
+          optstring++;
+        }
+
+      /* Check if the option appears in 'optstring' */
 
       optchar = strchr(optstring, *go->go_optptr);
       if (!optchar)
@@ -439,7 +463,7 @@ int getopt_common(int argc, FAR char * const argv[],
           return '?';
         }
 
-      /* Yes, the character is in the list of valid options.  Does it have an
+      /* Yes, the character is in the list of valid options.  Does it have a
        * required argument?
        */
 
@@ -489,9 +513,7 @@ int getopt_common(int argc, FAR char * const argv[],
       return (optchar[2] == ':') ? *optchar : noarg_ret;
     }
 
-errout:
-
-  /* Restore the initial, uninitialized state */
+  /* Restore the initial, uninitialized state, and return an error. */
 
   go->go_binitialized = false;
   return ERROR;
