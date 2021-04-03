@@ -137,6 +137,10 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   group->tg_libvars = up_stack_frame(&tcb->cmn, sizeof(struct libvars_s));
   DEBUGASSERT(group->tg_libvars != NULL);
 
+  /* Initialize the task-specific data */
+
+  memset(group->tg_libvars, 0, sizeof(struct libvars_s));
+
   /* Save the allocated task data in TLS */
 
   tls_set_taskdata(&tcb->cmn);
