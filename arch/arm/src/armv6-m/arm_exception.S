@@ -138,12 +138,6 @@ exception_common:
 
 	mrs		r0, ipsr				/* R0=exception number */
 
-	/* Disable interrupts, select the stack to use for interrupt handling
-	 * and call arm_doirq to handle the interrupt
-	 */
-
-	cpsid	i						/* Disable further interrupts */
-
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will use a special interrupt
 	 * stack pointer.  The way that this is done here prohibits nested interrupts!
 	 * Otherwise, we will use the stack that was current when the interrupt was taken.
@@ -246,7 +240,6 @@ exception_common:
 	/* Restore the interrupt state */
 
 	msr		primask, r3				/* Restore interrupts priority masking*/
-	cpsie	i						/* Re-enable interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) select the correct stack.
