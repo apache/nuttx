@@ -1,58 +1,44 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_tc.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_TC_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_TC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Timer Channel Offset *************************************************************/
+ ****************************************************************************/
+
+/* Timer Channel Offset *****************************************************/
 
 #define AVR32_TC_CHAN_OFFSET(n)   ((n) << 6)
 #define AVR32_TC_CHAN0_OFFSET     (0x000)
 #define AVR32_TC_CHAN1_OFFSET     (0x040)
 #define AVR32_TC_CHAN2_OFFSET     (0x080)
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_TC_CCR_OFFSET       0x000 /* Channel Control Register */
 #define AVR32_TC_CMR_OFFSET       0x004 /* Channel Mode Register */
@@ -112,14 +98,14 @@
 #define AVR32_TC_BCR_OFFSET       0x0c0 /* Block Control Register */
 #define AVR32_TC_BMR_OFFSET       0x0c4 /* Block Mode Register */
 
-/* Timer Channel Base Addresses *****************************************************/
+/* Timer Channel Base Addresses *********************************************/
 
 #define AVR32_TC_CHAN_BASE(n)     (AVR32_TC_BASE+AVR32_TC_CHAN_OFFSET(n))
 #define AVR32_TC_CHAN0_BASE       (AVR32_TC_BASE+AVR32_TC_CHAN0_OFFSET)
 #define AVR32_TC_CHAN1_BASE       (AVR32_TC_BASE+AVR32_TC_CHAN1_OFFSET)
 #define AVR32_TC_CHAN2_BASE       (AVR32_TC_BASE+AVR32_TC_CHAN2_OFFSET)
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_TC_CCR(n)           (AVR32_TC_CHAN0_BASE(n)+AVR32_TC_CCR_OFFSET)
 #define AVR32_TC_CMRn(n)          (AVR32_TC_CHAN0_BASE(n)+AVR32_TC_CMR_OFFSET)
@@ -168,7 +154,7 @@
 #define AVR32_TC_BCR              (AVR32_TC_BASE+AVR32_TC_BCR_OFFSET)
 #define AVR32_TC_BMR              (AVR32_TC_BASE+AVR32_TC_BMR_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Channel Control Register */
 
@@ -188,6 +174,7 @@
 #  define TC_CMR_TCCLKS_XC0       (5 << TC_CMR_TCCLKS_SHIFT) /* XC0 */
 #  define TC_CMR_TCCLKS_XC1       (6 << TC_CMR_TCCLKS_SHIFT) /* XC1 */
 #  define TC_CMR_TCCLKS_XC2       (7 << TC_CMR_TCCLKS_SHIFT) /* XC2 */
+
 #define TC_CMR_CLKI               (1 << 3)  /* Bit 3:  Clock Invert */
 #define TC_CMR_BURST_SHIFT        (4)       /* Bits 4-5:  Burst Signal Selection */
 #define TC_CMR_BURST_MASK         (3 << TC_CMR_BURST_SHIFT)
@@ -208,6 +195,7 @@
 #  define TC_CMR_ETRGEDG_RISING   (1 << TC_CMR_ETRGEDG_SHIFT) /* Rising edge */
 #  define TC_CMR_ETRGEDG_FALLING  (2 << TC_CMR_ETRGEDG_SHIFT) /* Falling edge */
 #  define TC_CMR_ETRGEDG_BOTH     (3 << TC_CMR_ETRGEDG_SHIFT) /* Each edge */
+
 #define TC_CMR_ABETRG             (1 << 10) /* Bit 10: TIOA or TIOB External Trigger Selection */
 #define TC_CMR_CPCTRG             (1 << 14) /* Bit 14: RC Compare Trigger Enable */
 #define TC_CMR_LDRA_SHIFT         (16)      /* Bits 16-17: A Loading Selection */
@@ -216,6 +204,7 @@
 #  define TC_CMR_LDRA_RISING      (1 << TC_CMR_LDRA_SHIFT) /* Rising edge of TIOA */
 #  define TC_CMR_LDRA_FALLING     (2 << TC_CMR_LDRA_SHIFT) /* Falling edge of TIOA */
 #  define TC_CMR_LDRA_BOTH        (3 << TC_CMR_LDRA_SHIFT) /* Each edge of TIOA */
+
 #define TC_CMR_LDRB_SHIFT         (18)      /* Bits 18-19: RB Loading Selection */
 #define TC_CMR_LDRB_MASK          (3 << TC_CMR_LDRB_SHIFT)
 #  define TC_CMR_LDRB_NONE        (0 << TC_CMR_LDRB_SHIFT) /* None */
@@ -233,12 +222,14 @@
 #  define TC_CMR_EEVTEDG_RISING   (1 << TC_CMR_EEVTEDG_SHIFT) /* Rising edge */
 #  define TC_CMR_EEVTEDG_FALLING  (2 << TC_CMR_EEVTEDG_SHIFT) /* Falling edge */
 #  define TC_CMR_EEVTEDG_BOTH     (3 << TC_CMR_EEVTEDG_SHIFT) /* Each edge */
+
 #define TC_CMR_EEVT_SHIFT         (10)       /* Bits 10-11:  External Event Selection */
 #define TC_CMR_EEVT_MASK          (3 << TC_CMR_EEVT_SHIFT)
 #  define TC_CMR_EEVT_TIOB        (0 << TC_CMR_EEVT_SHIFT) /* TIOB Input */
 #  define TC_CMR_EEVT_XC0         (1 << TC_CMR_EEVT_SHIFT) /* XC0 Output */
 #  define TC_CMR_EEVT_XC1         (2 << TC_CMR_EEVT_SHIFT) /* XC1 Output */
 #  define TC_CMR_EEVT_XC2         (3 << TC_CMR_EEVT_SHIFT) /* XC2 Output */
+
 #define TC_CMR_ENETRG             (1 << 12)  /* Bit 12: External Event Trigger Enable */
 #define TC_CMR_WAVSEL_SHIFT       (13)       /* Bits 13-14:  Waveform Selection */
 #define TC_CMR_WAVSEL_MASK        (3 << TC_CMR_WAVSEL_SHIFT)
@@ -246,6 +237,7 @@
 #  define TC_CMR_WAVSEL_UPDWNNOT  (1 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode no trigger on RC compare */
 #  define TC_CMR_WAVSEL_UPT       (2 << TC_CMR_WAVSEL_SHIFT) /* UP mode with trigger on RC compare */
 #  define TC_CMR_WAVSEL_UPDWNT    (3 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode with trigger on RC compare */
+
 #define TC_CMR_ACPA_SHIFT         (16)       /* Bits 16-17: RA Compare Effect on TIOA */
 #define TC_CMR_ACPA_MASK          (3 << TC_CMR_ACPA_SHIFT)
 #  define TC_CMR_ACPA_NONE        (0 << TC_CMR_ACPA_SHIFT)
@@ -312,8 +304,11 @@
 #define TC_RC_MASK                (0xffff)
 
 /* Channel Status Register (common) */
+
 /* Interrupt Enable Register */
+
 /* Channel Interrupt Disable Register */
+
 /* Channel Interrupt Mask Register */
 
 #define TC_INT_COVFS              (1 << 0)  /* Bit 0:  Counter Overflow Status/Int */
@@ -343,12 +338,14 @@
 #  define TC_BMR_TC2XC0S_NONE     (1 << TC_BMR_TC2XC0S_SHIFT) /* None */
 #  define TC_BMR_TC2XC0S_TIOA1    (2 << TC_BMR_TC2XC0S_SHIFT) /* TIOA1 */
 #  define TC_BMR_TC2XC0S_TIOA2    (3 << TC_BMR_TC2XC0S_SHIFT) /* TIOA2 */
+
 #define TC_BMR_TC1XC1S_SHIFT      (2)       /* Bits 2-3: External Clock Signal 1 Selection */
 #define TC_BMR_TC1XC1S_MASK       (3 << TC_BMR_TC1XC1S_SHIFT)
 #  define TC_BMR_TC2XC1S_TCLK1    (0 << TC_BMR_TC2XC1S_SHIFT) /* TCLK1 */
 #  define TC_BMR_TC2XC1S_NONE     (1 << TC_BMR_TC2XC1S_SHIFT) /* None */
 #  define TC_BMR_TC2XC1S_TIOA0    (2 << TC_BMR_TC2XC1S_SHIFT) /* TIOA0 */
 #  define TC_BMR_TC2XC1S_TIOA2    (3 << TC_BMR_TC2XC1S_SHIFT) /* TIOA2 */
+
 #define TC_BMR_TC2XC2S_SHIFT      (3)       /* Bits 4-5: External Clock Signal 2 Selection */
 #define TC_BMR_TC2XC2S_MASK       (3 << TC_BMR_TC2XC2S_SHIFT)
 #  define TC_BMR_TC2XC2S_TCLK2    (0 << TC_BMR_TC2XC2S_SHIFT) /* TCLK2 */
@@ -356,16 +353,16 @@
 #  define TC_BMR_TC2XC2S_TIOA0    (2 << TC_BMR_TC2XC2S_SHIFT) /* TIOA0 */
 #  define TC_BMR_TC2XC2S_TIOA1    (3 << TC_BMR_TC2XC2S_SHIFT) /* TIOA1 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_TC_H */

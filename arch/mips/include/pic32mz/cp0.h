@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/mips/include/pic32mz/cp0.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -47,6 +32,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* CP0 Register Addresses ***************************************************/
 
 #ifdef __ASSEMBLY__
@@ -206,11 +192,14 @@
  *   NOTES:
  *   1. The following are reserved bits in the PIC32MZ:
  *      CP0_STATUS_UX   Bit 5: Enables 64-bit user address space (Not MIPS32)
- *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space (Not MIPS32)
- *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space (Not MIPS32)
+ *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space
+ *                               (Not MIPS32)
+ *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space
+ *                               (Not MIPS32)
  *      CP0_STATUS_IMPL Bits 16-17: Implementation dependent
  *      CP0_STATUS_PX   Bit 23: Enables 64-bit operations (Not MIPS32)
- *      CP0_STATUS_FR   Bit 26: Controls the floating point register mode (Not MIPS32)
+ *      CP0_STATUS_FR   Bit 26: Controls the floating point register mode
+ *                               (Not MIPS32)
  *      CP0_STATUS_MX   Bit 24: Enables MDMX (Not MIPS32)
  *      CP0_STATUS_CU1  Bit 29: Controls access to coprocessor 1
  *      CP0_STATUS_CU2  Bit 30: Controls access to coprocessor 2
@@ -372,6 +361,7 @@
 #define CP0_CONFIG_MM_MASK          (3 << CP0_CONFIG_MM_SHIFT)
 #  define CP0_CONFIG_MM_PROHIBITED  (0 << CP0_CONFIG_MM_SHIFT) /* Merging is not allowed */
 #  define CP0_CONFIG_MM_ALLOWED     (2 << CP0_CONFIG_MM_SHIFT) /* Merging is allowed */
+
 #define CP0_CONFIG_MDU              (1 << 20) /* Multipley/Divide unit bit */
 #define CP0_CONFIG_SB               (1 << 21) /* Bit 32: Simple BE bus mode bit */
 #define CP0_CONFIG_UDI              (1 << 22) /* Bit 22: User defined bit */

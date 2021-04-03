@@ -118,8 +118,8 @@
 
 /* Common initialization logic will not not know that the all of the UARTs
  * have been disabled.  So, as a result, we may still have to provide
- * stub implementations of misoc_earlyserialinit(), misoc_serial_initialize(), and
- * misoc_putc().
+ * stub implementations of misoc_earlyserialinit(),
+ * misoc_serial_initialize(), and misoc_putc().
  */
 
 #ifdef HAVE_UART_DEVICE
@@ -228,7 +228,7 @@ static uart_dev_t g_uart1port =
   {
     .size    = CONFIG_UART1_TXBUFSIZE,
     .buffer  = g_uart1txbuffer,
-   },
+  },
   .ops       = &g_uart_ops,
   .priv      = &g_uart1priv,
 };
@@ -258,9 +258,9 @@ static void misoc_restoreuartint(struct uart_dev_s *dev, uint8_t im)
 static void misoc_disableuartint(struct uart_dev_s *dev, uint8_t *im)
 {
   if (im)
-   {
-     *im = uart_ev_enable_read();
-   }
+    {
+      *im = uart_ev_enable_read();
+    }
 
   misoc_restoreuartint(dev, 0);
 }
@@ -297,14 +297,15 @@ static void misoc_shutdown(struct uart_dev_s *dev)
  * Name: misoc_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   interrupts are not enabled until the txint() and rxint() methods are
+ *   called.
  *
  ****************************************************************************/
 
@@ -323,8 +324,8 @@ static int misoc_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -560,7 +561,7 @@ int up_putc(int ch)
   struct uart_dev_s *dev = (struct uart_dev_s *)&CONSOLE_DEV;
   uint8_t imr;
 
-   misoc_disableuartint(dev, &imr);
+  misoc_disableuartint(dev, &imr);
 
   /* Check for LF */
 
@@ -659,6 +660,7 @@ void misoc_serial_initialize(void)
 #endif
 
   /* Register all UARTs */
+
   uart_register("/dev/ttyS0", &TTYS0_DEV);
 #endif
 }

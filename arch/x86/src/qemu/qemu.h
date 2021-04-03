@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/x86/src/qemu/qemu.h
  *
- *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_X86_SRC_QEMU_QEMU_H
 #define __ARCH_X86_SRC_QEMU_QEMU_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -50,25 +35,25 @@
 #include "up_internal.h"
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -79,43 +64,45 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_clockconfig
  *
  * Description:
- *   Called to initialize the i486.  This does whatever setup is needed to put the
- *   MCU in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.
+ *   Called to initialize the i486.  This does whatever setup is needed to
+ *   put the MCU in a usable state.  This includes the initialization of
+ *   clocking using the settings in board.h.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void i486_clockconfig(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console UART.  This UART done early so that the serial
- *   console is available for debugging very early in the boot sequence.
+ *   Called at the very beginning of _start.  Performs low level
+ *   initialization including setup of the console UART.  This UART done
+ *   early so that the serial console is available for debugging very early
+ *   in the boot sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void i486_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_gpioirqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_QEMU_GPIOIRQ
 void i486_gpioirqinitialize(void);
@@ -123,43 +110,43 @@ void i486_gpioirqinitialize(void);
 #  define i486_gpioirqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int i486_configgpio(uint16_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void i486_gpiowrite(uint16_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool i486_gpioread(uint16_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_QEMU_GPIOIRQ
 void i486_gpioirqenable(int irq);
@@ -167,13 +154,13 @@ void i486_gpioirqenable(int irq);
 #  define i486_gpioirqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: i486_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_QEMU_GPIOIRQ
 void i486_gpioirqdisable(int irq);
@@ -181,13 +168,14 @@ void i486_gpioirqdisable(int irq);
 #  define i486_gpioirqdisable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  i486_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int i486_dumpgpio(uint16_t pinset, const char *msg);
@@ -211,37 +199,39 @@ int i486_dumpgpio(uint16_t pinset, const char *msg);
 
 FAR struct spi_dev_s *i486_spibus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  i486_spi/ssp0/ssp1select, i486_spi/ssp0/ssp1status, and
  *        i486_spi/ssp0/ssp1cmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including i486_spibus_initialize()) are provided by common i486 logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.  They
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods including i486_spibus_initialize()) are provided by
+ *   common i486 logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in i486_boardinitialize() to configure SPI/SSP chip select
- *      pins.
- *   2. Provide i486_spi/ssp0/ssp1select() and i486_spi/ssp0/ssp1status() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *   1. Provide logic in i486_boardinitialize() to configure SPI/SSP chip
+ *      select pins.
+ *   2. Provide i486_spi/ssp0/ssp1select() and i486_spi/ssp0/ssp1status()
+ *      functions in your board-specific logic.  These functions will perform
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      i486_spi/ssp0/ssp1cmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
+ *      i486_spi/ssp0/ssp1cmddata() functions in your board-specific logic.
+ *      These functions will perform cmd/data selection operations using
+ *      GPIOs in the way your board is configured.
  *   3. Add a call to i486_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by i486_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by i486_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I486_SPI
-void  i486_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void  i486_spiselect(FAR struct spi_dev_s *dev,
+                     uint32_t devid, bool selected);
 uint8_t i486_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 int i486_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);

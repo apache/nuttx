@@ -50,3 +50,36 @@ wapi
 ----
 
 Enables WiFi support
+
+mqttc
+-----
+
+This configuration tests the MQTT-C publisher example.
+
+From the host, start the broker and subscribe to the :code:`test` topic.  Using
+`mosquitto` this should be::
+
+    mosquitto&
+    mosquitto_sub -t test
+
+From the NSH, connect to an access point::
+
+    wapi psk wlan0 mypasswd 1
+    wapi essid wlan0 myssid 1
+    renew wlan0
+
+Publish to the broker::
+
+    nsh> mqttc_pub -h 192.168.1.11
+
+The default behavior is to publish the message :code:`test`.  The following should be
+outputted::
+
+    nsh> mqttc_pub -h 192.168.1.11
+         Success: Connected to broker!
+         Success: Published to broker!
+
+         Disconnecting from 192.168.1.11
+
+From the host the message :code:`test` should be outputted.
+

@@ -65,6 +65,7 @@ FAR wchar_t *wmemchr(FAR const wchar_t *s, wchar_t c, size_t n)
 
           return (FAR wchar_t *) s;
         }
+
       s++;
     }
 

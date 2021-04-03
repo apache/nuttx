@@ -71,8 +71,8 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs)
   DEBUGASSERT(g_current_regs == NULL);
   g_current_regs = regs;
 
-  /* Disable further occurrences of this interrupt (until the interrupt sources
-   * have been clear by the driver).
+  /* Disable further occurrences of this interrupt (until the interrupt
+   * sources have been clear by the driver).
    */
 
   up_disable_irq(irq);

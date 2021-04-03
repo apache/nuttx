@@ -88,7 +88,7 @@ void up_earlyserialinit(void)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Mark the serial console (if any) */
 
-  //CONSOLE_DEV.isconsole = true;
+  /* CONSOLE_DEV.isconsole = true; */
 #endif
 }
 #endif
@@ -139,10 +139,11 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      //or1k_lowputc('\r');
+      /* or1k_lowputc('\r'); */
     }
 
-  //or1k_lowputc(ch);
+  /* or1k_lowputc(ch); */
+
   leave_critical_section(flags);
 #endif
   return ch;

@@ -263,6 +263,13 @@ static const char *g_white_list[] =
   "ASCII_y",
   "ASCII_z",
 
+/* Ref:
+ * nuttx/compiler.h
+ */
+
+  "_Far",
+  "_Erom",
+
   NULL
 };
 
@@ -2799,7 +2806,7 @@ int main(int argc, char **argv, char **envp)
 
               if (!bfunctions && (indent & 1) != 0)
                 {
-                  ERROR("right left brace alignment", lineno, indent);
+                  ERROR("Bad left brace alignment", lineno, indent);
                 }
               else if ((indent & 3) != 0 && !bswitch && prevdnest == 0)
                 {
@@ -2846,7 +2853,7 @@ int main(int argc, char **argv, char **envp)
   if (!bfunctions && g_file_type == C_SOURCE)
     {
       ERROR("\"Private/Public Functions\" not found!"
-            " File was not be checked", lineno, 1);
+            " File will not be checked", lineno, 1);
     }
 
   if (ncomment > 0 || bstring)

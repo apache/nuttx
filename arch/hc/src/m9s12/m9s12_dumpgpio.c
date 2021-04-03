@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_dumpgpio.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -139,15 +124,15 @@ static const struct gpio_piminfo_s piminfo[HCS12_PIM_NPORTS] =
   {HCS12_PIM_PORTG_BASE, 'G', PIMPORT_FORM3}, /* Port G */
   {HCS12_PIM_PORTH_BASE, 'H', PIMPORT_FORM3}, /* Port H */
   {HCS12_PIM_PORTJ_BASE, 'J', PIMPORT_FORM3}, /* Port J */
-  {HCS12_PIM_PORTL_BASE, 'L', PIMPORT_FORM2}  /* Port L */
+  {HCS12_PIM_PORTL_BASE, 'L', PIMPORT_FORM2}, /* Port L */
 };
 
 static const struct gpio_mebiinfo_s mebiinfo[HCS12_MEBI_NPORTS] =
 {
- {HCS12_MEBI_PORTA, HCS12_MEBI_DDRA, 'A', MEBIPORT_AB}, /* Port A */
- {HCS12_MEBI_PORTB, HCS12_MEBI_DDRB, 'B', MEBIPORT_AB}, /* Port B */
- {HCS12_MEBI_PORTE, HCS12_MEBI_DDRE, 'E', MEBIPORT_E},  /* Port E */
- {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK, 'K', MEBIPORT_K}   /* Port K */
+  {HCS12_MEBI_PORTA, HCS12_MEBI_DDRA, 'A', MEBIPORT_AB}, /* Port A */
+  {HCS12_MEBI_PORTB, HCS12_MEBI_DDRB, 'B', MEBIPORT_AB}, /* Port B */
+  {HCS12_MEBI_PORTE, HCS12_MEBI_DDRE, 'E', MEBIPORT_E},  /* Port E */
+  {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK, 'K', MEBIPORT_K},  /* Port K */
 };
 
 /****************************************************************************
@@ -179,32 +164,32 @@ static inline void hcs12_pimdump(uint8_t portndx)
   ptr = &piminfo[portndx];
   gpioinfo(" PIM Port%c:\n", ptr->name);
   gpioinfo("   IO:%02x  INP:%02x DDR:%02x RDR:%02x\n",
-           getreg8(ptr->base+HCS12_PIM_IO_OFFSET),
-           getreg8(ptr->base+HCS12_PIM_INPUT_OFFSET),
-           getreg8(ptr->base+HCS12_PIM_DDR_OFFSET),
-           getreg8(ptr->base+HCS12_PIM_RDR_OFFSET));
+           getreg8(ptr->base + HCS12_PIM_IO_OFFSET),
+           getreg8(ptr->base + HCS12_PIM_INPUT_OFFSET),
+           getreg8(ptr->base + HCS12_PIM_DDR_OFFSET),
+           getreg8(ptr->base + HCS12_PIM_RDR_OFFSET));
 
   switch (ptr->form)
     {
     case PIMPORT_FORM1:
       gpioinfo("  PER:%02x  PS:%02x\n",
-               getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_PS_OFFSET));
+               getreg8(ptr->base + HCS12_PIM_PER_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_PS_OFFSET));
       break;
 
     case PIMPORT_FORM2:
       gpioinfo("  PER:%02x  PS:%02x WOM:%02x\n",
-               getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_PS_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_WOM_OFFSET));
+               getreg8(ptr->base + HCS12_PIM_PER_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_PS_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_WOM_OFFSET));
       break;
 
     case PIMPORT_FORM3:
       gpioinfo("  PER:%02x  PS:%02x  IE:%02x  IF:%02x\n",
-               getreg8(ptr->base+HCS12_PIM_PER_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_PS_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_IE_OFFSET),
-               getreg8(ptr->base+HCS12_PIM_IF_OFFSET));
+               getreg8(ptr->base + HCS12_PIM_PER_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_PS_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_IE_OFFSET),
+               getreg8(ptr->base + HCS12_PIM_IF_OFFSET));
       break;
 
     default:
@@ -261,13 +246,14 @@ static inline void hcs12_mebidump(uint8_t portndx)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Function:  hcs12_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int hcs12_dumpgpio(uint16_t pinset, const char *msg)
 {

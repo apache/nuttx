@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/hc/src/m9s12/m9s12_emac.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H
 #define __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define HCS12_EMAC_NETCTL_OFFSET       0x0000 /* Network Control (8-bit) */
 #define HCS12_EMAC_RXCTS_OFFSET        0x0003 /* Receive Control and Status (8-bit) */
@@ -76,7 +61,7 @@
 #define HCS12_EMAC_MACAD0_OFFSET       0x002c /* MAC Unicast AAddress 0-15 (16-bit) */
 #define HCS12_EMAC_EMISC _OFFSET       0x002e /* Miscellaneous (16-bit) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define HCS12_EMAC_NETCTL              (HCS12_EMAC_BASE+HCS12_EMAC_NETCTL_OFFSET)
 #define HCS12_EMAC_RXCTS               (HCS12_EMAC_BASE+HCS12_EMAC_RXCTS_OFFSET)
@@ -105,7 +90,7 @@
 #define HCS12_EMAC_MACAD0              (HCS12_EMAC_BASE+HCS12_EMAC_MACAD0_OFFSET)
 #define HCS12_EMAC_EMISC               (HCS12_EMAC_BASE+HCS12_EMAC_EMISC_OFFSET)
 
-/* Register Bit-Field Definitions ***************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Network Control (8-bit) */
 
@@ -145,9 +130,11 @@
 #define EMAC_ETCTL_FPET                (1 << 7)  /* Bit 7: Programmable Ethertype */
 
 /* Programmable Ethertype (16-bit) -- 16-bit Ethernet type data */
+
 /* PAUSE Timer Value and Counter (16-bit) -- 16-bit PAUSER timer value */
 
 /* Interrupt Event (16-bit) */
+
 /* Interrupt Mask (16-bit) */
 
 #define EMAC_INT_TXCI                  (1 << 1)  /* Bit 1:  Frame Transmission Complete Interrupt */
@@ -175,6 +162,7 @@
 #define EMAC_MRADR_MASK                (0x1f)
 
 /* MII Management Write Data (16-bit) -- 16-bit write data */
+
 /* MII Management Read Data (16-bit) -- 16-bit read data */
 
 /* MII Management Command and Status (8-bit) */
@@ -214,12 +202,17 @@
 #define EMAC_TXEFP_MASK                (0x07ff)
 
 /* Multicast Hash Table 48-63 (16-bit) -- 16-bits of MAC address */
+
 /* Multicast Hash Table 32-47 (16-bit) -- 16-bits of MAC address */
+
 /* Multicast Hash Table 16-31 (16-bit) -- 16-bits of MAC address */
+
 /* Multicast Hash Table  0:15 (16-bit) -- 16-bits of MAC address */
 
 /* MAC Unicast Address 32-47 (16-bit) -- 16-bits of address */
+
 /* MAC Unicast AAddress 16-31 (16-bit) -- 16-bits of address */
+
 /* MAC Unicast AAddress 0-15 (16-bit) -- 16-bits of address */
 
 /* Miscellaneous (16-bit) */
@@ -233,16 +226,16 @@
 #  define EMAC_EMISC_INDEX_RETX        (5 << EMAC_EMISC_INDEX_SHIFT) /* Retransmission Counter */
 #  define EMAC_EMISC_INDEX_RANDOM      (6 << EMAC_EMISC_INDEX_SHIFT) /* Backoff Random Number */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_EMAC_H */

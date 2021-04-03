@@ -52,7 +52,8 @@
  *
  ****************************************************************************/
 
-long long int wcstoll(FAR const wchar_t *nptr, FAR wchar_t **endptr, int base)
+long long int wcstoll(FAR const wchar_t *nptr,
+                      FAR wchar_t **endptr, int base)
 {
   return strtoll((FAR const char *)nptr, (FAR char **)endptr, base);
 }

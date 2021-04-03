@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/renesas/src/m16c/m16c_serial.c
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -66,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **********************************************************/
+/* Configuration ************************************************************/
 
 #ifndef M16C_XIN_PRESCALER
 #  define M16C_XIN_PRESCALER 1
@@ -75,22 +60,22 @@
 /* Make sure interrupt priorities are defined.  If not, use a default of 5 */
 
 #ifndef M16C_S2T_PRIO
-#  define  M16C_S2T_PRIO   5            /* UART2 transmit interrupt priority */
+#  define  M16C_S2T_PRIO   5      /* UART2 transmit interrupt priority */
 #endif
 #ifndef M16C_S2R_PRIO
-#  define  M16C_S2R_PRIO   5            /* UART2 receive interrupt priority */
+#  define  M16C_S2R_PRIO   5      /* UART2 receive interrupt priority */
 #endif
 #ifndef M16C_S0T_PRIO
-#  define  M16C_S0T_PRIO   5            /* UART0 transmit interrupt priority */
+#  define  M16C_S0T_PRIO   5      /* UART0 transmit interrupt priority */
 #endif
 #ifndef M16C_S0R_PRIO
-#  define  M16C_S0R_PRIO   5            /* UART0 receive interrupt priority */
+#  define  M16C_S0R_PRIO   5      /* UART0 receive interrupt priority */
 #endif
 #ifndef M16C_S1T_PRIO
-#  define  M16C_S1T_PRIO   5            /* UART1 transmit interrupt priority */
+#  define  M16C_S1T_PRIO   5      /* UART1 transmit interrupt priority */
 #endif
 #ifndef M16C_S1R_PRIO
-#  define  M16C_S1R_PRIO   5            /* UART1 receive interrupt priority */
+#  define  M16C_S1R_PRIO   5      /* UART1 receive interrupt priority */
 #endif
 
 /* Some sanity checks *******************************************************/
@@ -244,17 +229,17 @@ elif defined(CONFIG_M16C_UART1)
 
 struct up_dev_s
 {
-          uint32_t baud;      /* Configured baud */
-          uint16_t uartbase;  /* Base address of UART registers */
-           uint8_t uartno;    /* UART number */
- volatile  uint8_t ucon;      /* Saved SCR value */
- volatile  uint8_t ssr;       /* Saved SR value (only used during interrupt processing) */
-           uint8_t rcvirq;    /* UART receive data available IRQ */
-           uint8_t xmtirq;    /* UART transmit complete IRQ */
-           uint8_t enables;   /* Bit 0: 1=RX enabled, Bit 1: 1=TX enabled */
-           uint8_t parity;    /* 0=none, 1=odd, 2=even */
-           uint8_t bits;      /* Number of bits (7 or 8) */
-              bool stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+            uint32_t baud;     /* Configured baud */
+            uint16_t uartbase; /* Base address of UART registers */
+            uint8_t uartno;    /* UART number */
+  volatile  uint8_t ucon;      /* Saved SCR value */
+  volatile  uint8_t ssr;       /* Saved SR value (only used during interrupt processing) */
+            uint8_t rcvirq;    /* UART receive data available IRQ */
+            uint8_t xmtirq;    /* UART transmit complete IRQ */
+            uint8_t enables;   /* Bit 0: 1=RX enabled, Bit 1: 1=TX enabled */
+            uint8_t parity;    /* 0=none, 1=odd, 2=even */
+            uint8_t bits;      /* Number of bits (7 or 8) */
+            bool stopbits2;    /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
@@ -363,15 +348,15 @@ static struct up_dev_s g_uart1priv =
 static uart_dev_t g_uart1port =
 {
   .recv     =
-  {
-    .size   = CONFIG_UART1_RXBUFSIZE,
-    .buffer = g_uart1rxbuffer,
-  },
+    {
+      .size   = CONFIG_UART1_RXBUFSIZE,
+      .buffer = g_uart1rxbuffer,
+    },
   .xmit     =
-  {
-    .size   = CONFIG_UART1_TXBUFSIZE,
-    .buffer = g_uart1txbuffer,
-   },
+    {
+      .size   = CONFIG_UART1_TXBUFSIZE,
+      .buffer = g_uart1txbuffer,
+    },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -395,15 +380,15 @@ static struct up_dev_s g_uart2priv =
 static uart_dev_t g_uart2port =
 {
   .recv     =
-  {
-    .size   = CONFIG_UART2_RXBUFSIZE,
-    .buffer = g_uart2rxbuffer,
-  },
+    {
+      .size   = CONFIG_UART2_RXBUFSIZE,
+      .buffer = g_uart2rxbuffer,
+    },
   .xmit     =
-  {
-    .size   = CONFIG_UART2_TXBUFSIZE,
-    .buffer = g_uart2txbuffer,
-   },
+    {
+      .size   = CONFIG_UART2_TXBUFSIZE,
+      .buffer = g_uart2txbuffer,
+    },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -435,7 +420,8 @@ static inline uint16_t up_serialin16(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value)
+static inline void up_serialout(struct up_dev_s *priv,
+                                int offset, uint8_t value)
 {
   putreg8(value, priv->uartbase + offset);
 }
@@ -444,7 +430,8 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value
  * Name: up_serialout16
  ****************************************************************************/
 
-static inline void up_serialout16(struct up_dev_s *priv, int offset, uint16_t value)
+static inline void up_serialout16(struct up_dev_s *priv,
+                                  int offset, uint16_t value)
 {
   putreg16(value, priv->uartbase + offset);
 }
@@ -453,7 +440,8 @@ static inline void up_serialout16(struct up_dev_s *priv, int offset, uint16_t va
  * Name: up_disableuartint
  ****************************************************************************/
 
-static inline void up_disableuartint(struct up_dev_s *priv, uint8_t *penables)
+static inline void up_disableuartint(struct up_dev_s *priv,
+                                     uint8_t *penables)
 {
   uint8_t enables = priv->enables;
   m16c_txint(priv, false);
@@ -491,8 +479,9 @@ static inline void up_waittxready(struct up_dev_s *priv)
       /* Check the TI bit in the CI register.  1=Transmit buffer empty */
 
       if ((up_serialin(priv, M16C_UART_C1) & UART_C1_TI) != 0)
-       {
+        {
           /* The transmit buffer is empty... return */
+
           break;
         }
     }
@@ -540,7 +529,7 @@ static inline void ub_setbrg(struct up_dev_s *priv, unsigned int baud)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t regval;
 
   /* Set the baud rate generator */
@@ -556,13 +545,13 @@ static int up_setup(struct uart_dev_s *dev)
   m16c_rxint(priv, false);
   m16c_txint(priv, false);
 
-/* Set interrupt cause=TX complete and continuous receive mode */
+  /* Set interrupt cause=TX complete and continuous receive mode */
 
 #ifdef CONFIG_M16C_UART0
   if (priv->uartno == 0)
     {
       regval  = getreg8(M16C_UCON);
-      regval |= (UART_CON_U0IRS|UART_CON_U0RRM);
+      regval |= (UART_CON_U0IRS | UART_CON_U0RRM);
       putreg8(regval, M16C_UCON);
     }
   else
@@ -571,7 +560,7 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->uartno == 1)
     {
       regval  = getreg8(M16C_UCON);
-      regval |= (UART_CON_U1IRS|UART_CON_U1RRM);
+      regval |= (UART_CON_U1IRS | UART_CON_U1RRM);
       putreg8(regval, M16C_UCON);
     }
   else
@@ -580,7 +569,7 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->uartno == 2)
     {
       regval  = getreg8(M16C_U2C1);
-      regval |= (UART_C1_U2IRS|UART_C1_U2RRM);
+      regval |= (UART_C1_U2IRS | UART_C1_U2RRM);
       putreg8(regval, M16C_U2C1);
     }
   else
@@ -589,11 +578,15 @@ static int up_setup(struct uart_dev_s *dev)
       _err("ERROR: Invalid UART #\n");
     }
 
-  /* Set UART transmit/receive control register 1 to enable transmit and receive */
+  /* Set UART transmit/receive control register 1 to enable transmit
+   * and receive
+   */
 
-  up_serialout(priv, M16C_UART_C1, UART_C1_TE|UART_C1_RE);
+  up_serialout(priv, M16C_UART_C1, UART_C1_TE | UART_C1_RE);
 
-  /* Set UART transmit/receive mode register data bits, stop bits, parity */
+  /* Set UART transmit/receive mode register data bits, stop bits,
+   * parity
+   */
 
   regval = 0;
 
@@ -683,7 +676,7 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   up_disableuartint(priv, NULL);
 }
 
@@ -691,20 +684,21 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
 static int up_attach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
 
   /* Attach the UART receive data available IRQ */
@@ -731,14 +725,14 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
 static void up_detach(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Disable all UART interrupts */
 
@@ -786,7 +780,7 @@ static int up_rcvinterrupt(int irq, void *context, void *arg)
 
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint16_t rb;
 
   /* Read the character from the readbuffer */
@@ -872,7 +866,7 @@ static void m16c_rxint(struct up_dev_s *dev, bool enable)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
-  m16c_rxint((struct up_dev_s*)dev->priv, enable);
+  m16c_rxint((struct up_dev_s *)dev->priv, enable);
 }
 
 /****************************************************************************
@@ -885,7 +879,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Return true if there is data available in the read buffer */
 
@@ -927,7 +921,7 @@ static int up_xmtinterrupt(int irq, void *context, void *arg)
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Write the data to the transmit buffer */
 
@@ -1004,7 +998,7 @@ static void m16c_txint(struct up_dev_s *dev, bool enable)
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
-  m16c_txint((struct up_dev_s*)dev->priv, enable);
+  m16c_txint((struct up_dev_s *)dev->priv, enable);
 }
 
 /****************************************************************************
@@ -1017,7 +1011,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 static bool up_txready(struct uart_dev_s *dev)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, M16C_UART_C1) & UART_C1_TI) != 0);
 }
 
@@ -1102,7 +1096,7 @@ void up_consoleinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIALCONSOLE
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+  struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint8_t  ucon;
 
   up_disableuartint(priv, &ucon);

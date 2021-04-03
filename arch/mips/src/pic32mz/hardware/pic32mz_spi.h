@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mz_spi.h
  *
- *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -207,12 +192,14 @@
 #  define SPI_CON_SRXISEL_NEMPTY   (1 << SPI_CON_SRXISEL_SHIFT) /* Buffer not empty */
 #  define SPI_CON_SRXISEL_HALF     (2 << SPI_CON_SRXISEL_SHIFT) /* Buffer half full or more */
 #  define SPI_CON_SRXISEL_FULL     (3 << SPI_CON_SRXISEL_SHIFT) /* Buffer full */
+
 #define SPI_CON_STXISEL_SHIFT      (2)       /* Bits 2-3: SPI Transmit Buffer Empty Interrupt Mode */
 #define SPI_CON_STXISEL_MASK       (3 << SPI_CON_STXISEL_SHIFT)
 #  define SPI_CON_STXISEL_DONE     (0 << SPI_CON_STXISEL_SHIFT) /* Buffer empty (and data shifted out) */
 #  define SPI_CON_STXISEL_EMPTY    (1 << SPI_CON_STXISEL_SHIFT) /* Buffer empty */
 #  define SPI_CON_STXISEL_HALF     (2 << SPI_CON_STXISEL_SHIFT) /* Buffer half empty or more */
 #  define SPI_CON_STXISEL_NFULL    (3 << SPI_CON_STXISEL_SHIFT) /* Buffer not full */
+
 #define SPI_CON_DISSDI             (1 << 4)  /* Bit 4: Disable SDI */
 #define SPI_CON_MSTEN              (1 << 5)  /* Bit 5: Master mode enable */
 #define SPI_CON_CKP                (1 << 6)  /* Bit 6: Clock polarity select */
@@ -230,6 +217,7 @@
 #  define SPI_CON_MODE_161632      (1 << SPI_CON_MODE_SHIFT) /* 16-bit data, 16-bit FIFO, 32-bit channel */
 #  define SPI_CON_MODE_323232      (2 << SPI_CON_MODE_SHIFT) /* 32-bit data, 32-bit FIFO, 32-bit channel */
 #  define SPI_CON_MODE_243232      (3 << SPI_CON_MODE_SHIFT) /* 24-bit data, 32-bit FIFO, 32-bit channel */
+
 #define SPI_CON_DISSDO             (1 << 12) /* Bit 12: Disable SDOx pin */
 #define SPI_CON_SIDL               (1 << 13) /* Bit 13: Stop in idle mode */
 #define SPI_CON_ON                 (1 << 15) /* Bit 15: SPI peripheral on */
@@ -245,6 +233,7 @@
 #  define SPI_CON_FRMCNT_CHAR8     (3 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 8 chars */
 #  define SPI_CON_FRMCNT_CHAR16    (4 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 16 chars */
 #  define SPI_CON_FRMCNT_CHAR32    (5 << SPI_CON_FRMCNT_SHIFT) /* Frame sync pulse every 32 chars */
+
 #define SPI_CON_FRMSYPW            (1 << 27) /* Bits 27: Frame sync pulse width */
 #define SPI_CON_MSSEN              (1 << 28) /* Bits 28: Master mode slave select enable */
 #define SPI_CON_FRMPOL             (1 << 29) /* Bits 29: Frame sync polarity */
@@ -259,18 +248,19 @@
 #  define SPI_CON2_AUDMOD_LJ      (1 << SPI2_CON2_AUDMOD_SHIFT) /* Left Justified mode */
 #  define SPI_CON2_AUDMOD_RJ      (2 << SPI2_CON2_AUDMOD_SHIFT) /* Right Justified mode */
 #  define SPI_CON2_AUDMOD_PCM     (3 << SPI2_CON2_AUDMOD_SHIFT) /* PCM/DSP mode */
-                                             /* Bit 2: Reserved */
+
+                                            /* Bit 2: Reserved */
 #define SPI_CON2_AUDMONO          (1 << 3)  /* Bit 3:  Transmit Audio Data Format */
-                                             /* Bits 5-6: Reserved */
+                                            /* Bits 5-6: Reserved */
 #define SPI_CON2_AUDEN            (1 << 7)  /* Bit 7:  Enable Audio CODEC Support */
 #define SPI_CON2_IGNTUR           (1 << 8)  /* Bit 8:  Ignore Transmit Underrun bit */
 #define SPI_CON2_IGNROV           (1 << 9)  /* Bit 9:  Ignore Receive Overflow */
 #define SPI_CON2_SPITUREN         (1 << 10) /* Bit 10: Enable Interrupt Events via SPITUR */
 #define SPI_CON2_SPIROVEN         (1 << 11) /* Bit 11: Enable Interrupt Events via SPIROV */
 #define SPI_CON2_FRMERREN         (1 << 12) /* Bit 12: Enable Interrupt Events via FRMERR */
-                                             /* Bits 13-14: Reserved */
+                                            /* Bits 13-14: Reserved */
 #define SPI_CON2_SPISGNEXT        (1 << 15) /* Bit 15 : Sign Extend Read Data from the RX FIFO */
-                                             /* Bits 16-31: Reserved */
+                                            /* Bits 16-31: Reserved */
 
 /* SPI status register */
 

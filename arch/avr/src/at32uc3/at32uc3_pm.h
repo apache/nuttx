@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_pm.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_PM_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_PM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_PM_MCCTRL_OFFSET     0x0000 /* Main Clock Control Register */
 #define AVR32_PM_CKSEL_OFFSET      0x0004 /* Clock Select Register */
@@ -65,7 +50,9 @@
 #define AVR32_PM_ISR_OFFSET        0x004c /* Interrupt Status Register */
 #define AVR32_PM_ICR_OFFSET        0x0050 /* Interrupt Clear Register */
 #define AVR32_PM_POSCSR_OFFSET     0x0054 /* Power and Oscillators Status Register */
+
 #define AVR32_PM_GCCTRL_OFFSET(n)  (0x0060+((n)<<2)) /* 0x0060-0x070 Generic Clock Control Register */
+
 #define AVR32_PM_RCCR_OFFSET       0x00c0 /* RC Oscillator Calibration Register */
 #define AVR32_PM_BGCR_OFFSET       0x00c4 /* Bandgap Calibration Register */
 #define AVR32_PM_VREGCR_OFFSET     0x00c8 /* Linear Regulator Calibration Register */
@@ -75,7 +62,7 @@
 #define AVR32_PM_GPLP0_OFFSET      0x0200 /* General Purpose Low-Power Register 0 */
 #define AVR32_PM_GPLP1_OFFSET      0x0204 /* General Purpose Low-Power Register 1 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_PM_MCCTRL            (AVR32_PM_BASE+AVR32_PM_MCCTRL_OFFSET)
 #define AVR32_PM_CKSEL             (AVR32_PM_BASE+AVR32_PM_CKSEL_OFFSET)
@@ -104,7 +91,7 @@
 #define AVR32_PM_GPLP0             (AVR32_PM_BASE+AVR32_PM_GPLP0_OFFSET)
 #define AVR32_PM_GPLP1             (AVR32_PM_BASE+AVR32_PM_GPLP1_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Main Clock Control Register Bit-field Definitions */
 
@@ -113,6 +100,7 @@
 #  define PM_MCCTRL_MCSEL_SLOW     (0 << PM_MCCTRL_MCSEL_SHIFT) /* slow clock is source */
 #  define PM_MCCTRL_MCSEL_OSC0     (1 << PM_MCCTRL_MCSEL_SHIFT) /* Oscillator 0 is source */
 #  define PM_MCCTRL_MCSEL_PLL0     (2 << PM_MCCTRL_MCSEL_SHIFT) /* PLL0 is source */
+
 #define PM_MCCTRL_OSC0EN           (1 << 2)  /* Bit 2:  Oscillator 0 Enable */
 #define PM_MCCTRL_OSC1EN           (1 << 3)  /* Bit 3:  Oscillator 1 Enable */
 
@@ -175,6 +163,7 @@
 #  define PM_PLL_PLLOPT_VCO        (1 << PM_PLL_PLLOPT_SHIFT) /* Select the VCO frequency range */
 #  define PM_PLL_PLLOPT_XTRADIV    (2 << PM_PLL_PLLOPT_SHIFT) /* Enable the extra output divider */
 #  define PM_PLL_PLLOPT_WBWDIS     (4 << PM_PLL_PLLOPT_SHIFT) /* Disable the Wide-Bandwidth mode */
+
 #define PM_PLL_PLLDIV_SHIFT        (8)       /* Bits 8-11: PLL Division Factor */
 #define PM_PLL_PLLDIV_MASK         (15 << PM_PLL_PLLDIV_SHIFT)
 #define PM_PLL_PLLMUL_SHIFT        (16)      /* Bits 16-19: PLL Multiply Factor */
@@ -187,10 +176,11 @@
 #define PM_OSCCTRL_MODE_SHIFT      (0)       /* Bits 0-2: Oscillator Mode */
 #define PM_OSCCTRL_MODE_MASK       (7 << PM_OSCCTRL_MODE_SHIFT)
 #  define PM_OSCCTRL_MODE_EXT      (0 << PM_OSCCTRL_MODE_SHIFT) /* External clock */
-#  define PM_OSCCTRL_MODE_XTALp9   (4 << PM_OSCCTRL_MODE_SHIFT) /* Crystal XIN 0.4-0.9MHz */
+#  define PM_OSCCTRL_MODE_XTALP9   (4 << PM_OSCCTRL_MODE_SHIFT) /* Crystal XIN 0.4-0.9MHz */
 #  define PM_OSCCTRL_MODE_XTAL3    (5 << PM_OSCCTRL_MODE_SHIFT) /* Crystal XIN 0.9-3.0MHz */
 #  define PM_OSCCTRL_MODE_XTAL8    (6 << PM_OSCCTRL_MODE_SHIFT) /* Crystal XIN 3.0-8.0MHz */
 #  define PM_OSCCTRL_MODE_XTALHI   (7 << PM_OSCCTRL_MODE_SHIFT) /* Crystal XIN above 8.0MHz */
+
 #define PM_OSCCTRL_STARTUP_SHIFT   (8)       /* Bits 8-10: Oscillator Startup Time */
 #define PM_OSCCTRL_STARTUP_MASK    (7 << PM_OSCCTRL_STARTUP_SHIFT)
 #  define PM_OSCCTRL_STARTUP_0     (0 << PM_OSCCTRL_STARTUP_SHIFT) /* Num RCOsc cycles */
@@ -208,6 +198,7 @@
 #define PM_OSCCTRL32_MODE_MASK      (7 << PM_OSCCTRL32_MODE_SHIFT)
 #  define PM_OSCCTRL32_MODE_EXT     (0 << PM_OSCCTRL32_MODE_SHIFT) /* External clock */
 #  define PM_OSCCTRL32_MODE_XTAL    (1 << PM_OSCCTRL32_MODE_SHIFT) /* Crystal */
+
 #define PM_OSCCTRL32_STARTUP_SHIFT  (16)      /* Bits 16-18: Oscillator Startup Time */
 #define PM_OSCCTRL32_STARTUP_MASK   (7 << PM_OSCCTRL32_STARTUP_SHIFT)
 #  define PM_OSCCTRL32_STARTUP_0    (0 << PM_OSCCTRL32_STARTUP_SHIFT) /* Num RCOsc cycles */
@@ -219,9 +210,13 @@
 #  define PM_OSCCTRL32_STARTUP_512K (6 << PM_OSCCTRL32_STARTUP_SHIFT) /* " " "   " "    " */
 
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
+
 /* Interrupt Status Register Bit-field Definitions */
+
 /* Interrupt Clear Register Bit-field Definitions */
 
 #define PM_INT_LOCK0               (1 << 0)  /* Bit 0:  PLL0 locked */
@@ -288,6 +283,7 @@
 #  define PM_BOD_CTRL_OFF             (xxx << PM_BOD_CTRL_SHIFT) /* BOD is off */
 #  define PM_BOD_CTRL_RESET           (xxx << PM_BOD_CTRL_SHIFT) /* BOD enabled/can reset */
 #  define PM_BOD_CTRL_NORESET         (xxx << PM_BOD_CTRL_SHIFT) /* BOD enabled/cannot reset */
+
 #define PM_BOD_FCD                    (1 << 16) /* Bit 16: BOD Fuse calibration done */
 #define PM_BOD_KEY_SHIFT              (24)      /* Bits 24-31: Register Write protection */
 #define PM_BOD_KEY_MASK               (0xff << PM_BOD_KEY_SHIFT)
@@ -311,7 +307,7 @@
 
 /* These registers contain a 32-bit value with no smaller bit-field */
 
-/* GCLK Allocation ******************************************************************/
+/* GCLK Allocation **********************************************************/
 
 #define AVR32_PM_GCLK0                (0)       /* GCLK0 pin */
 #define AVR32_PM_GCLK1                (1)       /* GCLK2 pin */
@@ -319,16 +315,16 @@
 #define AVR32_PM_GCLK_USBB            (3)       /* USBB */
 #define AVR32_PM_GCLK_ABDAC           (4)       /* ABDAC */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_PM_H */

@@ -1,51 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mzec_features.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEC_FEATURES_H
 #define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEC_FEATURES_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register/Flash Offsets ***********************************************************/
+ ****************************************************************************/
+
+/* Register/Flash Offsets ***************************************************/
 
 /* Device ID, Revision, and Configuration (SFR PIC32MZ_CONFIG_K1BASE) */
 
@@ -99,7 +85,7 @@
 #define PIC32MZ_DEVSN0_OFFSET    0x0000 /* Device serial number 0 */
 #define PIC32MZ_DEVSN1_OFFSET    0x0004 /* Device serial number 1 */
 
-/* Register/Flash Addresses *********************************************************/
+/* Register/Flash Addresses *************************************************/
 
 /* Device ID, Revision, and Configuration (SFR PIC32MZ_CONFIG_K1BASE) */
 
@@ -148,17 +134,21 @@
 #define PIC32MZ_DEVADC4          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC4_OFFSET)
 #define PIC32MZ_DEVADC5          (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVADC5_OFFSET)
 
-/* Device Serial Number (Boot Flash PIC32MZ_DEVSN_K1BASEPIC32MZ_DEVSN_K1BASE) */
+/* Device Serial Number
+ * (Boot Flash PIC32MZ_DEVSN_K1BASEPIC32MZ_DEVSN_K1BASE)
+ */
 
 #define PIC32MZ_DEVSN0           (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVSN0_OFFSET)
 #define PIC32MZ_DEVSN1           (PIC32MZ_ADCCALIB_K1BASE+PIC32MZ_DEVSN1_OFFSET)
 
-/* Register/Flash Bit Field Definitions *********************************************/
+/* Register/Flash Bit Field Definitions *************************************/
 
 /* Device ID, Revision, and Configuration (SFR PIC32MZ_CONFIG_K1BASE) */
+
 /* Configuration control register
  *
- * NOTE: To change many of the bits in the register, the unlock sequence must first
+ * NOTE:
+ * To change many of the bits in the register, the unlock sequence must first
  * be performed.
  */
 
@@ -171,6 +161,7 @@
 #  define CFGCON_ECCCON_DYNECC   (1 << CFGCON_ECCCON_SHIFT) /* Dynamic Flash ECC enabled */
 #  define CFGCON_ECCCON_DISLCK   (2 << CFGCON_ECCCON_SHIFT) /* ECC / dynamic ECC disabled (locked) */
 #  define CFGCON_ECCCON_DISWR    (3 << CFGCON_ECCCON_SHIFT) /* ECC / dynamic ECC disabled (writable) */
+
 #define CFGCON_USBSSEN           (1 << 8)  /* Bit 8:  USB Suspend Sleep Enable bit */
 #define CFGCON_PGLOCK            (1 << 11) /* Bit 11: Permission Group Lock bit */
 #define CFGCON_PMDLOCK           (1 << 12) /* Bit 12: Peripheral Module Disable bit */
@@ -305,7 +296,9 @@
 #  define CFGPG_CRYPTPG_GROUP3   CFGPG_CRYPTPG(CFGPG_GROUP3)
 
 /* Alternate Device Configuration (Boot Flash PIC32MZ_BOOTCFG_K1BASE) */
+
 /* Device Configuration (Boot Flash PIC32MZ_BOOTCFG_K1BASE) */
+
 /* Device configuration word 3 / Alternate device configuration word 3 */
 
 #define DEVCFG3_USERID_SHIFT     (0)       /* Bit 0-15: 16-bit user defined value */
@@ -331,6 +324,7 @@
 #define DEVCFG2_FPLLIDIV_SHIFT   (0)        /* Bits 0-2: PLL Input Divider bits */
 #define DEVCFG2_FPLLIDIV_MASK    (7 << DEVCFG2_FPLLIDIV_SHIFT)
 #  define DEVCFG2_FPLLIDIV(n)    ((uint32_t)((n)-1) << DEVCFG2_FPLLIDIV_SHIFT) /* n=1..8 */
+
 #  define DEVCFG2_FPLLIDIV_1     (0 << DEVCFG2_FPLLIDIV_SHIFT) /* Divide by 1 */
 #  define DEVCFG2_FPLLIDIV_2     (1 << DEVCFG2_FPLLIDIV_SHIFT) /* Divide by 2 */
 #  define DEVCFG2_FPLLIDIV_3     (2 << DEVCFG2_FPLLIDIV_SHIFT) /* Divide by 3 */
@@ -339,6 +333,7 @@
 #  define DEVCFG2_FPLLIDIV_6     (5 << DEVCFG2_FPLLIDIV_SHIFT) /* Divide by 6 */
 #  define DEVCFG2_FPLLIDIV_7     (6 << DEVCFG2_FPLLIDIV_SHIFT) /* Divide by 7 */
 #  define DEVCFG2_FPLLIDIV_8     (7 << DEVCFG2_FPLLIDIV_SHIFT) /* Divide by 8 */
+
 #define DEVCFG2_FPLLRNG_SHIFT    (4)       /* Bits 4-6: System PLL Divided Input Clock Frequency Range bits */
 #define DEVCFG2_FPLLRNG_MASK     (7 << DEVCFG2_FPLLRNG_SHIFT)
 #  define DEVCFG2_FPLLRNG_BYPASS    (0 << DEVCFG2_FPLLRNG_SHIFT) /* Bypass */
@@ -347,10 +342,12 @@
 #  define DEVCFG2_FPLLRNG_13_26MHZ  (3 << DEVCFG2_FPLLRNG_SHIFT) /* 13-26 MHz */
 #  define DEVCFG2_FPLLRNG_21_42MHZ  (4 << DEVCFG2_FPLLRNG_SHIFT) /* 21-42 MHz */
 #  define DEVCFG2_FPLLRNG_34_64MHZ  (5 << DEVCFG2_FPLLRNG_SHIFT) /* 34-64 MHz */
+
 #define DEVCFG2_FPLLICLK         (1 << 7)  /* Bit 7: System PLL Input Clock Select bit */
 #define DEVCFG2_FPLLMULT_SHIFT   (8)       /* Bits 8-14: System PLL Feedback Divider bits */
 #define DEVCFG2_FPLLMULT_MASK    (0x7f << DEVCFG2_FPLLMULT_SHIFT)
 #  define DEVCFG2_FPLLMULT(n)    ((uint32_t)((n)-1) << DEVCFG2_FPLLMULT_SHIFT) /* n=1..128 */
+
 #define DEVCFG2_FPLLODIV_SHIFT   (16)      /* Bits 16-18: Default System PLL Output Divisor bits */
 #define DEVCFG2_FPLLODIV_MASK    (7 << DEVCFG2_FPLLODIV_SHIFT)
 #  define DEVCFG2_FPLLODIV_2     (1 << DEVCFG2_FPLLODIV_SHIFT) /* PLL output divided by 2 */
@@ -358,6 +355,7 @@
 #  define DEVCFG2_FPLLODIV_8     (3 << DEVCFG2_FPLLODIV_SHIFT) /* PLL output divided by 8 */
 #  define DEVCFG2_FPLLODIV_16    (4 << DEVCFG2_FPLLODIV_SHIFT) /* PLL output divided by 16 */
 #  define DEVCFG2_FPLLODIV_32    (5 << DEVCFG2_FPLLODIV_SHIFT) /* PLL output divided by 32 */
+
 #define DEVCFG2_UPLLFSEL         (1 << 30) /* Bit 30: USB PLL Input Frequency Select bit */
 #  define DEVCFG2_UPLLFSEL_24MHZ (1 << 30) /*   Bit 30=1: UPLL input clock is 24 MHz */
 #  define DEVCFG2_UPLLFSEL_12MHZ (0 << 30) /*   Bit 30=0: UPLL input clock is 12 MHz */
@@ -374,6 +372,7 @@
 #  define DEVCFG1_FNOSC_SOSC     (4 << DEVCFG1_FNOSC_SHIFT) /* SOSC */
 #  define DEVCFG1_FNOSC_LPRC     (5 << DEVCFG1_FNOSC_SHIFT) /* LPRC */
 #  define DEVCFG1_FNOSC_FRCDIV   (7 << DEVCFG1_FNOSC_SHIFT) /* FRC divided by FRCDIV<2:0> */
+
 #define DEVCFG1_DMTINV_SHIFT     (3)       /* Bits 3-5: Deadman Timer Count Window Interval bits */
 #define DEVCFG1_DMTINV_MASK      (7 << DEVCFG1_DMTINV_SHIFT)
 #  define DEVCFG1_DMTINV_0       (0 << DEVCFG1_DMTINV_SHIFT) /* Window/Interval value zero */
@@ -384,6 +383,7 @@
 #  define DEVCFG1_DMTINV_31_32   (5 << DEVCFG1_DMTINV_SHIFT) /* Window/Interval value 31/32 counter */
 #  define DEVCFG1_DMTINV_63_64   (6 << DEVCFG1_DMTINV_SHIFT) /* Window/Interval value 63/64 counter */
 #  define DEVCFG1_DMTINV_127_128 (7 << DEVCFG1_DMTINV_SHIFT) /* Window/Interval value 127/128 counter */
+
 #define DEVCFG1_FSOSCEN          (1 << 6)  /* Bit 6:  Secondary Oscillator Enable bit */
 #define DEVCFG1_IESO             (1 << 7)  /* Bit 7:  Internal External Switchover bit */
 #define DEVCFG1_POSCMOD_SHIFT    (8)       /* Bits 8-9: Primary Oscillator Configuration bits */
@@ -391,6 +391,7 @@
 #  define DEVCFG1_POSCMOD_EC     (0 << DEVCFG1_POSCMOD_SHIFT) /* EC mode selected */
 #  define DEVCFG1_POSCMOD_HS     (2 << DEVCFG1_POSCMOD_SHIFT) /* HS Oscillator mode selected */
 #  define DEVCFG1_POSCMOD_DIS    (3 << DEVCFG1_POSCMOD_SHIFT) /* POSC disabled */
+
 #define DEVCFG1_OSCIOFNC         (1 << 10) /* Bit 10: CLKO Enable Configuration bit */
 #define DEVCFG1_FCKSM_SHIFT      (14)      /* Bits 14-15: Clock Switching and Monitoring Selection */
 #define DEVCFG1_FCKSM_MASK       (3 << DEVCFG1_FCKSM_SHIFT)
@@ -398,6 +399,7 @@
 #  define DEVCFG1_FCKSM_SWITCH   (1 << DEVCFG1_FCKSM_SHIFT) /* Clock switching enabled */
 #  define DEVCFG1_FCKSM_MONITOR  (2 << DEVCFG1_FCKSM_SHIFT) /* Clock monitoring enabled */
 #  define DEVCFG1_FCKSM_BOTH     (3 << DEVCFG1_FCKSM_SHIFT) /* Clock switching/monitoring enabled */
+
 #define DEVCFG1_WDTPS_SHIFT      (16)      /* Bits 16-20: Watchdog Timer Postscale Select bits */
 #define DEVCFG1_WDTPS_MASK       (31 << DEVCFG1_WDTPS_SHIFT)
 #  define DEVCFG1_WDTPS_1        (0 << DEVCFG1_WDTPS_SHIFT)  /* 1:1 */
@@ -421,6 +423,7 @@
 #  define DEVCFG1_WDTPS_262144   (18 << DEVCFG1_WDTPS_SHIFT) /* 1:262144 */
 #  define DEVCFG1_WDTPS_524288   (19 << DEVCFG1_WDTPS_SHIFT) /* 1:524288 */
 #  define DEVCFG1_WDTPS_1048576  (20 << DEVCFG1_WDTPS_SHIFT) /* 1:1048576 */
+
 #define DEVCFG1_WDTSPGM          (1 << 21) /* Bit 21: WDT stop/run during flash programming bit */
 #  define DEVCFG1_WDTSPGM_STOP   (1 << 21) /*   Bit 21=1: WDT stops during flash programming */
 #  define DEVCFG1_WDTSPGM_RUN    (0 << 21) /*   Bit 21=0: WDT runs during flash programming */
@@ -436,11 +439,14 @@
 #  define DEVCFG1_FWDTWINSZ_50   (1 << DEVCFG1_FWDTWINSZ_SHIFT) /* Window size is 50% */
 #  define DEVCFG1_FWDTWINSZ_37p5 (2 << DEVCFG1_FWDTWINSZ_SHIFT) /* Window size is 37.5% */
 #  define DEVCFG1_FWDTWINSZ_25   (3 << DEVCFG1_FWDTWINSZ_SHIFT) /* Window size is 25% */
+
 #define DEVCFG1_DMTCNT_SHIFT     (26)      /* Bits 26-30: Deadman Timer Count Select bits */
 #define DEVCFG1_DMTCNT_MASK      (31 << DEVCFG1_DMTCNT_SHIFT)
 #  define DEVCFG1_DMTCNT(n)      ((uint32_t)((n)-8) << DEVCFG1_DMTCNT_SHIFT) /* 2**n, n=8..31 */
+
 #  define DEVCFG1_DMTCNT_MIN     (0  << DEVCFG1_DMTCNT_SHIFT) /* 2**8   (256) */
 #  define DEVCFG1_DMTCNT_MAX     (23 << DEVCFG1_DMTCNT_SHIFT) /* 2**31 (2147483648) */
+
 #define DEVCFG1_FDMTEN           (1 << 31) /* Bit 31: Deadman Timer enable bit */
 
 #define DEVCFG1_RWO              0x00003800 /* Bits 11-13: Reserved, write as one */
@@ -451,11 +457,13 @@
 #define DEVCFG0_DEBUG_MASK       (3 << DEVCFG0_DEBUG_SHIFT)
 #  define DEVCFG0_DEBUG_ENABLED  (2 << DEVCFG0_DEBUG_SHIFT) /* Debugger is enabled */
 #  define DEVCFG0_DEBUG_DISABLED (3 << DEVCFG0_DEBUG_SHIFT) /* Debugger is disabled */
+
 #define DEVCFG0_JTAGEN           (1 << 2)  /* Bit 2: JTAG Enable bit(1) */
 #define DEVCFG0_ICESEL_SHIFT     (3)       /* Bits 3-4: ICE Communication Channel Select bits */
 #define DEVCFG0_ICESEL_MASK      (3 << DEVCFG0_ICESEL_SHIFT)
 #  define DEVCFG0_ICESEL_1       (3 << DEVCFG0_ICESEL_SHIFT) /* PGEC1/PGED1 pair is used */
 #  define DEVCFG0_ICESEL_2       (2 << DEVCFG0_ICESEL_SHIFT) /* PGEC2/PGED2 pair is used */
+
 #define DEVCFG0_TRCEN            (1 << 5)  /* Bit 5: Trace Enable bit */
 #define DEVCFG0_BOOTISA          (1 << 6)  /* Bit 6: Boot ISA Selection bit */
 #  define DEVCFG0_BOOT_MIPS32    (1 << 6)  /*   Bit 6=1: Boot code and Exception code is MIPS32 */
@@ -466,6 +474,7 @@
 #  define DEVCFG0_FECCCON_DYNECC (1 << DEVCFG0_FECCCON_SHIFT) /* Dynamic Flash ECC enabled (locked) */
 #  define DEVCFG0_FECCCON_DISLCK (2 << DEVCFG0_FECCCON_SHIFT) /* ECC / dynamic ECC disabled (locked) */
 #  define DEVCFG0_FECCCON_DISWR  (3 << DEVCFG0_FECCCON_SHIFT) /* ECC / dynamic ECC disabled (writable) */
+
 #define DEVCFG0_FSLEEP           (1 << 10) /* Bit 10: Flash Sleep Mode bit */
 #  define DEVCFG0_FSLEEP_OFF     (1 << 10) /*   Bit 10=1: Flash powered down in sleep mode */
 #  define DEVCFG0_FSLEEP_ON      (0 << 10) /*   Bit 10=0: Flash powerdown controlled by VREGS bit */
@@ -475,6 +484,7 @@
 #  define DEVCFG0_DBGPER_GROUP1  (2 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 1 regions */
 #  define DEVCFG0_DBGPER_GROUP2  (4 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to group 2 regions */
 #  define DEVCFG0_DBGPER_ALL     (7 << DEVCFG0_DBGPER_SHIFT) /* Allow/deny access to all regions */
+
 #define DEVCFG0_EJTAGBEN         (1 << 30) /* Bit 30: EJTAG Boot Enable bit */
 #  define DEVCFG0_EJTAG_NORMAL   (1 << 30) /*   Bit 30=1: Normal EJTAG functionality */
 #  define DEVCFG0_EJTAG_REDUCED  (0 << 30) /*   Bit 30=0: Reduced EJTAG functionality */
@@ -506,9 +516,11 @@
 #define DEVSIGN0_RWO             0x7fffffff /* Bits 0-30: Reserved, write as one */
 
 /* Device ADC Calibration (Boot Flash PIC32MZ_ADCCALIB_K1BASE) */
+
 /* ADC1-5 Calibration:  32-bit calibration values */
 
 /* Device Serial Number (Boot Flash PIC32MZ_DEVSN_K1BASE) */
+
 /* Device serial number 0-1: 32-bit serial number data */
 
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZEC_FEATURES_H */

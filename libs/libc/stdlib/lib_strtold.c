@@ -71,7 +71,7 @@
 
 static inline int is_real(long double x)
 {
-  const long double infinite = 1.0L/0.0L;
+  const long double infinite = 1.0L / 0.0L;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -97,7 +97,7 @@ long double strtold(FAR const char *str, FAR char **endptr)
   int n;
   int num_digits;
   int num_decimals;
-  const long double infinite = 1.0L/0.0L;
+  const long double infinite = 1.0L / 0.0L;
 
   /* Skip leading whitespace */
 
@@ -113,10 +113,14 @@ long double strtold(FAR const char *str, FAR char **endptr)
     {
     case '-':
       negative = 1; /* Fall through to increment position */
+
       /* FALLTHROUGH */
+
     case '+':
       p++;
+
       /* FALLTHROUGH */
+
     default:
       break;
     }
@@ -177,10 +181,14 @@ long double strtold(FAR const char *str, FAR char **endptr)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */
+
           /* FALLTHROUGH */
+
         case '+':
           p++;
+
           /* FALLTHROUGH */
+
         default:
           break;
         }

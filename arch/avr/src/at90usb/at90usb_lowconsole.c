@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/avr/src/at90usb/at90usb_lowconsole.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -64,8 +49,8 @@
 #define AVR_DBLSPEED_UBRR1 \
   ((((BOARD_CPU_CLOCK / 8) + (CONFIG_USART1_BAUD / 2)) / (CONFIG_USART1_BAUD)) - 1)
 
-/* Select normal or double speed baud settings.  This is a trade-off between the
- * sampling rate and the accuracy of the divisor for high baud rates.
+/* Select normal or double speed baud settings.  This is a trade-off between
+ * the sampling rate and the accuracy of the divisor for high baud rates.
  *
  * As examples, consider:
  *
@@ -231,10 +216,11 @@ void usart1_configure(void)
   /* Pin Configuration: None necessary, Port D bits 2&3 are automatically
    * configured:
    *
-   *   Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1). When
-   *     the USART1 receiver is enabled this pin is configured as an input
-   *     regardless of the value of DDD2. When the USART forces this pin to
-   *     be an input, the pull-up can still be controlled by the PORTD2 bit.
+   *   Port D, Bit 2: RXD1, Receive Data (Data input pin for the USART1).
+   *     When the USART1 receiver is enabled this pin is configured as an
+   *     input regardless of the value of DDD2. When the USART forces this
+   *     pin to be an input, the pull-up can still be controlled by the
+   *     PORTD2 bit.
    *   Port D, Bit 3: TXD1, Transmit Data (Data output pin for the USART1).
    *     When the USART1 Transmitter is enabled, this pin is configured as
    *     an output regardless of the value of DDD3.
@@ -254,8 +240,8 @@ void usart1_configure(void)
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the initialization sequence to configure the serial console uart
- *   (only).
+ *   early in the initialization sequence to configure the serial console
+ *   uart (only).
  *
  ****************************************************************************/
 

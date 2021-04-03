@@ -175,7 +175,7 @@ static int sim_foc_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq)
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
 
-  pwrinfo("[PWM_SETUP] devno=%d freq=%d\n", dev->devno, freq);
+  mtrinfo("[PWM_SETUP] devno=%d freq=%d\n", dev->devno, freq);
 
   DEBUGASSERT(freq > 0);
 
@@ -200,14 +200,14 @@ static int sim_foc_start(FAR struct foc_dev_s *dev, bool state)
   irqstate_t                 flags;
   int                        ret = OK;
 
-  pwrinfo("[FOC_START] devno=%d state=%d\n", dev->devno, state);
+  mtrinfo("[FOC_START] devno=%d state=%d\n", dev->devno, state);
 
   /* Start PWM */
 
   ret = sim_foc_pwm_start(dev, state);
   if (ret < 0)
     {
-      pwrerr("ERROR: sim_foc_pwm_start failed %d\n", ret);
+      mtrerr("sim_foc_pwm_start failed %d\n", ret);
       goto errout;
     }
 
@@ -216,7 +216,7 @@ static int sim_foc_start(FAR struct foc_dev_s *dev, bool state)
   ret = sim_foc_adc_start(dev, state);
   if (ret < 0)
     {
-      pwrerr("ERROR: sim_foc_adc_start failed %d\n", ret);
+      mtrerr("sim_foc_adc_start failed %d\n", ret);
       goto errout;
     }
 
@@ -242,7 +242,7 @@ static int sim_foc_pwm_start(FAR struct foc_dev_s *dev, bool state)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[PWM_START] devno=%d state=%d\n", dev->devno, state);
+  mtrinfo("[PWM_START] devno=%d state=%d\n", dev->devno, state);
 
   return OK;
 }
@@ -259,7 +259,7 @@ static int sim_foc_adc_setup(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[ADC_SETUP] devno=%d\n", dev->devno);
+  mtrinfo("[ADC_SETUP] devno=%d\n", dev->devno);
 
   return OK;
 }
@@ -276,7 +276,7 @@ static int sim_foc_adc_start(FAR struct foc_dev_s *dev, bool state)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[ADC_START] devno=%d state=%d\n", dev->devno, state);
+  mtrinfo("[ADC_START] devno=%d state=%d\n", dev->devno, state);
 
   return OK;
 }
@@ -297,7 +297,7 @@ static int sim_foc_notifier_cfg(FAR struct foc_dev_s *dev, uint32_t freq)
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
 
-  pwrinfo("[NOTIFIER_CFG] devno=%d freq=%d\n", dev->devno, freq);
+  mtrinfo("[NOTIFIER_CFG] devno=%d freq=%d\n", dev->devno, freq);
 
   DEBUGASSERT(freq > 0);
 
@@ -336,14 +336,14 @@ static int sim_foc_configure(FAR struct foc_dev_s *dev,
   DEBUGASSERT(cfg->pwm_freq > 0);
   DEBUGASSERT(cfg->notifier_freq > 0);
 
-  pwrinfo("[FOC_SETUP] devno=%d\n", dev->devno);
+  mtrinfo("[FOC_SETUP] devno=%d\n", dev->devno);
 
   /* Configure ADC */
 
   ret = sim_foc_adc_setup(dev);
   if (ret < 0)
     {
-      pwrerr("ERROR: sim_foc_adc_setup failed %d\n", ret);
+      mtrerr("sim_foc_adc_setup failed %d\n", ret);
       goto errout;
     }
 
@@ -352,7 +352,7 @@ static int sim_foc_configure(FAR struct foc_dev_s *dev,
   ret = sim_foc_pwm_setup(dev, cfg->pwm_freq);
   if (ret < 0)
     {
-      pwrerr("ERROR: sim_foc_pwm_setup failed %d\n", ret);
+      mtrerr("sim_foc_pwm_setup failed %d\n", ret);
       goto errout;
     }
 
@@ -361,7 +361,7 @@ static int sim_foc_configure(FAR struct foc_dev_s *dev,
   ret = sim_foc_notifier_cfg(dev, cfg->notifier_freq);
   if (ret < 0)
     {
-      pwrerr("ERROR: sim_foc_notifier_cfg failed %d\n", ret);
+      mtrerr("sim_foc_notifier_cfg failed %d\n", ret);
       goto errout;
     }
 
@@ -385,7 +385,7 @@ static int sim_foc_setup(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[FOC_SETUP] devno=%d\n", dev->devno);
+  mtrinfo("[FOC_SETUP] devno=%d\n", dev->devno);
 
   /* Get HW configuration */
 
@@ -406,7 +406,7 @@ static int sim_foc_shutdown(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[FOC_SHUTDOWN] devno=%d\n", dev->devno);
+  mtrinfo("[FOC_SHUTDOWN] devno=%d\n", dev->devno);
 
   return OK;
 }
@@ -426,7 +426,7 @@ static int sim_foc_ioctl(FAR struct foc_dev_s *dev, int cmd,
 
   DEBUGASSERT(dev);
 
-  pwrinfo("[FOC_IOCTL] devno=%d cmd=%d\n", dev->devno, cmd);
+  mtrinfo("[FOC_IOCTL] devno=%d cmd=%d\n", dev->devno, cmd);
 
   switch (cmd)
     {
@@ -456,7 +456,7 @@ static int sim_foc_notifier_handler(FAR struct foc_dev_s *dev)
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
 
-  pwrinfo("[FOC_NOTIFIER_HANDLER] devno=%d cntr=%d\n",
+  mtrinfo("[FOC_NOTIFIER_HANDLER] devno=%d cntr=%d\n",
           dev->devno, sim->notifier_cntr);
 
   flags = enter_critical_section();
@@ -500,14 +500,14 @@ static int sim_foc_pwm_duty_set(FAR struct foc_dev_s *dev,
       DEBUGASSERT(duty[i] >= 0);
     }
 
-  pwrinfo("[PWM_DUTY_SET] devno=%d duty= ", dev->devno);
+  mtrinfo("[PWM_DUTY_SET] devno=%d duty= ", dev->devno);
 
 #if CONFIG_MOTOR_FOC_PHASES == 2
-  pwrinfo("[%d %d]\n", duty[0], duty[1]);
+  mtrinfo("[%d %d]\n", duty[0], duty[1]);
 #elif CONFIG_MOTOR_FOC_PHASES == 3
-  pwrinfo("[%d %d %d]\n", duty[0], duty[1], duty[2]);
+  mtrinfo("[%d %d %d]\n", duty[0], duty[1], duty[2]);
 #elif CONFIG_MOTOR_FOC_PHASES == 4
-  pwrinfo("[%d %d %d %d]\n", duty[0], duty[1], duty[2], duty[3]);
+  mtrinfo("[%d %d %d %d]\n", duty[0], duty[1], duty[2], duty[3]);
 #else
 #  error
 #endif
@@ -551,14 +551,13 @@ static int sim_foc_bind(FAR struct foc_dev_s *dev,
   DEBUGASSERT(cb);
   DEBUGASSERT(sim);
 
-  pwrinfo("[FOC_BIND] devno=%d\n", dev->devno);
+  mtrinfo("[FOC_BIND] devno=%d\n", dev->devno);
 
   /* Do we support given FOC instance? */
 
   if (dev->devno > CONFIG_MOTOR_FOC_INST)
     {
-      pwrerr("ERROR: unsupported SIM FOC instance %d\n",
-             dev->devno);
+      mtrerr("unsupported SIM FOC instance %d\n", dev->devno);
       ret = -EINVAL;
       goto errout;
     }
@@ -583,7 +582,7 @@ static int sim_foc_fault_clear(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[FAULT_CLEAR] devno=%d\n", dev->devno);
+  mtrinfo("[FAULT_CLEAR] devno=%d\n", dev->devno);
 
   return OK;
 }
@@ -601,7 +600,7 @@ static void sim_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
 {
   DEBUGASSERT(dev);
 
-  pwrinfo("[FOC_TRACE] devno=%d type=%d state=%d\n",
+  mtrinfo("[FOC_TRACE] devno=%d type=%d state=%d\n",
           dev->devno, type, state);
 }
 #endif  /* CONFIG_MOTOR_FOC_TRACE */
@@ -623,7 +622,7 @@ FAR struct foc_dev_s *sim_foc_initialize(int inst)
   FAR struct foc_lower_s *foc_lower = NULL;
   FAR struct foc_dev_s   *dev       = NULL;
 
-  pwrinfo("[FOC_INITIALIZE] inst=%d\n", inst);
+  mtrinfo("[FOC_INITIALIZE] inst=%d\n", inst);
 
   /* Reset data */
 

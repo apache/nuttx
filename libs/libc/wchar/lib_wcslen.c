@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- *	citrus Id: wcslen.c,v 1.1 1999/12/29 21:47:45 tshiozak Exp
+ * citrus Id: wcslen.c,v 1.1 1999/12/29 21:47:45 tshiozak Exp
  *
  ****************************************************************************/
 

@@ -56,6 +56,7 @@ FAR char *__ultoa_invert(unsigned long val, FAR char *str, int base)
       upper = 1;
       base &= ~XTOA_UPPER;
     }
+
   do
     {
       int v;

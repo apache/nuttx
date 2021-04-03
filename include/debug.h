@@ -731,6 +731,24 @@
 #  define wdinfo      _none
 #endif
 
+#ifdef CONFIG_DEBUG_MOTOR_ERROR
+#  define mtrerr      _err
+#else
+#  define mtrerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_MOTOR_WARN
+#  define mtrwarn     _warn
+#else
+#  define mtrwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_MOTOR_INFO
+#  define mtrinfo     _info
+#else
+#  define mtrinfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR
@@ -993,6 +1011,14 @@
 #else
 #  define wderrdumpbuffer(m,b,n)
 #  define wdinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_MOTOR
+#  define mtrerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define mtrinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define mtrerrdumpbuffer(m,b,n)
+#  define mtrinfodumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

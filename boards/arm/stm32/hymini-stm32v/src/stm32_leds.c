@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/hymini-stm32v/src/stm32_leds.c
  *
- *   Copyright (C) 2009, 2011, 2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Laurent Latil <laurent@latil.nom.fr>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -140,29 +124,29 @@
 
 static const uint16_t g_ledbits[8] =
 {
-  (LED_STARTED_ON_SETBITS | LED_STARTED_ON_CLRBITS | LED_STARTED_OFF_SETBITS
-   | LED_STARTED_OFF_CLRBITS),
+  (LED_STARTED_ON_SETBITS | LED_STARTED_ON_CLRBITS |
+  LED_STARTED_OFF_SETBITS | LED_STARTED_OFF_CLRBITS),
 
-  (LED_HEAPALLOCATE_ON_SETBITS | LED_HEAPALLOCATE_ON_CLRBITS
-   | LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
+  (LED_HEAPALLOCATE_ON_SETBITS | LED_HEAPALLOCATE_ON_CLRBITS |
+  LED_HEAPALLOCATE_OFF_SETBITS | LED_HEAPALLOCATE_OFF_CLRBITS),
 
-  (LED_IRQSENABLED_ON_SETBITS | LED_IRQSENABLED_ON_CLRBITS
-   | LED_IRQSENABLED_OFF_SETBITS | LED_IRQSENABLED_OFF_CLRBITS),
+  (LED_IRQSENABLED_ON_SETBITS | LED_IRQSENABLED_ON_CLRBITS |
+  LED_IRQSENABLED_OFF_SETBITS | LED_IRQSENABLED_OFF_CLRBITS),
 
-  (LED_STACKCREATED_ON_SETBITS | LED_STACKCREATED_ON_CLRBITS
-   | LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
+  (LED_STACKCREATED_ON_SETBITS | LED_STACKCREATED_ON_CLRBITS |
+  LED_STACKCREATED_OFF_SETBITS | LED_STACKCREATED_OFF_CLRBITS),
 
-  (LED_INIRQ_ON_SETBITS | LED_INIRQ_ON_CLRBITS | LED_INIRQ_OFF_SETBITS
-   | LED_INIRQ_OFF_CLRBITS),
+  (LED_INIRQ_ON_SETBITS | LED_INIRQ_ON_CLRBITS |
+  LED_INIRQ_OFF_SETBITS | LED_INIRQ_OFF_CLRBITS),
 
-  (LED_SIGNAL_ON_SETBITS | LED_SIGNAL_ON_CLRBITS | LED_SIGNAL_OFF_SETBITS
-   | LED_SIGNAL_OFF_CLRBITS),
+  (LED_SIGNAL_ON_SETBITS | LED_SIGNAL_ON_CLRBITS |
+  LED_SIGNAL_OFF_SETBITS | LED_SIGNAL_OFF_CLRBITS),
 
-  (LED_ASSERTION_ON_SETBITS | LED_ASSERTION_ON_CLRBITS | LED_ASSERTION_OFF_SETBITS
-   | LED_ASSERTION_OFF_CLRBITS),
+  (LED_ASSERTION_ON_SETBITS | LED_ASSERTION_ON_CLRBITS |
+  LED_ASSERTION_OFF_SETBITS | LED_ASSERTION_OFF_CLRBITS),
 
-  (LED_PANIC_ON_SETBITS | LED_PANIC_ON_CLRBITS | LED_PANIC_OFF_SETBITS
-   | LED_PANIC_OFF_CLRBITS)
+  (LED_PANIC_ON_SETBITS | LED_PANIC_ON_CLRBITS |
+  LED_PANIC_OFF_SETBITS | LED_PANIC_OFF_CLRBITS)
 };
 
 /****************************************************************************
@@ -172,27 +156,27 @@ static const uint16_t g_ledbits[8] =
 static inline void led_clrbits(unsigned int clrbits)
 {
   if ((clrbits & HYMINI_STM32_LED1) != 0)
-  {
-    stm32_gpiowrite(GPIO_LED1, false);
-  }
+    {
+      stm32_gpiowrite(GPIO_LED1, false);
+    }
 
   if ((clrbits & HYMINI_STM32_LED2) != 0)
-  {
-    stm32_gpiowrite(GPIO_LED2, false);
-  }
+    {
+      stm32_gpiowrite(GPIO_LED2, false);
+    }
 }
 
 static inline void led_setbits(unsigned int setbits)
 {
   if ((setbits & HYMINI_STM32_LED1) != 0)
-  {
-    stm32_gpiowrite(GPIO_LED1, true);
-  }
+    {
+      stm32_gpiowrite(GPIO_LED1, true);
+    }
 
   if ((setbits & HYMINI_STM32_LED2) != 0)
-  {
-    stm32_gpiowrite(GPIO_LED2, true);
-  }
+    {
+      stm32_gpiowrite(GPIO_LED2, true);
+    }
 }
 
 static void led_setonoff(unsigned int bits)
@@ -213,6 +197,7 @@ static void led_setonoff(unsigned int bits)
 void board_autoled_initialize(void)
 {
   /* Configure LED1 & LED2 GPIOs for output */
+
   stm32_configgpio(GPIO_LED1);
   stm32_configgpio(GPIO_LED2);
 }

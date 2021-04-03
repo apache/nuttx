@@ -4362,7 +4362,7 @@ Configurations
 
        The FAT file system includes long file name support.  Please be aware
        that Microsoft claims patents against the long file name support (see
-       more discussion in the top-level COPYING file).
+       more discussion in the top-level NOTICE file).
 
          CONFIG_FS_FAT=y        : Enables the FAT file system
          CONFIG_FAT_LCNAMES=y   : Enable lower case 8.3 file names

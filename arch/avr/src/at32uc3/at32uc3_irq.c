@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_irq.c
- * arch/avr/src/chip/at32uc3_irq.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -163,6 +147,7 @@ static int up_getgrp(unsigned int irq)
             }
         }
     }
+
   return -EINVAL;
 }
 
@@ -200,10 +185,14 @@ void up_irqinitialize(void)
    */
 
 #if 1 /* REVISIT -- Can we come up with a way to statically initialize? */
-  g_ipr[0] = ((AVR32_INT0_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT0);
-  g_ipr[1] = ((AVR32_INT1_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT1);
-  g_ipr[2] = ((AVR32_INT2_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT2);
-  g_ipr[3] = ((AVR32_INT3_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) | INTC_IPR_INTLEVEL_INT3);
+  g_ipr[0] = ((AVR32_INT0_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT0);
+  g_ipr[1] = ((AVR32_INT1_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT1);
+  g_ipr[2] = ((AVR32_INT2_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT2);
+  g_ipr[3] = ((AVR32_INT3_RADDR << INTC_IPR_AUTOVECTOR_SHIFT) |
+               INTC_IPR_INTLEVEL_INT3);
 #endif
 
   /* Set the interrupt group priority to a default value.  All are linked to
@@ -321,8 +310,8 @@ unsigned int avr32_intirqno(unsigned int level)
           mask <<= 1;
         }
 
-       _err("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
-       return -ENODEV;
+      _err("ERROR: Spurious interrupt: group=%d IRR=%08x\n", group, irr);
+      return -ENODEV;
     }
 
   _err("ERROR: Bad group: %d\n", group);

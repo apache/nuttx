@@ -44,7 +44,8 @@
 static float asinf_aux(float x)
 {
   double y;
-  float  y_sin, y_cos;
+  float y_sin;
+  float y_cos;
 
   y = 0.0;
   y_sin = 0.0F;

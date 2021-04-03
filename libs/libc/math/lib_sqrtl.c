@@ -44,7 +44,8 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double sqrtl(long double x)
 {
-  long double y, y1;
+  long double y;
+  long double y1;
 
   /* Filter out invalid/trivial inputs */
 
@@ -56,17 +57,17 @@ long double sqrtl(long double x)
 
   if (isnan(x))
     {
-    return NAN;
+      return NAN;
     }
 
   if (isinf(x))
     {
-    return INFINITY;
+      return INFINITY;
     }
 
   if (x == 0.0)
     {
-    return 0.0;
+      return 0.0;
     }
 
   /* Guess square root (using bit manipulation) */

@@ -1,44 +1,29 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_dma.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_DMA_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_DMA_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,10 +32,12 @@
 
 #if CHIP_NDMACH > 0
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
+
 /* Global DMA Registers */
 
 #define PIC32MX_DMA_CON_OFFSET        0x0000  /* DMA Controller Control Register */
@@ -114,7 +101,8 @@
 #define PIC32MX_DMACH_DATSET_OFFSET   0x00b8  /* DMA Channel Pattern Data Set Register */
 #define PIC32MX_DMACH_DATINV_OFFSET   0x00bc  /* DMA Channel Pattern Data Invert Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
+
 /* Global DMA Registers */
 
 #define PIC32MX_DMA_CON               (PIC32MX_DMA_K1BASE+PIC32MX_DMA_CON_OFFSET)
@@ -513,8 +501,10 @@
 #  define PIC32MX_DMACH7_DATINV       (PIC32MX_DMACH7_K1BASE+PIC32MX_DMACH_DATINV_OFFSET)
 #endif
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
+
 /* Global DMA Registers */
+
 /* DMA Controller Control Register */
 
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)
@@ -595,6 +585,7 @@
 /* DMA CRCXOR Enable Register -- 16 or 32-bits of data */
 
 /* Per-Channel DMA Registers */
+
 /* DMA Channel Control Register */
 
 #define DMACH_CON_CHPRI_SHIFT         (0)       /* Bits 0-1: Channel priority */
@@ -622,6 +613,7 @@
 #define DMACH_ECON_CHSIRQ_SHIFT       (8)       /* Bits 8-15: Channel Transfer Start IRQ */
 #define DMACH_ECON_CHSIRQ_MASK        (0xff << DMACH_ECON_CHSIRQ_SHIFT)
 #  define DMACH_ECON_CHSIRQ(n)        ((n) << DMACH_ECON_CHSIRQ_SHIFT) /* Interrupt n will initiate a DMA transfer */
+
 #define DMACH_ECON_CHAIRQ_SHIFT       (16)      /* Bits 16-23: Channel transfer abort irq */
 #define DMACH_ECON_CHAIRQ_MASK        (0xff << DMACH_ECON_CHAIRQ_SHIFT)
 #  define DMACH_ECON_CHAIRQ(n)        ((n) << DMACH_ECON_CHAIRQ_SHIFT) /* Interrupt n will abort any transfers in progress and set CHAIF */
@@ -645,39 +637,57 @@
 #define DMACH_INT_CHSHIE              (1 << 22) /* Bit 22: Channel source half empty interrupt enable */
 #define DMACH_INT_CHSDIE              (1 << 23) /* Bit 23: Channel source done interrupt enable */
 
-/* DMA Channel Source Start Address Register -- This register contains a 32-bit address value */
+/* DMA Channel Source Start Address Register --
+ * This register contains a 32-bit address value
+ */
 
-/* DMA Channel Destination Start Address Register -- This register contains a 32-bit address value */
+/* DMA Channel Destination Start Address Register --
+ * This register contains a 32-bit address value
+ */
 
-/* DMA Channel Source Size Register -- 8 or 16 bits of byte size data */
+/* DMA Channel Source Size Register --
+ * 8 or 16 bits of byte size data
+ */
 
-/* DMA Channel Destination Size Register -- 8 or 16 bits of byte size data */
+/* DMA Channel Destination Size Register --
+ * 8 or 16 bits of byte size data
+ */
 
-/* DMA Channel Source Pointer Register -- 8 or 16 bits of byte index data */
+/* DMA Channel Source Pointer Register --
+ * 8 or 16 bits of byte index data
+ */
 
-/* DMA Channel Destination Pointer Register -- 8 or 16 bits of byte index data */
+/* DMA Channel Destination Pointer Register --
+ * 8 or 16 bits of byte index data
+ */
 
-/* DMA Channel Cell-Size Register -- 8 or 16 bits of byte transferred data */
+/* DMA Channel Cell-Size Register --
+ * 8 or 16 bits of byte transferred data
+ */
 
-/* DMA Channel Cell Pointer Register -- 8 or 16 bits of byte transferred data */
+/* DMA Channel Cell Pointer Register --
+ * 8 or 16 bits of byte transferred data
+ */
 
-/* DMA Channel Pattern Data Register -- 8-bits of pattern data */
+/* DMA Channel Pattern Data Register --
+ * 8-bits of pattern data
+ */
 
 #define DMACH_DAT_MASK                0xff
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

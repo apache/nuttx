@@ -95,108 +95,6 @@ static dq_queue_t g_active_tcp_connections;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_ipv4_listener
- *
- * Description:
- *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this port.
- *
- *   Primary uses: (1) to determine if a port number is available, (2) to
- *   To identify the socket that will accept new connections on a local port.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv4
-static inline FAR struct tcp_conn_s *tcp_ipv4_listener(in_addr_t ipaddr,
-                                                       uint16_t portno)
-{
-  FAR struct tcp_conn_s *conn;
-  int i;
-
-  /* Check if this port number is in use by any active UIP TCP connection */
-
-  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
-    {
-      conn = &g_tcp_connections[i];
-
-      /* Check if this connection is open and the local port assignment
-       * matches the requested port number.
-       */
-
-      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno)
-        {
-          /* If there are multiple interface devices, then the local IP
-           * address of the connection must also match.  INADDR_ANY is a
-           * special case:  There can only be instance of a port number
-           * with INADDR_ANY.
-           */
-
-          if (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr) ||
-              net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
-            {
-              /* The port number is in use, return the connection */
-
-              return conn;
-            }
-        }
-    }
-
-  return NULL;
-}
-#endif /* CONFIG_NET_IPv4 */
-
-/****************************************************************************
- * Name: tcp_ipv6_listener
- *
- * Description:
- *   Given a local port number (in network byte order), find the TCP
- *   connection that listens on this port.
- *
- *   Primary uses: (1) to determine if a port number is available, (2) to
- *   To identify the socket that will accept new connections on a local port.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_IPv6
-static inline FAR struct tcp_conn_s *
-tcp_ipv6_listener(const net_ipv6addr_t ipaddr, uint16_t portno)
-{
-  FAR struct tcp_conn_s *conn;
-  int i;
-
-  /* Check if this port number is in use by any active UIP TCP connection */
-
-  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
-    {
-      conn = &g_tcp_connections[i];
-
-      /* Check if this connection is open and the local port assignment
-       * matches the requested port number.
-       */
-
-      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno)
-        {
-          /* If there are multiple interface devices, then the local IP
-           * address of the connection must also match.  The IPv6
-           * unspecified address is a special case:  There can only be
-           * one instance of a port number with the unspecified address.
-           */
-
-          if (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr) ||
-              net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
-            {
-              /* The port number is in use, return the connection */
-
-              return conn;
-            }
-        }
-    }
-
-  return NULL;
-}
-#endif /* CONFIG_NET_IPv6 */
-
-/****************************************************************************
  * Name: tcp_listener
  *
  * Description:
@@ -212,23 +110,64 @@ static FAR struct tcp_conn_s *
   tcp_listener(uint8_t domain, FAR const union ip_addr_u *ipaddr,
                uint16_t portno)
 {
+  FAR struct tcp_conn_s *conn;
+  int i;
+
+  /* Check if this port number is in use by any active UIP TCP connection */
+
+  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
+    {
+      conn = &g_tcp_connections[i];
+
+      /* Check if this connection is open and the local port assignment
+       * matches the requested port number.
+       */
+
+      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          && domain == conn->domain
+#endif
+         )
+        {
+          /* If there are multiple interface devices, then the local IP
+           * address of the connection must also match.  INADDR_ANY is a
+           * special case:  There can only be instance of a port number
+           * with INADDR_ANY.
+           */
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-  if (domain == PF_INET)
-#endif
-    {
-      return tcp_ipv4_listener(ipaddr->ipv4, portno);
-    }
+          if (domain == PF_INET)
+#endif /* CONFIG_NET_IPv6 */
+            {
+              if (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4) ||
+                  net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
+                {
+                  /* The port number is in use, return the connection */
+
+                  return conn;
+                }
+            }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      return tcp_ipv6_listener(ipaddr->ipv6, portno);
-    }
+          else
+#endif /* CONFIG_NET_IPv4 */
+            {
+              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6) ||
+                  net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
+                {
+                  /* The port number is in use, return the connection */
+
+                  return conn;
+                }
+            }
 #endif /* CONFIG_NET_IPv6 */
+        }
+    }
+
+  return NULL;
 }
 
 /****************************************************************************

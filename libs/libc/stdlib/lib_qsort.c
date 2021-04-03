@@ -196,7 +196,7 @@ loop:
         }
 
       return;
-  }
+    }
 
   pm = (FAR char *)base + (nel / 2) * width;
   if (nel > 7)

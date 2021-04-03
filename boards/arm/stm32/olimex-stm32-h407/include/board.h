@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-h407/include/board.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Modified for H407 Neil Hancock
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -58,29 +42,32 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
+
 /* The Olimex-STM32-H407 board features a 12MHz crystal and
  * a 32kHz RTC backup crystal.
  *
  * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
- *   SDIO and RNG clock
+ *   System Clock source       : PLL (HSE)
+ *   SYSCLK(Hz)                : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)                  : 168000000    (STM32_RCC_CFGR_HPRE)
+ *   AHB Prescaler             : 1            (STM32_RCC_CFGR_HPRE)
+ *   APB1 Prescaler            : 4            (STM32_RCC_CFGR_PPRE1)
+ *   APB2 Prescaler            : 2            (STM32_RCC_CFGR_PPRE2)
+ *   HSE Frequency(Hz)         : 8000000      (STM32_BOARD_XTAL)
+ *   PLLM                      : 8            (STM32_PLLCFG_PLLM)
+ *   PLLN                      : 336          (STM32_PLLCFG_PLLN)
+ *   PLLP                      : 2            (STM32_PLLCFG_PLLP)
+ *   PLLQ                      : 7            (STM32_PLLCFG_PLLQ)
+ *   Main regulator output
+ *              voltage        : Scale1 mode  Needed for high speed SYSCLK
+ *   Flash Latency(WS)         : 5
+ *   Prefetch Buffer           : OFF
+ *   Instruction cache         : ON
+ *   Data cache                : ON
+ *   Require 48MHz for
+ *   USB OTG FS,
+ *   SDIO and RNG clock        : Enabled
  */
 
 /* HSI - 16 MHz RC factory-trimmed
@@ -203,9 +190,11 @@
 #  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status LED in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the status
+ * LED in any way.
+ * The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -217,8 +206,9 @@
 
 #define BOARD_LED_STATUS_BIT  (1 << BOARD_LED_STATUS)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of the
- * Olimex STM32-H405.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the status LED of
+ * the Olimex STM32-H405.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED       0  /* LED_STATUS on */
@@ -230,7 +220,8 @@
 #define LED_ASSERTION     6  /* LED_STATUS off */
 #define LED_PANIC         7  /* LED_STATUS blinking */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The Olimex STM32-H405 supports one buttons: */
 
 #define BUTTON_BUT     0
@@ -238,7 +229,7 @@
 
 #define BUTTON_BUT_BIT (1 << BUTTON_BUT)
 
-/* Alternate function pin selections ************************************************/
+/* Alternate function pin selections ****************************************/
 
 /* USART3: */
 
@@ -270,9 +261,10 @@
 #define GPIO_CAN2_RX      GPIO_CAN1_RX_2    /* PB5 */
 #define GPIO_CAN2_TX      GPIO_CAN1_TX_2    /* PB6 */
 
-/* DMA Channel/Stream Selections *****************************************************/
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* DMA Channel/Stream Selections ********************************************/
+
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDIO_1 = Channel 4, Stream 3

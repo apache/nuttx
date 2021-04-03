@@ -56,7 +56,8 @@
 static double asin_aux(double x)
 {
   long double y;
-  double y_cos, y_sin;
+  double y_cos;
+  double y_sin;
 
   y = 0.0;
   y_sin = 0.0;

@@ -1,53 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_che.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CHE_H
 #define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CHE_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "pic32mx_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Register Offsets *************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define PIC32MX_CHE_CON_OFFSET    0x0000 /* Pre-fetch cache control register */
 #define PIC32MX_CHE_CONCLR_OFFSET 0x0004 /* Pre-fetch cache control clear register */
@@ -74,7 +60,7 @@
 #define PIC32MX_CHE_MIS_OFFSET    0x00a0 /* Cache miss statistics register */
 #define PIC32MX_CHE_PFABT_OFFSET  0x00c0 /* Pre-fetch cache abort statistics register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define PIC32MX_CHE_CON           (PIC32MX_CHE_K1BASE+PIC32MX_CHE_CON_OFFSET)
 #define PIC32MX_CHE_CONCLR        (PIC32MX_CHE_K1BASE+PIC32MX_CHE_CONCLR_OFFSET)
@@ -101,25 +87,28 @@
 #define PIC32MX_CHE_MIS           (PIC32MX_CHE_K1BASE+PIC32MX_CHE_MIS_OFFSET)
 #define PIC32MX_CHE_PFABT         (PIC32MX_CHE_K1BASE+PIC32MX_CHE_PFABT_OFFSET)
 
-/* Register Bit-Field Definitions ***********************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Pre-fetch cache control register */
 
 #define CHE_CON_PFMWS_SHIFT       (0)       /* Bits 0-2: PFM access time (SYSCLK wait states) */
 #define CHE_CON_PFMWS_MASK        (7 << CHE_CON_PFMWS_SHIFT)
 #  define CHE_CON_PFMWS(n)        ((n) << CHE_CON_PFMWS_SHIFT) /* n wait states, n=0-7 */
+
 #define CHE_CON_PREFEN_SHIFT      (4)       /* Bits 4-5: Predictive pre-fetch cache enable */
 #define CHE_CON_PREFEN_MASK       (3 << CHE_CON_PREFEN_SHIFT)
 #  define CHE_CON_PREFEN_DISABLE  (0 << CHE_CON_PREFEN_SHIFT) /* Disable predictive pre-fetch cache */
 #  define CHE_CON_PREFEN_CACHE    (1 << CHE_CON_PREFEN_SHIFT) /* Enable for cacheable regions only */
 #  define CHE_CON_PREFEN_NONCACHE (2 << CHE_CON_PREFEN_SHIFT) /* Enable for non-cacheable regions only */
 #  define CHE_CON_PREFEN_ALL      (3 << CHE_CON_PREFEN_SHIFT) /* Enable for both regions */
+
 #define CHE_CON_DCSZ_SHIFT        (8)       /* Bits 8-9: Data cache size (lines) */
 #define CHE_CON_DCSZ_MASK         (3 << CHE_CON_DCSZ_SHIFT)
 #  define CHE_CON_DCSZ_DISABLE    (0 << CHE_CON_DCSZ_SHIFT) /* Disable data caching */
 #  define CHE_CON_DCSZ_1LINE      (1 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 1 line */
 #  define CHE_CON_DCSZ_2LINES     (2 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 2 lines */
 #  define CHE_CON_DCSZ_4LINES     (3 << CHE_CON_DCSZ_SHIFT) /* Enable with size of 4 lines */
+
 #define CHE_CON_CHECOH            (1 << 16) /* Bit 16: Cache coherency setting */
 
 /* Pre-fetch cache access register */
@@ -154,19 +143,19 @@
 
 /* Pre-fetch cache abort statistics register -- 32 bit counter value */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/********************************************************************************************
+/****************************************************************************
  * Inline Functions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

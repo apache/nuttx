@@ -673,7 +673,9 @@ void z80_serial_initialize(void)
   /* Configure pins for usage of UARTs */
 
 #ifdef CONFIG_EZ80_UART0
-  /* Set Port D, pins 0 and 1 for their alternate function (Mode 7) to enable UART0 */
+  /* Set Port D, pins 0 and 1 for their alternate function (Mode 7)
+   * to enable UART0
+   */
 
   regval  = inp(EZ80_PD_DDR);
   regval |= 3;
@@ -689,7 +691,9 @@ void z80_serial_initialize(void)
 #endif
 
 #ifdef CONFIG_EZ80_UART1
-  /* Set Port C, pins 0 and 1 for their alternate function (Mode 7) to enable UART1 */
+  /* Set Port C, pins 0 and 1 for their alternate function (Mode 7)
+   * to enable UART1
+   */
 
   regval  = inp(EZ80_PC_DDR);
   regval |= 3;
@@ -743,7 +747,7 @@ int up_putc(int ch)
 
   if (ch == '\n')
     {
-      /* Output CR before LF*/
+      /* Output CR before LF */
 
       ez80_waittxready(priv);
       ez80_serialout(priv, EZ80_UART_THR, '\r');

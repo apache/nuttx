@@ -230,7 +230,7 @@ static const unsigned char g_kdbus[128] =
   KEY_F1,                                                /* 59 - F1 key ... > */
   KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9,
   KEY_F10,                                               /* < ... F10 */
-  0,                                                     /* 69 - Num lock*/
+  0,                                                     /* 69 - Num lock */
   0,                                                     /* Scroll Lock */
   KEY_HOME,                                              /* Home key */
   KEY_UP,                                                /* Up Arrow */
@@ -240,7 +240,7 @@ static const unsigned char g_kdbus[128] =
   0,
   KEY_RIGHT,                                             /* Right Arrow */
   '+',
-  KEY_END,                                               /* 79 - End key*/
+  KEY_END,                                               /* 79 - End key */
   KEY_DOWN,                                              /* Down Arrow */
   KEY_PAGEDOWN,                                          /* Page Down */
   KEY_INSERT,                                            /* Insert Key */
@@ -306,6 +306,7 @@ static ssize_t keypad_read(struct file *filep, FAR char *buf, size_t buflen)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name:  qemu_keypad
  *

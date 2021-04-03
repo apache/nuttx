@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/src/z180/z180_timerisr.c
  *
- *   Copyright (C) 2012, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,6 +38,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* "The Z180 contains a two channel 16-bit Programmable Reload Timer. Each
  * PRT channel contains a 16-bit down counter and a 16-bit reload register."
  * Channel 0 is dedicated as the system timer.
@@ -86,9 +72,9 @@
 
 static int z180_timerisr(int irq, chipreg_t *regs, void *arg)
 {
-  /* "When TMDR0 decrements to 0, TIF0 is set to 1. This generates an interrupt
-   * request if enabled by TIE0 = 1. TIF0 is reset to 0 when TCR is read and
-   * the higher or lower byte of TMDR0 is read."
+  /* "When TMDR0 decrements to 0, TIF0 is set to 1. This generates an
+   * interrupt request if enabled by TIE0 = 1. TIF0 is reset to 0 when TCR
+   * is read and the higher or lower byte of TMDR0 is read."
    */
 
   inp(Z180_PRT_TCR);
@@ -119,10 +105,11 @@ void up_timer_initialize(void)
   uint8_t regval;
 
   /* Configure PRT0 to interrupt at the requested rate */
+
   /* First stop PRT0 and disable interrupts */
 
   regval  = inp(Z180_PRT_TCR);
-  regval &= (PRT_TCR_TIF0|PRT_TCR_TIE0|PRT_TCR_TDE0);
+  regval &= (PRT_TCR_TIF0 | PRT_TCR_TIE0 | PRT_TCR_TDE0);
   outp(Z180_PRT_TCR, regval);
 
   /* Set the timer reload value so that the timer will interrupt at the

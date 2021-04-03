@@ -57,11 +57,12 @@
 
 #define SYS_syscall 0x00
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
+
 /* SYS call 1 and 2 are defined for internal use by the LM32 port (see
- * arch/miscoc/include/lm32/syscall.h).  In addition, SYS call 3 is the return from
- * a SYS call in kernel mode.  The first four syscall values must, therefore, be
- * reserved (0 is not used).
+ * arch/miscoc/include/lm32/syscall.h).  In addition, SYS call 3 is the
+ * return from a SYS call in kernel mode.  The first four syscall values
+ * must, therefore, be reserved (0 is not used).
  */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -72,11 +73,11 @@
 #  endif
 #endif
 
-/* sys_call macros ******************************************************************/
+/* sys_call macros **********************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* Context switching system calls ***************************************************/
+/* Context switching system calls *******************************************/
 
 /* SYS call 0: (not used) */
 
