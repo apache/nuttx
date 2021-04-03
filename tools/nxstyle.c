@@ -270,6 +270,34 @@ static const char *g_white_list[] =
   "_Far",
   "_Erom",
 
+/* Ref:
+ * fs/nfs/rpc.h
+ * fs/nfs/nfs_proto.h
+ */
+
+  "CREATE3args",
+  "CREATE3resok",
+  "LOOKUP3args",
+  "LOOKUP3filename",
+  "LOOKUP3resok",
+  "WRITE3args",
+  "WRITE3resok",
+  "READ3args",
+  "READ3resok",
+  "REMOVE3args",
+  "REMOVE3resok",
+  "RENAME3args",
+  "RENAME3resok",
+  "MKDIR3args",
+  "MKDIR3resok",
+  "RMDIR3args",
+  "RMDIR3resok",
+  "READDIR3args",
+  "READDIR3resok",
+  "SETATTR3args",
+  "SETATTR3resok",
+  "FS3args",
+
   NULL
 };
 
