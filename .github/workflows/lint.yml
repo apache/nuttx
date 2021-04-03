@@ -11,7 +11,7 @@ jobs:
       - name: 🧹 super-linter
         uses: github/super-linter@v3
         env:
-          FILTER_REGEX_INCLUDE: .*\.github/.*
+          # FILTER_REGEX_INCLUDE: .*\.github/.*
           VALIDATE_PYTHON_BLACK: true
           VALIDATE_PYTHON_FLAKE8: true
           VALIDATE_PYTHON_ISORT: true
