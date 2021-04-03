@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* NxTerm Definitions ****************************************************/
+/* NxTerm Definitions *******************************************************/
 
 /* Bitmap flags */
 
@@ -103,7 +103,7 @@ struct nxterm_bitmap_s
   struct nxgl_point_s pos;             /* Character position */
 };
 
-/* Describes the state of one NX console driver*/
+/* Describes the state of one NX console driver */
 
 struct nxterm_state_s
 {
@@ -186,7 +186,8 @@ int nxterm_sempost(FAR struct nxterm_state_s *priv);
 /* Common device registration/un-registration */
 
 FAR struct nxterm_state_s *nxterm_register(NXTERM handle,
-    FAR struct nxterm_window_s *wndo, FAR const struct nxterm_operations_s *ops,
+    FAR struct nxterm_window_s *wndo,
+    FAR const struct nxterm_operations_s *ops,
     int minor);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 void nxterm_unregister(FAR struct nxterm_state_s *priv);
@@ -210,20 +211,23 @@ int nxterm_resize(NXTERM handle, FAR const struct nxgl_size_s *size);
 
 /* VT100 Terminal emulation */
 
-enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch);
+enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv,
+                                      char ch);
 
 /* Generic text display helpers */
 
 void nxterm_home(FAR struct nxterm_state_s *priv);
 void nxterm_clear(FAR struct nxterm_state_s *priv);
 void nxterm_newline(FAR struct nxterm_state_s *priv);
-FAR const struct nxterm_bitmap_s *nxterm_addchar(FAR struct nxterm_state_s *priv,
-    uint8_t ch);
+FAR const
+struct nxterm_bitmap_s *nxterm_addchar(FAR struct nxterm_state_s *priv,
+                                       uint8_t ch);
 int nxterm_hidechar(FAR struct nxterm_state_s *priv,
     FAR const struct nxterm_bitmap_s *bm);
 int nxterm_backspace(FAR struct nxterm_state_s *priv);
 void nxterm_fillchar(FAR struct nxterm_state_s *priv,
-    FAR const struct nxgl_rect_s *rect, FAR const struct nxterm_bitmap_s *bm);
+                     FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxterm_bitmap_s *bm);
 
 void nxterm_putc(FAR struct nxterm_state_s *priv, uint8_t ch);
 void nxterm_showcursor(FAR struct nxterm_state_s *priv);
