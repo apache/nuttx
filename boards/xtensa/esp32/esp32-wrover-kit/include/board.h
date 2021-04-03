@@ -107,7 +107,8 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOOUT    3 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_WROVER_KIT_INCLUDE_BOARD_H */
