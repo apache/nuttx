@@ -74,7 +74,10 @@ static int getopt_long_option(FAR struct getopt_s *go,
       if (strcmp(go->go_optptr, longopts[ndx].name) == 0)
         {
           /* Found the option with the matching name.  Does it have an
-           * required argument?  And optional argument?
+           * required argument?  An optional argument?
+           *
+           * REVISIT:  Missing required support for arguments provided in
+           * the form:  --option=argument
            */
 
           switch (longopts[ndx].has_arg)
