@@ -25,10 +25,6 @@ HEAD_ASRC  = esp32c3_head.S
 
 CHIP_ASRCS  = esp32c3_vectors.S esp32c3_interrupt.S riscv_syscall.S
 
-ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-CMN_ASRCS  += riscv_setjmp.S
-endif
-
 # Specify C code within the common directory to be included
 
 CMN_CSRCS  += riscv_initialize.c riscv_swint.c
