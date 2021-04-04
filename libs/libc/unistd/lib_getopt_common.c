@@ -43,6 +43,60 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: compare_long_option
+ *
+ * Description:
+ *   Compare a command argument with a long option, handling the cases:
+ *
+ *   --option:          Any argument is in the next argv entry
+ *   --option=argument: The argument is in the same argv entry
+ *
+ ****************************************************************************/
+
+static int compare_long_option(FAR const char *cmdarg,
+                               FAR const char *optname,
+                               FAR const char **argument)
+{
+  int result;
+
+  *argument = NULL;
+
+  for (; ; )
+    {
+      int rawchar = *cmdarg++;
+      int optchar = *optname++;
+      int cmdchar;
+
+      /* The command line option may terminate with either '\0' or '='. */
+
+      cmdchar = rawchar;
+      if (cmdchar == '=')
+        {
+          cmdchar = '\0';
+        }
+
+      /* Perform the comparison */
+
+      result = cmdchar - optchar;
+      if (result != 0 || cmdchar == '\0')
+        {
+          /* If the '=' is the real terminator, then return the argument
+           * that follows the '='
+           */
+
+          if (rawchar == '=')
+            {
+              *argument = cmdarg;
+            }
+
+          break;
+        }
+    }
+
+  return result;
+}
+
+/****************************************************************************
  * Name: getopt_long_option
  *
  * Description:
@@ -71,64 +125,104 @@ static int getopt_long_option(FAR struct getopt_s *go,
 
   for (ndx = 0; longopts[ndx].name != NULL; ndx++)
     {
-      if (strcmp(go->go_optptr, longopts[ndx].name) == 0)
+      FAR char *terminator = NULL;
+
+      if (compare_long_option(go->go_optptr, longopts[ndx].name,
+                              (FAR const char **)&terminator) == 0)
         {
           /* Found the option with the matching name.  Does it have an
-           * required argument?  And optional argument?
+           * argument provided in the same argv entry like
+           * --option=argument?
            */
 
-          switch (longopts[ndx].has_arg)
+          if (terminator != NULL)
             {
-              FAR char *next;
+              /* Skip over the option + argument */
 
-              case no_argument:
-                /* No, no arguments. Just return the option that we
-                 * found.
-                 */
+              go->go_optptr = NULL;
+              go->go_optind++;
 
-                go->go_optptr = NULL;
-                go->go_optind++;
-                break;
+              switch (longopts[ndx].has_arg)
+                {
+                  case no_argument:
 
-              case optional_argument:
-                /* Check if there is a following argument and if that
-                 * following argument is another option.
-                 */
+                    /* But no argument is expected! */
 
-                next = argv[go->go_optind + 1];
-                if (next == NULL || next[0] == '-')
-                  {
-                    go->go_optptr = NULL;
                     go->go_optarg = NULL;
+                    return '?';
+
+                  case optional_argument:
+                  case required_argument:
+
+                    /* Return the required argument */
+
+                    go->go_optarg  = terminator;
+                    break;
+
+                  default:
+                    goto errout;
+                    break;
+                }
+            }
+          else
+            {
+              /* Does the option have a required argument in the next argv
+               * entry?  An optional argument?
+               */
+
+              switch (longopts[ndx].has_arg)
+                {
+                  FAR char *next;
+
+                  case no_argument:
+                    /* No, no arguments. Just return the argument that we
+                     * found.
+                     */
+
+                    go->go_optptr = NULL;
                     go->go_optind++;
                     break;
-                  }
 
-                 /* Fall through and treat as a required option */
+                  case optional_argument:
+                    /* Check if there is a following argument and if that
+                     * following argument is another option.
+                     */
 
-              case required_argument:
+                    next = argv[go->go_optind + 1];
+                    if (next == NULL || next[0] == '-')
+                      {
+                        go->go_optptr = NULL;
+                        go->go_optarg = NULL;
+                        go->go_optind++;
+                        break;
+                      }
 
-                /* Verify that the required option is present */
+                    /* Fall through and treat as a required option */
 
-                next = argv[go->go_optind + 1];
-                if (next == NULL || next[0] == '-')
-                  {
-                    go->go_optptr = NULL;
-                    go->go_optarg = NULL;
-                    go->go_optind++;
-                    return '?';
-                  }
+                  case required_argument:
 
-                /* Return the required option */
+                    /* Verify that the required argument is present */
 
-                go->go_optptr  = NULL;
-                go->go_optarg  = next;
-                go->go_optind += 2;
-                break;
+                    next = argv[go->go_optind + 1];
+                    if (next == NULL || next[0] == '-')
+                      {
+                        go->go_optptr = NULL;
+                        go->go_optarg = NULL;
+                        go->go_optind++;
+                        return '?';
+                      }
 
-              default:
-                goto errout;
-                break;
+                    /* Return the required argument */
+
+                    go->go_optptr  = NULL;
+                    go->go_optarg  = next;
+                    go->go_optind += 2;
+                    break;
+
+                  default:
+                    goto errout;
+                    break;
+                }
             }
 
           /* Setup return value.
