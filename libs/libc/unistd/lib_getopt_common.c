@@ -387,7 +387,7 @@ int getopt_common(int argc, FAR char * const argv[],
               ret = getopt_long_option(go, argv, longopts, longindex);
               if (ret == '?')
                 {
-                  /* Skip over the unrecognized long option */
+                  /* Skip over the unrecognized long option. */
 
                   go->go_optind++;
                   go->go_optptr = NULL;
@@ -412,13 +412,23 @@ int getopt_common(int argc, FAR char * const argv[],
               ret = getopt_long_option(go, argv, longopts, longindex);
               if (ret != '?')
                 {
-                  /* Success or ERROR */
+                  /* Return success or ERROR */
 
                   return ret;
                 }
+
+              /* Check for single character option.
+               *
+               * REVISIT:  There is no way to distinguish a sequence of
+               * short arguments like -abc (meaning -a -b -c) from a single
+               * long argument (like "abc").  I am not sure of the correct
+               * behavior in this case.  While supported for getopt(), I do
+               * not think that the first interpretation is standard.
+               */
+
               else if (*(go->go_optptr + 1) != '\0')
                 {
-                  /* Skip over the unrecognized long option */
+                  /* Skip over the unrecognized long option. */
 
                   go->go_optind++;
                   go->go_optptr = NULL;
