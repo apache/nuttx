@@ -1969,7 +1969,7 @@ static void stm32_bdma_start(DMA_HANDLE handle, dma_callback_t callback,
 static size_t stm32_bdma_residual(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
-  uint32_t    residual   = 0
+  uint32_t    residual   = 0;
 
   DEBUGASSERT(handle != NULL);
   DEBUGASSERT(dmachan->ctrl == BDMA);
