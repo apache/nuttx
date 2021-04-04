@@ -9,28 +9,30 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
 
@@ -205,7 +207,8 @@ int spirit_timer_setup_rxtimeout(FAR struct spirit_library_s *spirit,
    * register.
    */
 
-  return spirit_reg_write(spirit, TIMERS5_RX_TIMEOUT_PRESCALER_BASE, regval, 2);
+  return spirit_reg_write(spirit,
+                          TIMERS5_RX_TIMEOUT_PRESCALER_BASE, regval, 2);
 }
 
 /******************************************************************************
@@ -238,7 +241,8 @@ int spirit_timer_set_rxtimeout(FAR struct spirit_library_s *spirit,
    * register.
    */
 
-  return spirit_reg_write(spirit, TIMERS5_RX_TIMEOUT_PRESCALER_BASE, regval, 2);
+  return spirit_reg_write(spirit,
+                          TIMERS5_RX_TIMEOUT_PRESCALER_BASE, regval, 2);
 }
 
 /******************************************************************************
@@ -262,7 +266,8 @@ int spirit_timer_set_rxtimeout_counter(FAR struct spirit_library_s *spirit,
 {
   /* Writes the counter value for RX timeout in the corresponding register */
 
-  return spirit_reg_write(spirit, TIMERS4_RX_TIMEOUT_COUNTER_BASE, &counter, 1);
+  return spirit_reg_write(spirit,
+                          TIMERS4_RX_TIMEOUT_COUNTER_BASE, &counter, 1);
 }
 
 /******************************************************************************
@@ -286,7 +291,8 @@ int spirit_timer_set_rxtimeout_prescaler(FAR struct spirit_library_s *spirit,
 {
   /* Writes the prescaler value for RX timeout in the corresponding register */
 
-  return spirit_reg_write(spirit, TIMERS5_RX_TIMEOUT_PRESCALER_BASE, &prescaler, 1);
+  return spirit_reg_write(spirit,
+                          TIMERS5_RX_TIMEOUT_PRESCALER_BASE, &prescaler, 1);
 }
 
 /******************************************************************************
@@ -336,7 +342,8 @@ int spirit_timer_get_rxtimeout_setup(FAR struct spirit_library_s *spirit,
         }
 
       xtal_frequency /= 1000.0;
-      *mstimeout = (float)((regval[0] + 1) * regval[1] * (1210.0 / xtal_frequency));
+      *mstimeout = (float)((regval[0] + 1) *
+                            regval[1] * (1210.0 / xtal_frequency));
     }
 
   return ret;
@@ -550,7 +557,8 @@ int spirit_timer_setup_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
    * corresponding register
    */
 
-  return spirit_reg_write(spirit, TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
+  return spirit_reg_write(spirit,
+                          TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
 }
 
 /******************************************************************************
@@ -588,7 +596,8 @@ int spirit_timer_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
    * corresponding register.
    */
 
-  return spirit_reg_write(spirit, TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
+  return spirit_reg_write(spirit,
+                          TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
 }
 
 /******************************************************************************
@@ -611,14 +620,16 @@ int spirit_timer_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
  *
  ******************************************************************************/
 
-int spirit_timer_set_wakeuptimer_reloadcounter(FAR struct spirit_library_s *spirit,
-                                               uint8_t counter)
+int spirit_timer_set_wakeuptimer_reloadcounter(
+                                   FAR struct spirit_library_s *spirit,
+                                   uint8_t counter)
 {
   /* Write the counter value for reload Wake_Up timer in the corresponding
    * register.
    */
 
-  return spirit_reg_write(spirit, TIMERS0_LDC_RELOAD_COUNTER_BASE, &counter, 1);
+  return spirit_reg_write(spirit,
+                          TIMERS0_LDC_RELOAD_COUNTER_BASE, &counter, 1);
 }
 
 /******************************************************************************
@@ -641,14 +652,16 @@ int spirit_timer_set_wakeuptimer_reloadcounter(FAR struct spirit_library_s *spir
  *
  ******************************************************************************/
 
-int spirit_timer_set_wakeuptimer_reloadprescaler(FAR struct spirit_library_s *spirit,
-                                                 uint8_t prescaler)
+int spirit_timer_set_wakeuptimer_reloadprescaler(
+                                 FAR struct spirit_library_s *spirit,
+                                 uint8_t prescaler)
 {
   /* Writes the prescaler value for reload Wake_Up timer in the corresponding
    * register.
    */
 
-  return spirit_reg_write(spirit, TIMERS1_LDC_RELOAD_PRESCALER_BASE, &prescaler, 1);
+  return spirit_reg_write(spirit,
+                          TIMERS1_LDC_RELOAD_PRESCALER_BASE, &prescaler, 1);
 }
 
 /******************************************************************************
@@ -675,10 +688,11 @@ int spirit_timer_set_wakeuptimer_reloadprescaler(FAR struct spirit_library_s *sp
  *
  ******************************************************************************/
 
-int spirit_timer_get_wakeuptimer_reload_setup(FAR struct spirit_library_s *spirit,
-                                              FAR float *reload,
-                                              FAR uint8_t *counter,
-                                              FAR uint8_t *prescaler)
+int spirit_timer_get_wakeuptimer_reload_setup(
+                                      FAR struct spirit_library_s *spirit,
+                                      FAR float *reload,
+                                      FAR uint8_t *counter,
+                                      FAR uint8_t *prescaler)
 {
   uint8_t regval[2];
   float rco_freq;
@@ -688,7 +702,8 @@ int spirit_timer_get_wakeuptimer_reload_setup(FAR struct spirit_library_s *spiri
 
   /* Reads the reload Wake_Up timer registers value */
 
-  ret = spirit_reg_read(spirit, TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
+  ret = spirit_reg_read(spirit,
+                        TIMERS1_LDC_RELOAD_PRESCALER_BASE, regval, 2);
   if (ret >= 0)
     {
       /* Returns values */
@@ -753,7 +768,8 @@ uint16_t spirit_timer_get_rcofrequency(FAR struct spirit_library_s *spirit)
  *   Computes the values of the wakeup timer counter and prescaler from the
  *   user time expressed in millisecond.  The prescaler and the counter values
  *   are computed maintaining the prescaler value as small as possible in
- *   order to obtain the best resolution, and in the meantime minimizing the error.
+ *   order to obtain the best resolution, and in the meantime minimizing the
+ *   error.
  *
  * Input Parameters:
  *   spirit    - Reference to a Spirit library state structure instance
@@ -787,8 +803,8 @@ void spirit_timer_calc_wakeup_values(FAR struct spirit_library_s *spirit,
 
   n = (uint32_t)(desired * rco_freq);
 
-  /* check if it is possible to reach that target with prescaler and counter of
-   * spirit1.
+  /* check if it is possible to reach that target with prescaler and counter
+   * of spirit1.
    */
 
   if (n / 0xff > 0xfd)
@@ -811,7 +827,8 @@ void spirit_timer_calc_wakeup_values(FAR struct spirit_library_s *spirit,
 
   if ((*counter) <= 254)
     {
-      if (S_ABS((float)((*counter) + 1) * (*prescaler) / rco_freq - desired) < err)
+      if (S_ABS((float)((*counter) + 1) *
+         (*prescaler) / rco_freq - desired) < err)
         {
           (*counter)++;
         }
@@ -940,9 +957,10 @@ void spirit_timer_calc_rxtimeout_values(FAR struct spirit_library_s *spirit,
  *
  ******************************************************************************/
 
-int spirit_timer_set_rxtimeout_stopcondition(FAR struct spirit_library_s *spirit,
-                                             enum spirit_rxtimeout_stopcondition_e
-                                             stopcondition)
+int spirit_timer_set_rxtimeout_stopcondition(
+                                 FAR struct spirit_library_s *spirit,
+                                 enum spirit_rxtimeout_stopcondition_e
+                                 stopcondition)
 {
   uint8_t regval[2];
   int ret;

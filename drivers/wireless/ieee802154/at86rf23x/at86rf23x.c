@@ -345,7 +345,8 @@ static uint8_t at86rf23x_getregbits(FAR struct spi_dev_s *spi, uint8_t addr,
  *
  ****************************************************************************/
 
-static int at86rf23x_writeframe(FAR struct spi_dev_s *spi, FAR uint8_t *frame,
+static int at86rf23x_writeframe(FAR struct spi_dev_s *spi,
+                                FAR uint8_t *frame,
                                 uint8_t len)
 {
   uint8_t reg = RF23X_SPI_FRAME_WRITE;
@@ -432,7 +433,9 @@ static int at86rf23x_set_trxstate(FAR struct at86rf23x_dev_s *dev,
 
   int ret = OK;
 
-  /* TODO I don't have every state included verify this will work with SLEEP */
+  /* TODO
+   * I don't have every state included verify this will work with SLEEP
+   */
 
   if ((status != TRX_STATUS_TRXOFF) &&
      (status != TRX_STATUS_RXON) &&
@@ -614,7 +617,9 @@ static int at86rf23x_set_trxstate(FAR struct at86rf23x_dev_s *dev,
       break;
 
     case TRX_STATUS_SLEEP:
-      at86rf23x_setregbits(dev->spi, RF23X_TRXCMD_STATE, TRX_CMD_FORCETRXOFF);
+      at86rf23x_setregbits(dev->spi,
+                           RF23X_TRXCMD_STATE,
+                           TRX_CMD_FORCETRXOFF);
       up_udelay(RF23X_TIME_CMD_FORCE_TRX_OFF);
 
       dev->lower->slptr(dev->lower, true);
@@ -975,7 +980,9 @@ static int at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee,
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
-  /* TODO: this needs a lot of work to make sure all chips can share this function */
+  /* TODO:
+   * this needs a lot of work to make sure all chips can share this function
+   */
 
   /* Right now we only set tx power to 0 */
 
@@ -1229,8 +1236,9 @@ static int at86rf23x_resetrf(FAR struct at86rf23x_dev_s *dev)
  *
  ****************************************************************************/
 
-static int at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
-                              FAR struct ieee802154_packet_s *packet)
+static int
+  at86rf23x_rxenable(FAR struct ieee802154_radio_s *ieee, bool state,
+                     FAR struct ieee802154_packet_s *packet)
 {
   FAR struct at86rf23x_dev_s *dev = (FAR struct at86rf23x_dev_s *)ieee;
 
@@ -1327,7 +1335,9 @@ static int at86rf23x_regdump(FAR struct at86rf23x_dev_s *dev)
         }
     }
 
-  /* TODO: I have a few more regs that are not consecutive.  Will print later */
+  /* TODO:
+   * I have a few more regs that are not consecutive.  Will print later
+   */
 
   return 0;
 }

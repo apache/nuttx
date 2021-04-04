@@ -93,7 +93,8 @@
  */
 
 /* Page 0: Commands and status */
-                                             /* 0x00 - reserved for future use */
+
+                                         /* 0x00 - reserved for future use */
 #define MFRC522_COMMAND_REG      (0x01 << 1) /* starts/stops command execution */
 #define MFRC522_COM_IEN_REG      (0x02 << 1) /* dis/enable int. req. ctrl bits */
 #define MFRC522_DIV_IEN_REG      (0x03 << 1) /* dis/enable int. req. ctrl bits */
@@ -109,8 +110,10 @@
 #define MFRC522_BIT_FRAMING_REG  (0x0D << 1) /* adjustments for bit-oriented frames */
 #define MFRC522_COLL_REG         (0x0E << 1) /* bit position of first bit-collision detected */
                                              /* 0x0F - reserved for future use */
+
 /* Page 1: Commands */
-                                             /* 0x10 - reserved for future use */
+
+                                         /* 0x10 - reserved for future use */
 #define MFRC522_MODE_REG         (0x11 << 1) /* defines general modes for transmit/receive */
 #define MFRC522_TX_MODE_REG      (0x12 << 1) /* defines transmission data rate and framing */
 #define MFRC522_RX_MODE_REG      (0x13 << 1) /* defines reception data rate and framing */
@@ -128,7 +131,8 @@
 #define MFRC522_SERIAL_SPD_REG   (0x1F << 1) /* selects the speed of the serial UART */
 
 /* Page 2: Configuration */
-                                             /* 0x20 - reserved for future use */
+
+                                         /* 0x20 - reserved for future use */
 #define MFRC522_CRC_RESULT_REGH  (0x21 << 1) /* shows the MSB values of CRC calc. */
 #define MFRC522_CRC_RESULT_REGL  (0x22 << 1) /* shows the LSB values of CRC calc. */
                                              /* 0x23 - reserved for future use */
@@ -146,7 +150,8 @@
 #define MFRC522_TCOUNT_VAL_REGL  (0x2F << 1) /* shows the 16-bit timer value */
 
 /* Page 3: Test Registers */
-                                             /* 0x30 - reserved for future use */
+
+                                         /* 0x30 - reserved for future use */
 #define MFRC522_TEST_SEL1_REG    (0x31 << 1) /* general test signal configuration */
 #define MFRC522_TEST_SEL2_REG    (0x32 << 1) /* general test signal configuration */
 #define MFRC522_TEST_PIN_EN_REG  (0x33 << 1) /* enables pin output driver on pins D1 to D7 */
@@ -172,6 +177,7 @@
 #  define MFRC522_TRANSCV_CMD      0x0C /* transmits data from FIFO and receive automatically */
 #  define MFRC522_MF_AUTH_CMD      0x0E /* performs the MIFARE stand authentication as a reader */
 #  define MFRC522_SOFTRST_CMD      0x0F /* resets the MFRC522 */
+
 #define MFRC522_POWER_DOWN         (1 << 4) /* soft power-down mode entered */
 #define MFRC522_RCV_OFF            (1 << 5) /* turns off analog part of receiver */
 
@@ -212,11 +218,11 @@
 
 /* Section 9.3.1.7: ErrorReg register */
 
-#define MFRC522_PROTO_ERR       (1 << 0) /* set if the SOF is incorrect or during MFAuthent if data is incorrect */
+#define MFRC522_PROTO_ERR          (1 << 0) /* set if the SOF is incorrect or during MFAuthent if data is incorrect */
 #define MFRC522_PARITY_ERR         (1 << 1) /* parity check failed */
 #define MFRC522_CRC_ERR            (1 << 2) /* the RxCRCEn bit is set and the CRC calculation fails */
 #define MFRC522_COLL_ERR           (1 << 3) /* a bit-collision is detected */
-#define MFRC522_BUF_OVFL_ERR    (1 << 4) /* FIFO is full and the host or internal state machine try to write data */
+#define MFRC522_BUF_OVFL_ERR       (1 << 4) /* FIFO is full and the host or internal state machine try to write data */
 #define MFRC522_TEMP_ERR           (1 << 6) /* internal temperature sensor detects overheating */
 #define MFRC522_WR_ERR             (1 << 7) /* data write error in the FIFO, host writing to FIFO at the wrong time */
 
@@ -281,6 +287,7 @@
 #define MFRC522_CRC_PRESET_6363    (0x1) /* 6363h CRC preset value */
 #define MFRC522_CRC_PRESET_A671    (0x2) /* A671h CRC preset value */
 #define MFRC522_CRC_PRESET_FFFF    (0x3) /* FFFFh CRC preset value */
+
 #define MFRC522_POL_MFIN           (1 << 3) /* defines the polarity of pin MFIN */
 #define MFRC522_TX_WAIT_RF         (1 << 5) /* transmitter can only be started if an RF field is generated */
 #define MFRC522_MSB_FIRST          (1 << 7) /* CRC coprocessor calculates the CRC with MSB first */
@@ -352,7 +359,7 @@
 
 /* Section 9.3.2.9: RxThresholdReg register */
 
-#define MFRC522_COLL_LEVEL_MASK    (7) /* the minimum signal strength to generate a bit-collision */
+#define MFRC522_COLL_LEVEL_MASK    (7)        /* the minimum signal strength to generate a bit-collision */
 #define MFRC522_MIN_LEVEL_MASK     (0xF << 4) /* the minimum signal strength that will be accepted */
 
 /* Section 9.3.2.10: DemodReg register */

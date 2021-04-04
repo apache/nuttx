@@ -1559,7 +1559,8 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
            * PHSEG1 == PHSEG2 (PHSEG2 = TSEG2)
            *
            * See more at:
-           *  http://www.analog.com/en/analog-dialogue/articles/configure-can-bit-timing.html
+           *  http://www.analog.com/en/analog-dialogue/articles/
+           *          configure-can-bit-timing.html
            *
            */
 

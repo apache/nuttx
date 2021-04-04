@@ -28,19 +28,19 @@
  * Public Data
  ****************************************************************************/
 
-/** Settings for 868 MHz, GFSK at 100kbps
+/* Settings for 868 MHz, GFSK at 100kbps
  *
  *  ISM Region 1 (Europe) only, Band 868–870 MHz
  *
- * Frequency            ERP         Duty Cycle  Bandwidth   Remarks
- * 868 – 868.6 MHz      +14 dBm     < 1%        No limits
- * 868.7 – 869.2 MHz    +14 dBm     < 0.1%      No limits
- * 869.3 – 869.4 MHz    +10 dBm     No limits   < 25 kHz    Appropriate access
- *                                                          protocol required
- * 869.4 – 869.65 MHz   +27 dBm     < 10%       < 25 kHz    Channels may be
- *                                                          combined to one
- *                                                          high speed channel
- * 869.7 -870 MHz       +7 dBm      No limits   No limits
+ * Frequency          ERP         Duty Cycle  Bandwidth  Remarks
+ * 868 – 868.6 MHz    +14 dBm     < 1%        No limits
+ * 868.7 – 869.2 MHz  +14 dBm     < 0.1%      No limits
+ * 869.3 – 869.4 MHz  +10 dBm     No limits   < 25 kHz   Appropriate access
+ *                                                       protocol required
+ * 869.4 – 869.65 MHz +27 dBm     < 10%       < 25 kHz   Channels may be
+ *                                                       combined to one
+ *                                                       high speed channel
+ * 869.7 -870 MHz     +7 dBm      No limits   No limits
  *
  *   Deviation = 46.142578
  *   Base frequency = 867.999985
@@ -57,7 +57,8 @@
  *   Data rate = 99.9069
  *   RX filter BW = 210.937500
  *   Data format = Normal mode
- *   Length config = Fixed packet length mode. Length configured in PKTLEN register
+ *   Length config = Fixed packet length mode.
+ *                   Length configured in PKTLEN register
  *   CRC enable = true
  *   Packet length = 62
  *   Device address = 00
@@ -109,3 +110,7 @@ const struct c1101_rfsettings_s cc1101_rfsettings_ISM1_868MHzGFSK100kbps =
     0x03, 0x0f, 0x1e, 0x27, 0x67, 0x50, 0x81, 0xc2
   }
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
