@@ -69,15 +69,16 @@ struct xbee_maccb_s
   FAR struct xbee_maccb_s *flink;  /* Implements a singly linked list */
   uint8_t prio;                    /* RX frame callback priority */
 
-  /* Callback for various MLME or MCPS service events.  Return value represents
-   * whether the callback accepts the primitive. >= 0 means the callback has
-   * accepted the primitive and is responsible for calling
-   * ieee802154_primitive_free(). In the case of DATA.indication primitive, only
-   * one callback can accept the frame. The callbacks are stored in order of
-   * receiver priority defined by the 'prio' field above. All other
+  /* Callback for various MLME or MCPS service events.  Return value
+   * represents whether the callback accepts the primitive. >= 0 means the
+   * callback has accepted the primitive and is responsible for calling
+   * ieee802154_primitive_free(). In the case of DATA.indication primitive,
+   * only one callback can accept the frame. The callbacks are stored in
+   * order of receiver priority defined by the 'prio' field above. All other
    * notifications are offered to all callbacks and all can accept and free
-   * separately since the primitive will not be freed until the nclients count
-   * reaches 0. */
+   * separately since the primitive will not be freed until the nclients
+   * count reaches 0.
+   */
 
   CODE int (*notify)(FAR struct xbee_maccb_s *maccb,
                      FAR struct ieee802154_primitive_s *primitive);
@@ -95,7 +96,7 @@ struct xbee_maccb_s
  * Public Function Prototypes
  ****************************************************************************/
 
- /****************************************************************************
+/****************************************************************************
  * Name: xbee_bind
  *
  * Description:
@@ -138,14 +139,15 @@ int xbee_ioctl(XBEEHANDLE xbee, int cmd, unsigned long arg);
  * Name: xbee_get_mhrlen
  *
  * Description:
- *   Calculate the MAC header length given the frame meta-data. For the XBee,
- *   we use the header to store the entire API frame for the TX request. The
- *   size we need is fixed based on the address mode we are using as it changes
- *   which API frame we need to issue.
+ *   Calculate the MAC header length given the frame meta-data. For the
+ *   XBee, we use the header to store the entire API frame for the TX
+ *   request. The size we need is fixed based on the address mode we are
+ *   using as it changes which API frame we need to issue.
  *
  ****************************************************************************/
 
-int xbee_get_mhrlen(XBEEHANDLE xbee, FAR const struct ieee802154_frame_meta_s *meta);
+int xbee_get_mhrlen(XBEEHANDLE xbee,
+                    FAR const struct ieee802154_frame_meta_s *meta);
 
 /****************************************************************************
  * Name: xbee_req_data
@@ -158,7 +160,8 @@ int xbee_get_mhrlen(XBEEHANDLE xbee, FAR const struct ieee802154_frame_meta_s *m
  *
  ****************************************************************************/
 
-int xbee_req_data(XBEEHANDLE xbee, FAR const struct ieee802154_frame_meta_s *meta,
+int xbee_req_data(XBEEHANDLE xbee,
+                  FAR const struct ieee802154_frame_meta_s *meta,
                   FAR struct iob_s *frame);
 
 /****************************************************************************
@@ -170,8 +173,8 @@ int xbee_req_data(XBEEHANDLE xbee, FAR const struct ieee802154_frame_meta_s *met
  *
  *   NOTE: The standard specifies that the attribute value should be returned
  *   via the asynchronous MLME-GET.confirm primitive.  However, in our
- *   implementation, we synchronously return the value immediately.Therefore, we
- *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
+ *   implementation, we synchronously return the value immediately.Therefore,
+ *   we merge the functionality of the MLME-GET.request and MLME-GET.confirm
  *   primitives together.
  *
  ****************************************************************************/
@@ -186,11 +189,12 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
  *   The MLME-SET.request primitive attempts to write the given value to the
  *   indicated MAC PIB attribute.
  *
- *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
- *   we synchronously return the status from the request. Therefore, we do merge
- *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
- *   together.
+ *   NOTE:
+ *   The standard specifies that confirmation should be indicated via the
+ *   asynchronous MLME-SET.confirm primitive.  However, in our implementation
+ *   we synchronously return the status from the request. Therefore, we do
+ *   merge the functionality of the MLME-SET.request and MLME-SET.confirm
+ *   primitives together.
  *
  ****************************************************************************/
 
@@ -223,7 +227,8 @@ int xbee_req_start(XBEEHANDLE xbee, FAR struct ieee802154_start_req_s *req);
  *
  ****************************************************************************/
 
-int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req);
+int xbee_req_associate(XBEEHANDLE xbee,
+                       FAR struct ieee802154_assoc_req_s *req);
 
 /****************************************************************************
  * Name: xbee_req_reset
@@ -234,7 +239,8 @@ int xbee_req_associate(XBEEHANDLE xbee, FAR struct ieee802154_assoc_req_s *req);
  *
  * Input Parameters:
  *   xbee         - Handle to the XBee instance
- *   resetattr    - Whether or not to reset the MAC PIB attributes to defaults
+ *   resetattr    - Whether or not to reset the MAC PIB attributes to
+ *                  defaults
  *
  ****************************************************************************/
 

@@ -396,7 +396,7 @@ struct ssd1351_dev_s
    */
 
 #ifdef CONFIG_SSD1351_SPI3WIRE
-  uint16_t                  rowbuffer[SSD1351_STRIDE+1];
+  uint16_t                  rowbuffer[SSD1351_STRIDE + 1];
 #endif
 };
 
@@ -617,12 +617,12 @@ static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
 
   for (i = 0; i < datlen; i++)
     {
-      priv->rowbuffer[i+1] = (uint16_t)data[i] | SSD1351_SPIDATA;
+      priv->rowbuffer[i + 1] = (uint16_t)data[i] | SSD1351_SPIDATA;
     }
 
   /* Send the line buffer */
 
-  SPI_SNDBLOCK(priv->spi, priv->rowbuffer, datlen+1);
+  SPI_SNDBLOCK(priv->spi, priv->rowbuffer, datlen + 1);
 }
 #elif defined(CONFIG_SSD1351_SPI4WIRE)
 static void ssd1351_write(FAR struct ssd1351_dev_s *priv, uint8_t cmd,
@@ -721,7 +721,7 @@ static int ssd1351_putrun(fb_coord_t row, fb_coord_t col,
   /* Sanity check */
 
   DEBUGASSERT(buffer != NULL && ((uintptr_t)buffer & 1) == 0 &&
-              col >= 0 && col+npixels <= SSD1351_XRES &&
+              col >= 0 && col + npixels <= SSD1351_XRES &&
               row >= 0 && row < SSD1351_YRES);
 
   /* Select and lock the device */
@@ -768,7 +768,7 @@ static int ssd1351_getrun(fb_coord_t row, fb_coord_t col,
   /* Sanity check */
 
   DEBUGASSERT(buffer != NULL && ((uintptr_t)buffer & 1) == 0 &&
-              col >= 0 && col+npixels <= SSD1351_XRES &&
+              col >= 0 && col + npixels <= SSD1351_XRES &&
               row >= 0 && row < SSD1351_YRES);
 
   /* Select and lock the device */

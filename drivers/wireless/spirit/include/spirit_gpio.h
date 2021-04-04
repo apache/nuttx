@@ -9,28 +9,30 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
 
@@ -68,7 +70,6 @@
 
 #include "spirit_regs.h"
 #include "spirit_types.h"
-
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -189,8 +190,10 @@ enum spirit_gpio_io_e
   SPIRIT_GPIO_DIG_OUT_TX_STATE       = 0x28,  /* TX state indication: "1"
                                                * when Spirit1 is passing in
                                                * the TX state */
+
   SPIRIT_GPIO_DIG_OUT_TX_FIFO_ALMOST_EMPTY = 0x30, /* TX FIFO Almost Empty Flag */
   SPIRIT_GPIO_DIG_OUT_TX_FIFO_ALMOST_FULL  = 0x38, /* TX FIFO Almost Full Flag */
+
   SPIRIT_GPIO_DIG_OUT_RX_DATA        = 0x40,  /* RX data output */
   SPIRIT_GPIO_DIG_OUT_RX_CLOCK       = 0x48,  /* RX clock output
                                                * (recovered from received
@@ -198,8 +201,10 @@ enum spirit_gpio_io_e
   SPIRIT_GPIO_DIG_OUT_RX_STATE       = 0x50,  /* RX state indication: "1"
                                                * when Spirit1 is passing in
                                                * the RX state */
+
   SPIRIT_GPIO_DIG_OUT_RX_FIFO_ALMOST_FULL  = 0x58, /* RX FIFO Almost Full Flag */
   SPIRIT_GPIO_DIG_OUT_RX_FIFO_ALMOST_EMPTY = 0x60, /* RX FIFO Almost Empty Flag */
+
   SPIRIT_GPIO_DIG_OUT_ANTENNA_SWITCH = 0x68,  /* Antenna switch used for
                                                * antenna diversity */
   SPIRIT_GPIO_DIG_OUT_VALID_PREAMBLE = 0x70,  /* Valid Preamble Detected Flag */
@@ -271,7 +276,7 @@ enum spirit_clockoutput_xoprescaler_e
   XO_RATIO_1_3   = 0x06,  /* XO Clock signal available on the GPIO divided by 1/3 */
   XO_RATIO_1_4   = 0x08,  /* XO Clock signal available on the GPIO divided by 1/4 */
   XO_RATIO_1_6   = 0x0a,  /* XO Clock signal available on the GPIO divided by 1/6 */
-  XO_RATIO_1_8   = 0x0C,  /* XO Clock signal available on the GPIO divided by 1/8 */
+  XO_RATIO_1_8   = 0x0c,  /* XO Clock signal available on the GPIO divided by 1/8 */
   XO_RATIO_1_12  = 0x0e,  /* XO Clock signal available on the GPIO divided by 1/12 */
   XO_RATIO_1_16  = 0x10,  /* XO Clock signal available on the GPIO divided by 1/16 */
   XO_RATIO_1_24  = 0x12,  /* XO Clock signal available on the GPIO divided by 1/24 */
@@ -346,7 +351,6 @@ struct spirit_clockoutput_init_s
 
 int spirit_gpio_initialize(FAR struct spirit_library_s *spirit,
                            FAR const struct spirit_gpio_init_s *gpioinit);
-
 
 /******************************************************************************
  * Name: spirit_gpio_enable_tempsensor
@@ -446,7 +450,8 @@ int spirit_gpio_enable_clockoutput(FAR struct spirit_library_s *spirit,
  *   Initializes the SPIRIT Clock Output according to the specified parameters
  *   in the xClockOutputInitStruct.
  *
- *   NOTE: The function spirit_gpio_enable_clockoutput() must be called in order to
+ *   NOTE:
+ *   The function spirit_gpio_enable_clockoutput() must be called in order to
  *   enable or disable the MCU clock dividers.
  *
  * Input Parameters:
@@ -461,7 +466,7 @@ int spirit_gpio_enable_clockoutput(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_gpio_clockoutput_initialize(FAR struct spirit_library_s *spirit,
-                                       FAR const struct spirit_clockoutput_init_s *clockoutput);
+                   FAR const struct spirit_clockoutput_init_s *clockoutput);
 
 /******************************************************************************
  * Name: spirit_gpio_set_xoprescaler
@@ -481,7 +486,7 @@ int spirit_gpio_clockoutput_initialize(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_gpio_set_xoprescaler(FAR struct spirit_library_s *spirit,
-                                enum spirit_clockoutput_xoprescaler_e xoprescaler);
+                enum spirit_clockoutput_xoprescaler_e xoprescaler);
 
 /******************************************************************************
  * Name: spirit_gpio_get_xoprescaler
@@ -518,7 +523,7 @@ enum spirit_clockoutput_xoprescaler_e
  ******************************************************************************/
 
 int spirit_gpio_set_rcoprescaler(FAR struct spirit_library_s *spirit,
-                                 enum spirit_clockoutput_rcoprescaler_e rcoprescaler);
+                     enum spirit_clockoutput_rcoprescaler_e rcoprescaler);
 
 /******************************************************************************
  * Name: spirit_gpio_get_rcoprescaler

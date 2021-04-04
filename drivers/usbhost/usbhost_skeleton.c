@@ -154,7 +154,9 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
-/* Driver methods -- depend upon the type of NuttX driver interface exported */
+/* Driver methods --
+ * depend upon the type of NuttX driver interface exported
+ */
 
 /****************************************************************************
  * Private Data
@@ -913,11 +915,15 @@ static FAR struct usbhost_class_s *
           priv->usbclass.connect      = usbhost_connect;
           priv->usbclass.disconnected = usbhost_disconnected;
 
-          /* The initial reference count is 1... One reference is held by the driver */
+          /* The initial reference count is 1...
+           * One reference is held by the driver
+           */
 
           priv->crefs = 1;
 
-          /* Initialize semaphores (this works okay in the interrupt context) */
+          /* Initialize semaphores
+           * (this works okay in the interrupt context)
+           */
 
           nxsem_init(&priv->exclsem, 0, 1);
 

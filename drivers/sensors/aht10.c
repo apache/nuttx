@@ -320,11 +320,13 @@ static int aht10_read_values(FAR struct aht10_dev_s *priv, FAR int *temp,
 
   /* Humidity data (20bits). */
 
-  rh20 = ((buf[1] << 12) | (buf[2] << 4) | ((buf[3] & 0xf0) >> 4)) & 0x000fffff;
+  rh20 = ((buf[1] << 12) | (buf[2] << 4) |
+         ((buf[3] & 0xf0) >> 4)) & 0x000fffff;
 
   /* Temperature data (20bits). */
 
-  temp20 = (((buf[3] & 0x0f) << 16) | (buf[4] << 8) | buf[5]) & 0x000fffff;
+  temp20 = (((buf[3] & 0x0f) << 16) |
+             (buf[4] << 8) | buf[5]) & 0x000fffff;
 
   add_sensor_randomness((int)temp20 << 16 | rh20);
 
@@ -431,7 +433,8 @@ static int aht10_close(FAR struct file *filep)
  * Name: aht10_read
  ****************************************************************************/
 
-static ssize_t aht10_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t aht10_read(FAR struct file *filep,
+                          FAR char *buffer, size_t buflen)
 {
   FAR struct inode       *inode  = filep->f_inode;
   FAR struct aht10_dev_s *priv   = inode->i_private;

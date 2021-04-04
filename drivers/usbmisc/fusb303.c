@@ -660,7 +660,8 @@ static int fusb303_open(FAR struct file *filep)
   ret = fusb303_read_device_id(priv, &dev_id, &dev_type);
   if (ret < 0)
     {
-      fusb303_err("ERROR: No response at given address 0x%02X\n", priv->addr);
+      fusb303_err("ERROR: No response at given address 0x%02X\n",
+                  priv->addr);
       ret = -EFAULT;
     }
   else
@@ -1004,7 +1005,8 @@ int fusb303_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the FUSB303 device structure */
 
-  priv = (FAR struct fusb303_dev_s *)kmm_zalloc(sizeof(struct fusb303_dev_s));
+  priv = (FAR struct fusb303_dev_s *)
+                             kmm_zalloc(sizeof(struct fusb303_dev_s));
   if (!priv)
     {
       fusb303_err("ERROR: Failed to allocate instance\n");

@@ -7,18 +7,26 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  ****************************************************************************/
 
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdint.h>
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #ifndef PAD
 #define _PADLINE(line) pad ## line
@@ -143,6 +151,7 @@ struct sdpcmd_regs
   uint32_t biststatus;         /* rev8 */
 
   /* PCMCIA access */
+
   uint16_t pcmciamesportaladdr;  /* 0x010, rev8 */
   uint16_t PAD[1];
   uint16_t pcmciamesportalmask;  /* rev8 */
@@ -153,6 +162,7 @@ struct sdpcmd_regs
   uint16_t PAD[1];
 
   /* interrupt */
+
   uint32_t intstatus;         /* 0x020, rev8 */
   uint32_t hostintmask;       /* rev8 */
   uint32_t intmask;           /* rev8 */
@@ -166,20 +176,24 @@ struct sdpcmd_regs
   uint32_t tohostmailboxdata; /* rev8 */
 
   /* synchronized access to registers in SDIO clock domain */
+
   uint32_t sdioaccess;        /* 0x050, rev8 */
   uint32_t PAD[3];
 
   /* PCMCIA frame control */
+
   uint8_t pcmciaframectrl;    /* 0x060, rev8 */
   uint8_t PAD[3];
   uint8_t pcmciawatermark;    /* rev8 */
   uint8_t PAD[155];
 
   /* interrupt batching control */
+
   uint32_t intrcvlazy;        /* 0x100, rev8 */
   uint32_t PAD[3];
 
   /* counters */
+
   uint32_t cmd52rd;           /* 0x110, rev8 */
   uint32_t cmd52wr;           /* rev8 */
   uint32_t cmd53rd;           /* rev8 */
@@ -199,13 +213,16 @@ struct sdpcmd_regs
   uint32_t PAD[128];          /* DMA engines */
 
   /* SDIO/PCMCIA CIS region */
+
   char cis[512];              /* 0x400-0x5ff, rev6 */
 
   /* PCMCIA function control registers */
+
   char pcmciafcr[256];        /* 0x600-6ff, rev6 */
   uint16_t PAD[55];
 
   /* PCMCIA backplane access */
+
   uint16_t backplanecsr;      /* 0x76E, rev6 */
   uint16_t backplaneaddr0;    /* rev6 */
   uint16_t backplaneaddr1;    /* rev6 */
@@ -218,10 +235,15 @@ struct sdpcmd_regs
   uint16_t PAD[31];
 
   /* sprom "size" & "blank" info */
+
   uint16_t spromstatus;       /* 0x7BE, rev2 */
   uint32_t PAD[464];
 
   uint16_t PAD[0x80];
 };
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H */

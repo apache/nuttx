@@ -36,7 +36,15 @@
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include "bcmf_driver.h"
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 int bcmf_netdev_register(FAR struct bcmf_dev_s *priv);
 

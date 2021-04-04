@@ -97,3 +97,7 @@ const struct bcmf_sdio_chip bcmf_43438_config_sdio =
   .clm_blob_image_size = (FAR unsigned int *)&ap6212_clm_blob_len,
 #endif
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
