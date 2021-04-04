@@ -384,7 +384,16 @@ int getopt_common(int argc, FAR char * const argv[],
 
               /* And parse the long option */
 
-              return getopt_long_option(go, argv, longopts, longindex);
+              ret = getopt_long_option(go, argv, longopts, longindex);
+              if (ret == '?')
+                {
+                  /* Skip over the unrecognized long option */
+
+                  go->go_optind++;
+                  go->go_optptr = NULL;
+                }
+
+              return ret;
             }
 
           /* The -option form is only valid in getop_long_only() mode and
@@ -401,8 +410,18 @@ int getopt_common(int argc, FAR char * const argv[],
                */
 
               ret = getopt_long_option(go, argv, longopts, longindex);
-              if (ret != '?' ||  *(go->go_optptr + 1) != '\0')
+              if (ret != '?')
                 {
+                  /* Success or ERROR */
+
+                  return ret;
+                }
+              else if (*(go->go_optptr + 1) != '\0')
+                {
+                  /* Skip over the unrecognized long option */
+
+                  go->go_optind++;
+                  go->go_optptr = NULL;
                   return ret;
                 }
             }
