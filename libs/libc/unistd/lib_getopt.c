@@ -64,7 +64,10 @@
  *      -1 is returned.  As a result, your command line parsing loops
  *      must call getopt() repeatedly and continue to parse if other
  *      errors are returned ('?' or ':') until getopt() finally returns -1.
- *     (You can also set optind to -1 to force a reset).
+ *      (You can also set optind to -1 to force a reset).
+ *   4. Standard getopt() permutes the contents of argv as it scans, so that
+ *      eventually all the nonoptions are at the end.  This implementation
+ *      does not do this.
  *
  * Returned Value:
  *   If an option was successfully found, then getopt() returns the option
