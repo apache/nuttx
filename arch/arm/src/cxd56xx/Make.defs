@@ -25,12 +25,6 @@ ifneq ($(CONFIG_CXD56_TESTSET),y)
 CMN_ASRCS += arm_testset.S
 endif
 
-ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-CMN_ASRCS += arm_setjmp.S
-endif
-endif
-
 CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c
 CMN_CSRCS += arm_createstack.c arm_exit.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c

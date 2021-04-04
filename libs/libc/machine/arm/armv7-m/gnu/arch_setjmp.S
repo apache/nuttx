@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_setjmp.S
+ * libs/libc/machine/arm/armv7-m/gnu/arm_setjmp.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -136,7 +136,7 @@ longjmp:
 #endif /* CONFIG_ARCH_FPU */
 
 	mov		r0, r1				/* return val */
-	b		lr
+	bx		lr
 
 	.size	longjmp, .-longjmp
 	.end
