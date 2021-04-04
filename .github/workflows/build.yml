@@ -124,7 +124,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim, xtensa]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim01, sim02, xtensa]
 
     steps:
       - name: Download Source Artifact
@@ -169,7 +169,7 @@ jobs:
     needs: Fetch-Source
     strategy:
       matrix:
-        boards: [macos, sim]
+        boards: [macos, sim01, sim02]
     steps:
       - name: Download Source Artifact
         uses: actions/download-artifact@v1
