@@ -241,6 +241,21 @@
 #  define GPIO_CAN2_TX GPIO_CAN2_TX_1
 #endif
 
+/* USART1 */
+
+#ifdef CONFIG_USART1_RS485
+  /* Lets use for RS485 on pins: PB6 and PB7 */
+
+#  define GPIO_USART1_TX        GPIO_USART1_TX_2
+#  define GPIO_USART1_RX        GPIO_USART1_RX_2
+
+  /* RS485 DIR pin: PA15 */
+
+#  define GPIO_USART1_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
+                               GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN15)
+
+#endif
+
 /* USART2:
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
