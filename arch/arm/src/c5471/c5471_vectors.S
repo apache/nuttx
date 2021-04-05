@@ -168,15 +168,15 @@ arm_vectorirq:
 	.align	5
 
 /****************************************************************************
- * Function: arm_vectorswi
+ * Function: arm_vectorsvc
  *
  * Description:
  *   SWI interrupt. We enter the SWI in SVC mode
  ****************************************************************************/
 
-	.globl	arm_vectorswi
-	.type	arm_vectorswi, %function
-arm_vectorswi:
+	.globl	arm_vectorsvc
+	.type	arm_vectorsvc, %function
+arm_vectorsvc:
 
 	/* The c547x rrload bootloader intemediates all
 	 * interrupts.  For the* case of the SWI, it mucked
