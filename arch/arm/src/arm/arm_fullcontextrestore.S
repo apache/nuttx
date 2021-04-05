@@ -89,9 +89,7 @@ arm_fullcontextrestore:
 	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
 	msr	cpsr, r1		/* Set the CPSR */
 
-	/* Now recover r0 and r1. Then return to the address at the stop of
-	 * the stack, destroying the stack frame
-	 */
+	/* Now recover r0-r1 and pc, destroying the stack frame */
 
 	ldmia	sp!, {r0-r1, r15}
 

@@ -47,7 +47,7 @@
 _undef_instr:
 	b	arm_vectorundefinsn
 _sw_interr:
-	b	arm_vectorswi
+	b	arm_vectorsvc
 _prefetch_abort:
 	b	arm_vectorprefetch
 _data_abort:

@@ -92,9 +92,9 @@ arm_saveusercontext:
 	add	r1, r0, #(4*REG_PC)
 	str	lr, [r1]
 
-	/* Return 0 */
+	/* Return 0 now indicating that this return is not a context switch */
 
 	mov	r0, #0		/* Return value == 0 */
-	mov	pc, lr		/* Return */
+	bx	lr		/* Return */
 	.size	arm_saveusercontext, .-arm_saveusercontext
 	.end

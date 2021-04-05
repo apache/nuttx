@@ -457,7 +457,7 @@ _vector_table:
 
 	.globl	__start
 	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
+	.globl	arm_vectorsvc
 	.globl	arm_vectorprefetch
 	.globl	arm_vectordata
 	.globl	arm_vectorirq
@@ -468,7 +468,7 @@ _vector_table:
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
 .Lswihandler:
-	.long	arm_vectorswi
+	.long	arm_vectorsvc
 .Lprefetchaborthandler:
 	.long	arm_vectorprefetch
 .Ldataaborthandler:

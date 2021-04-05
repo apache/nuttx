@@ -393,7 +393,7 @@ void arm_undefinedinsn(uint32_t *regs);
 #endif /* CONFIG_ARCH_ARMV[6-8]M */
 
 void arm_vectorundefinsn(void);
-void arm_vectorswi(void);
+void arm_vectorsvc(void);
 void arm_vectorprefetch(void);
 void arm_vectordata(void);
 void arm_vectoraddrexcptn(void);

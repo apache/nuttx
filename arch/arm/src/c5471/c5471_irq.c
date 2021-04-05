@@ -70,7 +70,7 @@ static up_vector_t g_vectorinittab[] =
 {
   (up_vector_t)NULL,
   arm_vectorundefinsn,
-  arm_vectorswi,
+  arm_vectorsvc,
   arm_vectorprefetch,
   arm_vectordata,
   arm_vectoraddrexcptn,
