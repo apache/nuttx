@@ -13,3 +13,4 @@ jobs:
         env:
           VALIDATE_YAML: true
           VALIDATE_PYTHON_BLACK: true
+          FILTER_REGEX_INCLUDE: .*(\.github|tools|Documentation)/.*
