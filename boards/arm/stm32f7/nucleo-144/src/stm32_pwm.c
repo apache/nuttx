@@ -134,6 +134,7 @@ int stm32_pwm_setup(void)
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;
