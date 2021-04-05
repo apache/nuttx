@@ -1,0 +1,38 @@
+# Chose a minimalistic subset of board/configs due to macOS builds
+# being extremely slow on GitHub
+
+# AVR
+#
+# We do not have a toolchain for avr32 outside of Microchip login wall.
+# The work was never upstreamed to GCC.
+
+/avr/atmega/arduino-mega2560/configs/nsh
+
+# MIPS
+#
+# PINGUINOL toolchain doesn't provide macOS binaries
+# with the same name
+
+#/mips/pic32mx/pic32mx-starterkit/configs/nsh,CONFIG_MIPS32_TOOLCHAIN_PINGUINOL
+
+# RISC-V
+
+/risc-v/bl602/bl602evb/configs/wifi,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
+
+/risc-v/esp32c3/esp32c3-devkit/configs/wapi,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
+
+# ARM
+
+/arm/stm32/stm32f4discovery/configs/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+
+# XTENSA
+
+/xtensa/esp32/esp32-devkitc/configs/wapi
+
+# x86_64-elf-gcc from homebrew doesn't seem to
+# provide __udivdi3 etc for -m32, so we do not build
+# x86
+
+# x86_64
+
+/x86_64/intel64/qemu-intel64/configs/nsh
