@@ -31,7 +31,6 @@
 
 #include "task/task.h"
 #include "sched/sched.h"
-#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -79,7 +78,7 @@ void up_exit(int status)
 
   /* Then switch contexts */
 
-  up_longjmp(tcb->xcp.regs, 1);
+  longjmp(tcb->xcp.regs, 1);
 
   /* The function does not return */
 

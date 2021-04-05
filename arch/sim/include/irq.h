@@ -26,27 +26,16 @@
 #define __ARCH_SIM_INCLUDE_IRQ_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <arch/setjmp.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define NR_IRQS 64
-
-/* Number of registers saved in context switch */
-
-#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
-  /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
-
-#  define XCPTCONTEXT_REGS    8
-#  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
-#elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
-  /* Storage order: %ebx, %esi, %edi, %ebp, sp, and return PC */
-
-#  define XCPTCONTEXT_REGS    6
-#  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
-#elif defined(CONFIG_HOST_ARM)
-#  define XCPTCONTEXT_REGS    16
-#  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
-#endif
 
 /****************************************************************************
  * Public Types
@@ -54,19 +43,12 @@
 
 #ifndef __ASSEMBLY__
 
-#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
-typedef unsigned long xcpt_reg_t;
-#else
-typedef unsigned int xcpt_reg_t;
-#endif
-
 /* This struct defines the way the registers are stored */
 
 struct xcptcontext
 {
   void *sigdeliver; /* Actual type is sig_deliver_t */
-
-  xcpt_reg_t regs[XCPTCONTEXT_REGS];
+  jmp_buf regs;
 };
 #endif
 

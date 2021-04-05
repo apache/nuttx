@@ -23,7 +23,7 @@ CSRCS += arch_elf.c
 endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ASRCS  += arch_setjmp.S
+ASRCS += arch_setjmp.S
 endif
 
 DEPPATH += --dep-path machine/risc-v/common

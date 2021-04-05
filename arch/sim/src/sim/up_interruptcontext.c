@@ -63,7 +63,7 @@ void *up_doirq(int irq, void *context)
    */
 
 #ifdef CONFIG_SMP
-  if (up_setjmp(regs) == 0)
+  if (setjmp(regs) == 0)
     {
 #endif
 
@@ -95,7 +95,7 @@ void *up_doirq(int irq, void *context)
 
       /* Then switch contexts */
 
-      up_longjmp(regs, 1);
+      longjmp(regs, 1);
     }
 #endif
 
