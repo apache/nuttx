@@ -1,15 +1,15 @@
-name: ❄️ Lint
+name: Lint
 
 on: [pull_request]
 
 jobs:
-  yamllint:
-    name: 🍺 YAML
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: 🧹 YAML Lint
+      - name: YAML Lint
         uses: github/super-linter@v3
         env:
           VALIDATE_YAML: true
-          FILTER_REGEX_INCLUDE: .*\.github/.*
+          VALIDATE_PYTHON_BLACK: true
