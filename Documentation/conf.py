@@ -37,10 +37,10 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'NuttX'
-copyright = '2020, The Apache Software Foundation'
-author = 'NuttX community'
-version = release = 'latest'
+project = "NuttX"
+copyright = "2020, The Apache Software Foundation"
+author = "NuttX community"
+version = release = "latest"
 
 
 # -- General configuration ---------------------------------------------------
@@ -51,12 +51,12 @@ version = release = 'latest'
 extensions = [
     "sphinx_rtd_theme",
     "m2r2",
-    'sphinx.ext.autosectionlabel',
-    'sphinx.ext.todo',
-    'sphinx_tabs.tabs'
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.todo",
+    "sphinx_tabs.tabs",
 ]
 
-source_suffix = [ '.rst', '.md' ]
+source_suffix = [".rst", ".md"]
 
 todo_include_todos = True
 
@@ -67,19 +67,19 @@ highlight_language = "none"
 primary_domain = None
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # list of documentation versions to offer (besides latest). this will be
 # overriden by command line option but we can provide a sane default
 # this way
 
 html_context = dict()
-html_context['nuttx_versions'] = 'latest'
+html_context["nuttx_versions"] = "latest"
 
 # TODO: append other options using releases detected from git (or maybe just
 # a few hand-selected ones, or maybe just a "stable" option)
@@ -89,41 +89,33 @@ html_context['nuttx_versions'] = 'latest'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 html_show_sphinx = False
 
-html_theme_options = {
-    'navigation_depth': 5
-}
+html_theme_options = {"navigation_depth": 5}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
-html_css_files = [
-    'custom.css'
-]
+html_css_files = ["custom.css"]
 
 html_show_license = True
 
-html_logo = '_static/NuttX.png'
-html_favicon = '_static/favicon.ico'
+html_logo = "_static/NuttX.png"
+html_favicon = "_static/favicon.ico"
 
-today_fmt = '%d %B %y at %H:%M'
+today_fmt = "%d %B %y at %H:%M"
 
-c_id_attributes = [
-  'FAR',
-  'CODE',
-  'noreturn_function'
-]
+c_id_attributes = ["FAR", "CODE", "noreturn_function"]
 
 # This is required to allow running linkcheck with sphinx-tabs
-sphinx_tabs_valid_builders = ['linkcheck']
+sphinx_tabs_valid_builders = ["linkcheck"]
 
 # There are some sites where the linkchecker cannot handle anchors
 linkcheck_ignore = [
-   'https://github.com/pyenv/pyenv#installation',
-   'http://openocd.zylin.com/#/c/4103/',
+    "https://github.com/pyenv/pyenv#installation",
+    "http://openocd.zylin.com/#/c/4103/",
 ]
