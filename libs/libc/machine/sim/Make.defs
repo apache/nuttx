@@ -21,18 +21,34 @@
 # XXX ELF relocations are not actually sim-dependent.
 # We should share the code with eg. ../x86/arch_elf.c.
 
-ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
-else
-CSRCS += arch_elf64.c
+endif
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp.S
 endif
 else
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+CSRCS += arch_elf64.c
+endif
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp64.S
+endif
+endif
+else ifeq ($(CONFIG_HOST_X86),y)
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
+endif
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp.S
+endif
+else ifeq ($(CONFIG_HOST_ARM),y)
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp_arm.S
+endif
 endif
 
 DEPPATH += --dep-path machine/sim
 VPATH += :machine/sim
-
-endif

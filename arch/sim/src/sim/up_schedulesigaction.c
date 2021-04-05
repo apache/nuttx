@@ -30,7 +30,6 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions

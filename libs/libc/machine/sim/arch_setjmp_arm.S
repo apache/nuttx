@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_setjmp_arm.h
+ * libs/libc/machine/sim/arch_setjmp_arm.S
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Nickolay Semyonov (RPI) <snob@wolpike.com>
@@ -37,9 +37,9 @@
  ****************************************************************************/
 
 .syntax unified
-.global up_setjmp
-.type up_setjmp,%function
-up_setjmp:
+.global setjmp
+.type setjmp,%function
+setjmp:
 	mov ip,r0
 	stmia ip!,{v1,v2,v3,v4,v5,v6,sl,fp}
 	mov r2,sp
@@ -75,9 +75,9 @@ up_setjmp:
 3:	bx lr
 
 .syntax unified
-.global up_longjmp
-.type up_longjmp,%function
-up_longjmp:
+.global longjmp
+.type longjmp,%function
+longjmp:
 	mov ip,r0
 	movs r0,r1
 	moveq r0,#1

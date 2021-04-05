@@ -106,11 +106,11 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
         }
 
       /* Copy the exception context into the TCB at the (old) head of the
-       * ready-to-run Task list. if up_setjmp returns a non-zero
+       * ready-to-run Task list. if setjmp returns a non-zero
        * value, then this is really the previously running task restarting!
        */
 
-      else if (!up_setjmp(rtcb->xcp.regs))
+      else if (!setjmp(rtcb->xcp.regs))
         {
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
@@ -125,7 +125,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           /* Then switch contexts */
 
-          up_longjmp(rtcb->xcp.regs, 1);
+          longjmp(rtcb->xcp.regs, 1);
         }
       else
         {
