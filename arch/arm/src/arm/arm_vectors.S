@@ -260,7 +260,7 @@ arm_vectordata:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr_cxsf, r0
+	msr	spsr, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Ldaborttmp:
@@ -332,7 +332,7 @@ arm_vectorprefetch:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr_cxsf, r0
+	msr	spsr, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lpaborttmp:
@@ -401,7 +401,7 @@ arm_vectorundefinsn:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr_cxsf, r0
+	msr	spsr, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lundeftmp:

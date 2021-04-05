@@ -256,12 +256,10 @@ arm_vectorirq:
 
 	ldmia		r0, {r0-r15}^			/* Return */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
-#ifndef CONFIG_SMP
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lirqstackbase:
 	.word	g_intstackbase
 #endif
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 	.size	arm_vectorirq, . - arm_vectorirq
 
 	.align	5
@@ -500,7 +498,7 @@ arm_vectordata:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -642,7 +640,7 @@ arm_vectorprefetch:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -780,7 +778,7 @@ arm_vectorundefinsn:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Are we leaving in user mode?  If so then we need to restore the
