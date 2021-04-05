@@ -470,7 +470,7 @@ __flashstart:
 
 	/* Setup the initial processor mode */
 
-	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT )
 	msr		cpsr, r0
 
 	/* Initialize the external memory interface (EMI) */
