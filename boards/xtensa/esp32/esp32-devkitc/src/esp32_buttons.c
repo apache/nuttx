@@ -56,7 +56,7 @@
 
 uint32_t board_button_initialize(void)
 {
-  esp32_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLDOWN);
+  esp32_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLUP);
   return 1;
 }
 
