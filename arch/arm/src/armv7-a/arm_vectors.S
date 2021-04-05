@@ -180,7 +180,7 @@ arm_vectorirq:
 	 * USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r1, #PSR_MODE_USR		/* User mode? */
 	bne		.Lirqentersvc			/* Branch if not user mode */
 
@@ -301,7 +301,7 @@ arm_vectorirq:
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r2, r1, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lirqleavesvc			/* Branch if not user mode */
 
@@ -310,7 +310,7 @@ arm_vectorirq:
 	 */
 
 	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
 	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
 	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
 	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
@@ -448,7 +448,7 @@ arm_vectorsvc:
 	 */
 
 	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
 	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
 	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
 	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
@@ -592,7 +592,7 @@ arm_vectordata:
 	 */
 
 	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
 	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
 	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
 	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
@@ -738,7 +738,7 @@ arm_vectorprefetch:
 	 */
 
 	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
 	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
 	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
 	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
@@ -879,7 +879,7 @@ arm_vectorundefinsn:
 	 */
 
 	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
 	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
 	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
 	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
@@ -945,7 +945,7 @@ arm_vectorfiq:
 	 * USER mode rr13(sp) and r14(lr).
 	 */
 
-	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r1, #PSR_MODE_USR		/* User mode? */
 	bne		.Lfiqentersvc			/* Branch if not user mode */
 
@@ -1021,7 +1021,7 @@ arm_vectorfiq:
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
-	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
+	and		r2, r1, #PSR_MODE_MASK		/* Interrupted mode */
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lfiqleavesvc			/* Branch if not user mode */
 
@@ -1030,7 +1030,7 @@ arm_vectorfiq:
 	 */
 
 	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-R12}			/* Restore common R0-R12 */
+	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
 	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
 	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
 	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
