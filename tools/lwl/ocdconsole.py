@@ -65,13 +65,13 @@ LWL_UPSENSESHIFT = 29
 LWL_OCTVALSHIFT = 27
 LWL_PORTSHIFT = 24
 
-LWL_PORTMASK  = (7<<LWL_PORTSHIFT)
-LWL_SENSEMASK  = (3<<LWL_UPSENSESHIFT)
-LWL_OCTVALMASK = (3<<LWL_OCTVALSHIFT)
+LWL_PORTMASK = 7 << LWL_PORTSHIFT
+LWL_SENSEMASK = 3 << LWL_UPSENSESHIFT
+LWL_OCTVALMASK = 3 << LWL_OCTVALSHIFT
 
-LWL_ACTIVE = (1<<LWL_ACTIVESHIFT)
-LWL_DNSENSEBIT = (1<<LWL_DNSENSESHIFT)
-LWL_UPSENSEBIT = (1<<LWL_UPSENSESHIFT)
+LWL_ACTIVE = 1 << LWL_ACTIVESHIFT
+LWL_DNSENSEBIT = 1 << LWL_DNSENSESHIFT
+LWL_UPSENSEBIT = 1 << LWL_UPSENSESHIFT
 
 LWL_SIG = 0x7216A318
 
@@ -84,25 +84,28 @@ length = 0x8000
 import time
 import socket
 import os
-if os.name == 'nt':
+
+if os.name == "nt":
     import msvcrt
 else:
     import sys, select, termios, tty
 
+
 def kbhit():
-    ''' Returns True if a keypress is waiting to be read in stdin, False otherwise.
-    '''
-    if os.name == 'nt':
+    """Returns True if a keypress is waiting to be read in stdin, False otherwise."""
+    if os.name == "nt":
         return msvcrt.kbhit()
     else:
-        dr,dw,de = select.select([sys.stdin], [], [], 0)
+        dr, dw, de = select.select([sys.stdin], [], [], 0)
         return dr != []
 
+
 def dooutput(x):
-    if (x&255==10):
-        print("\r",flush=True)
+    if x & 255 == 10:
+        print("\r", flush=True)
     else:
-        print(chr(x),end="",flush=True)
+        print(chr(x), end="", flush=True)
+
 
 ###############################################################################
 # Code from here to *** below was taken from GPL'ed ocd_rpc_example.py and is
@@ -114,16 +117,19 @@ def dooutput(x):
 # email ID: 15e1f0a0-9592-bd07-c996-697f44860877@finf.uni-hannover.de
 ###############################################################################
 
+
 def strToHex(data):
     return map(strToHex, data) if isinstance(data, list) else int(data, 16)
 
+
 class oocd:
-    NL = '\x1A'
+    NL = "\x1A"
+
     def __init__(self, verbose=False):
         self.verbose = verbose
-        self.tclRpcIp       = "127.0.0.1"
-        self.tclRpcPort     = 6666
-        self.bufferSize     = 4096
+        self.tclRpcIp = "127.0.0.1"
+        self.tclRpcPort = 6666
+        self.bufferSize = 4096
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -156,12 +162,12 @@ class oocd:
                 break
 
         data = data.decode("utf-8").strip()
-        data = data[:-1] # strip trailing NL
+        data = data[:-1]  # strip trailing NL
 
         return data
 
     def readVariable(self, address):
-        raw = self.send("%s 0x%x" % (self.mdwText,address)).split(": ")
+        raw = self.send("%s 0x%x" % (self.mdwText, address)).split(": ")
         return None if (len(raw) < 2) else strToHex(raw[1])
 
     def writeVariable(self, address, value):
@@ -169,13 +175,14 @@ class oocd:
         self.send("mww 0x%x 0x%x" % (address, value))
 
     def testInterface(self):
-        self.mdwText="ocd_mdw"
-        if (self.readVariable(baseaddr)!=None):
+        self.mdwText = "ocd_mdw"
+        if self.readVariable(baseaddr) != None:
             return
-        self.mdwText="mdw"
-        if (self.readVariable(baseaddr)!=None):
+        self.mdwText = "mdw"
+        if self.readVariable(baseaddr) != None:
             return
         raise ConnectionRefusedError
+
 
 # *** Incorporated code ends ######################################################
 
@@ -195,31 +202,35 @@ if __name__ == "__main__":
                     # =================================================
                     try:
                         ocd.testInterface()
-                        downwordaddr=0
-                        while (downwordaddr<length):
-                            if (ocd.readVariable(baseaddr+downwordaddr)==LWL_SIG):
+                        downwordaddr = 0
+                        while downwordaddr < length:
+                            if ocd.readVariable(baseaddr + downwordaddr) == LWL_SIG:
                                 break
-                            downwordaddr=downwordaddr+4
+                            downwordaddr = downwordaddr + 4
 
-                        if (downwordaddr>=length):
+                        if downwordaddr >= length:
                             print("ERROR: Cannot find signature\r")
                             exit(1)
 
                         # We have the base address, so get the variables themselves
                         # =========================================================
-                        downwordaddr=baseaddr+downwordaddr+4
-                        upwordaddr=downwordaddr+4
-                        downword=LWL_ACTIVE
+                        downwordaddr = baseaddr + downwordaddr + 4
+                        upwordaddr = downwordaddr + 4
+                        downword = LWL_ACTIVE
 
                         # Now wake up the link...keep on trying if it goes down
                         # =====================================================
                         while True:
                             ocd.writeVariable(downwordaddr, downword)
                             upword = ocd.readVariable(upwordaddr)
-                            if (upword&LWL_ACTIVE!=0):
+                            if upword & LWL_ACTIVE != 0:
                                 print("==Link Activated\r")
                                 break
-                    except (BrokenPipeError, ConnectionRefusedError, ConnectionResetError) as e:
+                    except (
+                        BrokenPipeError,
+                        ConnectionRefusedError,
+                        ConnectionResetError,
+                    ) as e:
                         raise e
 
                     # Now run the comms loop until something fails
@@ -228,32 +239,48 @@ if __name__ == "__main__":
                         while True:
                             ocd.writeVariable(downwordaddr, downword)
                             upword = ocd.readVariable(upwordaddr)
-                            if (upword&LWL_ACTIVE==0):
+                            if upword & LWL_ACTIVE == 0:
                                 print("\r==Link Deactivated\r")
                                 break
                             if kbhit():
                                 charin = sys.stdin.read(1)
-                                if (ord(charin)==3):
+                                if ord(charin) == 3:
                                     sys.exit(0)
-                                if (downword&LWL_DNSENSEBIT):
-                                    downword=(downword&LWL_UPSENSEBIT)
+                                if downword & LWL_DNSENSEBIT:
+                                    downword = downword & LWL_UPSENSEBIT
                                 else:
-                                    downword=(downword&LWL_UPSENSEBIT)|LWL_DNSENSEBIT
-                                downword|=(LWL_PORT_CONSOLE<<LWL_PORTSHIFT)|(1<<LWL_OCTVALSHIFT)|LWL_ACTIVE|ord(charin)
+                                    downword = (
+                                        downword & LWL_UPSENSEBIT
+                                    ) | LWL_DNSENSEBIT
+                                downword |= (
+                                    (LWL_PORT_CONSOLE << LWL_PORTSHIFT)
+                                    | (1 << LWL_OCTVALSHIFT)
+                                    | LWL_ACTIVE
+                                    | ord(charin)
+                                )
 
-                            if ((upword&LWL_UPSENSEBIT)!=(downword&LWL_UPSENSEBIT)):
-                                incomingPort=(upword&LWL_PORTMASK)>>LWL_PORTSHIFT
-                                if (incomingPort==LWL_PORT_CONSOLE):
-                                    incomingBytes=(upword&LWL_OCTVALMASK)>>LWL_OCTVALSHIFT
-                                    if (incomingBytes>=1): dooutput(upword&255);
-                                    if (incomingBytes>=2): dooutput((upword>>8)&255);
-                                    if (incomingBytes==3): dooutput((upword>>16)&255);
+                            if (upword & LWL_UPSENSEBIT) != (downword & LWL_UPSENSEBIT):
+                                incomingPort = (upword & LWL_PORTMASK) >> LWL_PORTSHIFT
+                                if incomingPort == LWL_PORT_CONSOLE:
+                                    incomingBytes = (
+                                        upword & LWL_OCTVALMASK
+                                    ) >> LWL_OCTVALSHIFT
+                                    if incomingBytes >= 1:
+                                        dooutput(upword & 255)
+                                    if incomingBytes >= 2:
+                                        dooutput((upword >> 8) & 255)
+                                    if incomingBytes == 3:
+                                        dooutput((upword >> 16) & 255)
 
-                                if (downword&LWL_UPSENSEBIT):
-                                    downword = downword&~LWL_UPSENSEBIT
+                                if downword & LWL_UPSENSEBIT:
+                                    downword = downword & ~LWL_UPSENSEBIT
                                 else:
-                                    downword = downword|LWL_UPSENSEBIT
-                    except (ConnectionResetError, ConnectionResetError, BrokenPipeError) as e:
+                                    downword = downword | LWL_UPSENSEBIT
+                    except (
+                        ConnectionResetError,
+                        ConnectionResetError,
+                        BrokenPipeError,
+                    ) as e:
                         print("\r==Link Lost\r")
                         raise e
 
