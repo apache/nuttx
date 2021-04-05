@@ -25,22 +25,30 @@ apache = r"""
  *
  ****************************************************************************/"""
 
+
 def apachize(path, header):
-    relpath = os.path.relpath(path, os.environ['TOPDIR'])
-    header = re.sub('PATH', relpath, header)
+    relpath = os.path.relpath(path, os.environ["TOPDIR"])
+    header = re.sub("PATH", relpath, header)
 
     with open(path) as f:
         s = f.read()
-        s = re.sub('(?i)/\*\*\*.+?(?:Copyright).+?\*\*\*+/', header, s, 1, re.DOTALL)
+        s = re.sub("(?i)/\*\*\*.+?(?:Copyright).+?\*\*\*+/", header, s, 1, re.DOTALL)
         print(s)
 
-if (len(sys.argv) != 2):
-    print("Usage: ./apachize.py <file>", file = sys.stderr)
-    print("This will replace the license header of the passed file to that of Apache 2.0 and print it to stdout", file = sys.sterr)
+
+if len(sys.argv) != 2:
+    print("Usage: ./apachize.py <file>", file=sys.stderr)
+    print(
+        "This will replace the license header of the passed file to that of Apache 2.0 and print it to stdout",
+        file=sys.sterr,
+    )
     sys.exit(2)
 
-if (not 'TOPDIR' in os.environ):
-    print("Please define the TOPDIR environment variable to the full path to nuttx/ root", file = sys.stderr)
+if not "TOPDIR" in os.environ:
+    print(
+        "Please define the TOPDIR environment variable to the full path to nuttx/ root",
+        file=sys.stderr,
+    )
     sys.exit(2)
 
 apachize(sys.argv[1], apache)
