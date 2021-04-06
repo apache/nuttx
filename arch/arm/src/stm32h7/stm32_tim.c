@@ -251,24 +251,31 @@ struct stm32_tim_priv_s
 
 /* Timer methods */
 
-static int  stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev,
-                              stm32_tim_mode_t mode);
-static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev,
-                               uint32_t freq);
-static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
-                                uint32_t period);
-static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
-                                 uint8_t channel, stm32_tim_channel_t mode);
-static int  stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev,
-                                 uint8_t channel, uint32_t compare);
-static int  stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev,
-                                 uint8_t channel);
-static int  stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
-                             void *arg, int source);
-static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source);
-static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev,
-                                 int source);
-static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
+static int      stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev,
+                                  stm32_tim_mode_t mode);
+static int      stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev,
+                                   uint32_t freq);
+static void     stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
+                                    uint32_t period);
+static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev);
+static void     stm32_tim_setcounter(FAR struct stm32_tim_dev_s *dev,
+                                     uint32_t count);
+static int      stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev);
+static int      stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
+                                     uint8_t channel,
+                                     stm32_tim_channel_t mode);
+static int      stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev,
+                                     uint8_t channel, uint32_t compare);
+static int      stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev,
+                                     uint8_t channel);
+static int      stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
+                                 xcpt_t handler, void *arg, int source);
+static void     stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev,
+                                    int source);
+static void     stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev,
+                                     int source);
+static void     stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
+static int      stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source);
 
 /****************************************************************************
  * Private Data
@@ -279,13 +286,17 @@ static const struct stm32_tim_ops_s stm32_tim_ops =
   .setmode        = &stm32_tim_setmode,
   .setclock       = &stm32_tim_setclock,
   .setperiod      = &stm32_tim_setperiod,
+  .getcounter     = &stm32_tim_getcounter,
+  .setcounter     = &stm32_tim_setcounter,
+  .getwidth       = &stm32_tim_getwidth,
   .setchannel     = &stm32_tim_setchannel,
   .setcompare     = &stm32_tim_setcompare,
   .getcapture     = &stm32_tim_getcapture,
   .setisr         = &stm32_tim_setisr,
   .enableint      = &stm32_tim_enableint,
   .disableint     = &stm32_tim_disableint,
-  .ackint         = &stm32_tim_ackint
+  .ackint         = &stm32_tim_ackint,
+  .checkint       = &stm32_tim_checkint,
 };
 
 #ifdef CONFIG_STM32H7_TIM1
@@ -483,6 +494,64 @@ static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev)
   uint16_t val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
   val &= ~GTIM_CR1_CEN;
   stm32_putreg16(dev, STM32_GTIM_CR1_OFFSET, val);
+}
+
+/*****************************************************************************
+ * Name: stm32_tim_getwidth
+ *****************************************************************************/
+
+static int stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev)
+{
+  /* Only TIM2 and TIM5 timers may be 32-bits in width */
+
+  switch (((struct stm32_tim_priv_s *)dev)->base)
+    {
+#if defined(CONFIG_STM32H7_TIM2)
+      case STM32_TIM2_BASE:
+        return 32;
+#endif
+
+#if defined(CONFIG_STM32H7_TIM5)
+      case STM32_TIM5_BASE:
+        return 32;
+#endif
+
+      /* All others are 16-bit times */
+
+      default:
+        return 16;
+    }
+}
+
+/*****************************************************************************
+ * Name: stm32_tim_getcounter
+ *****************************************************************************/
+
+static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
+{
+  DEBUGASSERT(dev != NULL);
+  return stm32_tim_getwidth(dev) > 16 ?
+    stm32_getreg32(dev, STM32_BTIM_CNT_OFFSET) :
+    (uint32_t)stm32_getreg16(dev, STM32_BTIM_CNT_OFFSET);
+}
+
+/*****************************************************************************
+ * Name: stm32_tim_setcounter
+ *****************************************************************************/
+
+static void stm32_tim_setcounter(FAR struct stm32_tim_dev_s *dev,
+                                 uint32_t count)
+{
+  DEBUGASSERT(dev != NULL);
+
+  if (stm32_tim_getwidth(dev) > 16)
+    {
+      stm32_putreg32(dev, STM32_BTIM_CNT_OFFSET, count);
+    }
+  else
+    {
+      stm32_putreg16(dev, STM32_BTIM_CNT_OFFSET, (uint16_t)count);
+    }
 }
 
 /* Reset timer into system default state, but do not affect output/input
@@ -771,6 +840,12 @@ static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source)
 {
   DEBUGASSERT(dev != NULL);
   stm32_modifyreg16(dev, STM32_GTIM_DIER_OFFSET, source, 0);
+}
+
+static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source)
+{
+  uint16_t regval = stm32_getreg16(dev, STM32_BTIM_SR_OFFSET);
+  return (regval & source) ? 1 : 0;
 }
 
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
