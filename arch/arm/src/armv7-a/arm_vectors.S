@@ -39,25 +39,6 @@
  * Private Data
  ****************************************************************************/
 
-	.data
-g_irqtmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
-
-g_undeftmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
-
-g_aborttmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
-
-#ifdef CONFIG_ARMV7A_DECODEFIQ
-g_fiqtmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
-#endif
-
 /****************************************************************************
  * Assembly Macros
  ****************************************************************************/
@@ -134,21 +115,12 @@ arm_vectorirq:
 	 * and r14.
 	 */
 
-	ldr		r13, .Lirqtmp
-	sub		lr, lr, #4
-	str		lr, [r13]			/* Save lr_IRQ */
-	mrs		lr, spsr
-	str		lr, [r13, #4]			/* Save spsr_IRQ */
-
-	/* Then switch back to SVC mode */
-
-	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
 #ifdef CONFIG_ARMV7A_DECODEFIQ
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 #else
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT)
 #endif
-	msr		cpsr_c, lr			/* Switch to SVC mode */
+	msr		cpsr_c, r13			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -157,10 +129,26 @@ arm_vectorirq:
 	sub		sp, sp, #XCPTCONTEXT_SIZE
 	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r0, #(PSR_MODE_IRQ | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r0, #(PSR_MODE_IRQ | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r0			/* Switch back IRQ mode */
+
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	ldr		r0, .Lirqtmp			/* Points to temp storage */
-	ldmia		r0, {r3, r4}			/* Recover r3=lr_IRQ, r4=spsr_IRQ */
+	sub		r3, lr, #4
+	mrs		r4, spsr
+
+	/* Then switch back to SVC mode */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	orr		r0, r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+#else
+	orr		r0, r0, #(PSR_MODE_SVC | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r0
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -268,17 +256,14 @@ arm_vectorirq:
 
 	ldmia		r0, {r0-r15}^			/* Return */
 
-.Lirqtmp:
-	.word	g_irqtmp
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 #ifndef CONFIG_SMP
 .Lirqstackbase:
 	.word	g_intstackbase
 #endif
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
-
 	.size	arm_vectorirq, . - arm_vectorirq
+
 	.align	5
 
 /****************************************************************************
@@ -400,7 +385,6 @@ arm_vectorsvc:
 	/* Life is simple when everything is SVC mode */
 
 	ldmia		r0, {r0-r15}^			/* Return */
-
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
@@ -425,17 +409,8 @@ arm_vectordata:
 	 * r13 and r14
 	 */
 
-	ldr		r13, .Ldaborttmp		/* Points to temp storage */
-	sub		lr, lr, #8			/* Fixup return */
-	str		lr, [r13]			/* Save in temp storage */
-	mrs		lr, spsr			/* Get SPSR */
-	str		lr, [r13, #4]			/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr			/* Switch to SVC mode */
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r13			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -444,10 +419,18 @@ arm_vectordata:
 	sub		sp, sp, #XCPTCONTEXT_SIZE
 	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
+	mov		r0, #(PSR_MODE_ABT | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0			/* Switch back ABT mode */
+
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	ldr		r0, .Ldaborttmp			/* Points to temp storage */
-	ldmia		r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
+	sub		r3, lr, #8
+	mrs		r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -544,9 +527,6 @@ arm_vectordata:
 	/* Life is simple when everything is SVC mode */
 
 	ldmia		r0, {r1-r15}^			/* Return */
-
-.Ldaborttmp:
-	.word	g_aborttmp
 	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
@@ -571,17 +551,8 @@ arm_vectorprefetch:
 	 * r13 and r14
 	 */
 
-	ldr		r13, .Lpaborttmp		/* Points to temp storage */
-	sub		lr, lr, #4			/* Fixup return */
-	str		lr, [r13]			/* Save in temp storage */
-	mrs		lr, spsr			/* Get SPSR */
-	str		lr, [r13, #4]			/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr			/* Switch to SVC mode */
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r13			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -590,10 +561,18 @@ arm_vectorprefetch:
 	sub		sp, sp, #XCPTCONTEXT_SIZE
 	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
+	mov		r0, #(PSR_MODE_ABT | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0			/* Switch back ABT mode */
+
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	ldr		r0, .Lpaborttmp			/* Points to temp storage */
-	ldmia		r0, {r3, r4}			/* Recover r3=lr_ABT, r4=spsr_ABT */
+	sub		r3, lr, #4
+	mrs		r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -690,9 +669,6 @@ arm_vectorprefetch:
 	/* Life is simple when everything is SVC mode */
 
 	ldmia		r0, {r0-r15}^			/* Return */
-
-.Lpaborttmp:
-	.word	g_aborttmp
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
 	.align	5
@@ -715,16 +691,8 @@ arm_vectorundefinsn:
 	 * r13 and r14
 	 */
 
-	ldr		r13, .Lundeftmp			/* Points to temp storage */
-	str		lr, [r13]			/* Save in temp storage */
-	mrs		lr, spsr			/* Get SPSR */
-	str		lr, [r13, #4]			/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr			/* Switch to SVC mode */
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r13			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -733,10 +701,18 @@ arm_vectorundefinsn:
 	sub		sp, sp, #XCPTCONTEXT_SIZE
 	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
+	mov		r0, #(PSR_MODE_UND | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0			/* Switch back UND mode */
+
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	ldr		r0, .Lundeftmp			/* Points to temp storage */
-	ldmia		r0, {r3, r4}			/* Recover r3=lr_UND, r4=spsr_UND */
+	mov		r3, lr
+	mrs		r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -831,9 +807,6 @@ arm_vectorundefinsn:
 	/* Life is simple when everything is SVC mode */
 
 	ldmia		r0, {r0-r15}^			/* Return */
-
-.Lundeftmp:
-	.word	g_undeftmp
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
 	.align	5
@@ -857,17 +830,8 @@ arm_vectorfiq:
 #ifdef CONFIG_ARMV7A_DECODEFIQ
 	/* On entry we are free to use the FIQ mode registers r8 through r14 */
 
-	ldr		r13, .Lfiqtmp			/* Points to temp storage */
-	sub		lr, lr, #4			/* Fixup return */
-	str		lr, [r13]			/* Save in temp storage */
-	mrs		lr, spsr			/* Get SPSR_fiq */
-	str		lr, [r13, #4]			/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic		lr, lr, #PSR_MODE_MASK		/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, lr			/* Switch to SVC mode */
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r13			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -876,10 +840,18 @@ arm_vectorfiq:
 	sub		sp, sp, #XCPTCONTEXT_SIZE
 	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
+	mov		r0, #(PSR_MODE_FIQ | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0			/* Switch back FIQ mode */
+
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	ldr		r0, .Lfiqtmp			/* Points to temp storage */
-	ldmia		r0, {r3, r4}			/* Recover r3=lr_SVC, r4=spsr_SVC */
+	sub		r3, lr, #4
+	mrs		r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
@@ -982,9 +954,6 @@ arm_vectorfiq:
 	/* Life is simple when everything is SVC mode */
 
 	ldmia		r0, {r0-r15}^			/* Return */
-
-.Lfiqtmp:
-	.word	g_fiqtmp
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lfiqstackbase:
