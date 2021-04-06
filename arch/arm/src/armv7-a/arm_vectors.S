@@ -58,19 +58,6 @@ g_fiqtmp:
 	.word	0		/* Saved spsr */
 #endif
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7 && defined(CONFIG_ARMV7A_HAVE_GICv2)
-
-g_nestlevel:
-#ifdef CONFIG_SMP
-	.rept	CONFIG_SMP_NCPUS
-	.word	0		/* CPUn Interrupt nesting level */
-	.endr
-#else
-	.word	0		/* Interrupt nesting level */
-#endif
-
-#endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 && CONFIG_ARMV7A_HAVE_GICv2 */
-
 /****************************************************************************
  * Assembly Macros
  ****************************************************************************/
@@ -227,55 +214,14 @@ arm_vectorirq:
 	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-#ifdef CONFIG_ARMV7A_HAVE_GICv2
-	/* We will switch to the interrupt stack, UNLESS we are processing a
-	 * nested interrupt in which case we are already using the interrupt
-	 * stack.  SGI interrupts may be nested because they are non-maskable.
-	 */
-
-	ldr		r5, .Lirqnestlevel		/* r5=Points to interrupt nesting level */
-#ifdef CONFIG_SMP
-	cpuindex	r1				/* r1=cpu index */
-	lsls		r1, r1, #2			/* r1=array byte offset */
-	add		r5, r5, r1			/* Indexed interrupt nesting level */
-#endif
-	ldr		r1, [r5]			/* Get r1= nesting level */
-	add		r1, r1, #1			/* Increment nesting level */
-	str		r1, [r5]			/* Save r1= nesting level */
-
-	cmp		r1, #1				/* r1>1 if nested */
-	bgt		.Lintnested			/* Use current SP if nested */
-#endif
-
 	/* Call arm_decodeirq() on the interrupt stack */
 
-	setirqstack	r1, r3				/* SP = IRQ stack top */
+	setirqstack	r1, r3				/* SP = interrupt stack base */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
 	ldr		sp, [r4]			/* Restore the user stack pointer */
-
-#ifdef CONFIG_ARMV7A_HAVE_GICv2
-	b		.Lintreturn
-
-	/* Call arm_decodeirq() on whatever stack is in place */
-
-.Lintnested:
-	mov		r4, sp				/* Save the SP in a preserved register */
-	bic		sp, sp, #7			/* Force 8-byte alignment */
-	bl		arm_decodeirq			/* Call the handler */
-	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
-
-	/* Decrement the nesting level (r5 should be preserved) */
-
-.Lintreturn:
-	ldr		r1, [r5]			/* Get r1= nesting level */
-	cmp		r1, #0				/* A sanity check*/
-	subgt		r1, r1, #1			/* Decrement nesting level */
-	strgt		r1, [r5]			/* Save r1= nesting level */
-#endif
-
 #else
 	/* Call arm_decodeirq() on the user stack */
 
@@ -329,11 +275,6 @@ arm_vectorirq:
 #ifndef CONFIG_SMP
 .Lirqstackbase:
 	.word	g_intstackbase
-#endif
-
-#ifdef CONFIG_ARMV7A_HAVE_GICv2
-.Lirqnestlevel:
-	.word	g_nestlevel
 #endif
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
@@ -992,7 +933,7 @@ arm_vectorfiq:
 	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-	setfiqstack	r1, r4				/* SP = FIQ stack top */
+	setfiqstack	r1, r4				/* SP = interrupt stack base */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
