@@ -64,11 +64,15 @@
 #elif defined(CONFIG_ARCH_CHIP_MIMXRT1061DVL6A) || \
       defined(CONFIG_ARCH_CHIP_MIMXRT1061CVL5A) || \
       defined(CONFIG_ARCH_CHIP_MIMXRT1062DVL6A) || \
-      defined(CONFIG_ARCH_CHIP_MIMXRT1062CVL5A)
+      defined(CONFIG_ARCH_CHIP_MIMXRT1062CVL5A) || \
+      defined(CONFIG_ARCH_CHIP_MIMXRT1064DVL6A) || \
+      defined(CONFIG_ARCH_CHIP_MIMXRT1064CVL5A)
 /* MIMXRT1061CVL5A - Industrial, Reduced Features, 528MHz
  * MIMXRT1061DVL6A - Consumer, Reduced Features, 600MHz
  * MIMXRT1062CVL5A - Industrial, Full Feature, 528MHz
  * MIMXRT1062DVL6A - Consumer, Full Feature, 600MHz
+ * MIMXRT1064CVL5A - Industrial, Full Feature, 528MHz
+ * MIMXRT1064DVL6A - Consumer, Full Feature, 600MHz
  */
 
 #  define IMXRT_OCRAM_SIZE            (1024 * 1024) /* 1024Kb OCRAM */
