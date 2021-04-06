@@ -3034,9 +3034,7 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-#endif
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
   /* IDMA must be possible to the buffer */
