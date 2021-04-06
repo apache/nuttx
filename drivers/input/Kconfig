@@ -14,7 +14,7 @@ menuconfig INPUT
 if INPUT
 
 config MOUSE
-	bool "Enable mouse support"
+	bool "Mouse support"
 	default n
 	---help---
 		Enable support for mouse devices.
@@ -29,6 +29,14 @@ config MOUSE_WHEEL
 		position.
 
 endif # MOUSE
+
+config TOUCHSCREEN
+	bool "Touchscreen support"
+	default n
+	---help---
+		Enable support for touchscreen controllers.
+
+if TOUCHSCREEN
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
@@ -214,7 +222,7 @@ config ADS7843E_THRESHY
 		12-bit values the raw ranges are 0-4095. So for example, if your display is
 		320x240, then THRESHX=13 and THRESHY=17 would correspond to one pixel.  Default: 12
 
-endif
+endif # INPUT_ADS7843E
 
 config INPUT_MXT
 	bool "Atmel maXTouch Driver"
@@ -425,6 +433,8 @@ config INPUT_CYPRESS_MBR3108_NPOLLWAITERS
 
 endif # INPUT_CYPRESS_MBR3108
 
+endif # TOUCHSCREEN
+
 config BUTTONS
 	bool "Button Inputs"
 	default n
@@ -459,6 +469,14 @@ config BUTTONS_NPOLLWAITERS
 	default 2
 
 endif # BUTTONS
+
+config JOYSTICK
+	bool "Joystick support"
+	default n
+	---help---
+		Enable support for joystick devices.
+
+if JOYSTICK
 
 config DJOYSTICK
 	bool "Discrete Joystick"
@@ -502,9 +520,9 @@ config INPUT_NUNCHUCK
 	select I2C
 	---help---
 		Enable a Nintendo Wii Nunchuck joystick upper half driver. The
-		nunchuck joystick provides position data as an integer value.The
-		analog positional data may also	be accompanied by discrete
-		button data.
+		nunchuck joystick provides position data as an integer value. The
+		analog positional data may also be accompanied by discrete button
+		data.
 
 if INPUT_NUNCHUCK
 
@@ -513,6 +531,16 @@ config NUNCHUCK_NPOLLWAITERS
 	default 2
 
 endif # INPUT_NUNCHUCK
+
+endif # JOYSTICK
+
+config KEYBOARD
+	bool "Keyboard support"
+	default n
+	---help---
+		Enable support for keyboard devices.
+
+if KEYBOARD
 
 config INPUT_SPQ10KBD
 	bool "Solder Party Q10 BlackBerry Keyboard"
@@ -545,5 +573,7 @@ config SPQ10KBD_NPOLLWAITERS
 	default 2
 
 endif # INPUT_SPQ10KBD
+
+endif # KEYBOARD
 
 endif # INPUT
