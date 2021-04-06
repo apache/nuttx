@@ -99,4 +99,3 @@ External devices:
   ------
 
   When using BMP180 (enabling CONFIG_SENSORS_BMP180), it's expected this device is wired to I2C0 bus.
-  The current bring-up routines doesn't allow BMP180 device to be used in I2C1 bus.

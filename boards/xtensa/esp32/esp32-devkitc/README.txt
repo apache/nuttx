@@ -619,13 +619,6 @@ OpenOCD for the ESP32
   will be written. ROM bootloader expects to find an application (or second stage
   bootloader) image at offset 0x1000, so we are writing the binary there.
 
-  Clocking
-  --------
-  Right now, the NuttX port depends on the bootloader to initialize hardware,
-  including basic (slow) clocking.    If I had the clock configuration logic,
-  would I be able to run directly out of IRAM without a bootloader?  That
-  might be a simpler bring-up.
-
   Sample OpenOCD Debug Steps
   --------------------------
   I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
@@ -886,12 +879,7 @@ A new image "esp32_qemu_image.bin" will be created.  It can be run as:
 Things to Do
 ============
 
-  1. There is no clock initialization logic in place.  This depends on logic in
-     Espressif libraries.  The board comes up using that basic 40 MHz crystal
-     for clocking.  Getting to 80 MHz will require clocking initialization in
-     esp32_clockconfig.c.
-
-  2. I did not implement the lazy co-processor save logic supported by Xtensa.
+  1. I did not implement the lazy co-processor save logic supported by Xtensa.
      That logic works like this:
 
      a. CPENABLE is set to zero on each context switch, disabling all co-
@@ -905,14 +893,14 @@ Things to Do
      be saved and restored even if the co-processor was never used, and (2)
      tasks must explicitly enable and disable co-processors.
 
-  3. Currently the Xtensa port copies register state save information from
+  2. Currently the Xtensa port copies register state save information from
      the stack into the TCB.  A more efficient alternative would be to just
      save a pointer to a register state save area in the TCB.  This would
      add some complexity to signal handling and also also the
      up_initialstate().  But the performance improvement might be worth
      the effort.
 
-  4. See SMP-related issues above
+  3. See SMP-related issues above
 
-  5. See OpenOCD for the ESP32 above
+  4. See OpenOCD for the ESP32 above
 
