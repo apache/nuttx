@@ -162,7 +162,7 @@
 #define IOMUX_FT5X06_RST     (IOMUX_PULL_NONE | IOMUX_CMOS_OUTPUT | \
                               IOMUX_DRIVE_40OHM | IOMUX_SPEED_MEDIUM | \
                               IOMUX_SLEW_SLOW)                            /* AD_B0_11 */
-#define GPIO_FT5X06_CTRSTn   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
+#define GPIO_FT5X06_CTRSTN   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                               GPIO_PORT1 | GPIO_PIN2 | IOMUX_FT5X06_RST)  /* AD_B0_02 */
 
 /* Test Pins ****************************************************************/

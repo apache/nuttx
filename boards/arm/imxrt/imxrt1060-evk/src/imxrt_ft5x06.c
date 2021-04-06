@@ -186,7 +186,7 @@ static void imxrt_ft5x06_wakeup(FAR const struct ft5x06_config_s *config)
 static void imxrt_ft5x06_nreset(FAR const struct ft5x06_config_s *config,
                                 bool nstate)
 {
-  imxrt_gpio_write(GPIO_FT5X06_CTRSTn, nstate);
+  imxrt_gpio_write(GPIO_FT5X06_CTRSTN, nstate);
 }
 
 /****************************************************************************
@@ -206,9 +206,9 @@ int imxrt_ft5x06_register(void)
   FAR struct i2c_master_s *i2c;
   int ret;
 
-  /* Initialize CTRSTn pin */
+  /* Initialize CTRSTN pin */
 
-  imxrt_config_gpio(GPIO_FT5X06_CTRSTn);
+  imxrt_config_gpio(GPIO_FT5X06_CTRSTN);
 
 #ifndef CONFIG_FT5X06_POLLMODE
   int irq;
@@ -228,7 +228,7 @@ int imxrt_ft5x06_register(void)
 
   /* Take the FT5X06 out of reset */
 
-  imxrt_gpio_write(GPIO_FT5X06_CTRSTn, true);
+  imxrt_gpio_write(GPIO_FT5X06_CTRSTN, true);
 
   /* The FT5X06 is on LPI2C1.  Get the handle and register the F5x06 device */
 
@@ -246,7 +246,7 @@ int imxrt_ft5x06_register(void)
           syslog(LOG_ERR, "ERROR: Failed to register FT5X06 driver: %d\n",
                  ret);
 
-          imxrt_gpio_write(GPIO_FT5X06_CTRSTn, false);
+          imxrt_gpio_write(GPIO_FT5X06_CTRSTN, false);
           imxrt_i2cbus_uninitialize(i2c);
           return ret;
         }
