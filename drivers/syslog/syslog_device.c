@@ -435,22 +435,43 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
 {
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
 
-  /* Check if the system is ready */
+  /* Uninitializing a SYSLOG device should not take place within
+   * interrupt context.
+   */
 
-  if (syslog_dev_outputready(syslog_dev) < 0)
+  if (up_interrupt_context() || getpid() == 0)
     {
+      DEBUGASSERT(!up_interrupt_context() && getpid() != 0);
       return;
     }
 
-  /* Attempt to flush any buffered data */
+  /* The device cannot be uninitialized while it is being
+   * initialized simultaneously.
+   */
+
+  DEBUGASSERT(syslog_dev->sl_state != SYSLOG_UNINITIALIZED &&
+              syslog_dev->sl_state != SYSLOG_INITIALIZING);
+
+  /* Attempt to flush any buffered data. */
 
   sched_lock();
   syslog_dev_flush(channel);
 
-  /* Close the detached file instance */
+  /* Close the detached file instance, and destroy the semaphore. These are
+   * both only created when the device is in SYSLOG_OPENED or SYSLOG_FAILURE
+   * state.
+   */
+
+  if (syslog_dev->sl_state == SYSLOG_OPENED ||
+      syslog_dev->sl_state == SYSLOG_FAILURE)
+    {
+      file_close(&syslog_dev->sl_file);
+      nxsem_destroy(&syslog_dev->sl_sem);
+    }
+
+  /* Set the device in UNINITIALIZED state. */
 
   syslog_dev->sl_state = SYSLOG_UNINITIALIZED;
-  file_close(&syslog_dev->sl_file);
 
   /* Free the device path */
 
@@ -458,10 +479,6 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
     {
       kmm_free(syslog_dev->sl_devpath);
     }
-
-  /* Destroy the semaphore */
-
-  nxsem_destroy(&syslog_dev->sl_sem);
 
   /* Free the channel structure */
 
