@@ -382,7 +382,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
       _files_semgive(list);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
