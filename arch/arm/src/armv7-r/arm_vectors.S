@@ -940,7 +940,7 @@ arm_vectorfiq:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lfiqstackbase:
-	.word	g_intstackbase
+	.word	g_fiqstackbase
 #endif
 
 #else
@@ -967,6 +967,22 @@ g_intstackbase:
 	.skip	4
 	.size	g_intstackbase, 4
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+
+/****************************************************************************
+ *  Name: g_fiqstackalloc/g_fiqstackbase
+ ****************************************************************************/
+
+	.globl	g_fiqstackalloc
+	.type	g_fiqstackalloc, object
+	.globl	g_fiqstackbase
+	.type	g_fiqstackbase, object
+
+g_fiqstackalloc:
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
+g_fiqstackbase:
+	.skip	4
+	.size	g_fiqstackbase, 4
+	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 	.end
