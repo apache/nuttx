@@ -1838,6 +1838,27 @@ config STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED
 
 menu "Timer Configuration"
 
+if SCHED_TICKLESS
+
+config STM32H7_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 2
+	range 1 17
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config STM32H7_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
+
 config STM32H7_ONESHOT
 	bool "TIM one-shot wrapper"
 	default n

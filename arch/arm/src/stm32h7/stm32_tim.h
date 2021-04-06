@@ -39,6 +39,9 @@
 #define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
 #define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
 #define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
+#define STM32_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
+#define STM32_TIM_SETCOUNTER(d,c)       ((d)->ops->setcounter(d,c))
+#define STM32_TIM_GETWIDTH(d)           ((d)->ops->getwidth(d))
 #define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
 #define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
 #define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
@@ -46,6 +49,7 @@
 #define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
 #define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
+#define STM32_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
 
 /****************************************************************************
  * Public Types
@@ -143,9 +147,12 @@ struct stm32_tim_ops_s
   int  (*setmode)(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
   int  (*setclock)(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
   void (*setperiod)(FAR struct stm32_tim_dev_s *dev, uint32_t period);
+  uint32_t (*getcounter)(FAR struct stm32_tim_dev_s *dev);
+  void (*setcounter)(FAR struct stm32_tim_dev_s *dev, uint32_t count);
 
   /* General and Advanced Timers Adds */
 
+  int  (*getwidth)(FAR struct stm32_tim_dev_s *dev);
   int  (*setchannel)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                      stm32_tim_channel_t mode);
   int  (*setcompare)(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
@@ -159,6 +166,7 @@ struct stm32_tim_ops_s
   void (*enableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*disableint)(FAR struct stm32_tim_dev_s *dev, int source);
   void (*ackint)(FAR struct stm32_tim_dev_s *dev, int source);
+  int  (*checkint)(FAR struct stm32_tim_dev_s *dev, int source);
 };
 
 /****************************************************************************
