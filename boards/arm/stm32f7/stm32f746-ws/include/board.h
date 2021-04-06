@@ -57,8 +57,10 @@
 
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
+ *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module
+ *        (daughter board)
+ *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and
+ *         Ethernet PHY.
  *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
  *
  * So we have these clock source available within the STM32
@@ -249,8 +251,8 @@
 
 /* SDMMC */
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3

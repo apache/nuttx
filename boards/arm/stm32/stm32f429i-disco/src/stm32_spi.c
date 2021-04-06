@@ -56,7 +56,8 @@ FAR struct spi_dev_s *g_spidev5 = NULL;
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f429i-disco board.
+ *   Called to configure SPI chip select GPIO pins for the stm32f429i-disco
+ *   board.
  *
  ****************************************************************************/
 
@@ -77,31 +78,35 @@ void weak_function stm32_spidev_initialize(void)
  * Name:  stm32_spi1/2/3/4/5select and stm32_spi1/2/3/4/5status
  *
  * Description:
- *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
- *   provided by board-specific logic.  They are implementations of the select
- *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including stm32_spibus_initialize())
- *   are provided by common STM32 logic.  To use this common SPI logic on your
- *   board:
+ *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status
+ *   must be provided by board-specific logic.  They are implementations of
+ *   the select and status methods of the SPI interface defined by struct
+ *   spi_ops_s (see include/nuttx/spi/spi.h). All other methods (including
+ *   stm32_spibus_initialize()) are provided by common STM32 logic.
+ *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in stm32_boardinitialize() to configure SPI chip select
- *      pins.
- *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to stm32_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by stm32_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip
+ *      select pins.
+ *   2. Provide stm32_spi1/2/3select() and stm32_spi1/2/3status() functions
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
+ *   3. Add a calls to stm32_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by stm32_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_SPI1
-void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi1select(FAR struct spi_dev_s *dev,
+                      uint32_t devid,
+                      bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -111,9 +116,12 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi2select(FAR struct spi_dev_s *dev,
+                      uint32_t devid,
+                      bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n",
+         (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -123,9 +131,11 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI3
-void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi3select(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -135,7 +145,8 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI4
-void stm32_spi4select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi4select(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
 #if defined(CONFIG_MTD_SST25XX)
   if (devid == SPIDEV_FLASH(0))
@@ -152,9 +163,11 @@ uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 #ifdef CONFIG_STM32_SPI5
-void stm32_spi5select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+void stm32_spi5select(FAR struct spi_dev_s *dev,
+                      uint32_t devid, bool selected)
 {
-  spiinfo("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spiinfo("devid: %d CS: %s\n",
+          (int)devid, selected ? "assert" : "de-assert");
 
 #if defined(CONFIG_STM32F429I_DISCO_ILI9341)
   if (devid == SPIDEV_DISPLAY(0))
@@ -254,14 +267,14 @@ int stm32_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  * Description:
  *   Initialize the selected SPI port.
- *   As long as the method stm32_spibus_initialize recognized the initialized state of
- *   the spi device by the spi enable flag of the cr1 register, it isn't safe to
- *   disable the spi device outside of the nuttx spi interface structure. But
- *   this has to be done as long as the nuttx spi interface doesn't support
- *   bidirectional data transfer for multiple devices share one spi bus. This
- *   wrapper does nothing else than store the initialized state of the spi
- *   device after the first initializing and should be used by each driver who
- *   shares the spi5 bus.
+ *   As long as the method stm32_spibus_initialize recognized the initialized
+ *   state of the spi device by the spi enable flag of the cr1 register, it
+ *   isn't safe to disable the spi device outside of the nuttx spi interface
+ *   structure. But this has to be done as long as the nuttx spi interface
+ *   doesn't support bidirectional data transfer for multiple devices share
+ *   one spi bus. This wrapper does nothing else than store the initialized
+ *   state of the spi device after the first initializing and should be used
+ *   by each driver who shares the spi5 bus.
  *
  * Input Parameters:
  *

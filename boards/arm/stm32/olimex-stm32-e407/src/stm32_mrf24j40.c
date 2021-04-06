@@ -248,7 +248,8 @@ static int stm32_mrf24j40_devsetup(FAR struct stm32_priv_s *priv)
   ret = mac802154dev_register(mac, 0);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to register the MAC character driver /dev/ieee%d: %d\n",
+      wlerr("ERROR: "
+            "Failed to register the MAC character driver /dev/ieee%d: %d\n",
             0, ret);
       return ret;
     }

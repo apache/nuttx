@@ -266,7 +266,8 @@ static int sam_xbee_devsetup(FAR struct sam_priv_s *priv)
   ret = xbee_netdev_register(xbee);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to register the XBee MAC network driver wpan%d: %d\n",
+      wlerr("ERROR: "
+            "Failed to register the XBee MAC network driver wpan%d: %d\n",
             0, ret);
       return ret;
     }

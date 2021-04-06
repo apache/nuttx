@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo F303RE board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -72,6 +73,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo F303RE supports two buttons; only one button is controllable
  * by software:
  *
@@ -89,6 +91,7 @@
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
 
 /* PWM definitions **********************************************************/
+
 /* The Nucleo F303RE has no real on-board PWM devices, but the board can be
  * configured to output a pulse train using variously unused pins on the
  * board for PWM output (see board.h for details of pins).
@@ -142,7 +145,8 @@ void weak_function stm32_spidev_initialize(void);
  *   Configure the timer driver.
  *
  * Input Parameters:
- *   devpath - The full path to the timer device.  This should be of the form /dev/timer0
+ *   devpath - The full path to the timer device.
+ *             This should be of the form /dev/timer0
  *   timer   - The timer's number.
  *
  * Returned Value:

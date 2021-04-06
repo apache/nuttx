@@ -61,9 +61,11 @@
 
 /* This is the clock setup we configure for:
  *
- * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- * CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ * SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  ->
+ *                                  Select Main oscillator for source
+ * PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz ->
+ *                                  PLL0 multipler=20, pre-divider=1
+ * CCLCK = 480MHz / 6 = 80MHz      -> CCLK divider = 6
  */
 
 #define LPC17_40_CCLK                 80000000 /* 80Mhz */
@@ -216,6 +218,7 @@
 /* The u-blox C027 board has a single red LED
  * (there are additional LEDs on the base board not considered here).
  */
+
                                      /* ON      OFF                 */
 #define LED_STARTED                0 /* OFF     ON  (never happens) */
 #define LED_HEAPALLOCATE           0 /* OFF     ON  (never happens) */

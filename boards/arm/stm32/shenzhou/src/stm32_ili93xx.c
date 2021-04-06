@@ -33,22 +33,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* TFT LCD
  *
- * -- ---- -------------- -----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- -----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * 37 PB2  DATA_LE        To TFT LCD (CN13, ping 28)
- * 96 PB9  F_CS           To both the TFT LCD (CN13, pin 30) and to the W25X16 SPI FLASH
+ * 96 PB9  F_CS           To both the TFT LCD (CN13, pin 30) and
+ *                        to the W25X16 SPI FLASH
  * 34 PC5  TP_INT         JP6.  To TFT LCD (CN13) module (CN13, pin 26)
  * 65 PC8  LCD_CS         Active low: Pulled high (CN13, pin 19)
  * 66 PC9  TP_CS          Active low: Pulled high (CN13, pin 31)
  * 78 PC10 SPI3_SCK       To TFT LCD (CN13, pin 29)
  * 79 PC11 SPI3_MISO      To TFT LCD (CN13, pin 25)
  * 80 PC12 SPI3_MOSI      To TFT LCD (CN13, pin 27)
- * 58 PD11 SD_CS          Active low: Pulled high (See also TFT LCD CN13, pin 32)
+ * 58 PD11 SD_CS          Active low: Pulled high
+ *                        (See also TFT LCD CN13, pin 32)
  * 60 PD13 LCD_RS         To TFT LCD (CN13, pin 20)
- * 61 PD14 LCD_WR         To TFT LCD (CN13, pin 21). Schematic is wrong LCD_WR is PB14.
+ * 61 PD14 LCD_WR         To TFT LCD (CN13, pin 21).
+ *                        Schematic is wrong LCD_WR is PB14.
  * 62 PD15 LCD_RD         To TFT LCD (CN13, pin 22)
  * 97 PE0  DB00           To TFT LCD (CN13, pin 3)
  * 98 PE1  DB01           To TFT LCD (CN13, pin 4)
@@ -67,13 +71,14 @@
  * 45 PE14 DB14           To TFT LCD (CN13, pin 17)
  * 46 PE15 DB15           To TFT LCD (CN13, pin 18)
  *
- * NOTE:  The backlight signal NC_BL (CN13, pin 24) is pulled high and not under
+ * NOTE:
+ * The backlight signal NC_BL (CN13, pin 24) is pulled high and not under
  * software control
  *
  * On LCD module:
- * -- -------------- -------------------------------------------------------------------
+ * -- -------------- --------------------------------------------------------
  * PN SIGNAL         NOTES
- * -- -------------- -------------------------------------------------------------------
+ * -- -------------- --------------------------------------------------------
  * 3  DB01           To LCD DB1
  * 4  DB00           To LCD DB0
  * 5  DB03           To LCD DB3
@@ -133,7 +138,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration **********************************************************************/
+
+/* Configuration ************************************************************/
+
 /* CONFIG_STM32_ILI1505_DISABLE may be defined to disable the LCD_ILI1505
  * CONFIG_STM32_ILI9300_DISABLE may be defined to disable the LCD_ILI9300
  * CONFIG_STM32_ILI9320_DISABLE may be defined to disable the LCD_ILI9320
@@ -202,7 +209,8 @@
 #undef CONFIG_LCD_FASTCONFIG
 #define CONFIG_LCD_FASTCONFIG 1
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties *************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -218,7 +226,8 @@
 #define STM32_BPP             16
 #define STM32_COLORFMT        FB_FMT_RGB16_565
 
-/* Shenzhou LCD Hardware Definitions **************************************************/
+/* Shenzhou LCD Hardware Definitions ****************************************/
+
 /* LCD /CS is CE4,  Bank 3 of NOR/SRAM Bank 1~4 */
 
 #define STM32_LCDBASE         ((uintptr_t)(0x60000000 | 0x08000000))
@@ -398,10 +407,12 @@ struct stm32_dev_s
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+
 /* Low Level LCD access */
 
 #ifdef CONFIG_LCD_REGDEBUG
-static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg);
+static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
+                          FAR const char *msg);
 #else
 #  define stm32_lcdshow(p,m)
 #endif
@@ -412,23 +423,27 @@ static uint16_t stm32_readreg(FAR struct stm32_dev_s *priv, uint8_t regaddr);
 static void stm32_gramselect(FAR struct stm32_dev_s *priv);
 static void stm32_writegram(FAR struct stm32_dev_s *priv, uint16_t rgbval);
 static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv);
-static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum);
-static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv, FAR uint16_t *accum);
-static void stm32_setcursor(FAR struct stm32_dev_s *priv, uint16_t col, uint16_t row);
+static void stm32_readnosetup(FAR struct stm32_dev_s *priv,
+                              FAR uint16_t *accum);
+static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv,
+                                  FAR uint16_t *accum);
+static void stm32_setcursor(FAR struct stm32_dev_s *priv,
+                            uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
 
-static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
-static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-             size_t npixels);
+static int stm32_putrun(fb_coord_t row, fb_coord_t col,
+                        FAR const uint8_t *buffer, size_t npixels);
+static int stm32_getrun(fb_coord_t row, fb_coord_t col,
+                        FAR uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
 
 static int stm32_getvideoinfo(FAR struct lcd_dev_s *dev,
-             FAR struct fb_videoinfo_s *vinfo);
-static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-             FAR struct lcd_planeinfo_s *pinfo);
+                              FAR struct fb_videoinfo_s *vinfo);
+static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev,
+                              unsigned int planeno,
+                              FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -455,10 +470,12 @@ static void stm32_lcdinput(FAR struct stm32_dev_s *priv);
 static void stm32_lcdoutput(FAR struct stm32_dev_s *priv);
 
 #if !defined(CONFIG_STM32_ILI9300_DISABLE) || !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9321_DISABLE)
-static void stm32_lcd9300init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdtype);
+static void stm32_lcd9300init(FAR struct stm32_dev_s *priv,
+                              enum lcd_type_e lcdtype);
 #endif
 #if !defined(CONFIG_STM32_ILI9325_DISABLE) || !defined(CONFIG_STM32_ILI9328_DISABLE)
-static void stm32_lcd9325init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdtype);
+static void stm32_lcd9325init(FAR struct stm32_dev_s *priv,
+                              enum lcd_type_e lcdtype);
 #endif
 #ifndef CONFIG_STM32_ILI9919_DISABLE
 static inline void stm32_lcd9919init(FAR struct stm32_dev_s *priv);
@@ -471,6 +488,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* LCD GPIO configurations */
 
 #ifndef CONFIG_LCD_FASTCONFIG
@@ -518,17 +536,17 @@ static const struct fb_videoinfo_s g_videoinfo =
   .fmt     = STM32_COLORFMT,    /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
   .xres    = STM32_XRES,        /* Horizontal resolution in pixel columns */
   .yres    = STM32_YRES,        /* Vertical resolution in pixel rows */
-  .nplanes = 1,                    /* Number of color planes supported */
+  .nplanes = 1,                 /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = stm32_putrun,       /* Put a run into LCD memory */
-  .getrun = stm32_getrun,       /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = STM32_BPP,          /* Bits-per-pixel */
+  .putrun = stm32_putrun,           /* Put a run into LCD memory */
+  .getrun = stm32_getrun,           /* Get a run from LCD memory */
+  .buffer = (uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = STM32_BPP,              /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -543,6 +561,7 @@ static struct stm32_dev_s g_lcddev =
     .getplaneinfo = stm32_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -567,7 +586,8 @@ static struct stm32_dev_s g_lcddev =
  ****************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
+static void stm32_lcdshow(FAR struct stm32_lower_s *priv,
+                          FAR const char *msg)
 {
   _info("%s:\n", msg);
   _info("  CRTL   RS: %d CS: %d RD: %d WR: %d LE: %d\n",
@@ -593,7 +613,8 @@ static void stm32_lcdshow(FAR struct stm32_lower_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-static void stm32_writereg(FAR struct stm32_dev_s *priv, uint8_t regaddr, uint16_t regval)
+static void stm32_writereg(FAR struct stm32_dev_s *priv,
+                           uint8_t regaddr, uint16_t regval)
 {
   /* Make sure that we are configured for output */
 
@@ -624,7 +645,8 @@ static void stm32_writereg(FAR struct stm32_dev_s *priv, uint8_t regaddr, uint16
  *
  ****************************************************************************/
 
-static uint16_t stm32_readreg(FAR struct stm32_dev_s *priv, uint8_t regaddr)
+static uint16_t stm32_readreg(FAR struct stm32_dev_s *priv,
+                              uint8_t regaddr)
 {
   uint16_t regval;
 
@@ -687,7 +709,8 @@ static void stm32_gramselect(FAR struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_writegram(FAR struct stm32_dev_s *priv, uint16_t rgbval)
+static inline void stm32_writegram(FAR struct stm32_dev_s *priv,
+                                   uint16_t rgbval)
 {
   /* Make sure that we are configured for output */
 
@@ -735,15 +758,16 @@ static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv)
  * Name:  stm32_readnosetup
  *
  * Description:
- *   Prime the operation by reading one pixel from the GRAM memory if necessary for
- *   this LCD type.  When reading 16-bit gram data, there may be some shifts in the
- *   returned data:
+ *   Prime the operation by reading one pixel from the GRAM memory if
+ *   necessary for this LCD type.  When reading 16-bit gram data, there may
+ *   be some shifts in the returned data:
  *
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
  ****************************************************************************/
 
-static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
+static void stm32_readnosetup(FAR struct stm32_dev_s *priv,
+                              FAR uint16_t *accum)
 {
   /* Read-ahead one pixel */
 
@@ -754,14 +778,16 @@ static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
  * Name:  stm32_readnoshift
  *
  * Description:
- *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
- *   data and possibly swapping red and green components.
+ *   Read one correctly aligned pixel from the GRAM memory.
+ *   Possibly shifting the data and possibly swapping red and green
+ *   components.
  *
  *   - ILI932x: Unknown -- assuming colors are in the color order
  *
  ****************************************************************************/
 
-static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
+static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv,
+                                  FAR uint16_t *accum)
 {
   /* Read the value (GRAM register already selected) */
 
@@ -772,12 +798,14 @@ static uint16_t stm32_readnoshift(FAR struct stm32_dev_s *priv, FAR uint16_t *ac
  * Name:  stm32_setcursor
  *
  * Description:
- *   Set the cursor position.  In landscape mode, the "column" is actually the physical
+ *   Set the cursor position.
+ *   In landscape mode, the "column" is actually the physical
  *   Y position and the "row" is the physical X position.
  *
  ****************************************************************************/
 
-static void stm32_setcursor(FAR struct stm32_dev_s *priv, uint16_t col, uint16_t row)
+static void stm32_setcursor(FAR struct stm32_dev_s *priv,
+                            uint16_t col, uint16_t row)
 {
   if (priv->type == LCD_TYPE_ILI9919)
     {
@@ -803,9 +831,11 @@ static void stm32_setcursor(FAR struct stm32_dev_s *priv, uint16_t col, uint16_t
  ****************************************************************************/
 
 #if 0 /* Sometimes useful */
-static void stm32_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
+static void stm32_dumprun(FAR const char *msg,
+                          FAR uint16_t *run, size_t npixels)
 {
-  int i, j;
+  int i;
+  int j;
 
   syslog(LOG_DEBUG, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
@@ -836,11 +866,11 @@ static void stm32_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels
  *
  ****************************************************************************/
 
-static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int stm32_putrun(fb_coord_t row, fb_coord_t col,
+                        FAR const uint8_t *buffer, size_t npixels)
 {
   FAR struct stm32_dev_s *priv = &g_lcddev;
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -870,8 +900,8 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 #elif defined(CONFIG_LCD_RLANDSCAPE)
   /* Convert coordinates */
 
-  col = (STM32_XRES-1) - col;
-  row = (STM32_YRES-1) - row;
+  col = (STM32_XRES - 1) - col;
+  row = (STM32_YRES - 1) - row;
 
   /* Set the cursor position */
 
@@ -882,14 +912,16 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   stm32_gramselect(priv);
   for (i = 0; i < npixels; i++)
     {
-      /* Write the next pixel to this position (auto-decrements to the next column) */
+      /* Write the next pixel to this position
+       * (auto-decrements to the next column)
+       */
 
       stm32_writegram(priv, *src++);
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates */
 
-  col = (STM32_XRES-1) - col;
+  col = (STM32_XRES - 1) - col;
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
@@ -906,9 +938,10 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
       col--;
     }
 #else /* CONFIG_LCD_RPORTRAIT */
+
   /* Convert coordinates */
 
-  row = (STM32_YRES-1) - row;
+  row = (STM32_YRES - 1) - row;
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
@@ -925,6 +958,7 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
       col++;
     }
 #endif
+
   return OK;
 }
 
@@ -942,11 +976,11 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
  *
  ****************************************************************************/
 
-static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                       size_t npixels)
+static int stm32_getrun(fb_coord_t row, fb_coord_t col,
+                        FAR uint8_t *buffer, size_t npixels)
 {
   FAR struct stm32_dev_s *priv = &g_lcddev;
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
   void (*readsetup)(FAR struct stm32_dev_s *priv, FAR uint16_t *accum);
   uint16_t (*readgram)(FAR struct stm32_dev_s *priv, FAR uint16_t *accum);
   uint16_t accum;
@@ -957,7 +991,9 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Configure according to the LCD type.  Kind of silly with only one LCD type */
+  /* Configure according to the LCD type.
+   * Kind of silly with only one LCD type
+   */
 
   switch (priv->type)
    {
@@ -1000,8 +1036,8 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #elif defined(CONFIG_LCD_RLANDSCAPE)
   /* Convert coordinates */
 
-  col = (STM32_XRES-1) - col;
-  row = (STM32_YRES-1) - row;
+  col = (STM32_XRES - 1) - col;
+  row = (STM32_YRES - 1) - row;
 
   /* Set the cursor position */
 
@@ -1018,14 +1054,16 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   for (i = 0; i < npixels; i++)
     {
-      /* Read the next pixel from this position (autoincrements to the next row) */
+      /* Read the next pixel from this position
+       * (autoincrements to the next row)
+       */
 
       *dest++ = readgram(priv, &accum);
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates */
 
-  col = (STM32_XRES-1) - col;
+  col = (STM32_XRES - 1) - col;
 
   /* Then read the GRAM data, manually incrementing Y (which is col) */
 
@@ -1046,7 +1084,7 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #else /* CONFIG_LCD_RPORTRAIT */
   /* Convert coordinates */
 
-  row = (STM32_YRES-1) - row;
+  row = (STM32_YRES - 1) - row;
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
@@ -1082,7 +1120,8 @@ static int stm32_getvideoinfo(FAR struct lcd_dev_s *dev,
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres,
+          g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
@@ -1095,7 +1134,8 @@ static int stm32_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev,
+                              unsigned int planeno,
                               FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
@@ -1108,8 +1148,9 @@ static int stm32_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  * Name:  stm32_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *  this setting may correspond to the backlight setting.
  *
  ****************************************************************************/
 
@@ -1125,8 +1166,9 @@ static int stm32_getpower(struct lcd_dev_s *dev)
  * Name:  stm32_poweroff
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
  ****************************************************************************/
 
@@ -1146,8 +1188,9 @@ static int stm32_poweroff(FAR struct stm32_dev_s *priv)
  * Name:  stm32_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
  ****************************************************************************/
 
@@ -1302,6 +1345,7 @@ static void stm32_lcdinput(FAR struct stm32_dev_s *priv)
           stm32_configgpio(g_lcdin[i]);
         }
 #endif
+
       /* No longer configured for output */
 
       priv->output = false;
@@ -1337,6 +1381,7 @@ static void stm32_lcdoutput(FAR struct stm32_dev_s *priv)
           stm32_configgpio(g_lcdout[i]);
         }
 #endif
+
       /* Now we are configured for output */
 
       priv->output = true;
@@ -1352,18 +1397,21 @@ static void stm32_lcdoutput(FAR struct stm32_dev_s *priv)
  ****************************************************************************/
 
 #if !defined(CONFIG_STM32_ILI9300_DISABLE) || !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9321_DISABLE)
-static void stm32_lcd9300init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdtype)
+static void stm32_lcd9300init(FAR struct stm32_dev_s *priv,
+                              enum lcd_type_e lcdtype)
 {
   stm32_writereg(priv, LCD_REG_0,   0x0001); /* Start internal OSC */
   stm32_writereg(priv, LCD_REG_1,   0x0100); /* Driver Output Control */
   stm32_writereg(priv, LCD_REG_2,   0x0700); /* LCD Driver Waveform Control */
-  stm32_writereg(priv, LCD_REG_3,   0x1018); /* Set GRAM write direction and BGR=1 (0x1030)*/
+  stm32_writereg(priv, LCD_REG_3,   0x1018); /* Set GRAM write direction and BGR=1 (0x1030) */
 
   stm32_writereg(priv, LCD_REG_4,   0x0000); /* Scalling Control */
   stm32_writereg(priv, LCD_REG_8,   0x0202); /* Set the back porch and front porch (0x0207) */
   stm32_writereg(priv, LCD_REG_9,   0x0000); /* Set non-display area refresh cycle ISC[3:0] */
   stm32_writereg(priv, LCD_REG_10,  0x0000); /* Frame Cycle Control */
-  stm32_writereg(priv, LCD_REG_12,  (1<<0)); /* RGB interface setting (0x0000) */
+
+  stm32_writereg(priv, LCD_REG_12,  (1 << 0)); /* RGB interface setting (0x0000) */
+
   stm32_writereg(priv, LCD_REG_13,  0x0000); /* Frame Maker Position */
   stm32_writereg(priv, LCD_REG_15,  0x0000); /* RGB interface polarity */
 
@@ -1373,13 +1421,16 @@ static void stm32_lcd9300init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdt
 
   /* Power On sequence */
 
-  stm32_writereg(priv, LCD_REG_16,  (1<<12)|(0<<8)|(1<<7)|(1<<6)|(0<<4));    /* Power Control 1 (0x16b0) */
+  stm32_writereg(priv, LCD_REG_16,  (1 << 12) | (0 << 8) | (1 << 7) | (1 << 6) | (0 << 4));    /* Power Control 1 (0x16b0) */
+
   stm32_writereg(priv, LCD_REG_17,  0x0007); /* Power Control 2 (0x0001) */
-  stm32_writereg(priv, LCD_REG_18,  (1<<8)|(1<<4)|(0<<0)); /* Power Control 3 (0x0138) */
+
+  stm32_writereg(priv, LCD_REG_18,  (1 << 8) | (1 << 4) | (0 << 0)); /* Power Control 3 (0x0138) */
+
   stm32_writereg(priv, LCD_REG_19,  0x0b00); /* VDV[4:0] for VCOM amplitude */
   stm32_writereg(priv, LCD_REG_41,  0x0000); /* VCM[4:0] for VCOMH */
 
-  stm32_writereg(priv, LCD_REG_43,  (1<<14)|(1<<4));
+  stm32_writereg(priv, LCD_REG_43,  (1 << 14) | (1 << 4));
 
   stm32_writereg(priv, LCD_REG_80,  0);      /* Set X Start */
   stm32_writereg(priv, LCD_REG_81,  239);    /* Set X End */
@@ -1397,11 +1448,12 @@ static void stm32_lcd9300init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdt
   stm32_writereg(priv, LCD_REG_132, 0x0000); /* RAM Address Start? Partial Display 2 */
   stm32_writereg(priv, LCD_REG_133, 0x0000); /* RAM Address End? Partial Display 2 */
 
-  stm32_writereg(priv, LCD_REG_144, (0<<7)|(16<<0)); /* Frame Cycle Control (0x0013) */
+  stm32_writereg(priv, LCD_REG_144, (0 << 7) | (16 << 0)); /* Frame Cycle Control (0x0013) */
+
   stm32_writereg(priv, LCD_REG_146, 0x0000); /* Panel Interface Control 2 */
   stm32_writereg(priv, LCD_REG_147, 0x0001); /* Panel Interface Control 3 */
   stm32_writereg(priv, LCD_REG_149, 0x0110); /* Frame Cycle Control */
-  stm32_writereg(priv, LCD_REG_151, (0<<8));
+  stm32_writereg(priv, LCD_REG_151, (0 << 8));
   stm32_writereg(priv, LCD_REG_152, 0x0000); /* Frame Cycle Control */
   up_mdelay(50);
   stm32_writereg(priv, LCD_REG_7,   0x0000); /* Display off */
@@ -1498,16 +1550,21 @@ static void stm32_lcd9331init(FAR struct stm32_dev_s *priv)
  ****************************************************************************/
 
 #if !defined(CONFIG_STM32_ILI9325_DISABLE) || !defined(CONFIG_STM32_ILI9328_DISABLE)
-static void stm32_lcd9325init(FAR struct stm32_dev_s *priv, enum lcd_type_e lcdtype)
+static void stm32_lcd9325init(FAR struct stm32_dev_s *priv,
+                              enum lcd_type_e lcdtype)
 {
   stm32_writereg(priv, LCD_REG_227, 0x3008);
   stm32_writereg(priv, LCD_REG_231, 0x0012);
   stm32_writereg(priv, LCD_REG_239, 0x1231); /* Set the internal vcore voltage */
-/*stm32_writereg(priv, LCD_REG_231, 0x0010); */
+
+  /* stm32_writereg(priv, LCD_REG_231, 0x0010); */
+
   stm32_writereg(priv, LCD_REG_0,   0x0001); /* Start internal osc */
   stm32_writereg(priv, LCD_REG_1,   0x0100); /* Set SS and SM bit */
   stm32_writereg(priv, LCD_REG_2,   0x0700); /* Power on sequence */
-  stm32_writereg(priv, LCD_REG_3,   (1<<12)|(1<<5)|(1<<4) ); /* 65K */
+
+  stm32_writereg(priv, LCD_REG_3,   (1 << 12) | (1 << 5) | (1 << 4)); /* 65K */
+
   stm32_writereg(priv, LCD_REG_4,   0x0000); /* Resize register */
   stm32_writereg(priv, LCD_REG_8,   0x0207); /* Set the back porch and front porch */
   stm32_writereg(priv, LCD_REG_9,   0x0000); /* Set non-display area refresh cycle ISC[3:0] */
@@ -1843,9 +1900,10 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.
+ *   The initial state of the LCD is fully initialized, display memory
+ *   cleared, and the LCD ready to use, but with the power setting at 0
+ *  (full off).
  *
  ****************************************************************************/
 
@@ -1892,8 +1950,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *   This allows support for multiple LCD devices.
  *
  ****************************************************************************/
 
@@ -1928,10 +1986,11 @@ void board_lcd_uninitialize(void)
  * Name:  stm32_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the Shenzhou board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the Shenzhou board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
  ****************************************************************************/
 
@@ -1958,7 +2017,7 @@ void stm32_lcdclear(uint16_t color)
       putreg32(1, LCD_WR_SET);
     }
 
-   putreg32(1, LCD_CS_SET);
+  putreg32(1, LCD_CS_SET);
 }
 
 #endif /* !HAVE_LCD */

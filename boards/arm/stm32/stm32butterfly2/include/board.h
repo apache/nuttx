@@ -108,7 +108,8 @@
 /* LED definitions **********************************************************/
 
 /* There are four LEDs on stm32butterfly2 board that can be controlled by
- * software. All pulled high and van be illuminated by driving the output low.
+ * software.
+ * All pulled high and van be illuminated by driving the output low.
  *
  *   LED1 PB0
  *   LED2 PB1
@@ -131,9 +132,10 @@
 #define BOARD_LED3_BIT  (1 << BOARD_LED3)
 #define BOARD_LED4_BIT  (1 << BOARD_LED4)
 
-/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is defined.
- * In thath case, the usage by the board port is defined in include/board.h and
- * src/stm32_leds.c. The LEDs are used to encode OS-related events as follows:
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In thath case, the usage by the board port is defined in
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *      SYMBOL            Val    Meaning                     LED state
  *                                                       LED1 LED2 LED3 LED4
@@ -150,12 +152,14 @@
 #define LED_PANIC         8  /* The system has crashed   N/C  N/C  N/C  FLASH */
 #undef  LED_IDLE             /* MCU is is sleep mode         Not used         */
 
-/* After booting, LED1-3 are not longer used by the system and can be used for
- * other purposes by the application (Of course, all LEDs are available to the
- * application if CONFIG_ARCH_LEDS is not defined.
+/* After booting, LED1-3 are not longer used by the system and can be used
+ * for other purposes by the application (Of course, all LEDs are available
+ * to the application if CONFIG_ARCH_LEDS is not defined.
  */
 
-/* ADC configuration. Right now only ADC12_IN10 is supported (potentiometer) */
+/* ADC configuration. Right now only ADC12_IN10 is supported
+ * (potentiometer)
+ */
 
 #ifdef CONFIG_STM32_ADC2
 #  error "CONFIG_STM32_ADC2 is not supported"

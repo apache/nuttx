@@ -73,5 +73,9 @@ __attribute__((externally_visible, section(".dfu_signature")))
   {0, 0, 0, 0},               /* reserved */
   6,                          /* Current board is photon */
   4, 1,                       /* Firmware is "system-part1" */
-  {0, 0, 0, 0, 0, 0, 0, 0}    /* reserved */
+  {0, 0, 0, 0, 0, 0, 0, 0},   /* reserved */
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/

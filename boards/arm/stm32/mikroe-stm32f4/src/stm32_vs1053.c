@@ -100,6 +100,7 @@ static int  up_read_dreq(FAR const struct vs1053_lower_s *lower);
  * following structure provides an MCU-independent mechanixm for controlling
  * the VS1053 GPIO interrupt.
  */
+
 static struct stm32_lower_s g_vs1053lower =
 {
   .lower =
@@ -165,7 +166,7 @@ static int up_read_dreq(FAR const struct vs1053_lower_s *lower)
  * Name: up_vs1053initialize
  ****************************************************************************/
 
-void up_vs1053initialize(FAR struct spi_dev_s* spi)
+void up_vs1053initialize(FAR struct spi_dev_s * spi)
 {
   int   ret;
   char  name[8];
@@ -173,7 +174,8 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
 
   /* Assumptions:
    * 1) SPI pins were configured in up_spi.c early in the boot-up phase.
-   * 2) Clocking for the SPI3 peripheral was also provided earlier in boot-up.
+   * 2) Clocking for the SPI3 peripheral was also provided earlier in
+   * boot-up.
    */
 
   /* NOTE:  The RST line should be asserted early in the boot process
@@ -182,7 +184,7 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
    *        until the RST line is asserted.
    */
 
-  //(void)stm32_configgpio(GPIO_VS1053_RST);
+  /* (void)stm32_configgpio(GPIO_VS1053_RST); */
 
   /* Initialize the VS1053 DREQ GPIO line */
 
@@ -193,7 +195,8 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
   pVs1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
   if (pVs1053 == NULL)
     {
-      auderr("ERROR: Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
+      auderr("ERROR: Failed to bind SPI port %d VS1053 device\n",
+             VS1053_DEVNO);
       return;
     }
 
