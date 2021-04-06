@@ -36,7 +36,7 @@ const struct flexspi_nor_config_s g_flash_config =
   {
     .tag                   = FLEXSPI_CFG_BLK_TAG,
     .version               = FLEXSPI_CFG_BLK_VERSION,
-    .read_sample_clksrc    = FLASH_READ_SAMPLE_CLK_EXTERNALINPUT_FROM_DQSPAD,
+    .read_sample_clksrc    = FLASH_READ_SAMPLE_CLK_EXT_INPUT_FROM_DQSPAD,
     .cs_hold_time          = 3u,
     .cs_setup_time         = 3u,
     .column_address_width  = 3u,

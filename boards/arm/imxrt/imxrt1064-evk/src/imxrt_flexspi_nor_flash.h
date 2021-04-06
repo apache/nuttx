@@ -1,25 +1,41 @@
 /****************************************************************************
- * boards/arm/imxrt/imxrt1020-evk/src/imxrt_flexspi_nor_flash.h
+ * boards/arm/imxrt/imxrt1064-evk/src/imxrt_flexspi_nor_flash.h
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Authors: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
+ *            David Sidrane <david_s5@nscdg.com>
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H
-#define __BOARDS_ARM_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H
+#ifndef __BOARDS_ARM_IMXRT_IMXRT1064_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H
+#define __BOARDS_ARM_IMXRT_IMXRT1064_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H
 
 /****************************************************************************
  * Included Files
@@ -142,9 +158,7 @@
 
 #define NOR_CMD_LUT_SEQ_IDX_READSTATUS CMD_LUT_SEQ_IDX_READSTATUS
 
-/* 2  Read status DPI/QPI/OPI sequence id in lookupTable stored in config
- * block
- */
+/* 2  Read status DPI/QPI/OPI sequence id in LUT stored in config block */
 
 #define NOR_CMD_LUT_SEQ_IDX_READSTATUS_XPI 2
 
@@ -152,9 +166,7 @@
 
 #define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE CMD_LUT_SEQ_IDX_WRITEENABLE
 
-/* 4  Write Enable DPI/QPI/OPI sequence id in lookupTable stored in config
- * block
- */
+/* 4  Write Enable DPI/QPI/OPI sequence id in LUT stored in config block */
 
 #define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE_XPI 4
 
@@ -178,15 +190,11 @@
 
 #define NOR_CMD_LUT_SEQ_IDX_READ_SFDP 13
 
-/* 14 Restore 0-4-4/0-8-8 mode sequence id in lookupTable stored in config
- * block
- */
+/* 14 Restore 0-4-4/0-8-8 mode sequence id in LUT stored in config block */
 
 #define NOR_CMD_LUT_SEQ_IDX_RESTORE_NOCMD 14
 
-/* 15 Exit 0-4-4/0-8-8 mode sequence id in lookupTable stored in config
- * blobk
- */
+/* 15 Exit 0-4-4/0-8-8 mode sequence id in LUT stored in config blobk */
 
 #define NOR_CMD_LUT_SEQ_IDX_EXIT_NOCMD 15
 
@@ -292,9 +300,11 @@ struct flexspi_mem_config_s
   uint8_t read_sample_clksrc;
   uint8_t cs_hold_time;
   uint8_t cs_setup_time;
-  uint8_t column_address_width;       /* [0x00f-0x00f] Column Address with, for
-                                       * HyperBus protocol, it is fixed to 3, For
-                                       * Serial NAND, need to refer to datasheet */
+  uint8_t column_address_width;     /* [0x00f-0x00f] Column Address with, for
+                                     * HyperBus protocol, it is fixed to 3,
+                                     * For Serial NAND, need to refer to
+                                     * datasheet
+                                     */
   uint8_t device_mode_cfg_enable;
   uint8_t device_mode_type;
   uint16_t wait_time_cfg_commands;
@@ -334,18 +344,30 @@ struct flexspi_mem_config_s
 
 struct flexspi_nor_config_s
 {
-  struct flexspi_mem_config_s mem_config; /* Common memory configuration info via FlexSPI */
-  uint32_t page_size;                     /* Page size of Serial NOR */
-  uint32_t sector_size;                   /* Sector size of Serial NOR */
-  uint8_t ipcmd_serial_clkfreq;           /* Clock frequency for IP command */
-  uint8_t is_uniform_blocksize;           /* Sector/Block size is the same */
-  uint8_t reserved0[2];                   /* Reserved for future use */
-  uint8_t serial_nor_type;                /* Serial NOR Flash type: 0/1/2/3 */
-  uint8_t need_exit_nocmdmode;            /* Need to exit NoCmd mode before other IP command */
-  uint8_t halfclk_for_nonreadcmd;         /* Half the Serial Clock for non-read command: true/false */
-  uint8_t need_restore_nocmdmode;         /* Need to Restore NoCmd mode after IP command execution */
-  uint32_t blocksize;                     /* Block size */
-  uint32_t reserve2[11];                  /* Reserved for future use */
+  struct flexspi_mem_config_s mem_config; /* Common memory configuration info
+                                           * via FlexSPI
+                                           */
+
+  uint32_t page_size;                  /* Page size of Serial NOR */
+  uint32_t sector_size;                /* Sector size of Serial NOR */
+  uint8_t ipcmd_serial_clkfreq;        /* Clock frequency for IP command */
+  uint8_t is_uniform_blocksize;        /* Sector/Block size is the same */
+  uint8_t reserved0[2];                /* Reserved for future use */
+  uint8_t serial_nor_type;             /* Serial NOR Flash type: 0/1/2/3 */
+  uint8_t need_exit_nocmdmode;         /* Need to exit NoCmd mode before
+                                        * other IP command
+                                        */
+
+  uint8_t halfclk_for_nonreadcmd;      /* Half the Serial Clock for non-read
+                                        * command: true/false
+                                        */
+
+  uint8_t need_restore_nocmdmode;      /* Need to Restore NoCmd mode after IP
+                                        * command execution
+                                        */
+
+  uint32_t blocksize;                  /* Block size */
+  uint32_t reserve2[11];               /* Reserved for future use */
 };
 
-#endif /* __BOARDS_ARM_IMXRT1020_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H */
+#endif /* __BOARDS_ARM_IMXRT_IMXRT1064_EVK_SRC_IMXRT_FLEXSPI_NOR_FLASH_H */

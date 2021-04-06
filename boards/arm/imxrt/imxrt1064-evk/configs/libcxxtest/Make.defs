@@ -1,0 +1,104 @@
+############################################################################
+# boards/arm/imxrt/imxrt1060-evk/configs/libcxxtest/Make.defs
+#
+#   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#           Daniel Pereira Volpato <dpo@certi.org.br>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
+
+ifeq ($(CONFIG_ARMV7M_DTCM),y)
+  LDSCRIPT = flash-dtcm.ld
+else
+  LDSCRIPT = flash-ocram.ld
+endif
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
+else
+  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing \
+                      -fno-strength-reduce -fomit-frame-pointer
+endif
+
+ARCHCFLAGS = -fno-builtin
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCPUFLAGSXX = -fno-builtin
+else
+  ARCHCPUFLAGSXX = -fno-builtin -fno-exceptions -fcheck-new
+endif
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef #-fno-strict-aliasing
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS  = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
+            $(ARCHCPUFLAGS) $(ARCHXXINCLUDES)
+CXXFLAGS += $(ARCHDEFINES) $(EXTRAFLAGS) -pipe -std=c++11
+CXXFLAGS += -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
+CXXFLAGS += -pedantic -D_DEBUG -D_LIBCPP_BUILD_STATIC -D_LIBCPP_NO_EXCEPTIONS
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
+
+LDMODULEFLAGS = -r -e module_initialize
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
+else
+  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
+endif
+
+ifneq ($(CROSSDEV),arm-nuttx-elf-)
+  LDFLAGS += -nostartfiles -nodefaultlibs
+endif
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS += -g
+endif
