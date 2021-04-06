@@ -76,6 +76,36 @@ void stm32h7_flash_optmodify(uint32_t clear, uint32_t set);
 
 void stm32h7_flash_swapbanks(void);
 
+/****************************************************************************
+ * Name: stm32h7_flash_lock
+ *
+ * Description:
+ *   Locks a bank
+ *
+ ****************************************************************************/
+
+int stm32h7_flash_lock(void);
+
+/****************************************************************************
+ * Name: stm32h7_flash_unlock
+ *
+ * Description:
+ *   Unlocks a bank
+ *
+ ****************************************************************************/
+
+int stm32h7_flash_unlock(void);
+
+/****************************************************************************
+ * Name: stm32h7_flash_writeprotect
+ *
+ * Description:
+ *   Enable or disable the write protection of a flash sector.
+ *
+ ****************************************************************************/
+
+int stm32h7_flash_writeprotect(size_t page, bool enabled);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
