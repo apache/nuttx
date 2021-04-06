@@ -128,6 +128,7 @@ void tiva_ssiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
       tiva_gpiowrite(OLEDCS_GPIO, !selected);
     }
 #endif
+
   ssi_dumpgpio("tiva_ssiselect() Exit");
 }
 

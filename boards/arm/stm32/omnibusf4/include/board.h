@@ -53,28 +53,30 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* The OMNIBUSF4 board uses a single 8MHz crystal.
  *
  * This is the canonical configuration:
- *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 168000000    Determined by PLL configuration
- *   HCLK(Hz)                      : 168000000    (STM32_RCC_CFGR_HPRE)
- *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
- *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
- *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
- *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
- *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
- *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
- *   Flash Latency(WS)             : 5
- *   Prefetch Buffer               : OFF
- *   Instruction cache             : ON
- *   Data cache                    : ON
- *   Require 48MHz for USB OTG FS, : Enabled
+ *   System Clock source    : PLL (HSE)
+ *   SYSCLK(Hz)             : 168000000    Determined by PLL configuration
+ *   HCLK(Hz)               : 168000000    (STM32_RCC_CFGR_HPRE)
+ *   AHB Prescaler          : 1            (STM32_RCC_CFGR_HPRE)
+ *   APB1 Prescaler         : 4            (STM32_RCC_CFGR_PPRE1)
+ *   APB2 Prescaler         : 2            (STM32_RCC_CFGR_PPRE2)
+ *   HSE Frequency(Hz)      : 8000000      (STM32_BOARD_XTAL)
+ *   PLLM                   : 8            (STM32_PLLCFG_PLLM)
+ *   PLLN                   : 336          (STM32_PLLCFG_PLLN)
+ *   PLLP                   : 2            (STM32_PLLCFG_PLLP)
+ *   PLLQ                   : 7            (STM32_PLLCFG_PLLQ)
+ *   Main regulator
+ *   output voltage         : Scale1 mode  Needed for high speed SYSCLK
+ *   Flash Latency(WS)      : 5
+ *   Prefetch Buffer        : OFF
+ *   Instruction cache      : ON
+ *   Data cache             : ON
+ *   Require 48MHz for
+ *   USB OTG FS,            : Enabled
  *   SDIO and RNG clock
  */
 
@@ -161,7 +163,7 @@
 #define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY / 2)
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* Pin configurations **************************************************************/
+/* Pin configurations *******************************************************/
 
 #define BOARD_NLEDS     2                      /* One literal LED, one beeper */
 #define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
@@ -246,7 +248,8 @@
 
 /* SPI3 :
  *
- * OMNIBUSF4SD targets use PA15 for NSS; others use PB4 (? BF code says "PB3").
+ * OMNIBUSF4SD targets use PA15 for NSS; others use PB4
+ * (? BF code says "PB3").
  * define GPIO_SPI3_NSS     GPIO_SPI3_NSS_2   PB4
  *
  * Barometer and/or MAX7456, depending on the target.

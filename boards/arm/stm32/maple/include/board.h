@@ -54,13 +54,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* On-board crystal frequency is 8MHz (HSE) */
 
 #define STM32_BOARD_XTAL        8000000ul
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1, PLL multipler is 9:
+ * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -109,7 +111,8 @@
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1 */
+ * Note: TIM1,8 are on APB2, others on APB1
+ */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
@@ -150,9 +153,10 @@
 #  define SDIO_SDXFR_CLKDIV     (3 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
 /* The board has only one controllable LED */
+
 #define LED_STARTED       0  /* No LEDs */
 #define LED_HEAPALLOCATE  1  /* LED1 on */
 #define LED_IRQSENABLED   2  /* LED2 on */

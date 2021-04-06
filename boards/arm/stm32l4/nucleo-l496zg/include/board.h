@@ -88,9 +88,10 @@
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as 16 MHz / 1 * 10 / 2 = 80 MHz
  *
- * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- * the system clock; this should be configurable since not all applications may
- * want things done this way.
+ * XXX NOTE:
+ * currently the main PLL is implicitly turned on and is implicitly
+ * the system clock; this should be configurable since not all
+ * applications may want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(10)
@@ -198,9 +199,10 @@
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as 8 MHz / 1 * 20 / 2 = 80 MHz
  *
- * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- * the system clock; this should be configurable since not all applications may
- * want things done this way.
+ * XXX NOTE:
+ * currently the main PLL is implicitly turned on and is implicitly
+ * the system clock; this should be configurable since not all
+ * applications may want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(20)
@@ -309,9 +311,10 @@
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as 4 MHz / 1 * 40 / 2 = 80 MHz
  *
- * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- * the system clock; this should be configurable since not all applications may
- * want things done this way.
+ * XXX NOTE:
+ * currently the main PLL is implicitly turned on and is implicitly
+ * the system clock; this should be configurable since not all
+ * applications may want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(40)
@@ -429,7 +432,8 @@
 #define BOARD_LPTIM1_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
 #define BOARD_LPTIM2_FREQUENCY  (STM32L4_HCLK_FREQUENCY / 2)
 
-/* SDMMC dividers.  Note that slower clocking is required when DMA is disabled
+/* SDMMC dividers.
+ * Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
  * to service FIFOs in interrupt driven mode.  These values have not been
  * tuned!!!
@@ -485,7 +489,6 @@
 #define DMAMAP_SDMMC1  DMACHAN_SDMMC_1
 #define DMAMAP_SDMMC2  DMACHAN_SDMMC_2
 
-
 /* FLASH wait states
  *
  *  --------- ---------- -----------
@@ -529,13 +532,14 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_autoleds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_autoleds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ----*/
+ *   ----------------------  --------------------------  ------ ------ ----
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
@@ -574,8 +578,8 @@
 #if defined(CONFIG_NUCLEO_CONSOLE_ARDUINO)
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
@@ -595,7 +599,9 @@
  */
 
 #if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
-/* LPUART1 is connector to Virtual COM port PG6 and PG7, but there is no lpserial. */
+/* LPUART1 is connector to Virtual COM port PG6 and PG7,
+ * but there is no lpserial.
+ */
 
 /* #define GPIO_USART2_TX        GPIO_LPUART1_TX_3 */
 
@@ -688,9 +694,10 @@ extern "C"
  * Name: stm32l4_board_initialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the initialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   All STM32 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 

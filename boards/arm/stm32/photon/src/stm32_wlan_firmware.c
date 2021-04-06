@@ -1,51 +1,58 @@
-/*
+/****************************************************************************
  * boards/arm/stm32/photon/src/stm32_wlan_firmware.c
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  *
- * 3. Neither the name of Broadcom nor the names of other contributors to this
- * software may be used to endorse or promote products derived from this software
- * without specific prior written permission.
+ * 3. Neither the name of Broadcom nor the names of other contributors to
+ * this software may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
  *
- * 4. This software may not be used as a standalone product, and may only be used as
- * incorporated in your product or device that incorporates Broadcom wireless connectivity
- * products and solely for the purpose of enabling the functionalities of such Broadcom products.
+ * 4. This software may not be used as a standalone product, and may only be
+ * used as incorporated in your product or device that incorporates Broadcom
+ * wireless connectivity products and solely for the purpose of enabling the
+ * functionalities of such Broadcom products.
  *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR
+ * A PARTICULAR PURPOSE AND NON-INFRINGEMENT, ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT, ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ ****************************************************************************/
 
-/** @file
- *
- *  BCM43362 NVRAM variables for WM-N-BM-09 USI SiP
- *
- */
+/* BCM43362 NVRAM variables for WM-N-BM-09 USI SiP */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdint.h>
 
-/**
- * Character array of NVRAM image
- */
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-const char __attribute__((section(".wlan_nvram_image"))) bcm43362_nvram_image[] =
+/* Character array of NVRAM image */
+
+const char
+__attribute__((section(".wlan_nvram_image"))) bcm43362_nvram_image[] =
         "manfid=0x2d0"                                              "\x00"
         "prodid=0x492"                                              "\x00"
         "vendid=0x14e4"                                             "\x00"
@@ -65,7 +72,7 @@ const char __attribute__((section(".wlan_nvram_image"))) bcm43362_nvram_image[] 
         "mcs2gpo0=0x4444"                                           "\x00"
         "mcs2gpo1=0x6444"                                           "\x00"
         "pa0maxpwr=80"                                              "\x00"
-        "pa0b0=5264"                                                "\x00"  /*PA params*/
+        "pa0b0=5264"                                                "\x00"  /* PA params */
         "pa0b1=64897"                                               "\x00"
         "pa0b2=65359"                                               "\x00"
         "pa0itssit=62"                                              "\x00"
@@ -109,7 +116,8 @@ const char __attribute__((section(".wlan_nvram_image"))) bcm43362_nvram_image[] 
 const unsigned int bcm43362_nvram_image_len = sizeof(bcm43362_nvram_image);
 
 const uint8_t
-__attribute__((section(".wlan_firmware_image"))) bcm43362_firmware_image[] = {
+__attribute__((section(".wlan_firmware_image"))) bcm43362_firmware_image[] =
+{
   0x00, 0x00, 0x00, 0x00, 0xcd, 0xc2, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00,
   0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00,
   0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00, 0x91, 0xc1, 0x00, 0x00,
@@ -17647,4 +17655,9 @@ __attribute__((section(".wlan_firmware_image"))) bcm43362_firmware_image[] = {
   0xd2, 0x58, 0x82, 0x92
 };
 
-const unsigned int bcm43362_firmware_image_len = sizeof(bcm43362_firmware_image);
+const unsigned
+int bcm43362_firmware_image_len = sizeof(bcm43362_firmware_image);
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

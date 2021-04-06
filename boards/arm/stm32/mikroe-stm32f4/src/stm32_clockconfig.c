@@ -62,10 +62,11 @@
  * Name: stm32_board_clockconfig
  *
  * Description:
- *   The Mikroe-STM32F4 board does not have an external crystal, so it must rely
- *   on the internal 16Mhz RC oscillator.  The default clock configuration in the
- *   OS for the STM32 architecture assumes an external crystal, so we must provide
- *   a board specific clock configuration routine.
+ *   The Mikroe-STM32F4 board does not have an external crystal, so it must
+ *   rely on the internal 16Mhz RC oscillator.  The default clock
+ *   configuration in the OS for the STM32 architecture assumes an external
+ *   crystal, so we must provide a board specific clock configuration
+ *   routine.
  *
  ****************************************************************************/
 
@@ -111,7 +112,7 @@ void stm32_board_clockconfig(void)
 
   /* Set the PLL dividers and multipliers to configure the main PLL */
 
-  regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |
+  regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN | STM32_PLLCFG_PLLP |
             RCC_PLLCFG_PLLSRC_HSI | STM32_PLLCFG_PLLQ);
   putreg32(regval, STM32_RCC_PLLCFG);
 
@@ -126,10 +127,13 @@ void stm32_board_clockconfig(void)
   while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
     ;
 
-  /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+  /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait
+   * states
+   */
 
 #ifdef CONFIG_STM32_FLASH_PREFETCH
-  regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
+  regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN |
+            FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
 #else
   regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
 #endif

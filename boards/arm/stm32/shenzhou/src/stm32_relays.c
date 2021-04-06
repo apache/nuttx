@@ -195,7 +195,7 @@ void up_relaysinit(void)
   g_relays_init = true;
 }
 
-void relays_setstat(int relays,bool stat)
+void relays_setstat(int relays, bool stat)
 {
   if ((unsigned)relays < NUM_RELAYS)
     {
@@ -227,7 +227,7 @@ void relays_setstats(uint32_t relays_stat)
 
   for (i = 0; i < NUM_RELAYS; i++)
     {
-      relays_setstat(i, (relays_stat & (1<<i))!=0);
+      relays_setstat(i, (relays_stat & (1 << i)) != 0);
     }
 }
 
@@ -240,16 +240,16 @@ void relays_onoff(int relays, uint32_t mdelay)
 {
   if ((unsigned)relays < NUM_RELAYS)
     {
-      if (mdelay>0)
+      if (mdelay > 0)
         {
           if (relays_getstat(relays))
             {
               relays_setstat(relays, false);
-              nxsig_usleep(RELAYS_MIN_RESET_TIME*1000*1000);
+              nxsig_usleep(RELAYS_MIN_RESET_TIME * 1000 * 1000);
             }
 
-          relays_setstat(relays,true);
-          nxsig_usleep(mdelay*100*1000);
+          relays_setstat(relays, true);
+          nxsig_usleep(mdelay * 100 * 1000);
           relays_setstat(relays, false);
         }
     }

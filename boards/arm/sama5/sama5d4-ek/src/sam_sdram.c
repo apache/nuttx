@@ -273,9 +273,12 @@ static void sam_config_slaveddr(void)
 
   for (ddrport = 1 ; ddrport < 8 ; ddrport++)
     {
-      putreg32(0x00ffffff, SAM_MATRIX0_SSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
-      putreg32(0x0000000f, SAM_MATRIX0_SRTSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
-      putreg32(0x0000ffff, SAM_MATRIX0_SASSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
+      putreg32(0x00ffffff,
+               SAM_MATRIX0_SSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
+      putreg32(0x0000000f,
+               SAM_MATRIX0_SRTSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
+      putreg32(0x0000ffff,
+               SAM_MATRIX0_SASSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
     }
 }
 
@@ -292,9 +295,9 @@ static void sam_config_slaveddr(void)
  *   Per the SAMA5D3-EK User guide:
  *   "Two DDR2/SDRAM (MT47H64M16HR) used as main system memory (256 MByte).
  *   The board includes 2 Gbits of on-board solderedDDR2 (double data rate)
- *   SDRAM. The footprints can also host two DDR2 (MT47H128M16RT) from Micron®
- *   for a total of 512 MBytes of DDR2 memory. The memory bus is 32 bits wide
- *   and operates with a frequency of up to 166 MHz."
+ *   SDRAM. The footprints can also host two DDR2 (MT47H128M16RT) from
+ *   Micron® for a total of 512 MBytes of DDR2 memory. The memory bus is 32
+ *   bits wide and operates with a frequency of up to 166 MHz."
  *
  *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
@@ -377,7 +380,9 @@ void sam_sdram_config(void)
               MPDDRC_IO_CALIBR_EN_CALIB);
   putreg32(regval, SAM_MPDDRC_IO_CALIBR);
 
-  /* Step 2: Program the features of DDR2-SDRAM device into the Timing Register */
+  /* Step 2: Program the features of DDR2-SDRAM device into the Timing
+   *         Register
+   */
 
 #if defined(CONFIG_SAMA5D4EK_MT47H128M16RT)
 

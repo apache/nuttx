@@ -118,8 +118,8 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-  /* Contrairement à l'ADC, il n'y a pas de BOARDIOC_DAC_SETUP spécifique. Il
-   * faut le faire ici
+  /* Contrairement à l'ADC, il n'y a pas de BOARDIOC_DAC_SETUP spécifique.
+   * Il faut le faire ici
    */
 
 #ifdef HAVE_DAC

@@ -69,11 +69,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration **********************************************************************/
-/* CONFIG_STM3240G_ILI9320_DISABLE may be defined to disabled the AM-240320L8TNQW00H
- *  (LCD_ILI9320 or LCD_ILI9321)
- * CONFIG_STM3240G_ILI9325_DISABLE may be defined to disabled the AM-240320D5TOQW01H
- *  (LCD_ILI9325)
+
+/* Configuration ************************************************************/
+
+/* CONFIG_STM3240G_ILI9320_DISABLE may be defined to disabled the
+ *   AM-240320L8TNQW00H(LCD_ILI9320 or LCD_ILI9321)
+ * CONFIG_STM3240G_ILI9325_DISABLE may be defined to disabled the
+ *   AM-240320D5TOQW01H(LCD_ILI9325)
  */
 
 /* Check contrast selection */
@@ -110,7 +112,8 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties *************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -126,7 +129,8 @@
 #define STM3240G_BPP          16
 #define STM3240G_COLORFMT     FB_FMT_RGB16_565
 
-/* STM3240G-EVAL LCD Hardware Definitions *********************************************/
+/* STM3240G-EVAL LCD Hardware Definitions ***********************************/
+
 /* LCD /CS is CE4,  Bank 3 of NOR/SRAM Bank 1~4 */
 
 #define STM3240G_LCDBASE      ((uintptr_t)(0x60000000 | 0x08000000))
@@ -287,6 +291,7 @@ struct stm3240g_dev_s
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+
 /* Low Level LCD access */
 
 static void stm3240g_writereg(uint8_t regaddr, uint16_t regval);
@@ -299,17 +304,18 @@ static void stm3240g_setcursor(uint16_t col, uint16_t row);
 
 /* LCD Data Transfer Methods */
 
-static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
-static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-             size_t npixels);
+static int stm3240g_putrun(fb_coord_t row, fb_coord_t col,
+                           FAR const uint8_t *buffer, size_t npixels);
+static int stm3240g_getrun(fb_coord_t row, fb_coord_t col,
+                           FAR uint8_t *buffer, size_t npixels);
 
 /* LCD Configuration */
 
 static int stm3240g_getvideoinfo(FAR struct lcd_dev_s *dev,
              FAR struct fb_videoinfo_s *vinfo);
-static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-             FAR struct lcd_planeinfo_s *pinfo);
+static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                 unsigned int planeno,
+                                 FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -328,7 +334,8 @@ static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
 static int stm3240g_getpower(struct lcd_dev_s *dev);
 static int stm3240g_setpower(struct lcd_dev_s *dev, int power);
 static int stm3240g_getcontrast(struct lcd_dev_s *dev);
-static int stm3240g_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int stm3240g_setcontrast(struct lcd_dev_s *dev,
+                                unsigned int contrast);
 
 /* Initialization */
 
@@ -365,10 +372,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = stm3240g_putrun,       /* Put a run into LCD memory */
-  .getrun = stm3240g_getrun,       /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = STM3240G_BPP,          /* Bits-per-pixel */
+  .putrun = stm3240g_putrun,        /* Put a run into LCD memory */
+  .getrun = stm3240g_getrun,        /* Get a run from LCD memory */
+  .buffer = (uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = STM3240G_BPP,           /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -383,6 +390,7 @@ static struct stm3240g_dev_s g_lcddev =
     .getplaneinfo = stm3240g_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -462,9 +470,9 @@ static inline void stm3240g_writegram(uint16_t rgbval)
  * Name:  stm3240g_readnosetup
  *
  * Description:
- *   Prime the operation by reading one pixel from the GRAM memory if necessary for
- *   this LCD type.  When reading 16-bit gram data, there may be some shifts in the
- *   returned data:
+ *   Prime the operation by reading one pixel from the GRAM memory if
+ *   necessary for this LCD type.  When reading 16-bit gram data, there may
+ *   be some shifts in the returned data:
  *
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
@@ -481,8 +489,8 @@ static void stm3240g_readnosetup(FAR uint16_t *accum)
  * Name:  stm3240g_readnoshift
  *
  * Description:
- *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
- *   data and possibly swapping red and green components.
+ *   Read one correctly aligned pixel from the GRAM memory.  Possibly
+ *   shifting the data and possibly swapping red and green components.
  *
  *   - ILI932x: Unknown -- assuming colors are in the color order
  *
@@ -499,8 +507,8 @@ static uint16_t stm3240g_readnoshift(FAR uint16_t *accum)
  * Name:  stm3240g_setcursor
  *
  * Description:
- *   Set the cursor position.  In landscape mode, the "column" is actually the physical
- *   Y position and the "row" is the physical X position.
+ *   Set the cursor position.  In landscape mode, the "column" is actually
+ *   the physical Y position and the "row" is the physical X position.
  *
  ****************************************************************************/
 
@@ -522,9 +530,11 @@ static void stm3240g_setcursor(uint16_t col, uint16_t row)
  ****************************************************************************/
 
 #if 0 /* Sometimes useful */
-static void stm3240g_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
+static void stm3240g_dumprun(FAR const char *msg,
+                             FAR uint16_t *run, size_t npixels)
 {
-  int i, j;
+  int i;
+  int j;
 
   syslog(LOG_DEBUG, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
@@ -535,6 +545,7 @@ static void stm3240g_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
         {
           syslog(LOG_DEBUG, " %04x", *run++);
         }
+
       up_putc('\n');
     }
 }
@@ -554,10 +565,11 @@ static void stm3240g_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npix
  *
  ****************************************************************************/
 
-static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int stm3240g_putrun(fb_coord_t row, fb_coord_t col,
+                           FAR const uint8_t *buffer,
+                           size_t npixels)
 {
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
   int i;
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -591,8 +603,8 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
    * the STM3240G-EVAL is used as the top.
    */
 
-  col = (STM3240G_XRES-1) - col;
-  row = (STM3240G_YRES-1) - row;
+  col = (STM3240G_XRES - 1) - col;
+  row = (STM3240G_YRES - 1) - row;
 
   /* Set the cursor position */
 
@@ -603,17 +615,21 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
   stm3240g_gramselect();
   for (i = 0; i < npixels; i++)
     {
-      /* Write the next pixel to this position (auto-decrements to the next column) */
+      /* Write the next pixel to this position
+       * (auto-decrements to the next column)
+       */
 
       stm3240g_writegram(*src++);
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
-  /* Convert coordinates.  In this configuration, the top of the display is to the left
-   * of the buttons (if the board is held so that the buttons are at the bottom of the
-   * board).
+
+  /* Convert coordinates.
+   * In this configuration, the top of the display is to the left of the
+   * buttons  (if the board is held so that the buttons are at the bottom of
+   * the board).
    */
 
-  col = (STM3240G_XRES-1) - col;
+  col = (STM3240G_XRES - 1) - col;
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
@@ -630,12 +646,14 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
       col--;
     }
 #else /* CONFIG_LCD_RPORTRAIT */
-  /* Convert coordinates.  In this configuration, the top of the display is to the right
-   * of the buttons (if the board is held so that the buttons are at the bottom of the
-   * board).
+
+  /* Convert coordinates.
+   * In this configuration, the top of the display is to the right of the
+   * buttons (if the board is held so that the buttons are at the bottom of
+   * the board).
    */
 
-  row = (STM3240G_YRES-1) - row;
+  row = (STM3240G_YRES - 1) - row;
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
@@ -652,6 +670,7 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
       col++;
     }
 #endif
+
   return OK;
 }
 
@@ -669,10 +688,10 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
  *
  ****************************************************************************/
 
-static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                       size_t npixels)
+static int stm3240g_getrun(fb_coord_t row, fb_coord_t col,
+                           FAR uint8_t *buffer, size_t npixels)
 {
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
   void (*readsetup)(FAR uint16_t *accum);
   uint16_t (*readgram)(FAR uint16_t *accum);
   uint16_t accum;
@@ -683,7 +702,9 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Configure according to the LCD type.  Kind of silly with only one LCD type. */
+  /* Configure according to the LCD type.
+   * Kind of silly with only one LCD type.
+   */
 
   switch (g_lcddev.type)
    {
@@ -722,8 +743,8 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    * the STM3240G-EVAL is used as the top.
    */
 
-  col = (STM3240G_XRES-1) - col;
-  row = (STM3240G_YRES-1) - row;
+  col = (STM3240G_XRES - 1) - col;
+  row = (STM3240G_YRES - 1) - row;
 
   /* Set the cursor position */
 
@@ -739,17 +760,20 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   for (i = 0; i < npixels; i++)
     {
-      /* Read the next pixel from this position (autoincrements to the next row) */
+      /* Read the next pixel from this position
+       * (autoincrements to the next row)
+       */
 
       *dest++ = readgram(&accum);
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
-  /* Convert coordinates.  In this configuration, the top of the display is to the left
-   * of the buttons (if the board is held so that the buttons are at the bottom of the
-   * board).
+  /* Convert coordinates.
+   * In this configuration, the top of the display is to the left of the
+   * buttons (if the board is held so that the buttons are at the bottom of
+   * the board).
    */
 
-  col = (STM3240G_XRES-1) - col;
+  col = (STM3240G_XRES - 1) - col;
 
   /* Then read the GRAM data, manually incrementing Y (which is col) */
 
@@ -767,12 +791,13 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       col--;
     }
 #else /* CONFIG_LCD_RPORTRAIT */
-  /* Convert coordinates.  In this configuration, the top of the display is to the right
-   * of the buttons (if the board is held so that the buttons are at the bottom of the
-   * board).
+  /* Convert coordinates.
+   * In this configuration, the top of the display is to the right of the
+   * buttons (if the board is held so that the buttons are at the bottom of
+   * the board).
    */
 
-  row = (STM3240G_YRES-1) - row;
+  row = (STM3240G_YRES - 1) - row;
 
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
@@ -807,7 +832,8 @@ static int stm3240g_getvideoinfo(FAR struct lcd_dev_s *dev,
 {
   DEBUGASSERT(dev && vinfo);
   lcdinfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-          g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+          g_videoinfo.fmt, g_videoinfo.xres,
+          g_videoinfo.yres, g_videoinfo.nplanes);
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
@@ -820,8 +846,9 @@ static int stm3240g_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                              FAR struct lcd_planeinfo_s *pinfo)
+static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                 unsigned int planeno,
+                                 FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
   lcdinfo("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
@@ -833,8 +860,9 @@ static int stm3240g_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno
  * Name:  stm3240g_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *   (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
  ****************************************************************************/
 
@@ -848,8 +876,9 @@ static int stm3240g_getpower(struct lcd_dev_s *dev)
  * Name:  stm3240g_poweroff
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *  this setting may correspond to the backlight setting.
  *
  ****************************************************************************/
 
@@ -869,8 +898,9 @@ static int stm3240g_poweroff(void)
  * Name:  stm3240g_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *   (0: full off - CONFIG_LCD_MAXPOWER: full on). On backlit LCDs,
+ *   this setting may correspond to the backlight setting.
  *
  ****************************************************************************/
 
@@ -955,7 +985,9 @@ static inline void stm3240g_lcdinitialize(void)
   if (id == ILI9325_ID)
 #endif
     {
-      /* Save the LCD type (not actually used at for anything important) */
+      /* Save the LCD type
+       * (not actually used at for anything important)
+       */
 
 #if !defined(CONFIG_STM3240G_ILI9320_DISABLE)
 # if !defined(CONFIG_STM3240G_ILI9325_DISABLE)
@@ -980,7 +1012,11 @@ static inline void stm3240g_lcdinitialize(void)
       stm3240g_writereg(LCD_REG_1,   0x0100); /* Set SS and SM bit */
       stm3240g_writereg(LCD_REG_2,   0x0700); /* Set 1 line inversion */
       stm3240g_writereg(LCD_REG_3,   0x1030); /* Set GRAM write direction and BGR=1. */
-    //stm3240g_writereg(LCD_REG_3,   0x1018); /* Set GRAM write direction and BGR=1. */
+
+      /* stm3240g_writereg(LCD_REG_3,   0x1018);
+       *                        Set GRAM write direction and BGR=1.
+       */
+
       stm3240g_writereg(LCD_REG_4,   0x0000); /* Resize register */
       stm3240g_writereg(LCD_REG_8,   0x0202); /* Set the back porch and front porch */
       stm3240g_writereg(LCD_REG_9,   0x0000); /* Set non-display area refresh cycle ISC[3:0] */
@@ -1015,39 +1051,40 @@ static inline void stm3240g_lcdinitialize(void)
 
 #if !defined(CONFIG_STM3240G_ILI9320_DISABLE)
 # if !defined(CONFIG_STM3240G_ILI9325_DISABLE)
-    if (g_lcddev.type == LCD_TYPE_ILI9320)
+      if (g_lcddev.type == LCD_TYPE_ILI9320)
 # endif
-      {
-        stm3240g_writereg(LCD_REG_48,  0x0006);
-        stm3240g_writereg(LCD_REG_49,  0x0101);
-        stm3240g_writereg(LCD_REG_50,  0x0003);
-        stm3240g_writereg(LCD_REG_53,  0x0106);
-        stm3240g_writereg(LCD_REG_54,  0x0b02);
-        stm3240g_writereg(LCD_REG_55,  0x0302);
-        stm3240g_writereg(LCD_REG_56,  0x0707);
-        stm3240g_writereg(LCD_REG_57,  0x0007);
-        stm3240g_writereg(LCD_REG_60,  0x0600);
-        stm3240g_writereg(LCD_REG_61,  0x020b);
-      }
+        {
+          stm3240g_writereg(LCD_REG_48,  0x0006);
+          stm3240g_writereg(LCD_REG_49,  0x0101);
+          stm3240g_writereg(LCD_REG_50,  0x0003);
+          stm3240g_writereg(LCD_REG_53,  0x0106);
+          stm3240g_writereg(LCD_REG_54,  0x0b02);
+          stm3240g_writereg(LCD_REG_55,  0x0302);
+          stm3240g_writereg(LCD_REG_56,  0x0707);
+          stm3240g_writereg(LCD_REG_57,  0x0007);
+          stm3240g_writereg(LCD_REG_60,  0x0600);
+          stm3240g_writereg(LCD_REG_61,  0x020b);
+        }
 #endif
+
       /* Adjust the Gamma Curve (ILI9325) */
 
 #if !defined(CONFIG_STM3240G_ILI9325_DISABLE)
 # if !defined(CONFIG_STM3240G_ILI9320_DISABLE)
-    else
+      else
 # endif
-      {
-        stm3240g_writereg(LCD_REG_48, 0x0007);
-        stm3240g_writereg(LCD_REG_49, 0x0302);
-        stm3240g_writereg(LCD_REG_50, 0x0105);
-        stm3240g_writereg(LCD_REG_53, 0x0206);
-        stm3240g_writereg(LCD_REG_54, 0x0808);
-        stm3240g_writereg(LCD_REG_55, 0x0206);
-        stm3240g_writereg(LCD_REG_56, 0x0504);
-        stm3240g_writereg(LCD_REG_57, 0x0007);
-        stm3240g_writereg(LCD_REG_60, 0x0105);
-        stm3240g_writereg(LCD_REG_61, 0x0808);
-      }
+        {
+          stm3240g_writereg(LCD_REG_48, 0x0007);
+          stm3240g_writereg(LCD_REG_49, 0x0302);
+          stm3240g_writereg(LCD_REG_50, 0x0105);
+          stm3240g_writereg(LCD_REG_53, 0x0206);
+          stm3240g_writereg(LCD_REG_54, 0x0808);
+          stm3240g_writereg(LCD_REG_55, 0x0206);
+          stm3240g_writereg(LCD_REG_56, 0x0504);
+          stm3240g_writereg(LCD_REG_57, 0x0007);
+          stm3240g_writereg(LCD_REG_60, 0x0105);
+          stm3240g_writereg(LCD_REG_61, 0x0808);
+        }
 #endif
 
       /* Set GRAM area */
@@ -1057,7 +1094,11 @@ static inline void stm3240g_lcdinitialize(void)
       stm3240g_writereg(LCD_REG_82,  0x0000); /* Vertical GRAM Start Address */
       stm3240g_writereg(LCD_REG_83,  0x013f); /* Vertical GRAM End Address */
       stm3240g_writereg(LCD_REG_96,  0x2700); /* Gate Scan Line */
-    //stm3240g_writereg(LCD_REG_96,  0xa700); /* Gate Scan Line(GS=1, scan direction is G320~G1) */
+
+      /* stm3240g_writereg(LCD_REG_96,  0xa700);
+       *                      Gate Scan Line(GS=1, scan direction is G320~G1)
+       */
+
       stm3240g_writereg(LCD_REG_97,  0x0001); /* NDL,VLE, REV */
       stm3240g_writereg(LCD_REG_106, 0x0000); /* Set scrolling line */
 
@@ -1102,9 +1143,9 @@ static inline void stm3240g_lcdinitialize(void)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the power setting at 0 (full off).
  *
  ****************************************************************************/
 
@@ -1135,8 +1176,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *   This allows support for multiple LCD devices.
  *
  ****************************************************************************/
 
@@ -1164,10 +1205,11 @@ void board_lcd_uninitialize(void)
  * Name:  stm3240g_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the stm3240g-EVAL board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the stm3240g-EVAL board.
+ *   Because of the various rotations, clearing the display in the normal way
+ *   by writing a sequences of runs that covers the entire display can be
+ *   very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
  ****************************************************************************/
 
@@ -1175,7 +1217,7 @@ void stm3240g_lcdclear(uint16_t color)
 {
   uint32_t i = 0;
 
-  stm3240g_setcursor(0, STM3240G_XRES-1);
+  stm3240g_setcursor(0, STM3240G_XRES - 1);
   stm3240g_gramselect();
   for (i = 0; i < STM3240G_XRES * STM3240G_YRES; i++)
     {

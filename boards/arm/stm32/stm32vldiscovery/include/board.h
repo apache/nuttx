@@ -52,13 +52,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* On-board crystal frequency is 8MHz (HSE) */
 
 #define STM32_BOARD_XTAL        8000000ul
 
-/* PLL source is HSE / 1, PLL multiplier is 3: PLL output frequency is 8MHz (XTAL) x 3 = 24MHz */
+/* PLL source is HSE / 1,
+ * PLL multiplier is 3: PLL output frequency is 8MHz (XTAL) x 3 = 24MHz
+ */
 
 #define STM32_CFGR2_PREDIV1     RCC_CFGR2_PREDIV1d1
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
@@ -108,7 +110,8 @@
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,15-17 are on APB2, others on APB1 */
+ * Note: TIM1,15-17 are on APB2, others on APB1
+ */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
@@ -119,11 +122,12 @@
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* LED definitions ******************************************************************/
+/* LED definitions **********************************************************/
 
-/* It is assumed that a generic board has 1 LED. Thus only two different states
- * can be shown. Statuses defined as "1" will light the LED, the ones defined as
- * "0" will turn the LED off. */
+/* It is assumed that a generic board has 1 LED. Thus only two different
+ * states can be shown. Statuses defined as "1" will light the LED, the
+ * ones defined as "0" will turn the LED off.
+ */
 
 #define LED_STARTED       1
 #define LED_HEAPALLOCATE  1
@@ -134,7 +138,7 @@
 #define LED_ASSERTION     0
 #define LED_PANIC         0
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
 
 /* It is assumed that a generic board has 1 button. */
 

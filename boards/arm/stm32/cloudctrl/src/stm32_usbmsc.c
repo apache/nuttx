@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
@@ -74,7 +75,8 @@
 int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initized in board_app_initialize() (see stm32_appinit.c).
+   * already have been initized in board_app_initialize()
+   * (see stm32_appinit.c).
    * In this case, there is nothing further to be done here.
    */
 

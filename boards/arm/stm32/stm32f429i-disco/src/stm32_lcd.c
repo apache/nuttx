@@ -126,8 +126,7 @@
 
 /* Memory access control (MADCTL) */
 
-/*
- * Landscape:   00100000 / 00101000 / h28
+/* Landscape:   00100000 / 00101000 / h28
  *
  * MY:          0
  * MX:          0
@@ -240,7 +239,6 @@
                                         ILI9341_MADCTL_RPORTRAIT_ML | \
                                         ILI9341_MADCTL_RPORTRAIT_BGR | \
                                         ILI9341_MADCTL_RPORTRAIT_MH)
-
 
 /* Set the display orientation */
 
@@ -420,7 +418,6 @@ void board_lcd_uninitialize(void)
   g_lcd = NULL;
 }
 
-
 /****************************************************************************
  * Name: board_lcd_getdev
  *
@@ -545,7 +542,8 @@ int up_fbinitialize(int display)
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.
+ *   Many OSDs support multiple planes of video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this

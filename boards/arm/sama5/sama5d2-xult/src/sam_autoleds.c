@@ -95,7 +95,7 @@ void board_autoled_on(int led)
   switch (led)
     {
       default:
-      case 0: /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
+      case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
         break; /* Leave Green LED off */
 
       case 1:   /* LED_STACKCREATED */

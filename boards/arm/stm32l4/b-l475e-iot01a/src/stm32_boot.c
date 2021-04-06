@@ -54,16 +54,18 @@
  * Name: stm32l4_board_initialize
  *
  * Description:
- *   All STM32L4 architectures must provide the following entry point.  This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All STM32L4 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
 void stm32l4_board_initialize(void)
 {
 #if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || defined(CONFIG_STM32L4_SPI3)
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+  /* Configure SPI chip selects if
+   * 1) SPI is not disabled, and 2) the weak function
    * stm32l4_spidev_initialize() has been brought into the link.
    */
 
@@ -86,10 +88,11 @@ void stm32l4_board_initialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_intitialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_intitialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
  *
  ****************************************************************************/
 

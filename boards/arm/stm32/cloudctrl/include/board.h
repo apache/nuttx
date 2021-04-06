@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
 /* HSI - 8 MHz RC factory-trimmed
  * LSI - 40 KHz RC (30-60KHz, uncalibrated)
@@ -110,7 +110,8 @@
 #define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
 
-/* MCO output driven by PLL3. From above, we already have PLL3 input frequency as:
+/* MCO output driven by PLL3. From above, we already have PLL3 input
+ * frequency as:
  *
  *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz
  */
@@ -120,9 +121,10 @@
 #  define STM32_PLL_PLL3MUL      RCC_CFGR2_PLL3MULx10  /* MCO 5MHz * 10 = 50MHz */
 #endif
 
-/* LED definitions ******************************************************************/
-/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
- * way.  The following definitions are used to access individual LEDs.
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
  */
 
 /* LED index values for use with board_userled() */
@@ -140,8 +142,9 @@
 #define BOARD_LED3_BIT      (1 << BOARD_LED3)
 #define BOARD_LED4_BIT      (1 << BOARD_LED4)
 
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
- * STM3240G-EVAL.  The following definitions describe how NuttX controls the LEDs:
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
+ * board the STM3240G-EVAL.
+ * The following definitions describe how NuttX controls the LEDs:
  */
 
 #define LED_STARTED         0  /* LED1 */
@@ -153,7 +156,8 @@
 #define LED_ASSERTION       6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC           7  /* N/C  + N/C  + N/C + LED4 */
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************/
+
 /* The STM3240G-EVAL supports three buttons: */
 
 #define BUTTON_KEY1         0  /* Name printed on board */
@@ -177,16 +181,17 @@
 
 #define NUM_RELAYS          2
 
-/* Pin selections ******************************************************************/
+/* Pin selections ***********************************************************/
+
 /* Ethernet
  *
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- ----------------------------------------------------------
- * 24 PA1  MII_RX_CLK     Ethernet PHY   NOTE:  Despite the MII labeling of these
- *         RMII_REF_CLK   Ethernet PHY   signals, the DM916AEP is actually configured
- * 25 PA2  MII_MDIO       Ethernet PHY   to work in RMII mode.
- * 48 PB11 MII_TX_EN      Ethernet PHY
+ * -- ---- -------------- ---------------------------------------------------
+ * 24 PA1  MII_RX_CLK     Ethernet PHY   NOTE:  Despite the MII labeling of
+ *         RMII_REF_CLK   Ethernet PHY   these signals, the DM916AEP is
+ * 25 PA2  MII_MDIO       Ethernet PHY   actually configured to work in
+ * 48 PB11 MII_TX_EN      Ethernet PHY   RMII mode.
  * 51 PB12 MII_TXD0       Ethernet PHY
  * 52 PB13 MII_TXD1       Ethernet PHY
  * 16 PC1  MII_MDC        Ethernet PHY
@@ -216,9 +221,9 @@
 
 /* USB
  *
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * 68 PA9  USB_VBUS       MINI-USB-AB. JP3
  * 69 PA10 USB_ID         MINI-USB-AB. JP5
  * 70 PA11 USB_DM         MINI-USB-AB
@@ -228,9 +233,9 @@
 
 /* UARTS/USARTS
  *
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * 68 PA9  USART1_TX      MAX3232 to CN5.  Requires CONFIG_STM32_USART1_REMAP
  * 69 PA10 USART1_RX      MAX3232 to CN5.  Requires CONFIG_STM32_USART1_REMAP
  * 86 PD5  USART2_TX      MAX3232 to CN6.  Requires CONFIG_STM32_USART2_REMAP
@@ -249,20 +254,23 @@
 
 /* SPI
  *
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * 30 PA5  SPI1_SCK       To the SD card, SPI FLASH.
  *                        Requires !CONFIG_STM32_SPI1_REMAP
  * 31 PA6  SPI1_MISO      To the SD card, SPI FLASH.
  *                        Requires !CONFIG_STM32_SPI1_REMAP
  * 32 PA7  SPI1_MOSI      To the SD card, SPI FLASH.
  *                        Requires !CONFIG_STM32_SPI1_REMAP
- * 78 PC10 SPI3_SCK       To TFT LCD (CN13), the NRF24L01 2.4G wireless module.
+ * 78 PC10 SPI3_SCK       To TFT LCD (CN13),
+ *                        the NRF24L01 2.4G wireless module.
  *                        Requires CONFIG_STM32_SPI3_REMAP.
- * 79 PC11 SPI3_MISO      To TFT LCD (CN13), the NRF24L01 2.4G wireless module.
+ * 79 PC11 SPI3_MISO      To TFT LCD (CN13),
+ *                        the NRF24L01 2.4G wireless module.
  *                        Requires CONFIG_STM32_SPI3_REMAP.
- * 80 PC12 SPI3_MOSI      To TFT LCD (CN13), the NRF24L01 2.4G wireless module.
+ * 80 PC12 SPI3_MOSI      To TFT LCD (CN13),
+ *                        the NRF24L01 2.4G wireless module.
  *                        Requires CONFIG_STM32_SPI3_REMAP.
  */
 
@@ -276,18 +284,18 @@
 
 /* DAC
  *
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * 29 PA4  DAC_OUT1       To CON5(CN14)
  * 30 PA5  DAC_OUT2       To CON5(CN14). JP10
  */
 
 /* ADC
  *
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * PN NAME SIGNAL         NOTES
- * -- ---- -------------- ----------------------------------------------------------
+ * -- ---- -------------- ---------------------------------------------------
  * 35 PB0  ADC_IN1        GPIO_ADC12_IN8. To CON5(CN14)
  * 36 PB1  ADC_IN2        GPIO_ADC12_IN9. To CON5(CN14)
  * 15 PC0  POTENTIO_METER GPIO_ADC12_IN10
@@ -302,7 +310,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -315,10 +324,11 @@ extern "C" {
  * Name:  stm32_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the Shenzhou board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the Shenzhou board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can
+ *   be very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
  ****************************************************************************/
 

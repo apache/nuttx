@@ -88,6 +88,7 @@ int stm32_max7456_initialize(void)
     {
      .spi_devid = minor,
     };
+
   UNUSED(cs);
 
   /* Get the spi bus instance. */

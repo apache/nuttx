@@ -58,7 +58,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ********************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Up to 3 ADC interfaces are supported */
 
 #if STM32_NADC < 3
@@ -86,8 +88,8 @@
  * Private Data
  ****************************************************************************/
 
-/* Identifying number of each ADC channel. The only internal signal for ADC testing
- * is the potentiometer input:
+/* Identifying number of each ADC channel. The only internal signal for ADC
+ * testing is the potentiometer input:
  *
  *   ADC1_IN10(PC0) Potentiometer
  *
@@ -98,11 +100,19 @@
  */
 
 #ifdef CONFIG_STM32_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {10}; //{10, 8, 9};
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] =
+{
+  10  /* {10, 8, 9}; */
+};
 
 /* Configurations of pins used by each ADC channel */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS]  = {GPIO_ADC12_IN10}; //{GPIO_ADC12_IN10, GPIO_ADC12_IN8, GPIO_ADC12_IN9};
+static const uint32_t g_pinlist[ADC1_NCHANNELS]  =
+{
+  GPIO_ADC12_IN10
+};
+
+/* {GPIO_ADC12_IN10, GPIO_ADC12_IN8, GPIO_ADC12_IN9}; */
 #endif
 
 /****************************************************************************
