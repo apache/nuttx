@@ -121,7 +121,6 @@
 
 #define STM32_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY     STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK         STM32_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* APB2 clock (PCLK2) is HCLK (32MHz) */
 
