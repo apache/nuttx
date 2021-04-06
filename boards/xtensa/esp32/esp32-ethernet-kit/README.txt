@@ -63,10 +63,6 @@ Ethernet
       ESP32 GPIO          PHY Chip GPIO
         IO5        <-->      Reset_N
 
-Espressif has an official Ethernet development board:
-
-  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-ethernet-kit.html
-
 Using QEMU:
 ==========
 
