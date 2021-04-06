@@ -170,7 +170,7 @@ void up_vs1053initialize(FAR struct spi_dev_s * spi)
 {
   int   ret;
   char  name[8];
-  FAR struct audio_lowerhalf_s *pVs1053;
+  FAR struct audio_lowerhalf_s *PVS1053;
 
   /* Assumptions:
    * 1) SPI pins were configured in up_spi.c early in the boot-up phase.
@@ -192,8 +192,8 @@ void up_vs1053initialize(FAR struct spi_dev_s * spi)
 
   /* Bind the SPI port to the VS1053 driver */
 
-  pVs1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
-  if (pVs1053 == NULL)
+  PVS1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
+  if (PVS1053 == NULL)
     {
       auderr("ERROR: Failed to bind SPI port %d VS1053 device\n",
              VS1053_DEVNO);
@@ -203,7 +203,7 @@ void up_vs1053initialize(FAR struct spi_dev_s * spi)
   /* Now register the audio device */
 
   sprintf(name, "vs1053d%d", VS1053_DEVNO);
-  ret = audio_register(name, pVs1053);
+  ret = audio_register(name, PVS1053);
   if (ret < 0)
     {
       auderr("ERROR: Failed to register VS1053 Audio device\n");
