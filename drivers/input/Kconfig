@@ -30,10 +30,15 @@ config MOUSE_WHEEL
 
 endif # MOUSE
 
+config INPUT_TOUCHSCREEN
+	bool
+	default n
+
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
 	default n
 	select SPI
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the MAX11802 touchscreen controller
 
@@ -41,6 +46,7 @@ config INPUT_TSC2007
 	bool "TI TSC2007 touchscreen controller"
 	default n
 	select I2C
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the TI TSC2007 touchscreen controller
 
@@ -70,6 +76,7 @@ config INPUT_FT5X06
 	bool "FocalTech FT5x06 multi-touch, capacitive touch panel controller"
 	default n
 	select I2C
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the FocalTech FT5x06 multi-touch, capacitive
 		touch panel controller
@@ -79,6 +86,7 @@ config INPUT_FT5336
 	default n
 	select I2C
 	select INPUT_FT5X06
+	select INPUT_TOUCHSCREEN
 	depends on EXPERIMENTAL
 	---help---
 		Enable support for the FocalTech FT5x06 multi-touch, capacitive
@@ -143,6 +151,7 @@ config INPUT_ADS7843E
 	bool "TI ADS7843/TSC2046 touchscreen controller"
 	default n
 	select SPI
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the TI/Burr-Brown ADS7842 touchscreen controller.  I believe
 		that driver should be compatible with the TI/Burr-Brown TSC2046 and XPT2046
@@ -214,10 +223,11 @@ config ADS7843E_THRESHY
 		12-bit values the raw ranges are 0-4095. So for example, if your display is
 		320x240, then THRESHX=13 and THRESHY=17 would correspond to one pixel.  Default: 12
 
-endif
+endif # INPUT_ADS7843E
 
 config INPUT_MXT
 	bool "Atmel maXTouch Driver"
+	select INPUT_TOUCHSCREEN
 	default n
 	---help---
 		Enables support for the Atmel maXTouch driver
@@ -275,6 +285,7 @@ endif # INPUT_MXT
 config INPUT_STMPE811
 	bool "STMicro STMPE811 Driver"
 	default n
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enables support for the STMPE811 driver
 
@@ -404,6 +415,7 @@ endif # INPUT_STMPE811
 config INPUT_CYPRESS_MBR3108
 	bool "Enable Cypress MBR3108 CapSense driver"
 	default n
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for Cypress MBR3108 CapSense touch button & proximity
 		input sensor.
