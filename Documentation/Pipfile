@@ -10,6 +10,7 @@ m2r2 = "*"
 sphinx_rtd_theme = "*"
 Sphinx = "*"
 sphinx-tabs = "*"
+sphinx-autobuild = "*"
 
 [requires]
 python_version = "3"
