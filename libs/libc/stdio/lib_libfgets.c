@@ -216,11 +216,9 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
             }
         }
 
-      /* Otherwise, check if the character is printable and, if so, put the
-       * character in the line buffer
-       */
+      /* Otherwise, put the character in the line buffer */
 
-      else if (isprint(ch))
+      else
         {
           buf[nch++] = ch;
 
