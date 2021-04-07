@@ -407,10 +407,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sam_putrun,            /* Put a run into LCD memory */
-  .getrun = sam_getrun,            /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SAM_BPP,               /* Bits-per-pixel */
+  .putrun = sam_putrun,             /* Put a run into LCD memory */
+  .getrun = sam_getrun,             /* Get a run from LCD memory */
+  .buffer = (uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SAM_BPP,                /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -730,11 +730,11 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
                       size_t npixels)
 {
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 #elif defined(CONFIG_SAM4EEK_LCD_RGB24)
-  FAR const uint8_t  *src = (FAR const uint8_t*)buffer;
+  FAR const uint8_t  *src = (FAR const uint8_t *)buffer;
 #elif defined(CONFIG_SAM4EEK_LCD_RGB32)
-  FAR const uint32_t *src = (FAR const uint32_t*)buffer;
+  FAR const uint32_t *src = (FAR const uint32_t *)buffer;
 #endif
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -788,11 +788,11 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels)
 {
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
-  FAR uint16_t *dest = (FAR uint16_t*)buffer;
+  FAR uint16_t *dest = (FAR uint16_t *)buffer;
 #elif defined(CONFIG_SAM4EEK_LCD_RGB24)
-  FAR uint8_t  *dest = (FAR uint8_t*)buffer;
+  FAR uint8_t  *dest = (FAR uint8_t *)buffer;
 #elif defined(dest)
-  FAR uint32_t *dest = (FAR uint32_t*)buffer;
+  FAR uint32_t *dest = (FAR uint32_t *)buffer;
 #endif
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */

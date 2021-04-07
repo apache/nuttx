@@ -155,23 +155,6 @@ static struct uart_ops_s g_uart_ops =
 static char g_uart0_rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0_txbuffer[CONFIG_UART0_TXBUFSIZE];
 
-static struct esp32c3_uart_s g_uart0_config =
-{
-  .periph = ESP32C3_PERIPH_UART0,
-  .id = 0,
-  .cpuint = -ENOMEM,
-  .irq = ESP32C3_IRQ_UART0,
-  .baud = CONFIG_UART0_BAUD,
-  .bits = CONFIG_UART0_BITS,
-  .parity = CONFIG_UART0_PARITY,
-  .stop_b2 =  CONFIG_UART0_2STOP,
-  .int_pri = ESP32C3_INT_PRIO_DEF,
-  .txpin = CONFIG_ESP32C3_UART0_TXPIN,
-  .txsig = U0TXD_OUT_IDX,
-  .rxpin = CONFIG_ESP32C3_UART0_RXPIN,
-  .rxsig = U0RXD_IN_IDX,
-};
-
 /* Fill only the requested fields */
 
 static uart_dev_t g_uart0_dev =
@@ -204,23 +187,6 @@ static uart_dev_t g_uart0_dev =
 
 static char g_uart1_rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1_txbuffer[CONFIG_UART1_TXBUFSIZE];
-
-static struct esp32c3_uart_s g_uart1_config =
-{
-  .periph = ESP32C3_PERIPH_UART1,
-  .id = 1,
-  .cpuint = -ENOMEM,
-  .irq = ESP32C3_IRQ_UART1,
-  .baud = CONFIG_UART1_BAUD,
-  .bits = CONFIG_UART1_BITS,
-  .parity = CONFIG_UART1_PARITY,
-  .stop_b2 =  CONFIG_UART1_2STOP,
-  .int_pri = ESP32C3_INT_PRIO_DEF,
-  .txpin = CONFIG_ESP32C3_UART1_TXPIN,
-  .txsig = U1TXD_OUT_IDX,
-  .rxpin = CONFIG_ESP32C3_UART1_RXPIN,
-  .rxsig = U1RXD_IN_IDX,
-};
 
 /* Fill only the requested fields */
 
@@ -319,6 +285,33 @@ static int esp32c3_setup(struct uart_dev_s *dev)
 
   /* Initialize UART module */
 
+  /* Discard corrupt RX data and
+   * disable UART memory clock gate enable signal.
+   */
+
+  modifyreg32(UART_CONF0_REG(priv->id), UART_ERR_WR_MASK_M |
+              UART_MEM_CLK_EN_M, UART_ERR_WR_MASK_M);
+
+  /* Define 0 as the threshold that means TX FIFO buffer is empty. */
+
+  modifyreg32(UART_CONF1_REG(priv->id), UART_TXFIFO_EMPTY_THRHD_M, 0);
+
+  /* Define a threshold to trigger an RX FIFO FULL interrupt.
+   * Define just one byte to read data immediately.
+   */
+
+  modifyreg32(UART_CONF1_REG(priv->id), UART_RXFIFO_FULL_THRHD_M,
+              1 << UART_RXFIFO_FULL_THRHD_S);
+
+  /* Define the maximum FIFO size for RX and TX FIFO.
+   * That means, 1 block = 128 bytes.
+   * As a consequence, software serial FIFO can unload the bytes and
+   * not wait too much on polling activity.
+   */
+
+  modifyreg32(UART_MEM_CONF_REG(priv->id), UART_TX_SIZE_M | UART_RX_SIZE_M,
+              (1 << UART_TX_SIZE_S) | (1 << UART_RX_SIZE_S));
+
   /* Configure the UART Baud Rate */
 
   esp32c3_lowputc_baud(priv);
@@ -343,13 +336,14 @@ static int esp32c3_setup(struct uart_dev_s *dev)
 
   esp32c3_lowputc_set_tx_idle_time(priv, 0);
 
-  /* Set pins */
-
-  esp32c3_lowputc_config_pins(priv);
-
   /* Enable cores */
 
   esp32c3_lowputc_enable_sclk(priv);
+
+  /* Clear FIFOs */
+
+  esp32c3_lowputc_rst_txfifo(priv);
+  esp32c3_lowputc_rst_rxfifo(priv);
 
   return OK;
 }
@@ -371,18 +365,9 @@ static void esp32c3_shutdown(struct uart_dev_s *dev)
 {
   struct esp32c3_uart_s *priv = dev->priv;
 
-  /* Clear FIFOs */
-
-  esp32c3_lowputc_rst_txfifo(priv);
-  esp32c3_lowputc_rst_rxfifo(priv);
-
   /* Disable ints */
 
   esp32c3_lowputc_disable_all_uart_int(priv, NULL);
-
-  /* Back pins to normal */
-
-  esp32c3_lowputc_restore_pins(priv);
 }
 
 /****************************************************************************
@@ -486,6 +471,7 @@ static void esp32c3_txint(struct uart_dev_s *dev, bool enable)
       /* Set to receive an interrupt when the TX holding register register
        * is empty
        */
+
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       modifyreg32(UART_INT_ENA_REG(priv->id), ints_mask, ints_mask);
 #endif
@@ -518,8 +504,9 @@ static void esp32c3_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Receive an interrupt when there is anything in the Rx data register
-       * (or an Rx timeout occurs).
+      /* Receive an interrupt when there is anything in the RX data register
+       * (or an RX timeout occurs).
+       * NOTE: RX timeout feature needs to be enabled.
        */
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       modifyreg32(UART_CONF1_REG(priv->id), UART_RX_TOUT_EN_M,
@@ -883,15 +870,27 @@ static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-/* TODO */
-
 void riscv_earlyserialinit(void)
 {
-  /* I've been looking at others chips/arches and I noticed
-   * that <chips>_lowsetup performs almost the same of this func and it's
-   * called earlier than this one in <chip>_start
-   * So, I am not sure what to do here
+  /* NOTE:  All GPIO configuration for the UARTs was performed in
+   * esp32c3_lowsetup
    */
+
+  /* Disable all UARTS interrupts */
+
+  esp32c3_lowputc_disable_all_uart_int(TTYS0_DEV.priv, NULL);
+#ifdef TTYS1_DEV
+  esp32c3_lowputc_disable_all_uart_int(TTYS1_DEV.priv, NULL);
+#endif
+
+  /* Configure console in early step.
+   * Setup for other serials will be perfomed when the serial driver is
+   * open.
+   */
+
+#ifdef HAVE_SERIAL_CONSOLE
+  esp32c3_setup(&CONSOLE_DEV);
+#endif
 }
 
 #endif /* USE_EARLYSERIALINIT */
@@ -956,7 +955,7 @@ int up_putc(int ch)
  * Name: riscv_earlyserialinit, riscv_serialinit, and up_putc
  *
  * Description:
- *   stubs that may be needed.  These stubs will be used if all UARTs are
+ *   Stubs that may be needed.  These stubs will be used if all UARTs are
  *   disabled.  In that case, the logic in common/up_initialize() is not
  *   smart enough to know that there are not UARTs and will still expect
  *   these interfaces to be provided.
@@ -978,12 +977,6 @@ int up_putc(int ch)
 
 #endif /* HAVE_UART_DEVICE */
 #else /* USE_SERIALDRIVER */
-
-/* Common initialization logic will not not know that the all of the UARTs
- * have been disabled.  So, as a result, we may still have to provide
- * stub implementations of riscv_earlyserialinit(), riscv_serialinit(), and
- * up_putc().
- */
 
 /****************************************************************************
  * Name: up_putc

@@ -26,7 +26,6 @@
 
 #include "arm.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
 
 /****************************************************************************
  * Macros
@@ -36,8 +35,8 @@
 
 #ifdef CONFIG_DEBUG_FEATURES
 	.macro	showprogress, code
-	mov	r0, #\code
-	bl	arm_lowputc
+	mov		r0, #\code
+	bl		arm_lowputc
 	.endm
 #else
 	.macro	showprogress, code
@@ -53,7 +52,7 @@
  * below.
  */
 	.text
-        .global __start
+	.global __start
 	.type	__start, #function
 __start:
 
@@ -62,35 +61,35 @@ __start:
 	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
 	msr		cpsr, r0
 
-	showprogress 'A'
-
 	/* Setup system stack (and get the BSS range) */
 
 	adr		r0, .Lbssinit
-	ldmia	r0, {r4, r5, sp}
+	ldmia		r0, {r4, r5, sp}
 
-	/* Clear system BSS section */
-
-	mov		r0, #0
-1:	cmp		r4, r5
-	strcc	r0, [r4], #4
-	bcc		1b
-
-	showprogress 'B'
+	showprogress	'A'
 
 	/* Copy system .data sections to new home in RAM. */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 
 	adr		r3, .Ldatainit
-	ldmia	r3, {r0, r1, r2}
+	ldmia		r3, {r0, r1, r2}
 
-1:	ldmia	r0!, {r3 - r10}
-	stmia	r1!, {r3 - r10}
+1:	ldmia		r0!, {r3, r6 - r12}
+	stmia		r1!, {r3, r6 - r12}
 	cmp		r1, r2
 	blt		1b
 
 #endif
+
+	showprogress	'B'
+
+	/* Clear system BSS section */
+
+	mov		r0, #0
+1:	cmp		r4, r5
+	strcc		r0, [r4], #4
+	bcc		1b
 
 	/* Perform early serial initialization */
 
@@ -119,13 +118,13 @@ __start:
 	 */
 
 	adr		r3, .Lstkinit
-	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
+	ldmia		r3, {r0, r1, r2}		/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
 
-2:								/* Top of the loop */
+2:							/* Top of the loop */
 	sub		r1, r1, #1			/* R1 = Number of words remaining */
 	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4		/* Save stack color word, increment stack address */
-	bne		2b					/* Bottom of the loop */
+	str		r2, [r0], #4			/* Save stack color word, increment stack address */
+	bne		2b				/* Bottom of the loop */
 
 #endif
 

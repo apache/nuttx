@@ -24,14 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <arch/board/board.h>
-
 #include "arm.h"
 #include "cp15.h"
 #include "sctlr.h"
 #include "mmu.h"
 #include "smp.h"
-
 #include "chip.h"
 #include "arm_internal.h"
 
@@ -350,7 +347,7 @@ __cpu3_start:
 	/* Then write the configured control register */
 
 	mcr		CP15_SCTLR(r0)			/* Write control reg */
-	.rept	12						/* Cortex A8 wants lots of NOPs here */
+	.rept		12				/* Cortex A8 wants lots of NOPs here */
 	nop
 	.endr
 
@@ -408,11 +405,11 @@ __cpu3_start:
 	mov		r0, sp		/* R0 = end of IDLE stack */
 	ldmia		r3, {r1, r2}	/* R1 = Size of stack; R2 = coloration */
 
-1:								/* Top of the loop */
+1:							/* Top of the loop */
 	sub		r1, r1, #1			/* R1 = Number of words remaining */
 	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0, #-4]!		/* Save stack color word, increment stack address */
-	bne		1b					/* Bottom of the loop */
+	str		r2, [r0, #-4]!			/* Save stack color word, increment stack address */
+	bne		1b				/* Bottom of the loop */
 #endif
 
 	/* Branch to continue C level CPU initialization */
@@ -420,7 +417,7 @@ __cpu3_start:
 	mov		fp, #0				/* Clear framepointer */
 	mov		lr, #0				/* LR = return address (none) */
 	mov		r0, r5				/* Input parameter = CPU index */
-	b		arm_cpu_boot		/* Branch to C level CPU initialization */
+	b		arm_cpu_boot			/* Branch to C level CPU initialization */
 	.size	.Lcpu_vstart, .-.Lcpu_vstart
 
 /***************************************************************************

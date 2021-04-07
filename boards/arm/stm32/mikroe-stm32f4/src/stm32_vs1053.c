@@ -100,6 +100,7 @@ static int  up_read_dreq(FAR const struct vs1053_lower_s *lower);
  * following structure provides an MCU-independent mechanixm for controlling
  * the VS1053 GPIO interrupt.
  */
+
 static struct stm32_lower_s g_vs1053lower =
 {
   .lower =
@@ -165,15 +166,16 @@ static int up_read_dreq(FAR const struct vs1053_lower_s *lower)
  * Name: up_vs1053initialize
  ****************************************************************************/
 
-void up_vs1053initialize(FAR struct spi_dev_s* spi)
+void up_vs1053initialize(FAR struct spi_dev_s * spi)
 {
   int   ret;
   char  name[8];
-  FAR struct audio_lowerhalf_s *pVs1053;
+  FAR struct audio_lowerhalf_s *PVS1053;
 
   /* Assumptions:
    * 1) SPI pins were configured in up_spi.c early in the boot-up phase.
-   * 2) Clocking for the SPI3 peripheral was also provided earlier in boot-up.
+   * 2) Clocking for the SPI3 peripheral was also provided earlier in
+   * boot-up.
    */
 
   /* NOTE:  The RST line should be asserted early in the boot process
@@ -182,7 +184,7 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
    *        until the RST line is asserted.
    */
 
-  //(void)stm32_configgpio(GPIO_VS1053_RST);
+  /* (void)stm32_configgpio(GPIO_VS1053_RST); */
 
   /* Initialize the VS1053 DREQ GPIO line */
 
@@ -190,17 +192,18 @@ void up_vs1053initialize(FAR struct spi_dev_s* spi)
 
   /* Bind the SPI port to the VS1053 driver */
 
-  pVs1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
-  if (pVs1053 == NULL)
+  PVS1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
+  if (PVS1053 == NULL)
     {
-      auderr("ERROR: Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
+      auderr("ERROR: Failed to bind SPI port %d VS1053 device\n",
+             VS1053_DEVNO);
       return;
     }
 
   /* Now register the audio device */
 
   sprintf(name, "vs1053d%d", VS1053_DEVNO);
-  ret = audio_register(name, pVs1053);
+  ret = audio_register(name, PVS1053);
   if (ret < 0)
     {
       auderr("ERROR: Failed to register VS1053 Audio device\n");

@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/sim/src/sim/up_setjmp32.S
+ * libs/libc/machine/sim/arch_setjmp.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,7 @@
  * Included Files
  **************************************************************************/
 
-#include "up_internal.h"
+#include <arch/setjmp.h>
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -41,11 +41,11 @@
  **************************************************************************/
 
 	.text
-	.globl	SYMBOL(up_setjmp)
+	.globl	SYMBOL(setjmp)
 #ifdef __ELF__
-	.type	SYMBOL(up_setjmp), @function
+	.type	SYMBOL(setjmp), @function
 #endif
-SYMBOL(up_setjmp):
+SYMBOL(setjmp):
 
 	/* %ebx, %esi, %edi, and %ebp must be preserved.
 	 * save %ebx, $esi, and %edi now... */
@@ -74,13 +74,13 @@ SYMBOL(up_setjmp):
 	xorl	%eax, %eax
 	ret
 #ifdef __ELF__
-	.size	SYMBOL(up_setjmp), . - SYMBOL(up_setjmp)
+	.size	SYMBOL(setjmp), . - SYMBOL(setjmp)
 #endif
-	.globl	SYMBOL(up_longjmp)
+	.globl	SYMBOL(longjmp)
 #ifdef __ELF__
-	.type	SYMBOL(up_longjmp), @function
+	.type	SYMBOL(longjmp), @function
 #endif
-SYMBOL(up_longjmp):
+SYMBOL(longjmp):
 	movl	4(%esp), %ecx      /* jmpbuf in %ecx.  */
 	movl	8(%esp), %eax      /* Second argument is return value.  */
 
@@ -100,5 +100,5 @@ SYMBOL(up_longjmp):
 
 	jmp		*%edx
 #ifdef __ELF__
-	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
+	.size SYMBOL(longjmp), . - SYMBOL(longjmp)
 #endif

@@ -1,7 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/mikroe-stm32f4/src/stm32_mio283qt9a.c
  *
- * Interface definition for the MI0283QT-9A LCD from Multi-Inno Technology Co., Ltd.
+ * Interface definition for the MI0283QT-9A LCD from Multi-Inno Technology
+ * Co., Ltd.
  * LCD is based on the Ilitek ILI9341 LCD controller.
  *
  *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
@@ -69,38 +70,40 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Mikroe-STM32F4 Hardware Definitions ************************************************/
-/* --- ---------------------------------- -------------------- ------------------------
- * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
- *     (Family Data Sheet Table 1-1)     (PIC32MX7 Schematic)
- * --- ---------------------------------- -------------------- ------------------------
- *  39 PE8                                LCD_RST              TFT display
- *  46 PE15                               LCD-CS#              TFT display
- *  40 PE9                                LCD_BLED             LCD backlight LED
- *  43 PE12                               LCD-RS               TFT display
+/* Mikroe-STM32F4 Hardware Definitions **************************************/
+
+/* --- ------------------ -------------------- ------------------------
+ * PIN CONFIGURATIONS         SIGNAL NAME          ON-BOARD CONNECTIONS
+ *     (Family Data Sheet
+  *          Table 1-1)     (PIC32MX7 Schematic)
+ * --- ------------------ -------------------- ------------------------
+ *  39 PE8                  LCD_RST              TFT display
+ *  46 PE15                 LCD-CS#              TFT display
+ *  40 PE9                  LCD_BLED             LCD backlight LED
+ *  43 PE12                 LCD-RS               TFT display
  *
  *
- *  97 RE0                                T_D0                 TFT display
- *  98 RE1                                T_D1                 TFT display
- *   1 RE2                                T_D2                 TFT display
- *   2 RE3                                T_D3                 TFT display
- *   3 RE4                                T_D4                 TFT display
- *   4 RE5                                T_D5                 TFT display
- *   5 RE6                                T_D6                 TFT display
- *  38 RE7                                T_D7                 TFT display
+ *  97 RE0                  T_D0                 TFT display
+ *  98 RE1                  T_D1                 TFT display
+ *   1 RE2                  T_D2                 TFT display
+ *   2 RE3                  T_D3                 TFT display
+ *   3 RE4                  T_D4                 TFT display
+ *   4 RE5                  T_D5                 TFT display
+ *   5 RE6                  T_D6                 TFT display
+ *  38 RE7                  T_D7                 TFT display
  *
- *  41 PE10                               PMPRD
- *  42 RE11                               PMPWR
+ *  41 PE10                 PMPRD
+ *  42 RE11                 PMPWR
  *
  * TOUCHSCREEN PIN CONFIGURATIONS
- * PIN CONFIGURATIONS                     SIGNAL NAME          ON-BOARD CONNECTIONS
- * --- ---------------------------------- -------------------- ------------------------
- *  35 PB0                                LCD-YD               TFT display
- *   ?                                    LCD-XR               TFT display
- *   ?                                    LCD-YU               TFT display
- *  36 PB1                                LCD-XL               TFT display
- *  95 PB8                                DRIVEA               TFT display
- *  96 PB9                                DRIVEB               TFT display
+ * PIN CONFIGURATIONS       SIGNAL NAME          ON-BOARD CONNECTIONS
+ * --- ------------------ ----------------- --------------------------
+ *  35 PB0                  LCD-YD               TFT display
+ *   ?                      LCD-XR               TFT display
+ *   ?                      LCD-YU               TFT display
+ *  36 PB1                  LCD-XL               TFT display
+ *  95 PB8                  DRIVEA               TFT display
+ *  96 PB9                  DRIVEB               TFT display
  */
 
 /****************************************************************************
@@ -118,6 +121,7 @@ struct stm32f4_dev_s
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+
 /* Low Level LCD access */
 
 static void stm32_select(FAR struct mio283qt9a_lcd_s *dev);
@@ -133,7 +137,9 @@ static void stm32_backlight(FAR struct mio283qt9a_lcd_s *dev, int power);
  * Private Data
  ****************************************************************************/
 
-/* This is the driver state structure (there is no retained state information) */
+/* This is the driver state structure
+ * (there is no retained state information)
+ */
 
 static struct stm32f4_dev_s g_stm32f4_lcd =
 {
@@ -249,11 +255,12 @@ static void stm32_index(FAR struct mio283qt9a_lcd_s *dev, uint8_t index)
 
   stm32_command();
 
-  /* Write the index register to the 8-bit GPIO pin bus.  We are violating the
-   * datasheet here a little by driving the WR pin low at the same time as
-   * the data, but the fact is that all ASIC logic will latch on the rising
-   * edge of WR anyway, not the falling edge.  We are just shaving off a few
-   * cycles every time this routine is called, which will be fairly often.
+  /* Write the index register to the 8-bit GPIO pin bus.  We are violating
+   * the datasheet here a little by driving the WR pin low at the same time
+   * as the data, but the fact is that all ASIC logic will latch on the
+   * rising edge of WR anyway, not the falling edge.  We are just shaving off
+   * a few cycles every time this routine is called, which will be fairly
+   * often.
    */
 
   *g_portsetreset = index | ((uint8_t) (~index) << 16) |
@@ -295,13 +302,13 @@ static uint16_t stm32_read(FAR struct mio283qt9a_lcd_s *dev)
 
   /* Set the I/O Port to input mode.  Ugly, but fast. */
 
-  *portmode &= 0xFFFF0000;
+  *portmode &= 0xffff0000;
 
   /* Read the data */
 
   *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
   stm32_tinydelay();
-  data = *portinput & 0x00FF;
+  data = *portinput & 0x00ff;
   *portsetreset = (1 << LCD_PMPRD_PIN);
 
   /* Test if a 16-bit read is needed (GRAM mode) */
@@ -328,20 +335,20 @@ static uint16_t stm32_read(FAR struct mio283qt9a_lcd_s *dev)
 
       /* Clip RED sample to 5-bits and shit to MSB */
 
-      data = (data & 0xF8) << 8;
+      data = (data & 0xf8) << 8;
 
       /* Now read Green sample */
 
       *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
       stm32_tinydelay();
-      data |= (*portinput & 0x00FC) << 3;
+      data |= (*portinput & 0x00fc) << 3;
       *portsetreset = (1 << LCD_PMPRD_PIN);
 
       /* Now read Blue sample */
 
       *portsetreset = (1 << LCD_PMPRD_PIN) << 16;
       stm32_tinydelay();
-      data |= (*portinput & 0x00F8) >> 3;
+      data |= (*portinput & 0x00f8) >> 3;
       *portsetreset = (1 << LCD_PMPRD_PIN);
     }
 
@@ -374,17 +381,19 @@ static void stm32_write(FAR struct mio283qt9a_lcd_s *dev, uint16_t data)
 
   if (priv->grammode)
     {
-      /* Need to write 16-bit pixel data (16 BPP).  Write the upper pixel data first */
+      /* Need to write 16-bit pixel data (16 BPP).
+       *  Write the upper pixel data first
+       */
 
-      *g_portsetreset = ((data>>8) & 0xFF) | (((~data>>8) & 0xFF) << 16) |
-        ((1 << LCD_PMPWR_PIN) << 16);
+      *g_portsetreset = ((data >> 8) & 0xff) | (((~data >> 8) & 0xff) <<
+                           16) | ((1 << LCD_PMPWR_PIN) << 16);
       stm32_tinydelay();
       *g_portsetreset = (1 << LCD_PMPWR_PIN);
     }
 
   /* Now write the lower 8-bit of data */
 
-  *g_portsetreset = (data & 0xFF) | ((~data & 0xFF) << 16) |
+  *g_portsetreset = (data & 0xff) | ((~data & 0xff) << 16) |
     ((1 << LCD_PMPWR_PIN) << 16);
   stm32_tinydelay();
   *g_portsetreset = (1 << LCD_PMPWR_PIN);
@@ -400,9 +409,9 @@ static void stm32_write(FAR struct mio283qt9a_lcd_s *dev, uint16_t data)
 
 static void stm32_backlight(FAR struct mio283qt9a_lcd_s *dev, int power)
 {
-  /* For now, we just control the backlight as a discrete.  Pulse width modulation
-   * would be required to vary the backlight level.  A low value turns the backlight
-   * off.
+  /* For now, we just control the backlight as a discrete.  Pulse width
+   * modulation would be required to vary the backlight level.  A low value
+   * turns the backlight off.
    */
 
   stm32_gpiowrite(GPIO_LCD_BLED, power > 0);
@@ -432,31 +441,31 @@ void stm32_lcdinitialize(void)
    */
 
 #ifdef CONFIG_LCD_MIO283QT9A
-   stm32_configgpio(GPIO_LCD_RST);
-   stm32_configgpio(GPIO_LCD_CS);
-   stm32_configgpio(GPIO_LCD_BLED);
-   stm32_gpiowrite(GPIO_LCD_BLED, false);
-   stm32_configgpio(GPIO_LCD_RS);
-   stm32_configgpio(GPIO_LCD_PMPWR);
-   stm32_configgpio(GPIO_LCD_PMPRD);
+  stm32_configgpio(GPIO_LCD_RST);
+  stm32_configgpio(GPIO_LCD_CS);
+  stm32_configgpio(GPIO_LCD_BLED);
+  stm32_gpiowrite(GPIO_LCD_BLED, false);
+  stm32_configgpio(GPIO_LCD_RS);
+  stm32_configgpio(GPIO_LCD_PMPWR);
+  stm32_configgpio(GPIO_LCD_PMPRD);
 
-   /* Configure PE0-7 for output */
+  /* Configure PE0-7 for output */
 
-   stm32_configgpio(GPIO_LCD_T_D0);
-   stm32_configgpio(GPIO_LCD_T_D1);
-   stm32_configgpio(GPIO_LCD_T_D2);
-   stm32_configgpio(GPIO_LCD_T_D3);
-   stm32_configgpio(GPIO_LCD_T_D4);
-   stm32_configgpio(GPIO_LCD_T_D5);
-   stm32_configgpio(GPIO_LCD_T_D6);
-   stm32_configgpio(GPIO_LCD_T_D7);
+  stm32_configgpio(GPIO_LCD_T_D0);
+  stm32_configgpio(GPIO_LCD_T_D1);
+  stm32_configgpio(GPIO_LCD_T_D2);
+  stm32_configgpio(GPIO_LCD_T_D3);
+  stm32_configgpio(GPIO_LCD_T_D4);
+  stm32_configgpio(GPIO_LCD_T_D5);
+  stm32_configgpio(GPIO_LCD_T_D6);
+  stm32_configgpio(GPIO_LCD_T_D7);
 
 #else
   /* Just configure the backlight control as an output and turn off the
    * backlight for now.
    */
 
-   stm32_configgpio(GPIO_LCD_BLED);
+  stm32_configgpio(GPIO_LCD_BLED);
 #endif
 }
 
@@ -464,16 +473,16 @@ void stm32_lcdinitialize(void)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware.  The initial state of the LCD is
+ *   fully initialized, display memory cleared, and the LCD ready to use,
+ *   but with the power setting at 0 (full off).
  *
  ****************************************************************************/
 
 int board_lcd_initialize(void)
 {
-  /* Only initialize the driver once.  NOTE: The LCD GPIOs were already configured
-   * by stm32_lcdinitialize.
+  /* Only initialize the driver once.
+   * NOTE: The LCD GPIOs were already configured by stm32_lcdinitialize.
    */
 
   if (!g_stm32f4_lcd.drvr)
@@ -510,8 +519,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.  This
+ *   allows support for multiple LCD devices.
  *
  ****************************************************************************/
 

@@ -340,7 +340,7 @@ for line in $testlist; do
     dir=`echo $line | cut -d',' -f1`
     list=`find boards$dir -name defconfig | cut -d'/' -f4,6`
     for i in ${list}; do
-      dotest $i${line/$dir/}
+      dotest $i${line/"$dir"/}
     done
   else
     dotest $line

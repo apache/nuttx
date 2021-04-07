@@ -91,16 +91,17 @@
 #define STM32L4_BOARD_USEHSI           1
 
 /* Prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
- as per comment above HSI) */
+ * as per comment above HSI)
+ */
 
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as 16 MHz / 1 * 10 / 2 = 80 MHz
  *
- * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- * the system clock; this should be configurable since not all applications may
- * want things done this way.
+ * XXX NOTE: currently the main PLL is implicitly turned on and is implicitly
+ * the system clock; this should be configurable since not all applications
+ * may want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(10)
@@ -352,8 +353,9 @@
 #endif
 
 /* The timer clock frequencies are automatically defined by hardware.
- * If the APB prescaler equals 1, the timer clock frequencies are set to the same
- * frequency as that of the APB domain. Otherwise they are set to twice.
+ * If the APB prescaler equals 1, the timer clock frequencies are set to
+ * the same frequency as that of the APB domain. Otherwise they are set to
+ * twice.
  * Note: TIM1,8,15,16,17 are on APB2, others on APB1
  */
 

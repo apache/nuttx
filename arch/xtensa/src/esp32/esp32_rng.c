@@ -201,8 +201,6 @@ static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
 
   esp32_rng_start();
 
-  /* Now, got data */
-
   while (buflen > 0)
     {
       uint32_t word = esp_random();

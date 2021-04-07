@@ -32,8 +32,7 @@
  * File info
  ****************************************************************************/
 
-	.cpu	cortex-m0
-	.file	"arm_signal_handler.S"
+	.file		"arm_signal_handler.S"
 
 /****************************************************************************
  * Private Functions
@@ -49,6 +48,10 @@
  * Description:
  *   This function is the user-space, signal handler trampoline function.  It
  *   is called from up_signal_dispatch() in user-mode.
+ *
+ *     R0-R3, R11 - volatile registers need not be preserved.
+ *     R4-R10 - static registers must be preserved
+ *     R12-R14 - LR and SP must be preserved
  *
  * Input Parameters:
  *   R0 = sighand
@@ -72,7 +75,7 @@ up_signal_handler:
 
 	/* Save some register */
 
-	push	{r4, r5			/* Save R4 and R5 on the stack */
+	push		{r4, r5}		/* Save R4 and R5 on the stack */
 	mov		r5, lr			/* Save LR in R5 */
 
 	/* Call the signal handler */
@@ -81,7 +84,7 @@ up_signal_handler:
 	mov		r0, r1			/* R0=signo */
 	mov		r1, r2			/* R1=info */
 	mov		r2, r3			/* R2=ucontext */
-	blx		r4				/* Call the signal handler */
+	blx		r4			/* Call the signal handler */
 
 	/* Restore the registers */
 
@@ -91,7 +94,7 @@ up_signal_handler:
 	/* Execute the SYS_signal_handler_return SVCall (will not return) */
 
 	mov		r0, #SYS_signal_handler_return
-	svc		0
+	svc		#SYS_syscall
 	nop
 
 	.size	up_signal_handler, .-up_signal_handler

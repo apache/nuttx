@@ -296,9 +296,7 @@ struct stm32_i2s_s
   sem_t             exclsem;      /* Assures mutually exclusive access to I2S */
   bool              initialized;  /* Has I2S interface been initialized */
   uint8_t           datalen;      /* Data width (8 or 16) */
-#ifdef CONFIG_DEBUG_FEATURES
   uint8_t           align;        /* Log2 of data width (0 or 1) */
-#endif
   uint8_t           rxenab:1;     /* True: RX transfers enabled */
   uint8_t           txenab:1;     /* True: TX transfers enabled */
   uint8_t           i2sno:6;      /* I2S controller number (0 or 1) */
@@ -1750,15 +1748,11 @@ static int i2s_checkwidth(struct stm32_i2s_s *priv, int bits)
   switch (bits)
     {
     case 8:
-#ifdef CONFIG_DEBUG
       priv->align = 0;
-#endif
       break;
 
     case 16:
-#ifdef CONFIG_DEBUG
       priv->align = 1;
-#endif
       break;
 
     default:

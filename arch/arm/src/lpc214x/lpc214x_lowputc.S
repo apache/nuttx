@@ -25,8 +25,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-#include "arm_internal.h"
 
 #include "lpc214x_pinsel.h"
 #include "lpc214x_uart.h"
@@ -141,7 +139,7 @@ arm_lowputc:
 
 	/* And return */
 
-	mov     pc, lr
+	mov	pc, lr
 	.size	arm_lowputc, . - arm_lowputc
 
 /* This performs basic initialization of the UART.  This can be called very

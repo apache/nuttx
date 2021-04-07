@@ -88,9 +88,10 @@ int syslog_putc(int ch)
                   break;
                 }
 
-              DEBUGASSERT(g_syslog_channel[i]->sc_force != NULL);
+              DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
 
-              g_syslog_channel[i]->sc_force(ch);
+              g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i],
+                                                    ch);
             }
         }
     }
@@ -111,9 +112,9 @@ int syslog_putc(int ch)
               break;
             }
 
-          DEBUGASSERT(g_syslog_channel[i]->sc_putc != NULL);
+          DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_putc != NULL);
 
-          g_syslog_channel[i]->sc_putc(ch);
+          g_syslog_channel[i]->sc_ops->sc_putc(g_syslog_channel[i], ch);
         }
     }
 

@@ -201,6 +201,9 @@ static const char *g_white_prefix[] =
   "ub8",     /* Ref:  include/fixedmath.h */
   "ub16",    /* Ref:  include/fixedmath.h */
   "ub32",    /* Ref:  include/fixedmath.h */
+  "ASCII_",  /* Ref:  include/nuttx/ascii.h */
+  "XK_",     /* Ref:  include/input/X11_keysymdef.h */
+
   NULL
 };
 
@@ -234,41 +237,40 @@ static const char *g_white_list[] =
 
   "L_tmpnam",
 
-  /* Ref: ascii.h */
-
-  "ASCII_a",
-  "ASCII_b",
-  "ASCII_c",
-  "ASCII_d",
-  "ASCII_e",
-  "ASCII_f",
-  "ASCII_g",
-  "ASCII_h",
-  "ASCII_i",
-  "ASCII_j",
-  "ASCII_k",
-  "ASCII_l",
-  "ASCII_m",
-  "ASCII_n",
-  "ASCII_o",
-  "ASCII_p",
-  "ASCII_q",
-  "ASCII_r",
-  "ASCII_s",
-  "ASCII_t",
-  "ASCII_u",
-  "ASCII_v",
-  "ASCII_w",
-  "ASCII_x",
-  "ASCII_y",
-  "ASCII_z",
-
-/* Ref:
- * nuttx/compiler.h
- */
+  /* Ref:
+   * nuttx/compiler.h
+   */
 
   "_Far",
   "_Erom",
+
+  /* Ref:
+   * fs/nfs/rpc.h
+   * fs/nfs/nfs_proto.h
+   */
+
+  "CREATE3args",
+  "CREATE3resok",
+  "LOOKUP3args",
+  "LOOKUP3filename",
+  "LOOKUP3resok",
+  "WRITE3args",
+  "WRITE3resok",
+  "READ3args",
+  "READ3resok",
+  "REMOVE3args",
+  "REMOVE3resok",
+  "RENAME3args",
+  "RENAME3resok",
+  "MKDIR3args",
+  "MKDIR3resok",
+  "RMDIR3args",
+  "RMDIR3resok",
+  "READDIR3args",
+  "READDIR3resok",
+  "SETATTR3args",
+  "SETATTR3resok",
+  "FS3args",
 
   NULL
 };

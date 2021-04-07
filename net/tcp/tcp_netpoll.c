@@ -97,7 +97,18 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       /* A poll is a sign that we are free to send data. */
 
-      else if (psock_tcp_cansend(info->psock) >= 0)
+      /* Wake up poll() speculatively on TCP_ACKDATA.
+       * Note: our event handler is usually executed before
+       * psock_send_eventhandler, which might free IOBs/WRBs on TCP_ACKDATA.
+       * Revisit: consider some kind of priority for devif callback to allow
+       * this callback to be inserted after psock_send_eventhandler.
+       */
+
+      else if (psock_tcp_cansend(info->psock) >= 0
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+               || (flags & TCP_ACKDATA) != 0
+#endif
+              )
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -198,7 +209,11 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   if ((fds->events & POLLOUT) != 0)
     {
-      cb->flags |= TCP_POLL;
+      cb->flags |= TCP_POLL
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+                   | TCP_ACKDATA
+#endif
+                   ;
     }
 
   if ((fds->events & POLLIN) != 0)

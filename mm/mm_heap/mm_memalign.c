@@ -42,8 +42,8 @@
  *   within that chunk that meets the alignment request and then frees any
  *   leading or trailing space.
  *
- *   The alignment argument must be a power of two (not checked).  8-byte
- *   alignment is guaranteed by normal malloc calls.
+ *   The alignment argument must be a power of two.  8-byte alignment is
+ *   guaranteed by normal malloc calls.
  *
  ****************************************************************************/
 
@@ -55,6 +55,21 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   size_t alignedchunk;
   size_t mask = (size_t)(alignment - 1);
   size_t allocsize;
+  size_t newsize;
+
+  /* Make sure that alignment is less than half max size_t */
+
+  if (alignment >= (SIZE_MAX / 2))
+    {
+      return NULL;
+    }
+
+  /* Make sure that alignment is a power of 2 */
+
+  if ((alignment & -alignment) != alignment)
+    {
+      return NULL;
+    }
 
   /* If this requested alinement's less than or equal to the natural
    * alignment of malloc, then just let malloc do the work.
@@ -77,8 +92,16 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * not include SIZEOF_MM_ALLOCNODE.
    */
 
-  size      = MM_ALIGN_UP(size);   /* Make multiples of our granule size */
-  allocsize = size + 2*alignment;  /* Add double full alignment size */
+  newsize  = MM_ALIGN_UP(size);   /* Make multiples of our granule size */
+
+  allocsize = newsize + 2 * alignment; /* Add double full alignment size */
+
+  if ((newsize < size) || (allocsize < newsize))
+    {
+      /* Integer overflow */
+
+      return NULL;
+    }
 
   /* Then malloc that size */
 
@@ -117,8 +140,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       next = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size);
 
       /* Make sure that there is space to convert the preceding
-       * mm_allocnode_s into an mm_freenode_s.
-       * I think that this should always be true
+       * mm_allocnode_s into an mm_freenode_s.  I think that this should
+       * always be true
        */
 
       DEBUGASSERT(alignedchunk >= rawchunk + 8);

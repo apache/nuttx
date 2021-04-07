@@ -62,6 +62,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the changeable state of the automounter */
 
 struct stm32_automount_state_s
@@ -76,8 +77,8 @@ struct stm32_automount_state_s
 
 struct stm32_automount_config_s
 {
-  /* This must be first thing in structure so that we can simply cast from struct
-   * automount_lower_s to struct stm32_automount_config_s
+  /* This must be first thing in structure so that we can simply cast from
+   * struct automount_lower_s to struct stm32_automount_config_s
    */
 
   struct automount_lower_s lower;             /* Publicly visible part */
@@ -90,8 +91,9 @@ struct stm32_automount_config_s
  ****************************************************************************/
 
 static int  stm32_attach(FAR const struct automount_lower_s *lower,
-                       automount_handler_t isr, FAR void *arg);
-static void stm32_enable(FAR const struct automount_lower_s *lower, bool enable);
+                         automount_handler_t isr, FAR void *arg);
+static void stm32_enable(FAR const struct automount_lower_s *lower,
+                         bool enable);
 static bool stm32_inserted(FAR const struct automount_lower_s *lower);
 
 /****************************************************************************
@@ -107,8 +109,10 @@ static const struct stm32_automount_config_s g_mb1_mmcsdconfig =
     .fstype     = CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_UDELAY),
+    .ddelay     = MSEC2TICK(
+                  CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK(
+                  CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_UDELAY),
     .attach     = stm32_attach,
     .enable     = stm32_enable,
     .inserted   = stm32_inserted
@@ -127,8 +131,10 @@ static const struct stm32_automount_config_s g_mb2_mmcsdconfig =
     .fstype     = CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_UDELAY),
+    .ddelay     = MSEC2TICK(
+                  CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK(
+                  CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_UDELAY),
     .attach     = stm32_attach,
     .enable     = stm32_enable,
     .inserted   = stm32_inserted
@@ -197,7 +203,8 @@ static int stm32_attach(FAR const struct automount_lower_s *lower,
  *
  ****************************************************************************/
 
-static void stm32_enable(FAR const struct automount_lower_s *lower, bool enable)
+static void stm32_enable(FAR const struct automount_lower_s *lower,
+                         bool enable)
 {
   FAR const struct stm32_automount_config_s *config;
   FAR struct stm32_automount_state_s *state;
@@ -310,16 +317,16 @@ int stm32_automount_initialize(void)
  * Name:  stm32_automount_event
  *
  * Description:
- *   The HSMCI card detection logic has detected an insertion or removal event.  It
- *   has already scheduled the MMC/SD block driver operations.  Now we need to
- *   schedule the auto-mount event which will occur with a substantial delay to make
- *   sure that everything has settle down.
+ *   The HSMCI card detection logic has detected an insertion or removal
+ *   event.  It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
  *
  * Input Parameters:
- *   slotno - Identifies the MB slot: MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO.  There is a
- *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
- *      number.
+ *   slotno - Identifies the MB slot: MB1_MMCSD_SLOTNO or MB2_MMCSD_SLOTNO.
+ *      There is a terminology problem here:  Each HSMCI supports two slots,
+ *      slot A and slot B. Only slot A is used.  So this is not a really a
+ *      slot, but an HSCMI peripheral number.
  *   inserted - True if the card is inserted in the slot.  False otherwise.
  *
  *  Returned Value:

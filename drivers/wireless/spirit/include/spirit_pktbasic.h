@@ -9,41 +9,44 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
 
 #ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTBASIC_H
 #define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTBASIC_H
 
-/* This module can be used to manage the configuration of Spirit Basic packets.
+/* This module can be used to manage the configuration of Spirit Basic
+ * packets.
  * The user can obtain a packet configuration filling the structure struct
- * spirit_pktbasic_init_s, defining in it some general parameters for the Spirit Basic
- * packet format.  Another structure the user can fill is struct spirit_pktbasic_addr_s
- * to define the addresses which will be used during the communication.  In
- * addition, functions to set the payload length and the destination address
- * are provided.
+ * spirit_pktbasic_init_s, defining in it some general parameters for the
+ * Spirit Basic packet format.  Another structure the user can fill is struct
+ * spirit_pktbasic_addr_s to define the addresses which will be used during
+ * the communication.  In addition, functions to set the payload length and
+ * the destination address are provided.
  *
  * Example:
  *
@@ -53,7 +56,8 @@
  *   PKT_SYNC_LENGTH_4BYTES,            # sync word length in bytes
  *   0x1A2635A8,                        # sync word
  *   PKT_LENGTH_VAR,                    # variable or fixed payload length
- *   7,                                 # length field width in bits (used only for variable length)
+ *   7,                                 # length field width in bits
+ *                                        (used only for variable length)
  *   PKT_NO_CRC,                        # CRC mode
  *   PKT_CONTROL_LENGTH_0BYTES,         # control field length
  *   S_ENABLE,                          # address field
@@ -63,12 +67,12 @@
  *
  * struct spirit_pktbasic_addr_s g_pktbasic_addrinit =
  * {
- *   S_ENABLE,                          # enable/disable filtering on my address
- *   0x34,                              # my address (address of the current node)
- *   S_DISABLE,                         # enable/disable filtering on multicast address
- *   0xee,                              # multicast address
- *   S_DISABLE,                         # enable/disable filtering on broadcast address
- *   0xff                               # broadcast address
+ *   S_ENABLE,                 # enable/disable filtering on my address
+ *   0x34,                     # my address (address of the current node)
+ *   S_DISABLE,                # enable/disable filtering on multicast address
+ *   0xee,                     # multicast address
+ *   S_DISABLE,                # enable/disable filtering on broadcast address
+ *   0xff                      # broadcast address
  * };
  *
  * ...
@@ -194,7 +198,7 @@ struct spirit_pktbasic_addr_s
  ******************************************************************************/
 
 int spirit_pktbasic_initialize(FAR struct spirit_library_s *spirit,
-                               FAR const struct spirit_pktbasic_init_s *pktbasic);
+                        FAR const struct spirit_pktbasic_init_s *pktbasic);
 
 /******************************************************************************
  * Name: spirit_pktbasic_get_setup
@@ -232,7 +236,7 @@ int spirit_pktbasic_get_setup(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_pktbasic_addr_initialize(FAR struct spirit_library_s *spirit,
-                                    FAR struct spirit_pktbasic_addr_s *basicaddr);
+                                FAR struct spirit_pktbasic_addr_s *basicaddr);
 
 /******************************************************************************
  * Name: spirit_pktbasic_get_addrsetup
@@ -251,7 +255,7 @@ int spirit_pktbasic_addr_initialize(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_pktbasic_get_addrsetup(FAR struct spirit_library_s *spirit,
-                                  FAR struct spirit_pktbasic_addr_s *basicaddr);
+                            FAR struct spirit_pktbasic_addr_s *basicaddr);
 
 /******************************************************************************
  * Name: spirit_pktbasic_set_format

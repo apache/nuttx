@@ -27,7 +27,6 @@
 
 #ifdef CONFIG_ARCH_FPU
 
-	.file	"arm_fpuconfig.S"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,6 +37,7 @@
  ****************************************************************************/
 
 	.globl	arm_fpuconfig
+	.file	"arm_fpuconfig.S"
 
 /****************************************************************************
  * Assembly Macros
@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_fpuconfig
+ * Name: arm_fpuconfig
  *
  * Description:
  *   Configure the FPU.  Enables access to CP10 and CP11
@@ -77,9 +77,9 @@ arm_fpuconfig:
 
 	/* Set FPEXC.EN (B30) */
 
-	fmrx	r0, fpexc
+	fmrx		r0, fpexc
 	orr		r0, r0, #0x40000000
-	fmxr	fpexc, r0
+	fmxr		fpexc, r0
 	bx		lr
 	.size	arm_fpuconfig, . - arm_fpuconfig
 #endif

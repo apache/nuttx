@@ -34,7 +34,6 @@
  * Public Symbols
  ****************************************************************************/
 
-	.cpu	cortex-m0
 	.file	"vfork.S"
 	.globl	up_vfork
 
@@ -46,20 +45,21 @@
  * Name: vfork
  *
  * Description:
- *   The vfork() function has the same effect as fork(), except that the behavior is
- *   undefined if the process created by vfork() either modifies any data other than
- *   a variable of type pid_t used to store the return value from vfork(), or returns
- *   from the function in which vfork() was called, or calls any other function before
- *   successfully calling _exit() or one of the exec family of functions.
+ *   The vfork() function has the same effect as fork(), except that the
+ *   behavior is undefined if the process created by vfork() either modifies
+ *   any data other than a variable of type pid_t used to store the return
+ *   value from vfork(), or returns from the function in which vfork() was
+ *   called, or calls any other function before successfully calling _exit()
+ *   or one of the exec family of functions.
  *
- *   This thin layer implements vfork by simply calling up_vfork() with the vfork()
- *   context as an argument.  The overall sequence is:
+ *   This thin layer implements vfork by simply calling up_vfork() with the
+ *   vfork() context as an argument.  The overall sequence is:
  *
  *   1) User code calls vfork().  vfork() collects context information and
  *      transfers control up up_vfork().
  *   2) up_vfork()and calls nxtask_setup_vfork().
- *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.  This
- *      consists of:
+ *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
+ *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
@@ -76,10 +76,10 @@
  *   None
  *
  * Returned Value:
- *   Upon successful completion, vfork() returns 0 to the child process and returns
- *   the process ID of the child process to the parent process. Otherwise, -1 is
- *   returned to the parent, no child process is created, and errno is set to
- *   indicate the error.
+ *   Upon successful completion, vfork() returns 0 to the child process and
+ *   returns the process ID of the child process to the parent process.
+ *   Otherwise, -1 is returned to the parent, no child process is created,
+ *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 
@@ -91,21 +91,21 @@
 vfork:
 	/* Create a stack frame */
 
-	mov		r0, sp					/* Save the value of the stack on entry */
+	mov		r0, sp			/* Save the value of the stack on entry */
 	sub		sp, sp, #VFORK_SIZEOF	/* Allocate the structure on the stack */
 
 	/* CPU registers */
 	/* Save the volatile registers */
 
 	mov		r1, sp
-	stmia	r1!, {r4-r7}			/* Save r4-r7 in the structure */
-	mov		r4, r8					/* Copy high registers to low registers */
+	stmia		r1!, {r4-r7}		/* Save r4-r7 in the structure */
+	mov		r4, r8			/* Copy high registers to low registers */
 	mov		r5, r9
 	mov		r6, r10
 	mov		r7, fp
-	stmia	r1!, {r4-r7}			/* Save r8-r10 and fp in the structure */
-	mov		r5, lr					/* Copy lr to a low register */
-	stmia	r1!, {r0,r5}			/* Save sp and lr in the structure */
+	stmia		r1!, {r4-r7}		/* Save r8-r10 and fp in the structure */
+	mov		r5, lr			/* Copy lr to a low register */
+	stmia		r1!, {r0,r5}		/* Save sp and lr in the structure */
 
 	/* Then, call up_vfork(), passing it a pointer to the stack structure */
 
@@ -115,7 +115,7 @@ vfork:
 	/* Recover r4-r7 that were destroyed before up_vfork was called */
 
 	mov		r1, sp
-	ldmia	r1!, {r4-r7}
+	ldmia		r1!, {r4-r7}
 
 	/* Release the stack data and return the value returned by up_vfork */
 

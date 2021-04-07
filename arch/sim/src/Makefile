@@ -41,17 +41,13 @@ REQUIREDOBJS = $(LINKOBJS)
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
-  ASRCS += up_setjmp32.S
   ASRCS += up_vfork32.S
 else
-  ASRCS += up_setjmp64.S
   ASRCS += up_vfork64.S
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
-  ASRCS += up_setjmp32.S
   ASRCS += up_vfork32.S
 else ifeq ($(CONFIG_HOST_ARM),y)
-  ASRCS += up_setjmp_arm.S
   ASRCS += up_vfork_arm.S
 endif
 
@@ -181,7 +177,7 @@ endif
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
-ifneq ($(HOSTOS),Cygwin)
+ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
   HOSTSRCS += up_tapdev.c
 ifeq ($(CONFIG_SIM_NET_BRIDGE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE
@@ -190,10 +186,10 @@ endif
 ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
 endif
-else # HOSTOS != Cygwin
+else # CONFIG_WINDOWS_CYGWIN != y
   HOSTSRCS += up_wpcap.c
   STDLIBS = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
-endif # HOSTOS != Cygwin
+endif # CONFIG_WINDOWS_CYGWIN != y
 else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT_PATH=\"$(CONFIG_SIM_NETDEV_VPNKIT_PATH)\"
@@ -252,7 +248,7 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 # Override in Make.defs if linker is not 'ld'
 
-ifneq ($(HOSTOS),Darwin)
+ifneq ($(CONFIG_HOST_MACOS),y)
   ARCHSCRIPT += -T nuttx.ld
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group

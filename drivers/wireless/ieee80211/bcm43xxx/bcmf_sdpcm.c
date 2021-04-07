@@ -205,7 +205,8 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
   /* Read remaining frame data */
 
-  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t *)header + 4, len - 4);
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0,
+                           (uint8_t *)header + 4, len - 4);
   if (ret != OK)
     {
       ret = -EIO;
@@ -377,7 +378,8 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
 {
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
   struct bcmf_sdio_frame *sframe = (struct bcmf_sdio_frame *)frame;
-  struct bcmf_sdpcm_header *header = (struct bcmf_sdpcm_header *)sframe->data;
+  struct bcmf_sdpcm_header *header =
+                           (struct bcmf_sdpcm_header *)sframe->data;
 
   /* Prepare sw header */
 

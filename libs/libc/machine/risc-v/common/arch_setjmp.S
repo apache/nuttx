@@ -1,5 +1,5 @@
 ############################################################################
-# arch/risc-v/src/common/riscv_setjmp.S
+# libs/libc/machine/risc-v/common/arch_setjmp.S
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

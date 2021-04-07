@@ -238,7 +238,7 @@
 #  define ADC_CFGR_EXTSEL_T1CC1      (0x0 << ADC_CFGR_EXTSEL_SHIFT)    /* 0000: Timer 1 CC1 event */
 #  define ADC_CFGR_EXTSEL_T1CC2      (0x01 << ADC_CFGR_EXTSEL_SHIFT)   /* 0001: Timer 1 CC2 event */
 #  define ADC_CFGR_EXTSEL_T1CC3      (0x02 << ADC_CFGR_EXTSEL_SHIFT)   /* 0010: Timer 1 CC3 event */
-#  define ADC_CFGR_EXTSEL_T2CC2      (0x03 << ADC_CFGR_EXTSEL_SHIFT)   /* 0011: Timer 2 CC2 event */
+#  define ADC_CFGR_EXTSEL_T2CC4      (0x03 << ADC_CFGR_EXTSEL_SHIFT)   /* 0011: Timer 2 CC4 event */
 #  define ADC_CFGR_EXTSEL_T3TRGO     (0x04 << ADC_CFGR_EXTSEL_SHIFT)   /* 0100: Timer 3 TRGO event */
 #  if !defined(CONFIG_STM32L4_STM32L4X3)
 #    define ADC_CFGR_EXTSEL_T4CC4    (0x05 << ADC_CFGR_EXTSEL_SHIFT)   /* 0101: Timer 4 CC4 event */

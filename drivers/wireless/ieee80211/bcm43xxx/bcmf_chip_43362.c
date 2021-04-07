@@ -91,3 +91,7 @@ const struct bcmf_sdio_chip bcmf_43362_config_sdio =
   .firmware_image_size = (FAR unsigned int *)&bcm43362_firmware_image_len,
 #endif
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

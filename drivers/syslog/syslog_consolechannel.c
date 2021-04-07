@@ -26,9 +26,11 @@
 
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/compiler.h>
 
 #include "syslog.h"
 
@@ -56,29 +58,28 @@
 
 /* SYSLOG channel methods */
 
-#ifndef HAVE_LOWPUTC
-static int syslog_console_force(int ch);
-#endif
+static int syslog_console_force(FAR struct syslog_channel_s *channel,
+                                int ch);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the SYSLOG channel */
+/* This structure describes the channel's operations. */
 
-static const struct syslog_channel_s g_syslog_console_channel =
+static const struct syslog_channel_ops_s g_syslog_ops =
 {
   syslog_dev_putc,
-#ifdef HAVE_LOWPUTC
-  up_putc,
-#else
   syslog_console_force,
-#endif
   syslog_dev_flush,
 #ifdef CONFIG_SYSLOG_WRITE
   syslog_dev_write,
 #endif
 };
+
+/* Handle to the SYSLOG channel */
+
+FAR static struct syslog_channel_s *g_syslog_console_channel;
 
 /****************************************************************************
  * Private Functions
@@ -92,12 +93,17 @@ static const struct syslog_channel_s g_syslog_console_channel =
  *
  ****************************************************************************/
 
-#ifndef HAVE_LOWPUTC
-static int syslog_console_force(int ch)
+static int syslog_console_force(FAR struct syslog_channel_s *channel,
+                                int ch)
 {
+  UNUSED(channel);
+
+#ifdef HAVE_LOWPUTC
+  return up_putc(ch);
+#endif
+
   return ch;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -132,19 +138,22 @@ static int syslog_console_force(int ch)
 
 int syslog_console_channel(void)
 {
-  int ret;
-
   /* Initialize the character driver interface */
 
-  ret = syslog_dev_initialize("/dev/console", OPEN_FLAGS, OPEN_MODE);
-  if (ret < 0)
+  g_syslog_console_channel = syslog_dev_initialize("/dev/console",
+                                                   OPEN_FLAGS, OPEN_MODE);
+  if (g_syslog_console_channel == NULL)
     {
-      return ret;
+      return -ENOMEM;
     }
+
+  /* Register the channel operations */
+
+  g_syslog_console_channel->sc_ops = &g_syslog_ops;
 
   /* Use the character driver as the SYSLOG channel */
 
-  return syslog_channel(&g_syslog_console_channel);
+  return syslog_channel(g_syslog_console_channel);
 }
 
 #endif /* CONFIG_SYSLOG_CONSOLE */

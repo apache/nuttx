@@ -77,7 +77,7 @@
  *
  *   VCO input frequency        = PLL input clock frequency / PLLM,
  *                                2 <= PLLM <= 63
- *   VCO output frequency       = VCO input frequency × PLLN,
+ *   VCO output frequency       = VCO input frequency ï¿½ PLLN,
  *                                50 <= PLLN <= 432
  *   PLL output clock frequency = VCO frequency / PLLP,
  *                                PLLP = 2, 4, 6, or 8
@@ -110,7 +110,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/2 (50MHz) */
 

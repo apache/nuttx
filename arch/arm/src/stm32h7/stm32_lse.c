@@ -28,7 +28,7 @@
 
 #include "stm32_rcc.h"
 #include "stm32_pwr.h"
-#include "hardware/stm32h7xxx_dbgmcu.h"
+#include "stm32_dbgmcu.h"
 
 /****************************************************************************
  * Pre-processor Definitions

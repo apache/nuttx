@@ -55,14 +55,15 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef HAVE_SERIAL_CONSOLE
-#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#ifdef HAVE_UART_DEVICE
 
-static const struct esp32c3_uart_s g_console_config =
+#ifdef CONFIG_ESP32C3_UART0
+
+struct esp32c3_uart_s g_uart0_config =
 {
   .periph = ESP32C3_PERIPH_UART0,
-  .cpuint = -ENOMEM,
   .id = 0,
+  .cpuint = -ENOMEM,
   .irq = ESP32C3_IRQ_UART0,
   .baud = CONFIG_UART0_BAUD,
   .bits = CONFIG_UART0_BITS,
@@ -75,13 +76,15 @@ static const struct esp32c3_uart_s g_console_config =
   .rxsig = U0RXD_IN_IDX,
 };
 
-# elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#endif /* CONFIG_ESP32C3_UART0 */
 
-static const struct esp32c3_uart_s g_console_config =
+#ifdef CONFIG_ESP32C3_UART1
+
+struct esp32c3_uart_s g_uart1_config =
 {
   .periph = ESP32C3_PERIPH_UART1,
-  .cpuint = -ENOMEM,
   .id = 1,
+  .cpuint = -ENOMEM,
   .irq = ESP32C3_IRQ_UART1,
   .baud = CONFIG_UART1_BAUD,
   .bits = CONFIG_UART1_BITS,
@@ -93,8 +96,9 @@ static const struct esp32c3_uart_s g_console_config =
   .rxpin = CONFIG_ESP32C3_UART1_RXPIN,
   .rxsig = U1RXD_IN_IDX,
 };
-#endif /* CONFIG_UART0_SERIAL_CONSOLE */
-#endif /* HAVE_SERIAL_CONSOLE */
+
+#endif /* CONFIG_ESP32C3_UART1 */
+#endif /* HAVE_UART_DEVICE */
 
 /****************************************************************************
  * Public Functions
@@ -267,21 +271,53 @@ uint32_t esp32c3_lowputc_get_sclk(const struct esp32c3_uart_s * priv)
 
 void esp32c3_lowputc_baud(const struct esp32c3_uart_s * priv)
 {
-  const int sclk_div = 1;
-  uint32_t sclk_freq = esp32c3_lowputc_get_sclk(priv);
-  uint32_t clk_div = ((sclk_freq) << 4) / priv->baud;
-  uint32_t int_part = clk_div >> 4;
-  uint32_t frag_part = clk_div &  0xf;
+  int sclk_div;
+  uint32_t sclk_freq;
+  uint32_t clk_div;
+  uint32_t int_part;
+  uint32_t frag_part;
 
-  /* The baud rate configuration register is divided into
-   * an integer part and a fractional part.
+  /* Get serial clock */
+
+  sclk_freq = esp32c3_lowputc_get_sclk(priv);
+
+  /* Calculate integral part of the frequency divider factor.
+   * For low baud rates, the sclk must be less than half.
+   * For high baud rates, the sclk must be the higher.
    */
 
+  sclk_div =  DIV_UP(sclk_freq, MAX_UART_CLKDIV * priv->baud);
+
+  /* Calculate the clock divisor to achieve the baud rate.
+   * baud = f/clk_div
+   * f = sclk_freq/sclk_div
+   * clk_div                 = 16*int_part + frag_part
+   * 16*int_part + frag_part = 16*(sclk_freq/sclk_div)/baud
+   */
+
+  clk_div = ((sclk_freq) << 4) / (priv->baud * sclk_div);
+
+  /* Get the integer part of it. */
+
+  int_part = clk_div >> 4;
+
+  /* Get the frag part of it. */
+
+  frag_part = clk_div & 0xf;
+
+  /* Set integer part of the clock divisor for baud rate. */
+
   modifyreg32(UART_CLKDIV_REG(priv->id), UART_CLKDIV_M, int_part);
+
+  /* Set decimal part of the clock divisor for baud rate. */
+
   modifyreg32(UART_CLKDIV_REG(priv->id), UART_CLKDIV_FRAG_M,
-                              frag_part << UART_CLKDIV_FRAG_S);
+              (frag_part & UART_CLKDIV_FRAG_V) << UART_CLKDIV_FRAG_S);
+
+  /* Set the the integral part of the frequency divider factor. */
+
   modifyreg32(UART_CLK_CONF_REG(priv->id), UART_SCLK_DIV_NUM_M,
-                                (sclk_div - 1) << UART_SCLK_DIV_NUM_S);
+              (sclk_div - 1) << UART_SCLK_DIV_NUM_S);
 }
 
 /****************************************************************************
@@ -601,8 +637,8 @@ void esp32c3_lowputc_config_pins(const struct esp32c3_uart_s *priv)
 {
   /* Configure the pins */
 
-  esp32c3_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
   esp32c3_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
+  esp32c3_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
 
   esp32c3_configgpio(priv->rxpin, INPUT_FUNCTION_1);
   esp32c3_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
@@ -646,13 +682,19 @@ void riscv_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
 
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+  struct esp32c3_uart_s *priv = &g_uart0_config;
+#elif defined (CONFIG_UART1_SERIAL_CONSOLE)
+  struct esp32c3_uart_s *priv = &g_uart1_config;
+#endif
+
   /* Wait until the TX FIFO has space to insert new char */
 
-  while (esp32c3_lowputc_is_tx_fifo_full(&g_console_config));
+  while (esp32c3_lowputc_is_tx_fifo_full(priv));
 
   /* Then send the character */
 
-  esp32c3_lowputc_send_byte(&g_console_config, ch);
+  esp32c3_lowputc_send_byte(priv, ch);
 
 #endif /* HAVE_CONSOLE */
 }
@@ -661,51 +703,25 @@ void riscv_lowputc(char ch)
  * Name: esp32c3_lowsetup
  *
  * Description:
- *   This performs basic initialization of the UART used for the serial
- *   console.  Its purpose is to get the console output available as soon
- *   as possible.
+ *   This performs only the basic configuration for UART pins.
  *
  ****************************************************************************/
 
 void esp32c3_lowsetup(void)
 {
-  /* Enable and configure the selected console device */
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
 
-#if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+#ifdef CONFIG_ESP32C3_UART0
 
-  /* Initialize UART module */
+  esp32c3_lowputc_config_pins(&g_uart0_config);
 
-  /* Configure the UART Baud Rate */
+#endif
 
-  esp32c3_lowputc_baud(&g_console_config);
+#ifdef CONFIG_ESP32C3_UART1
 
-  /* Set a mode */
+  esp32c3_lowputc_config_pins(&g_uart1_config);
 
-  esp32c3_lowputc_normal_mode(&g_console_config);
+#endif
 
-  /* Parity */
-
-  esp32c3_lowputc_parity(&g_console_config);
-
-  /* Data Frame size */
-
-  esp32c3_lowputc_data_length(&g_console_config);
-
-  /* Stop bit */
-
-  esp32c3_lowputc_stop_length(&g_console_config);
-
-  /* No Tx idle interval */
-
-  esp32c3_lowputc_set_tx_idle_time(&g_console_config, 0);
-
-  /* Set pins */
-
-  esp32c3_lowputc_config_pins(&g_console_config);
-
-  /* Enable cores */
-
-  esp32c3_lowputc_enable_sclk(&g_console_config);
-
-#endif /* HAVE_SERIAL_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
+#endif /* !CONFIG_SUPPRESS_UART_CONFIG */
 }

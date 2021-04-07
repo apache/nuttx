@@ -20,14 +20,14 @@
 ############################################################################
 
 import sys
-import xmlrpclib
+import xmlrpc.client
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print 'Usage: %s <ip address>' % sys.argv[0]
+        print("Usage: %s <ip address>" % sys.argv[0])
         quit(1)
 
-    server_url = 'http://%s/device' % sys.argv[1]
-    server = xmlrpclib.ServerProxy(server_url)
+    server_url = "http://%s/device" % sys.argv[1]
+    server = xmlrpc.client.ServerProxy(server_url)
     result = server.get_device_stats("username", "password", 0)
-    print result
+    print(result)

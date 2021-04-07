@@ -83,7 +83,9 @@ int mbed_adc_setup(void)
 
   if (!initialized)
     {
-      /* Call lpc17_40_adcinitialize() to get an instance of the ADC interface */
+      /* Call lpc17_40_adcinitialize() to get an instance of the ADC
+       * interface
+       */
 
       adc = lpc17_40_adcinitialize();
       if (adc == NULL)

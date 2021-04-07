@@ -126,7 +126,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    */
 
   alignsize = MM_ALIGN_UP(size + SIZEOF_MM_ALLOCNODE);
-  DEBUGASSERT(alignsize >= size);  /* Check for integer overflow */
+  if (alignsize < size)
+    {
+      /* There must have been an integer overflow */
+
+      return NULL;
+    }
+
   DEBUGASSERT(alignsize >= MM_MIN_CHUNK);
   DEBUGASSERT(alignsize >= SIZEOF_MM_FREENODE);
 

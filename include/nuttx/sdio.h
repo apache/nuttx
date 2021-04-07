@@ -683,7 +683,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_WAITENABLE(dev,eventset)  ((dev)->waitenable(dev,eventset))
+#define SDIO_WAITENABLE(dev,eventset,timeout)  ((dev)->waitenable(dev,eventset,timeout))
 
 /****************************************************************************
  * Name: SDIO_EVENTWAIT
@@ -706,7 +706,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_EVENTWAIT(dev,timeout)  ((dev)->eventwait(dev,timeout))
+#define SDIO_EVENTWAIT(dev)  ((dev)->eventwait(dev))
 
 /****************************************************************************
  * Name: SDIO_CALLBACKENABLE
@@ -920,8 +920,9 @@ struct sdio_dev_s
 
   /* Event/Callback support */
 
-  void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
-  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32_t timeout);
+  void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset,
+          uint32_t timeout);
+  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev);
   void  (*callbackenable)(FAR struct sdio_dev_s *dev,
           sdio_eventset_t eventset);
 

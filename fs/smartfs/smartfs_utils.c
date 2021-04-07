@@ -212,7 +212,9 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
       goto errout;
     }
 
-  /* Make sure that that the media is write-able (if write access is needed) */
+  /* Make sure that that the media is write-able
+   * (if write access is needed)
+   */
 
   if (writeable && !geo.geo_writeenabled)
     {
@@ -724,7 +726,9 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
                                       break;
                                     }
 
-                                  /* Add used bytes to the total and point to next sector */
+                                  /* Add used bytes to the total and point
+                                   * to next sector
+                                   */
 
                                   if (*((FAR uint16_t *)header->used) !=
                                       SMARTFS_ERASEDSTATE_16BIT)
@@ -847,10 +851,12 @@ errout:
  ****************************************************************************/
 
 int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
-                        uint16_t parentdirsector, FAR const char *filename,
+                        uint16_t parentdirsector,
+                        FAR const char *filename,
                         uint16_t type, mode_t mode,
                         FAR struct smartfs_entry_s *direntry,
-                        uint16_t sectorno, FAR struct smartfs_ofile_s *sf)
+                        uint16_t sectorno,
+                        FAR struct smartfs_ofile_s *sf)
 {
   struct    smart_read_write_s readwrite;
   int       ret;
@@ -1264,7 +1270,9 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
           offset += entrysize;
         }
 
-      /* Test if the count it zero.  If it is, then we will release the sector */
+      /* Test if the count it zero.
+       * If it is, then we will release the sector
+       */
 
       if (count == 0)
         {
@@ -1275,7 +1283,9 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
 
           nextsector = SMARTFS_NEXTSECTOR(header);
 
-          /* Now loop through the dir sectors to find ourselves in the chain */
+          /* Now loop through the dir sectors to find ourselves in the
+           * chain
+           */
 
           sector = entry->dfirst;
           readwrite.offset = 0;

@@ -156,7 +156,7 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
 
       /* Program the Main Counter, MAINCNT (0x229<1:0>, 0x228, 0x227,
        * 0x226), and Remain Counter, REMCNT (0x225, 0x224), according to BO
-       * and SO values.  Refer to Section 3.15.1.3 “Sleep Mode * Counters”
+       * and SO values.  Refer to Section 3.15.1.3 "Sleep Mode * Counters"
        */
 
       mrf24j40_setreg(dev->spi, MRF24J40_REMCNTL, (remcnt & 0xff));
@@ -172,7 +172,8 @@ static void mrf24j40_setorder(FAR struct mrf24j40_radio_s *dev, uint8_t bo,
    * After configuring BO and SO, the beacon frame will be sent immediately.
    */
 
-  mrf24j40_setreg(dev->spi, MRF24J40_ORDER, ((bo << 4) & 0xf0) | (so & 0x0f));
+  mrf24j40_setreg(dev->spi, MRF24J40_ORDER,
+                 ((bo << 4) & 0xf0) | (so & 0x0f));
 }
 
 static void mrf24j40_slpclkcal(FAR struct mrf24j40_radio_s *dev)
@@ -264,7 +265,8 @@ int mrf24j40_txnotify(FAR struct ieee802154_radio_s *radio, bool gts)
         {
           /* Schedule to serialize the poll on the worker thread. */
 
-          work_queue(HPWORK, &dev->gts_pollwork, mrf24j40_dopoll_gts, dev, 0);
+          work_queue(HPWORK, &dev->gts_pollwork,
+                     mrf24j40_dopoll_gts, dev, 0);
         }
     }
   else
@@ -424,7 +426,8 @@ int mrf24j40_rxenable(FAR struct ieee802154_radio_s *radio, bool enable)
   return OK;
 }
 
-int mrf24j40_energydetect(FAR struct ieee802154_radio_s *radio, uint32_t nsymbols)
+int mrf24j40_energydetect(FAR struct ieee802154_radio_s *radio,
+                          uint32_t nsymbols)
 {
   return -ENOTTY;
 }
@@ -657,13 +660,17 @@ int mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
 
   if (sfspec->pancoord)
     {
-      /* Set the PANCOORD (RXMCR 0x00<3>) bit = 1to configure as PAN coordinator */
+      /* Set the PANCOORD (RXMCR 0x00<3>) bit = 1to configure as
+       * PAN coordinator
+       */
 
       reg = mrf24j40_getreg(dev->spi, MRF24J40_RXMCR);
       reg |= MRF24J40_RXMCR_PANCOORD;
       mrf24j40_setreg(dev->spi, MRF24J40_RXMCR, reg);
 
-      /* Set the SLOTTED (TXMCR 0x11<5>) bit = 1 to use Slotted CSMA-CA mode */
+      /* Set the SLOTTED (TXMCR 0x11<5>) bit = 1 to use
+       * Slotted CSMA-CA mode
+       */
 
       reg = mrf24j40_getreg(dev->spi, MRF24J40_TXMCR);
       reg |= MRF24J40_TXMCR_SLOTTED;
@@ -679,8 +686,8 @@ int mrf24j40_beaconstart(FAR struct ieee802154_radio_s *radio,
       dev->bsn = 0;
       mrf24j40_setreg(dev->spi, MRF24J40_BEACON_FIFO + 4, dev->bsn++);
 
-      /* Set the TXBMSK (TXBCON1 0x25<7>) bit = 1 to mask the beacon interrupt
-       * mask
+      /* Set the TXBMSK (TXBCON1 0x25<7>) bit = 1 to mask the beacon
+       * interrupt mask
        */
 
       reg = mrf24j40_getreg(dev->spi, MRF24J40_TXBCON1);

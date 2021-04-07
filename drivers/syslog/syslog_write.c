@@ -78,8 +78,9 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
                       break;
                     }
 
-                  DEBUGASSERT(g_syslog_channel[i]->sc_force != NULL);
-                  g_syslog_channel[i]->sc_force(*buffer++);
+                  DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
+                  g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i],
+                                                        *buffer++);
                 }
             }
         }
@@ -94,18 +95,21 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
             }
 
 #ifdef CONFIG_SYSLOG_WRITE
-          if (g_syslog_channel[i]->sc_write)
+          if (g_syslog_channel[i]->sc_ops->sc_write)
             {
-              nwritten = g_syslog_channel[i]->sc_write(buffer, buflen);
+              nwritten =
+                g_syslog_channel[i]->sc_ops->sc_write(g_syslog_channel[i],
+                                                      buffer, buflen);
             }
           else
 #endif
             {
-              DEBUGASSERT(g_syslog_channel[i]->sc_putc != NULL);
+              DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_putc != NULL);
 
               for (nwritten = 0; nwritten < buflen; nwritten++)
                 {
-                  g_syslog_channel[i]->sc_putc(*buffer++);
+                  g_syslog_channel[i]->sc_ops->sc_putc(g_syslog_channel[i],
+                                                       *buffer++);
                 }
             }
         }

@@ -36,7 +36,6 @@
  * Public Symbols
  ****************************************************************************/
 
-	.cpu	cortex-m0
 	.file	"arm_fullcontextrestore.S"
 
 /****************************************************************************
@@ -69,12 +68,12 @@ arm_fullcontextrestore:
 
 	/* Perform the System call with R0=1 and R1=regs */
 
-	mov		r1, r0						/* R1: regs */
+	mov		r1, r0				/* R1: regs */
 	mov		r0, #SYS_restore_context	/* R0: restore context */
-	svc		0							/* Force synchronous SVCall (or Hard Fault) */
+	svc		#SYS_syscall			/* Force synchronous SVCall (or Hard Fault) */
 
 	/* This call should not return */
 
-	bx		lr							/* Unnecessary ... will not return */
+	bx		lr				/* Unnecessary ... will not return */
 	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
 	.end

@@ -103,7 +103,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
 
@@ -239,6 +238,21 @@
 #ifndef CONFIG_STM32_ETHMAC
 #  define GPIO_CAN2_RX GPIO_CAN2_RX_1
 #  define GPIO_CAN2_TX GPIO_CAN2_TX_1
+#endif
+
+/* USART1 */
+
+#ifdef CONFIG_USART1_RS485
+  /* Lets use for RS485 on pins: PB6 and PB7 */
+
+#  define GPIO_USART1_TX        GPIO_USART1_TX_2
+#  define GPIO_USART1_RX        GPIO_USART1_RX_2
+
+  /* RS485 DIR pin: PA15 */
+
+#  define GPIO_USART1_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz |\
+                               GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN15)
+
 #endif
 
 /* USART2:

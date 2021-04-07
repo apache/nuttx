@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * drivers/wireless/spirit/include/spirit_spi.h
  * Header file for NuttX SPIRIT SPI driver interface.
  *
@@ -39,20 +39,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_SPI_H
 #define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_SPI_H
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include "spirit_types.h"
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Defintiions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* SPIRIT1 SPI Headers */
 
@@ -69,9 +69,9 @@
 #define READ_HEADER           __MKHEADER(HEADER_ADDRESS_MASK, HEADER_READ_MASK)
 #define COMMAND_HEADER        __MKHEADER(HEADER_COMMAND_MASK, HEADER_WRITE_MASK)
 
-/******************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 extern "C"
@@ -80,7 +80,7 @@ extern "C"
 
 struct spi_dev_s; /* Forward reference */
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_reg_read
  *
  * Description:
@@ -95,12 +95,12 @@ struct spi_dev_s; /* Forward reference */
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_reg_read(FAR struct spirit_library_s *spirit, uint8_t regaddr,
                     FAR uint8_t *buffer, unsigned int buflen);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_reg_write
  *
  * Description:
@@ -116,12 +116,12 @@ int spirit_reg_read(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
                      FAR const uint8_t *buffer, unsigned int buflen);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_reg_modify
  *
  * Description:
@@ -139,12 +139,12 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
                       uint8_t setbits, uint8_t clrbits);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_command
  *
  * Description:
@@ -158,11 +158,11 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_fifo_read
  *
  * Description:
@@ -177,12 +177,13 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd);
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
+int spirit_fifo_read(FAR struct spirit_library_s *spirit,
+                     FAR uint8_t *buffer,
                      unsigned int buflen);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_fifo_write
  *
  * Description:
@@ -197,12 +198,12 @@ int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_fifo_write(FAR struct spirit_library_s *spirit,
                       FAR const uint8_t *buffer, unsigned int buflen);
 
-/******************************************************************************
+/****************************************************************************
  * Name: spirit_update_status
  *
  * Description:
@@ -216,7 +217,7 @@ int spirit_fifo_write(FAR struct spirit_library_s *spirit,
  *   Zero (OK) is returned on success.  A negated errno value is returned on
  *   any failure.  On success, spirit->state is updated.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int spirit_update_status(FAR struct spirit_library_s *spirit);
 

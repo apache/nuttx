@@ -48,9 +48,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_allocnode_s *node;
-#ifdef CONFIG_DEBUG_ASSERTIONS
   FAR struct mm_allocnode_s *prev;
-#endif
   size_t mxordblk = 0;
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
@@ -71,9 +69,8 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   for (region = 0; region < heap_impl->mm_nregions; region++)
 #endif
     {
-#ifdef CONFIG_DEBUG_ASSERTIONS
       prev = NULL;
-#endif
+
       /* Visit each node in the region
        * Retake the semaphore for each region to reduce latencies
        */
@@ -99,9 +96,8 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
             }
           else
             {
-#ifdef CONFIG_DEBUG_ASSERTIONS
               FAR struct mm_freenode_s *fnode = (FAR void *)node;
-#endif
+
               DEBUGASSERT(node->size >= SIZEOF_MM_FREENODE);
               DEBUGASSERT(fnode->blink->flink == fnode);
               DEBUGASSERT(fnode->blink->size <= fnode->size);
@@ -120,9 +116,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
           DEBUGASSERT(prev == NULL ||
                       prev->size == (node->preceding & ~MM_ALLOC_BIT));
-#ifdef CONFIG_DEBUG_ASSERTIONS
           prev = node;
-#endif
         }
 
       minfo("region=%d node=%p heapend=%p\n",

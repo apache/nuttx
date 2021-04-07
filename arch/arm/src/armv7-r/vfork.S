@@ -26,8 +26,6 @@
 
 #include "arm_vfork.h"
 
-	.file	"vfork.S"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -36,6 +34,7 @@
  * Public Symbols
  ****************************************************************************/
 
+	.file	"vfork.S"
 	.globl	up_vfork
 
 /****************************************************************************
@@ -89,7 +88,7 @@
 vfork:
 	/* Create a stack frame */
 
-	mov		r0, sp					/* Save the value of the stack on entry */
+	mov		r0, sp			/* Save the value of the stack on entry */
 	sub		sp, sp, #VFORK_SIZEOF	/* Allocate the structure on the stack */
 
 	/* CPU registers */
@@ -120,6 +119,6 @@ vfork:
 
 	ldr		lr, [sp, #VFORK_LR_OFFSET]
 	add		sp, sp, #VFORK_SIZEOF
-	mov		pc, lr
+	bx		lr
 	.size	vfork, .-vfork
 	.end

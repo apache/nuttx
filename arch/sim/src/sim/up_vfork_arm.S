@@ -23,7 +23,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "up_internal.h"
+#include <arch/irq.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -87,7 +87,7 @@
 vfork:
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	mov	r0, sp
-	bl	up_setjmp
+	bl	setjmp
 
 	subs	r0, #1
 	jz	child

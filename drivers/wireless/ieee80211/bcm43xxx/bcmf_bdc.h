@@ -66,7 +66,8 @@ struct __attribute__((packed)) bcmf_event_s
 /* Event callback handler */
 
 typedef void (*event_handler_t)(FAR struct bcmf_dev_s *priv,
-                                struct bcmf_event_s *event, unsigned int len);
+                                struct bcmf_event_s *event,
+                                unsigned int len);
 
 /****************************************************************************
  * Public Function Prototypes

@@ -53,7 +53,7 @@
  * HCLK set to 150 MHz).
  */
 
-#define STM32_SYSTICK_CLOCK  (STM32_BOARD_HCLK / 8)
+#define STM32_SYSTICK_CLOCK  (STM32_HCLK_FREQUENCY / 8)
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of

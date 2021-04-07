@@ -34,7 +34,6 @@
  *
  ****************************************************************************/
 
-
 #ifndef __NUTTX_DRIVERS_USBDEV_RNDIS_STD_H
 #define __NUTTX_DRIVERS_USBDEV_RNDIS_STD_H
 
@@ -44,8 +43,10 @@
 
 /* Definitions for Microsoft RNDIS protocol.
  * Documentation:
- * https://docs.microsoft.com/en-us/windows-hardware/drivers/network/remote-ndis--rndis-2
- * https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/WinArchive/[MS-RNDIS].pdf
+ * https://docs.microsoft.com/en-us/windows-hardware/
+ *         drivers/network/remote-ndis--rndis-2
+ * https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/
+ *         WinArchive/[MS-RNDIS].pdf
  */
 
 #define RNDIS_MAJOR_VERSION                  1

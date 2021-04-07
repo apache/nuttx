@@ -36,7 +36,6 @@
  * Public Symbols
  ****************************************************************************/
 
-	.cpu	cortex-m0
 	.file	"arm_switchcontext.S"
 
 /****************************************************************************
@@ -72,10 +71,10 @@ arm_switchcontext:
 
 	mov		r2, r1					/* R2: restoreregs */
 	mov		r1, r0					/* R1: saveregs */
-	mov		r0, #SYS_switch_context	/* R0: context switch */
-	svc		0						/* Force synchronous SVCall (or Hard Fault) */
+	mov		r0, #SYS_switch_context			/* R0: context switch */
+	svc		#SYS_syscall				/* Force synchronous SVCall (or Hard Fault) */
 
-	/*  We will get here only after the rerturn from the context switch */
+	/* We will get here only after the rerturn from the context switch */
 
 	bx		lr
 	.size	arm_switchcontext, .-arm_switchcontext

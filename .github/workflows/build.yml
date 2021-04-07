@@ -32,7 +32,6 @@ jobs:
         id: gittargets
         shell: bash
         run: |
-          TESTING_REF="master"  # Always use master for testing
           OS_REF=""
           APPS_REF=""
 
@@ -80,7 +79,6 @@ jobs:
 
           echo ::set-output name=os_ref::$OS_REF
           echo ::set-output name=apps_ref::$APPS_REF
-          echo ::set-output name=testing_ref::$TESTING_REF
 
       - name: Checkout nuttx repo
         uses: actions/checkout@v2
@@ -100,14 +98,6 @@ jobs:
           path: sources/apps
           fetch-depth: 1
 
-      - name: Checkout testing repo
-        uses: actions/checkout@v2
-        with:
-          repository: apache/incubator-nuttx-testing
-          ref: ${{ steps.gittargets.outputs.testing_ref }}
-          path: sources/testing
-          fetch-depth: 1
-
       - name: Tar sources
         run: tar zcf sources.tar.gz sources
       - name: Archive Source Bundle
@@ -124,7 +114,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, sim]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim01, sim02, xtensa]
 
     steps:
       - name: Download Source Artifact
@@ -142,11 +132,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Pull
-        run: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
+        run: docker pull docker.pkg.github.com/apache/incubator-nuttx/apache-nuttx-ci-linux
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run builds
-        uses: ./sources/testing/.github/actions/ci-container
+        uses: ./sources/nuttx/.github/actions/ci-container
         env:
           BLOBDIR: /tools/blobs
         with:
@@ -154,8 +144,8 @@ jobs:
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             export CCACHE_DIR=`pwd`/ccache
             mkdir $CCACHE_DIR
-            cd sources/testing
-            export ARTIFACTDIR=`pwd`/../../buildartifacts
+            export ARTIFACTDIR=`pwd`/buildartifacts
+            cd sources/nuttx/tools/ci
             ./cibuild.sh -A -c testlist/${{matrix.boards}}.dat
             ccache -s
       - uses: actions/upload-artifact@v2
@@ -169,7 +159,7 @@ jobs:
     needs: Fetch-Source
     strategy:
       matrix:
-        boards: [arm-12, other, sim]
+        boards: [macos, sim01, sim02]
     steps:
       - name: Download Source Artifact
         uses: actions/download-artifact@v1
@@ -185,7 +175,7 @@ jobs:
           cache-name: ${{ runner.os }}-cache-tools
         with:
           path: prebuilt
-          key: ${{ runner.os }}-tools-${{ hashFiles('./sources/testing/cibuild.sh') }}
+          key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/cibuild.sh') }}
 
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
@@ -194,8 +184,8 @@ jobs:
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
           export CCACHE_DIR=`pwd`/ccache
           mkdir $CCACHE_DIR
-          cd sources/testing
-          export ARTIFACTDIR=`pwd`/../../buildartifacts
+          export ARTIFACTDIR=`pwd`/buildartifacts
+          cd sources/nuttx/tools/ci
           ./cibuild.sh -i -A -c testlist/${{matrix.boards}}.dat
           ccache -s
       - uses: actions/upload-artifact@v2

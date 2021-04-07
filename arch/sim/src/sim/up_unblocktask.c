@@ -106,11 +106,11 @@ void up_unblock_task(FAR struct tcb_s *tcb)
         }
 
       /* Copy the exception context into the TCB of the task that was
-       * previously active.  if up_setjmp returns a non-zero value, then
+       * previously active.  if setjmp returns a non-zero value, then
        * this is really the previously running task restarting!
        */
 
-      else if (!up_setjmp(rtcb->xcp.regs))
+      else if (!setjmp(rtcb->xcp.regs))
         {
           /* Restore the exception context of the new task that is ready to
            * run (probably tcb).  This is the new rtcb at the head of the
@@ -126,7 +126,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
           /* Then switch contexts */
 
-          up_longjmp(rtcb->xcp.regs, 1);
+          longjmp(rtcb->xcp.regs, 1);
         }
       else
         {
