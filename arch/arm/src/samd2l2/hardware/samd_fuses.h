@@ -4,7 +4,6 @@
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- *
  * Some fuse-related definitions derive from Atmel sample code:
  *
  *   Copyright (c) 2013 Atmel Corporation. All rights reserved.
