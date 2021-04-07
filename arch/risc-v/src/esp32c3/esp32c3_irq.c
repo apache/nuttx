@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/errno.h>
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>

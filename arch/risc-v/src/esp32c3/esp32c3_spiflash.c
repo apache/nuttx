@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/init.h>

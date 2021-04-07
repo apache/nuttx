@@ -27,7 +27,7 @@
 #include <string.h>
 #include <debug.h>
 #include <stdio.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <nuttx/kmalloc.h>
 

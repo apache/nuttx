@@ -31,7 +31,7 @@
 #include <debug.h>
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <arpa/inet.h>
 #include <net/if.h>
