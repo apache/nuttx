@@ -105,14 +105,14 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * positive word offsets from sp.
    */
 
-  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size;
 
   /* The i486 stack must be aligned at word (4 byte) boundaries. If necessary
    * top_of_stack must be rounded down to the next boundary
    */
 
   top_of_stack &= ~3;
-  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr;
 
   /* Save the adjusted stack values in the struct tcb_s */
 

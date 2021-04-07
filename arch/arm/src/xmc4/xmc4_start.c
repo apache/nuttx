@@ -74,7 +74,6 @@ static void go_nx_start(void *pv, unsigned int nbytes)
  * 0x2002:ffff - End of internal SRAM and end of heap (a
  */
 
-#define IDLE_STACK ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 #define HEAP_BASE  ((uintptr_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************

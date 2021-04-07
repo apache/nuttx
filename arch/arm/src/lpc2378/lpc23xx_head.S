@@ -210,7 +210,7 @@ __start:
 
 LC0:	.long	_sbss
 	.long	_ebss
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 	.long	_sdata	/* Where .data needs to reside in SDRAM */

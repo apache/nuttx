@@ -40,10 +40,6 @@
  * heap continues from there until the end of memory.  See g_idle_topstack below.
  */
 
-#define STACKBASE    ((_ebss + 0x1f) & 0xffffffe0)
-#define IDLE_STACK    (STACKBASE+CONFIG_IDLETHREAD_STACKSIZE)
-#define HEAP_BASE    (STACKBASE+CONFIG_IDLETHREAD_STACKSIZE)
-
 /****************************************************************************
  * Macros
  ****************************************************************************/

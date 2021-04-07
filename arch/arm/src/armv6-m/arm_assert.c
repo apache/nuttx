@@ -232,7 +232,7 @@ static void up_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp > istackbase - istacksize)
+  if (sp < istackbase && sp >= istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
@@ -266,7 +266,7 @@ static void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp <= ustackbase && sp > ustackbase - ustacksize)
+  if (sp < ustackbase && sp >= ustackbase - ustacksize)
     {
       up_stackdump(sp, ustackbase);
     }
@@ -288,7 +288,7 @@ static void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp > ustackbase || sp <= ustackbase - ustacksize)
+  if (sp >= ustackbase || sp < ustackbase - ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
       up_stackdump(ustackbase - ustacksize, ustackbase);

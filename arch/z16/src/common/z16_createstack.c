@@ -188,14 +188,14 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * the stack are referenced as positive word offsets from sp.
        */
 
-      top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+      top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size;
 
       /* Align the stack to word (4 byte) boundaries.  This is probably
        * a greater alignment than is required.
        */
 
       top_of_stack &= ~3;
-      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
 

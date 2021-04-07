@@ -245,7 +245,7 @@ static void up_dumpstate(void)
   if (rtcb->xcp.kstack)
     {
       kstackbase = (uint32_t)rtcb->xcp.kstack +
-                   CONFIG_ARCH_KERNEL_STACKSIZE - 4;
+                   CONFIG_ARCH_KERNEL_STACKSIZE;
 
       _alert("Kernel stack:\n");
       _alert("  base: %08x\n", kstackbase);
@@ -256,7 +256,7 @@ static void up_dumpstate(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
   /* Does the current stack pointer lie within the interrupt stack? */
 
-  if (sp > istackbase - istacksize && sp < istackbase)
+  if (sp >= istackbase - istacksize && sp < istackbase)
     {
       /* Yes.. dump the interrupt stack */
 
@@ -285,7 +285,7 @@ static void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp > ustackbase - ustacksize && sp < ustackbase)
+  if (sp >= ustackbase - ustacksize && sp < ustackbase)
     {
       _alert("User Stack\n", sp);
       up_stackdump(sp, ustackbase);

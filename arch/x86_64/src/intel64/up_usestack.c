@@ -105,7 +105,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * referenced as positive word offsets from sp.
    */
 
-  top_of_stack = (uint64_t)tcb->stack_alloc_ptr + stack_size - 8;
+  top_of_stack = (uint64_t)tcb->stack_alloc_ptr + stack_size;
 
   /* The intel64 stack must be aligned at word (16 byte) boundaries. If
    * necessary top_of_stack must be rounded down to the next boundary.
@@ -113,9 +113,8 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * frame pointer will be pushed, not instruction pointer.
    */
 
-  top_of_stack &= ~0xff;
-  top_of_stack -= 0x8;
-  size_of_stack = top_of_stack - (uint64_t)tcb->stack_alloc_ptr + 8;
+  top_of_stack &= ~0x0f;
+  size_of_stack = top_of_stack - (uint64_t)tcb->stack_alloc_ptr;
 
   /* Save the adjusted stack values in the struct tcb_s */
 

@@ -78,7 +78,7 @@
  */
 
 #define PIC32MX_STACK_BASE      _ebss
-#define PIC32MX_STACK_TOP       _ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+#define PIC32MX_STACK_TOP       _ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 #  define PIC32MX_INTSTACK_BASE PIC32MX_STACK_TOP
@@ -668,7 +668,7 @@ devconfig0:
 	.sdata
 	.type	g_intstackbase, object
 g_intstackbase:
-	.long	PIC32MX_INTSTACK_TOP-4
+	.long	PIC32MX_INTSTACK_TOP
 	.size	g_intstackbase, .-g_intstackbase
 
 /* g_nextlevel is the exception nesting level... the interrupt stack is not

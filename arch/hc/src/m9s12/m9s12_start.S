@@ -226,7 +226,7 @@ __start:
 .Lebss:
 	.hword	_ebss
 .Lstackbase:
-	.hword	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.hword	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 .Leronly:
 	.hword	_eronly /* Where .data defaults are stored in FLASH */
 .Lsdata:

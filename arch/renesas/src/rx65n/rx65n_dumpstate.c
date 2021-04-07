@@ -149,7 +149,7 @@ void up_dumpstate(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   istackbase = ebss; /* check how to declare ebss, as of now declared in chip.h */
 
-  istacksize = CONFIG_ARCH_INTERRUPTSTACK;
+  istacksize = CONFIG_ARCH_INTERRUPTSTACK & ~3;
 
   /* Show interrupt stack info */
 
@@ -162,7 +162,7 @@ void up_dumpstate(void)
    * stack?
    */
 
-  if (sp <= istackbase && sp > istackbase - istacksize)
+  if (sp < istackbase && sp >= istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
@@ -194,7 +194,7 @@ void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp > ustackbase || sp <= ustackbase - ustacksize)
+  if (sp >= ustackbase || sp < ustackbase - ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
       rx65n_stackdump(ustackbase - ustacksize, ustackbase);

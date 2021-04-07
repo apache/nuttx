@@ -148,13 +148,13 @@ excpt_common:
  *  Name: up_interruptstack
  ****************************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 0
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.align	4
 	.globl	up_interruptstack
 	.type	up_interruptstack, object
 up_interruptstack:
-	.skip	CONFIG_ARCH_INTERRUPTSTACK
+	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 .Lintstackbase:
 	.size	up_interruptstack, .-up_interruptstack
 #endif

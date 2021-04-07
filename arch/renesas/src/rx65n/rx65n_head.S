@@ -178,7 +178,7 @@ _loop_here:
   .type   _g_idle_topstack, @object
 
 _g_idle_topstack:
-  .long   _ebss + CONFIG_ARCH_INTERRUPTSTACK + CONFIG_IDLETHREAD_STACKSIZE
+  .long   _ebss + (CONFIG_ARCH_INTERRUPTSTACK & ~3) + CONFIG_IDLETHREAD_STACKSIZE
   .size   _g_idle_topstack, . - _g_idle_topstack
   .end
 

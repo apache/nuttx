@@ -178,9 +178,9 @@ __vector_table:
 	 */
 
 	.long	__start						/* 0-1: Power-on reset (hard, NMI high) PC & SP */
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 	.long	__start						/* 2-3: Manual reset (soft, NMI low) PC & SP */
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 	.rept	SH1_NCMN_VECTORS-4
 	.long	_up_invalid_handler
@@ -344,7 +344,7 @@ __start:
 
 	.align 2
 .Lstack:
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 .Lwcr1:
 	.long	0x5ffffa2
 .Lbcr:

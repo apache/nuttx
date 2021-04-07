@@ -143,7 +143,7 @@ normal_irq:
 
   mv   a1, sp      /* context = sp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
   /* Load mhartid (cpuid) */
 
   csrr s0, mhartid
@@ -155,7 +155,7 @@ normal_irq:
   j    4f
 3:
   la   sp, g_intstackbase
-  addi sp, sp, -((CONFIG_ARCH_INTERRUPTSTACK) & ~7)
+  addi sp, sp, -(CONFIG_ARCH_INTERRUPTSTACK & ~7)
 4:
 
 #endif
@@ -223,9 +223,8 @@ normal_irq:
   .type   g_intstackalloc, object
   .type   g_intstackbase, object
 g_intstackalloc:
-  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7))
+  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_intstackbase:
-  .skip  8
-  .size  g_intstackbase, 8
-  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7)
+  .size  g_intstackbase, 0
+  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 #endif
