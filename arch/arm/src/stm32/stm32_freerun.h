@@ -49,7 +49,6 @@ struct stm32_freerun_s
 {
   uint8_t chan;                    /* The timer/counter in use */
   uint8_t width;                   /* Width of timer (16- or 32-bits) */
-  bool running;                    /* True: the timer is running */
   FAR struct stm32_tim_dev_s *tch; /* Handle returned by stm32_tim_init() */
   uint32_t frequency;
 

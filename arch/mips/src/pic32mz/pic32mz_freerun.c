@@ -139,7 +139,6 @@ int pic32mz_freerun_initialize(struct pic32mz_freerun_s *freerun, int chan,
   freerun->freq    = PIC32MZ_TIMER_GETFREQ(freerun->timer);
   freerun->width   = PIC32MZ_TIMER_GETWIDTH(freerun->timer);
   freerun->chan    = chan;
-  freerun->running = false;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   if (freerun->width == 32)
@@ -169,7 +168,6 @@ int pic32mz_freerun_initialize(struct pic32mz_freerun_s *freerun, int chan,
   /* Start the timer */
 
   PIC32MZ_TIMER_START(freerun->timer);
-  freerun->running = true;
 
   return OK;
 }
@@ -307,7 +305,6 @@ int pic32mz_freerun_uninitialize(struct pic32mz_freerun_s *freerun)
 
   pic32mz_timer_deinit(freerun->timer);
 
-  freerun->running = false;
   freerun->timer = NULL;
 
   return OK;

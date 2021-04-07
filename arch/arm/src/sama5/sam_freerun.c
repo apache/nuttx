@@ -184,7 +184,6 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
    */
 
   freerun->chan     = chan;
-  freerun->running  = false;
   freerun->overflow = 0;
 
   /* Set up to receive the callback when the counter overflow occurs */

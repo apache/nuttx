@@ -64,7 +64,6 @@
 struct stm32l4_freerun_s
 {
   uint8_t chan;                      /* The timer/counter in use */
-  bool running;                      /* True: the timer is running */
   uint32_t overflow;                 /* Timer counter overflow */
   FAR struct stm32l4_tim_dev_s *tch; /* Handle returned by stm32l4_tim_init() */
   uint32_t frequency;
