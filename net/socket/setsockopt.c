@@ -82,7 +82,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-  /* Process the option */
+  /* Process the options always handled locally */
 
   switch (option)
     {
@@ -132,10 +132,19 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               _SO_SETOPT(psock->s_options, option);
             }
         }
-        break;
 
-#ifndef CONFIG_NET_USRSOCK
+        return OK;
+    }
 
+#ifdef CONFIG_NET_USRSOCK
+    if (psock->s_type == SOCK_USRSOCK_TYPE)
+      {
+        return -ENOPROTOOPT;
+      }
+#endif
+
+  switch (option)
+    {
       case SO_BROADCAST:  /* Permits sending of broadcast messages */
       case SO_DEBUG:      /* Enables recording of debugging information */
       case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
@@ -276,7 +285,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       case SO_ERROR:      /* Reports and clears error status. */
       case SO_TYPE:       /* Reports the socket type */
 
-#endif
       default:
         return -ENOPROTOOPT;
     }
