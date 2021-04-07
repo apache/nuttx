@@ -69,10 +69,12 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
 
-  // Calculate the end of .bss section
-  uintptr_t hstart = (((uintptr_t)&_ebss + PAGE_SIZE - 1) & PAGE_MASK);
-  *heap_start = (void*)hstart;
+  /* Calculate the end of .bss section */
 
-  // The size is the rest of the RAM
+  uintptr_t hstart = (((uintptr_t)&_ebss + PAGE_SIZE - 1) & PAGE_MASK);
+  *heap_start = (void *)hstart;
+
+  /* The size is the rest of the RAM */
+
   *heap_size = (size_t)(CONFIG_RAM_SIZE - (hstart - 0x100000000 - 1));
 }
