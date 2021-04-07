@@ -27,7 +27,7 @@ LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
 LDSCRIPT4 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_peripherals.ld
 
-ifeq ($(CONFIG_ESP32_ETHERNETKIT_RUN_IRAM),y)
+ifeq ($(CONFIG_ESP32_RUN_IRAM),y)
   LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_iram.ld
 else
   LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_flash.ld
