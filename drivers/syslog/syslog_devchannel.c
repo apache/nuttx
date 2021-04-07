@@ -29,7 +29,6 @@
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/compiler.h>
 
 #include "syslog.h"
 
@@ -43,92 +42,12 @@
 #define OPEN_MODE  (S_IROTH | S_IRGRP | S_IRUSR | S_IWUSR)
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/* SYSLOG channel methods */
-
-#ifdef CONFIG_SYSLOG_CHAR_CRLF
-static int syslog_devchan_putc(FAR struct syslog_channel_s *channel,
-                               int ch);
-#endif
-static int syslog_devchan_force(FAR struct syslog_channel_s *channel,
-                                int ch);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* This structure describes the channel's operations. */
-
-static const struct syslog_channel_ops_s g_syslog_ops =
-{
-#ifdef CONFIG_SYSLOG_CHAR_CRLF
-  syslog_devchan_putc,
-#else
-  syslog_dev_putc,
-#endif
-  syslog_devchan_force,
-  syslog_dev_flush,
-#ifdef CONFIG_SYSLOG_WRITE
-  syslog_dev_write,
-#endif
-};
 
 /* Handle to the SYSLOG channel */
 
 FAR static struct syslog_channel_s *g_syslog_dev_channel;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_devchan_putc
- *
- * Description:
- *   A front-end to syslog_dev_putc that does LF -> CR-LF expansion
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSLOG_CHAR_CRLF
-static int syslog_devchan_putc(FAR struct syslog_channel_s *channel, int ch)
-{
-  int ret;
-
-  /* Check for a linefeed */
-
-  if (ch == '\n')
-    {
-      /* Pre-pend a carriage return */
-
-      ret = syslog_dev_putc(channel, '\r');
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-  /* Output the provided character */
-
-  return syslog_dev_putc(channel, ch);
-}
-#endif
-
-/****************************************************************************
- * Name: syslog_devchan_force
- *
- * Description:
- *   A dummy FORCE method
- *
- ****************************************************************************/
-
-static int syslog_devchan_force(FAR struct syslog_channel_s *channel,
-                                int ch)
-{
-  UNUSED(channel);
-  return ch;
-}
 
 /****************************************************************************
  * Public Functions
@@ -168,10 +87,6 @@ int syslog_dev_channel(void)
     {
       return -ENOMEM;
     }
-
-  /* Register the channel operations */
-
-  g_syslog_dev_channel->sc_ops = &g_syslog_ops;
 
   /* Use the character driver as the SYSLOG channel */
 

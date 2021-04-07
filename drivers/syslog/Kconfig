@@ -13,10 +13,6 @@ config ARCH_SYSLOG
 
 # Selected if the SYSLOG device supports multi-byte write operations
 
-config SYSLOG_WRITE
-	bool
-	default n
-
 config SYSLOG_MAX_CHANNELS
 	int "Maximum SYSLOG channels"
 	default 1
@@ -77,7 +73,6 @@ endif
 config SYSLOG_BUFFER
 	bool "Use buffered output"
 	default n
-	depends on SYSLOG_WRITE
 	select MM_IOB
 	---help---
 		Enables an buffering logic that will be used to serialize debug
@@ -193,7 +188,6 @@ choice
 
 config SYSLOG_CHAR
 	bool "Log to a character device"
-	select SYSLOG_WRITE
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
@@ -211,7 +205,6 @@ config RAMLOG_SYSLOG
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
 	depends on DEV_CONSOLE
-	select SYSLOG_WRITE
 	---help---
 		Use the system console as a SYSLOG output device.
 
@@ -219,7 +212,6 @@ config SYSLOG_RPMSG
 	bool "Log to RPMSG"
 	depends on OPENAMP
 	depends on SCHED_WORKQUEUE
-	select SYSLOG_WRITE
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
@@ -246,7 +238,6 @@ config SYSLOG_RPMSG_SERVER
 config SYSLOG_FILE
 	bool "Syslog file output"
 	default n
-	select SYSLOG_WRITE
 	---help---
 		Build in support to use a file to collect SYSLOG output.  File SYSLOG
 		channels differ from other SYSLOG channels in that they cannot be
@@ -268,14 +259,6 @@ config CONSOLE_SYSLOG
 		re-directed to syslog output (syslog_putc). This is useful, for
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
-
-config SYSLOG_CHAR_CRLF
-	bool "SYSLOG device CR/LF"
-	default y
-	depends on SYSLOG_CHAR
-	---help---
-		Pre-pend a carriage return before every linefeed that goes to the
-		character device.
 
 config SYSLOG_DEVPATH
 	string "System log device"

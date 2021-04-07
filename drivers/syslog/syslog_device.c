@@ -40,6 +40,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/compiler.h>
 
 #include "syslog.h"
 
@@ -89,8 +90,28 @@ struct syslog_dev_s
 };
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
+                                FAR const char *buffer, size_t buflen);
+static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch);
+static int syslog_dev_force(FAR struct syslog_channel_s *channel, int ch);
+static int syslog_dev_flush(FAR struct syslog_channel_s *channel);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* This structure contains all SYSLOG device operations */
+
+static const struct syslog_channel_ops_s g_syslog_dev_ops =
+{
+  syslog_dev_putc,
+  syslog_dev_force,
+  syslog_dev_flush,
+  syslog_dev_write
+};
 
 static const uint8_t g_syscrlf[2] =
 {
@@ -365,128 +386,6 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
 }
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_dev_initialize
- *
- * Description:
- *   Initialize to use the character device (or file) at
- *   CONFIG_SYSLOG_DEVPATH as the SYSLOG sink.
- *
- *   One power up, the SYSLOG facility is non-existent or limited to very
- *   low-level output.  This function may be called later in the
- *   initialization sequence after full driver support has been initialized.
- *   (via syslog_initialize())  It installs the configured SYSLOG drivers
- *   and enables full SYSLOGing capability.
- *
- *   NOTE that this implementation excludes using a network connection as
- *   SYSLOG device.  That would be a good extension.
- *
- * Input Parameters:
- *   devpath - The full path to the character device to be used.
- *   oflags  - File open flags.
- *   mode    - File open mode (only if oflags include O_CREAT).
- *
- * Returned Value:
- *   Returns a newly created SYSLOG channel, or NULL in case of any failure.
- *
- ****************************************************************************/
-
-FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
-                                                   int oflags, int mode)
-{
-  FAR struct syslog_dev_s * syslog_dev;
-
-  syslog_dev = kmm_zalloc(sizeof(struct syslog_dev_s));
-
-  if (syslog_dev == NULL)
-    {
-      return NULL;
-    }
-
-  syslog_dev_open(syslog_dev, devpath, oflags, mode);
-
-  return (FAR struct syslog_channel_s *)syslog_dev;
-}
-
-/****************************************************************************
- * Name: syslog_dev_uninitialize
- *
- * Description:
- *   Called to disable the last device/file channel in preparation to use
- *   a different SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
- *
- * Input Parameters:
- *   channel    - Handle to syslog channel to be used.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- * Assumptions:
- *   The caller has already switched the SYSLOG source to some safe channel
- *   (the default channel).
- *
- ****************************************************************************/
-
-void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
-{
-  FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
-
-  /* Uninitializing a SYSLOG device should not take place within
-   * interrupt context.
-   */
-
-  if (up_interrupt_context() || getpid() == 0)
-    {
-      DEBUGASSERT(!up_interrupt_context() && getpid() != 0);
-      return;
-    }
-
-  /* The device cannot be uninitialized while it is being
-   * initialized simultaneously.
-   */
-
-  DEBUGASSERT(syslog_dev->sl_state != SYSLOG_UNINITIALIZED &&
-              syslog_dev->sl_state != SYSLOG_INITIALIZING);
-
-  /* Attempt to flush any buffered data. */
-
-  sched_lock();
-  syslog_dev_flush(channel);
-
-  /* Close the detached file instance, and destroy the semaphore. These are
-   * both only created when the device is in SYSLOG_OPENED or SYSLOG_FAILURE
-   * state.
-   */
-
-  if (syslog_dev->sl_state == SYSLOG_OPENED ||
-      syslog_dev->sl_state == SYSLOG_FAILURE)
-    {
-      file_close(&syslog_dev->sl_file);
-      nxsem_destroy(&syslog_dev->sl_sem);
-    }
-
-  /* Set the device in UNINITIALIZED state. */
-
-  syslog_dev->sl_state = SYSLOG_UNINITIALIZED;
-
-  /* Free the device path */
-
-  if (syslog_dev->sl_devpath != NULL)
-    {
-      kmm_free(syslog_dev->sl_devpath);
-    }
-
-  /* Free the channel structure */
-
-  kmm_free(syslog_dev);
-  sched_unlock();
-}
-
-/****************************************************************************
  * Name: syslog_dev_write
  *
  * Description:
@@ -504,8 +403,8 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
-                         FAR const char *buffer, size_t buflen)
+static ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
+                                FAR const char *buffer, size_t buflen)
 {
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
   FAR const char *endptr;
@@ -643,7 +542,7 @@ errout_with_sem:
  *
  ****************************************************************************/
 
-int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
+static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
 {
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
   ssize_t nbytes;
@@ -723,6 +622,27 @@ int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
 }
 
 /****************************************************************************
+ * Name: syslog_dev_force
+ *
+ * Description:
+ *   Dummy, do nothing force write operation.
+ *
+ * Input Parameters:
+ *   channel    - Handle to syslog channel to be used.
+ *
+ * Returned Value:
+ *   On success, the character is echoed back to the caller.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int syslog_dev_force(FAR struct syslog_channel_s *channel, int ch)
+{
+  UNUSED(channel);
+  return ch;
+}
+
+/****************************************************************************
  * Name: syslog_dev_flush
  *
  * Description:
@@ -736,7 +656,7 @@ int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
  *
  ****************************************************************************/
 
-int syslog_dev_flush(FAR struct syslog_channel_s *channel)
+static int syslog_dev_flush(FAR struct syslog_channel_s *channel)
 {
 #if defined(CONFIG_SYSLOG_FILE) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
@@ -750,4 +670,128 @@ int syslog_dev_flush(FAR struct syslog_channel_s *channel)
 #endif
 
   return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: syslog_dev_initialize
+ *
+ * Description:
+ *   Initialize to use the character device (or file) at
+ *   CONFIG_SYSLOG_DEVPATH as the SYSLOG sink.
+ *
+ *   On power up, the SYSLOG facility is non-existent or limited to very
+ *   low-level output.  This function may be called later in the
+ *   initialization sequence after full driver support has been initialized.
+ *   (via syslog_initialize())  It installs the configured SYSLOG drivers
+ *   and enables full SYSLOGing capability.
+ *
+ *   NOTE that this implementation excludes using a network connection as
+ *   SYSLOG device.  That would be a good extension.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the character device to be used.
+ *   oflags  - File open flags.
+ *   mode    - File open mode (only if oflags include O_CREAT).
+ *
+ * Returned Value:
+ *   Returns a newly created SYSLOG channel, or NULL in case of any failure.
+ *
+ ****************************************************************************/
+
+FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
+                                                   int oflags, int mode)
+{
+  FAR struct syslog_dev_s * syslog_dev;
+
+  syslog_dev = kmm_zalloc(sizeof(struct syslog_dev_s));
+
+  if (syslog_dev == NULL)
+    {
+      return NULL;
+    }
+
+  syslog_dev_open(syslog_dev, devpath, oflags, mode);
+
+  syslog_dev->channel.sc_ops = &g_syslog_dev_ops;
+
+  return (FAR struct syslog_channel_s *)syslog_dev;
+}
+
+/****************************************************************************
+ * Name: syslog_dev_uninitialize
+ *
+ * Description:
+ *   Disable the last device/file channel in preparation to use a different
+ *   SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
+ *
+ * Input Parameters:
+ *   channel    - Handle to syslog channel to be used.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   The caller has already switched the SYSLOG source to some safe channel
+ *   (the default channel).
+ *
+ ****************************************************************************/
+
+void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
+{
+  FAR struct syslog_dev_s *syslog_dev = (FAR struct syslog_dev_s *)channel;
+
+  /* Uninitializing a SYSLOG device should not take place within
+   * interrupt context.
+   */
+
+  if (up_interrupt_context() || getpid() == 0)
+    {
+      DEBUGASSERT(!up_interrupt_context() && getpid() != 0);
+      return;
+    }
+
+  /* The device cannot be uninitialized while it is being
+   * initialized simultaneously.
+   */
+
+  DEBUGASSERT(syslog_dev->sl_state != SYSLOG_UNINITIALIZED &&
+              syslog_dev->sl_state != SYSLOG_INITIALIZING);
+
+  /* Attempt to flush any buffered data. */
+
+  sched_lock();
+  syslog_dev_flush(channel);
+
+  /* Close the detached file instance, and destroy the semaphore. These are
+   * both only created when the device is in SYSLOG_OPENED or SYSLOG_FAILURE
+   * state.
+   */
+
+  if (syslog_dev->sl_state == SYSLOG_OPENED ||
+      syslog_dev->sl_state == SYSLOG_FAILURE)
+    {
+      file_close(&syslog_dev->sl_file);
+      nxsem_destroy(&syslog_dev->sl_sem);
+    }
+
+  /* Set the device in UNINITIALIZED state. */
+
+  syslog_dev->sl_state = SYSLOG_UNINITIALIZED;
+
+  /* Free the device path */
+
+  if (syslog_dev->sl_devpath != NULL)
+    {
+      kmm_free(syslog_dev->sl_devpath);
+    }
+
+  /* Free the channel structure */
+
+  kmm_free(syslog_dev);
+  sched_unlock();
 }
