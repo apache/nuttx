@@ -103,7 +103,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-  /* Process the option */
+  /* Process the options always handled locally */
 
   switch (option)
     {
@@ -142,8 +142,29 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           *value_len   = sizeof(struct timeval);
         }
         break;
+    }
 
-#ifndef CONFIG_NET_USRSOCK
+#ifdef CONFIG_NET_USRSOCK
+    if (psock->s_type == SOCK_USRSOCK_TYPE)
+      {
+        if (option == SO_TYPE)
+          {
+            FAR struct usrsock_conn_s *conn = psock->s_conn;
+
+            /* Return the actual socket type */
+
+            *(FAR int *)value = conn->type;
+            *value_len        = sizeof(int);
+
+            return OK;
+          }
+
+          return -ENOPROTOOPT;
+      }
+#endif
+
+  switch (option)
+    {
       case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
         if (*value_len < sizeof(int))
           {
@@ -220,20 +241,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
-#ifdef CONFIG_NET_USRSOCK
-          if (psock->s_type == SOCK_USRSOCK_TYPE)
-            {
-              FAR struct usrsock_conn_s *conn = psock->s_conn;
-
-              /* Return the actual socket type */
-
-              *(FAR int *)value = conn->type;
-              *value_len        = sizeof(int);
-
-              break;
-            }
-#endif
-
           /* Return the socket type */
 
           *(FAR int *)value = psock->s_type;
@@ -275,7 +282,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
       case SO_SNDBUF:     /* Sets send buffer size */
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
-#endif
 
       default:
         return -ENOPROTOOPT;
