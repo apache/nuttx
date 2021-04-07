@@ -29,7 +29,7 @@
 
 /* The ESP32 Core board V2 is fitted with either a 26 a 40MHz crystal */
 
-#ifdef CONFIG_ESP32_DEVKITC_XTAL_26MHz
+#ifdef CONFIG_ESP32_XTAL_26MHz
 #  define BOARD_XTAL_FREQUENCY  26000000
 #else
 #  define BOARD_XTAL_FREQUENCY  40000000
@@ -60,7 +60,7 @@
  *           /bootloader_support/src/bootloader_clock.c#L38-L62
  */
 
-#ifdef CONFIG_ESP32_DEVKITC_RUN_IRAM
+#ifdef CONFIG_ESP32_RUN_IRAM
 #  define BOARD_CLOCK_FREQUENCY (2 * BOARD_XTAL_FREQUENCY)
 #else
 #ifdef CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ
