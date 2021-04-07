@@ -49,7 +49,6 @@ struct pic32mz_freerun_s
 {
   uint8_t chan;                            /* The timer in use            */
   uint8_t width;                           /* Width of timer (16- or 32)  */
-  bool running;                            /* True: the timer is running  */
   FAR struct pic32mz_timer_dev_s *timer;   /* PIC32MZ timer driver        */
   uint32_t freq;                           /* Timer's frequency (Hz)      */
 

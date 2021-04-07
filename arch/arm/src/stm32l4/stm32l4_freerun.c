@@ -138,7 +138,6 @@ int stm32l4_freerun_initialize(FAR struct stm32l4_freerun_s *freerun,
    */
 
   freerun->chan     = chan;
-  freerun->running  = false;
   freerun->overflow = 0;
 
   /* Set up to receive the callback when the counter overflow occurs */
