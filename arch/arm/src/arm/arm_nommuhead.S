@@ -145,7 +145,7 @@ __start:
 .Lbssinit:
 	.long	_sbss
 	.long	_ebss
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 .Ldatainit:

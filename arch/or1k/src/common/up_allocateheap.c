@@ -124,7 +124,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Return the heap settings */
 
-  *heap_start = (FAR void *)g_idle_topstack + 4;
+  *heap_start = (FAR void *)g_idle_topstack;
   *heap_size  = CONFIG_RAM_END - *(uint32_t *)heap_start;
 
   board_autoled_on(LED_HEAPALLOCATE);

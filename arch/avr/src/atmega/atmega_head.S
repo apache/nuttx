@@ -36,7 +36,7 @@
 
 /* Stack is allocated just after uninitialized data and just before the heap */
 
-#define STACKBASE (_enoinit+CONFIG_IDLETHREAD_STACKSIZE-1)
+#define STACKBASE (_enoinit+CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The RAMPZ register is only available for CPUs with more than 64Kb of FLASH.
  * At present, only the ATMega128 is supported so RAMPZ should always be

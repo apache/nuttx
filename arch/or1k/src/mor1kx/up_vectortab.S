@@ -251,7 +251,7 @@ _reset_vector:
 
   l.movhi r1,hi(_ebss);
   l.ori   r1,r1,lo(_ebss);
-  l.addi  r1,r1,CONFIG_IDLETHREAD_STACKSIZE-4;
+  l.addi  r1,r1,CONFIG_IDLETHREAD_STACKSIZE;
   l.ori   r2,r1,0;
   l.nop
 

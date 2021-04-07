@@ -42,14 +42,14 @@
 
   .section  .noinit
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
   .align    4
   .type     g_intstackalloc, @object
   .type     g_intstackbase,  @object
 g_intstackalloc:
-  .skip     CONFIG_ARCH_INTERRUPTSTACK
+  .skip     (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
-  .size     g_intstackalloc, CONFIG_ARCH_INTERRUPTSTACK
+  .size     g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 
 /****************************************************************************
@@ -111,7 +111,7 @@ _interrupt_handler:
   csrr a0,  mcause    /* exception cause */
   mv   a1,  sp        /* context = sp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
   lui  sp,  %hi(g_intstackbase)
   addi sp,  sp, %lo(g_intstackbase)
 #endif

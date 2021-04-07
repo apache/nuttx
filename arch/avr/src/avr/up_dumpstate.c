@@ -145,7 +145,7 @@ void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  istackbase = (uint16_t)&g_intstackbase - 1;
+  istackbase = (uint16_t)&g_intstackbase;
   istacksize = CONFIG_ARCH_INTERRUPTSTACK;
 
   /* Show interrupt stack info */
@@ -162,7 +162,7 @@ void up_dumpstate(void)
    * stack?
    */
 
-  if (sp <= istackbase && sp > istackbase - istacksize)
+  if (sp < istackbase && sp >= istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
@@ -196,7 +196,7 @@ void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp <= ustackbase && sp > ustackbase - ustacksize)
+  if (sp < ustackbase && sp >= ustackbase - ustacksize)
     {
       up_stackdump(sp, ustackbase);
     }
@@ -217,7 +217,7 @@ void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp > ustackbase || sp <= ustackbase - ustacksize)
+  if (sp >= ustackbase || sp < ustackbase - ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
       up_stackdump(ustackbase - ustacksize, ustackbase);

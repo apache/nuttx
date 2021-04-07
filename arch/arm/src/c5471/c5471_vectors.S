@@ -463,8 +463,7 @@ arm_vectoraddrexcptn:
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
-	.skip	4
-	.size	g_intstackbase, 4
+	.size	g_intstackbase, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 	.end

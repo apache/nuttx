@@ -49,7 +49,7 @@ extern far unsigned long far_heapbot;
 #ifndef CONFIG_HEAP1_END
 extern far unsigned long far_stacktop;
 #  define CONFIG_HEAP1_END \
-     (((uint16_t)&far_stacktop) - CONFIG_IDLETHREAD_STACKSIZE + 1)
+     (((uint16_t)&far_stacktop) - CONFIG_IDLETHREAD_STACKSIZE)
 #endif
 
 /************************************************************************************

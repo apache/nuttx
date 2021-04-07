@@ -105,7 +105,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * positive word offsets from sp.
    */
 
-  top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size - 1;
+  top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size;
 
   /* Save the adjusted stack values in the struct tcb_s */
 

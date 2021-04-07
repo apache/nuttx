@@ -933,8 +933,7 @@ arm_vectorfiq:
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_intstackbase:
-	.skip	4
-	.size	g_intstackbase, 4
+	.size	g_intstackbase, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 /****************************************************************************
@@ -949,8 +948,7 @@ g_intstackbase:
 g_fiqstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 g_fiqstackbase:
-	.skip	4
-	.size	g_fiqstackbase, 4
+	.size	g_fiqstackbase, 0
 	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */

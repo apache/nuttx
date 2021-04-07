@@ -66,9 +66,6 @@
  * here.
  */
 
-#define IDLE_STACK ((uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE - 4)
-#define HEAP_BASE  ((uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
-
 /****************************************************************************
  * Private Function prototypes
  ****************************************************************************/
