@@ -1198,6 +1198,7 @@ arch/xtensa/include/xtensa/xtensa_corebits.h
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
 arch/xtensa/src/common/xtensa_windowspill.S
 ===========================================
 
@@ -1221,6 +1222,36 @@ arch/xtensa/src/common/xtensa_windowspill.S
  permit persons to whom the Software is furnished to do so, subject to
  the following conditions:
 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+arch/xtensa/include/esp32/tie-asm.h
+arch/xtensa/include/esp32/tie.h
+===============================
+
+ Compile-time assembler definitions dependent on CORE & TIE
+
+ This header file contains assembly-language definitions (assembly
+ macros, etc.) for this specific Xtensa processor's TIE extensions
+ and options.  It is customized to this Xtensa processor configuration.
+
+ Customer ID=11657; Build=0x5fe96;
+ Copyright (c) 1999-2016 Cadence Design Systems Inc.
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
  The above copyright notice and this permission notice shall be included
  in all copies or substantial portions of the Software.
 
@@ -1231,3 +1262,78 @@ arch/xtensa/src/common/xtensa_windowspill.S
  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+arch/xtensa/include/xtensa/core.h
+=================================
+
+ Leveraged to NuttX by:
+
+   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+
+ This file derives from code provided  Cadence Design Systems, Inc.:
+
+   Copyright (c) 2005-2014 Cadence Design Systems, Inc.
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+arch/xtensa/include/xtensa/xtensa_coproc.h
+arch/xtensa/src/common/xtensa_abi.h
+arch/xtensa/src/common/xtensa_context.S
+arch/xtensa/src/common/xtensa_coproc.S
+arch/xtensa/src/common/xtensa_cpuint.S
+arch/xtensa/src/common/xtensa_int_handlers.S
+arch/xtensa/src/common/xtensa_panic.S
+arch/xtensa/src/common/xtensa_timer.h
+arch/xtensa/src/common/xtensa_user_handler.S
+arch/xtensa/src/common/xtensa_vectors.S
+arch/xtensa/src/common/xtensa_window_vector.S
+arch/xtensa/src/esp32/chip_macros.h
+===================================
+
+ Adapted from use in NuttX by:
+
+   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ Derives from logic originally provided by Cadence Design Systems Inc.
+
+   Copyright (c) 2006-2015 Cadence Design Systems Inc.
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
