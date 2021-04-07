@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <syslog.h>
 
 #ifdef CONFIG_BL602_SPIFLASH
