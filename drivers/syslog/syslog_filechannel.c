@@ -30,7 +30,6 @@
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/compiler.h>
 
 #include "syslog.h"
 
@@ -44,50 +43,12 @@
 #define OPEN_MODE  (S_IROTH | S_IRGRP | S_IRUSR | S_IWUSR)
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/* SYSLOG channel methods */
-
-static int syslog_file_force(FAR struct syslog_channel_s *channel, int ch);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* This structure describes the channel's operations. */
-
-static const struct syslog_channel_ops_s g_syslog_ops =
-{
-  syslog_dev_putc,
-  syslog_file_force,
-  syslog_dev_flush,
-#ifdef CONFIG_SYSLOG_WRITE
-  syslog_dev_write,
-#endif
-};
 
 /* Handle to the SYSLOG channel */
 
 FAR static struct syslog_channel_s *g_syslog_file_channel;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_file_force
- *
- * Description:
- *   A dummy FORCE method
- *
- ****************************************************************************/
-
-static int syslog_file_force(FAR struct syslog_channel_s *channel, int ch)
-{
-  UNUSED(channel);
-  return ch;
-}
 
 /****************************************************************************
  * Public Functions
@@ -159,10 +120,6 @@ int syslog_file_channel(FAR const char *devpath)
       ret = -ENOMEM;
       goto errout_with_lock;
     }
-
-  /* Register the channel operations */
-
-  g_syslog_file_channel->sc_ops = &g_syslog_ops;
 
   /* Use the file as the SYSLOG channel. If this fails we are pretty much
    * screwed.
