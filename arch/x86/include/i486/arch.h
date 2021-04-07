@@ -230,7 +230,7 @@
 #    define PIC_ICW4_BMODE_SLAVE (2 << PIC_ICW4_BMODE_SHIFT) /* Buffered Mode - Slave */
 #    define PIC_ICW4_BMODE_MSTR  (3 << PIC_ICW4_BMODE_SHIFT) /* Buffered Mode - Master */
 #  define PIC_ICW4_AEOI          (1 << 1)                    /* Auto EOI  */
-#  define PIC_ICW4_808xMODE      (1 << 0)                    /* 8086/8080 Mode (vs MCS-80/85) */
+#  define PIC_ICW4_808XMODE      (1 << 0)                    /* 8086/8080 Mode (vs MCS-80/85) */
 
 /* Interrupt Mask Register */
 

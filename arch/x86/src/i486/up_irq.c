@@ -112,14 +112,14 @@ static void up_remappic(void)
   idt_outb(PIC_ICW1_ICW4 | PIC_ICW1_ICW1, PIC1_ICW1);
   idt_outb(0x20,                        PIC1_ICW2);
   idt_outb(PIC1_ICW3_IRQ2,              PIC1_ICW3);
-  idt_outb(PIC_ICW4_808xMODE,           PIC1_ICW4);
+  idt_outb(PIC_ICW4_808XMODE,           PIC1_ICW4);
 
   /* Remap irq for slave */
 
   idt_outb(PIC_ICW1_ICW4 | PIC_ICW1_ICW1, PIC2_ICW1);
   idt_outb(0x28,                        PIC2_ICW2);
   idt_outb(PIC_ICW3_SID2,               PIC2_ICW3);
-  idt_outb(PIC_ICW4_808xMODE,           PIC2_ICW4);
+  idt_outb(PIC_ICW4_808XMODE,           PIC2_ICW4);
 
   /* Mask interrupts from PIC */
 
