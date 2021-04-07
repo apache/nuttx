@@ -196,6 +196,31 @@ OBJPATH ?= .
 %.ddh: %.c
 	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(HOSTCFLAGS) -- $< > $@
 
+# MAX_ARGS - Split a single command up into multiple commands based on maximum number
+#   of words in the command arguments.  This is especially useful for cases like assembling
+#   a large archive or deleting a large number of objects.  The Argument list too long error
+#   is based on the number of bytes in the argument so this is not an exact fix, but selecting
+#   a reasonable number for the maximum number of words can still allow for multiple files
+#   to be supplied to a command but also split it up in the large cases. This takes
+#   a function as its first argument, static arguments second, and the list to split as the
+#   third.
+# Example: @$(call MAX_ARGS,_ARCHIVE_ADD, mylib.a,$(OBJS))
+
+define MAX_ARGS
+  $(eval _args:=)
+  $(foreach arg,$3,$(eval _args+=$(arg))$(if $(word 100,$(_args)),$(call $(1),$(2) $(_args))$(EOL)$(eval _args:=)))
+  $(if $(_args),$(call $(1),$(2) $(_args)))
+endef
+
+# EOL is used where a new line needs to be added in in a foreach expansion to allow for each
+# itteration to be evaluated as its own line.  MAX_ARGS uses this.
+define EOL
+
+
+
+
+endef
+
 # INCDIR - Convert a list of directory paths to a list of compiler include
 #   directories
 # Example: CFFLAGS += ${shell $(INCDIR) [options] "compiler" "dir1" "dir2" "dir2" ...}
@@ -327,10 +352,16 @@ endef
 # at $(TOPDIR)/.config:
 #
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
+# _ARCHIVE_ADD is the function that does the actual work ARCHIVE_ADD protects
+# the call by splitting it into multiple calls if there are too many arguments.
+
+define _ARCHIVE_ADD
+	@echo "AR (add): ${shell basename $(firstword $1)} $(wordlist 2, $(words $1),$1)"
+	$(Q) $(AR) $1
+endef
 
 define ARCHIVE_ADD
-	@echo "AR (add): ${shell basename $(1)} $(2)"
-	$(Q) $(AR) $1 $(2)
+	$(Q) $(call MAX_ARGS, _ARCHIVE_ADD,$1,$(OBJS))
 endef
 
 # ARCHIVE - Same as above, but ensure the archive is
@@ -467,12 +498,13 @@ define CLEAN
 	$(Q) if exist *$(LIBEXT) (del /f /q *$(LIBEXT))
 	$(Q) if exist *~ (del /f /q *~)
 	$(Q) if exist (del /f /q  .*.swp)
-	$(Q) if exist $(OBJS) (del /f /q $(OBJS))
+	$(Q) $(foreach OBJ, $(OBJS), $(if exist $(OBJS) (del /f /q $(OBJ))))
 	$(Q) if exist $(BIN) (del /f /q  $(BIN))
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN)
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(BIN)
+	$(Q) $(foreach OBJ, $(OBJS), $(rm -f $(OBJ)))
 endef
 endif
 
