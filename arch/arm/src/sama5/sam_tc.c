@@ -4,11 +4,6 @@
  *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *
- *   SAMA5D3 Series Data Sheet
- *   Atmel NoOS sample code.
- *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -42,6 +37,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *
+ *   SAMA5D3 Series Data Sheet
+ *   Atmel NoOS sample code.
+ */
 
 /****************************************************************************
  * Included Files
