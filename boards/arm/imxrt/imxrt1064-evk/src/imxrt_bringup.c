@@ -278,14 +278,6 @@ int imxrt_bringup(void)
   usbdev_serialinitialize(0);
 #endif
 
-#ifdef CONFIG_MTD_FLEXSPI_NOR
-  ret = imxrt_flexspi_nor_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: imxrt_flexspi_nor_setup failed: %d\n", ret);
-    }
-#endif
-
   UNUSED(ret);
   return OK;
 }
