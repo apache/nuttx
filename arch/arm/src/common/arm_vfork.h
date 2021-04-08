@@ -63,8 +63,8 @@ struct vfork_s
   uint32_t r10;  /* Volatile register r10 */
 
   uint32_t fp;   /* Frame pointer */
-  uint32_t sp;   /* Stack pointer*/
-  uint32_t lr;   /* Return address*/
+  uint32_t sp;   /* Stack pointer */
+  uint32_t lr;   /* Return address */
 
   /* Floating point registers (not yet) */
 };
