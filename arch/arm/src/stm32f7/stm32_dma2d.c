@@ -208,7 +208,7 @@ static int stm32_dma2d_loutpfc(uint8_t fmt);
 static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
                              uint8_t fmt);
 
-/* Public functions */
+/* Public Functions */
 
 #ifdef CONFIG_STM32F7_FB_CMAP
 static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap);
