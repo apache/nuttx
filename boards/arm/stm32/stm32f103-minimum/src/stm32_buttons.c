@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_BUTTONS) && !defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_INPUT_BUTTONS) && !defined(CONFIG_ARCH_IRQBUTTONS)
 #  error "The NuttX Buttons Driver depends on IRQ support to work!\n"
 #endif
 

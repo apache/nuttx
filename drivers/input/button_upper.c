@@ -95,7 +95,7 @@ struct btn_open_s
    * driver events.
    */
 
-  FAR struct pollfd *bo_fds[CONFIG_BUTTONS_NPOLLWAITERS];
+  FAR struct pollfd *bo_fds[CONFIG_INPUT_BUTTONS_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -283,7 +283,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
         {
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_BUTTONS_NPOLLWAITERS; i++)
+          for (i = 0; i < CONFIG_INPUT_BUTTONS_NPOLLWAITERS; i++)
             {
               FAR struct pollfd *fds = opriv->bo_fds[i];
               if (fds)
@@ -693,7 +693,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_BUTTONS_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_INPUT_BUTTONS_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -707,7 +707,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (i >= CONFIG_BUTTONS_NPOLLWAITERS)
+      if (i >= CONFIG_INPUT_BUTTONS_NPOLLWAITERS)
         {
           ierr("ERROR: Too many poll waiters\n");
           fds->priv    = NULL;

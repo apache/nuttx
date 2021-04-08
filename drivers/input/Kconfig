@@ -425,15 +425,15 @@ config INPUT_CYPRESS_MBR3108_NPOLLWAITERS
 
 endif # INPUT_CYPRESS_MBR3108
 
-config BUTTONS
+config INPUT_BUTTONS
 	bool "Button Inputs"
 	default n
 	---help---
 		Enable standard button upper half driver.
 
-if BUTTONS
+if INPUT_BUTTONS
 
-config BUTTONS_LOWER
+config INPUT_BUTTONS_LOWER
 	bool "Generic Lower Half Button Driver"
 	default n
 	depends on ARCH_BUTTONS && ARCH_IRQBUTTONS
@@ -454,11 +454,11 @@ config BUTTONS_LOWER
 		board src/ directory and modified for your specific board
 		requirements.
 
-config BUTTONS_NPOLLWAITERS
+config INPUT_BUTTONS_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
 
-endif # BUTTONS
+endif # INPUT_BUTTONS
 
 config DJOYSTICK
 	bool "Discrete Joystick"

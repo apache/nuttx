@@ -36,8 +36,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_BUTTONS_NPOLLWAITERS
-#  define CONFIG_BUTTONS_NPOLLWAITERS 2
+#ifndef CONFIG_INPUT_BUTTONS_NPOLLWAITERS
+#  define CONFIG_INPUT_BUTTONS_NPOLLWAITERS 2
 #endif
 
 /* ioctl commands */
@@ -198,7 +198,7 @@ int btn_register(FAR const char *devname,
  *
  ****************************************************************************/
 
-#if CONFIG_BUTTONS_LOWER
+#if CONFIG_INPUT_BUTTONS_LOWER
 int btn_lower_initialize(FAR const char *devname);
 #endif
 
