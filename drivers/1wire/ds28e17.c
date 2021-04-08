@@ -132,7 +132,9 @@ struct ds_i2c_inst_s                   /* Must be cast-compatible with i2c_maste
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_I2C_RESET
 static int ds_i2c_reset(FAR struct i2c_master_s *i2cdev);
+#endif
 static int ds_i2c_transfer(FAR struct i2c_master_s *i2cdev,
                            FAR struct i2c_msg_s *msgs, int count);
 
@@ -581,15 +583,15 @@ static int ds_i2c_setfrequency(FAR struct ds_i2c_inst_s *inst,
         break;
 
       default:
-        i2cerr("ERROR: bad I2C freq %u\n", frequency);
+        i2cerr("ERROR: bad I2C freq %lu\n", frequency);
         return -EINVAL;
     }
 
-  i2cinfo("Changing I2C freq %u -> %u\n", inst->frequency, frequency);
+  i2cinfo("Changing I2C freq %lu -> %lu\n", inst->frequency, frequency);
 
   /* Select DS28E17 */
 
-  ret = onewire_reset_select(&inst->slave);
+  ret = onewire_reset_select(master, inst->slave.romcode);
   if (ret < 0)
     {
       i2cerr("ERROR: cannot change I2C freq\n");
@@ -640,7 +642,7 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
 
   /* Select DS28E17 */
 
-  i = onewire_reset_select(&inst->slave);
+  i = onewire_reset_select(master, inst->slave.romcode);
   if (i < 0)
     {
       goto errout;
@@ -714,7 +716,7 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
             }
           else
             {
-              ret = onewire_reset_select(&inst->slave);
+              ret = onewire_reset_select(master, inst->slave.romcode);
             }
 
           if (ret < 0)
@@ -877,20 +879,10 @@ int ds28e17_search(FAR struct ds28e17_dev_s *priv,
                    void *arg)
 {
   FAR struct onewire_master_s *master = (FAR struct onewire_master_s *)priv;
-  int ret;
 
   DEBUGASSERT(master != NULL && cb_search != NULL);
 
-  ret = onewire_sem_wait(master);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = onewire_search(master, DS_FAMILY, false, cb_search, arg);
-  onewire_sem_post(master);
-
-  return ret;
+  return onewire_search(master, DS_FAMILY, false, cb_search, arg);
 }
 
 /****************************************************************************
