@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/drivers/1wire.h
+ * include/nuttx/1wire/1wire.h
  *
  *   Copyright (C) 2016 Aleksandr Vyhovanec. All rights reserved.
  *   Author: Aleksandr Vyhovanec <www.desh@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRIVERS_1WIRE_H
-#define __INCLUDE_NUTTX_DRIVERS_1WIRE_H
+#ifndef __INCLUDE_NUTTX_1WIRE_1WIRE_H
+#define __INCLUDE_NUTTX_1WIRE_1WIRE_H
 
 /****************************************************************************
  * Included Files
@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -217,4 +218,4 @@ struct onewire_dev_s
  * Public Functions Definitions
  ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_DRIVERS_1WIRE_H */
+#endif /* __INCLUDE_NUTTX_1WIRE_1WIRE_H */

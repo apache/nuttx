@@ -44,8 +44,8 @@
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/i2c/i2c_master.h>
-#include <nuttx/drivers/1wire.h>
+#include <nuttx/1wire/1wire_master.h>
+#include <nuttx/1wire/1wire.h>
 
 #include "1wire_internal.h"
 
@@ -729,7 +729,7 @@ int onewire_removeslave(FAR struct onewire_master_s *master,
  ****************************************************************************/
 
 FAR struct onewire_master_s *
-  onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves)
+onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves)
 {
   FAR struct onewire_master_s *master;
 
