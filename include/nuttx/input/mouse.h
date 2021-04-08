@@ -63,7 +63,7 @@ struct mouse_report_s
                      /* Possibly padded with 1 byte here */
   int16_t  x;        /* X coordinate of the mouse position */
   int16_t  y;        /* Y coordinate of the mouse position */
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   int16_t  wheel;    /* Mouse wheel position */
 #endif
 };

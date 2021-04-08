@@ -1904,7 +1904,7 @@ static int usbhost_open(FAR struct file *filep)
 #ifdef NEVER
           priv->xlast = INVALID_POSITION_B16;
           priv->ylast = INVALID_POSITION_B16;
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
           priv->wlast = INVALID_POSITION_B16;
 #endif
           /* Set the reported position to the center of the range */

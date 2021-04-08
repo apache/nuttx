@@ -488,7 +488,7 @@ config HIDMOUSE_THRESHY
 
 		Default: 12
 
-if MOUSE_WHEEL
+if INPUT_MOUSE_WHEEL
 
 config HIDMOUSE_WMAX
 	int "Maximum wheel position"
@@ -523,7 +523,7 @@ config HIDMOUSE_WTHRESH
 
 		Default: 1
 
-endif # MOUSE_WHEEL
+endif # INPUT_MOUSE_WHEEL
 endif # USBHOST_HIDMOUSE
 
 config USBHOST_XBOXCONTROLLER
