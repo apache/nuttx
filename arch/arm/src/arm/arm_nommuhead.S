@@ -58,7 +58,7 @@ __start:
 
 	/* First, setup initial processor mode */
 
-	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT )
 	msr		cpsr, r0
 
 	/* Setup system stack (and get the BSS range) */

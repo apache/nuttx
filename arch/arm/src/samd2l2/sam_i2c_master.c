@@ -7,10 +7,6 @@
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   SAMD/SAML Series Data Sheet
- *   Atmel NoOS sample code.
- *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -44,6 +40,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   SAMD/SAML Series Data Sheet
+ *   Atmel NoOS sample code.
+ */
 
 /****************************************************************************
  * Included Files

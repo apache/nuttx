@@ -70,7 +70,7 @@ static up_vector_t g_vectorinittab[] =
 {
   (up_vector_t)NULL,
   arm_vectorundefinsn,
-  arm_vectorswi,
+  arm_vectorsvc,
   arm_vectorprefetch,
   arm_vectordata,
   arm_vectoraddrexcptn,
@@ -170,7 +170,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  up_irq_restore(SVC_MODE | PSR_F_BIT);
+  up_irq_restore(PSR_MODE_SVC | PSR_F_BIT);
 #endif
 }
 

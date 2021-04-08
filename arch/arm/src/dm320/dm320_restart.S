@@ -53,7 +53,7 @@
 up_restart:
 	/* Make sure that we are in SVC mode with all IRQs disabled */
 
-	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT)
+	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr	cpsr_c, r0
 
 	/* Create identity mapping for first MB section to support

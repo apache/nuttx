@@ -421,7 +421,7 @@ _vector_table:
 
 	.globl	__start
 	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
+	.globl	arm_vectorsvc
 	.globl	arm_vectorprefetch
 	.globl	arm_vectordata
 	.globl	arm_vectorirq
@@ -432,7 +432,7 @@ _vector_table:
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
 .Lswihandler:
-	.long	arm_vectorswi
+	.long	arm_vectorsvc
 .Lprefetchaborthandler:
 	.long	arm_vectorprefetch
 .Ldataaborthandler:
@@ -470,7 +470,7 @@ __flashstart:
 
 	/* Setup the initial processor mode */
 
-	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT )
 	msr		cpsr, r0
 
 	/* Initialize the external memory interface (EMI) */

@@ -87,8 +87,8 @@ arm_vectorirq:
 
 	/* Then switch back to SVC mode */
 
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
+	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, lr		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -168,15 +168,15 @@ arm_vectorirq:
 	.align	5
 
 /****************************************************************************
- * Function: arm_vectorswi
+ * Function: arm_vectorsvc
  *
  * Description:
  *   SWI interrupt. We enter the SWI in SVC mode
  ****************************************************************************/
 
-	.globl	arm_vectorswi
-	.type	arm_vectorswi, %function
-arm_vectorswi:
+	.globl	arm_vectorsvc
+	.type	arm_vectorsvc, %function
+arm_vectorsvc:
 
 	/* The c547x rrload bootloader intemediates all
 	 * interrupts.  For the* case of the SWI, it mucked
@@ -245,8 +245,8 @@ arm_vectordata:
 
 	/* Then switch back to SVC mode */
 
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
+	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, lr		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -311,8 +311,8 @@ arm_vectorprefetch:
 
 	/* Then switch back to SVC mode */
 
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
+	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, lr		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -377,8 +377,8 @@ arm_vectorundefinsn:
 
 	/* Then switch back to SVC mode */
 
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
+	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, lr		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame

@@ -124,7 +124,6 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 
   freerun->chan         = chan;
   freerun->width        = STM32_TIM_GETWIDTH(freerun->tch);
-  freerun->running      = false;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   freerun->counter_mask = 0xffffffffull;

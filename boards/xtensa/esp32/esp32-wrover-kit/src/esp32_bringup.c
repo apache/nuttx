@@ -36,7 +36,7 @@
 #include <stdio.h>
 
 #include <syslog.h>
-#include <sys/errno.h>
+#include <errno.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
 

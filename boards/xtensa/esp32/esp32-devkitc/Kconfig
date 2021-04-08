@@ -5,25 +5,6 @@
 
 if ARCH_BOARD_ESP32_DEVKITC
 
-choice
-	prompt "On-board Crystal Frequency"
-	default ESP32_DEVKITC_XTAL_40MZ
-
-config ESP32_DEVKITC_XTAL_40MZ
-	bool "40MHz"
-
-config ESP32_DEVKITC_XTAL_26MHz
-	bool "26MHz"
-
-endchoice # On-board Crystal Frequency
-
-config ESP32_DEVKITC_RUN_IRAM
-	bool "Run from IRAM"
-	default n
-	---help---
-		This loads all of NuttX inside IRAM.  Used to test somewhat small
-		images that can fit entirely in IRAM.
-
 source boards/xtensa/esp32/common/Kconfig
 
 if PM

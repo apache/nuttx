@@ -8,7 +8,8 @@
  *  that extend basic Xtensa core functionality.  It is customized to this
  *  Xtensa processor configuration.
  *
- *  Customer ID=11657; Build=0x5fe96; Copyright (c) 1999-2016 Cadence Design Systems Inc.
+ *  Customer ID=11657; Build=0x5fe96;
+ *  Copyright (c) 1999-2016 Cadence Design Systems Inc.
  *
  *  Permission is hereby granted, free of charge, to any person obtaining
  *  a copy of this software and associated documentation files (the
@@ -107,13 +108,13 @@
  *  To filter out certain registers, e.g. to expand only the non-global
  *  registers used by the compiler, you can do something like this:
  *
- *  #define XCHAL_SA_REG(s,ccused,p...)    SELCC##ccused(p)
- *  #define SELCC0(p...)
- *  #define SELCC1(abikind,p...)    SELAK##abikind(p)
- *  #define SELAK0(p...)        REG(p)
- *  #define SELAK1(p...)        REG(p)
- *  #define SELAK2(p...)
- *  #define REG(kind,tie,name,galn,aln,asz,csz,dbnum,base,rnum,bsz,rst,x...) \
+ * #define XCHAL_SA_REG(s,ccused,p...)    SELCC##ccused(p)
+ * #define SELCC0(p...)
+ * #define SELCC1(abikind,p...)    SELAK##abikind(p)
+ * #define SELAK0(p...)        REG(p)
+ * #define SELAK1(p...)        REG(p)
+ * #define SELAK2(p...)
+ * #define REG(kind,tie,name,galn,aln,asz,csz,dbnum,base,rnum,bsz,rst,x...) \
  *        ...what you want to expand...
  */
 
@@ -190,4 +191,4 @@
     3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3, 3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3,\
     3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3, 3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3
 
-#endif /*_ARCH_XTENSA_INCLUDE_ESP32_TIE_H*/
+#endif /* _ARCH_XTENSA_INCLUDE_ESP32_TIE_H */

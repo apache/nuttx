@@ -33,19 +33,19 @@
 
 /* PSR bits */
 
-#define MODE_MASK       0x0000001f /* Bits 0-4: Mode bits */
-#  define USR26_MODE    0x00000000 /*   26-bit User mode */
-#  define FIQ26_MODE    0x00000001 /*   26-bit FIQ mode */
-#  define IRQ26_MODE    0x00000002 /*   26-bit IRQ mode */
-#  define SVC26_MODE    0x00000003 /*   26-bit Supervisor mode */
-#  define MODE32_BIT    0x00000010 /*   Bit 4: 32-bit mode */
-#  define USR_MODE      0x00000010 /*   32-bit User mode */
-#  define FIQ_MODE      0x00000011 /*   32-bit FIQ mode */
-#  define IRQ_MODE      0x00000012 /*   32-bit IRQ mode */
-#  define SVC_MODE      0x00000013 /*   32-bit Supervisor mode */
-#  define ABT_MODE      0x00000017 /*   32-bit Abort mode */
-#  define UND_MODE      0x0000001b /*   32-bit Undefined mode */
-#  define SYSTEM_MODE   0x0000001f /*   32-bit System mode */
+#define PSR_MODE_MASK   0x0000001f /* Bits 0-4: Mode bits */
+#define PSR_MODE_USR26  0x00000000 /*   26-bit User mode */
+#define PSR_MODE_FIQ26  0x00000001 /*   26-bit FIQ mode */
+#define PSR_MODE_IRQ26  0x00000002 /*   26-bit IRQ mode */
+#define PSR_MODE_SVC26  0x00000003 /*   26-bit Supervisor mode */
+#define PSR_MODE_MODE32 0x00000010 /*   Bit 4: 32-bit mode */
+#define PSR_MODE_USR    0x00000010 /*   32-bit User mode */
+#define PSR_MODE_FIQ    0x00000011 /*   32-bit FIQ mode */
+#define PSR_MODE_IRQ    0x00000012 /*   32-bit IRQ mode */
+#define PSR_MODE_SVC    0x00000013 /*   32-bit Supervisor mode */
+#define PSR_MODE_ABT    0x00000017 /*   32-bit Abort mode */
+#define PSR_MODE_UND    0x0000001b /*   32-bit Undefined mode */
+#define PSR_MODE_SYS    0x0000001f /*   32-bit System mode */
 #define PSR_T_BIT       0x00000020 /* Bit 5: Thumb state */
 #define PSR_F_BIT       0x00000040 /* Bit 6: FIQ disable */
 #define PSR_I_BIT       0x00000080 /* Bit 7: IRQ disable */

@@ -4,12 +4,6 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *
- *   SAMV71 Series Data Sheet
- *   NuttX SAMA5 free-running timer driver
- *   Atmel NoOS sample code for the SAMA5D3.
- *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -43,6 +37,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *
+ *   SAMV71 Series Data Sheet
+ *   NuttX SAMA5 free-running timer driver
+ *   Atmel NoOS sample code for the SAMA5D3.
+ */
 
 /****************************************************************************
  * Included Files
@@ -184,7 +185,6 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
    */
 
   freerun->chan     = chan;
-  freerun->running  = false;
   freerun->overflow = 0;
 
   /* Set up to receive the callback when the counter overflow occurs */
