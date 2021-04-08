@@ -56,7 +56,7 @@ ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += stm32_cs4344.c
 endif
 
-ifeq ($(CONFIG_DJOYSTICK),y)
+ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
   CSRCS += stm32_djoystick.c
 endif
 

@@ -149,7 +149,7 @@
 
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 #  define MIN_IRQBUTTON     BUTTON_TAMPER
 #  define MAX_IRQBUTTON     BUTTON_WKUP
 #  define NUM_IRQBUTTONS    2
@@ -349,7 +349,7 @@ int stm32_cs4344_initialize(int minor);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 int stm32_djoy_initialize(void);
 #endif
 

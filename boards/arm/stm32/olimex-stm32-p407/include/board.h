@@ -196,7 +196,7 @@
 #define BUTTON_TAMPER         0
 #define BUTTON_WKUP           1
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 #  define NUM_BUTTONS         2
 #else
 #  define JOYSTICK_RIGHT      2
@@ -211,7 +211,7 @@
 #define BUTTON_TAMPER_BIT     (1 << BUTTON_TAMPER)
 #define BUTTON_WKUP_BIT       (1 << BUTTON_WKUP)
 
-#ifndef CONFIG_DJOYSTICK
+#ifndef CONFIG_INPUT_DJOYSTICK
 #  define JOYSTICK_RIGHT_BIT  (1 << JOYSTICK_RIGHT)
 #  define JOYSTICK_UP_BIT     (1 << JOYSTICK_UP)
 #  define JOYSTICK_LEFT_BIT   (1 << JOYSTICK_LEFT)

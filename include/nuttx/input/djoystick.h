@@ -51,8 +51,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_DJOYSTICK_NPOLLWAITERS
-#  define CONFIG_DJOYSTICK_NPOLLWAITERS 2
+#ifndef CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS
+#  define CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS 2
 #endif
 
 /* Joystick Interface *******************************************************/

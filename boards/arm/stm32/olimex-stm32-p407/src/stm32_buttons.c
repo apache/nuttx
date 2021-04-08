@@ -50,12 +50,12 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
   GPIO_BTN_TAMPER,
   GPIO_BTN_WKUP,
 
-  /* The Joystick is treated like the other buttons unless CONFIG_DJOYSTICK
-   * is defined, then it is assumed that they should be used by the discrete
-   * joystick driver.
+  /* The Joystick is treated like the other buttons unless
+   * CONFIG_INPUT_DJOYSTICK is defined, then it is assumed that they should
+   * be used by the discrete joystick driver.
    */
 
-#ifndef CONFIG_DJOYSTICK
+#ifndef CONFIG_INPUT_DJOYSTICK
   GPIO_JOY_RIGHT,
   GPIO_JOY_UP,
   GPIO_JOY_LEFT,
@@ -115,7 +115,7 @@ uint32_t board_buttons(void)
       ret |= BUTTON_WKUP_BIT;
     }
 
-#ifndef CONFIG_DJOYSTICK
+#ifndef CONFIG_INPUT_DJOYSTICK
   if (stm32_gpioread(g_buttons[JOYSTICK_RIGHT]))
     {
       ret |= JOYSTICK_RIGHT_BIT;

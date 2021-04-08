@@ -299,7 +299,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
   /* Initialize and register the joystick driver */
 
   ret = stm32_djoy_initialization();

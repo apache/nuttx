@@ -178,16 +178,16 @@
  *   Joystick right  -- Connected to PG.13
  *   Joystick up     -- Connected to PG.15
  *
- * The Joystick is treated like the other buttons unless CONFIG_DJOYSTICK
- * is defined, then it is assumed that they should be used by the discrete
- * joystick driver.
+ * The Joystick is treated like the other buttons unless
+ * CONFIG_INPUT_DJOYSTICK is defined, then it is assumed that they should be
+ * used by the discrete joystick driver.
  */
 
 #define BUTTON_WAKEUP        0
 #define BUTTON_TAMPER        1
 #define BUTTON_KEY           2
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 #  define NUM_BUTTONS        3
 #else
 #  define JOYSTICK_SEL       3
@@ -203,7 +203,7 @@
 #define BUTTON_TAMPER_BIT    (1 << BUTTON_TAMPER)
 #define BUTTON_KEY_BIT       (1 << BUTTON_KEY)
 
-#ifndef CONFIG_DJOYSTICK
+#ifndef CONFIG_INPUT_DJOYSTICK
 #  define JOYSTICK_SEL_BIT   (1 << JOYSTICK_SEL)
 #  define JOYSTICK_DOWN_BIT  (1 << JOYSTICK_DOWN)
 #  define JOYSTICK_LEFT_BIT  (1 << JOYSTICK_LEFT)

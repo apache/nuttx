@@ -472,7 +472,7 @@ config INPUT_BUTTONS_NPOLLWAITERS
 
 endif # INPUT_BUTTONS
 
-config DJOYSTICK
+config INPUT_DJOYSTICK
 	bool "Discrete Joystick"
 	default n
 	---help---
@@ -482,13 +482,13 @@ config DJOYSTICK
 		values like buttons (as opposed to integer values like you might
 		obtain from an analog joystick).
 
-if DJOYSTICK
+if INPUT_DJOYSTICK
 
-config DJOYSTICK_NPOLLWAITERS
+config INPUT_DJOYSTICK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
 
-endif # DJOYSTICK
+endif # INPUT_DJOYSTICK
 
 config AJOYSTICK
 	bool "Analog Joystick"
@@ -541,7 +541,7 @@ if INPUT_SPQ10KBD
 
 config SPQ10KBD_DJOY
     bool "Joystick Interface for Buttons"
-	select DJOYSTICK
+	select INPUT_DJOYSTICK
 	default n
 
 config SPQ10KBD_REGDBG
