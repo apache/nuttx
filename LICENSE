@@ -1377,3 +1377,100 @@ drivers/wireless/ieee80211/bcm43xxx/bcmf_ioctl.h
  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  SUCH DAMAGE.
 
+arch/arm/src/lpc43xx/spifi/src/spifilib_fam_standard_cmd.c
+arch/arm/src/lpc43xx/spifi/src/spifilib_dev_common.c
+arch/arm/src/lpc43xx/spifi/inc/spifilib_dev.h
+arch/arm/src/lpc43xx/spifi/inc/spifilib_api.h
+arch/arm/src/lpc43xx/spifi/inc/private/spifilib_chiphw.h
+=========================================================
+
+ Copyright(C) NXP Semiconductors, 2014
+ All rights reserved.
+ Software that is described herein is for illustrative purposes only
+ which provides customers with programming information regarding the
+ LPC products.  This software is supplied "AS IS" without any warranties of
+ any kind, and NXP Semiconductors and its licenser disclaim any and
+ all warranties, express or implied, including all implied warranties of
+ merchantability, fitness for a particular purpose and non-infringement of
+ intellectual property rights.  NXP Semiconductors assumes no
+ responsibility or liability for the use of the software, conveys no
+ license or rights under any patent, copyright, mask work right, or any
+ other intellectual property rights in or to any products. NXP
+ Semiconductors reserves the right to make changes in the software without
+ notification. NXP Semiconductors also makes no representation or warranty
+ that such application will be suitable for the specified use without
+ further testing or modification.
+ Permission to use, copy, modify, and distribute this software and its
+ documentation is hereby granted, under NXP Semiconductors' and its
+ licensor's relevant copyrights in the software, without fee, provided that
+ it is used in conjunction with NXP Semiconductors microcontrollers.  This
+ copyright, permission, and disclaimer notice must appear in all copies of
+ this code.
+
+
+boards/arm/imxrt/imxrt1050-evk/src/imxrt_sdram_ini_dcd.c
+=========================================================
+
+ Copyright (C) 2017, NXP Semiconductors, Inc.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+ used to endorse or promote products derived from this software
+ without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/imxrt/imxrt_lcd.c
+==============================
+
+ Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ Copyright (C) 2017, NXP Semiconductors, Inc.
+ Author: Johannes Schock (Port)
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+ used to endorse or promote products derived from this software
+ without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
