@@ -103,6 +103,7 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
    */
 
   /* HARD: coded value for UART1 */
+
   bitm_off = 1;
 
   switch (cmd)
@@ -125,9 +126,11 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
           /* Update mode register with requested mode */
 
           vmode = getreg32(CONFIG_UART_MOXA_MODE_REG);
-          putreg32(vmode & ~(OP_MODE_MASK << 2 * bitm_off), CONFIG_UART_MOXA_MODE_REG);
+          putreg32(vmode & ~(OP_MODE_MASK << 2 * bitm_off),
+                   CONFIG_UART_MOXA_MODE_REG);
           vmode = opmode << 2 * bitm_off;
-          putreg32(getreg32(CONFIG_UART_MOXA_MODE_REG) | vmode, CONFIG_UART_MOXA_MODE_REG);
+          putreg32(getreg32(CONFIG_UART_MOXA_MODE_REG) | vmode,
+                   CONFIG_UART_MOXA_MODE_REG);
 
           leave_critical_section(flags);
           ret = OK;
@@ -141,7 +144,8 @@ int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 
           /* Read from mode register */
 
-          opmode = (getreg32(CONFIG_UART_MOXA_MODE_REG) >> 2 * bitm_off) & OP_MODE_MASK;
+          opmode = (getreg32(CONFIG_UART_MOXA_MODE_REG) >> 2 * bitm_off) &
+                    OP_MODE_MASK;
 
           leave_critical_section(flags);
           *(unsigned long *)arg = opmode;

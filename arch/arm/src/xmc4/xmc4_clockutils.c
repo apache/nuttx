@@ -37,15 +37,15 @@
  *
  *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
- * Infineon Technologies AG (Infineon) is supplying this software for use with
- * Infineon's microcontrollers.  This file can be freely distributed within
- * development tools that are supporting such microcontrollers.
+ * Infineon Technologies AG (Infineon) is supplying this software for use
+ * with Infineon's microcontrollers.  This file can be freely distributed
+ * within development tools that are supporting such microcontrollers.
  *
- * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS,
+ * IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ * SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR
+ * SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
  ****************************************************************************/
 
@@ -109,9 +109,12 @@ uint32_t xmc4_get_coreclock(void)
           /* PLL normal mode */
 
           regval = getreg32(XMC4_SCU_PLLCON1);
-          pdiv   = ((regval & SCU_PLLCON1_PDIV_MASK) >> SCU_PLLCON1_PDIV_SHIFT) + 1;
-          ndiv   = ((regval & SCU_PLLCON1_NDIV_MASK) >> SCU_PLLCON1_NDIV_SHIFT) + 1;
-          kdiv   = ((regval & SCU_PLLCON1_K2DIV_MASK) >> SCU_PLLCON1_K2DIV_SHIFT) + 1;
+          pdiv   = ((regval & SCU_PLLCON1_PDIV_MASK) >>
+                     SCU_PLLCON1_PDIV_SHIFT) + 1;
+          ndiv   = ((regval & SCU_PLLCON1_NDIV_MASK) >>
+                     SCU_PLLCON1_NDIV_SHIFT) + 1;
+          kdiv   = ((regval & SCU_PLLCON1_K2DIV_MASK) >>
+                     SCU_PLLCON1_K2DIV_SHIFT) + 1;
 
           temp   = (temp / (pdiv * kdiv)) * ndiv;
         }
@@ -120,7 +123,8 @@ uint32_t xmc4_get_coreclock(void)
           /* PLL prescalar mode */
 
           regval = getreg32(XMC4_SCU_PLLCON1);
-          kdiv   = ((regval & SCU_PLLCON1_K1DIV_MASK) >> SCU_PLLCON1_K1DIV_SHIFT) + 1;
+          kdiv   = ((regval & SCU_PLLCON1_K1DIV_MASK) >>
+                     SCU_PLLCON1_K1DIV_SHIFT) + 1;
 
           temp   = (temp / kdiv);
         }
@@ -135,7 +139,8 @@ uint32_t xmc4_get_coreclock(void)
   /* Divide by SYSDIV to get fSYS */
 
   regval = getreg32(XMC4_SCU_SYSCLKCR);
-  sysdiv = ((regval & SCU_SYSCLKCR_SYSDIV_MASK) >> SCU_SYSCLKCR_SYSDIV_SHIFT) + 1;
+  sysdiv = ((regval & SCU_SYSCLKCR_SYSDIV_MASK) >>
+             SCU_SYSCLKCR_SYSDIV_SHIFT) + 1;
   temp   = temp / sysdiv;
 
   /* Check if the fSYS clock is divided by two to produce fCPU clock. */

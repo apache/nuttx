@@ -33,17 +33,17 @@
  *
  * May include some logic from sample code provided by Infineon:
  *
- *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
+ * Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
- *   Infineon Technologies AG (Infineon) is supplying this software for use with
- *   Infineon's microcontrollers.  This file can be freely distributed within
- *   development tools that are supporting such microcontrollers.
+ * Infineon Technologies AG (Infineon) is supplying this software for use
+ * with Infineon's microcontrollers.  This file can be freely distributed
+ * within development tools that are supporting such microcontrollers.
  *
- *   THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- *   OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- *   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- *   INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- *   OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS,
+ * IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ * SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR
+ * SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
  ****************************************************************************/
 
@@ -203,6 +203,7 @@ int xmc4_disable_usic(enum usic_e usic)
   switch (usic)
     {
       case USIC0:
+
         /* Set bit in PRSET0 to assert USIC0 peripheral reset */
 
         putreg32(SCU_PR0_USIC0RS, XMC4_SCU_PRSET0);
@@ -216,6 +217,7 @@ int xmc4_disable_usic(enum usic_e usic)
 
 #if XMC4_NUSIC > 1
       case USIC1:
+
         /* Set bit in PRSET1 to assert USIC1 peripheral reset */
 
         putreg32(SCU_PR1_USIC1RS, XMC4_SCU_PRSET1);
@@ -229,6 +231,7 @@ int xmc4_disable_usic(enum usic_e usic)
 
 #if XMC4_NUSIC > 2
       case USIC2:
+
         /* Set bit in PRSET1 to assert USIC2 peripheral reset */
 
         putreg32(SCU_PR1_USIC2RS, XMC4_SCU_PRSET1);
@@ -454,8 +457,10 @@ int xmc4_usic_baudrate(enum usic_channel_e channel, uint32_t baud,
       /* Setup and enable the baud rate generator */
 
       regval  = getreg32(base + XMC4_USIC_BRG_OFFSET);
-      regval &=  ~(USIC_BRG_DCTQ_MASK | USIC_BRG_PDIV_MASK | USIC_BRG_PCTQ_MASK | USIC_BRG_PPPEN);
-      regval |= (USIC_BRG_DCTQ(oversampling - 1) | USIC_BRG_PDIV(pdiv_int_min - 1));
+      regval &=  ~(USIC_BRG_DCTQ_MASK | USIC_BRG_PDIV_MASK |
+                   USIC_BRG_PCTQ_MASK | USIC_BRG_PPPEN);
+      regval |= (USIC_BRG_DCTQ(oversampling - 1) |
+                 USIC_BRG_PDIV(pdiv_int_min - 1));
       putreg32(regval, base + XMC4_USIC_BRG_OFFSET);
 
       ret = OK;
