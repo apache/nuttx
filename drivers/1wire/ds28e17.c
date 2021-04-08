@@ -45,7 +45,9 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/drivers/1wire.h>
+#include <nuttx/1wire/1wire_master.h>
+#include <nuttx/1wire/1wire_crc.h>
+#include <nuttx/1wire/1wire.h>
 
 #include <nuttx/1wire/ds28e17.h>
 
