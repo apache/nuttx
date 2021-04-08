@@ -256,7 +256,7 @@ void tms570_memtest_selftest(void)
 
 void tms570_memtest_start(uint32_t rinfol)
 {
-  pbist_memtest_start(rinfol, PBIST_ALGO_March13N_SP);
+  pbist_memtest_start(rinfol, PBIST_ALGO_MARCH13N_SP);
 }
 
 /****************************************************************************

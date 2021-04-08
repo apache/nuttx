@@ -198,8 +198,8 @@
 
 #define PBIST_ALGO_TripleReadSlow      (1 << 0)
 #define PBIST_ALGO_TripleReadFast      (1 << 1)
-#define PBIST_ALGO_March13N_DP         (1 << 2)
-#define PBIST_ALGO_March13N_SP         (1 << 3)
+#define PBIST_ALGO_MARCH13N_DP         (1 << 2)
+#define PBIST_ALGO_MARCH13N_SP         (1 << 3)
 #define PBIST_ALGO_DOWN1a_DP           (1 << 4)
 #define PBIST_ALGO_DOWN1a_SP           (1 << 5)
 #define PBIST_ALGO_MapColumn_DP        (1 << 6)
