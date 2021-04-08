@@ -30,7 +30,7 @@
 
 #include "nucleo-f207zg.h"
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 

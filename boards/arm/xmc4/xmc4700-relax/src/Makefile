@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = xmc4_boot.c xmc4_bringup.c
 
-ifeq ($(CONFIG_BUTTONS),y)
+ifeq ($(CONFIG_INPUT_BUTTONS),y)
 CSRCS += xmc4_buttons.c
 endif
 

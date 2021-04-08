@@ -34,7 +34,7 @@
 
 #include <nuttx/timers/pwm.h>
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 
@@ -337,7 +337,7 @@ int tm4c_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_BUTTONS_LOWER
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");

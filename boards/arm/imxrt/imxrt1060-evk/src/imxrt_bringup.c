@@ -247,8 +247,8 @@ int imxrt_bringup(void)
   imxrt_lcd_initialize();
 #endif
 
-#ifdef CONFIG_BUTTONS
-#ifdef CONFIG_BUTTONS_LOWER
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");
@@ -261,8 +261,8 @@ int imxrt_bringup(void)
   /* Enable BUTTON support for some other purpose */
 
   board_button_initialize();
-#endif /* CONFIG_BUTTONS_LOWER */
-#endif /* CONFIG_BUTTONS */
+#endif /* CONFIG_INPUT_BUTTONS_LOWER */
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
