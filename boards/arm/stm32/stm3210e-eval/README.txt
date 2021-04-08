@@ -723,7 +723,7 @@ Where <subdir> is one of the following:
           Enable the DJoystick driver:
 
             CONFIG_INPUT=y             # Enable input driver support
-            CONFIG_DJOYSTICK=y         # Enable the joystick drivers
+            CONFIG_INPUT_DJOYSTICK=y   # Enable the joystick drivers
                                        # (default parameters should be okay)
           Enable the DJoystick Example:
 

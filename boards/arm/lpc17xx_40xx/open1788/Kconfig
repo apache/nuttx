@@ -8,7 +8,7 @@ if ARCH_BOARD_OPEN1788
 config OPEN1788_DJOYSTICK
 	bool "Discrete Joystick Support"
 	default n
-	depends on !ARCH_BUTTONS && DJOYSTICK
+	depends on !ARCH_BUTTONS && INPUT_DJOYSTICK
 
 config OPEN1788_DJOYDEV
 	string "Joystick Device"

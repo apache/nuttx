@@ -34,7 +34,7 @@
 #include "stm32_gpio.h"
 #include "stm3210e-eval.h"
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -293,4 +293,4 @@ int stm32_djoy_initialization(void)
   return djoy_register("/dev/djoy0", &g_djoylower);
 }
 
-#endif /* CONFIG_DJOYSTICK */
+#endif /* CONFIG_INPUT_DJOYSTICK */

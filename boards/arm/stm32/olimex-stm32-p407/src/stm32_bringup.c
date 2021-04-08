@@ -208,7 +208,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
   ret = stm32_djoy_initialize();
   if (ret != OK)
     {
