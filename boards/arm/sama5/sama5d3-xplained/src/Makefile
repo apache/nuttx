@@ -75,7 +75,7 @@ endif
 
 ifeq ($(CONFIG_ADC),y)
 CSRCS += sam_adc.c
-ifeq ($(CONFIG_AJOYSTICK),y)
+ifeq ($(CONFIG_INPUT_AJOYSTICK),y)
 CSRCS += sam_ajoystick.c
 endif
 endif

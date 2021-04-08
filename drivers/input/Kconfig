@@ -490,7 +490,7 @@ config INPUT_DJOYSTICK_NPOLLWAITERS
 
 endif # INPUT_DJOYSTICK
 
-config AJOYSTICK
+config INPUT_AJOYSTICK
 	bool "Analog Joystick"
 	default n
 	---help---
@@ -500,13 +500,13 @@ config AJOYSTICK
 		to-Digital Conversion (ADC).  The analog positional data may also
 		be accompanied by discrete button data.
 
-if AJOYSTICK
+if INPUT_AJOYSTICK
 
-config AJOYSTICK_NPOLLWAITERS
+config INPUT_AJOYSTICK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
 
-endif # AJOYSTICK
+endif # INPUT_AJOYSTICK
 
 config INPUT_NUNCHUCK
 	bool "Nintendo Wii Nunchuck Joystick (White Model)"

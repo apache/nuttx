@@ -300,7 +300,7 @@ int stm32_can_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 int board_ajoy_initialize(void);
 #endif
 

@@ -250,7 +250,7 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
   /* Initialize the simulated analog joystick input device */
 
   sim_ajoy_initialize();
