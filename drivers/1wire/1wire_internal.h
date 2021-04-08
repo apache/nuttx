@@ -111,7 +111,8 @@ int onewire_reset_resume(FAR struct onewire_master_s *master);
  *
  ****************************************************************************/
 
-int onewire_reset_select(FAR struct onewire_slave_s *slave);
+int onewire_reset_select(FAR struct onewire_master_s *master,
+                         uint64_t romcode);
 
 /****************************************************************************
  * Name: onewire_triplet
