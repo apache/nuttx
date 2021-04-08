@@ -13,22 +13,22 @@ menuconfig INPUT
 
 if INPUT
 
-config MOUSE
+config INPUT_MOUSE
 	bool "Enable mouse support"
 	default n
 	---help---
 		Enable support for mouse devices.
 
-if MOUSE
+if INPUT_MOUSE
 
-config MOUSE_WHEEL
+config INPUT_MOUSE_WHEEL
 	bool "Enable mouse wheel support"
 	default n
 	---help---
 		Enable support for a 4-button mouse report that includes a while
 		position.
 
-endif # MOUSE
+endif # INPUT_MOUSE
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"

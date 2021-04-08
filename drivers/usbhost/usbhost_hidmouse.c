@@ -108,10 +108,10 @@
 #define HIDMOUSE_YTHRESH_B16 (CONFIG_HIDMOUSE_YTHRESH << 16)
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
-#  undef CONFIG_MOUSE_WHEEL
+#  undef CONFIG_INPUT_MOUSE_WHEEL
 #endif
 
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
 
 #  ifndef CONFIG_HIDMOUSE_WMAX
 #    define CONFIG_HIDMOUSE_WMAX 100
@@ -129,7 +129,7 @@
 
 #  define HIDMOUSE_WTHRESH_B16 (CONFIG_HIDMOUSE_WTHRESH << 16)
 
-#endif /* CONFIG_MOUSE_WHEEL */
+#endif /* CONFIG_INPUT_MOUSE_WHEEL */
 
 #ifndef CONFIG_HIDMOUSE_DEFPRIO
 #  define CONFIG_HIDMOUSE_DEFPRIO 50
@@ -221,7 +221,7 @@ struct mouse_sample_s
   uint8_t  buttons;                     /* Button state (see MOUSE_BUTTON_* definitions) */
   uint16_t x;                           /* Accumulated X position */
   uint16_t y;                           /* Accumulated Y position */
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   uint16_t wheel;                       /* Reported wheel position */
 #endif
 };
@@ -264,7 +264,7 @@ struct usbhost_state_s
   b16_t                   yaccum;       /* Current integrated Y position */
   b16_t                   xlast;        /* Last reported X position */
   b16_t                   ylast;        /* Last reported Y position */
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   b16_t                   waccum;       /* Current integrated while position */
   b16_t                   wlast;        /* Last reported wheel position */
 #endif
@@ -798,7 +798,7 @@ static void usbhost_position(FAR struct usbhost_state_s *priv,
 
   priv->yaccum = pos;
 
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   /* Do the same for the wheel position */
 
   disp = rpt->wdisp;
@@ -982,7 +982,7 @@ static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
       return true;
     }
 
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   /* Get the difference in the wheel position from the last report */
 
   pos = priv->waccum;
@@ -1159,14 +1159,14 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
                   priv->xlast = priv->xaccum;
                   priv->ylast = priv->yaccum;
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
                   priv->wlast = priv->waccum;
 #endif
                   /* Update the sample X/Y positions */
 
                   priv->sample.x = b16toi(priv->xaccum);
                   priv->sample.y = b16toi(priv->yaccum);
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
                   priv->sample.wheel = b16toi(priv->waccum);
 #endif
 
@@ -2195,7 +2195,7 @@ static int usbhost_open(FAR struct file *filep)
 
           priv->xlast = INVALID_POSITION_B16;
           priv->ylast = INVALID_POSITION_B16;
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
           priv->wlast = INVALID_POSITION_B16;
 #endif
           /* Set the reported position to the center of the range */
@@ -2450,7 +2450,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer,
   report->buttons = sample.buttons;
   report->x       = sample.x;
   report->y       = sample.y;
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   report->wheel   = sample.wheel;
 #endif
 
