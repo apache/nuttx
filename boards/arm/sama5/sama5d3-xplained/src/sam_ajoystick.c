@@ -181,7 +181,7 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                     MAX_ADC_CHANNELS * sizeof(struct adc_msg_s));
   if (nread < 0)
     {
-      if (nread != iEINTR)
+      if (nread != EINTR)
         {
           ierr("ERROR: read failed: %d\n", (int)nread);
         }
