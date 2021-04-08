@@ -82,12 +82,26 @@ Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BIN
 Peripheral Support
 ==================
 
-.. todo:: To be updated
+The following list indicates peripherals supported in NuttX:
 
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-?          ?       ?
+GPIO         Yes       
+UART         Yes
+SPI          Yes       
+I2C          Yes       
+DMA          Yes       
+Wifi         Yes       
+Ethernet     Yes
+SPIFLASH     Yes
+SPIRAM       Yes
+Timers       Yes
+Watchdog     Yes
+RTC          Yes
+RNG          Yes
+AES          Yes
+eFuse        Yes
 ========== ======= =====
 
 Memory Map
