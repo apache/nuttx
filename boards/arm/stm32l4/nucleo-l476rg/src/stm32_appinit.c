@@ -288,7 +288,7 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
   /* Initialize and register the joystick driver */
 
   ret = board_ajoy_initialize();

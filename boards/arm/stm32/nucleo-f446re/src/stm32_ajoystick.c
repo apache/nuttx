@@ -45,17 +45,17 @@
 
 /* Check for pre-requisites and pin conflicts */
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 #  if !defined(CONFIG_ADC)
 #    error CONFIG_ADC is required for the Itead joystick
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  elif !defined(CONFIG_STM32_ADC1)
 #    error CONFIG_STM32_ADC1 is required for Itead joystick
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  endif
-#endif /* CONFIG_AJOYSTICK */
+#endif /* CONFIG_INPUT_AJOYSTICK */
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 
 /* A no-ADC, buttons only version can be built for testing */
 
@@ -485,4 +485,4 @@ int board_ajoy_initialize(void)
   return ret;
 }
 
-#endif /* CONFIG_AJOYSTICK */
+#endif /* CONFIG_INPUT_AJOYSTICK */

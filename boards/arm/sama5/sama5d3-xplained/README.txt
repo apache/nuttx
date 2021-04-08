@@ -2851,7 +2851,7 @@ Shields
       CONFIG_ANALOG=y                  : Should be automatically selected
       CONFIG_ADC=y                     : Should be automatically selected
       CONFIG_INPUT=y                   : Select input device support
-      CONFIG_AJOYSTICK=y               : Select analog joystick support
+      CONFIG_INPUT_AJOYSTICK=y         : Select analog joystick support
 
     System Type -> ADC Configuration
       CONFIG_SAMA5_ADC_CHAN0=y         : These settings enable the sequencer to collect

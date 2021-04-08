@@ -99,7 +99,7 @@ struct ajoy_open_s
    * driver events.
    */
 
-  FAR struct pollfd *ao_fds[CONFIG_AJOYSTICK_NPOLLWAITERS];
+  FAR struct pollfd *ao_fds[CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -192,7 +192,7 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
     {
       /* Are there any poll waiters? */
 
-      for (i = 0; i < CONFIG_AJOYSTICK_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS; i++)
         {
           if (opriv->ao_fds[i])
             {
@@ -299,7 +299,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
         {
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_AJOYSTICK_NPOLLWAITERS; i++)
+          for (i = 0; i < CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS; i++)
             {
               FAR struct pollfd *fds = opriv->ao_fds[i];
               if (fds)
@@ -708,7 +708,7 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_AJOYSTICK_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -722,7 +722,7 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (i >= CONFIG_AJOYSTICK_NPOLLWAITERS)
+      if (i >= CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS)
         {
           ierr("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;

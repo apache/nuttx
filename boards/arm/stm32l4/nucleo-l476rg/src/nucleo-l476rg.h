@@ -372,7 +372,7 @@ int stm32l4_adc_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 int board_ajoy_initialize(void);
 #endif
 
