@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import re
 import os
+import re
 import sys
 
 apache = r"""
@@ -40,11 +40,11 @@ if len(sys.argv) != 2:
     print("Usage: ./apachize.py <file>", file=sys.stderr)
     print(
         "This will replace the license header of the passed file to that of Apache 2.0 and print it to stdout",
-        file=sys.sterr,
+        file=sys.stderr,
     )
     sys.exit(2)
 
-if not "TOPDIR" in os.environ:
+if "TOPDIR" not in os.environ:
     print(
         "Please define the TOPDIR environment variable to the full path to nuttx/ root",
         file=sys.stderr,
