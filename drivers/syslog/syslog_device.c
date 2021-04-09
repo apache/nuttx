@@ -70,7 +70,7 @@ enum syslog_dev_state
   SYSLOG_UNINITIALIZED = 0, /* SYSLOG has not been initialized */
   SYSLOG_INITIALIZING,      /* SYSLOG is being initialized */
   SYSLOG_REOPEN,            /* SYSLOG open failed... try again later */
-  SYSLOG_FAILURE,           /* SYSLOG open failed... don't try again */
+  SYSLOG_FAILURE,           /* SYSLOG open failed... close and try again */
   SYSLOG_OPENED,            /* SYSLOG device is open and ready to use */
 };
 
@@ -298,8 +298,8 @@ static int syslog_dev_open(FAR struct syslog_dev_s *syslog_dev,
  * (5) Any debug output generated from the IDLE loop.  The character
  *     driver interface is blocking and the IDLE thread is not permitted
  *     to block.
- * (6) If an irrecoverable failure occurred during initialization.  In
- *     this case, we won't ever bother to try again (ever).
+ * (6) If any failure occurred during output.  In this case, we properly
+ *     close the device, and set it for later re-opening.
  *
  * NOTE: That the third case is different.  It applies only to the thread
  * that currently holds the sl_sem semaphore.  Other threads should wait.
@@ -339,11 +339,21 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
           return -EAGAIN; /* Can't access the SYSLOG now... maybe next time? */
         }
 
+      /* NOTE that the scheduler is locked.  That is because we do not have
+       * fully initialized semaphore capability until the SYSLOG device is
+       * successfully initialized.
+       */
+
+      sched_lock();
+
       /* Case (6) */
 
       if (syslog_dev->sl_state == SYSLOG_FAILURE)
         {
-          return -ENXIO;  /* There is no SYSLOG device */
+          file_close(&syslog_dev->sl_file);
+          nxsem_destroy(&syslog_dev->sl_sem);
+
+          syslog_dev->sl_state = SYSLOG_REOPEN;
         }
 
       /* syslog_dev_initialize() is called as soon as enough of the operating
@@ -351,13 +361,8 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
        * possible that the SYSLOG device is not yet registered at that time.
        * In this case, we know that the system is sufficiently initialized
        * to support an attempt to re-open the SYSLOG device.
-       *
-       * NOTE that the scheduler is locked.  That is because we do not have
-       * fully initialized semaphore capability until the SYSLOG device is
-       * successfully initialized.
        */
 
-      sched_lock();
       if (syslog_dev->sl_state == SYSLOG_REOPEN)
         {
           /* Try again to initialize the device.  We may do this repeatedly
@@ -521,6 +526,7 @@ static ssize_t syslog_dev_write(FAR struct syslog_channel_s *channel,
   return buflen;
 
 errout_with_sem:
+  syslog_dev->sl_state = SYSLOG_FAILURE;
   syslog_dev_givesem(syslog_dev);
   return ret;
 }
@@ -615,6 +621,7 @@ static int syslog_dev_putc(FAR struct syslog_channel_s *channel, int ch)
 
   if (nbytes < 0)
     {
+      syslog_dev->sl_state = SYSLOG_FAILURE;
       return (int)nbytes;
     }
 
