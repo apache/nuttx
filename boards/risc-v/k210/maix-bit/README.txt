@@ -38,4 +38,4 @@
 
   Support peripherals such as GPIO/SPI/I2C/...
   Support FPU
-  Support memory protection for user mode
+  Support RISC-V U-mode including memory protection
