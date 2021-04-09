@@ -5,6 +5,4 @@
 
 if ARCH_BOARD_ESP32_WROVERKIT
 
-source boards/xtensa/esp32/common/Kconfig
-
 endif # ARCH_BOARD_ESP32_WROVERKIT
