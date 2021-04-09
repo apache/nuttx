@@ -3198,7 +3198,6 @@ config BOARD_INITRNGSEED
 		board_init_rndseed() upon initialization. This function
 		can then provide early entropy seed to the pool through
 		entropy injection APIs provided at 'nuttx/random.h'.
-#endif
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"
