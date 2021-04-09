@@ -219,7 +219,7 @@ static struct ili9225_dev_s g_lcddev;
  * Name: ili9225_select
  *
  * Description:
- *   Select the SPI, locking and  re-configuring if necessary
+ *   Select the SPI, locking and re-configuring if necessary
  *
  * Input Parameters:
  *   spi   - Reference to the SPI driver structure
@@ -445,8 +445,8 @@ static void ili9225_display(FAR struct ili9225_dev_s *dev, bool on)
  ****************************************************************************/
 
 static void ili9225_setarea(FAR struct ili9225_dev_s *dev,
-                           uint16_t x0, uint16_t y0,
-                           uint16_t x1, uint16_t y1)
+                            uint16_t x0, uint16_t y0,
+                            uint16_t x1, uint16_t y1)
 {
   /* Set row address */
 
@@ -488,7 +488,7 @@ static void ili9225_bpp(FAR struct ili9225_dev_s *dev, int bpp)
  ****************************************************************************/
 
 static void ili9225_wrram(FAR struct ili9225_dev_s *dev,
-                         FAR const uint16_t *buff, size_t size)
+                          FAR const uint16_t *buff, size_t size)
 {
   ili9225_sendcmd(dev, ILI9225_GRAM_DATA_REG);
 
@@ -507,7 +507,7 @@ static void ili9225_wrram(FAR struct ili9225_dev_s *dev,
 
 #ifndef CONFIG_LCD_NOGETRUN
 static void ili9225_rdram(FAR struct ili9225_dev_s *dev,
-                         FAR uint16_t *buff, size_t size)
+                          FAR uint16_t *buff, size_t size)
 {
   ili9225_sendcmd(dev, ILI9225_GRAM_DATA_REG);
 
@@ -555,7 +555,7 @@ static void ili9225_fill(FAR struct ili9225_dev_s *dev, uint16_t color)
  ****************************************************************************/
 
 static int ili9225_putrun(fb_coord_t row, fb_coord_t col,
-                         FAR const uint8_t *buffer, size_t npixels)
+                          FAR const uint8_t *buffer, size_t npixels)
 {
   FAR struct ili9225_dev_s *priv = &g_lcddev;
   FAR const uint16_t *src = (FAR const uint16_t *)buffer;
