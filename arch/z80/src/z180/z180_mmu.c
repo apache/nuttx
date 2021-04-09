@@ -127,13 +127,13 @@ void z180_mmu_lowinit(void) __naked
    */
 
   __asm
-	ld	c, #Z180_MMU_CBAR		; port
-	ld	a, #Z180_CBAR_VALUE		; value
-	out	(c), a
+  ld c, #Z180_MMU_CBAR ; port
+  ld a, #Z180_CBAR_VALUE ; value
+  out (c), a
 
-	ld	c, #Z180_MMU_BBR		; port
-	ld	a, #Z180_BBR_VALUE		; value
-	out	(c), a
+  ld c, #Z180_MMU_BBR ; port
+  ld a, #Z180_BBR_VALUE ; value
+  out (c), a
   __endasm;
 }
 
