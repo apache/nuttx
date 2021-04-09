@@ -944,9 +944,10 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
                     }
                 }
 
-              leave_critical_section(flags);
               upper->gap = false;
             }
+
+          leave_critical_section(flags);
         }
 
       sample = ev.pulse ? LIRC_PULSE(ev.duration) : LIRC_SPACE(ev.duration);
