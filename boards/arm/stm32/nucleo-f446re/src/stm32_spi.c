@@ -53,6 +53,9 @@ struct spi_dev_s *g_spi1;
 #ifdef CONFIG_STM32_SPI2
 struct spi_dev_s *g_spi2;
 #endif
+#ifdef CONFIG_STM32_SPI3
+struct spi_dev_s *g_spi3;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -87,6 +90,18 @@ void weak_function stm32_spidev_initialize(void)
   /* Configure SPI-based devices */
 
   g_spi2 = stm32_spibus_initialize(2);
+#endif
+
+#ifdef CONFIG_STM32_SPI3
+  /* Configure SPI-based devices */
+
+  g_spi3 = stm32_spibus_initialize(3);
+
+#ifdef HAVE_LCD
+  stm32_configgpio(GPIO_LCD_CS);
+  stm32_configgpio(GPIO_LCD_RS);
+#endif
+
 #endif
 }
 
@@ -157,6 +172,10 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
+
+#ifdef HAVE_LCD
+      stm32_gpiowrite(GPIO_LCD_CS, !selected);
+#endif
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -206,7 +225,8 @@ int stm32_spi2cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #ifdef CONFIG_STM32_SPI3
 int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-  return OK;
+      stm32_gpiowrite(GPIO_LCD_RS, !cmd);
+      return OK;
 }
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
