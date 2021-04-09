@@ -137,8 +137,8 @@ __start:
 
 	/* Call lowlevel init C-function */
 
-	.extern ConfigurePLL
-	ldr	r0, =ConfigurePLL
+	.extern configure_pll
+	ldr	r0, =configure_pll
 	mov	lr, pc
 	bx	r0
 
