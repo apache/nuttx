@@ -58,6 +58,8 @@
 #  undef HAVE_MMCSD
 #endif
 
+#define HAVE_LCD 1
+
 /* LED.  User LD2: the green LED is a user LED connected to Arduino signal
  * D13 corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on
  * the STM32 target.
@@ -123,6 +125,15 @@
 #  define GPIO_SPI_CS_SD_CARD \
     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
      GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN5)
+#endif
+
+#ifdef HAVE_LCD
+#define GPIO_LCD_CS  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                      GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN9)
+#define GPIO_LCD_RST (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                      GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN10)
+#define GPIO_LCD_RS  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                      GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN8)
 #endif
 
 /* Devices on the onboard bus.
@@ -219,6 +230,9 @@ extern struct spi_dev_s *g_spi1;
 #endif
 #ifdef CONFIG_STM32_SPI2
 extern struct spi_dev_s *g_spi2;
+#endif
+#ifdef CONFIG_STM32_SPI3
+extern struct spi_dev_s *g_spi3;
 #endif
 #ifdef HAVE_MMCSD
 extern struct sdio_dev_s *g_sdio;
