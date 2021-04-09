@@ -34,6 +34,8 @@
 
 #include "esp32c3.h"
 
+#include "hardware/esp32c3_rom_layout.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -64,12 +66,13 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   extern uint8_t *_sheap;
-  extern uint8_t *_eheap;
+  extern const struct esp32c3_rom_layout_s *ets_rom_layout_p;
 
   board_autoled_on(LED_HEAPALLOCATE);
 
   *heap_start = (FAR void *)&_sheap;
-  *heap_size = (size_t)((uintptr_t)&_eheap - (uintptr_t)&_sheap);
+  *heap_size = (size_t)(ets_rom_layout_p->dram0_rtos_reserved_start -
+                        (uintptr_t)&_sheap);
 }
 
 /****************************************************************************

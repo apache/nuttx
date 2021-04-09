@@ -82,10 +82,6 @@ MEMORY
 
 }
 
-/* Heap ends at the start of the static data of the ROM bootloader */
-
-_eheap = 0x3fccae00;
-
 #if CONFIG_ESP32C3_DEVKIT_RUN_IRAM
   REGION_ALIAS("default_rodata_seg", dram0_0_seg);
   REGION_ALIAS("default_code_seg", iram0_0_seg);
