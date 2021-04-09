@@ -271,6 +271,10 @@ static int wlan_sta_set_linkstatus(FAR struct net_driver_s *dev,
                                    bool linkstatus);
 #endif
 
+#ifdef CONFIG_NET_ICMPv6
+static void wlan_ipv6multicast(FAR struct wlan_priv_s *priv);
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -1215,7 +1219,7 @@ static int wlan_ifup(FAR struct net_driver_s *dev)
         (uint8_t)(dev->d_ipaddr >> 16), (uint8_t)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
-  winfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
+  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);

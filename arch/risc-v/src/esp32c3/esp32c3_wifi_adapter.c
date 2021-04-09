@@ -5120,13 +5120,6 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
   DEBUGASSERT(ext != NULL);
 
   pdata = ext->key;
-  len   = ext->key_len;
-
-  if (set && len > PWD_MAX_LEN)
-    {
-      return -EINVAL;
-    }
-
   memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
@@ -5137,6 +5130,12 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      len = ext->key_len;
+      if (len > PWD_MAX_LEN)
+        {
+          return -EINVAL;
+        }
+
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
@@ -5150,6 +5149,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
     }
   else
     {
+      len = iwr->u.encoding.length - sizeof(*ext);
       size = strnlen((char *)wifi_cfg.sta.password, PWD_MAX_LEN);
       if (len < size)
         {
@@ -5157,8 +5157,8 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
         }
       else
         {
-          len = size;
-          memcpy(pdata, wifi_cfg.sta.password, len);
+          ext->key_len = size;
+          memcpy(pdata, wifi_cfg.sta.password, ext->key_len);
         }
 
       if (g_sta_connected)
@@ -5862,7 +5862,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
       country_code = (char *)iwr->u.data.pointer;
       if (strlen(country_code) != 2)
         {
-          wlerr("ERROR: Invalid input arguments\r\n");
+          wlerr("ERROR: Invalid input arguments\n");
           return -EINVAL;
         }
 
