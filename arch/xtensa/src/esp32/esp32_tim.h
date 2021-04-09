@@ -53,6 +53,7 @@
 #define ESP32_TIM_ENABLEINT(d)                     ((d)->ops->enableint(d))
 #define ESP32_TIM_DISABLEINT(d)                    ((d)->ops->disableint(d))
 #define ESP32_TIM_ACKINT(d)                        ((d)->ops->ackint(d))
+#define ESP32_TIM_CHECKINT(d)                      ((d)->ops->checkint(d))
 
 /****************************************************************************
  * Public Types
@@ -106,6 +107,7 @@ struct esp32_tim_ops_s
   CODE void (*enableint)(FAR struct esp32_tim_dev_s *dev);
   CODE void (*disableint)(FAR struct esp32_tim_dev_s *dev);
   CODE void (*ackint)(FAR struct esp32_tim_dev_s *dev);
+  CODE int (*checkint)(FAR struct esp32_tim_dev_s *dev);
 };
 
 /****************************************************************************
