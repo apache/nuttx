@@ -20,8 +20,7 @@
 ############################################################################
 
 import array
-import time
-from socket import *
+from socket import AF_INET, SO_BROADCAST, SOCK_DGRAM, SOL_SOCKET, socket, timeout
 
 PORT = 96
 

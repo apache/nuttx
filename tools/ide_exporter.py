@@ -37,13 +37,14 @@
 #
 ############################################################################
 
-import os
-import subprocess
-import re
-import sys
 import argparse
-from lxml import etree as ET
+import os
+import re
+import subprocess
+import sys
 from copy import deepcopy
+
+from lxml import etree as ET
 
 HELP = """
 ide_exporter.pyis a tool for generation nuttx iar/keil workspace
@@ -178,7 +179,7 @@ def get_common_dir(dir_list):
     """Get common parent directory of a given directory list"""
     com_dir = dir_list[0]
     found = False
-    while found == False:
+    while not found:
         found = True
         com_dir = os.path.split(com_dir)[0]
         for directory in dir_list:

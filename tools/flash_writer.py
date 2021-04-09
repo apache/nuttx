@@ -16,18 +16,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import time
-import sys
-import os
-import struct
-import glob
-import fnmatch
-import errno
-import telnetlib
 import argparse
-import shutil
-import subprocess
+import errno
+import os
 import re
+import subprocess
+import sys
+import telnetlib
+import time
+
 import xmodem
 
 import_serial_module = True
@@ -44,7 +41,7 @@ else:
 
 try:
     import serial
-except:
+except ImportError:
     import_serial_module = False
 
 # supported environment various
@@ -56,6 +53,7 @@ PROTOCOL_SERIAL = 0
 PROTOCOL_TELNET = 1
 
 MAX_DOT_COUNT = 70
+
 
 # configure parameters and default value
 class ConfigArgs:
@@ -216,12 +214,12 @@ class ConfigArgsLoader:
         ConfigArgs.PKGUPD_NAME = args.pkgupd_name
 
         # Get serial port or telnet server ip etc
-        if args.serial_protocol == True:
+        if args.serial_protocol is True:
             ConfigArgs.PROTOCOL_TYPE = PROTOCOL_SERIAL
-        elif args.telnet_protocol == True:
+        elif args.telnet_protocol is True:
             ConfigArgs.PROTOCOL_TYPE = PROTOCOL_TELNET
 
-        if ConfigArgs.PROTOCOL_TYPE == None:
+        if ConfigArgs.PROTOCOL_TYPE is None:
             proto = os.environ.get("CXD56_PROTOCOL")
             if proto is not None:
                 if "s" in proto:
@@ -229,7 +227,7 @@ class ConfigArgsLoader:
                 elif "t" in proto:
                     ConfigArgs.PROTOCOL_TYPE = PROTOCOL_TELNET
 
-        if ConfigArgs.PROTOCOL_TYPE == None:
+        if ConfigArgs.PROTOCOL_TYPE is None:
             ConfigArgs.PROTOCOL_TYPE = PROTOCOL_SERIAL
 
         if ConfigArgs.PROTOCOL_TYPE == PROTOCOL_SERIAL:
@@ -582,7 +580,7 @@ def main():
     try:
         config_loader = ConfigArgsLoader()
         config_loader.update_config()
-    except:
+    except Exception:
         return errno.EINVAL
 
     # Wait to reset the board
@@ -599,7 +597,7 @@ def main():
         do_wait_reset = False
         bootrom_msg = writer.cancel_autoboot()
 
-    if ConfigArgs.WAIT_RESET == False and do_wait_reset == True:
+    if ConfigArgs.WAIT_RESET is False and do_wait_reset is True:
         rx = writer.recv()
         time.sleep(1)
         for i in range(3):
@@ -615,7 +613,7 @@ def main():
         # Wait to reset the board
         print("Please press RESET button on target board")
         sys.stdout.flush()
-        bootrom_msg = writer.cancel_autoboot()
+        bootrom_msg = writer.cancel_autoboot()  # noqa: F841 unused variable
 
     # Remove files
     if ConfigArgs.ERASE_NAME:
