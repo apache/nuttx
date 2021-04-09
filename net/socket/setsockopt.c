@@ -148,13 +148,14 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               _SO_SETOPT(psock->s_options, option);
             }
         }
-        break;
+
+        return OK;
     }
 
 #ifdef CONFIG_NET_USRSOCK
     if (psock->s_type == SOCK_USRSOCK_TYPE)
       {
-      return -ENOPROTOOPT;
+        return -ENOPROTOOPT;
       }
 #endif
 

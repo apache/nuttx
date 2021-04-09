@@ -141,7 +141,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           net_dsec2timeval(timeo, (struct timeval *)value);
           *value_len   = sizeof(struct timeval);
         }
-        break;
+
+      return OK;
     }
 
 #ifdef CONFIG_NET_USRSOCK
