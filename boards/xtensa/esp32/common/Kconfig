@@ -2,7 +2,6 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
-
 config ESP32_QEMU_IMAGE
 	bool "ESP32 binary image for QEMU"
 	default n
@@ -10,22 +9,26 @@ config ESP32_QEMU_IMAGE
 		Create a binary flash image used for QEMU.
 
 choice ESP32_SPIFLASH_FS
-  prompt "SPIFLASH File System"
-  default ESP32_SPIFLASH_SMARTFS
-  depends on ESP32_SPIFLASH
+	prompt "SPIFLASH File System"
+	default ESP32_SPIFLASH_SMARTFS
+	depends on ESP32_SPIFLASH
 
-  config ESP32_SPIFLASH_SMARTFS
-        bool "SmartFS"
-        depends on FS_SMARTFS
-  config ESP32_SPIFLASH_NXFFS
-        bool "NXFFS"
-        depends on FS_NXFFS
-  config ESP32_SPIFLASH_SPIFFS
-        bool "SPIFFS"
-        depends on FS_SPIFFS
-  config ESP32_SPIFLASH_LITTLEFS
-        bool "LittleFS"
-        depends on FS_LITTLEFS
+	config ESP32_SPIFLASH_SMARTFS
+		bool "SmartFS"
+		depends on FS_SMARTFS
+
+	config ESP32_SPIFLASH_NXFFS
+		bool "NXFFS"
+		depends on FS_NXFFS
+
+	config ESP32_SPIFLASH_SPIFFS
+		bool "SPIFFS"
+		depends on FS_SPIFFS
+
+	config ESP32_SPIFLASH_LITTLEFS
+		bool "LittleFS"
+		depends on FS_LITTLEFS
+
 endchoice
 
 config ESP32_SPIFLASH_ENCRYPTION_TEST
@@ -33,7 +36,7 @@ config ESP32_SPIFLASH_ENCRYPTION_TEST
 	default n
 	depends on ESP32_SPIFLASH
 	select DEBUG_ASSERTIONS
-	help
+	---help---
 		Enable SPI Flash encryption test. This option will also select
 		DEBUG_ASSERTIONS to enable kernel assert macro.
 
@@ -41,5 +44,5 @@ config ESP32_SPIFLASH_TEST_ADDRESS
 	hex "SPI Flash test address"
 	default 0x180000
 	depends on ESP32_SPIFLASH_ENCRYPTION_TEST
-	help
+	---help---
 		SPI Flash encryption test read/write address.
