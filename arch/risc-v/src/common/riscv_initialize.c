@@ -32,6 +32,7 @@
 #include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/net/telnet.h>
 
 #include <arch/board/board.h>
 
@@ -160,6 +161,12 @@ void up_initialize(void)
   /* Initialize the local loopback device */
 
   localhost_initialize();
+#endif
+
+#ifdef CONFIG_NETDEV_TELNET
+  /* Initialize the Telnet session factory */
+
+  telnet_initialize();
 #endif
 
   board_autoled_on(LED_IRQSENABLED);
