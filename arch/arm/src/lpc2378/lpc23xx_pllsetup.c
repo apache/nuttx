@@ -70,7 +70,7 @@
 #include "lpc23xx_pinsel.h"
 #include "lpc23xx_scb.h"
 
-void IO_Init(void);
+void io_init(void);
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -163,13 +163,13 @@ static inline void up_scbpllfeed(void)
 }
 
 /****************************************************************************
- * Name: ConfigurePLL
+ * Name: configure_pll
  ****************************************************************************/
 
-void ConfigurePLL(void)
+void configure_pll(void)
 {
-  uint32_t MSel;
-  uint32_t NSel;
+  uint32_t m_sel;
+  uint32_t n_sel;
 
   /* LPC2378 Rev.'-' errata Enable the Ethernet block to enable 16k EnetRAM */
 
@@ -232,9 +232,9 @@ void ConfigurePLL(void)
 
   while ((SCB_PLLSTAT & (1 << 26)) == 0);
 
-  MSel = SCB_PLLSTAT & 0x00007fff;
-  NSel = (SCB_PLLSTAT & 0x00ff0000) >> 16;
-  while ((MSel != PLL_M) && (NSel != PLL_N));
+  m_sel = SCB_PLLSTAT & 0x00007fff;
+  n_sel = (SCB_PLLSTAT & 0x00ff0000) >> 16;
+  while ((m_sel != PLL_M) && (n_sel != PLL_N));
 
   /* Enable and connect */
 
@@ -255,7 +255,7 @@ void ConfigurePLL(void)
 
   SCB_SCS |= 0x01;
 
-  IO_Init();
+  io_init();
 
   return;
 }
