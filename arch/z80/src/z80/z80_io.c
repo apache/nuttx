@@ -56,9 +56,9 @@
 void outp(char p, char c)
 {
   __asm
-	ld	c, 4(ix)	; port
-	ld	a, 5(ix)	; value
-	out	(c), a
+  ld c, 4(ix) ; port
+  ld a, 5(ix) ; value
+  out (c), a
   __endasm;
 }
 
@@ -73,7 +73,7 @@ void outp(char p, char c)
 char inp(char p) __naked
 {
   __asm
-	ld	c, 4(ix)	;port
-	in	l, (c)
+  ld c, 4(ix) ; port
+  in l, (c)
   __endasm;
 }
