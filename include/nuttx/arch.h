@@ -1539,7 +1539,7 @@ void up_timer_initialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_CLOCK_TIMEKEEPING)
+#if defined(CONFIG_SCHED_TICKLESS)
 int up_timer_gettime(FAR struct timespec *ts);
 #endif
 
