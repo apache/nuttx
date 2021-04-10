@@ -106,12 +106,6 @@
 #  error Not supported ADC IP core
 #endif
 
-/* Should works for ADC IPv1 basic but was not tested yet */
-
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && defined(HAVE_BASIC_ADC)
-#  error Not tested yet
-#endif
-
 /* Multi instances support tested only on IP_ADC_V1 */
 
 #if CONFIG_MOTOR_FOC_INST > 1
@@ -141,13 +135,25 @@
 #  error ADC sample-time configuration interface must be enabled
 #endif
 
+/* Debug register for PWM timers */
+
+#if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2)
+#  define FOC_PWM_FZ_REG    (STM32_DBGMCU_APB2_FZ)
+#elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
+#  define FOC_PWM_FZ_REG    (STM32_DBGMCU_CR)
+#endif
+
 /* FOC0 always use TIMER1 for PWM */
 
 #ifdef CONFIG_STM32_FOC_FOC0
 #  define FOC0_PWM           (1)
 #  define FOC0_PWM_NCHANNELS (PWM_TIM1_NCHANNELS)
 #  define FOC0_PWM_BASE      (STM32_TIM1_BASE)
-#  define FOC0_PWM_APB2FZ    (DBGMCU_APB2_TIM1STOP)
+#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2)
+#    define FOC0_PWM_FZ_BIT    (DBGMCU_APB2_TIM1STOP)
+#  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
+#    define FOC0_PWM_FZ_BIT    (DBGMCU_CR_TIM1STOP)
+#  endif
 #  if CONFIG_STM32_TIM1_MODE != 2
 #    error TIM1 must be configured in center-aligned mode 1
 #  endif
@@ -159,7 +165,11 @@
 #  define FOC1_PWM           (8)
 #  define FOC1_PWM_NCHANNELS (PWM_TIM8_NCHANNELS)
 #  define FOC1_PWM_BASE      (STM32_TIM8_BASE)
-#  define FOC1_PWM_APB2FZ    (DBGMCU_APB2_TIM8STOP)
+#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2)
+#    define FOC1_PWM_FZ_BIT    (DBGMCU_APB2_TIM8STOP)
+#  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
+#    define FOC1_PWM_FZ_BIT    (DBGMCU_CR_TIM8STOP)
+#  endif
 #  if CONFIG_STM32_TIM8_MODE != 2
 #    error TIM8 must be configured in center-aligned mode 1
 #  endif
@@ -438,13 +448,13 @@
 /* Generalize ADC interupt flags */
 
 #if defined(CONFIG_STM32_HAVE_IP_ADC_V2)
-#  define ADC_ISR_FOC     ADC_ISR_JEOS
-#  define ADC_IER_FOC     ADC_IER_JEOS
-#  define ADC_ISR_OVR     ADC_INT_OVR
+#  define FOC_ADC_ISR_FOC ADC_ISR_JEOS
+#  define FOC_ADC_IER_FOC ADC_IER_JEOS
+#  define FOC_ADC_ISR_OVR ADC_INT_OVR
 #elif defined(CONFIG_STM32_HAVE_IP_ADC_V1)
-#  define ADC_ISR_FOC     ADC_ISR_JEOC
-#  define ADC_IER_FOC     ADC_IER_JEOC
-#  define ADC_ISR_OVR     ADC_SR_OVR
+#  define FOC_ADC_ISR_FOC ADC_ISR_JEOC
+#  define FOC_ADC_IER_FOC ADC_IER_JEOC
+#  define FOC_ADC_ISR_OVR ADC_SR_OVR
 #else
 #  error Not supported
 #endif
@@ -483,6 +493,7 @@
 /* Common for ADCv1 */
 
 #if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
+#  define FOC_ADC_HAVE_CMN (1)
 #  ifdef CONFIG_STM32_HAVE_ADC1
 #    define FOC_ADC1_CMN (&g_stm32_foc_adccmn123)
 #  endif
@@ -497,12 +508,22 @@
 /* Common for ADCv1 basic */
 
 #if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && defined(HAVE_BASIC_ADC)
-#  error ADCv1 basic not supported by this implementation
+#  undef FOC_ADC_HAVE_CMN
+#  ifdef CONFIG_STM32_HAVE_ADC1
+#    define FOC_ADC1_CMN (0)
+#  endif
+#  ifdef CONFIG_STM32_HAVE_ADC2
+#    define FOC_ADC2_CMN (0)
+#  endif
+#  ifdef CONFIG_STM32_HAVE_ADC3
+#    define FOC_ADC3_CMN (0)
+#  endif
 #endif
 
 /* Common for ADCv2 */
 
 #ifdef CONFIG_STM32_HAVE_IP_ADC_V2
+#  define FOC_ADC_HAVE_CMN (1)
 #  ifdef CONFIG_STM32_HAVE_ADC1
 #    define FOC_ADC1_CMN (&g_stm32_foc_adccmn12)
 #  endif
@@ -594,8 +615,8 @@
 
 /* Enable/disable ADC interrupts (FOC worker loop) */
 
-#define STM32_ADC_ENABLEINT(adc)  STM32_ADC_INT_ENABLE(adc, ADC_IER_FOC)
-#define STM32_ADC_DISABLEINT(adc) STM32_ADC_INT_DISABLE(adc, ADC_IER_FOC)
+#define STM32_ADC_ENABLEINT(adc)  STM32_ADC_INT_ENABLE(adc, FOC_ADC_IER_FOC)
+#define STM32_ADC_DISABLEINT(adc) STM32_ADC_INT_DISABLE(adc, FOC_ADC_IER_FOC)
 
 /* ADC calibration samples */
 
@@ -687,9 +708,11 @@ struct stm32_foc_priv_s
 
   FAR const struct foc_callbacks_s *cb;
 
+#ifdef FOC_ADC_HAVE_CMN
   /* Common data */
 
   FAR struct stm32_foc_adccmn_s *adc_cmn;
+#endif
 };
 
 /****************************************************************************
@@ -747,33 +770,35 @@ static void stm32_foc_hw_config_get(FAR struct foc_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_HAVE_IP_ADC_V1
+#ifdef FOC_ADC_HAVE_CMN
+#  ifdef CONFIG_STM32_HAVE_IP_ADC_V1
 /* Common for ADC123 */
 
 static struct stm32_foc_adccmn_s g_stm32_foc_adccmn123 =
 {
   .cntr = 0
 };
-#endif
+#  endif  /* CONFIG_STM32_HAVE_IP_ADC_V1 */
 
-#ifdef CONFIG_STM32_HAVE_IP_ADC_V2
-#  if defined(CONFIG_STM32_HAVE_ADC1) || defined(CONFIG_STM32_HAVE_ADC2)
+#  ifdef CONFIG_STM32_HAVE_IP_ADC_V2
+#    if defined(CONFIG_STM32_HAVE_ADC1) || defined(CONFIG_STM32_HAVE_ADC2)
 /* Common for ADC12 */
 
 static struct stm32_foc_adccmn_s g_stm32_foc_adccmn12 =
 {
   .cntr = 0
 };
-#  endif
-#  if defined(CONFIG_STM32_HAVE_ADC3) || defined(CONFIG_STM32_HAVE_ADC4)
+#    endif  /* CONFIG_STM32_HAVE_ADC1 || CONFIG_STM32_HAVE_ADC2 */
+#    if defined(CONFIG_STM32_HAVE_ADC3) || defined(CONFIG_STM32_HAVE_ADC4)
 /* Common for ADC34 */
 
 static struct stm32_foc_adccmn_s g_stm32_foc_adccmn34 =
 {
   .cntr = 0
 };
-#  endif
-#endif
+#    endif  /* CONFIG_STM32_HAVE_ADC3 || CONFIG_STM32_HAVE_ADC4 */
+#  endif    /* CONFIG_STM32_HAVE_IP_ADC_V2 */
+#endif  /* FOC_ADC_HAVE_CMN */
 
 /* STM32 specific FOC data */
 
@@ -1256,7 +1281,9 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   DEBUGASSERT(board);
   DEBUGASSERT(priv);
   DEBUGASSERT(adc);
+#ifdef FOC_ADC_HAVE_CMN
   DEBUGASSERT(priv->adc_cmn);
+#endif
 
   /* Call board-specific setup - must be done before TIM enable */
 
@@ -1271,6 +1298,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
 
   STM32_ADC_SETUP(foc_dev->adc);
 
+#ifdef FOC_ADC_HAVE_CMN
   /* Lock ADC common data */
 
   ret = nxsem_wait_uninterruptible(&priv->adc_cmn->sem);
@@ -1295,6 +1323,7 @@ static int stm32_foc_setup(FAR struct foc_dev_s *dev)
   /* Unlock ADC common data */
 
   nxsem_post(&priv->adc_cmn->sem);
+#endif
 
   /* Setup PWM */
 
@@ -1403,6 +1432,7 @@ static int stm32_foc_shutdown(FAR struct foc_dev_s *dev)
 
   STM32_ADC_SHUTDOWN(foc_dev->adc);
 
+#ifdef FOC_ADC_HAVE_CMN
   /* Lock ADC common data */
 
   ret = nxsem_wait_uninterruptible(&priv->adc_cmn->sem);
@@ -1418,15 +1448,18 @@ static int stm32_foc_shutdown(FAR struct foc_dev_s *dev)
   /* Deinitialize ADC only if last device */
 
   if (priv->adc_cmn->cntr == 0)
+#endif
     {
       /* Disable ADC interrupts */
 
       up_disable_irq(foc_dev->adc_irq);
     }
 
+#ifdef FOC_ADC_HAVE_CMN
   /* Unlock ADC common data */
 
   nxsem_post(&priv->adc_cmn->sem);
+#endif
 
   /* Call board-specific shutdown */
 
@@ -1436,7 +1469,9 @@ static int stm32_foc_shutdown(FAR struct foc_dev_s *dev)
 
   memset(&priv->data, 0, sizeof(struct stm32_foc_data_s));
 
+#ifdef FOC_ADC_HAVE_CMN
 errout:
+#endif
   return ret;
 }
 
@@ -1557,7 +1592,7 @@ static int stm32_foc_adc_handler(int irq, FAR void *context, FAR void *arg)
 
       /* Only if end of injected sequence */
 
-      if (pending & ADC_ISR_FOC)
+      if (pending & FOC_ADC_ISR_FOC)
         {
           /* Found device with penidng ADC interrupt */
 
@@ -2049,13 +2084,15 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
   FAR struct foc_lower_s        *foc_lower = NULL;
   FAR struct stm32_foc_dev_s    *foc_dev   = NULL;
   FAR struct stm32_foc_priv_s   *foc_priv  = NULL;
+#ifdef FOC_ADC_HAVE_CMN
   FAR struct stm32_foc_adccmn_s *adc_cmn   = NULL;
+#endif
   uint32_t                       adc_irq   = 0;
   uint32_t                       pwm_base  = 0;
   uint32_t                       jextval   = 0;
   uint8_t                        pwm_inst  = 0;
   uint8_t                        adc_inst  = 0;
-  uint32_t                       apb2_fz   = 0;
+  uint32_t                       pwmfzbit  = 0;
   int                            j         = 0;
 
   DEBUGASSERT(board != NULL);
@@ -2092,8 +2129,10 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
           adc_irq  = FOC0_ADC_IRQ;
           pwm_base = FOC0_PWM_BASE;
           jextval  = FOC0_ADC_JEXT;
-          apb2_fz  = FOC0_PWM_APB2FZ;
+          pwmfzbit = FOC0_PWM_FZ_BIT;
+#ifdef FOC_ADC_HAVE_CMN
           adc_cmn  = FOC0_ADC_CMN;
+#endif
           break;
         }
 #endif
@@ -2106,8 +2145,10 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
           adc_irq  = FOC1_ADC_IRQ;
           pwm_base = FOC1_PWM_BASE;
           jextval  = FOC1_ADC_JEXT;
-          apb2_fz  = FOC1_PWM_APB2FZ;
+          pwmfzbit = FOC1_PWM_FZ_BIT;
+#ifdef FOC_ADC_HAVE_CMN
           adc_cmn  = FOC1_ADC_CMN;
+#endif
           break;
         }
 #endif
@@ -2142,9 +2183,11 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
 
   foc_priv->board = board;
 
+#ifdef FOC_ADC_HAVE_CMN
   /* Connect ADC common data */
 
   foc_priv->adc_cmn = adc_cmn;
+#endif
 
   /* Get archspecific devive */
 
@@ -2210,11 +2253,13 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
    * TODO: move this to stm32_pwm.c and configure from Kconfig
    */
 
-  modifyreg32(STM32_DBGMCU_APB2_FZ, 0, apb2_fz);
+  modifyreg32(FOC_PWM_FZ_REG, 0, pwmfzbit);
 
+#ifdef FOC_ADC_HAVE_CMN
   /* Initialize ADC common data semaphore  */
 
   nxsem_init(&foc_priv->adc_cmn->sem, 0, 1);
+#endif
 
   /* Initialize calibration semaphore */
 
