@@ -37,9 +37,7 @@
 
 #define STM32_DBGMCU_IDCODE       0xe0042000  /* MCU identifier */
 #define STM32_DBGMCU_CR           0xe0042004  /* MCU debug */
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-    defined(CONFIG_STM32_STM32L15XX)
+#ifdef CONFIG_STM32_HAVE_IP_DBGMCU_V2
 #  define STM32_DBGMCU_APB1_FZ    0xe0042008  /* Debug MCU APB1 freeze register */
 #  define STM32_DBGMCU_APB2_FZ    0xe004200c  /* Debug MCU APB2 freeze register */
 #endif
@@ -67,7 +65,7 @@
 #  define DBGMCU_CR_SYNCH2        (2 << DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=2 */
 #  define DBGMCU_CR_SYNCH4        (3 << DBGMCU_CR_TRACEMODE_SHIFT) /* Synchronous Mode, TRACEDATA size=4 */
 
-#ifdef CONFIG_STM32_STM32F10XX
+#ifdef CONFIG_STM32_HAVE_IP_DBGMCU_V1
 #  define DBGMCU_CR_IWDGSTOP      (1 << 8)   /* Bit 8: Independent Watchdog stopped when core is halted */
 #  define DBGMCU_CR_WWDGSTOP      (1 << 9)   /* Bit 9: Window Watchdog stopped when core is halted */
 #  define DBGMCU_CR_TIM1STOP      (1 << 10)  /* Bit 10: TIM1 stopped when core is halted */
@@ -86,6 +84,7 @@
 
 /* Debug MCU APB1 freeze register */
 
+#ifdef CONFIG_STM32_HAVE_IP_DBGMCU_V2
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 #  define DBGMCU_APB1_TIM2STOP    (1 << 0)   /* Bit 0: TIM2 stopped when core is halted */
 #  define DBGMCU_APB1_TIM3STOP    (1 << 1)   /* Bit 1: TIM3 stopped when core is halted */
@@ -139,6 +138,7 @@
 #  define DBGMCU_APB2_TIM9STOP    (1 << 2)   /* Bit 2:  TIM9 stopped when core is halted */
 #  define DBGMCU_APB2_TIM10STOP   (1 << 3)   /* Bit 3:  TIM10 stopped when core is halted */
 #  define DBGMCU_APB2_TIM11STOP   (1 << 4)   /* Bit 4:  TIM11 stopped when core is halted */
+#endif
 #endif
 
 /****************************************************************************
