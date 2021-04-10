@@ -229,26 +229,33 @@
 
 #define SNIOC_READADDR             SNIOC_READID   /* Arg: uint8_t* pointer */
 
+/* IOCTL commands unique to the DS18B20 */
+
+/* SNIOC_SETRESOLUTION */                          /* Arg: uint8_t value */
+
+#define SNIOC_READROMCODE          _SNIOC(0x0067)  /* Arg: uint64_t* pointer */
+#define SNIOC_SETALARM             _SNIOC(0x0068)  /* Arg: struct ds18b20_alarm_s* */
+
 /* Command:      SNIOC_ACTIVATE
  * Description:  Enable or disable sensor
  * Argument:     true or false.
  */
 
-#define SNIOC_ACTIVATE             _SNIOC(0x0067)
+#define SNIOC_ACTIVATE             _SNIOC(0x0080)
 
 /* Command:      SNIOC_SET_INTERVAL
  * Description:  Set interval between samples
  * Argument:     This is the interval pointer, in microseconds
  */
 
-#define SNIOC_SET_INTERVAL         _SNIOC(0x0068)
+#define SNIOC_SET_INTERVAL         _SNIOC(0x0081)
 
 /* Command:      SNIOC_BATCH
  * Description:  Set batch latency between batch data.
  * Argument:     This is the latency pointer, in microseconds
  */
 
-#define SNIOC_BATCH                _SNIOC(0x0069)
+#define SNIOC_BATCH                _SNIOC(0x0082)
 
 /* Command:      SNIOC_GET_NEVENTBUF
  * Description:  the number of sensor events that sensor buffer of upper half
@@ -265,7 +272,7 @@
  *               See sensor.h(struct sensor_lower_half_s buffer_bytes).
  */
 
-#define SNIOC_GET_NEVENTBUF        _SNIOC(0x0070)
+#define SNIOC_GET_NEVENTBUF        _SNIOC(0x0083)
 
 /* Command:      SNIOC_SET_BUFFER_NUMBER
  * Description:  Set the number of events intermediate circualr buffer can
@@ -275,6 +282,6 @@
  *               circualr buffer can hold by this ioctl command.
  */
 
-#define SNIOC_SET_BUFFER_NUMBER    _SNIOC(0x0071)
+#define SNIOC_SET_BUFFER_NUMBER    _SNIOC(0x0084)
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
