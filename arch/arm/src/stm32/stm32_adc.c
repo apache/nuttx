@@ -1769,7 +1769,7 @@ static void adc_inj_startconv(FAR struct stm32_dev_s *priv, bool enable)
         }
     }
 }
-#elif defined(HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
+#elif defined(HAVE_IP_ADC_V1)
 static void adc_inj_startconv(FAR struct stm32_dev_s *priv, bool enable)
 {
   ainfo("inj enable: %d\n", enable ? 1 : 0);
@@ -1787,8 +1787,6 @@ static void adc_inj_startconv(FAR struct stm32_dev_s *priv, bool enable)
       adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_JSWSTART, 0);
     }
 }
-#else  /* ADV IPv1 BASIC */
-#  error TODO
 #endif
 
 #endif /* ADC_HAVE_INJECTED */
