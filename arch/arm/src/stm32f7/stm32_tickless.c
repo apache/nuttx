@@ -574,7 +574,7 @@ void up_timer_initialize(void)
   g_tickless.pending   = false;
   g_tickless.period    = 0;
 
-  tmrinfo("timer=%d channel=%d frequency=%d Hz\n",
+  tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
            g_tickless.timer, g_tickless.channel, g_tickless.frequency);
 
   g_tickless.tch = stm32_tim_init(g_tickless.timer);
@@ -724,7 +724,7 @@ int up_timer_gettime(FAR struct timespec *ts)
   tmrinfo("counter=%lu (%lu) overflow=%lu, pending=%i\n",
          (unsigned long)counter,  (unsigned long)verify,
          (unsigned long)overflow, pending);
-  tmrinfo("frequency=%u\n", g_tickless.frequency);
+  tmrinfo("frequency=%lu\n", g_tickless.frequency);
 
   /* Convert the whole thing to units of microseconds.
    *
@@ -746,7 +746,7 @@ int up_timer_gettime(FAR struct timespec *ts)
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%u, %lu)\n",
+  tmrinfo("usec=%llu ts=(%lu, %lu)\n",
           usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
 
   return OK;
