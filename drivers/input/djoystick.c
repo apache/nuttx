@@ -99,7 +99,7 @@ struct djoy_open_s
    * driver events.
    */
 
-  FAR struct pollfd *do_fds[CONFIG_DJOYSTICK_NPOLLWAITERS];
+  FAR struct pollfd *do_fds[CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -192,7 +192,7 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
     {
       /* Are there any poll waiters? */
 
-      for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS; i++)
         {
           if (opriv->do_fds[i])
             {
@@ -299,7 +299,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
         {
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
+          for (i = 0; i < CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS; i++)
             {
               FAR struct pollfd *fds = opriv->do_fds[i];
               if (fds)
@@ -704,7 +704,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_DJOYSTICK_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -718,7 +718,7 @@ static int djoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
             }
         }
 
-      if (i >= CONFIG_DJOYSTICK_NPOLLWAITERS)
+      if (i >= CONFIG_INPUT_DJOYSTICK_NPOLLWAITERS)
         {
           ierr("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;

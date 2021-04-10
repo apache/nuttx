@@ -64,19 +64,19 @@ ifeq ($(CONFIG_INPUT_CYPRESS_MBR3108),y)
   CSRCS += cypress_mbr3108.c
 endif
 
-ifeq ($(CONFIG_BUTTONS),y)
+ifeq ($(CONFIG_INPUT_BUTTONS),y)
   CSRCS += button_upper.c
-ifeq ($(CONFIG_BUTTONS_LOWER),y)
+ifeq ($(CONFIG_INPUT_BUTTONS_LOWER),y)
   CSRCS += button_lower.c
 endif
 
 endif
 
-ifeq ($(CONFIG_DJOYSTICK),y)
+ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
   CSRCS += djoystick.c
 endif
 
-ifeq ($(CONFIG_AJOYSTICK),y)
+ifeq ($(CONFIG_INPUT_AJOYSTICK),y)
   CSRCS += ajoystick.c
 endif
 

@@ -120,21 +120,31 @@ SYSLOG Channels
   SYSLOG channel is represented by an interface defined in
   include/nuttx/syslog/syslog.h:
 
-    /* This structure provides the interface to a SYSLOG device */
+    /* SYSLOG I/O redirection methods */
 
-    typedef CODE int (*syslog_putc_t)(int ch);
-    typedef CODE int (*syslog_flush_t)(void);
+    typedef CODE ssize_t (*syslog_write_t)(FAR struct syslog_channel_s *channel,
+                                       FAR const char *buf, size_t buflen);
+    typedef CODE int (*syslog_putc_t)(FAR struct syslog_channel_s *channel,
+                                  int ch);
+    typedef CODE int (*syslog_flush_t)(FAR struct syslog_channel_s *channel);
+
+    /* SYSLOG device operations */
+
+    struct syslog_channel_ops_s
+    {
+      syslog_putc_t  sc_putc;   /* Normal buffered output */
+      syslog_putc_t  sc_force;  /* Low-level output for interrupt handlers */
+      syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
+      syslog_write_t sc_write;  /* Write multiple bytes */
+    };
+
+    /* This structure provides the interface to a SYSLOG channel */
 
     struct syslog_channel_s
     {
-      /* I/O redirection methods */
+      /* Channel operations */
 
-    #ifdef CONFIG_SYSLOG_WRITE
-      syslog_write_t sc_write;  /* Write multiple bytes */
-    #endif
-      syslog_putc_t sc_putc;    /* Normal buffered output */
-      syslog_putc_t sc_force;   /* Low-level output for interrupt handlers */
-      syslog_flush_t sc_flush;  /* Flush buffered output (on crash) */
+      FAR const struct syslog_channel_ops_s *sc_ops;
 
       /* Implementation specific logic may follow */
     };
@@ -340,12 +350,6 @@ SYSLOG Channel Options
     * The forced SYSLOG output always goes to the bit-bucket.  This means
       that interrupt level SYSLOG output will be lost unless the interrupt
       buffer is enabled to support serialization.
-    * CONFIG_SYSLOG_CHAR_CRLF.  If CONFIG_SYSLOG_CHAR_CRLF is selected, then
-      linefeeds in the SYSLOG output will be expanded to Carriage Return +
-      Linefeed.  Since the character device is not a console device, the
-      addition of carriage returns to line feeds would not be performed
-      otherwise.  You would probably want this expansion if you use a serial
-      terminal program with the character device output.
 
   References: drivers/syslog/syslog_devchannel.c and
   drivers/syslog/syslog_device.c

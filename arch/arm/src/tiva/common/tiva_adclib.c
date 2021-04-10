@@ -4,11 +4,6 @@
  *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
  *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *
- * References:
- *
- *   TM4C123GH6PM Series Data Sheet
- *   TI Tivaware driverlib ADC sample code.
- *
  * The Tivaware sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -44,10 +39,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver
+ ****************************************************************************/
+
+/* This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver
  * Library.
  *
- ****************************************************************************/
+ * References:
+ *
+ *   TM4C123GH6PM Series Data Sheet
+ *   TI Tivaware driverlib ADC sample code.
+ */
 
 /****************************************************************************
  * Included Files

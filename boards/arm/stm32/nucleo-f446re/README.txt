@@ -488,7 +488,7 @@ Shields
       CONFIG_ANALOG=y                  : Should be automatically selected
       CONFIG_ADC=y                     : Should be automatically selected
       CONFIG_INPUT=y                   : Select input device support
-      CONFIG_AJOYSTICK=y               : Select analog joystick support
+      CONFIG_INPUT_AJOYSTICK=y         : Select analog joystick support
 
   There is nothing in the configuration that currently uses the joystick.
   For testing, you can add the following configuration options to enable the
@@ -558,3 +558,18 @@ Configurations
 
     Functionality of CAN driver can be tested by calling application
     "can" in NuttShell. This application sends 100 messages over CAN 1.
+
+  lcd:
+  ----
+    This is basically an nsh configuration (see above) with added support
+    of ILI9225 176x220 TFT display and test framebuffer application.
+
+    Display connection is set to SPI 3 and pinout is following:
+
+    CS    D8
+    RST   D6
+    RS    D7
+    SDA   D4
+    CLK   D3
+
+    Framebuffer application can be started from terminal by typing "fb".

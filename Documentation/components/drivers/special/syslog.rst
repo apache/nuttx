@@ -374,14 +374,6 @@ channel include:
      means that interrupt level SYSLOG output will be lost unless
      the interrupt buffer is enabled to support serialization.
 
-  -  ``CONFIG_SYSLOG_CHAR_CRLF``. If ``CONFIG_SYSLOG_CHAR_CRLF`` is
-     selected, then linefeeds in the SYSLOG output will be expanded
-     to Carriage Return plus Linefeed. Since the character device is
-     not a console device, the addition of carriage returns to line
-     feeds would not be performed otherwise. You would probably want
-     this expansion if you use a serial terminal program with the
-     character device output.
-
 References: ``drivers/syslog/syslog_devchannel.c`` and
 ``drivers/syslog/syslog_device.c``
 

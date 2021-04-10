@@ -357,7 +357,7 @@ class TelnetDev:
                 if MAX_DOT_COUNT < cur_count:
                     cur_count = MAX_DOT_COUNT
                 for idx in range(cur_count - self.count):
-                    print("#", end="", flush=true)
+                    print("#", end="", flush=True)
                 self.count = cur_count
                 if self.count == MAX_DOT_COUNT:
                     print("\n")

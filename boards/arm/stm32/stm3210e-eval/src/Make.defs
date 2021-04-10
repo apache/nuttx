@@ -60,7 +60,7 @@ CSRCS += stm32_pmbuttons.c
 endif
 endif
 
-ifeq ($(CONFIG_DJOYSTICK),y)
+ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
 CSRCS += stm32_djoystick.c
 endif
 

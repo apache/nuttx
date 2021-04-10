@@ -82,8 +82,8 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_BUTTONS
-#ifdef CONFIG_BUTTONS_LOWER
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
   iinfo("Initializing button driver\n");
 
   /* Register the BUTTON driver */
@@ -98,7 +98,7 @@ int stm32_bringup(void)
 
   board_button_initialize();
 #endif
-#endif /* CONFIG_BUTTONS */
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef HAVE_I2C_DRIVER
   /* Get the I2C lower half instance */

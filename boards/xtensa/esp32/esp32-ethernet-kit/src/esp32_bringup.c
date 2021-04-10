@@ -62,7 +62,7 @@
 #  include "esp32_board_wlan.h"
 #endif
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 
@@ -249,7 +249,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");

@@ -4,8 +4,6 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -48,6 +46,8 @@
  * INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
  ****************************************************************************/
+
+/* Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers. */
 
 #ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_USIC_H
 #define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_USIC_H

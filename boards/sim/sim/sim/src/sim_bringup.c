@@ -47,7 +47,7 @@
 #include <nuttx/lcd/lcd_dev.h>
 #endif
 
-#if defined(CONFIG_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
+#if defined(CONFIG_INPUT_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
 #include <nuttx/input/buttons.h>
 #endif
 
@@ -250,7 +250,7 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
   /* Initialize the simulated analog joystick input device */
 
   sim_ajoy_initialize();
@@ -402,7 +402,7 @@ int sim_bringup(void)
 #endif
 #endif
 
-#if defined(CONFIG_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
+#if defined(CONFIG_INPUT_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
   ret = btn_lower_initialize("/dev/buttons");
   if (ret < 0)
     {

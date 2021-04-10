@@ -168,7 +168,7 @@ int stm32_bringup(void)
   stm32_i2ctool();
 #endif
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");

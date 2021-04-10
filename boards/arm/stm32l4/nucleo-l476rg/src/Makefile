@@ -38,7 +38,7 @@ endif
 
 ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
-ifeq ($(CONFIG_AJOYSTICK),y)
+ifeq ($(CONFIG_INPUT_AJOYSTICK),y)
 CSRCS += stm32_ajoystick.c
 endif
 endif

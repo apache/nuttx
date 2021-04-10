@@ -78,7 +78,7 @@
 
 /* BUTTONS -- NOTE that some have EXTI interrupts configured */
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 #  define MIN_IRQBUTTON  BUTTON_KEY
 #  define MAX_IRQBUTTON  BUTTON_KEY
 #  define NUM_IRQBUTTONS (1)
@@ -351,7 +351,7 @@ void stm32_pmbuttons(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 int stm32_djoy_initialization(void);
 #endif
 

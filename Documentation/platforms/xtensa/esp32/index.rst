@@ -19,8 +19,7 @@ two CPUs are interchangeable.
 Toolchain
 =========
 
-You must use the custom Xtensa toolchain in order to build the ESP32 Core
-BSP. You can use the prebuilt `compiler <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-tools.html#xtensa-esp32-elf>`__
+You can use the prebuilt `toolchain <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-tools.html#xtensa-esp32-elf>`__
 for Xtensa architecture and `OpenOCD <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-tools.html#openocd-esp32>`__
 for ESP32 by Espressif.
 
@@ -32,7 +31,7 @@ Building from source
 --------------------
 
 You can also build the toolchain yourself. The steps to
-build toolchain with crosstool-NG on Linux are as follows
+build the toolchain with crosstool-NG on Linux are as follows
 
 .. code-block:: console
 
@@ -67,7 +66,7 @@ Bootloader and partitions
 
 ESP32 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
 (or any time you which to modify either of these). An easy way is to use prebuilt binaries for NuttX from `here <https://github.com/espressif/esp-nuttx-bootloader>`_. In there you will find instructions to rebuild these if necessary. 
-Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directiry where these binaries were downloaded:
+Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
 
 .. code-block:: console
 
@@ -83,12 +82,37 @@ Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BIN
 Peripheral Support
 ==================
 
-.. todo:: To be updated
+The following list indicates the state of peripherals' support in NuttX:
 
 ========== ======= =====
 Peripheral Support NOTES
 ========== ======= =====
-?          ?       ?
+GPIO         Yes       
+UART         Yes
+SPI          Yes       
+I2C          Yes       
+DMA          Yes       
+Wifi         Yes       
+Ethernet     Yes
+SPIFLASH     Yes
+SPIRAM       Yes
+Timers       Yes
+Watchdog     Yes
+RTC          Yes
+RNG          Yes
+AES          Yes
+eFuse        Yes
+ADC          No
+Bluetooth    No
+SDIO         No
+SD/MMC       No
+I2S          No
+LED_PWM      No
+RMT          No
+MCPWM        No
+Pulse_CNT    No
+SHA          No
+RSA          No
 ========== ======= =====
 
 Memory Map
@@ -174,7 +198,7 @@ Linker Segments
 |     - Constructors  |            |            |      |                              |
 |       /destructors  |            |            |      |                              |
 +---------------------+------------+------------+------+------------------------------+
-| COMMON data RAM:    | 0x3ffb0000 | 0x40000000 | RW   | dram0_0_seg  (NOTE 1,2)      |
+| COMMON data RAM:    | 0x3ffb0000 | 0x40000000 | RW   | dram0_0_seg  (NOTE 1,2,3)    |
 |  - .bss/.data       |            |            |      |                              |
 +---------------------+------------+------------+------+------------------------------+
 | IRAM for PRO cpu:   | 0x40080000 | 0x400a0000 | RX   | iram0_0_seg                  |
@@ -191,7 +215,7 @@ Linker Segments
 | FLASH:              | 0x400d0018 | 0x40400018 | RX   | iram0_2_seg  (actually FLASH)|
 |  - .text            |            |            |      |                              |
 +---------------------+------------+------------+------+------------------------------+
-| RTC slow memory:    | 0x50000000 | 0x50001000 | RW   | rtc_slow_seg (NOTE 3)        |
+| RTC slow memory:    | 0x50000000 | 0x50001000 | RW   | rtc_slow_seg (NOTE 4)        |
 |  - .rtc.data/rodata |            |            |      |                              |
 |    (unused?)        |            |            |      |                              |
 +---------------------+------------+------------+------+------------------------------+
@@ -200,8 +224,9 @@ Linker Segments
 
   (1) Linker script will reserve space at the beginning of the segment
       for BT and at the end for trace memory.
-  (2) Heap ends at the top of dram_0_seg
-  (3) Linker script will reserve space at the beginning of the segment
+  (2) Heap ends at the top of dram_0_seg.
+  (3) Parts of this region is reserved for the ROM bootloader.
+  (4) Linker script will reserve space at the beginning of the segment
       for co-processor reserve memory and at the end for ULP coprocessor
       reserve memory.
 

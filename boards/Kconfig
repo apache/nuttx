@@ -3116,6 +3116,9 @@ endif
 if ARCH_BOARD_RX65N_GRROSE
 source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
 endif
+if ARCH_CHIP_ESP32 && !ARCH_BOARD_CUSTOM
+source "boards/xtensa/esp32/common/Kconfig"
+endif
 if ARCH_BOARD_ESP32_DEVKITC
 source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
 endif
@@ -3198,7 +3201,6 @@ config BOARD_INITRNGSEED
 		board_init_rndseed() upon initialization. This function
 		can then provide early entropy seed to the pool through
 		entropy injection APIs provided at 'nuttx/random.h'.
-#endif
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"

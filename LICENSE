@@ -1337,3 +1337,775 @@ arch/xtensa/src/esp32/chip_macros.h
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
+boards/arm/stm32/photon/src/stm32_wlan_firmware.c
+drivers/wireless/ieee80211/bcm43xxx/bcmf_ioctl.h
+================================================
+
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ 1. Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+
+ 3. Neither the name of Broadcom nor the names of other contributors to
+ this software may be used to endorse or promote products derived from
+ this software without specific prior written permission.
+
+ 4. This software may not be used as a standalone product, and may only be
+ used as incorporated in your product or device that incorporates Broadcom
+ wireless connectivity products and solely for the purpose of enabling the
+ functionalities of such Broadcom products.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR
+ A PARTICULAR PURPOSE AND NON-INFRINGEMENT, ARE DISCLAIMED. IN NO EVENT
+ SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+arch/arm/src/lpc43xx/spifi/src/spifilib_fam_standard_cmd.c
+arch/arm/src/lpc43xx/spifi/src/spifilib_dev_common.c
+arch/arm/src/lpc43xx/spifi/inc/spifilib_dev.h
+arch/arm/src/lpc43xx/spifi/inc/spifilib_api.h
+arch/arm/src/lpc43xx/spifi/inc/private/spifilib_chiphw.h
+=========================================================
+
+ Copyright(C) NXP Semiconductors, 2014
+ All rights reserved.
+ Software that is described herein is for illustrative purposes only
+ which provides customers with programming information regarding the
+ LPC products.  This software is supplied "AS IS" without any warranties of
+ any kind, and NXP Semiconductors and its licenser disclaim any and
+ all warranties, express or implied, including all implied warranties of
+ merchantability, fitness for a particular purpose and non-infringement of
+ intellectual property rights.  NXP Semiconductors assumes no
+ responsibility or liability for the use of the software, conveys no
+ license or rights under any patent, copyright, mask work right, or any
+ other intellectual property rights in or to any products. NXP
+ Semiconductors reserves the right to make changes in the software without
+ notification. NXP Semiconductors also makes no representation or warranty
+ that such application will be suitable for the specified use without
+ further testing or modification.
+ Permission to use, copy, modify, and distribute this software and its
+ documentation is hereby granted, under NXP Semiconductors' and its
+ licensor's relevant copyrights in the software, without fee, provided that
+ it is used in conjunction with NXP Semiconductors microcontrollers.  This
+ copyright, permission, and disclaimer notice must appear in all copies of
+ this code.
+
+
+boards/arm/imxrt/imxrt1050-evk/src/imxrt_sdram_ini_dcd.c
+=========================================================
+
+ Copyright (C) 2017, NXP Semiconductors, Inc.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+ used to endorse or promote products derived from this software
+ without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/imxrt/imxrt_lcd.c
+==============================
+
+ Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ Copyright (C) 2017, NXP Semiconductors, Inc.
+ Author: Johannes Schock (Port)
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+ used to endorse or promote products derived from this software
+ without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/xmc4/hardware/xmc4_ethernet.h
+arch/arm/src/xmc4/hardware/xmc4_flash.h
+arch/arm/src/xmc4/hardware/xmc4_memorymap.h
+arch/arm/src/xmc4/hardware/xmc4_ports.h
+arch/arm/src/xmc4/hardware/xmc4_scu.h
+arch/arm/src/xmc4/hardware/xmc4_usic.h
+arch/arm/src/xmc4/xmc4_clockconfig.c
+arch/arm/src/xmc4/xmc4_clockutils.c
+arch/arm/src/xmc4/xmc4_usic.c
+===============================================
+
+   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+ May include some logic from sample code provided by Infineon:
+
+   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
+
+ Infineon Technologies AG (Infineon) is supplying this software for use
+ with Infineon's microcontrollers.  This file can be freely distributed
+ within development tools that are supporting such microcontrollers.
+
+ THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+ OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL,
+ INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+
+
+crypto/aes.c
+include/nuttx/crypto/aes.h
+
+   Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+   Extracted from the CC3000 Host Driver Implementation.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+   Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the
+   distribution.
+
+   Neither the name of Texas Instruments Incorporated nor the names of
+   its contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+arch/arm/src/tms570/tms570_selftest.c
+arch/arm/src/tms570/tms570_lowputc.c
+arch/arm/src/tms570/tms570_esm.c
+arch/arm/src/tms570/tms570_clockconfig.c
+
+   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ Most logic in this file was leveraged from TI's Project0 which has a
+ compatible BSD license:
+
+   Copyright (c) 2012, Texas Instruments Incorporated
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX, Texas Instruments Incorporated, nor the
+    names of its contributors may be used to endorse or promote
+    products derived from this software without specific prior written
+    permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/tiva_chipinfo.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_vims.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_uart.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_timer.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_smph.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_prcm.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_memorymap.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_ioc.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_i2c.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_gpio.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_flash.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_fcfg1.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_ddi0_osc.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_ddi.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_ccfg.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aux_sysif.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aux_smph.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aon_rtc.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aon_pmctl.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aon_ioc.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aon_batmon.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi4_aux.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi3_refsys.h
+arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi2_refsys.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_vims.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_uart.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_timer.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_smph.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_prcm.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_memorymap.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_ioc.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_i2c.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_gpio.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_flash.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_fcfg1.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_ddi0_osc.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_ddi.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_ccfg.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aux_wuc.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aux_smph.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_wuc.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_sysctl.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_rtc.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_ioc.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_batmon.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_adi4_aux.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_adi3_refsys.h
+arch/arm/src/tiva/hardware/cc13x0/cc13x0_adi2_refsys.h
+arch/arm/src/tiva/cc13xx/cc13xx_chipinfo.c
+arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v2_rom.h
+================================================
+
+   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+   Authors: Gregory Nutt <gnutt@nuttx.org>
+
+ Technical content derives from a TI header file that has a compatible BSD
+ license:
+
+   Copyright (c) 2015-2017, Texas Instruments Incorporated
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tms570/tms570_boot.c
+=================================
+
+   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ This is primarily original code.  However, some logic in this file was
+ inspired/leveraged from TI's Project0 which has a compatible BSD license
+ and credit should be given in any case:
+
+   Copyright (c) 2012, Texas Instruments Incorporated
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+arch/arm/src/tiva/common/tiva_adclow.c
+======================================
+
+   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
+   Copyright (C) 2015 TRD2 Inc. All rights reserved.
+   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+           Gregory Nutt <gnutt@nuttx.org>
+
+ The Tivaware sample code has a BSD compatible license that requires this
+ copyright notice:
+
+ Copyright (c) 2005-2014 Texas Instruments Incorporated.
+ All rights reserved.
+ Software License Agreement
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the
+   distribution.
+
+   Neither the name of Texas Instruments Incorporated nor the names of
+   its contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/common/tiva_adclib.c
+=======================================
+
+   Copyright (C) 2015 TRD2 Inc. All rights reserved.
+   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+
+ The Tivaware sample code has a BSD compatible license that requires this
+ copyright notice:
+
+ Copyright (c) 2005-2014 Texas Instruments Incorporated.
+ All rights reserved.
+ Software License Agreement
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the
+   distribution.
+
+   Neither the name of Texas Instruments Incorporated nor the names of
+   its contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13xx_prcm.c
+arch/arm/src/tiva/cc13xx/cc13xx_prcm.h
+======================================
+
+   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ Includes definitions from TI's prcm.c file which has a fully compatible
+ BSD license:
+
+    Copyright (c) 2015-2017, Texas Instruments Incorporated
+    All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13x2_v1_trim.c
+arch/arm/src/tiva/cc13xx/cc13x2_v2_trim.c
+arch/arm/src/tiva/cc13xx/cc13x0_trim.c
+=========================================
+
+   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ This is a port of TI's setup.c file (revision 49363) which has a fully
+ compatible BSD license:
+
+    Copyright (c) 2015-2017, Texas Instruments Incorporated
+    All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:
+
+  1) Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+  2) Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+  3) Neither the name NuttX nor the names of its contributors may be used
+     to endorse or promote products derived from this software without
+     specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v1_rom.h
+===============================================
+
+   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ This is a port of TI's rom.h file which has a fully compatible
+ BSD license:
+
+    Copyright (c) 2015-2017, Texas Instruments Incorporated
+    All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v1_rom.c
+arch/arm/src/tiva/cc13xx/cc13x0_rom.c
+===============================================
+
+   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ This is a port of TI's setup_rom.c file which has a fully compatible BSD
+ license:
+
+    Copyright (c) 2015-2017, Texas Instruments Incorporated
+    All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.h
+===========================================
+
+   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ This is a port of TI's aux_sysif.h file which has a fully compatible BSD
+ license:
+
+    Copyright (c) 2015-2017, Texas Instruments Incorporated
+    All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.c
+===========================================
+
+   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+   Authors: Gregory Nutt <gnutt@nuttx.org>
+
+ Technical content derives from a TI aux_sysif.c file that has a
+ compatible BSD license:
+
+   Copyright (c) 2015-2017, Texas Instruments Incorporated
+   All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+
+arch/arm/src/tiva/cc13xx/cc13x0_rom.h
+=====================================
+
+   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+   Author: Gregory Nutt <gnutt@nuttx.org>
+
+ This is a port of TI's setup_rom.h file which has a fully compatible
+ BSD license:
+
+    Copyright (c) 2015-2017, Texas Instruments Incorporated
+    All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+ 3. Neither the name NuttX nor the names of its contributors may be
+    used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+

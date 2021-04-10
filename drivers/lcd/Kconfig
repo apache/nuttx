@@ -958,6 +958,39 @@ config LCD_LPM013M091A
 		Recommended to use DMA to transfer data or displayed image would be
 		broken.
 
+config LCD_ILI9225
+	bool "ILI9225 LCD Single Chip Driver"
+	default n
+	---help---
+		LCD Single Chip Driver, ILI9225, ILI Technology Corp.
+
+if LCD_ILI9225
+	config LCD_ILI9225_XRES
+		int "ILI9225 X Resolution"
+		default 176
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_ILI9225_YRES
+		int "ILI9225 Y Resolution"
+		default 220
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_ILI9225_BPP
+		int "Bit Per Pixel (16)"
+		default 16
+
+	config LCD_ILI9225_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_ILI9225_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_ILI9225
+
 config LCD_ILI9340
 	bool "ILI9340 LCD Single Chip Driver"
 	default n

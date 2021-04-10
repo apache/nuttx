@@ -94,7 +94,6 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
               break;
             }
 
-#ifdef CONFIG_SYSLOG_WRITE
           if (g_syslog_channel[i]->sc_ops->sc_write)
             {
               nwritten =
@@ -102,7 +101,6 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
                                                       buffer, buflen);
             }
           else
-#endif
             {
               DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_putc != NULL);
 

@@ -33,7 +33,7 @@
 #  include <nuttx/video/fb.h>
 #endif
 
-#ifdef CONFIG_BUTTONS_LOWER
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
 #  include <nuttx/input/buttons.h>
 #endif
 
@@ -161,7 +161,7 @@ int lpc54_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_BUTTONS_LOWER
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");

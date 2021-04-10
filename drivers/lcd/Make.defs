@@ -105,6 +105,10 @@ ifeq ($(CONFIG_LCD_SHARP_MEMLCD),y)
   CSRCS += memlcd.c
 endif
 
+ifeq ($(CONFIG_LCD_ILI9225),y)
+  CSRCS += ili9225.c
+endif
+
 ifeq ($(CONFIG_LCD_ILI9340),y)
   CSRCS += ili9340.c
 endif

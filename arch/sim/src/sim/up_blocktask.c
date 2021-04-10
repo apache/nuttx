@@ -134,13 +134,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
            * interrupt driven environment.
            */
 
-          rtcb = this_task();
-          if (rtcb->xcp.sigdeliver)
-            {
-              sinfo("Delivering signals TCB=%p\n", rtcb);
-              ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-              rtcb->xcp.sigdeliver = NULL;
-            }
+          sim_sigdeliver();
         }
     }
 }

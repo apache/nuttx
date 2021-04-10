@@ -39,12 +39,16 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
 #include "board_qencoder.h"
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+#include <nuttx/video/fb.h>
 #endif
 
 #include "nucleo-f446re.h"
@@ -71,7 +75,7 @@ int stm32_bringup(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");
@@ -132,6 +136,16 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret  = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
@@ -145,7 +159,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
   /* Initialize and register the joystick driver */
 
   ret = board_ajoy_initialize();

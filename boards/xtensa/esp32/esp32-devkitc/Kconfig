@@ -5,8 +5,6 @@
 
 if ARCH_BOARD_ESP32_DEVKITC
 
-source boards/xtensa/esp32/common/Kconfig
-
 if PM
 
 config PM_ALARM_SEC

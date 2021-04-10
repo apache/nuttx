@@ -53,42 +53,43 @@ struct lpc43_aes_s
 {
   /* Initialize the AES engine */
 
-  void (*aes_Init)(void);
+  void (*aes_init)(void);
 
   /* Offset 0x04 -- Defines AES engine operation mode.
    *  See enum lpc43_aescmd_e
    */
 
-  unsigned int (*aes_SetMode)(unsigned int cmd);
+  unsigned int (*aes_set_mode)(unsigned int cmd);
 
   /* Load 128-bit AES user keys */
 
-  void (*aes_LoadKey1)(void);
-  void (*aes_LoadKey2)(void);
+  void (*aes_load_key1)(void);
+  void (*aes_load_key2)(void);
 
   /* Loads randomly generated key in AES engine. To update the RNG and load
-   * a new random number, use the API call otp_GenRand before aes_LoadKeyRNG.
+   * a new random number, use the API call otp_GenRand before
+   * aes_load_key_rng.
    */
 
-  void (*aes_LoadKeyRNG)(void);
+  void (*aes_load_key_rng)(void);
 
   /* Loads 128-bit AES software defined user key (16 bytes) */
 
-  void (*aes_LoadKeySW)(const unsigned char *key);
+  void (*aes_load_key_sw)(const unsigned char *key);
 
   /* Loads 128-bit AES initialization vector (16 bytes) */
 
-  void (*aes_LoadIV_SW)(const unsigned char *iv);
+  void (*aes_load_iv_sw)(const unsigned char *iv);
 
   /* Loads 128-bit AES IC specific initialization vector, which is used to
    * decrypt a boot image.
    */
 
-  void (*aes_LoadIV_IC)(void);
+  void (*aes_load_iv_ic)(void);
 
   /* Process data */
 
-  unsigned int (*aes_Operate)(unsigned char *out,
+  unsigned int (*aes_operate)(unsigned char *out,
                               const unsigned char *in, unsigned blocks);
 };
 

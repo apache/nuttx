@@ -150,7 +150,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
   /* Initialize and register the joystick driver */
 
   ret = board_ajoy_initialize();

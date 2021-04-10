@@ -90,13 +90,13 @@ void z180_putc(uint8_t ch) __naked
 {
   __asm
 txbe:
-	in0		a,(CONSOLE_CR)		; Read RR0
-	bit		2, a				; Bit 2, Tx buffer empty?
-	jr		z, txbe				; No, wait until the Tx buffer is empty
+  in0 a, (CONSOLE_CR) ; read RR0
+  bit 2, a ; bit 2, tx buffer empty?
+  jr z, txbe ; no, wait until the tx buffer is empty
 
-	ld		a, 4(ix)			; Character to output
-	out		(CONSOLE_DR), a		; Send it
-	ret
+  ld a, 4(ix) ; character to output
+  out (CONSOLE_DR), a ; send it
+  ret
   __endasm;
 }
 #endif

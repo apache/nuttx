@@ -158,13 +158,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * interrupt driven environment.
                */
 
-              rtcb = this_task();
-              if (rtcb->xcp.sigdeliver)
-                {
-                  sinfo("Delivering signals TCB=%p\n", rtcb);
-                  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
-                  rtcb->xcp.sigdeliver = NULL;
-                }
+              sim_sigdeliver();
             }
         }
     }

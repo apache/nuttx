@@ -256,7 +256,7 @@ void tms570_memtest_selftest(void)
 
 void tms570_memtest_start(uint32_t rinfol)
 {
-  pbist_memtest_start(rinfol, PBIST_ALGO_March13N_SP);
+  pbist_memtest_start(rinfol, PBIST_ALGO_MARCH13N_SP);
 }
 
 /****************************************************************************
@@ -274,21 +274,22 @@ void tms570_memtest_start(uint32_t rinfol)
 int tms570_memtest_complete(void)
 {
   bool pass;
+
   /* Wait for the test to complete */
 
- while (!pbist_test_complete());
+  while (!pbist_test_complete());
 
- /* Get the test result */
+  /* Get the test result */
 
- pass = pbist_test_passed();
+  pass = pbist_test_passed();
 
- /* Disable PBIST clocks and disable memory self-test mode */
+  /* Disable PBIST clocks and disable memory self-test mode */
 
- pbist_stop();
+  pbist_stop();
 
- /* Then return the test result */
+  /* Then return the test result */
 
- return pass ? OK : ERROR;
+  return pass ? OK : ERROR;
 }
 
 /****************************************************************************

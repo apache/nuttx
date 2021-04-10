@@ -54,11 +54,11 @@ volatile chipreg_t *g_current_regs;
 irqstate_t up_irq_save(void) __naked
 {
   __asm
-	ld		a, i	; AF Parity bit holds interrupt state
-	di				; Interrupts are disabled
-	push	af		; Return AF in HL
-	pop		hl		;
-	ret				;
+  ld a, i ; AF parity bit holds interrupt state
+  di ; interrupts are disabled
+  push af ; return AF in HL
+  pop hl ;
+  ret ;
   __endasm;
 }
 
@@ -73,15 +73,15 @@ irqstate_t up_irq_save(void) __naked
 void up_irq_restore(irqstate_t flags) __naked
 {
   __asm
-	di				; Assume disabled
-	pop		hl		; HL = return address
-	pop		af		; AF Parity bit holds interrupt state
-	jp		po, statedisable
-	ei
+  di ; assume disabled
+  pop hl ; HL = return address
+  pop af ; AF parity bit holds interrupt state
+  jp po, statedisable
+  ei
 statedisable:
-	push	af		; Restore stack
-	push	hl		;
-	ret				; and return
+  push af ; restore stack
+  push hl ;
+  ret ; and return
   __endasm;
 }
 
@@ -96,10 +96,10 @@ statedisable:
 irqstate_t up_irq_enable(void) __naked
 {
   __asm
-	ld		a, i	; AF Parity bit holds interrupt state
-	ei				; Interrupts are enabled
-	push	af		; Return AF in HL
-	pop		hl		;
-	ret				;
+  ld a, i ; AF parity bit holds interrupt state
+  ei ; interrupts are enabled
+  push af ; return AF in HL
+  pop hl ;
+  ret ;
   __endasm;
 }

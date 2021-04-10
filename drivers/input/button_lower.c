@@ -34,7 +34,7 @@
 
 #include <nuttx/irq.h>
 
-#if CONFIG_BUTTONS_LOWER
+#if CONFIG_INPUT_BUTTONS_LOWER
 
 /****************************************************************************
  * Private Function Prototypes
@@ -220,4 +220,4 @@ int btn_lower_initialize(FAR const char *devname)
   return btn_register(devname, &g_btnlower);
 }
 
-#endif /* CONFIG_BUTTONS_LOWER */
+#endif /* CONFIG_INPUT_BUTTONS_LOWER */
