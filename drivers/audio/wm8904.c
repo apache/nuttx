@@ -32,7 +32,6 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <inttypes.h>

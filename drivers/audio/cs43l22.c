@@ -43,7 +43,6 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
-#include <math.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
