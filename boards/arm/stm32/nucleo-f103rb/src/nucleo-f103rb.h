@@ -114,6 +114,18 @@ int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_foc_setup
+ *
+ * Description:
+ *  Initialize FOC peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_FOC
+int stm32_foc_setup(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
