@@ -683,13 +683,15 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
                           if ((smartfs_rdle16(&entry->flags) &
                                 SMARTFS_DIRENT_TYPE) ==
                               SMARTFS_DIRENT_TYPE_FILE)
-                            {
-                              dirsector =
-                                smartfs_rdle16(&entry->firstsector);
 #else
                           if ((entry->flags & SMARTFS_DIRENT_TYPE) ==
                               SMARTFS_DIRENT_TYPE_FILE)
+#endif
                             {
+#ifdef CONFIG_SMARTFS_ALIGNED_ACCESS
+                              dirsector =
+                                smartfs_rdle16(&entry->firstsector);
+#else
                               dirsector = entry->firstsector;
 #endif
                               readwrite.count =
