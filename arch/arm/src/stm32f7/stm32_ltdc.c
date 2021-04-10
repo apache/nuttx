@@ -5,9 +5,6 @@
  *   Authors: Ken Pettit <pettitd@gmail.com>
  *            Marco Krahl <ocram.lhark@gmail.com>
  *
- * References:
- *   STM32F429 Technical Reference Manual and Data Sheet
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -36,6 +33,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   STM32F429 Technical Reference Manual and Data Sheet
+ */
 
 /****************************************************************************
  * Included Files

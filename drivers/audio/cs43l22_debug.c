@@ -5,11 +5,6 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author:  Taras Drozdovsky <t.drozdovskiy@gmail.comnuttx.org>
  *
- * References:
- * - "CS43L22 Ultra Low Power CODEC for Portable Audio Applications, Pre-
- *    Production", September 2012, Rev b1, Cirrus Logic
- * -  The framework for this driver is based on Ken Pettit's VS1053 driver.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -38,6 +33,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ * - "CS43L22 Ultra Low Power CODEC for Portable Audio Applications, Pre-
+ *    Production", September 2012, Rev b1, Cirrus Logic
+ * -  The framework for this driver is based on Ken Pettit's VS1053 driver.
+ */
 
 /****************************************************************************
  * Included Files
