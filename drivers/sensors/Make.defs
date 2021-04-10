@@ -260,6 +260,16 @@ endif
 
 endif # CONFIG_SPI
 
+# These drivers depend on 1WIRE support
+
+ifeq ($(CONFIG_1WIRE),y)
+
+ifeq ($(CONFIG_SENSORS_DS18B20),y)
+  CSRCS += ds18b20.c
+endif
+
+endif # CONFIG_1WIRE
+
 ifeq ($(CONFIG_SENSORS_MPU60X0),y)
   CSRCS += mpu60x0.c
 endif
