@@ -69,6 +69,6 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
       return OK;
     }
 
-  return ENOSYS;
+  return EINVAL;
 #endif
 }
