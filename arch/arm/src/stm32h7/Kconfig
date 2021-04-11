@@ -764,6 +764,19 @@ config STM32H7_UART8
 endmenu # STM32H7 U[S]ART Selection
 endmenu # STM32H7 Peripheral Selection
 
+config STM32H7_SYSCFG_IOCOMPENSATION
+	bool "SYSCFG I/O Compensation"
+	default n
+	select STM32H7_CSI
+	---help---
+		By default the I/O compensation cell is not used. However when the I/O
+		output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+		recommended to use the compensation cell for slew rate control on I/O
+		tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+
+		The I/O compensation cell can be used only when the supply voltage ranges
+		from 2.4 to 3.6 V
+
 menu "I2C Configuration"
 	depends on STM32H7_I2C
 
