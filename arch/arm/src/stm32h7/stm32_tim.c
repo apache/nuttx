@@ -939,7 +939,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
 
   /* Assume that channel is disabled and polarity is active high */
 
-  ccer_val &= ~(3 << (channel << 2));
+  ccer_val &= ~(3 << GTIM_CCER_CCXBASE(channel));
 
   /* This function is not supported on basic timers. To enable or
    * disable it, simply set its clock to valid frequency or zero.
@@ -960,13 +960,13 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
 
       case STM32_TIM_CH_OUTTOGGLE:
         ccmr_val  = (GTIM_CCMR_MODE_OCREFTOG << GTIM_CCMR1_OC1M_SHIFT);
-        ccer_val |= GTIM_CCER_CC1E << (channel << 2);
+        ccer_val |= GTIM_CCER_CC1E << GTIM_CCER_CCXBASE(channel);
         break;
 
       case STM32_TIM_CH_OUTPWM:
         ccmr_val  = (GTIM_CCMR_MODE_PWM1 << GTIM_CCMR1_OC1M_SHIFT) +
                     GTIM_CCMR1_OC1PE;
-        ccer_val |= GTIM_CCER_CC1E << (channel << 2);
+        ccer_val |= GTIM_CCER_CC1E << GTIM_CCER_CCXBASE(channel);
         break;
 
       default:
@@ -977,7 +977,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
 
   if (mode & STM32_TIM_CH_POLARITY_NEG)
     {
-      ccer_val |= GTIM_CCER_CC1P << (channel << 2);
+      ccer_val |= GTIM_CCER_CC1P << GTIM_CCER_CCXBASE(channel);
     }
 
   /* Define its position (shift) and get register offset */
