@@ -237,7 +237,8 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   /* Assume that channel is disabled and polarity is active high */
 
-  ccer_val &= ~(3 << (channel << 2));
+  ccer_val &= ~((GTIM_CCER_CC1P | GTIM_CCER_CC1E) <<
+                GTIM_CCER_CCXBASE(channel));
 
   /* This function is not supported on basic timers. To enable or
    * disable it, simply set its clock to valid frequency or zero.
@@ -264,7 +265,7 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   /* Set polarity */
 
-  ccer_val |= ATIM_CCER_CC1P << (channel << 2);
+  ccer_val |= ATIM_CCER_CC1P << GTIM_CCER_CCXBASE(channel);
 
   /* Define its position (shift) and get register offset */
 
