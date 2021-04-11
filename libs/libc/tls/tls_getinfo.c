@@ -63,8 +63,8 @@ FAR struct tls_info_s *tls_get_info(void)
   ret = nxsched_get_stackinfo(0, &stackinfo);
   if (ret >= 0)
     {
-      /* This currently assumes a push-down stack.  The TLS data lies at the
-       * lowest address of the stack allocation.
+      /* The TLS data lies at the lowest address of the stack allocation.
+       * This is true for both push-up and push-down stacks.
        */
 
       info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
