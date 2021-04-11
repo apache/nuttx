@@ -637,7 +637,6 @@ void stm32_stdclockconfig(void)
     }
 #endif
 
-#define CONFIG_STM32H7_HSI48
 #ifdef CONFIG_STM32H7_HSI48
   /* Enable HSI48 */
 
@@ -648,6 +647,20 @@ void stm32_stdclockconfig(void)
   /* Wait until the HSI48 is ready */
 
   while ((getreg32(STM32_RCC_CR) & RCC_CR_HSI48RDY) == 0)
+    {
+    }
+#endif
+
+#ifdef CONFIG_STM32H7_CSI
+  /* Enable CSI */
+
+  regval  = getreg32(STM32_RCC_CR);
+  regval |= RCC_CR_CSION;
+  putreg32(regval, STM32_RCC_CR);
+
+  /* Wait until the CSI is ready */
+
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_CSIRDY) == 0)
     {
     }
 #endif
