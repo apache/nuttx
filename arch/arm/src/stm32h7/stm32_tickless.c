@@ -93,13 +93,13 @@
 #endif
 
 #if CONFIG_STM32H7_TICKLESS_CHANNEL == 1
-#define DIER_CAPT_IE          ATIM_DIER_CC1IE
+#define DIER_CAPT_IE          GTIM_DIER_CC1IE
 #elif CONFIG_STM32H7_TICKLESS_CHANNEL == 2
-#define DIER_CAPT_IE          ATIM_DIER_CC2IE
+#define DIER_CAPT_IE          GTIM_DIER_CC2IE
 #elif CONFIG_STM32H7_TICKLESS_CHANNEL == 3
-#define DIER_CAPT_IE          ATIM_DIER_CC3IE
+#define DIER_CAPT_IE          GTIM_DIER_CC3IE
 #elif CONFIG_STM32H7_TICKLESS_CHANNEL == 4
-#define DIER_CAPT_IE          ATIM_DIER_CC4IE
+#define DIER_CAPT_IE          GTIM_DIER_CC4IE
 #endif
 
 /****************************************************************************
@@ -231,7 +231,8 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   /* Assume that channel is disabled and polarity is active high */
 
-  ccer_val &= ~(3 << (channel << 2));
+  ccer_val &= ~((GTIM_CCER_CC1P | GTIM_CCER_CC1E) <<
+                GTIM_CCER_CCXBASE(channel));
 
   /* This function is not supported on basic timers. To enable or
    * disable it, simply set its clock to valid frequency or zero.
@@ -247,11 +248,11 @@ static int stm32_tickless_setchannel(uint8_t channel)
    * disabled.
    */
 
-  ccmr_val = (ATIM_CCMR_MODE_FRZN << ATIM_CCMR1_OC1M_SHIFT);
+  ccmr_val = (GTIM_CCMR_MODE_FRZN << GTIM_CCMR1_OC1M_SHIFT);
 
   /* Set polarity */
 
-  ccer_val |= ATIM_CCER_CC1P << (channel << 2);
+  ccer_val |= GTIM_CCER_CC1P << GTIM_CCER_CCXBASE(channel);
 
   /* Define its position (shift) and get register offset */
 
@@ -334,7 +335,7 @@ static void stm32_timing_handler(void)
 {
   g_tickless.overflow++;
 
-  STM32_TIM_ACKINT(g_tickless.tch, ATIM_SR_UIF);
+  STM32_TIM_ACKINT(g_tickless.tch, GTIM_SR_UIF);
 }
 
 /****************************************************************************
@@ -356,7 +357,7 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
 {
   int interrupt_flags = stm32_tickless_getint();
 
-  if (interrupt_flags & ATIM_SR_UIF)
+  if (interrupt_flags & GTIM_SR_UIF)
     {
       stm32_timing_handler();
     }
@@ -678,7 +679,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   overflow = g_tickless.overflow;
   counter  = STM32_TIM_GETCOUNTER(g_tickless.tch);
-  pending  = STM32_TIM_CHECKINT(g_tickless.tch, ATIM_SR_UIF);
+  pending  = STM32_TIM_CHECKINT(g_tickless.tch, GTIM_SR_UIF);
   verify   = STM32_TIM_GETCOUNTER(g_tickless.tch);
 
   /* If an interrupt was pending before we re-enabled interrupts,
@@ -687,7 +688,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   if (pending)
     {
-      STM32_TIM_ACKINT(g_tickless.tch, ATIM_SR_UIF);
+      STM32_TIM_ACKINT(g_tickless.tch, GTIM_SR_UIF);
 
       /* Increment the overflow count and use the value of the
        * guaranteed to be AFTER the overflow occurred.
