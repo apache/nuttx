@@ -401,8 +401,13 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
 
 static uint64_t stm32_get_counter(void)
 {
+#ifdef HAVE_32BIT_TICKLESS
   return ((uint64_t)g_tickless.overflow << 32) |
          STM32_TIM_GETCOUNTER(g_tickless.tch);
+#else
+  return ((uint64_t)g_tickless.overflow << 16) |
+         STM32_TIM_GETCOUNTER(g_tickless.tch);
+#endif
 }
 
 /****************************************************************************
@@ -1060,8 +1065,13 @@ int up_alarm_start(FAR const struct timespec *ts)
 
 int up_alarm_cancel(FAR struct timespec *ts)
 {
+#ifdef HAVE_32BIT_TICKLESS
   uint64_t nsecs = (((uint64_t)g_tickless.overflow << 32) |
                     STM32_TIM_GETCOUNTER(g_tickless.tch)) * NSEC_PER_TICK;
+#else
+  uint64_t nsecs = (((uint64_t)g_tickless.overflow << 16) |
+                    STM32_TIM_GETCOUNTER(g_tickless.tch)) * NSEC_PER_TICK;
+#endif
 
   ts->tv_sec = nsecs / NSEC_PER_SEC;
   ts->tv_nsec = nsecs - ts->tv_sec * NSEC_PER_SEC;
