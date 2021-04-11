@@ -207,7 +207,7 @@ static inline void rcc_enableahb1(void)
 #endif
 
 #ifdef CONFIG_STM32H7_OTGHS
-#ifdef BOARD_ENABLE_USBOTG_HSULPI
+#  if defined(CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI)
   /* Enable clocking for USB OTG HS and external PHY */
 
   regval |= (RCC_AHB1ENR_OTGHSEN | RCC_AHB1ENR_OTGHSULPIEN);

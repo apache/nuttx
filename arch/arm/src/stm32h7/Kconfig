@@ -777,6 +777,29 @@ config STM32H7_SYSCFG_IOCOMPENSATION
 		The I/O compensation cell can be used only when the supply voltage ranges
 		from 2.4 to 3.6 V
 
+menu "OTG_HS Configuration"
+	depends on STM32H7_OTGHS
+
+choice
+	prompt "ULPI Selection"
+	default STM32H7_OTGHS_NO_ULPI
+
+config STM32H7_OTGHS_NO_ULPI
+	bool "No External ULPI on board."
+	---help---
+	Select to indicate that there is no external ULPI PHY. This means the OTG_HS
+	peripheral must use the internal full-speed PHY and will be limited to
+	full-speed mode.
+
+config STM32H7_OTGHS_EXTERNAL_ULPI
+	bool "External ULPI"
+	---help---
+		Select to indicate the presence of an external ULPI PHY and use it.
+
+endchoice #"ULPI Selection"
+
+endmenu # OTG_HS Config
+
 menu "I2C Configuration"
 	depends on STM32H7_I2C
 

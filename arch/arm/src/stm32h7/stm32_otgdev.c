@@ -5248,7 +5248,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTG_GAHBCFG_TXFELVL, STM32_OTG_GAHBCFG);
 
-#if defined(CONFIG_STM32H7_OTGFS)
+#if defined(CONFIG_STM32H7_OTGFS) || defined (CONFIG_STM32H7_OTGHS_NO_ULPI)
   /* Full speed serial transceiver select */
 
   regval  = stm32_getreg(STM32_OTG_GUSBCFG);
@@ -5469,7 +5469,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   regval &=  OTG_GINT_RESERVED;
   stm32_putreg(regval | OTG_GINT_RC_W1, STM32_OTG_GINTSTS);
 
-#if defined(CONFIG_STM32H7_OTGHS) && !defined(BOARD_ENABLE_USBOTG_HSULPI)
+#if defined(CONFIG_STM32H7_OTGHS) && defined(CONFIG_STM32H7_OTGHS_NO_ULPI)
   /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must
    * be done because if both the ULPI and the FS PHY clock enable bits
    * are set at the same time, the ARM never awakens from WFI due to
