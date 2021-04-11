@@ -959,12 +959,13 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
   /* Assume that channel is disabled and polarity is active high */
 
   ccer_val = tim_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
-  ccer_val &= ~(3 << (channel << 2));
+  ccer_val &= ~((GTIM_CCER_CC1P | GTIM_CCER_CC1E) <<
+                GTIM_CCER_CCXBASE(channel));
 
   ccmr_val = (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT) |
              (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC1S_SHIFT) |
               ATIM_CCMR1_OC1PE;
-  ccer_val |= ATIM_CCER_CC1E << (channel << 2);
+  ccer_val |= ATIM_CCER_CC1E << GTIM_CCER_CCXBASE(channel);
 
   if (channel & 1)
     {
