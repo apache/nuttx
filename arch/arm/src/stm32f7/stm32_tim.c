@@ -660,7 +660,7 @@ static int stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source)
 
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source)
 {
-  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~ATIM_SR_UIF);
+  stm32_putreg16(dev, STM32_BTIM_SR_OFFSET, ~source);
 }
 
 /****************************************************************************

@@ -583,7 +583,7 @@ void up_timer_initialize(void)
 
   /* Start the timer */
 
-  STM32_TIM_ACKINT(g_tickless.tch, GTIM_SR_UIF);
+  STM32_TIM_ACKINT(g_tickless.tch, ~0);
   STM32_TIM_ENABLEINT(g_tickless.tch, GTIM_DIER_UIE);
 }
 
@@ -644,7 +644,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   overflow = g_tickless.overflow;
   counter  = STM32_TIM_GETCOUNTER(g_tickless.tch);
-  pending  = STM32_TIM_CHECKINT(g_tickless.tch, 0);
+  pending  = STM32_TIM_CHECKINT(g_tickless.tch, GTIM_SR_UIF);
   verify   = STM32_TIM_GETCOUNTER(g_tickless.tch);
 
   /* If an interrupt was pending before we re-enabled interrupts,
