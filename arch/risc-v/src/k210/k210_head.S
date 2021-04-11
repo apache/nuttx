@@ -223,9 +223,17 @@ normal_irq:
   .type   g_intstackalloc, object
   .type   g_intstackbase, object
 g_intstackalloc:
-  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7))
+#ifndef CONFIG_SMP
+  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
+#else
+  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) + 4) & ~7)
+#endif
 g_intstackbase:
   .skip  8
   .size  g_intstackbase, 8
-  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7)
+#ifndef CONFIG_SMP
+  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+#else
+  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~7)
+#endif
 #endif
