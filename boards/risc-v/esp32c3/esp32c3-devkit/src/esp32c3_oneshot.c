@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_timer.c
+ * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_oneshot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <debug.h>
-
-#include "esp32c3_tim_lowerhalf.h"
-#include "esp32c3_tim.h"
-
+#include <sys/types.h>
+#include <nuttx/timers/timer.h>
+#include <nuttx/clock.h>
+#include <nuttx/timers/oneshot.h>
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
@@ -41,10 +40,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_tim_init
+ * Name: board_oneshot_init
  *
  * Description:
- *   Configure the timer driver.
+ *   Configure the oneshot timer driver.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -52,32 +51,33 @@
  *
  ****************************************************************************/
 
-int board_tim_init(void)
+int board_oneshot_init(int timer, uint16_t resolution)
 {
   int ret = OK;
+  FAR struct oneshot_lowerhalf_s *os_lower = NULL;
 
-#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
-  ret = esp32c3_timer_initialize("/dev/timer0", ESP32C3_TIMER0);
-  if (ret < 0)
+  os_lower = oneshot_initialize(timer, resolution);
+  if (os_lower != NULL)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      return ret;
-    }
-#endif /* CONFIG_ESP32C3_TIMER0 */
+#if defined(CONFIG_CPULOAD_ONESHOT)
+      /* Configure the oneshot timer to support CPU load measurement */
 
-#ifdef CONFIG_ESP32C3_TIMER1
-  ret = esp32c3_timer_initialize("/dev/timer1", ESP32C3_TIMER1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer driver: %d\n",
-             ret);
-      return ret;
+      nxsched_oneshot_extclk(os_lower);
+
+#else
+      ret = oneshot_register("/dev/oneshot", os_lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+            "ERROR: Failed to register oneshot at /dev/oneshot: %d\n", ret);
+        }
+#endif /* CONFIG_CPULOAD_ONESHOT */
     }
-#endif /* CONFIG_ESP32C3_TIMER1 */
+  else
+    {
+      syslog(LOG_ERR, "ERROR: oneshot_initialize failed\n");
+      ret = -EBUSY;
+    }
 
   return ret;
 }
-

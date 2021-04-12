@@ -54,8 +54,8 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CSRCS += esp32c3_wdt.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CSRCS += esp32c3_timer.c
+ifeq ($(CONFIG_ONESHOT),y)
+CSRCS += esp32c3_oneshot.c
 endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld

@@ -85,6 +85,13 @@ CHIP_CSRCS += esp32c3_tim_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_ESP32C3_ONESHOT),y)
+CHIP_CSRCS += esp32c3_oneshot.c
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += esp32c3_oneshot_lowerhalf.c
+endif
+endif
+
 ifeq ($(CONFIG_ESP32C3_RT_TIMER),y)
 CHIP_CSRCS += esp32c3_rt_timer.c
 endif

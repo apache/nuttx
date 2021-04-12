@@ -42,6 +42,10 @@
 #include "esp32c3_partition.h"
 #include "esp32c3-devkit.h"
 
+#ifdef CONFIG_TIMER
+#  include "esp32c3_tim_lowerhalf.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -193,17 +197,45 @@ int esp32c3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_TIMER
-  /* Configure timer timer */
+/* First, register the timer drivers and let timer 1 for oneshot
+ * if it is enabled.
+ */
 
-  ret = board_tim_init();
+#ifdef CONFIG_TIMER
+
+#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
+  ret = esp32c3_timer_initialize("/dev/timer0", TIMER0);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to initialize timer drivers: %d\n",
+             "ERROR: Failed to initialize timer driver: %d\n",
              ret);
     }
 #endif
+
+#if defined(CONFIG_ESP32C3_TIMER1) && !defined(CONFIG_ONESHOT)
+  ret = esp32c3_timer_initialize("/dev/timer1", TIMER1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+    }
+#endif
+
+#endif /* CONFIG_TIMER */
+
+  /* Now register one oneshot driver */
+
+#if defined(CONFIG_ONESHOT) && defined(CONFIG_ESP32C3_TIMER1)
+
+  ret = board_oneshot_init(ONESHOT_TIMER, ONESHOT_RESOLUTION_US);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_oneshot_init() failed: %d\n", ret);
+    }
+
+#endif /* CONFIG_ONESHOT */
 
 #ifdef CONFIG_ESP32C3_WIRELESS
 
