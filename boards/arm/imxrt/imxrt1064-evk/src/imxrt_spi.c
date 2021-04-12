@@ -59,7 +59,6 @@ void weak_function imxrt_spidev_initialize(void)
 {
 #ifdef CONFIG_IMXRT_LPSPI1
   imxrt_config_gpio(GPIO_LPSPI1_CS); /* LPSPI1 chip select */
-  imxrt_config_gpio(GPIO_MMCSD_EN);
 #endif
 #ifdef CONFIG_IMXRT_LPSPI3
   imxrt_config_gpio(GPIO_LPSPI3_CS); /* LPSPI3 chip select */
