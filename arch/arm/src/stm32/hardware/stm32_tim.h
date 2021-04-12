@@ -58,7 +58,7 @@
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
     defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F37XX) || \
-    defined(CONFIG_STM32_STM32F4XXX)
+    defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32FGXXX)
 #  define HAVE_GTIM_CCXNP
 #endif
 
@@ -82,7 +82,7 @@
  * For the STM32F20xx and STM32F40xx, TIM2 and 5 are 32-bit
  * The STM32 F1 Value Line and the STM32 F3 have variant general purpose
  *   registers that are not yet fully covered in this header file.
- * The STM32 G47x also have variant registers that are not yet covered.
+ * The STM32 G4xx also have variant registers that are not yet covered.
  *   Check whether those are similar to the F1 and F3 mentioned above. In
  *   particular, the DCR and DMAR offsets are 0x3dc and 0x3e0, respectively,
  *   as opposed to the values below:
@@ -117,7 +117,7 @@
 
 /* Advanced Timers - TIM1 and TIM8
  *
- * The STM32 G47x have variant registers that are not yet covered. In
+ * The STM32 G4xx have variant registers that are not yet covered. In
  * particular, the DCR and DMAR offsets are 0x3dc and 0x3e0, respectively,
  * as opposed to the values below, and there are several additional
  * registers that are not mentioned below at all.
