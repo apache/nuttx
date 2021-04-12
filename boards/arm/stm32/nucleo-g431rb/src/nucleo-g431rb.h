@@ -101,4 +101,16 @@ int stm32_bringup(void);
 int stm32_pwm_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431RB_SRC_NUCLEO_G431RB_H */
