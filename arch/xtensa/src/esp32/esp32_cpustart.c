@@ -158,7 +158,7 @@ void xtensa_appcpu_start(void)
    * is to switch to a well-known IDLE thread stack.
    */
 
-  sp = (uint32_t)tcb->adj_stack_ptr;
+  sp = (uint32_t)tcb->stack_base_ptr + tcb->adj_stack_size;
   __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
   sinfo("CPU%d Started\n", up_cpu_index());

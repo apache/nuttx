@@ -42,7 +42,7 @@
  *
  * Input Parameters:
  *   pid       - Identifies the thread to query.  Zero is interpreted as the
- *               the calling thread
+ *               the calling thread, -1 is interpreted as the calling task.
  *   stackinfo - User-provided location to return the stack information.
  *
  * Returned Value:
@@ -68,6 +68,16 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
       /* We can always query ourself */
 
       qtcb = rtcb;
+    }
+  else if (pid == -1)
+    {
+      /* We can always query our main thread */
+
+      qtcb = nxsched_get_tcb(rtcb->group->tg_pid);
+      if (qtcb == NULL)
+        {
+          return -ENOENT;
+        }
     }
   else
     {
@@ -100,6 +110,7 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 
   stackinfo->adj_stack_size  = qtcb->adj_stack_size;
   stackinfo->stack_alloc_ptr = qtcb->stack_alloc_ptr;
-  stackinfo->adj_stack_ptr   = qtcb->adj_stack_ptr;
+  stackinfo->stack_base_ptr   = qtcb->stack_base_ptr;
+
   return OK;
 }

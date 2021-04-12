@@ -123,7 +123,7 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint64_t)rtcb->adj_stack_ptr;
+  ustackbase = (uint64_t)rtcb->stack_base_ptr;
   ustacksize = (uint64_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
@@ -172,15 +172,14 @@ static void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp >= ustackbase || sp < ustackbase - ustacksize)
+  if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-#endif
+      up_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
-      up_stackdump(sp, ustackbase);
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      up_stackdump(ustackbase, ustackbase + ustacksize);
     }
 
   /* Then dump the registers (if available) */

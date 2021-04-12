@@ -50,7 +50,7 @@ static void z16_stackdump(void)
 {
   struct tcb_s *rtcb = this_task();
   chipreg_t sp = z16_getsp();
-  chipreg_t stack_base = (chipreg_t)rtcb->adj_stack_ptr;
+  chipreg_t stack_base = (chipreg_t)rtcb->stack_base_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
   chipreg_t stack;
 
@@ -58,18 +58,18 @@ static void z16_stackdump(void)
   _alert("stack_size: %08x\n", stack_size);
   _alert("sp:         %08x\n", sp);
 
-  if (sp >= stack_base || sp < stack_base - stack_size)
-    {
-      _err("ERROR: Stack pointer is not within allocated stack\n");
-      stack = stack_base - stack_size;
-    }
-  else
+  if (sp >= stack_base && sp < stack_base + stack_size)
     {
       stack = sp;
     }
+  else
+    {
+      _err("ERROR: Stack pointer is not within allocated stack\n");
+      stack = stack_base;
+    }
 
   for (stack = stack & ~0x0f;
-       stack < stack_base;
+       stack < stack_base + stack_size;
        stack += 8 * sizeof(chipreg_t))
     {
       chipreg_t *ptr = (chipreg_t *)stack;

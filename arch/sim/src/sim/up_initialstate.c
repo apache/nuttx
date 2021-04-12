@@ -55,11 +55,12 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(sim_getsp() -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->adj_stack_ptr   = (void *)sim_getsp();
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
-  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr - sizeof(xcpt_reg_t);
+  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size;
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
 }

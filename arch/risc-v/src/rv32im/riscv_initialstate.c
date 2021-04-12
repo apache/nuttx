@@ -63,7 +63,7 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
@@ -77,7 +77,8 @@ void up_initial_state(struct tcb_s *tcb)
    * only the start function would do that and we have control over that one
    */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size;
 
   /* Save the task entry point */
 

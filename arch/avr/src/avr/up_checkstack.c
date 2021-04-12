@@ -146,12 +146,12 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size);
+  return do_stackcheck((uintptr_t)tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
 {
-  return (ssize_t)tcb->adj_stack_size - (ssize_t)up_check_tcbstack(tcb);
+  return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }
 
 size_t up_check_stack(void)

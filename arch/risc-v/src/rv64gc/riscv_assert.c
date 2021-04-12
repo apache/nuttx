@@ -195,7 +195,7 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uintptr_t)rtcb->adj_stack_ptr;
+  ustackbase = (uintptr_t)rtcb->stack_base_ptr;
   ustacksize = (uintptr_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
@@ -247,14 +247,14 @@ static void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp >= ustackbase || sp < ustackbase - ustacksize)
+  if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase - ustacksize, ustackbase);
+      up_stackdump(ustackbase, ustackbase + ustacksize);
     }
   else
     {
-      up_stackdump(sp, ustackbase);
+      up_stackdump(sp, ustackbase + ustacksize);
     }
 }
 

@@ -222,7 +222,8 @@ int up_cpu_start(int cpu)
   core1_boot_msg[0] = 0;
   core1_boot_msg[1] = 1;
   core1_boot_msg[2] = getreg32(ARMV6M_SYSCON_VECTAB);
-  core1_boot_msg[3] = (uint32_t)tcb->adj_stack_ptr;
+  core1_boot_msg[3] = (uint32_t)tcb->stack_base_ptr +
+                                tcb->adj_stack_size;
   core1_boot_msg[4] = (uint32_t)core1_boot;
 
   do

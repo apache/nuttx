@@ -291,7 +291,7 @@ void xtensa_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustackbase = (uint32_t)rtcb->stack_base_ptr;
   ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
@@ -362,14 +362,14 @@ void xtensa_dumpstate(void)
    * stack memory.
    */
 
-  if (sp >= ustackbase || sp < ustackbase - ustacksize)
+  if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      xtensa_stackdump(ustackbase - ustacksize, ustackbase);
+      xtensa_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
-      xtensa_stackdump(sp, ustackbase);
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      xtensa_stackdump(ustackbase, ustackbase + ustacksize);
     }
 
   /* Dump the state of all tasks (if available) */

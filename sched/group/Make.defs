@@ -57,10 +57,6 @@ ifneq ($(CONFIG_TLS_NELEM),0)
 CSRCS += group_tlsalloc.c group_tlsfree.c
 endif
 
-ifndef CONFIG_BUILD_KERNEL
-CSRCS += group_taskdata.c
-endif
-
 # Include group build support
 
 DEPPATH += --dep-path group
