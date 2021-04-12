@@ -33,10 +33,6 @@ CSRCS += esp32_reset.c
 endif
 endif
 
-ifeq ($(CONFIG_ESP32_SPI),y)
-CSRCS += esp32_spi.c
-endif
-
 ifeq ($(CONFIG_MMCSD),y)
 CSRCS += esp32_mmcsd.c
 endif
