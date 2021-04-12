@@ -54,6 +54,7 @@ void up_initial_state(FAR struct tcb_s *tcb)
 {
   FAR struct xcptcontext *xcp  = &tcb->xcp;
   FAR uint8_t            *regs = xcp->regs;
+  uintptr_t               sp;
 
   /* Initialize the idle thread stack */
 
@@ -61,7 +62,7 @@ void up_initial_state(FAR struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
@@ -90,7 +91,9 @@ void up_initial_state(FAR struct tcb_s *tcb)
 
   /* Offset 18-20: User stack pointer */
 
+  sp      = (uintptr_t)tcb->stack_base_ptr +
+                       tcb->adj_stack_size;
   regs    = &xcp->regs[REG_SP];
-  *regs++ = (uint32_t)tcb->adj_stack_ptr >> 8;  /* Bits 8-15 of SP */
-  *regs   = (uint32_t)tcb->adj_stack_ptr;       /* Bits 0-7 of SP */
+  *regs++ = sp >> 8; /* Bits 8-15 of SP */
+  *regs   = sp;      /* Bits 0-7 of SP */
 }

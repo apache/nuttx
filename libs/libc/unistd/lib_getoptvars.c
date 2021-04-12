@@ -24,16 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <assert.h>
 
 #include <nuttx/tls.h>
-#include <nuttx/lib/libvars.h>
-
-#include <arch/tls.h>
 
 #include "unistd.h"
-#include "libc.h"
 
 /****************************************************************************
  * Private Data
@@ -70,13 +65,13 @@ FAR struct getopt_s g_getopt_vars =
 FAR struct getopt_s *getoptvars(void)
 {
 #ifndef CONFIG_BUILD_KERNEL
-  FAR struct tls_info_s *tlsinfo;
+  FAR struct task_info_s *info;
 
   /* Get the structure of getopt() variables using the key. */
 
-  tlsinfo = up_tls_info();
-  DEBUGASSERT(tlsinfo != NULL && tlsinfo->tl_libvars != NULL);
-  return &tlsinfo->tl_libvars->lv_getopt;
+  info = task_get_info();
+  DEBUGASSERT(info != NULL);
+  return &info->ta_getopt;
 #else
   return &g_getopt_vars;
 #endif

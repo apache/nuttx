@@ -140,10 +140,4 @@ int  group_setuptaskfiles(FAR struct task_tcb_s *tcb);
 int  group_setupstreams(FAR struct task_tcb_s *tcb);
 #endif
 
-#ifndef CONFIG_BUILD_KERNEL
-/* Task specific data */
-
-void tls_set_taskdata(FAR struct tcb_s *tcb);
-#endif
-
 #endif /* __SCHED_GROUP_GROUP_H */

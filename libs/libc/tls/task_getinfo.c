@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_taskdata.c
+ * libs/libc/tls/task_getinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,51 +25,39 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
-#include <assert.h>
 
 #include <nuttx/tls.h>
-
-#include "group/group.h"
-
-#ifndef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_taskdata
+ * Name: task_get_info
  *
  * Description:
- *   Set task-specific data pointer in TLS.
+ *   Return a reference to the task_info_s structure.
  *
  * Input Parameters:
- *   tcb - Identifies task to set TLS data
+ *   None
  *
  * Returned Value:
- *   None
+ *   A reference to the task-specific task_info_s structure is return on
+ *   success.  NULL would be returned in the event of any failure.
  *
  ****************************************************************************/
 
-void tls_set_taskdata(FAR struct tcb_s *tcb)
+FAR struct task_info_s *task_get_info(void)
 {
-  FAR struct tls_info_s *info;
-  FAR struct task_group_s *group;
+  FAR struct task_info_s *info = NULL;
+  struct stackinfo_s stackinfo;
+  int ret;
 
-  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
-  group = tcb->group;
+  ret = nxsched_get_stackinfo(-1, &stackinfo);
+  if (ret >= 0)
+    {
+      info = (FAR struct task_info_s *)stackinfo.stack_alloc_ptr;
+    }
 
-  /* This currently assumes a push-down stack.  The TLS data lies at the
-   * lowest address of the stack allocation.
-   */
-
-  info = (FAR struct tls_info_s *)tcb->stack_alloc_ptr;
-
-  /* Copy the task data point buffer in the group structure into the
-   * thread's TLS data.
-   */
-
-  info->tl_libvars = group->tg_libvars;
+  return info;
 }
-
-#endif /* !CONFIG_BUILD_KERNEL */

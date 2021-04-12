@@ -31,7 +31,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/tls.h>
 #include <nuttx/board.h>
 
 #include "sched/sched.h"
@@ -207,13 +206,12 @@ void arm_stack_color(FAR void *stackbase, size_t nbytes)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
-      tcb->adj_stack_size), tcb->adj_stack_size);
+  return do_stackcheck(tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
 {
-  return (ssize_t)tcb->adj_stack_size - (ssize_t)up_check_tcbstack(tcb);
+  return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }
 
 size_t up_check_stack(void)
