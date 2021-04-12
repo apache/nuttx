@@ -141,9 +141,15 @@
 #    define RCC_RSTR_ADC123RST RCC_APB2RSTR_ADCRST
 #  endif
 #elif defined(HAVE_IP_ADC_V2)
-#  define STM32_RCC_RSTR       STM32_RCC_AHBRSTR
-#  define RCC_RSTR_ADC12RST    RCC_AHBRSTR_ADC12RST
-#  define RCC_RSTR_ADC34RST    RCC_AHBRSTR_ADC34RST
+#  ifdef STM32_RCC_AHB2RSTR_OFFSET
+#    define STM32_RCC_RSTR       STM32_RCC_AHB2RSTR
+#    define RCC_RSTR_ADC12RST    RCC_AHB2RSTR_ADC12RST
+#    define RCC_RSTR_ADC34RST    RCC_AHB2RSTR_ADC345RST
+#  else
+#    define STM32_RCC_RSTR       STM32_RCC_AHBRSTR
+#    define RCC_RSTR_ADC12RST    RCC_AHBRSTR_ADC12RST
+#    define RCC_RSTR_ADC34RST    RCC_AHBRSTR_ADC34RST
+#  endif
 #endif
 
 /* ADC Channels/DMA *********************************************************/
@@ -196,6 +202,31 @@
 #    define ADC_SMPR_DEFAULT    ADC_SMPR_601p5
 #  endif
 #  define ADC_SMPR1_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR1_SMP1_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP2_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP3_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP4_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP5_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP6_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP7_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP8_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP9_SHIFT))
+#  define ADC_SMPR2_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR2_SMP10_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP11_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP12_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP13_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP14_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP15_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP16_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP17_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR2_SMP18_SHIFT))
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  if defined(ADC_HAVE_DMA) || (CONFIG_STM32_ADC_MAX_SAMPLES == 1)
+#    define ADC_SMPR_DEFAULT    ADC_SMPR_47p5
+#  else /* Slow down sampling frequency */
+#    define ADC_SMPR_DEFAULT    ADC_SMPR_640p5
+#  endif
+#  define ADC_SMPR1_DEFAULT   ((ADC_SMPR_DEFAULT << ADC_SMPR1_SMP0_SHIFT) | \
+                               (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP1_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP2_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP3_SHIFT) | \
                                (ADC_SMPR_DEFAULT << ADC_SMPR1_SMP4_SHIFT) | \
@@ -289,7 +320,8 @@
 #if defined(CONFIG_STM32_STM32F10XX)
 #  define ADC_CHANNELS_NUMBER 18
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-      defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F4XXX)
+      defined(CONFIG_STM32_STM32F33XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G4XXX)
 #  define ADC_CHANNELS_NUMBER 19
 #elif defined(CONFIG_STM32_STM32L15XX)
 #  define ADC_CHANNELS_NUMBER 32
