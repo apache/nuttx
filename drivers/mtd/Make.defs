@@ -140,10 +140,6 @@ ifeq ($(CONFIG_MTD_IS25XP),y)
 CSRCS += is25xp.c
 endif
 
-ifeq ($(CONFIG_MTD_FLEXSPI_NOR),y)
-CSRCS += flexspi_nor.c
-endif
-
 ifeq ($(CONFIG_MTD_SMART),y)
 ifeq ($(CONFIG_FS_SMARTFS),y)
 CSRCS += smart.c
