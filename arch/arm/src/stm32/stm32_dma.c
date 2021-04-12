@@ -37,7 +37,11 @@
  */
 
 #if defined(CONFIG_STM32_HAVE_IP_DMA_V1)
-#  include "stm32_dma_v1.c"
+#  if defined(CONFIG_STM32_HAVE_DMAMUX)
+#    include "stm32_dma_v1mux.c"
+#  else
+#    include "stm32_dma_v1.c"
+#  endif
 #elif defined(CONFIG_STM32_HAVE_IP_DMA_V2)
 #  include "stm32_dma_v2.c"
 #endif

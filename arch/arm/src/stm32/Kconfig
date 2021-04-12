@@ -1927,6 +1927,19 @@ config STM32_STM32F469
 config STM32_STM32G4XXX
 	bool
 	default n
+	select STM32_HAVE_DMAMUX
+
+config STM32_STM32G4_CAT2
+	bool
+	default n
+
+config STM32_STM32G4_CAT3
+	bool
+	default n
+
+config STM32_STM32G4_CAT4
+	bool
+	default n
 
 config STM32_STM32G4XXK
 	bool
@@ -1960,6 +1973,7 @@ config STM32_STM32G43XX
 	bool
 	default n
 	select STM32_STM32G4XXX
+	select STM32_STM32G4_CAT2
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
@@ -2030,6 +2044,7 @@ config STM32_STM32G47XX
 	bool
 	default n
 	select STM32_STM32G4XXX
+	select STM32_STM32G4_CAT3
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
@@ -2171,6 +2186,10 @@ config STM32_HAVE_DMA1_CHAN8
 	default n
 
 config STM32_HAVE_DMA2_CHAN678
+	bool
+	default n
+
+config STM32_HAVE_DMAMUX
 	bool
 	default n
 
@@ -2758,13 +2777,21 @@ config STM32_CRYP
 config STM32_DMA1
 	bool "DMA1"
 	default n
+	select STM32_DMA
 	select ARCH_DMA
 
 config STM32_DMA2
 	bool "DMA2"
 	default n
+	select STM32_DMA
 	select ARCH_DMA
 	depends on !STM32_VALUELINE || (STM32_VALUELINE && STM32_HIGHDENSITY)
+
+config STM32_DMAMUX1
+	bool "DMAMUX1"
+	default n
+	depends on STM32_HAVE_DMAMUX
+	select STM32_DMAMUX
 
 config STM32_DAC1
 	bool "DAC1"
@@ -3284,6 +3311,12 @@ config STM32_SDADC
 	bool
 
 config STM32_DAC
+	bool
+
+config STM32_DMA
+	bool
+
+config STM32_DMAMUX
 	bool
 
 config STM32_SPI

@@ -47,6 +47,10 @@
 
 #include "hardware/stm32_dma.h"
 
+#ifdef CONFIG_STM32_HAVE_DMAMUX
+#  include "hardware/stm32_dmamux.h"
+#endif
+
 /* These definitions provide the bit encoding of the 'status' parameter
  * passed to the DMA callback function (see dma_callback_t).
  */
