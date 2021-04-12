@@ -25,6 +25,15 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 #if defined(CONFIG_EABI_UNWINDER)
 
 /* Store up to SIZE return address of the current program state in
@@ -35,6 +44,11 @@ extern int  backtrace(FAR void **buffer, int size);
 extern void dump_stack(void);
 #else
 # define dump_stack()
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
 #endif
 
 #endif /* __INCLUDE_EXECINFO_H */
