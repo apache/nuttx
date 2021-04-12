@@ -313,8 +313,8 @@ void imxrt_lcd_initialize(void);
 int imxrt_usbhost_initialize(void);
 #endif
 
-#ifdef CONFIG_MTD_FLEXSPI_NOR
-int imxrt_flexspi_nor_setup(void);
+#ifdef CONFIG_IMXRT_FLEXSPI
+int imxrt_flexspi_nor_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
