@@ -33,7 +33,7 @@
 
 /* Stack is allocated just after uninitialized data and just before the heap */
 
-#define STACKBASE (_enoinit+CONFIG_IDLETHREAD_STACKSIZE-1)
+#define STACKBASE (_enoinit+CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The RAMPZ register is only available for CPUs with more than 64Kb of FLASH.
  * Only the AT90USB646, 647, 1286, and 1287 are supported by this file.

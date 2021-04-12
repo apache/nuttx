@@ -83,7 +83,7 @@ void up_irqinitialize(void)
 
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
   riscv_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                 intstack_size);
+                     intstack_size);
 #endif
 
   /* currents_regs is non-NULL only while processing an interrupt */

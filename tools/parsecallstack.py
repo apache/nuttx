@@ -17,8 +17,8 @@
 # under the License.
 #
 
-import os
 import argparse
+import os
 
 
 def parse_args():

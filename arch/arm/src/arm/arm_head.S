@@ -642,7 +642,7 @@ __start:
 .Linitparms:
 	.long	_sbss
 	.long	_ebss
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 #if !defined(CONFIG_PAGING) && !defined(CONFIG_BOOT_RUNFROMFLASH)
 

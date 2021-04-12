@@ -271,10 +271,10 @@ void __start(void)
 
   __asm__ __volatile__("\tmsr msp, %0\n" :
                        : "r" ((uint32_t)&_ebss +
-                              CONFIG_IDLETHREAD_STACKSIZE - 4));
+                              CONFIG_IDLETHREAD_STACKSIZE));
   __asm__ __volatile__("\tmsr psp, %0\n" :
                        : "r" ((uint32_t)&_ebss +
-                              CONFIG_IDLETHREAD_STACKSIZE - 4));
+                              CONFIG_IDLETHREAD_STACKSIZE));
 
 #ifndef CONFIG_CXD56_SUBCORE
   cpuid = getreg32(CPU_ID);

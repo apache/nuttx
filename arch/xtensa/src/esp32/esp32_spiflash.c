@@ -173,7 +173,7 @@ struct spiflash_cachestate_s
  * ROM function prototypes
  ****************************************************************************/
 
-extern void Cache_Flush(int cpu);
+extern void cache_flush(int cpu);
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -535,9 +535,9 @@ static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
 #ifdef CONFIG_ESP32_SPIRAM
           esp_spiram_writeback_cache();
 #endif
-          Cache_Flush(0);
+          cache_flush(0);
 #ifdef CONFIG_SMP
-          Cache_Flush(1);
+          cache_flush(1);
 #endif
         }
     }
@@ -1377,9 +1377,9 @@ static int IRAM_ATTR esp32_mmap(FAR struct esp32_spiflash_s *priv,
 #ifdef CONFIG_ESP32_SPIRAM
       esp_spiram_writeback_cache();
 #endif
-      Cache_Flush(0);
+      cache_flush(0);
 #ifdef CONFIG_SMP
-      Cache_Flush(1);
+      cache_flush(1);
 #endif
     }
 
@@ -1422,9 +1422,9 @@ static void IRAM_ATTR esp32_ummap(FAR struct esp32_spiflash_s *priv,
 #ifdef CONFIG_ESP32_SPIRAM
   esp_spiram_writeback_cache();
 #endif
-  Cache_Flush(0);
+  cache_flush(0);
 #ifdef CONFIG_SMP
-  Cache_Flush(1);
+  cache_flush(1);
 #endif
   esp32_spiflash_opdone(&state);
 }

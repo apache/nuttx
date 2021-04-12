@@ -59,6 +59,18 @@
 # linker file) and referencing them directly.
 #
 
+import os
+import socket
+import time
+
+if os.name == "nt":
+    import msvcrt
+else:
+    import select
+    import sys
+    import termios
+    import tty
+
 LWL_ACTIVESHIFT = 31
 LWL_DNSENSESHIFT = 30
 LWL_UPSENSESHIFT = 29
@@ -80,15 +92,6 @@ LWL_PORT_CONSOLE = 1
 # Memory to scan through looking for signature
 baseaddr = 0x20000000
 length = 0x8000
-
-import time
-import socket
-import os
-
-if os.name == "nt":
-    import msvcrt
-else:
-    import sys, select, termios, tty
 
 
 def kbhit():
@@ -176,10 +179,10 @@ class oocd:
 
     def testInterface(self):
         self.mdwText = "ocd_mdw"
-        if self.readVariable(baseaddr) != None:
+        if self.readVariable(baseaddr) is not None:
             return
         self.mdwText = "mdw"
-        if self.readVariable(baseaddr) != None:
+        if self.readVariable(baseaddr) is not None:
             return
         raise ConnectionRefusedError
 
@@ -284,7 +287,7 @@ if __name__ == "__main__":
                         print("\r==Link Lost\r")
                         raise e
 
-        except (BrokenPipeError, ConnectionRefusedError, ConnectionResetError) as e:
+        except (BrokenPipeError, ConnectionRefusedError, ConnectionResetError):
             time.sleep(1)
             continue
         finally:

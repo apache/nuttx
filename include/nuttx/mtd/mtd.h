@@ -90,7 +90,8 @@
  * Public Types
  ****************************************************************************/
 
-struct qspi_dev_s; /* Forward reference */
+struct qspi_dev_s;    /* Forward reference */
+struct flexspi_dev_s; /* Forward reference */
 
 /* The following defines the geometry for the device.  It treats the device
  * as though it were just an array of fixed size blocks.  That is most likely
@@ -593,6 +594,18 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
 
 FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
+
+/****************************************************************************
+ * Name: flexspi_nor_initialize
+ *
+ * Description:
+ *   Create an initialized MTD device instance for the FlexSPI-based
+ *   FLASH part.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *flexspi_nor_initialize(FAR struct flexspi_dev_s
+                                             *flexspi, bool unprotect);
 
 /****************************************************************************
  * Name: blockmtd_initialize

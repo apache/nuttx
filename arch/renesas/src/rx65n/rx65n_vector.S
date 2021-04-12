@@ -792,10 +792,9 @@ _uprx65_groupal1_handler:
   .global  _g_intstackbase
   .type   _g_intstackbase, object
 _g_intstackalloc:
-  .skip   ((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+  .skip   (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 _g_intstackbase:
-  .skip   2
-  .size   _g_intstackbase, 4
+  .size   _g_intstackbase, 0
   .size   _g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 

@@ -655,6 +655,25 @@ config W25QXXXJV_SECTOR512
 
 endif # MTD_W25QXXXJV
 
+config MTD_FLEXSPI_NOR
+	bool "FlexSPI-based NOR FLASH"
+	default n
+	---help---
+		Support the W25Q064JV, WIS25WP064
+
+if MTD_FLEXSPI_NOR
+
+config FLEXSPI_NOR_FREQUENCY
+	int "FlexSPI NOR Frequency"
+	default 133000000
+	---help---
+		Per data sheet:
+		– 133MHz Single, Dual/Quad SPI clocks
+		– 266/532MHz equivalent Dual/Quad SPI
+		– 66MB/S continuous data transfer rate
+
+endif # MTD_FLEXSPI_NOR
+
 config MTD_MX25RXX
 	bool "QuadSPI-based Macronix MX25RXX family FLASH"
 	default n

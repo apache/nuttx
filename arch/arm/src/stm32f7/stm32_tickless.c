@@ -356,7 +356,7 @@ static void stm32_timing_handler(void)
 {
   g_tickless.overflow++;
 
-  STM32_TIM_ACKINT(g_tickless.tch, 0);
+  STM32_TIM_ACKINT(g_tickless.tch, ATIM_SR_UIF);
 }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
@@ -401,8 +401,13 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
 
 static uint64_t stm32_get_counter(void)
 {
+#ifdef HAVE_32BIT_TICKLESS
   return ((uint64_t)g_tickless.overflow << 32) |
          STM32_TIM_GETCOUNTER(g_tickless.tch);
+#else
+  return ((uint64_t)g_tickless.overflow << 16) |
+         STM32_TIM_GETCOUNTER(g_tickless.tch);
+#endif
 }
 
 /****************************************************************************
@@ -574,7 +579,7 @@ void up_timer_initialize(void)
   g_tickless.pending   = false;
   g_tickless.period    = 0;
 
-  tmrinfo("timer=%d channel=%d frequency=%d Hz\n",
+  tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
            g_tickless.timer, g_tickless.channel, g_tickless.frequency);
 
   g_tickless.tch = stm32_tim_init(g_tickless.timer);
@@ -627,7 +632,7 @@ void up_timer_initialize(void)
 
   /* Start the timer */
 
-  STM32_TIM_ACKINT(g_tickless.tch, 0);
+  STM32_TIM_ACKINT(g_tickless.tch, ~0);
   STM32_TIM_ENABLEINT(g_tickless.tch, 0);
 }
 
@@ -696,7 +701,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   overflow = g_tickless.overflow;
   counter  = STM32_TIM_GETCOUNTER(g_tickless.tch);
-  pending  = STM32_TIM_CHECKINT(g_tickless.tch, 0);
+  pending  = STM32_TIM_CHECKINT(g_tickless.tch, ATIM_SR_UIF);
   verify   = STM32_TIM_GETCOUNTER(g_tickless.tch);
 
   /* If an interrupt was pending before we re-enabled interrupts,
@@ -705,7 +710,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   if (pending)
     {
-      STM32_TIM_ACKINT(g_tickless.tch, 0);
+      STM32_TIM_ACKINT(g_tickless.tch, ATIM_SR_UIF);
 
       /* Increment the overflow count and use the value of the
        * guaranteed to be AFTER the overflow occurred.
@@ -724,7 +729,7 @@ int up_timer_gettime(FAR struct timespec *ts)
   tmrinfo("counter=%lu (%lu) overflow=%lu, pending=%i\n",
          (unsigned long)counter,  (unsigned long)verify,
          (unsigned long)overflow, pending);
-  tmrinfo("frequency=%u\n", g_tickless.frequency);
+  tmrinfo("frequency=%lu\n", g_tickless.frequency);
 
   /* Convert the whole thing to units of microseconds.
    *
@@ -746,7 +751,7 @@ int up_timer_gettime(FAR struct timespec *ts)
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%u, %lu)\n",
+  tmrinfo("usec=%llu ts=(%lu, %lu)\n",
           usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
 
   return OK;
@@ -1060,8 +1065,13 @@ int up_alarm_start(FAR const struct timespec *ts)
 
 int up_alarm_cancel(FAR struct timespec *ts)
 {
+#ifdef HAVE_32BIT_TICKLESS
   uint64_t nsecs = (((uint64_t)g_tickless.overflow << 32) |
                     STM32_TIM_GETCOUNTER(g_tickless.tch)) * NSEC_PER_TICK;
+#else
+  uint64_t nsecs = (((uint64_t)g_tickless.overflow << 16) |
+                    STM32_TIM_GETCOUNTER(g_tickless.tch)) * NSEC_PER_TICK;
+#endif
 
   ts->tv_sec = nsecs / NSEC_PER_SEC;
   ts->tv_nsec = nsecs - ts->tv_sec * NSEC_PER_SEC;

@@ -155,7 +155,7 @@ void minerva_dumpstate(void)
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   istackbase = (uint32_t) & g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* Show interrupt stack info */
 
@@ -166,7 +166,7 @@ void minerva_dumpstate(void)
 
   /* Does the current stack pointer lie within the interrupt stack? */
 
-  if (sp <= istackbase && sp > istackbase - istacksize)
+  if (sp < istackbase && sp >= istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
@@ -200,7 +200,7 @@ void minerva_dumpstate(void)
    * stack memory.
    */
 
-  if (sp > ustackbase || sp <= ustackbase - ustacksize)
+  if (sp >= ustackbase || sp < ustackbase - ustacksize)
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
       up_stackdump(ustackbase - ustacksize, ustackbase);

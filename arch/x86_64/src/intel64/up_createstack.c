@@ -194,7 +194,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * the stack are referenced as positive quad-words offsets from sp.
        */
 
-      top_of_stack = (uint64_t)tcb->stack_alloc_ptr + stack_size - 8;
+      top_of_stack = (uint64_t)tcb->stack_alloc_ptr + stack_size;
 
       /* The intel64 stack must be aligned at word (16 byte) boundaries. If
        * necessary top_of_stack must be rounded down to the next boundary.
@@ -202,9 +202,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * only frame pointer will be pushed, not instruction pointer.
        */
 
-      top_of_stack &= ~0xff;
-      top_of_stack -= 0x8;
-      size_of_stack = top_of_stack - (uint64_t)tcb->stack_alloc_ptr + 8;
+      top_of_stack &= ~0x0f;
+      size_of_stack = top_of_stack - (uint64_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
 

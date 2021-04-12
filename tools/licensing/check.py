@@ -19,13 +19,14 @@
 #
 ############################################################################
 
+import getopt
 import json
-import sys
+import os
 import re
 import subprocess
-import getopt
+import sys
+
 import termcolor
-import os
 
 committers_json = None
 non_commiters_json = None
@@ -56,7 +57,7 @@ def get_file(blob):
         return subprocess.check_output(
             ["git", "cat-file", "-p", blob], stderr=subprocess.DEVNULL
         ).decode()
-    except subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError:
         return None
 
 
@@ -277,7 +278,7 @@ try:
         os.path.dirname(os.path.abspath(__file__)) + "/icla-info_noid.json", "r"
     ) as file:
         non_committers_json = json.load(file)
-except:
+except Exception:
     print(
         "Could not open CLA JSON files, please read README.md for download instructions"
     )

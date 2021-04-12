@@ -130,4 +130,19 @@ int sim_gpio_initialize(void);
 int sim_tsc_setup(int minor);
 #endif
 
+/****************************************************************************
+ * Name: sim_foc_setup
+ *
+ * Description:
+ *   Initialize the FOC controller driver.
+ *
+ * Returned Value:
+ *   0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_MOTOR_FOC
+int sim_foc_setup(void);
+#endif
+
 #endif /* __BOARDS_SIM_SIM_SIM_SRC_SIM_H */

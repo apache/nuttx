@@ -168,6 +168,10 @@ config IMXRT_LPSPI
 	bool
 	default n
 
+config IMXRT_FLEXSPI
+	bool
+	default n
+
 config IMXRT_ADC
     bool
     default n
@@ -643,6 +647,15 @@ menuconfig IMXRT_LPSPI4
 	select IMXRT_LPSPI
 
 endmenu # LPSPI Peripherals
+
+menu "FLEXSPI Peripherals"
+
+menuconfig IMXRT_FLEXSPI1
+	bool "FLEXSPI1"
+	default n
+	select IMXRT_FLEXSPI
+
+endmenu # FLEXSPI Peripherals
 
 menu "ADC Peripherals"
 

@@ -77,9 +77,7 @@ static void go_nx_start(void *pv, unsigned int nbytes)
  * NOTE:  ARM EABI requires 64 bit stack alignment.
  */
 
-#define IDLE_STACKSIZE (CONFIG_IDLETHREAD_STACKSIZE & ~7)
-#define IDLE_STACK     ((uintptr_t)&_ebss + IDLE_STACKSIZE)
-#define HEAP_BASE      ((uintptr_t)&_ebss + IDLE_STACKSIZE)
+#define HEAP_BASE      ((uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Public Data

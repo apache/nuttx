@@ -55,8 +55,8 @@ static volatile spinlock_t g_appcpu_interlock SP_SECTION;
  * ROM function prototypes
  ****************************************************************************/
 
-extern void Cache_Flush(int cpu);
-extern void Cache_Read_Enable(int cpu);
+extern void cache_flush(int cpu);
+extern void cache_read_enable(int cpu);
 extern void ets_set_appcpu_boot_addr(uint32_t start);
 
 /****************************************************************************
@@ -277,8 +277,8 @@ int up_cpu_start(int cpu)
 
       /* Flush and enable I-cache for APP CPU */
 
-      Cache_Flush(cpu);
-      Cache_Read_Enable(cpu);
+      cache_flush(cpu);
+      cache_read_enable(cpu);
 
       /* Unstall the APP CPU */
 

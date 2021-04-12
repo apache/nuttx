@@ -75,7 +75,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # list of documentation versions to offer (besides latest). this will be
-# overriden by command line option but we can provide a sane default
+# overridden by command line option but we can provide a sane default
 # this way
 
 html_context = dict()

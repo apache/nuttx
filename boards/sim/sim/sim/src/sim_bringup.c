@@ -410,5 +410,15 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SIM_MOTOR_FOC
+  /* Setup FOC device */
+
+  ret = sim_foc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_foc_setup() failed: %d\n", ret);
+    }
+#endif
+
   return ret;
 }

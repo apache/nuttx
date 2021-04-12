@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -36,6 +37,7 @@
 #include "hardware/esp32_iomux.h"
 #include "hardware/esp32_gpio.h"
 #include "esp32_cpuint.h"
+#include "esp32_rtc_gpio.h"
 #include "esp32_gpio.h"
 
 /****************************************************************************
@@ -66,6 +68,19 @@ static const uint8_t g_pin2func[40] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rtc_gpio_is_valid_gpio
+ *
+ * Description:
+ *   Determine if the specified GPIO is a valid RTC GPIO.
+ *
+ ****************************************************************************/
+
+static inline bool rtc_gpio_is_valid_gpio(uint32_t gpio_num)
+{
+  return (gpio_num < GPIO_PIN_COUNT && g_rtc_io_num_map[gpio_num] >= 0);
+}
 
 /****************************************************************************
  * Name: gpio_dispatch
@@ -178,7 +193,71 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
       func |= FUN_IE;
 
-      if ((attr & PULLUP) != 0)
+      /* Some pins only support Pull-Up and Pull-Down resistor on RTC GPIO */
+
+      if (rtc_gpio_is_valid_gpio(pin))
+        {
+          uint32_t rtc_gpio_idx = g_rtc_io_num_map[pin];
+
+          if (rtc_gpio_idx >= RTCIO_GPIO34_IDX)
+            {
+              gpioerr("Pins 34-39 don't support PullUp/PullDown\n");
+            }
+          else
+            {
+              uint32_t regval;
+              uint32_t rtc_gpio_pin;
+              bool en_pu = false;
+              bool en_pd = false;
+
+              if ((attr & PULLUP) != 0)
+                {
+                  en_pu = true;
+                }
+              else if ((attr & PULLDOWN) != 0)
+                {
+                  en_pd = true;
+                }
+
+              /* Get the pin register */
+
+              rtc_gpio_pin = g_rtc_io_desc[rtc_gpio_idx];
+
+              /* Read the current value from RTC GPIO pin */
+
+              regval = getreg32(rtc_gpio_pin);
+
+              /* RTC_IO_X32P (GPIO32) uses different PU/PD bits */
+
+              if (rtc_gpio_idx == RTCIO_GPIO32_IDX)
+                {
+                  /* First, disable PU/PD */
+
+                  regval &= ~SPECIAL_RTC_PU_BIT;
+                  regval &= ~SPECIAL_RTC_PD_BIT;
+
+                  /* Enable PU/PD, if needed */
+
+                  regval |= en_pu ? SPECIAL_RTC_PU_BIT : 0;
+                  regval |= en_pd ? SPECIAL_RTC_PD_BIT : 0;
+                }
+              else
+                {
+                  /* First, disable PU/PD */
+
+                  regval &= ~DEFAULT_RTC_PU_BIT;
+                  regval &= ~DEFAULT_RTC_PD_BIT;
+
+                  /* Enable PU/PD, if needed */
+
+                  regval |= en_pu ? DEFAULT_RTC_PU_BIT : 0;
+                  regval |= en_pd ? DEFAULT_RTC_PD_BIT : 0;
+                }
+
+              putreg32(regval, rtc_gpio_pin);
+            }
+        }
+      else if ((attr & PULLUP) != 0)
         {
           func |= FUN_PU;
         }
@@ -503,4 +582,3 @@ void esp32_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx, bool out_inv,
 
   putreg32(regval, regaddr);
 }
-

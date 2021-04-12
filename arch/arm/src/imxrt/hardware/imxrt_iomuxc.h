@@ -175,4 +175,7 @@
 
 #define IOMUX_ADC_DEFAULT                     (0)
 
+#define IOMUX_FLEXSPI_DEFAULT                 (IOMUX_SLEW_FAST | IOMUX_DRIVE_40OHM | IOMUX_SPEED_MAX | \
+                                               IOMUX_PULL_DOWN_100K | IOMUX_PULL_KEEP | GPIO_SION_ENABLE )
+
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_IOMUXC_H */

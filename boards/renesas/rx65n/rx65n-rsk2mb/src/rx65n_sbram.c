@@ -408,7 +408,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
   /* Get the limits on the interrupt stack memory */
 
   pdump->info.stacks.interrupt.top = (uint32_t)&istack;
-  pdump->info.stacks.interrupt.size  = (CONFIG_ARCH_INTERRUPTSTACK);
+  pdump->info.stacks.interrupt.size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* If In interrupt Context save the interrupt stack data centered
    * about the interrupt stack pointer
