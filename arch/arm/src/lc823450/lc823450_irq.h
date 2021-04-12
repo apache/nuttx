@@ -57,8 +57,8 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-EXTERN uintptr_t arm_intstack_base(void);
 EXTERN uintptr_t arm_intstack_alloc(void);
+EXTERN uintptr_t arm_intstack_top(void);
 #endif
 
 #undef EXTERN

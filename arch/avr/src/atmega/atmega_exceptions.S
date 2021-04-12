@@ -234,17 +234,19 @@ excpt_common:
 	reti
 
 /****************************************************************************************************
- *  Name: up_interruptstack
+ *  Name: g_intstackalloc
  ****************************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
 	.bss
 	.align	4
-	.globl	up_interruptstack
-	.type	up_interruptstack, object
-up_interruptstack:
+	.globl	g_intstackalloc
+	.type	g_intstackalloc, object
+	.globl	g_intstacktop
+	.type	g_intstacktop, object
+g_intstackalloc:
 	.skip	CONFIG_ARCH_INTERRUPTSTACK
-.Lintstackbase:
-	.size	up_interruptstack, .-up_interruptstack
+g_intstacktop:
+	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 	.end

@@ -257,7 +257,8 @@ extern uint32_t g_svarvect;      /* Start of variable vectors */
 
 #ifndef __ASSEMBLY__
 #  if CONFIG_ARCH_INTERRUPTSTACK > 3
-     extern uint16_t g_intstackbase;
+     extern uint16_t g_intstackalloc;
+     extern uint16_t g_intstacktop;
 #  endif
 #endif
 

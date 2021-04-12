@@ -72,11 +72,11 @@ static uint8_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint16_t sp, uint16_t stack_base)
+static void up_stackdump(uint16_t sp, uint16_t stack_top)
 {
   uint16_t stack;
 
-  for (stack = sp; stack < stack_base; stack += 16)
+  for (stack = sp; stack < stack_top; stack += 16)
     {
       uint8_t *ptr = (uint8_t *)stack;
 
@@ -190,7 +190,7 @@ static void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint16_t)&g_intstackbase;
+  istackbase = (uint16_t)&g_intstackalloc;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* Show interrupt stack info */
@@ -204,23 +204,23 @@ static void up_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp >= istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase);
+      up_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
        */
 
-      sp = g_intstackbase;
+      sp = g_intstacktop;
       _alert("sp:     %04x\n", sp);
     }
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase - istacksize, istackbase);
+      up_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */
