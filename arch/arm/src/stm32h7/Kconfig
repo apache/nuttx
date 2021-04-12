@@ -501,14 +501,12 @@ config STM32H7_OTGFS
 	bool "OTG FS"
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
-	select STM32H7_HSI48
 
 config STM32H7_OTGHS
 	bool "OTG HS"
 	default n
 	depends on EXPERIMENTAL
 	select USBHOST_HAVE_ASYNCH if USBHOST
-	select STM32H7_HSI48
 
 config STM32H7_OTG_SOFOUTPUT
 	bool "OTG SOF output"
