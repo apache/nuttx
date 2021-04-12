@@ -24,11 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <syslog.h>
-
 #include <nuttx/board.h>
-#include <nuttx/leds/userled.h>
 
 #include "nucleo-g431rb.h"
 
@@ -36,10 +32,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef HAVE_LEDS
-
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
-#  define HAVE_LEDS 1
+#ifndef OK
+#  define OK 0
 #endif
 
 /****************************************************************************
@@ -73,19 +67,13 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-  int ret;
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-#if defined(HAVE_LEDS)
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize(LED_DRIVER_PATH);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  UNUSED(ret);
   return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return stm32_bringup();
+#endif
 }
