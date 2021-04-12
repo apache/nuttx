@@ -82,4 +82,8 @@ ifeq ($(CONFIG_IMXRT1064_EVK_SDRAM),y)
 CSRCS += imxrt_sdram_ini_dcd.c
 endif
 
+ifeq ($(CONFIG_IMXRT_FLEXSPI),y)
+CSRCS += imxrt_flexspi_nor.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
