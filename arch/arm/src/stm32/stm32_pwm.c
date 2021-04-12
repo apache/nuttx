@@ -280,7 +280,8 @@
     defined(CONFIG_STM32_STM32F33XX) ||           \
     defined(CONFIG_STM32_STM32F37XX) ||           \
     defined(CONFIG_STM32_STM32F4XXX) ||           \
-    defined(CONFIG_STM32_STM32L15XX)
+    defined(CONFIG_STM32_STM32L15XX) ||           \
+    defined(CONFIG_STM32_STM32G4XXX)
 #  define PINCFG_DEFAULT (GPIO_INPUT | GPIO_FLOAT)
 #else
 #  error "Unrecognized STM32 chip"
