@@ -31,6 +31,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* TIMERS */
+
+#define TIMER0 0
+#define TIMER1 1
+
+/* ONESHOT */
+
+#define ONESHOT_TIMER         1
+#define ONESHOT_RESOLUTION_US 1
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -101,10 +111,14 @@ int board_i2c_init(void);
 #endif
 
 /****************************************************************************
- * Name: board_tim_init
+ * Name: board_oneshot_init
  *
  * Description:
- *   Configure the timer driver.
+ *   Configure the oneshot timer driver.
+ *
+ * Input Parameters:
+ *   timer      - Timer instance to be used as oneshot timer.
+ *   resolution - Oneshot timer resolution.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -112,8 +126,8 @@ int board_i2c_init(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TIMER
-int board_tim_init(void);
+#ifdef CONFIG_ONESHOT
+int board_oneshot_init(int timer, uint16_t resolution);
 #endif
 
 /****************************************************************************
