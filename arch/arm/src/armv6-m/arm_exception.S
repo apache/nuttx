@@ -142,7 +142,7 @@ exception_common:
 	 */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr		r7, =g_intstackbase			/* R7=Base of the interrupt stack */
+	ldr		r7, =g_intstacktop			/* R7=Top of the interrupt stack */
 	mov		sp, r7					/* Set the new stack point */
 	push		{r1}					/* Save the MSP on the interrupt stack */
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
@@ -248,7 +248,7 @@ exception_common:
 	.size	exception_common, .-exception_common
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  *
  * Description:
  *   Shouldn't happen
@@ -258,11 +258,11 @@ exception_common:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.global	g_intstackalloc
-	.global	g_intstackbase
+	.global	g_intstacktop
 	.balign	4
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
+g_intstacktop:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 

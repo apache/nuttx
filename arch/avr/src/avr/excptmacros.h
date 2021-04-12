@@ -47,7 +47,8 @@
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  .global g_intstackbase
+  .global g_intstackalloc
+  .global g_intstacktop
   .global g_nestlevel
 #endif
 

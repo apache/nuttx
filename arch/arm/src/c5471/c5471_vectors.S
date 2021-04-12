@@ -145,7 +145,7 @@ arm_vectorirq:
 	mov	r1, sp			/* Get r1=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr	sp, .Lirqstackbase	/* SP = interrupt stack base */
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
 	str	r1, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_doirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
@@ -162,8 +162,8 @@ arm_vectorirq:
 .Lirqtmp:
 	.word	g_irqtmp
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-.Lirqstackbase:
-	.word	g_intstackbase
+.Lirqstacktop:
+	.word	g_intstacktop
 #endif
 	.align	5
 
@@ -446,7 +446,7 @@ arm_vectoraddrexcptn:
 	b	arm_vectoraddrexcptn
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  *
  * Description:
  *   Shouldn't happen
@@ -457,13 +457,13 @@ arm_vectoraddrexcptn:
 	.bss
 	.balign	4
 	.global	g_intstackalloc
-	.global	g_intstackbase
+	.global	g_intstacktop
 	.type	g_intstackalloc, object
-	.type	g_intstackbase, object
+	.type	g_intstacktop, object
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
-	.size	g_intstackbase, 0
+g_intstacktop:
+	.size	g_intstacktop, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 	.end

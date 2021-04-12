@@ -65,11 +65,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint64_t sp, uint64_t stack_base)
+static void up_stackdump(uint64_t sp, uint64_t stack_top)
 {
   uint64_t stack ;
 
-  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -129,7 +129,7 @@ static void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint64_t)&g_intstackbase;
+  istackbase = (uint64_t)&g_intstackalloc;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* Show interrupt stack info */
@@ -143,17 +143,17 @@ static void up_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp >= istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase);
+      up_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
        */
 
-      sp = g_intstackbase;
+      sp = g_intstacktop;
       _alert("sp:     %016x\n", sp);
     }
 

@@ -50,11 +50,11 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  * Name: sh1_stackdump
  ****************************************************************************/
 
-static void sh1_stackdump(uint32_t sp, uint32_t stack_base)
+static void sh1_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack ;
 
-  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -129,7 +129,7 @@ void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_intstackbase;
+  istackbase = (uint32_t)&g_intstackalloc;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* Show interrupt stack info */
@@ -143,23 +143,23 @@ void up_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp >= istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      sh1_stackdump(sp, istackbase);
+      sh1_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
        */
 
-      sp = g_intstackbase;
+      sp = g_intstacktop;
       _alert("sp:     %08x\n", sp);
     }
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      sh1_stackdump(istackbase - istacksize, istackbase);
+      sh1_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */

@@ -88,8 +88,8 @@ exception_common:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Switch to interrupt stack */
 
-  lui  sp, %hi(g_intstackbase)
-  addi sp, sp, %lo(g_intstackbase)
+  lui  sp, %hi(g_intstacktop)
+  addi sp, sp, %lo(g_intstacktop)
 #ifdef CONFIG_STACK_OVERFLOW_CHECK
   la s11, g_intstackalloc
 #endif
@@ -147,19 +147,19 @@ exception_common:
   mret
 
 /************************************************************************************
- *  Name: g_intstackalloc and g_intstackbase
+ *  Name: g_intstackalloc and g_intstacktop
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   .bss
   .align  4
   .global g_intstackalloc
-  .global g_intstackbase
+  .global g_intstacktop
   .type   g_intstackalloc, object
-  .type   g_intstackbase, object
+  .type   g_intstacktop, object
 g_intstackalloc:
   .skip  (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
-  .size  g_intstackbase, 0
+g_intstacktop:
+  .size  g_intstacktop, 0
   .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif

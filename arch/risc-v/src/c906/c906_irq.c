@@ -74,8 +74,7 @@ void up_irqinitialize(void)
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 7
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~7);
-  riscv_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                    intstack_size);
+  riscv_stack_color((FAR void *)&g_intstackalloc, intstack_size);
 #endif
 
   /* Set priority for all global interrupts to 1 (lowest) */

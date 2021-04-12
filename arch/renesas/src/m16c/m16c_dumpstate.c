@@ -63,11 +63,11 @@ static inline uint16_t m16c_getusersp(void)
  * Name: m16c_stackdump
  ****************************************************************************/
 
-static void m16c_stackdump(uint16_t sp, uint16_t stack_base)
+static void m16c_stackdump(uint16_t sp, uint16_t stack_top)
 {
   uint16_t stack;
 
-  for (stack = sp & ~7; stack < stack_base; stack += 8)
+  for (stack = sp & ~7; stack < stack_top; stack += 8)
     {
       uint8_t *ptr = (uint8_t *)stack;
       _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
@@ -165,11 +165,11 @@ void up_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp >= istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      m16c_stackdump(sp, istackbase);
+      m16c_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer from the register area */
 
@@ -179,7 +179,7 @@ void up_dumpstate(void)
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      m16c_stackdump(istackbase - istacksize, istackbase);
+      m16c_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */

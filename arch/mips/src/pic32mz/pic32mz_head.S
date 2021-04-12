@@ -167,7 +167,8 @@
 	.global halt
 	.global	devcfg
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	.global g_intstackbase
+	.global g_intstackalloc
+	.global g_intstacktop
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
 	.global	g_nestlevel
 #endif
@@ -918,15 +919,20 @@ adevcfg0:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 
-/* g_instackbase is a pointer to the final, aligned word of the interrupt
+/* g_instacktop is a pointer to the final, aligned word of the interrupt
  * stack.
  */
 
 	.sdata
-	.type	g_intstackbase, object
-g_intstackbase:
+	.type	g_intstackalloc, object
+g_intstackalloc:
+	.long	PIC32MZ_INTSTACK_BASE
+	.size	g_intstackalloc, .-g_intstackalloc
+
+	.type	g_intstacktop, object
+g_intstacktop:
 	.long	PIC32MZ_INTSTACK_TOP
-	.size	g_intstackbase, .-g_intstackbase
+	.size	g_intstacktop, .-g_intstacktop
 
 /* g_nextlevel is the exception nesting level... the interrupt stack is not
  * available to nested exceptions.

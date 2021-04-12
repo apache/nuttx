@@ -114,7 +114,7 @@ __cyg_profile_func_enter(void *this_fn, void *call_site)
   __asm__("add %0, x0, sp" : "=r"(sp));
   __asm__("add %0, x0, s11" : "=r"(stack_base));
 
-  if (sp <= stack_base)
+  if (sp < stack_base)
     {
 #if CONFIG_TASK_NAME_SIZE > 0
       struct tcb_s *rtcb;

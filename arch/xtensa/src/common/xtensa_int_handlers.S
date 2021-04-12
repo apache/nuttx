@@ -72,12 +72,12 @@
  .data
  .align     16
  .global    g_intstackalloc
- .global    g_intstackbase
+ .global    g_intstacktop
  .type      g_intstackalloc, @object
- .type      g_intstackbase, @object
+ .type      g_intstacktop, @object
 g_intstackalloc:
  .skip      INTSTACK_SIZE
-g_intstackbase:
+g_intstacktop:
  .size      g_intstackalloc, .-g_intstackalloc
 #endif
 
@@ -115,7 +115,7 @@ g_intstackbase:
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 	.macro	setintstack tmp1 tmp2
-	movi		a1, g_intstackbase
+	movi		a1, g_intstacktop
 	.endm
 #endif
 

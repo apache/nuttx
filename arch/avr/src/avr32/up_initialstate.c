@@ -83,7 +83,7 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_LR] = 0;
 #endif
 
-  /* Set the initial stack pointer to the "base" of the allocated stack */
+  /* Set the initial stack pointer to the top of the allocated stack */
 
   xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
 

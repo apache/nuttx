@@ -41,7 +41,8 @@
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  .global g_intstackbase
+  .global g_intstackalloc
+  .global g_intstacktop
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
   .global g_nestlevel
 #endif

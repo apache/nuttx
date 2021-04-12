@@ -65,11 +65,11 @@ static inline uint16_t rx65n_getusersp(void)
  * Name: rx65n_stackdump
  ****************************************************************************/
 
-static void rx65n_stackdump(uint16_t sp, uint16_t stack_base)
+static void rx65n_stackdump(uint16_t sp, uint16_t stack_top)
 {
   uint16_t stack;
 
-  for (stack = sp & ~7; stack < stack_base; stack += 8) /* check */
+  for (stack = sp & ~7; stack < stack_top; stack += 8) /* check */
 
     {
       uint8_t *ptr = (uint8_t *)&stack;
@@ -162,11 +162,11 @@ void up_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp >= istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      rx65n_stackdump(sp, istackbase);
+      rx65n_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer from the register area */
 
@@ -176,7 +176,7 @@ void up_dumpstate(void)
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      rx65n_stackdump(istackbase - istacksize, istackbase);
+      rx65n_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */

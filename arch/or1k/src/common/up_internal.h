@@ -145,7 +145,7 @@ EXTERN const uint32_t g_idle_topstack;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
-EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
+EXTERN uint32_t g_intstacktop;   /* Initial top of interrupt stack */
 #endif
 
 /* These 'addresses' of these values are setup by the linker script.  They

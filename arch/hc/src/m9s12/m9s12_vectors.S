@@ -417,7 +417,7 @@ up_fullcontextrestore:
 	.comm	.Lspsave, 2, 1
 
 /************************************************************************************
- *	Name: up_interruptstack/g_intstackbase
+ *	Name: g_intstackalloc/g_intstacktop
  *
  * Description:
  *	 If CONFIG_ARCH_INTERRUPTSTACK is defined, this sets aside memory for the
@@ -426,8 +426,8 @@ up_fullcontextrestore:
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 1
-	.comm	.up_interruptstack:, CONFIG_ARCH_INTERRUPTSTACK, 1
-up_interruptstack_base:
-	.size	up_interruptstack, .-up_interruptstack
+	.comm	.g_intstackalloc:, CONFIG_ARCH_INTERRUPTSTACK, 1
+g_intstacktop:
+	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 	.end

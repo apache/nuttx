@@ -109,7 +109,7 @@ arm_vectorirq:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	/* Call arm_decodeirq() on the interrupt stack */
 
-	ldr	sp, .Lirqstackbase	/* SP = interrupt stack base */
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
 	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_decodeirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
@@ -126,8 +126,8 @@ arm_vectorirq:
 	ldmia	sp, {r0-r15}^		/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-.Lirqstackbase:
-	.word	g_intstackbase
+.Lirqstacktop:
+	.word	g_intstacktop
 #endif
 	.size	arm_vectorirq, . - arm_vectorirq
 
@@ -414,7 +414,7 @@ arm_vectorfiq:
 	.size	arm_vectorfiq, . - arm_vectorfiq
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -423,13 +423,13 @@ arm_vectorfiq:
 
 	.globl	g_intstackalloc
 	.type	g_intstackalloc, object
-	.globl	g_intstackbase
-	.type	g_intstackbase, object
+	.globl	g_intstacktop
+	.type	g_intstacktop, object
 
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
-	.size	g_intstackbase, 0
+g_intstacktop:
+	.size	g_intstacktop, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 
 #endif

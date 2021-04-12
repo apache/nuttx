@@ -75,11 +75,11 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint32_t sp, uint32_t stack_base)
+static void up_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack ;
 
-  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -88,7 +88,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
     }
 }
 #else
-#  define up_stackdump(sp,stack_base)
+#  define up_stackdump(sp,stack_top)
 #endif
 
 /****************************************************************************
@@ -221,9 +221,9 @@ static void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #ifdef CONFIG_SMP
-  istackbase = (uint32_t)arm_intstack_base();
+  istackbase = (uint32_t)arm_intstack_alloc();
 #else
-  istackbase = (uint32_t)&g_intstackbase;
+  istackbase = (uint32_t)&g_intstackalloc;
 #endif
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~7);
 
@@ -251,8 +251,7 @@ static void up_dumpstate(void)
 
   if (rtcb->xcp.kstack)
     {
-      kstackbase = (uint32_t)rtcb->xcp.kstack +
-                   CONFIG_ARCH_KERNEL_STACKSIZE;
+      kstackbase = (uint32_t)rtcb->xcp.kstack;
 
       _alert("Kernel stack:\n");
       _alert("  base: %08x\n", kstackbase);
@@ -263,17 +262,17 @@ static void up_dumpstate(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
   /* Does the current stack pointer lie within the interrupt stack? */
 
-  if (sp >= istackbase - istacksize && sp < istackbase)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
       _alert("Interrupt Stack\n", sp);
-      up_stackdump(sp, istackbase);
+      up_stackdump(sp, istackbase + istacksize);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase - istacksize, istackbase);
+      up_stackdump(istackbase, istackbase + istacksize);
     }
 #endif
 
@@ -303,10 +302,11 @@ static void up_dumpstate(void)
    * kernel stack memory.
    */
 
-  else if (sp >= (uint32_t)rtcb->xcp.kstack && sp < kstackbase)
+  else if (sp >= kstackbase &&
+           sp < kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE)
     {
       _alert("Kernel Stack\n", sp);
-      up_stackdump(sp, kstackbase);
+      up_stackdump(sp, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
     }
 #endif
   else
@@ -314,7 +314,7 @@ static void up_dumpstate(void)
       _alert("ERROR: Stack pointer is not within the allocated stack\n");
       up_stackdump(ustackbase - ustacksize, ustackbase);
 #ifdef CONFIG_ARCH_KERNEL_STACK
-      up_stackdump((uint32_t)rtcb->xcp.kstack, kstackbase);
+      up_stackdump(kstackbase, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
 #endif
     }
 
