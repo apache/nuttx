@@ -224,8 +224,6 @@
 #define GPIO_USART2_TX     GPIO_USART2_TX_1 /* PA2 */
 #define GPIO_USART2_RX     GPIO_USART2_RX_1 /* PA3 */
 
-/* Pin Multiplexing Disambiguation ******************************************/
-
 /* PWM configuration ********************************************************/
 
 /* TIM1 PWM */
@@ -237,5 +235,11 @@
 #define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_1  /* PA10 */
 #define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_1 /* PB1 */
 #define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_2  /* PC3 */
+
+/* DMA channels *************************************************************/
+
+/* ADC */
+
+#define ADC1_DMA_CHAN DMAMAP_DMA12_ADC1_0     /* DMA1 */
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431RB_INCLUDE_BOARD_H */
