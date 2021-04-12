@@ -472,6 +472,7 @@ bool stm32_gpioread(uint32_t pinset)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32H7_SYSCFG_IOCOMPENSATION
 void stm32_iocompensation(void)
 {
   /* Enable I/O Compensation.  Writing '1' to the CMPCR power-down bit
@@ -486,5 +487,6 @@ void stm32_iocompensation(void)
     {
     }
 }
+#endif
 
 #endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */

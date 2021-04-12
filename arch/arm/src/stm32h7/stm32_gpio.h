@@ -348,7 +348,9 @@ bool stm32_gpioread(uint32_t pinset);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32H7_SYSCFG_IOCOMPENSATION
 void stm32_iocompensation(void);
+#endif
 
 /****************************************************************************
  * Name: stm32_gpiosetevent
