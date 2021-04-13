@@ -1063,7 +1063,7 @@ void weak_function arm_dma_initialize(void)
  * Input Parameters:
  *   dmamap - Identifies the stream/channel resource. For the STM32+, this
  *     is a bit-encoded value as provided by the DMAMAP_* definitions
- *     in hardware/stm32xrxx_dmamux.h
+ *     in hardware/stm32g4xxxx_dmamux.h
  *
  * Returned Value:
  *   One success, this function returns a non-NULL, void* DMA channel
