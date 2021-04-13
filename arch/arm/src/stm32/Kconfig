@@ -1928,6 +1928,7 @@ config STM32_STM32G4XXX
 	bool
 	default n
 	select STM32_HAVE_DMAMUX
+	select STM32_HAVE_IP_DBGMCU_V3
 
 config STM32_STM32G4_CAT2
 	bool
@@ -2568,6 +2569,10 @@ config STM32_HAVE_IP_DBGMCU_V1
 	default n
 
 config STM32_HAVE_IP_DBGMCU_V2
+	bool
+	default n
+
+config STM32_HAVE_IP_DBGMCU_V3
 	bool
 	default n
 
