@@ -165,6 +165,7 @@ Public Function Prototypes
   - :c:func:`iob_peek_queue()`
   - :c:func:`iob_free_queue()`
   - :c:func:`iob_free_queue_qentry()`
+  - :c:func:`iob_get_queue_size()`
   - :c:func:`iob_copyin()`
   - :c:func:`iob_trycopyin()`
   - :c:func:`iob_copyout()`
@@ -241,6 +242,10 @@ Public Function Prototypes
 
 .. c:function:: void iob_free_queue_qentry(FAR struct iob_s *iob, \
                   FAR struct iob_queue_s *iobq);
+
+  Queue helper for get the iob queue buffer size.
+
+.. c:function:: unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
 
   Free an iob entire queue of I/O buffer chains.
 
