@@ -458,6 +458,18 @@ int iob_get_queue_count(FAR struct iob_queue_s *queue);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_get_queue_size
+ *
+ * Description:
+ *   Queue helper for get the iob entry size.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+size_t iob_get_queue_size(FAR struct iob_queue_s *queue);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_copyin
  *
  * Description:
