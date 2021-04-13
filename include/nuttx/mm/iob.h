@@ -440,6 +440,18 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_get_queue_size
+ *
+ * Description:
+ *   Queue helper for get the iob queue buffer size.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_copyin
  *
  * Description:
