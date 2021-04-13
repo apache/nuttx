@@ -650,7 +650,7 @@ static bool _copy_data_from_pkt(FAR struct gs2200m_dev_s *dev,
 
   pkt_dat->remain -= len;
 
-  if (0 == pkt_dat->remain)
+  if (0 == pkt_dat->remain || TYPE_BULK_DATA_UDP == pkt_dat->type)
     {
       _remove_and_free_pkt(dev, c);
     }
