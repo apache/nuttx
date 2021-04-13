@@ -129,14 +129,14 @@ SECTIONS
     .ARM.extab :
     {
         *(.ARM.extab*)
-    } > flash
+    } > sram AT > flash
 
     .ARM.exidx :
     {
         __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
         __exidx_end = ABSOLUTE(.);
-    } > flash
+    } > sram AT > flash
 
     _eronly = ABSOLUTE(.);
 
