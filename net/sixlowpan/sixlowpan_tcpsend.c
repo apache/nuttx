@@ -193,7 +193,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   ipv6tcp->ipv6.tcf    = 0x00;
   ipv6tcp->ipv6.flow   = 0x00;
   ipv6tcp->ipv6.proto  = IP_PROTO_TCP;
-  ipv6tcp->ipv6.ttl    = IP_TTL;
+  ipv6tcp->ipv6.ttl    = IP_TTL_DEFAULT;
 
   /* The IPv6 header length field does not include the size of IPv6 IP
    * header.

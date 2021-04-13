@@ -137,7 +137,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
    */
 
   ipv4->proto       = IP_PROTO_TCP;
-  ipv4->ttl         = IP_TTL;
+  ipv4->ttl         = IP_TTL_DEFAULT;
   ipv4->vhl         = 0x45;
 
   /* At this point the TCP header holds the size of the payload, the
@@ -208,7 +208,7 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
    */
 
   ipv6->proto     = IP_PROTO_TCP;
-  ipv6->ttl       = IP_TTL;
+  ipv6->ttl       = IP_TTL_DEFAULT;
 
   /* At this point the TCP header holds the size of the payload, the
    * TCP header, and the IP header.  For IPv6, the IP length field does

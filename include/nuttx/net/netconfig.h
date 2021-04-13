@@ -210,7 +210,7 @@
  * This should normally not be changed.
  */
 
-#define IP_TTL 64
+#define IP_TTL_DEFAULT 64
 
 #ifdef CONFIG_NET_TCP_REASSEMBLY
 #  ifndef CONFIG_NET_TCP_REASS_MAXAGE
