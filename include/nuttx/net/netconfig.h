@@ -210,7 +210,7 @@
  * This should normally not be changed.
  */
 
-#define IP_TTL 64
+#define IP_TTL_DEFAULT 64
 
 /* Network drivers often receive packets with garbage at the end
  * and are longer than the size of packet in the TCP header.  The
