@@ -33,6 +33,8 @@
 
 #include <nuttx/arch.h>
 
+#include "arm_arch.h"
+
 #include "stm32_pwm.h"
 #include "stm32_adc.h"
 #include "stm32_dma.h"
@@ -137,7 +139,8 @@
 
 /* Debug register for PWM timers */
 
-#if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2)
+#if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2) || \
+    defined(CONFIG_STM32_HAVE_IP_DBGMCU_V3)
 #  define FOC_PWM_FZ_REG    (STM32_DBGMCU_APB2_FZ)
 #elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
 #  define FOC_PWM_FZ_REG    (STM32_DBGMCU_CR)
@@ -149,7 +152,8 @@
 #  define FOC0_PWM           (1)
 #  define FOC0_PWM_NCHANNELS (PWM_TIM1_NCHANNELS)
 #  define FOC0_PWM_BASE      (STM32_TIM1_BASE)
-#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2)
+#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2) ||  \
+      defined(CONFIG_STM32_HAVE_IP_DBGMCU_V3)
 #    define FOC0_PWM_FZ_BIT    (DBGMCU_APB2_TIM1STOP)
 #  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
 #    define FOC0_PWM_FZ_BIT    (DBGMCU_CR_TIM1STOP)
