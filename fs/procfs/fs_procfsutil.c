@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <nuttx/fs/procfs.h>
@@ -77,8 +78,8 @@
  *   read operation to provide the 'offset' for the next read.
  *
  *   procfs_memcpy() is a helper function.  Each read() method should
- *   provide data in a local data buffer ('src' and 'srclen').  This
- *   will transfer the data to the user receive buffer ('dest' and 'destlen'),
+ *   provide data in a local data buffer ('src' and 'srclen').  This will
+ *   transfer the data to the user receive buffer ('dest' and 'destlen'),
  *   respecting both (1) the size of the destination buffer so that it will
  *   write beyond the user receiver and (1) the file position, 'offset'.
  *
@@ -132,6 +133,36 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
   copysize = MIN(srclen, destlen);
   memcpy(dest, src, copysize);
   return copysize;
+}
+
+/****************************************************************************
+ * Name: procfs_snprintf
+ *
+ * Description:
+ *   This function is same with snprintf, except return values.
+ *   If buf has no enough space and output was truncated due to size limit,
+ *   snprintf:        return formated string len.
+ *   procfs_snprintf: return string len which has written to buf.
+ *
+ * Input Parameters:
+ *   Same with snprintf
+ *
+ * Returned Value:
+ *   See Description.
+ *
+ ****************************************************************************/
+
+int procfs_snprintf(FAR char *buf, size_t size,
+                    FAR const IPTR char *format, ...)
+{
+  va_list ap;
+  int n;
+
+  va_start(ap, format);
+  n = vsnprintf(buf, size, format, ap);
+  va_end(ap);
+
+  return n < size - 1 ? n : size - 1;
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

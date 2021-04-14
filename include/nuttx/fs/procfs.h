@@ -46,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Data entry declaration prototypes ****************************************/
 
 /* Procfs operations are a subset of the mountpt_operations */
@@ -61,14 +62,15 @@ struct procfs_operations
   int     (*open)(FAR struct file *filep, FAR const char *relpath,
                   int oflags, mode_t mode);
 
-  /* The following methods must be identical in signature and position because
-   * the struct file_operations and struct mountp_operations are treated like
-   * unions.
+  /* The following methods must be identical in signature and position
+   *  because the struct file_operations and struct mountp_operations
+   *  are treated like unions.
    */
 
   int     (*close)(FAR struct file *filep);
   ssize_t (*read)(FAR struct file *filep, FAR char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+  ssize_t (*write)(FAR struct file *filep,
+                   FAR const char *buffer, size_t buflen);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
@@ -160,8 +162,8 @@ extern "C"
  *   read operation to provide the 'offset' for the next read.
  *
  *   procfs_memcpy() is a helper function.  Each read() method should
- *   provide data in a local data buffer ('src' and 'srclen').  This
- *   will transfer the data to the user receive buffer ('dest' and 'destlen'),
+ *   provide data in a local data buffer ('src' and 'srclen').  This will
+ *   transfer the data to the user receive buffer ('dest' and 'destlen'),
  *   respecting both (1) the size of the destination buffer so that it will
  *   write beyond the user receiver and (1) the file position, 'offset'.
  *
@@ -189,6 +191,26 @@ extern "C"
 size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      FAR char *dest, size_t destlen,
                      off_t *offset);
+
+/****************************************************************************
+ * Name: procfs_snprintf
+ *
+ * Description:
+ *   This function is same with snprintf, except return values.
+ *   If buf has no enough space and output was truncated due to size limit,
+ *   snprintf:        return formated string len.
+ *   procfs_snprintf: return string len which has written to buf.
+ *
+ * Input Parameters:
+ *   Same with snprintf
+ *
+ * Returned Value:
+ *   See Description.
+ *
+ ****************************************************************************/
+
+int procfs_snprintf(FAR char *buf, size_t size,
+                    FAR const IPTR char *format, ...);
 
 /****************************************************************************
  * Name: procfs_register
