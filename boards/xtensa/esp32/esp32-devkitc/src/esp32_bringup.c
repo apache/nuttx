@@ -202,7 +202,7 @@ int esp32_bringup(void)
 
 #ifdef CONFIG_TIMER
 
-#ifdef CONFIG_ESP32_TIMER0
+#if defined(CONFIG_ESP32_TIMER0) && !defined(CONFIG_ESP32_RT_TIMER)
   ret = esp32_timer_initialize("/dev/timer0", TIMER0);
   if (ret < 0)
     {
