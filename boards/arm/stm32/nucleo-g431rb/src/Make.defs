@@ -29,6 +29,10 @@ else
 CSRCS += stm32_userleds.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
