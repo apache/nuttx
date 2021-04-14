@@ -242,4 +242,49 @@
 
 #define ADC1_DMA_CHAN DMAMAP_DMA12_ADC1_0     /* DMA1 */
 
+/* USART2 */
+
+#define DMACHAN_USART2_TX DMAMAP_DMA12_USART2TX_0 /* DMA1 */
+#define DMACHAN_USART2_RX DMAMAP_DMA12_USART2RX_0 /* DMA1 */
+
+#ifdef CONFIG_BOARD_STM32_IHM16M1
+
+/* Configuration specific for the X-NUCLEO-IHM16M1 expansion board with
+ * the STSPIN830 driver.
+ */
+
+/* TIM1 configuration *******************************************************/
+
+#  define GPIO_TIM1_CH1OUT   GPIO_TIM1_CH1OUT_1 /* TIM1 CH1  - PA8  - U high */
+#  define GPIO_TIM1_CH2OUT   GPIO_TIM1_CH2OUT_1 /* TIM1 CH2  - PA9  - V high */
+#  define GPIO_TIM1_CH3OUT   GPIO_TIM1_CH3OUT_1 /* TIM1 CH3  - PA10 - W high */
+#  define GPIO_TIM1_CH4OUT   0                  /* not used as output */
+
+/* UVW ENABLE */
+
+#  define GPIO_FOC_EN_U (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN13)
+#  define GPIO_FOC_EN_V (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN14)
+#  define GPIO_FOC_EN_W (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN15)
+
+/* EN_FAULT */
+
+#  define GPIO_FOC_ENFAULT (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN12)
+
+/* Debug pins */
+
+#  define GPIO_FOC_DEBUG0 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN8)
+#  define GPIO_FOC_DEBUG1 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN9)
+#  define GPIO_FOC_DEBUG2 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN6)
+#  define GPIO_FOC_DEBUG3 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN12)
+
+#endif  /* CONFIG_BOARD_STM32_IHM16M1 */
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431RB_INCLUDE_BOARD_H */
