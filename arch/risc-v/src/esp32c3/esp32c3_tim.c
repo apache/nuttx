@@ -662,9 +662,7 @@ static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev)
  * Name: esp32c3_tim_init
  *
  * Description:
- *   Initialize TIMER device, if software real-time timer
- *   (CONFIG_ESP32C3_RT_TIMER) is enabled, then timer0 can't
- *   be initialized by this function directly.
+ *   Initialize TIMER device.
  *
  * Parameters:
  *   timer           - Timer instance to be initialized.
@@ -681,11 +679,11 @@ FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
 {
   FAR struct esp32c3_tim_priv_s *tim = NULL;
 
-  /* Get timer instance */
+  /* First, take the data structure associated with the timer instance */
 
   switch (timer)
     {
-#if defined(CONFIG_ESP32C3_TIMER0) && !defined(CONFIG_ESP32C3_RT_TIMER)
+#ifdef CONFIG_ESP32C3_TIMER0
       case 0:
         {
           tim = &g_esp32c3_tim0_priv;
@@ -708,7 +706,13 @@ FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
         }
     }
 
-  if (tim->inuse == true)
+  /* Verify if it is in use */
+
+  if (tim->inuse == false)
+    {
+      tim->inuse = true;  /* If it was not, now it is */
+    }
+  else
     {
       tmrerr("ERROR: TIMER %d is already in use\n", timer);
       tim = NULL;
@@ -738,37 +742,3 @@ void esp32c3_tim_deinit(FAR struct esp32c3_tim_dev_s *dev)
   tim = (FAR struct esp32c3_tim_priv_s *)dev;
   tim->inuse = false;
 }
-
-/****************************************************************************
- * Name: esp32c3_tim0_init
- *
- * Description:
- *   Initialize TIMER0 device, if software real-time timer
- *   (CONFIG_ESP32C3_RT_TIMER) is enabled.
- *
- * Parameters:
- *   None
- *
- * Returned Values:
- *   If the initialization is successful, return a pointer to the timer
- *   driver struct associated to that timer instance.
- *   In case it fails, return NULL.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32C3_RT_TIMER
-
-FAR struct esp32c3_tim_dev_s *esp32c3_tim0_init(void)
-{
-  FAR struct esp32c3_tim_priv_s *tim = &g_esp32c3_tim0_priv;
-
-  if (tim->inuse == true)
-    {
-      tmrerr("ERROR: TIMER0 is already in use\n");
-      tim = NULL;
-    }
-
-  return (FAR struct esp32c3_tim_dev_s *)tim;
-}
-
-#endif
