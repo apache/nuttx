@@ -459,8 +459,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 #else
   name       = "<noname>";
 #endif
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
-                        "Name:", name);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
+                               "Name:", name);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -475,11 +475,12 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the thread type */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n", "Type:",
-                        g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK) >>
-                        TCB_FLAG_TTYPE_SHIFT]);
-  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
-                             &offset);
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
+                             "Type:",
+                             g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK)
+                             >>  TCB_FLAG_TTYPE_SHIFT]);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                           &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -493,8 +494,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   group = tcb->group;
   DEBUGASSERT(group != NULL);
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "PPID:",
-                        group->tg_ppid);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s%d\n", "PPID:",
+                               group->tg_ppid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -511,13 +513,13 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   if (tcb->task_state >= FIRST_ASSIGNED_STATE &&
       tcb->task_state <= LAST_ASSIGNED_STATE)
     {
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                            "CPU:", tcb->cpu);
+      linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                   "%-12s%d\n", "CPU:", tcb->cpu);
     }
   else
     {
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s---\n",
-                            "CPU:");
+      linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                   "%-12s---\n", "CPU:");
     }
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
@@ -535,8 +537,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the thread state */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
-                        "State:", g_statenames[tcb->task_state]);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s%s\n", "State:",
+                               g_statenames[tcb->task_state]);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -551,11 +554,11 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show task flags */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN,
-                        "%-12s%c%c%c\n", "Flags:",
-                        tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-',
-                        tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-',
-                        tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                          "%-12s%c%c%c\n", "Flags:",
+                          tcb->flags & TCB_FLAG_NONCANCELABLE ? 'N' : '-',
+                          tcb->flags & TCB_FLAG_CANCEL_PENDING ? 'P' : '-',
+                          tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-');
 
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
@@ -572,12 +575,12 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   /* Show the thread priority */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  linesize   = snprintf(procfile->line, STATUS_LINELEN,
-                        "%-12s%d (%d)\n", "Priority:",
-                        tcb->sched_priority, tcb->base_priority);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s%d (%d)\n", "Priority:",
+                               tcb->sched_priority, tcb->base_priority);
 #else
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                        "Priority:", tcb->sched_priority);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Priority:", tcb->sched_priority);
 #endif
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
@@ -595,8 +598,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   policy     = g_policy[(tcb->flags & TCB_FLAG_POLICY_MASK) >>
                         TCB_FLAG_POLICY_SHIFT];
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
-                        "Scheduler:", policy);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
+                               "Scheduler:", policy);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -611,8 +614,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the signal mask. Note: sigset_t is uint32_t on NuttX. */
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08" PRIx32 "\n",
-                      "SigMask:", tcb->sigprocmask);
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                             "%-12s%08" PRIx32 "\n",
+                             "SigMask:", tcb->sigprocmask);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -667,8 +671,8 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
     {
       FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
 
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %p\n",
-                            ptcb->arg);
+      linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, " %p\n",
+                                   ptcb->arg);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                  remaining, &offset);
 
@@ -686,7 +690,8 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
 
   for (argv = ttcb->argv + 1; *argv; argv++)
     {
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %s", *argv);
+      linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                                   " %s", *argv);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                  remaining, &offset);
 
@@ -700,7 +705,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
         }
     }
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n");
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "\n");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -748,9 +753,9 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
       fracpart = 0;
     }
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN,
-                      "%3" PRId32 ".%01" PRId32 "%%",
-                      intpart, fracpart);
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                             "%3" PRId32 ".%01" PRId32 "%%",
+                             intpart, fracpart);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                            &offset);
 
@@ -794,9 +799,9 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time pre-emption disabled */
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
-                     (unsigned long)maxtime.tv_sec,
-                     (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+                             (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                            &offset);
 
@@ -827,9 +832,9 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time in a critical section */
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu\n",
-                     (unsigned long)maxtime.tv_sec,
-                     (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu\n",
+                             (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                            &offset);
 
@@ -872,8 +877,8 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
 
   /* Show the stack base address */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%p\n",
-                        "StackBase:", tcb->stack_base_ptr);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%p\n",
+                               "StackBase:", tcb->stack_base_ptr);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -888,8 +893,8 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
 
   /* Show the stack size */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
-                        "StackSize:", (long)tcb->adj_stack_size);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
+                               "StackSize:", (long)tcb->adj_stack_size);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -905,8 +910,8 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
 
   /* Show the stack size */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
-                        "StackUsed:", (long)up_check_tcbstack(tcb));
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
+                               "StackUsed:", (long)up_check_tcbstack(tcb));
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -940,8 +945,8 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   remaining = buflen;
   totalsize = 0;
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                        "Main task:", group->tg_pid);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Main task:", group->tg_pid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -954,8 +959,9 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s0x%02x\n",
-                        "Flags:", group->tg_flags);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s0x%02x\n",
+                               "Flags:", group->tg_flags);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -968,8 +974,8 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                        "Members:", group->tg_nmembers);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Members:", group->tg_nmembers);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                             remaining, &offset);
 
@@ -983,7 +989,8 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "Member IDs:");
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "Member IDs:");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -998,8 +1005,8 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 
   for (i = 0; i < group->tg_nmembers; i++)
     {
-      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %d",
-                            group->tg_members[i]);
+      linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, " %d",
+                                   group->tg_members[i]);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                  remaining, &offset);
 
@@ -1013,7 +1020,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
         }
     }
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n");
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "\n");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1047,8 +1054,9 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   remaining = buflen;
   totalsize = 0;
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%-3s %-8s %s\n",
-                        "FD", "POS", "OFLAGS");
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "\n%-3s %-8s %s\n",
+                               "FD", "POS", "OFLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1073,7 +1081,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
           if (file->f_inode && !INODE_IS_SOCKET(file->f_inode))
             {
-              linesize   = snprintf(procfile->line, STATUS_LINELEN,
+              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                     "%3d %8ld %04x\n",
                                     i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
                                     j, (long)file->f_pos,
@@ -1094,9 +1102,9 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
     }
 
 #ifdef CONFIG_NET
-  linesize   = snprintf(procfile->line, STATUS_LINELEN,
-                        "\n%-3s %-2s %-3s %s\n",
-                        "SD", "RF", "TYP", "FLAGS");
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "\n%-3s %-2s %-3s %s\n",
+                               "SD", "RF", "TYP", "FLAGS");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1122,7 +1130,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
           if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
             {
               FAR struct socket *socket = file->f_priv;
-              linesize   = snprintf(procfile->line, STATUS_LINELEN,
+              linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                     "%3d %3d %02x",
                                     i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
                                     j, socket->s_type,
@@ -1195,8 +1203,9 @@ static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
 
   /* Output the header */
 
-  linesize        = snprintf(info->procfile->line, STATUS_LINELEN, "%s=%s\n",
-                             name, value);
+  linesize        = procfs_snprintf(info->procfile->line,
+                                    STATUS_LINELEN, "%s=%s\n",
+                                    name, value);
   copysize        = procfs_memcpy(info->procfile->line, linesize,
                                   info->buffer, info->remaining,
                                   &info->offset);

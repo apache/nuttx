@@ -195,6 +195,26 @@ size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      off_t *offset);
 
 /****************************************************************************
+ * Name: procfs_snprintf
+ *
+ * Description:
+ *   This function is same with snprintf, except return values.
+ *   If buf has no enough space and output was truncated due to size limit,
+ *   snprintf:        return formated string len.
+ *   procfs_snprintf: return string len which has written to buf.
+ *
+ * Input Parameters:
+ *   Same with snprintf
+ *
+ * Returned Value:
+ *   See Description.
+ *
+ ****************************************************************************/
+
+int procfs_snprintf(FAR char *buf, size_t size,
+                    FAR const IPTR char *format, ...);
+
+/****************************************************************************
  * Name: procfs_register
  *
  * Description:
