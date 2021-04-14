@@ -50,6 +50,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_MEMCPY
+#undef memcpy
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   FAR unsigned char *pout = (FAR unsigned char *)dest;

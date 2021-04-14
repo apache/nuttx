@@ -32,6 +32,7 @@
  * Name: rindex
  ****************************************************************************/
 
+#undef rindex
 FAR char *rindex(FAR const char *s, int c)
 {
   return strrchr(s, c);

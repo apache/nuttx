@@ -57,6 +57,7 @@
  * string haystack. Returns NULL if needle was not found.
  */
 
+#undef strstr
 FAR char *strstr(FAR const char *haystack, FAR const char *needle)
 {
 #ifndef ULONG_BIGENDIAN

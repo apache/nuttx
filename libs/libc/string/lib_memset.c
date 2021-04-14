@@ -63,6 +63,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_MEMSET
+#undef memset
 FAR void *memset(FAR void *s, int c, size_t n)
 {
 #ifdef CONFIG_MEMSET_OPTSPEED

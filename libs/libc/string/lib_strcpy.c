@@ -58,6 +58,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STRCPY
+#undef strcpy
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
   char *tmp = dest;

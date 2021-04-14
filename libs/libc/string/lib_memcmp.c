@@ -46,6 +46,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_MEMCMP
+#undef memcmp
 int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {
   unsigned char *p1 = (unsigned char *)s1;

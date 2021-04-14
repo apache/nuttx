@@ -46,6 +46,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_STRCAT
+#undef strcat
 char *strcat(char *dest, const char *src)
 {
   char *ret   = dest;

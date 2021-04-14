@@ -55,10 +55,17 @@
  * Removed from Open Group Base Specifications Issue 7/
  * IEEE Std 1003.1-2008
  */
-
+#ifndef bcmp
 #define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
+#endif
+
+#ifndef bcopy
 #define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+#endif
+
+#ifndef bzero
 #define bzero(s,n)       (void)memset(s,0,n)
+#endif
 
 /****************************************************************************
  * Inline Functions
