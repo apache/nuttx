@@ -30,6 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
+#undef strstr /* See mm/README.txt */
 FAR char *strstr(FAR const char *str, FAR const char *substr)
 {
   FAR const char *candidate; /* Candidate in str with matching start character */

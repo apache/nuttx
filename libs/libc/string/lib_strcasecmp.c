@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_STRCASECMP
+#undef strcasecmp /* See mm/README.txt */
 int strcasecmp(FAR const char *cs, FAR const char *ct)
 {
   int result;

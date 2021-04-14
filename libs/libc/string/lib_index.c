@@ -32,6 +32,7 @@
  * Name: index
  ****************************************************************************/
 
+#undef index /* See mm/README.txt */
 FAR char *index(FAR const char *s, int c)
 {
   return strchr(s, c);
