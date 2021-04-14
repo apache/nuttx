@@ -1,0 +1,68 @@
+############################################################################
+# graphics/nxglib/Make.defs
+#
+#   Copyright (C) 2008, 2010-2011, 2013, 2016 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+set(CSRCS)
+
+list(APPEND CSRCS nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c)
+list(APPEND CSRCS nxglib_setpixel_4bpp.c nxglib_setpixel_8bpp.c)
+list(APPEND CSRCS nxglib_setpixel_16bpp.c nxglib_setpixel_24bpp.c)
+list(APPEND CSRCS nxglib_setpixel_32bpp.c)
+
+list(APPEND CSRCS nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c)
+list(APPEND CSRCS nxglib_fillrectangle_4bpp.c nxglib_fillrectangle_8bpp.c)
+list(APPEND CSRCS nxglib_fillrectangle_16bpp.c nxglib_fillrectangle_24bpp.c)
+list(APPEND CSRCS nxglib_fillrectangle_32bpp.c)
+
+list(APPEND CSRCS nxglib_getrectangle_1bpp.c nxglib_getrectangle_2bpp.c)
+list(APPEND CSRCS nxglib_getrectangle_4bpp.c nxglib_getrectangle_8bpp.c)
+list(APPEND CSRCS nxglib_getrectangle_16bpp.c nxglib_getrectangle_24bpp.c)
+list(APPEND CSRCS nxglib_getrectangle_32bpp.c)
+
+list(APPEND CSRCS nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c)
+list(APPEND CSRCS nxglib_filltrapezoid_4bpp.c nxglib_filltrapezoid_8bpp.c)
+list(APPEND CSRCS nxglib_filltrapezoid_16bpp.c nxglib_filltrapezoid_24bpp.c)
+list(APPEND CSRCS nxglib_filltrapezoid_32bpp.c)
+
+list(APPEND CSRCS nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c)
+list(APPEND CSRCS nxglib_moverectangle_4bpp.c nxglib_moverectangle_8bpp.c)
+list(APPEND CSRCS nxglib_moverectangle_16bpp.c nxglib_moverectangle_24bpp.c)
+list(APPEND CSRCS nxglib_moverectangle_32bpp.c)
+
+list(APPEND CSRCS nxglib_copyrectangle_1bpp.c nxglib_copyrectangle_2bpp.c)
+list(APPEND CSRCS nxglib_copyrectangle_4bpp.c nxglib_copyrectangle_8bpp.c)
+list(APPEND CSRCS nxglib_copyrectangle_16bpp.c nxglib_copyrectangle_24bpp.c)
+list(APPEND CSRCS nxglib_copyrectangle_32bpp.c)
+
+set_parent_srcs(${CSRCS})

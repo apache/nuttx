@@ -1,0 +1,66 @@
+
+set(CSRCS)
+
+list(APPEND CSRCS
+	arm_addrenv.c
+	arm_addrenv_kstack.c
+	arm_addrenv_shm.c
+	arm_addrenv_ustack.c
+	arm_addrenv_utils.c
+	arm_allocpage.c
+	arm_assert.c
+	arm_blocktask.c
+	arm_checkmapping.c
+	arm_coherent_dcache.c
+	arm_copyarmstate.c
+	arm_copyfullstate.c
+	arm_cpuidlestack.c
+	arm_cpuindex.c
+	arm_cpupause.c
+	arm_cpustart.c
+	arm_dataabort.c
+	arm_doirq.c
+	arm_gicv2.c
+	arm_gicv2_dump.c
+	arm_initialstate.c
+	arm_l2cc_pl310.c
+	arm_mmu.c
+	arm_pgalloc.c
+	arm_pginitialize.c
+	arm_physpgaddr.c
+	arm_prefetchabort.c
+	arm_releasepending.c
+	arm_reprioritizertr.c
+	arm_schedulesigaction.c
+	arm_scu.c
+	arm_sigdeliver.c
+	arm_signal_dispatch.c
+	arm_syscall.c
+	arm_unblocktask.c
+	arm_undefinedinsn.c
+	arm_va2pte.c
+	arm_virtpgaddr.c
+	crt0.c
+
+	arm_cpuhead.S
+	arm_fetchadd.S
+	arm_fpuconfig.S
+	arm_fullcontextrestore.S
+	arm_head.S
+	arm_pghead.S
+	arm_restorefpu.S
+	arm_savefpu.S
+	arm_saveusercontext.S
+	arm_testset.S
+	arm_vectoraddrexcptn.S
+	arm_vectors.S
+	arm_vectortab.S
+	arm_vfork.S
+	cp15_clean_dcache.S
+	cp15_coherent_dcache.S
+	cp15_flush_dcache.S
+	cp15_invalidate_dcache.S
+	cp15_invalidate_dcache_all.S
+)
+set_parent_srcs(${CSRCS})
+

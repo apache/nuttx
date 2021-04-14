@@ -1,0 +1,81 @@
+############################################################################
+# fs/driver/Make.defs
+#
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Don't build anything if there are no file descriptors
+
+if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
+
+	set(CSRCS)
+
+	# Don't build-in block driver support if there are no mountpoints
+	if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
+
+		list(APPEND CSRCS
+			fs_registerblockdriver.c
+			fs_unregisterblockdriver.c
+			fs_findblockdriver.c
+			fs_openblockdriver.c
+			fs_closeblockdriver.c
+			fs_blockpartition.c
+		)
+
+		if("${CONFIG_MTD}" STREQUAL "y")
+
+			list(APPEND CSRCS
+				fs_registermtddriver.c
+				fs_unregistermtddriver.c
+				fs_findmtddriver.c
+				fs_mtdproxy.c
+			)
+
+			if("${CONFIG_MTD_PARTITION}" STREQUAL "y")
+				list(APPEND CSRCS fs_mtdpartition.c)
+			endif()
+		endif()
+
+		if(NOT "${CONFIG_DISABLE_PSEUDOFS_OPERATIONS}" STREQUAL "y")
+			list(APPEND CSRCS fs_blockproxy.c)
+		endif()
+
+	endif() # CONFIG_DISABLE_MOUNTPOINT
+
+	# Include driver build support
+	list(APPEND CSRCS
+		fs_registerdriver.c
+		fs_unregisterdriver.c
+	)
+	set_parent_srcs(${CSRCS})
+
+endif()
