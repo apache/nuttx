@@ -171,6 +171,35 @@ config SENSORS_DHTXX
 	---help---
 		Enable driver support for the DHTxx humidity/temperature sensor.
 
+config SENSORS_DS18B20
+	bool "Maxim Integrated DS18B20 Temperature Sensor support"
+	default n
+	select 1WIRE
+	---help---
+		Enable driver support for the DS18B20 temperature sensor.
+
+config SENSORS_DS18B20_POLL
+	bool "Enables polling sensor data"
+	depends on SENSORS_DS18B20
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_DS18B20_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_DS18B20 && SENSORS_DS18B20_POLL
+	default 1000000
+	range 0  4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_DS18B20_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_DS18B20 && SENSORS_DS18B20_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
 config SENSORS_FXOS8700CQ
 	bool "NXP FXOS8700CQ Motion Sensor support"
 	default n

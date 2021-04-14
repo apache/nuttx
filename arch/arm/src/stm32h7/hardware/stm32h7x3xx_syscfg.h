@@ -44,7 +44,8 @@
 #define STM32_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
 #define STM32_SYSCFG_EXTICR4_OFFSET   0x0014 /* SYSCFG external interrupt configuration register 4 */
 
-#define STM32_SYSCFG_CCSR_OFFSET      0x0020 /* Compensation cell control/status register */
+#define STM32_SYSCFG_CFGR_OFFSET      0x0018 /* SYSCFG configuration register */
+#define STM32_SYSCFG_CCCSR_OFFSET     0x0020 /* Compensation cell control/status register */
 #define STM32_SYSCFG_CCVR_OFFSET      0x0024 /* Compensation cell value register */
 #define STM32_SYSCFG_CCCR_OFFSET      0x0028 /* Compensation cell code register */
 #define STM32_SYSCFG_PWRCR_OFFSET     0x002c /* Power Control register */
@@ -80,7 +81,7 @@
 #define STM32_SYSCFG_EXTICR3          (STM32_SYSCFG_BASE + STM32_SYSCFG_EXTICR3_OFFSET)
 #define STM32_SYSCFG_EXTICR4          (STM32_SYSCFG_BASE + STM32_SYSCFG_EXTICR4_OFFSET)
 
-#define STM32_SYSCFG_CCSR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCSR_OFFSET)
+#define STM32_SYSCFG_CCCSR            (STM32_SYSCFG_BASE + STM32_SYSCFG_CCCSR_OFFSET)
 #define STM32_SYSCFG_CCVR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCVR_OFFSET)
 #define STM32_SYSCFG_CCCR             (STM32_SYSCFG_BASE + STM32_SYSCFG_CCCR_OFFSET)
 #define STM32_SYSCFG_PWRCR            (STM32_SYSCFG_BASE + STM32_SYSCFG_PWRCR_OFFSET)
@@ -164,9 +165,10 @@
 
 /* Compensation cell control/status register */
 
-/* REVISIT:  Missing bitfield definitions */
-
-#define SYSCFG_CCSR_
+#define SYSCFG_CCCSR_EN               (1 << 0)  /* Bit 0: Compensation Cell enable */
+#define SYSCFG_CCCSR_CS               (1 << 1)  /* Bit 1: Compensation Cell code selection */
+#define SYSCFG_CCCSR_READY            (1 << 8)  /* Bit 8: Compensation Cell ready flag */
+#define SYSCFG_CCCSR_HSLV             (1 << 16) /* Bit 16: High-speed at low-voltage */
 
 /* Compensation cell value register */
 

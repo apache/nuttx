@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/drivers/1wire.h>
+#include <nuttx/1wire/1wire.h>
 
 /****************************************************************************
  * Pre-processor Definitions

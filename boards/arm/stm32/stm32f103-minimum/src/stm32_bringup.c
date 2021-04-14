@@ -122,6 +122,14 @@
 #include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_SENSORS_HYT271
+# define HAVE_SENSORS_DEVICE
+#endif
+
+#ifdef CONFIG_SENSORS_DS18B20
+# define HAVE_SENSORS_DEVICE
+#endif
+
 #ifdef CONFIG_LCD_BACKPACK
 #include "stm32_lcd_backpack.h"
 #endif
@@ -167,6 +175,10 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef HAVE_SENSORS_DEVICE
+static int g_sensor_devno;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -325,6 +337,34 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_ws2812_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_HYT271
+  /* Configure and initialize the HYT271 sensors */
+
+  ret = stm32_hyt271initialize(g_sensor_devno);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_hyt271initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      g_sensor_devno += ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_DS18B20
+  /* Configure and initialize the DS18B20 sensors */
+
+  ret = stm32_ds18b20initialize(g_sensor_devno);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ds18b20initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      g_sensor_devno += ret;
     }
 #endif
 

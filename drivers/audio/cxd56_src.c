@@ -24,7 +24,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <math.h>
 #include <queue.h>
 #include <stdio.h>
 #include <string.h>

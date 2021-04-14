@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <math.h>
 #include <stdlib.h>
 
 #include <nuttx/lib/lib.h>
@@ -42,6 +41,12 @@
 #if CONFIG_LIB_RAND_ORDER > 3
 #  undef CONFIG_LIB_RAND_ORDER
 #  define CONFIG_LIB_RAND_ORDER 3
+#endif
+
+#ifndef CONFIG_HAVE_DOUBLE
+typedef float        float_t;
+#else
+typedef double       float_t;
 #endif
 
 /* Values needed by the random number generator */
@@ -64,7 +69,7 @@
 
 static inline unsigned long fgenerate1(void);
 #if (CONFIG_LIB_RAND_ORDER == 1)
-static double_t frand1(void);
+static float_t frand1(void);
 #endif
 
 /* Second order congruential generators */
@@ -72,14 +77,14 @@ static double_t frand1(void);
 #if (CONFIG_LIB_RAND_ORDER > 1)
 static inline unsigned long fgenerate2(void);
 #if (CONFIG_LIB_RAND_ORDER == 2)
-static double_t frand2(void);
+static float_t frand2(void);
 #endif
 
 /* Third order congruential generators */
 
 #if (CONFIG_LIB_RAND_ORDER > 2)
 static inline unsigned long fgenerate3(void);
-static double_t frand3(void);
+static float_t frand3(void);
 #endif
 #endif
 
@@ -116,7 +121,7 @@ static inline unsigned long fgenerate1(void)
 }
 
 #if (CONFIG_LIB_RAND_ORDER == 1)
-static double_t frand1(void)
+static float_t frand1(void)
 {
   /* First order congruential generator. */
 
@@ -124,7 +129,7 @@ static double_t frand1(void)
 
   /* Construct an floating point value in the range from 0.0 up to 1.0 */
 
-  return ((double_t)randint) / ((double_t)RND1_CONSTP);
+  return ((float_t)randint) / ((float_t)RND1_CONSTP);
 }
 #endif
 
@@ -156,7 +161,7 @@ static inline unsigned long fgenerate2(void)
 }
 
 #if (CONFIG_LIB_RAND_ORDER == 2)
-static double_t frand2(void)
+static float_t frand2(void)
 {
   /* Second order congruential generator */
 
@@ -164,7 +169,7 @@ static double_t frand2(void)
 
   /* Construct an floating point value in the range from 0.0 up to 1.0 */
 
-  return ((double_t)randint) / ((double_t)RND2_CONSTP);
+  return ((float_t)randint) / ((float_t)RND2_CONSTP);
 }
 #endif
 
@@ -197,7 +202,7 @@ static inline unsigned long fgenerate3(void)
   return randint;
 }
 
-static double_t frand3(void)
+static float_t frand3(void)
 {
   /* Third order congruential generator */
 
@@ -205,7 +210,7 @@ static double_t frand3(void)
 
   /* Construct an floating point value in the range from 0.0 up to 1.0 */
 
-  return ((double_t)randint) / ((double_t)RND3_CONSTP);
+  return ((float_t)randint) / ((float_t)RND3_CONSTP);
 }
 #endif
 #endif
@@ -246,7 +251,7 @@ void srand(unsigned int seed)
 unsigned long nrand(unsigned long limit)
 {
   unsigned long result;
-  double_t ratio;
+  float_t ratio;
 
   /* Loop to be sure a legal random number is generated */
 
@@ -264,7 +269,7 @@ unsigned long nrand(unsigned long limit)
 
       /* Then, produce the return-able value in the requested range */
 
-      result = (unsigned long)(((double_t)limit) * ratio);
+      result = (unsigned long)(((float_t)limit) * ratio);
 
       /* Loop because there is an (unlikely) possibility that rounding
        * could increase the result at the limit value about the limit.

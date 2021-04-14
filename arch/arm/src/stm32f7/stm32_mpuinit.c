@@ -70,12 +70,25 @@ void stm32_mpuinitialize(void)
 
   mpu_showtype();
 
-  /* Configure user flash and SRAM space */
+  /* Configure user flash space */
 
   mpu_user_flash(USERSPACE->us_textstart,
                  USERSPACE->us_textend - USERSPACE->us_textstart);
 
-  mpu_user_intsram(datastart, dataend - datastart);
+  /* Configure user SRAM space
+   * Ordered
+   * Cacheable
+   * Not Bufferable
+   * Not Shareable
+   * P:RW   U:RW
+   * Instruction access
+   */
+
+  mpu_configure_region(datastart, dataend - datastart,
+                       MPU_RASR_TEX_SO   |
+                       MPU_RASR_C        |
+                       MPU_RASR_AP_RWRW
+                       );
 
   /* Then enable the MPU */
 
@@ -94,7 +107,20 @@ void stm32_mpuinitialize(void)
 
 void stm32_mpu_uheap(uintptr_t start, size_t size)
 {
-  mpu_user_intsram(start, size);
+  /* Configure the user SRAM space
+   * Ordered
+   * Cacheable
+   * Not Bufferable
+   * Not Shareable
+   * P:RW   U:RW
+   * Instruction access
+   */
+
+  mpu_configure_region(start, size,
+                       MPU_RASR_TEX_SO   |
+                       MPU_RASR_C        |
+                       MPU_RASR_AP_RWRW
+                       );
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */

@@ -34,7 +34,6 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
-#include <math.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/power/battery_gauge.h>

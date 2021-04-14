@@ -52,8 +52,10 @@
 
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
+#ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
   uint32_t carry;
+#endif
   int ret = OK;
 
   sinfo("clock_id=%d\n", clock_id);

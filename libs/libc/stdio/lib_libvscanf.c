@@ -24,7 +24,6 @@
 
 #include <nuttx/compiler.h>
 
-#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>

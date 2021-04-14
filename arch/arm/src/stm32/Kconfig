@@ -1927,6 +1927,20 @@ config STM32_STM32F469
 config STM32_STM32G4XXX
 	bool
 	default n
+	select STM32_HAVE_DMAMUX
+	select STM32_HAVE_IP_DBGMCU_V3
+
+config STM32_STM32G4_CAT2
+	bool
+	default n
+
+config STM32_STM32G4_CAT3
+	bool
+	default n
+
+config STM32_STM32G4_CAT4
+	bool
+	default n
 
 config STM32_STM32G4XXK
 	bool
@@ -1960,6 +1974,7 @@ config STM32_STM32G43XX
 	bool
 	default n
 	select STM32_STM32G4XXX
+	select STM32_STM32G4_CAT2
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
@@ -1997,7 +2012,7 @@ config STM32_STM32G43XX
 	select STM32_HAVE_IP_ADC_V2
 	select STM32_HAVE_IP_DMA_V1
 	select STM32_HAVE_IP_I2C_V2
-	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_TIMERS_V2
 
 config STM32_STM32G431K
 	bool
@@ -2030,6 +2045,7 @@ config STM32_STM32G47XX
 	bool
 	default n
 	select STM32_STM32G4XXX
+	select STM32_STM32G4_CAT3
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_ADC2
@@ -2089,7 +2105,7 @@ config STM32_STM32G47XX
 	select STM32_HAVE_IP_ADC_V2
 	select STM32_HAVE_IP_DMA_V1
 	select STM32_HAVE_IP_I2C_V2
-	select STM32_HAVE_IP_TIMERS_V1
+	select STM32_HAVE_IP_TIMERS_V2
 
 config STM32_STM32G474C
 	bool
@@ -2171,6 +2187,10 @@ config STM32_HAVE_DMA1_CHAN8
 	default n
 
 config STM32_HAVE_DMA2_CHAN678
+	bool
+	default n
+
+config STM32_HAVE_DMAMUX
 	bool
 	default n
 
@@ -2552,6 +2572,10 @@ config STM32_HAVE_IP_DBGMCU_V2
 	bool
 	default n
 
+config STM32_HAVE_IP_DBGMCU_V3
+	bool
+	default n
+
 config STM32_HAVE_IP_I2C_V1
 	bool
 	default n
@@ -2603,6 +2627,7 @@ config STM32_ADC1
 	select STM32_HAVE_ADC1_DMA if STM32_STM32F10XX && STM32_DMA1
 	select STM32_HAVE_ADC1_DMA if STM32_STM32F37XX && STM32_DMA1
 	select STM32_HAVE_ADC1_DMA if !STM32_STM32F10XX && STM32_DMA2
+	select STM32_HAVE_ADC1_DMA if STM32_DMAMUX
 
 config STM32_ADC2
 	bool "ADC2"
@@ -2610,6 +2635,7 @@ config STM32_ADC2
 	select STM32_ADC
 	depends on STM32_HAVE_ADC2
 	select STM32_HAVE_ADC2_DMA if STM32_DMA2
+	select STM32_HAVE_ADC2_DMA if STM32_DMAMUX
 
 config STM32_ADC3
 	bool "ADC3"
@@ -2617,6 +2643,7 @@ config STM32_ADC3
 	select STM32_ADC
 	depends on STM32_HAVE_ADC3
 	select STM32_HAVE_ADC3_DMA if STM32_DMA2
+	select STM32_HAVE_ADC3_DMA if STM32_DMAMUX
 
 config STM32_ADC4
 	bool "ADC4"
@@ -2624,6 +2651,7 @@ config STM32_ADC4
 	select STM32_ADC
 	depends on STM32_HAVE_ADC4
 	select STM32_HAVE_ADC4_DMA if STM32_DMA2
+	select STM32_HAVE_ADC4_DMA if STM32_DMAMUX
 
 config STM32_ADC5
 	bool "ADC5"
@@ -2631,6 +2659,7 @@ config STM32_ADC5
 	select STM32_ADC
 	depends on STM32_HAVE_ADC5
 	select STM32_HAVE_ADC5_DMA if STM32_DMA2
+	select STM32_HAVE_ADC5_DMA if STM32_DMAMUX
 
 config STM32_SDADC1
 	bool "SDADC1"
@@ -2758,13 +2787,21 @@ config STM32_CRYP
 config STM32_DMA1
 	bool "DMA1"
 	default n
+	select STM32_DMA
 	select ARCH_DMA
 
 config STM32_DMA2
 	bool "DMA2"
 	default n
+	select STM32_DMA
 	select ARCH_DMA
 	depends on !STM32_VALUELINE || (STM32_VALUELINE && STM32_HIGHDENSITY)
+
+config STM32_DMAMUX1
+	bool "DMAMUX1"
+	default n
+	depends on STM32_HAVE_DMAMUX
+	select STM32_DMAMUX
 
 config STM32_DAC1
 	bool "DAC1"
@@ -3284,6 +3321,12 @@ config STM32_SDADC
 	bool
 
 config STM32_DAC
+	bool
+
+config STM32_DMA
+	bool
+
+config STM32_DMAMUX
 	bool
 
 config STM32_SPI

@@ -40,7 +40,6 @@
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spi/flexspi.h>
 
 #include "arm_internal.h"
 #include "arm_arch.h"
@@ -49,7 +48,6 @@
 #include "imxrt_gpio.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_flexspi.h"
-#include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_flexspi.h"
 
 #ifdef CONFIG_IMXRT_FLEXSPI
@@ -1242,7 +1240,6 @@ struct flexspi_dev_s *imxrt_flexspi_initialize(int intf)
    * is reserved for code XIP
    */
 
-  spiinfo("intf: %d\n", intf);
   DEBUGASSERT(intf >= 0 && intf < 1);
 
   /* Select the FlexSPI interface */
@@ -1260,20 +1257,9 @@ struct flexspi_dev_s *imxrt_flexspi_initialize(int intf)
       /* Enable clocking to the FlexSPI peripheral */
 
       imxrt_clockrun_flexspi();
-
-      /* Configure multiplexed pins as connected on the board */
-
-      imxrt_config_gpio(GPIO_FLEXSPI_DQS);
-      imxrt_config_gpio(GPIO_FLEXSPI_CS);
-      imxrt_config_gpio(GPIO_FLEXSPI_IO0);
-      imxrt_config_gpio(GPIO_FLEXSPI_IO1);
-      imxrt_config_gpio(GPIO_FLEXSPI_IO2);
-      imxrt_config_gpio(GPIO_FLEXSPI_IO3);
-      imxrt_config_gpio(GPIO_FLEXSPI_SCK);
     }
   else
     {
-      spierr("ERROR: FlexSPI%d not supported\n", intf);
       return NULL;
     }
 
