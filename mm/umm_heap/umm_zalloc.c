@@ -49,6 +49,7 @@
  *
  ****************************************************************************/
 
+#undef zalloc /* See mm/README.txt */
 FAR void *zalloc(size_t size)
 {
 #ifdef CONFIG_ARCH_ADDRENV

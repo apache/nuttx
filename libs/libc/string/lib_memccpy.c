@@ -46,6 +46,7 @@
  *
  ****************************************************************************/
 
+#undef memccpy /* See mm/README.txt */
 FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
 {
   FAR unsigned char *pout = (FAR unsigned char *)s1;

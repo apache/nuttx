@@ -74,6 +74,41 @@ This directory contains the NuttX memory management logic.  This include:
      mm/umm_heap - Holds the user-mode memory allocation interfaces
      mm/kmm_heap - Holds the kernel-mode memory allocation interfaces
 
+   Debugging:
+
+    Please follow these steps to hook all memory related routines:
+
+    1.Add a new header file(e.g. xxx_malloc.h):
+
+      ...
+      #include <malloc.h>
+      #include <stdlib.h>
+      #include <string.h>
+      #include <strings.h>
+
+      #ifndef __ASSEMBLY__
+      FAR void *xxx_malloc(FAR const char *file, int line, size_t size);
+      void xxx_free(FAR const char *file, int line, FAR const void *ptr);
+      FAR void *xxx_memcpy(FAR const char *file, int line,
+                           FAR void *dst, FAR const void *src, size_t len);
+      ...
+      #define malloc(s) xxx_malloc(__FILE__, __LINE__, s)
+      #define free(p) xxx_free(__FILE__, __LINE__, p)
+      #define memcpy(d, s, l) xxx_memcpy(__FILE__, __LINE__, d, s, l)
+      ...
+      #endif
+      ...
+
+    2.Implement xxx_malloc, xxx_free, xxx_memcpy... in source code, you can:
+      a.Modify some arguments(e.g. extend the allocation size for redzone)
+      d.Check the critical arguments(e.g. pointer and length) in the range 
+      b.Forward to the original implementation(call malloc/free/memcpy)
+      c.Attach the context info(e.g. file and line) before return
+
+    3.Enable the hook by either:
+      a.Include xxx_malloc.h in your source code to hook one file
+      b.Add -include xxx_malloc.h to CFLAGS to hook all source code
+
 2) Granule Allocator.
 
      A non-standard granule allocator is also available in this directory  The

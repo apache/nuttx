@@ -31,6 +31,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STRCMP
+#undef strcmp /* See mm/README.txt */
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
   register signed char result;
