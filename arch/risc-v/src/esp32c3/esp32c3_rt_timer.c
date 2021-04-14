@@ -57,6 +57,7 @@
 #define RT_TIMER_TASK_STACK_SIZE  CONFIG_ESP32C3_RT_TIMER_TASK_STACK_SIZE
 
 #define ESP32C3_TIMER_PRESCALER     (APB_CLK_FREQ / (1000 * 1000))
+#define ESP32C3_RT_TIMER            0 /* Timer 0 */
 
 /****************************************************************************
  * Private Data
@@ -597,7 +598,7 @@ int esp32c3_rt_timer_init(void)
   irqstate_t flags;
   struct esp32c3_tim_dev_s *tim;
 
-  tim = esp32c3_tim0_init();
+  tim = esp32c3_tim_init(ESP32C3_RT_TIMER);
   if (!tim)
     {
       tmrerr("ERROR: Failed to initialize ESP32 timer0\n");
@@ -669,6 +670,7 @@ void esp32c3_rt_timer_deinit(void)
   flags = enter_critical_section();
 
   ESP32C3_TIM_STOP(s_esp32c3_tim_dev);
+  esp32c3_tim_deinit(s_esp32c3_tim_dev);
   s_esp32c3_tim_dev = NULL;
 
   leave_critical_section(flags);
