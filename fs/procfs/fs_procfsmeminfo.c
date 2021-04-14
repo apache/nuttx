@@ -287,7 +287,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
   /* The first line is the headers */
 
   linesize  =
-    snprintf(procfile->line, MEMINFO_LINELEN,
+    procfs_snprintf(procfile->line, MEMINFO_LINELEN,
              "                     "
              "total       used       free    largest  nused  nfree\n");
 
@@ -311,15 +311,16 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
           /* Show heap information */
 
           entry->mallinfo(entry->user_data, &minfo);
-          linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                                "%12s:  %11lu%11lu%11lu%11lu%7lu%7lu\n",
-                                entry->name,
-                                (unsigned long)minfo.arena,
-                                (unsigned long)minfo.uordblks,
-                                (unsigned long)minfo.fordblks,
-                                (unsigned long)minfo.mxordblk,
-                                (unsigned long)minfo.aordblks,
-                                (unsigned long)minfo.ordblks);
+          linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                                       "%12s:  "
+                                       "%11lu%11lu%11lu%11lu%7lu%7lu\n",
+                                       entry->name,
+                                       (unsigned long)minfo.arena,
+                                       (unsigned long)minfo.uordblks,
+                                       (unsigned long)minfo.fordblks,
+                                       (unsigned long)minfo.mxordblk,
+                                       (unsigned long)minfo.aordblks,
+                                       (unsigned long)minfo.ordblks);
           copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                      buflen, &offset);
           totalsize += copysize;
@@ -347,9 +348,9 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
       allocated  = total - available;
       max        = (unsigned long)pginfo.mxfree << MM_PGSHIFT;
 
-      linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Page:  %11lu%11lu%11lu%11lu\n",
-                            total, allocated, available, max);
+      linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                                   "Page:  %11lu%11lu%11lu%11lu\n",
+                                   total, allocated, available, max);
 
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                                  &offset);
@@ -369,14 +370,14 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
       meminfo_progmem(&progmem);
 
-      linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
-                            "Prog:  %11lu%11lu%11lu%11lu%7lu%7lu\n",
-                            (unsigned long)progmem.arena,
-                            (unsigned long)progmem.uordblks,
-                            (unsigned long)progmem.fordblks,
-                            (unsigned long)progmem.mxordblk,
-                            (unsigned long)progmem.aordblks,
-                            (unsigned long)progmem.ordblks);
+      linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                                   "Prog:  %11lu%11lu%11lu%11lu%7lu%7lu\n",
+                                   (unsigned long)progmem.arena,
+                                   (unsigned long)progmem.uordblks,
+                                   (unsigned long)progmem.fordblks,
+                                   (unsigned long)progmem.mxordblk,
+                                   (unsigned long)progmem.aordblks,
+                                   (unsigned long)progmem.ordblks);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                                  &offset);
       totalsize += copysize;

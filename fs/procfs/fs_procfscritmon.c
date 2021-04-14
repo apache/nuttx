@@ -215,9 +215,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for maximum time pre-emption disabled */
 
-  linesize = snprintf(attr->line, CRITMON_LINELEN, "%d,%lu.%09lu,",
-                     cpu, (unsigned long)maxtime.tv_sec,
-                     (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, "%d,%lu.%09lu,",
+                             cpu, (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 
   totalsize += copysize;
@@ -247,9 +247,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for maximum time in a critical section */
 
-  linesize = snprintf(attr->line, CRITMON_LINELEN, "%lu.%09lu\n",
-                     (unsigned long)maxtime.tv_sec,
-                     (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, "%lu.%09lu\n",
+                             (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 
   totalsize += copysize;
