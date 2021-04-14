@@ -220,7 +220,7 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION} 1>/dev/null; then
+  if ! ./tools/configure.sh $config ${JOPTION} 1>/dev/null; then
     fail=1
   fi
 
@@ -236,6 +236,20 @@ function configure {
     kconfig-tweak --file $nuttx/.config -e $toolchain
 
     makefunc olddefconfig
+  fi
+
+  return $fail
+}
+
+function cmake_configure {
+  echo "  Configuring..."
+  mkdir build
+  cd build
+
+  nuttx_board=$(cd ../boards && find ../boards -type d -name ${boarddir} -print -quit)
+
+  if ! cmake -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
+    fail=1
   fi
 
   return $fail
@@ -328,7 +342,8 @@ function dotest {
 
   echo "------------------------------------------------------------------------------------"
   distclean
-  configure
+  #configure
+  cmake_configure
   build
 }
 

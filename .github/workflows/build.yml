@@ -22,6 +22,7 @@ on:
     branches:
       - master
       - 'releases/*'
+      - cmake
     tags:
 
 jobs:
@@ -46,7 +47,7 @@ jobs:
           echo "Working with ref: $REF"
 
           # We modify for all tags and release branches
-          if [[ $REF =~ refs/heads/releases/*|refs/tags/* ]]; then
+          if [[ $REF =~ refs/heads/releases/*|refs/tags/*|refs/heads/cmake ]]; then
             if [[ $REF =~ refs/heads/* ]]
               then
                 REF_NAME=${REF##refs/heads/}
@@ -114,7 +115,8 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim01, sim02, xtensa]
+        #        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim01, sim02, xtensa]
+        boards: [ sim01, sim02 ]
 
     steps:
       - name: Download Source Artifact
@@ -159,7 +161,8 @@ jobs:
     needs: Fetch-Source
     strategy:
       matrix:
-        boards: [macos, sim01, sim02]
+        #        boards: [macos, sim01, sim02]
+        boards: [ sim01, sim02 ]
     steps:
       - name: Download Source Artifact
         uses: actions/download-artifact@v1
