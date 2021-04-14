@@ -730,15 +730,15 @@ void up_module_text_init(void);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_alloc
+ * Name: up_module_text_memalign
  *
  * Description:
- *   Allocate memory for module text.
+ *   Allocate memory for module text with the specified alignment.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-FAR void *up_module_text_alloc(size_t size);
+FAR void *up_module_text_memalign(size_t align, size_t size);
 #endif
 
 /****************************************************************************
