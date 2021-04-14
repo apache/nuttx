@@ -70,16 +70,16 @@ void up_module_text_init()
 }
 
 /****************************************************************************
- * Name: up_module_text_alloc
+ * Name: up_module_text_memalign
  *
  * Description:
- *   Allocate memory for module text.
+ *   Allocate memory for module text with the specified alignment.
  *
  ****************************************************************************/
 
-FAR void *up_module_text_alloc(size_t size)
+FAR void *up_module_text_memalign(size_t align, size_t size)
 {
-  return mm_malloc(&g_module_text, size);
+  return mm_memalign(&g_module_text, align, size);
 }
 
 /****************************************************************************
