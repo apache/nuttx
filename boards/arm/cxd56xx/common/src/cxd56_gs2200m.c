@@ -47,6 +47,20 @@
 #define SPI_TX_MAXSIZE (CONFIG_CXD56_DMAC_SPI5_TX_MAXSIZE)
 #define SPI_RX_MAXSIZE (CONFIG_CXD56_DMAC_SPI5_RX_MAXSIZE)
 
+#if defined(CONFIG_WIFI_BOARD_IS110B_HARDWARE_VERSION_10B)
+/* v1.0b */
+#define GS2200M_GPIO_37          (PIN_UART2_CTS)
+#define GS2200M_EXT_RTC_RESET_IN (PIN_EMMC_DATA3)
+#elif defined(CONFIG_WIFI_BOARD_IS110B_HARDWARE_VERSION_10C)
+/* v1.0c */
+#define GS2200M_GPIO_37          (PIN_EMMC_DATA2)
+#define GS2200M_EXT_RTC_RESET_IN (PIN_EMMC_DATA3)
+#else
+/* v1.0a */
+#define GS2200M_GPIO_37          (PIN_UART2_CTS)
+#define GS2200M_EXT_RTC_RESET_IN (PIN_UART2_RTS)
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -84,7 +98,7 @@ static volatile uint32_t _n_called;
 
 static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 {
-  cxd56_gpioint_config(PIN_UART2_CTS,
+  cxd56_gpioint_config(GS2200M_GPIO_37,
                        GPIOINT_LEVEL_HIGH,
                        handler,
                        arg);
@@ -104,7 +118,7 @@ static void gs2200m_irq_enable(void)
 
   if (0 == _enable_count)
     {
-      cxd56_gpioint_enable(PIN_UART2_CTS);
+      cxd56_gpioint_enable(GS2200M_GPIO_37);
     }
 
   _enable_count++;
@@ -127,7 +141,7 @@ static void gs2200m_irq_disable(void)
 
   if (0 == _enable_count)
     {
-      cxd56_gpioint_disable(PIN_UART2_CTS);
+      cxd56_gpioint_disable(GS2200M_GPIO_37);
     }
 
   leave_critical_section(flags);
@@ -141,7 +155,7 @@ static uint32_t gs2200m_dready(int *ec)
 {
   irqstate_t flags = enter_critical_section();
 
-  uint32_t r = cxd56_gpio_read(PIN_UART2_CTS);
+  uint32_t r = cxd56_gpio_read(GS2200M_GPIO_37);
 
   if (ec)
     {
@@ -160,7 +174,7 @@ static uint32_t gs2200m_dready(int *ec)
 
 static void gs2200m_reset(bool reset)
 {
-  cxd56_gpio_write(PIN_UART2_RTS, !reset);
+  cxd56_gpio_write(GS2200M_EXT_RTC_RESET_IN, !reset);
 }
 
 /****************************************************************************
@@ -222,8 +236,8 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus)
       /* Change UART2 to GPIO */
 
       CXD56_PIN_CONFIGS(PINCONFS_UART2_GPIO);
-      cxd56_gpio_config(PIN_UART2_CTS, true);
-      cxd56_gpio_config(PIN_UART2_RTS, false);
+      cxd56_gpio_config(GS2200M_GPIO_37, true);
+      cxd56_gpio_config(GS2200M_EXT_RTC_RESET_IN, false);
 
       /* Initialize spi device */
 
