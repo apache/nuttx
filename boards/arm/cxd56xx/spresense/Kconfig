@@ -515,6 +515,23 @@ config LCD_ON_MAIN_BOARD
 
 endchoice
 endif
+
+choice
+	prompt "Spresense Wi-Fi Add-on board (iS110B)"
+	default WIFI_BOARD_IS110B_HARDWARE_VERSION_10A
+	---help---
+		Specify the hardware version of Wi-Fi Add-on board (iS110B)
+
+config WIFI_BOARD_IS110B_HARDWARE_VERSION_10A
+	bool "WIFI Board iS110B v1.0A"
+
+config WIFI_BOARD_IS110B_HARDWARE_VERSION_10B
+	bool "WIFI Board iS110B v1.0B"
+
+config WIFI_BOARD_IS110B_HARDWARE_VERSION_10C
+	bool "WIFI Board iS110B v1.0C"
+endchoice
+
 comment "LTE Options"
 
 menuconfig CXD56_LTE
