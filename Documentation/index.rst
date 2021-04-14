@@ -27,6 +27,7 @@ Last Updated: |today|
    components/index.rst
    applications/index.rst
    reference/index.rst
+   faq/index.rst
    guides/index.rst
    contributing/index.rst
    glossary.rst
