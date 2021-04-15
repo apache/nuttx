@@ -1710,6 +1710,13 @@ config DEBUG_WATCHDOG_INFO
 
 endif # DEBUG_WATCHDOG
 
+config DEBUG_MOTOR
+	bool "Motor Debug Features"
+	default n
+	depends on MOTOR
+	---help---
+		Enable motor debug features.
+
 if DEBUG_MOTOR
 
 config DEBUG_MOTOR_ERROR
