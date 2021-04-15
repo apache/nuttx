@@ -44,7 +44,7 @@
 void dump_stack(void)
 {
   FAR void *address[DUMP_DEPTH];
-  char line[DUMP_LINESIZE];
+  char line[DUMP_LINESIZE + 1];
   int ret = 0;
   int size;
   int i;
@@ -61,7 +61,7 @@ void dump_stack(void)
                       DUMP_FORMAT, DUMP_WIDTH, address[i]);
       if (i == size - 1 || ret % DUMP_LINESIZE == 0)
         {
-          syslog(LOG_INFO, "[BackTrace]: %s\n", line);
+          syslog(LOG_INFO, "[CallStack %d]: %s\n", i / DUMP_NITEM, line);
           ret = 0;
         }
     }
