@@ -215,6 +215,11 @@ Once booted the following command is used to mount a FAT file system::
 
     mount -t vfat /dev/mmcsd0 /mnt
 
+module
+------
+
+This config is to run apps/examples/module.
+
 spiflash
 --------
 
