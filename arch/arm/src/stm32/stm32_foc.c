@@ -1740,8 +1740,6 @@ static int stm32_foc_calibration_start(FAR struct foc_dev_s *dev)
   DEBUGASSERT(pwm);
   DEBUGASSERT(adc);
 
-  mtrinfo("Start ADC offset calibration\n");
-
   /* Call board-specific */
 
   board->ops->calibration(dev, true);
