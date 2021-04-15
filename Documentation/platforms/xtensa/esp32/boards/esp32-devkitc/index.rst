@@ -220,6 +220,11 @@ module
 
 This config is to run apps/examples/module.
 
+sotest
+------
+
+This config is to run apps/examples/sotest.
+
 spiflash
 --------
 
