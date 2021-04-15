@@ -343,11 +343,10 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
                 (unsigned int)t,
                 (void *)regs[REG_A0 + t]);
 
-          DEBUGASSERT(regs[REG_A0 + s] + imm8 == regs[REG_EXCVADDR]);
-          store_uint8(((uint8_t *)regs[REG_A0 + s]) + imm8,
-                      regs[REG_A0 + t]);
-          store_uint8(((uint8_t *)regs[REG_A0 + s]) + imm8 + 1,
-                      regs[REG_A0 + t] >> 8);
+          uintptr_t va = regs[REG_A0 + s] + (imm8 << 1);
+          DEBUGASSERT(va == regs[REG_EXCVADDR]);
+          store_uint8((uint8_t *)va, regs[REG_A0 + t]);
+          store_uint8((uint8_t *)va + 1, regs[REG_A0 + t] >> 8);
           advance_pc(regs, 3);
           return regs;
         }
@@ -375,9 +374,10 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
                 (unsigned int)t,
                 (void *)regs[REG_A0 + t]);
 
-          DEBUGASSERT(regs[REG_A0 + s] + imm8 == regs[REG_EXCVADDR]);
-          uint8_t lo = load_uint8(((uint8_t *)regs[REG_A0 + s]) + imm8);
-          uint8_t hi = load_uint8(((uint8_t *)regs[REG_A0 + s]) + imm8 + 1);
+          uintptr_t va = regs[REG_A0 + s] + (imm8 << 1);
+          DEBUGASSERT(va == regs[REG_EXCVADDR]);
+          uint8_t lo = load_uint8((uint8_t *)va);
+          uint8_t hi = load_uint8((uint8_t *)va + 1);
           regs[REG_A0 + t] = (hi << 8) | lo;
           advance_pc(regs, 3);
           return regs;
