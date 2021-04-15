@@ -286,7 +286,7 @@ static int ds18b20_isalarm(FAR struct onewire_master_s *master,
   alarm.romcode = config->romcode;
   alarm.isalarm = false;
 
-  ret = onewire_search(master, config->family, true, ds18b20_alarm_cb,
+  ret = onewire_search(master, DS18B20_DEVICE_FAMILY, true, ds18b20_alarm_cb,
                        &alarm);
   if (ret > 0)
     {
@@ -935,7 +935,6 @@ int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,
 
   priv->master           = onewire;
   priv->config.romcode   = romcode;
-  priv->config.family    = DS18B20_DEVICE_FAMILY;
   priv->reg.res          = DS18B20_RES_CONV(DS18B20_RESMAX);
   priv->reg.alarm.thigh  = DS18B20_TALARM_MAX;
   priv->reg.alarm.tlow   = DS18B20_TALARM_MIN;

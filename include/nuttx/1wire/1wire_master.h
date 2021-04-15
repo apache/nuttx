@@ -39,7 +39,6 @@ struct onewire_master_s;
 
 struct onewire_config_s
 {
-  uint8_t  family;                  /* Device family identifier */
   uint64_t romcode;                 /* Unique device identifier */
 };
 
