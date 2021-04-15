@@ -241,10 +241,6 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
 int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 {
-#if !defined(CONFIG_ARCH_USE_MODULE_TEXT)
-  size_t align;
-  size_t text_size;
-#endif
   int ret;
 
   binfo("loadinfo: %p\n", loadinfo);
@@ -267,12 +263,16 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold the ELF image */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
   if (loadinfo->textsize > 0)
     {
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
       loadinfo->textalloc = (uintptr_t)
                             up_module_text_memalign(loadinfo->textalign,
                                                     loadinfo->textsize);
+#else
+      loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
+                                                    loadinfo->textsize);
+#endif
       if (!loadinfo->textalloc)
         {
           berr("ERROR: Failed to allocate memory for the module text\n");
@@ -292,31 +292,6 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
           goto errout_with_buffers;
         }
     }
-#else
-  align = loadinfo->textalign;
-  if (align < loadinfo->dataalign)
-    {
-      align = loadinfo->dataalign;
-    }
-
-  text_size = loadinfo->textsize;
-  if (loadinfo->datasize > 0)
-    {
-      text_size = _ALIGN_UP(text_size, loadinfo->dataalign);
-    }
-
-  loadinfo->textalloc = (uintptr_t)lib_memalign(align,
-                                                text_size +
-                                                loadinfo->datasize);
-  if (!loadinfo->textalloc)
-    {
-      berr("ERROR: Failed to allocate memory for the module\n");
-      ret = -ENOMEM;
-      goto errout_with_buffers;
-    }
-
-  loadinfo->datastart = loadinfo->textalloc + text_size;
-#endif
 
   /* Load ELF section data into memory */
 

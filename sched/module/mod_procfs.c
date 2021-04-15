@@ -138,17 +138,9 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
                       modp->modname, modp->initializer,
                       modp->modinfo.uninitializer, modp->modinfo.arg,
                       modp->modinfo.nexports,
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
                       modp->textalloc,
-#else
-                      modp->alloc,
-#endif
                       (unsigned long)modp->textsize,
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
                       (FAR uint8_t *)modp->dataalloc,
-#else
-                      (FAR uint8_t *)modp->alloc + modp->textsize,
-#endif
                       (unsigned long)modp->datasize);
   copysize = procfs_memcpy(priv->line, linesize, priv->buffer,
                            priv->remaining, &priv->offset);
