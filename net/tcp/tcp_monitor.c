@@ -361,15 +361,13 @@ void tcp_close_monitor(FAR struct socket *psock)
   /* Find and free the the connection event callback */
 
   net_lock();
-  for (cb = conn->connevents;
-       cb != NULL && cb->priv != (FAR void *)psock;
-       cb = cb->nxtconn)
-    {
-    }
 
-  if (cb != NULL)
+  for (cb = conn->connevents; cb != NULL; cb = cb->nxtconn)
     {
-      devif_conn_callback_free(conn->dev, cb, &conn->connevents);
+      if (cb->priv == (FAR void *)psock)
+        {
+          devif_conn_callback_free(conn->dev, cb, &conn->connevents);
+        }
     }
 
   /* Make sure that this socket is explicitly marked as closed */
