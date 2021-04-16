@@ -244,6 +244,15 @@
 #define DR_REG_PWM3_BASE                        0x3ff70000
 #define PERIPHS_SPI_ENCRYPT_BASEADDR            DR_REG_SPI_ENCRYPT_BASE
 
+/* Some AHB addresses can be used instead of DPORT addresses
+ * as a workaround for some HW bugs.
+ * This workaround is detailed at
+ * https://www.espressif.com/sites/default/files/documentation/
+ * eco_and_workarounds_for_bugs_in_esp32_en.pdf
+ */
+
+#define AHB_REG_UART_BASE   0x60000000
+
 /* Overall memory map */
 
 #define SOC_DROM_LOW            0x3f400000
