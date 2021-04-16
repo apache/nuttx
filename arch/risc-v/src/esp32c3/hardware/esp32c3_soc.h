@@ -76,17 +76,18 @@
 /* Registers Operation */
 
 #define REG_UHCI_BASE(i)      (DR_REG_UHCI0_BASE - (i) * 0x8000)
-#define REG_UART_BASE( i )    (DR_REG_UART_BASE + (i) * 0x10000 + \
+#define REG_UART_BASE(i)      (DR_REG_UART_BASE + (i) * 0x10000 + \
                                ( (i) > 1 ? 0xe000 : 0 ) )
 #define REG_UART_AHB_BASE(i)  (0x60000000 + (i) * 0x10000 + \
                                ( (i) > 1 ? 0xe000 : 0 ) )
 #define UART_FIFO_AHB_REG(i)  (REG_UART_AHB_BASE(i) + 0x0)
-#define REG_I2S_BASE( i )     (DR_REG_I2S_BASE + (i) * 0x1E000)
+#define REG_I2S_BASE(i)       (DR_REG_I2S_BASE + (i) * 0x1E000)
 #define REG_TIMG_BASE(i)      (DR_REG_TIMERGROUP0_BASE + (i)*0x1000)
 #define REG_SPI_MEM_BASE(i)   (DR_REG_SPI0_BASE - (i) * 0x1000)
+#define REG_SPI_BASE(i)       (DR_REG_SPI2_BASE)
 #define REG_I2C_BASE(i)       (DR_REG_I2C_EXT_BASE + (i) * 0x14000)
 
-/* Periheral Clock */
+/* Peripheral Clock */
 
 #define APB_CLK_FREQ_ROM        (40 * 1000000)
 #define CPU_CLK_FREQ_ROM        APB_CLK_FREQ_ROM
