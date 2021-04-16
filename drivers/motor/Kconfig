@@ -9,6 +9,56 @@ menuconfig MOTOR
 
 if MOTOR
 
+config MOTOR_UPPER
+	bool "Motor generic upper-half driver"
+	default n
+	---help---
+		Enables building of a motor generic upper half driver.
+
+if MOTOR_UPPER
+
+config MOTOR_UPPER_HAVE_POSITION
+	bool "Have position control"
+	default n
+
+config MOTOR_UPPER_HAVE_DIRECTION
+	bool "Have direction control"
+	default n
+
+config MOTOR_UPPER_HAVE_SPEED
+	bool "Have speed control"
+	default n
+
+config MOTOR_UPPER_HAVE_TORQUE
+	bool "Have torque control (rotary motors)"
+	default n
+
+config MOTOR_UPPER_HAVE_FORCE
+	bool "Have force control (linear motors)"
+	default n
+
+config MOTOR_UPPER_HAVE_ACCELERATION
+	bool "Have acceleration control"
+	default n
+
+config MOTOR_UPPER_HAVE_DECELERATION
+	bool "Have deceleration control"
+	default n
+
+config MOTOR_UPPER_HAVE_INPUT_VOLTAGE
+	bool "Have input voltage protection"
+	default n
+
+config MOTOR_UPPER_HAVE_INPUT_CURRENT
+	bool "Have input current protection"
+	default n
+
+config MOTOR_UPPER_HAVE_INPUT_POWER
+	bool "Have input power protection"
+	default n
+
+endif
+
 source "drivers/motor/foc/Kconfig"
 
 endif # MOTOR
