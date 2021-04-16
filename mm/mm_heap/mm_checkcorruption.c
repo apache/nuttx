@@ -66,15 +66,13 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
   for (region = 0; region < heap_impl->mm_nregions; region++)
 #endif
     {
-      irqstate_t flags = 0;
-
       prev = NULL;
 
       /* Visit each node in the region
        * Retake the semaphore for each region to reduce latencies
        */
 
-      if (up_interrupt_context() || sched_idletask())
+      if (up_interrupt_context())
         {
           if (heap_impl->mm_counts_held)
             {
@@ -84,8 +82,13 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
               return;
 #endif
             }
-
-          flags = enter_critical_section();
+        }
+      else if (sched_idletask())
+        {
+          if (mm_trysemaphore(heap))
+            {
+              return;
+            }
         }
       else
         {
@@ -122,11 +125,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       assert(node == heap_impl->mm_heapend[region]);
 
-      if (up_interrupt_context() || sched_idletask())
-        {
-          leave_critical_section(flags);
-        }
-      else
+      if (!up_interrupt_context())
         {
           mm_givesemaphore(heap);
         }

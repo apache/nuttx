@@ -821,19 +821,20 @@ void nx_start(void)
 
       /* Check stack in idle thread */
 
-      flags = enter_critical_section();
-
       for (i = 0; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
         {
+          flags = enter_critical_section();
+
           if (up_check_tcbstack_remain(g_pidhash[i].tcb) <= 0)
             {
               _alert("Stack check failed, pid %d, name %s\n",
                       g_pidhash[i].tcb->pid, g_pidhash[i].tcb->name);
               PANIC();
             }
+
+          leave_critical_section(flags);
         }
 
-      leave_critical_section(flags);
 #endif
 
       /* Check heap in idle thread */
