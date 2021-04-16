@@ -178,8 +178,13 @@ config ESP32C3_WDT
 	bool
 	default n
 
+config ESP32C3_SPI
+	bool
+	default n
+
 config ESP32C3_GPIO_IRQ
 	bool "GPIO pin interrupts"
+	default n
 	---help---
 		Enable support for interrupting GPIO pins
 
@@ -229,6 +234,12 @@ config ESP32C3_SPIFLASH
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
+
+config ESP32C3_SPI2
+	bool "SPI 2"
+	default n
+	select ESP32C3_SPI
+	select SPI
 
 config ESP32C3_MWDT0
 	bool "Main System Watchdog Timer (Group 0)"
@@ -287,6 +298,48 @@ config ESP32C3_I2C0_SDAPIN
 endif # ESP32C3_I2C0
 
 endmenu # I2C configuration
+
+menu "SPI configuration"
+	depends on ESP32C3_SPI
+
+config ESP32C3_SPI_SWCS
+	bool "SPI software CS"
+	default n
+	---help---
+		Use SPI software CS.
+
+config ESP32C3_SPI_UDCS
+	bool "User defined CS"
+	default n
+	depends on ESP32C3_SPI_SWCS
+	---help---
+		Use user-defined CS.
+
+if ESP32C3_SPI2
+
+config ESP32C3_SPI2_CSPIN
+	int "SPI2 CS Pin"
+	default 10
+	range 0 21
+
+config ESP32C3_SPI2_CLKPIN
+	int "SPI2 CLK Pin"
+	default 6
+	range 0 21
+
+config ESP32C3_SPI2_MOSIPIN
+	int "SPI2 MOSI Pin"
+	default 7
+	range 0 21
+
+config ESP32C3_SPI2_MISOPIN
+	int "SPI2 MISO Pin"
+	default 2
+	range 0 21
+
+endif # ESP32C3_SPI2
+
+endmenu # SPI configuration
 
 menu "UART configuration"
 	depends on ESP32C3_UART
