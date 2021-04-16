@@ -886,6 +886,15 @@ void stm32_stdclockconfig(void)
         {
         }
 
+      /* Configure SDMMC source clock */
+
+#if defined(STM32_RCC_D1CCIPR_SDMMCSEL)
+      regval = getreg32(STM32_RCC_D1CCIPR);
+      regval &= ~RCC_D1CCIPR_SDMMC_MASK;
+      regval |= STM32_RCC_D1CCIPR_SDMMCSEL;
+      putreg32(regval, STM32_RCC_D1CCIPR);
+#endif
+
       /* Configure I2C source clock */
 
 #if defined(STM32_RCC_D2CCIP2R_I2C123SRC)
