@@ -212,7 +212,7 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint32_t)rtcb->stack_base_ptr;
+  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
   ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   _alert("Current sp: %08x\n", sp);
@@ -291,10 +291,10 @@ static void up_dumpstate(void)
    * stack memory.
    */
 
-  if (sp >= ustackbase && sp < ustackbase + ustacksize)
+  if (sp >= ustackbase - ustacksize && sp < ustackbase)
     {
       _alert("User Stack\n", sp);
-      up_stackdump(sp, ustackbase + ustacksize);
+      up_stackdump(sp, ustackbase);
     }
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -312,7 +312,7 @@ static void up_dumpstate(void)
   else
     {
       _alert("ERROR: Stack pointer is not within the allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      up_stackdump(ustackbase - ustacksize, ustackbase);
 #ifdef CONFIG_ARCH_KERNEL_STACK
       up_stackdump(kstackbase, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
 #endif

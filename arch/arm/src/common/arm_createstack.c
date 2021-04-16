@@ -58,6 +58,12 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* 32bit alignment macros */
+
+#define INT32_ALIGN_MASK    (3)
+#define INT32_ALIGN_DOWN(a) ((a) & ~INT32_ALIGN_MASK)
+#define INT32_ALIGN_UP(a)   (((a) + INT32_ALIGN_MASK) & ~INT32_ALIGN_MASK)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -74,8 +80,8 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -102,19 +108,27 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-  stack_size = STACK_ALIGN_UP(stack_size);
+  size_t alloc_size;
+  size_t tls_size;
+
+  /* Add the size of the TLS information structure and align. */
+
+  tls_size   = INT32_ALIGN_UP(sizeof(struct tls_info_s));
+  alloc_size = STACK_ALIGN_UP(stack_size + tls_size);
 
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
    */
 
-  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
-  if (stack_size > TLS_MAXSTACK)
+  DEBUGASSERT(alloc_size <= TLS_MAXSTACK);
+  if (alloc_size > TLS_MAXSTACK)
     {
-      stack_size = TLS_MAXSTACK;
+      alloc_size = TLS_MAXSTACK;
     }
 #endif
+
+  stack_size = alloc_size - tls_size;
 
   /* Is there already a stack allocated of a different size? */
 
@@ -140,14 +154,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          tcb->stack_alloc_ptr = kmm_memalign(TLS_STACK_ALIGN, stack_size);
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kmm_memalign(TLS_STACK_ALIGN, alloc_size);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = kumm_memalign(TLS_STACK_ALIGN, stack_size);
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, alloc_size);
         }
 
 #else /* CONFIG_TLS_ALIGNED */
@@ -157,7 +173,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
           tcb->stack_alloc_ptr =
-              kmm_memalign(CONFIG_STACK_ALIGNMENT, stack_size);
+              (uint32_t *)kmm_memalign(CONFIG_STACK_ALIGNMENT, alloc_size);
         }
       else
 #endif
@@ -165,7 +181,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
           /* Use the user-space allocator if this is a task or pthread */
 
           tcb->stack_alloc_ptr =
-              kumm_memalign(CONFIG_STACK_ALIGNMENT, stack_size);
+              (uint32_t *)kumm_memalign(CONFIG_STACK_ALIGNMENT, alloc_size);
         }
 #endif /* CONFIG_TLS_ALIGNED */
 
@@ -190,14 +206,19 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * Items on the stack are referenced as positive word offsets from sp.
        */
 
-      /* Since both stack_alloc_ptr and stack_size are in
+      /* Since both stack_alloc_ptr and alloc_size are in
        * CONFIG_STACK_ALIGNMENT, and the stack ptr is decremented before
        * the first write, we can directly save our variables to struct
        * tcb_s.
        */
 
       tcb->adj_stack_size = stack_size;
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->adj_stack_ptr  = (FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+          alloc_size);
+
+      /* Initialize the TLS data structure */
+
+      memset(tcb->stack_alloc_ptr, 0, tls_size);
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
@@ -205,7 +226,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      arm_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+      arm_stack_color((FAR void *)((uintptr_t)tcb->adj_stack_ptr -
+          tcb->adj_stack_size), tcb->adj_stack_size);
 #endif /* CONFIG_STACK_COLORATION */
 
       board_autoled_on(LED_STACKCREATED);

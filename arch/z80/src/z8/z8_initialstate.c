@@ -74,7 +74,6 @@ void up_initial_state(FAR struct tcb_s *tcb)
   xcp->regs[XCPT_IRQCTL]  = 0x0080; /* IRQE bit will enable interrupts */
 #endif
   xcp->regs[XCPT_RPFLAGS] = 0xe000; /* RP=%e0 */
-  xcp->regs[XCPT_SP]      = (chipreg_t)tcb->stack_base_ptr +
-                                       tcb->adj_stack_size;
+  xcp->regs[XCPT_SP]      = (chipreg_t)tcb->adj_stack_ptr;
   xcp->regs[XCPT_PC]      = (chipreg_t)tcb->start;
 }

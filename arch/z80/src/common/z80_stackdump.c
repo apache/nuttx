@@ -45,7 +45,7 @@ void up_stackdump(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   uintptr_t sp = z80_getsp();
-  uintptr_t stack_base = (uintptr_t)rtcb->stack_base_ptr;
+  uintptr_t stack_base = (uintptr_t)rtcb->adj_stack_ptr;
   uintptr_t stack_size = (uintptr_t)rtcb->adj_stack_size;
   uintptr_t stack;
 
@@ -53,17 +53,17 @@ void up_stackdump(void)
   _alert("stack_size: %06x\n", stack_size);
   _alert("sp:         %06x\n", sp);
 
-  if (sp >= stack_base && sp < stack_base + stack_size)
+  if (sp >= stack_base || sp < stack_base - stack_size)
     {
-      stack = sp;
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      stack = stack_base - stack_size;
     }
   else
     {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      stack = stack_base;
+      stack = sp;
     }
 
-  for (stack = stack & ~0x0f; stack < stack_base + stack_size; stack += 16)
+  for (stack = stack & ~0x0f; stack < stack_base; stack += 16)
     {
       FAR uint8_t *ptr = (FAR uint8_t *)stack;
 

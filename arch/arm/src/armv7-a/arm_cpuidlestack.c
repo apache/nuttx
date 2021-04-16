@@ -94,8 +94,8 @@ static FAR const uint32_t *g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is
@@ -111,6 +111,7 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 {
 #if CONFIG_SMP_NCPUS > 1
   uintptr_t stack_alloc;
+  uintptr_t top_of_stack;
 
   DEBUGASSERT(cpu > 0 && cpu < CONFIG_SMP_NCPUS && tcb != NULL &&
               stack_size <= SMP_STACK_SIZE);
@@ -119,10 +120,11 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 
   stack_alloc          = (uintptr_t)g_cpu_stackalloc[cpu];
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
+  top_of_stack         = stack_alloc + SMP_STACK_SIZE;
 
   tcb->adj_stack_size  = SMP_STACK_SIZE;
-  tcb->stack_alloc_ptr = (FAR void *)stack_alloc;
-  tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+  tcb->stack_alloc_ptr = (FAR uint32_t *)stack_alloc;
+  tcb->adj_stack_ptr   = (FAR uint32_t *)top_of_stack;
 #endif
 
   return OK;

@@ -67,16 +67,16 @@
  *
  *   1) User code calls vfork().  vfork() collects context information and
  *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
+ *   2) up_vfork()and calls nxtask_setup_vfork().
  *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
- *      - Initialization of the TCB (including call to up_initial_state())
+ *      - Initialization of the TCB (including call to up_initial_state()
  *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
  *   5) up_vfork() then calls nxtask_start_vfork()
@@ -100,11 +100,13 @@ pid_t up_vfork(const struct vfork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
+  size_t stacksize;
   uint32_t newsp;
   uint32_t newfp;
-  uint32_t newtop;
-  uint32_t stacktop;
   uint32_t stackutil;
+  size_t argsize;
+  void *argv;
+  int ret;
 
   sinfo("vfork context [%p]:\n", context);
   sinfo("  r4:%08" PRIx32 " r5:%08" PRIx32
@@ -117,7 +119,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_vfork((start_t)(context->lr & ~1));
+  child = nxtask_setup_vfork((start_t)(context->lr & ~1), &argsize);
   if (!child)
     {
       serr("ERROR: nxtask_setup_vfork failed\n");
@@ -126,18 +128,37 @@ pid_t up_vfork(const struct vfork_s *context)
 
   sinfo("TCBs: Parent=%p Child=%p\n", parent, child);
 
+  /* Get the size of the parent task's stack. */
+
+  stacksize = parent->adj_stack_size;
+
+  /* Allocate the stack for the TCB */
+
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
+                        parent->flags & TCB_FLAG_TTYPE_MASK);
+  if (ret != OK)
+    {
+      serr("ERROR: up_create_stack failed: %d\n", ret);
+      nxtask_abort_vfork(child, -ret);
+      return (pid_t)ERROR;
+    }
+
+  /* Allocate the memory and copy argument from parent task */
+
+  argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
+  memcpy(argv, parent->adj_stack_ptr, argsize);
+
   /* How much of the parent's stack was utilized?  The ARM uses
    * a push-down stack so that the current stack pointer should
    * be lower than the initial, adjusted stack pointer.  The
    * stack usage should be the difference between those two.
    */
 
-  stacktop = (uint32_t)parent->stack_base_ptr +
-                       parent->adj_stack_size;
-  DEBUGASSERT(stacktop > context->sp);
-  stackutil = stacktop - context->sp;
+  DEBUGASSERT((uint32_t)parent->adj_stack_ptr > context->sp);
+  stackutil = (uint32_t)parent->adj_stack_ptr - context->sp;
 
-  sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
+  sinfo("Parent: stacksize:%zu stackutil:%" PRId32 "\n",
+        stacksize, stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -146,27 +167,26 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uint32_t)child->cmn.stack_base_ptr +
-                     child->cmn.adj_stack_size;
-  newsp = newtop - stackutil;
+  newsp = (uint32_t)child->cmn.adj_stack_ptr - stackutil;
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
 
-  if (context->fp >= context->sp && context->fp < stacktop)
+  if (context->fp <= (uint32_t)parent->adj_stack_ptr &&
+      context->fp >= (uint32_t)parent->adj_stack_ptr - stacksize)
     {
-      uint32_t frameutil = stacktop - context->fp;
-      newfp = newtop - frameutil;
+      uint32_t frameutil = (uint32_t)parent->adj_stack_ptr - context->fp;
+      newfp = (uint32_t)child->cmn.adj_stack_ptr - frameutil;
     }
   else
     {
       newfp = context->fp;
     }
 
-  sinfo("Old stack top:%08" PRIx32 " SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        stacktop, context->sp, context->fp);
-  sinfo("New stack top:%08" PRIx32 " SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        newtop, newsp, newfp);
+  sinfo("Parent: stack base:%p SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
+        parent->adj_stack_ptr, context->sp, context->fp);
+  sinfo("Child:  stack base:%p SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
+        child->cmn.adj_stack_ptr, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When
    * the child TCB was initialized, all of the values were set to zero.

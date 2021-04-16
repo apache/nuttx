@@ -67,8 +67,8 @@
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *     initial value of the stack pointer.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -83,6 +83,7 @@
 
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 {
+  uintptr_t adj_stack_addr;
   size_t adj_stack_size;
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -96,11 +97,23 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 
   adj_stack_size = STACK_ALIGN_DOWN(stack_size);
 
+  /* This is the address of the last word in the allocation.
+   * NOTE that stack_alloc_ptr + adj_stack_size may lie one byte
+   * outside of the stack.  This is okay for an initial state; the
+   * first pushed values will be within the stack allocation.
+   */
+
+  adj_stack_addr = STACK_ALIGN_DOWN((uintptr_t)stack + adj_stack_size);
+
   /* Save the values in the TCB */
 
   tcb->adj_stack_size  = adj_stack_size;
   tcb->stack_alloc_ptr = stack;
-  tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+  tcb->adj_stack_ptr   = (FAR void *)adj_stack_addr;
+
+  /* Initialize the TLS data structure */
+
+  memset(stack, 0, sizeof(struct tls_info_s));
 
 #if defined(CONFIG_STACK_COLORATION)
   /* If stack debug is enabled, then fill the stack with a
@@ -108,7 +121,9 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
    * water marks.
    */
 
-  up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+  up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+                 sizeof(struct tls_info_s)),
+                 adj_stack_size - sizeof(struct tls_info_s));
 #endif
 
   return OK;

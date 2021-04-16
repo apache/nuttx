@@ -52,7 +52,7 @@
 
 void up_initial_state(FAR struct tcb_s *tcb)
 {
-  FAR struct xcptcontext *xcp = &tcb->xcp;
+  struct xcptcontext *xcp = &tcb->xcp;
 
   /* Initialize the initial exception register context structure */
 
@@ -61,10 +61,9 @@ void up_initial_state(FAR struct tcb_s *tcb)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Parity/Overflow flag will enable interrupts */
 
-  ((FAR uint8_t *)xcp->regs)[XCPT_IF_OFFSET] = EZ80_PV_FLAG;
+  ((FAR uint8_t *)xcp->regs)[XCPT_IF_OFFSET]  = EZ80_PV_FLAG;
 #endif
 
-  xcp->regs[XCPT_SP] = (chipreg_t)tcb->stack_base_ptr +
-                                  tcb->adj_stack_size;
+  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
   xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
 }

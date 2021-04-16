@@ -52,7 +52,6 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
-  uintptr_t sp;
 
   /* Initialize the idle thread stack */
 
@@ -60,7 +59,7 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
@@ -70,10 +69,8 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Save the initial stack pointer */
 
-  sp                      = (uintptr_t)tcb->stack_base_ptr +
-                                       tcb->adj_stack_size;
-  xcp->regs[REG_SPH]      = sp >> 8;
-  xcp->regs[REG_SPL]      = sp & 0xff;
+  xcp->regs[REG_SPH]      = (uint16_t)tcb->adj_stack_ptr >> 8;
+  xcp->regs[REG_SPL]      = (uint16_t)tcb->adj_stack_ptr & 0xff;
 
   /* Save the task entry point */
 

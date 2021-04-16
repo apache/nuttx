@@ -79,8 +79,9 @@
  *
  *   - adj_stack_size: Stack size after removal of the stack frame from
  *     the stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted initial stack pointer after the frame has
+ *     been removed from the stack.  This will still be the initial value
+ *     of the stack pointer when the task is started.
  *
  * Input Parameters:
  *   - tcb:  The TCB of new task
@@ -95,8 +96,6 @@
 
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 {
-  FAR void *ret;
-
   /* Align the frame_size */
 
   frame_size = STACK_ALIGN_UP(frame_size);
@@ -108,15 +107,16 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
       return NULL;
     }
 
-  ret = tcb->stack_base_ptr;
-  memset(ret, 0, frame_size);
-
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr   = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
-  tcb->adj_stack_size -= frame_size;
+  tcb->adj_stack_ptr    = (uint8_t *)tcb->adj_stack_ptr - frame_size;
+  tcb->adj_stack_size  -= frame_size;
+
+  /* Reset the initial stack pointer */
+
+  tcb->xcp.regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
 
   /* And return the pointer to the allocated region */
 
-  return ret;
+  return tcb->adj_stack_ptr;
 }

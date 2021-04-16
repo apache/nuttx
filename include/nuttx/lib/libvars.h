@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/z80/z80_initialstate.c
+ * include/nuttx/lib/libvars.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,57 +18,59 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_LIB_LIBVARS_H
+#define __INCLUDE_NUTTX_LIB_LIBVARS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <nuttx/arch.h>
+#include <stdbool.h>
 
-#include "chip.h"
-#include "z80_internal.h"
-#include "z80_arch.h"
+#include <nuttx/lib/getopt.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_initial_state
+#ifndef CONFIG_BUILD_KERNEL
+/* This structure encapsulates all task-specific variables needed by the C
+ * Library.  This structure is retained at the beginning of the main thread
+ * of and is accessed via a reference stored in the TLS of all threads in
+ * the task group.
  *
- * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
- *
- *   This function must setup the initial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
- *
- ****************************************************************************/
+ * NOTE: task-specific variables are not needed in the KERNEL build.  In
+ * that build mode, all global variables are inherently process-specific.
+ */
 
-void up_initial_state(struct tcb_s *tcb)
+struct libvars_s
 {
-  struct xcptcontext *xcp = &tcb->xcp;
-
-  /* Initialize the idle thread stack */
-
-  if (tcb->pid == 0)
-    {
-      tcb->stack_alloc_ptr = (void *)CONFIG_STACK_BASE;
-      tcb->adj_stack_ptr   = (void *)(CONFIG_STACK_BASE +
-                                      CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-
-  /* Initialize the initial exception register context structure */
-
-  memset(xcp, 0, sizeof(struct xcptcontext));
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  xcp->regs[XCPT_I]  = Z80_PV_FLAG; /* Parity flag will enable interrupts */
+  struct getopt_s lv_getopt; /* Globals used by getopt() */
+};
 #endif
-  xcp->regs[XCPT_SP] = (chipreg_t)tcb->adj_stack_ptr;
-  xcp->regs[XCPT_PC] = (chipreg_t)tcb->start;
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_LIB_LIBVARS_H */

@@ -38,6 +38,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
+#include <nuttx/lib/libvars.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -400,9 +401,8 @@ struct stackinfo_s
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
                                          /* Needed to deallocate stack          */
-  FAR void *stack_base_ptr;              /* Adjusted initial stack pointer      */
-                                         /* after the frame has been removed    */
-                                         /* from the stack.                     */
+  FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
+                                         /* The initial stack pointer value     */
 };
 
 /* struct exitinfo_s ************************************************************/
@@ -528,6 +528,12 @@ struct task_group_s
 
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t tg_tlsset;           /* Set of TLS data indexes allocated        */
+#endif
+
+  /* Task-specific Data *********************************************************/
+
+#ifndef CONFIG_BUILD_KERNEL
+  FAR struct libvars_s *tg_libvars; /* C library global variables */
 #endif
 
   /* POSIX Signal Control Fields ************************************************/
@@ -656,9 +662,8 @@ struct tcb_s
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
                                          /* Needed to deallocate stack          */
-  FAR void *stack_base_ptr;              /* Adjusted initial stack pointer      */
-                                         /* after the frame has been removed    */
-                                         /* from the stack.                     */
+  FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
+                                         /* The initial stack pointer value     */
 
   /* External Module Support ****************************************************/
 
@@ -1025,10 +1030,10 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *    - Allocation of the child task's TCB.
  *    - Initialization of file descriptors and streams
  *    - Configuration of environment variables
- *    - Allocate and initialize the stack
  *    - Setup the input parameters for the task.
- *    - Initialization of the TCB (including call to up_initial_state())
+ *    - Initialization of the TCB (including call to up_initial_state()
  * 4) vfork() provides any additional operating context. vfork must:
+ *    - Allocate and initialize the stack
  *    - Initialize special values in any CPU registers that were not
  *      already configured by up_initial_state()
  * 5) vfork() then calls nxtask_start_vfork()
@@ -1038,7 +1043,7 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *
  ********************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr);
+FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize);
 pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
 void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
 
@@ -1325,7 +1330,7 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
  *
  * Input Parameters:
  *   pid       - Identifies the thread to query.  Zero is interpreted as the
- *               the calling thread, -1 is interpreted as the calling task.
+ *               the calling thread
  *   stackinfo - User-provided location to return the stack information.
  *
  * Returned Value:

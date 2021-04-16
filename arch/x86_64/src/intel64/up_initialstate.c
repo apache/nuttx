@@ -51,9 +51,12 @@
  *
  ****************************************************************************/
 
+extern uintptr_t tux_mm_new_pd1(void);
+
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+  struct tcb_s *rtcb;
 
   /* Initialize the idle thread stack */
 
@@ -61,7 +64,7 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
@@ -77,14 +80,17 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[3]      = (uint64_t)0x0000000000001f80;
 
+  /* set page table to share space with current process */
+
+  rtcb = this_task();
+  UNUSED(rtcb);
+
   /* Save the initial stack pointer... the value of the stackpointer before
    * the "interrupt occurs."
    */
 
-  xcp->regs[REG_RSP]      = (uint64_t)tcb->stack_base_ptr +
-                                      tcb->adj_stack_size;
-  xcp->regs[REG_RBP]      = (uint64_t)tcb->stack_base_ptr +
-                                      tcb->adj_stack_size;
+  xcp->regs[REG_RSP]      = (uint64_t)tcb->adj_stack_ptr;
+  xcp->regs[REG_RBP]      = (uint64_t)tcb->adj_stack_ptr;
 
   /* Save the task entry point */
 

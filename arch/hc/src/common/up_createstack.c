@@ -61,8 +61,8 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -88,6 +88,10 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
+  /* Add the size of the TLS information structure */
+
+  stack_size += sizeof(struct tls_info_s);
+
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
@@ -127,14 +131,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          tcb->stack_alloc_ptr = kmm_memalign(TLS_STACK_ALIGN, stack_size);
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kmm_memalign(TLS_STACK_ALIGN, stack_size);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = kumm_memalign(TLS_STACK_ALIGN, stack_size);
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
         }
 
 #else /* CONFIG_TLS_ALIGNED */
@@ -143,14 +149,14 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          tcb->stack_alloc_ptr = kmm_malloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)kmm_malloc(stack_size);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = kumm_malloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
         }
 #endif /* CONFIG_TLS_ALIGNED */
 
@@ -168,7 +174,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-      uintptr_t top_of_stack;
+      size_t top_of_stack;
       size_t size_of_stack;
 
       /* Yes.. If stack debug is enabled, then fill the stack with a
@@ -187,7 +193,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * stack address.
        */
 
-      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+      top_of_stack = (size_t)tcb->stack_alloc_ptr + stack_size;
 
       /* The CPU12 stack should be aligned at half-word (2 byte)
        * boundaries. If necessary top_of_stack must be rounded
@@ -195,12 +201,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       top_of_stack &= ~1;
-      size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
+      size_of_stack = top_of_stack - (size_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->stack_base_ptr  = tcb->alloc_stack_ptr;
+      tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
       tcb->adj_stack_size = size_of_stack;
+
+      /* Initialize the TLS data structure */
+
+      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 
       board_autoled_on(LED_STACKCREATED);
       return OK;

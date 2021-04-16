@@ -74,5 +74,5 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 
   dtcb->stack_alloc_ptr = NULL;
   dtcb->adj_stack_size  = 0;
-  dtcb->stack_base_ptr   = NULL;
+  dtcb->adj_stack_ptr   = NULL;
 }

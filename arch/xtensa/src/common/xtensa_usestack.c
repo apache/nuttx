@@ -67,8 +67,8 @@
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *     initial value of the stack pointer.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -83,7 +83,7 @@
 
 int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
-  uintptr_t top_of_stack;
+  size_t top_of_stack;
   size_t size_of_stack;
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -111,19 +111,23 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * as positive word offsets from sp.
    */
 
-  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+  top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size;
 
   /* The XTENSA stack must be aligned at 16 bytes boundaries. If necessary
    * top_of_stack must be rounded down to the next boundary.
    */
 
   top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
-  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
+  size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr;
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+  tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
+
+  /* Initialize the TLS data structure */
+
+  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 
 #if defined(CONFIG_STACK_COLORATION)
   /* If stack debug is enabled, then fill the stack with a
@@ -131,7 +135,9 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * water marks.
    */
 
-  up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+  up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+                 sizeof(struct tls_info_s)),
+                 size_of_stack - sizeof(struct tls_info_s));
 #endif
 
   return OK;

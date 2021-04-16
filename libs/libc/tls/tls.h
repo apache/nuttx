@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_initialstate.c
+ * libs/libc/tls/tls.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,48 +18,17 @@
  *
  ****************************************************************************/
 
+#ifndef __SCHED_TLS_TLS_H
+#define __SCHED_TLS_TLS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <string.h>
-
-#include <nuttx/arch.h>
-
-#include "up_internal.h"
-
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_initial_state
- *
- * Description:
- *   A new thread is being started and a new TCB
- *   has been created. This function is called to initialize
- *   the processor specific portions of the new TCB.
- *
- *   This function must setup the initial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
- *   on the next context switch.
- *
- ****************************************************************************/
-
-void up_initial_state(struct tcb_s *tcb)
-{
-  if (tcb->pid == 0)
-    {
-      tcb->stack_alloc_ptr = (void *)(sim_getsp() -
-                                      CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->adj_stack_ptr   = (void *)sim_getsp();
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
-    }
-
-  memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
-  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr - sizeof(xcpt_reg_t);
-  tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
-}
+#endif /* __SCHED_TLS_TLS_H */

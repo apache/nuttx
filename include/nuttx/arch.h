@@ -232,8 +232,8 @@ void up_initial_state(FAR struct tcb_s *tcb);
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -274,8 +274,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *     initial value of the stack pointer.
  *
  * Input Parameters:
  *   - tcb:  The TCB of new task
@@ -308,24 +308,9 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *
  *   - adj_stack_size: Stack size after removal of the stack frame from
  *     the stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
- *
- *   Here is the diagram after some allocation(tls, arg):
- *
- *                   +-------------+ <-stack_alloc_ptr(lowest)
- *                   |  TLS Data   |
- *                   +-------------+
- *                   |  Arguments  |
- *  stack_base_ptr-> +-------------+\
- *                   |  Available  | +
- *                   |    Stack    | |
- *                |  |             | |
- *                |  |             | +->adj_stack_size
- *                v  |             | |
- *                   |             | |
- *                   |             | +
- *                   +-------------+/
+ *   - adj_stack_ptr: Adjusted initial stack pointer after the frame has
+ *     been removed from the stack.  This will still be the initial value
+ *     of the stack pointer when the task is started.
  *
  * Input Parameters:
  *   - tcb:  The TCB of new task
@@ -1862,8 +1847,8 @@ int up_cpu_index(void);
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
- *     Arguments has been removed from the stack allocation.
+ *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *     the stack pointer.
  *
  * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is

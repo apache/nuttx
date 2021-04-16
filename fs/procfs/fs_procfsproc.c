@@ -857,7 +857,7 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   /* Show the stack base address */
 
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s0x%p\n",
-                        "StackBase:", tcb->stack_base_ptr);
+                        "StackBase:", tcb->adj_stack_ptr);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 

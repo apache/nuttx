@@ -68,16 +68,16 @@
  *
  *   1) User code calls vfork().  vfork() collects context information and
  *      transfers control up up_vfork().
- *   2) up_vfork() and calls nxtask_setup_vfork().
+ *   2) up_vfork()and calls nxtask_setup_vfork().
  *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
  *     This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Allocate and initialize the stack
  *      - Setup the input parameters for the task.
- *      - Initialization of the TCB (including call to up_initial_state())
+ *      - Initialization of the TCB (including call to up_initial_state()
  *   4) up_vfork() provides any additional operating context. up_vfork must:
+ *      - Allocate and initialize the stack
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
  *   5) up_vfork() then calls nxtask_start_vfork()
@@ -105,13 +105,15 @@ pid_t up_vfork(const struct vfork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
+  size_t stacksize;
   uint32_t newsp;
 #ifdef CONFIG_RISCV_FRAMEPOINTER
   uint32_t newfp;
 #endif
-  uint32_t newtop;
-  uint32_t stacktop;
   uint32_t stackutil;
+  size_t argsize;
+  void *argv;
+  int ret;
 
   sinfo("s0:%08x s1:%08x s2:%08x s3:%08x s4:%08x\n",
         context->s0, context->s1, context->s2, context->s3, context->s4);
@@ -139,7 +141,7 @@ pid_t up_vfork(const struct vfork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_vfork((start_t)context->ra);
+  child = nxtask_setup_vfork((start_t)context->ra, &argsize);
   if (!child)
     {
       sinfo("nxtask_setup_vfork failed\n");
@@ -148,18 +150,39 @@ pid_t up_vfork(const struct vfork_s *context)
 
   sinfo("Parent=%p Child=%p\n", parent, child);
 
+  /* Get the size of the parent task's stack.  Due to alignment operations,
+   * the adjusted stack size may be smaller than the stack size originally
+   * requested.
+   */
+
+  stacksize = parent->adj_stack_size + CONFIG_STACK_ALIGNMENT - 1;
+
+  /* Allocate the stack for the TCB */
+
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
+                        parent->flags & TCB_FLAG_TTYPE_MASK);
+  if (ret != OK)
+    {
+      serr("ERROR: up_create_stack failed: %d\n", ret);
+      nxtask_abort_vfork(child, -ret);
+      return (pid_t)ERROR;
+    }
+
+  /* Allocate the memory and copy argument from parent task */
+
+  argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
+  memcpy(argv, parent->adj_stack_ptr, argsize);
+
   /* How much of the parent's stack was utilized?  The RISC-V uses
    * a push-down stack so that the current stack pointer should
    * be lower than the initial, adjusted stack pointer.  The
    * stack usage should be the difference between those two.
    */
 
-  stacktop = (uint32_t)parent->stack_base_ptr +
-                       parent->adj_stack_size;
-  DEBUGASSERT(stacktop > context->sp);
-  stackutil = stacktop - context->sp;
+  DEBUGASSERT((uint32_t)parent->adj_stack_ptr > context->sp);
+  stackutil = (uint32_t)parent->adj_stack_ptr - context->sp;
 
-  sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
+  sinfo("stacksize:%d stackutil:%d\n", stacksize, stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -168,33 +191,32 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uint32_t)child->cmn.stack_base_ptr +
-                     child->cmn.adj_stack_size;
-  newsp = newtop - stackutil;
+  newsp = (uint32_t)child->cmn.adj_stack_ptr - stackutil;
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
 
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  if (context->fp >= context->sp && context->fp < stacktop)
+  if (context->fp <= (uint32_t)parent->adj_stack_ptr &&
+      context->fp >= (uint32_t)parent->adj_stack_ptr - stacksize)
     {
-      uint32_t frameutil = stacktop - context->fp;
-      newfp = newtop - frameutil;
+      uint32_t frameutil = (uint32_t)parent->adj_stack_ptr - context->fp;
+      newfp = (uint32_t)child->cmn.adj_stack_ptr - frameutil;
     }
   else
     {
       newfp = context->fp;
     }
 
-  sinfo("Old stack top:%08x SP:%08x FP:%08x\n",
-        stacktop, context->sp, context->fp);
-  sinfo("New stack top:%08x SP:%08x FP:%08x\n",
-        newtop, newsp, newfp);
+  sinfo("Old stack base:%08x SP:%08x FP:%08x\n",
+        parent->adj_stack_ptr, context->sp, context->fp);
+  sinfo("New stack base:%08x SP:%08x FP:%08x\n",
+        child->cmn.adj_stack_ptr, newsp, newfp);
 #else
-  sinfo("Old stack top:%08x SP:%08x\n",
-        stacktop, context->sp);
-  sinfo("New stack top:%08x SP:%08x\n",
-        newtop, newsp);
+  sinfo("Old stack base:%08x SP:%08x\n",
+        parent->adj_stack_ptr, context->sp);
+  sinfo("New stack base:%08x SP:%08x\n",
+        child->cmn.adj_stack_ptr, newsp);
 #endif
 
   /* Update the stack pointer, frame pointer, global pointer and saved
