@@ -24,6 +24,12 @@ ifeq ($(CONFIG_MOTOR_FOC),y)
 include motor$(DELIM)foc$(DELIM)Make.defs
 endif
 
+# Add generic upper-half motor driver
+
+ifeq ($(CONFIG_MOTOR_UPPER),y)
+CSRCS += motor.c
+endif
+
 # Include motor drivers in the build
 
 MOTOR_DEPPATH := --dep-path motor
