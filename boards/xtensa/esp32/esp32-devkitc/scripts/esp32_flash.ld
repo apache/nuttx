@@ -62,6 +62,7 @@ SECTIONS
 
     /* Module text area starts at the end of iram0_0_seg */
 
+    . = ALIGN (4);
     _smodtext = ABSOLUTE(.);
   } > iram0_0_seg
 

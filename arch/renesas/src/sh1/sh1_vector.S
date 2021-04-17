@@ -323,7 +323,7 @@ _up_vector:
 	/* Switch to the interrupt stack */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	mov.l	.Lintstack, r15		/* SP = interrupt stack base */
+	mov.l	.Lirqstacktop, r15	/* SP = interrupt stack top */
 	mov.l	r5, @r15		/* Save the user stack pointer (pre-decremented) */
 
 	/* Dispatch the interrupt */
@@ -395,8 +395,8 @@ _up_vector:
 	nop
 	.align	2
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-.Lintstack:
-	.long	_g_intstackbase
+.Lirqstacktop:
+	.long	_g_intstacktop
 #endif
 .Ldoirq:
         .long   _up_doirq
@@ -486,7 +486,7 @@ _up_fullcontextrestore:
 	.size	_up_fullcontextrestore, .-_up_fullcontextrestore
 
 /************************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  *
  * Description:
  *   Shouldn't happen
@@ -498,12 +498,12 @@ _up_fullcontextrestore:
 	.align	2
 	.globl	_g_intstackalloc
 	.type	_g_intstackalloc, object
-	.globl	_g_intstackbase
-	.type	_g_intstackbase, object
+	.globl	_g_intstacktop
+	.type	_g_intstacktop, object
 _g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
-_g_intstackbase:
-	.size	_g_intstackbase, 0
+_g_intstacktop:
+	.size	_g_intstacktop, 0
 	.size	_g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 	.end

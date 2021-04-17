@@ -34,7 +34,7 @@
   .global   _interrupt_handler
   .global   _exception_handler
   .global   g_intstackalloc
-  .global   g_intstackbase
+  .global   g_intstacktop
 
 /****************************************************************************
  * Section: .noinit
@@ -45,10 +45,10 @@
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   .align    4
   .type     g_intstackalloc, @object
-  .type     g_intstackbase,  @object
+  .type     g_intstacktop,  @object
 g_intstackalloc:
   .skip     (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
+g_intstacktop:
   .size     g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 
@@ -112,8 +112,8 @@ _interrupt_handler:
   mv   a1,  sp        /* context = sp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  lui  sp,  %hi(g_intstackbase)
-  addi sp,  sp, %lo(g_intstackbase)
+  lui  sp,  %hi(g_intstacktop)
+  addi sp,  sp, %lo(g_intstacktop)
 #endif
 
   /* Call interrupt/exception handler in C */

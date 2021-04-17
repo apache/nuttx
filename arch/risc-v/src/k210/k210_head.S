@@ -151,10 +151,10 @@ normal_irq:
   /* Switch to interrupt stack */
 
   bnez s0, 3f
-  la   sp, g_intstackbase
+  la   sp, g_intstacktop
   j    4f
 3:
-  la   sp, g_intstackbase
+  la   sp, g_intstacktop
   addi sp, sp, -(CONFIG_ARCH_INTERRUPTSTACK & ~7)
 4:
 
@@ -212,24 +212,24 @@ normal_irq:
   mret
 
 /************************************************************************************
- *  Name: g_intstackalloc and g_intstackbase
+ *  Name: g_intstackalloc and g_intstacktop
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
   .bss
   .align  8
   .global g_intstackalloc
-  .global g_intstackbase
+  .global g_intstacktop
   .type   g_intstackalloc, object
-  .type   g_intstackbase, object
+  .type   g_intstacktop, object
 g_intstackalloc:
 #ifndef CONFIG_SMP
   .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
 #else
   .skip  (((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) + 4) & ~7)
 #endif
-g_intstackbase:
-  .size  g_intstackbase, 0
+g_intstacktop:
+  .size  g_intstacktop, 0
 #ifndef CONFIG_SMP
   .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 #else

@@ -60,8 +60,7 @@ void up_irqinitialize(void)
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-  riscv_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                    intstack_size);
+  riscv_stack_color((FAR void *)&g_intstackalloc, intstack_size);
 #endif
 
   /* litex vexriscv dont have priority and threshold control */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls.h
+ * boards/arm/stm32/common/include/stm32_ihm16m1.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_TLS_TLS_H
-#define __SCHED_TLS_TLS_H
+#ifndef __STM32_IHM16M1_H
+#define __STM32_IHM16M1_H
 
 /****************************************************************************
  * Included Files
@@ -27,8 +27,33 @@
 
 #include <nuttx/config.h>
 
+#include "stm32_foc.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __SCHED_TLS_TLS_H */
+/****************************************************************************
+ * Name: stm32_ihm16m1_initialize
+ ****************************************************************************/
+
+int board_ihm16m1_initialize(FAR struct stm32_foc_adc_s *adc_cfg);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __STM32_IHM16M1_H

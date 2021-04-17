@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lib/libvars.h
+ * libs/libc/tls/task_getinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,59 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LIB_LIBVARS_H
-#define __INCLUDE_NUTTX_LIB_LIBVARS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <sched.h>
 
-#include <nuttx/lib/getopt.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
- * Public Types
+ * Public Functions
  ****************************************************************************/
 
-#ifndef CONFIG_BUILD_KERNEL
-/* This structure encapsulates all task-specific variables needed by the C
- * Library.  This structure is retained at the beginning of the main thread
- * of and is accessed via a reference stored in the TLS of all threads in
- * the task group.
+/****************************************************************************
+ * Name: task_get_info
  *
- * NOTE: task-specific variables are not needed in the KERNEL build.  In
- * that build mode, all global variables are inherently process-specific.
- */
-
-struct libvars_s
-{
-  struct getopt_s lv_getopt; /* Globals used by getopt() */
-};
-#endif
-
-/****************************************************************************
- * Public Data
+ * Description:
+ *   Return a reference to the task_info_s structure.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   A reference to the task-specific task_info_s structure is return on
+ *   success.  NULL would be returned in the event of any failure.
+ *
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+FAR struct task_info_s *task_get_info(void)
 {
-#else
-#define EXTERN extern
-#endif
+  FAR struct task_info_s *info = NULL;
+  struct stackinfo_s stackinfo;
+  int ret;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  ret = nxsched_get_stackinfo(-1, &stackinfo);
+  if (ret >= 0)
+    {
+      info = (FAR struct task_info_s *)stackinfo.stack_alloc_ptr;
+    }
 
-#undef EXTERN
-#if defined(__cplusplus)
+  return info;
 }
-#endif
-
-#endif /* __INCLUDE_NUTTX_LIB_LIBVARS_H */

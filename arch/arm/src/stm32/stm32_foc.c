@@ -607,15 +607,32 @@
 
 #define ADC_FROM_FOC_DEV_GET(d) (STM32_FOC_DEV_FROM_DEV_GET(d)->adc)
 
+/* Define PWM all outputs */
+
+#ifdef CONFIG_STM32_FOC_HAS_PWM_COMPLEMENTARY
+#  define PMW_OUTPUTS_ALL_COMP (STM32_PWM_OUT1N|  \
+                                STM32_PWM_OUT2N|  \
+                                STM32_PWM_OUT3N)
+#else
+#  define PMW_OUTPUTS_ALL_COMP (0)
+#endif
+
+#if defined(CONFIG_STM32_FOC_ADC_CCR4) || (CONFIG_MOTOR_FOC_PHASES > 3)
+#  define PMW_OUTPUTS_ALL_OUT4 (STM32_PWM_OUT4)
+#else
+#  define PMW_OUTPUTS_ALL_OUT4 (0)
+#endif
+
+#define PWM_OUTPUTS_ALL (STM32_PWM_OUT1|        \
+                         STM32_PWM_OUT2|        \
+                         STM32_PWM_OUT3|        \
+                         PMW_OUTPUTS_ALL_COMP|  \
+                         PMW_OUTPUTS_ALL_OUT4)
+
 /* Enable all PWM outputs at once (include CHAN4 for ADC trigger) */
 
-#define PWM_ALL_OUTPUTS_ENABLE(pwm, state)                          \
-  PWM_OUTPUTS_ENABLE(pwm,                                           \
-                     STM32_PWM_OUT1|STM32_PWM_OUT1N|                \
-                     STM32_PWM_OUT2|STM32_PWM_OUT2N|                \
-                     STM32_PWM_OUT3|STM32_PWM_OUT3N|                \
-                     STM32_PWM_OUT4,                                \
-                     state);
+#define PWM_ALL_OUTPUTS_ENABLE(pwm, state)          \
+  PWM_OUTPUTS_ENABLE(pwm, PWM_OUTPUTS_ALL, state);
 
 /* Enable/disable ADC interrupts (FOC worker loop) */
 
@@ -1722,8 +1739,6 @@ static int stm32_foc_calibration_start(FAR struct foc_dev_s *dev)
   DEBUGASSERT(board);
   DEBUGASSERT(pwm);
   DEBUGASSERT(adc);
-
-  mtrinfo("Start ADC offset calibration\n");
 
   /* Call board-specific */
 

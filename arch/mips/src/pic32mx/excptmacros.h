@@ -41,7 +41,8 @@
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  .global g_intstackbase
+  .global g_intstackalloc
+  .global g_intstacktop
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
   .global g_nestlevel
 #endif
@@ -391,7 +392,7 @@
    * interrupt stack first.
    */
 
-  la \tmp3, g_intstackbase
+  la \tmp3, g_intstacktop
   lw \tmp4, (\tmp3)
   sw sp, (\tmp4)
   move sp, \tmp4

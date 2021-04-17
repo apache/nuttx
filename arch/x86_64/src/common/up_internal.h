@@ -125,7 +125,8 @@ extern uint64_t g_idle_topstack;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-extern uint64_t g_intstackbase;
+extern uint64_t g_intstackalloc;
+extern uint64_t g_intstacktop;
 #endif
 
 /* These 'addresses' of these values are setup by the linker script.  They

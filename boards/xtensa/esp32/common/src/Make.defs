@@ -30,6 +30,10 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
   CSRCS += esp32_board_i2c.c
 endif
 
+ifeq ($(CONFIG_ESP32_SPI),y)
+  CSRCS += esp32_board_spi.c
+endif
+
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
   CSRCS += esp32_board_wlan.c
 endif
@@ -40,6 +44,10 @@ endif
 
 ifeq ($(CONFIG_CAN_MCP2515),y)
   CSRCS += esp32_mcp2515.c
+endif
+
+ifeq ($(CONFIG_LCD_ILI9341),y)
+  CSRCS += esp32_ili9341.c
 endif
 
 DEPPATH += --dep-path src

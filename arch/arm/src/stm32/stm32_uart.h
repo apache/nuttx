@@ -449,20 +449,20 @@
 #elif defined(CONFIG_STM32_USART3) && !defined(CONFIG_USART3_RXDMA) && \
     !defined(CONFIG_USART3_TXDMA)
 #  define SERIAL_HAVE_NODMA_OPS
-#elif defined(CONFIG_STM32_UART4) && !defined(CONFIG_USART4_RXDMA) &&  \
-    !defined(CONFIG_USART4_TXDMA)
+#elif defined(CONFIG_STM32_UART4) && !defined(CONFIG_UART4_RXDMA) &&  \
+    !defined(CONFIG_UART4_TXDMA)
 #  define SERIAL_HAVE_NODMA_OPS
-#elif defined(CONFIG_STM32_UART5) && !defined(CONFIG_USART5_RXDMA) &&  \
-    !defined(CONFIG_USART5_TXDMA)
+#elif defined(CONFIG_STM32_UART5) && !defined(CONFIG_UART5_RXDMA) &&  \
+    !defined(CONFIG_UART5_TXDMA)
 #  define SERIAL_HAVE_NODMA_OPS
 #elif defined(CONFIG_STM32_USART6) && !defined(CONFIG_USART6_RXDMA) && \
     !defined(CONFIG_USART6_TXDMA)
 #  define SERIAL_HAVE_NODMA_OPS
-#elif defined(CONFIG_STM32_UART7) && !defined(CONFIG_USART7_RXDMA) &&  \
-    !defined(CONFIG_USART7_TXDMA)
+#elif defined(CONFIG_STM32_UART7) && !defined(CONFIG_UART7_RXDMA) &&  \
+    !defined(CONFIG_UART7_TXDMA)
 #  define SERIAL_HAVE_NODMA_OPS
-#elif defined(CONFIG_STM32_UART8) && !defined(CONFIG_USART8_RXDMA) &&  \
-    !defined(CONFIG_USART8_TXDMA)
+#elif defined(CONFIG_STM32_UART8) && !defined(CONFIG_UART8_RXDMA) &&  \
+    !defined(CONFIG_UART8_TXDMA)
 #  define SERIAL_HAVE_NODMA_OPS
 #endif
 
@@ -475,15 +475,15 @@
 #  define SERIAL_HAVE_RXTXDMA_OPS
 #elif defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
 #  define SERIAL_HAVE_RXTXDMA_OPS
-#elif defined(CONFIG_USART4_RXDMA) && defined(CONFIG_USART4_TXDMA)
+#elif defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
 #  define SERIAL_HAVE_RXTXDMA_OPS
-#elif defined(CONFIG_USART5_RXDMA) && defined(CONFIG_USART5_TXDMA)
+#elif defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
 #  define SERIAL_HAVE_RXTXDMA_OPS
 #elif defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
 #  define SERIAL_HAVE_RXTXDMA_OPS
-#elif defined(CONFIG_USART7_RXDMA) && defined(CONFIG_USART7_TXDMA)
+#elif defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
 #  define SERIAL_HAVE_RXTXDMA_OPS
-#elif defined(CONFIG_USART8_RXDMA) && defined(CONFIG_USART8_TXDMA)
+#elif defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
 #  define SERIAL_HAVE_RXTXDMA_OPS
 #endif
 
@@ -496,15 +496,15 @@
 #  define SERIAL_HAVE_TXDMA_OPS
 #elif !defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
 #  define SERIAL_HAVE_TXDMA_OPS
-#elif !defined(CONFIG_USART4_RXDMA) && defined(CONFIG_USART4_TXDMA)
+#elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
 #  define SERIAL_HAVE_TXDMA_OPS
-#elif !defined(CONFIG_USART5_RXDMA) && defined(CONFIG_USART5_TXDMA)
+#elif !defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
 #  define SERIAL_HAVE_TXDMA_OPS
 #elif !defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
 #  define SERIAL_HAVE_TXDMA_OPS
-#elif !defined(CONFIG_USART7_RXDMA) && defined(CONFIG_USART7_TXDMA)
+#elif !defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
 #  define SERIAL_HAVE_TXDMA_OPS
-#elif !defined(CONFIG_USART8_RXDMA) && defined(CONFIG_USART8_TXDMA)
+#elif !defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
 #  define SERIAL_HAVE_TXDMA_OPS
 #endif
 
@@ -517,15 +517,15 @@
 #  define SERIAL_HAVE_RXDMA_OPS
 #elif defined(CONFIG_USART3_RXDMA) && !defined(CONFIG_USART3_TXDMA)
 #  define SERIAL_HAVE_RXDMA_OPS
-#elif defined(CONFIG_USART4_RXDMA) && !defined(CONFIG_USART4_TXDMA)
+#elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
 #  define SERIAL_HAVE_RXDMA_OPS
-#elif defined(CONFIG_USART5_RXDMA) && !defined(CONFIG_USART5_TXDMA)
+#elif defined(CONFIG_UART5_RXDMA) && !defined(CONFIG_UART5_TXDMA)
 #  define SERIAL_HAVE_RXDMA_OPS
 #elif defined(CONFIG_USART6_RXDMA) && !defined(CONFIG_USART6_TXDMA)
 #  define SERIAL_HAVE_RXDMA_OPS
-#elif defined(CONFIG_USART7_RXDMA) && !defined(CONFIG_USART7_TXDMA)
+#elif defined(CONFIG_UART7_RXDMA) && !defined(CONFIG_UART7_TXDMA)
 #  define SERIAL_HAVE_RXDMA_OPS
-#elif defined(CONFIG_USART8_RXDMA) && !defined(CONFIG_USART8_TXDMA)
+#elif defined(CONFIG_UART8_RXDMA) && !defined(CONFIG_UART8_TXDMA)
 #  define SERIAL_HAVE_RXDMA_OPS
 #endif
 

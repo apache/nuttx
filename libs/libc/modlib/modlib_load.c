@@ -55,6 +55,10 @@
 #  define MIN(x,y) ((x) < (y) ? (x) : (y))
 #endif
 
+/* _ALIGN_UP: 'a' is assumed to be a power of two */
+
+#define _ALIGN_UP(v, a) (((v) + ((a) - 1)) & ~((a) - 1))
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -98,11 +102,21 @@ static void modlib_elfsize(struct mod_loadinfo_s *loadinfo)
 
           if ((shdr->sh_flags & SHF_WRITE) != 0)
             {
+              datasize = _ALIGN_UP(datasize, shdr->sh_addralign);
               datasize += ELF_ALIGNUP(shdr->sh_size);
+              if (loadinfo->dataalign < shdr->sh_addralign)
+                {
+                  loadinfo->dataalign = shdr->sh_addralign;
+                }
             }
           else
             {
+              textsize = _ALIGN_UP(textsize, shdr->sh_addralign);
               textsize += ELF_ALIGNUP(shdr->sh_size);
+              if (loadinfo->textalign < shdr->sh_addralign)
+                {
+                  loadinfo->textalign = shdr->sh_addralign;
+                }
             }
         }
     }
@@ -166,6 +180,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
           pptr = &text;
         }
 
+      *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr, shdr->sh_addralign);
+
       /* SHT_NOBITS indicates that there is no data in the file for the
        * section.
        */
@@ -225,6 +241,10 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
 int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 {
+#if !defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  size_t align;
+  size_t text_size;
+#endif
   int ret;
 
   binfo("loadinfo: %p\n", loadinfo);
@@ -251,7 +271,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   if (loadinfo->textsize > 0)
     {
       loadinfo->textalloc = (uintptr_t)
-                            up_module_text_alloc(loadinfo->textsize);
+                            up_module_text_memalign(loadinfo->textalign,
+                                                    loadinfo->textsize);
       if (!loadinfo->textalloc)
         {
           berr("ERROR: Failed to allocate memory for the module text\n");
@@ -262,7 +283,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->datasize > 0)
     {
-      loadinfo->datastart = (uintptr_t)lib_malloc(loadinfo->datasize);
+      loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
+                                                    loadinfo->datasize);
       if (!loadinfo->datastart)
         {
           berr("ERROR: Failed to allocate memory for the module data\n");
@@ -271,8 +293,21 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
         }
     }
 #else
-  loadinfo->textalloc = (uintptr_t)lib_malloc(loadinfo->textsize +
-                                              loadinfo->datasize);
+  align = loadinfo->textalign;
+  if (align < loadinfo->dataalign)
+    {
+      align = loadinfo->dataalign;
+    }
+
+  text_size = loadinfo->textsize;
+  if (loadinfo->datasize > 0)
+    {
+      text_size = _ALIGN_UP(text_size, loadinfo->dataalign);
+    }
+
+  loadinfo->textalloc = (uintptr_t)lib_memalign(align,
+                                                text_size +
+                                                loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
       berr("ERROR: Failed to allocate memory for the module\n");
@@ -280,7 +315,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
-  loadinfo->datastart = loadinfo->textalloc + loadinfo->textsize;
+  loadinfo->datastart = loadinfo->textalloc + text_size;
 #endif
 
   /* Load ELF section data into memory */

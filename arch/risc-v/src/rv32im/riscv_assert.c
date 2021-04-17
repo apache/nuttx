@@ -69,11 +69,11 @@
  * Name: riscv_stackdump
  ****************************************************************************/
 
-static void riscv_stackdump(uint32_t sp, uint32_t stack_base)
+static void riscv_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack ;
 
-  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -184,13 +184,13 @@ static void riscv_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustackbase = (uint32_t)rtcb->stack_base_ptr;
   ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-  istackbase = (uint32_t)&g_intstackbase;
+  istackbase = (uint32_t)&g_intstackalloc;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* Show interrupt stack info */
@@ -204,23 +204,23 @@ static void riscv_dumpstate(void)
    * stack?
    */
 
-  if (sp < istackbase && sp >= istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      riscv_stackdump(sp, istackbase);
+      riscv_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
        */
 
-      sp = (uint32_t)&g_intstackbase;
+      sp = (uint32_t)&g_intstacktop;
       _alert("sp:     %08x\n", sp);
     }
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      riscv_stackdump(istackbase - istacksize, istackbase);
+      riscv_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */
@@ -238,14 +238,14 @@ static void riscv_dumpstate(void)
    * stack memory.
    */
 
-  if (sp >= ustackbase || sp < ustackbase - ustacksize)
+  if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      riscv_stackdump(ustackbase - ustacksize, ustackbase);
+      riscv_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
-      riscv_stackdump(sp, ustackbase);
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      riscv_stackdump(ustackbase, ustackbase + ustacksize);
     }
 }
 

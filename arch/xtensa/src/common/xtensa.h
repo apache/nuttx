@@ -171,7 +171,7 @@ extern volatile uint32_t *g_current_regs[1];
 /* The (optional) interrupt stack */
 
 extern uint32_t g_intstackalloc; /* Allocated interrupt stack */
-extern uint32_t g_intstackbase;  /* Initial top of interrupt stack */
+extern uint32_t g_intstacktop;   /* Initial top of interrupt stack */
 #endif
 
 /* Address of the CPU0 IDLE thread */

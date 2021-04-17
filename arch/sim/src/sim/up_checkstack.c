@@ -46,7 +46,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/tls.h>
 #include <nuttx/board.h>
 
 #include "sched/sched.h"
@@ -56,7 +55,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack);
+static size_t do_stackcheck(uintptr_t alloc, size_t size);
 
 /****************************************************************************
  * Name: do_stackcheck
@@ -75,7 +74,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
+static size_t do_stackcheck(uintptr_t alloc, size_t size)
 {
   FAR uintptr_t start;
   FAR uintptr_t end;
@@ -89,21 +88,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 
   /* Get aligned addresses of the top and bottom of the stack */
 
-  if (!int_stack)
-    {
-      /* Skip over the TLS data structure at the bottom of the stack */
-
-#ifdef CONFIG_TLS_ALIGNED
-      DEBUGASSERT((alloc & TLS_STACK_MASK) == 0);
-#endif
-      start = alloc + sizeof(struct tls_info_s);
-    }
-  else
-    {
-      start = alloc & ~3;
-    }
-
-  end   = (alloc + size + 3) & ~3;
+  start = (alloc + 3) & ~3;
+  end   = (alloc + size) & ~3;
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -185,13 +171,12 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size,
-                       false);
+  return do_stackcheck((uintptr_t)tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
 {
-  return (ssize_t)tcb->adj_stack_size - (ssize_t)up_check_tcbstack(tcb);
+  return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }
 
 size_t up_check_stack(void)

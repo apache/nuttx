@@ -74,11 +74,11 @@ uint32_t board_button_initialize(void)
 
 uint32_t board_buttons(void)
 {
-  /* Check the state of the USER button.  A LOW value means that the key is
+  /* Check the state of the USER button.  A HIGH value means that the key is
    * pressed.
    */
 
-  return stm32_gpioread(GPIO_BTN_USER) ? 0 : BUTTON_USER_BIT;
+  return stm32_gpioread(GPIO_BTN_USER) ? BUTTON_USER_BIT : 0;
 }
 
 /****************************************************************************

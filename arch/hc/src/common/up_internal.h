@@ -107,7 +107,8 @@ extern uint16_t g_idle_topstack;
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 1
-extern uint32_t g_intstackbase;
+extern uint32_t g_intstackalloc;
+extern uint32_t g_intstacktop;
 #endif
 
 /****************************************************************************

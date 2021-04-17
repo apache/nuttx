@@ -111,7 +111,7 @@
 	ldr		\tmp1, =g_intstackalloc
 	msr		msplim, \tmp1
 #endif
-	ldr		sp, =g_intstackbase
+	ldr		sp, =g_intstacktop
 	.endm
 #endif
 
@@ -347,7 +347,7 @@ exception_common:
 	.size	exception_common, .-exception_common
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  *
  * Description:
  *   Shouldn't happen
@@ -357,11 +357,11 @@ exception_common:
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 	.bss
 	.global	g_intstackalloc
-	.global	g_intstackbase
+	.global	g_intstacktop
 	.balign	8
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
-g_intstackbase:
+g_intstacktop:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 

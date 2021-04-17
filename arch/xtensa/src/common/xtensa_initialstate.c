@@ -63,8 +63,7 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == 0)
     {
       tcb->stack_alloc_ptr = g_idlestack;
-      tcb->adj_stack_ptr   = (char *)g_idlestack +
-                             CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
@@ -74,9 +73,10 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Set initial values of registers */
 
-  xcp->regs[REG_PC]   = (uint32_t)tcb->start;         /* Task entrypoint                */
-  xcp->regs[REG_A0]   = 0;                            /* To terminate GDB backtrace     */
-  xcp->regs[REG_A1]   = (uint32_t)tcb->adj_stack_ptr; /* Physical top of stack frame    */
+  xcp->regs[REG_PC]   = (uint32_t)tcb->start;           /* Task entrypoint                */
+  xcp->regs[REG_A0]   = 0;                              /* To terminate GDB backtrace     */
+  xcp->regs[REG_A1]   = (uint32_t)tcb->stack_base_ptr + /* Physical top of stack frame    */
+                                  tcb->adj_stack_size;
 
   /* Set initial PS to int level 0, EXCM disabled ('rfe' will enable), user
    * mode.

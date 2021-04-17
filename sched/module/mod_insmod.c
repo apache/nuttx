@@ -64,6 +64,8 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
   binfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
   binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
   binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  binfo("  textalign:    %zu\n",   loadinfo->textalign);
+  binfo("  dataalign:    %zu\n",   loadinfo->dataalign);
   binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
   binfo("  filfd:        %d\n",    loadinfo->filfd);
   binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);

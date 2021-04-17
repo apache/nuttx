@@ -1569,6 +1569,27 @@ errout:
 }
 
 /****************************************************************************
+ * Name: gs2200m_send_cmd2
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_send_cmd2(FAR struct gs2200m_dev_s *dev,
+                                         FAR char *cmd)
+{
+  struct pkt_dat_s pkt_dat;
+  enum pkt_type_e  r;
+
+  /* Initialize pkt_dat and send */
+
+  memset(&pkt_dat, 0, sizeof(pkt_dat));
+  r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
+
+  /* Release the pkt_dat */
+
+  _release_pkt_dat(dev, &pkt_dat);
+  return r;
+}
+
+/****************************************************************************
  * Name: gs2200m_set_opmode
  * NOTE: See 5.1.2 Operation Mode
  ****************************************************************************/
@@ -1580,7 +1601,7 @@ static enum pkt_type_e gs2200m_set_opmode(FAR struct gs2200m_dev_s *dev,
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+WM=%d\r\n", mode);
-  t = gs2200m_send_cmd(dev, cmd, NULL);
+  t = gs2200m_send_cmd2(dev, cmd);
 
   if (TYPE_OK == t)
     {
@@ -1636,7 +1657,7 @@ errout:
 
 static enum pkt_type_e gs2200m_disassociate(FAR struct gs2200m_dev_s *dev)
 {
-  return gs2200m_send_cmd(dev, (char *)"AT+WD\r\n", NULL);
+  return gs2200m_send_cmd2(dev, (char *)"AT+WD\r\n");
 }
 
 /****************************************************************************
@@ -1650,7 +1671,7 @@ static enum pkt_type_e gs2200m_enable_dhcpc(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+NDHCP=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1664,7 +1685,7 @@ static enum pkt_type_e gs2200m_calc_key(FAR struct gs2200m_dev_s *dev,
   char cmd[80];
 
   snprintf(cmd, sizeof(cmd), "AT+WPAPSK=%s,%s\r\n", ssid, psk);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1678,7 +1699,7 @@ static enum pkt_type_e gs2200m_set_security(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+WSEC=%d\r\n", mode);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1749,7 +1770,8 @@ static enum pkt_type_e gs2200m_set_addresses(FAR struct gs2200m_dev_s *dev,
 
   snprintf(cmd, sizeof(cmd), "AT+NSET=%s,%s,%s\r\n",
            address, netmask, gateway);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1763,7 +1785,7 @@ static enum pkt_type_e gs2200m_enable_dhcps(FAR struct gs2200m_dev_s *dev,
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+DHCPSRVR=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1777,7 +1799,7 @@ static enum pkt_type_e gs2200m_set_auth(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+WAUTH=%d\r\n", mode);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 #ifdef CONFIG_WL_GS2200M_ENABLE_WEP
@@ -1793,7 +1815,7 @@ static enum pkt_type_e gs2200m_set_wepkey(FAR struct gs2200m_dev_s *dev,
   char cmd[32];
 
   snprintf(cmd, sizeof(cmd), "AT+WWEP1=%s\r\n", key);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 #else
@@ -1809,7 +1831,7 @@ static enum pkt_type_e gs2200m_set_wpa2pf(FAR struct gs2200m_dev_s *dev,
   char cmd[64];
 
   snprintf(cmd, sizeof(cmd), "AT+WWPA=%s\r\n", key);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 #endif /* CONFIG_WL_GS2200M_ENABLE_WEP */
@@ -2038,21 +2060,10 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 static enum pkt_type_e gs2200m_close_conn(FAR struct gs2200m_dev_s *dev,
                                           char cid)
 {
-  struct pkt_dat_s pkt_dat;
-  enum pkt_type_e   r;
   char cmd[15];
 
-  /* Prepare cmd */
-
   snprintf(cmd, sizeof(cmd), "AT+NCLOSE=%c\r\n", cid);
-
-  /* Initialize pkt_dat and send */
-
-  memset(&pkt_dat, 0, sizeof(pkt_dat));
-  r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
-
-  _release_pkt_dat(dev, &pkt_dat);
-  return r;
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2066,7 +2077,7 @@ static enum pkt_type_e gs2200m_enable_bulk(FAR struct gs2200m_dev_s *dev,
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+BDATA=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2080,7 +2091,7 @@ static enum pkt_type_e gs2200m_enable_echo(FAR struct gs2200m_dev_s *dev,
   char cmd[8];
 
   snprintf(cmd, sizeof(cmd), "ATE%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2094,7 +2105,7 @@ static enum pkt_type_e gs2200m_activate_wrx(FAR struct gs2200m_dev_s *dev,
   char cmd[30];
 
   snprintf(cmd, sizeof(cmd), "AT+WRXACTIVE=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2109,7 +2120,7 @@ static enum pkt_type_e gs2200m_set_gpio(FAR struct gs2200m_dev_s *dev,
   char cmd[24];
 
   snprintf(cmd, sizeof(cmd), "AT+DGPIO=%d,%d\r\n", n, val);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
 
@@ -2125,7 +2136,7 @@ static enum pkt_type_e gs2200m_set_loglevel(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+LOGLVL=%d\r\n", level);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
 
@@ -2139,7 +2150,7 @@ static enum pkt_type_e gs2200m_get_version(FAR struct gs2200m_dev_s *dev)
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+VER=??\r\n");
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
 

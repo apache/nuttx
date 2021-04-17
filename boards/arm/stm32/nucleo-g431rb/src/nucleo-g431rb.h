@@ -57,6 +57,24 @@
 
 #define LED_DRIVER_PATH                "/dev/userleds"
 
+/* Button definitions *******************************************************/
+
+/* The Nucleo G431RB supports two buttons; only one button is controllable
+ * by software:
+ *
+ *   B1 USER:  user button connected to the I/O PC13 of the STM32G431RB.
+ *   B2 RESET: push button connected to NRST is used to RESET the
+ *             STM32G431R.
+ *
+ * NOTE that EXTI interrupts are configured.
+ */
+
+#define MIN_IRQBUTTON  BUTTON_USER
+#define MAX_IRQBUTTON  BUTTON_USER
+#define NUM_IRQBUTTONS 1
+
+#define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
+
 /* PWM */
 
 #define NUCLEOG431RB_PWMTIMER   1
@@ -99,6 +117,30 @@ int stm32_bringup(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_foc_setup
+ *
+ * Description:
+ *  Initialize FOC peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_FOC
+int stm32_foc_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431RB_SRC_NUCLEO_G431RB_H */

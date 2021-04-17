@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_taskdata.c
+ * boards/arm/imxrt/imxrt1064-evk/src/imxrt_lcd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,52 +24,70 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <assert.h>
+#include <stdbool.h>
+#include <debug.h>
 
-#include <nuttx/tls.h>
+#include "imxrt_lcd.h"
+#include "imxrt_gpio.h"
 
-#include "group/group.h"
+#include "imxrt1064-evk.h"
 
-#ifndef CONFIG_BUILD_KERNEL
+#include <arch/board/board.h>
+
+#ifdef CONFIG_IMXRT_LCD
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_taskdata
+ * Name: imxrt_lcd_bkl_pin_setup
  *
  * Description:
- *   Set task-specific data pointer in TLS.
- *
- * Input Parameters:
- *   tcb - Identifies task to set TLS data
- *
- * Returned Value:
- *   None
+ *   Setup backlight pin (initially off)
  *
  ****************************************************************************/
 
-void tls_set_taskdata(FAR struct tcb_s *tcb)
+void imxrt_lcd_pkl_pin_setup(void)
 {
-  FAR struct tls_info_s *info;
-  FAR struct task_group_s *group;
-
-  DEBUGASSERT(tcb != NULL && tcb->group != NULL);
-  group = tcb->group;
-
-  /* This currently assumes a push-down stack.  The TLS data lies at the
-   * lowest address of the stack allocation.
-   */
-
-  info = (FAR struct tls_info_s *)tcb->stack_alloc_ptr;
-
-  /* Copy the task data point buffer in the group structure into the
-   * thread's TLS data.
-   */
-
-  info->tl_libvars = group->tg_libvars;
+  imxrt_config_gpio(GPIO_LCD_BL);
 }
 
-#endif /* !CONFIG_BUILD_KERNEL */
+/****************************************************************************
+ * Name: imxrt_backlight
+ *
+ * Description:
+ *   If CONFIG_IMXRT_LCD_BACKLIGHT is defined, then the board-specific
+ *   logic must provide this interface to turn the backlight on and off.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_LCD_BACKLIGHT
+void imxrt_backlight(bool blon)
+{
+  imxrt_gpio_write(GPIO_LCD_BL, blon); /* High illuminates */
+}
+#endif
+
+/****************************************************************************
+ * Name: imxrt_lcd_initialize
+ *
+ * Description:
+ *   Initialization of the LCD blackligt and pin for the imxrt_bringup().
+ *
+ ****************************************************************************/
+
+void imxrt_lcd_initialize(void)
+{
+  /* Setup the backlight pin */
+
+  imxrt_lcd_pkl_pin_setup();
+
+#ifdef CONFIG_IMXRT_LCD_BACKLIGHT
+  /* Turn ON the backlight */
+
+  imxrt_backlight(true);
+#endif
+}
+
+#endif /* CONFIG_IMXRT_LCD */

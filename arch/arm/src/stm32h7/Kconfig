@@ -410,6 +410,14 @@ config STM32H7_RTC
 	default n
 	select RTC
 
+config STM32H7_CSI
+	bool "CSI Low-speed internal oscillator (4MHz)"
+	default n
+
+config STM32H7_HSI48
+	bool "HSI48 High-speed 48MHz internal oscillator"
+	default n
+
 config STM32H7_PWR
 	bool "PWR"
 	default n
@@ -1301,6 +1309,18 @@ config UART8_RXFIFO_THRES
 		overrun errors.
 
 endif # STM32H7_UART8
+
+config STM32H7_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
 
 config STM32H7_SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."

@@ -72,6 +72,15 @@
 #endif
 #endif
 
+/* GPIO definitions *********************************************************/
+
+/* Display */
+
+#define DISPLAY_SPI       2
+#define DISPLAY_DC        21
+#define DISPLAY_RST       18
+#define DISPLAY_BCKL      5
+
 /* LED definitions **********************************************************/
 
 /* Define how many LEDs this board has (needed by userleds) */

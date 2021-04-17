@@ -179,16 +179,16 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: xtensa_intstack_base
+ * Name: xtensa_intstack_top
  *
  * Description:
- *   Return a pointer to the "base" of the correct interrupt stack for the
+ *   Return a pointer to the top of the correct interrupt stack for the
  *   given CPU.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-uintptr_t xtensa_intstack_base(void)
+uintptr_t xtensa_intstack_top(void)
 {
   return g_cpu_intstack_top[up_cpu_index()];
 }

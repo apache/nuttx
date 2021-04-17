@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-ethernet-kit/src/esp32_spi.c
+ * boards/arm/imxrt/imxrt1064-evk/src/imxrt_userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,39 +18,67 @@
  *
  ****************************************************************************/
 
+/* There are four LED status indicators located on the EVK Board.  The
+ * functions of these LEDs include:
+ *
+ *   - Main Power Supply(D3)
+ *     Green: DC 5V main supply is normal.
+ *     Red:   J2 input voltage is over 5.6V.
+ *     Off:   The board is not powered.
+ *   - Reset RED LED(D15)
+ *   - OpenSDA LED(D16)
+ *   - USER LED(D18)
+ *
+ * Only a single LED, D18, is under software control.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/spi/spi.h>
+#include "imxrt_gpio.h"
+#include "imxrt_iomuxc.h"
 #include <arch/board/board.h>
+#include "imxrt1064-evk.h"
 
-#include "esp32-ethernet-kit.h"
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_spi2_status
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-uint8_t esp32_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
+uint32_t board_userled_initialize(void)
 {
-  uint8_t status = 0;
+  /* Configure LED GPIO for output */
 
-#ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD(0))
-    {
-       status |= SPI_STATUS_PRESENT;
-    }
-#endif
-
-  return status;
+  imxrt_config_gpio(GPIO_LED);
+  return BOARD_NLEDS;
 }
+
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  imxrt_gpio_write(GPIO_LED, !ledon);  /* Low illuminates */
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint32_t ledset)
+{
+  /* Low illuminates */
+
+  imxrt_gpio_write(GPIO_LED, (ledset & BOARD_USERLED_BIT) == 0);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

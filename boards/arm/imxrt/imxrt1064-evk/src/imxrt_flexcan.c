@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-wrover-kit/src/esp32_spi.c
+ * boards/arm/imxrt/imxrt1064-evk/src/imxrt_flexcan.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,33 +24,60 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
+#include <nuttx/can/can.h>
 
-#include "esp32-wrover-kit.h"
+#include "imxrt_flexcan.h"
+#include "imxrt1064-evk.h"
+
+#ifdef CONFIG_IMXRT_FLEXCAN
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_spi2_status
+ * Name: imxrt_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
  ****************************************************************************/
 
-uint8_t esp32_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
+int imxrt_can_setup(void)
 {
-  uint8_t status = 0;
-
-#ifdef CONFIG_MMCSD_SPI
-  if (devid == SPIDEV_MMCSD(0))
-    {
-       status |= SPI_STATUS_PRESENT;
-    }
+  int ret;
+#if defined(CONFIG_IMXRT_FLEXCAN3) && defined(CONFIG_IMXRT_FLEXCAN2)
+  canerr("ERROR: Only one FlexCAN can be defined at the same time\n");
+  return -ENODEV;
 #endif
 
-  return status;
+#ifdef CONFIG_IMXRT_FLEXCAN3
+  /* Call arm_caninitialize() to get an instance of the CAN interface */
+
+  ret = imxrt_caninitialize(3);
+  if (ret < 0)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+#elif CONFIG_IMXRT_FLEXCAN2
+  ret = imxrt_caninitialize(2);
+  if (ret < 0)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+#elif CONFIG_IMXRT_FLEXCAN1
+  canerr("ERROR: FlexCAN1 is not available on imxrt1060-evk\n");
+  return -ENODEV;
+#else
+  return -ENODEV;
+#endif
+  return OK;
 }
+
+#endif /* CONFIG_IMXRT_FLEXCAN */
