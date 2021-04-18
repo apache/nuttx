@@ -55,6 +55,7 @@ CHIP_CSRCS += rp2040_serial.c
 CHIP_CSRCS += rp2040_start.c
 CHIP_CSRCS += rp2040_timerisr.c
 CHIP_CSRCS += rp2040_gpio.c
+CHIP_CSRCS += rp2040_pio.c
 CHIP_CSRCS += rp2040_clock.c
 CHIP_CSRCS += rp2040_xosc.c
 CHIP_CSRCS += rp2040_pll.c
