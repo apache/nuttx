@@ -134,5 +134,13 @@ int rp2040_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RP2040_I2S
+  ret = board_i2sdev_initialize(0);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize I2S.\n");
+    }
+#endif
+
   return ret;
 }

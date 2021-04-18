@@ -13,6 +13,7 @@ Currently only the following devices are suppored.
   - I2C
   - SPI
   - DMAC
+  - PIO (RP2040 Programmable I/O)
   - Flash ROM Boot
   - SRAM Boot
     - If Pico SDK is available, nuttx.uf2 file which can be used in
@@ -21,6 +22,8 @@ Currently only the following devices are suppored.
   - INA219 sensor / module (don't forget to define I2C0 GPIOs at "I2C0 GPIO pin assign" in Board Selection menu)
   - Pico Display Pack (ST7789 LCD)
     - RGB leds and buttons are not supported yet.
+  - Pico Audio Pack (PCM5100A I2S DAC)
+    - I2S interface is realized by PIO.
 
   Not supported:
   - All other devices
@@ -109,6 +112,12 @@ Defconfigs
     See the following page for connection:
       https://shop.pimoroni.com/products/pico-display-pack
 
+- audiopack
+    Pico Audio Pack support
+    See the following page for connection:
+      https://shop.pimoroni.com/products/pico-audio-pack
+    SD card interface is also enabled.
+
 License exceptions
 ==================
 
@@ -119,6 +128,11 @@ So, the files are licensed under 3-Clause BSD same as Pico SDK.
 - arch/arm/src/rp2040/rp2040_pll.c
 - arch/arm/src/rp2040/rp2040_xosc.c
   - These are created by referring the Pico SDK clock initialization.
+
+- arch/arm/src/rp2040/rp2040_pio.c
+- arch/arm/src/rp2040/rp2040_pio.h
+- arch/arm/src/rp2040/rp2040_pio_instructions.h
+  - These provide the similar APIs to Pico SDK's hardware_pio APIs.
 
 - arch/arm/src/rp2040/hardware/*.h
   - These are generated from rp2040.svd originally provided in Pico SDK.
