@@ -291,15 +291,6 @@ config SMP_NCPUS
 		SMP configuration.  However, running the SMP logic in a single CPU
 		configuration is useful during certain testing.
 
-config SMP_IDLETHREAD_STACKSIZE
-	int "CPU IDLE stack size"
-	default DEFAULT_TASK_STACKSIZE
-	---help---
-		Each CPU will have its own IDLE task.  System initialization occurs
-		on CPU0 and uses CONFIG_IDLETHREAD_STACKSIZE which will probably be
-		larger than is generally needed.  This setting provides the stack
-		size for the IDLE task on CPUS 1 through (CONFIG_SMP_NCPUS-1).
-
 endif # SMP
 
 choice

@@ -315,7 +315,6 @@ SMP
     +CONFIG_SPINLOCK=y
     +CONFIG_SMP=y
     +CONFIG_SMP_NCPUS=2
-    +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
   You also must enable near-realtime-performance otherwise even long timeouts
   will expire before a CPU thread even has a chance to execute.
