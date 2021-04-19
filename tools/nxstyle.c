@@ -223,7 +223,7 @@ static const char *g_white_list[] =
 
   /* Ref:  unwind-arm-common.h */
 
-  "_Unwind_Ptr",
+  "_Unwind",
 
   /* Ref:
    * https://pubs.opengroup.org/onlinepubs/9699919799/functions/tempnam.html
