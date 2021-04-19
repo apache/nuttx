@@ -60,7 +60,18 @@ void up_initial_state(struct tcb_s *tcb)
     }
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
+
+  /* Note: The amd64 ABI requires 16-bytes alignment _before_ a function
+   * call.
+   * On the other hand, our way to set up and switch to a new context
+   * is basically a JUMP.
+   * Thus, we need to emulate the effect of a CALL here, by subtracting
+   * sizeof(xcpt_reg_t), which is the amount a CALL would move RSP to store
+   * the return address.
+   */
+
   tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
+                                     tcb->adj_stack_size -
+                                     sizeof(xcpt_reg_t);
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
 }
