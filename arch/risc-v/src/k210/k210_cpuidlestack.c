@@ -35,7 +35,7 @@
 #ifdef CONFIG_SMP
 
 #define SMP_STACK_MASK       7
-#define SMP_STACK_SIZE       ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
+#define SMP_STACK_SIZE       ((CONFIG_IDLETHREAD_STACKSIZE + 7) & ~7)
 #define STACK_ISALIGNED(a)   ((uintptr_t)(a) & ~SMP_STACK_MASK)
 
 #if CONFIG_SMP_NCPUS > 1

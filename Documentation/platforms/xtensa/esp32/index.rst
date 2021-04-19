@@ -258,7 +258,6 @@ in :menuselection:`RTOS Features --> Tasks and Scheduling`, with::
     CONFIG_SPINLOCK=y
     CONFIG_SMP=y
     CONFIG_SMP_NCPUS=2
-    CONFIG_SMP_IDLETHREAD_STACKSIZE=3072
 
 Debug Tip:  During debug session, OpenOCD may mysteriously switch from one
 CPU to another.  This behavior can be eliminated by uncommenting one of the

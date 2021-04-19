@@ -711,7 +711,6 @@ be enabled with the following configuration settings:
     CONFIG_SPINLOCK=y
     CONFIG_SMP=y
     CONFIG_SMP_NCPUS=4
-    CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
 Open Issues:
 
