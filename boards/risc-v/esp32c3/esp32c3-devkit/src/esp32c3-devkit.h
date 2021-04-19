@@ -96,6 +96,25 @@ int board_wdt_init(void);
 #endif
 
 /****************************************************************************
+ * Name: board_spidev_initialize
+ *
+ * Description:
+ *   Initialize SPI driver and register the /dev/spi device.
+ *
+ * Input Parameters:
+ *   bus - The SPI bus number, used to build the device path as /dev/spiN
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DRIVER
+int board_spidev_initialize(int bus);
+#endif
+
+/****************************************************************************
  * Name: board_i2c_init
  *
  * Description:
@@ -106,6 +125,7 @@ int board_wdt_init(void);
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_I2C_DRIVER
 int board_i2c_init(void);
 #endif
@@ -154,6 +174,7 @@ int board_bmp180_initialize(int devno, int busno);
  *
  * Description:
  *   Initialize the SPIFLASH and register the MTD device.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
