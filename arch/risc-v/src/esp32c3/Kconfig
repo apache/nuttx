@@ -436,6 +436,13 @@ config ESP32C3_WIFI_FS_MOUNTPT
 	help
 		Mount point of Wi-Fi storage file system.
 
+config ESP32C3_WIFI_STA_DISCONNECT_PM
+	bool "Power Management for station when disconnected"
+	default n
+	---help---
+		Select this option to enable power management for station when disconnected.
+		Chip will do modem-sleep when RF module is not in use anymore.
+
 endmenu # ESP32C3_WIRELESS
 
 menu "SPI Flash configuration"
