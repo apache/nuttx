@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_LEDS is not set
-# CONFIG_ESP32_SPIRAM_BANKSWITCH_ENABLE is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
 # CONFIG_NSH_CMDPARMS is not set
