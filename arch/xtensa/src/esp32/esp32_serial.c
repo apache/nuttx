@@ -362,12 +362,12 @@ static uart_dev_t g_uart2port =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
 /****************************************************************************
  * Name: esp32_reset_rx_fifo
  *
  * Description:
- *   Resets the RX FIFO. 
+ *   Resets the RX FIFO.
  *   NOTE: We can not use rxfifo_rst to reset the hardware RX FIFO.
  *
  * Parameters:
@@ -388,7 +388,7 @@ static void esp32_reset_rx_fifo(struct esp32_dev_s *priv)
     {
       getreg32(DR_UART_FIFO_REG(priv->config->id));
 
-      rx_status_reg     = getreg32(UART_STATUS_REG(priv->config->id));
+      rx_status_reg = getreg32(UART_STATUS_REG(priv->config->id));
       fifo_cnt = REG_MASK(rx_status_reg, UART_RXFIFO_CNT);
       mem_rx_status_reg = getreg32(UART_MEM_RX_STATUS_REG(priv->config->id));
       rd_address = REG_MASK(mem_rx_status_reg, UART_RD_ADDRESS);
@@ -400,7 +400,7 @@ static void esp32_reset_rx_fifo(struct esp32_dev_s *priv)
  * Name: esp32_reset_tx_fifo
  *
  * Description:
- *   Resets the TX FIFO. 
+ *   Resets the TX FIFO.
  *
  * Parameters:
  *   priv        -  Pointer to the serial driver struct.
@@ -412,6 +412,7 @@ static void esp32_reset_tx_fifo(struct esp32_dev_s *priv)
   modifyreg32(UART_CONF0_REG(priv->config->id), 0, UART_TXFIFO_RST_M);
   modifyreg32(UART_CONF0_REG(priv->config->id), UART_TXFIFO_RST_M, 0);
 }
+#endif
 
 /****************************************************************************
  * Name: esp32_get_rx_fifo_len
@@ -442,11 +443,11 @@ static uint32_t esp32_get_rx_fifo_len(struct esp32_dev_s *priv)
   uint32_t len;
 
   mem_rx_status_reg = getreg32(UART_MEM_RX_STATUS_REG(priv->config->id));
-  rd_address        = ((mem_rx_status_reg & UART_RD_ADDRESS_M) 
+  rd_address        = ((mem_rx_status_reg & UART_RD_ADDRESS_M)
                        >> UART_RD_ADDRESS_S);
-  wr_address        = ((mem_rx_status_reg & UART_WR_ADDRESS_M) 
+  wr_address        = ((mem_rx_status_reg & UART_WR_ADDRESS_M)
                        >> UART_WR_ADDRESS_S);
-  rx_status_reg     = getreg32(UART_STATUS_REG(priv->config->id)); 
+  rx_status_reg     = getreg32(UART_STATUS_REG(priv->config->id));
   fifo_cnt          = ((rx_status_reg & UART_RXFIFO_CNT_M)
                        >> UART_RXFIFO_CNT_S);
 
@@ -458,7 +459,7 @@ static uint32_t esp32_get_rx_fifo_len(struct esp32_dev_s *priv)
     {
       len = (wr_address + 128) - rd_address;
     }
-  else 
+  else
     {
       len = fifo_cnt > 0 ? 128 : 0;
     }
@@ -594,26 +595,6 @@ static int esp32_setup(struct uart_dev_s *dev)
   regval |= (clkdiv & 15) << UART_CLKDIV_FRAG_S;
   putreg32(regval, UART_CLKDIV_REG(priv->config->id));
 
-  /* Configure UART pins
-   *
-   * Internal signals can be output to multiple GPIO pads.
-   * But only one GPIO pad can connect with input signal
-   */
-
-  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
-  esp32_gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
-
-  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
-  esp32_gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
-  esp32_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
-
-  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
-  esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
-#endif
-
   /* Enable RX and error interrupts.  Clear and pending interrtupt */
 
   regval = UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
@@ -669,25 +650,6 @@ static void esp32_shutdown(struct uart_dev_s *dev)
   /* Disable all UART interrupts */
 
   esp32_disableallints(priv, NULL);
-
-  /* Revert pins to inputs and detach UART signals */
-
-  esp32_configgpio(priv->config->txpin, INPUT);
-  esp32_gpio_matrix_out(priv->config->txsig,
-                        MATRIX_DETACH_OUT_SIG, true, false);
-
-  esp32_configgpio(priv->config->rxpin, INPUT);
-  esp32_gpio_matrix_in(priv->config->rxsig, MATRIX_DETACH_IN_LOW_PIN, false);
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  esp32_configgpio(priv->config->rtspin, INPUT);
-  esp32_gpio_matrix_out(priv->config->rtssig,
-                        MATRIX_DETACH_OUT_SIG, true, false);
-
-  esp32_configgpio(priv->config->ctspin, INPUT);
-  esp32_gpio_matrix_in(priv->config->ctssig,
-                       MATRIX_DETACH_IN_LOW_PIN, false);
-#endif
 
   /* Unconfigure and disable the UART */
 
@@ -1232,8 +1194,8 @@ static bool esp32_txready(struct uart_dev_s *dev)
   uint32_t txcnt;
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  txcnt = (getreg32(UART_STATUS_REG(priv->config->id)) >> UART_TXFIFO_CNT_S) &
-          UART_TXFIFO_CNT_V;
+  txcnt = (getreg32(UART_STATUS_REG(priv->config->id)) >> UART_TXFIFO_CNT_S)
+           & UART_TXFIFO_CNT_V;
 
   if (txcnt < (UART_TX_FIFO_SIZE -1))
     {
@@ -1261,6 +1223,41 @@ static bool esp32_txempty(struct uart_dev_s *dev)
           & UART_TXFIFO_CNT_M) == 0);
 }
 
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+/****************************************************************************
+ * Name: esp32_config_pins
+ *
+ * Description:
+ *   Performs the pin configuration.
+ *
+ * Parameters:
+ *   priv        -  Pointer to the serial driver struct.
+ *
+ ****************************************************************************/
+
+static void esp32_config_pins(struct esp32_dev_s *priv)
+{
+  /* Configure UART pins
+   *
+   * Internal signals can be output to multiple GPIO pads.
+   * But only one GPIO pad can connect with input signal
+   */
+
+  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
+  esp32_gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
+
+  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
+  esp32_gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
+  esp32_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
+
+  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
+  esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
+#endif
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1269,17 +1266,23 @@ static bool esp32_txempty(struct uart_dev_s *dev)
  * Name: esp32_lowsetup
  *
  * Description:
- *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   Performs the pin configuration for all UARTs.
+ *   This functions is intended to be called in the __start function.
  *
  ****************************************************************************/
 
 void esp32_lowsetup(void)
 {
- 
+  esp32_config_pins(TTYS0_DEV.priv);
+#ifdef TTYS1_DEV
+  esp32_config_pins(TTYS1_DEV.priv);
+#endif
+#ifdef TTYS2_DEV
+  esp32_config_pins(TTYS2_DEV.priv);
+#endif
 }
 
+#endif /* CONFIG_SUPPRESS_UART_CONFIG */
 /****************************************************************************
  * Name: xtensa_early_serial_initialize
  *
