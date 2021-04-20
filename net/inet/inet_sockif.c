@@ -1272,7 +1272,7 @@ static ssize_t inet_sendmsg(FAR struct socket *psock,
 
   for (len = 0, iov = msg->msg_iov; iov != end; iov++)
     {
-      memcpy(buf + len, iov->iov_base, iov->iov_len);
+      memcpy(((unsigned char *)buf) + len, iov->iov_base, iov->iov_len);
       len += iov->iov_len;
     }
 
