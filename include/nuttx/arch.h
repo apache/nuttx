@@ -1370,39 +1370,6 @@ void up_irqinitialize(void);
 bool up_interrupt_context(void);
 
 /****************************************************************************
- * Name: up_irq_save
- *
- * Description:
- *   Save the current interrupt state and disable interrupts.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Interrupt state prior to disabling interrupts.
- *
- ****************************************************************************/
-
-irqstate_t up_irq_save(void);
-
-/****************************************************************************
- * Name: up_irq_restore
- *
- * Description:
- *   Restore the previous irq state (i.e., the one previously
- *   returned by up_irq_save())
- *
- * Input Parameters:
- *   irqstate - The interrupt state to be restored.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void up_irq_restore(irqstate_t irqstate);
-
-/****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
