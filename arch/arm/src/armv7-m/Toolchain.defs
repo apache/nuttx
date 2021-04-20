@@ -134,13 +134,13 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
   MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
-  CC = clang
-  CXX = clang++
-  CPP = clang -E -P -x c
+  CC = clang -fshort-wchar
+  CXX = clang++ -fshort-wchar
+  CPP = clang -E -P -x c -fshort-wchar
 else
-  CC = $(CROSSDEV)gcc
-  CXX = $(CROSSDEV)g++
-  CPP = $(CROSSDEV)gcc -E -P -x c
+  CC = $(CROSSDEV)gcc -fshort-wchar
+  CXX = $(CROSSDEV)g++ -fshort-wchar
+  CPP = $(CROSSDEV)gcc -E -P -x c -fshort-wchar
 endif
 
 LD = $(CROSSDEV)ld
