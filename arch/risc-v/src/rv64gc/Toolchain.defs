@@ -66,9 +66,9 @@ endif
 
 # Default toolchain
 
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E -P -x c
+CC = $(CROSSDEV)gcc -fshort-wchar
+CXX = $(CROSSDEV)g++ -fshort-wchar
+CPP = $(CROSSDEV)gcc -E -P -x c -fshort-wchar
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
