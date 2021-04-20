@@ -44,7 +44,7 @@ struct trace_arg
  * Private Functions
  ****************************************************************************/
 
-static inline weak_function
+weak_function
 FAR void *unwind_arch_adjustment(FAR void *prev, FAR void *addr)
 {
   return addr;
