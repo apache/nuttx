@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1026,11 +1027,13 @@ static inline void spi_writebyte(FAR struct stm32_spidev_s *priv,
 #ifdef CONFIG_DEBUG_SPI_INFO
 static void spi_dumpregs(FAR struct stm32_spidev_s *priv)
 {
-  spiinfo("CR1: 0x%08x CFG1: 0x%08x CFG2: 0x%08x\n",
+  spiinfo("CR1: 0x%08" PRIx32 " CFG1: 0x%08" PRIx32
+          " CFG2: 0x%08" PRIx32 "\n",
           spi_getreg(priv, STM32_SPI_CR1_OFFSET),
           spi_getreg(priv, STM32_SPI_CFG1_OFFSET),
           spi_getreg(priv, STM32_SPI_CFG2_OFFSET));
-  spiinfo("IER: 0x%08x SR: 0x%08x I2SCFGR: 0x%08x\n",
+  spiinfo("IER: 0x%08" PRIx32 " SR: 0x%08" PRIx32
+          " I2SCFGR: 0x%08" PRIx32 "\n",
           spi_getreg(priv, STM32_SPI_IER_OFFSET),
           spi_getreg(priv, STM32_SPI_SR_OFFSET),
           spi_getreg(priv, STM32_SPI_I2SCFGR_OFFSET));
@@ -1527,7 +1530,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
        * will be faster.
        */
 
-      spiinfo("Frequency %d->%d\n", frequency, actual);
+      spiinfo("Frequency %" PRId32 "->%" PRId32 "\n", frequency, actual);
 
       priv->frequency = frequency;
       priv->actual    = actual;
@@ -1557,7 +1560,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
 
-  spiinfo("mode=%d\n", mode);
+  spiinfo("mode=%" PRIx32 "\n", (uint32_t) mode);
 
   /* Has the mode changed? */
 
@@ -1697,7 +1700,7 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev,
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
 
-  spiinfo("features=%08x\n", features);
+  spiinfo("features=%08" PRIx8 "\n", features);
 
   /* Transfer data LSB first? */
 
@@ -1802,11 +1805,13 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 
   if (priv->nbits > 8)
     {
-      spiinfo("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32 " Status: %02" PRIx32
+              "\n", wd, ret, regval);
     }
   else
     {
-      spiinfo("Sent: %02x Return: %02x Status: %02x\n", wd, ret, regval);
+      spiinfo("Sent: %02" PRIx32 " Return: %02" PRIx32 " Status: %02" PRIx32
+              "\n", wd, ret, regval);
     }
 
   UNUSED(regval);
