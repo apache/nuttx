@@ -28,6 +28,7 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -509,7 +510,8 @@ static int cromfs_compare_node(FAR const struct cromfs_volume_s *fs,
   name   = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
   namlen = strlen(name);
 
-  finfo("Compare %s to %s[0-%u]\n", name, cpnode->segment, cpnode->seglen);
+  finfo("Compare %s to %s[0-%" PRIu16 "]\n", name, cpnode->segment,
+        cpnode->seglen);
 
   /* If the lengths of the name does not match the length of the next path
    * segment, then this is not the node we are looking for.
@@ -952,8 +954,8 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
           src = (FAR const uint8_t *)currhdr + LZF_TYPE0_HDR_SIZE;
           memcpy(dest, &src[copyoffs], copysize);
 
-          finfo("blkoffs=%lu ulen=%u copysize=%u\n",
-                (unsigned long)blkoffs, ulen, copysize);
+          finfo("blkoffs=%" PRIu32 " ulen=%" PRIu16 " copysize=%u\n",
+                blkoffs, ulen, copysize);
         }
       else
         {
@@ -986,10 +988,9 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                   ff->ff_ulen   = decomplen;
                 }
 
-              finfo(
-                "voloffs=%lu blkoffs=%lu ulen=%u ff_offset=%u copysize=%u\n",
-                (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
-                ff->ff_offset, copysize);
+              finfo("voloffs=%" PRIu32 " blkoffs=%" PRIu32
+                    " ulen=%" PRIu16 " ff_offset=%" PRIu32 " copysize=%u\n",
+                    voloffs, blkoffs, ulen, ff->ff_offset, copysize);
               DEBUGASSERT(ff->ff_ulen >= copysize);
             }
           else
@@ -1025,10 +1026,11 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
                   ff->ff_ulen   = decomplen;
                 }
 
-              finfo("voloffs=%lu blkoffs=%lu ulen=%u clen=%u ff_offset=%u "
-                    "copyoffs=%u copysize=%u\n",
-                    (unsigned long)voloffs, (unsigned long)blkoffs, ulen,
-                    clen, ff->ff_offset, copyoffs, copysize);
+              finfo("voloffs=%" PRIu32 " blkoffs=%" PRIu32 " ulen=%" PRIu16
+                    " clen=%" PRIu16 " ff_offset=%" PRIu32
+                    "  copyoffs=%u copysize=%u\n",
+                    voloffs, blkoffs, ulen, clen, ff->ff_offset,
+                    copyoffs, copysize);
               DEBUGASSERT(ff->ff_ulen >= (copyoffs + copysize));
 
               /* Then copy to user buffer */
@@ -1254,7 +1256,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        * special error -ENOENT
        */
 
-      finfo("Entry %d: End of directory\n", offset);
+      finfo("Entry %" PRIu32 ": End of directory\n", offset);
       return -ENOENT;
     }
 
@@ -1269,7 +1271,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
        * special error -ENOENT
        */
 
-      finfo("Entry %d: End of directory\n", offset);
+      finfo("Entry %" PRIu32 ": End of directory\n", offset);
       return -ENOENT;
     }
 
@@ -1284,7 +1286,7 @@ static int cromfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   /* Save the filename and file type */
 
   name = (FAR char *)cromfs_offset2addr(fs, node->cn_name);
-  finfo("Entry %lu: %s\n", (unsigned long)offset, name);
+  finfo("Entry %" PRIu32 ": %s\n", offset, name);
   strncpy(dir->fd_dir.d_name, name, NAME_MAX);
 
   switch (node->cn_mode & S_IFMT)
