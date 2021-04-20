@@ -5,7 +5,7 @@ i.MX RT
 The i.MX RT series of chips from NXP Semiconductors is based around an ARM Cortex-M7 core running
 at 500 MHz, 600 MHz or 1 GHz based on particular MCUs
 
-Suported MCUs
+Supported MCUs
 =============
 
 The following list includes MCUs from i.MX RT series and indicates whether they are supported in NuttX

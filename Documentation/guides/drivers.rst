@@ -149,7 +149,7 @@ NuttX Drivers as a Reference
 
 If you're not porting a NuttX driver from another architecture, it still helps to look at other similar NuttX
 drivers, if there are any. For instance, when implementing an Ethernet driver, look at other NuttX Ethernet drivers;
-for an SD Card driver, look at other NuttX Ethernet drivers. Even if the chip-specific code won't be the same, the
+for an SD Card driver, look at other NuttX SD Card drivers. Even if the chip-specific code won't be the same, the
 structure to interface with NuttX can be used.
 
 Using Chip Datasheets

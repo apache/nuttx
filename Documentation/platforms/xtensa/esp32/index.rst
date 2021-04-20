@@ -699,9 +699,8 @@ Things to Do
 2. Currently the Xtensa port copies register state save information from
    the stack into the TCB.  A more efficient alternative would be to just
    save a pointer to a register state save area in the TCB.  This would
-   add some complexity to signal handling and also also the
-   up_initialstate().  But the performance improvement might be worth
-   the effort.
+   add some complexity to signal handling and also to up_initialstate().
+   But the performance improvement might be worth the effort.
 
 3. See SMP-related issues above
 
