@@ -110,12 +110,12 @@ extern const irq_mapped_t g_irqmap[NR_IRQS];
  * disabled.
  */
 
-extern volatile spinlock_t g_cpu_irqlock SP_SECTION;
+extern volatile spinlock_t g_cpu_irqlock;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
-extern volatile cpu_set_t g_cpu_irqset SP_SECTION;
+extern volatile spinlock_t g_cpu_irqsetlock;
+extern volatile cpu_set_t g_cpu_irqset;
 
 /* Handles nested calls to enter_critical section from interrupt handlers */
 

@@ -38,7 +38,7 @@
 
 /* Used for access control */
 
-static volatile spinlock_t g_irq_spin SP_SECTION = SP_UNLOCKED;
+static volatile spinlock_t g_irq_spin = SP_UNLOCKED;
 
 /* Handles nested calls to spin_lock_irqsave and spin_unlock_irqrestore */
 
