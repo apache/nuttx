@@ -433,7 +433,6 @@ int ipv6_input(FAR struct net_driver_s *dev)
             }
           else
 #endif
-          if (nxthdr != IP_PROTO_UDP)
             {
               /* Not destined for us and not forwardable...
                * drop the packet.

@@ -297,7 +297,6 @@ int ipv4_input(FAR struct net_driver_s *dev)
             }
           else
 #endif
-          if (ipv4->proto != IP_PROTO_UDP)
             {
               /* Not destined for us and not forwardable... Drop the
                * packet.
