@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 static volatile bool g_appcpu_started;
-static volatile spinlock_t g_appcpu_interlock SP_SECTION;
+static volatile spinlock_t g_appcpu_interlock;
 
 /****************************************************************************
  * ROM function prototypes
