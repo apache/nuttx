@@ -151,8 +151,29 @@
 #  define REG_D15           (ARM_CONTEXT_REGS+30) /* D15 */
 #  define REG_S30           (ARM_CONTEXT_REGS+30) /* S30 */
 #  define REG_S31           (ARM_CONTEXT_REGS+31) /* S31 */
-#  define REG_FPSCR         (ARM_CONTEXT_REGS+32) /* Floating point status and control */
-#  define FPU_CONTEXT_REGS  (33)
+#  ifdef CONFIG_ARM_HAVE_FPU_D32
+#    define REG_D16         (ARM_CONTEXT_REGS+32) /* D16 */
+#    define REG_D17         (ARM_CONTEXT_REGS+34) /* D17 */
+#    define REG_D18         (ARM_CONTEXT_REGS+36) /* D18 */
+#    define REG_D19         (ARM_CONTEXT_REGS+38) /* D19 */
+#    define REG_D20         (ARM_CONTEXT_REGS+40) /* D20 */
+#    define REG_D21         (ARM_CONTEXT_REGS+42) /* D21 */
+#    define REG_D22         (ARM_CONTEXT_REGS+44) /* D22 */
+#    define REG_D23         (ARM_CONTEXT_REGS+46) /* D23 */
+#    define REG_D24         (ARM_CONTEXT_REGS+48) /* D24 */
+#    define REG_D25         (ARM_CONTEXT_REGS+50) /* D25 */
+#    define REG_D26         (ARM_CONTEXT_REGS+52) /* D26 */
+#    define REG_D27         (ARM_CONTEXT_REGS+54) /* D27 */
+#    define REG_D28         (ARM_CONTEXT_REGS+56) /* D28 */
+#    define REG_D29         (ARM_CONTEXT_REGS+58) /* D29 */
+#    define REG_D30         (ARM_CONTEXT_REGS+60) /* D30 */
+#    define REG_D31         (ARM_CONTEXT_REGS+62) /* D31 */
+#    define REG_FPSCR       (ARM_CONTEXT_REGS+64) /* Floating point status and control */
+#    define FPU_CONTEXT_REGS  (65)
+#  else
+#    define REG_FPSCR       (ARM_CONTEXT_REGS+32) /* Floating point status and control */
+#    define FPU_CONTEXT_REGS  (33)
+#  endif
 #else
 #  define FPU_CONTEXT_REGS  (0)
 #endif

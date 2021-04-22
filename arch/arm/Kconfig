@@ -789,6 +789,14 @@ config ARM_THUMB
 	default n
 	depends on ARCH_ARMV7A
 
+config ARM_HAVE_FPU_D32
+	bool
+	select ARCH_HAVE_FPU
+	default n
+	---help---
+		FPU implemented in the VFPv3-D32 format that supports
+		32 double-precision floating-point registers.
+
 config ARM_HAVE_MPU_UNIFIED
 	bool
 	default n
