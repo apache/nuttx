@@ -33,24 +33,16 @@
 #
 ############################################################################
 
-if("${CONFIG_NET_ICMP}" STREQUAL "y")
-	if(NOT "${CONFIG_NET_ICMP_NO_STACK}" STREQUAL "y")
-	
-		# ICMP source files
 
-		list(APPEND CSRCS icmp_input.c)
-		
-		if("${CONFIG_NET_ICMP_SOCKET}" STREQUAL "y")
-			list(APPEND CSRCS icmp_sockif.c icmp_poll.c icmp_conn.c icmp_sendto.c)
-			list(APPEND CSRCS icmp_recvfrom.c)
-			if("${CONFIG_MM_IOB}" STREQUAL "y")
-				list(APPEND CSRCS icmp_netpoll.c)
-			endif()
-		endif()
-		
-		# Include ICMP build support
-		
-		set_parent_srcs(${CSRCS})
+if (CONFIG_NET_ICMP AND NOT CONFIG_NET_ICMP_NO_STACK)
+  # ICMP source files
+  set(SRCS icmp_input.c)
 
-	endif() # !CONFIG_NET_ICMP_NO_STACK
-endif() # CONFIG_NET_ICMP
+  if (CONFIG_NET_ICMP_SOCKET)
+    list(APPEND SRCS
+      icmp_sockif.c icmp_poll.c icmp_conn.c icmp_sendmsg.c
+      icmp_recvmsg.c icmp_netpoll.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
+endif()

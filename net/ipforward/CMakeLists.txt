@@ -35,26 +35,20 @@
 
 # IP forwarding source files
 
-if("${CONFIG_NET_IPFORWARD}" STREQUAL "y")
+if (CONFIG_NET_IPFORWARD)
+  set(SRCS ipfwd_alloc.c ipfwd_forward.c ipfwd_poll.c)
 
-	set(CSRCS)
+  if (CONFIG_NET_IPv4)
+    list(APPEND SRCS ipv4_forward.c)
+  endif()
 
-	list(APPEND CSRCS ipfwd_alloc.c ipfwd_forward.c ipfwd_poll.c)
-	
-	if("${CONFIG_NET_IPv4}" STREQUAL "y")
-		list(APPEND CSRCS ipv4_forward.c)
-	endif()
-	
-	if("${CONFIG_NET_IPv6}" STREQUAL "y")
-		list(APPEND CSRCS ipv6_forward.c)
-	endif()
-	
-	if("${CONFIG_NET_STATISTICS}" STREQUAL "y")
-		list(APPEND CSRCS ipfwd_dropstats.c)
-	endif()
-	
-	# Include IP forwaring build support
-	
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_NET_IPv6)
+    list(APPEND SRCS ipv6_forward.c)
+  endif()
 
+  if (CONFIG_NET_STATISTICS)
+    list(APPEND SRCS ipfwd_dropstats.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
 endif()

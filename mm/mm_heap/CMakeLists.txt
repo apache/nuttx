@@ -33,29 +33,22 @@
 #
 ############################################################################
 
-# Core heap allocator logic
-set(CSRCS)
+if (CONFIG_MM_DEFAULT_MANAGER)
+  set(SRCS)
 
-if("${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-	list(APPEND CSRCS mm_sbrk.c)
+  list(APPEND SRCS
+    mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
+    mm_malloc_usable_size.c mm_shrinkchunk.c
+    mm_brkaddr.c mm_calloc.c mm_extend.c mm_free.c mm_mallinfo.c
+    mm_malloc.c mm_memalign.c mm_realloc.c mm_zalloc.c mm_heapmember.c)
+
+  if (CONFIG_BUILD_KERNEL)
+    list(APPEND SRCS mm_sbrk.c)
+  endif()
+
+  if (CONFIG_DEBUG_MM)
+    list(APPEND SRCS mm_checkcorruption.c)
+  endif()
+
+  target_sources(mm PRIVATE ${SRCS})
 endif()
-
-# Add the core heap directory to the build
-list(APPEND CSRCS
-	mm_addfreechunk.c
-	mm_brkaddr.c
-	mm_calloc.c
-	mm_extend.c
-	mm_free.c
-	mm_heapmember.c
-	mm_initialize.c
-	mm_mallinfo.c
-	mm_malloc.c
-	mm_memalign.c
-	mm_realloc.c
-	mm_sem.c
-	mm_shrinkchunk.c
-	mm_size2ndx.c
-	mm_zalloc.c
-)
-set_parent_srcs(${CSRCS})

@@ -33,36 +33,78 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
-list(APPEND CSRCS nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c)
-list(APPEND CSRCS nxglib_setpixel_4bpp.c nxglib_setpixel_8bpp.c)
-list(APPEND CSRCS nxglib_setpixel_16bpp.c nxglib_setpixel_24bpp.c)
-list(APPEND CSRCS nxglib_setpixel_32bpp.c)
+set(OPERATIONS setpixel fillrectangle getrectangle
+  filltrapezoid moverectangle copyrectangle)
+set(BPPS 1 2 8 4 16 24 32)
 
-list(APPEND CSRCS nxglib_fillrectangle_1bpp.c nxglib_fillrectangle_2bpp.c)
-list(APPEND CSRCS nxglib_fillrectangle_4bpp.c nxglib_fillrectangle_8bpp.c)
-list(APPEND CSRCS nxglib_fillrectangle_16bpp.c nxglib_fillrectangle_24bpp.c)
-list(APPEND CSRCS nxglib_fillrectangle_32bpp.c)
+if (CONFIG_NX_LCDDRIVER)
+  set(BLITDIR lcd)
+else()
+  set(BLITDIR fb)
+endif()
 
-list(APPEND CSRCS nxglib_getrectangle_1bpp.c nxglib_getrectangle_2bpp.c)
-list(APPEND CSRCS nxglib_getrectangle_4bpp.c nxglib_getrectangle_8bpp.c)
-list(APPEND CSRCS nxglib_getrectangle_16bpp.c nxglib_getrectangle_24bpp.c)
-list(APPEND CSRCS nxglib_getrectangle_32bpp.c)
+set(BLIT_SRCS)
+foreach(op OPERATIONS)
+  foreach(bpp BPPS)
+    add_custom_command(
+      OUTPUT nxglib_${op}_${bpp}bpp.c
+      COMMAND ${CMAKE_C_COMPILER}
+      ARGS -E ${CMAKE_C_FLAGS} -c ${BLITDIR}/nxglib_${op}.c -o nxglib_${op}_${bpp}bpp.c
+      DEPENDS ${BLITDIR}/nxglib_${op}.c
+    )
 
-list(APPEND CSRCS nxglib_filltrapezoid_1bpp.c nxglib_filltrapezoid_2bpp.c)
-list(APPEND CSRCS nxglib_filltrapezoid_4bpp.c nxglib_filltrapezoid_8bpp.c)
-list(APPEND CSRCS nxglib_filltrapezoid_16bpp.c nxglib_filltrapezoid_24bpp.c)
-list(APPEND CSRCS nxglib_filltrapezoid_32bpp.c)
+    list(APPEND BLIT_SRCS nxglib_${op}_${bpp}bpp.c)
+  endforeach()
+endforeach()
 
-list(APPEND CSRCS nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c)
-list(APPEND CSRCS nxglib_moverectangle_4bpp.c nxglib_moverectangle_8bpp.c)
-list(APPEND CSRCS nxglib_moverectangle_16bpp.c nxglib_moverectangle_24bpp.c)
-list(APPEND CSRCS nxglib_moverectangle_32bpp.c)
+set(SRCS ${SRCS} ${BLIT_SRCS})
+add_custom_target(nxglib_blit ${BLIT_SRCS})
+add_dependencies(graphics nxglib_blit)
 
-list(APPEND CSRCS nxglib_copyrectangle_1bpp.c nxglib_copyrectangle_2bpp.c)
-list(APPEND CSRCS nxglib_copyrectangle_4bpp.c nxglib_copyrectangle_8bpp.c)
-list(APPEND CSRCS nxglib_copyrectangle_16bpp.c nxglib_copyrectangle_24bpp.c)
-list(APPEND CSRCS nxglib_copyrectangle_32bpp.c)
+if (CONFIG_NX_RAMBACKED)
+  set(PWFB_SRCS)
 
-set_parent_srcs(${CSRCS})
+  foreach(op OPERATIONS)
+    foreach(bpp BPPS)
+      add_custom_command(
+        OUTPUT pwfb_${op}_${bpp}bpp.c
+        COMMAND ${CMAKE_C_COMPILER}
+        ARGS -E ${CMAKE_C_FLAGS} -c pwfb/pwfb_${op}.c -o pwfb_${op}_${bpp}bpp.c
+        DEPENDS pwfb/pwfb_${op}.c
+      )
+
+      list(APPEND PWFB_SRCS pwfb_${op}_${bpp}bpp.c)
+    endforeach()
+  endforeach()
+
+  add_custom_target(nxglib_pwfb DEPEND ${PWFB_SRCS})
+  add_dependencies(graphics nxglib_pwfb)
+  set(SRCS ${SRCS} ${PWFB_SRCS})
+endif()
+
+if (CONFIG_NX_SWCURSOR)
+  set(CURSOR_SRCS)
+  set(CURSOR_OPS draw erase backup)
+  set(CURSOR_BPPS 8 16 24 32)
+
+  foreach(op CURSOR_OPS)
+    foreach(bpp CURSOR_BPPS)
+      add_custom_command(
+        OUTPUT nxglib_cursor_${op}_${bpp}bpp.c
+        COMMAND ${CMAKE_C_COMPILER}
+        ARGS -E ${CMAKE_C_FLAGS} -c cursor/nxglib_cursor_${op}.c -o nxglib_cursor_${op}_${bpp}bpp.c
+        DEPENDS cursor/nxglib_cursor_${op}.c
+      )
+
+      list(APPEND CURSOR_SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}_${bpp}bpp.c)
+    endforeach()
+  endforeach()
+
+  add_custom_target(nxglib_cursor DEPEND ${CURSOR_SRCS})
+  add_dependencies(graphics nxglib_cursor)
+  set(SRCS ${SRCS} ${CURSOR_SRCS})
+endif()
+
+target_sources(graphics PRIVATE ${SRCS})

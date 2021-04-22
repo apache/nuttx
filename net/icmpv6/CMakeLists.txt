@@ -33,45 +33,35 @@
 #
 ############################################################################
 
-if("${CONFIG_NET_ICMPv6}" STREQUAL "y")
-	if(NOT "${CONFIG_NET_ICMPv6_NO_STACK}" STREQUAL "y")
-	
-		set(CSRCS)
-	
-		# ICMPv6 source files
-		
-		list(APPEND CSRCS icmpv6_input.c icmpv6_solicit.c icmpv6_advertise.c)
-		list(APPEND CSRCS icmpv6_linkipaddr.c)
-		
-		if("${CONFIG_NET_ICMPv6_SOCKET}" STREQUAL "y")
-			list(APPEND CSRCS icmpv6_sockif.c icmpv6_conn.c icmpv6_sendto.c)
-			list(APPEND CSRCS icmpv6_recvfrom.c)
-			if("${CONFIG_MM_IOB}" STREQUAL "y")
-				list(APPEND CSRCS icmpv6_netpoll.c)
-			endif()
-		endif()
-		
-		if("${CONFIG_NET_ICMPv6_NEIGHBOR}" STREQUAL "y")
-			list(APPEND CSRCS icmpv6_neighbor.c icmpv6_notify.c)
-		endif()
-		
-		if("${CONFIG_NET_ICMPv6_SOCKET}" STREQUAL "y")
-			list(APPEND CSRCS icmpv6_poll.c)
-		elseif("${CONFIG_NET_ICMPv6_NEIGHBOR}" STREQUAL "y")
-			list(APPEND CSRCS icmpv6_poll.c)
-		endif()
-		
-		if("${CONFIG_NET_ICMPv6_AUTOCONF}" STREQUAL "y")
-			list(APPEND CSRCS icmpv6_autoconfig.c icmpv6_rsolicit.c icmpv6_rnotify.c)
-		endif()
-		
-		if("${CONFIG_NET_ICMPv6_ROUTER}" STREQUAL "y")
-			list(APPEND CSRCS icmpv6_radvertise.c)
-		endif()
+if (CONFIG_NET_ICMPv6 AND CONFIG_NET_ICMPv6_NO_STACK)
+  # ICMPv6 source files
 
-		# Include ICMPv6 build support
+  set(SRCS
+    icmpv6_input.c icmpv6_solicit.c icmpv6_advertise.c icmpv6_linkipaddr.c)
 
-		set_parent_srcs(${CSRCS})
-	
-	endif() # !CONFIG_NET_ICMPv6_NO_STACK
-endif() # CONFIG_NET_ICMPv6
+  if (CONFIG_NET_ICMPv6_SOCKET)
+    list(APPEND SRCS
+      icmpv6_sockif.c icmpv6_conn.c icmpv6_sendmsg.c
+      icmpv6_recvmsg.c icmpv6_netpoll.c)
+  endif()
+
+  if (CONFIG_NET_ICMPv6_NEIGHBOR)
+    list(APPEND SRCS icmpv6_neighbor.c icmpv6_notify.c)
+  endif()
+
+  if (CONFIG_NET_ICMPv6_SOCKET)
+    list(APPEND SRCS icmpv6_poll.c)
+  elseif (CONFIG_NET_ICMPv6_NEIGHBOR)
+    list(APPEND SRCS icmpv6_poll.c)
+  endif()
+
+  if (CONFIG_NET_ICMPv6_AUTOCONF)
+    list(APPEND SRCS icmpv6_autoconfig.c icmpv6_rsolicit.c icmpv6_rnotify.c)
+  endif()
+
+  if (CONFIG_NET_ICMPv6_ROUTER)
+    list(APPEND SRCS icmpv6_radvertise.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
+endif()

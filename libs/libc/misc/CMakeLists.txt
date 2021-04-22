@@ -35,91 +35,55 @@
 ############################################################################
 
 # Add the internal C files to the build
-set(CSRCS)
 
-if(NOT "${CONFIG_STDIO_DISABLE_BUFFERING}" STREQUAL "y")
-	list(APPEND CSRCS lib_filesem.c)
+list(APPEND SRCS
+  lib_stream.c lib_umask.c lib_utsname.c
+  lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c)
+
+if (NOT CONFIG_STDIO_DISABLE_BUFFERING)
+  list(APPEND SRCS lib_filesem.c)
 endif()
+
+# Support for platforms that do not have long long types
+
+list(APPEND SRCS
+  lib_umul32.c lib_umul64.c lib_umul32x64.c
+  lib_uadd32x64.c lib_uadd64.c lib_usub64x32.c lib_usub64.c)
 
 # Add C files that depend on file OR socket descriptors
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
 
-	list(APPEND CSRCS lib_sendfile.c)
-	
-	if(NOT "${CONFIG_NFILE_STREAMS}" STREQUAL "0")
-		list(APPEND CSRCS lib_streamsem.c)
-	endif()
+list(APPEND SRCS lib_sendfile.c)
 
-	if("${CONFIG_LIBC_IOCTL_VARIADIC}" STREQUAL "y")
-		list(APPEND CSRCS lib_ioctl.c)
-	endif()
-
-	if("${CONFIG_PIPES}" STREQUAL "y")
-		list(APPEND CSRCS lib_mkfifo.c)
-	endif()
-
-else() # CONFIG_NFILE_DESCRIPTORS > 0
-	if(NOT "${CONFIG_NSOCKET_DESCRIPTORS}" STREQUAL "0")
-	
-		list(APPEND CSRCS lib_sendfile.c)
-		
-			if(NOT "${CONFIG_NFILE_STREAMS}" STREQUAL "0")
-				list(APPEND CSRCS lib_streamsem.c)
-			endif()
-	
-		if("${CONFIG_LIBC_IOCTL_VARIADIC}" STREQUAL "y")
-			list(APPEND CSRCS lib_ioctl.c)
-		endif()
-
-	endif() # CONFIG_NSOCKET_DESCRIPTORS > 0
-endif() # CONFIG_NFILE_DESCRIPTORS > 0
-
-# Add the miscellaneous C files to the build
-if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-	list(APPEND CSRCS lib_debug.c)
+if (CONFIG_FILE_STREAM)
+  list(APPEND SRCS lib_streamsem.c)
 endif()
 
+if (CONFIG_PIPES)
+  list(APPEND SRCS lib_mkfifo.c)
+endif()
+
+# Add the miscellaneous C files to the build
+
+list(APPEND SRCS
+  lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
+  lib_dumpbuffer.c lib_dumpvbuffer.c lib_match.c lib_debug.c)
+
 # Keyboard driver encoder/decoder
-if("${CONFIG_LIB_KBDCODEC}" STREQUAL "y")
-	list(APPEND CSRCS
-		lib_kbdencode.c
-		lib_kbddecode.c
-	)
+
+if (CONFIG_LIB_KBDCODEC)
+  list(APPEND SRCS lib_kbdencode.c lib_kbddecode.c)
 endif()
 
 # SLCD driver encoder/decoder
-if("${CONFIG_LIB_SLCDCODEC}" STREQUAL "y")
-	list(APPEND CSRCS
-		lib_slcdencode.c
-		lib_slcddecode.c
-	)
+
+if (CONFIG_LIB_SLCDCODEC)
+  list(APPEND SRCS lib_slcdencode.c lib_slcddecode.c)
 endif()
 
 # Environment search path support
-if("${CONFIG_LIB_ENVPATH}" STREQUAL "y")
-	list(APPEND CSRCS lib_envpath.c)
+
+if (CONFIG_LIB_ENVPATH)
+  list(APPEND SRCS lib_envpath.c)
 endif()
 
-# Add the misc directory to the build
-list(APPEND CSRCS
-	lib_crc16.c
-	lib_crc32.c
-	lib_crc64.c
-	lib_crc8.c
-	lib_crc8ccitt.c
-	lib_dumpbuffer.c
-	lib_match.c
-	lib_stream.c
-	lib_tea_decrypt.c
-	lib_tea_encrypt.c
-	lib_uadd32x64.c
-	lib_uadd64.c
-	lib_umul32.c
-	lib_umul32x64.c
-	lib_umul64.c
-	lib_usub64.c
-	lib_usub64x32.c
-	lib_utsname.c
-	lib_xorshift128.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

@@ -33,10 +33,4 @@
 #
 ############################################################################
 
-# Add the internal C files to the build
-set(CSRCS)
-list(APPEND CSRCS
-	lib_setlogmask.c
-	lib_syslog.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE lib_setlogmask.c lib_syslog.c)

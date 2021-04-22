@@ -33,18 +33,14 @@
 #
 ############################################################################
 
-if("${CONFIG_VNCSERVER}" STREQUAL "y")
+if (CONFIG_VNCSERVER)
+  set(SRCS
+    vnc_server.c vnc_negotiate.c vnc_updater.c vnc_receiver.c
+    vnc_raw.c vnc_rre.c vnc_color.c vnc_fbdev.c)
 
-	set(CSRCS)
+  if (CONFIG_NX_KBD)
+    list(APPEND SRCS vnc_keymap.c)
+  endif()
 
-	list(APPEND CSRCS vnc_server.c vnc_negotiate.c vnc_updater.c vnc_receiver.c)
-	list(APPEND CSRCS vnc_raw.c vnc_rre.c vnc_color.c vnc_fbdev.c)
-	
-	if("${CONFIG_NX_KBD}" STREQUAL "y")
-		list(APPEND CSRCS vnc_keymap.c)
-	endif()
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(graphics PRIVATE ${SRCS})
 endif()
-

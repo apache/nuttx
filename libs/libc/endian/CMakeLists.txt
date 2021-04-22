@@ -33,11 +33,4 @@
 #
 ############################################################################
 
-# Add the endian directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	lib_swap16.c
-	lib_swap32.c
-	lib_swap64.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE lib_swap16.c lib_swap32.c lib_swap64.c)

@@ -34,49 +34,38 @@
 #
 ############################################################################
 
+set(SRCS)
+
 # Check if I/O expander support is enabled
 
-set(CSRCS)
+if (CONFIG_IOEXPANDER)
+  # Include the selected I/O expander drivers
 
-if("${CONFIG_IOEXPANDER}" STREQUAL "y")
+  if (CONFIG_IOEXPANDER_PCA9555)
+    list(APPEND SRCS pca9555.c)
+  endif()
 
-	# Include the selected I/O expander drivers
+  if (CONFIG_IOEXPANDER_PCA9538)
+    list(APPEND SRCS pca9538.c)
+  endif()
 
-	if("${CONFIG_IOEXPANDER_PCA9555}" STREQUAL "y")
-		list(APPEND CSRCS pca9555.c)
-	endif()
+  if (CONFIG_IOEXPANDER_TCA64XX)
+    list(APPEND SRCS tca64xx.c)
+  endif()
 
-	if("${CONFIG_IOEXPANDER_TCA64XX}" STREQUAL "y")
-		list(APPEND CSRCS tca64xx.c)
-	endif()
-
-	if("${CONFIG_IOEXPANDER_PCF8574}" STREQUAL "y")
-		list(APPEND CSRCS pcf8574.c)
-	endif()
-
-endif() # CONFIG_IOEXPANDER
+  if (CONFIG_IOEXPANDER_PCF8574)
+    list(APPEND SRCS pcf8574.c)
+  endif()
+endif()
 
 # GPIO test device driver (independent of IOEXPANDERS)
 
-if("${CONFIG_DEV_GPIO}" STREQUAL "y")
-	list(APPEND CSRCS gpio.c)
-	if("${CONFIG_GPIO_LOWER_HALF}" STREQUAL "y")
-		list(APPEND CSRCS gpio_lower_half.c)
-	endif()
+if (CONFIG_DEV_GPIO)
+  list(APPEND SRCS gpio.c)
+
+  if (CONFIG_GPIO_LOWER_HALF)
+    list(APPEND SRCS gpio_lower_half.c)
+  endif()
 endif()
 
-# The folling implements an awkward OR
-
-if("${CONFIG_IOEXPANDER}" STREQUAL "y")
-
-	# Include ioexpander I/O device driver build support
-
-	set_parent_srcs(${CSRCS})
-
-elseif("${CONFIG_DEV_GPIO}" STREQUAL "y")
-
-	# Include ioexpander I/O device driver build support
-
-	set_parent_srcs(${CSRCS})
-
-endif()
+target_sources(drivers PRIVATE ${SRCS})

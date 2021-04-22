@@ -35,56 +35,70 @@
 #
 ############################################################################
 
-# Include Audio drivers
+if (CONFIG_DRIVERS_AUDIO)
+  set(SRCS)
 
-if("${CONFIG_DRIVERS_AUDIO}" STREQUAL "y")
+  if (CONFIG_AUDIO_CXD56)
+    list(APPEND SRCS cxd56.c)
+    if (CONFIG_AUDIO_CXD56_SRC)
+      list(APPEND SRCS cxd56_src.c)
+    endif()
+  endif()
 
-	set(CSRCS)
+  if (CONFIG_AUDIO_VS1053)
+    list(APPEND SRCS vs1053.c)
+  endif()
 
-	if("${CONFIG_AUDIO_VS1053}" STREQUAL "y")
-		list(APPEND CSRCS vs1053.c)
-	endif()
-	
-	if("${CONFIG_AUDIO_CS43L22}" STREQUAL "y")
-		list(APPEND CSRCS cs43l22.c)
-		if("${CONFIG_CS43L22_REGDUMP}" STREQUAL "y")
-			list(APPEND CSRCS cs43l22_debug.c)
-		else()
-			if("${CONFIG_CS43L22_CLKDEBUG}" STREQUAL "y")
-				list(APPEND CSRCS cs43l22_debug.c)
-			endif()
-		endif()
-	endif()
+  if (CONFIG_AUDIO_CS43L22)
+    list(APPEND SRCS cs43l22.c)
 
-	if("${CONFIG_AUDIO_WM8904}" STREQUAL "y")
-		list(APPEND CSRCS wm8904.c)
-		if("${CONFIG_WM8904_REGDUMP}" STREQUAL "y")
-			list(APPEND CSRCS wm8904_debug.c)
-		else()
-			if("${CONFIG_WM8904_CLKDEBUG}" STREQUAL "y")
-				list(APPEND CSRCS wm8904_debug.c)
-			endif()
-		endif()
-	endif()
+    if (CONFIG_CS43L22_REGDUMP)
+      list(APPEND SRCS cs43l22_debug.c)
+    elseif(CONFIG_CS43L22_CLKDEBUG)
+      list(APPEND SRCS cs43l22_debug.c)
+    endif()
+  endif()
 
-	if("${CONFIG_AUDIO_WM8776}" STREQUAL "y")
-		list(APPEND CSRCS wm8776.c)
-	endif()
-	
-	if("${CONFIG_AUDIO_NULL}" STREQUAL "y")
-		list(APPEND CSRCS audio_null.c)
-	endif()
-	
-	if("${CONFIG_AUDIO_TONE}" STREQUAL "y")
-		list(APPEND CSRCS tone.c)
-	endif()
-	
-	if("${CONFIG_AUDIO_I2S}" STREQUAL "y")
-		list(APPEND CSRCS audio_i2s.c)
-	endif()
+  if (CONFIG_AUDIO_CS4344)
+    list(APPEND SRCS cs4344.c)
+  endif()
 
-	# Include Audio driver support
-	
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_AUDIO_WM8994)
+    list(APPEND SRCS wm8994.c)
 
+    if (CONFIG_WM8994_REGDUMP)
+      list(APPEND SRCS wm8994_debug.c)
+    elseif (CONFIG_WM8994_CLKDEBUG)
+      list(APPEND SRCS wm8994_debug.c)
+    endif()
+  endif()
+
+  if (CONFIG_AUDIO_WM8904)
+    list(APPEND SRCS wm8904.c)
+
+    if (CONFIG_WM8904_REGDUMP)
+      list(APPEND SRCS wm8904_debug.c)
+    elseif (CONFIG_WM8904_CLKDEBUG)
+      list(APPEND SRCS wm8904_debug.c)
+    endif()
+  endif()
+
+  if (CONFIG_AUDIO_WM8776)
+    list(APPEND SRCS wm8776.c)
+  endif()
+
+  if (CONFIG_AUDIO_NULL)
+    list(APPEND SRCS audio_null.c)
+  endif()
+
+  if (CONFIG_AUDIO_TONE)
+    list(APPEND SRCS tone.c)
+  endif()
+
+  if (CONFIG_AUDIO_I2S)
+    list(APPEND SRCS audio_i2s.c)
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
+

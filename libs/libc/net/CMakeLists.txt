@@ -33,29 +33,24 @@
 #
 ############################################################################
 
-# Add the networking C files to the build
-set(CSRCS) 
+set(SRCS
+  lib_addrconfig.c lib_base64.c lib_htons.c lib_htonl.c
+  lib_inetaddr.c lib_inetaton.c lib_inetntoa.c
+  lib_inetntop.c lib_inetpton.c
+  lib_etherntoa.c lib_etheraton.c)
 
-if("${CONFIG_NET}" STREQUAL "y")
-	list(APPEND CSRCS lib_recvmsg.c lib_sendmsg.c lib_shutdown.c)
+if (CONFIG_NET)
+  list(APPEND SRCS lib_shutdown.c lib_socketpair.c)
+endif()
+
+if (CONFIG_NET_LOOPBACK)
+  list(APPEND SRCS lib_loopback.c)
 endif()
 
 # Routing table support
 
-if("${CONFIG_NET_ROUTE}" STREQUAL "y")
-	list(APPEND CSRCS lib_addroute.c lib_delroute.c)
+if (CONFIG_NET_ROUTE)
+  list(APPEND SRCS lib_addroute.c lib_delroute.c)
 endif()
 
-# Add the net directory to the build
-list(APPEND CSRCS
-	lib_addrconfig.c
-	lib_etherntoa.c
-	lib_htons.c
-	lib_htonl.c
-	lib_inetaddr.c
-	lib_inetaton.c
-	lib_inetntoa.c
-	lib_inetntop.c
-	lib_inetpton.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

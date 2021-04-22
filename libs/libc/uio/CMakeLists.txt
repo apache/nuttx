@@ -33,10 +33,4 @@
 #
 ############################################################################
 
-# Add the uio directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	lib_readv.c
-	lib_writev.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE lib_readv.c lib_writev.c)

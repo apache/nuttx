@@ -33,14 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_UNIONFS}" STREQUAL "y")
-	# Files required for Union file system support
-	set(CSRCS)
-
-	list(APPEND CSRCS fs_unionfs.c)
-	
-	# Include Union File System build support
-
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_FS_UNIONFS)
+  target_sources(fs PRIVATE fs_unionfs.c)
 endif()

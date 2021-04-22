@@ -33,16 +33,18 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_HOSTFS}" STREQUAL "y")
+set(SRCS)
 
-	set(CSRCS)
-
-	# Files required for HostFS file system support
-
-	list(APPEND CSRCS hostfs.c)
-	
-	# Include HOSTFS build support
-
-	set_parent_srcs(${CSRCS})
-
+if (CONFIG_FS_HOSTFS)
+  list(APPEND SRCS hostfs.c)
 endif()
+
+if (CONFIG_FS_HOSTFS_RPMSG)
+  list(APPEND SRCS hostfs_rpmsg.c)
+endif()
+
+if (CONFIG_FS_HOSTFS_RPMSG_SERVER)
+  list(APPEND SRCS hostfs_rpmsg_server.c)
+endif()
+
+target_sources(fs PRIVATE ${SRCS})

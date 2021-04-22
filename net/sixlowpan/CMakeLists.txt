@@ -35,44 +35,39 @@
 
 # IEEE 802.15.4 support
 
-if("${CONFIG_NET_6LOWPAN}" STREQUAL "y")
+if (CONFIG_NET_6LOWPAN)
+  # Include IEEE 802.15.4 file in the build
 
-	set(CSRCS)
+  set(SRCS
+    sixlowpan_initialize.c sixlowpan_globals.c sixlowpan_utils.c
+    sixlowpan_input.c sixlowpan_framer.c sixlowpan_framelist.c
+    sixlowpan_reassbuf.c)
 
-	# Include IEEE 802.15.4 file in the build
-	
-	list(APPEND CSRCS sixlowpan_initialize.c sixlowpan_globals.c sixlowpan_utils.c)
-	list(APPEND CSRCS sixlowpan_input.c sixlowpan_framer.c sixlowpan_framelist.c)
-	list(APPEND CSRCS sixlowpan_reassbuf.c)
-	
-	if("${CONFIG_NET_TCP}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_tcpsend.c)
-	endif()
-	
-	if("${CONFIG_NET_UDP}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_udpsend.c)
-	endif()
-	
-	if("${CONFIG_NET_ICMPv6}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_icmpv6send.c)
-	endif()
-	
-	if("${CONFIG_NET_UDP}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_send.c)
-	elseif("${CONFIG_NET_ICMPv6}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_send.c)
-	endif()
-	
-	if("${CONFIG_NET_6LOWPAN_COMPRESSION_HC1}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_hc1.c)
-	endif()
-	
-	if("${CONFIG_NET_6LOWPAN_COMPRESSION_HC06}" STREQUAL "y")
-		list(APPEND CSRCS sixlowpan_hc06.c)
-	endif()
-	
-	# Include the sixlowpan directory in the build
+  if (CONFIG_NET_TCP)
+    list(APPEND SRCS sixlowpan_tcpsend.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_NET_UDP)
+    list(APPEND SRCS sixlowpan_udpsend.c)
+  endif()
 
-endif() # CONFIG_NET_6LOWPAN
+  if (CONFIG_NET_ICMPv6)
+    list(APPEND SRCS sixlowpan_icmpv6send.c)
+  endif()
+
+  if (CONFIG_NET_UDP)
+    list(APPEND SRCS sixlowpan_send.c)
+  else if (CONFIG_NET_ICMPv6)
+    list(APPEND SRCS sixlowpan_send.c)
+  endif()
+
+  if (CONFIG_NET_6LOWPAN_COMPRESSION_HC1)
+    list(APPEND SRCS sixlowpan_hc1.c)
+  endif()
+
+  if (CONFIG_NET_6LOWPAN_COMPRESSION_HC06)
+    list(APPEND SRCS sixlowpan_hc06.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
+endif()

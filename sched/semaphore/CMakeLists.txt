@@ -33,11 +33,9 @@
 #
 ############################################################################
 
-set(CSRCS)
-
 # Add semaphore-related files to the build
 
-if("${CONFIG_PRIORITY_INHERITANCE}" STREQUAL "y")
+if(CONFIG_PRIORITY_INHERITANCE)
 	list(APPEND CSRCS
 		sem_initialize.c
 		sem_holder.c
@@ -45,22 +43,16 @@ if("${CONFIG_PRIORITY_INHERITANCE}" STREQUAL "y")
 	)
 endif()
 
-if("${CONFIG_SPINLOCK}" STREQUAL "y")
+if(CONFIG_SPINLOCK)
 	list(APPEND CSRCS spinlock.c)
 endif()
 
 # Include semaphore build support
 
 list(APPEND CSRCS
-	sem_destroy.c
-	sem_post.c
-	sem_recover.c
-	sem_reset.c
-	sem_tickwait.c
-	sem_timedwait.c
-	sem_timeout.c
-	sem_trywait.c
-	sem_wait.c
-	sem_waitirq.c
+  sem_destroy.c sem_wait.c sem_trywait.c sem_tickwait.c
+  sem_timedwait.c sem_clockwait.c sem_timeout.c sem_post.c
+  sem_recover.c sem_reset.c sem_waitirq.c
 )
-set_parent_srcs(${CSRCS})
+
+target_sources(sched PRIVATE ${CSRCS})

@@ -33,33 +33,21 @@
 #
 ############################################################################
 
-# Packet socket support
+if (CONFIG_NET_BLUETOOTH)
+  target_sources(net PRIVATE
+    # Initialization / resource management
+    bluetooth_initialize.c
+    bluetooth_conn.c
+    bluetooth_container.c
 
-if("${CONFIG_NET_BLUETOOTH}" STREQUAL "y")
+    # Socket layer
+    bluetooth_sockif.c
+    bluetooth_sendmsg.c
+    bluetooth_recvmsg.c
 
-	set(CSRCS)
-
-	# Initialization / resource managment
-	
-	list(APPEND CSRCS bluetooth_initialize.c)
-	list(APPEND CSRCS bluetooth_conn.c)
-	list(APPEND CSRCS bluetooth_container.c)
-	
-	# Socket layer
-	
-	list(APPEND CSRCS bluetooth_sockif.c)
-	list(APPEND CSRCS bluetooth_sendto.c)
-	list(APPEND CSRCS bluetooth_recvfrom.c)
-	
-	# Device interface
-	
-	list(APPEND CSRCS bluetooth_input.c)
-	list(APPEND CSRCS bluetooth_callback.c)
-	list(APPEND CSRCS bluetooth_poll.c)
-	list(APPEND CSRCS bluetooth_finddev.c)
-
-	# Include packet socket build support
-
-	set_parent_srcs(${CSRCS})
-
-endif() # CONFIG_NET_BLUETOOTH
+    # Device interface
+    bluetooth_input.c
+    bluetooth_callback.c
+    bluetooth_poll.c
+    bluetooth_finddev.c)
+endif()

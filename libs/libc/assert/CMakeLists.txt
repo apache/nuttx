@@ -33,13 +33,11 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS lib_assert.c)
 
-list(APPEND CSRCS lib_assert.c)
-
-if("${CONFIG_STACK_CANARIES}" STREQUAL "y")
-  list(APPEND CSRCS lib_stackchk.c)
+if(CONFIG_STACK_CANARIES)
+  list(APPEND SRCS lib_stackchk.c)
 endif()
 
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})
 

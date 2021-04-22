@@ -33,32 +33,12 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_DISABLE_MQUEUE}" STREQUAL "y")
+if(NOT CONFIG_DISABLE_MQUEUE)
 
-	set(CSRCS)
-
-	if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-		list(APPEND CSRCS
-			mq_waitirq.c
-			mq_notify.c
-		)
-	endif()
-
-	list(APPEND CSRCS
-		mq_send.c
-		mq_timedsend.c
-		mq_sndinternal.c
-		mq_receive.c
-		mq_timedreceive.c
-		mq_rcvinternal.c
-		mq_initialize.c
-		mq_msgfree.c
-		mq_msgqalloc.c
-		mq_msgqfree.c
-		mq_recover.c
-		mq_setattr.c
-		mq_getattr.c
-	)
-	set_parent_srcs(${CSRCS})
+  target_sources(sched PRIVATE
+    mq_send.c mq_timedsend.c mq_sndinternal.c mq_receive.c
+    mq_timedreceive.c mq_rcvinternal.c mq_initialize.c
+    mq_msgfree.c mq_msgqalloc.c mq_msgqfree.c mq_recover.c
+    mq_setattr.c mq_waitirq.c mq_notify.c mq_getattr.c)
 
 endif()

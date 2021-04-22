@@ -35,57 +35,51 @@
 
 # TCP/IP source files
 
-if("${CONFIG_NET_TCP}" STREQUAL "y")
-	if(NOT "${CONFIG_NET_TCP_NO_STACK}" STREQUAL "y")
-	
-		set(CSRCS)
-		
-		# Socket layer
-		
-		list(APPEND CSRCS tcp_connect.c tcp_accept.c)
-	
-		if("${CONFIG_NET_TCP_WRITE_BUFFERS}" STREQUAL "y")
-			list(APPEND CSRCS tcp_send_buffered.c)
-		else()
-			list(APPEND CSRCS tcp_send_unbuffered.c)
-		endif()
-		
-		if("${CONFIG_NET_SENDFILE}" STREQUAL "y")
-			list(APPEND CSRCS tcp_sendfile.c)
-		endif()
-		
-		if(NOT "${CONFIG_DISABLE_POLL}" STREQUAL "y")
-			if("${CONFIG_NET_TCP_READAHEAD}" STREQUAL "y")
-				list(APPEND CSRCS tcp_netpoll.c)
-				if("${CONFIG_TCP_NOTIFIER}" STREQUAL "y")
-					list(APPEND CSRCS tcp_notifier.c)
-				endif()
-			endif()
-		endif()
-		
-		if("${CONFIG_NET_TCPPROTO_OPTIONS}" STREQUAL "y")
-			list(APPEND CSRCS tcp_setsockopt.c tcp_getsockopt.c)
-		endif()
-		
-		# Transport layer
-		
-		list(APPEND CSRCS tcp_conn.c tcp_seqno.c tcp_devpoll.c tcp_finddev.c tcp_timer.c)
-		list(APPEND CSRCS tcp_send.c tcp_input.c tcp_appsend.c tcp_listen.c)
-		list(APPEND CSRCS tcp_monitor.c tcp_callback.c tcp_backlog.c tcp_ipselect.c)
-		list(APPEND CSRCS tcp_recvwindow.c)
-		
-		# TCP write buffering
-		
-		if("${CONFIG_NET_TCP_WRITE_BUFFERS}" STREQUAL "y")
-			list(APPEND CSRCS tcp_wrbuffer.c)
-			if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-				list(APPEND CSRCS tcp_wrbuffer_dump.c)
-			endif()
-		endif()
-		
-		# Include TCP build support
+if (CONFIG_NET_TCP NOT CONFIG_NET_TCP_NO_STACK)
 
-		set_parent_srcs(${CSRCS})
-	
-	endif() # !CONFIG_NET_TCP_NO_STACK
-endif() # CONFIG_NET_TCP
+  # Socket layer
+
+  set(SRCS tcp_connect.c tcp_accept.c tcp_recvfrom.c)
+
+  if (CONFIG_NET_TCP_WRITE_BUFFERS)
+    list(APPEND SRCS tcp_send_buffered.c)
+  else()
+    list(APPEND SRCS tcp_send_unbuffered.c)
+  endif()
+
+  if (CONFIG_NET_SENDFILE)
+    list(APPEND SRCS tcp_sendfile.c)
+  endif()
+
+  if (CONFIG_NET_TCP_NOTIFIER)
+    list(APPEND SRCS tcp_notifier.c)
+
+    if (CONFIG_NET_TCP_WRITE_BUFFERS)
+    list(APPEND SRCS tcp_txdrain.c)
+    endif()
+  endif()
+
+  if (CONFIG_NET_TCPPROTO_OPTIONS)
+    list(APPEND SRCS tcp_setsockopt.c tcp_getsockopt.c)
+  endif()
+
+  # Transport layer
+
+  list(APPEND SRCS
+    tcp_conn.c tcp_seqno.c tcp_devpoll.c tcp_finddev.c tcp_timer.c
+    tcp_send.c tcp_input.c tcp_appsend.c tcp_listen.c tcp_close.c
+    tcp_monitor.c tcp_callback.c tcp_backlog.c tcp_ipselect.c
+    tcp_recvwindow.c tcp_netpoll.c)
+
+  # TCP write buffering
+
+  if (CONFIG_NET_TCP_WRITE_BUFFERS)
+    list(APPEND SRCS tcp_wrbuffer.c)
+
+    if (CONFIG_DEBUG_FEATURES)
+      list(APPEND SRCS tcp_wrbuffer_dump.c)
+    endif()
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
+endif()

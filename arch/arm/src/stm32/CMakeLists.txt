@@ -213,4 +213,4 @@ if("${CONFIG_STM32_BBSRAM}" STREQUAL "y")
 	list(APPEND CHIP_CSRCS stm32_bbsram.c)
 endif()
 
-set_parent_srcs(${CHIP_CSRCS})
+target_sources(arch PRIVATE ${CHIP_CSRCS})

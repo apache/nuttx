@@ -35,14 +35,6 @@
 
 # Include POSIX message queue support
 
-if(NOT "${CONFIG_DISABLE_MQUEUE}" STREQUAL "y")
-
-	# Include POSIX message queue build support
-	set(CSRCS)
-	list(APPEND CSRCS
-		mq_open.c
-		mq_close.c
-		mq_unlink.c
-	)
-	set_parent_srcs(${CSRCS})
+if(NOT CONFIG_DISABLE_MQUEUE)
+  target_sources(fs PRIVATE mq_open.c mq_close.c mq_unlink.c)
 endif()

@@ -33,12 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_LIBC_ARCH_ELF}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS arch_elf.c)
-	
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_LIBC_ARCH_ELF)
+  target_sources(c PRIVATE arch_elf.c)
 endif()

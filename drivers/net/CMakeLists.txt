@@ -33,56 +33,55 @@
 #
 ############################################################################
 
-# Include nothing if networking is disabled
+if (CONFIG_NET)
+  set(SRCS)
 
-if("${CONFIG_NET}" STREQUAL "y")
+  # Include network interface drivers
 
-	set(CSRCS)
+  if (CONFIG_NET_LOOPBACK)
+    list(APPEND SRCS loopback.c)
+  endif()
 
-	# Include network interface drivers
-	
-	if("${CONFIG_NETDEV_LOOPBACK}" STREQUAL "y")
-		list(APPEND CSRCS loopback.c)
-	endif()
-	
-	if("${CONFIG_NETDEV_TELNET}" STREQUAL "y")
-		list(APPEND CSRCS telnet.c)
-	endif()
-	
-	if("${CONFIG_NET_DM90x0}" STREQUAL "y")
-		list(APPEND CSRCS dm90x0.c)
-	endif()
-	
-	if("${CONFIG_ENC28J60}" STREQUAL "y")
-		list(APPEND CSRCS enc28j60.c)
-	endif()
-	
-	if("${CONFIG_ENCX24J600}" STREQUAL "y")
-		list(APPEND CSRCS encx24j600.c)
-	endif()
-	
-	if("${CONFIG_NET_SLIP}" STREQUAL "y")
-		list(APPEND CSRCS slip.c)
-	endif()
-	
-	if("${CONFIG_NET_TUN}" STREQUAL "y")
-		list(APPEND CSRCS tun.c)
-	endif()
-	
-	if("${CONFIG_NET_FTMAC100}" STREQUAL "y")
-		list(APPEND CSRCS ftmac100.c)
-	endif()
-	
-	if("${CONFIG_NET_LAN91C111}" STREQUAL "y")
-		list(APPEND CSRCS lan91c111.c)
-	endif()
-	
-	if("${CONFIG_ARCH_PHY_INTERRUPT}" STREQUAL "y")
-		list(APPEND CSRCS phy_notify.c)
-	endif()
-	
-	# Include network build support
+  if (CONFIG_NET_RPMSG_DRV)
+    list(APPEND SRCS rpmsgdrv.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_NETDEV_TELNET)
+    list(APPEND SRCS telnet.c)
+  endif()
+
+  if (CONFIG_NET_DM90x0)
+    list(APPEND SRCS dm90x0.c)
+  endif()
+
+  if (CONFIG_ENC28J60)
+    list(APPEND SRCS enc28j60.c)
+  endif()
+
+  if (CONFIG_ENCX24J600)
+    list(APPEND SRCS encx24j600.c)
+  endif()
+
+  if (CONFIG_NET_SLIP)
+    list(APPEND SRCS slip.c)
+  endif()
+
+  if (CONFIG_NET_TUN)
+    list(APPEND SRCS tun.c)
+  endif()
+
+  if (CONFIG_NET_FTMAC100)
+    list(APPEND SRCS ftmac100.c)
+  endif()
+
+  if (CONFIG_NET_LAN91C111)
+    list(APPEND SRCS lan91c111.c)
+  endif()
+
+  if (CONFIG_ARCH_PHY_INTERRUPT)
+    list(APPEND SRCS phy_notify.c)
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
 

@@ -1,33 +1,31 @@
-if("${CONFIG_CRYPTO}" STREQUAL "y")
+if(CONFIG_CRYPTO)
+  nuttx_add_library(crypto)
 
-	set(CSRCS)
-	list(APPEND CSRCS crypto.c testmngr.c)
+  set(SRCS crypto.c testmngr.c)
 
-	# cryptodev support
+  # cryptodev support
 
-	if ("${CONFIG_CRYPTO_CRYPTODEV}" STREQUAL "y")
-		list(APPEND CSRCS cryptodev.c)
-	endif()
+  if (CONFIG_CRYPTO_CRYPTODEV)
+    list(APPEND SRCS cryptodev.c)
+  endif()
 
-	# Software AES library
+  # Software AES library
 
-	if ("${CONFIG_CRYPTO_SW_AES}" STREQUAL "y")
-		list(APPEND CSRCS aes.c)
-	endif()
+  if (CONFIG_CRYPTO_SW_AES)
+    list(APPEND SRCS aes.c)
+  endif()
 
-	# BLAKE2s hash algorithm
+  # BLAKE2s hash algorithm
 
-	if ("${CONFIG_CRYPTO_BLAKE2S}" STREQUAL "y")
-		list(APPEND CSRCS blake2s.c)
-	endif
+  if (CONFIG_CRYPTO_BLAKE2S)
+    list(APPEND SRCS blake2s.c)
+  endif()
 
-	# Entropy pool random number generator
+  # Entropy pool random number generator
 
-	if ("${CONFIG_CRYPTO_RANDOM_POOL}" STREQUAL "y")
-		list(APPEND CSRCS random_pool.c)
-	endif()
-	
-	if(CSRCS)
-		nuttx_add_library(crypto ${CSRCS})
-	endif()
+  if (CONFIG_CRYPTO_RANDOM_POOL)
+    list(APPEND SRCS random_pool.c)
+  endif()
+
+  target_sources(crypto PRIVATE ${SRCS})
 endif()

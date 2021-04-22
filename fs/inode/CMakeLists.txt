@@ -33,24 +33,7 @@
 #
 ############################################################################
 
-# Don't build anything if there are no file descriptors
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-
-	# Include inode/utils build support
-	set(CSRCS)
-	list(APPEND CSRCS
-		fs_files.c
-		fs_foreachinode.c
-		fs_inode.c
-		fs_inodeaddref.c
-		fs_inodebasename.c
-		fs_inodefind.c
-		fs_inodefree.c
-		fs_inoderelease.c
-		fs_inoderemove.c
-		fs_inodereserve.c
-		fs_inodesearch.c
-	)
-	set_parent_srcs(${CSRCS})
-
-endif()
+target_sources(fs PRIVATE
+  fs_files.c fs_foreachinode.c fs_inode.c fs_inodeaddref.c
+  fs_inodebasename.c fs_inodefind.c fs_inodefree.c fs_inoderelease.c
+  fs_inoderemove.c fs_inodereserve.c fs_inodesearch.c)

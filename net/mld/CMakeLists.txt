@@ -35,15 +35,9 @@
 
 # Logic specific to Multicast Listener Discovery (MLD)
 
-if("${CONFIG_NET_MLD}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS mld_done.c mld_initialize.c mld_leave.c mld_msg.c mld_query.c)
-	list(APPEND CSRCS mld_send.c mld_group.c mld_join.c mld_mcastmac.c mld_poll.c)
-	list(APPEND CSRCS mld_report.c mld_timer.c)
-	
-	# Include MLD build support
-
-	set_parent_srcs(${CSRCS})
+if (CONFIG_NET_MLD)
+  target_sources(net PRIVATE
+    mld_done.c mld_initialize.c mld_leave.c mld_msg.c mld_query.c
+    mld_send.c mld_group.c mld_join.c mld_mcastmac.c mld_poll.c
+    mld_report.c mld_timer.c)
 endif()

@@ -33,76 +33,75 @@
 #
 ############################################################################
 
-# Don't build anything if there is no support for input devices
+if (CONFIG_INPUT)
+  set(SRCS)
 
-if("${CONFIG_INPUT}" STREQUAL "y")
+  # Include the selected touchscreen drivers
 
-	set(CSRCS)
+  if (CONFIG_INPUT_TSC2007)
+    list(APPEND SRCS tsc2007.c)
+  endif()
 
-	# Include the selected touchscreen drivers
-	
-	if("${CONFIG_INPUT_TSC2007}" STREQUAL "y")
-		list(APPEND CSRCS tsc2007.c)
-	endif()
-	
-	if("${CONFIG_INPUT_FT5X06}" STREQUAL "y")
-		list(APPEND CSRCS ft5x06.c)
-	endif()
-	
-	if("${CONFIG_INPUT_ADS7843E}" STREQUAL "y")
-		list(APPEND CSRCS ads7843e.c)
-	endif()
-	
-	if("${CONFIG_INPUT_MAX11802}" STREQUAL "y")
-		list(APPEND CSRCS max11802.c)
-	endif()
-	
-	if("${CONFIG_INPUT_MXT}" STREQUAL "y")
-		list(APPEND CSRCS mxt.c)
-	endif()
-	
-	if("${CONFIG_INPUT_STMPE811}" STREQUAL "y")
-		list(APPEND CSRCS stmpe811_base.c)
-		if(NOT "${CONFIG_INPUT_STMPE811_TSC_DISABLE}" STREQUAL "y")
-			list(APPEND CSRCS stmpe811_tsc.c)
-		endif()
-		if(NOT "${CONFIG_INPUT_STMPE811_GPIO_DISABLE}" STREQUAL "y")
-			list(APPEND CSRCS stmpe811_gpio.c)
-		endif()
-		if(NOT "${CONFIG_INPUT_STMPE811_ADC_DISABLE}" STREQUAL "y")
-			list(APPEND CSRCS stmpe811_adc.c)
-		endif()
-		if(NOT "${CONFIG_INPUT_STMPE811_TEMP_DISABLE}" STREQUAL "y")
-			list(APPEND CSRCS stmpe811_temp.c)
-		endif()
-	endif()
-	
-	if("${CONFIG_INPUT_CYPRESS_MBR3108}" STREQUAL "y")
-		list(APPEND CSRCS cypress_mbr3108.c)
-	endif()
-	
-	if("${CONFIG_BUTTONS}" STREQUAL "y")
-		list(APPEND CSRCS button_upper.c)
-		if("${CONFIG_BUTTONS_LOWER}" STREQUAL "y")
-			list(APPEND CSRCS button_lower.c)
-		endif()
-	
-	endif()
-	
-	if("${CONFIG_DJOYSTICK}" STREQUAL "y")
-		list(APPEND CSRCS djoystick.c)
-	endif()
-	
-	if("${CONFIG_AJOYSTICK}" STREQUAL "y")
-		list(APPEND CSRCS ajoystick.c)
-	endif()
-	
-	if("${CONFIG_INPUT_NUNCHUCK}" STREQUAL "y")
-		list(APPEND CSRCS nunchuck.c)
-	endif()
-	
-	# Include input device driver build support
+  if (CONFIG_INPUT_FT5X06)
+    list(APPEND SRCS ft5x06.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_INPUT_ADS7843E)
+    list(APPEND SRCS ads7843e.c)
+  endif()
+
+  if (CONFIG_INPUT_MAX11802)
+    list(APPEND SRCS max11802.c)
+  endif()
+
+  if (CONFIG_INPUT_MXT)
+    list(APPEND SRCS mxt.c)
+  endif()
+
+  if (CONFIG_INPUT_STMPE811)
+    list(APPEND SRCS stmpe811_base.c)
+
+    if (NOT CONFIG_INPUT_STMPE811_TSC_DISABLE)
+      list(APPEND SRCS stmpe811_tsc.c)
+    endif()
+    if (NOT CONFIG_INPUT_STMPE811_GPIO_DISABLE)
+      list(APPEND SRCS stmpe811_gpio.c)
+    endif()
+    if (NOT CONFIG_INPUT_STMPE811_ADC_DISABLE)
+      list(APPEND SRCS stmpe811_adc.c)
+    endif()
+    if (NOT CONFIG_INPUT_STMPE811_TEMP_DISABLE)
+      list(APPEND SRCS stmpe811_temp.c)
+    endif()
+  endif()
+
+  if (CONFIG_INPUT_CYPRESS_MBR3108)
+    list(APPEND SRCS cypress_mbr3108.c)
+  endif()
+
+  if (CONFIG_INPUT_BUTTONS)
+    list(APPEND SRCS button_upper.c)
+
+    if (CONFIG_INPUT_BUTTONS_LOWER)
+      list(APPEND SRCS button_lower.c)
+    endif()
+  endif()
+
+  if (CONFIG_INPUT_DJOYSTICK)
+    list(APPEND SRCS djoystick.c)
+  endif()
+
+  if (CONFIG_INPUT_AJOYSTICK)
+    list(APPEND SRCS ajoystick.c)
+  endif()
+
+  if (CONFIG_INPUT_NUNCHUCK)
+    list(APPEND SRCS nunchuck.c)
+  endif()
+
+  if (CONFIG_INPUT_SPQ10KBD)
+    list(APPEND SRCS spq10kbd.c)
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
-

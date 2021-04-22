@@ -35,33 +35,26 @@
 
 # Network procfs support
 
-if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
-	if("${CONFIG_FS_PROCFS}" STREQUAL "y")
-		if(NOT "${CONFIG_FS_PROCFS_EXCLUDE_NET}" STREQUAL "y")
-		
-			set(CSRCS)
+if (NOT CONFIG_DISABLE_MOUNTPOINT AND CONFIG_FS_PROCFS AND
+    NOT CONFIG_FS_PROCFS_EXCLUDE_NET)
 
-			list(APPEND CSRCS net_procfs.c netdev_statistics.c)
-			
-			# General network statistics
-	
-			if("${CONFIG_NET_STATISTICS}" STREQUAL "y")
-			  list(APPEND CSRCS net_statistics.c)
-				if("${CONFIG_NET_MLD}" STREQUAL "y")
-					list(APPEND CSRCS net_mld.c)
-				endif()
-			endif()
-			
-			# Routing table
-			
-			if("${CONFIG_NET_ROUTE}" STREQUAL "y")
-				list(APPEND CSRCS net_procfs_route.c)
-			endif()
-			
-			# Include packet socket build support
-			
-			set_parent_srcs(${CSRCS})
+  set(SRCS net_procfs.c netdev_statistics.c)
 
-		endif() # CONFIG_FS_PROCFS_EXCLUDE_NET
-	endif() # CONFIG_FS_PROCFS
-endif() # CONFIG_DISABLE_MOUNTPOINT
+  # General network statistics
+
+  if (CONFIG_NET_STATISTICS)
+    list(APPEND SRCS net_statistics.c)
+
+    if (CONFIG_NET_MLD)
+      list(APPEND SRCS net_mld.c)
+    endif()
+  endif()
+
+  # Routing table
+
+  if (CONFIG_NET_ROUTE)
+    list(APPEND SRCS net_procfs_route.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
+endif()

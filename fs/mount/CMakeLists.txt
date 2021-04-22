@@ -33,28 +33,19 @@
 #
 ############################################################################
 
-# Don't build anything if there are no file descriptors
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-	if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
+# Don't build anything if there is no mountpoint support
 
-		set(CSRCS)
+if (NOT CONFIG_DISABLE_MOUNTPOINT)
+  set(SRCS fs_mount.c fs_umount2.c fs_foreachmountpoint.c)
 
-		if("${CONFIG_FS_AUTOMOUNTER}" STREQUAL "y")
-			list(APPEND CSRCS fs_automount.c)
-		endif()
+  if (CONFIG_FS_AUTOMOUNTER)
+    list(APPEND SRCS fs_automount.c)
+  endif()
 
-		if("${CONFIG_FS_PROCFS}" STREQUAL "y")
-			if(NOT "${CONFIG_FS_PROCFS_EXCLUDE_MOUNT}" STREQUAL "y")
-				list(APPEND CSRCS fs_procfs_mount.c fs_gettype.c)
-			endif()
-		endif()
+  if (CONFIG_FS_PROCFS AND NOT CONFIG_FS_PROCFS_EXCLUDE_MOUNT)
+    list(APPEND SRCS fs_procfs_mount.c fs_gettype.c)
+  endif()
 
-		list(APPEND CSRCS
-			fs_mount.c
-			fs_umount2.c
-			fs_foreachmountpoint.c
-		)
-		set_parent_srcs(${CSRCS})
-
-	endif()
+  target_sources(fs PRIVATE ${SRCS})
 endif()
+

@@ -33,29 +33,26 @@
 #
 ############################################################################
 
-if("${CONFIG_MM_IOB}" STREQUAL "y")
+if(CONFIG_MM_IOB)
 
-	set(CSRCS)
+	set(SRCS)
 
-	# Include IOB source files
+  list(APPEND SRCS
+    iob_add_queue.c iob_alloc.c iob_alloc_qentry.c iob_clone.c
+    iob_concat.c iob_copyin.c iob_copyout.c iob_contig.c iob_free.c
+    iob_free_chain.c iob_free_qentry.c iob_free_queue.c
+    iob_initialize.c iob_pack.c iob_peek_queue.c iob_remove_queue.c
+    iob_statistics.c iob_trimhead.c iob_trimhead_queue.c iob_trimtail.c
+    iob_navail.c)
 	
-	list(APPEND CSRCS iob_add_queue.c iob_alloc.c iob_alloc_qentry.c iob_clone.c)
-	list(APPEND CSRCS iob_concat.c iob_copyin.c iob_copyout.c iob_contig.c iob_free.c)
-	list(APPEND CSRCS iob_free_chain.c iob_free_qentry.c iob_free_queue.c)
-	list(APPEND CSRCS iob_initialize.c iob_pack.c iob_peek_queue.c iob_remove_queue.c)
-	list(APPEND CSRCS iob_trimhead.c iob_trimhead_queue.c iob_trimtail.c)
-	list(APPEND CSRCS iob_navail.c)
-	
-	if("${CONFIG_IOB_NOTIFIER}" STREQUAL "y")
-		list(APPEND CSRCS iob_notifier.c)
+	if(CONFIG_IOB_NOTIFIER)
+		list(APPEND SRCS iob_notifier.c)
 	endif()
 	
-	if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-		list(APPEND CSRCS iob_dump.c)
+	if(CONFIG_DEBUG_FEATURES)
+		list(APPEND SRCS iob_dump.c)
 	endif()
 	
-	# Include iob build support
-	
-	set_parent_srcs(${CSRCS})
+  target_sources(mm PRIVATE ${SRCS})
 
-endif() # CONFIG_MM_IOB
+endif()

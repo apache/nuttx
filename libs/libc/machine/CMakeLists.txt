@@ -33,14 +33,4 @@
 #
 ############################################################################
 
-if("${CONFIG_ARCH_ARM}" STREQUAL "y")
-	add_subdirectory(arm)
-endif()
-
-if("${CONFIG_ARCH_SIM}" STREQUAL "y")
-	add_subdirectory(sim)
-endif()
-
-if("${CONFIG_ARCH_X86}" STREQUAL "y")
-	add_subdirectory(x86)
-endif()
+add_subdirectory(${CONFIG_ARCH})

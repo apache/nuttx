@@ -72,4 +72,6 @@ list(APPEND CSRCS
 	arm_unblocktask.c
 	arm_vectors.c
 )
-set_parent_srcs(${CSRCS})
+
+target_include_directories(arch PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_sources(arch PRIVATE ${CSRCS})

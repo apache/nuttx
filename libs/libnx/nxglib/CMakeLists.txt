@@ -35,33 +35,28 @@
 
 # Expose NXGL interfaces to applications
 
-if("${CONFIG_NXGLIB}" STREQUAL "y")
+if(CONFIG_NXGLIB)
 
-	set(CSRCS)
-
-	# Files needed by both NX and NXFONTS
-	
-	list(APPEND CSRCS nxglib_rgbblend.c)
+  # Files needed by both NX and NXFONTS
+	set(SRCS nxglib_rgbblend.c)
 	
 	# Files needed only by NX
 	
-	if("${CONFIG_NX}" STREQUAL "y")
-		list(APPEND CSRCS nxglib_circlepts.c nxglib_circletraps.c nxglib_intersecting.c)
-		list(APPEND CSRCS nxglib_nonintersecting.c nxglib_nullrect.c nxglib_rectadd.c)
-		list(APPEND CSRCS nxglib_rectcopy.c nxglib_rectinside.c nxglib_rectintersect.c)
-		list(APPEND CSRCS nxglib_rectoffset.c nxglib_rectoverlap.c nxglib_rectsize.c)
-		list(APPEND CSRCS nxglib_rectunion.c nxglib_rgb2yuv.c)
-		list(APPEND CSRCS nxglib_runcopy.c nxglib_runoffset.c nxglib_splitline.c)
-		list(APPEND CSRCS nxglib_trapcopy.c nxglib_trapoffset.c nxglib_vectoradd.c)
-		list(APPEND CSRCS nxglib_vectsubtract.c nxglib_yuv2rgb.c)
-	
-		if(NOT "${CONFIG_NX_NPLANES}" STREQUAL "1")
-			list(APPEND CSRCS nxglib_colorcmp.c nxglib_colorcopy.c)
+	if(CONFIG_NX)
+    list(APPEND SRCS
+      nxgl_area2rect.c nxglib_circlepts.c nxglib_circletraps.c
+      nxglib_intersecting.c nxglib_nonintersecting.c nxglib_nullrect.c
+      nxgl_rect2area.c nxglib_rectadd.c nxglib_rectcopy.c nxglib_rectinside.c
+      nxglib_rectintersect.c nxglib_rectoffset.c nxglib_rectoverlap.c
+      nxglib_rectsize.c nxglib_rectunion.c nxglib_rgb2yuv.c
+      nxglib_runcopy.c nxglib_runoffset.c nxglib_splitline.c
+      nxglib_trapcopy.c nxglib_trapoffset.c nxglib_vectoradd.c
+      nxglib_vectsubtract.c nxglib_yuv2rgb.c)
+
+		if (NOT CONFIG_NX_NPLANES EQUAL 1)
+			list(APPEND SRCS nxglib_colorcmp.c nxglib_colorcopy.c)
 		endif()
 	endif()
 	
-	# Add the nxglib/ directory to the build
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(nx PRIVATE ${SRCS})
 endif()

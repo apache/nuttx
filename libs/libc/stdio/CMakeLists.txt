@@ -33,60 +33,48 @@
 #
 ############################################################################
 
-# Add the stdio C files to the build
+# This first group of C files do not depend on having C streams.
 
-set(CSRCS)
+set(SRCS
+  lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
+  lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_vasprintf.c
+  lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c
+  lib_meminstream.c lib_memoutstream.c lib_memsistream.c
+  lib_memsostream.c lib_lowoutstream.c
+  lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
+  lib_sscanf.c lib_vsscanf.c lib_libvscanf.c lib_libnoflush.c
+  lib_libsnoflush.c lib_tempnam.c lib_tmpnam.c)
 
-list(APPEND CSRCS
-	lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
-	lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_vasprintf.c
-	lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c
-	lib_meminstream.c lib_memoutstream.c lib_memsistream.c
-	lib_memsostream.c lib_lowoutstream.c
-	lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
-	lib_sscanf.c lib_vsscanf.c lib_libvscanf.c lib_libnoflush.c
-	lib_libsnoflush.c
-)
+if (CONFIG_LIBC_PRINT_LEGACY)
+  list(APPEND SRCS legacy_libvsprintf.c)
 
-if(${CONFIG_LIBC_PRINT_LEGACY} MATCHES "y")
-	list(APPEND CSRCS legacy_libvsprintf.c)
-
-	if(${CONFIG_LIBC_FLOATINGPOINT} MATCHES "y")
-		list(APPEND CSRCS legacy_dtoa.c)
-	endif()
+  if (CONFIG_LIBC_FLOATINGPOINT)
+    list(APPEND SRCS legacy_dtoa.c)
+  endif()
 else()
-	list(APPEND CSRCS lib_libvsprintf.c lib_ultoa_invert.c)
-
-	if(${CONFIG_LIBC_FLOATINGPOINT} MATCHES "y")
-		list(APPEND CSRCS lib_dtoa_engine.c lib_dtoa_data.c)
-	endif()
+  list(APPEND SRCS lib_libvsprintf.c lib_ultoa_invert.c)
+  if (CONFIG_LIBC_FLOATINGPOINT)
+    list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
+  endif()
 endif()
 
 # The remaining sources files depend upon C streams
-if(NOT "${CONFIG_NFILE_STREAMS}" STREQUAL "0")
 
-	list(APPEND CSRCS
-		lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
-		lib_fseek.c lib_ftell.c lib_fsetpos.c lib_fgetpos.c lib_fgetc.c
-		lib_fgets.c lib_gets_s.c lib_gets.c lib_libfgets.c lib_fwrite.c
-		lib_libfwrite.c lib_fflush.c lib_libflushall.c lib_libfflush.c
-		lib_rdflush.c lib_wrflush.c lib_fputc.c lib_puts.c lib_fputs.c
-		lib_ungetc.c lib_vprintf.c lib_fprintf.c lib_vfprintf.c
-		lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
-		lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
-		lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
-		lib_rawsostream.c lib_remove.c lib_clearerr.c lib_scanf.c
-		lib_fscanf.c lib_vfscanf.c
-	)
+if (CONFIG_FILE_STREAM)
+  list(APPEND SRCS
+    lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
+    lib_fseek.c lib_fseeko.c lib_ftell.c lib_ftello.c lib_fsetpos.c
+    lib_getdelim.c lib_fgetpos.c lib_getc.c lib_getchar.c lib_fgetc.c
+    lib_fgets.c lib_gets_s.c lib_gets.c lib_libfgets.c lib_fwrite.c
+    lib_libfwrite.c lib_fflush.c lib_libflushall.c lib_libfflush.c
+    lib_rdflush.c lib_wrflush.c lib_putc.c lib_putchar.c lib_fputc.c
+    lib_puts.c lib_fputs.c lib_ungetc.c lib_vprintf.c lib_fprintf.c
+    lib_vfprintf.c lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
+    lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
+    lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
+    lib_rawsostream.c lib_remove.c lib_rewind.c lib_clearerr.c
+    lib_scanf.c lib_vscanf.c lib_fscanf.c lib_vfscanf.c lib_tmpfile.c
+    lib_setbuf.c lib_setvbuf.c)
 endif()
 
-
-if("${CONFIG_FS_WRITABLE}" STREQUAL "y")
-	list(APPEND CSRCS lib_tempnam.c lib_tmpnam.c)
-endif()
-
-if(NOT "${CONFIG_STDIO_DISABLE_BUFFERING}" STREQUAL "y")
-	list(APPEND CSRCS lib_setbuf.c lib_setvbuf.c)
-endif()
-
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

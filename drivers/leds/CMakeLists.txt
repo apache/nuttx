@@ -34,39 +34,38 @@
 #
 ############################################################################
 
-# Include LED drivers
+set(SRCS)
 
-set(CSRCS)
+if (CONFIG_USERLED)
+  list(APPEND SRCS userled_upper.c)
 
-# Include user LED driver
-
-if("${CONFIG_USERLED}" STREQUAL "y")
-	list(APPEND CSRCS userled_upper.c)
-	if("${CONFIG_USERLED_LOWER}" STREQUAL "y")
-		list(APPEND CSRCS userled_lower.c)
-	endif()
+  if (CONFIG_USERLED_LOWER)
+    list(APPEND SRCS userled_lower.c)
+  endif()
 endif()
 
-if("${CONFIG_LEDS_APA102}" STREQUAL "y")
-	list(APPEND CSRCS apa102.c)
+if (CONFIG_LEDS_APA102)
+  list(APPEND SRCS apa102.c)
 endif()
 
-if("${CONFIG_LEDS_MAX7219}" STREQUAL "y")
-	list(APPEND CSRCS max7219.c)
+if (CONFIG_LEDS_MAX7219)
+  list(APPEND SRCS max7219.c)
 endif()
 
-if("${CONFIG_RGBLED}" STREQUAL "y")
-	list(APPEND CSRCS rgbled.c)
+if (CONFIG_RGBLED)
+  list(APPEND SRCS rgbled.c)
 endif()
 
-if("${CONFIG_PCA9635PW}" STREQUAL "y")
-	list(APPEND CSRCS pca9635pw.c)
+if (CONFIG_PCA9635PW)
+  list(APPEND SRCS pca9635pw.c)
 endif()
 
-if("${CONFIG_NCP5623C}" STREQUAL "y")
-	list(APPEND CSRCS ncp5623c.c)
+if (CONFIG_NCP5623C)
+  list(APPEND SRCS ncp5623c.c)
 endif()
 
-# Include LED build support (if any LED drivers were selected)
+if (CONFIG_WS2812)
+  list(APPEND SRCS ws2812.c)
+endif()
 
-set_parent_srcs(${CSRCS})
+target_sources(drivers PRIVATE ${SRCS})

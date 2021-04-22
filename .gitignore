@@ -25,18 +25,10 @@
 *.sym
 *.wsp
 *~
-.depend
-/.clean_context
-/.config
-/.config.old
 /.cproject
 /.gdbinit
 /.project
-/.version
-/_SAVED_APPS_config
 /cscope.*
-/defconfig
-/Make.defs
 /nuttx
 /nuttx-*
 /nuttx.*
@@ -44,6 +36,5 @@
 /tags
 /TAGS
 core
-Make*.dep
 uImage
 /external

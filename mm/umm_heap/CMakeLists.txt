@@ -35,26 +35,20 @@
 
 # User heap allocator
 
-set(CSRCS) 
+set(SRCS)
 
-if("${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-	list(APPEND CSRCS umm_sbrk.c)
+list(APPEND SRCS
+  umm_initialize.c umm_addregion.c
+  umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
+  umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c umm_heapmember.c
+  umm_globals.c umm_valloc.c umm_aligned_alloc.c umm_posix_memalign.c)
+
+if (CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS umm_sbrk.c)
 endif()
 
-# Add the user heap directory to the build
-list(APPEND CSRCS
-	umm_addregion.c
-	umm_brkaddr.c
-	umm_calloc.c
-	umm_extend.c
-	umm_free.c
-	umm_globals.c
-	umm_heapmember.c
-	umm_initialize.c
-	umm_mallinfo.c
-	umm_malloc.c
-	umm_memalign.c
-	umm_realloc.c
-	umm_zalloc.c
-)
-set_parent_srcs(${CSRCS})
+if (CONFIG_DEBUG_MM)
+  list(APPEND SRCS umm_checkcorruption.c)
+endif()
+
+target_sources(mm PRIVATE ${SRCS})

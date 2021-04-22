@@ -33,13 +33,6 @@
 #
 ############################################################################
 
-# Add the fixed precision math directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	lib_fixedmath.c
-	lib_b16sin.c
-	lib_b16cos.c
-	lib_b16atan2.c
-	lib_ubsqrt.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE
+  lib_fixedmath.c lib_b16sin.c lib_b16cos.c lib_b16atan2.c
+  lib_ubsqrt.c)

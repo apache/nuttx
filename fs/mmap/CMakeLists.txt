@@ -33,15 +33,10 @@
 #
 ############################################################################
 
-set(CSRCS) 
+set(SRCS fs_mmap.c  fs_munmap.c)
 
-if("${CONFIG_FS_RAMMAP}" STREQUAL "y")
-	list(APPEND CSRCS
-		fs_munmap.c
-		fs_rammap.c
-	)
+if(CONFIG_FS_RAMMAP)
+	list(APPEND SRCS fs_rammap.c)
 endif()
 
-# Include MMAP build support
-list(APPEND CSRCS fs_mmap.c)
-set_parent_srcs(${CSRCS})
+target_sources(fs PRIVATE ${SRCS})

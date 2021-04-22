@@ -33,93 +33,104 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
 # Include power management sources
 
-if("${CONFIG_PM}" STREQUAL "y")
+if (CONFIG_PM)
+  list(APPEND SRCS
+    pm_initialize.c pm_activity.c pm_changestate.c pm_checkstate.c
+    pm_register.c pm_unregister.c)
 
-	list(APPEND CSRCS pm_activity.c pm_changestate.c pm_checkstate.c pm_initialize.c)
-	list(APPEND CSRCS pm_register.c pm_unregister.c pm_update.c)
+  # Governor implementations
 
-	# Include power management in the build
+  if (CONFIG_PM_GOVERNOR_ACTIVITY)
+    list(APPEND SRCS activity_governor.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
-
+  if (CONFIG_PM_GOVERNOR_GREEDY)
+    list(APPEND SRCS greedy_governor.c)
+  endif()
 endif()
 
 # Add switched-mode power supply support
 
-if("${CONFIG_DRIVERS_SMPS}" STREQUAL "y")
-
-	list(APPEND CSRCS smps.c)
-	
-	set_parent_srcs(${CSRCS})
-
+if (CONFIG_DRIVERS_SMPS)
+  list(APPEND SRCS smps.c)
 endif()
 
 # Add powerled support
 
-if("${CONFIG_DRIVERS_POWERLED}" STREQUAL "y")
-
-	list(APPEND CSRCS powerled.c)
-
+if (CONFIG_DRIVERS_POWERLED)
+  list(APPEND SRCS powerled.c)
 endif()
 
 # Add motor driver
 
-if("${CONFIG_DRIVERS_MOTOR}" STREQUAL "y")
-
-	list(APPEND CSRCS motor.c)
-
+if (CONFIG_DRIVERS_MOTOR)
+  list(APPEND SRCS motor.c)
 endif()
 
 # Add battery charger drivers
 
-if("${CONFIG_BATTERY_CHARGER}" STREQUAL "y")
+if (CONFIG_BATTERY_CHARGER)
+  list(APPEND SRCS battery_charger.c)
 
-	list(APPEND CSRCS battery_charger.c)
-	
-	# Add I2C-based battery charger drivers
-	
-	if("${CONFIG_I2C}" STREQUAL "y")
-	
-		# Add the BQ2425x I2C-based battery charger driver
-		
-		if("${CONFIG_I2C_BQ2425X}" STREQUAL "y")
-			list(APPEND CSRCS bq2425x.c)
-		endif()
-		
-		# Add the BQ2429x I2C-based battery charger driver
-		
-		if("${CONFIG_I2C_BQ2429X}" STREQUAL "y")
-			list(APPEND CSRCS bq2429x.c)
-		endif()
-	
-	endif()
+  # Add the MCP73871 battery charger driver
+  if (CONFIG_MCP73871)
+    list(APPEND SRCS mcp73871.c)
+  endif()
 
+  # Add I2C-based battery charger drivers
+  if (CONFIG_I2C)
+    # Add the BQ2425x I2C-based battery charger driver
+
+    if (CONFIG_I2C_BQ2425X)
+      list(APPEND SRCS bq2425x.c)
+    endif()
+
+    # Add the BQ2429x I2C-based battery charger driver
+    if (CONFIG_I2C_BQ2429X)
+      list(APPEND SRCS bq2429x.c)
+    endif()
+  endif()
 endif()
 
 # Add battery gauge drivers
 
-if("${CONFIG_BATTERY_GAUGE}" STREQUAL "y")
+if (CONFIG_BATTERY_GAUGE)
+  list(APPEND SRCS battery_gauge.c)
 
-	list(APPEND CSRCS battery_gauge.c)
-	
-	# Add I2C-based battery gauge drivers
-	
-	if("${CONFIG_I2C}" STREQUAL "y")
-	
-		# Add the MAX1704x I2C-based battery guage driver
-		
-		if("${CONFIG_I2C_MAX1704X}" STREQUAL "y")
-			list(APPEND CSRCS max1704x.c)
-		endif()
-	
-	endif()
+  # Add I2C-based battery gauge drivers
 
+  if (CONFIG_I2C)
+    # Add the MAX1704x I2C-based battery gauge driver
+
+    if (CONFIG_I2C_MAX1704X)
+      list(APPEND SRCS max1704x.c)
+    endif()
+
+    # Add the bq27426 I2C-based battery gauge driver
+
+    if (CONFIG_BQ27426)
+      list(APPEND SRCS bq27426.c)
+    endif()
+  endif()
 endif()
 
-# Include power management in the build
+# Add battery monitor drivers
 
-set_parent_srcs(${CSRCS})
+if (CONFIG_BATTERY_MONITOR)
+  list(APPEND SRCS battery_monitor.c)
+
+  # Add I2C-based battery monitor drivers
+
+  if (CONFIG_I2C)
+    # Add the BQ769x0 I2C-based battery monitor driver
+    if (CONFIG_I2C_BQ769X0)
+      list(APPEND SRCS bq769x0.c)
+    endif()
+  endif()
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

@@ -33,29 +33,17 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_PROCFS}" STREQUAL "y")
-	# Files required for procfs file system support
-	set(CSRCS) 
+if(CONFIG_FS_PROCFS)
 
-	if("${CONFIG_SCHED_CRITMONITOR}" STREQUAL "y")
-		list(APPEND CSRCS fs_procfscritmon.c)
-	endif()
+	set(SRCS
+    fs_procfs.c fs_procfsutil.c fs_procfsproc.c fs_procfsuptime.c
+    fs_procfscpuload.c fs_procfsmeminfo.c fs_procfsiobinfo.c
+    fs_procfsversion.c)
 
-	# Include procfs build support
-	list(APPEND CSRCS
-		fs_procfs.c
-		fs_procfsutil.c
-		fs_procfsproc.c
-		fs_procfsuptime.c
-		fs_procfscpuload.c
-		fs_procfsmeminfo.c
-		fs_procfsversion.c
-	)
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_SCHED_CRITMONITOR)
+    list(APPEND SRCS fs_procfscritmon.c)
+  endif()
 
-	# To ensure version information is newest,
-	# add fs_procfsversion to phony target for force rebuild
-
-	#.PHONY: fs_procfsversion$(OBJEXT)
+  target_sources(fs PRIVATE ${SRCS})
 
 endif()

@@ -33,27 +33,18 @@
 #
 ############################################################################
 
-# Add the sched C files to the build
-set(CSRCS) 
+set(SRCS sched_getprioritymax.c sched_getprioritymin.c)
 
-if(NOT "${CONFIG_CANCELLATION_POINTS}" STREQUAL "y")
-	list(APPEND CSRCS
-		task_setcanceltype.c
-		task_testcancel.c
-	)
+if (NOT CONFIG_CANCELLATION_POINTS)
+  list(APPEND SRCS task_setcanceltype.c task_testcancel.c)
 endif()
 
-if("${CONFIG_SMP}" STREQUAL "y")
-	list(APPEND CSRCS sched_cpucount.c)
+if (NOT CONFIG_SMP)
+  list(APPEND SRCS sched_cpucount.c)
 endif()
 
-if(NOT "${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-	list(APPEND CSRCS task_startup.c)
+if (NOT CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS task_startup.c)
 endif()
 
-# Add the sched directory to the build
-list(APPEND CSRCS
-	sched_getprioritymax.c
-	sched_getprioritymin.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

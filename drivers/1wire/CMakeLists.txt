@@ -33,18 +33,12 @@
 #
 ############################################################################
 
-if("${CONFIG_1WIRE}" STREQUAL "y")
+if (CONFIG_1WIRE)
+  set(SRCS 1wire.c 1wire_crc.c)
 
-	set(CSRCS)
+  if (CONFIG_1WIRE_DS28E17)
+    list(APPEND SRCS ds28e17.c)
+  endif()
 
-	list(APPEND CSRCS 1wire.c 1wire_crc.c)
-
-	if("${CONFIG_1WIRE_DS28E17}" STREQUAL "y")
-		list(APPEND CSRCS ds28e17.c)
-	endif()
-
-	# Include 1wire device driver build support
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

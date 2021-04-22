@@ -33,12 +33,26 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS
+  nxbe_bitmap.c nxbe_configure.c nxbe_colormap.c nxbe_clipper.c
+  nxbe_closewindow.c nxbe_redraw.c nxbe_redrawbelow.c
+  nxbe_setposition.c nxbe_move.c nxbe_getrectangle.c
+  nxbe_fill.c nxbe_filltrapezoid.c nxbe_setpixel.c
+  nxbe_lower.c nxbe_raise.c nxbe_modal.c nxbe_isvisible.c
+  nxbe_setsize.c nxbe_setvisibility.c)
 
-list(APPEND CSRCS nxbe_bitmap.c nxbe_configure.c nxbe_colormap.c nxbe_clipper.c)
-list(APPEND CSRCS nxbe_closewindow.c  nxbe_fill.c nxbe_filltrapezoid.c)
-list(APPEND CSRCS nxbe_getrectangle.c nxbe_lower.c nxbe_move.c nxbe_raise.c)
-list(APPEND CSRCS nxbe_redraw.c nxbe_redrawbelow.c nxbe_setpixel.c nxbe_setposition.c)
-list(APPEND CSRCS nxbe_setsize.c nxbe_visible.c)
+if (CONFIG_NX_RAMBACKED)
+  list(APPEND SRCS nxbe_flush.c)
+endif()
 
-set_parent_srcs(${CSRCS})
+if (CONFIG_NX_SWCURSOR)
+  list(APPEND SRCS nxbe_cursor.c nxbe_cursor_backupdraw.c)
+elseif (CONFIG_NX_HWCURSOR)
+  list(APPEND SRCS nxbe_cursor.c)
+endif()
+
+target_sources(graphics PRIVATE ${SRCS})
+
+ifeq ($(CONFIG_NX_UPDATE),y)
+CSRCS += nxbe_notify_rectangle.c
+endif

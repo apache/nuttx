@@ -33,12 +33,8 @@
 #
 ############################################################################
 
-set(CSRCS)
-
-list(APPEND CSRCS
-        lib_isalnum.c lib_isalpha.c lib_isascii.c lib_isblank.c
-        lib_iscntrl.c lib_isdigit.c lib_isgraph.c lib_islower.c
-        lib_isprint.c lib_ispunct.c lib_isspace.c lib_isupper.c
-        lib_isxdigit.c lib_tolower.c lib_toupper.c)
-
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE
+  lib_isalnum.c lib_isalpha.c lib_isascii.c lib_isblank.c
+  lib_iscntrl.c lib_isdigit.c lib_isgraph.c lib_islower.c
+  lib_isprint.c lib_ispunct.c lib_isspace.c lib_isupper.c
+  lib_isxdigit.c lib_tolower.c lib_toupper.c)

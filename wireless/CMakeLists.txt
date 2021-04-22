@@ -33,17 +33,10 @@
 #
 ############################################################################
 
-if("${CONFIG_WIRELESS}" STREQUAL "y")
+if(CONFIG_WIRELESS)
+  nuttx_add_library(wireless)
 
-	set(SRCS)
-	
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-	add_subdirectory(bluetooth)
+  add_subdirectory(bluetooth)
 	add_subdirectory(ieee802154)
-	add_subdirectory(pktradio)
-		
-	nuttx_add_library(wireless ${SRCS})
-	target_include_directories(net INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-
+	add_subdirectory(pktradio)		
 endif()

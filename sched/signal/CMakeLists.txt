@@ -33,53 +33,21 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
+set(SRCS)
 
-	set(CSRCS) 
-
-	if("${CONFIG_SIG_DEFAULT}" STREQUAL "y")
-		list(APPEND CSRCS sig_default.c)
-	endif()
-
-	if("${CONFIG_SIG_EVTHREAD}" STREQUAL "y")
-		list(APPEND CSRCS sig_evthread.c)
-	endif()
-
-	if(NOT "${CONFIG_DISABLE_POLL}" STREQUAL "y")
-		list(APPEND CSRCS
-			sig_ppoll.c
-			sig_pselect.c
-		)
-	endif()
-
-	# Include signal build support
-	
-	list(APPEND CSRCS
-		sig_action.c
-		sig_allocpendingsigaction.c
-		sig_cleanup.c
-		sig_deliver.c
-		sig_dispatch.c
-		sig_findaction.c
-		sig_initialize.c
-		sig_kill.c
-		sig_lowest.c
-		sig_nanosleep.c
-		sig_notification.c
-		sig_pause.c
-		sig_pending.c
-		sig_procmask.c
-		sig_queue.c
-		sig_releasependingsigaction.c
-		sig_releasependingsignal.c
-		sig_removependingsignal.c
-		sig_sleep.c
-		sig_suspend.c
-		sig_timedwait.c
-		sig_unmaskpendingsignal.c
-		sig_usleep.c
-		sig_waitinfo.c
-	)
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_SIG_DEFAULT)
+  list(APPEND SRCS sig_default.c)
 endif()
+
+list(APPEND SRCS
+  sig_initialize.c
+  sig_action.c sig_procmask.c sig_pending.c sig_suspend.c
+  sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
+  sig_findaction.c sig_allocpendingsigaction.c
+  sig_releasependingsigaction.c sig_unmaskpendingsignal.c
+  sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
+  sig_notification.c sig_cleanup.c sig_dispatch.c sig_deliver.c
+  sig_pause.c sig_nanosleep.c sig_usleep.c sig_sleep.c
+  sig_ppoll.c sig_pselect.c)
+
+target_sources(sched PRIVATE ${SRCS})

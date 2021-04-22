@@ -33,14 +33,12 @@
 #
 ############################################################################
 
-if("${CONFIG_I2S}" STREQUAL "y")
+if (CONFIG_I2S)
+  set(SRCS)
 
-	set(CSRCS)
+  if (CONFIG_AUDIO_I2SCHAR)
+    list(APPEND SRCS i2schar.c)
+  endif()
 
-	if("${CONFIG_AUDIO_I2SCHAR}" STREQUAL "y")
-		list(APPEND CSRCS i2schar.c)
-	endif()
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

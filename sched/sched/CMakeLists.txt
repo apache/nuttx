@@ -32,122 +32,87 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-set(CSRCS)
+set(SRCS)
 
-if("${CONFIG_PRIORITY_INHERITANCE}" STREQUAL "y")
-	list(APPEND CSRCS sched_reprioritize.c)
+list(APPEND SRCS
+  sched_getfiles.c
+  sched_addreadytorun.c sched_removereadytorun.c
+  sched_addprioritized.c sched_mergeprioritized.c sched_mergepending.c
+  sched_addblocked.c sched_removeblocked.c
+  sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
+  sched_getstreams.c
+  sched_setparam.c sched_setpriority.c sched_getparam.c
+  sched_setscheduler.c sched_getscheduler.c
+  sched_yield.c sched_rrgetinterval.c sched_foreach.c
+  sched_lock.c sched_unlock.c sched_lockcount.c
+  sched_idletask.c sched_self.c sched_get_stackinfo.c)
+
+if (CONFIG_PRIORITY_INHERITANCE)
+  list(APPEND SRCS sched_reprioritize.c)
 endif()
 
-if("${CONFIG_SMP}" STREQUAL "y")
-	list(APPEND CSRCS
-		sched_cpuselect.c
-		sched_cpupause.c
-		sched_getaffinity.c
-		sched_setaffinity.c
-	)
+if (CONFIG_SMP)
+  list(APPEND SRCS sched_cpuselect.c sched_cpupause.c sched_getcpu.c
+    sched_getaffinity.c sched_setaffinity.c)
 endif()
 
-if("${CONFIG_SIG_SIGSTOP_ACTION}" STREQUAL "y")
-	list(APPEND CSRCS
-		sched_suspend.c
-		sched_continue.c
-	)
+if (CONFIG_SIG_SIGSTOP_ACTION)
+  list(APPEND SRCS sched_suspend.c sched_continue.c)
 endif()
 
-if("${CONFIG_SCHED_WAITPID}" STREQUAL "y")
-	list(APPEND CSRCS sched_waitpid.c)
-	if("${CONFIG_SCHED_HAVE_PARENT}" STREQUAL "y")
-		list(APPEND CSRCS
-			sched_waitid.c
-			sched_wait.c
-		)
-	endif()
+if (CONFIG_SCHED_WAITPID)
+  list(APPEND SRCS sched_waitpid.c)
+  if (CONFIG_SCHED_HAVE_PARENT)
+    list(APPEND SRCS sched_waitid.c sched_wait.c)
+  endif()
 endif()
 
-if(NOT "${CONFIG_RR_INTERVAL}" STREQUAL "0")
-	list(APPEND CSRCS sched_roundrobin.c)
+if (NOT "${CONFIG_RR_INTERVAL}" STREQUAL "0")
+  list(APPEND SRCS sched_roundrobin.c)
 endif()
 
-if("${CONFIG_SCHED_SPORADIC}" STREQUAL "y")
-	list(APPEND CSRCS sched_sporadic.c)
+if (CONFIG_SCHED_SPORADIC)
+  list(APPEND SRCS sched_sporadic.c)
 endif()
 
-if("${CONFIG_SCHED_SUSPENDSCHEDULER}" STREQUAL "y")
-	list(APPEND CSRCS sched_suspendscheduler.c)
+if (CONFIG_SCHED_SUSPENDSCHEDULER)
+  list(APPEND SRCS sched_suspendscheduler.c)
 endif()
 
-if(NOT "${CONFIG_RR_INTERVAL}" STREQUAL "0")
-	list(APPEND CSRCS sched_resumescheduler.c)
-elseif("${CONFIG_SCHED_RESUMESCHEDULER}" STREQUAL "y")
-	list(APPEND CSRCS sched_resumescheduler.c)
+if (NOT "${CONFIG_RR_INTERVAL}" STREQUAL "0")
+  list(APPEND SRCS sched_resumescheduler.c)
+elseif (CONFIG_SCHED_RESUMESCHEDULER)
+  list(APPEND SRCS sched_resumescheduler.c)
 endif()
 
-if("${CONFIG_SCHED_CPULOAD}" STREQUAL "y")
-
-	list(APPEND CSRCS sched_cpuload.c)
-
-	if("${CONFIG_CPULOAD_ONESHOT}" STREQUAL "y")
-		list(APPEND CSRCS sched_cpuload_oneshot.c)
-	endif()
-
-	if("${CONFIG_CPULOAD_PERIOD}" STREQUAL "y")
-		list(APPEND CSRCS sched_cpuload_period.c)
-	endif()
+if (CONFIG_SCHED_CPULOAD)
+  list(APPEND SRCS sched_cpuload.c)
+  if (CONFIG_CPULOAD_ONESHOT)
+    list(APPEND SRCS sched_cpuload_oneshot.c)
+  endif()
+  if (CONFIG_CPULOAD_PERIOD)
+    list(APPEND SRCS sched_cpuload_period.c)
+  endif()
 endif()
 
-if("${CONFIG_SCHED_TICKLESS}" STREQUAL "y")
-	list(APPEND CSRCS sched_timerexpiration.c)
+if (CONFIG_SCHED_TICKLESS)
+  list(APPEND SRCS sched_timerexpiration.c)
 else()
-	list(APPEND CSRCS sched_processtimer.c)
+  list(APPEND SRCS sched_processtimer.c)
 endif()
 
-if("${CONFIG_SMP}" STREQUAL "y")
-
-	list(APPEND CSRCS sched_tasklistlock.c)
-
-	if("${CONFIG_ARCH_GLOBAL_IRQDISABLE}" STREQUAL "y")
-		list(APPEND CSRCS sched_thistask.c)
-	elseif("${CONFIG_ARCH_HAVE_FETCHADD}" STREQUAL "y")
-		list(APPEND CSRCS sched_thistask.c)
-	endif()
+if (CONFIG_SMP)
+  list(APPEND SRCS sched_thistask.c)
 endif()
 
-if("${CONFIG_SCHED_INSTRUMENTATION_BUFFER}" STREQUAL "y")
-	list(APPEND CSRCS sched_note.c)
+if (CONFIG_SCHED_INSTRUMENTATION)
+  if (CONFIG_SCHED_INSTRUMENTATION_EXTERNAL)
+    list(APPEND SRCS sched_note.c)
+  endif()
 endif()
 
-if("${CONFIG_SCHED_CRITMONITOR}" STREQUAL "y")
-	list(APPEND CSRCS sched_critmonitor.c)
+if (CONFIG_SCHED_CRITMONITOR)
+  list(APPEND SRCS sched_critmonitor.c)
 endif()
 
-# Include sched build support
-
-list(APPEND CSRCS
-	sched_addblocked.c
-	sched_addprioritized.c
-	sched_addreadytorun.c
-	sched_foreach.c
-	sched_getfiles.c
-	sched_getparam.c
-	sched_getscheduler.c
-	sched_getstreams.c
-	sched_gettcb.c
-  sched_get_stackinfo.c
-	sched_idletask.c
-	sched_lock.c
-	sched_lockcount.c
-	sched_mergepending.c
-	sched_mergeprioritized.c
-	sched_releasetcb.c
-	sched_removeblocked.c
-	sched_removereadytorun.c
-	sched_rrgetinterval.c
-	sched_self.c
-	sched_setparam.c
-	sched_setpriority.c
-	sched_setscheduler.c
-	sched_unlock.c
-	sched_verifytcb.c
-	sched_yield.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(sched PRIVATE ${SRCS})

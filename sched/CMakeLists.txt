@@ -1,7 +1,7 @@
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(SRCS)
+nuttx_add_library(sched)
 
 add_subdirectory(clock)
 add_subdirectory(environ)
@@ -20,6 +20,4 @@ add_subdirectory(timer)
 add_subdirectory(wdog)
 add_subdirectory(wqueue)
 
-
-nuttx_add_library(sched ${SRCS})
 target_include_directories(sched INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

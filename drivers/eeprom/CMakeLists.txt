@@ -33,26 +33,18 @@
 #
 ############################################################################
 
-# Include EEPROM support
+if (CONFIG_EEPROM)
+  set(SRCS)
 
-if("${CONFIG_EEPROM}" STREQUAL "y")
+  # Include the Microchip/Atmel/ST xx25xx driver for SPI
+  if (CONFIG_SPI_EE_25XX)
+    list(APPEND SRCS spi_xx25xx.c)
+  endif()
 
-	set(CSRCS)
+  # Include the Microchip/Atmel/ST xx24xx driver for I2C
+  if (CONFIG_I2C_EE_24XX)
+    list(APPEND SRCS i2c_xx24xx.c)
+  endif()
 
-	# Include the Microchip/Atmel/ST xx25xx driver for SPI
-	
-	if("${CONFIG_SPI_EE_25XX}" STREQUAL "y")
-		list(APPEND CSRCS spi_xx25xx.c)
-	endif()
-	
-	# Include the Microchip/Atmel/ST xx24xx driver for I2C
-	
-	if("${CONFIG_I2C_EE_24XX}" STREQUAL "y")
-		list(APPEND CSRCS i2c_xx24xx.c)
-	endif()
-	
-	# Include build support
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

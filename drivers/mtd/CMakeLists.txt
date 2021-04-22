@@ -35,125 +35,127 @@
 #
 ############################################################################
 
-# Include MTD drivers
+if (CONFIG_MTD)
+  set(SRCS ftl.c mtd_config.c)
 
-set(CSRCS)
+  if (CONFIG_MTD_PARTITION)
+    list(APPEND SRCS mtd_partition.c)
+  endif()
 
-if("${CONFIG_MTD}" STREQUAL "y")
+  if (CONFIG_MTD_SECT512)
+    list(APPEND SRCS sector512.c)
+  endif()
 
-	list(APPEND CSRCS ftl.c mtd_config.c)
-	
-	if("${CONFIG_MTD_PARTITION}" STREQUAL "y")
-		list(APPEND CSRCS mtd_partition.c)
-	endif()
-	
-	if("${CONFIG_MTD_SECT512}" STREQUAL "y")
-		list(APPEND CSRCS sector512.c)
-	endif()
-	
-	if("${CONFIG_MTD_WRBUFFER}" STREQUAL "y")
-		list(APPEND CSRCS mtd_rwbuffer.c)
-	else()
-		if("${CONFIG_MTD_READAHEAD}" STREQUAL "y")
-			list(APPEND CSRCS mtd_rwbuffer.c)
-		endif()
-	endif()
-	
-	if("${CONFIG_MTD_PROGMEM}" STREQUAL "y")
-		list(APPEND CSRCS mtd_progmem.c)
-	endif()
-	
-	if("${CONFIG_MTD_NAND}" STREQUAL "y")
-		list(APPEND CSRCS mtd_nand.c mtd_onfi.c mtd_nandscheme.c mtd_nandmodel.c mtd_modeltab.c)
-		if("${CONFIG_MTD_NAND_SWECC}" STREQUAL "y")
-			list(APPEND CSRCS mtd_nandecc.c hamming.c)
-		endif()
-	endif()
-	
-	if("${CONFIG_RAMMTD}" STREQUAL "y")
-		list(APPEND CSRCS rammtd.c)
-	endif()
-	
-	if("${CONFIG_FILEMTD}" STREQUAL "y")
-		list(APPEND CSRCS filemtd.c)
-	endif()
-	
-	if("${CONFIG_MTD_AT24XX}" STREQUAL "y")
-		list(APPEND CSRCS at24xx.c)
-	endif()
-	
-	if("${CONFIG_MTD_AT45DB}" STREQUAL "y")
-		list(APPEND CSRCS at45db.c)
-	endif()
-	
-	if("${CONFIG_MTD_RAMTRON}" STREQUAL "y")
-		list(APPEND CSRCS ramtron.c)
-	endif()
-	
-	if("${CONFIG_MTD_SST25}" STREQUAL "y")
-		list(APPEND CSRCS sst25.c)
-	endif()
-	
-	if("${CONFIG_MTD_SST25XX}" STREQUAL "y")
-		list(APPEND CSRCS sst25xx.c)
-	endif()
-	
-	if("${CONFIG_MTD_SST26}" STREQUAL "y")
-		list(APPEND CSRCS sst26.c)
-	endif()
-	
-	if("${CONFIG_MTD_SST39FV}" STREQUAL "y")
-		list(APPEND CSRCS sst39vf.c)
-	endif()
-	
-	if("${CONFIG_MTD_W25}" STREQUAL "y")
-		list(APPEND CSRCS w25.c)
-	endif()
-	
-	if("${CONFIG_MTD_GD25}" STREQUAL "y")
-		list(APPEND CSRCS gd25.c)
-	endif()
-	
-	if("${CONFIG_MTD_AT25}" STREQUAL "y")
-		list(APPEND CSRCS at25.c)
-	endif()
-	
-	if("${CONFIG_MTD_M25P}" STREQUAL "y")
-		list(APPEND CSRCS m25px.c)
-	endif()
-	
-	if("${CONFIG_MTD_MX25L}" STREQUAL "y")
-		list(APPEND CSRCS mx25lx.c)
-	endif()
-	
-	if("${CONFIG_MTD_MX35}" STREQUAL "y")
-		list(APPEND CSRCS mx35.c)
-	endif()
-	
-	if("${CONFIG_MTD_S25FL1}" STREQUAL "y")
-		list(APPEND CSRCS s25fl1.c)
-	endif()
-	
-	if("${CONFIG_MTD_N25QXXX}" STREQUAL "y")
-		list(APPEND CSRCS n25qxxx.c)
-	endif()
-	
-	if("${CONFIG_MTD_MX25RXX}" STREQUAL "y")
-		list(APPEND CSRCS mx25rxx.c)
-	endif()
-	
-	if("${CONFIG_MTD_IS25XP}" STREQUAL "y")
-		list(APPEND CSRCS is25xp.c)
-	endif()
-	
-	if("${CONFIG_MTD_SMART}" STREQUAL "y")
-		if("${CONFIG_FS_SMARTFS}" STREQUAL "y")
-			list(APPEND CSRCS smart.c)
-		endif()
-	endif()
+  if (CONFIG_MTD_WRBUFFER)
+    list(APPEND SRCS mtd_rwbuffer.c)
+  else()
+    if (CONFIG_MTD_READAHEAD)
+      list(APPEND SRCS mtd_rwbuffer.c)
+    endif()
+  endif()
 
-	# Include MTD driver support
-	
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_MTD_PROGMEM)
+    list(APPEND SRCS mtd_progmem.c)
+  endif()
 
+  if (CONFIG_MTD_NAND)
+    list(APPEND SRCS mtd_nand.c mtd_onfi.c mtd_nandscheme.c mtd_nandmodel.c mtd_modeltab.c)
+
+    if (CONFIG_MTD_NAND_SWECC)
+      list(APPEND SRCS mtd_nandecc.c hamming.c)
+    endif()
+  endif()
+
+  if (CONFIG_RAMMTD)
+    list(APPEND SRCS rammtd.c)
+  endif()
+
+  if (CONFIG_FILEMTD)
+    list(APPEND SRCS filemtd.c)
+  endif()
+
+  if (CONFIG_MTD_AT24XX)
+    list(APPEND SRCS at24xx.c)
+  endif()
+
+  if (CONFIG_MTD_AT45DB)
+    list(APPEND SRCS at45db.c)
+  endif()
+
+  if (CONFIG_MTD_RAMTRON)
+    list(APPEND SRCS ramtron.c)
+  endif()
+
+  if (CONFIG_MTD_SST25)
+    list(APPEND SRCS sst25.c)
+  endif()
+
+  if (CONFIG_MTD_SST25XX)
+    list(APPEND SRCS sst25xx.c)
+  endif()
+
+  if (CONFIG_MTD_SST26)
+    list(APPEND SRCS sst26.c)
+  endif()
+
+  if (CONFIG_MTD_SST39FV)
+    list(APPEND SRCS sst39vf.c)
+  endif()
+
+  if (CONFIG_MTD_W25)
+    list(APPEND SRCS w25.c)
+  endif()
+
+  if (CONFIG_MTD_GD25)
+    list(APPEND SRCS gd25.c)
+  endif()
+
+  if (CONFIG_MTD_GD5F)
+    list(APPEND SRCS gd5f.c)
+  endif()
+
+  if (CONFIG_MTD_AT25)
+    list(APPEND SRCS at25.c)
+  endif()
+
+  if (CONFIG_MTD_M25P)
+    list(APPEND SRCS m25px.c)
+  endif()
+
+  if (CONFIG_MTD_MX25L)
+    list(APPEND SRCS mx25lx.c)
+  endif()
+
+  if (CONFIG_MTD_MX35)
+    list(APPEND SRCS mx35.c)
+  endif()
+
+  if (CONFIG_MTD_S25FL1)
+    list(APPEND SRCS s25fl1.c)
+  endif()
+
+  if (CONFIG_MTD_N25QXXX)
+    list(APPEND SRCS n25qxxx.c)
+  endif()
+
+  if (CONFIG_MTD_W25QXXXJV)
+    list(APPEND SRCS w25qxxxjv.c)
+  endif()
+
+  if (CONFIG_MTD_MX25RXX)
+    list(APPEND SRCS mx25rxx.c)
+  endif()
+
+  if (CONFIG_MTD_IS25XP)
+    list(APPEND SRCS is25xp.c)
+  endif()
+
+  if (CONFIG_MTD_SMART)
+    if (CONFIG_FS_SMARTFS)
+      list(APPEND SRCS smart.c)
+    endif()
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
+

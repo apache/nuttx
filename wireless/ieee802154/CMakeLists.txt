@@ -33,38 +33,33 @@
 #
 ############################################################################
 
-if("${CONFIG_WIRELESS_IEEE802154}" STREQUAL "y")
-
-	# Include IEEE 802.15.4 support
-	set(CSRCS)
+if(CONFIG_WIRELESS_IEEE802154)
+  set(SRCS ieee802154_primitive.c)
 	
-	list(APPEND CSRCS ieee802154_primitive.c)
+	if(CONFIG_IEEE802154_MAC)
 	
-	if("${CONFIG_IEEE802154_MAC}" STREQUAL "y")
-	
-		list(APPEND CSRCS mac802154.c  mac802154_assoc.c mac802154_disassoc.c)
-		list(APPEND CSRCS mac802154_bind.c mac802154_data.c mac802154_get_mhrlen.c)
-		list(APPEND CSRCS mac802154_getset.c mac802154_gts.c mac802154_ioctl.c)
-		list(APPEND CSRCS mac802154_orphan.c mac802154_poll.c mac802154_purge.c)
-		list(APPEND CSRCS mac802154_reset.c mac802154_rxenable.c mac802154_scan.c)
-		list(APPEND CSRCS mac802154_start.c mac802154_sync.c)
+		list(APPEND SRCS
+      mac802154.c  mac802154_assoc.c mac802154_disassoc.c
+      mac802154_bind.c mac802154_data.c mac802154_get_mhrlen.c
+      mac802154_getset.c mac802154_gts.c mac802154_ioctl.c
+      mac802154_orphan.c mac802154_poll.c mac802154_purge.c
+      mac802154_reset.c mac802154_rxenable.c mac802154_scan.c
+      mac802154_start.c mac802154_sync.c)
 		
 		# Include wireless devices build support
 		
-		if("${CONFIG_IEEE802154_MACDEV}" STREQUAL "y")
-			list(APPEND CSRCS mac802154_device.c)
+		if(CONFIG_IEEE802154_MACDEV)
+			list(APPEND SRCS mac802154_device.c)
 		endif()
 		
-		if("${CONFIG_IEEE802154_NETDEV}" STREQUAL "y")
-			list(APPEND CSRCS mac802154_netdev.c)
+		if(CONFIG_IEEE802154_NETDEV)
+			list(APPEND SRCS mac802154_netdev.c)
 		endif()
-	
 	endif()
 	
-	if("${CONFIG_IEEE802154_LOOPBACK}" STREQUAL "y")
-		list(APPEND CSRCS mac802154_loopback.c)
-	endif()
-	
-	set_parent_srcs(${CSRCS})
+	if(CONFIG_IEEE802154_LOOPBACK)
+		list(APPEND SRCS mac802154_loopback.c)
+  endif()
 
-endif() # CONFIG_WIRELESS_IEEE802154
+  target_sources(wireless PRIVATE ${SRCS})
+endif()

@@ -37,21 +37,24 @@
 # implementation so that they are available to the application in the kernel
 # build (single use mode cannot be used with the kernel build)
 
-if("${CONFIG_NX}" STREQUAL "y")
-	set(CSRCS)
-	list(APPEND CSRCS
-		nxmu_sendserver.c nx_connect.c nx_disconnect.c
-		nx_eventhandler.c nx_eventnotify.c nxmu_semtake.c nx_block.c
-		nx_kbdchin.c nx_kbdin.c nx_mousein.c
-		nx_releasebkgd.c nx_requestbkgd.c nx_setbgcolor.c
+if (CONFIG_NX)
+  set(SRCS
+    nxmu_sendserver.c nx_connect.c nx_disconnect.c
+    nx_eventhandler.c nx_eventnotify.c nxmu_semtake.c
+    nx_block.c nx_synch.c
+    nx_kbdchin.c nx_kbdin.c nx_mousein.c
+    nx_releasebkgd.c nx_requestbkgd.c nx_setbgcolor.c
+    nxmu_sendwindow.c nx_closewindow.c nx_constructwindow.c
+    nx_bitmap.c nx_fill.c nx_filltrapezoid.c nx_getposition.c
+    nx_getrectangle.c nx_lower.c nx_modal.c nx_move.c nx_openwindow.c
+    nx_raise.c nx_redrawreq.c nx_setpixel.c nx_setposition.c
+    nx_setsize.c nx_setvisibility.c)
 
-		nxmu_sendwindow.c nx_closewindow.c nx_constructwindow.c
-		nx_bitmap.c nx_fill.c nx_filltrapezoid.c nx_getposition.c
-		nx_getrectangle.c nx_lower.c nx_move.c nx_openwindow.c
-		nx_raise.c nx_redrawreq.c nx_setpixel.c nx_setposition.c
-		nx_setsize.c
-	)
+  if (CONFIG_NX_HWCURSOR)
+    list(APPEND SRCS nx_cursor.c)
+  elseif (CONFIG_NX_SWCURSOR)
+    list(APPEND SRCS nx_cursor.c)
+  endif()
 
-	# Add the nxmu/ directory to the build
-	set_parent_srcs(${CSRCS})
+  target_sources(nx PRIVATE ${SRCS})
 endif()

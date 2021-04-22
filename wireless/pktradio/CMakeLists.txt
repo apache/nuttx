@@ -33,17 +33,12 @@
 #
 ############################################################################
 
-if("${CONFIG_WIRELESS_PKTRADIO}" STREQUAL "y")
-
-	# Include packet radio support
-	set(CSRCS)
+if(CONFIG_WIRELESS_PKTRADIO)
+  set(SRCS pktradio_metadata.c)
 	
-	list(APPEND CSRCS pktradio_metadata.c)
-	
-	if("${CONFIG_WIRELESS_LOOPBACK}" STREQUAL "y")
-		list(APPEND CSRCS pktradio_loopback.c)
-	endif()
+	if(CONFIG_WIRELESS_LOOPBACK)
+		list(APPEND SRCS pktradio_loopback.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
-
-endif() # CONFIG_WIRELESS_PKTRADIO
+  target_sources(fs PRIVATE SRCS)
+endif()

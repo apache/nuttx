@@ -33,73 +33,49 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
-if("${CONFIG_ARCH_HAVE_VFORK}" STREQUAL "y")
-	if("${CONFIG_SCHED_WAITPID}" STREQUAL "y")
-		list(APPEND CSRCS task_vfork.c)
-	endif()
+list(APPEND SRCS
+  task_create.c task_init.c task_setup.c task_activate.c
+  task_start.c task_delete.c task_exit.c task_exithook.c
+  task_getgroup.c task_getpid.c task_prctl.c task_recover.c
+  task_restart.c task_spawnparms.c task_setcancelstate.c
+  task_cancelpt.c task_terminate.c task_gettid.c exit.c)
+
+if (CONFIG_SCHED_HAVE_PARENT)
+  list(APPEND SRCS task_getppid.c task_reparent.c)
 endif()
 
-if(NOT "${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-	list(APPEND CSRCS task_spawn.c)
+if (CONFIG_ARCH_HAVE_VFORK)
+  if (CONFIG_SCHED_WAITPID)
+    list(APPEND SRCS task_vfork.c)
+  endif()
 endif()
 
-if("${CONFIG_CANCELLATION_POINTS}" STREQUAL "y")
-	list(APPEND CSRCS
-		task_setcanceltype.c
-		task_testcancel.c
-	)
+if (NOT CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS task_spawn.c)
 endif()
 
-if(NOT "${CONFIG_BINFMT_DISABLE}" STREQUAL "y")
-	if("${CONFIG_LIBC_EXECFUNCS}" STREQUAL "y")
-		list(APPEND CSRCS
-			task_execv.c
-			task_posixspawn.c
-		)
-	endif()
+if (CONFIG_CANCELLATION_POINTS)
+  list(APPEND SRCS task_setcanceltype.c task_testcancel.c)
 endif()
 
-if("${CONFIG_SCHED_STARTHOOK}" STREQUAL "y")
-	list(APPEND CSRCS task_starthook.c)
+if (NOT CONFIG_BINFMT_DISABLE)
+  if (CONFIG_LIBC_EXECFUNCS)
+    list(APPEND SRCS task_execv.c task_posixspawn.c)
+  endif()
 endif()
 
-if("${CONFIG_SCHED_ATEXIT}" STREQUAL "y")
-	list(APPEND CSRCS task_atexit.c)
+if (CONFIG_SCHED_STARTHOOK)
+  list(APPEND SRCS task_starthook.c)
 endif()
 
-if("${CONFIG_SCHED_ONEXIT}" STREQUAL "y")
-	list(APPEND CSRCS task_onexit.c)
+if (CONFIG_SCHED_ATEXIT)
+  list(APPEND SRCS task_atexit.c)
 endif()
 
-if("${CONFIG_CANCELLATION_POINTS}" STREQUAL "y")
-	list(APPEND CSRCS task_cancelpt.c)
+if (CONFIG_SCHED_ONEXIT)
+  list(APPEND SRCS task_onexit.c)
 endif()
 
-if("${CONFIG_SCHED_HAVE_PARENT}" STREQUAL "y")
-	list(APPEND CSRCS task_reparent.c)
-endif()
-
-# Include task build support
-
-list(APPEND CSRCS
-	exit.c
-	task_activate.c
-	task_create.c
-	task_delete.c
-	task_exit.c
-	task_exithook.c
-	task_getgroup.c
-	task_getpid.c
-	task_init.c
-	task_prctl.c
-	task_recover.c
-	task_restart.c
-	task_setcancelstate.c
-	task_setup.c
-	task_spawnparms.c
-	task_start.c
-	task_terminate.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(sched PRIVATE ${SRCS})

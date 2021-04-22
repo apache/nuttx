@@ -34,64 +34,58 @@
 #
 ############################################################################
 
-############################################################################
 # Include SYSLOG Infrastructure
 
-	set(CSRCS)
+set(SRCS
+  vsyslog.c syslog_stream.c syslog_emergstream.c syslog_channel.c
+  syslog_putc.c syslog_write.c syslog_force.c syslog_flush.c)
 
-list(APPEND CSRCS vsyslog.c syslog_stream.c syslog_emergstream.c syslog_channel.c)
-list(APPEND CSRCS syslog_putc.c syslog_write.c syslog_force.c syslog_flush.c)
-
-if("${CONFIG_SYSLOG_INTBUFFER}" STREQUAL "y")
-	list(APPEND CSRCS syslog_intbuffer.c)
+if (CONFIG_SYSLOG_INTBUFFER)
+  list(APPEND SRCS syslog_intbuffer.c)
 endif()
 
-if(NOT "${CONFIG_ARCH_SYSLOG}" STREQUAL "y")
-	list(APPEND CSRCS syslog_initialize.c)
-endif()
-
-# The note driver is hosted in this directory, but is not associated with
-# SYSLOGging
-
-if("${CONFIG_DRIVER_NOTE}" STREQUAL "y")
-	list(APPEND CSRCS note_driver.c)
+if (NOT CONFIG_ARCH_SYSLOG)
+  list(APPEND SRCS syslog_initialize.c)
 endif()
 
 # The RAMLOG device is usable as a system logging device or standalone
 
-if("${CONFIG_RAMLOG}" STREQUAL "y")
-	list(APPEND CSRCS ramlog.c)
+if (CONFIG_RAMLOG)
+  list(APPEND SRCS ramlog.c)
 endif()
 
-############################################################################
 # Include SYSLOG drivers (only one should be enabled)
 
 # System logging to a character device (or file)
 
-list(APPEND CSRCS syslog_device.c)
+list(APPEND SRCS syslog_device.c)
 
-if("${CONFIG_SYSLOG_CHAR}" STREQUAL "y")
-	list(APPEND CSRCS syslog_devchannel.c)
+if (CONFIG_SYSLOG_CHAR)
+  list(APPEND SRCS syslog_devchannel.c)
 endif()
 
-if("${CONFIG_SYSLOG_CONSOLE}" STREQUAL "y")
-	list(APPEND CSRCS syslog_consolechannel.c)
+if (CONFIG_SYSLOG_CONSOLE)
+  list(APPEND SRCS syslog_consolechannel.c)
 endif()
 
-if("${CONFIG_SYSLOG_FILE}" STREQUAL "y")
-	list(APPEND CSRCS syslog_filechannel.c)
+if (CONFIG_SYSLOG_FILE)
+  list(APPEND SRCS syslog_filechannel.c)
 endif()
 
-if("${CONFIG_SYSLOG_CHARDEV}" STREQUAL "y")
-	list(APPEND CSRCS syslog_chardev.c)
+if (CONFIG_SYSLOG_CHARDEV)
+  list(APPEND SRCS syslog_chardev.c)
 endif()
 
-if("${CONFIG_CONSOLE_SYSLOG}" STREQUAL "y")
-	list(APPEND CSRCS syslog_console.c)
+if (CONFIG_SYSLOG_RPMSG)
+  list(APPEND SRCS syslog_rpmsg.c)
 endif()
 
-# (Add other SYSLOG drivers here)
+if (CONFIG_SYSLOG_RPMSG_SERVER)
+  list(APPEND SRCS syslog_rpmsg_server.c)
+endif()
 
-# Include SYSLOG build support
+if (CONFIG_CONSOLE_SYSLOG)
+  list(APPEND SRCS syslog_console.c)
+endif()
 
-set_parent_srcs(${CSRCS})
+target_sources(drivers PRIVATE ${SRCS})

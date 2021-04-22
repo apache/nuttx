@@ -33,16 +33,14 @@
 #
 ############################################################################
 
-if("${CONFIG_MODEM}" STREQUAL "y")
+if (CONFIG_MODEM)
+  set(SRCS)
 
-	set(CSRCS)
+  if (CONFIG_MODEM_U_BLOX)
+    list(APPEND SRCS u-blox.c)
+  endif()
 
-	if("${CONFIG_MODEM_U_BLOX}" STREQUAL "y")
-		list(APPEND CSRCS u-blox.c)
-	endif()
-	
-	# Include modem driver build support
+  add_subdirectory(altair)
 
-	set_parent_srcs(${CSRCS})
-
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

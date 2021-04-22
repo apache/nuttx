@@ -33,64 +33,49 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
-if("${CONFIG_SCHED_HAVE_PARENT}" STREQUAL "y")
-	if("${CONFIG_SCHED_CHILD_STATUS}" STREQUAL "y")
-		list(APPEND CSRCS group_childstatus.c)
-	endif()
+list(APPEND SRCS
+  group_create.c group_join.c group_leave.c group_find.c
+  group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
+  group_foreachchild.c group_killchildren.c group_signal.c)
+
+if (CONFIG_SCHED_HAVE_PARENT)
+  if (CONFIG_SCHED_CHILD_STATUS)
+    list(APPEND SRCS group_childstatus.c)
+  endif()
 else()
-	if("${CONFIG_SCHED_WAITPID}" STREQUAL "y")
-		list(APPEND CSRCS group_waiter.c)
-	endif()
-endif()
-
-if("${CONFIG_ARCH_ADDRENV}" STREQUAL "y")
-	list(APPEND CSRCS group_addrenv.c)
-endif()
-
-if("${CONFIG_SIG_SIGSTOP_ACTION}" STREQUAL "y")
-	list(APPEND CSRCS
-		group_suspendchildren.c
-		group_continue.c
-	)
-endif()
-
-if("${CONFIG_BINFMT_LOADABLE}" STREQUAL "y")
-	list(APPEND CSRCS group_exitinfo.c)
-endif()
-
-if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-	list(APPEND CSRCS group_signal.c)
-endif()
-
-if("${CONFIG_BUILD_PROTECTED}" STREQUAL "y")
-	list(APPEND CSRCS
-		group_malloc.c
-		group_zalloc.c
-		group_free.c
-	)
-else()
-	if("${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-		list(APPEND CSRCS
-			group_malloc.c
-			group_zalloc.c
-			group_free.c
-		)
-	else()
-    list(APPEND CSRCS group_taskdata.c)
+  if (CONFIG_SCHED_WAITPID)
+    list(APPEND SRCS group_waiter.c)
   endif()
 endif()
 
-list(APPEND CSRCS
-	group_create.c
-	group_join.c
-	group_leave.c
-	group_find.c
-	group_setupstreams.c
-	group_setupidlefiles.c
-	group_setuptaskfiles.c
-	group_foreachchild.c
-	group_killchildren.c
-)
-set_parent_srcs(${CSRCS})
+if (CONFIG_SCHED_USER_IDENTITY)
+  list(APPEND SRCS group_setuid.c group_setgid.c group_getuid.c group_getgid.c)
+endif()
+
+if (CONFIG_ARCH_ADDRENV)
+  list(APPEND SRCS group_addrenv.c)
+endif()
+
+if (CONFIG_SIG_SIGSTOP_ACTION)
+  list(APPEND SRCS group_suspendchildren.c group_continue.c)
+endif()
+
+if (CONFIG_BINFMT_LOADABLE)
+  list(APPEND SRCS group_exitinfo.c)
+endif()
+
+if (CONFIG_BUILD_FLAT)
+  list(APPEND SRCS group_malloc.c group_zalloc.c group_free.c)
+endif()
+
+if (NOT "${CONFIG_TLS_NELEM}" STREQUAL "0")
+  list(APPEND SRCS group_tlsalloc.c group_tlsfree.c)
+endif()
+
+if (NOT CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS group_taskdata.c)
+endif()
+
+target_sources(sched PRIVATE ${SRCS})

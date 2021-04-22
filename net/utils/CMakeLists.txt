@@ -35,37 +35,34 @@
 
 # Common utilities
 
-set(CSRCS)
-
-list(APPEND CSRCS net_dsec2tick.c net_dsec2timeval.c net_timeval2dsec.c)
-list(APPEND CSRCS net_chksum.c net_ipchksum.c net_incr32.c net_lock.c)
+set(SRCS
+  net_dsec2tick.c net_dsec2timeval.c net_timeval2dsec.c
+  net_chksum.c net_ipchksum.c net_incr32.c net_lock.c)
 
 # IPv6 utilities
 
-if("${CONFIG_NET_IPv6}" STREQUAL "y")
-	list(APPEND CSRCS net_ipv6_maskcmp.c net_ipv6_mask2pref.c net_ipv6_pref2mask.c)
+if (CONFIG_NET_IPv6)
+  list(APPEND SRCS net_ipv6_maskcmp.c net_ipv6_mask2pref.c net_ipv6_pref2mask.c)
 endif()
 
 # TCP utilities
 
-if("${CONFIG_NET_TCP}" STREQUAL "y")
-	list(APPEND CSRCS net_tcpchksum.c)
+if (CONFIG_NET_TCP)
+  list(APPEND SRCS net_tcpchksum.c)
 endif()
 
 # UDP utilities
 
-if("${CONFIG_NET_UDP}" STREQUAL "y")
-	list(APPEND CSRCS net_udpchksum.c)
+if (CONFIG_NET_UDP)
+  list(APPEND SRCS net_udpchksum.c)
 endif()
 
 # ICMP utilities
 
-if("${CONFIG_NET_ICMP}" STREQUAL "y")
-	list(APPEND CSRCS net_icmpchksum.c)
-elseif("${CONFIG_NET_ICMPv6}" STREQUAL "y")
-	list(APPEND CSRCS net_icmpchksum.c)
+if (CONFIG_NET_ICMP)
+  list(APPEND SRCS net_icmpchksum.c)
+elseif (CONFIG_NET_ICMPv6)
+  list(APPEND SRCS net_icmpchksum.c)
 endif()
 
-# Include utility build support
-
-set_parent_srcs(${CSRCS})
+target_sources(net PRIVATE ${SRCS})

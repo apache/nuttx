@@ -33,15 +33,5 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
+target_sources(drivers PRIVATE pipe.c fifo.c pipe_common.c)
 
-	set(CSRCS)
-
-	# Include pipe driver
-	
-	list(APPEND CSRCS pipe.c fifo.c pipe_common.c)
-	
-	# Include pipe build support
-
-	set_parent_srcs(${CSRCS})
-endif()

@@ -33,14 +33,12 @@
 #
 ############################################################################
 
-if("${CONFIG_NET}" STREQUAL "y")
-
-	set(SRCS)
-	
-	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+if(CONFIG_NET)
+  nuttx_add_library(net)
 
 	add_subdirectory(arp)
 	add_subdirectory(bluetooth)
+  add_subdirectory(can)
 	add_subdirectory(devif)
 	add_subdirectory(icmp)
 	add_subdirectory(icmpv6)
@@ -49,7 +47,6 @@ if("${CONFIG_NET}" STREQUAL "y")
 	add_subdirectory(inet)
 	add_subdirectory(ipforward)
 	add_subdirectory(local)
-	add_subdirectory(loopback)
 	add_subdirectory(mld)
 	add_subdirectory(neighbor)
 	add_subdirectory(netdev)
@@ -57,6 +54,7 @@ if("${CONFIG_NET}" STREQUAL "y")
 	add_subdirectory(pkt)
 	add_subdirectory(procfs)
 	add_subdirectory(route)
+  add_subdirectory(rpmsg)
 	add_subdirectory(sixlowpan)
 	add_subdirectory(socket)
 	add_subdirectory(tcp)
@@ -64,13 +62,5 @@ if("${CONFIG_NET}" STREQUAL "y")
 	add_subdirectory(usrsock)
 	add_subdirectory(utils)
 		
-	nuttx_add_library(net
-		net_initialize.c
-		${SRCS}
-	)
-
-	target_include_directories(net
-		INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-		)
-
+  target_sources(net PRIVATE net_initialize.c)
 endif()

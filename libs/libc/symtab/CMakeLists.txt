@@ -33,11 +33,5 @@
 #
 ############################################################################
 
-# Add the symtab directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	symtab_findbyname.c
-	symtab_findbyvalue.c
-	symtab_sortbyname.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE
+  symtab_findbyname.c symtab_findbyvalue.c symtab_sortbyname.c)

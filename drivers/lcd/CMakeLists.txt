@@ -33,113 +33,140 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
-if("${CONFIG_LCD}" STREQUAL "y")
+if (CONFIG_LCD)
+  # Support for the generic LCD framebuffer front-end
 
-	# Support for the generic LCD framebufer front-end
-	
-	if("${CONFIG_LCD_FRAMEBUFFER}" STREQUAL "y")
-		list(APPEND CSRCS lcd_framebuffer.c)
-	endif()
+  if (CONFIG_LCD_FRAMEBUFFER)
+    list(APPEND SRCS lcd_framebuffer.c)
+  endif()
 
-	# Include support for Graphics LCD drivers
-	
-	if("${CONFIG_LCD_FT80X}" STREQUAL "y")
-		list(APPEND CSRCS ft80x.c)
-		if("${CONFIG_LCD_FT80X_SPI}" STREQUAL "y")
-			list(APPEND CSRCS ft80x_spi.c)
-		elseif("${CONFIG_LCD_FT80X_I2C}" STREQUAL "y")
-			list(APPEND CSRCS ft80x_i2c.c)
-		endif()
-	endif()
+  if (CONFIG_LCD_DEV)
+    list(APPEND SRCS lcd_dev.c)
+  endif()
 
-	if("${CONFIG_LCD_P14201}" STREQUAL "y")
-		list(APPEND CSRCS p14201.c)
-	endif()
-	
-	if("${CONFIG_LCD_UG2864AMBAG01}" STREQUAL "y")
-		list(APPEND CSRCS ug-2864ambag01.c)
-	endif()
-	
-	if("${CONFIG_LCD_UG9664HSWAG01}" STREQUAL "y")
-		list(APPEND CSRCS ug-9664hswag01.c)
-	endif()
-	
-	if("${CONFIG_LCD_SSD1306}" STREQUAL "y")
-		list(APPEND CSRCS ssd1306_base.c)
-	endif()
-	
-	if("${CONFIG_LCD_SSD1306_SPI}" STREQUAL "y")
-		list(APPEND CSRCS ssd1306_spi.c)
-	endif()
-	
-	if("${CONFIG_LCD_SSD1306_I2C}" STREQUAL "y")
-		list(APPEND CSRCS ssd1306_i2c.c)
-	endif()
-	
-	if("${CONFIG_LCD_SSD1289}" STREQUAL "y")
-		list(APPEND CSRCS ssd1289.c)
-	endif()
-	
-	if("${CONFIG_LCD_SSD1351}" STREQUAL "y")
-		list(APPEND CSRCS ssd1351.c)
-	endif()
-	
-	if("${CONFIG_LCD_MIO283QT2}" STREQUAL "y")
-		list(APPEND CSRCS mio283qt2.c)
-	endif()
-	
-	if("${CONFIG_LCD_MAX7219}" STREQUAL "y")
-		list(APPEND CSRCS max7219.c)
-	endif()
-	
-	if("${CONFIG_LCD_MIO283QT9A}" STREQUAL "y")
-		list(APPEND CSRCS mio283qt9a.c)
-	endif()
-	
-	if("${CONFIG_LCD_PCD8544}" STREQUAL "y")
-		list(APPEND CSRCS pcd8544.c)
-	endif()
-	
-	if("${CONFIG_LCD_ST7565}" STREQUAL "y")
-		list(APPEND CSRCS st7565.c)
-	endif()
-	
-	if("${CONFIG_LCD_ST7567}" STREQUAL "y")
-		list(APPEND CSRCS st7567.c)
-	endif()
-	
-	if("${CONFIG_LCD_SHARP_MEMLCD}" STREQUAL "y")
-		list(APPEND CSRCS memlcd.c)
-	endif()
-	
-	if("${CONFIG_LCD_ILI9341}" STREQUAL "y")
-		list(APPEND CSRCS ili9341.c)
-	endif()
-	
-	if("${CONFIG_LCD_RA8875}" STREQUAL "y")
-		list(APPEND CSRCS ra8875.c)
-	endif()
-endif() # CONFIG_LCD
+  # Include support for Graphics LCD drivers
 
-if("${CONFIG_SLCD}" STREQUAL "y")
+  if (CONFIG_LCD_FT80X)
+    list(APPEND SRCS ft80x.c)
 
-	# Include support for Alphanumeric/Segment LCD drivers
-	
-	if("${CONFIG_LCD_BACKPACK}" STREQUAL "y")
-		list(APPEND CSRCS pcf8574_lcd_backpack.c)
-	endif()
+    if (CONFIG_LCD_FT80X_SPI)
+      list(APPEND SRCS ft80x_spi.c)
+    elseif (CONFIG_LCD_FT80X_I2C)
+      list(APPEND SRCS ft80x_i2c.c)
+    endif()
+  endif()
 
-	if("${CONFIG_LCD_ST7032}" STREQUAL "y")
-		list(APPEND CSRCS st7032.c)
-	endif()
-endif() # CONFIG_SLCD
+  if (CONFIG_LCD_LPM013M091A)
+    list(APPEND SRCS lpm013m091a.c)
+  endif()
 
-# Include LCD driver build support (the nested if-then-else() implements an OR)
+  if (CONFIG_LCD_P14201)
+    list(APPEND SRCS p14201.c)
+  endif()
 
-if("${CONFIG_LCD}" STREQUAL "y")
-	set_parent_srcs(${CSRCS})
-elseif("${CONFIG_SLCD}" STREQUAL "y")
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_LCD_UG2864AMBAG01)
+    list(APPEND SRCS ug-2864ambag01.c)
+  endif()
+
+  if (CONFIG_LCD_UG9664HSWAG01)
+    list(APPEND SRCS ug-9664hswag01.c)
+  endif()
+
+  if (CONFIG_LCD_SSD1306)
+    list(APPEND SRCS ssd1306_base.c)
+  endif()
+
+  if (CONFIG_LCD_SSD1306_SPI)
+    list(APPEND SRCS ssd1306_spi.c)
+  endif()
+
+  if (CONFIG_LCD_SSD1306_I2C)
+    list(APPEND SRCS ssd1306_i2c.c)
+  endif()
+
+  if (CONFIG_LCD_SSD1289)
+    list(APPEND SRCS ssd1289.c)
+  endif()
+
+  if (CONFIG_LCD_SSD1351)
+    list(APPEND SRCS ssd1351.c)
+  endif()
+
+  if (CONFIG_LCD_MIO283QT2)
+    list(APPEND SRCS mio283qt2.c)
+  endif()
+
+  if (CONFIG_LCD_MAX7219)
+    list(APPEND SRCS max7219.c)
+  endif()
+
+  if (CONFIG_LCD_MIO283QT9A)
+    list(APPEND SRCS mio283qt9a.c)
+  endif()
+
+  if (CONFIG_LCD_PCD8544)
+    list(APPEND SRCS pcd8544.c)
+  endif()
+
+  if (CONFIG_LCD_ST7565)
+    list(APPEND SRCS st7565.c)
+  endif()
+
+  if (CONFIG_LCD_ST7567)
+    list(APPEND SRCS st7567.c)
+  endif()
+
+  if (CONFIG_LCD_SHARP_MEMLCD)
+    list(APPEND SRCS memlcd.c)
+  endif()
+
+  if (CONFIG_LCD_ILI9225)
+    list(APPEND SRCS ili9225.c)
+  endif()
+
+  if (CONFIG_LCD_ILI9340)
+    list(APPEND SRCS ili9340.c)
+  endif()
+
+  if (CONFIG_LCD_ILI9341)
+    list(APPEND SRCS ili9341.c)
+  endif()
+
+  if (CONFIG_LCD_LCDDRV_SPIIF)
+    list(APPEND SRCS lcddrv_spiif.c)
+  endif()
+
+  if (CONFIG_LCD_RA8875)
+    list(APPEND SRCS ra8875.c)
+  endif()
+
+  if (CONFIG_LCD_ST7735)
+    list(APPEND SRCS st7735.c)
+  endif()
+
+  if (CONFIG_LCD_ST7789)
+    list(APPEND SRCS st7789.c)
+  endif()
 endif()
+
+if (CONFIG_SLCD)
+  # Include support for Alphanumeric/Segment LCD drivers
+
+  if (CONFIG_LCD_BACKPACK)
+    list(APPEND SRCS pcf8574_lcd_backpack.c)
+  endif()
+
+  if (CONFIG_LCD_ST7032)
+    list(APPEND SRCS st7032.c)
+  endif()
+endif()
+
+# Other LCD-related devices
+
+if (CONFIG_LCD_TDA19988)
+  list(APPEND SRCS tda19988.c)
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

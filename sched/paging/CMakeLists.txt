@@ -33,14 +33,10 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_PAGING}" STREQUAL "y")
+if(CONFIG_PAGING)
 
-	# Include paging build support
-	set(CSRCS)
-	list(APPEND CSRCS
+  target_sources(sched PRIVATE
 		pg_miss.c
-		pg_worker.c
-	)
-	set_parent_srcs(${CSRCS})
+		pg_worker.c)
 
 endif()

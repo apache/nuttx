@@ -33,14 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_TMPFS}" STREQUAL "y")
-	# Files required for TMPFS file system support
-	set(CSRCS)
-
-	list(APPEND CSRCS fs_tmpfs.c)
-	
-	# Include TMPFS build support
-
-	set_parent_srcs(${CSRCS})
-
+if (CONFIG_FS_TMPFS)
+  target_sources(fs PRIVATE fs_tmpfs.c)
 endif()

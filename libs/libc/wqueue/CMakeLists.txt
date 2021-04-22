@@ -33,33 +33,8 @@
 #
 ############################################################################
 
-if("${CONFIG_LIB_USRWORK}" STREQUAL "y")
-
-	set(CSRCS)
-
-	# Add the work queue C files to the build
-	list(APPEND CSRCS
-		work_usrthread.c
-		work_queue.c
-		work_cancel.c
-		work_signal.c
-		work_lock.c
-	)
-
-	# Protected mode
-	if("${CONFIG_BUILD_PROTECTED}" STREQUAL "y")
-		
-		# Add the wqueue directory to the build
-		set_parent_srcs(${CSRCS})
-
-	else()
-
-		# Kernel mode
-		if("${CONFIG_BUILD_KERNEL}" STREQUAL "y")			
-			# Add the wqueue directory to the build
-			message(FATAL_ERROR "fix this")
-			set_parent_srcs(${CSRCS})
-
-		endif()
-	endif()
+if (CONFIG_LIB_USRWORK)
+  target_sources(c PRIVATE
+    work_usrthread.c work_queue.c work_cancel.c work_signal.c
+    work_lock.c)
 endif()

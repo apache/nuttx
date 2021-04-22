@@ -33,33 +33,15 @@
 #
 ############################################################################
 
-# Packet socket support
+if (CONFIG_NET_IEEE802154)
+  target_sources(net PRIVATE
+    # Initialization / resource management
+    ieee802154_initialize.c ieee802154_conn.c ieee802154_container.c
 
-if("${CONFIG_NET_IEEE802154}" STREQUAL "y")
+    # Socket layer
+    ieee802154_sockif.c ieee802154_sendmsg.c ieee802154_recvmsg.c
 
-	set(CSRCS)
-
-	# Initialization / resource managment
-	
-	list(APPEND CSRCS ieee802154_initialize.c)
-	list(APPEND CSRCS ieee802154_conn.c)
-	list(APPEND CSRCS ieee802154_container.c)
-	
-	# Socket layer
-	
-	list(APPEND CSRCS ieee802154_sockif.c)
-	list(APPEND CSRCS ieee802154_sendto.c)
-	list(APPEND CSRCS ieee802154_recvfrom.c)
-	
-	# Device interface
-	
-	list(APPEND CSRCS ieee802154_input.c)
-	list(APPEND CSRCS ieee802154_callback.c)
-	list(APPEND CSRCS ieee802154_poll.c)
-	list(APPEND CSRCS ieee802154_finddev.c)
-	
-	# Include packet socket build support
-	
-	set_parent_srcs(${CSRCS})
-
-endif() # CONFIG_NET_IEEE802154
+    # Device interface
+    ieee802154_input.c ieee802154_callback.c ieee802154_poll.c
+    ieee802154_finddev.c)
+endif()

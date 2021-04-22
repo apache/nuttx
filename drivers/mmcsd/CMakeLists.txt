@@ -33,24 +33,19 @@
 #
 ############################################################################
 
-if("${CONFIG_MMCSD}" STREQUAL "y")
+if (CONFIG_MMCSD)
+  set(SRCS)
 
-	set(CSRCS)
+  # Include MMC/SD drivers
 
-	# Include MMC/SD drivers
-	
-	if("${CONFIG_MMCSD_SDIO}" STREQUAL "y")
-		list(APPEND CSRCS mmcsd_sdio.c)
-	endif()
-	
-	if("${CONFIG_MMCSD_SPI}" STREQUAL "y")
-		list(APPEND CSRCS mmcsd_spi.c mmcsd_debug.c)
-	endif()
+  if (CONFIG_MMCSD_SDIO)
+    list(APPEND SRCS mmcsd_sdio.c)
+  endif()
 
-	# Include MMC/SD driver build support
+  if (CONFIG_MMCSD_SPI)
+    list(APPEND SRCS mmcsd_spi.c mmcsd_debug.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
-
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
-
 

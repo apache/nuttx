@@ -33,38 +33,36 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
+set(SRCS serial.c serial_io.c)
 
-	set(CSRCS)
-
-	# Include serial drivers
-	
-	list(APPEND CSRCS serial.c serial_io.c)
-	
-	if("${CONFIG_SERIAL_DMA}" STREQUAL "y")
-		list(APPEND CSRCS serial_dma.c)
-	endif()
-	
-	if("${CONFIG_16550_UART}" STREQUAL "y")
-		list(APPEND CSRCS uart_16550.c)
-	endif()
-	
-	# termios support
-	
-	if("${CONFIG_SERIAL_TERMIOS}" STREQUAL "y")
-		list(APPEND CSRCS tcdrain.c)
-	endif()
-	
-	# Pseudo-terminal support
-	
-	if("${CONFIG_PSEUDOTERM}" STREQUAL "y")
-		list(APPEND CSRCS pty.c)
-		if("${CONFIG_PSEUDOTERM_SUSV1}" STREQUAL "y")
-			list(APPEND CSRCS ptmx.c)
-		endif()
-	endif()
-	
-	# Include serial build support
-
-	set_parent_srcs(${CSRCS})
+if (CONFIG_SERIAL_RXDMA)
+  list(APPEND SRCS serial_dma.c)
+elseif (CONFIG_SERIAL_TXDMA)
+  list(APPEND SRCS serial_dma.c)
 endif()
+
+if (CONFIG_16550_UART)
+  list(APPEND SRCS uart_16550.c)
+endif()
+
+if (CONFIG_RPMSG_UART)
+  list(APPEND SRCS uart_rpmsg.c)
+endif()
+
+# termios support
+
+if (CONFIG_SERIAL_TERMIOS)
+  list(APPEND SRCS tcdrain.c)
+endif()
+
+# Pseudo-terminal support
+
+if (CONFIG_PSEUDOTERM)
+  list(APPEND SRCS pty.c)
+
+  if (CONFIG_PSEUDOTERM_SUSV1)
+    list(APPEND SRCS ptmx.c)
+  endif()
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

@@ -33,11 +33,4 @@
 #
 ############################################################################
 
-# Add the inttypes directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	lib_imaxabs.c
-	lib_strtoimax.c
-	lib_strtoumax.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE lib_imaxabs.c lib_strtoimax.c lib_strtoumax.c)

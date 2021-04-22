@@ -35,17 +35,14 @@
 
 # Don't build anything if mountpoint doesn't support
 
-if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
+if (NOT CONFIG_DISABLE_MOUNTPOINT)
+  set(SRCS)
 
-	set(CSRCS) 
+  list(APPEND SRCS fs_partition.c)
 
-	if("${CONFIG_PTABLE_PARTITION}" STREQUAL "y")
-		list(APPEND CSRCS fs_ptable.c)
-	endif()
+  if (CONFIG_PTABLE_PARTITION)
+    list(APPEND SRCS fs_ptable.c)
+  endif()
 
-	# Include partition build support
-	list(APPEND CSRCS fs_partition.c)
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(fs PRIVATE ${SRCS})
 endif()

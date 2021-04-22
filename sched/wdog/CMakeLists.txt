@@ -33,14 +33,6 @@
 #
 ############################################################################
 
-# Include wdog build support
 
-set(CSRCS)
-list(APPEND CSRCS
-	wd_cancel.c
-	wd_gettime.c
-	wd_initialize.c
-	wd_recover.c
-	wd_start.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(sched PRIVATE
+ 	wd_cancel.c wd_gettime.c wd_initialize.c wd_recover.c wd_start.c)

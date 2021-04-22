@@ -33,15 +33,7 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_FAT}" STREQUAL "y")
-	# Files required for FAT file system support
-	
-	set(CSRCS)
-
-	list(APPEND CSRCS fs_fat32.c fs_fat32dirent.c fs_fat32attrib.c fs_fat32util.c)
-	
-	# Include FAT build support
-
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_FS_FAT)
+  target_sources(fs PRIVATE
+    fs_fat32.c fs_fat32dirent.c fs_fat32attrib.c fs_fat32util.c)
 endif()

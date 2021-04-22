@@ -1,6 +1,4 @@
 
-set(CSRCS)
-
 if("${CONFIG_ARMV7M_STACKCHECK}" STREQUAL "y")
 	list(APPEND CSRCS up_stackcheck.c)
 endif()
@@ -76,4 +74,5 @@ list(APPEND CSRCS
 	up_unblocktask.c
 	up_vectors.c
 )
-set_parent_srcs(${CSRCS})
+
+target_sources(arch PRIVATE ${CSRCS})

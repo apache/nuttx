@@ -33,27 +33,20 @@
 #
 ############################################################################
 
-# PF_INET/PF_INET6 socket address families
+set(SRCS inet_txdrain.c)
 
-set(CSRCS)
-
-if("${CONFIG_NET_IPv4}" STREQUAL "y")
-	list(APPEND CSRCS inet_sockif.c inet_recvfrom.c inet_close.c)
-	list(APPEND CSRCS inet_globals.c)
-elseif("${CONFIG_NET_IPv6}" STREQUAL "y")
-	list(APPEND CSRCS inet_sockif.c inet_recvfrom.c inet_close.c)
-	list(APPEND CSRCS inet_globals.c)
+if (CONFIG_NET_IPv4)
+  list(APPEND SRCS inet_sockif.c inet_globals.c)
+else if (CONFIG_NET_IPv6)
+  list(APPEND SRCS inet_sockif.c inet_globals.c)
 endif()
 
-if("${CONFIG_NET_IPv4}" STREQUAL "y")
-	list(APPEND CSRCS ipv4_setsockopt.c ipv4_getsockname.c ipv4_getpeername.c)
-	list(APPEND CSRCS inet_setipid.c)
+if (CONFIG_NET_IPv4)
+  list(APPEND SRCS ipv4_setsockopt.c ipv4_getsockname.c ipv4_getpeername.c)
 endif()
 
-if("${CONFIG_NET_IPv6}" STREQUAL "y")
-	list(APPEND CSRCS ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c)
+if (CONFIG_NET_IPv6)
+  list(APPEND SRCS ipv6_setsockopt.c ipv6_getsockname.c ipv6_getpeername.c)
 endif()
 
-# Include inet build support
-
-set_parent_srcs(${CSRCS})
+target_sources(net PRIVATE ${SRCS})

@@ -33,16 +33,8 @@
 #
 ############################################################################
 
-# Include named semaphore support
+if(CONFIG_FS_NAMED_SEMAPHORES)
 
-if("${CONFIG_FS_NAMED_SEMAPHORES}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS sem_open.c sem_close.c sem_unlink.c)
-
-	# Include named semaphore build support
-
-	set_parent_srcs(${CSRCS})
+  target_sources(fs PRIVATE sem_open.c sem_close.c sem_unlink.c)
 
 endif()

@@ -35,43 +35,30 @@
 ############################################################################
 
 set(SRCS)
-set(CSRCS)
 
-if("${CONFIG_ELF}" STREQUAL "y")
-	list(APPEND CSRCS elf.c)
-	add_subdirectory(libelf)
+nuttx_add_library(binfmt)
+
+add_subdirectory(libelf)
+add_subdirectory(libnxflat)
+
+list(APPEND SRCS
+  binfmt_globals.c binfmt_initialize.c binfmt_register.c binfmt_unregister.c
+  binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
+  binfmt_exec.c binfmt_copyargv.c binfmt_dumpmodule.c)
+
+if (CONFIG_BINFMT_LOADABLE)
+  list(APPEND SRCS binfmt_exit.c)
 endif()
 
-if("${CONFIG_NXFLAT}" STREQUAL "y")
-	add_subdirectory(libnxflat)
+if (CONFIG_LIBC_EXECFUNCS)
+  list(APPEND SRCS binfmt_execsymtab.c)
 endif()
 
-if("${CONFIG_BINFMT_PCODE}" STREQUAL "y")
-	list(APPEND CSRCS pcode.c)
-	add_subdirectory(libpcode)
+# Builtin application interfaces
+
+if (CONFIG_BUILTIN)
+  list(APPEND SRCS builtin.c)
 endif()
 
-if("${CONFIG_BINFMT_LOADABLE}" STREQUAL "y")
-	list(APPEND CSRCS binfmt_exit.c)
-endif()
-
-if("${CONFIG_LIBC_EXECFUNCS}" STREQUAL "y")
-	list(APPEND CSRCS binfmt_execsymtab.c)
-endif()
-
-nuttx_add_library(binfmt
-	binfmt_copyargv.c
-	binfmt_dumpmodule.c
-	binfmt_exec.c
-	binfmt_execmodule.c
-	binfmt_globals.c
-	binfmt_initialize.c
-	binfmt_loadmodule.c
-	binfmt_register.c
-	binfmt_unloadmodule.c
-	binfmt_unregister.c
-	${CSRCS}
-	${SRCS}
-)
-
-target_include_directories(binfmt INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_sources(binfmt PRIVATE ${SRCS})
+target_include_directories(binfmt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

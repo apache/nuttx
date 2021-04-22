@@ -33,40 +33,26 @@
 #
 ############################################################################
 
-# Add the spawn C files to the build
+set(SRCS
+  lib_psfa_addaction.c lib_psfa_addclose.c lib_psfa_adddup2.c
+  lib_psfa_addopen.c lib_psfa_destroy.c lib_psfa_init.c
+  lib_psa_getflags.c lib_psa_getschedparam.c lib_psa_getschedpolicy.c
+  lib_psa_init.c lib_psa_setflags.c lib_psa_setschedparam.c
+  lib_psa_setschedpolicy.c lib_psa_getsigmask.c lib_psa_setsigmask.c)
 
-set(CSRCS) 
-
-if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-	list(APPEND CSRCS lib_psfa_dump.c)
+if (CONFIG_DEBUG_FEATURES)
+  list(APPEND SRCS lib_psfa_dump.c)
 endif()
 
-if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-	list(APPEND CSRCS lib_psa_getsigmask.c lib_psa_setsigmask.c)
+if (NOT CONFIG_BUILD_KERNEL)
+  list(APPEND SRCS lib_psa_getstacksize.c lib_psa_setstacksize.c)
+  if (CONFIG_LIB_SYSCALL)
+    list(APPEND SRCS lib_task_spawn.c)
+  endif()
 endif()
 
-if(NOT "${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-	list(APPEND CSRCS lib_psa_getstacksize.c lib_psa_setstacksize.c)
+if (CONFIG_DEBUG_FEATURES)
+  list(APPEND SRCS lib_psa_dump.c)
 endif()
 
-if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-	list(APPEND CSRCS lib_psa_dump.c)
-endif()
-
-# Add the spawn directory to the build
-list(APPEND CSRCS
-	lib_psa_getflags.c
-	lib_psa_getschedparam.c
-	lib_psa_getschedpolicy.c
-	lib_psa_init.c
-	lib_psa_setflags.c
-	lib_psa_setschedparam.c
-	lib_psa_setschedpolicy.c
-	lib_psfa_addaction.c
-	lib_psfa_addclose.c
-	lib_psfa_adddup2.c
-	lib_psfa_addopen.c
-	lib_psfa_destroy.c
-	lib_psfa_init.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

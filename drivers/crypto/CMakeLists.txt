@@ -33,14 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_DEV_URANDOM}" STREQUAL "y")
-	if(NOT "${CONFIG_DEV_URANDOM_ARCH}" STREQUAL "y")
-	
-		set(CSRCS)
-
-		list(APPEND CSRCS dev_urandom.c)
-	  
-	  	# Include crypto device driver build support
-		set_parent_srcs(${CSRCS})
-	endif()
+if (CONFIG_DEV_URANDOM AND NOT CONFIG_DEV_URANDOM_ARCH)
+  target_sources(c PRIVATE dev_urandom.c)
 endif()

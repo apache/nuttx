@@ -33,18 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_LIB_HEX2BIN}" STREQUAL "y")
-
-	set(CSRCS)
-
-	# Add the hex2bin sources to the build
-	list(APPEND CSRCS
-		lib_fhex2mem.c
-		lib_hex2bin.c
-		lib_hex2mem.c
-	)
-
-	# Add the hex2bin directory to the build
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_LIB_HEX2BIN)
+  target_sources(c PRIVATE lib_fhex2mem.c lib_hex2bin.c lib_hex2mem.c)
 endif()

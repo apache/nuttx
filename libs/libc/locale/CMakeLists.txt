@@ -33,17 +33,8 @@
 #
 ############################################################################
 
-if("${CONFIG_LIBC_LOCALE}" STREQUAL "y")
-
-	set(CSRCS)
-
-	# Add the locale files to the build
-	list(APPEND CSRCS
-		lib_setlocale.c
-		lib_localeconv.c
-	)
-	
-	# Add the locale directory to the build
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_LIBC_LOCALE)
+  target_sources(c PRIVATE
+    lib_duplocale.c lib_freelocale.c lib_localeconv.c
+    lib_newlocale.c lib_setlocale.c lib_uselocale.c)
 endif()

@@ -33,47 +33,26 @@
 #
 ############################################################################
 
-set(CSRCS) 
+set (SRCS
+  lib_abs.c lib_abort.c lib_atof.c lib_atoi.c
+  lib_atol.c lib_atoll.c lib_div.c lib_ldiv.c lib_lldiv.c lib_Exit.c
+  lib_itoa.c lib_labs.c lib_llabs.c lib_realpath.c lib_bsearch.c
+  lib_rand.c lib_qsort.c lib_srand.c lib_strtol.c
+  lib_strtoll.c lib_strtoul.c lib_strtoull.c lib_strtod.c lib_strtof.c
+  lib_strtold.c lib_checkbase.c lib_mktemp.c lib_mkstemp.c lib_mkdtemp.c)
 
-if("${CONFIG_FS_WRITABLE}" STREQUAL "y")
-	list(APPEND CSRCS lib_mktemp.c lib_mkstemp.c)
+if (CONFIG_LIBC_WCHAR)
+  list(APPEND SRCS
+    lib_mblen.c lib_mbtowc.c lib_wctomb.c
+    lib_mbstowcs.c lib_wcstombs.c)
 endif()
 
-if("${CONFIG_LIBC_WCHAR}" STREQUAL "y")
-	list(APPEND CSRCS lib_mbtowc.c lib_wctomb.c)
+if (CONFIG_PSEUDOTERM_SUSV1)
+  list(APPEND SRCS lib_ptsname.c lib_ptsnamer.c)
 endif()
 
-if("${CONFIG_PSEUDOTERM_SUSV1}" STREQUAL "y")
-	list(APPEND CSRCS lib_ptsname.c lib_ptsnamer.c)
+if (CONFIG_PSEUDOTERM)
+  list(APPEND SRCS lib_unlockpt.c)
 endif()
 
-if("${CONFIG_PSEUDOTERM}" STREQUAL "y")
-	list(APPEND CSRCS lib_unlockpt.c)
-endif()
-
-# Add the stdlib directory to the build
-list(APPEND CSRCS
-	lib_abs.c
-  lib_atoi.c
-	lib_abort.c
-	lib_div.c
-	lib_ldiv.c
-	lib_lldiv.c
-	lib_itoa.c
-	lib_labs.c
-	lib_llabs.c
-	lib_bsearch.c
-	lib_rand.c
-	lib_qsort.c
-	lib_srand.c
-	lib_strtol.c
-	lib_strtoll.c
-	lib_strtoul.c
-	lib_strtoull.c
-	lib_strtod.c
-	lib_strtof.c
-	lib_strtold.c
-	lib_checkbase.c
-	${CSRCS}
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

@@ -35,26 +35,17 @@
 
 # Packet socket support
 
-if("${CONFIG_NET_PKT}" STREQUAL "y")
+if (CONFIG_NET_PKT)
+  target_sources(net PRIVATE
+    # Socket layer
+    pkt_sockif.c
+    pkt_sendmsg.c
+    pkt_recvmsg.c
 
-	set(CSRCS)
-
-	# Socket layer
-	
-	list(APPEND CSRCS pkt_sockif.c)
-	list(APPEND CSRCS pkt_send.c)
-	list(APPEND CSRCS pkt_recvfrom.c)
-	
-	# Transport layer
-	
-	list(APPEND CSRCS pkt_conn.c)
-	list(APPEND CSRCS pkt_input.c)
-	list(APPEND CSRCS pkt_callback.c)
-	list(APPEND CSRCS pkt_poll.c)
-	list(APPEND CSRCS pkt_finddev.c)
-	
-	# Include packet socket build support
-	
-	set_parent_srcs(${CSRCS})
-
-endif() # CONFIG_NET_PKT
+    # Transport layer
+    pkt_conn.c
+    pkt_input.c
+    pkt_callback.c
+    pkt_poll.c
+    pkt_finddev.c)
+endif()

@@ -35,43 +35,36 @@
 
 # Include socket source files
 
-set(CSRCS)
-
-list(APPEND CSRCS bind.c connect.c getsockname.c getpeername.c)
-list(APPEND CSRCS recv.c recvfrom.c send.c sendto.c)
-list(APPEND CSRCS socket.c net_sockets.c net_close.c net_dupsd.c)
-list(APPEND CSRCS net_dupsd2.c net_sockif.c net_clone.c net_poll.c net_vfcntl.c)
-list(APPEND CSRCS net_fstat.c)
+set(SRCS
+  bind.c connect.c getsockname.c getpeername.c
+  recv.c recvfrom.c send.c sendto.c
+  socket.c net_close.c
+  recvmsg.c sendmsg.c
+  net_dup2.c net_sockif.c net_poll.c net_vfcntl.c
+  net_fstat.c)
 
 # TCP/IP support
 
-if("${CONFIG_NET_TCP}" STREQUAL "y")
-	list(APPEND CSRCS listen.c accept.c)
+if (CONFIG_NET_TCP)
+  list(APPEND SRCS listen.c accept.c)
 
-	# Local Unix domain support
+  # Local Unix domain support
 
-elseif("${CONFIG_NET_LOCAL_STREAM}" STREQUAL "y")
-	list(APPEND CSRCS listen.c accept.c)
+  else if (CONFIG_NET_LOCAL_STREAM)
+    list(APPEND SRCS listen.c accept.c)
+  endif()
+
+  # Socket options
+
+  if (CONFIG_NET_SOCKOPTS)
+    list(APPEND SRCS setsockopt.c getsockopt.c net_timeo.c)
+  endif()
+
+  # Support for sendfile()
+
+  if (CONFIG_NET_SENDFILE)
+    list(APPEND SRCS net_sendfile.c)
+  endif()
 endif()
 
-# Socket options
-
-if("${CONFIG_NET_SOCKOPTS}" STREQUAL "y")
-	list(APPEND CSRCS setsockopt.c getsockopt.c net_timeo.c)
-endif()
-
-# Support for network access using streams
-
-if(NOT "${CONFIG_NFILE_STREAMS}" STREQUAL "0")
-	list(APPEND CSRCS net_checksd.c)
-endif()
-
-# Support for sendfile()
-
-if("${CONFIG_NET_SENDFILE}" STREQUAL "y")
-	list(APPEND CSRCS net_sendfile.c)
-endif()
-
-# Include socket build support
-
-set_parent_srcs(${CSRCS})
+target_sources(net PRIVATE ${SRCS})

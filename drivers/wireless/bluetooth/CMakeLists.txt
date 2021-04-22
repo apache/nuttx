@@ -33,27 +33,30 @@
 #
 ############################################################################
 
-# Include nothing if Bluetooth is disabled
+if (CONFIG_DRIVERS_BLUETOOTH)
+  set(SRCS)
 
-if("${CONFIG_DRIVERS_BLUETOOTH}" STREQUAL "y")
+  if (CONFIG_BLUETOOTH_UART)
+    list(APPEND SRCS bt_uart.c)
 
-	set(CSRCS)
+    if (CONFIG_BLUETOOTH_UART_GENERIC)
+      list(APPEND SRCS bt_uart_generic.c)
+    endif()
+    if (CONFIG_BLUETOOTH_UART_SHIM)
+      list(APPEND SRCS bt_uart_shim.c)
+    endif()
+    if (CONFIG_BLUETOOTH_UART_CC2564)
+      list(APPEND SRCS bt_uart_cc2564.c)
+    endif()
+    if (CONFIG_BLUETOOTH_BCM4343X)
+      list(APPEND SRCS bt_uart_bcm4343x.c)
+    endif()
+  endif()
 
-	# Include Bluetooth drivers into the build
-	
-	if("${CONFIG_BLUETOOTH_UART}" STREQUAL "y")
-		list(APPEND CSRCS bt_uart.c)
-		if("${CONFIG_BLUETOOTH_UART_GENERIC}" STREQUAL "y")
-			list(APPEND CSRCS bt_uart_generic.c)
-		endif()
-	endif()
-	
-	if("${CONFIG_BLUETOOTH_NULL}" STREQUAL "y")
-		list(APPEND CSRCS bt_null.c)
-	endif()
-	
-	# Include common Bluetooth drvier build support
+  if (CONFIG_BLUETOOTH_NULL)
+    list(APPEND SRCS bt_null.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  target_sources(drivers PRIVATE ${SRCS})
+endif()
 
-endif() # CONFIG_DRIVERS_BLUETOOTH

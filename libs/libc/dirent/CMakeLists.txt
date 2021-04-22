@@ -33,14 +33,6 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-
-	# Add the dirent directory to the build
-	set(CSRCS)
-	list(APPEND CSRCS
-		lib_readdirr.c
-		lib_telldir.c
-	)
-	set_parent_srcs(${CSRCS})
-
-endif()
+target_sources(c PRIVATE
+  lib_readdirr.c lib_telldir.c lib_alphasort.c lib_scandir.c
+  lib_ftw.c lib_nftw.c)

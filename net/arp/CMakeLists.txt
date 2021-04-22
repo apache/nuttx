@@ -33,28 +33,20 @@
 #
 ############################################################################
 
-# ARP support is available for Ethernet only
+if (CONFIG_NET_ARP)
+  set(SRCS arp_arpin.c arp_out.c arp_format.c arp_table.c)
 
-if("${CONFIG_NET_ARP}" STREQUAL "y")
+  if (CONFIG_NET_ARP_IPIN)
+    list(APPEND SRCS arp_ipin.c)
+  endif()
 
-	set(CSRCS)
+  if (CONFIG_NET_ARP_SEND)
+    list(APPEND SRCS arp_send.c arp_poll.c arp_notify.c)
+  endif()
 
-	list(APPEND CSRCS arp_arpin.c arp_out.c arp_format.c arp_table.c)
-	
-	if("${CONFIG_NET_ARP_IPIN}" STREQUAL "y")
-		list(APPEND CSRCS arp_ipin.c)
-	endif()
-	
-	if("${CONFIG_NET_ARP_SEND}" STREQUAL "y")
-		list(APPEND CSRCS arp_send.c arp_poll.c arp_notify.c)
-	endif()
-	
-	if("${CONFIG_NET_ARP_DUMP}" STREQUAL "y")
-		list(APPEND CSRCS arp_dump.c)
-	endif()
-	
-	# Include arp build support
+  if (CONFIG_NET_ARP_DUMP)
+    list(APPEND SRCS arp_dump.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
-
-endif() # CONFIG_NET_ARP
+  target_sources(net PRIVATE ${SRCS})
+endif()

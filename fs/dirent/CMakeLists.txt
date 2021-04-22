@@ -33,17 +33,5 @@
 #
 ############################################################################
 
-# Don't build anything if there are no file descriptors
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-
-	# Include dirent build support
-	set(CSRCS)
-	list(APPEND CSRCS
-		fs_closedir.c
-		fs_opendir.c
-		fs_readdir.c
-		fs_rewinddir.c
-		fs_seekdir.c
-	)
-	set_parent_srcs(${CSRCS})
-endif()
+target_sources(fs PRIVATE
+  fs_closedir.c fs_opendir.c fs_readdir.c fs_rewinddir.c fs_seekdir.c)

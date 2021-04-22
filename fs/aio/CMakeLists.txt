@@ -33,17 +33,10 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_AIO}" STREQUAL "y")
+if(CONFIG_FS_AIO)
 
-	set(CSRCS)
-
-	# Add the asynchronous I/O C files to the build
-	
-	list(APPEND CSRCS aio_cancel.c aioc_contain.c aio_fsync.c aio_initialize.c)
-	list(APPEND CSRCS aio_queue.c aio_read.c aio_signal.c aio_write.c)
-	
-	# Add the asynchronous I/O directory to the build
-
-	set_parent_srcs(${CSRCS})
+  target_sources(fs PRIVATE
+    aio_cancel.c aioc_contain.c aio_fsync.c aio_initialize.c
+    aio_queue.c aio_read.c aio_signal.c aio_write.c)
 
 endif()

@@ -33,22 +33,10 @@
 #
 ############################################################################
 
-if("${CONFIG_ARMV7R_MEMCPY}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS gnu/arch_memcpy.S)
-	
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_ARMV7R_MEMCPY)
+  target_sources(c PRIVATE gnu/arch_memcpy.S)
 endif()
 
-if("${CONFIG_LIBC_ARCH_ELF}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS arch_elf.c)
-	
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_LIBC_ARCH_ELF)
+  target_sources(c PRIVATE arch_elf.c)
 endif()

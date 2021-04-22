@@ -1,0 +1,5 @@
+if (CONFIG_DRIVERS_IEEE802154)
+  add_subdirectory(mrf24j40)
+  add_subdirectory(at86rf23x)
+  add_subdirectory(xbee)
+endif()

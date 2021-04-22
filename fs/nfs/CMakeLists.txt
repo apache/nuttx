@@ -33,17 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_NFS}" STREQUAL "y")
-	# Files required for NFS file system support
-
-	set(CSRCS)
-	
-	# Files required for NFS RPC
-
-	list(APPEND CSRCS rpc_clnt.c nfs_util.c nfs_vfsops.c)
-	
-	# Include NFS build support
-
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_NFS)
+  target_sources(fs PRIVATE rpc_clnt.c nfs_util.c nfs_vfsops.c)
 endif()

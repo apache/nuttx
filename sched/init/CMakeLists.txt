@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-set(CSRCS nx_start.c nx_bringup.c)
+set(SRCS nx_start.c nx_bringup.c)
 
-if("${CONFIG_SMP}" STREQUAL "y")
-	list(APPEND CSRCS nx_smpstart.c)
+if(CONFIG_SMP)
+	list(APPEND SRCS nx_smpstart.c)
 endif()
 
-set_parent_srcs(${CSRCS})
+target_sources(sched PRIVATE ${SRCS})

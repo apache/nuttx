@@ -33,19 +33,6 @@
 #
 ############################################################################
 
-# Don't build anything if there is no USB monitor support
-
-if("${CONFIG_USBMONITOR}" STREQUAL "y")
-
-	set(CSRCS)
-
-	# Include the USB monitor
-	
-	list(APPEND CSRCS usbmonitor.c)
-	
-	# Include USB monitor build support
-
-	set_parent_srcs(${CSRCS})
-
+if (CONFIG_USBMONITOR)
+  target_sources(drivers PRIVATE usbmonitor.c)
 endif()
-

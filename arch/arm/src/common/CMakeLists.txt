@@ -35,4 +35,5 @@ list(APPEND CSRCS
 	arm_usestack.c
 	arm_vfork.c
 )
-set_parent_srcs(${CSRCS})
+
+target_sources(arch PRIVATE ${CSRCS})

@@ -35,28 +35,27 @@
 
 # Logic specific to IPv6 Neighbor Discovery Protocol
 
-if("${CONFIG_NET_IPv6}" STREQUAL "y")
+if (CONFIG_NET_IPv6)
+  set(SRCS
+    neighbor_globals.c neighbor_add.c neighbor_lookup.c
+    neighbor_update.c neighbor_findentry.c neighbor_out.c)
 
-	set(CSRCS)
+  # Link layer specific support
+  if (CONFIG_NET_ETHERNET)
+    list(APPEND SRCS neighbor_ethernet_out.c)
+  endif()
 
-	list(APPEND CSRCS neighbor_globals.c neighbor_add.c neighbor_lookup.c)
-	list(APPEND CSRCS neighbor_update.c neighbor_findentry.c neighbor_out.c)
-	
-	# Link layer specific support
-	
-	if("${CONFIG_NET_ETHERNET}" STREQUAL "y")
-		list(APPEND CSRCS neighbor_ethernet_out.c)
-	endif()
-	
-	if("${CONFIG_NET_6LOWPAN}" STREQUAL "y")
-		#list(APPEND CSRCS neighbor_6lowpan_out.c)
-	endif()
-	
-	if("${CONFIG_DEBUG_NET_INFO}" STREQUAL "y")
-		list(APPEND CSRCS neighbor_dumpentry.c)
-	endif()
-	
-	# Include utility build support
+  #if (CONFIG_NET_6LOWPAN)
+  #   list(APPEND SRCS neighbor_6lowpan_out.c)
+  #endif()
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_DEBUG_NET_INFO)
+    list(APPEND SRCS neighbor_dumpentry.c)
+  endif()
+
+  if (CONFIG_NETLINK_ROUTE)
+    list(APPEND SRCS neighbor_snapshot.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
 endif()

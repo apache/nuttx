@@ -33,22 +33,13 @@
 #
 ############################################################################
 
-# Loop device can only be used with mountpoint support
+if (NOT CONFIG_DISABLE_MOUNTPOINT)
+  set(SRCS losetup.c)
 
-if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
+  if (CONFIG_DEV_LOOP)
+    list(APPEND SRCS loop.c)
+  endif()
 
-	set(CSRCS)
-
-	# Include loop device support
-	
-	if("${CONFIG_DEV_LOOP}" STREQUAL "y")
-		list(APPEND CSRCS loop.c)
-	endif()
-	
-	list(APPEND CSRCS losetup.c)
-	
-	# Add loop devicer build support
-
-	set_parent_srcs(${CSRCS})
-
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
+

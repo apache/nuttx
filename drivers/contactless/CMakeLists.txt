@@ -33,21 +33,16 @@
 #
 ############################################################################
 
-if("${CONFIG_DRIVERS_CONTACTLESS}" STREQUAL "y")
+if (CONFIG_DRIVERS_CONTACTLESS)
+  set(SRCS)
 
-	set(CSRCS)
+  if (CONFIG_CL_MFRC522)
+    list(APPEND SRCS mfrc522.c)
+  endif()
 
-	# Include contactless drivers
-	
-	if("${CONFIG_CL_MFRC522}" STREQUAL "y")
-		list(APPEND CSRCS mfrc522.c)
-	endif()
-	
-	if("${CONFIG_CL_PN532}" STREQUAL "y")
-		list(APPEND CSRCS pn532.c)
-	endif()
-	
-	# Include contactless devices build support
+  if (CONFIG_CL_PN532)
+    list(APPEND SRCS pn532.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

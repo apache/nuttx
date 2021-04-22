@@ -33,23 +33,23 @@
 #
 ############################################################################
 
-if("${CONFIG_NXTERM}" STREQUAL "y")
+if (CONFIG_NXTERM)
+  set(SRCS
+    nx_register.c nxterm_driver.c nxterm_font.c nxterm_putc.c
+    nxterm_redraw.c nxterm_resize.c nxterm_register.c nxterm_scroll.c
+    nxterm_vt100.c nxtk_register.c nxtool_register.c nxterm_clear.c)
 
-	set(CSRCS)
+  if (NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
+    list(APPEND SRCS nxterm_unregister.c)
+  endif()
 
-	list(APPEND CSRCS nx_register.c nxterm_driver.c nxterm_font.c nxterm_putc.c)
-	list(APPEND CSRCS nxterm_redraw.c nxterm_register.c nxterm_scroll.c)
-	list(APPEND CSRCS nxterm_vt100.c nxterm_unregister.c nxtk_register.c)
-	list(APPEND CSRCS nxtool_register.c)
-	
-	if("${CONFIG_NXTERM_NXKBDIN}" STREQUAL "y")
-		list(APPEND CSRCS nxterm_kbdin.c)
-	endif()
-	
-	if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-		list(APPEND CSRCS nxterm_sem.c)
-	endif()
-	
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_NXTERM_NXKBDIN)
+    list(APPEND SRCS nxterm_kbdin.c)
+  endif()
 
+  if (CONFIG_DEBUG_GRAPHICS)
+    list(APPEND SRCS nxterm_sem.c)
+  endif()
+
+  target_sources(graphics PRIVATE ${SRCS})
 endif()

@@ -33,20 +33,10 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-	if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
-	
-		# Include BCH driver
-		
-		set(CSRCS)
-		
-		list(APPEND CSRCS bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c)
-		list(APPEND CSRCS bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c)
-		list(APPEND CSRCS bchdev_driver.c)
-		
-		# Include BCH driver build support
-		
-		set_parent_srcs(${CSRCS})
-	
-	endif()
+if (CONFIG_BCH)
+  target_sources(drivers PRIVATE
+    bchlib_setup.c bchlib_teardown.c bchlib_read.c bchlib_write.c
+    bchlib_cache.c bchlib_sem.c bchdev_register.c bchdev_unregister.c
+    bchdev_driver.c)
 endif()
+

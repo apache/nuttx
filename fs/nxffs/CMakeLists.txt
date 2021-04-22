@@ -33,18 +33,13 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_NXFFS}" STREQUAL "y")
+if(CONFIG_FS_NXFFS)
 
-	set(CSRCS)
-
-	list(APPEND CSRCS nxffs_block.c nxffs_blockstats.c nxffs_cache.c nxffs_dirent.c)
-	list(APPEND CSRCS nxffs_dump.c nxffs_initialize.c nxffs_inode.c nxffs_ioctl.c)
-	list(APPEND CSRCS nxffs_open.c nxffs_pack.c nxffs_read.c nxffs_reformat.c)
-	list(APPEND CSRCS nxffs_stat.c nxffs_truncate.c nxffs_unlink.c nxffs_util.c)
-	list(APPEND CSRCS nxffs_write.c)
-
-	# Include NXFFS build support
-
-	set_parent_srcs(${CSRCS})
+  target_sources(fs PRIVATE
+    nxffs_block.c nxffs_blockstats.c nxffs_cache.c nxffs_dirent.c
+    nxffs_dump.c nxffs_initialize.c nxffs_inode.c nxffs_ioctl.c
+    nxffs_open.c nxffs_pack.c nxffs_read.c nxffs_reformat.c
+    nxffs_stat.c nxffs_truncate.c nxffs_unlink.c nxffs_util.c
+    nxffs_write.c)
 
 endif()

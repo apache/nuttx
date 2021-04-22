@@ -33,28 +33,32 @@
 #
 ############################################################################
 
-# Include video drivers
+if (CONFIG_DRIVERS_VIDEO)
+  set(SRCS)
 
-if("${CONFIG_DRIVERS_VIDEO}" STREQUAL "y")
+  if (CONFIG_VIDEO_FB)
+    list(APPEND SRCS fb.c)
+  endif()
 
-	set(CSRCS)
+  if (CONFIG_VIDEO_STREAM)
+    list(APPEND SRCS video.c video_framebuff.c)
+  endif()
 
-	if("${CONFIG_VIDEO_FB}" STREQUAL "y")
-		list(APPEND CSRCS fb.c)
-	endif()
-	
-	# These video drivers depend on I2C support
-	
-	if("${CONFIG_I2C}" STREQUAL "y")
-	
-		if("${CONFIG_VIDEO_OV2640}" STREQUAL "y")
-			list(APPEND CSRCS ov2640.c)
-		endif()
-	
-	endif()
+  # These video drivers depend on I2C support
 
-	# Include video driver build support
+  if (CONFIG_I2C)
+    if (CONFIG_VIDEO_OV2640)
+      list(APPEND SRCS ov2640.c)
+    endif()
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  # These video drivers depend on SPI support
 
+  if (CONFIG_SPI)
+    if (CONFIG_VIDEO_MAX7456)
+      list(APPEND SRCS max7456.c)
+    endif()
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

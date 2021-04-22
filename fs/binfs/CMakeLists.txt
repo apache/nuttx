@@ -33,16 +33,8 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_BINFS}" STREQUAL "y")
+if(CONFIG_FS_BINFS)
 
-	set(CSRCS)
-
-	# Files required for BINFS file system support
+  target_sources(fs PRIVATE fs_binfs.c)
 	
-	list(APPEND CSRCS fs_binfs.c)
-	
-	# Include BINFS build support
-	
-	set_parent_srcs(${CSRCS})
-
 endif()

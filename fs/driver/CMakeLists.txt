@@ -33,49 +33,31 @@
 #
 ############################################################################
 
-# Don't build anything if there are no file descriptors
+set(SRCS fs_registerdriver.c fs_unregisterdriver.c)
 
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
+# Don't built-in block driver support if there are no mountpoints
 
-	set(CSRCS)
+if (NOT CONFIG_DISABLE_MOUNTPOINT)
+  list(APPEND SRCS
+    fs_registerblockdriver.c fs_unregisterblockdriver.c
+    fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
+    fs_blockpartition.c fs_findmtddriver.c)
 
-	# Don't build-in block driver support if there are no mountpoints
-	if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
+  if (CONFIG_MTD)
+    list(APPEND SRCS
+      fs_registermtddriver.c fs_unregistermtddriver.c
+      fs_mtdproxy.c)
 
-		list(APPEND CSRCS
-			fs_registerblockdriver.c
-			fs_unregisterblockdriver.c
-			fs_findblockdriver.c
-			fs_openblockdriver.c
-			fs_closeblockdriver.c
-			fs_blockpartition.c
-		)
+    if (CONFIG_MTD_PARTITION)
+      list(APPEND SRCS fs_mtdpartition.c)
+    endif()
+  endif()
 
-		if("${CONFIG_MTD}" STREQUAL "y")
-
-			list(APPEND CSRCS
-				fs_registermtddriver.c
-				fs_unregistermtddriver.c
-				fs_findmtddriver.c
-				fs_mtdproxy.c
-			)
-
-			if("${CONFIG_MTD_PARTITION}" STREQUAL "y")
-				list(APPEND CSRCS fs_mtdpartition.c)
-			endif()
-		endif()
-
-		if(NOT "${CONFIG_DISABLE_PSEUDOFS_OPERATIONS}" STREQUAL "y")
-			list(APPEND CSRCS fs_blockproxy.c)
-		endif()
-
-	endif() # CONFIG_DISABLE_MOUNTPOINT
-
-	# Include driver build support
-	list(APPEND CSRCS
-		fs_registerdriver.c
-		fs_unregisterdriver.c
-	)
-	set_parent_srcs(${CSRCS})
-
+  if (CONFIG_BCH)
+    if (NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
+      list(APPEND SRCS fs_blockproxy.c)
+    endif()
+  endif()
 endif()
+
+target_sources(fs PRIVATE ${SRCS})

@@ -33,15 +33,13 @@
 #
 ############################################################################
 
-if("${CONFIG_BUILTIN}" STREQUAL "y")
-  set(CSRCS)
+if(CONFIG_BUILTIN)
+  set(SRCS
+    lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c)
 
-  list(APPEND CSRCS lib_builtin_getname.c lib_builtin_isavail.c
-                    lib_builtin_forindex.c)
-
-  if("${CONFIG_BUILD_PROTECTED}" STREQUAL "y")
-    list(APPEND CSRCS lib_builtin_setlist.c.c)
+  if(CONFIG_BUILD_PROTECTED)
+    list(APPEND SRCS lib_builtin_setlist.c.c)
   endif()
 
-  set_parent_srcs(${CSRCS})
+  target_sources(c PRIVATE ${SRCS})
 endif()

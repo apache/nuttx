@@ -33,16 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_SMARTFS}" STREQUAL "y")
-
-	set(CSRCS)
-
-	# Files required for SmartFS file system support
-
-	list(APPEND CSRCS smartfs_smart.c smartfs_utils.c smartfs_procfs.c)
-
-	# Include SMART build support
-
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_FS_SMARTFS)
+  target_sources(fs PRIVATE smartfs_smart.c smartfs_utils.c smartfs_procfs.c)
 endif()

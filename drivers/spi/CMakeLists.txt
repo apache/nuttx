@@ -33,27 +33,22 @@
 #
 ############################################################################
 
-# Don't build anything if there is no SPI support
+if (CONFIG_SPI)
+  set(SRCS)
 
-if("${CONFIG_SPI}" STREQUAL "y")
+  if (CONFIG_SPI_EXCHANGE)
+    list(APPEND SRCS spi_transfer.c)
 
-	set(CSRCS)
+    if (CONFIG_SPI_DRIVER)
+      list(APPEND SRCS spi_driver.c)
+    endif()
+  endif()
 
-	if("${CONFIG_SPI_EXCHANGE}" STREQUAL "y")
-		list(APPEND CSRCS spi_transfer.c)
-		if("${CONFIG_SPI_DRIVER}" STREQUAL "y")
-			list(APPEND CSRCS spi_driver.c)
-		endif()
-	endif()
-	
-	# Include the selected SPI drivers
-	
-	if("${CONFIG_SPI_BITBANG}" STREQUAL "y")
-		list(APPEND CSRCS spi_bitbang.c)
-	endif()
-	
-	# Include SPI device driver build support
+  # Include the selected SPI drivers
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_SPI_BITBANG)
+    list(APPEND SRCS spi_bitbang.c)
+  endif()
 
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

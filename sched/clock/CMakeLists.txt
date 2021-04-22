@@ -33,24 +33,17 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
-if("${CONFIG_CLOCK_TIMEKEEPING}" STREQUAL "y")
-	list(APPEND CSRCS clock_timekeeping.c)
+if(CONFIG_CLOCK_TIMEKEEPING)
+	list(APPEND SRCS clock_timekeeping.c)
 endif()
 
-list(APPEND CSRCS
-	clock_abstime2ticks.c
-	clock.c
-	clock_dow.c
-	clock_getres.c
-	clock_gettime.c
-	clock_initialize.c
-	clock_settime.c
-	clock_ticks2time.c
-	clock_time2ticks.c
-	clock_timespec_add.c
-	clock_timespec_subtract.c
-  clock_systime_timespec.c
+list(APPEND SRCS
+  clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c
+  clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
+  clock_systime_ticks.c clock_systime_timespec.c clock_timespec_add.c
+  clock_timespec_subtract.c clock.c
 )
-set_parent_srcs(${CSRCS})
+
+target_sources(sched PRIVATE ${SRCS})

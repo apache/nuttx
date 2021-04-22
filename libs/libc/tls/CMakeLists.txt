@@ -33,21 +33,13 @@
 #
 ############################################################################
 
-set(CSRCS)
-
-if(NOT "${CONFIG_TLS_NELEM}" STREQUAL "0")
-
-
-
-	list(APPEND CSRCS
-		tls_getvalue.c
-		tls_setvalue.c
-	)
-	
+set(SRCS)
+if (NOT CONFIG_TLS_NELEM EQUAL 0)
+  list(APPEND SRCS tls_setvalue.c tls_getvalue.c)
 endif()
 
-if(NOT "${CONFIG_TLS_ALIGNED}" STREQUAL "y")
-	list(APPEND CSRCS tls_getinfo.c)
+if (NOT CONFIG_TLS_ALIGNED)
+  list(APPEND SRCS tls_getinfo.c)
 endif()
 
-target_sources(c PRIVATE ${CSRCS})
+target_sources(c PRIVATE ${SRCS})

@@ -33,9 +33,7 @@
 #
 ############################################################################
 
-set(SRCS)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+nuttx_add_library(drivers)
 
 add_subdirectory(1wire)
 add_subdirectory(analog)
@@ -45,6 +43,7 @@ add_subdirectory(can)
 add_subdirectory(contactless)
 add_subdirectory(crypto)
 add_subdirectory(eeprom)
+add_subdirectory(efuse)
 add_subdirectory(i2c)
 add_subdirectory(i2s)
 add_subdirectory(input)
@@ -58,6 +57,9 @@ add_subdirectory(mtd)
 add_subdirectory(net)
 add_subdirectory(pipes)
 add_subdirectory(power)
+add_subdirectory(rc)
+add_subdirectory(rf)
+add_subdirectory(rptun)
 add_subdirectory(sensors)
 add_subdirectory(serial)
 add_subdirectory(spi)
@@ -70,25 +72,32 @@ add_subdirectory(usbmonitor)
 add_subdirectory(video)
 add_subdirectory(wireless)
 
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
+if (CONFIG_SPECIFIC_DRIVERS)
+  add_subdirectory(platform)
+endif()
 
-	if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
-		list(APPEND SRCS ramdisk.c)
+set(SRCS dev_null.c dev_zero.c)
 
-		if(NOT "${CONFIG_DRVR_WRITEBUFFER}" STREQUAL "y")
-			list(APPEND SRCS rwbuffer.c)
-		else()
-			if("${CONFIG_DRVR_READAHEAD}" STREQUAL "y")
-				list(APPEND SRCS rwbuffer.c)
-			endif()
-		endif()
-	endif()
-	
-	nuttx_add_library(drivers
-		dev_null.c
-		dev_zero.c
-		${SRCS}
-	)
-	target_include_directories(drivers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+if (CONFIG_DEV_SIMPLE_ADDRENV)
+  list(APPEND SRCS addrenv.c)
+endif()
 
-endif() # CONFIG_NFILE_DESCRIPTORS != 0
+if (CONFIG_LWL_CONSOLE)
+  list(APPEND SRCS lwl_console.c)
+endif()
+
+if (NOT CONFIG_DISABLE_MOUNTPOINT)
+  list(APPEND SRCS ramdisk.c)
+  if (CONFIG_DRVR_MKRD)
+    list(APPEND SRCS mkrd.c)
+  endif()
+  if (CONFIG_DRVR_WRITEBUFFER)
+    list(APPEND SRCS rwbuffer.c)
+  else()
+    if (CONFIG_DRVR_READAHEAD)
+      list(APPEND SRCS rwbuffer.c)
+    endif()
+  endif()
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

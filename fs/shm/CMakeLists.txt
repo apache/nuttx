@@ -35,14 +35,6 @@
 
 # Include POSIX message queue support
 
-if("${CONFIG_FS_SHM}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS shm_open.c shm_close.c)
-
-	# Include POSIX message queue build support
-
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_FS_SHM)
+  target_sources(fs PRIVATE shm_open.c shm_close.c)
 endif()

@@ -34,55 +34,27 @@
 #
 ############################################################################
 
-set(ARM_SUBDIR)
+set(ARCH_SUBDIR)
 
-if("${CONFIG_ARCH_CORTEXA5}" STREQUAL "y")        # Cortex-A5 is ARMv7-A
-	set(ARM_SUBDIR armv7-a)
-elseif("${CONFIG_ARCH_CORTEXA8}" STREQUAL "y")   # Cortex-A8 is ARMv7-A
-	set(ARM_SUBDIR armv7-a)
-elseif("${CONFIG_ARCH_CORTEXA9}" STREQUAL "y")   # Cortex-A9 is ARMv7-A
-	set(ARM_SUBDIR armv7-a)
-elseif("${CONFIG_ARCH_CORTEXR4}" STREQUAL "y")   # Cortex-R4 is ARMv7-R
-	set(ARM_SUBDIR armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR4F}" STREQUAL "y")  # Cortex-R4F is ARMv7-R
-	set(ARM_SUBDIR armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR5}" STREQUAL "y")   # Cortex-R5 is ARMv7-R
-	set(ARM_SUBDIR armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR5F}" STREQUAL "y")  # Cortex-R5F is ARMv7-R
-	set(ARM_SUBDIR armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR7}" STREQUAL "y")   # Cortex-R7 is ARMv7-R
-	set(ARM_SUBDIR armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR7F}" STREQUAL "y")  # Cortex-R7F is ARMv7-R
-	set(ARM_SUBDIR armv7-r)
-elseif("${CONFIG_ARCH_CORTEXM3}" STREQUAL "y")   # Cortex-M3 is ARMv7-M
-	set(ARM_SUBDIR armv7-m)
-elseif("${CONFIG_ARCH_CORTEXM4}" STREQUAL "y")   # Cortex-M4 is ARMv7E-M
-	set(ARM_SUBDIR armv7-m)
-elseif("${CONFIG_ARCH_CORTEXM7}" STREQUAL "y")   # Cortex-M4 is ARMv7E-M
-	set(ARM_SUBDIR armv7-m)
-elseif("${CONFIG_ARCH_CORTEXM0}" STREQUAL "y")   # Cortex-M0 is ARMv6-M
-	set(ARM_SUBDIR armv6-m)
-else()                                    # ARM9, ARM7TDMI
-	set(ARM_SUBDIR arm)
+if (CONFIG_ARCH_ARMV7A)         # ARMv7-A
+  set(ARCH_SUBDIR armv7-a)
+elseif (CONFIG_ARCH_ARMV7R)     # ARMv7-R
+  set(ARCH_SUBDIR armv7-r)
+elseif (CONFIG_ARCH_ARMV7M)     # ARMv7-M
+  set(ARCH_SUBDIR armv7-m)
+elseif (CONFIG_ARCH_ARMV8M)     # ARMv8-M
+  set(ARCH_SUBDIR armv8-m)
+elseif (CONFIG_ARCH_ARMV6M)     # ARMv6-M
+  set(ARCH_SUBDIR armv6-m)
+else()                          # ARM9, ARM7TDMI, etc.
+  set(ARCH_SUBDIR arm)
 endif()
 
-include_directories(${CMAKE_BINARY_DIR}/include)
-
-# TODO: use linking dependencies
-include_directories(${ARM_SUBDIR})
-include_directories(${CONFIG_ARCH_CHIP})
-include_directories(common)
-include_directories(${CMAKE_SOURCE_DIR}/sched)
-
-set(SRCS)
-add_subdirectory(${ARM_SUBDIR})
+add_subdirectory(${ARCH_SUBDIR})
 add_subdirectory(${CONFIG_ARCH_CHIP})
 add_subdirectory(common)
 
-
-# config board
-#add_subdirectory(${NUTTX_DIR}/configs/${NUTTX_BOARD}/src board)
-
-
-# create arch library
-nuttx_add_library(arch ${SRCS})
+# include directories
+target_include_directories(arch PRIVATE ${ARM_SUBDIR})
+target_include_directories(arch PRIVATE ${CONFIG_ARCH_CHIP})
+target_include_directories(arch PRIVATE common)

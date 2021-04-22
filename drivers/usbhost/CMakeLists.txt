@@ -33,70 +33,64 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS hid_parser.c)
 
-list(APPEND CSRCS hid_parser.c)
+if (CONFIG_USBHOST)
+  # Include built-in USB host driver logic
 
-if("${CONFIG_USBHOST}" STREQUAL "y")
+  list(APPEND SRCS
+    usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
+    usbhost_enumerate.c usbhost_devaddr.c)
 
-	# Include built-in USB host driver logic
-	
-	list(APPEND CSRCS usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c)
-	list(APPEND CSRCS usbhost_enumerate.c usbhost_devaddr.c)
-	
-	if("${CONFIG_USBHOST_HUB}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_hub.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_COMPOSITE}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_composite.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_MSC}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_storage.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_CDCACM}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_cdcacm.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_HIDKBD}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_hidkbd.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_HIDMOUSE}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_hidmouse.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_XBOXCONTROLLER}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_xboxcontroller.c)
-	endif()
-	
-	if("${CONFIG_USBHOST_MAX3421E}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_max3421e.c)
-	endif()
-	
-	# HCD debug/trace logic
-	
-	if("${CONFIG_USBHOST_TRACE}" STREQUAL "y")
-		list(APPEND CSRCS usbhost_trace.c)
-	else()
-		if("${CONFIG_DEBUG_USB}" STREQUAL "y")
-			list(APPEND CSRCS usbhost_trace.c)
-		endif()
-	endif()
-	
-	# Include add-on USB host driver logic if present and selected (availabel in
-	# the NuttX drivers GIT repository)
-	
-	if("${CONFIG_USBHOST_RTL8187}" STREQUAL "y")
-		#RTL8187_CSRC := ${shell if [ -f usbhost$(DELIM)rtl8187x.c ]; then echo "rtl8187x.c"; fi}
-		if(EXISTS "${CMAKE_CURRENT_SOUCE_DIR}/rtl8187x.c")
-			list(APPEND CSRCS rtl8187x.c)
-		endif()
-	endif()
+  if (CONFIG_USBHOST_HUB)
+    list(APPEND SRCS usbhost_hub.c)
+  endif()
+
+  if (CONFIG_USBHOST_COMPOSITE)
+    list(APPEND SRCS usbhost_composite.c)
+  endif()
+
+  if (CONFIG_USBHOST_MSC)
+    list(APPEND SRCS usbhost_storage.c)
+  endif()
+
+  if (CONFIG_USBHOST_CDCACM)
+    list(APPEND SRCS usbhost_cdcacm.c)
+  endif()
+
+  if (CONFIG_USBHOST_CDCMBIM)
+    list(APPEND SRCS usbhost_cdcmbim.c)
+  endif()
+
+  if (CONFIG_USBHOST_HIDKBD)
+    list(APPEND SRCS usbhost_hidkbd.c)
+  endif()
+
+  if (CONFIG_USBHOST_HIDMOUSE)
+    list(APPEND SRCS usbhost_hidmouse.c)
+  endif()
+
+  if (CONFIG_USBHOST_XBOXCONTROLLER)
+    list(APPEND SRCS usbhost_xboxcontroller.c)
+  endif()
+
+  if (CONFIG_USBHOST_MAX3421E)
+    list(APPEND SRCS usbhost_max3421e.c)
+  endif()
+
+  if (CONFIG_USBHOST_FT232R)
+    list(APPEND SRCS usbhost_ft232r.c)
+  endif()
+
+  # HCD debug/trace logic
+
+  if (CONFIG_USBHOST_TRACE)
+    list(APPEND SRCS usbhost_trace.c)
+  else()
+    if (CONFIG_DEBUG_USB)
+      list(APPEND SRCS usbhost_trace.c)
+    endif()
+  endif()
 endif()
 
-# Include USB host driver build logic
-
-set_parent_srcs(${CSRCS})
+target_sources(drivers PRIVATE ${SRCS})

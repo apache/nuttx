@@ -33,47 +33,48 @@
 #
 ############################################################################
 
-if("${CONFIG_USBDEV}" STREQUAL "y")
+if (CONFIG_USBDEV)
+  set(SRCS)
 
-	set(CSRCS)
+  # Include USB device drivers
 
-	# Include USB device drivers
-	
-	if("${CONFIG_PL2303}" STREQUAL "y")
-		list(APPEND CSRCS pl2303.c)
-	endif()
-	
-	if("${CONFIG_CDCACM}" STREQUAL "y")
-		list(APPEND CSRCS cdcacm.c cdcacm_desc.c)
-	endif()
-	
-	if("${CONFIG_USBMSC}" STREQUAL "y")
-		list(APPEND CSRCS usbmsc.c usbmsc_desc.c usbmsc_scsi.c)
-	endif()
-	
-	if("${CONFIG_USBDEV_COMPOSITE}" STREQUAL "y")
-		list(APPEND CSRCS composite.c composite_desc.c)
-	endif()
-	
-	if("${CONFIG_USBDEV_TRACE_STRINGS}" STREQUAL "y")
-		list(APPEND CSRCS usbdev_strings.c)
-	endif()
-	
-	if("${CONFIG_RNDIS}" STREQUAL "y")
-		list(APPEND CSRCS rndis.c)
-	endif()
-	
-	if("${CONFIG_DFU}" STREQUAL "y")
-		list(APPEND CSRCS dfu.c)
-	endif()
-	
-	if("${CONFIG_NET_CDCECM}" STREQUAL "y")
-		list(APPEND CSRCS cdcecm.c)
-	endif()
-	
-	list(APPEND CSRCS usbdev_trace.c usbdev_trprintf.c)
-	
-	# Include USB device build support
-	
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_PL2303)
+    list(APPEND SRCS pl2303.c)
+  endif()
+
+  if (CONFIG_CDCACM)
+    list(APPEND SRCS cdcacm.c cdcacm_desc.c)
+  endif()
+
+  if (CONFIG_USBMSC)
+    list(APPEND SRCS usbmsc.c usbmsc_desc.c usbmsc_scsi.c)
+  endif()
+
+  if (CONFIG_USBDEV_COMPOSITE)
+    list(APPEND SRCS composite.c composite_desc.c)
+  endif()
+
+  if (CONFIG_USBDEV_TRACE_STRINGS)
+    list(APPEND SRCS usbdev_strings.c)
+  endif()
+
+  if (CONFIG_RNDIS)
+    list(APPEND SRCS rndis.c)
+  endif()
+
+  if (CONFIG_DFU)
+    list(APPEND SRCS dfu.c)
+  endif()
+
+  if (CONFIG_USBADB)
+    list(APPEND SRCS adb.c)
+  endif()
+
+  if (CONFIG_NET_CDCECM)
+    list(APPEND SRCS cdcecm.c)
+  endif()
+
+  list(APPEND SRCS usbdev_trace.c usbdev_trprintf.c)
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

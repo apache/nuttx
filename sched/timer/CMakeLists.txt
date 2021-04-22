@@ -33,19 +33,10 @@
 #
 ############################################################################
 
-if(NOT "${CONFIG_DISABLE_POSIX_TIMERS}" STREQUAL "y")
+if(NOT CONFIG_DISABLE_POSIX_TIMERS)
 
-	# Include timer build support
-	set(CSRCS)
-	list(APPEND CSRCS
-		timer_initialize.c
-		timer_create.c
-		timer_delete.c
-		timer_getoverrun.c
-		timer_gettime.c
-		timer_settime.c
-		timer_release.c
-	)
-	set_parent_srcs(${CSRCS})
-
+  target_sources(sched PRIVATE
+    timer_initialize.c timer_create.c timer_delete.c
+    timer_getoverrun.c timer_getitimer.c timer_gettime.c
+    timer_setitimer.c timer_settime.c timer_release.c)
 endif()

@@ -35,20 +35,18 @@
 
 # An optional granule allocator
 
-if("${CONFIG_GRAN}" STREQUAL "y")
+if(CONFIG_GRAN)
+  set(SRCS)
 
-	set(CSRCS)
+	list(APPEND SRCS
+    mm_graninit.c mm_granrelease.c mm_granreserve.c mm_granalloc.c
+    mm_granmark.c mm_granfree.c mm_graninfo.c mm_grancritical.c)
 
-	list(APPEND CSRCS mm_graninit.c mm_granrelease.c mm_granreserve.c mm_granalloc.c)
-	list(APPEND CSRCS mm_granmark.c mm_granfree.c mm_graninfo.c mm_grancritical.c)
+  # A page allocator based on the granule allocator
 
-	# A page allocator based on the granule allocator
+  if(CONFIG_MM_PGALLOC)
+    list(APPEND SRCS mm_pgalloc.c)
+  endif()
 
-	if("${CONFIG_MM_PGALLOC}" STREQUAL "y")
-		list(APPEND CSRCS mm_pgalloc.c)
-	endif()
-
-	# Add the granule directory to the build
-
-	set_parent_srcs(${CSRCS})
+  target_sources(mm PRIVATE ${SRCS})
 endif()

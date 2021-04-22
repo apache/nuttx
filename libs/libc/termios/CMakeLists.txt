@@ -33,28 +33,10 @@
 #
 ############################################################################
 
-# termios.h support requires file descriptors and that CONFIG_SERIAL_TERMIOS
-# is defined
-
-if(NOT "${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-	if("${CONFIG_SERIAL_TERMIOS}" STREQUAL "y")
-	
-		set(CSRCS)
-
-		# Add the termios C files to the build
-		list(APPEND CSRCS
-			lib_cfspeed.c
-			lib_cfmakeraw.c
-			lib_isatty.c
-			lib_tcflush.c
-			lib_tcflow.c
-			lib_tcgetattr.c
-			lib_tcsetattr.c
-		)
-		
-		# Add the termios directory to the build
-		set_parent_srcs(${CSRCS})
-
-	endif()
+if (CONFIG_SERIAL_TERMIOS)
+  target_sources(c PRIVATE
+    lib_cfspeed.c lib_cfmakeraw.c lib_isatty.c lib_tcflush.c
+    lib_tcflow.c lib_tcgetattr.c lib_tcsetattr.c)
 endif()
+
 

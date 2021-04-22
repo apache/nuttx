@@ -33,10 +33,4 @@
 #
 ############################################################################
 
-# Add the libgen directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	lib_basename.c
-	lib_dirname.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE lib_basename.c lib_dirname.c)

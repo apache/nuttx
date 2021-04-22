@@ -33,15 +33,14 @@
 #
 ############################################################################
 
-# Logic specific to IPv6 Neighbor Discovery Protocol
+# Logic specific to NETLINK
 
-if("${CONFIG_NET_NETLINK}" STREQUAL "y")
+if (CONFIG_NET_NETLINK)
+  set(SRCS netlink_sockif.c netlink_conn.c netlink_notifier.c)
 
-	set(CSRCS)
+  if (CONFIG_NETLINK_ROUTE)
+    list(APPEND SRCS netlink_route.c)
+  endif()
 
-	list(APPEND CSRCS netlink_sockif.c netlink_conn.c)
-	
-	# Include netlink build support
-	
-	set_parent_srcs(${CSRCS})
+  target_sources(net PRIVATE ${SRCS})
 endif()

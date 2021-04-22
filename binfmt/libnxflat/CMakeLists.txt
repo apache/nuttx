@@ -33,22 +33,18 @@
 #
 ############################################################################
 
-if("${CONFIG_NXFLAT}" STREQUAL "y")
+if (CONFIG_NXFLAT)
 
-	set(CSRCS)
+  target_sources(binfmt PRIVATE
+    # NXFLAT application interfaces
 
-	# NXFLAT application interfaces
+    nxflat.c
 
-	list(APPEND CSRCS nxflat.c)
+    # NXFLAT library
 
-	# NXFLAT library
-
-	list(APPEND CSRCS libnxflat_init.c libnxflat_uninit.c libnxflat_addrenv.c)
-	list(APPEND CSRCS libnxflat_load.c libnxflat_unload.c libnxflat_verify.c)
-	list(APPEND CSRCS libnxflat_read.c libnxflat_bind.c)
-	
-	# Hook the libnxflat subdirectory into the build
-
-	nuttx_add_library(nxflat ${CSRCS})
+    libnxflat_init.c libnxflat_uninit.c libnxflat_addrenv.c
+    libnxflat_load.c libnxflat_unload.c libnxflat_verify.c
+    libnxflat_read.c libnxflat_bind.c)
 
 endif()
+

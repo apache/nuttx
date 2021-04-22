@@ -33,37 +33,33 @@
 #
 ############################################################################
 
-if("${CONFIG_SCHED_WORKQUEUE}" STREQUAL "y")
+# Add work queue files
 
-	set(CSRCS)
+set(SRCS)
 
-	# Add high priority work queue files
-	if("${CONFIG_SCHED_HPWORK}" STREQUAL "y")
-		list(APPEND CSRCS kwork_hpthread.c)
-	endif()
+if (CONFIG_SCHED_WORKQUEUE)
+  list(APPEND SRCS kwork_queue.c kwork_process.c kwork_cancel.c kwork_signal.c)
 
-	# Add low priority work queue files
-	if("${CONFIG_SCHED_LPWORK}" STREQUAL "y")
+  # Add high priority work queue files
 
-		list(APPEND CSRCS kwork_lpthread.c)
+  if (CONFIG_SCHED_HPWORK)
+    list(APPEND SRCS kwork_hpthread.c)
+  endif()
 
-		if("${CONFIG_PRIORITY_INHERITANCE}" STREQUAL "y")
-			list(APPEND CSRCS kwork_inherit.c)
-		endif() # CONFIG_PRIORITY_INHERITANCE
-	endif() # CONFIG_SCHED_LPWORK
+  # Add low priority work queue files
 
-	# Add work queue notifier support
-	if("${CONFIG_WQUEUE_NOTIFIER}" STREQUAL "y")
-		list(APPEND CSRCS kwork_notifier.c)
-	endif()
+  if (CONFIG_SCHED_LPWORK)
+    list(APPEND SRCS kwork_lpthread.c)
+    if (CONFIG_PRIORITY_INHERITANCE)
+      list(APPEND SRCS kwork_inherit.c)
+    endif()
+  endif()
 
-	# Include wqueue build support
-	list(APPEND CSRCS
-		kwork_cancel.c
-		kwork_process.c
-		kwork_queue.c
-		kwork_signal.c
-	)
-	set_parent_srcs(${CSRCS})
+  # Add work queue notifier support
 
-endif() # CONFIG_SCHED_WORKQUEUE
+  if (CONFIG_WQUEUE_NOTIFIER)
+    list(APPEND SRCS kwork_notifier.c)
+  endif()
+endif()
+
+target_sources(sched PRIVATE ${SRCS})

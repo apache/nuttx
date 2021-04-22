@@ -33,44 +33,30 @@
 #
 ############################################################################
 
-set(SRCS)
-
-if("${CONFIG_ARCH_ARM7TDMI}" STREQUAL "y")        # ARM7TDMI is ARMv4T
-	add_subdirectory(arm)
-elseif("${CONFIG_ARCH_ARM920T}" STREQUAL "y")    # ARM920T is ARMv4T
-	add_subdirectory(arm)
-elseif("${CONFIG_ARCH_ARM926EJS}" STREQUAL "y")  # ARM926EJS is ARMv5TE
-	add_subdirectory(arm)
-elseif("${CONFIG_ARCH_CORTEXA5}" STREQUAL "y")   # Cortex-A5 is ARMv7-A
-	add_subdirectory(arm7-a)
-elseif("${CONFIG_ARCH_CORTEXA8}" STREQUAL "y")   # Cortex-A8 is ARMv7-A
-	add_subdirectory(armv7-a)
-elseif("${CONFIG_ARCH_CORTEXA9}" STREQUAL "y")   # Cortex-A9 is ARMv7-A
-	add_subdirectory(armv7-a)
-elseif("${CONFIG_ARCH_CORTEXR4}" STREQUAL "y")   # Cortex-R4 is ARMv7-R
-	add_subdirectory(armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR4F}" STREQUAL "y")  # Cortex-R4F is ARMv7-R
-	add_subdirectory(armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR5}" STREQUAL "y")   # Cortex-R5 is ARMv7-R
-	add_subdirectory(armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR5F}" STREQUAL "y")  # Cortex-R5F is ARMv7-R
-	add_subdirectory(armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR7}" STREQUAL "y")   # Cortex-R7 is ARMv7-R
-	add_subdirectory(armv7-r)
-elseif("${CONFIG_ARCH_CORTEXR7F}" STREQUAL "y")  # Cortex-R7F is ARMv7-R
-	add_subdirectory(armv7-r)
-elseif("${CONFIG_ARCH_CORTEXM0}" STREQUAL "y")   # Cortex-M0 is ARMv6-M
-	add_subdirectory(armv6-m)
-elseif("${CONFIG_ARCH_CORTEXM3}" STREQUAL "y")   # Cortex-M3 is ARMv7-M
-	add_subdirectory(armv7-m)
-elseif("${CONFIG_ARCH_CORTEXM33}" STREQUAL "y")  # Cortex-M33 is ARMv8-M
-	add_subdirectory(armv8)
-elseif("${CONFIG_ARCH_CORTEXM4}" STREQUAL "y")   # Cortex-M4 is ARMv7E-M
-	add_subdirectory(armv7-m)
-elseif("${CONFIG_ARCH_CORTEXM7}" STREQUAL "y")   # Cortex-M4 is ARMv7E-M
-	add_subdirectory(armv7-m)
+if (CONFIG_ARCH_ARM7TDMI)        # ARM7TDMI is ARMv4T
+  add_subdirectory(arm)
+elseif (CONFIG_ARCH_ARM920T)    # ARM920T is ARMv4T
+  add_subdirectory(arm)
+elseif (CONFIG_ARCH_ARM926EJS)  # ARM926EJS is ARMv5TEJ
+  add_subdirectory(arm)
+elseif (CONFIG_ARCH_ARM1136J)   # ARM1136J is ARMv6
+  add_subdirectory(arm)
+elseif (CONFIG_ARCH_ARM1156T2)  # ARM1156T2 is ARMv6T2
+  add_subdirectory(arm)
+elseif (CONFIG_ARCH_ARM1176JZ)  # ARM1176JZ is ARMv6Z
+  add_subdirectory(arm)
+elseif (CONFIG_ARCH_ARMV7A)     # All ARMv7-A
+  add_subdirectory(armv7-a)
+elseif (CONFIG_ARCH_ARMV7R)     # All ARMv7-R
+  add_subdirectory(armv7-r)
+elseif (CONFIG_ARCH_ARMV6M)     # All ARMv6-M
+  add_subdirectory(armv6-m)
+elseif (CONFIG_ARCH_ARMV7M)     # All ARMv7-M
+  add_subdirectory(armv7-m)
+elseif (CONFIG_ARCH_ARMV8M)     # All ARMv8-M
+  add_subdirectory(armv8-m)
 endif()
 
-if(SRCS)
-	nuttx_add_library(c_machine_arm ${SRCS})
+if (CONFIG_CXX_EXCEPTION)
+  target_sources(c PRIVATE gnu_unwind_find_exidx.c)
 endif()

@@ -33,15 +33,8 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_ROMFS}" STREQUAL "y")
-	# Files required for ROMFS file system support
+if(CONFIG_FS_ROMFS)
 
-	set(CSRCS)
-
-	list(APPEND CSRCS fs_romfs.c fs_romfsutil.c)
-
-	# Include ROMFS build support
-
-	set_parent_srcs(${CSRCS})
+  target_sources(fs PRIVATE fs_romfs.c fs_romfsutil.c)
 
 endif()

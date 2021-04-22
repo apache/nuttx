@@ -33,22 +33,23 @@
 #
 ############################################################################
 
-if("${CONFIG_ELF}" STREQUAL "y")
+if (CONFIG_ELF)
+  set(SRCS)
 
-	set(CSRCS)
+  # ELF application interfaces
 
-	# ELF library
-	
-	list(APPEND CSRCS libelf_bind.c libelf_init.c libelf_addrenv.c libelf_iobuffer.c)
-	list(APPEND CSRCS libelf_load.c libelf_read.c libelf_sections.c libelf_symbols.c)
-	list(APPEND CSRCS libelf_uninit.c libelf_unload.c libelf_verify.c)
-	
-	if("${CONFIG_BINFMT_CONSTRUCTORS}" STREQUAL "y")
-		list(APPEND CSRCS libelf_ctors.c libelf_dtors.c)
-	endif()
+  list(APPEND SRCS elf.c)
 
-	# Hook the libelf subdirectory into the build
+  # ELF library
 
-	nuttx_add_library(elf ${CSRCS})
+  list(APPEND SRCS
+    libelf_bind.c libelf_init.c libelf_addrenv.c libelf_iobuffer.c
+    libelf_load.c libelf_read.c libelf_sections.c libelf_symbols.c
+    libelf_uninit.c libelf_unload.c libelf_verify.c)
 
+  if (CONFIG_BINFMT_CONSTRUCTORS)
+    list(APPEND SRCS libelf_ctors.c libelf_dtors.c)
+  endif()
+
+  target_sources(binfmt PRIVATE ${SRCS})
 endif()

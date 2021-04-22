@@ -33,26 +33,8 @@
 #
 ############################################################################
 
-# Add the queue directory to the build
-set(CSRCS)
-list(APPEND CSRCS
-	dq_addafter.c
-	dq_addbefore.c
-	dq_addfirst.c
-	dq_addlast.c
-	dq_cat.c
-	dq_count.c
-	dq_rem.c
-	dq_remfirst.c
-	dq_remlast.c
-	sq_addafter.c
-	sq_addfirst.c
-	sq_addlast.c
-	sq_cat.c
-	sq_count.c
-	sq_remafter.c
-	sq_rem.c
-	sq_remfirst.c
-	sq_remlast.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE
+  sq_addlast.c sq_addfirst.c sq_addafter.c sq_cat.c
+  sq_rem.c sq_remlast.c sq_remfirst.c sq_remafter.c sq_count.c
+  dq_addlast.c dq_addfirst.c dq_addafter.c dq_addbefore.c dq_cat.c
+  dq_rem.c dq_remlast.c dq_remfirst.c dq_count.c)

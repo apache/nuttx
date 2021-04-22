@@ -33,18 +33,13 @@
 #
 ############################################################################
 
-if("${CONFIG_LIBC_MODLIB}" STREQUAL "y")
+if(CONFIG_LIBC_MODLIB)
 
-	set(CSRCS)
-
-	# Add the nuttx/lib/modlib.h files to the build
-	list(APPEND CSRCS modlib_bind.c modlib_depend.c modlib_init.c modlib_iobuffer.c
-		modlib_load.c modlib_read.c modlib_registry.c modlib_sections.c
-		modlib_symbols.c modlib_symtab.c modlib_uninit.c modlib_unload.c
-		modlib_verify.c
-		)
-
-	# Add the modlib directory to the build
-	set_parent_srcs(${CSRCS})
+  target_sources(c PRIVATE
+    modlib_bind.c modlib_depend.c modlib_init.c modlib_iobuffer.c
+    modlib_load.c modlib_loadshdrs.c
+    modlib_read.c modlib_registry.c modlib_sections.c
+    modlib_symbols.c modlib_symtab.c modlib_uninit.c modlib_unload.c
+    modlib_verify.c)
 
 endif()

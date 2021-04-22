@@ -33,16 +33,6 @@
 #
 ############################################################################
 
-# Expose NXGL interfaces to applications
-
-if("${CONFIG_NX}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS nx_drawcircle.c nx_drawline.c nx_fillcircle.c)
-	
-	# Add the nx/ directory to the build
-	
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_NX)
+  target_sources(nx PRIVATE nx_drawcircle.c nx_drawline.c nx_fillcircle.c)
 endif()

@@ -1,6 +1,6 @@
 # Parse nuttx config options for cmake
 
-file(STRINGS ${NUTTX_DIR}/.config ConfigContents)
+file(STRINGS ${CMAKE_BINARY_DIR}/.config ConfigContents)
 foreach(NameAndValue ${ConfigContents})
 	# Strip leading spaces
 	string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
@@ -17,7 +17,8 @@ foreach(NameAndValue ${ConfigContents})
 
 		# Set the variable
 		#message(STATUS "${Name} ${Value}")
-		set(${Name} ${Value} CACHE INTERNAL "NUTTX DEFCONFIG: ${Name}" FORCE)
+		#set(${Name} ${Value} CACHE INTERNAL "NUTTX DEFCONFIG: ${Name}" FORCE)
+    set(${Name} ${Value})
 	endif()
 endforeach()
 

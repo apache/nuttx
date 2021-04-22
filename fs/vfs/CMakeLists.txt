@@ -33,89 +33,43 @@
 #
 ############################################################################
 
-# If there are no file descriptors configured, then a small part of the
-# logic in this directory may still apply to socket descriptors
+set(SRCS
+  # Common file/socket descriptor support
+  fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c
+  fs_epoll.c fs_fstat.c fs_fstatfs.c fs_ioctl.c
+  fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c  fs_read.c fs_rename.c
+  fs_rmdir.c fs_statfs.c fs_stat.c fs_select.c fs_unlink.c fs_write.c
 
-if("${CONFIG_NFILE_DESCRIPTORS}" STREQUAL "0")
-	if(NOT "${CONFIG_NSOCKET_DESCRIPTORS}" STREQUAL "0")
+  # Support for positional file access
+  fs_pread.c fs_pwrite.c
+  )
 
-		# Socket descriptor support
+# Certain interfaces are not available if there is no mountpoint support
 
-		set(CSRCS)
-
-		# Support for network access using streams
-		if(NOT "${CONFIG_NFILE_STREAMS}" STREQUAL "0")
-			list(APPEND CSRCS fs_fdopen.c)
-		endif()
-
-		# Support for poll() and select() (which derives from poll()
-		if(NOT "${CONFIG_DISABLE_POLL}" STREQUAL "y")
-			list(APPEND CSRCS fs_poll.c fs_select.c)
-		endif()
-
-		# Support for sendfile()
-		if("${CONFIG_NET_SENDFILE}" STREQUAL "y")
-			list(APPEND CSRCS fs_sendfile.c)
-		endif()
-
-		# Include vfs build support
-		list(APPEND CSRCS
-			fs_close.c
-			fs_read.c
-			fs_write.c
-			fs_ioctl.c
-		)
-		set_parent_srcs(${CSRCS})
-
-	endif()
-
-else()
-
-	# Common file/socket descriptor support
-
-	set(CSRCS) 
-
-	# Certain interfaces are not available if there is no mountpoint support
-	if(NOT "${CONFIG_DISABLE_MOUNTPOINT}" STREQUAL "y")
-		list(APPEND CSRCS fs_fsync.c fs_truncate.c)
-	endif()
-
-	# Support for positional file access
-	list(APPEND CSRCS fs_pread.c fs_pwrite.c)
-
-	# Stream support
-	if(NOT "${CONFIG_NFILE_STREAMS}" STREQUAL "0")
-		list(APPEND CSRCS fs_fdopen.c)
-	endif()
-
-	# Support for sendfile()
-	if("${CONFIG_NET_SENDFILE}" STREQUAL "y")
-		list(APPEND CSRCS fs_sendfile.c)
-	endif()
-
-	# Include vfs build support
-	list(APPEND CSRCS
-		fs_close.c
-		fs_dup.c
-		fs_dup2.c
-		fs_fcntl.c
-		fs_epoll.c
-		fs_fstat.c
-		fs_fstatfs.c
-		fs_ioctl.c
-		fs_lseek.c
-		fs_mkdir.c
-		fs_open.c
-		fs_poll.c 
-		fs_read.c
-		fs_rename.c
-		fs_rmdir.c
-		fs_statfs.c
-		fs_stat.c
-		fs_select.c
-		fs_unlink.c
-		fs_write.c
-	)
-	set_parent_srcs(${CSRCS})
-
+if (NOT CONFIG_DISABLE_MOUNTPOINT)
+  list(APPEND SRCS fs_fsync.c fs_truncate.c)
 endif()
+
+if (NOT "${CONFIG_PSEUDOFS_SOFTLINKS}" STREQUAL "0")
+  list(APPEND SRCS fs_symlink.c fs_readlink.c)
+endif()
+
+# Stream support
+
+if (CONFIG_FILE_STREAM)
+  list(APPEND SRCS fs_fdopen.c)
+endif()
+
+# Support for sendfile()
+
+if (CONFIG_NET_SENDFILE)
+  list(APPEND SRCS fs_sendfile.c)
+endif()
+
+# Support for eventfd
+
+if (CONFIG_EVENT_FD)
+  list(APPEND SRCS fs_eventfd.c)
+endif()
+
+target_sources(fs PRIVATE ${SRCS})

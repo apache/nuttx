@@ -33,17 +33,8 @@
 #
 ############################################################################
 
-# IGMP source files
-
-if("${CONFIG_NET_IGMP}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS igmp_group.c igmp_initialize.c igmp_input.c igmp_join.c igmp_leave.c)
-	list(APPEND CSRCS igmp_mcastmac.c igmp_msg.c igmp_poll.c igmp_send.c igmp_timer.c)
-	
-	# Include igmp build support
-
-	set_parent_srcs(${CSRCS})
-
+if (CONFIG_NET_IGMP)
+  target_sources(net PRIVATE
+    igmp_group.c igmp_initialize.c igmp_input.c igmp_join.c igmp_leave.c
+    igmp_mcastmac.c igmp_msg.c igmp_poll.c igmp_send.c igmp_timer.c)
 endif()

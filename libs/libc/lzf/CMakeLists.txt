@@ -33,17 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_LIBC_LZF}" STREQUAL "y")
-
-	set(CSRCS)
-
-	# Add the internal C files to the build
-	list(APPEND CSRCS
-		lzf_c.c
-		lzf_d.c
-	)
-
-	# Add the userfs directory to the build
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_LIBC_LZF)
+  target_sources(c PRIVATE lzf_c.c lzf_d.c)
 endif()

@@ -33,13 +33,8 @@
 #
 ############################################################################
 
-set(CSRCS)
-
-list(APPEND CSRCS
-	nxmu_kbdin.c nxmu_mouse.c nxmu_openwindow.c nxmu_redrawreq.c
-	nxmu_releasebkgd.c nxmu_requestbkgd.c nxmu_reportposition.c
-	nxmu_sendclient.c nxmu_sendclientwindow.c nxmu_server.c
-	nxmu_start.c
-)
-
-set_parent_srcs(${CSRCS})
+target_sources(graphics PRIVATE
+  nxmu_kbdin.c nxmu_mouse.c nxmu_openwindow.c nxmu_redraw.c
+  nxmu_releasebkgd.c nxmu_requestbkgd.c nxmu_reportposition.c
+  nxmu_sendclient.c nxmu_sendclientwindow.c nxmu_server.c
+  nxmu_start.c)

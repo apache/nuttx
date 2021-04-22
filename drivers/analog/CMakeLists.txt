@@ -33,91 +33,78 @@
 #
 ############################################################################
 
-# Don't build anything if there is no support for analog devices
-set(CSRCS)
+set(SRCS)
 
-# Check for DAC devices
+if (CONFIG_DAC)
+  # Include the common DAC character driver
+  list(APPEND SRCS dac.c)
 
-if("${CONFIG_DAC}" STREQUAL "y")
+  # Include DAC device drivers
 
-	# Include the common DAC character driver
-	
-	list(APPEND CSRCS dac.c)
-	
-	# Include DAC device drivers
-	
-	if("${CONFIG_DAC_AD5410}" STREQUAL "y")
-		list(APPEND CSRCS ad5410.c)
-	endif()
-	
-	if("${CONFIG_DAC7571}" STREQUAL "y")
-		list(APPEND CSRCS dac7571.c)
-	endif()
+  if (CONFIG_DAC_AD5410)
+    list(APPEND SRCS ad5410.c)
+  endif()
+
+  if (CONFIG_DAC7571)
+    list(APPEND SRCS dac7571.c)
+  endif()
+
+  if (CONFIG_DAC7554)
+    list(APPEND SRCS dac7554.c)
+  endif()
 endif()
-	
+
 # Check for COMP devices
 
-if("${CONFIG_COMP}" STREQUAL "y")
-	
-	# Include the common COMP character driver
-	
-	list(APPEND CSRCS comp.c)
-	
+if (CONFIG_COMP)
+  # Include the common COMP character driver
+  list(APPEND SRCS comp.c)
 endif()
-	
-# Check for OPAMP devices
-	
-if("${CONFIG_OPAMP}" STREQUAL "y")
-	
-	# Include the common OPAMP character driver
-	
-	list(APPEND CSRCS opamp.c)
-	
-endif()
-	
-# Check for ADC devices
-	
-if("${CONFIG_ADC}" STREQUAL "y")
-	
-	# Include the common ADC character driver
-	
-	list(APPEND CSRCS adc.c)
-	
-	# Amplifiers/multiplexers
-	
-	if("${CONFIG_ADC_PGA11X}" STREQUAL "y")
-		list(APPEND CSRCS pga11x.c)
-	endif()
-	
-	# Include ADC device drivers
-	
-	if("${CONFIG_ADC_ADS1242}" STREQUAL "y")
-		list(APPEND CSRCS ads1242.c)
-	endif()
-	
-	if("${CONFIG_ADC_ADS125X}" STREQUAL "y")
-		list(APPEND CSRCS ads1255.c)
-	endif()
-	
-	if("${CONFIG_ADC_LTC1867L}" STREQUAL "y")
-		list(APPEND CSRCS ltc1867l.c)
-	endif()
-endif()
-	
-# Add analog driver build support (the nested if-then-else implements an OR)
 
-if("${CONFIG_DAC}" STREQUAL "y")
-	set_parent_srcs(${CSRCS})
-else()
-	if("${CONFIG_ADC}" STREQUAL "y")
-		set_parent_srcs(${CSRCS})
-	else()
-		if("${CONFIG_COMP}" STREQUAL "y")
-			set_parent_srcs(${CSRCS})
-		else()
-			if("${CONFIG_OPAMP}" STREQUAL "y")
-				set_parent_srcs(${CSRCS})
-			endif()
-		endif()
-	endif()
+# Check for OPAMP devices
+
+if (CONFIG_OPAMP)
+  # Include the common OPAMP character driver
+  list(APPEND SRCS opamp.c)
 endif()
+
+# Check for ADC devices
+
+if (CONFIG_ADC)
+  # Include the common ADC character driver
+  list(APPEND SRCS adc.c)
+
+  # Amplifiers/multiplexers
+
+  if (CONFIG_ADC_PGA11X)
+    list(APPEND SRCS pga11x.c)
+  endif()
+
+  # Include ADC device drivers
+
+  if (CONFIG_ADC_ADS1242)
+    list(APPEND SRCS ads1242.c)
+  endif()
+
+  if (CONFIG_ADC_ADS125X)
+    list(APPEND SRCS ads1255.c)
+  endif()
+
+  if (CONFIG_ADC_ADS7828)
+    list(APPEND SRCS ads7828.c)
+  endif()
+
+  if (CONFIG_ADC_MAX1161X)
+    list(APPEND SRCS max1161x.c)
+  endif()
+
+  if (CONFIG_ADC_LTC1867L)
+    list(APPEND SRCS ltc1867l.c)
+  endif()
+endif()
+
+if (CONFIG_LMP92001)
+  list(APPEND SRCS lmp92001.c)
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

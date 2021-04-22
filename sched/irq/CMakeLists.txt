@@ -33,35 +33,32 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS)
 
-if("${CONFIG_SMP}" STREQUAL "y")
-	if("${CONFIG_SPINLOCK_IRQ}" STREQUAL "y")
-		if("${CONFIG_ARCH_GLOBAL_IRQDISABLE}" STREQUAL "y")
-			list(APPEND CSRCS irq_spinlock.c)
-		endif()
+if (CONFIG_SMP)
+  list(APPEND SRCS irq_spinlock.c)
+endif()
+
+if(CONFIG_IRQCOUNT)
+	list(APPEND SRCS irq_csection.c)
+endif()
+
+if(CONFIG_SCHED_IRQMONITOR)
+	list(APPEND SRCS irq_foreach.c)
+	if(CONFIG_FS_PROCFS)
+		list(APPEND SRCS irq_procfs.c)
 	endif()
 endif()
 
-if("${CONFIG_IRQCOUNT}" STREQUAL "y")
-	list(APPEND CSRCS irq_csection.c)
+if(CONFIG_IRQCHAIN)
+	list(APPEND SRCS irq_chain.c)
 endif()
 
-if("${CONFIG_SCHED_IRQMONITOR}" STREQUAL "y")
-	list(APPEND CSRCS irq_foreach.c)
-	if("${CONFIG_FS_PROCFS}" STREQUAL "y")
-		list(APPEND CSRCS irq_procfs.c)
-	endif()
-endif()
-
-if("${CONFIG_IRQCHAIN}" STREQUAL "y")
-	list(APPEND CSRCS irq_chain.c)
-endif()
-
-list(APPEND CSRCS
+list(APPEND SRCS
 	irq_initialize.c
 	irq_attach.c
 	irq_dispatch.c
 	irq_unexpectedisr.c
 )
-set_parent_srcs(${CSRCS})
+
+target_sources(sched PRIVATE ${SRCS})

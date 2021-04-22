@@ -33,41 +33,41 @@
 #
 ############################################################################
 
-set(CSRCS)
-
-# Network device interface source files
-
-list(APPEND CSRCS devif_initialize.c devif_send.c devif_poll.c devif_callback.c)
-list(APPEND CSRCS devif_loopback.c)
+set(SRCS
+  devif_initialize.c devif_send.c devif_poll.c devif_callback.c
+  devif_loopback.c)
 
 # Device driver IP packet receipt interfaces
 
-if("${CONFIG_NET_IPv4}" STREQUAL "y")
-	list(APPEND CSRCS ipv4_input.c)
+if (CONFIG_NET_IPv4)
+  list(APPEND SRCS ipv4_input.c)
 endif()
 
-if("${CONFIG_NET_IPv6}" STREQUAL "y")
-	list(APPEND CSRCS ipv6_input.c)
+if (CONFIG_NET_IPv6)
+  list(APPEND SRCS ipv6_input.c)
 endif()
 
 # IP forwarding
 
-if("${CONFIG_NET_IPFORWARD}" STREQUAL "y")
-	list(APPEND CSRCS devif_forward.c)
+if (CONFIG_NET_IPFORWARD)
+  list(APPEND SRCS devif_forward.c)
 endif()
 
 # I/O buffer chain support required?
 
-if("${CONFIG_MM_IOB}" STREQUAL "y")
-	list(APPEND CSRCS devif_iobsend.c)
+if (CONFIG_MM_IOB)
+  list(APPEND SRCS devif_iobsend.c)
 endif()
 
 # Raw packet socket support
 
-if("${CONFIG_NET_PKT}" STREQUAL "y")
-	list(APPEND CSRCS devif_pktsend.c)
+if (CONFIG_NET_PKT)
+  list(APPEND SRCS devif_pktsend.c)
 endif()
 
-# Include network device interface build support
+if (CONFIG_NET_CAN)
+  list(APPEND SRCS devif_cansend.c)
+endif()
 
-set_parent_srcs(${CSRCS})
+target_sources(net PRIVATE ${SRCS})
+

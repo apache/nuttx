@@ -33,56 +33,55 @@
 #
 ############################################################################
 
-if("${CONFIG_NET_ROUTE}" STREQUAL "y")
+if (CONFIG_NET_ROUTE)
 
-	set(CSRCS)
+  # General routing table support
 
-	# General routing table support
-	
-	list(APPEND CSRCS net_initroute.c net_router.c netdev_router.c)
-	
-	# Support in-memory, RAM-based routing tables
-	
-	if("${CONFIG_ROUTE_IPv4_RAMROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_alloc_ramroute.c  net_add_ramroute.c net_del_ramroute.c)
-		list(APPEND CSRCS net_queue_ramroute.c net_foreach_ramroute.c)
-	elseif("${CONFIG_ROUTE_IPv6_RAMROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_alloc_ramroute.c  net_add_ramroute.c net_del_ramroute.c)
-		list(APPEND CSRCS net_queue_ramroute.c net_foreach_ramroute.c)
-	endif()
-	
-	# Support for in-memory, read-only (ROM) routing tables
-	
-	if("${CONFIG_ROUTE_IPv4_ROMROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_foreach_romroute.c)
-	elseif("${CONFIG_ROUTE_IPv6_ROMROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_foreach_romroute.c)
-	endif()
-	
-	# Support for routing tables in files
-	
-	if("${CONFIG_ROUTE_IPv4_FILEROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_fileroute.c net_add_fileroute.c net_del_fileroute.c)
-		list(APPEND CSRCS net_foreach_fileroute.c)
-	elseif("${CONFIG_ROUTE_IPv6_FILEROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_fileroute.c net_add_fileroute.c net_del_fileroute.c)
-		list(APPEND CSRCS net_foreach_fileroute.c)
-	endif()
-	
-	# In-memory cache for file-based routing tables
-	
-	if("${CONFIG_ROUTE_IPv4_CACHEROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_cacheroute.c)
-	elseif("${CONFIG_ROUTE_IPv6_CACHEROUTE}" STREQUAL "y")
-		list(APPEND CSRCS net_cacheroute.c)
-	endif()
-	
-	if("${CONFIG_DEBUG_NET_INFO}" STREQUAL "y")
-		list(APPEND CSRCS net_dumproute.c)
-	endif()
-	
-	# Include routing table build support
+  set(SRCS net_initroute.c net_router.c netdev_router.c)
 
-	set_parent_srcs(${CSRCS})
+  # Support in-memory, RAM-based routing tables
 
+  if (CONFIG_ROUTE_IPv4_RAMROUTE)
+    list(APPEND SRCS
+      net_alloc_ramroute.c  net_add_ramroute.c net_del_ramroute.c
+      net_queue_ramroute.c net_foreach_ramroute.c)
+  else if (CONFIG_ROUTE_IPv6_RAMROUTE)
+    list(APPEND SRCS
+      net_alloc_ramroute.c  net_add_ramroute.c net_del_ramroute.c
+      net_queue_ramroute.c net_foreach_ramroute.c)
+  endif()
+
+  # Support for in-memory, read-only (ROM) routing tables
+
+  if (CONFIG_ROUTE_IPv4_ROMROUTE)
+    list(APPEND SRCS net_foreach_romroute.c)
+  else if (CONFIG_ROUTE_IPv6_ROMROUTE)
+    list(APPEND SRCS net_foreach_romroute.c)
+  endif()
+
+  # Support for routing tables in files
+
+  if (CONFIG_ROUTE_IPv4_FILEROUTE)
+    list(APPEND SRCS
+      net_fileroute.c net_add_fileroute.c net_del_fileroute.c
+      net_foreach_fileroute.c)
+  else if (CONFIG_ROUTE_IPv6_FILEROUTE)
+    list(APPEND SRCS
+      net_fileroute.c net_add_fileroute.c net_del_fileroute.c
+      net_foreach_fileroute.c)
+  endif()
+
+  # In-memory cache for file-based routing tables
+
+  if (CONFIG_ROUTE_IPv4_CACHEROUTE)
+    list(APPEND SRCS net_cacheroute.c)
+  else if (CONFIG_ROUTE_IPv6_CACHEROUTE)
+    list(APPEND SRCS net_cacheroute.c)
+  endif()
+
+  if (CONFIG_DEBUG_NET_INFO)
+    list(APPEND SRCS net_dumproute.c)
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
 endif()

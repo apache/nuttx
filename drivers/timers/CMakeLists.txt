@@ -34,50 +34,58 @@
 #
 ############################################################################
 
-# Include timer drivers
+set(SRCS)
 
-set(CSRCS)
-
-if("${CONFIG_WATCHDOG}" STREQUAL "y")
-	list(APPEND CSRCS watchdog.c)
+if (CONFIG_WATCHDOG)
+  list(APPEND SRCS watchdog.c)
 endif()
 
-if("${CONFIG_TIMER}" STREQUAL "y")
-	list(APPEND CSRCS timer.c)
+if (CONFIG_TIMER)
+  list(APPEND SRCS timer.c)
 endif()
 
-if("${CONFIG_TIMER_ARCH}" STREQUAL "y")
-	list(APPEND CSRCS arch_timer.c)
+if (CONFIG_TIMER_ARCH)
+  list(APPEND SRCS arch_timer.c)
 endif()
 
-if("${CONFIG_ONESHOT}" STREQUAL "y")
-	list(APPEND CSRCS oneshot.c)
+if (CONFIG_ONESHOT)
+  list(APPEND SRCS oneshot.c)
 endif()
 
-if("${CONFIG_ALARM_ARCH}" STREQUAL "y")
-	list(APPEND CSRCS arch_alarm.c)
+if (CONFIG_ALARM_ARCH)
+  list(APPEND SRCS arch_alarm.c)
 endif()
 
-if("${CONFIG_RTC_DSXXXX}" STREQUAL "y")
-	list(APPEND CSRCS ds3231.c)
+if (CONFIG_RTC_DSXXXX)
+  list(APPEND SRCS ds3231.c)
 endif()
 
-if("${CONFIG_RTC_PCF85263}" STREQUAL "y")
-	list(APPEND CSRCS pcf85263.c)
+if (CONFIG_RTC_PCF85263)
+  list(APPEND SRCS pcf85263.c)
 endif()
 
-if("${CONFIG_RTC_ARCH}" STREQUAL "y")
-	list(APPEND CSRCS arch_rtc.c)
+if (CONFIG_RTC_MCP794XX)
+  list(APPEND SRCS mcp794xx.c)
 endif()
 
-if("${CONFIG_RTC_DRIVER}" STREQUAL "y")
-	list(APPEND CSRCS rtc.c)
+if (CONFIG_RTC_RPMSG)
+  list(APPEND SRCS rpmsg_rtc.c)
 endif()
 
-if("${CONFIG_TIMERS_CS2100CP}" STREQUAL "y")
-	list(APPEND CSRCS cs2100-cp.c)
+if (CONFIG_RTC_ARCH)
+  list(APPEND SRCS arch_rtc.c)
 endif()
 
-# Include timer build support (if any were selected)
+if (CONFIG_RTC_DRIVER)
+  list(APPEND SRCS rtc.c)
+endif()
 
-set_parent_srcs(${CSRCS})
+if (CONFIG_TIMERS_CS2100CP)
+  list(APPEND SRCS cs2100-cp.c)
+endif()
+
+if (CONFIG_PWM)
+  list(APPEND SRCS pwm.c)
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})

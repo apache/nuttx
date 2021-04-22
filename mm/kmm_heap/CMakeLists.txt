@@ -35,20 +35,23 @@
 
 # Kernel heap allocator
 
-if("${CONFIG_MM_KERNEL_HEAP}" STREQUAL "y")
+if(CONFIG_MM_KERNEL_HEAP)
 
-	set(CSRCS)
+	set(SRCS)
 
-	list(APPEND CSRCS kmm_initialize.c kmm_addregion.c kmm_sem.c)
-	list(APPEND CSRCS kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c)
-	list(APPEND CSRCS kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c kmm_heapmember.c)
+  list(APPEND SRCS
+    kmm_initialize.c kmm_addregion.c
+    kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
+    kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c kmm_heapmember.c)
 
-	if("${CONFIG_BUILD_KERNEL}" STREQUAL "y")
-		list(APPEND CSRCS kmm_sbrk.c)
-	endif()
+	if(CONFIG_BUILD_KERNEL)
+		list(APPEND SRCS kmm_sbrk.c)
+  endif()
 
-	# Add the kernel heap directory to the build
+  if (CONFIG_DEBUG_MM)
+    list(APPEND SRCS kmm_checkcorruption.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  target_sources(mm PRIVATE ${SRCS})
 
-endif() # CONFIG_MM_KERNEL_HEAP
+endif()

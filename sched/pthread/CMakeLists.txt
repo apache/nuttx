@@ -33,64 +33,31 @@
 #
 ############################################################################
 
-set(CSRCS)
+if(NOT CONFIG_DISABLE_PTHREAD)
+  set(SRCS)
 
-# Include pthread build support
+	list(APPEND SRCS
+    pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
+    pthread_getschedparam.c pthread_setschedparam.c
+    pthread_mutexinit.c pthread_mutexdestroy.c
+    pthread_mutextimedlock.c pthread_mutextrylock.c pthread_mutexunlock.c
+    pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
+    pthread_condclockwait.c pthread_kill.c pthread_sigmask.c
+    pthread_cancel.c
+    pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
+    pthread_release.c pthread_setschedprio.c)
 
-if(NOT "${CONFIG_DISABLE_PTHREAD}" STREQUAL "y")
+  if (NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
+    list(APPEND SRCS pthread_mutex.c pthread_mutexconsistent.c pthread_mutexinconsistent.c)
+  endif()
 
-	list(APPEND CSRCS
-		pthread_cancel.c
-		pthread_completejoin.c
-		pthread_condbroadcast.c
-		pthread_condsignal.c
-		pthread_condwait.c
-		pthread_create.c
-		pthread_detach.c
-		pthread_exit.c
-		pthread_findjoininfo.c
-		pthread_getschedparam.c
-		pthread_initialize.c
-		pthread_join.c
-		pthread_mutexdestroy.c
-		pthread_mutexinit.c
-		pthread_mutextrylock.c
-		pthread_mutexunlock.c
-		pthread_release.c
-		pthread_setschedparam.c
-		pthread_setschedprio.c
-	)
+  if (CONFIG_SMP)
+    list(APPEND SRCS pthread_setaffinity.c pthread_getaffinity.c)
+  endif()
 
-	if(NOT "${CONFIG_PTHREAD_MUTEX_UNSAFE}" STREQUAL "y")
-		list(APPEND CSRCS
-			pthread_mutex.c
-			pthread_mutexconsistent.c
-			pthread_mutexinconsistent.c
-		)
-	endif()
+  if (CONFIG_PTHREAD_CLEANUP)
+    list(APPEND SRCS pthread_cleanup.c)
+  endif()
 
-	if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-		list(APPEND CSRCS
-			pthread_kill.c
-			pthread_sigmask.c
-		)
-	endif()
-
-	if("${CONFIG_SMP}" STREQUAL "y")
-		list(APPEND CSRCS
-			pthread_setaffinity.c
-			pthread_getaffinity.c
-		)
-	endif()
-
-	if("${CONFIG_PTHREAD_CLEANUP}" STREQUAL "y")
-		list(APPEND CSRCS pthread_cleanup.c)
-	endif()
-
+  target_sources(sched PRIVATE ${SRCS})
 endif()
-
-#list(APPEND CSRCS
-#	pthread_getspecific.c
-#	pthread_keydelete.c
-#)
-set_parent_srcs(${CSRCS})

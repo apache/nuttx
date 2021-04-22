@@ -33,68 +33,32 @@
 #
 ############################################################################
 
-set(CSRCS) 
+set(SRCS
+  lib_ffs.c lib_ffsl.c lib_ffsll.c lib_fls.c lib_flsl.c
+  lib_flsll.c lib_isbasedigit.c lib_memset.c lib_memchr.c
+  lib_memccpy.c lib_memcmp.c lib_memmove.c lib_memrchr.c
+  lib_popcount.c lib_popcountl.c lib_popcountll.c
+  lib_skipspace.c lib_stpcpy.c lib_stpncpy.c lib_strcasecmp.c
+  lib_strcat.c lib_strchr.c lib_strcpy.c lib_strcmp.c lib_strcspn.c
+  lib_strdup.c lib_strerror.c lib_strlen.c lib_strnlen.c
+  lib_strncasecmp.c lib_strncat.c lib_strncmp.c lib_strncpy.c
+  lib_strndup.c lib_strcasestr.c lib_strpbrk.c lib_strrchr.c
+  lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c
+  lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c lib_strsignal.c
+  lib_anbstr2cstr.c lib_ancstr2bstr.c lib_bmem2cmem.c
+  lib_bstrnlen.c lib_cmem2bmem.c lib_nbstr2cstr.c lib_ncstr2bstr.c
+  lib_index.c lib_rindex.c lib_strlcpy.c)
 
-if(NOT "${CONFIG_LIBC_ARCH_MEMCPY}" STREQUAL "y")
-	if("${CONFIG_MEMCPY_VIK}" STREQUAL "y")
-		list(APPEND CSRCS lib_vikmemcpy.c)
-	else()
-		list(APPEND CSRCS lib_memcpy.c)
-	endif()
+if (NOT CONFIG_LIBC_ARCH_MEMCPY)
+  if (CONFIG_MEMCPY_VIK)
+    list(APPEND SRCS lib_vikmemcpy.c)
+  else()
+    list(APPEND SRCS lib_memcpy.c)
+  endif()
 endif()
 
-if("${CONFIG_LIBC_LOCALE}" STREQUAL "y")
-	list(APPEND CSRCS
-		lib_strcoll.c
-		lib_strxfrm.c
-	)
+if (CONFIG_LIBC_LOCALE)
+  list(APPEND SRCS lib_strcoll.c lib_strxfrm.c)
 endif()
 
-if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-	list(APPEND CSRCS lib_strsignal.c)
-endif()
-
-# Add the string directory to the build
-list(APPEND CSRCS
-	lib_ffs.c
-	lib_ffsl.c
-	lib_ffsll.c
-	lib_fls.c
-	lib_flsl.c
-	lib_flsll.c
-	lib_isbasedigit.c
-	lib_memset.c
-	lib_memchr.c
-	lib_memccpy.c
-	lib_memcmp.c
-	lib_memmove.c
-	lib_memrchr.c
-	lib_skipspace.c
-	lib_stpcpy.c
-	lib_stpncpy.c
-	lib_strcasecmp.c
-	lib_strcat.c
-	lib_strchr.c
-	lib_strcpy.c
-	lib_strcmp.c
-	lib_strcspn.c
-	lib_strdup.c
-	lib_strerror.c
-	lib_strlen.c
-	lib_strnlen.c
-	lib_strncasecmp.c
-	lib_strncat.c
-	lib_strncmp.c
-	lib_strncpy.c
-	lib_strndup.c
-	lib_strcasestr.c
-	lib_strpbrk.c
-	lib_strrchr.c
-	lib_strspn.c
-	lib_strstr.c
-	lib_strtok.c
-	lib_strtokr.c
-	lib_strerrorr.c
-	lib_explicit_bzero.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

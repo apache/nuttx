@@ -33,10 +33,8 @@
 #
 ############################################################################
 
-if("${CONFIG_AUDIO}" STREQUAL "y")
-	set(CSRCS)
-	list(APPEND CSRCS lib_buffer.c)
-
-	# Add the audio/ directory to the build
-	set_parent_srcs(${CSRCS})
+if(CONFIG_AUDIO)
+  target_sources(c PRIVATE lib_buffer.c)
 endif()
+	add_subdirectory(libsrc)
+#endif()

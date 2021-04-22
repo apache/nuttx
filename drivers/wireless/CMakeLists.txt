@@ -33,45 +33,32 @@
 #
 ############################################################################
 
-if("${CONFIG_DRIVERS_WIRELESS}" STREQUAL "y")
+if (CONFIG_DRIVERS_WIRELESS)
+  set(SRCS)
 
-	set(SRCS)
+  add_subdirectory(ieee802154)
+  add_subdirectory(ieee80211)
+  add_subdirectory(lpwan)
 
-	# Include IEEE 802.15.4 support
-	
-	if("${CONFIG_DRIVERS_IEEE802154}" STREQUAL "y")
-		add_subdirectory(ieee802154)
-	endif()
-	
-	# Include IEEE 802.11 support
-	
-	if("${CONFIG_DRIVERS_IEEE80211}" STREQUAL "y")
-		add_subdirectory(ieee80211)
-	endif()
-	
-	# Include Bluetooth support
-	
-	if("${CONFIG_DRIVERS_BLUETOOTH}" STREQUAL "y")
-		add_subdirectory(bluetooth)
-	endif()
-	
-	# Include wireless drivers
-	
-	if("${CONFIG_WL_CC1101}" STREQUAL "y")
-		list(APPEND SRCS cc1101.c ISM1_868MHzGFSK100kbps.c ISM2_905MHzGFSK250kbps.c)
-		list(APPEND SRCS ISM2_433MHzMSK500kbps.c)
-	endif()
-	
-	if("${CONFIG_WL_SPIRIT}" STREQUAL "y")
-		add_subdirectory(spirit)
-	endif()
-	
-	if("${CONFIG_WL_NRF24L01}" STREQUAL "y")
-		list(APPEND SRCS nrf24l01.c)
-	endif()
-	
-	# Include wireless devices build support
+  # Include wireless drivers
 
-	nuttx_add_library(drivers_wireless ${SRCS})
+  if (CONFIG_WL_CC1101)
+    list(APPEND SRCS
+      cc1101.c ISM1_868MHzGFSK100kbps.c ISM2_905MHzGFSK250kbps.c
+      ISM2_433MHzMSK500kbps.c)
+  endif()
 
+  if (CONFIG_WL_GS2200M)
+    list(APPEND SRCS gs2200m.c)
+  endif()
+
+  if (CONFIG_WL_SPIRIT)
+    add_subdirectory(spirit)
+  endif()
+
+  if (CONFIG_WL_NRF24L01)
+    list(APPEND SRCS nrf24l01.c)
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

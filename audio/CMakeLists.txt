@@ -33,25 +33,18 @@
 #
 ############################################################################
 
-if("${CONFIG_AUDIO}" STREQUAL "y")
+if (CONFIG_AUDIO)
+  nuttx_add_library(audio)
 
-	set(CSRCS)
-	list(APPEND CSRCS audio.c)
-	
-	if("${CONFIG_AUDIO_COMP}" STREQUAL "y")
-		list(APPEND CSRCS audio_comp.c)
-	endif()
-	
-	# Include support for various drivers.  Each Make.defs file will add its
-	# files to the source file list, add its DEPPATH info, and will add
-	# the appropriate paths to the VPATH variable
-	
-	if("${CONFIG_AUDIO_FORMAT_PCM}" STREQUAL "y")
-		list(APPEND CSRCS pcm_decode.c)
-	endif()
-	
-	if(CSRCS)
-		nuttx_add_library(audio ${CSRCS})
-	endif()
+  set(SRCS audio.c)
 
+  if (CONFIG_AUDIO_COMP)
+    list(APPEND SRCSaudio_comp.c)
+  endif()
+
+  if (CONFIG_AUDIO_FORMAT_PCM)
+    list(APPEND SRCS pcm_decode.c)
+  endif()
+
+  target_sources(audio PRIVATE ${SRCS})
 endif()

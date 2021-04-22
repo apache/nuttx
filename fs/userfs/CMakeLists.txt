@@ -33,15 +33,6 @@
 #
 ############################################################################
 
-if("${CONFIG_FS_USERFS}" STREQUAL "y")
-
-	# Add the userfs C files to the build	
-	set(CSRCS)
-	
-	list(APPEND CSRCS fs_userfs.c)
-	
-	# Add the userfs directory to the build
-	
-	set_parent_srcs(${CSRCS})
-
+if(CONFIG_FS_USERFS)
+  target_sources(fs PRIVATE fs_userfs.c)
 endif()

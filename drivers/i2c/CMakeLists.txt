@@ -34,26 +34,22 @@
 #
 ############################################################################
 
-# Don't build anything if there is no I2C support
+if (CONFIG_I2C)
+  set(SRCS i2c_read.c i2c_write.c i2c_writeread.c)
 
-if("${CONFIG_I2C}" STREQUAL "y")
+  if (CONFIG_I2C_DRIVER)
+    list(APPEND SRCS i2c_driver.c)
+  endif()
 
-	set(CSRCS)
+  if (CONFIG_I2C_BITBANG)
+    list(APPEND SRCS i2c_bitbang.c)
+  endif()
 
-	list(APPEND CSRCS i2c_read.c i2c_write.c i2c_writeread.c)
-	
-	if("${CONFIG_I2C_DRIVER}" STREQUAL "y")
-		list(APPEND CSRCS i2c_driver.c)
-	endif()
-	
-	# Include the selected I2C multiplexer drivers
-	
-	if("${CONFIG_I2CMULTIPLEXER_PCA9540BDP}" STREQUAL "y")
-		list(APPEND CSRCS pca9540bdp.c)
-	endif()
+  # Include the selected I2C multiplexer drivers
 
-	# Include I2C device driver build support
+  if (CONFIG_I2CMULTIPLEXER_PCA9540BDP)
+    list(APPEND SRCS pca9540bdp.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
-
-endif()  # CONFIG_I2C
+  target_sources(drivers PRIVATE ${SRCS})
+endif()

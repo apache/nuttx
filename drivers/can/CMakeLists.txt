@@ -33,19 +33,12 @@
 #
 ############################################################################
 
-# Don't build anything if there is no CAN support
+if (CONFIG_CAN)
+  set(SRCS can.c)
 
-if("${CONFIG_CAN}" STREQUAL "y")
+  if (CONFIG_CAN_MCP2515)
+    list(APPEND SRCS mcp2515.c)
+  endif()
 
-	set(CSRCS)
-
-	list(APPEND CSRCS can.c)
-	
-	if("${CONFIG_CAN_MCP2515}" STREQUAL "y")
-		list(APPEND CSRCS mcp2515.c)
-	endif()
-	
-	# Include CAN device driver build support
-
-	set_parent_srcs(${CSRCS})
+  target_sources(drivers PRIVATE ${SRCS})
 endif()

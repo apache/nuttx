@@ -35,51 +35,44 @@
 
 # UDP source files
 
-if("${CONFIG_NET_UDP}" STREQUAL "y")
-	if(NOT "${CONFIG_NET_UDP_NO_STACK}" STREQUAL "y")
-	
-		set(CSRCS)
-		
-		# Socket layer
-		
-		list(APPEND CSRCS udp_psock_send.c)
-	
-		if("${CONFIG_NET_UDPPROTO_OPTIONS}" STREQUAL "y")
-			list(APPEND CSRCS udp_setsockopt.c)
-		endif()
-		
-		if("${CONFIG_NET_UDP_WRITE_BUFFERS}" STREQUAL "y")
-			list(APPEND CSRCS udp_psock_sendto_buffered.c)
-		else()
-			list(APPEND CSRCS udp_psock_sendto_unbuffered.c)
-		endif()
-		
-		if(NOT "${CONFIG_DISABLE_POLL}" STREQUAL "y")
-			if("${CONFIG_NET_UDP_READAHEAD}" STREQUAL "y")
-				list(APPEND CSRCS udp_netpoll.c)
-				if("${CONFIG_UDP_READAHEAD_NOTIFIER}" STREQUAL "y")
-					list(APPEND CSRCS udp_notifier.c)
-				endif()
-			endif()
-		endif()
-		
-		# Transport layer
-		
-		list(APPEND CSRCS udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c)
-		list(APPEND CSRCS udp_callback.c udp_ipselect.c)
-		
-		# UDP write buffering
-		
-		if("${CONFIG_NET_UDP_WRITE_BUFFERS}" STREQUAL "y")
-			list(APPEND CSRCS udp_wrbuffer.c)
-			if("${CONFIG_DEBUG_FEATURES}" STREQUAL "y")
-				list(APPEND CSRCS udp_wrbuffer_dump.c)
-			endif()
-		endif()
-		
-		# Include UDP build support
-	
-		set_parent_srcs(${CSRCS})
-	
-	endif() # !CONFIG_NET_UDP_NO_STACK
-endif() # CONFIG_NET_UDP
+if (CONFIG_NET_UDP AND NOT CONFIG_NET_UDP_NO_STACK)
+  # Socket layer
+
+  set(SRCS udp_recvfrom.c)
+
+  if (CONFIG_NET_UDPPROTO_OPTIONS)
+    list(APPEND SRCS udp_setsockopt.c)
+  endif()
+
+  if (CONFIG_NET_UDP_WRITE_BUFFERS)
+    list(APPEND SRCS udp_sendto_buffered.c)
+  else()
+    list(APPEND SRCS udp_sendto_unbuffered.c)
+  endif()
+
+  if (CONFIG_NET_UDP_NOTIFIER)
+    list(APPEND SRCS udp_notifier.c)
+
+    if (CONFIG_NET_UDP_WRITE_BUFFERS)
+      list(APPEND SRCS udp_txdrain.c)
+    endif()
+  endif()
+
+  # Transport layer
+
+  list(APPEND SRCS
+    udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c
+    udp_close.c udp_callback.c udp_ipselect.c udp_netpoll.c)
+
+  # UDP write buffering
+
+  if (CONFIG_NET_UDP_WRITE_BUFFERS)
+    list(APPEND SRCS udp_wrbuffer.c)
+
+    if (CONFIG_DEBUG_FEATURES)
+      list(APPEND SRCS udp_wrbuffer_dump.c)
+    endif()
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
+endif()

@@ -35,19 +35,12 @@
 
 # User Socket source files
 
-if("${CONFIG_NET_USRSOCK}" STREQUAL "y")
-
-	set(CSRCS)
-
-	list(APPEND CSRCS usrsock_close.c usrsock_conn.c usrsock_bind.c usrsock_connect.c)
-	list(APPEND CSRCS usrsock_dev.c usrsock_getpeername.c)
-	list(APPEND CSRCS usrsock_event.c usrsock_getsockname.c usrsock_getsockopt.c)
-	list(APPEND CSRCS usrsock_poll.c usrsock_recvfrom.c usrsock_sendto.c)
-	list(APPEND CSRCS usrsock_setsockopt.c usrsock_socket.c usrsock_sockif.c)
-	list(APPEND CSRCS usrsock_accept.c usrsock_listen.c usrsock_ioctl.c)
-	
-	# Include User Socket build support
-
-	set_parent_srcs(${CSRCS})
-
-endif() # CONFIG_NET_USRSOCK
+if (CONFIG_NET_USRSOCK)
+  target_sources(net PRIVATE
+    usrsock_close.c usrsock_conn.c usrsock_bind.c usrsock_connect.c
+    usrsock_dev.c usrsock_getpeername.c
+    usrsock_event.c usrsock_getsockname.c usrsock_getsockopt.c
+    usrsock_poll.c usrsock_recvmsg.c usrsock_sendmsg.c
+    usrsock_setsockopt.c usrsock_socket.c usrsock_sockif.c
+    usrsock_accept.c usrsock_listen.c usrsock_ioctl.c)
+endif()

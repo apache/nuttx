@@ -33,15 +33,17 @@
 #
 ############################################################################
 
-if("${CONFIG_WIRELESS_BLUETOOTH}" STREQUAL "y")
+if (CONFIG_WIRELESS_BLUETOOTH)
+  set(SRCS bt_buf.c bt_netdev.c bt_queue.c bt_hcicore.c)
 
-	# Include Bluetooth support
-	set(CSRCS)
-	
-	list(APPEND CSRCS bt_atomic.c bt_att.c bt_buf.c bt_conn.c bt_gatt.c bt_hcicore.c)
-	list(APPEND CSRCS bt_ioctl.c bt_keys.c bt_l2cap.c bt_netdev.c bt_queue.c bt_smp.c)
-	list(APPEND CSRCS bt_uuid.c)
+  # Host-layer
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_WIRELESS_BLUETOOTH_HOST)
+    list(APPEND SRCS
+      bt_atomic.c bt_att.c  bt_conn.c bt_gatt.c
+      bt_ioctl.c bt_keys.c bt_l2cap.c bt_smp.c
+      bt_uuid.c)
+  endif()
 
-endif() # CONFIG_WIRELESS_BLUETOOTH
+  target_sources(fs PRIVATE ${SRCS})
+endif()

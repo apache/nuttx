@@ -33,29 +33,25 @@
 #
 ############################################################################
 
-# Expose NXTK interfaces to applications
+if (CONFIG_NX)
+  set(SRCS
+    nxtk_setsubwindows.c nxtk_events.c nxtk_block.c nxtk_synch.c
+    nxtk_subwindowclip.c nxtk_containerclip.c nxtk_subwindowmove.c
+    nxtk_drawframe.c
+    nxtk_raise.c nxtk_lower.c nxtk_modal.c nxtk_setvisibility.c
+    nxtk_ishidden.c
+    nxtk_setposition.c nxtk_getposition.c nxtk_setsize.c
 
-if("${CONFIG_NX}" STREQUAL "y")
+    nxtk_openwindow.c nxtk_closewindow.c nxtk_fillwindow.c
+    nxtk_getwindow.c nxtk_filltrapwindow.c nxtk_movewindow.c
+    nxtk_bitmapwindow.c nxtk_drawcirclewindow.c nxtk_drawlinewindow.c
+    nxtk_fillcirclewindow.c
 
-	set(CSRCS)
+    nxtk_opentoolbar.c nxtk_closetoolbar.c nxtk_filltoolbar.c
+    nxtk_gettoolbar.c nxtk_filltraptoolbar.c nxtk_movetoolbar.c
+    nxtk_bitmaptoolbar.c nxtk_drawcircletoolbar.c nxtk_drawlinetoolbar.c
+    nxtk_fillcircletoolbar.c nxtk_toolbarbounds.c)
 
-	list(APPEND CSRCS nxtk_openwindow.c nxtk_closewindow.c nxtk_getposition.c)
-	list(APPEND CSRCS nxtk_setposition.c nxtk_setsize.c nxtk_raise.c nxtk_lower.c)
-	list(APPEND CSRCS nxtk_fillwindow.c nxtk_getwindow.c nxtk_filltrapwindow.c)
-	list(APPEND CSRCS nxtk_movewindow.c nxtk_bitmapwindow.c nxtk_events.c)
-	list(APPEND CSRCS nxtk_setsubwindows.c nxtk_drawcirclewindow.c nxtk_drawlinewindow.c)
-	list(APPEND CSRCS nxtk_fillcirclewindow.c nxtk_block.c)
-
-	list(APPEND CSRCS nxtk_opentoolbar.c nxtk_closetoolbar.c nxtk_filltoolbar.c)
-	list(APPEND CSRCS nxtk_gettoolbar.c nxtk_filltraptoolbar.c nxtk_movetoolbar.c)
-	list(APPEND CSRCS nxtk_bitmaptoolbar.c nxtk_drawcircletoolbar.c nxtk_drawlinetoolbar.c)
-	list(APPEND CSRCS nxtk_fillcircletoolbar.c nxtk_toolbarbounds.c)
-
-	list(APPEND CSRCS nxtk_subwindowclip.c nxtk_containerclip.c nxtk_subwindowmove.c)
-	list(APPEND CSRCS nxtk_drawframe.c)
-
-	# Add the nxtk/ directory to the build
-	
-	set_parent_srcs(${CSRCS})
-
+  target_sources(nx PRIVATE ${SRCS})
 endif()
+

@@ -33,16 +33,10 @@
 #
 ############################################################################
 
-set(CSRCS)
+set(SRCS sem_init.c sem_getprotocol.c sem_getvalue.c)
 
-if(NOT "${CONFIG_PRIORITY_INHERITANCE}" STREQUAL "y")
-	list(APPEND CSRCS sem_setprotocol.c)
+if (NOT CONFIG_PRIORITY_INHERITANCE)
+  list(APPEND SRCS sem_setprotocol.c)
 endif()
 
-# Add the semaphore directory to the build
-list(APPEND CSRCS
-	sem_init.c
-	sem_getprotocol.c
-	sem_getvalue.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

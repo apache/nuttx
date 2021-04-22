@@ -33,24 +33,20 @@
 #
 ############################################################################
 
-# Support for operations on network devices
+set(SRCS
+  netdev_register.c netdev_ioctl.c netdev_txnotify.c
+  netdev_findbyname.c netdev_findbyaddr.c netdev_findbyindex.c
+  netdev_count.c netdev_ifconf.c netdev_foreach.c
+  netdev_unregister.c netdev_carrier.c netdev_default.c
+  netdev_verify.c netdev_lladdrsize.c)
 
-set(CSRCS)
-
-list(APPEND CSRCS netdev_register.c netdev_ioctl.c netdev_txnotify.c)
-list(APPEND CSRCS netdev_findbyname.c netdev_findbyaddr.c netdev_findbyindex.c)
-list(APPEND CSRCS netdev_count.c netdev_ifconf.c netdev_foreach.c)
-list(APPEND CSRCS netdev_unregister.c netdev_carrier.c netdev_default.c)
-list(APPEND CSRCS netdev_verify.c netdev_lladdrsize.c)
-
-if("${CONFIG_NETDEV_IFINDEX}" STREQUAL "y")
-	list(APPEND CSRCS netdev_indextoname.c netdev_nametoindex.c)
+if (CONFIG_NETDEV_IFINDEX)
+  list(APPEND SRCS netdev_indextoname.c netdev_nametoindex.c)
 endif()
 
-if("${CONFIG_NETDOWN_NOTIFIER}" STREQUAL "y")
-	list(APPEND CSRCS netdown_notifier.c)
+if (CONFIG_NETDOWN_NOTIFIER)
+  list(APPEND SRCS netdown_notifier.c)
 endif()
 
-# Include netdev build support
+target_sources(net PRIVATE ${SRCS})
 
-set_parent_srcs(${CSRCS})

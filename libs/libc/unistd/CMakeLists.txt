@@ -33,36 +33,39 @@
 #
 ############################################################################
 
-set(CSRCS)
-
-# Add the unistd directory to the build
-list(APPEND CSRCS
-	lib_access.c lib_daemon.c lib_swab.c lib_sysconf.c
+set(SRCS
+  lib_access.c lib_daemon.c lib_swab.c lib_pathconf.c lib_sysconf.c
   lib_getopt_common.c lib_getopt.c lib_getopt_long.c
   lib_getopt_longonly.c lib_getoptvars.c lib_getoptargp.c
-  lib_getopterrp.c lib_getoptindp.c lib_getoptoptp.c
-)
+  lib_getopterrp.c
+  lib_getoptindp.c lib_getoptoptp.c
+  lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c
+  lib_usleep.c lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
+  lib_setreuid.c lib_setregid.c
+  lib_getrusage.c lib_utimes.c
+  lib_setrlimit.c lib_getrlimit.c
+  lib_setpriority.c lib_getpriority.c
+  lib_futimes.c lib_futimens.c
+  lib_gethostname.c lib_sethostname.c)
 
-if(NOT "${CONFIG_DISABLE_ENVIRON}" STREQUAL "y")
-	list(APPEND CSRCS lib_chdir.c lib_getcwd.c)
+if (NOT CONFIG_SCHED_USER_IDENTITY)
+  list(APPEND SRCS lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c)
 endif()
 
-if("${CONFIG_LIBC_EXECFUNCS}" STREQUAL "y")
-	list(APPEND CSRCS lib_execl.c)
+if (NOT CONFIG_DISABLE_ENVIRON)
+  list(APPEND SRCS lib_chdir.c lib_getcwd.c lib_restoredir.c)
 endif()
 
-if(NOT "${CONFIG_DISABLE_MOUNTPOINTS}" STREQUAL "y")
-	list(APPEND CSRCS lib_truncate.c)
+if (CONFIG_LIBC_EXECFUNCS)
+  list(APPEND SRCS lib_execl.c)
 endif()
 
-if("${CONFIG_PIPES}" STREQUAL "y")
-	list(APPEND CSRCS lib_pipe.c)
+if (NOT CONFIG_DISABLE_MOUNTPOINTS)
+  list(APPEND SRCS lib_truncate.c lib_posix_fallocate.c)
 endif()
 
-if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-	list(APPEND CSRCS lib_sleep.c lib_usleep.c)
+if (CONFIG_PIPES)
+  list(APPEND SRCS lib_pipe.c lib_pipe2.c)
 endif()
 
-list(APPEND CSRCS lib_gethostname.c lib_sethostname.c)
-
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})

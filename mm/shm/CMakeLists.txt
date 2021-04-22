@@ -35,13 +35,7 @@
 
 # Shared memory allocator
 
-if("${CONFIG_MM_SHM}" STREQUAL "y")
-	set(CSRCS)
-
-	list(APPEND CSRCS shm_initialize.c)
-	list(APPEND CSRCS shmat.c shmctl.c shmdt.c shmget.c)
-
-	# Add the shared memory directory to the build
-
-	set_parent_srcs(${CSRCS})
+if(CONFIG_MM_SHM)
+  target_sources(mm PRIVATE
+    shm_initialize.c shmat.c shmctl.c shmdt.c shmget.c)
 endif()

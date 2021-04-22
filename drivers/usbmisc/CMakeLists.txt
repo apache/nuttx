@@ -33,17 +33,19 @@
 #
 ############################################################################
 
-if("${CONFIG_USBMISC}" STREQUAL "y")
+if (CONFIG_USBMISC)
+  set(SRCS)
 
-	set(CSRCS)
+  # Include USB miscellaneous drivers
 
-	# Include USB miscellaneous drivers
-	
-	if("${CONFIG_FUSB301}" STREQUAL "y")
-		list(APPEND CSRCS fusb301.c)
-	endif()
-	
-	# Include USB miscellaneous build support
+  if (CONFIG_FUSB301)
+    list(APPEND SRCS fusb301.c)
+  endif()
 
-	set_parent_srcs(${CSRCS})
+  if (CONFIG_FUSB303)
+    list(APPEND SRCS fusb303.c)
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
 endif()
+

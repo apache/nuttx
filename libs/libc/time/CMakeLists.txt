@@ -34,49 +34,17 @@
 #
 ############################################################################
 
-# Add the time C files to the build
+set(SRCS
+  lib_strftime.c lib_calendar2utc.c lib_daysbeforemonth.c
+  lib_gettimeofday.c lib_isleapyear.c lib_settimeofday.c lib_time.c
+  lib_timespec_get.c lib_nanosleep.c lib_difftime.c lib_dayofweek.c
+  lib_asctime.c lib_asctimer.c lib_ctime.c lib_ctimer.c
+  lib_gethrtime.c)
 
-set(CSRCS) 
-
-if(NOT "${CONFIG_DISABLE_SIGNALS}" STREQUAL "y")
-	list(APPEND CSRCS lib_nanosleep.c)
-endif()
-
-if("${CONFIG_LIBC_LOCALTIME}" STREQUAL "y")
-	list(APPEND CSRCS
-		lib_localtime.c
-		lib_asctime.c
-		lib_asctimer.c
-		lib_ctime.c
-		lib_ctimer.c
-	)
+if (CONFIG_LIBC_LOCALTIME)
+  list(APPEND SRCS lib_localtime.c)
 else()
-	list(APPEND CSRCS
-		lib_mktime.c
-		lib_gmtime.c
-		lib_gmtimer.c
-	)
-
-	if("${CONFIG_TIME_EXTENDED}" STREQUAL "y")
-		list(APPEND CSRCS
-			lib_dayofweek.c
-			lib_asctime.c
-			lib_asctimer.c
-			lib_ctime.c
-			lib_ctimer.c
-		)
-	endif()
+  list(APPEND SRCS lib_mktime.c lib_gmtime.c lib_gmtimer.c)
 endif()
 
-# Add the time directory to the build
-list(APPEND CSRCS
-	lib_strftime.c
-	lib_calendar2utc.c
-	lib_daysbeforemonth.c
-	lib_gettimeofday.c
-	lib_isleapyear.c
-	lib_settimeofday.c
-	lib_time.c
-	lib_difftime.c
-)
-set_parent_srcs(${CSRCS})
+target_sources(c PRIVATE ${SRCS})
