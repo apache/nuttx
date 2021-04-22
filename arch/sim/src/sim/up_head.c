@@ -63,7 +63,7 @@ static char g_logbuffer[4096];
 int main(int argc, char **argv, char **envp)
 {
 #ifdef CONFIG_SYSLOG_RPMSG
-  syslog_rpmsg_init_early("server", g_logbuffer, sizeof(g_logbuffer));
+  syslog_rpmsg_init_early(g_logbuffer, sizeof(g_logbuffer));
 #endif
 
   /* Start NuttX */
