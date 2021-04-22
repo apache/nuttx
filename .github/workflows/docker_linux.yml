@@ -26,7 +26,7 @@ on:
       - 'tools/ci/docker/linux/**'
 
 env:
-  IMAGE_NAME: nuttx-ci-linux
+  IMAGE_NAME: apache-nuttx-ci-linux
 
 jobs:
   # Push image to GitHub Packages.
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
-      IMAGE_TAG: docker.pkg.github.com/${{ github.repository }}/nuttx-ci-linux
+      IMAGE_TAG: docker.pkg.github.com/${{ github.repository }}/apache-nuttx-ci-linux
     steps:
       - uses: actions/checkout@v2
 
