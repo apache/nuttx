@@ -29,6 +29,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/lib/getopt.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -225,6 +226,81 @@ int tls_set_value(int tlsindex, uintptr_t tlsvalue);
 
 #ifndef CONFIG_TLS_ALIGNED
 FAR struct tls_info_s *tls_get_info(void);
+#endif
+
+/****************************************************************************
+ * Name: tls_set_dtor
+ *
+ * Description:
+ *   Set the TLS element destructor associated with the 'tlsindex' to 'destr'
+ *
+ * Input Parameters:
+ *   tlsindex - Index of TLS data destructor to set
+ *   destr    - The destr of TLS data element
+ *
+ * Returned Value:
+ *   Zero is returned on success, a negated errno value is return on
+ *   failure:
+ *
+ *     EINVAL - tlsindex is not in range.
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+int tls_set_dtor(int tlsindex, tls_dtor_t destr);
+#endif
+
+/****************************************************************************
+ * Name: tls_get_dtor
+ *
+ * Description:
+ *   Get the TLS element destructor associated with the 'tlsindex' to 'destr'
+ *
+ * Input Parameters:
+ *   tlsindex - Index of TLS data destructor to get
+ *
+ * Returned Value:
+ *   A non-null destruct function pointer.
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+tls_dtor_t tls_get_dtor(int tlsindex);
+#endif
+
+/****************************************************************************
+ * Name: tls_get_set
+ *
+ * Description:
+ *   Get the TLS element index set map
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   A set of allocated TLS index
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+tls_ndxset_t tls_get_set(void);
+#endif
+
+/****************************************************************************
+ * Name: tls_destruct
+ *
+ * Description:
+ *   Destruct all TLS data element associated with allocated key
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   A set of allocated TLS index
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+void tls_destruct(void);
 #endif
 
 /****************************************************************************

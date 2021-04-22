@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "task/task.h"

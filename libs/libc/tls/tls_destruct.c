@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_exit.c
+ * libs/libc/tls/tls_destruct.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,42 +24,59 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include <sched.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
+
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_exit
+ * Name: tls_destruct
  *
  * Description:
- *   Terminate execution of a thread started with pthread_create.
+ *   Destruct all TLS data element associated with allocated key
  *
  * Input Parameters:
- *   exit_value - The pointer of the pthread_exit parameter
+ *    None
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   A set of allocated TLS index
  *
  ****************************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+void tls_destruct(void)
 {
-#ifdef CONFIG_PTHREAD_CLEANUP
-  pthread_cleanup_popall();
-#endif
+  FAR struct tls_info_s *info = up_tls_info();
+  FAR void *tls_elem_ptr = NULL;
+  tls_dtor_t destructor;
+  tls_ndxset_t tlsset;
+  int candidate;
 
-#if CONFIG_TLS_NELEM > 0
-  tls_destruct();
-#endif
+  DEBUGASSERT(info != NULL);
+  tlsset = tls_get_set();
 
-  nx_pthread_exit(exit_value);
-  PANIC();
+  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
+    {
+      /* Is this candidate index available? */
+
+      tls_ndxset_t mask = (1 << candidate);
+      if (tlsset & mask)
+        {
+          tls_elem_ptr = (FAR void *)info->tl_elem[candidate];
+          destructor = tls_get_dtor(candidate);
+          if (tls_elem_ptr && destructor)
+            {
+              destructor(tls_elem_ptr);
+            }
+        }
+    }
 }
+
+#endif /* CONFIG_TLS_NELEM > 0 */
