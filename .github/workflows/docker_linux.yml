@@ -19,11 +19,13 @@ on:
       - master
     paths:
       - 'tools/ci/docker/linux/**'
+      - '.github/workflows/docker_linux.yml'
 
   # Run builds for any PRs.
   pull_request:
     paths:
       - 'tools/ci/docker/linux/**'
+      - '.github/workflows/docker_linux.yml'
 
 env:
   IMAGE_NAME: apache-nuttx-ci-linux
