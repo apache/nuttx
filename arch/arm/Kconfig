@@ -825,6 +825,14 @@ config ARM_HAVE_WFE_SEV
 	---help---
 		Use WFE and SEV instructions for spinlock to reduce power consumption
 
+config ARM_HAVE_FPU_D32
+	bool
+	select ARCH_HAVE_FPU
+	default n
+	---help---
+		FPU implemented in the VFPv3-D32 format that supports
+		32 double-precision floating-point registers.
+
 config ARM_HAVE_MPU_UNIFIED
 	bool
 	default n
