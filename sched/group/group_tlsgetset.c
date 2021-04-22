@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_exit.c
+ * sched/group/group_tlsgetset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,42 +24,49 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include <sched.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
+
+#include "sched/sched.h"
+#include "group/group.h"
+
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_exit
+ * Name: tls_get_set
  *
  * Description:
- *   Terminate execution of a thread started with pthread_create.
+ *   Get the set map of TLE element index.
  *
  * Input Parameters:
- *   exit_value - The pointer of the pthread_exit parameter
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   TLS element index set map.
  *
  ****************************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+tls_ndxset_t tls_get_set(void)
 {
-#ifdef CONFIG_PTHREAD_CLEANUP
-  pthread_cleanup_popall();
-#endif
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group = rtcb->group;
+  irqstate_t flags;
+  tls_ndxset_t tlsset;
 
-#if CONFIG_TLS_NELEM > 0
-  tls_destruct();
-#endif
+  DEBUGASSERT(group != NULL);
 
-  nx_pthread_exit(exit_value);
-  PANIC();
+  flags = spin_lock_irqsave(NULL);
+  tlsset = group->tg_tlsset;
+  spin_unlock_irqrestore(NULL, flags);
+
+  return tlsset;
 }
+
+#endif /* CONFIG_TLS_NELEM > 0 */

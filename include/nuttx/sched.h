@@ -345,7 +345,7 @@ struct pthread_cleanup_s
 };
 #endif
 
-/* type tls_ndxset_t ************************************************************/
+/* type tls_ndxset_t & tls_dtor_t **********************************************/
 
 /* Smallest addressable type that can hold the entire configured number of TLS
  * data indexes.
@@ -361,6 +361,9 @@ struct pthread_cleanup_s
 #  else
      typedef uint8_t tls_ndxset_t;
 #  endif
+
+typedef CODE void (*tls_dtor_t)(FAR void *);
+
 #endif
 
 /* struct dspace_s **************************************************************/
@@ -528,7 +531,8 @@ struct task_group_s
   /* Thread local storage *******************************************************/
 
 #if CONFIG_TLS_NELEM > 0
-  tls_ndxset_t tg_tlsset;           /* Set of TLS data indexes allocated        */
+  tls_ndxset_t tg_tlsset;                     /* Set of TLS indexes allocated   */
+  tls_dtor_t  tg_tlsdestr[CONFIG_TLS_NELEM]; /* List of TLS destructors        */
 #endif
 
   /* POSIX Signal Control Fields ************************************************/

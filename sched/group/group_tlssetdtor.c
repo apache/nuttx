@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_exit.c
+ * sched/group/group_tlssetdtor.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,42 +24,54 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-#include <sched.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include <nuttx/pthread.h>
+#include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
+
+#include "sched/sched.h"
+#include "group/group.h"
+
+#if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_exit
+ * Name: tls_set_dtor
  *
  * Description:
- *   Terminate execution of a thread started with pthread_create.
+ *   Set the TLS element destructor associated with the 'tlsindex' to 'destr'
  *
  * Input Parameters:
- *   exit_value - The pointer of the pthread_exit parameter
+ *   tlsindex - Index of TLS data destructor to set
+ *   destr    - The destr of TLS data element
  *
  * Returned Value:
- *   None
+ *   Zero is returned on success, a negated errno value is return on
+ *   failure:
  *
- * Assumptions:
+ *     EINVAL - tlsindex is not in range.
  *
  ****************************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+int tls_set_dtor(int tlsindex, tls_dtor_t destr)
 {
-#ifdef CONFIG_PTHREAD_CLEANUP
-  pthread_cleanup_popall();
-#endif
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group = rtcb->group;
+  irqstate_t flags;
 
-#if CONFIG_TLS_NELEM > 0
-  tls_destruct();
-#endif
+  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
 
-  nx_pthread_exit(exit_value);
-  PANIC();
+  flags = spin_lock_irqsave(NULL);
+  group->tg_tlsdestr[tlsindex] = destr;
+  spin_unlock_irqrestore(NULL, flags);
+
+  return OK;
 }
+
+#endif /* CONFIG_TLS_NELEM > 0 */
