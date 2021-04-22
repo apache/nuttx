@@ -215,6 +215,13 @@ config SYSLOG_RPMSG
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
+config SYSLOG_RPMSG_SERVER_NAME
+	string "The name of Syslog Rpmsg Server"
+	depends on SYSLOG_RPMSG
+	---help---
+		The proc name of rpmsg server. Client sends message to
+		specified name of remote proc.
+
 config SYSLOG_DEFAULT
 	bool "Default SYSLOG device"
 	---help---
