@@ -130,7 +130,7 @@ _interrupt_handler:
   lw   s0,  32*4(sp)  /* restore mstatus */
   csrw mstatus, s0
 
-
+  lw   x1,  1*4(sp)  /* ra */
   lw   x4,  4*4(sp)  /* tp */
   lw   x5,  5*4(sp)  /* t0 */
   lw   x6,  6*4(sp)  /* t1 */
@@ -159,8 +159,6 @@ _interrupt_handler:
   lw  x29, 29*4(sp)  /* t4 */
   lw  x30, 30*4(sp)  /* t5 */
   lw  x31, 31*4(sp)  /* t6 */
-
-  lw  x1,  1*4(sp)   /* ra */
 
   lw  sp,  2*4(sp)  /* restore original sp */
 
