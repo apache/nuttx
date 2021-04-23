@@ -63,6 +63,7 @@ struct bt_uart_bridge_device_s
 
   struct circbuf_s               recvbuf;
   sem_t                          recvlock;
+  sem_t                          recvsig;
   char                           sendbuf[HCI_SENDBUF_SIZE];
   size_t                         sendlen;
 };
@@ -118,12 +119,10 @@ bt_uart_circbuf_read(FAR struct bt_uart_bridge_device_s *device,
   int ret;
 
   ret = nxsem_wait_uninterruptible(&device->recvlock);
-  if (ret < 0)
+  if (ret >= 0)
     {
-      return ret;
+      ret = circbuf_read(&device->recvbuf, buffer, buflen);
     }
-
-  ret = circbuf_read(&device->recvbuf, buffer, buflen);
 
   nxsem_post(&device->recvlock);
 
@@ -137,14 +136,12 @@ bt_uart_circbuf_write(FAR struct bt_uart_bridge_device_s *device,
   int ret;
 
   ret = nxsem_wait_uninterruptible(&device->recvlock);
-  if (ret < 0)
+  if (ret >= 0)
     {
-      return ret;
-    }
-
-  if (circbuf_space(&device->recvbuf) >= buflen)
-    {
-      ret = circbuf_write(&device->recvbuf, buffer, buflen);
+      if (circbuf_space(&device->recvbuf) >= buflen)
+        {
+          ret = circbuf_write(&device->recvbuf, buffer, buflen);
+        }
     }
 
   nxsem_post(&device->recvlock);
@@ -204,24 +201,22 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
   int ret;
   int i;
 
-  ret = bt_uart_circbuf_read(device, buffer, buflen);
-  if (ret != 0)
-    {
-      return ret;
-    }
-
   while (1)
     {
-      ret = nxsem_wait_uninterruptible(&bridge->recvlock);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
       if (!circbuf_is_empty(&device->recvbuf))
         {
-          nxsem_post(&bridge->recvlock);
           break;
+        }
+
+      ret = nxsem_trywait(&bridge->recvlock);
+      if (ret < 0)
+        {
+          if (ret == -EAGAIN)
+            {
+              break;
+            }
+
+          return ret;
         }
 
       ret = bt_uart_file_read(&bridge->filep,
@@ -288,16 +283,16 @@ static ssize_t bt_uart_bridge_read(FAR struct file *filep,
                                           bridge->tmpbuf, ret))
             {
               bt_uart_circbuf_write(iterator, bridge->tmpbuf, ret);
+              nxsem_post(&iterator->recvsig);
             }
         }
 
-      if (!circbuf_is_empty(&device->recvbuf))
-        {
-          nxsem_post(&bridge->recvlock);
-          break;
-        }
-
       nxsem_post(&bridge->recvlock);
+    }
+
+  while (circbuf_is_empty(&device->recvbuf))
+    {
+      nxsem_wait_uninterruptible(&device->recvsig);
     }
 
   return bt_uart_circbuf_read(device, buffer, buflen);
@@ -476,6 +471,7 @@ int bt_uart_bridge_register(const char *hciname,
       device->bridge = bridge;
       bt_uart_filter_init(&device->filter, i);
       nxsem_init(&device->recvlock, 0, 1);
+      nxsem_init(&device->recvsig, 0, 0);
 
       ret = circbuf_init(&device->recvbuf, NULL, HCI_RECVBUF_SIZE);
       if (ret < 0)
@@ -504,6 +500,7 @@ int bt_uart_bridge_register(const char *hciname,
 err_device:
       circbuf_uninit(&device->recvbuf);
 err_circbuf:
+      nxsem_destroy(&device->recvsig);
       nxsem_destroy(&device->recvlock);
     }
 
