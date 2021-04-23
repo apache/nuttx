@@ -69,7 +69,7 @@ _interrupt_handler:
   addi sp,  sp, -XCPTCONTEXT_SIZE
 
   sw   x1,  1*4(sp)   /* ra */
-  sw   x3,  3*4(sp)   /* gp */
+  sw   x3,  3*4(sp)   /* gp (For register dumping on exception handler) */
   sw   x4,  4*4(sp)   /* tp */
   sw   x5,  5*4(sp)   /* t0 */
   sw   x6,  6*4(sp)   /* t1 */
@@ -100,16 +100,20 @@ _interrupt_handler:
   sw   x31, 31*4(sp)  /* t6 */
 
   addi s0,  sp, XCPTCONTEXT_SIZE
-  sw   s0,  2*4(sp)   /* original SP */
+  sw   s0,  2*4(sp)   /* Save original SP */
+
+  /* Save MSTATUS (Machine Status Register) */
 
   csrr s0,  mstatus
-  sw   s0,  32*4(sp)  /* mstatus */
+  sw   s0,  32*4(sp)
+
+  /* Save MEPC (Machine Exception Program Counter) */
 
   csrr s0,  mepc
-  sw   s0,  0(sp)     /* exception PC */
+  sw   s0,  0(sp)
 
-  csrr a0,  mcause    /* exception cause */
-  mv   a1,  sp        /* context = sp */
+  csrr a0,  mcause    /* Handler arg0: Exception cause */
+  mv   a1,  sp        /* Handler arg1: Context (saved registers on stack) */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   lui  sp,  %hi(g_intstacktop)
@@ -120,17 +124,24 @@ _interrupt_handler:
 
   jal  x1, esp32c3_dispatch_irq
 
-  /* If context switch is needed, return a new sp */
+  /* If context switch is needed, return a new SP */
 
   mv   sp,  a0
 
-  lw   s0,  0(sp)     /* restore mepc */
+  /* Restore MEPC (Machine Exception Program Counter) */
+
+  lw   s0,  0(sp)
   csrw mepc, s0
 
-  lw   s0,  32*4(sp)  /* restore mstatus */
+  /* Restore MSTATUS (Machine Status Register) */
+
+  lw   s0,  32*4(sp)
   csrw mstatus, s0
 
   lw   x1,  1*4(sp)  /* ra */
+
+  /* GP must not be changed after start-up due to relaxing optimization */
+
   lw   x4,  4*4(sp)  /* tp */
   lw   x5,  5*4(sp)  /* t0 */
   lw   x6,  6*4(sp)  /* t1 */
