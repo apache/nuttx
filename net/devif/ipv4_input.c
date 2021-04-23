@@ -297,7 +297,17 @@ int ipv4_input(FAR struct net_driver_s *dev)
             }
           else
 #endif
-          if (ipv4->proto != IP_PROTO_UDP)
+#ifdef NET_UDP_HAVE_STACK
+          if (ipv4->proto == IP_PROTO_UDP &&
+              net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+            {
+              /* Accecpt the UDP packet if the devices has not obtained
+               * the IP address to solve the compatibility issue of DHCP
+               * BOOTP working on unicast mode.
+               */
+            }
+          else
+#endif
             {
               /* Not destined for us and not forwardable... Drop the
                * packet.
