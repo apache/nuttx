@@ -75,6 +75,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
 endif
 
 ifeq ($(CONFIG_ENDIAN_BIG),y)
@@ -91,14 +93,12 @@ ifeq ($(CONFIG_ARMV7A_OABI_TOOLCHAIN),y)
 else
   CROSSDEV ?= $(TARGET_ARCH)-nuttx-eabi-
 endif
-  MAXOPTIMIZATION ?= -Os
 endif
 
 # Generic GNU EABI toolchain
 
 ifeq ($(CONFIG_ARMV7A_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
-  MAXOPTIMIZATION ?= -Os
 endif
 
 # Default toolchain

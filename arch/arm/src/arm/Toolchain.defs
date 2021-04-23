@@ -63,6 +63,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
 endif
 
 # NuttX buildroot under Linux or Cygwin
@@ -73,14 +75,12 @@ ifeq ($(CONFIG_ARM_OABI_TOOLCHAIN),y)
 else
   CROSSDEV ?= arm-nuttx-eabi-
 endif
-  MAXOPTIMIZATION ?= -Os
 endif
 
 # Generic GNU EABI toolchain
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
 endif
 
 # Default toolchain
