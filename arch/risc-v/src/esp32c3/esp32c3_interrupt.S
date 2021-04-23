@@ -45,7 +45,7 @@
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   .balign   16
   .type     g_intstackalloc, @object
-  .type     g_intstacktop,  @object
+  .type     g_intstacktop,   @object
 g_intstackalloc:
   .skip     ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
 g_intstacktop:
@@ -138,40 +138,40 @@ _interrupt_handler:
   lw   s0,  32*4(sp)
   csrw mstatus, s0
 
-  lw   x1,  1*4(sp)  /* ra */
+  lw   x1,  1*4(sp)   /* ra */
 
   /* GP must not be changed after start-up due to relaxing optimization */
 
-  lw   x4,  4*4(sp)  /* tp */
-  lw   x5,  5*4(sp)  /* t0 */
-  lw   x6,  6*4(sp)  /* t1 */
-  lw   x7,  7*4(sp)  /* t2 */
-  lw   x8,  8*4(sp)  /* s0 */
-  lw   x9,  9*4(sp)  /* s1 */
-  lw  x10, 10*4(sp)  /* a0 */
-  lw  x11, 11*4(sp)  /* a1 */
-  lw  x12, 12*4(sp)  /* a2 */
-  lw  x13, 13*4(sp)  /* a3 */
-  lw  x14, 14*4(sp)  /* a4 */
-  lw  x15, 15*4(sp)  /* a5 */
-  lw  x16, 16*4(sp)  /* a6 */
-  lw  x17, 17*4(sp)  /* a7 */
-  lw  x18, 18*4(sp)  /* s2 */
-  lw  x19, 19*4(sp)  /* s3 */
-  lw  x20, 20*4(sp)  /* s4 */
-  lw  x21, 21*4(sp)  /* s5 */
-  lw  x22, 22*4(sp)  /* s6 */
-  lw  x23, 23*4(sp)  /* s7 */
-  lw  x24, 24*4(sp)  /* s8 */
-  lw  x25, 25*4(sp)  /* s9 */
-  lw  x26, 26*4(sp)  /* s10 */
-  lw  x27, 27*4(sp)  /* s11 */
-  lw  x28, 28*4(sp)  /* t3 */
-  lw  x29, 29*4(sp)  /* t4 */
-  lw  x30, 30*4(sp)  /* t5 */
-  lw  x31, 31*4(sp)  /* t6 */
+  lw   x4,  4*4(sp)   /* tp */
+  lw   x5,  5*4(sp)   /* t0 */
+  lw   x6,  6*4(sp)   /* t1 */
+  lw   x7,  7*4(sp)   /* t2 */
+  lw   x8,  8*4(sp)   /* s0 */
+  lw   x9,  9*4(sp)   /* s1 */
+  lw   x10, 10*4(sp)  /* a0 */
+  lw   x11, 11*4(sp)  /* a1 */
+  lw   x12, 12*4(sp)  /* a2 */
+  lw   x13, 13*4(sp)  /* a3 */
+  lw   x14, 14*4(sp)  /* a4 */
+  lw   x15, 15*4(sp)  /* a5 */
+  lw   x16, 16*4(sp)  /* a6 */
+  lw   x17, 17*4(sp)  /* a7 */
+  lw   x18, 18*4(sp)  /* s2 */
+  lw   x19, 19*4(sp)  /* s3 */
+  lw   x20, 20*4(sp)  /* s4 */
+  lw   x21, 21*4(sp)  /* s5 */
+  lw   x22, 22*4(sp)  /* s6 */
+  lw   x23, 23*4(sp)  /* s7 */
+  lw   x24, 24*4(sp)  /* s8 */
+  lw   x25, 25*4(sp)  /* s9 */
+  lw   x26, 26*4(sp)  /* s10 */
+  lw   x27, 27*4(sp)  /* s11 */
+  lw   x28, 28*4(sp)  /* t3 */
+  lw   x29, 29*4(sp)  /* t4 */
+  lw   x30, 30*4(sp)  /* t5 */
+  lw   x31, 31*4(sp)  /* t6 */
 
-  lw  sp,  2*4(sp)  /* restore original sp */
+  lw   sp,  2*4(sp)   /* Restore original SP */
 
   /* Return from Machine Interrupt */
 
