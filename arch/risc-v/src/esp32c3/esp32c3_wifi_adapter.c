@@ -2056,6 +2056,7 @@ static void esp_evt_work_cb(FAR void *arg)
         {
           case WIFI_ADPT_EVT_SCAN_DONE:
             esp_wifi_scan_event_parse();
+
             break;
 
 #ifdef ESP32C3_WLAN_HAS_STA
@@ -2079,7 +2080,11 @@ static void esp_evt_work_cb(FAR void *arg)
             g_sta_connected = false;
             if (g_sta_reconnect)
               {
+#ifdef CONFIG_ESP32C3_SCAN_TO_RECONNECT
+                ret = esp_wifi_scan_to_reconnect();
+#else
                 ret = esp_wifi_connect();
+#endif
                 if (ret)
                   {
                     wlerr("ERROR: Failed to connect AP error=%d\n", ret);

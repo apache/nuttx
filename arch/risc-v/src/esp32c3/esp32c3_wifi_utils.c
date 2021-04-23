@@ -22,8 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <errno.h>
 
+#include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/wireless/wireless.h>
@@ -295,6 +296,69 @@ exit_failed:
 }
 
 /****************************************************************************
+ * Name: esp_wifi_scan_to_reconnect
+ *
+ * Description:
+ *   Reconnect AP(Access Point) according to the scan results.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_scan_to_reconnect(void)
+{
+  int ret;
+  wifi_config_t wifi_cfg;
+  wifi_scan_config_t *config;
+  uint8_t target_ssid[SSID_MAX_LEN + 1] =
+    {
+      0
+    };
+
+  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+  ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("ERROR: Failed to get Wi-Fi config data ret=%d\n", ret);
+      return OK;
+    }
+
+  if (wifi_cfg.sta.ssid[0] == 0)
+    {
+      wlwarn("WARNING: Get ssid is NULL.\n");
+      return -EINVAL;
+    }
+
+  config = kmm_calloc(1, sizeof(wifi_scan_config_t));
+  if (config == NULL)
+    {
+      wlerr("ERROR: Cannot allocate config buffer\n");
+      return -ENOMEM;
+    }
+
+  memcpy(&target_ssid[0], wifi_cfg.sta.ssid, SSID_MAX_LEN);
+  config->ssid = &target_ssid[0];
+  config->scan_type = WIFI_SCAN_TYPE_ACTIVE;
+
+  esp_wifi_scan_stop();
+
+  ret = esp_wifi_scan_start(config, false);
+  if (ret != OK)
+    {
+      wlerr("ERROR: Scan error, ret: %d\n", ret);
+    }
+
+  kmm_free(config);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: esp_wifi_scan_event_parse
  *
  * Description:
@@ -317,6 +381,30 @@ void esp_wifi_scan_event_parse(void)
   bool parse_done = false;
 
   esp_wifi_scan_get_ap_num(&bss_total);
+
+#ifdef CONFIG_ESP32C3_SCAN_TO_RECONNECT
+  if (g_scan_priv.scan_status != ESP_SCAN_RUN)
+    {
+      if (bss_total == 0)
+        {
+          wlinfo("INFO: None AP is scanned\n");
+          if (esp_wifi_scan_to_reconnect())
+            {
+              wlerr("ERROR: Failed to scan to reconnect AP\n");
+            }
+        }
+      else
+        {
+          if (esp_wifi_connect())
+            {
+              wlerr("ERROR: Failed to connect AP\n");
+            }
+        }
+
+      return;
+    }
+#endif /* CONFIG_ESP32C3_SCAN_TO_RECONNECT */
+
   if (bss_total == 0)
     {
       wlinfo("INFO: None AP is scanned\n");

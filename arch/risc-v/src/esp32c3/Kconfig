@@ -412,6 +412,10 @@ config ESP32C3_WIFI_SCAN_RESULT_SIZE
 	help
 		Maximum scan result buffer size.
 
+config ESP32C3_SCAN_TO_RECONNECT
+	bool "Wi-Fi scan to reconnet"
+	default n
+
 config ESP32C3_WIFI_SAVE_PARAM
 	bool "Save Wi-Fi Parameters"
 	default n

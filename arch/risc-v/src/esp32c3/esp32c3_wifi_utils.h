@@ -111,6 +111,23 @@ void esp_wifi_scan_event_parse(void);
 
 int esp_wifi_scan_init(void);
 
+/****************************************************************************
+ * Name: esp_wifi_scan_to_reconnect
+ *
+ * Description:
+ *   Reconnect AP(Access Point) according to the scan results.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp_wifi_scan_to_reconnect(void);
+
 #ifdef __cplusplus
 }
 #endif
