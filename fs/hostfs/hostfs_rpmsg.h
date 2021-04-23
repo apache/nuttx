@@ -116,9 +116,17 @@ begin_packed_struct struct hostfs_rpmsg_ioctl_s
 begin_packed_struct struct hostfs_rpmsg_fstat_s
 {
   struct hostfs_rpmsg_header_s header;
-  int32_t                      fd;
-  uint32_t                     reserved;
-  struct stat                  buf;
+  union
+  {
+    struct stat                buf;
+    uint32_t                   reserved[16];
+  };
+
+  union
+  {
+    int32_t                    fd;
+    char                       pathname[0];
+  };
 } end_packed_struct;
 
 begin_packed_struct struct hostfs_rpmsg_ftruncate_s
@@ -169,17 +177,6 @@ begin_packed_struct struct hostfs_rpmsg_mkdir_s
 
 #define hostfs_rpmsg_rmdir_s hostfs_rpmsg_opendir_s
 #define hostfs_rpmsg_rename_s hostfs_rpmsg_opendir_s
-
-begin_packed_struct struct hostfs_rpmsg_stat_s
-{
-  struct hostfs_rpmsg_header_s header;
-  union
-  {
-    struct stat                buf;
-    uint32_t                   reserved[16];
-  };
-
-  char                         pathname[0];
-} end_packed_struct;
+#define hostfs_rpmsg_stat_s hostfs_rpmsg_fstat_s
 
 #endif /* __FS_HOSTFS_HOSTFS_RPMSG_H */
