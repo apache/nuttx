@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HCI_RECVBUF_SIZE     4096
+#define HCI_RECVBUF_SIZE     8192
 #define HCI_SENDBUF_SIZE     1024
 #define HCI_NPOLLWAITERS     2
 
@@ -76,7 +76,7 @@ struct bt_uart_bridge_s
   sem_t                          sendlock;
 
   struct file                    filep;
-  char                           tmpbuf[HCI_RECVBUF_SIZE];
+  char                           tmpbuf[1024];
 };
 
 /****************************************************************************

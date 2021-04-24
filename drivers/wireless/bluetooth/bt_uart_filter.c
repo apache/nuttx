@@ -251,12 +251,48 @@ bool bt_uart_filter_forward_recv(FAR struct bt_uart_filter_s *filter,
           case BT_HCI_EVT_CMD_COMPLETE:
             {
               FAR struct hci_evt_cmd_complete_s *evt;
+              uint8_t ogf;
 
               evt = (FAR void *)&buffer[3];
+              ogf = evt->opcode >> 10;
 
-              if (BT_OGF_BASEBAND == (evt->opcode >> 10))
+              if (BT_OGF_BASEBAND == ogf ||
+                  BT_OGF_LINK_CTRL == ogf ||
+                  BT_OGF_INFO == ogf)
                 {
                   return bt_uart_filter_free_opcode(filter, evt->opcode);
+                }
+              else if (BT_OGF_LINK_POLICY == ogf ||
+                       BT_OGF_STATUS == ogf)
+                {
+                  if (filter->type == BT_UART_FILTER_TYPE_BLE)
+                    {
+                      return false;
+                    }
+                }
+            }
+            break;
+          case BT_HCI_EVT_CMD_STATUS:
+            {
+              FAR struct bt_hci_evt_cmd_status_s *stat;
+              uint8_t ogf;
+
+              stat = (FAR void *)&buffer[3];
+              ogf = stat->opcode >> 10;
+
+              if (BT_OGF_BASEBAND == ogf ||
+                  BT_OGF_LINK_CTRL == ogf ||
+                  BT_OGF_INFO == ogf)
+                {
+                  return bt_uart_filter_free_opcode(filter, stat->opcode);
+                }
+              if (BT_OGF_LINK_POLICY == ogf ||
+                  BT_OGF_STATUS == ogf)
+                {
+                  if (filter->type == BT_UART_FILTER_TYPE_BLE)
+                    {
+                      return false;
+                    }
                 }
             }
             break;
@@ -284,6 +320,7 @@ bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
   if (buffer[0] == H4_CMD)
     {
       opcode = (uint16_t)buffer[2] << 8 | (uint16_t)buffer[1];
+      ogf    = buffer[2] >> 2;
 
       switch (opcode)
         {
@@ -302,22 +339,23 @@ bool bt_uart_filter_forward_send(FAR struct bt_uart_filter_s *filter,
             break;
         }
 
-      ogf = buffer[2] >> 2;
-      if (BT_OGF_BASEBAND == ogf)
+      if (BT_OGF_BASEBAND == ogf ||
+          BT_OGF_LINK_CTRL == ogf ||
+          BT_OGF_INFO == ogf)
         {
           if (!bt_uart_filter_alloc_opcode(filter, opcode))
-            {
-              nerr("Unable to set opcode 0x%04x.\n", opcode);
+          {
+            nerr("Unable to set opcode 0x%04x.\n", opcode);
 
-              for (i = 0; i < BT_UART_FILTER_OPCODE_COUNT; i++)
-                {
-                  nerr("PENDING opcode: %04x.\n", filter->opcode[i]);
-                }
+            for (i = 0; i < BT_UART_FILTER_OPCODE_COUNT; i++)
+              {
+                nerr("PENDING opcode: %04x.\n", filter->opcode[i]);
+              }
 
-              memset(filter->opcode, 0, sizeof(filter->opcode));
+            memset(filter->opcode, 0, sizeof(filter->opcode));
 
-              bt_uart_filter_alloc_opcode(filter, opcode);
-            }
+            bt_uart_filter_alloc_opcode(filter, opcode);
+          }
         }
     }
 
