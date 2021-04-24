@@ -26,6 +26,8 @@
 #include <arch/rv32im/irq.h>
 
 #include "chip.h"
+#include "fe310_memorymap.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Public Symbols
@@ -44,8 +46,7 @@ __start:
 
   /* Set stack pointer to the idle thread stack */
 
-  lui  sp, %hi(FE310_IDLESTACK_TOP)
-  addi sp, sp, %lo(FE310_IDLESTACK_TOP)
+  la   sp, FE310_IDLESTACK_TOP
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
@@ -53,9 +54,21 @@ __start:
 
   /* Initialize the Machine Trap Vector */
 
-  lui  t0, %hi(__trap_vec)
-  addi t0, t0, %lo(__trap_vec)
-  csrw  mtvec, t0
+  la   t0, __trap_vec
+  csrw mtvec, t0
+
+#ifdef CONFIG_STACK_COLORATION
+  /* t0 = start of IDLE stack; t1 = top of the stack; t2 = coloration */
+
+  la   t0, FE310_IDLESTACK_BASE
+  la   t1, FE310_IDLESTACK_TOP
+  li   t2, STACK_COLOR
+
+1:
+  sw   t2, 0(t0)
+  addi t0, t0, 4
+  bne  t0, t1, 1b
+#endif
 
   /* Jump to __fe310_start */
 

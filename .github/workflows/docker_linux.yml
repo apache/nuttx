@@ -19,14 +19,16 @@ on:
       - master
     paths:
       - 'tools/ci/docker/linux/**'
+      - '.github/workflows/docker_linux.yml'
 
   # Run builds for any PRs.
   pull_request:
     paths:
       - 'tools/ci/docker/linux/**'
+      - '.github/workflows/docker_linux.yml'
 
 env:
-  IMAGE_NAME: nuttx-ci-linux
+  IMAGE_NAME: apache-nuttx-ci-linux
 
 jobs:
   # Push image to GitHub Packages.
@@ -34,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
-      IMAGE_TAG: docker.pkg.github.com/${{ github.repository }}/nuttx-ci-linux
+      IMAGE_TAG: docker.pkg.github.com/${{ github.repository }}/apache-nuttx-ci-linux
     steps:
       - uses: actions/checkout@v2
 

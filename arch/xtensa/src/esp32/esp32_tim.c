@@ -93,6 +93,7 @@ static  int esp32_tim_setisr(FAR struct esp32_tim_dev_s *dev, xcpt_t handler,
 static void esp32_tim_enableint(FAR struct esp32_tim_dev_s *dev);
 static void esp32_tim_disableint(FAR struct esp32_tim_dev_s *dev);
 static void esp32_tim_ackint(FAR struct esp32_tim_dev_s *dev);
+static int  esp32_tim_checkint(FAR struct esp32_tim_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -117,7 +118,8 @@ struct esp32_tim_ops_s esp32_tim_ops =
   .setisr        = esp32_tim_setisr,
   .enableint     = esp32_tim_enableint,
   .disableint    = esp32_tim_disableint,
-  .ackint        = esp32_tim_ackint
+  .ackint        = esp32_tim_ackint,
+  .checkint      = esp32_tim_checkint
 };
 
 #ifdef CONFIG_ESP32_TIMER0
@@ -682,6 +684,47 @@ static void esp32_tim_ackint(FAR struct esp32_tim_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: esp32_tim_checkint
+ *
+ * Description:
+ *   Check the interrupt status bit.
+ *
+ ****************************************************************************/
+
+static int esp32_tim_checkint(FAR struct esp32_tim_dev_s *dev)
+{
+  int ret = 0;
+  uint32_t reg_value;
+
+  DEBUGASSERT(dev);
+
+  /* Timer 0 from group 0 or 1 */
+
+  if (((struct esp32_tim_priv_s *)dev)->base == TIMG_T0CONFIG_REG(0) ||
+      ((struct esp32_tim_priv_s *)dev)->base == TIMG_T0CONFIG_REG(1))
+    {
+      reg_value = esp32_tim_getreg(dev, TIM0_INT_ST_OFFSET);
+      if (reg_value & TIMG_T0_INT_ST)
+        {
+          ret = 1;
+        }
+    }
+
+  /* Timer 1 from group 0 or 1 */
+
+  else
+    {
+      reg_value = esp32_tim_getreg(dev, TIM1_INT_ST_OFFSET);
+      if (reg_value & TIMG_T1_INT_ST)
+        {
+          ret = 1;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -689,9 +732,7 @@ static void esp32_tim_ackint(FAR struct esp32_tim_dev_s *dev)
  * Name: esp32_tim_init
  *
  * Description:
- *   Initialize TIMER device, if software real-time timer
- *   (CONFIG_ESP32_RT_TIMER) is enabled, then timer0 can't
- *   be initialized by this function directly.
+ *   Initialize TIMER device.
  *
  ****************************************************************************/
 
@@ -699,11 +740,11 @@ FAR struct esp32_tim_dev_s *esp32_tim_init(int timer)
 {
   FAR struct esp32_tim_priv_s *tim = NULL;
 
-  /* Get timer instance */
+  /* First, take the data structure associated with the timer instance */
 
   switch (timer)
     {
-#if defined(CONFIG_ESP32_TIMER0) && !defined(CONFIG_ESP32_RT_TIMER)
+#ifdef CONFIG_ESP32_TIMER0
       case 0:
         {
           tim = &g_esp32_tim0_priv;
@@ -742,7 +783,13 @@ FAR struct esp32_tim_dev_s *esp32_tim_init(int timer)
         }
     }
 
-  if (tim->inuse == true)
+  /* Verify if it is in use */
+
+  if (tim->inuse == false)
+    {
+      tim->inuse = true;  /* If it was not, now it is */
+    }
+  else
     {
       tmrerr("ERROR: TIMER %d is already in use\n", timer);
       tim = NULL;
@@ -770,29 +817,3 @@ void esp32_tim_deinit(FAR struct esp32_tim_dev_s *dev)
 
   tim->inuse = false;
 }
-
-/****************************************************************************
- * Name: esp32_tim0_init
- *
- * Description:
- *   Initialize TIMER0 device, this function is only used by software
- *   real-time timer(esp32_rt_timer.c).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_RT_TIMER
-
-FAR struct esp32_tim_dev_s *esp32_tim0_init(void)
-{
-  FAR struct esp32_tim_priv_s *tim = &g_esp32_tim0_priv;
-
-  if (tim->inuse == true)
-    {
-      tmrerr("ERROR: Timer0 is already in use\n");
-      tim = NULL;
-    }
-
-  return (FAR struct esp32_tim_dev_s *)tim;
-}
-
-#endif /* CONFIG_ESP32_RT_TIMER */

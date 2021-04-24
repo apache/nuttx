@@ -61,6 +61,9 @@ SECTIONS
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *(.wifirxiram .wifirxiram.*)
     *(.wifirxiram .wifi0iram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
+    *(.phyiram .phyiram.*)
     _iram_text_end = ABSOLUTE(.);
 
     /* Module text area starts at the end of iram0_0_seg */

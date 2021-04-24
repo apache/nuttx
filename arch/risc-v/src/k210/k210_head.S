@@ -26,6 +26,8 @@
 #include <arch/rv64gc/irq.h>
 
 #include "chip.h"
+#include "k210_memorymap.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Public Symbols
@@ -53,6 +55,12 @@ __start:
   j    2f
 1:
   la   sp, K210_IDLESTACK1_TOP
+
+  /* In case of single CPU config, stop here */
+
+#if !(defined CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
+  wfi
+#endif
 2:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
@@ -63,6 +71,25 @@ __start:
 
   la   t0, __trap_vec
   csrw mtvec, t0
+
+#ifdef CONFIG_STACK_COLORATION
+  /* t0 = start of IDLE stack; t1 = top of the stack; t2 = coloration */
+
+  bnez a0, 3f  /* a0: hartid */
+  la   t0, K210_IDLESTACK0_BASE
+  j    4f
+3:
+  la   t0, K210_IDLESTACK1_BASE
+4:
+
+  mv   t1, sp
+  li   t2, STACK_COLOR
+
+5:
+  sw   t2, 0(t0)
+  addi t0, t0, 4
+  bne  t0, t1, 5b
+#endif
 
   /* Jump to __k210_start with mhartid */
 

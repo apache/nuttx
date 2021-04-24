@@ -124,17 +124,10 @@ static void pcm_dump(FAR const struct wav_header_s *wav);
 #  define pcm_dump(w)
 #endif
 
-#ifdef CONFIG_ENDIAN_BIG
-static uint16_t pcm_leuint16(uint16_t value);
-static uint16_t pcm_leuint32(uint32_t value);
-#else
-#  define pcm_leuint16(v) (v)
-#  define pcm_leuint32(v) (v)
-#endif
-
 #ifndef CONFIG_AUDIO_FORMAT_RAW
 static inline bool pcm_validwav(FAR const struct wav_header_s *wav);
-static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data);
+static ssize_t pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data,
+                            apb_samp_t len);
 #endif
 
 #ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
@@ -270,37 +263,37 @@ static void pcm_dump(FAR const struct wav_header_s *wav)
  * Name: pcm_leuint16
  *
  * Description:
- *   Get a 16-bit value stored in little endian order for a big-endian
- *   machine.
+ *   Get a 16-bit value stored in little endian order.  Unaligned address is
+ *   acceptable.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ENDIAN_BIG
-static uint16_t pcm_leuint16(uint16_t value)
+static uint16_t pcm_leuint16(FAR const uint16_t *ptr)
 {
-  return (((value & 0x00ff) << 8) |
-          ((value >> 8) & 0x00ff));
+  FAR const uint8_t *p = (FAR const uint8_t *)ptr;
+
+  return ((p[0] <<  0) |
+          (p[1] <<  8));
 }
-#endif
 
 /****************************************************************************
- * Name: pcm_leuint16
+ * Name: pcm_leuint32
  *
  * Description:
- *   Get a 16-bit value stored in little endian order for a big-endian
- *   machine.
+ *   Get a 32-bit value stored in little endian order.  Unaligned address is
+ *   acceptable.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ENDIAN_BIG
-static uint16_t pcm_leuint32(uint32_t value)
+static uint32_t pcm_leuint32(FAR const uint32_t *ptr)
 {
-  return (((value & 0x000000ff) << 24) |
-          ((value & 0x0000ff00) <<  8) |
-          ((value & 0x00ff0000) >>  8) |
-          ((value & 0xff000000) >> 24));
+  FAR const uint8_t *p = (FAR const uint8_t *)ptr;
+
+  return ((p[0] <<  0) |
+          (p[1] <<  8) |
+          (p[2] << 16) |
+          (p[3] << 24));
 }
-#endif
 
 /****************************************************************************
  * Name: pcm_validwav
@@ -319,8 +312,7 @@ static inline bool pcm_validwav(FAR const struct wav_header_s *wav)
           wav->fmt.format   == WAV_FMT_FORMAT   &&
           wav->fmt.nchannels < 256              &&
           wav->fmt.align     < 256              &&
-          wav->fmt.bpsamp    < 256              &&
-          wav->data.chunkid == WAV_DATA_CHUNKID);
+          wav->fmt.bpsamp    < 256);
 }
 
 /****************************************************************************
@@ -333,31 +325,67 @@ static inline bool pcm_validwav(FAR const struct wav_header_s *wav)
  *
  ****************************************************************************/
 
-static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
+static ssize_t pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data,
+                            apb_samp_t len)
 {
   FAR const struct wav_header_s *wav = (FAR const struct wav_header_s *)data;
+  FAR const struct wav_datachunk_s *dchunk;
   struct wav_header_s localwav;
-  bool ret;
+  size_t ret = sizeof(struct wav_header_s);
+
+  if (len < sizeof(struct wav_header_s))
+    {
+      return -EINVAL;
+    }
 
   /* Transfer the purported WAV file header into our stack storage,
    * correcting for endian issues as needed.
    */
 
-  localwav.hdr.chunkid   = pcm_leuint32(wav->hdr.chunkid);
-  localwav.hdr.chunklen  = pcm_leuint32(wav->hdr.chunklen);
-  localwav.hdr.format    = pcm_leuint32(wav->hdr.format);
+  localwav.hdr.chunkid   = pcm_leuint32(&wav->hdr.chunkid);
+  localwav.hdr.chunklen  = pcm_leuint32(&wav->hdr.chunklen);
+  localwav.hdr.format    = pcm_leuint32(&wav->hdr.format);
 
-  localwav.fmt.chunkid   = pcm_leuint32(wav->fmt.chunkid);
-  localwav.fmt.chunklen  = pcm_leuint32(wav->fmt.chunklen);
-  localwav.fmt.format    = pcm_leuint16(wav->fmt.format);
-  localwav.fmt.nchannels = pcm_leuint16(wav->fmt.nchannels);
-  localwav.fmt.samprate  = pcm_leuint32(wav->fmt.samprate);
-  localwav.fmt.byterate  = pcm_leuint32(wav->fmt.byterate);
-  localwav.fmt.align     = pcm_leuint16(wav->fmt.align);
-  localwav.fmt.bpsamp    = pcm_leuint16(wav->fmt.bpsamp);
+  localwav.fmt.chunkid   = pcm_leuint32(&wav->fmt.chunkid);
+  localwav.fmt.chunklen  = pcm_leuint32(&wav->fmt.chunklen);
+  localwav.fmt.format    = pcm_leuint16(&wav->fmt.format);
+  localwav.fmt.nchannels = pcm_leuint16(&wav->fmt.nchannels);
+  localwav.fmt.samprate  = pcm_leuint32(&wav->fmt.samprate);
+  localwav.fmt.byterate  = pcm_leuint32(&wav->fmt.byterate);
+  localwav.fmt.align     = pcm_leuint16(&wav->fmt.align);
+  localwav.fmt.bpsamp    = pcm_leuint16(&wav->fmt.bpsamp);
 
-  localwav.data.chunkid  = pcm_leuint32(wav->data.chunkid);
-  localwav.data.chunklen = pcm_leuint32(wav->data.chunklen);
+  /* Find the data chunk */
+
+  dchunk = &wav->data;
+
+  for (; ; )
+    {
+      /* NOTE: The data chunk is possible to be not word-aligned if extra
+       * chunks exist before it.
+       */
+
+      localwav.data.chunkid  = pcm_leuint32(&dchunk->chunkid);
+      localwav.data.chunklen = pcm_leuint32(&dchunk->chunklen);
+
+      if (localwav.data.chunkid == WAV_DATA_CHUNKID)
+        {
+          break;
+        }
+
+      /* Not data chunk. Skip it. */
+
+      ret += localwav.data.chunklen + 8;
+      if (ret >= len)
+        {
+          /* Data chunk not found */
+
+          return -EINVAL;
+        }
+
+      dchunk = (FAR const struct wav_datachunk_s *)
+               ((uintptr_t)dchunk + localwav.data.chunklen + 8);
+    }
 
   /* Dump the converted wave header information */
 
@@ -365,8 +393,11 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
   /* Check if the file is a valid PCM WAV header */
 
-  ret = pcm_validwav(&localwav);
-  if (ret)
+  if (!pcm_validwav(&localwav))
+    {
+      return -EINVAL;
+    }
+  else
     {
       /* Yes... pick off the relevant format values and save then in the
        * device structure.
@@ -1017,6 +1048,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)dev;
   FAR struct audio_lowerhalf_s *lower;
   apb_samp_t bytesleft;
+  ssize_t headersize;
   int ret;
 
   DEBUGASSERT(priv);
@@ -1070,8 +1102,8 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   /* Parse and verify the candidate PCM WAV file header */
 
 #ifndef CONFIG_AUDIO_FORMAT_RAW
-  if (bytesleft >= sizeof(struct wav_header_s) &&
-      pcm_parsewav(priv, &apb->samp[apb->curbyte]))
+  headersize = pcm_parsewav(priv, &apb->samp[apb->curbyte], bytesleft);
+  if (headersize > 0)
     {
       struct audio_caps_s caps;
 
@@ -1101,7 +1133,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
       /* Bump up the data offset */
 
-      apb->curbyte += sizeof(struct wav_header_s);
+      apb->curbyte += headersize;
 #endif
 #ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
       audinfo("Begin streaming: apb=%p curbyte=%d nbytes=%d\n",

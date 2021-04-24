@@ -40,7 +40,7 @@
 
 #define SMP_STACK_ALIGNMENT  8
 #define SMP_STACK_MASK       7
-#define SMP_STACK_SIZE       ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 7) & ~7)
+#define SMP_STACK_SIZE       ((CONFIG_IDLETHREAD_STACKSIZE + 7) & ~7)
 #define SMP_STACK_WORDS      (SMP_STACK_SIZE >> 2)
 
 /****************************************************************************

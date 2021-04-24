@@ -53,6 +53,7 @@
 #define ESP32_TIM_ENABLEINT(d)                     ((d)->ops->enableint(d))
 #define ESP32_TIM_DISABLEINT(d)                    ((d)->ops->disableint(d))
 #define ESP32_TIM_ACKINT(d)                        ((d)->ops->ackint(d))
+#define ESP32_TIM_CHECKINT(d)                      ((d)->ops->checkint(d))
 
 /****************************************************************************
  * Public Types
@@ -106,6 +107,7 @@ struct esp32_tim_ops_s
   CODE void (*enableint)(FAR struct esp32_tim_dev_s *dev);
   CODE void (*disableint)(FAR struct esp32_tim_dev_s *dev);
   CODE void (*ackint)(FAR struct esp32_tim_dev_s *dev);
+  CODE int (*checkint)(FAR struct esp32_tim_dev_s *dev);
 };
 
 /****************************************************************************
@@ -114,6 +116,5 @@ struct esp32_tim_ops_s
 
 FAR struct esp32_tim_dev_s *esp32_tim_init(int timer);
 void esp32_tim_deinit(FAR struct esp32_tim_dev_s *dev);
-FAR struct esp32_tim_dev_s *esp32_tim0_init(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_TIM_H */

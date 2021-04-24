@@ -30,8 +30,21 @@
 #include <nuttx/sched.h>
 
 #include "riscv_internal.h"
+#include "k210_memorymap.h"
 
 #ifdef CONFIG_SMP
+
+#define SMP_STACK_MASK       7
+#define SMP_STACK_SIZE       ((CONFIG_IDLETHREAD_STACKSIZE + 7) & ~7)
+#define STACK_ISALIGNED(a)   ((uintptr_t)(a) & ~SMP_STACK_MASK)
+
+#if CONFIG_SMP_NCPUS > 1
+static FAR const uintptr_t g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
+{
+    0
+  , K210_IDLESTACK1_BASE
+};
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -83,7 +96,19 @@
 int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 {
 #if CONFIG_SMP_NCPUS > 1
-  up_create_stack(tcb, stack_size, TCB_FLAG_TTYPE_KERNEL);
+  uintptr_t stack_alloc;
+
+  DEBUGASSERT(cpu > 0 && cpu < CONFIG_SMP_NCPUS && tcb != NULL &&
+              stack_size <= SMP_STACK_SIZE);
+
+  /* Get the top of the stack */
+
+  stack_alloc          = (uintptr_t)g_cpu_stackalloc[cpu];
+  DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
+
+  tcb->adj_stack_size  = SMP_STACK_SIZE;
+  tcb->stack_alloc_ptr = (FAR void *)stack_alloc;
+  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
 #endif
   return OK;
 }

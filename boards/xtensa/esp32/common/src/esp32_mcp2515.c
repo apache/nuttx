@@ -163,6 +163,8 @@ static int mcp2515_attach(FAR struct mcp2515_config_s *state,
       return ret;
     }
 
+  esp32_gpioirqenable(irq, FALLING);
+
   leave_critical_section(flags);
 
   return OK;

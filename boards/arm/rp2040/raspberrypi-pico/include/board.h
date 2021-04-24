@@ -29,6 +29,7 @@
 
 #include "rp2040_i2cdev.h"
 #include "rp2040_spidev.h"
+#include "rp2040_i2sdev.h"
 
 #include "rp2040_spisd.h"
 

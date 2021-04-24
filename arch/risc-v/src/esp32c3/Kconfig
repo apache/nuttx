@@ -341,6 +341,19 @@ config ESP32C3_RT_TIMER_TASK_STACK_SIZE
 
 endmenu # Real-Time Timer
 
+if ESP32C3_TIMER
+menu "Timer/counter Configuration"
+
+config ESP32C3_ONESHOT
+	bool "One-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+endmenu # Timer/counter Configuration
+endif # ESP32C3_TIMER
+
 menu "Wi-Fi configuration"
 	depends on ESP32C3_WIRELESS
 
@@ -422,6 +435,13 @@ config ESP32C3_WIFI_FS_MOUNTPT
 	depends on ESP32C3_WIFI_SAVE_PARAM
 	help
 		Mount point of Wi-Fi storage file system.
+
+config ESP32C3_WIFI_STA_DISCONNECT_PM
+	bool "Power Management for station when disconnected"
+	default n
+	---help---
+		Select this option to enable power management for station when disconnected.
+		Chip will do modem-sleep when RF module is not in use anymore.
 
 endmenu # ESP32C3_WIRELESS
 

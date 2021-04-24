@@ -141,6 +141,49 @@ config RP2040_I2C_DRIVER
 
 endif
 
+config RP2040_I2S
+	bool "I2S"
+	select I2S
+
+if RP2040_I2S
+
+config RP2040_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 16
+	---help---
+		This is the total number of transfers that can be enqueue before
+		the caller is required to wait.  This setting determines the number
+		certain queue data structures that will be pre-allocated.
+
+config RP2040_I2S_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config RP2040_I2S_DATA
+	int "I2S DATA GPIO pin assign (0-29)"
+	default 9
+	range 0 29
+
+config RP2040_I2S_CLOCK
+	int "I2S CLOCk GPIO pin assign (0-29)"
+	default 10
+	range 0 29
+
+config RP2040_I2S_PIO
+	int "RP2040 PIO number used for I2S (0-1)"
+	default 0
+	range 0 1
+
+config RP2040_I2S_PIO_SM
+	int "RP2040 PIO state machine number used for I2S (0-3)"
+	default 0
+	range 0 3
+
+endif
+
 menuconfig RP2040_SPISD
 	bool "SPI SD Card"
 	default n

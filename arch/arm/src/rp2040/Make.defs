@@ -55,6 +55,7 @@ CHIP_CSRCS += rp2040_serial.c
 CHIP_CSRCS += rp2040_start.c
 CHIP_CSRCS += rp2040_timerisr.c
 CHIP_CSRCS += rp2040_gpio.c
+CHIP_CSRCS += rp2040_pio.c
 CHIP_CSRCS += rp2040_clock.c
 CHIP_CSRCS += rp2040_xosc.c
 CHIP_CSRCS += rp2040_pll.c
@@ -77,6 +78,11 @@ endif
 
 ifeq ($(CONFIG_RP2040_I2C),y)
 CHIP_CSRCS += rp2040_i2c.c
+endif
+
+ifeq ($(CONFIG_RP2040_I2S),y)
+CHIP_CSRCS += rp2040_i2s.c
+CHIP_CSRCS += rp2040_i2s_pio.c
 endif
 
 ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)

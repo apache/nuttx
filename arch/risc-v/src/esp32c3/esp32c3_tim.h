@@ -135,12 +135,4 @@ struct esp32c3_tim_ops_s
 FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer);
 void esp32c3_tim_deinit(FAR struct esp32c3_tim_dev_s *dev);
 
-/****************************************************************************
- * The Timer0 is used by RT-Timer of wireless driver, so please don't use it
- * in any other components.
- ****************************************************************************/
-#ifdef CONFIG_ESP32C3_RT_TIMER
-FAR struct esp32c3_tim_dev_s *esp32c3_tim0_init(void);
-#endif
-
 #endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_TIM_H */

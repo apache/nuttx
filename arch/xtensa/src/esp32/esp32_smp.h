@@ -35,13 +35,13 @@
 
 /* An IDLE thread stack size for CPU0 must be defined */
 
-#if !defined(CONFIG_SMP_IDLETHREAD_STACKSIZE)
-#  error CONFIG_SMP_IDLETHREAD_STACKSIZE is not defined
-#elif CONFIG_SMP_IDLETHREAD_STACKSIZE < 16
-#  error CONFIG_SMP_IDLETHREAD_STACKSIZE is to small
+#if !defined(CONFIG_IDLETHREAD_STACKSIZE)
+#  error CONFIG_IDLETHREAD_STACKSIZE is not defined
+#elif CONFIG_IDLETHREAD_STACKSIZE < 16
+#  error CONFIG_IDLETHREAD_STACKSIZE is to small
 #endif
 
-#define CPU1_IDLETHREAD_STACKSIZE ((CONFIG_SMP_IDLETHREAD_STACKSIZE + 15) & ~15)
+#define CPU1_IDLETHREAD_STACKSIZE ((CONFIG_IDLETHREAD_STACKSIZE + 15) & ~15)
 #define CPU1_IDLETHREAD_STACKWORDS (CPU1_IDLETHREAD_STACKSIZE >> 2)
 
 /****************************************************************************

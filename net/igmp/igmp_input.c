@@ -140,7 +140,7 @@ void igmp_input(struct net_driver_s *dev)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
       nwarn("WARNING: Length error\n");
-      return;
+      goto drop;
     }
 
   /* Calculate and check the IGMP checksum */
@@ -149,7 +149,7 @@ void igmp_input(struct net_driver_s *dev)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
       nwarn("WARNING: Checksum error\n");
-      return;
+      goto drop;
     }
 
   /* Find the group (or create a new one) using the incoming IP address. */
@@ -161,7 +161,7 @@ void igmp_input(struct net_driver_s *dev)
     {
       nerr("ERROR: Failed to find/allocate group: %08" PRIx32 "\n",
            (uint32_t)destipaddr);
-      return;
+      goto drop;
     }
 
   /* Now handle the message based on the IGMP message type */
@@ -302,6 +302,7 @@ void igmp_input(struct net_driver_s *dev)
         break;
     }
 
+drop:
   dev->d_len = 0;
   return;
 }

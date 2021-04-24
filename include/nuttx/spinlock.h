@@ -81,18 +81,6 @@ typedef struct
 #  define __SP_UNLOCK_FUNCTION 1
 #endif
 
-/* If the target CPU supports a data cache then it may be necessary to
- * manage spinlocks in a special way, perhaps linking them all into a
- * special non-cacheable memory region.
- *
- *   SP_SECTION - Special storage attributes may be required to force
- *      spinlocks into a special, non-cacheable section.
- */
-
-#if !defined(SP_SECTION)
-#  define SP_SECTION
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
