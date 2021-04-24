@@ -107,7 +107,6 @@ struct rpmsg_rtc_lowerhalf_s
    */
 
   struct rpmsg_endpoint      ept;
-  FAR const char             *cpuname;
   struct work_s              syncwork;
 
 #ifdef CONFIG_RTC_ALARM
@@ -229,7 +228,8 @@ static void rpmsg_rtc_device_created(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
 
-  if (strcmp(lower->cpuname, rpmsg_get_cpuname(rdev)) == 0)
+  if (strcmp(CONFIG_RTC_RPMSG_SERVER_NAME,
+             rpmsg_get_cpuname(rdev)) == 0)
     {
       lower->ept.priv = lower;
 
@@ -244,7 +244,8 @@ static void rpmsg_rtc_device_destroy(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
 
-  if (strcmp(lower->cpuname, rpmsg_get_cpuname(rdev)) == 0)
+  if (strcmp(CONFIG_RTC_RPMSG_SERVER_NAME,
+             rpmsg_get_cpuname(rdev)) == 0)
     {
       rpmsg_destroy_ept(&lower->ept);
     }
@@ -681,7 +682,6 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
  *   Take remote core RTC as external RTC hardware through rpmsg.
  *
  * Input Parameters:
- *   cpuname - current cpu name
  *   minor  - device minor number
  *
  * Returned Value:
@@ -690,8 +690,7 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(FAR const char *cpuname,
-                                                 int minor)
+FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(int minor)
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower;
 
@@ -699,7 +698,6 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(FAR const char *cpuname,
   if (lower)
     {
       lower->ops     = &g_rpmsg_rtc_ops;
-      lower->cpuname = cpuname;
 
       rpmsg_register_callback(lower,
                               rpmsg_rtc_device_created,
