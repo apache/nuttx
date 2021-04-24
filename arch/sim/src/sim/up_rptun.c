@@ -240,7 +240,7 @@ int up_rptun_init(void)
 #endif
 
 #if CONFIG_SIM_RPTUN_MASTER == 0
-  up_rtc_set_lowerhalf(rpmsg_rtc_initialize("server", 0));
+  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
 #endif
 
 #ifdef CONFIG_FS_HOSTFS_RPMSG
