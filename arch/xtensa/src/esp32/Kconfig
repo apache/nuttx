@@ -1035,4 +1035,10 @@ config ESP32_AES_ACCELERATOR_TEST
 
 endmenu # ESP32_AES_ACCELERATOR
 
+config ESP32_TICKLESS
+    bool "Enable ESP32 tick-less OS"
+	default n
+	select ARCH_HAVE_TICKLESS
+	select SCHED_TICKLESS
+
 endif # ARCH_CHIP_ESP32
