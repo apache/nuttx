@@ -89,6 +89,10 @@ void __start(void)
   uint32_t *dest;
   int i;
 
+  /* Set MSP to the top of the IDLE stack */
+
+  __asm__ __volatile__ ("\tmsr msp, %0\n" :: "r" (g_idle_topstack));
+
   if (up_cpu_index() != 0)
     {
       while (1)
