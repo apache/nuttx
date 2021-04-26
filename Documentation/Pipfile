@@ -11,6 +11,7 @@ sphinx_rtd_theme = "*"
 Sphinx = "*"
 sphinx-tabs = "*"
 sphinx-autobuild = "*"
+kconfiglib = "*"
 
 [requires]
 python_version = "3"

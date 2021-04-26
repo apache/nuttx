@@ -1,0 +1,56 @@
+{% macro help(sc) -%}
+Help
+====
+{% for node in sc.nodes -%}
+{% if node.help %}
+
+.. parsed-literal::
+
+    {{node.help|indent(4)}}
+{% endif %}
+{% endfor %}
+{%- endmacro %}
+{%- macro direct_dep(sc) -%}
+{% if sc.direct_dep == sc.kconfig.y %}
+{% else %}
+Direct Dependencies
+===================
+
+{{expr_str(sc.direct_dep)}}
+{% endif %}
+{%- endmacro %}
+{%- macro defaults(sc, choice) -%}
+Defaults
+========
+{% if sc.defaults %}
+{%- for value, cond in sc.orig_defaults %}
+- {{expr_str(value)}}{% if cond != sc.kconfig.y %} if {{expr_str(cond)}}{% endif %}
+{%- endfor %}
+{% else %}
+No defaults defined. Implicitly defined to {% if choice %}the first (visible) choice option.{% elif sc.orig_type in [kconfiglib.BOOL, kconfiglib.TRISTATE] %}``n``.{% else %}the empty string.{% endif %}
+{% endif %}
+{%- endmacro %}
+{%- macro kconfig_definition(sc) -%}
+Kconfig Definitions
+===================
+
+.. highlight:: kconfig
+
+{% for node in sc.nodes %}
+
+At ``{{node.filename}}:{{node.linenr}}``
+{% if node.include_path %}
+Included via: {% for filename, linenr in node.include_path %}``{{filename}}:{{linenr}}``{% if not loop.last %} -> {% endif %}{% endfor %}
+{% endif %}
+Menu path: (Top) ->  {% for node_p in top_to_node(node) %}{% if node_p.prompt %}{{node_p.prompt[0]}}{% else %}{{kconfiglib.standard_sc_expr_str(node_p.item)}}{% endif %}{% if not loop.last %} -> {% endif %}{% endfor %}
+
+.. parsed-literal::
+
+    {{node.custom_str(rst_link)|indent(4)}}
+{%- if not loop.last %}
+
+    ----
+{%- endif %}
+{% endfor %}
+*(The 'depends on' condition includes propagated dependencies from ifs and menus.)*
+{%- endmacro -%}

@@ -1,0 +1,56 @@
+{% from 'helper.jinja' import help, direct_dep, defaults, kconfig_definition %}
+:orphan:
+
+.. title:: {{sym.name}}
+
+.. option:: CONFIG_{{sym.name}}
+
+{% if (sym.nodes|count) > 1 %}
+.. note:: Symbol is defined multiple times.
+{% endif %}
+
+{% for node in sym.nodes -%}
+{% if node.prompt %}
+*{% if (node.prompt[0]|count) == 0 %}(empty){% else %}{{node.prompt[0]}}{% endif %}*
+{% else %}
+*Not User Assignable*
+{% endif %}
+{% endfor %}
+Type: ``{{kconfiglib.TYPE_TO_STR[sym.type]}}``
+
+{{help(sym)}}
+{{direct_dep(sym)}}
+
+{{defaults(sym, false)}}
+{%- if sym.orig_selects %}
+Symbols Selected by this Symbol
+===============================
+{% for select, cond in sym.orig_selects %}
+- {{rst_link(select)}}{% if cond != sym.kconfig.y %} if {{expr_str(cond)}}{% endif %}
+{%- endfor %}
+{% endif %}
+{%- if sym.orig_implies %}
+Symbols Implied by this Symbol
+==============================
+{% for select, cond in sym.orig_implies %}
+- {{rst_link(select)}}{% if cond != sym.kconfig.y %} if {{expr_str(cond)}}{% endif %}
+{%- endfor %}
+{% endif %}
+
+
+{%- if sym.rev_dep != sym.kconfig.n%}
+Symbols that Select this Symbol
+===============================
+{% for select in kconfiglib.split_expr(sym.rev_dep, kconfiglib.OR) %}
+- {{rst_link(kconfiglib.split_expr(select, kconfiglib.AND)[0])}}
+{%- endfor %}
+{% endif %}
+{%- if sym.weak_rev_dep != sym.kconfig.n%}
+Symbols that Imply this Symbol
+===============================
+{% for select in kconfiglib.split_expr(sym.weak_rev_dep, kconfiglib.OR) %}
+- {{rst_link(kconfiglib.split_expr(select, kconfiglib.AND)[0])}}
+{%- endfor %}
+{% endif %}
+
+{{kconfig_definition(sym)}}

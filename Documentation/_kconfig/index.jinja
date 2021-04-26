@@ -1,0 +1,22 @@
+.. _configuration_options:
+
+Configuration Options
+=====================
+
+:file:`Kconfig` files describe build-time configuration options (called symbols
+in Kconfig-speak), how they're grouped into menus and sub-menus, and
+dependencies between them that determine what configurations are valid.
+
+All Configuration Options
+=====================
+
+.. list-table::
+   :header-rows: 1
+   :widths: auto
+
+   * - Symbol name
+     - Help/prompt
+{%- for sym in syms %}
+   * - :option:`CONFIG_{{sym.name}}`
+     - {% if sym.nodes %}{% if sym.nodes[0].help %}{{sym.nodes[0].help|replace('\n', ' ')|truncate(500, False, '...', 0)}}{% elif sym.nodes[0].prompt %}{{sym.nodes[0].prompt[0]}}{% else %}(empty){% endif %}{% endif %}
+{%- endfor %}

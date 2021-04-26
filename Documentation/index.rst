@@ -30,6 +30,7 @@ Last Updated: |today|
    faq/index.rst
    guides/index.rst
    contributing/index.rst
+   kconfig/index.rst
    glossary.rst
 
 .. include:: substitutions.rst

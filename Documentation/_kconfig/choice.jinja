@@ -1,0 +1,34 @@
+{% from 'helper.jinja' import help, direct_dep, defaults, kconfig_definition %}
+:orphan:
+
+.. title:: {{choice_desc(choice)}}
+
+.. _{{choice_id(choice)}}:
+
+.. describe:: {{choice_desc(choice)}}
+
+{% if (choice.nodes|count) > 1 %}
+.. note:: Choice is defined multiple times.
+{% endif %}
+
+{% for node in choice.nodes -%}
+{% if node.prompt %}
+*{% if (node.prompt[0]|count) == 0 %}(empty){% else %}{{node.prompt[0]}}{% endif %}*
+{% else %}
+*Not User Assignable*
+{% endif %}
+{% endfor %}
+Type: ``{{kconfiglib.TYPE_TO_STR[choice.type]}}``
+
+{{help(choice)}}
+{{direct_dep(choice)}}
+
+{{defaults(choice, true)}}
+{% if choice.syms %}
+Choice Options
+==============
+{% for sym in choice.syms %}
+- {{expr_str(sym)}}
+{%- endfor %}
+{% endif %}
+{{kconfig_definition(choice)}}
