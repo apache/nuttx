@@ -417,7 +417,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
       return (uint32_t)0xff;
     }
 
-  spiinfo("cmd: %04x resp: %02x\n", wd, response);
+  spiinfo("cmd: %04" PRIx32 " resp: %02x\n", wd, response);
   return (uint32_t)response;
 }
 
@@ -448,7 +448,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
                          size_t nwords)
 {
   FAR const uint8_t *inptr = (FAR const uint8_t *)txbuffer;
-  FAR uint8_t *outptr = (FAR const uint8_t *)rxbuffer;
+  FAR uint8_t *outptr = (FAR uint8_t *)rxbuffer;
 
   spiinfo("txbuffer: %p rxbuffer: %p nwords: %lu\n",
           txbuffer, rxbuffer, (unsigned long)nwords);
