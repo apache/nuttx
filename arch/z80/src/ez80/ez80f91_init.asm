@@ -28,35 +28,35 @@
 ; Constants
 ;**************************************************************************
 
-;PLL_DIV_L    EQU %5C
-;PLL_DIV_H    EQU %5D
-;PLL_CTL0     EQU %5E
-;PLL_CTL1     EQU %5F
+;PLL_DIV_L    EQU 05Ch
+;PLL_DIV_H    EQU 05Dh
+;PLL_CTL0     EQU 05Eh
+;PLL_CTL1     EQU 05Fh
 
 OSC           EQU 0
 PLL           EQU 1
 RTC           EQU 2
 
-CLK_MUX_OSC   EQU %00
-CLK_MUX_PLL   EQU %01
-CLK_MUX_RTC   EQU %02
+CLK_MUX_OSC   EQU 000h
+CLK_MUX_PLL   EQU 001h
+CLK_MUX_RTC   EQU 002h
 
-CHRP_CTL_0    EQU %00
-CHRP_CTL_1    EQU %40
-CHRP_CTL_2    EQU %80
-CHRP_CTL_3    EQU %C0
+CHRP_CTL_0    EQU 000h
+CHRP_CTL_1    EQU 040h
+CHRP_CTL_2    EQU 080h
+CHRP_CTL_3    EQU 0C0h
 
-LDS_CTL_0     EQU %00
-LDS_CTL_1     EQU %04
-LDS_CTL_2     EQU %08
-LDS_CTL_3     EQU %0C
+LDS_CTL_0     EQU 000h
+LDS_CTL_1     EQU 004h
+LDS_CTL_2     EQU 008h
+LDS_CTL_3     EQU 00Ch
 
-LCK_STATUS    EQU %20
-INT_LOCK      EQU %10
-INT_UNLOCK    EQU %08
-INT_LOCK_EN   EQU %04
-INT_UNLOCK_EN EQU %02
-PLL_ENABLE    EQU %01
+LCK_STATUS    EQU 020h
+INT_LOCK      EQU 010h
+INT_UNLOCK    EQU 008h
+INT_LOCK_EN   EQU 004h
+INT_UNLOCK_EN EQU 002h
+PLL_ENABLE    EQU 001h
 
 ;**************************************************************************
 ; Global symbols used
@@ -105,12 +105,12 @@ PLL_ENABLE    EQU %01
 _ez80_init:
 	; Disable internal peripheral interrupt sources
 
-	ld		a, %ff
+	ld		a, 0ffh
 	out0	(PA_DDR), a			; GPIO
 	out0	(PB_DDR), a
 	out0	(PC_DDR), a
 	out0	(PD_DDR), a
-	ld		a, %00
+	ld		a, 000h
 	out0	(PA_ALT1), a
 	out0	(PB_ALT1), a
 	out0	(PC_ALT1), a
@@ -129,10 +129,10 @@ _ez80_init:
 	out0	(I2C_CTL), a		; I2C
 	out0	(EMAC_IEN), a		; EMAC
 	out0	(FLASH_IRQ), a		; Flash
-	ld		a, %04
+	ld		a, 004h
 	out0	(SPI_CTL), a		; SPI
 	in0		a, (RTC_CTRL)		; RTC,
-	and		a, %be
+	and		a, 0beh
 	out0	(RTC_CTRL), a
 
 	; Configure external memory/io
@@ -196,7 +196,7 @@ _ez80_initsysclk:
 	; Set charge pump and lock criteria
 
 	ld		a, __PLL_CTL0_INIT_PARAM
-	and		a, %CC  ; mask off reserved and clock source bits
+	and		a, 0CCh  ; mask off reserved and clock source bits
 	out0	(PLL_CTL0), a
 
 	; Enable PLL

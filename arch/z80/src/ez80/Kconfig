@@ -50,17 +50,24 @@ config ARCH_CHIP_EZ80F93
 
 endchoice
 
-# The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
-# the ez80.
-#
+choice
+    prompt "Toolchain Selection"
+    default EZ80_TOOLCHAIN_ZDSII
 
 config EZ80_TOOLCHAIN_ZDSII
-	bool
-	default y
+	bool "ZDS-II for Windows"
+	depends on TOOLCHAIN_WINDOWS
+
+config EZ80_TOOLCHAIN_CLANG
+	bool "Clang for Linux, macOS, or Cygwin"
+        depends on EXPERIMENTAL
+
+endchoice
 
 choice
 	prompt "ZDS-II Toolchain version"
 	default EZ80_ZDSII_V533
+	depends on EZ80_TOOLCHAIN_ZDSII
 
 config EZ80_ZDSII_V511
 	bool "ZDS-II 5.1.1"
