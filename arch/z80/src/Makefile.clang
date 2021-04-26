@@ -1,0 +1,135 @@
+############################################################################
+# arch/z80/src/Makefile.clang
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Directories
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+BOARDDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src/board
+
+# Tools
+
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+CFLAGS += -I.
+
+CPPFLAGS += -D__ASSEMBLY__
+
+############################################################################
+# Files and directories
+
+# There should be one head source (.asm file)
+#
+HEAD_OBJ = $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
+STARTUP_OBJS ?= $(HEAD_OBJ)
+
+# Assembly sources and objects
+
+ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
+AOBJS = $(ASRCS:$(ASMEXT)=$(OBJEXT))
+
+CSRCS = $(CHIP_CSRCS) $(CMN_CSRCS)
+COBJS = $(CSRCS:.c=$(OBJEXT))
+
+# All sources and objcts
+
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+# Sources that can have dependencies (no .asm files)
+
+DEPSRCS  = $(CSRCS)
+
+VPATH = chip:common:board
+
+############################################################################
+# Targets
+
+all: $(HEAD_OBJ) libarch$(LIBEXT)
+
+.PHONY: board$(DELIM)libboard$(LIBEXT)
+
+$(AOBJS) $(HEAD_OBJ): %$(OBJEXT): %$(ASMEXT)
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+# TODO will I need the asm_mem.h hack of SDCC?
+
+libarch$(LIBEXT): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
+
+board$(DELIM)libboard$(LIBEXT):
+	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+LIBPATHS += -L"$(TOPDIR)$(DELIM)staging"
+LIBPATHS += -L"$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board"
+
+LDLIBS += $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS))) -lboard
+
+NUTTX = "$(TOPDIR)$(DELIM)nuttx$(EXEEXT)"
+
+nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(LINKCMD)
+	$(Q) echo "LD: nuttx into $(NUTTX)"
+	$(Q) "$(LD)" -o $(NUTTX) $(HEAD_OBJ) -T $(LINKCMD) --orphan-handling=error --print-memory-usage \
+	    $(LIBPATHS) "-(" $(LDLIBS) "-)" $(LDFLAGS) -Map="$(TOPDIR)$(DELIM)nuttx.map"
+
+.depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS) $(TOPDIR)$(DELIM).config
+	$(Q) if [ -e board$(DELIM)Makefile ]; then \
+		$(MAKE) -C board depend ; \
+	fi
+	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
+	$(Q) touch $@
+
+# This is part of the top-level export target
+
+export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
+	$(Q) if [ -d "$(EXPORT_DIR)$(DELIM)startup" ]; then \
+		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)$(DELIM)startup"; \
+	 else \
+		echo "$(EXPORT_DIR)$(DELIM)startup does not exist"; \
+		exit 1; \
+	 fi
+
+# Dependencies
+
+depend: .depend
+
+context::
+
+clean_context::
+
+clean:
+	$(Q) if [ -e board$(DELIM)Makefile ]; then \
+		$(MAKE) -C board clean ; \
+	fi
+	$(call DELFILE, *.map)
+	$(call DELFILE, libarch$(LIBEXT))
+	$(call CLEAN)
+
+distclean: clean
+	$(Q) if [ -e board$(DELIM)Makefile ]; then \
+		$(MAKE) -C board distclean ; \
+	fi
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
+
+-include Make.dep
