@@ -45,7 +45,7 @@
 #define MAX_DEPENDENCIES 128
 #define MAX_LEVELS       100
 #define MAX_SELECT       64
-#define MAX_DEFAULTS     196
+#define MAX_DEFAULTS     256
 #define TAB_SIZE         4
 #define VAR_SIZE         80
 #define HTML_VAR_SIZE    (2*VAR_SIZE + 64)
@@ -1389,18 +1389,24 @@ static void process_default(FILE *stream, struct default_s *defp)
   token = get_token();
   if (token)
     {
-      /* Yes.. something follows the default value. */
+      /* Yes.. something follows the default value.
+       *
+       * Ignore # comments after the command
+       */
 
-      tokid = tokenize(token);
-      if (tokid != TOKEN_IF)
+      if (token[0] != '#')
         {
-          error("Unrecognized garbage after default value\n");
-          exit(ERROR_GARBAGE_AFTER_DEFAULT);
+          tokid = tokenize(token);
+          if (tokid != TOKEN_IF)
+            {
+              error("Unrecognized garbage after default value\n");
+              exit(ERROR_GARBAGE_AFTER_DEFAULT);
+            }
+
+          /* The rest of the line is the dependency */
+
+          defp->d_item[ndx].d_dependency = strdup(g_lnptr);
         }
-
-      /* The rest of the line is the dependency */
-
-      defp->d_item[ndx].d_dependency = strdup(g_lnptr);
     }
 
   /* Update the number of defaults we have encountered in this block */
@@ -1530,7 +1536,7 @@ static void process_dependson(void)
       exit(ERRROR_ON_AFTER_DEPENDS);
     }
 
-    push_dependency(htmlize_expression(g_lnptr));
+  push_dependency(htmlize_expression(g_lnptr));
 }
 
 /****************************************************************************
@@ -1687,6 +1693,22 @@ static inline char *process_config(FILE *stream, const char *varname,
                   config.c_type = VALUE_STRING;
 
                   /* Get the description following the type */
+
+                  ptr = get_html_string();
+                  if (ptr)
+                    {
+                      config.c_desc = strdup(ptr);
+                    }
+
+                  /* Indicate that the line has been consumed */
+
+                  token = NULL;
+                }
+                break;
+
+              case TOKEN_PROMPT:
+                {
+                  /* Get the prompt string */
 
                   ptr = get_html_string();
                   if (ptr)
@@ -1933,6 +1955,53 @@ static inline char *process_config(FILE *stream, const char *varname,
       for (i = 0; i < config.c_select.s_nvar; i++)
         {
           free(config.c_select.s_varname[i]);
+        }
+    }
+
+  return token;
+}
+
+/****************************************************************************
+ * Name: process_comment
+ *
+ * Description:
+ *   Process one comment
+ *
+ ****************************************************************************/
+
+static inline char *process_comment(FILE *stream)
+{
+  enum token_type_e tokid;
+  char *token;
+
+  /* Process each line in the configuration */
+
+  token = NULL;
+
+  while (kconfig_line(stream) != NULL)
+    {
+      /* Process the first token on the Kconfig file line */
+
+      token = get_token();
+      if (token != NULL)
+        {
+          tokid = tokenize(token);
+          switch (tokid)
+            {
+              case TOKEN_DEPENDS:
+                token = NULL;
+                break;
+
+              default:
+                break;
+            }
+        }
+
+      /* Break out on the help token (or the first unhandled token) */
+
+      if (token != NULL)
+        {
+          break;
         }
     }
 
@@ -2335,6 +2404,11 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir,
                 break;
 
               case TOKEN_COMMENT:
+                {
+                  token = process_comment(stream);
+                }
+                break;
+
               case TOKEN_MAINMENU:
                 {
                   token = NULL; /* ignored */
