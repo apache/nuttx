@@ -858,7 +858,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
 
-  pwminfo("Channel %d: H=%08x L=%08x FI=%08x\n",
+  pwminfo("Channel %d: H=%08lx L=%08lx FI=%08lx\n",
           chan->channel, chan->ohpincfg, chan->olpincfg, chan->fipincfg);
 
   /* Configure selected PWM pins */
@@ -1031,7 +1031,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
     }
 
   pwm_chan_putreg(chan, SAM_PWM_CDTY_OFFSET, regval);
-  pwminfo("Fsrc=%d cprd=%d cdty=%d\n", fsrc, cprd, regval);
+  pwminfo("Fsrc=%ld cprd=%ld cdty=%ld\n", fsrc, cprd, regval);
 
   /* Enable the channel */
 
