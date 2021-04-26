@@ -3,7 +3,6 @@ import os
 import tempfile
 
 import kconfiglib
-
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -60,10 +59,14 @@ def escape_help(sc):
 
 
 def main():
-    topdir = os.path.join(os.path.dirname(__file__), "..", "..")
-    os.environ["TOPDIR"] = os.path.realpath(topdir)
+    topdir = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    os.environ["TOPDIR"] = topdir
     os.environ["APPSDIR"] = os.path.realpath(os.path.join(topdir, "..", "apps"))
 
+    open(os.path.join(topdir, "arch", "dummy", "Kconfig"), "w").write("")
+    open(os.path.join(topdir, "boards", "dummy", "Kconfig"), "w").write("")
+    os.makedirs(os.path.join(topdir, "drivers", "platform"), exist_ok=True)
+    open(os.path.join(topdir, "drivers", "platform", "Kconfig"), "w").write("")
     external = tempfile.mkdtemp()
     open(os.path.join(external, "Kconfig"), "w").write("")
     os.environ["EXTERNALDIR"] = os.path.realpath(external)

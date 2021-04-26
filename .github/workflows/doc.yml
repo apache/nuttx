@@ -20,14 +20,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+        with:
+          path: sources/nuttx
+          fetch-depth: 1
+      - uses: actions/checkout@v1
+        with:
+          repository: apache/incubator-nuttx-apps
+          ref: master
+          path: sources/apps
+          fetch-depth: 1
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
       - name: Generate Documentation
         run: |
+          pwd
           cd Documentation/
           pip3 install pipenv
           pipenv install
+          pipenv run python _kconfig/render.py
           pipenv run make html
       - uses: actions/upload-artifact@v2
         with:
