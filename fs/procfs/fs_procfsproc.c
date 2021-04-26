@@ -511,7 +511,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
 #ifdef HAVE_GROUPID
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                               "Group:", group->tg_pgrpid);
+                               "Group:", group->tg_task);
 #else
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                "%-12s%d\n", "PPID:", group->tg_ppid);
