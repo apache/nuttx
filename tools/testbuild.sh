@@ -243,12 +243,10 @@ function configure {
 
 function cmake_configure {
   echo "  Configuring..."
-  mkdir build
-  cd build
 
-  nuttx_board=$(cd ../boards && find ../boards -type d -name ${boarddir} -print -quit)
+  nuttx_board=$(cd ../boards && find ../boards -mindepth 3 -maxdepth 3 -type d -name ${boarddir} -print -quit)
 
-  if ! cmake -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
+  if ! cmake -DCMAKE_BUILD_TYPE=Debug -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
     fail=1
   fi
 
@@ -268,7 +266,7 @@ function build {
 
   # Ensure defconfig in the canonical form
 
-  if ! ./tools/refresh.sh --silent $config; then
+  if ! $nuttx/tools/refresh.sh --silent $config; then
     fail=1
   fi
 
@@ -341,10 +339,17 @@ function dotest {
   # Perform the build test
 
   echo "------------------------------------------------------------------------------------"
-  distclean
+  #distclean
   #configure
+
+  rm -rf build
+  mkdir build
+  cd build
   cmake_configure
+
   build
+
+  cd ..
 }
 
 # Perform the build test for each entry in the test list file
