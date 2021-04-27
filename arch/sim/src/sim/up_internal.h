@@ -312,7 +312,7 @@ void netdriver_loop(void);
 /* up_rptun.c ***************************************************************/
 
 #ifdef CONFIG_RPTUN
-int up_rptun_init(void);
+int up_rptun_init(const char *shmemname, const char *cpuname, bool master);
 void up_rptun_loop(void);
 #endif
 
