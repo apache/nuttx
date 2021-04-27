@@ -42,20 +42,13 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* RISC-V requires at least a 4-byte stack alignment.
- * For floating point use, however, the stack must be aligned to 8-byte
- * addresses.
- */
+/* RISC-V requires a 16-byte stack alignment. */
 
-#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
-#  define STACK_ALIGNMENT   8
-#else
-#  define STACK_ALIGNMENT   4
-#endif
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
@@ -193,18 +186,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       uintptr_t top_of_stack;
       size_t size_of_stack;
 
-      /* RISCV uses a push-down stack:  the stack grows toward lower
-       * addresses in memory.  The stack pointer register points to the
-       * lowest, valid working address (the "top" of the stack).  Items on
-       * the stack are referenced as positive word offsets from sp.
+      /* RISC-V uses a push-down stack: the stack grows toward lower
+       * addresses in memory. The stack pointer register points to the
+       * lowest, valid working address (the "top" of the stack). Items on
+       * the stack are referenced as positive word offsets from SP.
        */
 
       top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
 
-      /* The RISC-V stack must be aligned at word (4 byte) boundaries; for
-       * floating point use, the stack must be aligned to 8-byte addresses.
-       * If necessary top_of_stack must be rounded down to the next
-       * boundary to meet these alignment requirements.
+      /* The RISC-V stack must be aligned at 128-bit (16-byte) boundaries.
+       * If necessary top_of_stack must be rounded down to the next boundary.
        */
 
       top_of_stack = STACK_ALIGN_DOWN(top_of_stack);

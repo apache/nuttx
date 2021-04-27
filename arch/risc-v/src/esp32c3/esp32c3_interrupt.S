@@ -42,14 +42,14 @@
 
   .section  .noinit
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-  .align    4
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+  .balign   16
   .type     g_intstackalloc, @object
   .type     g_intstacktop,  @object
 g_intstackalloc:
-  .skip     (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+  .skip     ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
 g_intstacktop:
-  .size     g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+  .size     g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
 #endif
 
 /****************************************************************************
