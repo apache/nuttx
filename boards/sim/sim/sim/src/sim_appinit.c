@@ -24,12 +24,8 @@
 
 #include <nuttx/config.h>
 #include <nuttx/board.h>
-#include <nuttx/sensors/wtgahrs2.h>
-#include <nuttx/rc/lirc_dev.h>
-#include <nuttx/rc/dummy.h>
 
 #include "sim.h"
-#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -65,26 +61,6 @@ int board_app_initialize(uintptr_t arg)
 {
 #ifndef CONFIG_BOARD_LATE_INITIALIZE
   sim_bringup();
-#endif
-
-#ifdef CONFIG_RPTUN
-  up_rptun_init();
-#endif
-
-#ifdef CONFIG_SIM_WTGAHRS2_UARTN
-#if CONFIG_SIM_WTGAHRS2_UARTN == 0
-  wtgahrs2_initialize(CONFIG_SIM_UART0_NAME, 0);
-#elif CONFIG_SIM_WTGAHRS2_UARTN == 1
-  wtgahrs2_initialize(CONFIG_SIM_UART1_NAME, 1);
-#elif CONFIG_SIM_WTGAHRS2_UARTN == 2
-  wtgahrs2_initialize(CONFIG_SIM_UART2_NAME, 2);
-#elif CONFIG_SIM_WTGAHRS2_UARTN == 3
-  wtgahrs2_initialize(CONFIG_SIM_UART3_NAME, 3);
-#endif
-#endif
-
-#ifdef CONFIG_RC_DUMMY
-  rc_dummy_initialize(0);
 #endif
 
   return 0;
