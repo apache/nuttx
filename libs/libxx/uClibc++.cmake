@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libxx/Makefile
+# libs/libxx/libcxx.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,40 +14,28 @@
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations
+# under the License.
 #
 ###########################################################################
 
-nuttx_add_library(xx)
+set(UCLIBCXX_VERSION 0.2.5)
 
-set(SRCS libxx_cxa_atexit.cxx)
+FetchContent_Declare(uclibcxx
+  URL https://git.busybox.net/uClibc++/snapshot/uClibc++-${VERSION}.tar.gz
+	#$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
+)
+FetchContent_Populate(uclibcxx)
 
-if (CONFIG_CXX_LIBSUPCXX)
-  list(APPEND SRCS libxx_impure.cxx)
-else()
-  list(APPEND SRCS libxx_eabi_atexit.cxx)
-endif()
+set(SRCS
+  algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
+  complex.cpp del_op.cpp del_opnt.cpp del_ops.cpp del_opv.cpp
+  del_opvnt.cpp del_opvs.cpp deque.cpp exception.cpp fstream.cpp
+  func_exception.cpp iomanip.cpp ios.cpp iostream.cpp istream.cpp
+  iterator.cpp limits.cpp list.cpp locale.cpp map.cpp new_handler.cpp
+  new_op.cpp new_opnt.cpp new_opv.cpp new_opvnt.cpp numeric.cpp
+  ostream.cpp queue.cpp set.cpp sstream.cpp stack.cpp stdexcept.cpp
+  streambuf.cpp string.cpp typeinfo.cpp utility.cpp valarray.cpp
+  vector.cpp)
 
+list(TRANSFORM SRCS PREPEND uClibc++/src/)
 target_sources(xx PRIVATE ${SRCS})
-
-# Include the uClibc++ Make.defs file if selected.  If it is included,
-# the uClibc++/Make.defs file will add its files to the source file list,
-# add its DEPPATH info, and will add the appropriate paths to the VPATH
-# variable
-#
-# Note that an error will occur if you select CONFIG_LIBXX_UCLIBCXX
-# without installing the uClibc++ package.  This is intentional to let
-# you know about the configuration problem.  Refer to the README.txt file
-# in the NuttX uClibc++ GIT repository for more information
-
-if (CONFIG_UCLIBCXX)
-  include(uClibc++.cmake)
-elseif (CONFIG_LIBCXX)
-  include(libcxx.cmake)
-else()
-  include(cxx.cmake)
-endif()
-
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-#include_directories(SYSTEM ${NUTTX_DIR}/include/cxx)
-
-

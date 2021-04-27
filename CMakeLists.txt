@@ -61,7 +61,7 @@ set(ENV{DRIVERS_PLATFORM_DIR} dummy) # TODO
 # to specified one)
 
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR
-    NOT ${NUTTX_DEFCONFIG} STREQUAL ${NUTTX_DEFCONFIG_SAVED})
+    NOT "${NUTTX_DEFCONFIG}" STREQUAL "${NUTTX_DEFCONFIG_SAVED}")
 
   message(STATUS "Initializing NuttX")
   configure_file(${NUTTX_DEFCONFIG} defconfig COPYONLY)

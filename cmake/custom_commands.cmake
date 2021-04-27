@@ -105,6 +105,20 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${NUTTX_DIR}/include/nuttx/lib/setjmp.h ${CMAKE_BINARY_DIR}/include/setjmp.h
 )
 
+# libcxx
+
+add_custom_command(
+  OUTPUT ${CMAKE_BINARY_DIR}/include/libcxx
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${NUTTX_DIR}/libs/libxx/libcxx/include ${CMAKE_BINARY_DIR}/include/libcxx
+)
+
+# uClibc++
+
+add_custom_command(
+  OUTPUT ${CMAKE_BINARY_DIR}/include/uClibc++
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${NUTTX_DIR}/libs/libxx/uClibc++/include ${CMAKE_BINARY_DIR}/include/uClibc++
+)
+
 # Add final context target that ties together all of the above
 # The context target is invoked on each target build to assure that NuttX is
 # properly configured.  The basic configuration steps include creation of the
@@ -121,5 +135,7 @@ add_custom_target(nuttx_context
     $<$<BOOL:${NEED_MATH_H}>:${CMAKE_BINARY_DIR}/include/math.h>
     $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${CMAKE_BINARY_DIR}/include/float.h>
     $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>
+    $<$<BOOL:${CONFIG_LIBCXX}>:${CMAKE_BINARY_DIR}/include/libcxx>
+    $<$<BOOL:${CONFIG_UCLIBCXX}>:${CMAKE_BINARY_DIR}/include/uClibc++>
 )
 
