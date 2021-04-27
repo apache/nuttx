@@ -34,14 +34,18 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
-#include <nuttx/video/fb.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/rc/lirc_dev.h>
+#include <nuttx/rc/dummy.h>
+#include <nuttx/sensors/fakesensor.h>
+#include <nuttx/sensors/mpu60x0.h>
+#include <nuttx/sensors/wtgahrs2.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
-#include <nuttx/i2c/i2c_master.h>
-#include <nuttx/sensors/mpu60x0.h>
 
 #ifdef CONFIG_LCD_DEV
 #include <nuttx/lcd/lcd_dev.h>
@@ -418,6 +422,37 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: sim_foc_setup() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_RPTUN
+  up_rptun_init();
+#endif
+
+#ifdef CONFIG_SIM_WTGAHRS2_UARTN
+#if CONFIG_SIM_WTGAHRS2_UARTN == 0
+  wtgahrs2_initialize(CONFIG_SIM_UART0_NAME, 0);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 1
+  wtgahrs2_initialize(CONFIG_SIM_UART1_NAME, 1);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 2
+  wtgahrs2_initialize(CONFIG_SIM_UART2_NAME, 2);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 3
+  wtgahrs2_initialize(CONFIG_SIM_UART3_NAME, 3);
+#endif
+#endif
+
+#ifdef CONFIG_SENSORS_FAKESENSOR
+  fakesensor_init(SENSOR_TYPE_ACCELEROMETER,
+                  "/data/boards/sim/sim/sim/src/csv/accel.csv", 0, 50);
+
+  fakesensor_init(SENSOR_TYPE_MAGNETIC_FIELD,
+                  "/data/boards/sim/sim/sim/src/csv/mag.csv", 0, 50);
+
+  fakesensor_init(SENSOR_TYPE_GYROSCOPE,
+                  "/data/boards/sim/sim/sim/src/csv/gyro.csv", 0, 50);
+#endif
+
+#ifdef CONFIG_RC_DUMMY
+  rc_dummy_initialize(0);
 #endif
 
   return ret;
