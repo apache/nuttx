@@ -58,6 +58,10 @@
 #  include "esp32_board_wdt.h"
 #endif
 
+#ifdef CONFIG_ESP32_RT_TIMER
+#  include "esp32_rt_timer.h"
+#endif
+
 #ifdef CONFIG_ESP32_WIRELESS
 #  include "esp32_board_wlan.h"
 #endif
@@ -149,6 +153,15 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize partition error=%d\n",
              ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32_RT_TIMER
+  ret = esp32_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer error\n");
       return ret;
     }
 #endif

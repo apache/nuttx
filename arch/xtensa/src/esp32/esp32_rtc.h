@@ -302,6 +302,39 @@ uint64_t esp32_rtc_time_get(void);
 uint64_t esp32_rtc_time_us_to_slowclk(uint64_t time_in_us, uint32_t period);
 
 /****************************************************************************
+ * Name: esp32_rtc_time_slowclk_to_us
+ *
+ * Description:
+ *   Convert time interval from RTC_SLOW_CLK to microseconds
+ *
+ * Input Parameters:
+ *   time_in_us      - Time interval in RTC_SLOW_CLK cycles
+ *   slow_clk_period - Period of slow clock in microseconds
+ *
+ * Returned Value:
+ *   Time interval in microseconds
+ *
+ ****************************************************************************/
+
+uint64_t esp32_rtc_time_slowclk_to_us(uint64_t rtc_cycles, uint32_t period);
+
+/****************************************************************************
+ * Name: esp32_clk_slowclk_cal_get
+ *
+ * Description:
+ *   Get the calibration value of RTC slow clock.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   the calibration value obtained using rtc_clk_cal
+ *
+ ****************************************************************************/
+
+uint32_t esp32_clk_slowclk_cal_get(void);
+
+/****************************************************************************
  * Name: esp32_rtc_bbpll_disable
  *
  * Description:
