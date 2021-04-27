@@ -83,9 +83,6 @@ config ARCH_CHIP_ESP32SOLO1
 
 endchoice # ESP32 Chip Selection
 
-comment "Selected ESP32 chip without embedded Flash, an external Flash memory is required."
-	depends on ARCH_CHIP_ESP32S0WD || ARCH_CHIP_ESP32D0WD
-
 config ESP32_SINGLE_CPU
 	bool
 	default n
