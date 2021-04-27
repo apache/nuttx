@@ -244,7 +244,7 @@ function configure {
 function cmake_configure {
   echo "  Configuring..."
 
-  nuttx_board=$(cd ../boards && find ../boards -mindepth 3 -maxdepth 3 -type d -name ${boarddir} -print -quit)
+  nuttx_board=$(cd ../boards && find . -mindepth 3 -maxdepth 3 -type d -name ${boarddir} -print -quit | sed -r 's|^..||')
 
   if ! cmake -DCMAKE_BUILD_TYPE=Debug -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
     fail=1

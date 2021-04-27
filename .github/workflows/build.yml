@@ -22,7 +22,6 @@ on:
     branches:
       - master
       - 'releases/*'
-      - cmake
     tags:
 
 jobs:
@@ -47,7 +46,7 @@ jobs:
           echo "Working with ref: $REF"
 
           # We modify for all tags and release branches
-          if [[ $REF =~ refs/heads/releases/*|refs/tags/*|refs/heads/cmake ]]; then
+          if [[ $REF =~ refs/heads/releases/*|refs/tags/* ]]; then
             if [[ $REF =~ refs/heads/* ]]
               then
                 REF_NAME=${REF##refs/heads/}
@@ -94,8 +93,8 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v2
         with:
-          repository: apache/incubator-nuttx-apps
-          ref: ${{ steps.gittargets.outputs.apps_ref }}
+          repository: v01d/incubator-nuttx-apps
+          ref: cmake
           path: sources/apps
           fetch-depth: 1
 
