@@ -34,13 +34,18 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/mpu60x0.h>
 #include <nuttx/sensors/wtgahrs2.h>
+#include <nuttx/serial/uart_rpmsg.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
+#include <nuttx/timers/arch_rtc.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
@@ -62,8 +67,19 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void)
+{
+#ifdef CONFIG_SIM_RPTUN_MASTER
+  uart_rpmsg_init("proxy", "proxy", 4096, false);
+#else
+  uart_rpmsg_init("server", "proxy", 4096, true);
+#endif
+}
+#endif
+
 /****************************************************************************
- * Name: sam_bringup
+ * Name: sim_bringup
  *
  * Description:
  *   Bring up simulated board features
@@ -425,7 +441,27 @@ int sim_bringup(void)
 #endif
 
 #ifdef CONFIG_RPTUN
-  up_rptun_init();
+#ifdef CONFIG_SIM_RPTUN_MASTER
+  up_rptun_init("server-proxy", "proxy", true);
+#else
+  up_rptun_init("server-proxy", "server", false);
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER
+  syslog_rpmsg_server_init();
+#endif
+
+#ifndef CONFIG_RTC_RPMSG_SERVER
+  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
+#endif
+
+#ifdef CONFIG_FS_HOSTFS_RPMSG
+  hostfs_rpmsg_init("server");
+#endif
+
+#ifdef CONFIG_FS_HOSTFS_RPMSG_SERVER
+  hostfs_rpmsg_server_init();
+#endif
 #endif
 
 #ifdef CONFIG_SIM_WTGAHRS2_UARTN

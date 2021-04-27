@@ -228,17 +228,12 @@ endchoice
 
 endif
 
-config SIM_RPTUN_MASTER
-	bool "Remote Processor Tunneling Role"
-	depends on RPTUN
-
 menu "Simulated Graphics/Input"
 
 config SIM_X11FB
-  bool "X11 graphics/input"
-  default n
-  select SCHED_LPWORK
-	depends on SIM_WALLTIME
+	bool "X11 graphics/input"
+	default n
+	select SCHED_LPWORK
 	---help---
 		Use X11 to provide graphics and input emulation to interact with host.
 
