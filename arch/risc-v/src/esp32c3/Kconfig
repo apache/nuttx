@@ -40,9 +40,6 @@ config ARCH_CHIP_ESP32C3WROOM02
 
 endchoice # ESP32-C3 Chip Selection
 
-comment "Selected ESP32-C3 chip without embedded Flash, an external Flash memory is required."
-	depends on ARCH_CHIP_ESP32C3X
-
 config ESP32C3_SINGLE_CPU
 	bool
 	default n
