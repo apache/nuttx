@@ -201,16 +201,16 @@ exception_common:
  *  Name: g_intstackalloc and g_intstacktop
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   .bss
-  .align  4
+  .balign 16
   .global g_intstackalloc
   .global g_intstacktop
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
-  .skip  (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
 g_intstacktop:
   .size  g_intstacktop, 0
-  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
 #endif
