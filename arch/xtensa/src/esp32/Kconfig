@@ -502,6 +502,7 @@ endmenu # Memory Configuration
 
 config ESP32_GPIO_IRQ
 	bool "GPIO pin interrupts"
+	default n
 	---help---
 		Enable support for interrupting GPIO pins
 
