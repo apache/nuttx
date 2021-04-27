@@ -10,7 +10,6 @@ comment "ESP32-C3 Configuration Options"
 choice
 	prompt "ESP32-C3 Chip Selection"
 	default ARCH_CHIP_ESP32C3WROOM02
-	depends on ARCH_CHIP_ESP32C3
 
 config ARCH_CHIP_ESP32C3X
 	bool "ESP32-C3"
