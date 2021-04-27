@@ -993,7 +993,7 @@ uint64_t IRAM_ATTR esp32_rtc_time_get(void)
  *
  * Input Parameters:
  *   time_in_us      - Time interval in microseconds
- *   slow_clk_period -  Period of slow clock in microseconds
+ *   slow_clk_period - Period of slow clock in microseconds
  *
  * Returned Value:
  *   number of slow clock cycles
@@ -1008,6 +1008,46 @@ uint64_t IRAM_ATTR esp32_rtc_time_us_to_slowclk(uint64_t time_in_us,
    */
 
   return (time_in_us << RTC_CLK_CAL_FRACT) / period;
+}
+
+/****************************************************************************
+ * Name: esp32_rtc_time_slowclk_to_us
+ *
+ * Description:
+ *   Convert time interval from RTC_SLOW_CLK to microseconds
+ *
+ * Input Parameters:
+ *   time_in_us      - Time interval in RTC_SLOW_CLK cycles
+ *   slow_clk_period - Period of slow clock in microseconds
+ *
+ * Returned Value:
+ *   Time interval in microseconds
+ *
+ ****************************************************************************/
+
+uint64_t IRAM_ATTR esp32_rtc_time_slowclk_to_us(uint64_t rtc_cycles,
+                                                uint32_t period)
+{
+  return (rtc_cycles * period) >> RTC_CLK_CAL_FRACT;
+}
+
+/****************************************************************************
+ * Name: esp32_clk_slowclk_cal_get
+ *
+ * Description:
+ *   Get the calibration value of RTC slow clock.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   the calibration value obtained using rtc_clk_cal
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32_clk_slowclk_cal_get(void)
+{
+  return getreg32(RTC_SLOW_CLK_CAL_REG);
 }
 
 /****************************************************************************

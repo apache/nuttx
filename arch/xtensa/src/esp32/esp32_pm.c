@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/power/pm.h>
 
 #ifdef CONFIG_PM
 
@@ -41,6 +42,14 @@
 #include "esp32_clockconfig.h"
 #include "esp32_pm.h"
 #include "esp32_resetcause.h"
+
+#ifdef CONFIG_ESP32_RT_TIMER
+#include "esp32_rt_timer.h"
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+#include "esp32_tickless.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -191,6 +200,7 @@ static struct esp32_sleep_config_t s_config =
               { ESP_PD_OPTION_AUTO, ESP_PD_OPTION_AUTO, ESP_PD_OPTION_AUTO },
     .wakeup_triggers = 0
 };
+static volatile uint32_t pm_wakelock = 0;
 
 /****************************************************************************
  * Private Functions
@@ -836,7 +846,7 @@ static void RTC_IRAM_ATTR esp32_wake_deep_sleep(void)
  *
  ****************************************************************************/
 
-void esp32_sleep_enable_timer_wakeup(uint64_t time_in_us)
+void IRAM_ATTR esp32_sleep_enable_timer_wakeup(uint64_t time_in_us)
 {
   s_config.wakeup_triggers |= RTC_TIMER_TRIG_EN;
   s_config.sleep_duration = time_in_us;
@@ -849,14 +859,14 @@ void esp32_sleep_enable_timer_wakeup(uint64_t time_in_us)
  *   Enter sleep mode
  *
  * Input Parameters:
- *   None
+ *   sleep_time - Actual sleep time
  *
  * Returned Value:
  *   0 is returned on success or a negated errno value is returned
  *
  ****************************************************************************/
 
-int esp32_light_sleep_start(void)
+int esp32_light_sleep_start(uint64_t *sleep_time)
 {
   irqstate_t flags;
   uint32_t pd_flags;
@@ -905,6 +915,12 @@ int esp32_light_sleep_start(void)
 
   ret = esp32_light_sleep_inner(pd_flags, flash_enable_time_us,
                                                vddsdio_config);
+  if (sleep_time)
+    {
+      *sleep_time = esp32_rtc_time_slowclk_to_us(esp32_rtc_time_get() -
+          s_config.rtc_ticks_at_sleep_start, esp32_clk_slowclk_cal_get());
+    }
+
   leave_critical_section(flags);
   return ret;
 }
@@ -947,11 +963,42 @@ void esp32_pminit(void)
 
 void esp32_pmstandby(uint64_t time_in_us)
 {
+  uint64_t rtc_diff_us;
+#ifdef CONFIG_ESP32_RT_TIMER
+  uint64_t hw_start_us;
+  uint64_t hw_end_us;
+  uint64_t hw_diff_us;
+#endif
+
   /* don't power down XTAL — powering it up takes different time on. */
 
   fflush(stdout);
   esp32_sleep_enable_timer_wakeup(time_in_us);
-  esp32_light_sleep_start();
+
+#ifdef CONFIG_ESP32_RT_TIMER
+  /* Get rt-timer timestamp before entering sleep */
+
+  hw_start_us = rt_timer_time_us();
+#endif
+
+  esp32_light_sleep_start(&rtc_diff_us);
+
+#ifdef CONFIG_ESP32_RT_TIMER
+  /* Get rt-timer timestamp after waking up from sleep */
+
+  hw_end_us = rt_timer_time_us();
+  hw_diff_us = hw_end_us - hw_start_us;
+  DEBUGASSERT(rtc_diff_us > hw_diff_us);
+
+  rt_timer_calibration(rtc_diff_us - hw_diff_us);
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+  up_step_idletime((uint32_t)time_in_us);
+#endif
+
+  pwrinfo("Returned from auto-sleep, slept for %d ms\n",
+            (uint32_t)(rtc_diff_us) / 1000);
 }
 
 /****************************************************************************
@@ -1081,6 +1128,53 @@ void esp32_pmsleep(uint64_t time_in_us)
   fflush(stdout);
   esp32_sleep_enable_timer_wakeup(time_in_us);
   esp32_deep_sleep_start();
+}
+
+/****************************************************************************
+ * Name: esp32_pm_lockacquire
+ *
+ * Description:
+ *   Take a power management lock
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32_pm_lockacquire(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  ++pm_wakelock;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: esp32_pm_lockrelease
+ *
+ * Description:
+ *   Release the lock taken using esp32_pm_lockacquire.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32_pm_lockrelease(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  --pm_wakelock;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: esp32_pm_lockstatus
+ *
+ * Description:
+ *   Return power management lock status.
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32_pm_lockstatus(void)
+{
+  return pm_wakelock;
 }
 
 #endif /* CONFIG_PM */
