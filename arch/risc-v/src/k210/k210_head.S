@@ -242,24 +242,24 @@ normal_irq:
  *  Name: g_intstackalloc and g_intstacktop
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   .bss
-  .align  8
+  .balign 16
   .global g_intstackalloc
   .global g_intstacktop
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
 #ifndef CONFIG_SMP
-  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
+  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
 #else
-  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) + 4) & ~7)
+  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) + 8) & ~15)
 #endif
 g_intstacktop:
   .size  g_intstacktop, 0
 #ifndef CONFIG_SMP
-  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
 #else
-  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~7)
+  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~15)
 #endif
 #endif
