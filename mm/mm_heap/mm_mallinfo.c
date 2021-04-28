@@ -51,6 +51,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   FAR struct mm_allocnode_s *prev;
   size_t mxordblk = 0;
   int    ordblks  = 0;  /* Number of non-inuse chunks */
+  int    aordblks = 0;  /* Number of inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
   size_t fordblks = 0;  /* Total non-inuse space */
 #if CONFIG_MM_REGIONS > 1
@@ -92,6 +93,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
           if ((node->preceding & MM_ALLOC_BIT) != 0)
             {
               DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
+              aordblks++;
               uordblks += node->size;
             }
           else
@@ -133,6 +135,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
   info->arena    = heap_impl->mm_heapsize;
   info->ordblks  = ordblks;
+  info->aordblks = aordblks;
   info->mxordblk = mxordblk;
   info->uordblks = uordblks;
   info->fordblks = fordblks;
