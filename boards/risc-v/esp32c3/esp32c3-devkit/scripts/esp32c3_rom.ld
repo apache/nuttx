@@ -173,7 +173,6 @@ PROVIDE( Enable_QMode = 0x40000228 );
 /* Data (.data, .bss, .rodata) */
 PROVIDE( rom_spiflash_legacy_funcs = 0x3fcdfff4 );
 PROVIDE( rom_spiflash_legacy_data = 0x3fcdfff0 );
-PROVIDE( g_rom_flashchip = 0x3fcdf730 );
 PROVIDE( g_flash_guard_ops = 0x3fcdfff8 );
 
 
