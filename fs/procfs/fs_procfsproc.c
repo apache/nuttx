@@ -473,8 +473,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 #else
   name       = "<noname>";
 #endif
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
-                               "Name:", name);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s%.18s\n", "Name:", name);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
