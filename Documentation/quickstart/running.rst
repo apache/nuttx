@@ -11,7 +11,7 @@ which also integrates the debugger/programmer in the board itself exposed via US
 connector.
 
 A good choice is a Nucleo or Discovery board from ST Microelectronics,
-as there is a wide choice of suported boards for the STM32 architecture in NuttX.
+as there is a wide choice of supported boards for the STM32 architecture in NuttX.
 Also, these boards expose an UART port over the USB connection which allows you
 to interact with NuttX via the interactive console without any extra hardware.
 For the purposes of this guide, we will use the Nucleo F103RB board.
@@ -25,7 +25,7 @@ of programmers and target microcontrollers.
 
 You should note that ``openocd`` project has not made stable releases for long
 time and support for newer hardware will probably be only available in the
-latest Git version, so it is actually recommended to install latest development 
+latest Git version, so it is actually recommended to install latest development
 version.
 
 .. tabs::
@@ -37,7 +37,7 @@ version.
   .. tab:: Install latest version from source
 
      .. code-block:: console
-     
+
         $ git clone git://git.code.sf.net/p/openocd/code openocd
         $ cd openocd
         $ ./bootstrap
@@ -46,7 +46,7 @@ version.
 
      The resulting installation will be under ``openocd/install``. You can add
      ``openocd/install/bin`` to your ``PATH``.
-  
+
 Now, to flash the binary to your board, connect the USB cable and do:
 
 .. code-block:: console
@@ -72,15 +72,15 @@ if you don't see anything):
   .. code-tab:: console gtkterm (GUI)
 
     $ gtkterm -s 115200 -p /dev/ttyUSB0
-    
+
 .. tip::
 
   You may have to add yourself to the ``dialout`` group on Linux to have permission
   to access serial ports:
-  
+
   .. code-block:: console
-  
+
     $ gpasswd -a <user> dialout
-    
+
   Where ``<user>`` is your username. You will need to log out from your desktop
   for the change to have effect.

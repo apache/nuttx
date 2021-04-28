@@ -69,7 +69,7 @@ range of supply voltage (rail-to-rail operation).
 ADC
 ---
 
-ADC driver with the successive approximation analog/digital convertor. The lower-half of
+ADC driver with the successive approximation analog/digital converter. The lower-half of
 this driver is initialize by calling :c:func:`imxrt_adcinitialize`.
 
 CAN
@@ -82,7 +82,7 @@ calling :c:func:`imxrt_cannitialize()`.
 
 There is an booting option that automatically provides initialization of network interface
 in the early stages of booting and therefore calling :c:func:`imxrt_cannitialize()` via
-board specific logic is not neccessary. This however works only when there is only one
+board specific logic is not necessary. This however works only when there is only one
 interface in the chip. For running more interfaces (like CAN and Ethernet), network late
 initialization must be turn on by CONFIG_NETDEV_LATEINIT and board specific logic must call
 lower-half part of drivers.
@@ -95,7 +95,7 @@ CMOS Sensor interface which enables the chip to connect directly to external CMO
 DAC
 ---
 
-Digital/analog convertor for external signal is only supported in i.MX RT1170 MCU. It is 12 bit
+Digital/analog converter for external signal is only supported in i.MX RT1170 MCU. It is 12 bit
 lower power, general purpose DAC.
 
 eLCDIF
@@ -117,7 +117,7 @@ by calling :c:func:`imxrt_netnitialize`.
 
 There is an booting option that automatically provides initialization of network interface
 in the early stages of booting and therefore calling :c:func:`imxrt_cannitialize()` via
-board specific logic is not neccessary. This however works only when there is only one
+board specific logic is not necessary. This however works only when there is only one
 interface in the chip. For running more interfaces (like CAN and Ethernet), network late
 initialization must be turn on by CONFIG_NETDEV_LATEINIT and board specific logic must call
 lower-half part of drivers.
@@ -137,7 +137,7 @@ done by :c:func:`imxrt_gpio_write` function and reading is done by :c:func:`imxr
 
 MCUs i.MX RT1060 and higher includes both standard speed GPIOs (1-5) and high speed
 GPIOS (6-9). Regular and high speed GPIO share the same pins (GPIO1 is with GPIO6 etc),
-therefore IOMUXC_GPR_GPR26-29 registers are used to determine what modue is used for the
+therefore IOMUXC_GPR_GPR26-29 registers are used to determine what module is used for the
 GPIO pins.
 
 
@@ -160,7 +160,7 @@ Synchronous audio interface provided by I2C module. Supported in i.MX RT1015 and
 SPDIF
 -----
 
-Sony/Philips digital interface audio block. It is a stereo transciever that allows the
+Sony/Philips digital interface audio block. It is a stereo transceiver that allows the
 processor to receive and transmit digital audio. Supported in i.MX RT1010 and higher.
 
 SPI

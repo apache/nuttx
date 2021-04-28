@@ -17,7 +17,7 @@ The Nuttx FOC driver is split into two parts:
 
 #. An "upper half", generic driver that provides the common FOC
    interface to application level code,
-#. A "lower half", platform-specific driver that implemets
+#. A "lower half", platform-specific driver that implements
    the low-level logic to implement the FOC functionality
 
 Files supporting FOC can be found in the following locations:

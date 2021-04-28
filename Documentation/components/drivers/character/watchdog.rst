@@ -65,7 +65,7 @@ Enabling the Watchdog Support and Example in ``menuconfing``
 4. Include the Debug Watchdog Feature
 
  In order to get the watchdog timer status, you need to enable it. For production code and for your application you may disable it.
- 
+
  Go into menu :menuselection:`Build Setup --> Debug Options` and press :kbd:`Enter`. Then enable:
 
  - [x] Enable Debug Features
@@ -79,7 +79,7 @@ The previously selected example will basically do the following:
 * Open the watchdog device
 * Set the watchdog timeout
 * Start the watchdog timer
-* Ping (feed the dog) during the ``pingtime`` with a delay of ``pingdelay`` and print out the wdt status in case debug was enabled. 
+* Ping (feed the dog) during the ``pingtime`` with a delay of ``pingdelay`` and print out the wdt status in case debug was enabled.
 * Enter into an endless loop without pinging. It will cause the watchdog timer to reset the chip on timeout, i.e., after timer expiration.
 
 
@@ -136,7 +136,7 @@ This command gets the status of the watchdog timer. It receives a writeable poin
 
 .. c:macro:: WDIOC_SETTIMEOUT
 
-This command sets the timeout value, i.e., the value that will trigger the reset or interrupt. The argument is a ``uint32_t`` value in miliseconds.
+This command sets the timeout value, i.e., the value that will trigger the reset or interrupt. The argument is a ``uint32_t`` value in milliseconds.
 
 .. c:macro:: WDIOC_CAPTURE
 
@@ -153,12 +153,12 @@ This command registers an user callback that will be triggered on timeout. It re
 
 .. c:macro:: WDIOC_KEEPALIVE
 
- This command resets the watchdog timer AKA '**ping**", "**kick**", "**pet**",  "**feed**" the dog". 
+ This command resets the watchdog timer AKA '**ping**", "**kick**", "**pet**",  "**feed**" the dog".
 
 Enable Built in System Monitoring to reset the watchdog
 -------------------------------------------------------
 
-The auto-monitor provides an OS-internal mechanism to automatically start and repeatedly reset the watchdog.  
+The auto-monitor provides an OS-internal mechanism to automatically start and repeatedly reset the watchdog.
 
 To enable it, follow the next instructions:
 
@@ -181,16 +181,16 @@ To enable it, follow the next instructions:
  After selecting the option you may want to configure some parameters:
 
  * **Timeout**: It is the watchdog timer expiration time in seconds.
- * **Keep a live interval**: This is the interval in which the watchdog will be fed. It is in seconds. It can't be bigger than the timeout. If this interval is equal to timeout interval, than this interval will automatically change to half timeout. 
+ * **Keep a live interval**: This is the interval in which the watchdog will be fed. It is in seconds. It can't be bigger than the timeout. If this interval is equal to timeout interval, than this interval will automatically change to half timeout.
  * **Keep alive by**: This is a choice to determine who is going to feed the dog. There are 4 possible choices that are described as follows.
 
- ``Capture callback``: This choice registers a watchdog timer callback to reset the watchdog every time it expires, i.e., on timeout. 
+ ``Capture callback``: This choice registers a watchdog timer callback to reset the watchdog every time it expires, i.e., on timeout.
 
  ``Timer callback``: This choice also uses a timer callback to reset the watchdog, but it will reset the watchdog every "keep a live interval".
 
  ``Worker callback``:  This choice uses a Work Queue to reset the watchdog every "keep a live interval". This choice depends on having the Low or High Priority Work Queue enabled.
- If only the High Priority Work Queue is enabled, this one will be used, otherwise Low Priority Work Queue is used. 
- 
+ If only the High Priority Work Queue is enabled, this one will be used, otherwise Low Priority Work Queue is used.
+
  So, before enabling it, go into menu :menuselection:`RTOS Features --> Work queue support` and press :kbd:`Enter`.
 
  - [x] Low priority (kernel) worker thread
@@ -200,5 +200,5 @@ To enable it, follow the next instructions:
  Go into menu :menuselection:`Device Drivers` and enable:
 
  - [x] Power Management Support
- 
-After selecting one of these choices, the chip will keep itself alive by one of these options. 
+
+After selecting one of these choices, the chip will keep itself alive by one of these options.

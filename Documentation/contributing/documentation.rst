@@ -24,7 +24,7 @@ go into ``Documentation`` directory. Then,
 
       $ pip3 install pipenv
       $ pipenv install
-      $ # activate the virtual environent
+      $ # activate the virtual environment
       $ pipenv shell
 
   2. Build documentation:
@@ -82,7 +82,7 @@ sometimes Sphinx's approach is used over standard RST since it is more powerful 
 Documentation Conventions
 =========================
 
-While RST/Sphinx provide many ways to do things, it is best to follow a given convention to mantain consistency and avoid
+While RST/Sphinx provide many ways to do things, it is best to follow a given convention to maintain consistency and avoid
 pitfalls. For this reason, documentation changes should follow the following set of conventions.
 
 Indentation
@@ -180,7 +180,7 @@ Tips
 Spacing
 -------
 
-If you are getting formatting errors, be sure to provide the appropiate spacing between a directive and its content.
+If you are getting formatting errors, be sure to provide the appropriate spacing between a directive and its content.
 Generally, you should follow this format:
 
 .. code-block:: RST

@@ -57,7 +57,7 @@ credentials at login time:
      This is not very flexible since there can be only one user and the
      password is fixed in the FLASH image. This option is also not very
      secure because a malicious user could get the password by just
-     looking at the ``.text`` stings in the flash image.
+     looking at the ``.text`` strings in the flash image.
 
   #. NSH can also be configured to defer the entire user credential
      verification to platform-specific logic with this setting::

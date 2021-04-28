@@ -109,7 +109,7 @@ After getting the trace, the following command displays the accumulated trace da
 
   nsh> trace dump
 
-This will be get the trace results like the followings:
+This will get the trace results like the following:
 
 .. code-block::
 
@@ -266,7 +266,7 @@ The default value is given by the kernel configuration ``CONFIG_SCHED_INSTRUMENT
 - ``-a`` : Disable recording the system call arguments.
 
 - ``+i`` : Enable interrupt trace.
-  It records the event of enter/leave interrupt handler which is occured while the tracing.
+  It records the event of enter/leave interrupt handler which occurred while tracing.
   All IRQs are recorded by default. ``trace irq`` command can filter the IRQs to be recorded.
 
 - ``-i`` : Disable interrupt trace.
