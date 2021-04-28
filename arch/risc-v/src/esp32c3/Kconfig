@@ -15,14 +15,14 @@ config ARCH_CHIP_ESP32C3X
 	bool "ESP32-C3"
 	select ESP32C3_ESP32C3XXX
 	---help---
-		ESP32 chip with a single RISC-V IMC core, no embedded Flash memory
+		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
 config ARCH_CHIP_ESP32C3FX4
 	bool "ESP32-C3Fx4"
 	select ESP32C3_ESP32C3XXX
 	select ESP32C3_FLASH_4M
 	---help---
-		ESP32 chip with a single RISC-V IMC core, 4 MB of in-package Flash memory
+		ESP32-C3 chip with a single RISC-V IMC core, 4 MB of in-package Flash memory
 
 config ARCH_CHIP_ESP32C3MINI1
 	bool "ESP32-C3-MINI-1"
