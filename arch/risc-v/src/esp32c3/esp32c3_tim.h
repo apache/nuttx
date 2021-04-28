@@ -82,14 +82,14 @@ enum esp32c3_tim_mode_e
   ESP32C3_TIM_MODE_UP,
 };
 
-/* ESP32C3 TIM device */
+/* ESP32-C3 TIM device */
 
 struct esp32c3_tim_dev_s
 {
   struct esp32c3_tim_ops_s *ops;
 };
 
-/* ESP32C3 TIM ops */
+/* ESP32-C3 TIM ops */
 
 /* This is a struct containing the pointers to the timer operations */
 

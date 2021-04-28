@@ -672,7 +672,7 @@ FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
   ASSERT((ESP32C3_MTD_OFFSET % chip->sector_size) == 0);
   ASSERT((ESP32C3_MTD_SIZE % chip->sector_size) == 0);
 
-  finfo("ESP32 SPI Flash information:\n");
+  finfo("ESP32-C3 SPI Flash information:\n");
   finfo("\tID = 0x%" PRIx32 "\n", chip->device_id);
   finfo("\tStatus mask = 0x%" PRIx32 "\n", chip->status_mask);
   finfo("\tChip size = %" PRId32 " KB\n", chip->chip_size / 1024);

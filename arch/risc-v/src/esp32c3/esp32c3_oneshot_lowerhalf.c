@@ -54,7 +54,7 @@ struct esp32c3_oneshot_lowerhalf_s
    */
 
   struct oneshot_lowerhalf_s        lh;   /* Lower half instance */
-  struct esp32c3_oneshot_s     oneshot;   /* ESP32C3-specific oneshot state */
+  struct esp32c3_oneshot_s     oneshot;   /* ESP32-C3-specific oneshot state */
   oneshot_callback_t          callback;   /* Upper half Interrupt callback */
   FAR void                        *arg;   /* Argument passed to handler */
   uint16_t                  resolution;
