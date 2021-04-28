@@ -97,8 +97,13 @@ SECTIONS
     *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
+  } >dram0_0_seg
 
-    /* Uninitialized .bss */
+  .noinit (NOLOAD):
+  {
+    /* This section contains data that is not initialized during load,
+     * or during the application's initialization sequence.
+     */
 
     *(.noinit)
   } >dram0_0_seg
