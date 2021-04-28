@@ -257,4 +257,12 @@
 
 #define BIT(nr)                     (1UL << (nr))
 
+/* Extract the field from the register and shift it to avoid wrong reading */
+
+#define REG_MASK(_reg, _field) (((_reg) & (_field##_M)) >> (_field##_S))
+
+/* Helper to place a value in a field */
+
+#define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
+
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_SOC_H */
