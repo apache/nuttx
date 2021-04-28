@@ -99,7 +99,7 @@ static void esp32c3_wdt_ackint(struct esp32c3_wdt_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
-/* ESP32 WDT ops */
+/* ESP32-C3 WDT ops */
 
 struct esp32c3_wdt_ops_s esp32c3_mwdt_ops =
 {

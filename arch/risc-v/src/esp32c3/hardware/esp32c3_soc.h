@@ -146,7 +146,7 @@
 #define SOC_BYTE_ACCESSIBLE_HIGH  0x3fd00000
 
 /* Region of memory that is internal, as in on the same silicon die as the
- * ESP32 CPU (excluding RTC data region, that's checked separately.)
+ * ESP32-C3 CPU (excluding RTC data region, that's checked separately.)
  * See esp_ptr_internal().
  */
 

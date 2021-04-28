@@ -94,14 +94,14 @@ enum esp32c3_wdt_stage_action_e
                                                */
 };
 
-/* ESP32 WDT device */
+/* ESP32-C3 WDT device */
 
 struct esp32c3_wdt_dev_s
 {
   struct esp32c3_wdt_ops_s *ops;
 };
 
-/* ESP32 WDT ops */
+/* ESP32-C3 WDT ops */
 
 /* This is a struct containing the pointers to the wdt operations */
 

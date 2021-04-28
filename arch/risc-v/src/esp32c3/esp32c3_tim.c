@@ -87,7 +87,7 @@ static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
-/* ESP32C3 TIM ops */
+/* ESP32-C3 TIM ops */
 
 struct esp32c3_tim_ops_s esp32c3_tim_ops =
 {
