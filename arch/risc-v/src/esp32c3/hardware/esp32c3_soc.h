@@ -264,5 +264,43 @@
 /* Helper to place a value in a field */
 
 #define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
+#define DPORT_CPUPERIOD_SEL_80      0
+#define DPORT_CPUPERIOD_SEL_160     1
+
+#define DPORT_SOC_CLK_SEL_XTAL    0
+#define DPORT_SOC_CLK_SEL_PLL    1
+#define DPORT_SOC_CLK_SEL_8M     2
+
+/* Write value to register */
+
+#define REG_WRITE(_r, _v)    (*(volatile uint32_t *)(_r)) = (_v)
+
+/* Read value from register */
+
+#define REG_READ(_r) (*(volatile uint32_t *)(_r))
+
+/* Get bit or get bits from register */
+
+#define REG_GET_BIT(_r, _b)  (*(volatile uint32_t*)(_r) & (_b))
+
+/* Set bit or set bits to register */
+
+#define REG_SET_BIT(_r, _b)  (*(volatile uint32_t*)(_r) |= (_b))
+
+/* Clear bit or clear bits of register */
+
+#define REG_CLR_BIT(_r, _b)  (*(volatile uint32_t*)(_r) &= ~(_b))
+
+/* Get field from register,
+ * used when _f is not left shifted by _f##_S
+ */
+
+#define REG_GET_FIELD(_r, _f) ((REG_READ(_r) >> (_f##_S)) & (_f##_V))
+
+/* Set field to register,
+ * used when _f is not left shifted by _f##_S
+ */
+
+#define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f##_V) << (_f##_S)))|(((_v) & (_f##_V))<<(_f##_S)))))
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_SOC_H */
