@@ -199,7 +199,7 @@ Functions
   - Deletion of self is supported, but only because ``task_delete()``
     will re-direct processing to ``exit()``.
 
-.. :c:funcion:: int task_restart(pid_t pid)
+.. :c:function:: int task_restart(pid_t pid)
 
   This function *restarts* a task. The task is first
   terminated and then reinitialized with same ID, priority, original entry

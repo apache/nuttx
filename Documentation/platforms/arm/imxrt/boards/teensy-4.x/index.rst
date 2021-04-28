@@ -96,7 +96,7 @@ This configuration can be easily changed to work with Teensy 4.0 by
 selecting ``CONFIG_TEENSY_40=y``.
 
 This configuration runs over LPUART1 (pins 24 and 25 on Teensy). Communication
-over USB console can be turn on, but it couses problems with FlexCAN.
+over USB console can be turn on, but it causes problems with FlexCAN.
 
 netnsh-4.1
 ----------
