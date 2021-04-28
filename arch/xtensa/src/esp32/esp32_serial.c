@@ -443,13 +443,10 @@ static uint32_t esp32_get_rx_fifo_len(struct esp32_dev_s *priv)
   uint32_t len;
 
   mem_rx_status_reg = getreg32(UART_MEM_RX_STATUS_REG(priv->config->id));
-  rd_address        = ((mem_rx_status_reg & UART_RD_ADDRESS_M)
-                       >> UART_RD_ADDRESS_S);
-  wr_address        = ((mem_rx_status_reg & UART_WR_ADDRESS_M)
-                       >> UART_WR_ADDRESS_S);
-  rx_status_reg     = getreg32(UART_STATUS_REG(priv->config->id));
-  fifo_cnt          = ((rx_status_reg & UART_RXFIFO_CNT_M)
-                       >> UART_RXFIFO_CNT_S);
+  rd_address = REG_MASK(mem_rx_status_reg, UART_RD_ADDRESS);
+  wr_address = REG_MASK(mem_rx_status_reg, UART_WR_ADDRESS);
+  rx_status_reg = getreg32(UART_STATUS_REG(priv->config->id));
+  fifo_cnt = REG_MASK(rx_status_reg, UART_RXFIFO_CNT);
 
   if (wr_address > rd_address)
     {
@@ -611,8 +608,8 @@ static int esp32_setup(struct uart_dev_s *dev)
   /* Configure and enable the UART */
 
   putreg32(conf0, UART_CONF0_REG(priv->config->id));
-  regval = (UART_RX_FIFO_FULL_THRHD << UART_RXFIFO_FULL_THRHD_S) |
-           (UART_RX_TOUT_THRHD_VALUE << UART_RX_TOUT_THRHD_S) |
+  regval = VALUE_TO_FIELD(UART_RX_FIFO_FULL_THRHD, UART_RXFIFO_FULL_THRHD) |
+           VALUE_TO_FIELD(UART_RX_TOUT_THRHD_VALUE, UART_RX_TOUT_THRHD) |
            UART_RX_TOUT_EN;
   putreg32(regval, UART_CONF1_REG(priv->config->id));
 #endif
@@ -827,7 +824,7 @@ static int esp32_interrupt(int cpuint, void *context, FAR void *arg)
       if ((enabled & (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA))
           != 0)
         {
-          nfifo = (status & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S;
+          nfifo = REG_MASK(status, UART_TXFIFO_CNT);
           if (nfifo < 0x7f)
             {
               /* The TXFIFO is not full ... process outgoing bytes */
@@ -1066,7 +1063,7 @@ static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status)
 
   rx_fifo = getreg32(DR_UART_FIFO_REG(priv->config->id));
 
-  return (int)(rx_fifo & UART_RXFIFO_RD_BYTE_M);
+  return (int)REG_MASK(rx_fifo, UART_RXFIFO_RD_BYTE);
 }
 
 /****************************************************************************
@@ -1192,19 +1189,13 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 static bool esp32_txready(struct uart_dev_s *dev)
 {
   uint32_t txcnt;
+  uint32_t reg;
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  txcnt = (getreg32(UART_STATUS_REG(priv->config->id)) >> UART_TXFIFO_CNT_S)
-           & UART_TXFIFO_CNT_V;
+  reg = getreg32(UART_STATUS_REG(priv->config->id));
+  txcnt = REG_MASK(reg, UART_TXFIFO_CNT);
 
-  if (txcnt < (UART_TX_FIFO_SIZE -1))
-    {
-      return true;
-    }
-  else
-    {
-      return false;
-    }
+  return (txcnt < (UART_TX_FIFO_SIZE - 1));
 }
 
 /****************************************************************************
