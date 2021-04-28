@@ -183,6 +183,14 @@
 
 #define GET_PERI_REG_BITS2(reg, mask,shift)      ((READ_PERI_REG(reg)>>(shift))&(mask))
 
+/* Extract the field from the register and shift it to avoid wrong reading */
+
+#define REG_MASK(_reg, _field) (((_reg) & (_field##_M)) >> (_field##_S))
+
+/* Helper to place a value in a field */
+
+#define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
+
 /* Periheral Clock */
 
 #define APB_CLK_FREQ_ROM                        26 * 1000000
