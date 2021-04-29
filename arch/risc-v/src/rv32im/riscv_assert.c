@@ -173,7 +173,7 @@ static void riscv_dumpstate(void)
   uint32_t sp = riscv_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   uint32_t istackbase;
   uint32_t istacksize;
 #endif
@@ -189,9 +189,9 @@ static void riscv_dumpstate(void)
 
   /* Get the limits on the interrupt stack memory */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   istackbase = (uint32_t)&g_intstackalloc;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
 
   /* Show interrupt stack info */
 
