@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <signal.h>
@@ -61,6 +62,30 @@
 
 #ifndef MIN
 #  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE 0
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE > 0
+#  define CALL_WORKER(worker, arg) \
+     do \
+       { \
+         uint32_t start; \
+         uint32_t elapsed; \
+         start = up_critmon_gettime(); \
+         worker(arg); \
+         elapsed = up_critmon_gettime() - start; \
+         if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) \
+           { \
+             serr("WORKER %p execute too long %"PRIu32"\n", \
+                   worker, elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CALL_WORKER(worker, arg) worker(arg)
 #endif
 
 /****************************************************************************
@@ -154,7 +179,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
                */
 
               leave_critical_section(flags);
-              worker(arg);
+              CALL_WORKER(worker, arg);
 
               /* Now, unfortunately, since we re-enabled interrupts we don't
                * know the state of the work list and we will have to start
