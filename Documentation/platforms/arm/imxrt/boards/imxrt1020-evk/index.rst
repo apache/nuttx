@@ -3,7 +3,7 @@ i.MX RT1020 EVK
 ===============
 
 `i.MX RT1020 EVK <https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/i-mx-rt1020-evaluation-kit:MIMXRT1020-EVK>`_
-is an evaluation kit by NXP company. This kit uses the i.MX RT1020 crossover MCU in LQFP144 package with Arm Cortex M7 core.
+is an evaluation kit by NXP company. This kit uses the i.MX RT1020 crossover MCU in LQFP144 package with ARM Cortex M7 core.
 
 Features
 ========
@@ -42,9 +42,13 @@ LEDs
 There is one user accessible LED status indicator located on the 1020-EVK,
 USERLED.  The function of the LEDs include:
 
-- D3: Power (Green) & Overpower (Red)
-- D5: User LED (Green) GPIO_AD_B0_05
-- D15: RST LED (Red)
+=== ============ ======
+Pin Description  Colour
+=== ============ ======
+D3  Power Supply Green
+D5  User LED     Green
+D15 Reset LED    Red
+=== ============ ======
 
 This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
@@ -74,9 +78,11 @@ Buttons
 
 This IMXRT board has three external buttons
 
-- SW2 (IRQ88, ONOFF)  Not on a GPIO, No muxing
-- SW3 (IRQ88, POR)    Not on a GPIO, No muxing
-- SW4 (IRQ88, USER)   Wakeup, GPIO5-0
+=== ==============  ========================
+SW2 (IRQ88, ONOFF)  Not on a GPIO, No muxing
+SW3 (IRQ88, POR)    Not on a GPIO, No muxing
+SW4 (IRQ88, USER)   Wakeup, GPIO5-0
+=== ==============  ========================
 
 Configurations
 ==============
