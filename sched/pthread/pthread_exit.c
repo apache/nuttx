@@ -59,7 +59,7 @@
  *
  ****************************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+void nx_pthread_exit(FAR void *exit_value)
 {
   FAR struct tcb_s *tcb = this_task();
   sigset_t set = ALL_SIGNAL_SET;
@@ -85,12 +85,6 @@ void pthread_exit(FAR void *exit_value)
   tcb->flags  |=  TCB_FLAG_NONCANCELABLE;
   tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
   tcb->cpcount = 0;
-#endif
-
-#ifdef CONFIG_PTHREAD_CLEANUP
-  /* Perform any stack pthread clean-up callbacks */
-
-  pthread_cleanup_popall(tcb);
 #endif
 
   /* Complete pending join operations */

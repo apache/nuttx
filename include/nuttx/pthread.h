@@ -149,6 +149,41 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
                       pthread_startroutine_t entry, pthread_addr_t arg);
 
+/****************************************************************************
+ * Name: nx_pthread_exit
+ *
+ * Description:
+ *   Terminate execution of a thread started with pthread_create.
+ *
+ * Input Parameters:
+ *   exit_valie
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+void nx_pthread_exit(FAR void *exit_value) noreturn_function;
+
+/****************************************************************************
+ * Name: pthread_cleanup_poplist
+ *
+ * Description:
+ *   The pthread_cleanup_poplist() is function that will pop all clean-up
+ *   functions.  This function is only called from within the pthread_exit()
+ *
+ * Input Parameters:
+ *   cleanup - The array of struct pthread_cleanup_s to fetch callbacks
+ *
+ * Returned Value:
+ *   The index to the next available entry at the top of the stack
+ *
+ ****************************************************************************/
+
+int pthread_cleanup_poplist(FAR struct pthread_cleanup_s *cleanup);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

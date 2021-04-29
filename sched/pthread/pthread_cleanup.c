@@ -208,4 +208,57 @@ void pthread_cleanup_popall(FAR struct tcb_s *tcb)
     }
 }
 
+/****************************************************************************
+ * Name: pthread_cleanup_poplist
+ *
+ * Description:
+ *   The pthread_cleanup_poplist() is function that will pop all clean-up
+ *   functions.  This function is only called from within the pthread_exit()
+ *
+ * Input Parameters:
+ *   cleanup - The array of struct pthread_cleanup_s to fetch callbacks
+ *
+ * Returned Value:
+ *   The index to the next available entry at the top of the stack
+ *
+ ****************************************************************************/
+
+int pthread_cleanup_poplist(FAR struct pthread_cleanup_s *cleanup)
+{
+  uint8_t tos = 0;
+  uint8_t ndx = 0;
+  FAR struct tcb_s *tcb = this_task();
+
+  DEBUGASSERT(cleanup != NULL);
+  DEBUGASSERT(tcb != NULL);
+  DEBUGASSERT(tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
+
+  tos = tcb->tos;
+
+  /* Kernel threads do not support pthread APIs */
+
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+    {
+      /* Pop cleanup routine list
+       *
+       * sched_lock() should provide sufficient protection.  We only need to
+       * have this TCB stationary; the pthread cleanup stack should never be
+       * modified by interrupt level logic.
+       */
+
+      sched_lock();
+      while (tcb->tos > 0)
+        {
+          ndx = tcb->tos - 1;
+          DEBUGASSERT(ndx >= 0 && ndx < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
+          cleanup[ndx] = tcb->stack[ndx];
+          tcb->tos = ndx;
+        }
+
+      sched_unlock();
+    }
+
+  return tos;
+}
+
 #endif /* CONFIG_PTHREAD_CLEANUP */
