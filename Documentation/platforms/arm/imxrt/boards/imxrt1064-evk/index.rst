@@ -3,7 +3,7 @@ i.MX RT1064 EVK
 ===============
 
 `i.MX RT1064 EVK <https://www.nxp.com/design/development-boards/i-mx-evaluation-and-development-boards/mimxrt1064-evk-i-mx-rt1064-evaluation-kit:MIMXRT1064-EVK>`_
-is an evaluation kit by NXP company. This kit uses the i.MX RT1064 crossover MCU with Arm Cortex M7 core.
+is an evaluation kit by NXP company. This kit uses the i.MX RT1064 crossover MCU with ARM Cortex M7 core.
 
 Features
 ========
@@ -37,13 +37,17 @@ Serial Console
 
 Virtual console port provided by OpenSDA:
 
-- UART1_TXD   GPIO_AD_B0_12  LPUART1_TX
-- UART1_RXD   GPIO_AD_B0_13  LPUART1_RX
+========= ============= ==========
+UART1_TXD GPIO_AD_B0_12 LPUART1_TX
+UART1_RXD GPIO_AD_B0_13 LPUART1_RX
+========= ============= ==========
 
 Arduino RS-232 Shield:
 
-- J22 D0 UART_RX/D0  GPIO_AD_B1_07  LPUART3_RX
-- J22 D1 UART_TX/D1  GPIO_AD_B1_06  LPUART3_TX
+=== == ======= ============= ==========
+J22 D0 UART_RX GPIO_AD_B1_07 LPUART3_RX
+J22 D1 UART_TX GPIO_AD_B1_06 LPUART3_TX
+=== == ======= ============= ==========
 
 LEDs and buttons
 ================
@@ -54,13 +58,14 @@ LEDs
 There are four LED status indicators located on the EVK Board.  The
 functions of these LEDs include:
 
-- Main Power Supply(D3)
-    - Green: DC 5V main supply is normal.
-    - Red:   J2 input voltage is over 5.6V.
-    - Off:   The board is not powered.
-- Reset RED LED(D21)
-- OpenSDA LED(D20)
-- USER LED(D18)
+=== ============
+Pin Description
+=== ============
+D3  Power Supply
+D18 User LED
+D20 OpenSDA
+D21 Reset LED
+=== ============
 
 Only a single LED, D18, is under software control.  It connects to
 GPIO_AD_B0_09 which is shared with JTAG_TDI and ENET_RST
@@ -92,11 +97,11 @@ Buttons
 
 There are five user interface switches on the MIMXRT1050 EVK Board:
 
-- SW1: Power Switch (slide switch fir power from J2)
-- SW2: ON/OFF Button
-- SW3: Power-on Reset button state forces to reset the system power except SNVS domain
-- SW9: Reset button
-- SW8: User button GPIO5-00
+  - SW1: Power Switch (slide switch fir power from J2)
+  - SW2: ON/OFF Button
+  - SW3: Power-on Reset button state forces to reset the system power except SNVS domain
+  - SW9: Reset button
+  - SW8: User button GPIO5-00
 
 Only the user button is available to the software.  It is sensed on the
 WAKEUP pin which will be pulled low when the button is pressed.
