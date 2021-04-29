@@ -264,17 +264,17 @@ exception_common:
  *  Name: g_intstackalloc and g_intstackbase
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   .bss
-  .align  8
+  .balign 16
   .global g_intstackalloc
   .global g_intstackbase
   .type   g_intstackalloc, object
   .type   g_intstackbase, object
 g_intstackalloc:
-  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7))
+  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
 g_intstackbase:
   .skip  8
   .size  g_intstackbase, 8
-  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7)
+  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
 #endif
