@@ -28,6 +28,7 @@
 #  include <nuttx/irq.h>
 #endif
 
+#include <assert.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <debug.h>
@@ -237,6 +238,17 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
               signo = SIGTSTP;
             }
+        }
+      else
+#endif
+#ifdef CONFIG_TTY_FORCE_PANIC
+      /* Is this the special character that will generate the SIGTSTP
+       * signal?
+       */
+
+      if ((dev->tc_lflag & ISIG) && ch == CONFIG_TTY_FORCE_PANIC_CHAR)
+        {
+          PANIC();
         }
       else
 #endif

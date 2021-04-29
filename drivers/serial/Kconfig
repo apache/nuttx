@@ -173,6 +173,21 @@ config SERIAL_TERMIOS
 		If this is not defined, then the terminal settings (baud, parity, etc).
 		are not configurable at runtime; serial streams cannot be flushed, etc..
 
+config TTY_FORCE_PANIC
+	bool "Enable TTY force crash"
+	default n
+	depends on DEBUG_FEATURES
+	---help---
+		This is for debugging system busyloop or deadlock, when the shell can't run,
+		then use this force crash the system to see the dumplog.
+
+config TTY_FORCE_PANIC_CHAR
+	hex "TTY force crash characters"
+	default 0x0
+	depends on TTY_FORCE_PANIC
+	---help---
+		Use Ctrl-@  NULL(0x0) inputs to determine whether panic system
+
 config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
