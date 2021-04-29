@@ -50,6 +50,30 @@
 #  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG 0
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG > 0
+#  define CALL_FUNC(func, arg) \
+     do \
+       { \
+         uint32_t start; \
+         uint32_t elapsed; \
+         start = up_critmon_gettime(); \
+         func(arg); \
+         elapsed = up_critmon_gettime() - start; \
+         if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG) \
+           { \
+             serr("WDOG %p, %s IRQ, execute too long %"PRIu32"\n", \
+                   func, up_interrupt_context() ? "IN" : "NOT", elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CALL_FUNC(func, arg) func(arg)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -106,7 +130,7 @@ static inline void wd_expiration(void)
           /* Execute the watchdog function */
 
           up_setpicbase(wdog->picbase);
-          func(wdog->arg);
+          CALL_FUNC(func, wdog->arg);
         }
     }
 }
