@@ -83,6 +83,12 @@
            { \
              g_irqvector[ndx].time = delta.tv_nsec; \
            } \
+         if (CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ > 0 && \
+             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ) \
+           { \
+             serr("IRQ %d(%p), execute time too long %"PRIu32"\n", \
+                  irq, vector, elapsed); \
+           } \
        } \
      while (0)
 #else
