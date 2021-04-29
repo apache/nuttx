@@ -380,6 +380,9 @@
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
 
+/* TIM3 configuration *******************************************************/
+#define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
+
 #ifdef CONFIG_BOARD_STM32_IHM08M1
 
 /* Configuration specific to the X-NUCLEO-IHM08M1 expansion board with
