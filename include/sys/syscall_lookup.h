@@ -307,7 +307,7 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_cond_wait,        2)
   SYSCALL_LOOKUP(nx_pthread_create,        5)
   SYSCALL_LOOKUP(pthread_detach,           1)
-  SYSCALL_LOOKUP(pthread_exit,             1)
+  SYSCALL_LOOKUP(nx_pthread_exit,          1)
   SYSCALL_LOOKUP(pthread_getschedparam,    3)
   SYSCALL_LOOKUP(pthread_join,             2)
   SYSCALL_LOOKUP(pthread_mutex_destroy,    1)
@@ -330,6 +330,7 @@ SYSCALL_LOOKUP(telldir,                    1)
 #ifdef CONFIG_PTHREAD_CLEANUP
   SYSCALL_LOOKUP(pthread_cleanup_push,     2)
   SYSCALL_LOOKUP(pthread_cleanup_pop,      1)
+  SYSCALL_LOOKUP(pthread_cleanup_poplist,  1)
 #endif
 #endif
 
