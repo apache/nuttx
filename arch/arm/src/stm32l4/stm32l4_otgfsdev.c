@@ -5725,7 +5725,7 @@ void arm_usbinitialize(void)
   ret = irq_attach(STM32L4_IRQ_OTGFS, stm32l4_usbinterrupt, NULL);
   if (ret < 0)
     {
-      uerr("irq_attach failed\n", ret);
+      uerr("ERROR: irq_attach failed: %d\n", ret);
       goto errout;
     }
 
