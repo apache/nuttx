@@ -37,20 +37,13 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* RISC-V requires at least a 4-byte stack alignment.
- * For floating point use, however, the stack must be aligned to 8-byte
- * addresses.
- */
+/* RISC-V requires a 16-byte stack alignment. */
 
-#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
-#  define STACK_ALIGNMENT   8
-#else
-#  define STACK_ALIGNMENT   4
-#endif
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
