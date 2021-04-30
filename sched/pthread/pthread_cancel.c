@@ -85,19 +85,6 @@ int pthread_cancel(pthread_t thread)
       pthread_exit(PTHREAD_CANCELED);
     }
 
-#ifdef CONFIG_PTHREAD_CLEANUP
-  /* Perform any stack pthread clean-up callbacks.
-   *
-   * REVISIT: In this case, the clean-up callback will execute on the
-   * thread of the caller of pthread cancel, not on the thread of
-   * the thread-to-be-canceled.  This is a problem when deferred
-   * cancellation is not supported because, for example, the clean-up
-   * function will be unable to unlock its own mutexes.
-   */
-
-  pthread_cleanup_popall(tcb);
-#endif
-
   /* Complete pending join operations */
 
   pthread_completejoin((pid_t)thread, PTHREAD_CANCELED);

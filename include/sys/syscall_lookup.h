@@ -327,11 +327,6 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
   SYSCALL_LOOKUP(pthread_kill,             2)
   SYSCALL_LOOKUP(pthread_sigmask,          3)
-#ifdef CONFIG_PTHREAD_CLEANUP
-  SYSCALL_LOOKUP(pthread_cleanup_push,     2)
-  SYSCALL_LOOKUP(pthread_cleanup_pop,      1)
-  SYSCALL_LOOKUP(pthread_cleanup_poplist,  1)
-#endif
 #endif
 
 /* The following are defined only if message queues are enabled */

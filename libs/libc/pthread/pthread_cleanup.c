@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_cleanup.c
+ * libs/libc/pthread/pthread_cleanup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,10 +27,11 @@
 #include <pthread.h>
 #include <sched.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/sched.h>
-
-#include "sched/sched.h"
-#include "pthread/pthread.h"
+#include <nuttx/tls.h>
+#include <nuttx/pthread.h>
+#include <arch/tls.h>
 
 #ifdef CONFIG_PTHREAD_CLEANUP
 
@@ -39,7 +40,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cleanup_pop_tcb
+ * Name: pthread_cleanup_pop_tls
  *
  * Description:
  *   The pthread_cleanup_pop_tcb() function will remove the routine at the
@@ -57,15 +58,15 @@
  *
  ****************************************************************************/
 
-static void pthread_cleanup_pop_tcb(FAR struct tcb_s *tcb, int execute)
+static void pthread_cleanup_pop_tls(FAR struct tls_info_s *tls, int execute)
 {
-  if (tcb->tos > 0)
+  if (tls->tos > 0)
     {
       unsigned int ndx;
 
       /* Get the index to the last cleaner function pushed onto the stack */
 
-      ndx = tcb->tos - 1;
+      ndx = tls->tos - 1;
       DEBUGASSERT(ndx >= 0 && ndx < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
 
       /* Should we execute the cleanup routine at the top of the stack? */
@@ -81,11 +82,11 @@ static void pthread_cleanup_pop_tcb(FAR struct tcb_s *tcb, int execute)
            * mode!  See also on_exit() and atexit() callbacks.
            */
 
-          cb  = &tcb->stack[ndx];
+          cb  = &tls->stack[ndx];
           cb->pc_cleaner(cb->pc_arg);
         }
 
-      tcb->tos = ndx;
+      tls->tos = ndx;
     }
 }
 
@@ -123,9 +124,9 @@ static void pthread_cleanup_pop_tcb(FAR struct tcb_s *tcb, int execute)
 
 void pthread_cleanup_pop(int execute)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tls_info_s *tls = up_tls_info();
 
-  DEBUGASSERT(tcb != NULL);
+  DEBUGASSERT(tls != NULL);
 
   /* sched_lock() should provide sufficient protection.  We only need to
    * have this TCB stationary; the pthread cleanup stack should never be
@@ -133,20 +134,16 @@ void pthread_cleanup_pop(int execute)
    */
 
   sched_lock();
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      pthread_cleanup_pop_tcb(tcb, execute);
-    }
-
+  pthread_cleanup_pop_tls(tls, execute);
   sched_unlock();
 }
 
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct tls_info_s *tls = up_tls_info();
 
-  DEBUGASSERT(tcb != NULL);
-  DEBUGASSERT(tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
+  DEBUGASSERT(tls != NULL);
+  DEBUGASSERT(tls->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
 
   /* sched_lock() should provide sufficient protection.  We only need to
    * have this TCB stationary; the pthread cleanup stack should never be
@@ -154,14 +151,13 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
    */
 
   sched_lock();
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL &&
-      tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
+  if (tls->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE)
     {
-      unsigned int ndx = tcb->tos;
+      unsigned int ndx = tls->tos;
 
-      tcb->tos++;
-      tcb->stack[ndx].pc_cleaner = routine;
-      tcb->stack[ndx].pc_arg = arg;
+      tls->tos++;
+      tls->stack[ndx].pc_cleaner = routine;
+      tls->stack[ndx].pc_arg = arg;
     }
 
   sched_unlock();
@@ -176,89 +172,26 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
  *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
- *   tcb - The TCB of the pthread that is exiting or being canceled.
+ *   None
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void pthread_cleanup_popall(FAR struct tcb_s *tcb)
+void pthread_cleanup_popall(void)
 {
-  DEBUGASSERT(tcb != NULL);
+  FAR struct tls_info_s *tls = up_tls_info();
 
-  /* Kernel threads do not support pthread APIs */
+  DEBUGASSERT(tls != NULL);
 
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+  sched_lock();
+  while (tls->tos > 0)
     {
-      /* Pop and execute each cleanup routine/
-       *
-       * sched_lock() should provide sufficient protection.  We only need to
-       * have this TCB stationary; the pthread cleanup stack should never be
-       * modified by interrupt level logic.
-       */
-
-      sched_lock();
-      while (tcb->tos > 0)
-        {
-          pthread_cleanup_pop_tcb(tcb, 1);
-        }
-
-      sched_unlock();
-    }
-}
-
-/****************************************************************************
- * Name: pthread_cleanup_poplist
- *
- * Description:
- *   The pthread_cleanup_poplist() is function that will pop all clean-up
- *   functions.  This function is only called from within the pthread_exit()
- *
- * Input Parameters:
- *   cleanup - The array of struct pthread_cleanup_s to fetch callbacks
- *
- * Returned Value:
- *   The index to the next available entry at the top of the stack
- *
- ****************************************************************************/
-
-int pthread_cleanup_poplist(FAR struct pthread_cleanup_s *cleanup)
-{
-  uint8_t tos = 0;
-  uint8_t ndx = 0;
-  FAR struct tcb_s *tcb = this_task();
-
-  DEBUGASSERT(cleanup != NULL);
-  DEBUGASSERT(tcb != NULL);
-  DEBUGASSERT(tcb->tos < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
-
-  tos = tcb->tos;
-
-  /* Kernel threads do not support pthread APIs */
-
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      /* Pop cleanup routine list
-       *
-       * sched_lock() should provide sufficient protection.  We only need to
-       * have this TCB stationary; the pthread cleanup stack should never be
-       * modified by interrupt level logic.
-       */
-
-      sched_lock();
-      while (tcb->tos > 0)
-        {
-          ndx = tcb->tos - 1;
-          DEBUGASSERT(ndx >= 0 && ndx < CONFIG_PTHREAD_CLEANUP_STACKSIZE);
-          cleanup[ndx] = tcb->stack[ndx];
-          tcb->tos = ndx;
-        }
-
-      sched_unlock();
+      pthread_cleanup_pop_tls(tls, 1);
     }
 
-  return tos;
+  sched_unlock();
 }
 
 #endif /* CONFIG_PTHREAD_CLEANUP */
