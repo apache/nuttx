@@ -168,21 +168,24 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 void nx_pthread_exit(FAR void *exit_value) noreturn_function;
 
 /****************************************************************************
- * Name: pthread_cleanup_poplist
+ * Name: pthread_cleanup_popall
  *
  * Description:
- *   The pthread_cleanup_poplist() is function that will pop all clean-up
- *   functions.  This function is only called from within the pthread_exit()
+ *   The pthread_cleanup_popall() is an internal function that will pop and
+ *   execute all clean-up functions.  This function is only called from
+ *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
- *   cleanup - The array of struct pthread_cleanup_s to fetch callbacks
+ *   tcb - The TCB of the pthread that is exiting or being canceled.
  *
  * Returned Value:
- *   The index to the next available entry at the top of the stack
+ *   None
  *
  ****************************************************************************/
 
-int pthread_cleanup_poplist(FAR struct pthread_cleanup_s *cleanup);
+#ifdef CONFIG_PTHREAD_CLEANUP
+void pthread_cleanup_popall(void);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

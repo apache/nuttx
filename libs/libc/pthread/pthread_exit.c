@@ -52,19 +52,7 @@
 void pthread_exit(FAR void *exit_value)
 {
 #ifdef CONFIG_PTHREAD_CLEANUP
-  int cnt;
-  struct pthread_cleanup_s cleanup[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
-  cnt = pthread_cleanup_poplist(cleanup);
-
-  sched_lock();
-  while (cnt-- > 0)
-    {
-      struct pthread_cleanup_s cp = cleanup[cnt];
-      if (cp.pc_cleaner)
-        cp.pc_cleaner(cp.pc_arg);
-    }
-
-  sched_unlock();
+  pthread_cleanup_popall();
 #endif
 
   nx_pthread_exit(exit_value);

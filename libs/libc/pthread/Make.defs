@@ -61,6 +61,10 @@ ifeq ($(CONFIG_PTHREAD_SPINLOCKS),y)
 CSRCS += pthread_spinlock.c
 endif
 
+ifeq ($(CONFIG_PTHREAD_CLEANUP),y)
+CSRCS += pthread_cleanup.c
+endif
+
 endif # CONFIG_DISABLE_PTHREAD
 
 # Add the pthread directory to the build

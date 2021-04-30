@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/lib/getopt.h>
 
 /****************************************************************************
@@ -98,6 +99,16 @@ struct tls_info_s
 #if CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  /* tos   - The index to the next available entry at the top of the stack.
+   * stack - The pre-allocated clean-up stack memory.
+   */
+
+  uint8_t tos;
+  struct pthread_cleanup_s stack[CONFIG_PTHREAD_CLEANUP_STACKSIZE];
+#endif
+
   int tl_errno;                        /* Per-thread error number */
 };
 
