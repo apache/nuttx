@@ -81,7 +81,12 @@ void up_irqinitialize(void)
   /* Colorize the interrupt stack for debug purposes */
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-  size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+  size_t intstack_size = 0;
+#ifndef CONFIG_SMP
+  intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+#else
+  intstack_size = ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~15);
+#endif
   riscv_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
                  intstack_size);
 #endif
