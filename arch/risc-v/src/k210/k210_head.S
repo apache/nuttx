@@ -143,7 +143,7 @@ normal_irq:
 
   mv   a1, sp      /* context = sp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Load mhartid (cpuid) */
 
   csrr s0, mhartid
@@ -155,7 +155,7 @@ normal_irq:
   j    4f
 3:
   la   sp, g_intstackbase
-  addi sp, sp, -((CONFIG_ARCH_INTERRUPTSTACK) & ~7)
+  addi sp, sp, -((CONFIG_ARCH_INTERRUPTSTACK) & ~15)
 4:
 
 #endif
