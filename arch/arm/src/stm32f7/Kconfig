@@ -1734,6 +1734,19 @@ config STM32F7_SYSCFG_IOCOMPENSATION
 		The I/O compensation cell can be used only when the supply voltage ranges
 		from 2.4 to 3.6 V.
 
+menu "OTG Configuration"
+	depends on STM32F7_OTGFS
+
+config OTG_ID_GPIO_DISABLE
+	bool "Disable the use of GPIO_OTG_ID pin."
+	default n
+	---help---
+		Disables/Enabled the use of GPIO_OTG_ID pin. This allows non OTG use
+		cases to reuse this GPIO pin and ensure it is not set incorrectlty
+		during OS boot.
+
+endmenu
+
 menu "U[S]ART Configuration"
 	depends on STM32F7_USART
 
