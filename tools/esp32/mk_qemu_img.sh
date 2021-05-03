@@ -39,6 +39,10 @@ usage() {
   echo ""
 }
 
+imgappend() {
+  dd of="${1}" if="${2}" bs=1 seek="$(printf '%d' ${3})" conv=notrunc status=none
+}
+
 while [ -n "${1}" ]; do
   case "${1}" in
   -b )
@@ -82,10 +86,10 @@ printf "Generating %s...\n" "${FLASH_IMG}"
 printf "\tBootloader: %s\n" "${BOOTLOADER_IMG}"
 printf "\tPartition Table: %s\n" "${PARTITION_IMG}"
 
-dd if=/dev/zero bs=1024 count=4096 of="${FLASH_IMG}" && \
-dd if="${BOOTLOADER_IMG}" bs=1 seek="$(printf '%d' 0x1000)" of="${FLASH_IMG}" conv=notrunc && \
-dd if="${PARTITION_IMG}" bs=1 seek="$(printf '%d' 0x8000)" of="${FLASH_IMG}" conv=notrunc && \
-dd if="${NUTTX_IMG}" bs=1 seek="$(printf '%d' 0x10000)" of="${FLASH_IMG}" conv=notrunc
+dd if=/dev/zero bs=1024 count=4096 of="${FLASH_IMG}" status=none
+imgappend ${FLASH_IMG} ${BOOTLOADER_IMG} 0x1000
+imgappend ${FLASH_IMG} ${PARTITION_IMG} 0x8000
+imgappend ${FLASH_IMG} ${NUTTX_IMG} 0x10000
 
 if [ ${?} -ne 0 ]; then
   printf "Failed to generate %s!\n" "${FLASH_IMG}"
