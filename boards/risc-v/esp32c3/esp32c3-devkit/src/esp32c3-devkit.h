@@ -181,5 +181,17 @@ int board_bmp180_initialize(int devno, int busno);
 int esp32c3_spiflash_init(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32c3_ledc_setup
+ *
+ * Description:
+ *   Initialize LEDC PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_LEDC
+int esp32c3_pwm_setup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */
