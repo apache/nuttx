@@ -843,6 +843,19 @@ config STM32H7_I2CTIMEOTICKS
 
 endmenu # "I2C Configuration"
 
+menu "OTG Configuration"
+	depends on STM32H7_OTGFS
+
+config OTG_ID_GPIO_DISABLE
+	bool "Disable the use of GPIO_OTG_ID pin."
+	default n
+	---help---
+		Disables/Enabled the use of GPIO_OTG_ID pin. This allows non OTG use
+		cases to reuse this GPIO pin and ensure it is not set incorrectlty
+		during OS boot.
+
+endmenu
+
 menu "SPI Configuration"
 	depends on STM32H7_SPI
 
