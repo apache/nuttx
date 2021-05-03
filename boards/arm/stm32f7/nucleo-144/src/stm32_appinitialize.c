@@ -48,7 +48,13 @@
 
 #include "nucleo-144.h"
 #include <nuttx/fs/fs.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/sensors/mpu60x0.h>
+
+#include "stm32_i2c.h"
+
 #ifdef CONFIG_STM32_ROMFS
 #include "stm32_romfs.h"
 #endif
@@ -97,6 +103,13 @@ int stm32f7_can_setup(void);
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
+#ifdef CONFIG_I2C
+  int i2c_bus;
+  FAR struct i2c_master_s *i2c;
+#ifdef CONFIG_MPU60X0_I2C
+  FAR struct mpu_config_s *mpu_config;
+#endif
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -217,6 +230,40 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: stm32f7_can_setup failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_STM32F7_I2C1)
+  i2c_bus = 1;
+  i2c = stm32_i2cbus_initialize(i2c_bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", i2c_bus);
+    }
+  else
+    {
+#if defined(CONFIG_SYSTEM_I2CTOOL)
+      ret = i2c_register(i2c, i2c_bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 i2c_bus, ret);
+        }
+#endif
+
+#ifdef CONFIG_MPU60X0_I2C
+      mpu_config = kmm_zalloc(sizeof(struct mpu_config_s));
+      if (mpu_config == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to allocate mpu60x0 driver\n");
+        }
+      else
+        {
+          mpu_config->i2c = i2c;
+          mpu_config->addr = 0x68;
+          mpu60x0_register("/dev/imu0", mpu_config);
+        }
+#endif
     }
 #endif
 
