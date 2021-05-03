@@ -538,9 +538,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  /* If this is an un-connected socket, then return ENOTCONN */
+  /* Check early if this is an un-connected socket, if so, then
+   * return -ENOTCONN. Note, we will have to check this again, as we can't
+   * guarantee the state won't change until we have the network locked.
+   */
 
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+  if (psock->s_type != SOCK_STREAM)
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
@@ -593,6 +596,19 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    */
 
   net_lock();
+
+  /* Now that we have the network locked, we need to check the connection
+   * state again to ensure the connection is still valid.
+   */
+
+  if (!_SS_ISCONNECTED(psock->s_flags))
+    {
+      nerr("ERROR: No longer connected\n");
+      net_unlock();
+      ret = -ENOTCONN;
+      goto errout;
+    }
+
   memset(&state, 0, sizeof(struct send_s));
 
   /* This semaphore is used for signaling and, hence, should not have
