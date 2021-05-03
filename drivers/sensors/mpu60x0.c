@@ -77,7 +77,7 @@
 
 /* Masks and shifts @v into bit field @m */
 
-#define TO_BITFIELD(m,v) ((v) & MASK(m ##__WIDTH) << (m ##__SHIFT))
+#define TO_BITFIELD(m,v) (((v) & MASK(m ##__WIDTH)) << (m ##__SHIFT))
 
 /* Un-masks and un-shifts bit field @m from @v */
 
