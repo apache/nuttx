@@ -693,6 +693,7 @@ static void inline mpu_unlock(FAR struct mpu_dev_s *dev)
 
 static int mpu_reset(FAR struct mpu_dev_s *dev)
 {
+  int ret;
 #ifdef CONFIG_MPU60X0_SPI
   if (dev->config.spi == NULL)
     {
@@ -709,7 +710,12 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   /* Awaken chip, issue hardware reset */
 
-  __mpu_write_pwr_mgmt_1(dev, PWR_MGMT_1__DEVICE_RESET);
+  ret = __mpu_write_pwr_mgmt_1(dev, PWR_MGMT_1__DEVICE_RESET);
+  if (ret != OK)
+    {
+      snerr("Could not find mpu60x0!\n");
+      return ret;
+    }
 
   /* Wait for reset cycle to finish (note: per the datasheet, we don't need
    * to hold NSS for this)
@@ -994,6 +1000,19 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
 
   priv->config = *config;
 
+  /* Reset the chip, to give it an initial configuration. */
+
+  ret = mpu_reset(priv);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to configure mpu60x0: %d\n", ret);
+
+      nxmutex_destroy(&priv->lock);
+
+      kmm_free(priv);
+      return ret;
+    }
+
   /* Register the device node. */
 
   ret = register_driver(path, &g_mpu_fops, 0666, priv);
@@ -1007,7 +1026,5 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
       return ret;
     }
 
-  /* Reset the chip, to give it an initial configuration. */
-
-  return mpu_reset(priv);
+  return OK;
 }
