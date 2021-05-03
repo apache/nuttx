@@ -5726,7 +5726,11 @@ void arm_usbinitialize(void)
 
   stm32_configgpio(GPIO_OTG_DM);
   stm32_configgpio(GPIO_OTG_DP);
-  stm32_configgpio(GPIO_OTG_ID);        /* Only needed for OTG */
+
+  /* Only needed for OTG */
+#  ifndef CONFIG_OTG_ID_GPIO_DISABLE
+  stm32_configgpio(GPIO_OTG_ID);
+#  endif
 
   /* SOF output pin configuration is configurable. */
 
