@@ -66,6 +66,10 @@ ifeq ($(CONFIG_ONESHOT),y)
 CSRCS += esp32c3_oneshot.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += esp32c3_ledc.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 
