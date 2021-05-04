@@ -155,7 +155,7 @@ void IRAM_ATTR __start(void)
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization */
 
-  xtensa_early_serial_initialize();
+  xtensa_earlyserialinit();
 #endif
 
   showprogress("A");
