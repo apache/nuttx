@@ -1285,7 +1285,7 @@ void esp32_lowsetup(void)
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
-void xtensa_early_serial_initialize(void)
+void xtensa_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
    * esp32_lowsetup
@@ -1319,7 +1319,7 @@ void xtensa_early_serial_initialize(void)
  *
  ****************************************************************************/
 
-void xtensa_serial_initialize(void)
+void xtensa_serialinit(void)
 {
   /* Register the console */
 
