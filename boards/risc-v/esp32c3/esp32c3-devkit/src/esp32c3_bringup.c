@@ -291,6 +291,15 @@ int esp32c3_bringup(void)
     }
 #endif /* CONFIG_ESP32C3_LEDC */
 
+#ifdef CONFIG_ESP32C3_ADC
+  ret = board_adc_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init() failed: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32C3_ADC */
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.

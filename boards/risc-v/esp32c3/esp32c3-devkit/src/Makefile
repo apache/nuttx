@@ -70,6 +70,10 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += esp32c3_ledc.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += esp32c3_adc.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 
