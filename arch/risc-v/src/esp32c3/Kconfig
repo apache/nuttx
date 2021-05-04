@@ -158,6 +158,12 @@ config ESP32C3_DISABLE_STDC_ATOMIC
 
 menu "ESP32-C3 Peripheral Support"
 
+config ESP32C3_ADC
+	bool
+	default n
+	select ANALOG
+	select ADC
+
 config ESP32C3_UART
 	bool
 	default n
@@ -273,6 +279,11 @@ config ESP32C3_RWDT
 		it will reset Main System and the RTC module. If you don't want
 		to have the RTC module reset, please, use the Timers' Module WDTs.
 		They will only reset Main System.
+
+config ESP32C3_ADC1
+	bool "ADC1"
+	default n
+	select ESP32C3_ADC
 
 config ESP32C3_WIRELESS
 	bool "Wireless"
@@ -510,6 +521,52 @@ config ESP32C3_LEDC_CHANNEL5_PIN
 	default 7
 
 endmenu # LEDC configuration
+
+menu "ADC Configuration"
+	depends on ESP32C3_ADC
+
+if ESP32C3_ADC1
+
+choice ESP32C3_ADC_VOL_RANGES
+	prompt "ADC1 voltage ranges"
+	default ESP32C3_ADC_VOL_750
+
+config ESP32C3_ADC_VOL_750
+	bool "0~750mV"
+
+config ESP32C3_ADC_VOL_1050
+	bool "0~1050mV"
+
+config ESP32C3_ADC_VOL_1300
+	bool "0~1300mV"
+
+config ESP32C3_ADC_VOL_2500
+	bool "0~2500mV"
+
+endchoice
+
+config ESP32C3_ADC1_CHANNEL0
+	bool "ADC1 channel 0"
+	default n
+
+config ESP32C3_ADC1_CHANNEL1
+	bool "ADC1 channel 1"
+	default n
+
+config ESP32C3_ADC1_CHANNEL2
+	bool "ADC1 channel 2"
+	default n
+
+config ESP32C3_ADC1_CHANNEL3
+	bool "ADC1 channel 3"
+	default n
+
+config ESP32C3_ADC1_CHANNEL4
+	bool "ADC1 channel 4"
+	default n
+
+endif # ESP32C3_ADC1
+endmenu # ADC Configuration
 
 menu "Wi-Fi configuration"
 	depends on ESP32C3_WIRELESS
