@@ -1250,19 +1250,19 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+        case SPIDEV_MODE0: /* CPOL=0 CPHA=0 */
           modebits = 0;
           break;
 
-        case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+        case SPIDEV_MODE1: /* CPOL=0 CPHA=1 */
           modebits = SSI_CR0_SPH;
           break;
 
-        case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+        case SPIDEV_MODE2: /* CPOL=1 CPHA=0 */
           modebits = SSI_CR0_SPO;
          break;
 
-        case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+        case SPIDEV_MODE3: /* CPOL=1 CPHA=1 */
           modebits = SSI_CR0_SPH | SSI_CR0_SPO;
           break;
 
