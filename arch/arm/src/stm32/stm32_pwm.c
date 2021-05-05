@@ -3384,7 +3384,8 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
-  pwminfo("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
+  pwminfo("TIM%u channel: %u frequency: %" PRIx32 " duty: %08" PRIx32
+          " count: %" PRIx32 "\n",
           priv->timid, priv->channels[0].channel, info->frequency,
           info->duty, info->count);
 
@@ -3873,7 +3874,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
    * output.
    */
 
-  pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
+  pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %" PRIx32 "\n",
           regval, priv->prev, priv->curr, priv->count);
 
   return OK;
@@ -4358,7 +4359,7 @@ static int pwm_start_pulsecount(FAR struct pwm_lowerhalf_s *dev,
 
       if (priv->timtype != TIMTYPE_ADVANCED)
         {
-          pwmerr("ERROR: TIM%u cannot support pulse count: %u\n",
+          pwmerr("ERROR: TIM%u cannot support pulse count: %" PRIx32 "\n",
                  priv->timid, info->count);
           return -EPERM;
         }
