@@ -131,7 +131,7 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
 #endif
 
 #ifdef CONFIG_PWM_PULSECOUNT
-  pwminfo(" count: %d\n", info->count);
+  pwminfo(" count: %" PRIx32 "\n", info->count);
 #endif
 
   pwminfo(" started: %d\n", started);
