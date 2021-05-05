@@ -467,10 +467,10 @@
 
 enum spi_smode_e
 {
-  SPISLAVE_MODE0 = 0,     /* CPOL=0 CHPHA=0 */
-  SPISLAVE_MODE1,         /* CPOL=0 CHPHA=1 */
-  SPISLAVE_MODE2,         /* CPOL=1 CHPHA=0 */
-  SPISLAVE_MODE3          /* CPOL=1 CHPHA=1 */
+  SPISLAVE_MODE0 = 0,     /* CPOL=0 CPHA=0 */
+  SPISLAVE_MODE1,         /* CPOL=0 CPHA=1 */
+  SPISLAVE_MODE2,         /* CPOL=1 CPHA=0 */
+  SPISLAVE_MODE3          /* CPOL=1 CPHA=1 */
 };
 
 /* The SPI slave controller driver vtable */
