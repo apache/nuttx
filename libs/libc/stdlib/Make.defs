@@ -32,12 +32,8 @@ CSRCS += lib_mblen.c lib_mbtowc.c lib_wctomb.c
 CSRCS += lib_mbstowcs.c lib_wcstombs.c
 endif
 
-ifeq ($(CONFIG_PSEUDOTERM_SUSV1),y)
-CSRCS += lib_ptsname.c lib_ptsnamer.c
-endif
-
 ifeq ($(CONFIG_PSEUDOTERM),y)
-CSRCS += lib_unlockpt.c
+CSRCS += lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c
 endif
 
 # Add the stdlib directory to the build

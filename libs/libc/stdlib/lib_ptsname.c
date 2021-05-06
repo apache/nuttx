@@ -26,7 +26,7 @@
 
 #include <stdlib.h>
 
-#ifdef CONFIG_PSEUDOTERM_SUSV1
+#ifdef CONFIG_PSEUDOTERM
 
 /****************************************************************************
  * Public Functions
@@ -55,4 +55,4 @@ FAR char *ptsname(int fd)
   return ret < 0 ? NULL : devname;
 }
 
-#endif /* CONFIG_PSEUDOTERM_SUSV1 */
+#endif /* CONFIG_PSEUDOTERM */
