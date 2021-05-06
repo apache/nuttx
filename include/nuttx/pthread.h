@@ -133,11 +133,13 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *   attributes.
  *
  * Input Parameters:
- *    trampoline
- *    thread
- *    attr
- *    start_routine
- *    arg
+ *    trampoline - The user space startup function
+ *    thread     - The pthread handle to be used
+ *    attr       - It points to a pthread_attr_t structure whose contents are
+ *                 used at thread creation time to determine attributes
+ *                 for the new thread
+ *    entry      - The new thread starts execution by invoking entry
+ *    arg        - It is passed as the sole argument of entry
  *
  * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno
@@ -156,7 +158,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
  *   Terminate execution of a thread started with pthread_create.
  *
  * Input Parameters:
- *   exit_valie
+ *   exit_value
  *
  * Returned Value:
  *   None
@@ -176,7 +178,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
- *   tcb - The TCB of the pthread that is exiting or being canceled.
+ *   None
  *
  * Returned Value:
  *   None

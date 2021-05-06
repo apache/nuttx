@@ -40,7 +40,7 @@
  *   Terminate execution of a thread started with pthread_create.
  *
  * Input Parameters:
- *   exit_valie
+ *   exit_value
  *
  * Returned Value:
  *   None

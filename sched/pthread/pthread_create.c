@@ -208,11 +208,13 @@ static void pthread_start(void)
  *   attributes.
  *
  * Input Parameters:
- *    trampoline
- *    thread
- *    attr
- *    start_routine
- *    arg
+ *    trampoline - The user space startup function
+ *    thread     - The pthread handle to be used
+ *    attr       - It points to a pthread_attr_t structure whose contents are
+ *                 used at thread creation time to determine attributes
+ *                 for the new thread
+ *    entry      - The new thread starts execution by invoking entry
+ *    arg        - It is passed as the sole argument of entry
  *
  * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno

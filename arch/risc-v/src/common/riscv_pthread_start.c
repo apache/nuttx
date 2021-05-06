@@ -64,7 +64,7 @@
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
-  /* Let sys_call2() do all of the work */
+  /* Let sys_call3() do all of the work */
 
   sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
             (uintptr_t)arg);

@@ -288,7 +288,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
-          /* Set up to return to the user-space pthread start-up function in
+          /* Set up to enter the user-space pthread start-up function in
            * unprivileged mode. We need:
            *
            *   R0   = startup
