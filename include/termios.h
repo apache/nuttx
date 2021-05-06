@@ -97,7 +97,7 @@
 #define HUPCL     (1 << 10) /* Bit 10: Hang up on last close */
 #define CLOCAL    (1 << 11) /* Bit 11: Ignore modem status lines */
 #define CCTS_OFLOW (1 << 29)/* Bit 29: CTS flow control of output */
-#define CRTS_IFLOW (1 << 31)/* Bit 31: RTS flow control of input */
+#define CRTS_IFLOW (1u << 31)/* Bit 31: RTS flow control of input */
 #define CRTSCTS   (CCTS_OFLOW | CRTS_IFLOW)
 
 /* Local Modes (c_lflag in the termios structure) */
