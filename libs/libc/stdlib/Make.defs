@@ -34,6 +34,9 @@ endif
 
 ifeq ($(CONFIG_PSEUDOTERM),y)
 CSRCS += lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c
+ifeq ($(CONFIG_SERIAL_TERMIOS),y)
+CSRCS += lib_openpty.c
+endif
 endif
 
 # Add the stdlib directory to the build
