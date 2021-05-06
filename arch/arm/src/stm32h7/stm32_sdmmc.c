@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -742,7 +743,7 @@ static inline void stm32_setclkcr(struct stm32_dev_s *priv, uint32_t clkcr)
 
   sdmmc_putreg32(priv, regval, STM32_SDMMC_CLKCR_OFFSET);
 
-  mcinfo("CLKCR: %08x PWR: %08x\n",
+  mcinfo("CLKCR: %08" PRIx32 " PWR: %08" PRIx32 "\n",
          sdmmc_getreg32(priv, STM32_SDMMC_CLKCR_OFFSET),
          sdmmc_getreg32(priv, STM32_SDMMC_POWER_OFFSET));
 }
@@ -981,14 +982,22 @@ static void stm32_sample(struct stm32_dev_s *priv, int index)
 static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
 {
   mcinfo("SDIO Registers: %s\n", msg);
-  mcinfo("  POWER[%08x]: %08x\n", STM32_SDMMC_POWER_OFFSET,   regs->power);
-  mcinfo("  CLKCR[%08x]: %08x\n", STM32_SDMMC_CLKCR_OFFSET,   regs->clkcr);
-  mcinfo("  DCTRL[%08x]: %08x\n", STM32_SDMMC_DCTRL_OFFSET,   regs->dctrl);
-  mcinfo(" DTIMER[%08x]: %08x\n", STM32_SDMMC_DTIMER_OFFSET,  regs->dtimer);
-  mcinfo("   DLEN[%08x]: %08x\n", STM32_SDMMC_DLEN_OFFSET,    regs->dlen);
-  mcinfo(" DCOUNT[%08x]: %08x\n", STM32_SDMMC_DCOUNT_OFFSET,  regs->dcount);
-  mcinfo("    STA[%08x]: %08x\n", STM32_SDMMC_STA_OFFSET,     regs->sta);
-  mcinfo("   MASK[%08x]: %08x\n", STM32_SDMMC_MASK_OFFSET,    regs->mask);
+  mcinfo("  POWER[%08x]: %08" PRIx8 "\n", STM32_SDMMC_POWER_OFFSET,
+         regs->power);
+  mcinfo("  CLKCR[%08x]: %08" PRIx16 "\n", STM32_SDMMC_CLKCR_OFFSET,
+         regs->clkcr);
+  mcinfo("  DCTRL[%08x]: %08" PRIx16 "\n", STM32_SDMMC_DCTRL_OFFSET,
+         regs->dctrl);
+  mcinfo(" DTIMER[%08x]: %08" PRIx32 "\n", STM32_SDMMC_DTIMER_OFFSET,
+         regs->dtimer);
+  mcinfo("   DLEN[%08x]: %08" PRIx32 "\n", STM32_SDMMC_DLEN_OFFSET,
+         regs->dlen);
+  mcinfo(" DCOUNT[%08x]: %08" PRIx32 "\n", STM32_SDMMC_DCOUNT_OFFSET,
+         regs->dcount);
+  mcinfo("    STA[%08x]: %08" PRIx32 "\n", STM32_SDMMC_STA_OFFSET,
+         regs->sta);
+  mcinfo("   MASK[%08x]: %08" PRIx32 "\n", STM32_SDMMC_MASK_OFFSET,
+         regs->mask);
 }
 #endif
 
@@ -1403,7 +1412,7 @@ static void stm32_eventtimeout(wdparm_t arg)
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 ||
               priv->wkupevent != 0);
 
-  mcinfo("sta: %08x enabled irq: %08x\n",
+  mcinfo("sta: %08" PRIx32 " enabled irq: %08" PRIx32 "\n",
          sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET),
          sdmmc_getreg32(priv, STM32_SDMMC_MASK_OFFSET));
 
@@ -1414,7 +1423,7 @@ static void stm32_eventtimeout(wdparm_t arg)
       /* Yes.. wake up any waiting threads */
 
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcerr("Timeout: remaining: %d\n", priv->remaining);
+      mcerr("Timeout: remaining: %u\n", priv->remaining);
     }
 }
 
@@ -1712,7 +1721,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                *  Sets STM32_SDMMC_ICR_DCRCFAILC
                */
 
-              mcerr("ERROR: Data block CRC failure, remaining: %d\n",
+              mcerr("ERROR: Data block CRC failure, remaining: %u\n",
                     priv->remaining);
 
               stm32_endtransfer(priv,
@@ -1727,7 +1736,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                *  Sets STM32_SDMMC_ICR_DTIMEOUTC
                */
 
-              mcerr("ERROR: Data timeout, remaining: %d\n",
+              mcerr("ERROR: Data timeout, remaining: %u\n",
                     priv->remaining);
 
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
@@ -1742,7 +1751,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                * Sets STM32_SDMMC_ICR_RXOVERRC
                */
 
-              mcerr("ERROR: RX FIFO overrun, remaining: %d\n",
+              mcerr("ERROR: RX FIFO overrun, remaining: %u\n",
                     priv->remaining);
 
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
@@ -1757,7 +1766,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                * Sets STM32_SDMMC_ICR_TXUNDERRC
                */
 
-              mcerr("ERROR: TX FIFO underrun, remaining: %d\n",
+              mcerr("ERROR: TX FIFO underrun, remaining: %u\n",
                     priv->remaining);
 
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
@@ -1943,7 +1952,7 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
 
   leave_critical_section(flags);
 
-  mcinfo("CLCKR: %08x POWER: %08x\n",
+  mcinfo("CLCKR: %08" PRIx32 " POWER: %08" PRIx32 "\n",
          sdmmc_getreg32(priv, STM32_SDMMC_CLKCR_OFFSET),
          sdmmc_getreg32(priv, STM32_SDMMC_POWER_OFFSET));
 }
@@ -2212,7 +2221,8 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   sdmmc_putreg32(priv, STM32_SDMMC_CMDDONE_ICR | STM32_SDMMC_RESPDONE_ICR,
                  STM32_SDMMC_ICR_OFFSET);
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x enabled irq: %08x\n",
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32
+         " enabled irq: %08" PRIx32 "\n",
          cmd, arg, regval, sdmmc_getreg32(priv, STM32_SDMMC_MASK_OFFSET));
 
   /* Write the SDIO CMD */
@@ -2486,7 +2496,8 @@ static int stm32_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (--timeout <= 0)
         {
-          mcerr("ERROR: Timeout cmd: %08x events: %08x STA: %08x\n",
+          mcerr("ERROR: Timeout cmd: %08" PRIx32 " events: %08" PRIx32
+                " STA: %08" PRIx32 "\n",
                 cmd, events, sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET));
 
           return -ETIMEDOUT;
@@ -2565,7 +2576,7 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R5_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2576,12 +2587,12 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET);
       if ((regval & STM32_SDMMC_STA_CTIMEOUT) != 0)
         {
-          mcerr("ERROR: Command timeout: %08x\n", regval);
+          mcerr("ERROR: Command timeout: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & STM32_SDMMC_STA_CCRCFAIL) != 0)
         {
-          mcerr("ERROR: CRC failure: %08x\n", regval);
+          mcerr("ERROR: CRC failure: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
 #if defined(CONFIG_DEBUG_FEATURES)
@@ -2593,7 +2604,8 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
           if ((uint8_t)(respcmd & STM32_SDMMC_RESPCMD_MASK) !=
               (cmd & MMCSD_CMDIDX_MASK))
             {
-              mcerr("ERROR: RESCMD=%02x CMD=%08x\n", respcmd, cmd);
+              mcerr("ERROR: RESCMD=%02" PRIx32 " CMD=%08" PRIx32
+                    "\n", respcmd, cmd);
               ret = -EINVAL;
             }
         }
@@ -2631,7 +2643,7 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2642,12 +2654,12 @@ static int stm32_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET);
       if (regval & STM32_SDMMC_STA_CTIMEOUT)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & STM32_SDMMC_STA_CCRCFAIL)
         {
-          mcerr("ERROR: CRC fail STA: %08x\n", regval);
+          mcerr("ERROR: CRC fail STA: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
     }
@@ -2690,7 +2702,7 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R4_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2703,7 +2715,7 @@ static int stm32_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET);
       if (regval & STM32_SDMMC_STA_CTIMEOUT)
         {
-          mcerr("ERROR: Timeout STA: %08x\n", regval);
+          mcerr("ERROR: Timeout STA: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
     }
@@ -2969,7 +2981,7 @@ static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
-  mcinfo("eventset: %02x\n", eventset);
+  mcinfo("eventset: %02" PRIx8 "\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
@@ -3050,8 +3062,8 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
           (uintptr_t)buffer + buflen <= SRAM4_END))
         {
           mcerr("invalid IDMA address "
-                "buffer:0x%08x end:0x%08x\n",
-                buffer, buffer + buflen - 1);
+                "buffer:0x%08" PRIxPTR " end:0x%08" PRIxPTR "\n",
+                (uintptr_t)buffer, (uintptr_t)(buffer + buflen - 1));
           return -EFAULT;
         }
     }
@@ -3070,7 +3082,7 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
       ((uintptr_t)(buffer + buflen) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0))
     {
       mcerr("dcache unaligned "
-            "buffer:0x%08x end:0x%08x\n",
+            "buffer:%p end:%p\n",
             buffer, buffer + buflen - 1);
       return -EFAULT;
     }
@@ -3282,7 +3294,7 @@ static void stm32_callback(void *arg)
   /* Is a callback registered? */
 
   DEBUGASSERT(priv != NULL);
-  mcinfo("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
+  mcinfo("Callback %p(%p) cbevents: %02" PRIx8 " cdstatus: %02" PRIx8 "\n",
          priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
 
   if (priv->callback)
@@ -3518,7 +3530,8 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
   leave_critical_section(flags);
 
-  mcinfo("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  mcinfo("cdstatus OLD: %02" PRIx8 " NEW: %02" PRIx8 "\n",
+         cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 
@@ -3561,7 +3574,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
 
-  mcinfo("cdstatus: %02x\n", priv->cdstatus);
+  mcinfo("cdstatus: %02" PRIx8 "\n", priv->cdstatus);
   leave_critical_section(flags);
 }
 #endif /* CONFIG_STM32H7_SDMMC1 || CONFIG_STM32H7_SDMMC2 */

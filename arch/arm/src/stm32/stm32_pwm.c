@@ -410,9 +410,8 @@ struct stm32_pwmtimer_s
   uint8_t  prev;                        /* The previous value of the RCR (pre-loaded) */
   uint8_t  curr;                        /* The current value of the RCR (pre-loaded) */
   uint32_t count;                       /* Remaining pulse count */
-#else
-  uint32_t frequency;                   /* Current frequency setting */
 #endif
+  uint32_t frequency;                   /* Current frequency setting */
   uint32_t base;                        /* The base address of the timer */
   uint32_t pclk;                        /* The frequency of the peripheral
                                          * clock that drives the timer module
@@ -488,10 +487,9 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev);
 #ifdef CONFIG_PWM_PULSECOUNT
 static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
                                 FAR const struct pwm_info_s *info);
-#else
+#endif
 static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info);
-#endif
 #ifdef HAVE_PWM_INTERRUPT
 static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev);
 #  ifdef CONFIG_STM32_TIM1_PWM
@@ -509,13 +507,12 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info,
-                     FAR void *handle);
-#else
+static int pwm_start_pulsecount(FAR struct pwm_lowerhalf_s *dev,
+                                FAR const struct pwm_info_s *info,
+                                FAR void *handle);
+#endif
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info);
-#endif
 
 static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
 static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
@@ -533,7 +530,11 @@ static const struct pwm_ops_s g_pwmops =
 {
   .setup       = pwm_setup,
   .shutdown    = pwm_shutdown,
+#ifdef CONFIG_PWM_PULSECOUNT
+  .start       = pwm_start_pulsecount,
+#else
   .start       = pwm_start,
+#endif
   .stop        = pwm_stop,
   .ioctl       = pwm_ioctl,
 };
@@ -3376,7 +3377,6 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
   ub16_t    duty    = 0;
   uint8_t   channel = 0;
-  uint32_t  mode    = 0;
   uint16_t  outputs = 0;
   int       ret     = OK;
 
@@ -3384,7 +3384,8 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
-  pwminfo("TIM%u channel: %u frequency: %u duty: %08x count: %u\n",
+  pwminfo("TIM%u channel: %u frequency: %" PRIx32 " duty: %08" PRIx32
+          " count: %" PRIx32 "\n",
           priv->timid, priv->channels[0].channel, info->frequency,
           info->duty, info->count);
 
@@ -3394,7 +3395,6 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
   duty    = info->duty;
   channel = priv->channels[0].channel;
-  mode    = priv->channels[0].mode;
 
   /* Disable all interrupts and DMA requests, clear all pending status */
 
@@ -3503,7 +3503,7 @@ errout:
   return ret;
 }
 
-#else  /* !CONFIG_PWM_PULSECOUNT */
+#endif /* CONFIG_PWM_PULSECOUNT */
 
 /****************************************************************************
  * Name: pwm_configure
@@ -3795,7 +3795,6 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
 errout:
   return ret;
 }
-#endif /* CONFIG_PWM_PULSECOUNT */
 
 #ifdef HAVE_PWM_INTERRUPT
 
@@ -3875,7 +3874,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
    * output.
    */
 
-  pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %u\n",
+  pwminfo("Update interrupt SR: %04x prev: %u curr: %u count: %" PRIx32 "\n",
           regval, priv->prev, priv->curr, priv->count);
 
   return OK;
@@ -4230,10 +4229,16 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
    */
 
 #ifdef CONFIG_PWM_PULSECOUNT
-  ret = pwm_pulsecount_configure(dev);
-#else
-  ret = pwm_configure(dev);
+  if (priv->timtype == TIMTYPE_ADVANCED)
+    {
+      ret = pwm_pulsecount_configure(dev);
+    }
+  else
 #endif
+    {
+      ret = pwm_configure(dev);
+    }
+
   if (ret < 0)
     {
       pwmerr("failed to configure PWM %d\n", priv->timid);
@@ -4331,11 +4336,18 @@ errout:
  ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info,
-                     FAR void *handle)
+static int pwm_start_pulsecount(FAR struct pwm_lowerhalf_s *dev,
+                                FAR const struct pwm_info_s *info,
+                                FAR void *handle)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
+  /* Generate an indefinite number of pulses */
+
+  if (info->count == 0)
+    {
+      return pwm_start(dev, info);
+    }
 
   /* Check if a pulsecount has been selected */
 
@@ -4347,7 +4359,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       if (priv->timtype != TIMTYPE_ADVANCED)
         {
-          pwmerr("ERROR: TIM%u cannot support pulse count: %u\n",
+          pwmerr("ERROR: TIM%u cannot support pulse count: %" PRIx32 "\n",
                  priv->timid, info->count);
           return -EPERM;
         }
@@ -4361,7 +4373,8 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   return pwm_pulsecount_timer(dev, info);
 }
-#else  /* !CONFIG_PWM_PULSECOUNT */
+#endif /* CONFIG_PWM_PULSECOUNT */
+
 static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
                      FAR const struct pwm_info_s *info)
 {
@@ -4403,7 +4416,6 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   return ret;
 }
-#endif /* CONFIG_PWM_PULSECOUNT */
 
 /****************************************************************************
  * Name: pwm_stop
@@ -4587,11 +4599,9 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   flags = enter_critical_section();
 
-#ifndef CONFIG_PWM_PULSECOUNT
   /* Stopped so frequency is zero */
 
   priv->frequency = 0;
-#endif
 
   /* Disable further interrupts and stop the timer */
 

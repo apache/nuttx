@@ -71,18 +71,6 @@ POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
-# Add motor driver
-
-ifeq ($(CONFIG_DRIVERS_MOTOR),y)
-
-CSRCS += motor.c
-
-POWER_DEPPATH := --dep-path power
-POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
-
-endif
-
 # Add battery charger drivers
 
 ifeq ($(CONFIG_BATTERY_CHARGER),y)

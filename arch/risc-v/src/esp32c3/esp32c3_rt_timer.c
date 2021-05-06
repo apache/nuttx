@@ -601,7 +601,7 @@ int esp32c3_rt_timer_init(void)
   tim = esp32c3_tim_init(ESP32C3_RT_TIMER);
   if (!tim)
     {
-      tmrerr("ERROR: Failed to initialize ESP32 timer0\n");
+      tmrerr("ERROR: Failed to initialize ESP32-C3 timer0\n");
       return -EINVAL;
     }
 
@@ -628,7 +628,7 @@ int esp32c3_rt_timer_init(void)
   flags = enter_critical_section();
 
   /**
-   * ESP32 hardware timer configuration:
+   * ESP32-C3 hardware timer configuration:
    *   - 1 counter = 1us
    *   - Counter increase mode
    *   - Non-reload mode

@@ -34,6 +34,7 @@
 
 #include "esp32c3_tim.h"
 #include "esp32c3_irq.h"
+#include "esp32c3_gpio.h"
 
 /****************************************************************************
  * Private Types
@@ -82,12 +83,13 @@ static int esp32c3_tim_setisr(FAR struct esp32c3_tim_dev_s *dev,
 static void esp32c3_tim_enableint(FAR struct esp32c3_tim_dev_s *dev);
 static void esp32c3_tim_disableint(FAR struct esp32c3_tim_dev_s *dev);
 static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev);
+static int  esp32c3_tim_checkint(FAR struct esp32c3_tim_dev_s *dev);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* ESP32C3 TIM ops */
+/* ESP32-C3 TIM ops */
 
 struct esp32c3_tim_ops_s esp32c3_tim_ops =
 {
@@ -107,7 +109,8 @@ struct esp32c3_tim_ops_s esp32c3_tim_ops =
   .setisr        = esp32c3_tim_setisr,
   .enableint     = esp32c3_tim_enableint,
   .disableint    = esp32c3_tim_disableint,
-  .ackint        = esp32c3_tim_ackint
+  .ackint        = esp32c3_tim_ackint,
+  .checkint      = esp32c3_tim_checkint
 };
 
 #ifdef CONFIG_ESP32C3_TIMER0
@@ -652,6 +655,31 @@ static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev)
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
   modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->id), 0, TIMG_T0_INT_CLR_M);
+}
+
+/****************************************************************************
+ * Name: esp32c3_tim_checkint
+ *
+ * Description:
+ *   Check the interrupt status bit.
+ *
+ * Parameters:
+ *   dev           - Pointer to the timer driver struct.
+ *
+ * Returned Values:
+ *  Return 1 in case of an interrupt is triggered, otherwise 0.
+ *
+ ****************************************************************************/
+
+static int esp32c3_tim_checkint(FAR struct esp32c3_tim_dev_s *dev)
+{
+  struct esp32c3_tim_priv_s *priv = (struct esp32c3_tim_priv_s *)dev;
+  uint32_t reg_value;
+
+  DEBUGASSERT(dev != NULL);
+
+  reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->id));
+  return ((reg_value & TIMG_T0_INT_ST_V) >> TIMG_T0_INT_ST_S);
 }
 
 /****************************************************************************

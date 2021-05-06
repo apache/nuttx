@@ -121,7 +121,7 @@
 
 /* CPU Interrupts.
  *
- * The ESP32 CPU interrupt controller accepts 31 asynchronous interrupts.
+ * The ESP32-C3 CPU interrupt controller accepts 31 asynchronous interrupts.
  */
 
 #define ESP32C3_CPUINT_MIN             1

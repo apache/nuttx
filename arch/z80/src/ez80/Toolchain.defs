@@ -18,6 +18,74 @@
 #
 ############################################################################
 
+# CPU Identification
+
+ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
+  ARCHCPU    = eZ80F91
+  ARCHCPUDEF = _EZ80F91
+  ARCHFAMILY = _EZ80ACCLAIM
+else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
+  ARCHCPU    = eZ80F92
+  ARCHCPUDEF = _EZ80F92
+  ARCHFAMILY = _EZ80ACCLAIM
+endif
+
+ifeq ($(CONFIG_EZ80_TOOLCHAIN_CLANG),y)
+
+# Optimization level
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHASMOPTIMIZATION =
+  ARCHOPTIMIZATION = -g
+else
+  ARCHASMOPTIMIZATION =
+  ARCHOPTIMIZATION =
+endif
+
+ifeq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -O0
+else
+  ARCHOPTIMIZATION += -Oz
+endif
+
+ARCHSTDINCLUDES =
+
+ARCHCPUFLAGS = -Dinterrupt="__attribute__((__interrupt__))" -ffreestanding
+ARCHCPUFLAGS += -ffunction-sections -fdata-sections -Wa,-march=ez80
+ARCHLIST = 
+ARCHWARNINGS = -Wall -Wextra -Wno-incompatible-library-redeclaration
+ARCHWARNINGS += -Wno-main-return-type -Wno-unused-parameter
+ARCHWARNINGS += -Wno-invalid-noreturn -Wimplicit-int-conversion
+ARCHDEFINES = -D$(ARCHCPUDEF) -D"$(ARCHFAMILY)"
+ARCHINCLUDES = $(ARCHSTDINCLUDES)
+
+ARCHASMCPUFLAGS = -Wa,-march=ez80 -xassembler-with-cpp
+ARCHASMINCLUDES = -include chip/clang-compat.asm
+ARCHASMLIST =
+ARCHASMWARNINGS = -W
+
+LDFLAGS += -gc-sections
+
+# Tool names/paths.
+
+CROSSDEV = ez80-none-elf-
+CC = $(CROSSDEV)clang
+CPP = $(CC) -E -P -x c
+STRIP = $(CROSSDEV)strip --strip-unneeded
+LD = $(CROSSDEV)ld
+AS = $(CROSSDEV)as
+AR = $(CROSSDEV)ar -r
+OBJCOPY= $(CROSSDEV)objcopy
+
+# File extensions
+
+ASMEXT = .asm
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT = .bin
+
+else
+
 # These are the default directories where the ZDS-II toolchain is installed.
 # NOTE that short 8.3 path names are used in order to avoid spaces.  On my
 # machine I have:
@@ -76,18 +144,6 @@ else
   EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
 endif
 
-# CPU Identification
-
-ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
-  ARCHCPU    = eZ80F91
-  ARCHCPUDEF = _EZ80F91
-  ARCHFAMILY = _EZ80ACCLAIM!
-else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
-  ARCHCPU    = eZ80F92
-  ARCHCPUDEF = _EZ80F92
-  ARCHFAMILY = _EZ80ACCLAIM!
-endif
-
 # Optimization level
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -104,6 +160,13 @@ else
   ARCHOPTIMIZATION += -promote -NOreduceopt -sdiopt -optsize
 endif
 
+ARCHCPUFLAGS = -chartype:S -promote -cpu:$(ARCHCPU) -NOgenprintf -NOmodsect \
+               -asmsw:" $(ARCHASMCPUFLAGS) $(EARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
+ARCHLIST = -keeplst -NOlist -NOlistinc -keepasm
+ARCHWARNINGS = -warn
+ARCHDEFINES = -define:$(ARCHCPUDEF) -define:$(ARCHFAMILY)
+ARCHINCLUDES = $(ARCHSTDINCLUDES)
+
 # Tool names/paths.
 
 CROSSDEV =
@@ -119,3 +182,5 @@ ASMEXT = .asm
 OBJEXT = .obj
 LIBEXT = .lib
 EXEEXT = .lod
+
+endif

@@ -191,7 +191,7 @@ exception_common:
 
   mv   a1, sp      /* context = sp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Load mhartid (cpuid) */
 
   csrr s0, mhartid
@@ -203,7 +203,7 @@ exception_common:
   j    4f
 3:
   la   sp, g_intstacktop
-  addi sp, sp, -(CONFIG_ARCH_INTERRUPTSTACK & ~7)
+  addi sp, sp, -(CONFIG_ARCH_INTERRUPTSTACK & ~15)
 4:
 
 #endif
@@ -264,16 +264,16 @@ exception_common:
  *  Name: g_intstackalloc and g_intstacktop
  ************************************************************************************/
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   .bss
-  .align  8
+  .balign 16
   .global g_intstackalloc
   .global g_intstacktop
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
-  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
+  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
 g_intstacktop:
   .size  g_intstacktop, 0
-  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
 #endif

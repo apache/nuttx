@@ -49,6 +49,10 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
 
+ifeq ($(CONFIG_STM32_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif

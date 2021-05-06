@@ -521,10 +521,10 @@ enum spi_devtype_e
 
 enum spi_mode_e
 {
-  SPIDEV_MODE0 = 0,     /* CPOL=0 CHPHA=0 */
-  SPIDEV_MODE1,         /* CPOL=0 CHPHA=1 */
-  SPIDEV_MODE2,         /* CPOL=1 CHPHA=0 */
-  SPIDEV_MODE3,         /* CPOL=1 CHPHA=1 */
+  SPIDEV_MODE0 = 0,     /* CPOL=0 CPHA=0 */
+  SPIDEV_MODE1,         /* CPOL=0 CPHA=1 */
+  SPIDEV_MODE2,         /* CPOL=1 CPHA=0 */
+  SPIDEV_MODE3,         /* CPOL=1 CPHA=1 */
   SPIDEV_MODETI,        /* CPOL=0 CPHA=1 TI Synchronous Serial Frame Format */
 };
 

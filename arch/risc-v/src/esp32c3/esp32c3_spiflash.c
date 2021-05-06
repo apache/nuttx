@@ -51,9 +51,9 @@
 #define ESP32C3_MTD_SIZE            CONFIG_ESP32C3_MTD_SIZE
 
 #define MTD2PRIV(_dev)              ((FAR struct esp32c3_spiflash_s *)_dev)
-#define MTD_SIZE(_priv)             ((_priv)->chip->chip_size)
-#define MTD_BLKSIZE(_priv)          ((_priv)->chip->page_size)
-#define MTD_ERASESIZE(_priv)        ((_priv)->chip->sector_size)
+#define MTD_SIZE(_priv)             ((*(_priv)->data)->chip.chip_size)
+#define MTD_BLKSIZE(_priv)          ((*(_priv)->data)->chip.page_size)
+#define MTD_ERASESIZE(_priv)        ((*(_priv)->data)->chip.sector_size)
 #define MTD_BLK2SIZE(_priv, _b)     (MTD_BLKSIZE(_priv) * (_b))
 #define MTD_SIZE2BLK(_priv, _s)     ((_s) / MTD_BLKSIZE(_priv))
 
@@ -69,7 +69,7 @@ struct esp32c3_spiflash_s
 
   /* SPI Flash data */
 
-  esp32c3_spiflash_chip_t *chip;
+  const struct spiflash_legacy_data_s **data;
 };
 
 /****************************************************************************
@@ -104,6 +104,12 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg);
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern const struct spiflash_legacy_data_s *rom_spiflash_legacy_data;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -121,7 +127,7 @@ static struct esp32c3_spiflash_s g_esp32c3_spiflash =
 #endif
             .name   = "esp32c3_spiflash"
           },
-  .chip = &g_rom_flashchip,
+  .data = &rom_spiflash_legacy_data,
 };
 
 static struct esp32c3_spiflash_s g_esp32c3_spiflash_encrypt =
@@ -662,7 +668,7 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
 FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
 {
   struct esp32c3_spiflash_s *priv = &g_esp32c3_spiflash;
-  esp32c3_spiflash_chip_t *chip = priv->chip;
+  const esp32c3_spiflash_chip_t *chip = &(*priv->data)->chip;
   FAR struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
@@ -672,7 +678,7 @@ FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
   ASSERT((ESP32C3_MTD_OFFSET % chip->sector_size) == 0);
   ASSERT((ESP32C3_MTD_SIZE % chip->sector_size) == 0);
 
-  finfo("ESP32 SPI Flash information:\n");
+  finfo("ESP32-C3 SPI Flash information:\n");
   finfo("\tID = 0x%" PRIx32 "\n", chip->device_id);
   finfo("\tStatus mask = 0x%" PRIx32 "\n", chip->status_mask);
   finfo("\tChip size = %" PRId32 " KB\n", chip->chip_size / 1024);

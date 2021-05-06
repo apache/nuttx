@@ -183,6 +183,14 @@
 
 #define GET_PERI_REG_BITS2(reg, mask,shift)      ((READ_PERI_REG(reg)>>(shift))&(mask))
 
+/* Extract the field from the register and shift it to avoid wrong reading */
+
+#define REG_MASK(_reg, _field) (((_reg) & (_field##_M)) >> (_field##_S))
+
+/* Helper to place a value in a field */
+
+#define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
+
 /* Periheral Clock */
 
 #define APB_CLK_FREQ_ROM                        26 * 1000000
@@ -243,6 +251,15 @@
 #define DR_REG_PWM2_BASE                        0x3ff6f000
 #define DR_REG_PWM3_BASE                        0x3ff70000
 #define PERIPHS_SPI_ENCRYPT_BASEADDR            DR_REG_SPI_ENCRYPT_BASE
+
+/* Some AHB addresses can be used instead of DPORT addresses
+ * as a workaround for some HW bugs.
+ * This workaround is detailed at
+ * https://www.espressif.com/sites/default/files/documentation/
+ * eco_and_workarounds_for_bugs_in_esp32_en.pdf
+ */
+
+#define AHB_REG_UART_BASE   0x60000000
 
 /* Overall memory map */
 

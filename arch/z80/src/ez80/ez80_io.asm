@@ -33,7 +33,7 @@
 ; Global Symbols Expported
 ;**************************************************************************
 
-	CONFIG_EZ80_Z80MODE equ 0
+CONFIG_EZ80_Z80MODE	equ	0
 
 ;**************************************************************************
 ; Code
@@ -54,7 +54,7 @@ _outp:
 	; Create a stack frame
 
 	push	ix
-	ld	ix, #0
+	ld	ix, 0
 	add	ix, sp
 
 	; Get the arguments from the stack
@@ -104,7 +104,7 @@ _inp:
 	; Create a stack frame
 
 	push	ix
-	ld	ix, #0
+	ld	ix, 0
 	add	ix, sp
 
 	; Get the arguments from the stack

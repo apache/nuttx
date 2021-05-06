@@ -170,10 +170,10 @@ static uint32_t g_intenable[1];
  * devices.
  */
 
-static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET &
+static uint32_t g_cpu0_freeints = ESP32_CPUINT_PERIPHSET &
                                   (~ESP32_WIRELESS_RESERVE_INT);
 #ifdef CONFIG_SMP
-static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET &
+static uint32_t g_cpu1_freeints = ESP32_CPUINT_PERIPHSET &
                                   (~ESP32_WIRELESS_RESERVE_INT);
 #endif
 
@@ -465,7 +465,7 @@ int esp32_alloc_levelint(int priority)
    * interrupt priority.
    */
 
-  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_LEVELSET;
+  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_LEVELSET;
   return esp32_alloc_cpuint(intmask);
 }
 
@@ -497,7 +497,7 @@ int esp32_alloc_edgeint(int priority)
    * interrupt priority.
    */
 
-  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & EPS32_CPUINT_EDGESET;
+  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_EDGESET;
   return esp32_alloc_cpuint(intmask);
 }
 

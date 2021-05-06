@@ -2054,7 +2054,7 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
       ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
       dmainfo("stm32_dmacapable: dcache unaligned "
-              "maddr:0x%08" PRIx32 " mend:0x%08x\n",
+              "maddr:0x%08" PRIx32 " mend:0x%08" PRIx32 "\n",
               cfg->maddr, mend);
 #if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;

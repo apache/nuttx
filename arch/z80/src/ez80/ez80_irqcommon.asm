@@ -26,7 +26,7 @@
 
 EZ80_C_FLAG		EQU	01h		; Bit 0: Carry flag
 EZ80_N_FLAG		EQU	02h		; Bit 1: Add/Subtract flag
-EZ80_PV_FLAG	EQU	04h		; Bit 2: Parity/Overflow flag
+EZ80_PV_FLAG		EQU	04h		; Bit 2: Parity/Overflow flag
 EZ80_H_FLAG		EQU	10h		; Bit 4: Half carry flag
 EZ80_Z_FLAG		EQU	40h		; Bit 5: Zero flag
 EZ80_S_FLAG		EQU	80h		; Bit 7: Sign flag
@@ -62,7 +62,7 @@ _ez80_irq_common:
 	; IRQ number is in A
 
 	push	hl					; Offset 6: HL
-	ld		hl, #(3*3)			;    HL is the value of the stack pointer before
+	ld		hl, 3*3				;    HL is the value of the stack pointer before
 	add		hl, sp				;    the interrupt occurred (3 for PC, AF, HL)
 	push	hl					; Offset 5: Stack pointer
 	push	iy					; Offset 4: IY
@@ -74,16 +74,16 @@ _ez80_irq_common:
 	; so we can save a fake indication that will cause interrupts to restored when
 	; this context is restored
 
-	ld		bc, #EZ80_PV_FLAG	; Parity bit.  1=parity odd, IEF2=1
+	ld		bc, EZ80_PV_FLAG	; Parity bit.  1=parity odd, IEF2=1
 	push	bc					; Offset 0: I with interrupt state in parity
 	di							; (not necessary)
 
 	; Call the interrupt decode logic. SP points to the beginning of the reg structure
 
-	ld		hl, #0				; Argument #2 is the beginning of the reg structure
+	ld		hl, 0				; Argument #2 is the beginning of the reg structure
 	add		hl, sp				;
 	push	hl					; Place argument #2 at the top of stack
-	ld		bc, #0				; BC = reset number
+	ld		bc, 0				; BC = reset number
 	ld		c, a				;   Save the reset number in C
 	push	bc					; Argument #1 is the Reset number
 	call	_z80_doirq			; Decode the IRQ

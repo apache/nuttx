@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -506,10 +507,10 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
       UNUSED(manufacturer); /* Eliminate warnings when debug is off */
       UNUSED(memory);       /* Eliminate warnings when debug is off */
 
-      finfo(
-       "RAMTRON %s of size %d bytes (mf:%02x mem:%02x cap:%02x part:%02x)\n",
-        priv->part->name, priv->part->size,
-        manufacturer, memory, capacity, part);
+      finfo("RAMTRON %s of size %" PRIu32 " bytes (mf:%02" PRIx16 " mem:%02"
+            PRIx16 " cap:%02" PRIx16 " part:%02" PRIx16 ")\n",
+            priv->part->name, priv->part->size, manufacturer, memory,
+            capacity, part);
 
       priv->sectorshift = RAMTRON_EMULATE_SECTOR_SHIFT;
       priv->nsectors    = priv->part->size /
@@ -945,7 +946,7 @@ static int ramtron_ioctl(FAR struct mtd_dev_s *dev,
               geo->neraseblocks = priv->nsectors;
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %ld erasesize: %ld neraseblocks: %ld\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }

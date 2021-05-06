@@ -559,21 +559,6 @@ Configurations
     Functionality of CAN driver can be tested by calling application
     "can" in NuttShell. This application sends 100 messages over CAN 1.
 
-  lcd:
-  ----
-    This is basically an nsh configuration (see above) with added support
-    of ILI9225 176x220 TFT display and test framebuffer application.
-
-    Display connection is set to SPI 3 and pinout is following:
-
-    CS    D8
-    RST   D6
-    RS    D7
-    SDA   D4
-    CLK   D3
-
-    Framebuffer application can be started from terminal by typing "fb".
-
   ihm08m1_f32 and ihm08m1_b16:
   ----------------------------
 
@@ -637,3 +622,24 @@ Configurations
     VBUS_RATIO   = 1/VBUS_gain      = 19.152
 
     For now only 3-shunt resistors configuration is supported.
+
+  lcd:
+  ----
+    This is basically an nsh configuration (see above) with added support
+    of ILI9225 176x220 TFT display and test framebuffer application.
+
+    Display connection is set to SPI 3 and pinout is following:
+
+    CS    D8
+    RST   D6
+    RS    D7
+    SDA   D4
+    CLK   D3
+
+    Framebuffer application can be started from terminal by typing "fb".
+
+  pwm:
+  ----
+  This is an nsh configuration (see above) with added capability of pulse width
+  modulation. PWM output is on Timer 3 channel 1, which is pin PA_6 (D12) on
+  Nucleo board. Example program can be stared by "pwm" command.

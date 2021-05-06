@@ -49,6 +49,8 @@
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -O2
 endif
 
 # Pick correct or1k architecture selection
@@ -61,7 +63,6 @@ endif
 
 #ifeq ($(CONFIG_OR1K_TOOLCHAIN),GNU_ELF)
 CROSSDEV ?= or1k-elf-
-MAXOPTIMIZATION ?= -O2
 ARCHCPUFLAGS = -mboard=de0_nano
 ARCHPICFLAGS = -fpic -membedded-pic
 LDFLAGS += -nostartfiles -nodefaultlibs

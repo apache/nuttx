@@ -76,17 +76,18 @@
 /* Registers Operation */
 
 #define REG_UHCI_BASE(i)      (DR_REG_UHCI0_BASE - (i) * 0x8000)
-#define REG_UART_BASE( i )    (DR_REG_UART_BASE + (i) * 0x10000 + \
+#define REG_UART_BASE(i)      (DR_REG_UART_BASE + (i) * 0x10000 + \
                                ( (i) > 1 ? 0xe000 : 0 ) )
 #define REG_UART_AHB_BASE(i)  (0x60000000 + (i) * 0x10000 + \
                                ( (i) > 1 ? 0xe000 : 0 ) )
 #define UART_FIFO_AHB_REG(i)  (REG_UART_AHB_BASE(i) + 0x0)
-#define REG_I2S_BASE( i )     (DR_REG_I2S_BASE + (i) * 0x1E000)
+#define REG_I2S_BASE(i)       (DR_REG_I2S_BASE + (i) * 0x1E000)
 #define REG_TIMG_BASE(i)      (DR_REG_TIMERGROUP0_BASE + (i)*0x1000)
 #define REG_SPI_MEM_BASE(i)   (DR_REG_SPI0_BASE - (i) * 0x1000)
+#define REG_SPI_BASE(i)       (DR_REG_SPI2_BASE)
 #define REG_I2C_BASE(i)       (DR_REG_I2C_EXT_BASE + (i) * 0x14000)
 
-/* Periheral Clock */
+/* Peripheral Clock */
 
 #define APB_CLK_FREQ_ROM        (40 * 1000000)
 #define CPU_CLK_FREQ_ROM        APB_CLK_FREQ_ROM
@@ -145,7 +146,7 @@
 #define SOC_BYTE_ACCESSIBLE_HIGH  0x3fd00000
 
 /* Region of memory that is internal, as in on the same silicon die as the
- * ESP32 CPU (excluding RTC data region, that's checked separately.)
+ * ESP32-C3 CPU (excluding RTC data region, that's checked separately.)
  * See esp_ptr_internal().
  */
 
@@ -255,5 +256,13 @@
 #define SOC_INTERRUPT_LEVEL_MEDIUM  4
 
 #define BIT(nr)                     (1UL << (nr))
+
+/* Extract the field from the register and shift it to avoid wrong reading */
+
+#define REG_MASK(_reg, _field) (((_reg) & (_field##_M)) >> (_field##_S))
+
+/* Helper to place a value in a field */
+
+#define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_SOC_H */

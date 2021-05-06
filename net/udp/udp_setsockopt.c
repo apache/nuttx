@@ -29,9 +29,11 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <net/if.h>
 #include <netinet/udp.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
 
 #include "socket/socket.h"
@@ -112,31 +114,74 @@ int udp_setsockopt(FAR struct socket *psock, int option,
        */
 
       case UDP_BINDTODEVICE:  /* Bind socket to a specific network device */
-        if (value == NULL || value_len == 0 ||
-           (value_len > 0 && ((FAR char *)value)[0] == 0))
-          {
-            conn->boundto = 0;  /* This interface is no longer bound */
-            ret = OK;
-          }
-        else
-          {
-            int ifindex;
+        {
+          FAR struct net_driver_s *dev;
 
-            /* Get the interface index corresponding to the interface name */
+          /* Check if we are are unbinding the socket */
 
-            ifindex = netdev_nametoindex(value);
-            if (ifindex >= 0)
-              {
-                DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
-                conn->boundto = ifindex;
-                ret = OK;
-              }
-            else
-              {
-                ret = ifindex;
-              }
-          }
+          if (value == NULL || value_len == 0 ||
+             (value_len > 0 && ((FAR char *)value)[0] == 0))
+            {
+              /* Just report success if the socket is not bound to an
+               * interface.
+               */
 
+              if (conn->boundto != 0)
+                {
+                  /* Get the interface that we are bound do.  NULL would
+                   * indicate that the interface no longer exists for some
+                   * reason.
+                   */
+
+                  dev = netdev_findbyindex(conn->boundto);
+                  if (dev != NULL)
+                    {
+                      /* Clear the interface flag to unbind the device from
+                       * the socket.
+                       */
+
+                      IFF_CLR_BOUND(dev->d_flags);
+                    }
+
+                  conn->boundto = 0;  /* This interface is no longer bound */
+                }
+
+              ret = OK;
+            }
+
+          /* No, we are binding a socket to the interface. */
+
+          else
+            {
+              /* Find the interface device with this name */
+
+              dev = netdev_findbyname(value);
+              if (dev == NULL)
+                {
+                  ret = -ENODEV;
+                }
+
+              /* An interface may be bound only to one socket. */
+
+              else if (IFF_IS_BOUND(dev->d_flags))
+                {
+                  ret = -EBUSY;
+                }
+              else
+                {
+                  /* Bind the interface to a socket */
+
+                  IFF_SET_BOUND(dev->d_flags);
+
+                  /* Bind the socket to the interface */
+
+                  DEBUGASSERT(dev->d_ifindex > 0 &&
+                              dev->d_ifindex <= MAX_IFINDEX);
+                  conn->boundto = dev->d_ifindex;
+                  ret = OK;
+                }
+            }
+        }
         break;
 #endif
 

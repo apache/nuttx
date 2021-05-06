@@ -49,6 +49,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
 endif
 
 # Generic GNU RVG toolchain
@@ -65,13 +67,6 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   else
     ARCHCPUFLAGS += -mno-div
   endif
-endif
-
-# Individual tools may limit the optimization level but, by default, the
-# optimization level will be set to -Os
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),)
-MAXOPTIMIZATION ?= -Os
 endif
 
 # Default toolchain

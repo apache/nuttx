@@ -40,7 +40,7 @@
 ;**************************************************************************
 
 _z80_getsp:
-	ld		hl, #0			; Initialize HL to zero
+	ld		hl, 0			; Initialize HL to zero
 	add		hl, sp			; Add the stack pointer to HL
 	ret						; Return stack pointer in HL
 

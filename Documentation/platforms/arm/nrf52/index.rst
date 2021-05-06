@@ -63,7 +63,7 @@ GPIO/GPIOTE
 -----------
 
 Pins can be configured/operated using ``nrf52_gpio_*`` functions. Interrupts are
-handled via the GPIOTE peripheral in one of two ways: via a GPIOTE channel or via 
+handled via the GPIOTE peripheral in one of two ways: via a GPIOTE channel or via
 PORT events. The former allows for simultaneous rising/falling edge-sensitive interrupts
 per-pin. However, as there are a limited number of channels (and sometimes these
 are used by some drivers for specific tasks), it may not always be possible to use
@@ -88,7 +88,7 @@ is initialized by calling :c:func:`nrf52_adcinitialize`.
 I2C
 ---
 
-I2C is supported both in polling and interrupt mode (via EasyDMA). 
+I2C is supported both in polling and interrupt mode (via EasyDMA).
 
 .. note:: The I2C peripheral does not support sending two transfers without sending
    a START nor RSTART. For this reason, this is supported via an internal buffer where
@@ -105,7 +105,7 @@ SPI is supported both in polling and interrupt-based (via EasyDMA) mode. The lat
 supports arbitrarily long transfers using Nordic's list-mode EasyDMA (intermediate
 transfers are currently still manually started).
 
-It is possible to use SPI without either MOSI/MISO pin defined by simply not providing 
+It is possible to use SPI without either MOSI/MISO pin defined by simply not providing
 the relevant ``BOARD_SPI*_MISO/MOSI_PIN`` definition.
 
 This implementation support power management hooks, which will disable SPI peripheral when
@@ -115,7 +115,7 @@ UART
 ----
 
 UART is implemented using polling. UARTE EasyDMA feature is not yet supported.
-This may introduce a large number of interrupts which may be undesireable.
+This may introduce a large number of interrupts which may be undesirable.
 
 PPI
 ---
@@ -166,7 +166,7 @@ you need to call :c:func:`nrf52_sdc_initialize` on boot, which will initialize t
 
 SDC support involves registering various high-priority zero-latency interrupts and thus requires
 enabling BASEPRI and high-priority interrupt support. On supported boards, a sample ``sdc`` configuration
-is provided with settings already set. 
+is provided with settings already set.
 
 Note that in this case, some peripherals (mostly those related to BLE) will be unavailable. Some PPI
 channels will also be ocuppied (``NRF52_PPI_NUM_CONFIGURABLE_CHANNELS`` will be set accordingly in this case).

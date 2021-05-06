@@ -60,7 +60,7 @@ to match the highest priority client.
 
 **Configuration Options**.
 
--  ``CONFIG_SCHED_HPWORK``. Enables the hight priority work queue.
+-  ``CONFIG_SCHED_HPWORK``. Enables the high priority work queue.
 -  ``CONFIG_SCHED_HPNTHREADS``. The number of threads in the
    high-priority queue's thread pool. Default: 1
 -  ``CONFIG_SCHED_HPWORKPRIORITY``. The execution priority of the

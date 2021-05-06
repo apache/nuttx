@@ -403,8 +403,8 @@
 #ifdef HAVE_ADC_CMN_DATA
 struct adccmn_data_s
 {
-  uint8_t initialized; /* How many ADC instances are currently in use */
-  sem_t   lock;        /* Exclusive access to common ADC data */
+  uint8_t refcount; /* How many ADC instances are currently in use */
+  sem_t   lock;     /* Exclusive access to common ADC data */
 };
 #endif
 
@@ -726,7 +726,7 @@ static const struct stm32_adc_ops_s g_adc_llops =
 
 struct adccmn_data_s g_adc123_cmn =
 {
-  .initialized = 0
+  .refcount = 0
 };
 
 #  elif defined(HAVE_IP_ADC_V2)
@@ -740,7 +740,7 @@ struct adccmn_data_s g_adc123_cmn =
 
 struct adccmn_data_s g_adc12_cmn =
 {
-  .initialized = 0
+  .refcount = 0
 };
 
 #    endif
@@ -750,7 +750,7 @@ struct adccmn_data_s g_adc12_cmn =
 
 struct adccmn_data_s g_adc34_cmn =
 {
-  .initialized = 0
+  .refcount = 0
 };
 
 #    endif
@@ -2863,7 +2863,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
       goto out;
     }
 
-  if (priv->cmn->initialized == 0)
+  if (priv->cmn->refcount == 0)
 #endif
     {
       /* Enable ADC reset state */
@@ -2994,7 +2994,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
       return ret;
     }
 
-  if (priv->cmn->initialized == 0)
+  if (priv->cmn->refcount == 0)
 #endif
     {
       /* Enable the ADC interrupt */
@@ -3006,7 +3006,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
     }
 
 #ifdef HAVE_ADC_CMN_DATA
-  priv->cmn->initialized += 1;
+  priv->cmn->refcount += 1;
   adccmn_lock(priv, false);
 #endif
 
@@ -3062,7 +3062,7 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
       return;
     }
 
-  if (priv->cmn->initialized <= 1)
+  if (priv->cmn->refcount <= 1)
 #endif
     {
 #ifndef CONFIG_STM32_ADC_NOIRQ
@@ -3096,9 +3096,9 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_CMN_DATA
   /* Decrease instances counter */
 
-  if (priv->cmn->initialized > 0)
+  if (priv->cmn->refcount > 0)
     {
-      priv->cmn->initialized -= 1;
+      priv->cmn->refcount -= 1;
     }
 
   adccmn_lock(priv, false);

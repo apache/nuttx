@@ -330,4 +330,19 @@ int board_ajoy_initialize(void);
 int stm32_foc_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ * Return Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F401RE_SRC_NUCLEO_F446RE_H */
