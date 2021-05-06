@@ -167,7 +167,21 @@
 
 #define FIFO_SIZE_IN_BYTES        64
 
-/* Friendly CLKCR bit re-definitions ****************************************/
+/* Friendly Clock source & CLKCR bit re-definitions *************************/
+
+/* If not set in board use default pll1_q_ck clock is selected as
+ * kernel peripheral clock (default after reset)
+ */
+
+#if !defined(STM32_RCC_D1CCIPR_SDMMCSEL)
+#  define STM32_RCC_D1CCIPR_SDMMCSEL  RCC_D1CCIPR_SDMMC_PLL1
+#endif
+
+#if STM32_RCC_D1CCIPR_SDMMCSEL  == RCC_D1CCIPR_SDMMC_PLL1
+#  define STM32_SDMMC_CLK  STM32_PLL1Q_FREQUENCY
+#else
+#  define STM32_SDMMC_CLK  STM32_PLL2R_FREQUENCY
+#endif
 
 #define STM32_CLKCR_RISINGEDGE    (0)
 #define STM32_CLKCR_FALLINGEDGE   STM32_SDMMC_CLKCR_NEGEDGE
@@ -208,9 +222,9 @@
 #define SDMMC_CMDTIMEOUT         (100000)
 #define SDMMC_LONGTIMEOUT        (0x7fffffff)
 
-/* Big DTIMER setting */
+/* DTIMER setting */
 
-#define SDMMC_DTIMER_DATATIMEOUT (6250000) /* 250 ms @ 25 MHz */
+#define SDMMC_DTIMER_DATATIMEOUT_MS  250
 
 /* Block size for multi-block transfers */
 
@@ -1080,7 +1094,10 @@ static uint8_t stm32_log2(uint16_t value)
 static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
                              uint32_t dlen, bool receive)
 {
-  uint32_t dctrl = 0;
+  uint32_t clkdiv;
+  uint32_t regval;
+  uint32_t dctrl;
+  uint32_t sdio_clk = STM32_SDMMC_CLK;
 
   DEBUGASSERT((sdmmc_getreg32(priv, STM32_SDMMC_IDMACTRLR_OFFSET) &
                STM32_SDMMC_IDMACTRLR_IDMAEN) == 0);
@@ -1140,7 +1157,26 @@ static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
 
   /* Enable data path */
 
-  /* Set DTIMER */
+  /* Set DTIMER
+   *
+   * Enable data path using a timeout scaled to the SD_CLOCK (the card
+   * clock).
+   */
+
+  regval = sdmmc_getreg32(priv, STM32_SDMMC_CLKCR_OFFSET);
+  clkdiv = (regval & STM32_SDMMC_CLKCR_CLKDIV_MASK) >>
+            STM32_SDMMC_CLKCR_CLKDIV_SHIFT;
+
+  /* CLKDIV_ of 0x000: is Bypass */
+
+  if (clkdiv != 0)
+    {
+      sdio_clk = sdio_clk / (2 * clkdiv);
+    }
+
+  /*  Convert Timeout in Ms to SD_CLK counts */
+
+  timeout  = timeout * (sdio_clk / 1000);
 
   sdmmc_putreg32(priv, timeout, STM32_SDMMC_DTIMER_OFFSET);
 
@@ -1174,8 +1210,11 @@ static void stm32_datadisable(struct stm32_dev_s *priv)
 
   /* Reset DTIMER */
 
-  sdmmc_putreg32(priv, SDMMC_DTIMER_DATATIMEOUT, STM32_SDMMC_DTIMER_OFFSET);
-  sdmmc_putreg32(priv, 0, STM32_SDMMC_DLEN_OFFSET);   /* Reset DLEN */
+  sdmmc_putreg32(priv, UINT32_MAX, STM32_SDMMC_DTIMER_OFFSET);
+
+  /* Reset DLEN */
+
+  sdmmc_putreg32(priv,  0, STM32_SDMMC_DLEN_OFFSET);
 
   /* Reset DCTRL DTEN, DTDIR, DTMODE, and DBLOCKSIZE fields */
 
@@ -2305,8 +2344,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
-                   nbytes, true);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT_MS, nbytes, true);
 
   /* Workaround the FIFO data available issue */
 
@@ -2380,8 +2418,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
 
   /* Then set up the SDIO data path */
 
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((nbytes + 511) >> 9),
-                   nbytes, false);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT_MS, nbytes, false);
 
   /* Enable TX interrupts */
 
@@ -3163,8 +3200,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
-                   buflen, true);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT_MS, buflen, true);
 
   /* Configure the RX DMA */
 
@@ -3255,8 +3291,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Then set up the SDIO data path */
 
-  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT * ((buflen + 511) >> 9),
-                   buflen, false);
+  stm32_dataconfig(priv, SDMMC_DTIMER_DATATIMEOUT_MS, buflen, false);
 
   /* Configure the TX DMA */
 
