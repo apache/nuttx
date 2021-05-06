@@ -211,7 +211,7 @@ static void gpio_porthandler(uint32_t regbase, int irqbase,
               xcpt_t handler = g_gpiohandler[irq].handler;
               if (handler != NULL)
                 {
-                  handler(irq, contex, g_gpiohandler[irq].arg);
+                  handler(irq, context, g_gpiohandler[irq].arg);
                 }
               else
                 {
