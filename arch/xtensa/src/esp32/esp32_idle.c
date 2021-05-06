@@ -96,24 +96,20 @@ static void up_idlepm(void)
   irqstate_t flags;
 
 #ifdef CONFIG_ESP32_AUTO_SLEEP
-  uint64_t sleep_us;
-  uint64_t os_idle_us;
-  uint64_t os_start_us;
-  uint64_t os_end_us;
-  uint64_t os_step_us;
-  uint64_t hw_idle_us;
-  uint64_t hw_start_us;
-  uint64_t hw_end_us;
-  uint64_t hw_step_us;
-  uint64_t rtc_diff_us;
-  struct timespec ts;
-
   flags = spin_lock_irqsave(NULL);
   if (esp32_pm_lockstatus() == 0)
     {
-      os_idle_us = up_get_idletime();
-      hw_idle_us = rt_timer_get_alarm();
-      sleep_us   = MIN(os_idle_us, hw_idle_us);
+      uint64_t os_start_us;
+      uint64_t os_end_us;
+      uint64_t os_step_us;
+      uint64_t hw_start_us;
+      uint64_t hw_end_us;
+      uint64_t hw_step_us;
+      uint64_t rtc_diff_us;
+      struct   timespec ts;
+      uint64_t os_idle_us = up_get_idletime();
+      uint64_t hw_idle_us = rt_timer_get_alarm();
+      uint64_t sleep_us   = MIN(os_idle_us, hw_idle_us);
       if (sleep_us > EXPECTED_IDLE_TIME_US)
         {
           sleep_us -= EARLY_WAKEUP_US;

@@ -62,6 +62,7 @@
 #include "xtensa_timer.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
+#include "xtensa_counter.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -74,6 +75,7 @@
 
 #define SEC_2_CTICK(s)        ((s) * CTICK_PER_SEC)
 #define USEC_2_CTICK(us)      ((us) * CTICK_PER_USEC)
+#define NSEC_2_CTICK(nsec)    (((nsec) * CTICK_PER_USEC) / NSEC_PER_USEC)
 
 #define CTICK_2_SEC(tick)     ((tick) / CTICK_PER_SEC)
 #define CTICK_2_USEC(tick)    ((tick) / CTICK_PER_USEC)
@@ -85,10 +87,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline uint32_t xtensa_getcount(void);
-static inline uint32_t xtensa_getcompare(void);
-static inline void xtensa_setcount(uint32_t ticks);
-static inline void xtensa_setcompare(uint32_t compare);
 static inline uint64_t up_tmr_total_count(void);
 static inline uint64_t up_tmr_getcount(void);
 static void IRAM_ATTR up_tmr_setcompare(uint32_t ticks);
@@ -99,74 +97,17 @@ static int up_timer_expire(int irq, void *regs, FAR void *arg);
  * Private Data
  ****************************************************************************/
 
-static bool g_timer_started;
-static uint64_t g_cticks;
-static uint32_t g_loop_cnt;
+static bool g_timer_started; /* Whether an interval timer is being started */
+static uint64_t g_cticks;    /* Total ticks of system since power-on */
+static uint32_t g_loop_cnt;  /* System Cycle counter cycle times */
+
+/* Redundant ticks of an interval timer on the cycle counter */
+
 static uint32_t g_last_cticks;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function:  xtensa_getcount, xtensa_setcount
- *            xtensa_getcompare, and xtensa_setcompare
- *
- * Description:
- *   Lower level operations on Xtensa special registers.
- *
- ****************************************************************************/
-
-/* Return the current value of the cycle count register */
-
-static inline uint32_t xtensa_getcount(void)
-{
-  uint32_t count;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, CCOUNT"  : "=r"(count)
-  );
-
-  return count;
-}
-
-/* Set the value of the cycle count register */
-
-static inline void xtensa_setcount(uint32_t ticks)
-{
-  __asm__ __volatile__
-  (
-    "wsr    %0, ccount\n"
-    :
-    : "a"(ticks)
-    : "memory"
-  );
-}
-
-/* Return the old value of the compare register */
-
-static inline uint32_t xtensa_getcompare(void)
-{
-  uint32_t compare;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, %1"  : "=r"(compare) : "I"(XT_CCOMPARE)
-  );
-
-  return compare;
-}
-
-/* Set the value of the compare register */
-
-static inline void xtensa_setcompare(uint32_t compare)
-{
-  __asm__ __volatile__
-  (
-    "wsr %0, %1" : : "r"(compare), "I"(XT_CCOMPARE)
-  );
-}
 
 /****************************************************************************
  * Name: up_tmr_total_count
@@ -211,14 +152,14 @@ static inline uint64_t up_tmr_getcount(void)
  * Name: up_tmr_setcompare
  *
  * Description:
- *   Set the value of the compare register and
- *   save the currently running system tick.
+ *   Set the value of the compare register, save the currently running
+ *   system tick and clear cycle count register.
  *
  * Input Parameters:
- *   None
+ *   ticks - Set the new value of the compare register
  *
  * Returned Value:
- *   Remaining ticks
+ *   None
  *
  ****************************************************************************/
 
@@ -245,10 +186,11 @@ static void IRAM_ATTR up_tmr_setcompare(uint32_t ticks)
 
 static void IRAM_ATTR up_tmr_setcount(uint64_t ticks)
 {
+  irqstate_t flags;
   uint32_t loop_cnt;
   uint32_t last_ticks;
 
-  if (!ticks)
+  if (ticks == 0)
     {
       ticks = 1;
     }
@@ -256,7 +198,7 @@ static void IRAM_ATTR up_tmr_setcount(uint64_t ticks)
   loop_cnt   = ticks / CPU_TICKS_MAX;
   last_ticks = ticks % CPU_TICKS_MAX;
 
-  if (loop_cnt)
+  if (loop_cnt != 0)
     {
       xtensa_setcompare(CPU_TICKS_MAX);
     }
@@ -265,9 +207,13 @@ static void IRAM_ATTR up_tmr_setcount(uint64_t ticks)
       xtensa_setcompare(last_ticks);
     }
 
+  flags = enter_critical_section();
+
   g_loop_cnt      = loop_cnt;
   g_last_cticks   = last_ticks;
   g_timer_started = true;
+
+  leave_critical_section(flags);
 
   g_cticks += xtensa_getcount();
   xtensa_setcount(0);
@@ -296,12 +242,12 @@ static int up_timer_expire(int irq, void *regs, FAR void *arg)
 
   if (g_timer_started)
     {
-      if (g_loop_cnt)
+      if (g_loop_cnt != 0)
         {
           --g_loop_cnt;
-          if (!g_loop_cnt)
+          if (g_loop_cnt == 0)
             {
-              if (g_last_cticks)
+              if (g_last_cticks != 0)
                 {
                   up_tmr_setcompare(g_last_cticks);
                 }
@@ -433,7 +379,7 @@ int IRAM_ATTR up_timer_cancel(FAR struct timespec *ts)
 
   flags = enter_critical_section();
 
-  if (ts)
+  if (ts != NULL)
     {
       if (!g_timer_started)
         {
@@ -503,7 +449,7 @@ int IRAM_ATTR up_timer_start(FAR const struct timespec *ts)
     }
 
   cpu_ticks = SEC_2_CTICK((uint64_t)ts->tv_sec) +
-              USEC_2_CTICK((uint64_t)ts->tv_nsec / 1000);
+              NSEC_2_CTICK((uint64_t)ts->tv_nsec);
 
   up_tmr_setcount(cpu_ticks);
 
