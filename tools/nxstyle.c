@@ -221,6 +221,10 @@ static const char *g_white_list[] =
 
   "_Exit",
 
+  /* Ref:  stdatomic.h */
+
+  "_Atomic",
+
   /* Ref:  unwind-arm-common.h */
 
   "_Unwind",
