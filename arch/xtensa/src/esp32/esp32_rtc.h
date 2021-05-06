@@ -308,8 +308,8 @@ uint64_t esp32_rtc_time_us_to_slowclk(uint64_t time_in_us, uint32_t period);
  *   Convert time interval from RTC_SLOW_CLK to microseconds
  *
  * Input Parameters:
- *   time_in_us      - Time interval in RTC_SLOW_CLK cycles
- *   slow_clk_period - Period of slow clock in microseconds
+ *   rtc_cycles - Time interval in RTC_SLOW_CLK cycles
+ *   period     - Period of slow clock in microseconds
  *
  * Returned Value:
  *   Time interval in microseconds

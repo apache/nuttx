@@ -161,8 +161,7 @@ int esp32_bringup(void)
   ret = esp32_rt_timer_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize RT timer error\n");
-      return ret;
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
     }
 #endif
 

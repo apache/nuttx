@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_tickless.h
+ * arch/xtensa/src/common/xtensa_counter.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,50 +18,95 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_TICKLESS_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_TICKLESS_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_COUNTER_H
+#define __ARCH_XTENSA_SRC_COMMON_XTENSA_COUNTER_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <stdint.h>
 
+#include "xtensa_timer.h"
+
 /****************************************************************************
- * Public Function Prototypes
+ * Inline functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_get_idletime
+ * Name: xtensa_getcount
  *
  * Description:
- *   This function returns the idle time.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The time in system ticks remaining for idle.
- *   Zero means system is busy.
+ *   Get the current value of the cycle count register.
  *
  ****************************************************************************/
 
-uint32_t up_get_idletime(void);
+static inline uint32_t xtensa_getcount(void)
+{
+  uint32_t count;
+
+  __asm__ __volatile__
+  (
+    "rsr %0, CCOUNT"  : "=r"(count)
+  );
+
+  return count;
+}
 
 /****************************************************************************
- * Name:  up_step_idletime
+ * Name: xtensa_setcount
  *
  * Description:
- *   Add system time by idletime_us.
- *
- * Input Parameters:
- *   idletime_us - Idle time(us)
- *
- * Returned Value:
- *   None
+ *   Set the value of the cycle count register.
  *
  ****************************************************************************/
 
-void up_step_idletime(uint32_t idletime_us);
+static inline void xtensa_setcount(uint32_t ticks)
+{
+  __asm__ __volatile__
+  (
+    "wsr    %0, ccount\n"
+    :
+    : "a"(ticks)
+    : "memory"
+  );
+}
 
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_TICKLESS_H */
+/****************************************************************************
+ * Name: xtensa_getcompare
+ *
+ * Description:
+ *   Get the old value of the compare register.
+ *
+ ****************************************************************************/
+
+static inline uint32_t xtensa_getcompare(void)
+{
+  uint32_t compare;
+
+  __asm__ __volatile__
+  (
+    "rsr %0, %1"  : "=r"(compare) : "I"(XT_CCOMPARE)
+  );
+
+  return compare;
+}
+
+/****************************************************************************
+ * Name: xtensa_getcompare
+ *
+ * Description:
+ *   Set the value of the compare register.
+ *
+ ****************************************************************************/
+
+static inline void xtensa_setcompare(uint32_t compare)
+{
+  __asm__ __volatile__
+  (
+    "wsr %0, %1" : : "r"(compare), "I"(XT_CCOMPARE)
+  );
+}
+
+#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_COUNTER_H */

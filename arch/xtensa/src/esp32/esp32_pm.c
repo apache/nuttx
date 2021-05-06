@@ -200,7 +200,8 @@ static struct esp32_sleep_config_t s_config =
               { ESP_PD_OPTION_AUTO, ESP_PD_OPTION_AUTO, ESP_PD_OPTION_AUTO },
     .wakeup_triggers = 0
 };
-static volatile uint32_t pm_wakelock = 0;
+
+static _Atomic uint32_t pm_wakelock = 0;
 
 /****************************************************************************
  * Private Functions
@@ -915,7 +916,7 @@ int esp32_light_sleep_start(uint64_t *sleep_time)
 
   ret = esp32_light_sleep_inner(pd_flags, flash_enable_time_us,
                                                vddsdio_config);
-  if (sleep_time)
+  if (sleep_time != NULL)
     {
       *sleep_time = esp32_rtc_time_slowclk_to_us(esp32_rtc_time_get() -
           s_config.rtc_ticks_at_sleep_start, esp32_clk_slowclk_cal_get());
@@ -997,7 +998,7 @@ void esp32_pmstandby(uint64_t time_in_us)
   up_step_idletime((uint32_t)time_in_us);
 #endif
 
-  pwrinfo("Returned from auto-sleep, slept for %d ms\n",
+  pwrinfo("Returned from auto-sleep, slept for %" PRIu32 " ms\n",
             (uint32_t)(rtc_diff_us) / 1000);
 }
 
@@ -1140,11 +1141,7 @@ void esp32_pmsleep(uint64_t time_in_us)
 
 void IRAM_ATTR esp32_pm_lockacquire(void)
 {
-  irqstate_t flags;
-
-  flags = enter_critical_section();
   ++pm_wakelock;
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1157,11 +1154,7 @@ void IRAM_ATTR esp32_pm_lockacquire(void)
 
 void IRAM_ATTR esp32_pm_lockrelease(void)
 {
-  irqstate_t flags;
-
-  flags = enter_critical_section();
   --pm_wakelock;
-  leave_critical_section(flags);
 }
 
 /****************************************************************************

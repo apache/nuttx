@@ -972,17 +972,17 @@ config ESP32_WIFI_STA_DISCONNECT_PM
 		Chip will do modem-sleep when RF module is not in use anymore.
 
 config EXAMPLE_WIFI_LISTEN_INTERVAL
-	int "WiFi listen interval"
-    default 3
-	help
+	int "Wi-Fi listen interval"
+	default 3
+	---help---
 		Interval for station to listen to beacon from AP. The unit of listen interval is one beacon interval.
 		For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
 		to beacon is 300 ms.
 
 choice EXAMPLE_POWER_SAVE_MODE
-	prompt "power save mode"
+	prompt "Power save mode"
 	default EXAMPLE_POWER_SAVE_NONE
-	help
+	---help---
 		Power save mode for the esp32 to use. Modem sleep mode includes minimum and maximum power save modes.
 		In minimum power save mode, station wakes up every DTIM to receive beacon. Broadcast data will not be
 		lost because it is transmitted after DTIM. However, it can not save much more power if DTIM is short
@@ -1074,7 +1074,7 @@ config ESP32_AUTO_SLEEP
 		Enable ESP32 Auto-sleep
 
 config ESP32_TICKLESS
-    bool "Enable ESP32 tick-less OS"
+	bool "Enable ESP32 tickless OS"
 	default n
 	select ARCH_HAVE_TICKLESS
 	select SCHED_TICKLESS
