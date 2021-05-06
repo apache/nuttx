@@ -336,7 +336,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
  *   abstime - the absolute time to wait until a timeout is declared.
  *
  * Returned Value:
- *   One success, the length of the selected message in bytes is returned.
+ *   On success, the length of the selected message in bytes is returned.
  *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
  *
  *   EAGAIN    The queue was empty, and the O_NONBLOCK flag was set

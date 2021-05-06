@@ -62,7 +62,7 @@
  *   prio   - The priority of the message
  *
  * Returned Value:
- *   One success, 0 (OK) is returned. On failure, a negated errno value is
+ *   On success, 0 (OK) is returned. On failure, a negated errno value is
  *   returned.
  *
  *     EINVAL   Either msg or msgq is NULL or the value of prio is invalid.

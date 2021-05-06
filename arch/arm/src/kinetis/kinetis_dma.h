@@ -150,9 +150,9 @@ void kinetis_dmainitialize(void);
  *   dir         - transfer direction
  *
  * Returned Value:
- *   One success, this function returns a non-NULL, void * DMA channel
- *   handle.  NULL is returned on any failure.  This function can fail only
- *   if no DMA channel is available.
+ *   On success, this function returns a non-NULL, void* DMA channel handle.
+ *   NULL is returned on any failure.  This function can fail only if no DMA
+ *   channel is available.
  *
  ****************************************************************************/
 

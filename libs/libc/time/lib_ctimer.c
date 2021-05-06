@@ -47,7 +47,7 @@
  *   buf   - A user provided buffer to receive the 26 character time string.
  *
  * Returned Value:
- *   One success, the pointer to the 'buf' is returned; on failure, NULL is
+ *   On success, the pointer to the 'buf' is returned; on failure, NULL is
  *   returned.
  *
  ****************************************************************************/
