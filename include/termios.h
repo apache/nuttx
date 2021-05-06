@@ -85,19 +85,19 @@
 
 /* Control Modes (c_cflag in the termios structure) */
 
-#define CSIZE     (3 << 4)  /* Bits 4-5: Character size: */
-#  define CS5     (0 << 4)  /*   5 bits */
-#  define CS6     (1 << 4)  /*   6 bits */
-#  define CS7     (2 << 4)  /*   7 bits */
-#  define CS8     (3 << 4)  /*   8 bits */
-#define CSTOPB    (1 << 6)  /* Bit 6:  Send two stop bits, else one */
-#define CREAD     (1 << 7)  /* Bit 7:  Enable receiver */
-#define PARENB    (1 << 8)  /* Bit 8: Parity enable */
-#define PARODD    (1 << 9)  /* Bit 9: Odd parity, else even */
-#define HUPCL     (1 << 10) /* Bit 10: Hang up on last close */
-#define CLOCAL    (1 << 11) /* Bit 11: Ignore modem status lines */
-#define CCTS_OFLOW (1 << 29)/* Bit 29: CTS flow control of output */
-#define CRTS_IFLOW (1 << 31)/* Bit 31: RTS flow control of input */
+#define CSIZE     (3 << 4)    /* Bits 4-5: Character size: */
+#  define CS5     (0 << 4)    /*   5 bits */
+#  define CS6     (1 << 4)    /*   6 bits */
+#  define CS7     (2 << 4)    /*   7 bits */
+#  define CS8     (3 << 4)    /*   8 bits */
+#define CSTOPB    (1 << 6)    /* Bit 6:  Send two stop bits, else one */
+#define CREAD     (1 << 7)    /* Bit 7:  Enable receiver */
+#define PARENB    (1 << 8)    /* Bit 8: Parity enable */
+#define PARODD    (1 << 9)    /* Bit 9: Odd parity, else even */
+#define HUPCL     (1 << 10)   /* Bit 10: Hang up on last close */
+#define CLOCAL    (1 << 11)   /* Bit 11: Ignore modem status lines */
+#define CCTS_OFLOW (1 << 29)  /* Bit 29: CTS flow control of output */
+#define CRTS_IFLOW (1u << 31) /* Bit 31: RTS flow control of input */
 #define CRTSCTS   (CCTS_OFLOW | CRTS_IFLOW)
 
 /* Local Modes (c_lflag in the termios structure) */
