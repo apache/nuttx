@@ -211,12 +211,9 @@ int       posix_memalign(FAR void **, size_t, size_t);
 
 /* Pseudo-Terminals */
 
-#ifdef CONFIG_PSEUDOTERM_SUSV1
+#ifdef CONFIG_PSEUDOTERM
 FAR char *ptsname(int fd);
 int       ptsname_r(int fd, FAR char *buf, size_t buflen);
-#endif
-
-#ifdef CONFIG_PSEUDOTERM
 int       unlockpt(int fd);
 
 /* int grantpt(int fd); Not implemented */
