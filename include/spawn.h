@@ -53,6 +53,7 @@
 #define POSIX_SPAWN_SETSCHEDULER  (1 << 3)  /* 1: Set task's scheduler policy */
 #define POSIX_SPAWN_SETSIGDEF     (1 << 4)  /* 1: Set default signal actions */
 #define POSIX_SPAWN_SETSIGMASK    (1 << 5)  /* 1: Set sigmask */
+#define POSIX_SPAWN_SETSID        (1 << 7)  /* 1: Create the new session(glibc specific) */
 
 /****************************************************************************
  * Type Definitions
