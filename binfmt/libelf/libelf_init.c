@@ -161,7 +161,6 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   if (ret < 0)
     {
       berr("Failed to read ELF header: %d\n", ret);
-      nx_close(loadinfo->filfd);
       return ret;
     }
 
@@ -181,7 +180,6 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
        */
 
       berr("Bad ELF header: %d\n", ret);
-      nx_close(loadinfo->filfd);
       return ret;
     }
 
