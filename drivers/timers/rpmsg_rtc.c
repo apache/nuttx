@@ -84,6 +84,7 @@ begin_packed_struct struct rpmsg_rtc_alarm_cancel_s
 
 #define rpmsg_rtc_alarm_fire_s rpmsg_rtc_alarm_cancel_s
 
+#ifndef CONFIG_RTC_RPMSG_SERVER
 struct rpmsg_rtc_cookie_s
 {
   FAR struct rpmsg_rtc_header_s *msg;
@@ -113,7 +114,7 @@ struct rpmsg_rtc_lowerhalf_s
   struct lower_setalarm_s    alarminfo[CONFIG_RTC_NALARMS];
 #endif
 };
-
+#else
 struct rpmsg_rtc_server_s
 {
   FAR struct rtc_ops_s *ops;
@@ -127,11 +128,13 @@ struct rpmsg_rtc_session_s
   struct list_node node;
   struct rpmsg_endpoint ept;
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifndef CONFIG_RTC_RPMSG_SERVER
 static void rpmsg_rtc_device_created(FAR struct rpmsg_device *rdev,
               FAR void *priv);
 static void rpmsg_rtc_device_destroy(FAR struct rpmsg_device *rdev,
@@ -159,7 +162,7 @@ static int rpmsg_rtc_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_rdalarm(FAR struct rtc_lowerhalf_s *lower_,
               FAR struct lower_rdalarm_s *alarminfo);
 #endif
-
+#else
 static int rpmsg_rtc_server_rdtime(FAR struct rtc_lowerhalf_s *lower,
                                    FAR struct rtc_time *rtctime);
 static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
@@ -184,11 +187,13 @@ static int rpmsg_rtc_server_setperiodic(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_server_cancelperiodic
               (FAR struct rtc_lowerhalf_s *lower, int alarmid);
 #endif
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_RTC_RPMSG_SERVER
 static const struct rtc_ops_s g_rpmsg_rtc_ops =
 {
   .rdtime      = rpmsg_rtc_rdtime,
@@ -201,7 +206,7 @@ static const struct rtc_ops_s g_rpmsg_rtc_ops =
   .rdalarm     = rpmsg_rtc_rdalarm,
 #endif
 };
-
+#else
 static struct rtc_ops_s g_rpmsg_rtc_server_ops =
 {
   .rdtime      = rpmsg_rtc_server_rdtime,
@@ -218,11 +223,13 @@ static struct rtc_ops_s g_rpmsg_rtc_server_ops =
   .cancelperiodic = rpmsg_rtc_server_cancelperiodic,
 #endif
 };
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+#ifndef CONFIG_RTC_RPMSG_SERVER
 static void rpmsg_rtc_device_created(FAR struct rpmsg_device *rdev,
                                      FAR void *priv)
 {
@@ -442,7 +449,7 @@ static int rpmsg_rtc_rdalarm(FAR struct rtc_lowerhalf_s *lower_,
   return 0;
 }
 #endif
-
+#else
 static int rpmsg_rtc_server_rdtime(FAR struct rtc_lowerhalf_s *lower,
                                    FAR struct rtc_time *rtctime)
 {
@@ -673,6 +680,7 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
   list_add_tail(&server->list, &session->node);
   nxsem_post(&server->exclsem);
 }
+#endif
 
 /****************************************************************************
  * Name: rpmsg_rtc_initialize
@@ -690,6 +698,7 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_RTC_RPMSG_SERVER
 FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(int minor)
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower;
@@ -710,6 +719,7 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(int minor)
   return (FAR struct rtc_lowerhalf_s *)lower;
 }
 
+#else
 /****************************************************************************
  * Name: rpmsg_rtc_server_initialize
  *
@@ -746,3 +756,4 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
 
   return (FAR struct rtc_lowerhalf_s *)server;
 }
+#endif
