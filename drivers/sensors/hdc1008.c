@@ -299,6 +299,7 @@ static int hdc1008_set_operational_mode(struct hdc1008_dev_s *priv,
       case HDC1008_MEAS_T_AND_RH:
         {
           reg |= HDC1008_CONFIGURATION_MODE;
+          break;
         }
 
       default:
