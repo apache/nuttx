@@ -1862,10 +1862,9 @@ int main(int argc, char **argv, char **envp)
 
               else if (line[n + 1] == '/')
                 {
-                  /* Check for "http://" or "https://" */
+                  /* Check for URI schemes, e.g. "http://" or "https://" */
 
-                  if ((n < 5 || strncmp(&line[n - 5], "http://", 7) != 0) &&
-                      (n < 6 || strncmp(&line[n - 6], "https://", 8) != 0))
+                  if (n == 0 || strncmp(&line[n - 1], "://", 3) != 0)
                     {
                       ERROR("C++ style comment", lineno, n);
                       n++;
