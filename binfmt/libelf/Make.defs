@@ -37,16 +37,16 @@ ifeq ($(CONFIG_ELF),y)
 
 # ELF application interfaces
 
-CSRCS += elf.c
+BINFMT_CSRCS += elf.c
 
 # ELF library
 
-CSRCS += libelf_bind.c libelf_init.c libelf_addrenv.c libelf_iobuffer.c
-CSRCS += libelf_load.c libelf_read.c libelf_sections.c libelf_symbols.c
-CSRCS += libelf_uninit.c libelf_unload.c libelf_verify.c
+BINFMT_CSRCS += libelf_bind.c libelf_init.c libelf_addrenv.c libelf_iobuffer.c
+BINFMT_CSRCS += libelf_load.c libelf_read.c libelf_sections.c libelf_symbols.c
+BINFMT_CSRCS += libelf_uninit.c libelf_unload.c libelf_verify.c
 
 ifeq ($(CONFIG_BINFMT_CONSTRUCTORS),y)
-CSRCS += libelf_ctors.c libelf_dtors.c
+BINFMT_CSRCS += libelf_ctors.c libelf_dtors.c
 endif
 
 # Hook the libelf subdirectory into the build

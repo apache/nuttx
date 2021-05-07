@@ -38,22 +38,22 @@ include $(TOPDIR)/Make.defs
 
 # Basic BINFMT source files
 
-CSRCS  = binfmt_globals.c binfmt_initialize.c binfmt_register.c binfmt_unregister.c
-CSRCS += binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
-CSRCS += binfmt_exec.c binfmt_copyargv.c binfmt_dumpmodule.c
+BINFMT_CSRCS  = binfmt_globals.c binfmt_initialize.c binfmt_register.c binfmt_unregister.c
+BINFMT_CSRCS += binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
+BINFMT_CSRCS += binfmt_exec.c binfmt_copyargv.c binfmt_dumpmodule.c
 
 ifeq ($(CONFIG_BINFMT_LOADABLE),y)
-CSRCS += binfmt_exit.c
+BINFMT_CSRCS += binfmt_exit.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-CSRCS += binfmt_execsymtab.c
+BINFMT_CSRCS += binfmt_execsymtab.c
 endif
 
 # Builtin application interfaces
 
 ifeq ($(CONFIG_BUILTIN),y)
-CSRCS += builtin.c
+BINFMT_CSRCS += builtin.c
 endif
 
 # Add configured binary modules
@@ -61,31 +61,31 @@ endif
 include libnxflat/Make.defs
 include libelf/Make.defs
 
-AOBJS = $(BINFMT_ASRCS:.S=$(OBJEXT))
-COBJS = $(CSRCS:.c=$(OBJEXT))
+BINFMT_AOBJS = $(BINFMT_ASRCS:.S=$(OBJEXT))
+BINFMT_COBJS = $(BINFMT_CSRCS:.c=$(OBJEXT))
 
-SRCS = $(BINFMT_ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
+BINFMT_SRCS = $(BINFMT_ASRCS) $(BINFMT_CSRCS)
+BINFMT_OBJS = $(BINFMT_AOBJS) $(BINFMT_COBJS)
 
 BIN = libbinfmt$(LIBEXT)
 
 all: $(BIN)
 .PHONY: depend clean distclean
 
-$(AOBJS): %$(OBJEXT): %.S
+$(BINFMT_AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): %$(OBJEXT): %.c
+$(BINFMT_COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN): $(OBJS)
+$(BIN): $(BINFMT_OBJS)
 	$(call ARCHIVE, $@, $^)
 
-makedepfile: $(CSRCS:.c=.ddc) $(BINFMT_ASRCS:.S=.dds)
+makedepfile: $(BINFMT_CSRCS:.c=.ddc) $(BINFMT_ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
 
-.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+.depend: Makefile $(BINFMT_SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) $(MAKE) makedepfile
 	$(Q) touch $@
 
