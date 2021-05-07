@@ -76,7 +76,7 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
   FAR struct lib_rawsistream_s *mthis = (FAR struct lib_rawsistream_s *)this;
 
   DEBUGASSERT(this);
-  return lseek(mthis->fd, offset, whence);
+  return _NX_SEEK(mthis->fd, offset, whence);
 }
 
 /****************************************************************************

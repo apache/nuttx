@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/drivers/1wire.h>
+#include <nuttx/1wire/1wire.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,7 +61,7 @@ struct ds28e17_dev_s;
 struct i2c_master_s;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -81,7 +81,9 @@ struct i2c_master_s;
  ****************************************************************************/
 
 int ds28e17_search(FAR struct ds28e17_dev_s *priv,
-                   CODE void (*cb_search)(int family, uint64_t romcode, FAR void *arg),
+                   CODE void (*cb_search)(int family,
+                                          uint64_t romcode,
+                                          FAR void *arg),
                    FAR void *arg);
 
 /****************************************************************************

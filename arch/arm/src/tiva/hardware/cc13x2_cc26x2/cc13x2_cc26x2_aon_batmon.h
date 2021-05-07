@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_aon_batmon.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_AON_BATMON_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_AON_BATMON_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* AON BATMON Register Offsets **************************************************************************************/
+/* AON BATMON Register Offsets **********************************************/
 
 #define TIVA_AON_BATMON_CTL_OFFSET                      0x0000
 #define TIVA_AON_BATMON_MEASCFG_OFFSET                  0x0004
@@ -74,7 +75,7 @@
 #define TIVA_AON_BATMON_TEMPUL_OFFSET                   0x0058  /* Temperature Upper Limit */
 #define TIVA_AON_BATMON_TEMPLL_OFFSET                   0x005c  /* Temperature Lower Limit */
 
-/* AON BATMON Register Addresses ************************************************************************************/
+/* AON BATMON Register Addresses ********************************************/
 
 #define TIVA_AON_BATMON_CTL                             (TIVA_AON_BATMON_BASE + TIVA_AON_BATMON_CTL_OFFSET)
 #define TIVA_AON_BATMON_MEASCFG                         (TIVA_AON_BATMON_BASE + TIVA_AON_BATMON_MEASCFG_OFFSET)
@@ -96,7 +97,7 @@
 #define TIVA_AON_BATMON_TEMPUL                          (TIVA_AON_BATMON_BASE + TIVA_AON_BATMON_TEMPUL_OFFSET)
 #define TIVA_AON_BATMON_TEMPLL                          (TIVA_AON_BATMON_BASE + TIVA_AON_BATMON_TEMPLL_OFFSET)
 
-/* AON BATMON Register Bitfield Definitions *************************************************************************/
+/* AON BATMON Register Bitfield Definitions *********************************/
 
 /* AON_BATMON_CTL */
 

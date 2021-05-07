@@ -1,0 +1,5 @@
+/arm/lpc17xx_40xx,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+-lpcxpresso-lpc1768:thttpd
+-olimex-lpc1766stk:slip-httpd
+-olimex-lpc1766stk:thttpd-nxflat
+-zkit-arm-1769:thttpd

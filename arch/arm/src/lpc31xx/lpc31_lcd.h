@@ -1,58 +1,43 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_lcd.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_LCD_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_LCD_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* LCD register base address offset into the APB2 domain ****************************************/
+/* LCD register base address offset into the APB2 domain ********************/
 
 #define LPC31_LCD_VBASE                (LPC31_APB2_VSECTION+LPC31_APB2_LCD_OFFSET)
 #define LPC31_LCD_PBASE                (LPC31_APB2_PSECTION+LPC31_APB2_LCD_OFFSET)
 
-/* LCD register offsets (with respect to the LCD base) ******************************************/
+/* LCD register offsets (with respect to the LCD base) **********************/
 
 #define LPC31_LCD_STATUS_OFFSET        0x000 /* Status register */
 #define LPC31_LCD_CONTROL_OFFSET       0x004 /* Control register */
@@ -65,7 +50,7 @@
 #define LPC31_LCD_INSTWORD_OFFSET      0x040 /* Instruction Word register */
 #define LPC31_LCD_DATAWORD_OFFSET      0x080 /* Data Word register */
 
-/* LCD register (virtual) addresses *************************************************************/
+/* LCD register (virtual) addresses *****************************************/
 
 #define LPC31_LCD_STATUS               (LPC31_LCD_VBASE+LPC31_LCD_STATUS_OFFSET)
 #define LPC31_LCD_CONTROL              (LPC31_LCD_VBASE+LPC31_LCD_CONTROL_OFFSET)
@@ -78,7 +63,8 @@
 #define LPC31_LCD_INSTWORD             (LPC31_LCD_VBASE+LPC31_LCD_INSTWORD_OFFSET)
 #define LPC31_LCD_DATAWORD             (LPC31_LCD_VBASE+LPC31_LCD_DATAWORD_OFFSET)
 
-/* LCD register bit definitions *****************************************************************/
+/* LCD register bit definitions *********************************************/
+
 /* LCD interface Status Register LCD_STATUS, address 0x15000400 */
 
 #define LCD_STATUS_COUNTER_SHIFT         (5)       /* Bits 5-9: Current value of the FIFO counter */
@@ -100,6 +86,7 @@
 #define LCD_CONTROL_BUSYRSVALUE          (1 << 14) /* Bit 14: Busy check on RS=1*/
 #define LCD_CONTROL_BUSYBITNR_SHIFT      (10)      /* Bits 10-13: Bit that represents busy flag*/
 #define LCD_CONTROL_BUSYBITNR_MASK       (15 << LCD_CONTROL_BUSYBITNR_SHIFT)
+
 #define LCD_CONTROL_BUSYVALUE            (1 << 9)  /* Bit 9:  LCD controller is busy if bit=1*/
 #define LCD_CONTROL_BUSYFLAGCHECK        (1 << 8)  /* Bit 8:  Enable the busy-flag-checking*/
 #define LCD_CONTROL_SERRDPOSS_SHIFT      (9)       /* Bits 6-7: 7:6 Serial sample mode*/
@@ -108,12 +95,14 @@
 #  define LCD_CONTROL_SERRDPOSS_FOURTH   (1 << LCD_CONTROL_SERRDPOSS_SHIFT) /* Sample at 0.25 * cycle*/
 #  define LCD_CONTROL_SERRDPOSS_HALF     (2 << LCD_CONTROL_SERRDPOSS_SHIFT) /* Sample at 0.5 * cycle*/
 #  define LCD_CONTROL_SERRDPOSS_3FOURTHS (3 << LCD_CONTROL_SERRDPOSS_SHIFT) /* Sample at 0.75 * cycle*/
+
 #define LCD_CONTROL_SERCLKSHIFT_SHIFT    (4)       /* Bits 4-5: Serial clock mode*/
 #define LCD_CONTROL_SERCLKSHIFT_MASK     (3 << LCD_CONTROL_SERCLKSHIFT_SHIFT)
 #  define LCD_CONTROL_SERCLKSHIFT_MODE0  (0 << LCD_CONTROL_SERCLKSHIFT_SHIFT) /* Clock mode 0*/
 #  define LCD_CONTROL_SERCLKSHIFT_MODE1  (1 << LCD_CONTROL_SERCLKSHIFT_SHIFT) /* Clock mode 1*/
 #  define LCD_CONTROL_SERCLKSHIFT_MODE2  (2 << LCD_CONTROL_SERCLKSHIFT_SHIFT) /* Clock mode 2*/
 #  define LCD_CONTROL_SERCLKSHIFT_MODE3  (3 << LCD_CONTROL_SERCLKSHIFT_SHIFT) /* Clock mode 3*/
+
 #define LCD_CONTROL_4BIT                 (1 << 3)  /* Bit 2:  LCD interface 4 bit mode (vs 8)*/
 #define LCD_CONTROL_MI                   (1 << 2)  /* Bit 2:  LCD interface 6800 mode (vs 8080 mode)*/
 #define LCD_CONTROL_PS                   (1 << 1)  /* Bit 1:  LCD interface serial mode (vs parallel)*/
@@ -146,16 +135,16 @@
 #define LCD_DATABYTE_BYTE_SHIFT          (0)       /* Bits 0-7: 8 bit mode = 7:0 Instruction */
 #define LCD_DATABYTE_BYTE_MASK           (0xff << LCD_IDATABYTE_BYTE_SHIFT)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_LCD_H */

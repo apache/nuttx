@@ -71,14 +71,10 @@
 #  define _NX_SEND(s,b,l,f)         nx_send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         nx_recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) nx_recvfrom(s,b,l,f,a,n)
-#  define _NX_GETERRNO(r)           (-(r))
-#  define _NX_GETERRVAL(r)          (r)
 #else
 #  define _NX_SEND(s,b,l,f)         send(s,b,l,f)
 #  define _NX_RECV(s,b,l,f)         recv(s,b,l,f)
 #  define _NX_RECVFROM(s,b,l,f,a,n) recvfrom(s,b,l,f,a,n)
-#  define _NX_GETERRNO(r)           errno
-#  define _NX_GETERRVAL(r)          (-errno)
 #endif
 
 /* Capabilities of a socket */
@@ -1007,8 +1003,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
- *   value is returned (see comments with recvfrom() for a list of
+ *   psock_recvfrom() will return 0.  Otherwise, on any failure, a negated
+ *   errno value is returned (see comments with recvfrom() for a list of
  *   appropriate errno values).
  *
  ****************************************************************************/
@@ -1045,7 +1041,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   nx_recvfrom() will return 0.  Otherwise, on any failure, a negated errno
  *   value is returned (see comments with recvfrom() for a list of
  *   appropriate errno values).
  *
@@ -1062,12 +1058,12 @@ ssize_t nx_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
  * Name: psock_getsockopt
  *
  * Description:
- *   getsockopt() retrieve thse value for the option specified by the
+ *   getsockopt() retrieve the value for the option specified by the
  *   'option' argument for the socket specified by the 'psock' argument. If
  *   the size of the option value is greater than 'value_len', the value
  *   stored in the object pointed to by the 'value' argument will be silently
  *   truncated. Otherwise, the length pointed to by the 'value_len' argument
- *   will be modified to indicate the actual length of the'value'.
+ *   will be modified to indicate the actual length of the 'value'.
  *
  *   The 'level' argument specifies the protocol level of the option. To
  *   retrieve options at the socket level, specify the level argument as
@@ -1145,8 +1141,6 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *  ENOBUFS
  *    Insufficient resources are available in the system to complete the
  *    call.
- *
- * Assumptions:
  *
  ****************************************************************************/
 
@@ -1240,9 +1234,9 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   Perform network device specific operations.
  *
  * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   cmd      The ioctl command
- *   ap      The argument of the ioctl cmd
+ *   psock    A pointer to a NuttX-specific, internal socket structure.
+ *   cmd      The ioctl command.
+ *   ap      The argument of the ioctl cmd.
  *
  * Returned Value:
  *   A non-negative value is returned on success; a negated errno value is
@@ -1278,10 +1272,10 @@ int psock_ioctl(FAR struct socket *psock, int cmd, ...);
  *   psock - An instance of the internal socket structure.
  *   fds   - The structure describing the events to be monitored, OR NULL if
  *           this is a request to stop monitoring events.
- *   setup - true: Setup up the poll; false: Teardown the poll
+ *   setup - true: Setup up the poll; false: Teardown the poll.
  *
  * Returned Value:
- *  0: Success; Negated errno on failure
+ *  0: Success; Negated errno on failure.
  *
  ****************************************************************************/
 
@@ -1293,7 +1287,7 @@ int psock_poll(FAR struct socket *psock, struct pollfd *fds, bool setup);
  * Name: psock_dup2
  *
  * Description:
- *   Clone a socket instance to an new instance.
+ *   Clone a socket instance to a new instance.
  *
  * Returned Value:
  *   On success, returns the number of new socket.  On any error,
@@ -1307,11 +1301,11 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2);
  * Name: psock_fstat
  *
  * Description:
- *   Performs fstat operations on socket
+ *   Performs fstat operations on socket.
  *
  * Input Parameters:
  *   psock  - An instance of the internal socket structure.
- *   buf    - Caller-provided location in which to return the fstat data
+ *   buf    - Caller-provided location in which to return the fstat data.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -1335,9 +1329,9 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
+ *   buf      Data to send.
+ *   len      Length of data to send.
+ *   flags    Send flags.
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -1395,12 +1389,12 @@ ssize_t psock_sendfile(FAR struct socket *psock, FAR struct file *infile,
  * Name: psock_vfcntl
  *
  * Description:
- *   Performs fcntl operations on socket
+ *   Performs fcntl operations on socket.
  *
  * Input Parameters:
  *   psock - An instance of the internal socket structure.
  *   cmd   - The fcntl command.
- *   ap    - Command-specific arguments
+ *   ap    - Command-specific arguments.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -1449,10 +1443,10 @@ int psock_fcntl(FAR struct socket *psock, int cmd, ...);
  *            ...
  *
  * Returned Value:
- *   0:Success; negated errno on failure
+ *   0:Success; negated errno on failure.
  *
  * Assumptions:
- *   Called during system initialization from normal user mode
+ *   Called during system initialization from normal user mode.
  *
  ****************************************************************************/
 
@@ -1466,14 +1460,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
  *   Unregister a network device driver.
  *
  * Input Parameters:
- *   dev - The device driver structure to un-register
+ *   dev - The device driver structure to un-register.
  *
  * Returned Value:
- *   0:Success; negated errno on failure
+ *   0:Success; negated errno on failure.
  *
  * Assumptions:
  *   Currently only called for USB networking devices when the device is
- *   physically removed from the slot
+ *   physically removed from the slot.
  *
  ****************************************************************************/
 

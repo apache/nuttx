@@ -381,7 +381,7 @@ int main(int argc, char **argv, char **envp)
           convpath = (char *)malloc(bufsize);
           if (convpath == NULL)
             {
-              fprintf(stderr, "ERROR:  Faile to allocate buffer.\n");
+              fprintf(stderr, "ERROR:  Failed to allocate buffer.\n");
               exit(EXIT_FAILURE);
             }
 

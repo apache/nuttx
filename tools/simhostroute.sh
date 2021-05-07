@@ -21,7 +21,7 @@
 #****************************************************************************
 
 # Helper script to set up host route to NuttX simulator
-# and set up IP Tables to allow it to access the 
+# and set up IP Tables to allow it to access the
 # internet.
 #
 # This script needs to be run as root.
@@ -51,7 +51,7 @@ if [ "$STATUS" == "on" ]; then
     ifconfig $IF_BRIDGE $IP_HOST
     ifconfig $IF_BRIDGE up
     ifconfig -a
-    ip addr add $IP_HOST dev $IF_BRIDGE 
+    ip addr add $IP_HOST dev $IF_BRIDGE
     ifconfig $IF_BRIDGE netmask $IP_NETMASK
     ip route delete $IP_NET
     ip route add $IP_NET dev $IF_BRIDGE src $IP_HOST

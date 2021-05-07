@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_vfork
+ * sched/task/task_vfork.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,190 +34,15 @@
 #include <debug.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
 #include "task/task.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /* vfork() requires architecture-specific support as well as waipid(). */
 
 #if defined(CONFIG_ARCH_HAVE_VFORK) && defined(CONFIG_SCHED_WAITPID)
-
-/* This is an artificial limit to detect error conditions where an argv[]
- * list is not properly terminated.
- */
-
-#define MAX_VFORK_ARGS 256
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxvfork_setup_name
- *
- * Description:
- *   Copy the task name.
- *
- * Input Parameters:
- *   tcb        - Address of the new task's TCB
- *   name       - Name of the new task
- *
- * Returned Value:
- *  None
- *
- ****************************************************************************/
-
-#if CONFIG_TASK_NAME_SIZE > 0
-static inline void nxvfork_setup_name(FAR struct tcb_s *parent,
-                                      FAR struct task_tcb_s *child)
-{
-  /* Copy the name from the parent into the child TCB */
-
-  strncpy(child->cmn.name, parent->name, CONFIG_TASK_NAME_SIZE);
-}
-#else
-#  define nxvfork_setup_name(p,c)
-#endif /* CONFIG_TASK_NAME_SIZE */
-
-/****************************************************************************
- * Name: nxvfork_setup_stackargs
- *
- * Description:
- *   Clone the task arguments in the same relative positions on the child's
- *   stack.
- *
- * Input Parameters:
- *   parent - Address of the parent task's TCB
- *   child  - Address of the child task's TCB
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure.
- *
- ****************************************************************************/
-
-static inline int nxvfork_setup_stackargs(FAR struct tcb_s *parent,
-                                          FAR struct task_tcb_s *child)
-{
-  /* Is the parent a task? or a pthread?  Only tasks (and kernel threads)
-   * have command line arguments.
-   */
-
-  child->argv = NULL;
-  if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
-    {
-      FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
-      uintptr_t offset;
-      int argc;
-
-      /* Get the address correction */
-
-      offset = (uintptr_t)child->cmn.adj_stack_ptr -
-               (uintptr_t)parent->adj_stack_ptr;
-
-      /* Change the child argv[] to point into its stack (instead of its
-       * parent's stack).
-       */
-
-      child->argv = (FAR char **)((uintptr_t)ptcb->argv + offset);
-
-      /* Copy the adjusted address for each argument */
-
-      argc = 0;
-      while (ptcb->argv[argc])
-        {
-          uintptr_t newaddr = (uintptr_t)ptcb->argv[argc] + offset;
-          child->argv[argc] = (FAR char *)newaddr;
-
-          /* Increment the number of args.  Here is a sanity check to
-           * prevent running away with an unterminated argv[] list.
-           * MAX_VFORK_ARGS should be sufficiently large that this never
-           * happens in normal usage.
-           */
-
-          if (++argc > MAX_VFORK_ARGS)
-            {
-              return -E2BIG;
-            }
-        }
-
-      /* Put a terminator entry at the end of the child argv[] array. */
-
-      child->argv[argc] = NULL;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: nxvfork_setup_arguments
- *
- * Description:
- *   Clone the argument list from the parent to the child.
- *
- * Input Parameters:
- *   parent - Address of the parent task's TCB
- *   child  - Address of the child task's TCB
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure.
- *
- ****************************************************************************/
-
-static inline int nxvfork_setup_arguments(FAR struct tcb_s *parent,
-                                          FAR struct task_tcb_s *child)
-{
-  /* Clone the task name */
-
-  nxvfork_setup_name(parent, child);
-
-  /* Adjust and copy the argv[] array. */
-
-  return nxvfork_setup_stackargs(parent, child);
-}
-
-/****************************************************************************
- * Name: nxvfork_sizeof_arguments
- *
- * Description:
- *   Get the parent's argument size.
- *
- * Input Parameters:
- *   parent - Address of the parent task's TCB
- *
- * Return Value:
- *   The parent's argument size.
- *
- ****************************************************************************/
-
-static inline size_t nxvfork_sizeof_arguments(FAR struct tcb_s *parent)
-{
-  if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
-    {
-      FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
-      size_t strtablen = 0;
-      int argc = 0;
-
-      while (ptcb->argv[argc])
-        {
-          /* Add the size of this argument (with NUL terminator) */
-
-          strtablen += strlen(ptcb->argv[argc++]) + 1;
-        }
-
-      /* Return the size to hold argv[] array and the strings. */
-
-      return (argc + 1) * sizeof(FAR char *) + strtablen;
-    }
-  else
-    {
-      return 0;
-    }
-}
 
 /****************************************************************************
  * Public Functions
@@ -246,10 +71,10 @@ static inline size_t nxvfork_sizeof_arguments(FAR struct tcb_s *parent)
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Setup the input parameters for the task.
- *      - Initialization of the TCB (including call to up_initial_state()
- *   4) up_vfork() provides any additional operating context. up_vfork must:
  *      - Allocate and initialize the stack
+ *      - Setup the input parameters for the task.
+ *      - Initialization of the TCB (including call to up_initial_state())
+ *   4) up_vfork() provides any additional operating context. up_vfork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
  *   5) up_vfork() then calls nxtask_start_vfork()
@@ -266,29 +91,48 @@ static inline size_t nxvfork_sizeof_arguments(FAR struct tcb_s *parent)
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize)
+FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 {
-  FAR struct tcb_s *parent = this_task();
+  FAR struct tcb_s *ptcb = this_task();
+  FAR struct task_tcb_s *parent;
   FAR struct task_tcb_s *child;
+  FAR struct task_info_s *info;
+  FAR const char *name = NULL;
+  size_t stack_size;
   uint8_t ttype;
   int priority;
   int ret;
 
-  DEBUGASSERT(retaddr != NULL && argsize != NULL);
+  DEBUGASSERT(retaddr != NULL);
 
   /* Get the type of the fork'ed task (kernel or user) */
 
-  if ((parent->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       /* Fork'ed from a kernel thread */
 
       ttype = TCB_FLAG_TTYPE_KERNEL;
+      parent = (FAR struct task_tcb_s *)ptcb;
     }
   else
     {
       /* Fork'ed from a user task or pthread */
 
       ttype = TCB_FLAG_TTYPE_TASK;
+      if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
+        {
+          parent = (FAR struct task_tcb_s *)ptcb;
+        }
+      else
+        {
+          parent = (FAR struct task_tcb_s *)
+              nxsched_get_tcb(ptcb->group->tg_pid);
+          if (parent == NULL)
+            {
+              ret = -ENOENT;
+              goto errout;
+            }
+        }
     }
 
   /* Allocate a TCB for the child task. */
@@ -297,13 +141,13 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize)
   if (!child)
     {
       serr("ERROR: Failed to allocate TCB\n");
-      set_errno(ENOMEM);
-      return NULL;
+      ret = -ENOMEM;
+      goto errout;
     }
 
   /* Allocate a new task group with the same privileges as the parent */
 
-  ret = group_allocate(child, parent->flags);
+  ret = group_allocate(child, ttype);
   if (ret < 0)
     {
       goto errout_with_tcb;
@@ -317,33 +161,71 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize)
       goto errout_with_tcb;
     }
 
-  /* Get the priority of the parent task */
+  /* Allocate the stack for the TCB */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  priority = parent->base_priority;   /* "Normal," unboosted priority */
-#else
-  priority = parent->sched_priority;  /* Current priority */
-#endif
+  stack_size = (uintptr_t)ptcb->stack_base_ptr -
+      (uintptr_t)ptcb->stack_alloc_ptr + ptcb->adj_stack_size;
 
-  /* Initialize the task control block.  This calls up_initial_state() */
-
-  sinfo("Child priority=%d start=%p\n", priority, retaddr);
-  ret = nxtask_setup_scheduler(child, priority, retaddr, parent->entry.main,
-                          ttype);
+  ret = up_create_stack(&child->cmn, stack_size, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
     }
 
-  /* Return the argument size */
+  /* Setup thread local storage */
 
-  *argsize = nxvfork_sizeof_arguments(parent);
+  info = up_stack_frame(&child->cmn, sizeof(struct task_info_s));
+  if (info == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout_with_tcb;
+    }
+
+  DEBUGASSERT(info == child->cmn.stack_alloc_ptr);
+  memcpy(info, parent->cmn.stack_alloc_ptr, sizeof(struct task_info_s));
+
+  /* Get the priority of the parent task */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  priority = ptcb->base_priority;   /* "Normal," unboosted priority */
+#else
+  priority = ptcb->sched_priority;  /* Current priority */
+#endif
+
+  /* Initialize the task control block.  This calls up_initial_state() */
+
+  sinfo("Child priority=%d start=%p\n", priority, retaddr);
+  ret = nxtask_setup_scheduler(child, priority, retaddr,
+                               ptcb->entry.main, ttype);
+  if (ret < OK)
+    {
+      goto errout_with_tcb;
+    }
+
+  /* Setup to pass parameters to the new task */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+  name = parent->cmn.name;
+#endif
+
+  nxtask_setup_arguments(child, name, parent->argv);
+
+  /* Now we have enough in place that we can join the group */
+
+  ret = group_initialize(child);
+  if (ret < OK)
+    {
+      goto errout_with_list;
+    }
 
   sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
 
+errout_with_list:
+  dq_rem((FAR dq_entry_t *)child, (FAR dq_queue_t *)&g_inactivetasks);
 errout_with_tcb:
   nxsched_release_tcb((FAR struct tcb_s *)child, ttype);
+errout:
   set_errno(-ret);
   return NULL;
 }
@@ -371,10 +253,10 @@ errout_with_tcb:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Setup the input parameters for the task.
- *      - Initialization of the TCB (including call to up_initial_state()
- *   4) vfork() provides any additional operating context. vfork must:
  *      - Allocate and initialize the stack
+ *      - Setup the input parameters for the task.
+ *      - Initialization of the TCB (including call to up_initial_state())
+ *   4) vfork() provides any additional operating context. vfork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
  *   5) vfork() then calls nxtask_start_vfork()
@@ -394,31 +276,12 @@ errout_with_tcb:
 
 pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
 {
-  FAR struct tcb_s *parent = this_task();
   pid_t pid;
-  int rc;
+  int rc = 0;
   int ret;
 
-  sinfo("Starting Child TCB=%p, parent=%p\n", child, this_task());
+  sinfo("Starting Child TCB=%p\n", child);
   DEBUGASSERT(child);
-
-  /* Duplicate the original argument list in the forked child TCB */
-
-  ret = nxvfork_setup_arguments(parent, child);
-  if (ret < 0)
-    {
-      nxtask_abort_vfork(child, -ret);
-      return ERROR;
-    }
-
-  /* Now we have enough in place that we can join the group */
-
-  ret = group_initialize(child);
-  if (ret < 0)
-    {
-      nxtask_abort_vfork(child, -ret);
-      return ERROR;
-    }
 
   /* Get the assigned pid before we start the task */
 
@@ -453,17 +316,11 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
    * opportunity to run.
    */
 
-  rc = 0;
-
-#ifdef CONFIG_DEBUG_FEATURES
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {
-      serr("ERROR: waitpid failed: %d\n", errno);
+      serr("ERROR: waitpid failed: %d\n", get_errno());
     }
-#else
-  waitpid(pid, &rc, 0);
-#endif
 
   sched_unlock();
   return pid;
@@ -489,7 +346,7 @@ void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode)
   /* Release the TCB */
 
   nxsched_release_tcb((FAR struct tcb_s *)child,
-                   child->cmn.flags & TCB_FLAG_TTYPE_MASK);
+                      child->cmn.flags & TCB_FLAG_TTYPE_MASK);
   set_errno(errcode);
 }
 

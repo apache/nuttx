@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32g0_syscfg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_SYSCFG_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_SYSCFG_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SYSCFG_CFGR1_OFFSET      0x0000 /* SYSCFG configuration register 1 */
 #define STM32_SYSCFG_CFGR2_OFFSET      0x0018 /* SYSCFG configuration register 2 */
@@ -69,7 +69,7 @@
 #define STM32_SYSCFG_ITLINE30_OFFSET   0x00f8 /* SYSCFG interrupt line 30 status register */
 #define STM32_SYSCFG_ITLINE31_OFFSET   0x00fc /* SYSCFG interrupt line 31 status register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_SYSCFG_CFGR1             (STM32_SYSCFG_BASE + STM32_SYSCFG_CFGR1_OFFSET)
 
@@ -106,7 +106,7 @@
 #define STM32_SYSCFG_ITLINE30          (STM32_SYSCFG_BASE + STM32_SYSCFG_ITLINE30_OFFSET)
 #define STM32_SYSCFG_ITLINE31          (STM32_SYSCFG_BASE + STM32_SYSCFG_ITLINE31_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* SYSCFG memory remap register */
 

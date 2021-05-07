@@ -412,7 +412,7 @@ struct sim_clock_config_s
 struct peripheral_clock_config_s;      /* Forward reference */
 struct pcc_config_s
 {
-  unsigned int count;                  /* Number of peripherals to be configured */
+  unsigned int count;                            /* Number of peripherals to be configured */
   const struct peripheral_clock_config_s *pclks; /* The peripheral clock configuration array */
 };
 

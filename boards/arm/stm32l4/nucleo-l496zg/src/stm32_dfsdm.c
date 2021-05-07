@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32l4/nucleo-l496zg/src/stm32_dfsdm.c
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
@@ -66,6 +66,33 @@ int stm32_dfsdm_setup(void)
     {
       int ret;
       struct adc_dev_s *adc;
+#ifdef CONFIG_STM32L4_DFSDM1_FLT0
+      const uint8_t chanlist0[1] =
+      {
+        0
+      };
+#endif
+
+#ifdef CONFIG_STM32L4_DFSDM1_FLT1
+      const uint8_t chanlist1[2] =
+      {
+        0, 1
+      };
+#endif
+
+#ifdef CONFIG_STM32L4_DFSDM1_FLT2
+      const uint8_t chanlist2[8] =
+      {
+        0, 1, 2, 3, 4, 5, 6, 7
+      };
+#endif
+
+#ifdef CONFIG_STM32L4_DFSDM1_FLT3
+      const uint8_t chanlist3[4] =
+      {
+        6, 5, 4, 3
+      };
+#endif
 
       ainfo("Initializing DFSDM\n");
 
@@ -75,7 +102,7 @@ int stm32_dfsdm_setup(void)
        */
 
 #ifdef CONFIG_STM32L4_DFSDM1_FLT0
-      adc = stm32l4_dfsdm_initialize(0, (const uint8_t[1]){0}, 1);
+      adc = stm32l4_dfsdm_initialize(0, chanlist0, 1);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT0 interface\n");
@@ -89,8 +116,9 @@ int stm32_dfsdm_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DFSDM1_FLT1
-      adc = stm32l4_dfsdm_initialize(1, (const uint8_t[2]){0,1}, 2);
+      adc = stm32l4_dfsdm_initialize(1, chanlist1, 2);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT1 interface\n");
@@ -104,8 +132,9 @@ int stm32_dfsdm_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DFSDM1_FLT2
-      adc = stm32l4_dfsdm_initialize(2, (const uint8_t[8]){0,1,2,3,4,5,6,7}, 8);
+      adc = stm32l4_dfsdm_initialize(2, chanlist2, 8);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT2 interface\n");
@@ -119,8 +148,9 @@ int stm32_dfsdm_setup(void)
           return ret;
         }
 #endif
+
 #ifdef CONFIG_STM32L4_DFSDM1_FLT3
-      adc = stm32l4_dfsdm_initialize(3, (const uint8_t[4]){6,5,4,3}, 4);
+      adc = stm32l4_dfsdm_initialize(3, chanlist3, 4);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT3 interface\n");

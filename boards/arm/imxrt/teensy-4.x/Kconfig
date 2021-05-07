@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_TEENSY_4X
+choice
+	prompt "Boot Flash"
+	default TEENSY4_QSPI_FLASH
+
+config TEENSY4_QSPI_FLASH
+	bool "QSPI Flash"
+
+endchoice # Boot Flash
+
+choice
+	prompt "Board configuration"
+
+config TEENSY_40
+	bool "Teensy 4.0"
+
+config TEENSY_41
+	bool "Teensy 4.1"
+
+endchoice # Board configuration
+
+endif

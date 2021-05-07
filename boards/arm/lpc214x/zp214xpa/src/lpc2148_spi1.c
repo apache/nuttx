@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/lpc214x/zp214xpa/src/lpc2148_spi1.c
  *
- *   Copyright (C) 2008-2010, 2012, 2016-2017 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -65,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -236,16 +221,20 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
       /* Enable slave select (low enables) */
 
       putreg32(bit, CS_CLR_REGISTER);
-      spiinfo("CS asserted: %08x->%08x\n",
+#ifdef CONFIG_DEBUG_SPI_INFO
+      spiinfo("CS asserted: %08" PRIx32 "->%08" PRIx32 "\n",
               regval, getreg32(CS_PIN_REGISTER));
+#endif
     }
   else
     {
       /* Disable slave select (low enables) */
 
       putreg32(bit, CS_SET_REGISTER);
-      spiinfo("CS de-asserted: %08x->%08x\n", regval,
+#ifdef CONFIG_DEBUG_SPI_INFO
+      spiinfo("CS de-asserted: %08" PRIx32 "->%08" PRIx32 "\n", regval,
                getreg32(CS_PIN_REGISTER));
+#endif
 
       /* Wait for the TX FIFO not full indication */
 
@@ -302,7 +291,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   divisor = (divisor + 1) & ~1;
   putreg8(divisor, LPC214X_SPI1_CPSR);
 
-  spiinfo("Frequency %d->%d\n", frequency, LPC214X_PCLKFREQ / divisor);
+  spiinfo("Frequency %" PRId32 "->%" PRId32 "\n",
+          frequency, (uint32_t)(LPC214X_PCLKFREQ / divisor));
   return LPC214X_PCLKFREQ / divisor;
 }
 
@@ -380,14 +370,20 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
       /* L: the inputs at D0 to D7 are transferred to the command registers */
 
       putreg32(bit, CS_CLR_REGISTER);
-      spiinfo("Command: %08x->%08x\n", regval, getreg32(CS_PIN_REGISTER));
+#ifdef CONFIG_DEBUG_SPI_INFO
+      spiinfo("Command: %08" PRIx32 "->%08" PRIx32 "\n",
+              regval, getreg32(CS_PIN_REGISTER));
+#endif
     }
   else
     {
       /* H: the inputs at D0 to D7 are treated as display data. */
 
       putreg32(bit, CS_SET_REGISTER);
-      spiinfo("Data: %08x->%08x\n", regval, getreg32(CS_PIN_REGISTER));
+#ifdef CONFIG_DEBUG_SPI_INFO
+      spiinfo("Data: %08" PRIx32 "->%08" PRIx32 "\n",
+              regval, getreg32(CS_PIN_REGISTER));
+#endif
     }
 
   return OK;
@@ -429,7 +425,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
   /* Get the value from the RX FIFO and return it */
 
   regval = getreg16(LPC214X_SPI1_DR);
-  spiinfo("%04x->%04x\n", wd, regval);
+  spiinfo("%04" PRIx32 "->%04x\n", wd, regval);
   return regval;
 }
 
@@ -545,7 +541,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
        * and (3) there are more bytes to be sent.
        */
 
-      spiinfo("TX: rxpending: %d nwords: %d\n", rxpending, nwords);
+      spiinfo("TX: rxpending: %" PRId32 " nwords: %d\n", rxpending, nwords);
       while ((getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_TNF) &&
              (rxpending < LPC214X_SPI1_FIFOSZ) && nwords)
         {
@@ -556,7 +552,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
 
       /* Now, read RX data from RX FIFO while RX FIFO is not empty */
 
-      spiinfo("RX: rxpending: %d\n", rxpending);
+      spiinfo("RX: rxpending: %" PRId32 "\n", rxpending);
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)
         {
           *ptr++ = (uint8_t)getreg16(LPC214X_SPI1_DR);
@@ -636,7 +632,8 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
   regval32 |= getreg32(CS_DIR_REGISTER);
   putreg32(regval32, CS_DIR_REGISTER);
 
-  spiinfo("CS Pin Config: PINSEL1: %08x PIN: %08x DIR: %08x\n",
+  spiinfo("CS Pin Config: PINSEL1: %08" PRIx32
+          " PIN: %08" PRIx32 " DIR: %08" PRIx32 "\n",
           getreg32(LPC214X_PINSEL1), getreg32(CS_PIN_REGISTER),
           getreg32(CS_DIR_REGISTER));
 

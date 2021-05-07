@@ -170,10 +170,10 @@ static inline void usbhost_requestsensecbw(FAR struct usbmsc_cbw_s *cbw);
 static inline void usbhost_testunitreadycbw(FAR struct usbmsc_cbw_s *cbw);
 static inline void usbhost_readcapacitycbw(FAR struct usbmsc_cbw_s *cbw);
 static inline void usbhost_inquirycbw (FAR struct usbmsc_cbw_s *cbw);
-static inline void usbhost_readcbw (size_t startsector, uint16_t blocksize,
+static inline void usbhost_readcbw (blkcnt_t startsector, uint16_t blocksize,
                                     unsigned int nsectors,
                                     FAR struct usbmsc_cbw_s *cbw);
-static inline void usbhost_writecbw(size_t startsector, uint16_t blocksize,
+static inline void usbhost_writecbw(blkcnt_t startsector, uint16_t blocksize,
                                     unsigned int nsectors,
                                     FAR struct usbmsc_cbw_s *cbw);
 
@@ -231,11 +231,11 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 static int usbhost_open(FAR struct inode *inode);
 static int usbhost_close(FAR struct inode *inode);
 static ssize_t usbhost_read(FAR struct inode *inode,
-                            FAR unsigned char *buffer, size_t startsector,
+                            FAR unsigned char *buffer, blkcnt_t startsector,
                             unsigned int nsectors);
 static ssize_t usbhost_write(FAR struct inode *inode,
                              FAR const unsigned char *buffer,
-                             size_t startsector, unsigned int nsectors);
+                             blkcnt_t startsector, unsigned int nsectors);
 static int usbhost_geometry(FAR struct inode *inode,
                             FAR struct geometry *geometry);
 static int usbhost_ioctl(FAR struct inode *inode, int cmd,
@@ -629,7 +629,7 @@ static inline void usbhost_inquirycbw (FAR struct usbmsc_cbw_s *cbw)
 }
 
 static inline void
-usbhost_readcbw (size_t startsector, uint16_t blocksize,
+usbhost_readcbw (blkcnt_t startsector, uint16_t blocksize,
                  unsigned int nsectors, FAR struct usbmsc_cbw_s *cbw)
 {
   FAR struct scsicmd_read10_s *rd10;
@@ -651,7 +651,7 @@ usbhost_readcbw (size_t startsector, uint16_t blocksize,
 }
 
 static inline void
-usbhost_writecbw(size_t startsector, uint16_t blocksize,
+usbhost_writecbw(blkcnt_t startsector, uint16_t blocksize,
                  unsigned int nsectors, FAR struct usbmsc_cbw_s *cbw)
 {
   FAR struct scsicmd_write10_s *wr10;
@@ -2024,7 +2024,7 @@ static int usbhost_close(FAR struct inode *inode)
  ****************************************************************************/
 
 static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
-                            size_t startsector, unsigned int nsectors)
+                            blkcnt_t startsector, unsigned int nsectors)
 {
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
@@ -2037,7 +2037,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(priv->usbclass.hport);
   hport = priv->usbclass.hport;
 
-  uinfo("startsector: %d nsectors: %d sectorsize: %d\n",
+  uinfo("startsector: %" PRIu32 " nsectors: %u sectorsize: %" PRIu16 "\n",
         startsector, nsectors, priv->blocksize);
 
   /* Check if the mass storage device is still connected */
@@ -2137,14 +2137,14 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
 
 static ssize_t usbhost_write(FAR struct inode *inode,
                              FAR const unsigned char *buffer,
-                             size_t startsector, unsigned int nsectors)
+                             blkcnt_t startsector, unsigned int nsectors)
 {
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
   ssize_t nbytes;
   int ret;
 
-  uinfo("sector: %zu nsectors: %u\n", startsector, nsectors);
+  uinfo("sector: %" PRIu32 " nsectors: %u\n", startsector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
@@ -2271,7 +2271,7 @@ static int usbhost_geometry(FAR struct inode *inode,
           geometry->geo_sectorsize    = priv->blocksize;
           usbhost_givesem(&priv->exclsem);
 
-          uinfo("nsectors: %ld sectorsize: %d\n",
+          uinfo("nsectors: %ld sectorsize: %" PRIi16 "n",
                  (long)geometry->geo_nsectors, geometry->geo_sectorsize);
         }
     }

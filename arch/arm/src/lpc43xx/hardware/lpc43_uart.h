@@ -1,52 +1,38 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_uart.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_UART_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_UART_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
+
 /* Common Register Offsets */
 
 #define LPC43_UART_RBR_OFFSET        0x0000 /* (DLAB =0) Receiver Buffer Register */
@@ -81,7 +67,7 @@
 #define LPC43_USART_SYNCCTRL_OFFSET  0x0058 /* Synchronous mode control register */
 #define LPC43_USART_TER_OFFSET       0x005c /* Transmit Enable Register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC43_USART0_RBR             (LPC43_USART0_BASE+LPC43_UART_RBR_OFFSET)
 #define LPC43_USART0_THR             (LPC43_USART0_BASE+LPC43_UART_THR_OFFSET)
@@ -190,7 +176,7 @@
 #define LPC43_USART3_SYNCCTRL        (LPC43_USART3_BASE+LPC43_USART_SYNCCTRL_OFFSET)
 #define LPC43_USART3_TER             (LPC43_USART3_BASE+LPC43_USART_TER_OFFSET)
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* RBR (DLAB =0) Receiver Buffer Register */
 
@@ -236,12 +222,14 @@
 #  define UART_IIR_INTID_RDA         (2 << UART_IIR_INTID_SHIFT) /* 2a - Receive Data Available (RDA) */
 #  define UART_IIR_INTID_RLS         (3 << UART_IIR_INTID_SHIFT) /* 1 - Receive Line Status (RLS) */
 #  define UART_IIR_INTID_CTI         (6 << UART_IIR_INTID_SHIFT) /* 2b - Character Time-out Indicator (CTI) */
+
                                                /* Bits 4-5: Reserved */
 #define UART_IIR_FIFOEN_SHIFT        (6)       /* Bits 6-7: Copies of FCR[0] */
 #define UART_IIR_FIFOEN_MASK         (3 << UART_IIR_FIFOEN_SHIFT)
 #define UART_IIR_ABEOINT             (1 << 8)  /* Bit 8:  End of auto-baud interrupt */
 #define UART_IIR_ABTOINT             (1 << 9)  /* Bit 9:  Auto-baud time-out interrupt */
                                                /* Bits 10-31: Reserved */
+
 /* FCR FIFO Control Register */
 
 #define UART_FCR_FIFOEN              (1 << 0)  /* Bit 0:  Enable FIFOs */
@@ -255,7 +243,9 @@
 #  define UART_FCR_RXTRIGGER_4       (1 << UART_FCR_RXTRIGGER_SHIFT) /* Trigger level 1 (4 chars) */
 #  define UART_FCR_RXTRIGGER_8       (2 << UART_FCR_RXTRIGGER_SHIFT) /* Trigger level 2 (8 chars) */
 #  define UART_FCR_RXTRIGGER_14      (3 << UART_FCR_RXTRIGGER_SHIFT) /* Trigger level 3 (14 chars) */
+
                                                /* Bits 8-31: Reserved */
+
 /* LCR Line Control Register */
 
 #define UART_LCR_WLS_SHIFT           (0)       /* Bit 0-1: Word Length Select */
@@ -272,9 +262,11 @@
 #  define UART_LCR_PS_EVEN           (1 << UART_LCR_PS_SHIFT) /* Even Parity */
 #  define UART_LCR_PS_STICKY1        (2 << UART_LCR_PS_SHIFT) /* Forced "1" stick parity */
 #  define UART_LCR_PS_STICKY0        (3 << UART_LCR_PS_SHIFT) /* Forced "0" stick parity */
+
 #define UART_LCR_BRK                 (1 << 6)  /* Bit 6: Break Control */
 #define UART_LCR_DLAB                (1 << 7)  /* Bit 7: Divisor Latch Access Bit (DLAB) */
                                                /* Bits 8-31: Reserved */
+
 /* MCR Modem Control Register (UART only) */
 
 #define UART_MCR_DTR                 (1 << 0)  /* Bit 0:  DTR Control Source for DTR output */
@@ -285,6 +277,7 @@
 #define UART_MCR_RTSEN               (1 << 6)  /* Bit 6:  Enable auto-RTS flow control */
 #define UART_MCR_CTSEN               (1 << 7)  /* Bit 7:  Enable auto-CTS flow control */
                                                /* Bits 8-31: Reserved */
+
 /* LSR Line Status Register */
 
 #define UART_LSR_RDR                 (1 << 0)  /* Bit 0:  Receiver Data Ready */
@@ -297,6 +290,7 @@
 #define UART_LSR_RXFE                (1 << 7)  /* Bit 7:  Error in RX FIFO (RXFE) */
 #define USART_LSR_RXFE               (1 << 8)  /* Bit 8:  Error in transmitted char (USART onlY) */
                                                /* Bits 8-31: Reserved */
+
 /* MSR Modem Status Register (UART only) */
 
 #define UART_MSR_DCTS                (1 << 0)  /* Bit 0:  Delta CTS. CTS state change */
@@ -308,10 +302,12 @@
 #define UART_MSR_RI                  (1 << 6)  /* Bit 6:  Ring Indicator State */
 #define UART_MSR_DCD                 (1 << 7)  /* Bit 7:  Data Carrier Detect State */
                                                /* Bits 8-31: Reserved */
+
 /* SCR Scratch Pad Register */
 
 #define UART_SCR_MASK                (0xff)    /* Bits 0-7: SCR data */
                                                /* Bits 8-31: Reserved */
+
 /* ACR Auto-baud Control Register */
 
 #define UART_ACR_START               (1 << 0)  /* Bit 0:  Auto-baud start/running */
@@ -321,6 +317,7 @@
 #define UART_ACR_ABEOINTCLR          (1 << 8)  /* Bit 8:  End of auto-baud interrupt clear */
 #define UART_ACR_ABTOINTCLRT         (1 << 9)  /* Bit 9:  Auto-baud time-out interrupt clear */
                                                /* Bits 10-31: Reserved */
+
 /* ICA IrDA Control Register (USART0,2,3 only) */
 
 #define UART_ICR_IRDAEN              (1 << 0)  /* Bit 0:  Enable IrDA mode */
@@ -336,7 +333,9 @@
 #  define UART_ICR_PULSEDIV_64TPCLK  (5 << UART_ICR_PULSEDIV_SHIFT) /* 64 x TPCLK */
 #  define UART_ICR_PULSEDIV_128TPCLK (6 << UART_ICR_PULSEDIV_SHIFT) /* 128 x TPCLK */
 #  define UART_ICR_PULSEDIV_256TPCLK (7 << UART_ICR_PULSEDIV_SHIFT) /* 256 x TPCLK */
+
                                                /* Bits 6-31: Reserved */
+
 /* FDR Fractional Divider Register */
 
 #define UART_FDR_DIVADDVAL_SHIFT     (0)       /* Bits 0-3: Baud-rate generation pre-scaler divisor value */
@@ -344,7 +343,9 @@
 #define UART_FDR_MULVAL_SHIFT        (4)       /* Bits 4-7 Baud-rate pre-scaler multiplier value */
 #define UART_FDR_MULVAL_MASK         (15 << UART_FDR_MULVAL_SHIFT)
                                                /* Bits 8-31: Reserved */
+
 /* Oversampling Register (USART only) */
+
                                                /* Bit 0:  Reserved */
 #define USART_OSR_OSFRAC_SHIFT       (1)       /* Bits 1-3: Fractional part of the oversampling ratio */
 #define USART_OSR_OSFRAC_MASK        (7 << USART_OSR_OSFRAC_SHIFT)
@@ -353,14 +354,18 @@
 #define USART_OSR_FDINT_SHIFT        (8)       /* Bits 8-14: Extension for Smart Card mode */
 #define USART_OSR_FDINT_MASK         (0x7f << USART_OSR_FDINT_SHIFT)
                                                /* Bits 15-31: Reserved */
+
 /* TER Transmit Enable Register (UART only) */
+
                                                /* Bits 0-6: Reserved */
 #define UART_TER_TXEN                (1 << 7)  /* Bit 7:  TX Enable */
                                                /* Bits 8-31: Reserved */
+
 /* Half-duplex enable Register (USART only) */
 
 #define USART_HDEN_TXEN              (1 << 0)  /* Bit 0:  Half-duplex mode enable */
                                                /* Bits 1-31: Reserved */
+
 /* Smart card interface control register (USART only) */
 
 #define USART_SCICTRL_SCIEN          (1 << 0)  /* Bit 0:  Smart Card Interface Enable */
@@ -372,6 +377,7 @@
 #define USART_SCICTRL_GUARDTIME_SHIFT (8)      /* Bits 8-15: Extra guard time */
 #define USART_SCICTRL_GUARDTIME_MASK  (0xff << USART_SCICTRL_GUARDTIME_SHIFT)
                                                /* Bits 16-31: Reserved */
+
 /* RS-485/EIA-485 Control */
 
 #define UART_RS485CTRL_NMMEN         (1 << 0)  /* Bit 0: RS-485/EIA-485 Normal Multidrop Mode (NMM) enabled */
@@ -381,14 +387,17 @@
 #define UART_RS485CTRL_DCTRL         (1 << 4)  /* Bit 4: Enable Auto Direction Control */
 #define UART_RS485CTRL_OINV          (1 << 5)  /* Bit 5: Polarity of the direction control signal on RTS/DTR */
                                                /* Bits 6-31: Reserved */
+
 /* RS-485/EIA-485 address match */
 
 #define UART_ADRMATCH_MASK           (0xff)    /* Bits 0-7: Address match value */
                                                /* Bits 8-31: Reserved */
+
 /* RS-485/EIA-485 direction control delay */
 
 #define UART_RS485DLY_MASK           (0xff)    /* Bits 0-7: Firection control (RTS/DTR) delay */
                                                /* Bits 8-31: Reserved */
+
 /* Synchronous mode control register (USART only) */
 
 #define USART_SYNCCTRL_SYNC          (1 << 0)  /* Bit 0: Enables synchronous mode */
@@ -399,21 +408,22 @@
 #define USART_SYNCCTRL_SSSDIS        (1 << 5)  /* Bit 5: Start/stop bits */
 #define USART_SYNCCTRL_CCCLR         (1 << 6)  /* Bit 6: Continuous clock clear */
                                                /* Bits 7-31: Reserved */
+
 /* TER Transmit Enable Register (USART only) */
 
 #define USART_TER_TXEN               (1 << 0)  /* Bit 0:  TX Enable */
                                                /* Bits 1-31: Reserved */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_UART_H */

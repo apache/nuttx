@@ -1,55 +1,39 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_adc_v1l1.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V1L1_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V1L1_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ************************************************************************************/
+/* Configuration ************************************************************/
 
 /* This is implementation for STM32 ADC IPv1 modified for L1 */
 
@@ -72,7 +56,7 @@
 #  define HAVE_ADC_POWERDOWN
 #endif
 
-/* Base addresses ***********************************************************************************/
+/* Base addresses ***********************************************************/
 
 #define STM32_ADC1_OFFSET            0x0000
 #define STM32_ADC2_OFFSET            0x0100
@@ -82,9 +66,10 @@
 #define STM32_ADC1_BASE              (STM32_ADC1_OFFSET + STM32_ADC_BASE) /* ADC1 ADC */
 #define STM32_ADC2_BASE              (STM32_ADC2_OFFSET + STM32_ADC_BASE) /* ADC2 ADC */
 #define STM32_ADC3_BASE              (STM32_ADC3_OFFSET + STM32_ADC_BASE) /* ADC3 ADC */
+
 #define STM32_ADCCMN_BASE            (STM32_ADC_CMN_OFFSET + STM32_ADC_BASE) /* ADC1, ADC2, ADC3 common */
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_ADC_SR_OFFSET          0x0000  /* ADC status register (32-bit) */
 #define STM32_ADC_CR1_OFFSET         0x0004  /* ADC control register 1 (32-bit) */
@@ -114,7 +99,7 @@
 #define STM32_ADC_CSR_OFFSET         0x0000  /* Common status register */
 #define STM32_ADC_CCR_OFFSET         0x0004  /* Common control register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NADC > 0
 #  define STM32_ADC1_SR              (STM32_ADC1_BASE + STM32_ADC_SR_OFFSET)
@@ -192,7 +177,7 @@
 #define STM32_ADC_CSR                (STM32_ADCCMN_BASE + STM32_ADC_CSR_OFFSET)
 #define STM32_ADC_CCR                (STM32_ADCCMN_BASE + STM32_ADC_CCR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* ADC status register */
 
@@ -235,6 +220,7 @@
 #  define ADC_CR1_RES_10BIT          (1 << ADC_CR1_RES_SHIFT) /* 11 ADCCLK cycles */
 #  define ADC_CR1_RES_8BIT           (2 << ADC_CR1_RES_SHIFT) /* 9 ADCCLK cycles */
 #  define ADC_CR1_RES_6BIT           (3 << ADC_CR1_RES_SHIFT) /* 7 ADCCLK cycles */
+
 #define ADC_CR1_OVRIE                (1 << 26) /* Bit 26: Overrun interrupt enable */
 #define ADC_CR1_RESERVED             (0xfb3f0000)
 
@@ -246,6 +232,7 @@
                                                 * conversion is on going.  This bit is available in high and medium +
                                                 * density devices only.
                                                 */
+
 #define ADC_CR2_DELS_SHIFT           (4)       /* Bits 2-0: Delay selection */
 #define ADC_CR2_DELS_MASK            (0x07 << ADC_CR2_DELS_SHIFT)
 #define ADC_CR2_DELS_NODEL           (0x0 << ADC_CR2_DELS_SHIFT)  /* No delay */
@@ -256,6 +243,7 @@
 #define ADC_CR2_DELS_APB63           (0x05 << ADC_CR2_DELS_SHIFT) /* 63 APB clock cycles after the end of conversion */
 #define ADC_CR2_DELS_APB127          (0x06 << ADC_CR2_DELS_SHIFT) /* 127 APB clock cycles after the end of conversion */
 #define ADC_CR2_DELS_APB255          (0x07 << ADC_CR2_DELS_SHIFT) /* 255 APB clock cycles after the end of conversion */
+
 #define ADC_CR2_DMA                  (1 << 8)  /* Bit 8: Direct Memory access mode */
 #define ADC_CR2_DDS                  (1 << 9)  /* Bit 9: DMA disable selection (for single ADC mode) */
 #define ADC_CR2_EOCS                 (1 << 10) /* Bit 10: End of conversion selection */
@@ -267,7 +255,7 @@
 #  define ADC_CR2_JEXTSEL_T9TRGO     (0x01 << ADC_CR2_JEXTSEL_SHIFT) /* 0001: Timer 9 TRGO event */
 #  define ADC_CR2_JEXTSEL_T2TRGO     (0x02 << ADC_CR2_JEXTSEL_SHIFT) /* 0010: Timer 2 TRGO event*/
 #  define ADC_CR2_JEXTSEL_T2CC1      (0x03 << ADC_CR2_JEXTSEL_SHIFT) /* 0011: Timer 2 CC1 event */
-#  define ADC_CR2_JEXTSEL_T3CC4        (0x04 << ADC_CR2_JEXTSEL_SHIFT) /* 0100: Timer 3 CC4 event */
+#  define ADC_CR2_JEXTSEL_T3CC4      (0x04 << ADC_CR2_JEXTSEL_SHIFT) /* 0100: Timer 3 CC4 event */
 #  define ADC_CR2_JEXTSEL_T4TRGO     (0x05 << ADC_CR2_JEXTSEL_SHIFT) /* 0101: Timer 4 TRGO event */
 #  define ADC_CR2_JEXTSEL_T4CC1      (0x06 << ADC_CR2_JEXTSEL_SHIFT) /* 0110: Timer 4 CC1 event */
 #  define ADC_CR2_JEXTSEL_T4CC2      (0x07 << ADC_CR2_JEXTSEL_SHIFT) /* 0111: Timer 4 CC2 event */
@@ -275,12 +263,14 @@
 #  define ADC_CR2_JEXTSEL_T10CC1     (0x09 << ADC_CR2_JEXTSEL_SHIFT) /* 1001: Timer 10 CC1 event */
 #  define ADC_CR2_JEXTSEL_T7TRGO     (0x0A << ADC_CR2_JEXTSEL_SHIFT) /* 1010: Timer 7 TRGO event */
 #  define ADC_CR2_JEXTSEL_EXTI15     (0x0F << ADC_CR2_JEXTSEL_SHIFT) /* 1111: EXTI line 15 */
+
 #define ADC_CR2_JEXTEN_SHIFT         (20)      /* Bits 20-21: External trigger enable for injected channels */
 #define ADC_CR2_JEXTEN_MASK          (3 << ADC_CR2_JEXTEN_SHIFT)
 #  define ADC_CR2_JEXTEN_NONE        (0 << ADC_CR2_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
 #  define ADC_CR2_JEXTEN_RISING      (1 << ADC_CR2_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
 #  define ADC_CR2_JEXTEN_FALLING     (2 << ADC_CR2_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
 #  define ADC_CR2_JEXTEN_BOTH        (3 << ADC_CR2_JEXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+
 #define ADC_CR2_JSWSTART             (1 << 22) /* Bit 22: Start Conversion of injected channels */
                                                /* Bit 23: Reserved, must be kept at reset value. */
 #define ADC_CR2_EXTSEL_SHIFT         (24)      /* Bits 24-27: External Event Select for regular group */
@@ -297,12 +287,14 @@
 #  define ADC_CR2_EXTSEL_T4TRGO      (0x09 << ADC_CR2_EXTSEL_SHIFT) /* 1001: Timer 4 TRGO event */
 #  define ADC_CR2_EXTSEL_T6TRGO      (0x0A << ADC_CR2_EXTSEL_SHIFT) /* 1010: Timer 6 TRGO event */
 #  define ADC_CR2_EXTSEL_EXTI11      (0x0F << ADC_CR2_EXTSEL_SHIFT) /* 1111: EXTI line 11 */
+
 #define ADC_CR2_EXTEN_SHIFT          (28)      /* Bits 28-29: External trigger enable for regular channels */
 #define ADC_CR2_EXTEN_MASK           (3 << ADC_CR2_EXTEN_SHIFT)
 #  define ADC_CR2_EXTEN_NONE         (0 << ADC_CR2_EXTEN_SHIFT) /* 00: Trigger detection disabled */
 #  define ADC_CR2_EXTEN_RISING       (1 << ADC_CR2_EXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
 #  define ADC_CR2_EXTEN_FALLING      (2 << ADC_CR2_EXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
 #  define ADC_CR2_EXTEN_BOTH         (3 << ADC_CR2_EXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+
 #define ADC_CR2_SWSTART              (1 << 30) /* Bit 30: Start Conversion of regular channels */
 #define ADC_CR2_RESERVED             (0x8080f0fc)
 
@@ -541,29 +533,37 @@
 
 /* Common control register */
 
-                                               /* Bits 15-0: Reserved, must be kept at reset value */
+/*                                                Bits 15-0: Reserved,
+ * must be kept at reset value
+ */
+
 #define ADC_CCR_ADCPRE_SHIFT         (16)      /* Bits 16-17: ADC prescaler */
 #define ADC_CCR_ADCPRE_MASK          (3 << ADC_CCR_ADCPRE_SHIFT)
 #  define ADC_CCR_ADCPRE_DIV1        (0 << ADC_CCR_ADCPRE_SHIFT) /* HSI divided by 1 */
 #  define ADC_CCR_ADCPRE_DIV2        (1 << ADC_CCR_ADCPRE_SHIFT) /* HSI divided by 2 */
 #  define ADC_CCR_ADCPRE_DIV4        (2 << ADC_CCR_ADCPRE_SHIFT) /* HSI divided by 4 */
                                                                  /* 11: Reserved */
-                                               /* Bits 22-18: Reserved, must be kept at reset value */
+
+/*                                                Bits 22-18: Reserved,
+ * must be kept at reset value
+ */
 #define ADC_CCR_TSVREFE              (1 << 23) /* Bit 23: Temperature sensor and VREFINT enable */
                                                /* Bits 31-24: Reserved, must be kept at reset value */
 
-/* Data register for dual and triple modes (32-bit data with no named fields) */
+/* Data register for dual and triple modes
+ *(32-bit data with no named fields)
+ */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V1L1_H */

@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_i2c.h
  *
- *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_I2C_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_I2C_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_I2C_SYSC_OFFSET                  0x0010
 #define AM335X_I2C_IRQ_STAT_RAW_OFFSET          0x0024
@@ -79,7 +64,7 @@
 #define AM335X_I2C_ACTOA_OFFSET                 0x00d0
 #define AM335X_I2C_SBLOCK_OFFSET                0x00d4
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_I2C0_SYSC                        (AM335X_I2C0_VADDR + AM335X_I2C_SYSC_OFFSET)
 #define AM335X_I2C0_IRQ_STAT_RAW                (AM335X_I2C0_VADDR + AM335X_I2C_IRQ_STAT_RAW_OFFSET)
@@ -171,17 +156,18 @@
 #define AM335X_I2C2_ACTOA                       (AM335X_I2C2_VADDR + AM335X_I2C_ACTOA_OFFSET)
 #define AM335X_I2C2_SBLOCK                      (AM335X_I2C2_VADDR + AM335X_I2C_SBLOCK_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 #define I2C_SYSC_AUTOIDLE                       (1 << 0)  /* Bit 0:  Auto-idle */
 #define I2C_SYSC_SRST                           (1 << 1)  /* Bit 1:  SoftReset */
 #define I2C_SYSC_WAKEUP                         (1 << 2)  /* Bit 2:  Enable Wakeup control */
-#define I2C_SYSC_IDLE_SHIFT                     (3)  /* Bits 3-4:  Idle Mode selection */
+#define I2C_SYSC_IDLE_SHIFT                     (3)       /* Bits 3-4:  Idle Mode selection */
 #define I2C_SYSC_IDLE_MASK                      (3 << I2C_SYSC_IDLE_SHIFT)
 #  define I2C_SYSC_IDLE_FORCE                   (0 << I2C_SYSC_IDLE_SHIFT) /* Force-idle mode */
 #  define I2C_SYSC_IDLE_NO                      (1 << I2C_SYSC_IDLE_SHIFT) /* No-idle mode */
 #  define I2C_SYSC_IDLE_SMART                   (2 << I2C_SYSC_IDLE_SHIFT) /* Smart-idle mode */
 #  define I2C_SYSC_IDLE_SMART_WKUP              (3 << I2C_SYSC_IDLE_SHIFT) /* Smart-idle Wakeup mode */
+
 #define I2C_SYSC_CLK_SHIFT                      (8)  /* Bits 8-9:  Clock Activity selection */
 #define I2C_SYSC_CLK_MASK                       (3 << I2C_SYSC_CLK_SHIFT)
 #  define I2C_SYSC_CLK_NONE                     (0 << I2C_SYSC_CLK_SHIFT) /* Both clocks can be cut off */
@@ -189,16 +175,16 @@
 #  define I2C_SYSC_CLK_FUNC                     (2 << I2C_SYSC_CLK_SHIFT) /* Only functions clock must be kept active */
 #  define I2C_SYSC_CLK_BOTH                     (3 << I2C_SYSC_CLK_SHIFT) /* Both clocks must be kept active */
 
-#define I2C_IRQ_AL                              (1 << 0)  /* Bit 0:  Arbitration lost */
-#define I2C_IRQ_NACK                            (1 << 1)  /* Bit 1:  No acknowledgment */
-#define I2C_IRQ_ARDY                            (1 << 2)  /* Bit 2:  Register access ready */
-#define I2C_IRQ_RRDY                            (1 << 3)  /* Bit 3:  Receive data ready */
-#define I2C_IRQ_XRDY                            (1 << 4)  /* Bit 4:  Transmit data ready */
-#define I2C_IRQ_GC                              (1 << 5)  /* Bit 5:  General call */
-#define I2C_IRQ_STC                             (1 << 6)  /* Bit 6:  Start Condition */
-#define I2C_IRQ_AERR                            (1 << 7)  /* Bit 7:  Access Error */
-#define I2C_IRQ_BF                              (1 << 8)  /* Bit 8:  Bus Free */
-#define I2C_IRQ_AAS                             (1 << 9)  /* Bit 9:  Address recognized as slave */
+#define I2C_IRQ_AL                              (1 << 0)   /* Bit 0:  Arbitration lost */
+#define I2C_IRQ_NACK                            (1 << 1)   /* Bit 1:  No acknowledgment */
+#define I2C_IRQ_ARDY                            (1 << 2)   /* Bit 2:  Register access ready */
+#define I2C_IRQ_RRDY                            (1 << 3)   /* Bit 3:  Receive data ready */
+#define I2C_IRQ_XRDY                            (1 << 4)   /* Bit 4:  Transmit data ready */
+#define I2C_IRQ_GC                              (1 << 5)   /* Bit 5:  General call */
+#define I2C_IRQ_STC                             (1 << 6)   /* Bit 6:  Start Condition */
+#define I2C_IRQ_AERR                            (1 << 7)   /* Bit 7:  Access Error */
+#define I2C_IRQ_BF                              (1 << 8)   /* Bit 8:  Bus Free */
+#define I2C_IRQ_AAS                             (1 << 9)   /* Bit 9:  Address recognized as slave */
 #define I2C_IRQ_XUDF                            (1 << 10)  /* Bit 10:  Transmit underflow */
 #define I2C_IRQ_ROVR                            (1 << 11)  /* Bit 11:  Receive overrun */
 #define I2C_IRQ_BB                              (1 << 12)  /* Bit 12:  Bus busy */
@@ -215,14 +201,14 @@
                            | I2C_IRQ_GC | I2C_IRQ_STC | I2C_IRQ_AERR | I2C_IRQ_BF | I2C_IRQ_AAS \
                            | I2C_IRQ_XUDF | I2C_IRQ_ROVR | I2C_IRQ_RDR | I2C_IRQ_XDR)
 
-#define I2C_WE_AL                               (1 << 0)  /* Bit 0:  Arbitration lost */
-#define I2C_WE_NACK                             (1 << 1)  /* Bit 1:  No acknowledgment */
-#define I2C_WE_ARDY                             (1 << 2)  /* Bit 2:  Register access ready */
-#define I2C_WE_DRDY                             (1 << 3)  /* Bit 3:  Receive/Transmit data ready */
-#define I2C_WE_GC                               (1 << 5)  /* Bit 5:  General call */
-#define I2C_WE_STC                              (1 << 6)  /* Bit 6:  Start Condition */
-#define I2C_WE_BF                               (1 << 8)  /* Bit 8:  Bus Free */
-#define I2C_WE_AAS                              (1 << 9)  /* Bit 9:  Address recognized as slave */
+#define I2C_WE_AL                               (1 << 0)   /* Bit 0:  Arbitration lost */
+#define I2C_WE_NACK                             (1 << 1)   /* Bit 1:  No acknowledgment */
+#define I2C_WE_ARDY                             (1 << 2)   /* Bit 2:  Register access ready */
+#define I2C_WE_DRDY                             (1 << 3)   /* Bit 3:  Receive/Transmit data ready */
+#define I2C_WE_GC                               (1 << 5)   /* Bit 5:  General call */
+#define I2C_WE_STC                              (1 << 6)   /* Bit 6:  Start Condition */
+#define I2C_WE_BF                               (1 << 8)   /* Bit 8:  Bus Free */
+#define I2C_WE_AAS                              (1 << 9)   /* Bit 9:  Address recognized as slave */
 #define I2C_WE_XUDF                             (1 << 10)  /* Bit 10:  Transmit underflow */
 #define I2C_WE_ROVR                             (1 << 11)  /* Bit 11:  Receive overrun */
 #define I2C_WE_RDR                              (1 << 13)  /* Bit 13:  Receive draining IRQ */
@@ -236,6 +222,7 @@
 #define I2C_BUF_TXTRSH_MASK                     (63 << I2C_BUF_TXTRSH_SHIFT)
 #define I2C_BUF_TXFIFO_CLR                      (1 << 6)  /* Bit 6:  Transmit FIFO clear */
 #define I2C_BUF_XDMA_EN                         (1 << 7)  /* Bit 7:  Transmit DMA channel enable */
+
 #define I2C_BUF_RXTRSH_SHIFT                    (8)  /* Bits 8-13:  Threshold value for FIFO buffer in RX mode */
 #define I2C_BUF_RXTRSH_MASK                     (63 << I2C_BUF_RXTRSH_SHIFT)
 #define I2C_BUF_RXFIFO_CLR                      (1 << 14)  /* Bit 14:  Receive FIFO clear */
@@ -247,14 +234,14 @@
 #define I2C_DATA_SHIFT                          (0)  /* Bits 0-7:  Transmit/Receive data FIFO endpoint */
 #define I2C_DATA_MASK                           (255 << I2C_DATA_SHIFT)
 
-#define I2C_CON_STT                             (1 << 0)  /* Bit 0:  Start condition (I2C master mode only) */
-#define I2C_CON_STP                             (1 << 1)  /* Bit 1:  Stop condition (I2C master mode only) */
-#define I2C_CON_XOA3                            (1 << 4)  /* Bit 4:  Expand own address 3 */
-#define I2C_CON_XOA2                            (1 << 5)  /* Bit 5:  Expand own address 2 */
-#define I2C_CON_XOA1                            (1 << 6)  /* Bit 6:  Expand own address 1 */
-#define I2C_CON_XOA0                            (1 << 7)  /* Bit 7:  Expand own address 0 */
-#define I2C_CON_XSA                             (1 << 8)  /* Bit 8:  Expand slave address */
-#define I2C_CON_TRX                             (1 << 9)  /* Bit 9:  Transmitter/receiver mode (I2C master mode only) */
+#define I2C_CON_STT                             (1 << 0)   /* Bit 0:  Start condition (I2C master mode only) */
+#define I2C_CON_STP                             (1 << 1)   /* Bit 1:  Stop condition (I2C master mode only) */
+#define I2C_CON_XOA3                            (1 << 4)   /* Bit 4:  Expand own address 3 */
+#define I2C_CON_XOA2                            (1 << 5)   /* Bit 5:  Expand own address 2 */
+#define I2C_CON_XOA1                            (1 << 6)   /* Bit 6:  Expand own address 1 */
+#define I2C_CON_XOA0                            (1 << 7)   /* Bit 7:  Expand own address 0 */
+#define I2C_CON_XSA                             (1 << 8)   /* Bit 8:  Expand slave address */
+#define I2C_CON_TRX                             (1 << 9)   /* Bit 9:  Transmitter/receiver mode (I2C master mode only) */
 #define I2C_CON_MST                             (1 << 10)  /* Bit 10:  Master/slave mode */
 #define I2C_CON_STB                             (1 << 11)  /* Bit 11:  Start byte mode (I2C master mode only) */
 #define I2C_CON_OPMODE_SHIFT                    (1 << 12)  /* Bits 12-13:  Operation mode selection */
@@ -274,20 +261,22 @@
 #define I2C_SCLH_SHIFT                          (0)  /* Bits 0-7:  Fast/Standard mode SCL high time. */
 #define I2C_SCLH_MASK                           (255 << I2C_SCLH_SHIFT)
 
-#define I2C_SYSTEST_SDA_O                       (1 << 0)  /* Bit 0:  SDA line drive output value */
-#define I2C_SYSTEST_SDA_I                       (1 << 1)  /* Bit 1:  SDA line sense input value */
-#define I2C_SYSTEST_SCL_O                       (1 << 2)  /* Bit 2:  SCL line drive output value */
-#define I2C_SYSTEST_SCL_I                       (1 << 3)  /* Bit 3:  SCL line sense input value */
-#define I2C_SYSTEST_SDA_O_FUNC                  (1 << 5)  /* Bit 5:  SDA line output value (functional mode) */
-#define I2C_SYSTEST_SDA_I_FUNC                  (1 << 6)  /* Bit 6:  SDA line input value (functional mode) */
-#define I2C_SYSTEST_SCL_O_FUNC                  (1 << 7)  /* Bit 7:  SCL line output value (functional mode) */
-#define I2C_SYSTEST_SCL_I_FUNC                  (1 << 8)  /* Bit 8:  SCL line input value (functional mode) */
+#define I2C_SYSTEST_SDA_O                       (1 << 0)   /* Bit 0:  SDA line drive output value */
+#define I2C_SYSTEST_SDA_I                       (1 << 1)   /* Bit 1:  SDA line sense input value */
+#define I2C_SYSTEST_SCL_O                       (1 << 2)   /* Bit 2:  SCL line drive output value */
+#define I2C_SYSTEST_SCL_I                       (1 << 3)   /* Bit 3:  SCL line sense input value */
+#define I2C_SYSTEST_SDA_O_FUNC                  (1 << 5)   /* Bit 5:  SDA line output value (functional mode) */
+#define I2C_SYSTEST_SDA_I_FUNC                  (1 << 6)   /* Bit 6:  SDA line input value (functional mode) */
+#define I2C_SYSTEST_SCL_O_FUNC                  (1 << 7)   /* Bit 7:  SCL line output value (functional mode) */
+#define I2C_SYSTEST_SCL_I_FUNC                  (1 << 8)   /* Bit 8:  SCL line input value (functional mode) */
 #define I2C_SYSTEST_SSB                         (1 << 11)  /* Bit 11:  Set status bits */
+
 #define I2C_SYSTEST_TMODE_SHIFT                 (12)  /* Bits 12-13:  Test mode select */
 #define I2C_SYSTEST_TMODE_MASK                  (3 << I2C_SYSTEST_TMODE_SHIFT)
 #  define I2C_SYSTEST_TMODE_FUNC                (0 << I2C_SYSTEST_TMODE_SHIFT) /* Functional mode */
 #  define I2C_SYSTEST_TMODE_SCL                 (2 << I2C_SYSTEST_TMODE_SHIFT) /* Test of SCL counters (SCLL, SCLH, PSC) */
 #  define I2C_SYSTEST_TMODE_LOOPBACK            (3 << I2C_SYSTEST_TMODE_SHIFT) /* Loop back mode select + SDA/SCL IO mode select */
+
 #define I2C_SYSTEST_FREE                        (1 << 14)  /* Bit 14:  Free running mode (on breakpoint) */
 #define I2C_SYSTEST_ST_EN                       (1 << 15)  /* Bit 15:  System test enable */
 

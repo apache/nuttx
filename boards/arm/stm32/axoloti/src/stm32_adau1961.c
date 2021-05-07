@@ -106,14 +106,14 @@ static void adau1961_hw_reset(FAR const struct adau1961_lower_s *lower)
 static struct stm32_mwinfo_s g_adau1961info =
 {
   .lower =
-  {
+    {
     .address   = ADAU1961_I2C_ADDRESS,
     .frequency = I2C_SPEED_FAST,        /* 400 kHz */
     .mclk      = STM32_HSE_FREQUENCY,   /* see MCO1 configuration */
     .attach    = adau1961_attach,
     .enable    = adau1961_enable,
     .reset     = adau1961_hw_reset,
-  }
+    }
 };
 
 /****************************************************************************
@@ -125,8 +125,9 @@ static struct stm32_mwinfo_s g_adau1961info =
  *
  * Description:
  *   This function is called by platform-specific, setup logic to configure
- *   and register the ADAU1961 device.  This function will register the driver
- *   as /dev/audio/pcm[x] where x is determined by the minor device number.
+ *   and register the ADAU1961 device.  This function will register the
+ *   driver as /dev/audio/pcm[x] where x is determined by the minor device
+ *   number.
  *
  * Input Parameters:
  *   minor - The input device minor number

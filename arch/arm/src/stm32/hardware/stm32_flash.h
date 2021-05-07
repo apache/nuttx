@@ -1,45 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_flash.h
  *
- *   Copyright (C) 2009, 2011, 2015, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FLASH_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define _K(x) ((x)*1024)
 
@@ -82,7 +66,7 @@
 #      define STM32_FLASH_PAGESIZE      256
 #    endif
 
-     /* Maximum EEPROM size on Cat.5 MCU. TODO: this should be in chip config. */
+/* Maximum EEPROM size on Cat.5 MCU. TODO: this should be in chip config. */
 
 #    ifndef STM32_EEPROM_SIZE
 #      define STM32_EEPROM_SIZE         (16 * 1024)
@@ -126,7 +110,7 @@
 
 #    undef STM32_FLASH_PAGESIZE
 
-#  elif defined(CONFIG_STM32_STM32G47XX)
+#  elif defined(CONFIG_STM32_STM32G4XXX)
 #    define STM32_FLASH_NPAGES        32
 #    define STM32_FLASH_PAGESIZE      4096
 
@@ -193,7 +177,7 @@
 
 /* Define the Valid Configuration the G4 */
 
-#  elif defined(CONFIG_STM32_STM32G47XX)
+#  elif defined(CONFIG_STM32_STM32G4XXX)
 #    if defined(CONFIG_STM32_FLASH_CONFIG_B)
 #      define STM32_FLASH_NPAGES      32
 #      define STM32_FLASH_PAGESIZE    4096
@@ -259,7 +243,7 @@
       (STM32_FLASH_BASE + STM32_FLASH_PAGESIZE * STM32_FLASH_BANK0_NPAGES)
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET       0x0000
 #if defined(CONFIG_STM32_STM32L15XX)
@@ -274,7 +258,7 @@
 #  define STM32_FLASH_WRPR2_OFFSET   0x0080
 #  define STM32_FLASH_WRPR3_OFFSET   0x0084
 #  define STM32_FLASH_WRPR4_OFFSET   0x0088
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 #  define STM32_FLASH_PDKEYR_OFFSET    0x0004
 #  define STM32_FLASH_KEYR_OFFSET      0x0008
 #  define STM32_FLASH_OPT_KEYR_OFFSET  0x000c
@@ -322,7 +306,7 @@
 #  define STM32_FLASH_AR2_OFFSET     0x0054
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FLASH_ACR              (STM32_FLASHIF_BASE+STM32_FLASH_ACR_OFFSET)
 #if defined(CONFIG_STM32_STM32L15XX)
@@ -337,7 +321,7 @@
 #  define STM32_FLASH_WRPR2          (STM32_FLASHIF_BASE+STM32_FLASH_WRPR2_OFFSET)
 #  define STM32_FLASH_WRPR3          (STM32_FLASHIF_BASE+STM32_FLASH_WRPR3_OFFSET)
 #  define STM32_FLASH_WRPR4          (STM32_FLASHIF_BASE+STM32_FLASH_WRPR4_OFFSET)
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 #  define STM32_FLASH_PDKEYR         (STM32_FLASHIF_BASE+STM32_FLASH_PDKEYR_OFFSET)
 #  define STM32_FLASH_KEYR           (STM32_FLASHIF_BASE+STM32_FLASH_KEYR_OFFSET)
 #  define STM32_FLASH_OPT_KEYR       (STM32_FLASHIF_BASE+STM32_FLASH_OPT_KEYR_OFFSET)
@@ -382,7 +366,7 @@
 #  define STM32_FLASH_AR2            (STM32_FLASHIF_BASE+STM32_FLASH_AR1_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Flash Access Control Register (ACR) */
 
@@ -392,7 +376,7 @@
 #  define FLASH_ACR_ACC64           (1 << 2)  /* Bit 2: 64-bit access */
 #  define FLASH_ACR_SLEEP_PD        (1 << 3)  /* Bit 3: Flash mode during Sleep */
 #  define FLASH_ACR_RUN_PD          (1 << 4)  /* Bit 4: Flash mode during Run */
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_ACR_LATENCY_SHIFT   (0)
 #  define FLASH_ACR_LATENCY_MASK    (0xf << FLASH_ACR_LATENCY_SHIFT)
 #    define FLASH_ACR_LATENCY(n)    ((n) << FLASH_ACR_LATENCY_SHIFT)  /* n wait states = 0..15 */
@@ -477,7 +461,7 @@
 #  define FLASH_SR_OPTVERR          (1 << 11) /* Bit 11: Option validity error */
 #  define FLASH_SR_OPTVERRUSR       (1 << 12) /* Bit 12: Option UserValidity Error */
 #  define FLASH_SR_RDERR            (1 << 13) /* Bit 13: Read protected error */
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_SR_EOP              (1 << 0)  /* Bit 0:  End of operation */
 #  define FLASH_SR_OPERR            (1 << 1)  /* Bit 1:  Operation error */
 #  define FLASH_SR_PROGERR          (1 << 3)  /* Bit 3:  Programming error */
@@ -549,7 +533,7 @@
 #  define FLASH_CR_EOPIE            (1 << 24)                   /* Bit 24: End of operation interrupt enable */
 #  define FLASH_CR_ERRIE            (1 << 25)                   /* Bit 25: Error interrupt enable */
 #  define FLASH_CR_LOCK             (1 << 31)                   /* Bit 31: Lock */
-#elif defined(CONFIG_STM32_STM32G47XX)
+#elif defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_CR_PG               (1 << 0)
 #  define FLASH_CR_PER              (1 << 1)
 #  define FLASH_CR_MER1             (1 << 2)
@@ -576,7 +560,7 @@
 
 /* Flash ECC register (ECCR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_ECCR_ADDR_ECC_SHIFT    (0)
 #  define FLASH_ECCR_ADDR_ECC_MASK     (0x7ffff << FLASH_ECCR_ADDR_ECC_SHIFT)
 #    define FLASH_ECCR_ADDR_ECC(n)     (((n) << FLASH_ECCR_ADDR_ECC_SHIFT) & FLASH_ECCR_ADDR_ECC_MASK)
@@ -629,7 +613,7 @@
 
 /* Flash option register (OPTR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_OPTR_RDP_SHIFT         (0)
 #  define FLASH_OPTR_RDP_MASK          (0xff << FLASH_OPTR_RDP_SHIFT)
 #    define FLASH_OPTR_RDP             (((n) << FLASH_OPTR_RDP_SHIFT) & FLASH_OPTR_RDP_MASK)
@@ -664,7 +648,7 @@
 
 /* Flash PCROP1 Start Address Register (PCROP1SR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_PCROP1SR_PCROP1_STRT_SHIFT       (0)
 #  define FLASH_PCROP1SR_PCROP1_STRT_MASK        (0x7fff << FLASH_PCROP1SR_PCROP1_STRT_SHIFT)
 #    define FLASH_PCROP1SR_PCROP1_STRT(n)        (((n) << FLASH_PCROP1SR_PCROP1_STRT_SHIFT) & FLASH_PCROP1SR_PCROP1_STRT_MASK)
@@ -672,7 +656,7 @@
 
 /* Flash PCROP1 End Address Register (PCROP1ER) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_PCROP1ER_PCROP1_END_SHIFT        (0)
 #  define FLASH_PCROP1ER_PCROP1_END_MASK         (0x7fff << FLASH_PCROP1ER_PCROP1_END_SHIFT)
 #    define FLASH_PCROP1ER_PCROP1_END(n)         (((n) << FLASH_PCROP1ER_PCROP1_END_SHIFT) & FLASH_PCROP1ER_PCROP1_END_MASK)
@@ -681,7 +665,7 @@
 
 /* Flash Bank 1 WRP Area A Address Register (WRP1AR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_WRP1AR_WRP1A_STRT_SHIFT          (0)
 #  define FLASH_WRP1AR_WRP1A_STRT_MASK           (0x7f << FLASH_WRP1AR_WRP1A_STRT_SHIFT)
 #    define FLASH_WRP1AR_WRP1A_STRT(n)           (((n) << FLASH_WRP1AR_WRP1A_STRT_SHIFT) & FLASH_WRP1AR_WRP1A_STRT_MASK)
@@ -692,7 +676,7 @@
 
 /* Flash Bank 1 WRP Area B Address Register (WRPB1R) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_WRP1BR_WRP1B_STRT_SHIFT          (0)
 #  define FLASH_WRP1BR_WRP1B_STRT_MASK           (0x7f << FLASH_WRP1BR_WRP1B_STRT_SHIFT)
 #    define FLASH_WRP1BR_WRP1B_STRT(n)           (((n) << FLASH_WRP1BR_WRP1B_STRT_SHIFT) & FLASH_WRP1BR_WRP1B_STRT_MASK)
@@ -703,7 +687,7 @@
 
 /* Flash PCROP2 Start Address Register (PCROP2SR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_PCROP2SR_PCROP2_STRT_SHIFT       (0)
 #  define FLASH_PCROP2SR_PCROP2_STRT_MASK        (0x7fff << FLASH_PCROP2SR_PCROP2_STRT_SHIFT)
 #    define FLASH_PCROP2SR_PCROP2_STRT(n)        (((n) << FLASH_PCROP2SR_PCROP2_STRT_SHIFT) & FLASH_PCROP2SR_PCROP2_STRT_MASK)
@@ -711,7 +695,7 @@
 
 /* Flash PCROP2 End Address Register (PCROP2ER) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_PCROP2ER_PCROP2_END_SHIFT        (0)
 #  define FLASH_PCROP2ER_PCROP2_END_MASK         (0x7fff << FLASH_PCROP2ER_PCROP2_END_SHIFT)
 #    define FLASH_PCROP2ER_PCROP2_END(n)         (((n) << FLASH_PCROP2ER_PCROP2_END_SHIFT) & FLASH_PCROP2ER_PCROP2_END_MASK)
@@ -719,7 +703,7 @@
 
 /* Flash Bank 2 WRP Area A Address Register (WRP2AR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_WRP2AR_WRP2A_STRT_SHIFT          (0)
 #  define FLASH_WRP2AR_WRP2A_STRT_MASK           (0x7f << FLASH_WRP2AR_WRP2A_STRT_SHIFT)
 #    define FLASH_WRP2AR_WRP2A_STRT(n)           (((n) << FLASH_WRP2AR_WRP2A_STRT_SHIFT) & FLASH_WRP2AR_WRP2A_STRT_MASK)
@@ -730,7 +714,7 @@
 
 /* Flash Bank 2 WRP Area B Address Register (WRP2BR) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_WRP2BR_WRP2B_STRT_SHIFT          (0)
 #  define FLASH_WRP2BR_WRP2B_STRT_MASK           (0x7f << FLASH_WRP2BR_WRP2B_STRT_SHIFT)
 #    define FLASH_WRP2BR_WRP2B_STRT(n)           (((n) << FLASH_WRP2BR_WRP2B_STRT_SHIFT) & FLASH_WRP2BR_WRP2B_STRT_SHIFT)
@@ -741,7 +725,7 @@
 
 /* Flash Securable Area Bank 1 Register (SEC1R) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_SEC1R_SEC_SIZE1_SHIFT            (0)
 #  define FLASH_SEC1R_SEC_SIZE1_MASK             (0xff << FLASH_SEC1R_SEC_SIZE1_SHIFT)
 #    define FLASH_SEC1R_SEC_SIZE1(n)             (((n) << FLASH_SEC1R_SEC_SIZE1_SHIFT) & FLASH_SEC1R_SEC_SIZE1_MASK)
@@ -750,15 +734,15 @@
 
 /* Flash Securable Area Bank 2 Register (SEC2R) */
 
-#if defined(CONFIG_STM32_STM32G47XX)
+#if defined(CONFIG_STM32_STM32G4XXX)
 #  define FLASH_SEC2R_SEC_SIZE2_SHIFT            (0)
 #  define FLASH_SEC2R_SEC_SIZE2_MASK             (0xff << FLASH_SEC2R_SEC_SIZE2_SHIFT)
 #    define FLASH_SEC2R_SEC_SIZE2(n)             (((n) << FLASH_SEC2R_SEC_SIZE2_SHIFT) & FLASH_SEC2R_SEC_SIZE2_MASK)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_flash_lock(void);
 int stm32_flash_unlock(void);

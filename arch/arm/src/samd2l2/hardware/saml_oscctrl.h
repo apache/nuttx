@@ -1,48 +1,34 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_oscctrl.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
  *   Datasheet", Atmel-42385C-SAML21_Datasheet_Preliminary-03/20/15
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_OSCCTRL_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_OSCCTRL_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* OSCCTRL register offsets *****************************************************************/
+ ****************************************************************************/
+
+/* OSCCTRL register offsets *************************************************/
 
 #define SAM_OSCCTRL_INTENCLR_OFFSET      0x0000  /* Interrupt enable clear */
 #define SAM_OSCCTRL_INTENSET_OFFSET      0x0004  /* Interrupt enable set */
@@ -72,7 +59,7 @@
 #define SAM_OSCCTRL_DPLLSYNCBUSY_OFFSET  0x0038  /* DPLL synchronization busy */
 #define SAM_OSCCTRL_DPLLSTATUS_OFFSET    0x003c  /* DPLL status */
 
-/* OSCCTRL register addresses ***************************************************************/
+/* OSCCTRL register addresses ***********************************************/
 
 #define SAM_OSCCTRL_INTENCLR             (SAM_OSCCTRL_BASE+SAM_OSCCTRL_INTENCLR_OFFSET)
 #define SAM_OSCCTRL_INTENSET             (SAM_OSCCTRL_BASE+SAM_OSCCTRL_INTENSET_OFFSET)
@@ -91,10 +78,10 @@
 #define SAM_OSCCTRL_DPLLSYNCBUSY         (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPLLSYNCBUSY_OFFSET)
 #define SAM_OSCCTRL_DPLLSTATUS           (SAM_OSCCTRL_BASE+SAM_OSCCTRL_DPLLSTATUS_OFFSET)
 
-/* OSCCTRL register bit definitions *********************************************************/
+/* OSCCTRL register bit definitions *****************************************/
 
-/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and clear, and
- * Status registers.
+/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and
+ * clear, and Status registers.
  */
 
 #define OSCCTRL_INT_XOSCRDY              (1 << 0)  /* Bit 0:  XOSC ready */
@@ -125,6 +112,7 @@
 #  define OSCCTRL_XOSCCTRL_GAIN_8MHZ     (2 << OSCCTRL_XOSCCTRL_GAIN_SHIFT) /* 8MHz */
 #  define OSCCTRL_XOSCCTRL_GAIN_16MHZ    (3 << OSCCTRL_XOSCCTRL_GAIN_SHIFT) /* 16MHz */
 #  define OSCCTRL_XOSCCTRL_GAIN_30MHZ    (4 << OSCCTRL_XOSCCTRL_GAIN_SHIFT) /* 30MHz */
+
 #define OSCCTRL_XOSCCTRL_AMPGC           (1 << 11) /* Bit 11: Automatic amplitude gain control */
 #define OSCCTRL_XOSCCTRL_STARTUP_SHIFT   (12)      /* Bits 12-15: Start-up time */
 #define OSCCTRL_XOSCCTRL_STARTUP_MASK    (15 << OSCCTRL_XOSCCTRL_STARTUP_SHIFT)
@@ -155,6 +143,7 @@
 #  define OSCCTRL_OSC16MCTRL_FSEL_8MHZ     (1 << OSCCTRL_OSC16MCTRL_FSEL_SHIFT)
 #  define OSCCTRL_OSC16MCTRL_FSEL_12MHZ    (2 << OSCCTRL_OSC16MCTRL_FSEL_SHIFT)
 #  define OSCCTRL_OSC16MCTRL_FSEL_16MHZ    (3 << OSCCTRL_OSC16MCTRL_FSEL_SHIFT)
+
 #define OSCCTRL_OSC16MCTRL_RUNSTDBY        (1 << 6)  /* Bit 6:  Run in standby */
 #define OSCCTRL_OSC16MCTRL_ONDEMAND        (1 << 7)  /* Bit 7:  On demand control */
 #define OSCCTRL_OSC16MCTRL_GAIN_SHIFT      (8)       /* Bits 8-10: Oscillator gain */
@@ -165,6 +154,7 @@
 #  define OSCCTRL_OSC16MCTRL_GAIN_8MHZ     (2 << OSCCTRL_OSC16MCTRL_GAIN_SHIFT) /* 8MHz */
 #  define OSCCTRL_OSC16MCTRL_GAIN_16MHZ    (3 << OSCCTRL_OSC16MCTRL_GAIN_SHIFT) /* 16MHz */
 #  define OSCCTRL_OSC16MCTRL_GAIN_30MHZ    (4 << OSCCTRL_OSC16MCTRL_GAIN_SHIFT) /* 30MHz */
+
 #define OSCCTRL_OSC16MCTRL_AMPGC           (1 << 11) /* Bit 11: Automatic amplitude gain control */
 #define OSCCTRL_OSC16MCTRL_STARTUP_SHIFT   (12)      /* Bits 12-15: Start-up time */
 #define OSCCTRL_OSC16MCTRL_STARTUP_MASK    (15 << OSCCTRL_OSC16MCTRL_STARTUP_SHIFT)
@@ -251,6 +241,7 @@
 #  define OSCCTRL_DPLLCTRLB_FILTER_LBFILT   (1 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* Low bandwidth filter */
 #  define OSCCTRL_DPLLCTRLB_FILTER_HBFILT   (2 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* High bandwidth filter */
 #  define OSCCTRL_DPLLCTRLB_FILTER_HDFILT   (3 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* High damping filter */
+
 #define OSCCTRL_DPLLCTRLB_LPEN           (1 << 2)  /* Bit 2: Low-power enable */
 #define OSCCTRL_DPLLCTRLB_WUF            (1 << 3)  /* Bit 3: Wake up fast */
 #define OSCCTRL_DPLLCTRLB_REFLCK_SHIFT   (4)       /* Bits 4-5: Reference clock selection */
@@ -258,6 +249,7 @@
 #  define OSCCTRL_DPLLCTRLB_REFLCK_XOSCK32K (0 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT) /* XOSC32K clock reference */
 #  define OSCCTRL_DPLLCTRLB_REFLCK_XOSC     (1 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT) /* XOSC clock reference */
 #  define OSCCTRL_DPLLCTRLB_REFLCK_GLCK     (1 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT) /* GCLK clock reference */
+
 #define OSCCTRL_DPLLCTRLB_LTIME_SHIFT    (8)       /* Bits 8-10: Lock time */
 #define OSCCTRL_DPLLCTRLB_LTIME_MASK     (7 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT)
 #  define OSCCTRL_DPLLCTRLB_LTIME_NONE   (0 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* No time-out. Automatic lock */
@@ -265,6 +257,7 @@
 #  define OSCCTRL_DPLLCTRLB_LTIME_9MS    (5 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 9MS */
 #  define OSCCTRL_DPLLCTRLB_LTIME_10MS   (6 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 10MS */
 #  define OSCCTRL_DPLLCTRLB_LTIME_11MS   (7 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 11MS */
+
 #define OSCCTRL_DPLLCTRLB_LBYPASS        (1 << 12) /* Bit 12: Lock bypass */
 #define OSCCTRL_DPLLCTRLB_DIV_SHIFT      (16)      /* Bits 16-26: Clock divider */
 #define OSCCTRL_DPLLCTRLB_DIV_MASK       (0x7ff << OSCCTRL_DPLLCTRLB_DIV_SHIFT)
@@ -289,17 +282,17 @@
 #define OSCCTRL_DPLLSTATUS_LOCK          (1 << 0)  /* Bit 0:  DPLL lock status */
 #define OSCCTRL_DPLLSTATUS_CLKRDY        (1 << 1)  /* Bit 1:  Output clock ready */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_OSCCTRL_H */

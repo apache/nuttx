@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sama5d2_sdmmc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org> & Contributors
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAMA5D2_SDMMC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAMA5D2_SDMMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define SAMA5D2_SDMMC_SSAR_OFFSET          0x0000 /* SDMA System Address / Argument 2 Register */
 #define SAMA5D2_SDMMC_BSR_OFFSET           0x0004 /* Block Size Register */
@@ -84,7 +69,9 @@
 #define SAMA5D2_SDMMC_FEREIS_OFFSET        0x0052 /* Force Event Register for Error Interrupt Status */
 #define SAMA5D2_SDMMC_AESR_OFFSET          0x0054 /* ADMA Error Status Register */
 #define SAMA5D2_SDMMC_ASAR0_OFFSET         0x0054 /* ADMA System Address Register 0 */
+
 #define SAMA5D2_SDMMC_PVRX_OFFSET(x)       (0x60 + x * 0x02) /* Preset Value Register */
+
 #define SAMA5D2_SDMMC_PVR0_OFFSET          SAMA5D2_SDMMC_PVRX_OFFSET(0) /* Initialization */
 #define SAMA5D2_SDMMC_PVR1_OFFSET          SAMA5D2_SDMMC_PVRX_OFFSET(1) /* Default Speed */
 #define SAMA5D2_SDMMC_PVR2_OFFSET          SAMA5D2_SDMMC_PVRX_OFFSET(2) /* High Speed */
@@ -93,6 +80,7 @@
 #define SAMA5D2_SDMMC_PVR5_OFFSET          SAMA5D2_SDMMC_PVRX_OFFSET(5) /* SDR50 */
 #define SAMA5D2_SDMMC_PVR6_OFFSET          SAMA5D2_SDMMC_PVRX_OFFSET(6) /* SDR104/HS200 */
 #define SAMA5D2_SDMMC_PVR7_OFFSET          SAMA5D2_SDMMC_PVRX_OFFSET(7) /* DDR50 */
+
 #define SAMA5D2_SDMMC_SISR_OFFSET          0x00fc /* Slot Interrupt Status Register */
 #define SAMA5D2_SDMMC_HCVR_OFFSET          0x00fe /* Host Controller Version Register */
 #define SAMA5D2_SDMMC_APSR_OFFSET          0x0200 /* Additional Present State Register */
@@ -111,7 +99,7 @@
 #define SAMA5D2_SDMMC_CACR_OFFSET          0x0230 /* Capabilities Control Register */
 #define SAMA5D2_SDMMC_CALCR_OFFSET         0x0240 /* Calibration Control Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 /* For SDMMC0 ... */
 
@@ -239,7 +227,7 @@
 #define SAMA5D2_SDMMC1_CACR          (SAM_SDMMC1_VBASE + SAMA5D2_SDMMC_CACR_OFFSET)
 #define SAMA5D2_SDMMC1_CALCR         (SAM_SDMMC1_VBASE + SAMA5D2_SDMMC_CALCR_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Block Size Register (0x04) */
 
@@ -295,6 +283,7 @@
 #  define SDMMC_CR_CMDTYP_SUSPEND        (1 << SDMMC_CR_CMDTYP_SHIFT) /* CMD52 to write "Bus Suspend" in CCCR */
 #  define SDMMC_CR_CMDTYP_RESUME         (2 << SDMMC_CR_CMDTYP_SHIFT) /* CMD52 to write "Function Select" in CCCR */
 #  define SDMMC_CR_CMDTYP_ABORT          (3 << SDMMC_CR_CMDTYP_SHIFT) /* CMD12, CMD52 to write "I/O Abort" in CCCR */
+
 #define SDMMC_CR_CMDINX_SHIFT            (8)         /* Bits 8-13: Command Index */
 #define SDMMC_CR_CMDINX_MASK             (0x3f << SDMMC_CR_CMDINX_SHIFT)
 
@@ -328,11 +317,13 @@
 #define SDMMC_HC1R_DW_MASK               (1 << SDMMC_HC1R_DW_SHIFT)
 #  define SDMMC_HC1R_DW_1BIT             (0 << SDMMC_HC1R_DW_SHIFT) /* 1-bit mode */
 #  define SDMMC_HC1R_DW_4BIT             (1 << SDMMC_HC1R_DW_SHIFT) /* 4-bit mode */
+
 #define SDMMC_H1CR_HSEN                  (1 << 2)     /* Bit 2: High Speed Enable */
 #define SDMMC_H1CR_DMASEL_SHIFT          (3)          /* Bits 3-4: DMA Select */
 #define SDMMC_H1CR_DMASEL_MASK           (3 << SDMMC_DMASEL_SHIFT)
 #  define SDMMC_H1CR_DMASEL_SDMA         (0 << SDMMC_DMASEL_SHIFT) /* SDMA is selected */
 #  define SDMMC_H1CR_DMASEL_ADMA32       (2 << SDMMC_DMASEL_SHIFT) /* 32-bit Address ADMA2 is selected */
+
 #define SDMMC_H1CR_EXTDW                 (1 << 5)     /* Bit 5:  Extended Data Width (e.MMC) */
 #define SDMMC_H1CR_CARDDTL               (1 << 6)     /* Bit 6:  Card Detect Test Level */
 #define SDMMC_H1CR_CARDDSEL              (1 << 7)     /* Bit 7:  Card Detect Signal Selection */
@@ -479,9 +470,11 @@
 #  define SDMMC_HC2R_UHSMS_SDR50         (2 << SDMMC_HC2R_UHSMS_SHIFT) /* UHS SDR50 Mode */
 #  define SDMMC_HC2R_UHSMS_SDR104        (3 << SDMMC_HC2R_UHSMS_SHIFT) /* UHS SDR104 Mode */
 #  define SDMMC_HC2R_UHSMS_DDR50         (4 << SDMMC_HC2R_UHSMS_SHIFT) /* UHS DDR50 Mode */
+
 #define SDMMC_HC2R_HS200EN_SHIFT         (0)          /* Bits 0-3: HS200 Mode Enable (e.MMC) */
 #define SDMMC_HC2R_HS200EN_MASK          (0x0f << SDMMC_HC2R_HS200EN_SHIFT)
 #  define SDMMC_HC2R_HS200EN_ENABLE      (0x0b << SDMMC_HC2R_HS200EN_SHIFT) /* HS200 mode is enabled */
+
 #define SDMMC_HC2R_VS18EN                (1 << 3)     /* Bit 3: 1.8V Signaling Enable */
 #define SDMMC_HC2R_DRVSEL_SHIFT          (4)          /* Bits 4-5: Driver Strength Select */
 #define SDMMC_HC2R_DRVSEL_MASK           (3 << SDMMC_HC2R_DRVSEL_SHIFT)
@@ -489,6 +482,7 @@
 #  define SDMMC_HC2R_DRVSEL_TYPEA        (1 << SDMMC_HC2R_DRVSEL_SHIFT) /* Driver Type A is selected */
 #  define SDMMC_HC2R_DRVSEL_TYPEC        (2 << SDMMC_HC2R_DRVSEL_SHIFT) /* Driver Type C is selected */
 #  define SDMMC_HC2R_DRVSEL_TYPED        (3 << SDMMC_HC2R_DRVSEL_SHIFT) /* Driver Type D is selected */
+
 #define SDMMC_HC2R_EXTUN                 (1 << 6)     /* Bit 6: Execute Tuning */
 #define SDMMC_HC2R_SCLKSEL               (1 << 7)     /* Bit 7: Sampling Clock Select */
 #define SDMMC_HC2R_ASINTEN               (1 << 14)    /* Bit 14: Asynchronous Interrupt Enable */
@@ -511,6 +505,7 @@
 #define   SDMMC_CA0R_MAXBLKL_1024        (1 << SDMMC_CA0R_MAXBLKL_SHIFT) /* 1024 bytes */
 #define   SDMMC_CA0R_MAXBLKL_2048        (2 << SDMMC_CA0R_MAXBLKL_SHIFT) /* 2048 bytes */
 #define   SDMMC_CA0R_MAXBLKL_NONE        (3 << SDMMC_CA0R_MAXBLKL_SHIFT) /* Reserved */
+
 #define SDMMC_CA0R_ED8SUP                (1 << 18)    /* Bit 18: 8-Bit Support for Embedded Device */
 #define SDMMC_CA0R_ADMA2SUP              (1 << 19)    /* Bit 19: ADMA2 Support */
 #define SDMMC_CA0R_HSSUP                 (1 << 21)    /* Bit 21: High Speed Support */
@@ -543,6 +538,7 @@
 #define   SDMMC_CA1R_RTMOD_MODE1         (0 << SDMMC_CA1R_RTMOD_SHIFT) /* MODE1: Timer */
 #define   SDMMC_CA1R_RTMOD_MODE2         (1 << SDMMC_CA1R_RTMOD_SHIFT) /* MODE2: Timer and Retuning Request */
 #define   SDMMC_CA1R_RTMOD_MODE3         (2 << SDMMC_CA1R_RTMOD_SHIFT) /* MODE3: Auto Retuning Timer and Retuning Request */
+
 #define SDMMC_CA1R_CLKMULT_SHIFT         (16)         /* Bits 16-23: Clock Multiplier */
 #define SDMMC_CA1R_CLKMULT_MASK          (0xf << SDMMC_CA1R_CLKMULT_SHIFT)
 #define   SDMMC_CA1R_CLKMULT(n)          ((n & 0xf) << SDMMC_CA1R_CLKMULT_SHIFT)
@@ -604,16 +600,16 @@
 #define   SDMMC_CACR_KEY_ENABLE          (0x46 << SDMMC_CACR_KEY_SHIFT)
 #define   SDMMC_CACR_KEY_DISABLE         (0x00 << SDMMC_CACR_KEY_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAMA5D2_SDMMC_H */

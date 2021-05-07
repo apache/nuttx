@@ -1,58 +1,43 @@
-/************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc54_flexcomm.h
+/****************************************************************************
+ * arch/arm/src/lpc54xx/hardware/lpc54_flexcomm.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_FLEXCOMM_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_FLEXCOMM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC54_FLEXCOMM_PSELID_OFFSET   0x0ff8  /* Peripheral Select /Flexcomm Interface ID */
 #define LPC54_FLEXCOMM_PID_OFFSET      0x0ffc  /* Peripheral identification register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC54_FLEXCOMM0_PSELID         (LPC54_FLEXCOMM0_BASE+LPC54_FLEXCOMM_PSELID_OFFSET)
 #define LPC54_FLEXCOMM0_PID            (LPC54_FLEXCOMM0_BASE+LPC54_FLEXCOMM_PID_OFFSET)
@@ -84,7 +69,7 @@
 #define LPC54_FLEXCOMM9_PSELID         (LPC54_FLEXCOMM9_BASE+LPC54_FLEXCOMM_PSELID_OFFSET)
 #define LPC54_FLEXCOMM9_PID            (LPC54_FLEXCOMM9_BASE+LPC54_FLEXCOMM_PID_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Peripheral Select /Flexcomm Interface ID */
 
@@ -96,6 +81,7 @@
 #  define FLEXCOMM_PSELID_PERSEL_I2C   (3 << FLEXCOMM_PSELID_PERSEL_SHIFT) /* I2C function selected */
 #  define FLEXCOMM_PSELID_PERSEL_I2STX (4 << FLEXCOMM_PSELID_PERSEL_SHIFT) /* I2S transmit function */
 #  define FLEXCOMM_PSELID_PERSEL_I2SRX (5 << FLEXCOMM_PSELID_PERSEL_SHIFT) /* I2S receive function */
+
 #define FLEXCOMM_PSELID_LOCK           (1 << 3)  /* Bit 3:  Lock the peripheral select */
 #define FLEXCOMM_PSELID_USARTPRESENT   (1 << 4)  /* Bit 4:  USART present indicator */
 #define FLEXCOMM_PSELID_SPIPRESENT     (1 << 5)  /* Bit 5:  SPI present indicator */

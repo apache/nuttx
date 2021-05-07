@@ -127,7 +127,9 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
               status = work_cancel(LPWORK, &aioc->aioc_work);
               if (status >= 0)
                 {
-                  /* Remove the container from the list of pending transfers */
+                  /* Remove the container from the list of pending
+                   * transfers
+                   */
 
                   pid = aioc->aioc_pid;
                   aioc_decant(aioc);
@@ -182,7 +184,9 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
               status = work_cancel(LPWORK, &aioc->aioc_work);
               if (status >= 0)
                 {
-                  /* Remove the container from the list of pending transfers */
+                  /* Remove the container from the list of pending
+                   * transfers
+                   */
 
                   next   =
                     (FAR struct aio_container_s *)aioc->aioc_link.flink;

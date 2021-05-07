@@ -172,7 +172,7 @@ static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
  * Input Parameters:
  *   psock    - A pointer to a user allocated socket structure to be
  *              initialized.
- *   protocol - NetLink socket protocol (see sys/socket.h)
+ *   protocol - CAN socket protocol (see sys/socket.h)
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
@@ -209,7 +209,7 @@ static int can_setup(FAR struct socket *psock, int protocol)
 
   if (domain == PF_CAN && (type == SOCK_RAW || type == SOCK_DGRAM))
     {
-      /* Allocate the NetLink socket connection structure and save it in the
+      /* Allocate the CAN socket connection structure and save it in the
        * new socket instance.
        */
 
@@ -305,7 +305,7 @@ static void can_addref(FAR struct socket *psock)
  *   space (address family) but has no name assigned.
  *
  * Input Parameters:
- *   conn     NetLink socket connection structure
+ *   conn     CAN socket connection structure
  *   addr     Socket local address
  *   addrlen  Length of 'addr'
  *
@@ -367,7 +367,7 @@ static int can_bind(FAR struct socket *psock,
  *   the object pointed to by address is unspecified.
  *
  * Input Parameters:
- *   conn     NetLink socket connection structure
+ *   conn     CAN socket connection structure
  *   addr     sockaddr structure to receive data [out]
  *   addrlen  Length of sockaddr structure [in/out]
  *
@@ -437,7 +437,7 @@ static int can_getpeername(FAR struct socket *psock,
  *
  * Returned Value:
  *   On success, zero is returned. On error, a negated errno value is
- *   returned.  See list() for the set of appropriate error values.
+ *   returned.  See listen() for the set of appropriate error values.
  *
  ****************************************************************************/
 
@@ -662,7 +662,7 @@ errout_with_lock:
  * Name: can_close
  *
  * Description:
- *   Performs the close operation on a NetLink socket instance
+ *   Performs the close operation on a CAN socket instance
  *
  * Input Parameters:
  *   psock   Socket instance

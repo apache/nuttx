@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/errno/lib_errno.c
+ * libs/libc/errno/lib_errno.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

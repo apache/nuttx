@@ -64,7 +64,7 @@
  * Public Types
  ****************************************************************************/
 
-/* Describes memory organization block information in ONFI parameter page*/
+/* Describes memory organization block information in ONFI parameter page */
 
 struct onfi_pgparam_s
 {

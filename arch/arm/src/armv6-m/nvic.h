@@ -63,6 +63,7 @@
 
 #define ARMV6M_SYSCON_CPUID_OFFSET     0x0000  /* CPUID Register */
 #define ARMV6M_SYSCON_ICSR_OFFSET      0x0004  /* Interrupt control and state register  */
+#define ARMV6M_SYSCON_VECTAB_OFFSET    0x0008  /* Vector table offset register */
 #define ARMV6M_SYSCON_AIRCR_OFFSET     0x000c  /* Application interrupt and reset control register */
 #define ARMV6M_SYSCON_SCR_OFFSET       0x0010  /* System control register */
 #define ARMV6M_SYSCON_CCR_OFFSET       0x0014  /* Configuration and control register */
@@ -98,6 +99,7 @@
 
 #define ARMV6M_SYSCON_CPUID            (ARMV6M_SYSCON2_BASE+ARMV6M_SYSCON_CPUID_OFFSET)
 #define ARMV6M_SYSCON_ICSR             (ARMV6M_SYSCON2_BASE+ARMV6M_SYSCON_ICSR_OFFSET)
+#define ARMV6M_SYSCON_VECTAB           (ARMV6M_SYSCON2_BASE+ARMV6M_SYSCON_VECTAB_OFFSET)
 #define ARMV6M_SYSCON_AIRCR            (ARMV6M_SYSCON2_BASE+ARMV6M_SYSCON_AIRCR_OFFSET)
 #define ARMV6M_SYSCON_SCR              (ARMV6M_SYSCON2_BASE+ARMV6M_SYSCON_SCR_OFFSET)
 #define ARMV6M_SYSCON_CCR              (ARMV6M_SYSCON2_BASE+ARMV6M_SYSCON_CCR_OFFSET)

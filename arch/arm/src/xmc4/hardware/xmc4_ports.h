@@ -1,10 +1,8 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/xmc4/hardware/xmc4_ports.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,34 +35,36 @@
  *
  *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
- * Infineon Technologies AG (Infineon) is supplying this software for use with
- * Infineon's microcontrollers.  This file can be freely distributed within
- * development tools that are supporting such microcontrollers.
+ * Infineon Technologies AG (Infineon) is supplying this software for use
+ * with Infineon's microcontrollers.  This file can be freely distributed
+ * within development tools that are supporting such microcontrollers.
  *
  * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ * SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL,
+ * INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers. */
 
 #ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PORTS_H
 #define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_PORTS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/xmc4_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* PORTS Registers */
 
@@ -87,7 +87,7 @@
 #define XMC4_PORT_PPS_OFFSET        0x0070    /* Port Pin Power Save Register */
 #define XMC4_PORT_HWSEL_OFFSET      0x0074    /* Port Pin Hardware Select Register */
 
-/* Register Addresses ****************************************************************/
+/* Register Addresses *******************************************************/
 
 #define XMC4_PORT0_OUT              (XMC4_PORT0_BASE+XMC4_PORT_OUT_OFFSET)
 #define XMC4_PORT0_OMR              (XMC4_PORT0_BASE+XMC4_PORT_OMR_OFFSET)
@@ -245,9 +245,10 @@
 #define XMC4_PORT15_PPS             (XMC4_PORT15_BASE+XMC4_PORT_PPS_OFFSET)
 #define XMC4_PORT15_HWSEL           (XMC4_PORT15_BASE+XMC4_PORT_HWSEL_OFFSET)
 
-/* Register Bit-Field Definitions **************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
-/* Port Output Register, , Port Input Register, Port Pin Function Decision Control
+/* Port Output Register, , Port Input Register,
+ * Port Pin Function Decision Control
  * Register, Port Pin Power Save Register.
  */
 
@@ -266,6 +267,7 @@
 #define OMR_PR(n)                   (1 << ((n) + 16))
 
 /* Basic port input/output field values */
+
 /* Direct Input */
 
 #define IOCR_INPUT_NOPULL           0         /* No internal pull device active */
@@ -275,6 +277,7 @@
                                                * continuously samples the input value */
 
 /* Any of the above input configurations may be OR'ed with */
+
 /* Inverted Input */
 
 #define IOCR_INPUT_INVERT           4         /* Inverted input modifier */
@@ -288,6 +291,7 @@
 #define IOCR_OUTPUT_ALT4            20        /* Alternate output function 4 */
 
 /* Any of the above may be OR'ed with */
+
 /* Open drain output */
 
 #define IOCR_OUTPUT_OPENDRAIN       8         /* Output drain output modifier */
@@ -365,6 +369,7 @@
 #  define PORT_IOCR12_PC15(n)       ((uint32_t)(n) << PORT_IOCR12_PC15_SHIFT)
 
 /* Pad driver field values */
+
 /* Pad class A1: */
 
 #define PDR_PADA1_MEDIUM           0         /* Medium driver */

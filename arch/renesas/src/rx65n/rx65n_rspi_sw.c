@@ -26,7 +26,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <math.h>
 #include <stdbool.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -1375,7 +1374,7 @@ static uint32_t rspi_setfrequency(FAR struct spi_dev_s *dev,
   if (frequency != priv->frequency)
     {
       /* Below formula used to calculate bit rate
-       * Bit rate f(PCLK)/(2 × (n + 1) × 2^N) .
+       * Bit rate f(PCLK)/(2 * (n + 1) * 2^N) .
        * n denotes SPBR setting (0,1,2..255) .
        * N denotes a BRDV[1:0] bit setting (0, 1, 2, 3) .
        */

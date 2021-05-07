@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/a1x_pio.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_A1X_PIO_H
 #define __ARCH_ARM_SRC_A1X_A1X_PIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +32,11 @@
 
 #include "hardware/a1x_pio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Bit-encoded input to a1x_pio_config() ********************************************/
+/* Bit-encoded input to a1x_pio_config() ************************************/
 
 /* 32-bit Encoding:
  *
@@ -137,7 +122,8 @@
 #  define PIO_INT_LOWLEVEL        (PIO_REG_INT_LOWLEVEL << PIO_INT_SHIFT)
 #  define PIO_INT_BOTHEDGES       (PIO_REG_INT_BOTHEDGES << PIO_INT_SHIFT)
 
-/* If the pin is an PIO output, then this identifies the initial output value:
+/* If the pin is an PIO output, then this identifies the initial
+ * output value:
  *
  *   3322 2222 2222 1111 1111 11
  *   1098 7654 3210 9876 5432 1098 7654 3210
@@ -213,23 +199,23 @@
 #define PIO_PIN30                 (30 << PIO_PIN_SHIFT)
 #define PIO_PIN31                 (31 << PIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Must be big enough to hold the 32-bit encoding */
 
 typedef uint32_t pio_pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -240,17 +226,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_irqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for PIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   PIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_A1X_PIO_IRQ
 void a1x_pio_irqinitialize(void);
@@ -258,43 +245,43 @@ void a1x_pio_irqinitialize(void);
 #  define a1x_pio_irqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_config
  *
  * Description:
  *   Configure a PIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int a1x_pio_config(pio_pinset_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_write
  *
  * Description:
  *   Write one or zero to the selected PIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void a1x_pio_write(pio_pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_read
  *
  * Description:
  *   Read one or zero from the selected PIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool a1x_pio_read(pio_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_irqenable
  *
  * Description:
  *   Enable the interrupt for specified PIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_A1X_PIO_IRQ
 void a1x_pio_irqenable(int irq);
@@ -302,13 +289,13 @@ void a1x_pio_irqenable(int irq);
 #  define a1x_pio_irqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_irqdisable
  *
  * Description:
  *   Disable the interrupt for specified PIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_A1X_PIO_IRQ
 void a1x_pio_irqdisable(int irq);

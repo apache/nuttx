@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/power/bq769x0.h
+ * include/nuttx/power/bq769x0.h
  * Lower half driver for 769x0 battery monitor
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more

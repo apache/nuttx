@@ -42,11 +42,14 @@ int mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode);
 
 int mrf24j40_setchannel(FAR struct mrf24j40_radio_s *dev, uint8_t chan);
 
-int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *panid);
+int mrf24j40_setpanid(FAR struct mrf24j40_radio_s *dev,
+                      FAR const uint8_t *panid);
 
-int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *saddr);
+int mrf24j40_setsaddr(FAR struct mrf24j40_radio_s *dev,
+                      FAR const uint8_t *saddr);
 
-int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev, FAR const uint8_t *eaddr);
+int mrf24j40_seteaddr(FAR struct mrf24j40_radio_s *dev,
+                      FAR const uint8_t *eaddr);
 
 int mrf24j40_setcoordsaddr(FAR struct mrf24j40_radio_s *dev,
                            FAR const uint8_t *saddr);

@@ -56,16 +56,15 @@
  ****************************************************************************/
 
 /* The freerun client must allocate an instance of this structure and called
- * stm32l4_freerun_initialize() before using the freerun facilities.  The client
- * should not access the contents of this structure directly since the
+ * stm32l4_freerun_initialize() before using the freerun facilities.  The
+ * client should not access the contents of this structure directly since the
  * contents are subject to change.
  */
 
 struct stm32l4_freerun_s
 {
-  uint8_t chan;                    /* The timer/counter in use */
-  bool running;                    /* True: the timer is running */
-  uint32_t overflow;               /* Timer counter overflow */
+  uint8_t chan;                      /* The timer/counter in use */
+  uint32_t overflow;                 /* Timer counter overflow */
   FAR struct stm32l4_tim_dev_s *tch; /* Handle returned by stm32l4_tim_init() */
   uint32_t frequency;
 };

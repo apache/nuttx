@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/is25xp.c
  * Driver for SPI-based IS25LPxx parts 32MBit and larger.
  *
@@ -37,11 +37,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,28 +59,30 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
-/* Per the data sheet, IS25xP parts can be driven with either SPI mode 0 (CPOL=0 and
- * CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to specify
- * CONFIG_IS25XP_SPIMODE to select the best mode for your device.  If
- * CONFIG_IS25XP_SPIMODE is not defined, mode 0 will be used.
+/* Configuration ************************************************************/
+
+/* Per the data sheet, IS25xP parts can be driven with either SPI mode 0
+ * (CPOL=0 and CPHA=0) or mode 3 (CPOL=1 and CPHA=1).  So you may need to
+ * specify CONFIG_IS25XP_SPIMODE to select the best mode for your device.
+ * If CONFIG_IS25XP_SPIMODE is not defined, mode 0 will be used.
  */
 
 #ifndef CONFIG_IS25XP_SPIMODE
-#  define CONFIG_IS25XP_SPIMODE SPIDEV_MODE0
+#define CONFIG_IS25XP_SPIMODE SPIDEV_MODE0
 #endif
 
 /* SPI Frequency.  May be up to 50MHz. */
 
 #ifndef CONFIG_IS25XP_SPIFREQUENCY
-#  define CONFIG_IS25XP_SPIFREQUENCY 20000000
+#define CONFIG_IS25XP_SPIFREQUENCY 20000000
 #endif
 
-/* IS25 Registers *******************************************************************/
+/* IS25 Registers ***********************************************************/
+
 /* Identification register values */
 
 #define IS25_MANUFACTURER         0x9d
@@ -108,22 +110,24 @@
 #define IS25_IS25LP128_PAGE_SHIFT     8     /* Page size 1 << 8 = 256 */
 #define IS25_IS25LP128_NPAGES         65536
 
-
 /* Instructions */
-/*      Command        Value      N Description             Addr Dummy  Data  */
-#define IS25_WREN      0x06    /* 1 Write Enable              0   0     0     */
-#define IS25_WRDI      0x04    /* 1 Write Disable             0   0     0     */
-#define IS25_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
-#define IS25_RDSR      0x05    /* 1 Read Status Register      0   0     >=1   */
-//#define IS25_EWSR    0x50    /* 1 Write enable status       0   0     0     */
-#define IS25_WRSR      0x01    /* 1 Write Status Register     0   0     1     */
-#define IS25_READ      0x03    /* 1 Read Data Bytes           3   0     >=1   */
-#define IS25_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1   */
-#define IS25_PP        0x02    /* 1 Page Program              3   0     1-256 */
-#define IS25_SE        0x20    /* 1 Sector Erase              3   0     0     */
-#define IS25_BE32      0x52    /* 2 32K Block Erase           3   0     0     */
-#define IS25_BE64      0xD8    /* 2 64K Block Erase           3   0     0     */
-#define IS25_CER       0xC7    /* 1 Chip Erase                0   0     0     */
+
+/*   Command          Value    N Description            Addr Dummy  Data */
+
+#define IS25_WREN      0x06  /* 1 Write Enable           0   0     0     */
+#define IS25_WRDI      0x04  /* 1 Write Disable          0   0     0     */
+#define IS25_RDID      0x9f  /* 1 Read Identification    0   0     1-3   */
+#define IS25_RDSR      0x05  /* 1 Read Status Register   0   0     >=1   */
+
+/* #define IS25_EWSR    0x50    1 Write enable status    0   0     0     */
+#define IS25_WRSR      0x01  /* 1 Write Status Register  0   0     1     */
+#define IS25_READ      0x03  /* 1 Read Data Bytes        3   0     >=1   */
+#define IS25_FAST_READ 0x0b  /* 1 Higher speed read      3   1     >=1   */
+#define IS25_PP        0x02  /* 1 Page Program           3   0     1-256 */
+#define IS25_SE        0x20  /* 1 Sector Erase           3   0     0     */
+#define IS25_BE32      0x52  /* 2 32K Block Erase        3   0     0     */
+#define IS25_BE64      0xD8  /* 2 64K Block Erase        3   0     0     */
+#define IS25_CER       0xC7  /* 1 Chip Erase             0   0     0     */
 
 /* NOTE 1: All parts.
  * NOTE 2: In IS25XP terminology, 0x52 and 0xd8 are block erase and 0x20
@@ -133,27 +137,27 @@
 
 /* Status register bit definitions */
 
-#define IS25_SR_WIP              (1 << 0)                /* Bit 0: Write in progress bit */
-#define IS25_SR_WEL              (1 << 1)                /* Bit 1: Write enable latch bit */
-#define IS25_SR_BP_SHIFT         (2)                     /* Bits 2-5: Block protect bits */
-#define IS25_SR_BP_MASK          (15 << IS25_SR_BP_SHIFT)
-#  define IS25_SR_BP_NONE        (0 << IS25_SR_BP_SHIFT) /* Unprotected */
-#  define IS25_SR_BP_UPPER128th  (1 << IS25_SR_BP_SHIFT) /* Upper 128th */
-#  define IS25_SR_BP_UPPER64th   (2 << IS25_SR_BP_SHIFT) /* Upper 64th */
-#  define IS25_SR_BP_UPPER32nd   (3 << IS25_SR_BP_SHIFT) /* Upper 32nd */
-#  define IS25_SR_BP_UPPER16th   (4 << IS25_SR_BP_SHIFT) /* Upper 16th */
-#  define IS25_SR_BP_UPPER8th    (5 << IS25_SR_BP_SHIFT) /* Upper 8th */
-#  define IS25_SR_BP_UPPERQTR    (6 << IS25_SR_BP_SHIFT) /* Upper quarter */
-#  define IS25_SR_BP_UPPERHALF   (7 << IS25_SR_BP_SHIFT) /* Upper half */
-#  define IS25_SR_BP_ALL         (8 << IS25_SR_BP_SHIFT) /* All sectors */
-#define IS25_SR_QE               (1 << 6)                /* Bit 6: Quad (QSPI) enable bit */
-#define IS25_SR_SRWD             (1 << 7)                /* Bit 7: Status register write protect */
+#define IS25_SR_WIP            (1 << 0)                /* Bit 0: Write in progress bit */
+#define IS25_SR_WEL            (1 << 1)                /* Bit 1: Write enable latch bit */
+#define IS25_SR_BP_SHIFT       (2)                     /* Bits 2-5: Block protect bits */
+#define IS25_SR_BP_MASK        (15 << IS25_SR_BP_SHIFT)
+#define IS25_SR_BP_NONE        (0 << IS25_SR_BP_SHIFT) /* Unprotected */
+#define IS25_SR_BP_UPPER128th  (1 << IS25_SR_BP_SHIFT) /* Upper 128th */
+#define IS25_SR_BP_UPPER64th   (2 << IS25_SR_BP_SHIFT) /* Upper 64th */
+#define IS25_SR_BP_UPPER32nd   (3 << IS25_SR_BP_SHIFT) /* Upper 32nd */
+#define IS25_SR_BP_UPPER16th   (4 << IS25_SR_BP_SHIFT) /* Upper 16th */
+#define IS25_SR_BP_UPPER8th    (5 << IS25_SR_BP_SHIFT) /* Upper 8th */
+#define IS25_SR_BP_UPPERQTR    (6 << IS25_SR_BP_SHIFT) /* Upper quarter */
+#define IS25_SR_BP_UPPERHALF   (7 << IS25_SR_BP_SHIFT) /* Upper half */
+#define IS25_SR_BP_ALL         (8 << IS25_SR_BP_SHIFT) /* All sectors */
+#define IS25_SR_QE             (1 << 6)                /* Bit 6: Quad (QSPI) enable bit */
+#define IS25_SR_SRWD           (1 << 7)                /* Bit 7: Status register write protect */
 
 #define IS25_DUMMY     0xa5
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This type represents the state of the MTD device.  The struct mtd_dev_s
  * must appear at the beginning of the definition so that you can freely
@@ -171,9 +175,9 @@ struct is25xp_dev_s
   uint8_t  lastwaswrite;     /* Indicates if last operation was write */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
@@ -182,29 +186,42 @@ static inline void is25xp_unlock(FAR struct spi_dev_s *dev);
 static inline int is25xp_readid(struct is25xp_dev_s *priv);
 static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv);
 static void is25xp_writeenable(struct is25xp_dev_s *priv);
-static inline void is25xp_sectorerase(struct is25xp_dev_s *priv, off_t offset, uint8_t type);
+static inline void is25xp_sectorerase(struct is25xp_dev_s *priv,
+                                      off_t offset,
+                                      uint8_t type);
 static inline int  is25xp_bulkerase(struct is25xp_dev_s *priv);
-static inline void is25xp_pagewrite(struct is25xp_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t offset);
+static inline void is25xp_pagewrite(struct is25xp_dev_s *priv,
+                                    FAR const uint8_t *buffer,
+                                    off_t offset);
 
 /* MTD driver methods */
 
-static int is25xp_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static ssize_t is25xp_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buf);
-static ssize_t is25xp_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf);
-static ssize_t is25xp_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer);
+static int is25xp_erase(FAR struct mtd_dev_s *dev,
+                        off_t startblock,
+                        size_t nblocks);
+static ssize_t is25xp_bread(FAR struct mtd_dev_s *dev,
+                            off_t startblock,
+                            size_t nblocks, FAR uint8_t *buf);
+static ssize_t is25xp_bwrite(FAR struct mtd_dev_s *dev,
+                             off_t startblock,
+                             size_t nblocks, FAR const uint8_t *buf);
+static ssize_t is25xp_read(FAR struct mtd_dev_s *dev,
+                           off_t offset,
+                           size_t nbytes,
+                           FAR uint8_t *buffer);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer);
+static ssize_t is25xp_write(FAR struct mtd_dev_s *dev,
+                            off_t offset,
+                            size_t nbytes,
+                            FAR const uint8_t *buffer);
 #endif
-static int is25xp_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int is25xp_ioctl(FAR struct mtd_dev_s *dev,
+                        int cmd,
+                        unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_lock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void is25xp_lock(FAR struct spi_dev_s *dev)
 {
@@ -212,16 +229,18 @@ static void is25xp_lock(FAR struct spi_dev_s *dev)
    * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusive access to
-   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the SPI bus. We will retain that exclusive access until the
+   * bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
-  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI bus is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the SPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the SPI is properly
+   * configured for the device.
+   * If the SPI bus is being shared, then it may have been left in an
+   * incompatible state.
    */
 
   SPI_SETMODE(dev, CONFIG_IS25XP_SPIMODE);
@@ -230,18 +249,18 @@ static void is25xp_lock(FAR struct spi_dev_s *dev)
   SPI_SETFREQUENCY(dev, CONFIG_IS25XP_SPIFREQUENCY);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void is25xp_unlock(FAR struct spi_dev_s *dev)
 {
   SPI_LOCK(dev, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_readid
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int is25xp_readid(struct is25xp_dev_s *priv)
 {
@@ -302,9 +321,9 @@ static inline int is25xp_readid(struct is25xp_dev_s *priv)
   return -ENODEV;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_waitwritecomplete
- ************************************************************************************/
+ ****************************************************************************/
 
 static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
 {
@@ -335,7 +354,9 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
 
   do
     {
-      /* Send a dummy byte to generate the clock needed to shift out the status */
+      /* Send a dummy byte to generate the clock needed to shift out
+       * the status
+       */
 
       status = SPI_SEND(priv->dev, IS25_DUMMY);
     }
@@ -359,7 +380,9 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
 
       SPI_SEND(priv->dev, IS25_RDSR);
 
-      /* Send a dummy byte to generate the clock needed to shift out the status */
+      /* Send a dummy byte to generate the clock needed to shift out
+       * the status
+       */
 
       status = SPI_SEND(priv->dev, IS25_DUMMY);
 
@@ -367,9 +390,9 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 
-      /* Given that writing could take up to few tens of milliseconds, and erasing
-       * could take more.  The following short delay in the "busy" case will allow
-       * other peripherals to access the SPI bus.
+      /* Given that writing could take up to few tens of milliseconds,
+       * and erasing could take more.  The following short delay in the
+       * "busy" case will allow other peripherals to access the SPI bus.
        */
 
       if ((status & IS25_SR_WIP) != 0)
@@ -387,9 +410,9 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
   finfo("Complete\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  is25xp_writeenable
- ************************************************************************************/
+ ****************************************************************************/
 
 static void is25xp_writeenable(struct is25xp_dev_s *priv)
 {
@@ -407,9 +430,9 @@ static void is25xp_writeenable(struct is25xp_dev_s *priv)
   finfo("Enabled\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_unprotect
- ************************************************************************************/
+ ****************************************************************************/
 
 static void is25xp_unprotect(struct is25xp_dev_s *priv)
 {
@@ -429,11 +452,13 @@ static void is25xp_unprotect(struct is25xp_dev_s *priv)
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  is25xp_sectorerase
- ************************************************************************************/
+ ****************************************************************************/
 
-static void is25xp_sectorerase(struct is25xp_dev_s *priv, off_t sector, uint8_t type)
+static void is25xp_sectorerase(struct is25xp_dev_s *priv,
+                               off_t sector,
+                               uint8_t type)
 {
   off_t offset;
 
@@ -479,9 +504,9 @@ static void is25xp_sectorerase(struct is25xp_dev_s *priv, off_t sector, uint8_t 
   finfo("Erased\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  is25xp_bulkerase
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int is25xp_bulkerase(struct is25xp_dev_s *priv)
 {
@@ -516,12 +541,13 @@ static inline int is25xp_bulkerase(struct is25xp_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  is25xp_pagewrite
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void is25xp_pagewrite(struct is25xp_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t page)
+static inline void is25xp_pagewrite(struct is25xp_dev_s *priv,
+                                    FAR const uint8_t *buffer,
+                                    off_t page)
 {
   off_t offset = page << priv->pageshift;
 
@@ -564,9 +590,9 @@ static inline void is25xp_pagewrite(struct is25xp_dev_s *priv, FAR const uint8_t
   finfo("Written\n");
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  is25xp_bytewrite
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
 static inline void is25xp_bytewrite(struct is25xp_dev_s *priv,
@@ -613,11 +639,13 @@ static inline void is25xp_bytewrite(struct is25xp_dev_s *priv,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int is25xp_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int is25xp_erase(FAR struct mtd_dev_s *dev,
+                        off_t startblock,
+                        size_t nblocks)
 {
   FAR struct is25xp_dev_s *priv = (FAR struct is25xp_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -689,21 +717,28 @@ static int is25xp_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblo
   return (int)nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_bread
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t is25xp_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                             FAR uint8_t *buffer)
+static ssize_t is25xp_bread(FAR struct mtd_dev_s *dev,
+                            off_t startblock,
+                            size_t nblocks,
+                            FAR uint8_t *buffer)
 {
   FAR struct is25xp_dev_s *priv = (FAR struct is25xp_dev_s *)dev;
   ssize_t nbytes;
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the byte-oriented
+   * read
+   */
 
-  nbytes = is25xp_read(dev, startblock << priv->pageshift, nblocks << priv->pageshift, buffer);
+  nbytes = is25xp_read(dev,
+                       startblock << priv->pageshift,
+                       nblocks << priv->pageshift,
+                       buffer);
   if (nbytes > 0)
     {
         return nbytes >> priv->pageshift;
@@ -712,12 +747,14 @@ static ssize_t is25xp_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t 
   return (int)nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_bwrite
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t is25xp_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                              FAR const uint8_t *buffer)
+static ssize_t is25xp_bwrite(FAR struct mtd_dev_s *dev,
+                             off_t startblock,
+                             size_t nblocks,
+                             FAR const uint8_t *buffer)
 {
   FAR struct is25xp_dev_s *priv = (FAR struct is25xp_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -733,18 +770,20 @@ static ssize_t is25xp_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t
       is25xp_pagewrite(priv, buffer, startblock);
       buffer += pagesize;
       startblock++;
-   }
+    }
 
   is25xp_unlock(priv->dev);
   return nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t is25xp_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                            FAR uint8_t *buffer)
+static ssize_t is25xp_read(FAR struct mtd_dev_s *dev,
+                           off_t offset,
+                           size_t nbytes,
+                           FAR uint8_t *buffer)
 {
   FAR struct is25xp_dev_s *priv = (FAR struct is25xp_dev_s *)dev;
 
@@ -794,13 +833,15 @@ static ssize_t is25xp_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyte
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_write
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR const uint8_t *buffer)
+static ssize_t is25xp_write(FAR struct mtd_dev_s *dev,
+                            off_t offset,
+                            size_t nbytes,
+                            FAR const uint8_t *buffer)
 {
   FAR struct is25xp_dev_s *priv = (FAR struct is25xp_dev_s *)dev;
   int    startpage;
@@ -833,7 +874,7 @@ static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 
       count = nbytes;
       pagesize = (1 << priv->pageshift);
-      bytestowrite = pagesize - (offset & (pagesize-1));
+      bytestowrite = pagesize - (offset & (pagesize - 1));
       is25xp_bytewrite(priv, buffer, offset, bytestowrite);
 
       /* Update offset and count */
@@ -870,11 +911,13 @@ static ssize_t is25xp_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
 }
 #endif /* CONFIG_MTD_BYTE_WRITE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
-static int is25xp_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int is25xp_ioctl(FAR struct mtd_dev_s *dev,
+                        int cmd,
+                        unsigned long arg)
 {
   FAR struct is25xp_dev_s *priv = (FAR struct is25xp_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
@@ -885,16 +928,18 @@ static int is25xp_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+          FAR struct mtd_geometry_s *geo =
+                              (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks.  That is most likely not true, but the
+               * client will expect the device logic to do whatever is
+               * necessary to make it appear so.
                */
 
               geo->blocksize = (1 << priv->pageshift);
@@ -929,19 +974,19 @@ static int is25xp_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: is25xp_initialize
  *
  * Description:
- *   Create an initialize MTD device instance.  MTD devices are not registered
+ *   Create an initialize MTD device instance. MTD devices are not registered
  *   in the file system, but are created as instances that can be bound to
  *   other functions (such as a block or character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
 {
@@ -953,8 +998,8 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same SPI bus.
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would
+   * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
   priv = (FAR struct is25xp_dev_s *)kmm_zalloc(sizeof(struct is25xp_dev_s));
@@ -985,7 +1030,9 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
       ret = is25xp_readid(priv);
       if (ret != OK)
         {
-          /* Unrecognized! Discard all of that work we just did and return NULL */
+          /* Unrecognized! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
@@ -993,7 +1040,9 @@ FAR struct mtd_dev_s *is25xp_initialize(FAR struct spi_dev_s *dev)
         }
       else
         {
-          /* Make sure that the FLASH is unprotected so that we can write into it */
+          /* Make sure that the FLASH is unprotected so that we can
+           * write into it
+           */
 
           is25xp_unprotect(priv);
         }

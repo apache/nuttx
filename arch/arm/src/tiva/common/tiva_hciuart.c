@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/tiva_hciuart.c
+ * arch/arm/src/tiva/common/tiva_hciuart.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -1242,7 +1242,7 @@ static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
 
   /* If the callback is NULL, then we are detaching */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   if (callback == NULL)
     {
       uint32_t intset;
@@ -1264,7 +1264,7 @@ static void hciuart_rxattach(const struct btuart_lowerhalf_s *lower,
       state->callback = callback;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1292,7 +1292,7 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
       uint32_t intset;
       irqstate_t flags;
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       if (enable)
         {
           /* Receive an interrupt when their is anything in the Rx data
@@ -1308,7 +1308,7 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
           hciuart_disableints(config, intset);
         }
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 }
 
@@ -1494,9 +1494,9 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
 
   /* Make sure that the Tx Interrupts are disabled. */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   hciuart_disableints(config, UART_IM_TXIM);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   /* Loop until all of the user data have been moved to the Tx buffer */
 
@@ -1591,9 +1591,9 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
 
   if (state->txhead != state->txtail)
     {
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       hciuart_enableints(config, UART_IM_TXIM);
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
 
   return ntotal;

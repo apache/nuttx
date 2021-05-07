@@ -1,55 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_scif.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_SCIF_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_SCIF_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* SCIF register offsets ****************************************************************/
+/* SCIF register offsets ****************************************************/
 
 #define SAM_SCIF_IER_OFFSET               0x0000 /* Interrupt Enable Register */
 #define SAM_SCIF_IDR_OFFSET               0x0004 /* Interrupt Disable Register */
@@ -98,7 +83,7 @@
 #define SAM_SCIF_GCLKVERSION_OFFSET       0x03f8 /* Generic Clock Version Register */
 #define SAM_SCIF_VERSION_OFFSET           0x03fc /* SCIF Version Register */
 
-/* SCIF register addresses **************************************************************/
+/* SCIF register addresses **************************************************/
 
 #define SAM_SCIF_IER                      (SAM_SCIF_BASE+SAM_SCIF_IER_OFFSET)
 #define SAM_SCIF_IDR                      (SAM_SCIF_BASE+SAM_SCIF_IDR_OFFSET)
@@ -147,13 +132,18 @@
 #define SAM_SCIF_GCLKVERSION              (SAM_SCIF_BASE+SAM_SCIF_GCLKVERSION_OFFSET)
 #define SAM_SCIF_VERSION                  (SAM_SCIF_BASE+SAM_SCIF_VERSION_OFFSET)
 
-/* SCIF register bit definitions ********************************************************/
+/* SCIF register bit definitions ********************************************/
 
 /* Interrupt Enable Register */
+
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
+
 /* Interrupt Status Register */
+
 /* Interrupt Clear Register */
+
 /* Power and Clocks Status Register */
 
 #define SCIF_INT_OSC0RDY                  (1 << 0)  /* Bit 0:  OSC0 Ready */
@@ -202,6 +192,7 @@
 #  define SCIF_OSCCTRL0_STARTUP_512       (13 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 512 4.5 ms */
 #  define SCIF_OSCCTRL0_STARTUP_1K        (14 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 1024 8.9 ms */
 #  define SCIF_OSCCTRL0_STARTUP_32K2      (15 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 2768 285 ms */
+
 #define SCIF_OSCCTRL0_OSCEN               (1 << 16) /* Bit 16: Oscillator Enable */
 
 /* PLL0 Control Register */
@@ -211,11 +202,13 @@
 #define SCIF_PLL0_PLLOSC_MASK             (3 << SCIF_PLL0_PLLOSC_SHIFT)
 #  define SCIF_PLL0_PLLOSC_OSC0           (0 << SCIF_PLL0_PLLOSC_SHIFT) /* Output clock from Oscillator0 */
 #  define SCIF_PLL0_PLLOSC_GCLK9          (1 << SCIF_PLL0_PLLOSC_SHIFT) /* Generic clock 9 */
+
 #define SCIF_PLL0_PLLOPT_SHIFT            (3)       /* Bits 3-5: PLL Option */
 #define SCIF_PLL0_PLLOPT_MASK             (7 << SCIF_PLL0_PLLOPT_SHIFT)
 #  define SCIF_PLL0_PLLOPT_FVO            (1 << SCIF_PLL0_PLLOPT_SHIFT) /* Selects the VCO frequency range (fvco) */
 #  define SCIF_PLL0_PLLOPT_DIV2           (2 << SCIF_PLL0_PLLOPT_SHIFT) /* Divides the output frequency by 2 */
 #  define SCIF_PLL0_PLLOPT_WBM            (4 << SCIF_PLL0_PLLOPT_SHIFT) /* Wide-Bandwidth mode */
+
 #define SCIF_PLL0_PLLDIV_SHIFT            (8)       /* Bits 8-11: PLL Division Factor */
 #define SCIF_PLL0_PLLDIV_MASK             (15 << SCIF_PLL0_PLLDIV_SHIFT)
 #define SCIF_PLL0_PLLMUL_SHIFT            (16)      /* Bits 16-19: PLL Multiply Factor */
@@ -224,7 +217,8 @@
 #define SCIF_PLL0_PLLCOUNT_MASK           (63 << SCIF_PLL0_PLLCOUNT_SHIFT)
 #  define SCIF_PLL0_PLLCOUNT_MAX          (63 << SCIF_PLL0_PLLCOUNT_SHIFT)
 
-/* PLL0 operates in two frequency ranges as determined by SCIF_PLL0_PLLOPT_FVO:
+/* PLL0 operates in two frequency ranges as determined by
+ * SCIF_PLL0_PLLOPT_FVO:
  *
  * 0: 80MHz  < fvco < 180MHz
  * 1: 160MHz < fvco < 240MHz
@@ -255,6 +249,7 @@
 #  define SCIF_DFLL0CONF_RANGE1           (1 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 50-110MHz */
 #  define SCIF_DFLL0CONF_RANGE2           (2 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 25-55MHz */
 #  define SCIF_DFLL0CONF_RANGE3           (3 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 20-30MHz */
+
 #define SCIF_DFLL0CONF_FCD                (1 << 23) /* Bit 23: Fuse Calibration Done */
 #define SCIF_DFLL0CONF_CALIB_SHIFT        (24)      /* Bits 24-27: Calibration Value */
 #define SCIF_DFLL0CONF_CALIB_MASK         (15 << SCIF_DFLL0CONF_CALIB_SHIFT)
@@ -326,6 +321,7 @@
 #  define SCIF_RCFASTCFG_FRANGE_4MHZ      (0 << SCIF_RCFASTCFG_FRANGE_SHIFT) /* 4MHz range selected */
 #  define SCIF_RCFASTCFG_FRANGE_8MHZ      (1 << SCIF_RCFASTCFG_FRANGE_SHIFT) /* 8MHz range selected */
 #  define SCIF_RCFASTCFG_FRANGE_12MHZ     (2 << SCIF_RCFASTCFG_FRANGE_SHIFT) /* 12MHz range selected */
+
 #define SCIF_RCFASTCFG_LOCKMARGIN_SHIFT   (12)      /* Bits 12-15: Accepted Count Error for Lock */
 #define SCIF_RCFASTCFG_LOCKMARGIN_MASK    (15 << SCIF_RCFASTCFG_LOCKMARGIN_SHIFT)
 #define SCIF_RCFASTCFG_CALIB_SHIFT        (16)      /* Bits 16-22: Oscillator Calibration Value */
@@ -398,18 +394,27 @@
 #  define SCIF_GCCTRL_OSCSEL_GCLKIN0      (19 << SCIF_GCCTRL_OSCSEL_SHIFT) /* GCLKIN0 */
 #  define SCIF_GCCTRL_OSCSEL_GCLKIN1      (20 << SCIF_GCCTRL_OSCSEL_SHIFT) /* GCLKIN1 */
 #  define SCIF_GCCTRL_OSCSEL_GCLK11       (21 << SCIF_GCCTRL_OSCSEL_SHIFT) /* GCLK11 */
+
 #define SCIF_GCCTRL_DIV_SHIFT             (16)      /* Bits 16-31: Division Factor */
 #define SCIF_GCCTRL_DIV_MASK              (0xffff << SCIF_GCCTRL_DIV_SHIFT)
 #  define SCIF_GCCTRL_DIV(n)              ((n) << SCIF_GCCTRL_DIV_SHIFT)
 
 /* 4/8/12MHz RC Oscillator Version Register */
+
 /* Generic Clock Prescaler Version Register */
+
 /* PLL Version Register */
+
 /* Oscillator0 Version Register */
+
 /* DFLL Version Register */
+
 /* System RC Oscillator Version Register */
+
 /* 80MHz RC Oscillator Version Register */
+
 /* Generic Clock Version Register */
+
 /* SCIF Version Register */
 
 #define SCIF_VERSION_SHIFT                (0)        /* Bits 0-11: Version Number */
@@ -417,16 +422,16 @@
 #define SCIF_VARIANT_SHIFT                (16)       /* Bits 16-19: Variant Number */
 #define SCIF_VARIANT_MASK                 (15 << SCIF_VARIANT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_SCIF_H */

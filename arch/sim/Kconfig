@@ -105,6 +105,11 @@ config SIM_X8664_MICROSOFT
 
 endchoice
 
+config SIM_WALLTIME
+	bool "Run the simulation at a fixed cadence in near real-time"
+	default y
+
+if SIM_WALLTIME
 choice
 	prompt "Simulation at a fixed cadence in near real-time"
 	default SIM_WALLTIME_SLEEP
@@ -112,7 +117,12 @@ choice
 config SIM_WALLTIME_SLEEP
 	bool "Execution the simulation in near real-time using host sleep"
 	---help---
-		NOTE: This configuration setting will cause the sim target's IDLE loop to delay
+		NOTE:  In order to facility fast testing, the sim target's IDLE loop, by default,
+		calls the system timer "interrupt handler" as fast as possible.  As a result, there
+		really are no noticeable delays when a task sleeps.  However, the task really does
+		sleep -- but the time scale is wrong.  If you want behavior that is closer to
+		normal timing, then you can define SIM_WALLTIME=y in your configuration
+		file.  This configuration setting will cause the sim target's IDLE loop to delay
 		on each call so that the system "timer interrupt" is called at a rate approximately
 		correct for the system timer tick rate.  With this definition in the configuration,
 		sleep() behavior is more or less normal.
@@ -127,12 +137,14 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+endif
+
 config SIM_NETDEV
 	bool "Simulated Network Device"
 	default y
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
-	depends on NET_ETHERNET
+	depends on (NET_ETHERNET && SIM_WALLTIME)
 	---help---
 		Build in support for a simulated network device.
 
@@ -226,6 +238,7 @@ config SIM_X11FB
   bool "X11 graphics/input"
   default n
   select SCHED_LPWORK
+	depends on SIM_WALLTIME
 	---help---
 		Use X11 to provide graphics and input emulation to interact with host.
 
@@ -296,6 +309,13 @@ config SIM_AJOYSTICK
 	depends on SIM_X11FB
 	---help---
 		Support an X11 mouse-based analog joystick emulation.  Also needs INPUT=y
+
+config SIM_BUTTONS
+	bool "X11 mouse-based button emulation"
+	depends on SIM_X11FB
+	---help---
+		Support an X11 mouse-based button emulation
+		(left-click mapped to button press). Also needs INPUT=y
 
 config SIM_NOINPUT
 	bool "No input device"
@@ -519,30 +539,30 @@ config SIM_QSPIFLASH_PAGESIZE
 		"wrap" causing the initial data sent to be overwritten.
 		This is consistent with standard SPI FLASH operation.
 
-choice
-	prompt "Simulated Prototype of HCI"
-	default SIM_HCISOCKET
-	depends on HOST_LINUX
-
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
-	depends on WIRELESS_BLUETOOTH
+	default false
+	depends on (WIRELESS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
 	---help---
 		Attached the local bluetooth device to the simulation
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
 
-config SIM_HCITTY
+config SIM_BTUART
 	bool "Attach Host Bluetooth As TTY Device"
-	depends on DRIVERS_BLUETOOTH
+	default false
+	depends on (DRIVERS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
+	select BLUETOOTH_UART_SHIM if BLUETOOTH_UART
 	---help---
 		Attached the local bluetooth device to the simulation
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
-
-endchoice
+		Unlike SIM_HCISOCKET, BTUART will wrap the bluetooth
+		interface/controller as a TTY device, which provides
+		an option for developers to setup the bluetooth host in
+		userspace.
 
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"
@@ -597,5 +617,12 @@ config SIM_UART3_NAME
 	string "the name of uart3 on sim"
 	default "/dev/ttySIM3"
 	depends on SIM_UART_NUMBER >= 4
+
+config SIM_MOTOR_FOC
+	bool "Simulated FOC device"
+	default n
+	depends on MOTOR_FOC
+	---help---
+		Build a simulated lower-half FOC device
 
 endif # ARCH_SIM

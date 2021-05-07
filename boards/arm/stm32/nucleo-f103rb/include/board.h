@@ -1,6 +1,5 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f103rb/include/board.h
- * include/arch/board/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -75,7 +74,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY      /* same as above, to satisfy compiler */
 
 /* APB2 clock (PCLK2) is HCLK (72MHz) */
 
@@ -174,5 +172,45 @@
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
+
+#ifdef CONFIG_BOARD_STM32_IHM07M1
+
+/* Configuration specific for the X-NUCLEO-IHM07M1 expansion board with
+ * the L6230 gate drivers.
+ */
+
+/* TIM1 configuration *******************************************************/
+
+/* Configured in stm32/hardware/stm32f103r_pinmap.h */
+
+/* UVW ENABLE */
+
+#  define GPIO_FOC_EN_U (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN10)
+#  define GPIO_FOC_EN_V (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN11)
+#  define GPIO_FOC_EN_W (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|  \
+                         GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN12)
+
+/* DIAG/ENABLE */
+
+#  define GPIO_FOC_DIAGEN (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|  \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN11)
+
+#  define GPIO_FOC_LED2   (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
+
+/* Debug pins */
+
+#  define GPIO_FOC_DEBUG0 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN8)
+#  define GPIO_FOC_DEBUG1 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN9)
+#  define GPIO_FOC_DEBUG2 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN6)
+#  define GPIO_FOC_DEBUG3 (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN5)
+
+#endif  /* CONFIG_BOARD_STM32_IHM07M1 */
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F103RB_INCLUDE_BOARD_H */

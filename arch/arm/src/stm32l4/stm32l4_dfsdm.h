@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/stm32L4/stm32l4_dfsdm.h
+/****************************************************************************
+ * arch/arm/src/stm32l4/stm32l4_dfsdm.h
  *
  *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
  *   Authors: Juha Niskanen <juha.niskanen@haltian.com>
@@ -31,31 +31,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_DFSDM_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_DFSDM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/analog/adc.h>
 #include "chip.h"
 #include "hardware/stm32l4_dfsdm.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
- * CONFIG_STM32L4_TIMn_DFSDM must also be defined to indicate that timer "n" is
- * intended to be used for that purpose. Timers 1,3,6 and 16 may be used on
- * STM32L4X3, while STM32L4X6 adds support for timers 4,7 and 8 as well.
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
+ * CONFIG_STM32L4_TIMn_DFSDM must also be defined to indicate that timer "n"
+ * is intended to be used for that purpose. Timers 1,3,6 and 16 may be used
+ * on STM32L4X3, while STM32L4X6 adds support for timers 4,7 and 8 as well.
  */
 
 #ifndef CONFIG_STM32L4_TIM1
@@ -144,7 +144,8 @@
 #  endif
 #endif
 
-/* NOTE:  The following assumes that all possible combinations of timers and
+/* NOTE:
+ * The following assumes that all possible combinations of timers and
  * values are support JEXTSEL.  That is not so and it varies from one STM32
  * to another.  But this (wrong) assumptions keeps the logic as simple as
  * possible.  If unsupported combination is used, an error will show up
@@ -300,13 +301,13 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

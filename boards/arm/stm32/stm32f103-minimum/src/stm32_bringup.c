@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f103-minimum/src/stm32_bringup.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -47,6 +31,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/timers/oneshot.h>
 
 #ifdef CONFIG_USBMONITOR
@@ -59,7 +44,7 @@
 #  include "stm32_usbhost.h"
 #endif
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 
@@ -91,6 +76,10 @@
 
 #ifdef CONFIG_LEDS_APA102
 #include "stm32_apa102.h"
+#endif
+
+#ifdef CONFIG_WS2812
+#include "stm32_ws2812.h"
 #endif
 
 #ifdef CONFIG_SENSORS_MAX6675
@@ -133,6 +122,22 @@
 #include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_SENSORS_HYT271
+# define HAVE_SENSORS_DEVICE
+#endif
+
+#ifdef CONFIG_SENSORS_DS18B20
+# define HAVE_SENSORS_DEVICE
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+#include "stm32_lcd_backpack.h"
+#endif
+
+#ifdef CONFIG_USBADB
+#include <nuttx/usb/adb.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -170,6 +175,10 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef HAVE_SENSORS_DEVICE
+static int g_sensor_devno;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -216,7 +225,9 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_LCD_BACKPACK
-  ret = stm32_lcd_backpack_init("/dev/slcd0");
+  /* slcd:0, i2c:1, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 1, 2, 16);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
@@ -270,7 +281,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
@@ -284,7 +295,7 @@ int stm32_bringup(void)
   ret = stm32_at24_automount(AT24_MINOR);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_at24_automount failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_at24_automount() failed: %d\n", ret);
       return ret;
     }
 #endif /* HAVE_AT24 */
@@ -305,7 +316,7 @@ int stm32_bringup(void)
   ret = board_tone_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_tone_setup() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_tone_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -315,7 +326,45 @@ int stm32_bringup(void)
   ret = board_apa102_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_apa102init() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_apa102_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_WS2812
+  /* Configure and initialize the WS2812 LEDs. */
+
+  ret = board_ws2812_initialize(0, WS2812_SPI, WS2812_NLEDS);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_ws2812_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_HYT271
+  /* Configure and initialize the HYT271 sensors */
+
+  ret = stm32_hyt271initialize(g_sensor_devno);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_hyt271initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      g_sensor_devno += ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_DS18B20
+  /* Configure and initialize the DS18B20 sensors */
+
+  ret = stm32_ds18b20initialize(g_sensor_devno);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_ds18b20initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      g_sensor_devno += ret;
     }
 #endif
 
@@ -325,7 +374,7 @@ int stm32_bringup(void)
   ret = board_lm75_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_lm75initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_lm75_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -345,7 +394,7 @@ int stm32_bringup(void)
   ret = board_hcsr04_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_hcsr04_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_hcsr04_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -353,7 +402,7 @@ int stm32_bringup(void)
   ret = board_max6675_initialize(0, 1);
   if (ret < 0)
     {
-      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+      serr("ERROR:  board_max6675_initialize() failed: %d\n", ret);
     }
 #endif
 
@@ -383,7 +432,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");
@@ -399,7 +448,8 @@ int stm32_bringup(void)
   ret = board_nunchuck_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: nunchuck_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_nunchuck_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -432,7 +482,8 @@ int stm32_bringup(void)
   ret = board_apds9960_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_apds9960initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -442,7 +493,8 @@ int stm32_bringup(void)
   ret = board_veml6070_initialize(0, 1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_veml6070initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_veml6070_initialize() failed: %d\n",
+             ret);
     }
 #endif
 
@@ -452,7 +504,7 @@ int stm32_bringup(void)
   ret = stm32_adc_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup() failed: %d\n", ret);
     }
 #endif
 
@@ -462,8 +514,13 @@ int stm32_bringup(void)
   ret = board_nrf24l01_initialize(1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize() failed: %d\n",
+             ret);
     }
+#endif
+
+#ifdef CONFIG_USBADB
+  usbdev_adb_initialize();
 #endif
 
   return ret;

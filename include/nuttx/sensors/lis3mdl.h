@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/sensors/lis3mdl.h
  *
- *   Copyright (C) 2016 DS-Automotion GmbH. All rights reserved.
- *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -75,29 +60,29 @@
 
 /* LIS3MDL CTRL_REG_1 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_1_TEMP_EN_bm      (1<<7)   /* Enable the temperature sensor */
-#define LIS3MDL_CTRL_REG_1_OM_1_bm         (1<<6)   /* Select the operating mode of X and Y axis bit 1 */
-#define LIS3MDL_CTRL_REG_1_OM_0_bm         (1<<5)   /* Select the operating mode of X and Y axis bit 0 */
-#define LIS3MDL_CTRL_REG_1_DO2_bm          (1<<4)   /* Output data rate selection bit 2 */
-#define LIS3MDL_CTRL_REG_1_DO1_bm          (1<<3)   /* Output data rate selection bit 1 */
-#define LIS3MDL_CTRL_REG_1_DO0_bm          (1<<2)   /* Output data rate selection bit 2 */
-#define LIS3MDL_CTRL_REG_1_FAST_ODR_bm     (1<<1)   /* Enable higher output data rates */
+#define LIS3MDL_CTRL_REG_1_TEMP_EN_BM      (1<<7)   /* Enable the temperature sensor */
+#define LIS3MDL_CTRL_REG_1_OM_1_BM         (1<<6)   /* Select the operating mode of X and Y axis bit 1 */
+#define LIS3MDL_CTRL_REG_1_OM_0_BM         (1<<5)   /* Select the operating mode of X and Y axis bit 0 */
+#define LIS3MDL_CTRL_REG_1_DO2_BM          (1<<4)   /* Output data rate selection bit 2 */
+#define LIS3MDL_CTRL_REG_1_DO1_BM          (1<<3)   /* Output data rate selection bit 1 */
+#define LIS3MDL_CTRL_REG_1_DO0_BM          (1<<2)   /* Output data rate selection bit 2 */
+#define LIS3MDL_CTRL_REG_1_FAST_ODR_BM     (1<<1)   /* Enable higher output data rates */
 
 /* LIS3MDL CTRL_REG_2 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_2_FS_1_bm         (1<<6)   /* Full scale selection bit 1 */
-#define LIS3MDL_CTRL_REG_2_FS_0_bm         (1<<5)   /* Full scale selection bit 0 */
-#define LIS3MDL_CTRL_REG_2_REBOOT_bm       (1<<3)   /* Reboot Memory Content */
-#define LIS3MDL_CTRL_REG_2_SOFT_RST_bm     (1<<2)   /* Soft Reset */
+#define LIS3MDL_CTRL_REG_2_FS_1_BM         (1<<6)   /* Full scale selection bit 1 */
+#define LIS3MDL_CTRL_REG_2_FS_0_BM         (1<<5)   /* Full scale selection bit 0 */
+#define LIS3MDL_CTRL_REG_2_REBOOT_BM       (1<<3)   /* Reboot Memory Content */
+#define LIS3MDL_CTRL_REG_2_SOFT_RST_BM     (1<<2)   /* Soft Reset */
 
 /* LIS3MDL CTRL_REG_4 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_4_OMZ_1_bm        (1<<3)   /* Select the operating mode of Z axis bit 1 */
-#define LIS3MDL_CTRL_REG_4_OMZ_0_bm        (1<<2)   /* Select the operating mode of Z axis bit 0 */
+#define LIS3MDL_CTRL_REG_4_OMZ_1_BM        (1<<3)   /* Select the operating mode of Z axis bit 1 */
+#define LIS3MDL_CTRL_REG_4_OMZ_0_BM        (1<<2)   /* Select the operating mode of Z axis bit 0 */
 
 /* LIS3MDL CTRL_REG_5 Bit Definitions ***************************************/
 
-#define LIS3MDL_CTRL_REG_5_BDU_bm          (1<<6)   /* Enable block data update for magnetic data (prevent race conditions while reading) */
+#define LIS3MDL_CTRL_REG_5_BDU_BM          (1<<6)   /* Enable block data update for magnetic data (prevent race conditions while reading) */
 
 /* SPI BUS PARAMETERS *******************************************************/
 

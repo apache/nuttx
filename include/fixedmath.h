@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/fixedmath.h
  *
- *   Copyright (C) 2008, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -81,7 +66,7 @@
 #define b16MIN          0x80000000               /* Min value of b16_t */
 #define ub16MIN         0x00000000               /* Min value of ub16_t */
 
-#define b32MILLION      0x000f424000000000LL       /* 1000000 */
+#define b32MILLION      0x000f424000000000LL     /* 1000000 */
 #define b32THOUSAND     0x000003e800000000LL     /* 1000 */
 #define b32HUNDRED      0x0000006400000000LL     /* 100 */
 #define b32TEN          0x0000000a00000000LL     /* 10 */
@@ -95,12 +80,12 @@
 #define b32PI           0x00000003243f6b4fLL     /* 3.14159269980 */
 #define b32TWOPI        0x00000006487ae7fdLL     /* 6.28312539984 */
 
-#define b32MAX          0x7fffffffffffffffLL     /* Max value of b16_t */
-#define ub32MAX         0xffffffffffffffffLL     /* Max value of ub16_t */
-#define b32MIN          0x8000000000000000LL     /* Min value of b16_t */
-#define ub32MIN         0x0000000000000000LL     /* Min value of ub16_t */
+#define b32MAX          0x7fffffffffffffffLL     /* Max value of b32_t */
+#define ub32MAX         0xffffffffffffffffLL     /* Max value of ub32_t */
+#define b32MIN          0x8000000000000000LL     /* Min value of b32_t */
+#define ub32MIN         0x0000000000000000LL     /* Min value of ub32_t */
 
-/* Conversions between b32, b16, and b8 ***********************************/
+/* Conversions between b32, b16, and b8 *************************************/
 
 #define b8tob16(b)      (((b16_t)(b)) << 8)
 #define ub8toub16(b)    (((ub16_t)(b)) << 8)
@@ -117,7 +102,7 @@
 #  define b32tob8(b)    (b8_t)(((b) + 0x0000000000000080)>>8)
 #endif
 
-/* 16-bit values with 8 bits of precision *********************************/
+/* 16-bit values with 8 bits of precision ***********************************/
 
 /* Conversions */
 
@@ -133,23 +118,23 @@
 
 /* Operators */
 
-#define ub8inv(b)       (0x8000/((b)>>1))        /* Inversion (b8=b15/b7) */
-#define b8inv(b)        (0x4000/((b)>>2))        /* Inversion (b8=b14/b6) */
-#define b8addb8(a,b)    ((a)+(b))                /* Addition */
-#define b8addi(a,i)     ((a)+itob8(i))           /* Add integer from b16 */
-#define b8subb8(a,b)    ((a)-(b))                /* Subtraction */
-#define b8subi(a,i)     ((a)-itob8(i))           /* Subtract integer from b8 */
-#define b8mulb8(a,b)    (b16tob8((b16_t)(a)*(b16_t)(b)) /* Muliplication */
+#define ub8inv(b)       (0x8000/((b)>>1))                   /* Inversion (b8=b15/b7) */
+#define b8inv(b)        (0x4000/((b)>>2))                   /* Inversion (b8=b14/b6) */
+#define b8addb8(a,b)    ((a)+(b))                           /* Addition */
+#define b8addi(a,i)     ((a)+itob8(i))                      /* Add integer from b16 */
+#define b8subb8(a,b)    ((a)-(b))                           /* Subtraction */
+#define b8subi(a,i)     ((a)-itob8(i))                      /* Subtract integer from b8 */
+#define b8mulb8(a,b)    (b16tob8((b16_t)(a)*(b16_t)(b))     /* Muliplication */
 #define ub8mulub8(a,b)  (ub16toub8((ub16_t)(a)*(ub16_t)(b)) /* Muliplication */
-#define b8muli(a,i)     ((a)*(i))                /* Simple multiplication by integer */
-#define b8sqr(a)        b8mulb8(a,a)             /* Square */
-#define ub8sqr(a)       ub8mulub8(a,a)           /* Square */
-#define b8divb8(a,b)    (b8tob16(a)/(b16_t)(b))  /* Division */
-#define ub8divub8(a,b)  (ub8toub16(a)/(ub16_t)(b)) /* Division */
-#define b8divi(a,i)     ((a)/(i))                /* Simple division by integer */
-#define b8idiv(i,j)     (((i)<<8)/j)             /* Division of integer, b8 result */
+#define b8muli(a,i)     ((a)*(i))                           /* Simple multiplication by integer */
+#define b8sqr(a)        b8mulb8(a,a)                        /* Square */
+#define ub8sqr(a)       ub8mulub8(a,a)                      /* Square */
+#define b8divb8(a,b)    (b8tob16(a)/(b16_t)(b))             /* Division */
+#define ub8divub8(a,b)  (ub8toub16(a)/(ub16_t)(b))          /* Division */
+#define b8divi(a,i)     ((a)/(i))                           /* Simple division by integer */
+#define b8idiv(i,j)     (((i)<<8)/j)                        /* Division of integer, b8 result */
 
-/* 32-bit values with 16 bits of precision ********************************/
+/* 32-bit values with 16 bits of precision **********************************/
 
 /* Conversions */
 
@@ -200,19 +185,19 @@
 #  define ub16sqrtub16(a)  ub8toub16(ub16sqrtub8(a))
 #endif
 
-/* 64-bit values with 32 bits of precision ********************************/
+/* 64-bit values with 32 bits of precision **********************************/
 
 #ifdef CONFIG_HAVE_LONG_LONG
 /* Conversions */
 
-#define b32toi(a)       ((a) >> 32)                  /* Conversion to integer */
-#define itob32(i)       (((b32_t)(i)) << 32)         /* Conversion from integer */
-#define uitoub32(i)     (((ub32_t)(i)) << 32)        /* Conversion from unsigned integer */
-#define b32tod(b)       (((double)(b))/b32ONE)       /* Conversion to double */
+#define b32toi(a)       ((a) >> 32)                   /* Conversion to integer */
+#define itob32(i)       (((b32_t)(i)) << 32)          /* Conversion from integer */
+#define uitoub32(i)     (((ub32_t)(i)) << 32)         /* Conversion from unsigned integer */
+#define b32tod(b)       (((double)(b))/b32ONE)        /* Conversion to double */
 #define dtob32(f)       (b32_t)(((f)*(double)b32ONE)) /* Conversion from double */
-#define b32trunc(a)     ((a) & 0xffffffff00000000)   /* Truncate to integer */
+#define b32trunc(a)     ((a) & 0xffffffff00000000)    /* Truncate to integer */
 #define b32round(a)     (((a)+0x0000000080000000) & 0xffffffff00000000)
-#define b32frac(a)      ((a) & 0x00000000ffffffff)   /* Take fractional part */
+#define b32frac(a)      ((a) & 0x00000000ffffffff)    /* Take fractional part */
 #endif
 
 /****************************************************************************
@@ -229,7 +214,7 @@ typedef uint64_t ub32_t;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN

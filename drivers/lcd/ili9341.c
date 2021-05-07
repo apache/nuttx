@@ -1,43 +1,27 @@
 /****************************************************************************
  * drivers/lcd/ili9341.c
  *
- * LCD driver for the ILI9341 LCD Single Chip Driver
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2014 Marco Krahl. All rights reserved.
- *   Author: Marco Krahl <ocram.lhark@gmail.com>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * References: ILI9341_DS_V1.10.pdf (Rev: 1.10), "a-Si TFT LCD Single Chip
- *             Driver 240RGBx320 Resolution and 262K color",
- *             ILI TECHNOLOGY CORP., http://www.ilitek.com.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* References: ILI9341_DS_V1.10.pdf (Rev: 1.10), "a-Si TFT LCD Single Chip
+ *             Driver 240RGBx320 Resolution and 262K color",
+ *             ILI TECHNOLOGY CORP., http://www.ilitek.com.
+ */
 
 /****************************************************************************
  * Included Files
@@ -122,7 +106,8 @@
  * EPF:     0   65k color format for RGB interface, not used set to default
  * MDT:     0   Display data transfer mode, not used
  *
- * Note! If RGB666 and 16-bit 8080-I interface supported by the driver, MDT must
+ * Note!
+ * If RGB666 and 16-bit 8080-I interface supported by the driver, MDT must
  * be defined for each selected driver instance. Leave it empty for now.
  */
 
@@ -130,7 +115,6 @@
 #define ILI9341_IFCTL_MDT       ILI9341_INTERFACE_CONTROL_MDT(0)
 
 #define ILI9341_IFCTL_PARAM2    ILI9341_IFCTL_EPF | ILI9341_IFCTL_MDT
-
 
 /* Parameter 3: 0x0000/0x0020
  *
@@ -152,7 +136,6 @@
 
 #define ILI9341_IFCTL_PARAM3    ILI9341_IFCTL_RIM | ILI9341_IFCTL_RM | \
                                 ILI9341_IFCTL_DM | ILI9341_IFCTL_ENDIAN
-
 
 /* Memory access control (MADCTL) */
 
@@ -299,12 +282,10 @@
 #define ILI9341_PIXSET_18BITMCU_PARAM1  (ILI9341_PIXSET_18BITDPI | \
                                         ILI9341_PIXSET_18BITDBI)
 
-
 /* General fix display resolution */
 
 #define ILI9341_XRES           240
 #define ILI9341_YRES           320
-
 
 /* Validate configuration */
 
@@ -313,7 +294,6 @@
 #elif CONFIG_LCD_ILI9341_NINTERFACES < 2
 #  undef CONFIG_LCD_ILI9341_IFACE1
 #endif
-
 
 /* First LCD display */
 
@@ -416,7 +396,6 @@ struct ili9341_dev_s
   uint8_t power;
 };
 
-
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
@@ -462,9 +441,10 @@ static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
 /* lcd configuration */
 
 static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
-                               FAR struct fb_videoinfo_s *vinfo);
-static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                               FAR struct lcd_planeinfo_s *pinfo);
+                                FAR struct fb_videoinfo_s *vinfo);
+static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
+                                FAR struct lcd_planeinfo_s *pinfo);
 
 /* lcd specific controls */
 
@@ -541,14 +521,13 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
 static inline uint16_t ili9341_getxres(FAR struct ili9341_dev_s *dev)
 {
   if (dev->orient == ILI9341_MADCTL_LANDSCAPE_PARAM1 ||
-        dev->orient == ILI9341_MADCTL_RLANDSCAPE_PARAM1)
+      dev->orient == ILI9341_MADCTL_RLANDSCAPE_PARAM1)
     {
           return ILI9341_YRES;
     }
 
   return ILI9341_XRES;
 }
-
 
 /****************************************************************************
  * Name:  ili9341_getyres
@@ -577,7 +556,6 @@ static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev)
   return ILI9341_YRES;
 }
 
-
 /****************************************************************************
  * Name:  ili9341_selectarea
  *
@@ -594,7 +572,8 @@ static inline uint16_t ili9341_getyres(FAR struct ili9341_dev_s *dev)
  ****************************************************************************/
 
 static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
-                            uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+                               uint16_t x0, uint16_t y0,
+                               uint16_t x1, uint16_t y1)
 {
   /* Select column */
 
@@ -612,7 +591,6 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
   lcd->sendparam(lcd, (y1 >> 8));
   lcd->sendparam(lcd, (y1 & 0xff));
 }
-
 
 /****************************************************************************
  * Name:  ili9341_putrun
@@ -645,6 +623,7 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Check if position outside of area */
+
   if (col + npixels > ili9341_getxres(dev) || row > ili9341_getyres(dev))
     {
       return -EINVAL;
@@ -672,7 +651,6 @@ static int ili9341_putrun(int devno, fb_coord_t row, fb_coord_t col,
 
   return OK;
 }
-
 
 /****************************************************************************
  * Name:  ili9341_getrun
@@ -706,6 +684,7 @@ static int ili9341_getrun(int devno, fb_coord_t row, fb_coord_t col,
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
   /* Check if position outside of area */
+
   if (col + npixels > ili9341_getxres(dev) || row > ili9341_getyres(dev))
     {
       return -EINVAL;
@@ -785,7 +764,8 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
   up_mdelay(5);
 
-  lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n", dev->orient);
+  lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n",
+          dev->orient);
   lcd->sendcmd(lcd, ILI9341_MEMORY_ACCESS_CONTROL);
   lcd->sendparam(lcd, dev->orient);
 
@@ -828,7 +808,6 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
   return OK;
 }
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -869,7 +848,6 @@ static int ili9341_putrun1(fb_coord_t row, fb_coord_t col,
 }
 #endif
 
-
 /****************************************************************************
  * Name:  ili9341_getrunx
  *
@@ -907,7 +885,6 @@ static int ili9341_getrun1(fb_coord_t row, fb_coord_t col,
 }
 # endif
 #endif
-
 
 /****************************************************************************
  * Name:  ili9341_getvideoinfo
@@ -965,8 +942,9 @@ static int ili9341_getvideoinfo(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                               FAR struct lcd_planeinfo_s *pinfo)
+static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                unsigned int planeno,
+                                FAR struct lcd_planeinfo_s *pinfo)
 {
   if (dev && pinfo && planeno == 0)
     {
@@ -991,7 +969,8 @@ static int ili9341_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  * Name:  ili9341_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on.
+ *   Get the LCD panel power status
+ *   (0: full off - CONFIG_LCD_MAXPOWER: full on.
  *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
  * Input Parameters:
@@ -1022,7 +1001,8 @@ static int ili9341_getpower(FAR struct lcd_dev_s *dev)
  * Name:  ili9341_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
  *   On backlight LCDs, this setting may correspond to the backlight setting.
  *
  * Input Parameters:
@@ -1119,7 +1099,6 @@ static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-
 /****************************************************************************
  * Name:  ili9341_initialize
  *
@@ -1131,15 +1110,15 @@ static int ili9341_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  * Input Parameters:
  *
- *   lcd - A reference to the platform specific driver instance to control the
- *     ili9341 display driver.
+ *   lcd - A reference to the platform specific driver instance to control
+ *         the ili9341 display driver.
  *   devno - A value in the range of 0 through CONFIG_ILI9341_NINTERFACES-1.
  *     This allows support for multiple LCD devices.
  *
  * Returned Value:
  *
- *   On success, this function returns a reference to the LCD driver object for
- *   the specified LCD driver. NULL is returned on any failure.
+ *   On success, this function returns a reference to the LCD driver object
+ *   for the specified LCD driver. NULL is returned on any failure.
  *
  ****************************************************************************/
 
@@ -1186,9 +1165,9 @@ FAR struct lcd_dev_s *
  *
  * Description:
  *   This is a non-standard LCD interface.  Because of the various rotations,
- *   clearing the display in the normal way by writing a sequences of runs that
- *   covers the entire display can be very slow. Here the display is cleared by
- *   simply setting all GRAM memory to the specified color.
+ *   clearing the display in the normal way by writing a sequences of runs
+ *   that covers the entire display can be very slow. Here the display is
+ *   cleared by simply setting all GRAM memory to the specified color.
  *
  * Input Parameters:
  *   dev   - A reference to the lcd driver structure

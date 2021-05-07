@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/cypress_mbr3108.c
+ * include/nuttx/input/cypress_mbr3108.h
  *
  *   Copyright (C) 2014 Haltian Ltd. All rights reserved.
  *   Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
@@ -72,8 +72,10 @@ begin_packed_struct enum mbr3108_cmd_e
   CYPRESS_MBR3108_CMD_CLEAR_LATCHED,
 } end_packed_struct;
 
-/* CYPRESS_MBR3108_CMD_SENSOR_CONF command structure. Used to reconfigure
- * chip with new configuration generated using EZ-Click tool. */
+/* CYPRESS_MBR3108_CMD_SENSOR_CONF command structure.
+ * Used to reconfigure chip with new configuration generated using
+ * EZ-Click tool.
+ */
 
 begin_packed_struct struct mbr3108_cmd_sensor_conf_s
 {
@@ -81,8 +83,10 @@ begin_packed_struct struct mbr3108_cmd_sensor_conf_s
   struct mbr3108_sensor_conf_s conf;
 } end_packed_struct;
 
-/* CYPRESS_MBR3108_CMD_DEBUG_CONF command structure. Use to enable debug
- * output from chip/sensor, see 'struct mbr3108_sensor_data_s'. */
+/* CYPRESS_MBR3108_CMD_DEBUG_CONF command structure.
+ * Use to enable debug output from chip/sensor,
+ * see 'struct mbr3108_sensor_data_s'.
+ */
 
 begin_packed_struct struct mbr3108_cmd_debug_conf_s
 {
@@ -119,7 +123,9 @@ begin_packed_struct struct mbr3108_sensor_debug_s
 
 struct mbr3108_board_s
 {
-  int (*irq_attach) (FAR struct mbr3108_board_s *state, xcpt_t isr, FAR void *arg);
+  int (*irq_attach) (FAR struct mbr3108_board_s *state,
+                     xcpt_t isr,
+                     FAR void *arg);
   void (*irq_enable) (FAR struct mbr3108_board_s *state, bool enable);
   int (*set_power) (FAR struct mbr3108_board_s *state, bool on);
 };
@@ -131,9 +137,9 @@ struct mbr3108_board_s
 /* Device registration */
 
 int cypress_mbr3108_register(FAR const char *devpath,
-                             FAR struct i2c_master_s *dev,
-                             uint8_t i2c_devaddr,
-                             struct mbr3108_board_s *board_config,
-                             const struct mbr3108_sensor_conf_s *sensor_conf);
+                        FAR struct i2c_master_s *dev,
+                        uint8_t i2c_devaddr,
+                        struct mbr3108_board_s *board_config,
+                        const struct mbr3108_sensor_conf_s *sensor_conf);
 
 #endif /* __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H_ */

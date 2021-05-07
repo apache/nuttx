@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/lm32/_irq.c
+ * arch/misoc/src/lm32/lm32_irq.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>

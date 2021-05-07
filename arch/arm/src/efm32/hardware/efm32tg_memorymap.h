@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/efm32/chip/efm32tg_memorymap.h
+/****************************************************************************
+ * arch/arm/src/efm32/hardware/efm32tg_memorymap.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -54,14 +54,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM3TG_MEMORYMAP_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM3TG_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Memory Base addresses */
 

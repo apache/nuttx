@@ -1,44 +1,29 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_pinconfig.h
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_PINCONFIG_H
 #define __ARCH_ARM_SRC_LPC43XX_PINCONFIG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +32,13 @@
 #include "chip.h"
 #include "hardware/lpc43_scu.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Each configurable pin can be individually configured by software in several modes. The
- * following definitions provide the bit encoding that is used to define a pin configuration.
+ ****************************************************************************/
+
+/* Each configurable pin can be individually configured by software in
+ * several modes. The following definitions provide the bit encoding that
+ * is used to define a pin configuration.
  * Note that these pins do not corresponding GPIO ports and pins.
  *
  * 21-bit Encoding:
@@ -81,8 +68,9 @@
 #  define PINCONF_FUNC6               (6 << PINCONF_FUNC_SHIFT)
 #  define PINCONF_FUNC7               (7 << PINCONF_FUNC_SHIFT)
 
-/* Pull-up/down resisters.  These selections are available for all pins but may not
- * make sense for all pins.  NOTE: that both pull up and down is not precluded.
+/* Pull-up/down resisters.  These selections are available for all pins but
+ * may not make sense for all pins.  NOTE: that both pull up and down is
+ * not precluded.
  *
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
@@ -144,7 +132,7 @@
  */
 
 #define PINCONF_SLEW_FAST             (1 << 10)   /* Bit 9: 1=Alternate function */
-#define PINCONF_SLEW_SLOW             (0)        /* Bit 9: 0=Normal function */
+#define PINCONF_SLEW_SLOW             (0)         /* Bit 9: 0=Normal function */
 
 #define PINCONF_IS_SLEW_FAST(p)       (((p) & PINCONF_SLEW_FAST) != 0)
 #define PINCONF_IS_SLOW_SLOW(p)       (((p) & PINCONF_SLEW_FAST) == 0)
@@ -235,13 +223,13 @@
 #  define PINCONF_PIN_30              (30 << PINCONF_PIN_SHIFT)
 #  define PINCONF_PIN_31              (31 << PINCONF_PIN_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -252,11 +240,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Name: lpc43_pin_config
  *
  * Description:
@@ -268,17 +256,18 @@ extern "C"
  * Returned Value:
  *   OK on success; A negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int lpc43_pin_config(uint32_t pinconf);
 
-/********************************************************************************************
+/****************************************************************************
  * Function:  lpc43_pin_dump
  *
  * Description:
- *   Dump all pin configuration registers associated with the provided pin configuration
+ *   Dump all pin configuration registers associated with the provided pin
+ *   configuration
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
 int lpc43_pin_dump(uint32_t pinconf, const char *msg);

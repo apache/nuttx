@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_allocateheap.c
  *
- *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -60,6 +45,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Internal SRAM is available in all members of the STM32L4 family. The
  * following definitions must be provided to specify the size and
  * location of internal (system) SRAM1 and SRAM2:
@@ -69,9 +55,9 @@
  * SRAM2_START   0x10000000
  * SRAM2_END
  *
- * In addition to internal SRAM, memory may also be available through the FSMC.
- * In order to use FSMC SRAM, the following additional things need to be
- * present in the NuttX configuration file:
+ * In addition to internal SRAM, memory may also be available through the
+ * FSMC. In order to use FSMC SRAM, the following additional things need to
+ * be present in the NuttX configuration file:
  *
  * CONFIG_STM32L4_FSMC=y      : Enables the FSMC
  * CONFIG_STM32L4_FSMC_SRAM=y : Indicates that SRAM is available via the
@@ -206,7 +192,8 @@ static inline void up_heap_color(FAR void *start, size_t size)
  *
  *     Kernel .data region.  Size determined at link time.
  *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
+ *     Kernel IDLE thread stack.  Size determined by
+ *                                    CONFIG_IDLETHREAD_STACKSIZE.
  *     Padding for alignment
  *     User .data region.  Size determined at link time.
  *     User .bss region  Size determined at link time.
@@ -223,7 +210,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = SRAM1_END - ubase;
   int       log2;
 
@@ -285,7 +273,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
+                               CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = SRAM1_END - ubase;
   int       log2;
 
@@ -323,24 +312,22 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
-
 #ifdef CONFIG_STM32L4_SRAM2_HEAP
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the SRAM2 heap */
 
-  stm32l4_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END-SRAM2_START);
-
+  stm32l4_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END - SRAM2_START);
 #endif
 
   /* Colorize the heap for debug */
 
-  up_heap_color((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
+  up_heap_color((FAR void *)SRAM2_START, SRAM2_END - SRAM2_START);
 
   /* Add the SRAM2 user heap region. */
 
-  kumm_addregion((FAR void *)SRAM2_START, SRAM2_END-SRAM2_START);
+  kumm_addregion((FAR void *)SRAM2_START, SRAM2_END - SRAM2_START);
 
 #endif /* SRAM2 */
 
@@ -350,17 +337,17 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the SRAM3 heap */
 
-  stm32l4_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END-SRAM3_START);
+  stm32l4_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END - SRAM3_START);
 
 #endif
 
   /* Colorize the heap for debug */
 
-  up_heap_color((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
+  up_heap_color((FAR void *)SRAM3_START, SRAM3_END - SRAM3_START);
 
   /* Add the SRAM3 user heap region. */
 
-  kumm_addregion((FAR void *)SRAM3_START, SRAM3_END-SRAM3_START);
+  kumm_addregion((FAR void *)SRAM3_START, SRAM3_END - SRAM3_START);
 
 #endif /* SRAM3 */
 
@@ -369,7 +356,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */
 
-   stm32l4_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  stm32l4_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 
 #endif
 

@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_pwm.c
  *
- *   Copyright 2018 Sony Semiconductor Solutions Corporation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
- *    the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -41,6 +26,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
@@ -250,8 +236,9 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
 
   if ((freq > ((pwmfreq + 1) >> 1)) || (freq <= 0))
     {
-      pwmerr("Frequency out of range. %d [Effective range:%d - %d]\n",
-                freq, 1, (pwmfreq + 1) >> 1);
+      pwmerr("Frequency out of range. %" PRId32
+             " [Effective range:%d - %" PRId32 "]\n",
+             freq, 1, (pwmfreq + 1) >> 1);
       return -1;
     }
 
@@ -259,7 +246,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
 
   if ((duty < 0x00000001) || (duty > 0x0000ffff))
     {
-      pwmerr("Duty out of range. %d\n", duty);
+      pwmerr("Duty out of range. %" PRId32 "\n", duty);
       return -1;
     }
 
@@ -297,7 +284,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
       offperiod = ((0x10000 - duty) * period + (1 << (16 - prescale))) >> 16;
       if (offperiod < 2)
         {
-          pwmerr("Duty out of range. %d\n", duty);
+          pwmerr("Duty out of range. %" PRId32 "\n", duty);
           return -1;
         }
     }
@@ -311,12 +298,14 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
       offperiod = period;
     }
 
-  pwminfo("Cycle = %d, Low = %d, High = %d, Clock = %d Hz\n",
+  pwminfo("Cycle = %" PRId32 ", Low = %" PRId32
+          ", High = %" PRId32 ", Clock = %" PRId32 " Hz\n",
           (prescale) ? (period << prescale) : period + 1,
           (prescale) ? (offperiod << prescale) - 1 : offperiod,
           (prescale) ? (period << prescale) - (offperiod << prescale) + 1
                      : period + 1 - offperiod, pwmfreq);
-  pwminfo("period/off/on = 0x%04x/0x%04x/0x%04x, prescale = %d\n",
+  pwminfo("period/off/on = 0x%04" PRIx32 "/0x%04" PRIx32
+          "/0x%04" PRIx32 ", prescale = %" PRId32 "\n",
           period, offperiod, period - offperiod, prescale);
 
   *param = (period & 0xffff) |
@@ -533,7 +522,7 @@ FAR struct pwm_lowerhalf_s *cxd56_pwminitialize(uint32_t channel)
         break;
 #endif
       default:
-        pwmerr("Illeagal channel number:%d\n", channel);
+        pwmerr("Illeagal channel number:%" PRId32 "\n", channel);
         return NULL;
     }
 

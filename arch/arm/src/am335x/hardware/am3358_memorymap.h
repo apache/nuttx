@@ -1,53 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am3358_memorymap.h
  *
- *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_MEMORYMAP_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/am335x/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
- * values unless we force them to unsigned long:
+ ****************************************************************************/
+
+/* Decimal configuration values may exceed 2Gb and, hence, overflow to
+ * negative values unless we force them to unsigned long:
  */
 
 #define __CONCAT(a,b) a ## b
@@ -267,8 +253,8 @@
 /* AM335X Virtual (mapped) Memory Map
  *
  * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it depends
- * on some the virtual address definitions provided above.
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
  */
 
 #include <arch/board/board_memorymap.h>
@@ -464,9 +450,9 @@
 #    error "Only one of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
 #  endif
 
-  /* A sanity check, if the configuration says that the page table is read-only
-   * and pre-initialized (maybe ROM), then it should have also defined both of
-   * the page table base addresses.
+  /* A sanity check, if the configuration says that the page table is
+   * read-only and pre-initialized (maybe ROM), then it should have also
+   * defined both of the page table base addresses.
    */
 
 #  ifdef CONFIG_ARCH_ROMPGTABLE
@@ -477,10 +463,10 @@
 
   /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
    * map probably do not apply because paging logic will probably partition
-   * the SRAM section differently.  In particular, if the page table is located
-   * at the end of SRAM, then the virtual page table address defined below
-   * will probably be in error.  In that case PGTABLE_BASE_VADDR is defined
-   * in the file mmu.h
+   * the SRAM section differently.  In particular, if the page table is
+   * located at the end of SRAM, then the virtual page table address defined
+   * below will probably be in error.  In that case PGTABLE_BASE_VADDR is
+   * defined in the file mmu.h
    *
    * We must declare the page table at the bottom or at the top of internal
    * SRAM.  We pick the bottom of internal SRAM *unless* there are vectors
@@ -510,28 +496,27 @@
 #    define PGTABLE_BASE_VADDR    AM335X_OCMC0_VADDR
 #    define PGTABLE_IN_LOWSRAM    1
 
-   /* We will force the IDLE stack to follow the page table */
+  /* We will force the IDLE stack to follow the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
 
 #  endif /* CONFIG_ARCH_LOWVECTORS */
 
-  /* Note that the page table does not lie in the same address space as does the
-   * mapped RAM in either case.  So we will need to create a special mapping for
-   * the page table at boot time.
+  /* Note that the page table does not lie in the same address space as does
+   * the mapped RAM in either case.  So we will need to create a special
+   * mapping for the page table at boot time.
    */
 
 #  define ARMV7A_PGTABLE_MAPPING 1
 
 #endif /* PGTABLE_BASE_PADDR || PGTABLE_BASE_VADDR */
 
-
 /* Level 2 Page table start addresses.
  *
- * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
- * portion of this table is not accessible in the virtual address space (for
- * normal operation).
+ * 16Kb of memory is reserved hold the page table for the virtual mappings.
+ *  A portion of this table is not accessible in the virtual address space
+ * (for normal operation).
  */
 
 #if !defined(CONFIG_ARCH_LOWVECTORS)
@@ -578,7 +563,8 @@
  *
  *   AM335X_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   AM335X_VECTOR_VSRAM - Virtual address of vector table in SRAM
- *   AM335X_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ *   AM335X_VECTOR_VADDR - Virtual address of vector table
+ *                         (0x00000000 or 0xffff0000)
  */
 
 #define VECTOR_TABLE_SIZE         0x00010000
@@ -602,16 +588,16 @@
 
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM3358_MEMORYMAP_H */

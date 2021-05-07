@@ -1,52 +1,36 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_flash.h
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
- *            Bob Feretich <bob.feretich@rafresearch.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM327_CHIP_STM32F72XX73XX_FLASH_H
 #define __ARCH_ARM_SRC_STM327_CHIP_STM32F72XX73XX_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Flash size is known from the chip selection:
  *
  *   When CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT is set the
- *   CONFIG_STM32F7_FLASH_CONFIG_x selects the default FLASH size based on the chip
- *   part number. This value can be overridden with CONFIG_STM32F7_FLASH_OVERRIDE_x
+ *   CONFIG_STM32F7_FLASH_CONFIG_x selects the default FLASH size based on
+ *   the chip part number.
+ *   This value can be overridden with CONFIG_STM32F7_FLASH_OVERRIDE_x
  *
  *   Parts STM32F72xxC have 256Kb of FLASH
  *   Parts STM32F72xxE have 512Kb of FLASH
@@ -98,7 +82,7 @@
 
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET     0x0000
 #define STM32_FLASH_KEYR_OFFSET    0x0004
@@ -108,7 +92,7 @@
 #define STM32_FLASH_OPTCR_OFFSET   0x0014
 #define STM32_FLASH_OPTCR1_OFFSET  0x0018
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FLASH_ACR            (STM32_FLASHIF_BASE+STM32_FLASH_ACR_OFFSET)
 #define STM32_FLASH_KEYR           (STM32_FLASHIF_BASE+STM32_FLASH_KEYR_OFFSET)
@@ -118,7 +102,8 @@
 #define STM32_FLASH_OPTCR          (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR_OFFSET)
 #define STM32_FLASH_OPTCR1         (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR1_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
+
 /* Flash Access Control Register (ACR) */
 
 #define FLASH_ACR_LATENCY_SHIFT    (0)       /* Bits 0-3: Latency */
@@ -140,6 +125,7 @@
 #  define FLASH_ACR_LATENCY_13     (13 << FLASH_ACR_LATENCY_SHIFT)   /* 1101: Thirteen wait states */
 #  define FLASH_ACR_LATENCY_14     (14 << FLASH_ACR_LATENCY_SHIFT)   /* 1110: Fourteen wait states */
 #  define FLASH_ACR_LATENCY_15     (15 << FLASH_ACR_LATENCY_SHIFT)   /* 1111: Fifteen wait states */
+
 #define FLASH_ACR_PRFTEN           (1 << 8)  /* FLASH prefetch enable */
 #define FLASH_ACR_ARTEN            (1 << 9)  /* Bit 9:  ART Accelerator Enable */
 #define FLASH_ACR_ARTRST           (1 << 11) /* Bit 11: ART Accelerator reset */
@@ -161,14 +147,17 @@
 #define FLASH_CR_SER               (1 << 1)  /* Bit 1:  Sector Erase */
 #define FLASH_CR_MER               (1 << 2)  /* Bit 2:  Mass Erase sectors 0..11 */
 #define FLASH_CR_SNB_SHIFT         (3)       /* Bits 3-6: Sector number */
-#define FLASH_CR_SNB_MASK          (0xf << FLASH_CR_SNB_SHIFT)  /* Used to clear FLASH_CR_SNB bits */
+
+#define FLASH_CR_SNB_MASK          (0xf << FLASH_CR_SNB_SHIFT)                 /* Used to clear FLASH_CR_SNB bits */
 #  define FLASH_CR_SNB(n)          ((uint32_t)(n & 0x7) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..7 */
+
 #define FLASH_CR_PSIZE_SHIFT       (8)       /* Bits 8-9: Program size */
 #define FLASH_CR_PSIZE_MASK        (3 << FLASH_CR_PSIZE_SHIFT)
 #  define FLASH_CR_PSIZE_X8        (0 << FLASH_CR_PSIZE_SHIFT) /* Program x8 */
 #  define FLASH_CR_PSIZE_X16       (1 << FLASH_CR_PSIZE_SHIFT) /* Program x16 */
 #  define FLASH_CR_PSIZE_X32       (2 << FLASH_CR_PSIZE_SHIFT) /* Program x32 */
 #  define FLASH_CR_PSIZE_X64       (3 << FLASH_CR_PSIZE_SHIFT) /* Program x64 */
+
 #define FLASH_CR_STRT              (1 << 16) /* Bit 16: Start Erase */
 #define FLASH_CR_EOPIE             (1 << 24) /* Bit 24: End of operation interrupt enable */
 #define FLASH_CR_ERRIE             (1 << 25) /* Bit 25: Error interrupt enable */
@@ -185,6 +174,7 @@
 #  define FLASH_OPTCR_VBOR2        (1 << FLASH_OPTCR_BORLEV_SHIFT) /* BOR Level 2 */
 #  define FLASH_OPTCR_VBOR1        (2 << FLASH_OPTCR_BORLEV_SHIFT) /* BOR Level 1 */
 #  define FLASH_OPTCR_VBOR0        (3 << FLASH_OPTCR_BORLEV_SHIFT) /* BOR off */
+
 #define FLASH_OPTCR_USER_SHIFT     (4)       /* Bits 5-7: User option bytes */
 #define FLASH_OPTCR_USER_MASK      (15 << FLASH_OPTCR_USER_SHIFT)
 #  define FLASH_OPTCR_WWDG_SW      (1 << 4)  /* Bit 4: WWDG_SW */

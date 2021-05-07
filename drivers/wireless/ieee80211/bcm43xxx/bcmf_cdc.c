@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/ieee80211/bcmf_cdc.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_cdc.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -44,6 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -241,7 +242,7 @@ int bcmf_cdc_control_request_unsafe(FAR struct bcmf_dev_s *priv,
 
   if (priv->control_status != 0)
     {
-      wlerr("Invalid cdc status 0x%x\n", priv->control_status);
+      wlerr("Invalid cdc status 0x%" PRIx32 "\n", priv->control_status);
       return -EINVAL;
     }
 
@@ -314,8 +315,8 @@ int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
         {
           if (priv->control_rxdata_len > cdc_header->len)
             {
-              wlerr("Not enough data %d %d\n",
-                      priv->control_rxdata_len, cdc_header->len);
+              wlerr("Not enough data %d %" PRId32 "\n",
+                    priv->control_rxdata_len, cdc_header->len);
               priv->control_rxdata_len = cdc_header->len;
             }
 

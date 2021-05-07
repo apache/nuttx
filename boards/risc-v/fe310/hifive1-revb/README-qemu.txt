@@ -28,8 +28,8 @@ index c449421741..5a76600785 100644
 4. Configure and build NuttX
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://bitbucket.org/nuttx/nuttx.git
-  $ git clone https://bitbucket.org/nuttx/apps.git
+  $ git clone https://github.com/apache/incubator-nuttx.git
+  $ git clone https://github.com/apache/incubator-nuttx-apps.git
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh hifive1-revb:nsh

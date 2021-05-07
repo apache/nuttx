@@ -1,41 +1,26 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_clkinit.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,46 +31,47 @@
 #include "lpc31_cgu.h"
 #include "lpc31_cgudrvr.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the configuration of one domain */
 
 struct lpc31_domainconfig_s
 {
-  enum lpc31_domainid_e dmnid; /* Domain ID */
-  uint32_t finsel;               /* Frequency input selection */
-  uint32_t clk1;                 /* ID of first clock in the domain */
-  uint32_t nclks;                /* Number of clocks in the domain */
-  uint32_t fdiv1;                /* First frequency divider in the domain */
-  uint32_t nfdiv;                /* Number of frequency dividers in the domain */
+  enum lpc31_domainid_e dmnid;               /* Domain ID */
+  uint32_t finsel;                           /* Frequency input selection */
+  uint32_t clk1;                             /* ID of first clock in the domain */
+  uint32_t nclks;                            /* Number of clocks in the domain */
+  uint32_t fdiv1;                            /* First frequency divider in the domain */
+  uint32_t nfdiv;                            /* Number of frequency dividers in the domain */
   const struct lpc31_subdomainconfig_s *sub; /* Sub=domain array */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_domaininit
  *
  * Description:
- *   Initialize one clock domain based on board-specific clock  configuration data
+ *   Initialize one clock domain based on board-specific clock configuration
+ *   data
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void lpc31_domaininit(struct lpc31_domainconfig_s *dmn)
 {
@@ -126,17 +112,21 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s *dmn)
             {
               /* Does this clock have an ESR register? */
 
-              esrndx = lpc31_esrndx((enum lpc31_clockid_e)(clkndx + dmn->clk1));
+              esrndx = lpc31_esrndx((enum lpc31_clockid_e)
+                                    (clkndx + dmn->clk1));
               if (esrndx != ESRNDX_INVALID)
                 {
                   /* Yes.. Check if this clock belongs to this sub-domain */
 
                   if (sub->clkset & (1 << clkndx))
                     {
-                      /* Yes.. configure the clock to use this fractional divider */
+                      /* Yes.. configure the clock to use this fractional
+                       * divider
+                       */
 
                       regaddr = LPC31_CGU_ESR(esrndx);
-                      putreg32((fdndx << CGU_ESR_ESRSEL_SHIFT) | CGU_ESR_ESREN, regaddr);
+                      putreg32((fdndx << CGU_ESR_ESRSEL_SHIFT) |
+                                CGU_ESR_ESREN, regaddr);
                     }
                 }
             }
@@ -163,17 +153,18 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s *dmn)
   lpc31_selectfreqin(dmn->dmnid, dmn->finsel);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_clkinit
  *
  * Description:
- *   Initialize all clock domains based on board-specific clock configuration data
+ *   Initialize all clock domains based on board-specific clock configuration
+ *   data
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc31_clkinit(const struct lpc31_clkinit_s *cfg)
 {

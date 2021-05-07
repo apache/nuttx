@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/chip/arm-l2cc_pl310.c
+ * arch/arm/src/armv7-a/arm_l2cc_pl310.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

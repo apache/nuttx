@@ -59,6 +59,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARCH_BUTTONS
@@ -66,7 +67,7 @@
 #endif
 
 #define BUTTON_MIN   0
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 #  define BUTTON_MAX 2
 #else
 #  define BUTTON_MAX 7
@@ -148,6 +149,7 @@
  *   Handle a button wake-up interrupt
  *
  ****************************************************************************/
+
 static int button_handler(int irq, FAR void *context, FAR void *arg)
 {
   /* At this point the MCU should have already awakened.  The state
@@ -189,7 +191,7 @@ void stm32_pmbuttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
   for (i = CONFIG_PM_IRQBUTTONS_MIN; i <= CONFIG_PM_IRQBUTTONS_MAX; i++)
     {
-      ret = board_button_irq(i, button_handler, (void*)i);
+      ret = board_button_irq(i, button_handler, (void *)i);
       if (ret < 0)
         {
           serr("ERROR: board_button_irq failed: %d\n", ret);

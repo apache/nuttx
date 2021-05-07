@@ -1,57 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_pm.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * This file is derived from nuttx/arch/avr/src/at32uc3/at32uc3_pm.h.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PM_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define SAM_PM_MCCTRL_OFFSET       0x0000 /* Main Clock Control Register */
 #define SAM_PM_CPUSEL_OFFSET       0x0004 /* CPU Clock Select Register */
@@ -83,7 +66,7 @@
 #define SAM_PM_CONFIG_OFFSET       0x03f8 /* Configuration Register */
 #define SAM_PM_VERSION_OFFSET      0x03fc /* Version Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define SAM_PM_MCCTRL              (SAM_PM_BASE+SAM_PM_MCCTRL_OFFSET)
 #define SAM_PM_CPUSEL              (SAM_PM_BASE+SAM_PM_CPUSEL_OFFSET)
@@ -115,7 +98,7 @@
 #define SAM_PM_CONFIG              (SAM_PM_BASE+SAM_PM_CONFIG_OFFSET)
 #define SAM_PM_VERSION             (SAM_PM_BASE+SAM_PM_VERSION_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Main Clock Control Register Bit-field Definitions */
 
@@ -248,10 +231,15 @@
 #  define PM_UNLOCK_KEY(n)         ((n) << PM_UNLOCK_KEY_SHIFT)
 
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
+
 /* Interrupt Status Register Bit-field Definitions */
+
 /* Interrupt Clear Register Bit-field Definitions */
+
 /* Status Register Register */
 
 #define PM_INT_CFD                (1 << 0)  /* Bit 0:  CFD */
@@ -335,16 +323,16 @@
 #define PM_VERSION_VARIANT_SHIFT      (16)       /* Bits 16-19: Variant Number */
 #define PM_VERSION_VARIANT_MASK       (15 << PM_VERSION_VARIANT_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PM_H */

@@ -1,44 +1,29 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/timers/cs2100-cp.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_TIMERS_CS2100_CP_H
 #define __INCLUDE_NUTTX_TIMERS_CS2100_CP_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +32,10 @@
 
 #ifdef CONFIG_TIMERS_CS2100CP
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_I2C
@@ -65,7 +51,7 @@
 #  undef CONFIG_CS2100CP_REGDEBUG
 #endif
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define CS2100_DEVID                       0x01      /* Device ID and Revision */
 #define CS2100_DEVCTL                      0x02      /* Device Control */
@@ -79,7 +65,7 @@
 #define CS2100_FNCCFG2                     0x17      /* Function Configuration 2 */
 #define CS2100_FNCCFG3                     0x1e      /* Function Configuration 3 */
 
-/* Register Bit Field Definitions ***********************************************************/
+/* Register Bit Field Definitions *******************************************/
 
 /* Device ID and Revision */
 
@@ -104,6 +90,7 @@
 #  define CS2100_DEVCFG1_AUXOUTSRC_CLKIN   (1 << CS2100_DEVCFG1_AUXOUTSRC_SHIFT) /* CLK_IN */
 #  define CS2100_DEVCFG1_AUXOUTSRC_CLKOUT  (2 << CS2100_DEVCFG1_AUXOUTSRC_SHIFT) /* CLK_OUT */
 #  define CS2100_DEVCFG1_AUXOUTSRC_PLLLOCK (3 << CS2100_DEVCFG1_AUXOUTSRC_SHIFT) /* PLL Lock Status Indicator*/
+
 #define CS2100_DEVCFG1_RMODSEL_SHIFT       (5)       /* Bit 5-7: Selects R-Mod value */
 #define CS2100_DEVCFG1_RMODSEL_MASK        (7 << CS2100_DEVCFG1_RMODSEL_SHIFT)
 #  define CS2100_DEVCFG1_RMODSEL_NONE      (0 << CS2100_DEVCFG1_RMODSEL_SHIFT) /* Left-shift R-value by 0 (x 1) */
@@ -153,9 +140,9 @@
 #  define CS2100_FNCCFG3_CLKINBW_64HZ      (6 << CS2100_FNCCFG3_CLKINBW_SHIFT) /* 64 Hz */
 #  define CS2100_FNCCFG3_CLKINBW_128HZ     (7 << CS2100_FNCCFG3_CLKINBW_SHIFT) /* 128 Hz */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 struct cs2100_config_s
 {
@@ -169,9 +156,9 @@ struct cs2100_config_s
   bool xtal;                     /* false: Refclck, true: Crystal on XTI/XTO */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -181,13 +168,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 struct i2c_master_s;  /* Forward reference */
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_enable
  *
  * Description:
@@ -199,39 +186,41 @@ struct i2c_master_s;  /* Forward reference */
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int cs2100_enable(FAR const struct cs2100_config_s *config);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_disable
  *
  * Description:
  *   Disable CS2100 CLK_OUT
  *
  * Input Parameters:
- *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *   config  - CS2100-CP configuration
+ *             (Needed only for I2C access: i2c and i2caddr)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int cs2100_disable(FAR const struct cs2100_config_s *config);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: cs2100_dump
  *
  * Description:
  *   Dump CS2100-CP registers to the SysLog
  *
  * Input Parameters:
- *   config  - CS2100-CP configuration (Needed only for I2C access: i2c and i2caddr)
+ *   config  - CS2100-CP configuration
+ *            (Needed only for I2C access: i2c and i2caddr)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CS2100CP_DEBUG
 int cs2100_dump(FAR const struct cs2100_config_s *config);

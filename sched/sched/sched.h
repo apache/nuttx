@@ -337,16 +337,16 @@ extern volatile uint32_t g_cpuload_total;
  *    least one CPU has pre-emption disabled.
  */
 
-extern volatile spinlock_t g_cpu_schedlock SP_SECTION;
+extern volatile spinlock_t g_cpu_schedlock;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_locksetlock SP_SECTION;
-extern volatile cpu_set_t g_cpu_lockset SP_SECTION;
+extern volatile spinlock_t g_cpu_locksetlock;
+extern volatile cpu_set_t g_cpu_lockset;
 
 /* Used to lock tasklist to prevent from concurrent access */
 
-extern volatile spinlock_t g_cpu_tasklistlock SP_SECTION;
+extern volatile spinlock_t g_cpu_tasklistlock;
 
 #endif /* CONFIG_SMP */
 

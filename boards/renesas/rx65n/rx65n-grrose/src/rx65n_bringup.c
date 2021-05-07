@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/rx65n/rx65n-grrose/src/rx65n.bringup.c
+ * boards/renesas/rx65n/rx65n-grrose/src/rx65n_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,13 +27,17 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <syslog.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/kthread.h>
 
+#include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/usb/usbhost.h>
+
+#include "rx65n_usbhost.h"
 #include "rx65n_grrose.h"
 #include <rx65n_definitions.h>
 #ifdef CONFIG_LIB_BOARDCTL
@@ -60,6 +64,165 @@
 #  include <nuttx/i2c/i2c_master.h>
 #  include "rx65n_riic.h"
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#define NSH_HAVE_USBHOST    1
+
+/* USB Host */
+
+#ifndef CONFIG_USBHOST
+#  undef NSH_HAVE_USBHOST
+#endif
+
+#ifdef NSH_HAVE_USBHOST
+#  ifndef CONFIG_USBHOST_DEFPRIO
+#    define CONFIG_USBHOST_DEFPRIO 100
+#  endif
+#  ifndef CONFIG_USBHOST_STACKSIZE
+#    ifdef CONFIG_USBHOST_HUB
+#      define CONFIG_USBHOST_STACKSIZE 1536
+#    else
+#      define CONFIG_USBHOST_STACKSIZE 1024
+#    endif
+#  endif
+#endif
+
+#ifdef NSH_HAVE_USBHOST
+static struct usbhost_connection_s *g_usbconn;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_waiter
+ *
+ * Description:
+ *   Wait for USB devices to be connected.
+ *
+ ****************************************************************************/
+
+#ifdef NSH_HAVE_USBHOST
+static int nsh_waiter(int argc, char *argv[])
+{
+  struct usbhost_hubport_s *hport;
+
+  syslog(LOG_INFO, "nsh_waiter: Running\n");
+  for (; ; )
+    {
+      /* Wait for the device to change state */
+
+      DEBUGVERIFY(CONN_WAIT(g_usbconn, &hport));
+      syslog(LOG_INFO, "nsh_waiter: %s\n",
+             hport->connected ? "Host:connected" : "Host:disconnected");
+
+      /* Did we just become connected? */
+
+      if (hport->connected && hport->port == 0)
+        {
+          /* Yes.. enumerate the newly connected device */
+
+          (void)CONN_ENUMERATE(g_usbconn, hport);
+        }
+    }
+
+  /* Keep the compiler from complaining */
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: nsh_usbhostinitialize
+ *
+ * Description:
+ *   Initialize SPI-based microSD.
+ *
+ ****************************************************************************/
+
+#ifdef NSH_HAVE_USBHOST
+static int nsh_usbhostinitialize(void)
+{
+  int pid;
+  int ret;
+
+  /* First, register all of the class drivers needed to support the drivers
+   * that we care about:
+   */
+
+  syslog(LOG_INFO, "Register class drivers\n");
+
+#ifdef CONFIG_USBHOST_HUB
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_MSC
+  /* Register the USB host Mass Storage Class */
+
+  ret = usbhost_msc_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the mass storage class: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_CDCACM
+  /* Register the CDC/ACM serial class */
+
+  ret = usbhost_kbdinit();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the KBD class: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_HIDKBD
+  /* Register the HID KBD class */
+
+  ret = usbhost_kbdinit();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+        "ERROR: Failed to register the CDC/ACM serial class: %d\n", ret);
+    }
+#endif
+
+  /* Then get an instance of the USB host interface */
+
+  g_usbconn = rx65n_usbhost_initialize(0);
+  if (g_usbconn)
+    {
+      /* Start a thread to handle device connection. */
+
+      syslog(LOG_INFO, "Start nsh_waiter\n");
+
+      pid = kthread_create("usbhost", CONFIG_USBHOST_DEFPRIO,
+                           CONFIG_USBHOST_STACKSIZE,
+                           (main_t)nsh_waiter, (FAR char * const *)NULL);
+      syslog(LOG_INFO, "USBHost: Created pid = %d\n", pid);
+      return pid < 0 ? -ENOEXEC : OK;
+    }
+
+  return -ENODEV;
+}
+#else
+#  define nsh_usbhostinitialize() (OK)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -207,12 +370,11 @@ int rx65n_bringup(void)
 
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
-             ret, errno);
+             "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
     }
 
 #endif
@@ -228,6 +390,10 @@ int rx65n_bringup(void)
   /* Initialize DTC */
 
   (void)rx65n_dtc_initialize();
+#endif
+
+#if defined(CONFIG_USBHOST)
+  ret = nsh_usbhostinitialize();
 #endif
 
 #ifdef CONFIG_RX65N_RSPI

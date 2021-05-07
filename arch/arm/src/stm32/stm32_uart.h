@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_uart.h
  *
- *   Copyright (C) 2009, 2012-2013, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_STC_STM32_STM32_UART_H
 #define __ARCH_ARM_STC_STM32_STM32_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/serial/serial.h>
@@ -56,15 +41,15 @@
 #  include "hardware/stm32f30xxx_uart.h"
 #elif defined(CONFIG_STM32_STM32F4XXX)
 #  include "hardware/stm32f40xxx_uart.h"
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  include "hardware/stm32g47xxx_uart.h"
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  include "hardware/stm32g4xxxx_uart.h"
 #else
 #  error "Unsupported STM32 UART"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Make sure that we have not enabled more U[S]ARTs than are supported by the
  * device.
@@ -278,51 +263,69 @@
 #  undef HAVE_CONSOLE
 #endif
 
-/* DMA support is only provided if CONFIG_ARCH_DMA is in the NuttX configuration */
+/* DMA support is only provided if CONFIG_ARCH_DMA is in the
+ * NuttX configuration
+ */
 
 #if !defined(HAVE_SERIALDRIVER) || !defined(CONFIG_ARCH_DMA)
 #  undef CONFIG_USART1_RXDMA
+#  undef CONFIG_USART1_TXDMA
 #  undef CONFIG_USART2_RXDMA
+#  undef CONFIG_USART2_TXDMA
 #  undef CONFIG_USART3_RXDMA
+#  undef CONFIG_USART3_TXDMA
 #  undef CONFIG_UART4_RXDMA
+#  undef CONFIG_UART4_TXDMA
 #  undef CONFIG_UART5_RXDMA
+#  undef CONFIG_UART5_TXDMA
 #  undef CONFIG_USART6_RXDMA
+#  undef CONFIG_USART6_TXDMA
 #  undef CONFIG_UART7_RXDMA
+#  undef CONFIG_UART7_TXDMA
 #  undef CONFIG_UART8_RXDMA
+#  undef CONFIG_UART8_TXDMA
 #endif
 
 /* Disable the DMA configuration on all unused USARTs */
 
 #ifndef CONFIG_STM32_USART1_SERIALDRIVER
 #  undef CONFIG_USART1_RXDMA
+#  undef CONFIG_USART1_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_USART2_SERIALDRIVER
 #  undef CONFIG_USART2_RXDMA
+#  undef CONFIG_USART2_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_USART3_SERIALDRIVER
 #  undef CONFIG_USART3_RXDMA
+#  undef CONFIG_USART3_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_UART4_SERIALDRIVER
 #  undef CONFIG_UART4_RXDMA
+#  undef CONFIG_UART4_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_UART5_SERIALDRIVER
 #  undef CONFIG_UART5_RXDMA
+#  undef CONFIG_UART5_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_USART6_SERIALDRIVER
 #  undef CONFIG_USART6_RXDMA
+#  undef CONFIG_USART6_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_UART7_SERIALDRIVER
 #  undef CONFIG_UART7_RXDMA
+#  undef CONFIG_UART7_TXDMA
 #endif
 
 #ifndef CONFIG_STM32_UART8_SERIALDRIVER
 #  undef CONFIG_UART8_RXDMA
+#  undef CONFIG_UART8_TXDMA
 #endif
 
 /* Is DMA available on any (enabled) USART? */
@@ -335,46 +338,195 @@
 #  define SERIAL_HAVE_RXDMA 1
 #endif
 
-/* Is DMA used on the console UART? */
+/* Is TX DMA available on any (enabled) USART? */
 
-#undef SERIAL_HAVE_CONSOLE_DMA
-#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_USART1_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_USART2_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_USART3_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_UART4_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_UART5_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_USART6_SERIAL_CONSOLE) && defined(CONFIG_USART6_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_UART7_SERIAL_CONSOLE) && defined(CONFIG_UART7_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
-#elif defined(CONFIG_UART8_SERIAL_CONSOLE) && defined(CONFIG_UART8_RXDMA)
-#  define SERIAL_HAVE_CONSOLE_DMA 1
+#undef SERIAL_HAVE_TXDMA
+#if defined(CONFIG_USART1_TXDMA) || defined(CONFIG_USART2_TXDMA) || \
+  defined(CONFIG_USART3_TXDMA) || defined(CONFIG_UART4_TXDMA)  ||   \
+  defined(CONFIG_UART5_TXDMA)  || defined(CONFIG_USART6_TXDMA) ||   \
+  defined(CONFIG_UART7_TXDMA)  || defined(CONFIG_UART8_TXDMA)
+#  define SERIAL_HAVE_TXDMA 1
 #endif
 
-/* Is DMA used on all (enabled) USARTs */
+/* Is RX DMA used on the console UART? */
 
-#define SERIAL_HAVE_ONLY_DMA 1
-#if defined(CONFIG_STM32_USART1_SERIALDRIVER) && !defined(CONFIG_USART1_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_USART2_SERIALDRIVER) && !defined(CONFIG_USART2_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_USART3_SERIALDRIVER) && !defined(CONFIG_USART3_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_UART4_SERIALDRIVER) && !defined(CONFIG_UART4_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_UART5_SERIALDRIVER) && !defined(CONFIG_UART5_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_USART6_SERIALDRIVER) && !defined(CONFIG_USART6_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_UART7_SERIALDRIVER) && !defined(CONFIG_UART7_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32_UART8_SERIALDRIVER) && !defined(CONFIG_UART8_RXDMA)
-#  undef SERIAL_HAVE_ONLY_DMA
+#undef SERIAL_HAVE_CONSOLE_RXDMA
+#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_USART1_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_USART2_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_USART3_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_UART4_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_UART5_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_USART6_SERIAL_CONSOLE) && defined(CONFIG_USART6_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_UART7_SERIAL_CONSOLE) && defined(CONFIG_UART7_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#elif defined(CONFIG_UART8_SERIAL_CONSOLE) && defined(CONFIG_UART8_RXDMA)
+#  define SERIAL_HAVE_CONSOLE_RXDMA 1
+#endif
+
+/* Is TX DMA used on the console UART? */
+
+#undef SERIAL_HAVE_CONSOLE_TXDMA
+#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_USART1_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_USART2_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_USART3_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_UART4_SERIAL_CONSOLE) && defined(CONFIG_UART4_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_UART5_SERIAL_CONSOLE) && defined(CONFIG_UART5_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_USART6_SERIAL_CONSOLE) && defined(CONFIG_USART6_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_UART7_SERIAL_CONSOLE) && defined(CONFIG_UART7_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#elif defined(CONFIG_UART8_SERIAL_CONSOLE) && defined(CONFIG_UART8_TXDMA)
+#  define SERIAL_HAVE_CONSOLE_TXDMA 1
+#endif
+
+/* Is RX DMA used on all (enabled) USARTs */
+
+#define SERIAL_HAVE_ONLY_RXDMA 1
+#if defined(CONFIG_STM32_USART1) && !defined(CONFIG_USART1_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_USART2) && !defined(CONFIG_USART2_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_USART3) && !defined(CONFIG_USART3_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_UART4) && !defined(CONFIG_UART4_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_UART5) && !defined(CONFIG_UART5_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_USART6) && !defined(CONFIG_USART6_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_UART7) && !defined(CONFIG_UART7_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#elif defined(CONFIG_STM32_UART8) && !defined(CONFIG_UART8_RXDMA)
+#  undef SERIAL_HAVE_ONLY_RXDMA
+#endif
+
+/* Is TX DMA used on all (enabled) USARTs */
+
+#define SERIAL_HAVE_ONLY_TXDMA 1
+#if defined(CONFIG_STM32_USART1) && !defined(CONFIG_USART1_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_USART2) && !defined(CONFIG_USART2_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_USART3) && !defined(CONFIG_USART3_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_UART4) && !defined(CONFIG_UART4_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_UART5) && !defined(CONFIG_UART5_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_USART6) && !defined(CONFIG_USART6_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_UART7) && !defined(CONFIG_UART7_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#elif defined(CONFIG_STM32_UART8) && !defined(CONFIG_UART8_TXDMA)
+#  undef SERIAL_HAVE_ONLY_TXDMA
+#endif
+
+#undef SERIAL_HAVE_ONLY_DMA
+#if defined(SERIAL_HAVE_ONLY_RXDMA) && defined(SERIAL_HAVE_ONLY_TXDMA)
+#  define SERIAL_HAVE_ONLY_DMA 1
+#endif
+
+/* No DMA ops */
+
+#undef SERIAL_HAVE_NODMA_OPS
+#if defined(CONFIG_STM32_USART1) && !defined(CONFIG_USART1_RXDMA) &&   \
+    !defined(CONFIG_USART1_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_USART2) && !defined(CONFIG_USART2_RXDMA) && \
+    !defined(CONFIG_USART2_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_USART3) && !defined(CONFIG_USART3_RXDMA) && \
+    !defined(CONFIG_USART3_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_UART4) && !defined(CONFIG_UART4_RXDMA) &&  \
+    !defined(CONFIG_UART4_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_UART5) && !defined(CONFIG_UART5_RXDMA) &&  \
+    !defined(CONFIG_UART5_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_USART6) && !defined(CONFIG_USART6_RXDMA) && \
+    !defined(CONFIG_USART6_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_UART7) && !defined(CONFIG_UART7_RXDMA) &&  \
+    !defined(CONFIG_UART7_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#elif defined(CONFIG_STM32_UART8) && !defined(CONFIG_UART8_RXDMA) &&  \
+    !defined(CONFIG_UART8_TXDMA)
+#  define SERIAL_HAVE_NODMA_OPS
+#endif
+
+/* RX+TX DMA ops */
+
+#undef SERIAL_HAVE_RXTXDMA_OPS
+#if defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#elif defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
+#  define SERIAL_HAVE_RXTXDMA_OPS
+#endif
+
+/* TX DMA ops */
+
+#undef SERIAL_HAVE_TXDMA_OPS
+#if !defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_USART2_RXDMA) && defined(CONFIG_USART2_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_USART3_RXDMA) && defined(CONFIG_USART3_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_UART4_RXDMA) && defined(CONFIG_UART4_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_UART5_RXDMA) && defined(CONFIG_UART5_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_USART6_RXDMA) && defined(CONFIG_USART6_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_UART7_RXDMA) && defined(CONFIG_UART7_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#elif !defined(CONFIG_UART8_RXDMA) && defined(CONFIG_UART8_TXDMA)
+#  define SERIAL_HAVE_TXDMA_OPS
+#endif
+
+/* RX DMA ops */
+
+#undef SERIAL_HAVE_RXDMA_OPS
+#if defined(CONFIG_USART1_RXDMA) && !defined(CONFIG_USART1_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_USART2_RXDMA) && !defined(CONFIG_USART2_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_USART3_RXDMA) && !defined(CONFIG_USART3_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_UART4_RXDMA) && !defined(CONFIG_UART4_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_UART5_RXDMA) && !defined(CONFIG_UART5_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_USART6_RXDMA) && !defined(CONFIG_USART6_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_UART7_RXDMA) && !defined(CONFIG_UART7_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
+#elif defined(CONFIG_UART8_RXDMA) && !defined(CONFIG_UART8_TXDMA)
+#  define SERIAL_HAVE_RXDMA_OPS
 #endif
 
 /* Is RS-485 used? */
@@ -392,13 +544,13 @@
 #  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -411,32 +563,32 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_serial_get_uart
  *
  * Description:
  *   Get serial driver structure for STM32 USART
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR uart_dev_t *stm32_serial_get_uart(int uart_num);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_serial_dma_poll
  *
  * Description:
- *   Must be called periodically if any STM32 UART is configured for DMA.  The DMA
- *   callback is triggered for each fifo size/2 bytes, but this can result in some
- *   bytes being transferred but not collected if the incoming data is not a whole
- *   multiple of half the FIFO size.
+ *   Must be called periodically if any STM32 UART is configured for DMA.
+ *   The DMA callback is triggered for each fifo size/2 bytes, but this can
+ *   result in some bytes being transferred but not collected if the incoming
+ *   data is not a whole multiple of half the FIFO size.
  *
  *   May be safely called from either interrupt or thread context.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 void stm32_serial_dma_poll(void);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/mikroe_stm32f4/src/stm32_idle.c
+ * boards/arm/stm32/mikroe-stm32f4/src/stm32_idle.c
  *
  *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -61,7 +61,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Does the board support an IDLE LED to indicate that the board is in the
  * IDLE state?
  */

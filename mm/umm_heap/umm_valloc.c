@@ -33,6 +33,8 @@
  * Name: valloc
  *
  * Description:
+ *   valloc - page-aligned memory allocator (OBSOLETE/LEGACY)
+ *
  *   valloc has the same effect as malloc(), except that the allocated
  *   memory is aligned to a page boundary.
  *

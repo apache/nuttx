@@ -62,8 +62,8 @@
  *   LOG_AUTHPRIV - Security/authorization messages (private)
  *   LOG_CRON     - Clock daemon (cron and at)
  *   LOG_DAEMON   - System daemons without separate facility value
- *   LOG_FTP      - Ftp daemon
- *   LOG_KERN     - Lernel messages (these can't be generated from user
+ *   LOG_FTP      - FTP daemon
+ *   LOG_KERN     - Kernel messages (these can't be generated from user
  *                  processes)
  *   LOG_LOCAL0 through LOG_LOCAL7 - Reserved for local use
  *   LOG_LPR      - Line printer subsystem
@@ -198,8 +198,9 @@ void closelog(void);
  *
  ****************************************************************************/
 
-void syslog(int priority, FAR const IPTR char *fmt, ...);
-void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap);
+void syslog(int priority, FAR const IPTR char *fmt, ...) sysloglike(2, 3);
+void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
+     sysloglike(2, 0);
 
 /****************************************************************************
  * Name: setlogmask

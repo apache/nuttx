@@ -1,52 +1,37 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/sama5/sama5d2_irq.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H
 #define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D2_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* SAMA5D2 Peripheral Identifiers */
 
@@ -203,13 +188,14 @@
 #define SAM_IRQ_MCAN00         SAM_PID_MCAN00    /* MCAN controller 0, Interrupt 0 */
 #define SAM_IRQ_MCAN10         SAM_PID_MCAN10    /* MCAN controller 1, Interrupt 0 */
 #define SAM_IRQ_CLASSD         SAM_PID_CLASSD    /* Audio Class D Amplifier */
-
-                                                 /* Special Function Register (no interrupt) */
-
-                                                 /* Secured Advanced Interrupt Controller (no interrupt) */
-
-                                                 /* Advanced Interrupt Controller (no interrupt) */
-
+                                                 /* Special Function Register
+                                                  * (no interrupt) */
+                                                 /* Secured Advanced Interrupt
+                                                  * Controller
+                                                  * (no interrupt) */
+                                                 /* Advanced Interrupt
+                                                  * Controller
+                                                  * (no interrupt) */
 #define SAM_IRQ_L2CC           SAM_PID_L2CC      /* L2 Cache Controller */
 #define SAM_IRQ_MCAN01         SAM_PID_MCAN01    /* MCAN controller 0, Interrupt 1 */
 #define SAM_IRQ_MCAN11         SAM_PID_MCAN11    /* MCAN controller 1, Interrupt 1 */
@@ -224,9 +210,8 @@
 #define SAM_IRQ_SYS            SAM_PID_SYS       /* System Controller Interrupt PMC, RTC, RSTC */
 #define SAM_IRQ_ACC            SAM_PID_ACC       /* Analog Comparator */
 #define SAM_IRQ_RXLP           SAM_PID_RXLP      /* UART Low-Power */
-
-                                                 /* Special Function Register BackUp (no interrupt) */
-
+                                                 /* Special Function
+                                                  * Register BackUp (no interrupt) */
                                                  /* Chip ID (no interrupt) */
 
 #define SAM_IRQ_NINT           (SAM_PID_RXLP + 1)
@@ -396,21 +381,21 @@
                                SAM_NPIOAIRQS + SAM_NPIOBIRQS + SAM_NPIOCIRQS + \
                                SAM_NPIODIRQS)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Inline functions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

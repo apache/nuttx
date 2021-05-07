@@ -8,7 +8,7 @@ comment "RISC-V Options"
 
 choice
 	prompt "RISC-V chip selection"
-	default ARCH_CHIP_NR5
+	default ARCH_CHIP_RISCV_CUSTOM
 
 config ARCH_CHIP_FE310
 	bool "SiFive FE310"
@@ -31,18 +31,34 @@ config ARCH_CHIP_LITEX
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
-config ARCH_CHIP_NR5
-	bool "NEXT NanoRisc5"
+config ARCH_CHIP_BL602
+	bool "BouffaloLab BL602"
 	select ARCH_RV32IM
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_RESET
 	---help---
-		NEXT RISC-V NR5Mxx architectures (RISC-V RV32IM cores).
+		BouffaloLab BL602(rv32imfc)
 
-config ARCH_CHIP_GAP8
-	bool "GreenwavesTechnologies GAP8"
+config ARCH_CHIP_ESP32C3
+	bool "Espressif ESP32-C3"
 	select ARCH_RV32IM
+	select RV32IM_HW_MULDIV
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RESET
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMCCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
 	---help---
-		GreenwavesTechnologies GAP8 features a 1+8-core RI5CY DSP-like
-		processor, which originally comes from the ETH PULP platform.
+		Espressif ESP32-C3 (RV32IMC).
+
+config ARCH_CHIP_C906
+	bool "THEAD C906"
+	select ARCH_RV64GC
+	select ARCH_HAVE_MPU
+	---help---
+		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
@@ -55,15 +71,18 @@ endchoice
 config ARCH_RV32I
 	bool
 	default n
+	select ARCH_HAVE_SETJMP
 
 config ARCH_RV32IM
 	bool
 	default n
+	select ARCH_HAVE_SETJMP
 
 config ARCH_RV64GC
 	bool
 	default n
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ARCH_HAVE_SETJMP
 
 config ARCH_FAMILY
 	string
@@ -75,18 +94,9 @@ config ARCH_CHIP
 	default "fe310"		if ARCH_CHIP_FE310
 	default "k210"		if ARCH_CHIP_K210
 	default "litex"		if ARCH_CHIP_LITEX
-	default "nr5m100"	if ARCH_CHIP_NR5
-	default "gap8"		if ARCH_CHIP_GAP8
-
-config NR5_MPU
-	bool "MPU support"
-	default n
-	depends on ARCH_HAVE_MPU
-	select ARCH_USE_MPU
-	---help---
-		Build in support for the RISC-V Memory Protection Unit (MPU).
-		Check your chip specifications first; not all RISC-V architectures
-		support the MPU.
+	default "bl602"		if ARCH_CHIP_BL602
+	default "esp32c3"	if ARCH_CHIP_ESP32C3
+	default "c906"		if ARCH_CHIP_C906
 
 if ARCH_RV32IM
 source arch/risc-v/src/rv32im/Kconfig
@@ -103,11 +113,13 @@ endif
 if ARCH_CHIP_LITEX
 source arch/risc-v/src/litex/Kconfig
 endif
-if ARCH_CHIP_NR5
-source arch/risc-v/src/nr5m100/Kconfig
+if ARCH_CHIP_BL602
+source arch/risc-v/src/bl602/Kconfig
 endif
-if ARCH_CHIP_GAP8
-source arch/risc-v/src/gap8/Kconfig
+if ARCH_CHIP_ESP32C3
+source arch/risc-v/src/esp32c3/Kconfig
 endif
-
+if ARCH_CHIP_C906
+source arch/risc-v/src/c906/Kconfig
+endif
 endif

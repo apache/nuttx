@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_iwdg.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -40,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
@@ -330,7 +316,7 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdinfo("Entry: started=%d\n");
+  wdinfo("Entry: started\n");
   DEBUGASSERT(priv);
 
   /* Have we already been started? */
@@ -476,9 +462,9 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   status->timeleft = priv->timeout - elapsed;
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -507,14 +493,14 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   int prescaler;
   int shift;
 
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
   DEBUGASSERT(priv);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > IWDG_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%d > %d\n",
+      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %d\n",
             timeout, IWDG_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -622,7 +608,8 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
     }
 #endif
 
-  wdinfo("prescaler=%d fiwdg=%d reload=%d\n", prescaler, fiwdg, reload);
+  wdinfo("prescaler=%d fiwdg=%" PRId32 " reload=%" PRId64 "\n",
+         prescaler, fiwdg, reload);
 
   return OK;
 }
@@ -653,7 +640,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 {
   FAR struct stm32_lowerhalf_s *priv = &g_wdgdev;
 
-  wdinfo("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
+  wdinfo("Entry: devpath=%s lsifreq=%" PRId32 "\n", devpath, lsifreq);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.
@@ -673,7 +660,7 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    */
 
   stm32_rcc_enablelsi();
-  wdinfo("RCC CSR: %08x\n", getreg32(STM32_RCC_CSR));
+  wdinfo("RCC CSR: %08" PRIx32 "\n", getreg32(STM32_RCC_CSR));
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

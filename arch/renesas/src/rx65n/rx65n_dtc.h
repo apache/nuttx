@@ -38,8 +38,8 @@
  * Public Types
  ****************************************************************************/
 
-/* DTC_HANDLE provides an opaque are reference that can be used to represent
- * a DTC channel.
+/* DTC_HANDLE provides an opaque reference that can be used to represent a
+ * DTC channel.
  */
 
 typedef FAR void *DTC_HANDLE;

@@ -1,57 +1,43 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_adc_v2.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V2_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V2_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ************************************************************************************/
+/* Configuration ************************************************************/
 
-/* This is implementation for STM32 ADC IPv2 - F0, F3 (without F37x), G4, H7, L0, L4, L4+ */
+/* This is implementation for STM32 ADC IPv2 - F0, F3 (without F37x),
+ * H7, L0, L4, L4+
+ */
 
 #define HAVE_IP_ADC_V2
 #undef HAVE_IP_ADC_V1           /* No ADC IPv1 */
@@ -84,7 +70,7 @@
 #  define HAVE_ADC_CFGR2
 #endif
 
-/* Base addresses ***********************************************************************************/
+/* Base addresses ***********************************************************/
 
 #define STM32_ADC1_OFFSET              0x0000
 #define STM32_ADC2_OFFSET              0x0100
@@ -99,7 +85,7 @@
 #define STM32_ADC12CMN_BASE            (STM32_ADCCMN_OFFSET + STM32_ADC12_BASE) /* ADC1, ADC2 common */
 #define STM32_ADC34CMN_BASE            (STM32_ADCCMN_OFFSET + STM32_ADC34_BASE) /* ADC3, ADC4 common */
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_ADC_ISR_OFFSET           0x0000  /* ADC interrupt and status register */
 #define STM32_ADC_IER_OFFSET           0x0004  /* ADC interrupt enable register */
@@ -138,7 +124,7 @@
 #define STM32_ADC_CCR_OFFSET           0x0008  /* Common control register */
 #define STM32_ADC_CDR_OFFSET           0x000c  /* Common regular data register for dual mode */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NADC > 0
 #  define STM32_ADC1_ISR               (STM32_ADC1_BASE + STM32_ADC_ISR_OFFSET)
@@ -284,9 +270,11 @@
 #  define STM32_ADC34_CDR              (STM32_ADC34CMN_BASE + STM32_ADC_CDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ********************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
-/* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
+/* ADC interrupt and status register (ISR), and
+ * ADC interrupt enable register (IER)
+ */
 
 #define ADC_INT_ARDY                   (1 << 0)  /* Bit 0:  ADC ready */
 #define ADC_INT_EOSMP                  (1 << 1)  /* Bit 1:  End of sampling flag */
@@ -375,71 +363,6 @@
 #  define ADC34_CFGR1_EXTSEL_T7TRGO    (13 << ADC_CFGR1_EXTSEL_SHIFT)
 #  define ADC34_CFGR1_EXTSEL_T15TRGO   (14 << ADC_CFGR1_EXTSEL_SHIFT)
 #  define ADC34_CFGR1_EXTSEL_T2CC1     (15 << ADC_CFGR1_EXTSEL_SHIFT)
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  define ADC12_CFGR1_EXTSEL_T1CC1     (0 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T1CC2     (1 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T1CC3     (2 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T2CC2     (3 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T3TRGO    (4 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T4CC4     (5 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_EXTI11    (6 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T8TRGO    (7 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T8TRGO2   (8 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T1TRGO    (9 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T1TRGO2   (10 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T2TRGO    (11 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T4TRGO    (12 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T6TRGO    (13 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T15TRGO   (14 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T3CC4     (15 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T20TRGO   (16 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T20TRGO2  (17 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T20CC1    (18 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T20CC2    (19 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T20CC3    (20 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG1  (21 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG3  (22 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG5  (23 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG6  (24 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG7  (25 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG8  (26 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG9  (27 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_HRT1TRG10 (28 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_LPTIMOUT  (29 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_T7TRGO    (30 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC12_CFGR1_EXTSEL_RSVD1     (31 << ADC_CFGR1_EXTSEL_SHIFT) /* 11111: Reserved */
-#  define ADC34_CFGR1_EXTSEL_T3CC1     (0 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T2CC3     (1 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T1CC3     (2 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T8CC1     (3 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T3TRGO    (4 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_EXTI2     (5 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T4CC1     (6 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T8TRGO    (7 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T8TRGO2   (8 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T1TRGO    (9 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T1TRGO2   (10 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T2TRGO    (11 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T4TRGO    (12 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T6TRGO    (13 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T15TRGO   (14 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T2CC1     (15 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T20TRGO   (16 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T20TRGO2  (17 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T20CC1    (18 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG2  (19 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG4  (20 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG1  (21 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG3  (22 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG5  (23 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG6  (24 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG7  (25 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG8  (26 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG9  (27 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_HRT1TRG10 (28 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_LPTIMOUT  (29 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_T7TRGO    (30 << ADC_CFGR1_EXTSEL_SHIFT)
-#  define ADC34_CFGR1_EXTSEL_RSVD1     (31 << ADC_CFGR1_EXTSEL_SHIFT) /* 11111: Reserved */
 #else
 #  error TODO EXTSEL
 #endif
@@ -461,7 +384,7 @@
 #define ADC_CFGR1_JQM                 (1 << 21)                    /* Bit 21: JSQR queue mode */
 #define ADC_CFGR1_AWD1SGL             (1 << 22)                    /* Bit 22: Enable watchdog on single/all channels */
 #define ADC_CFGR1_AWD1EN              (1 << 23)                    /* Bit 23: Analog watchdog enable 1 regular channels */
-#define ADC_CFGR1_JAWD1EN             (1 << 22)                    /* Bit 22: Analog watchdog enable 1 injected channels */
+#define ADC_CFGR1_JAWD1EN             (1 << 24)                    /* Bit 24: Analog watchdog enable 1 injected channels */
 #define ADC_CFGR1_JAUTO               (1 << 25)                    /* Bit 25: Automatic Injected Group conversion */
 #define ADC_CFGR1_AWD1CH_SHIFT        (26)                         /* Bits 26-30: Analog watchdog 1 channel select bits */
 #define ADC_CFGR1_AWD1CH_MASK         (31 << ADC_CFGR1_AWD1CH_SHIFT)
@@ -666,72 +589,6 @@
 #  define ADC34_JSQR_JEXTSEL_T2TRGO    (13 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC34_JSQR_JEXTSEL_T7TRGO    (14 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC34_JSQR_JEXTSEL_T15TRGO   (15 << ADC_JSQR_JEXTSEL_SHIFT)
-#elif defined(CONFIG_STM32_STM32G47XX)
-#  define ADC12_JSQR_JEXTSEL_T1TRGO    (0 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T1CC4     (1 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T2TRGO    (2 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T2CC1     (3 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T3CC4     (4 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T4TRGO    (5 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_EXTI15    (6 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T8CC4     (7 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T1TRGO2   (8 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T8TRGO    (9 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T8TRGO2   (10 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T3CC3     (11 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T3TRGO    (12 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T3CC1     (13 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T6TRGO    (14 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T15TRGO   (15 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T20TRGO   (16 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T20TRGO2  (17 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T20CC4    (18 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG2  (19 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG4  (20 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG5  (21 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG6  (22 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG7  (23 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG8  (24 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG9  (25 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_HRT1TRG10 (26 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T16CC1    (27 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_RSVD1     (28 << ADC_JSQR_JEXTSEL_SHIFT) /* 11100: Reserved */
-#  define ADC12_JSQR_JEXTSEL_LPTIMOUT  (29 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_T7TRGO    (30 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC12_JSQR_JEXTSEL_RSVD2     (31 << ADC_JSQR_JEXTSEL_SHIFT) /* 11111: Reserved */
-
-#  define ADC34_JSQR_JEXTSEL_T1TRGO    (0 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T1CC4     (1 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T2TRGO    (2 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T8CC2     (3 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T4CC3     (4 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T4TRGO    (5 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T4CC4     (6 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T8CC4     (7 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T1TRGO2   (8 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T8TRGO    (9 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T8TRGO2   (10 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T1CC3     (11 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T3TRGO    (12 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_EXTI3     (13 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T6TRGO    (14 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T15TRGO   (15 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T20TRGO   (16 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T20TRGO2  (17 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T20CC2    (18 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG2  (19 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG4  (20 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG5  (21 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG6  (22 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG7  (23 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG8  (24 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG9  (25 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG10 (26 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG1  (27 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_HRT1TRG3  (28 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_LPTIMOUT  (29 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_T7TRGO    (30 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC34_JSQR_JEXTSEL_RSVD1     (31 << ADC_JSQR_JEXTSEL_SHIFT) /* 11111: Reserved */
 #else
 #  error TODO JEXTSEL
 #endif
@@ -860,16 +717,16 @@
 #define ADC_CDR_RDATA_SLV_SHIFT        (16)       /* Bits 16-31: Regular data of the slave ADC */
 #define ADC_CDR_RDATA_SLV_MASK         (0xffff << ADC_CDR_RDATA_SLV_SHIFT)
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ADC_V2_H */

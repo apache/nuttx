@@ -1,35 +1,20 @@
 /****************************************************************************
- * graphics/vnc/vnc_keymap.c
+ * graphics/vnc/server/vnc_keymap.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -154,19 +139,17 @@ static const struct vnc_keymap_s g_asciimap[] =
   {ASCII_7,          XK_KP_7},
   {ASCII_8,          XK_KP_8},
   {ASCII_9,          XK_KP_9},
-
   {ASCII_ASTERISK,   XK_KP_Multiply},
   {ASCII_PLUS,       XK_KP_Add},
   {ASCII_COMMA,      XK_KP_Separator},
   {ASCII_HYPHEN,     XK_KP_Subtract},
   {ASCII_PERIOD,     XK_KP_Decimal},
   {ASCII_DIVIDE,     XK_KP_Divide},
-
   {ASCII_SPACE,      XK_KP_Space},
   {ASCII_TAB,        XK_KP_Tab},
-  {ASCII_CR,         XK_KP_Enter}
+  {ASCII_CR,         XK_KP_Enter},
 #ifdef CONFIG_VNCSERVER_KBDENCODE
-  , {ASCII_DEL,      XK_KP_Delete}
+  {ASCII_DEL,      XK_KP_Delete},
 #endif
 };
 
@@ -198,7 +181,6 @@ static const struct vnc_keymap_s g_cursor[] =
   {KEYCODE_PAGEDOWN, XK_KP_Page_Down},
   {KEYCODE_INSERT,   XK_Insert},
   {KEYCODE_INSERT,   XK_KP_Insert},
-
   {KEYCODE_SELECT,   XK_Select},
   {KEYCODE_EXECUTE,  XK_Execute},
   {KEYCODE_HELP,     XK_Help},
@@ -209,7 +191,6 @@ static const struct vnc_keymap_s g_cursor[] =
   {KEYCODE_CLEAR,    XK_Clear},
   {MOD_SCROLLLOCK,   XK_Scroll_Lock},
   {MOD_NUMLOCK,      XK_Num_Lock},
-
   {KEYCODE_F1,       XK_KP_F1},
   {KEYCODE_F1,       XK_F1},
   {KEYCODE_F2,       XK_KP_F2},
@@ -508,7 +489,8 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
     }
 #endif
 
-  /* If no external keyboard input handler has been provided, then we have to drop the keyboard input.
+  /* If no external keyboard input handler has been provided,
+   * then we have to drop the keyboard input.
    */
 
   if (session->kbdout == NULL)
@@ -633,7 +615,10 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
  * Name: vnc_kbdout
  *
  * Description:
- *   This is the default keyboard callout function.  This is simply wrappers around nx_kdbout(), respectively.  When configured using vnc_fbinitialize(), the 'arg' must be the correct NXHANDLE value.
+ *   This is the default keyboard callout function.
+ *   This is simply wrappers around nx_kdbout(), respectively.
+ *   When configured using vnc_fbinitialize(), the 'arg' must be the correct
+ *   NXHANDLE value.
  *
  * Input Parameters:
  *   arg - The NXHANDLE from the NX graphics subsystem

@@ -1,50 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/usb/usbdev.h
  *
- *   Copyright (C) 2008-2010, 2012-2013, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * NOTE:  This interface was inspired by the Linux gadget interface by
- * David Brownell. That work was very helpful in determining a usable
- * partitioning of functionality between standard class drivers and various
- * implementations of USB controller drivers.  This work, however, does
- * not derive directly from that work and is licensed differently.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_USB_USBDEV_H
 #define __INCLUDE_NUTTX_USB_USBDEV_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,19 +36,21 @@
 #include <nuttx/usb/usbmsc.h>
 #include <nuttx/usb/composite.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Endpoint helpers *****************************************************************/
+/* Endpoint helpers *********************************************************/
 
-/* Configure endpoint, making it usable.  The class driver may deallocate or re-use
- * the 'desc' structure after returning:
+/* Configure endpoint, making it usable.
+ * The class driver may deallocate or re-use the 'desc' structure after
+ * returning:
  *
  * ep   - the struct usbdev_ep_s instance obtained from allocep()
  * desc - A struct usb_epdesc_s instance describing the endpoint
- * last - true if this is the last endpoint to be configured.  Some hardware needs
- *        to take special action when all of the endpoints have been configured.
+ * last - true if this is the last endpoint to be configured.  Some hardware
+ *        needs to take special action when all of the endpoints have been
+ *        configured.
  */
 
 #define EP_CONFIGURE(ep,desc,last) (ep)->ops->configure(ep,desc,last)
@@ -78,19 +59,23 @@
 
 #define EP_DISABLE(ep)             (ep)->ops->disable(ep)
 
-/* Allocate/free I/O requests.  Should not be called from interrupt processing! */
+/* Allocate/free I/O requests.
+ * Should not be called from interrupt processing!
+ */
 
 #define EP_ALLOCREQ(ep)            (ep)->ops->allocreq(ep)
 #define EP_FREEREQ(ep,req)         (ep)->ops->freereq(ep,req)
 
-/* Allocate/free an I/O buffer.  Should not be called from interrupt processing! */
+/* Allocate/free an I/O buffer.
+ * Should not be called from interrupt processing!
+ */
 
 #ifdef CONFIG_USBDEV_DMA
 #  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->allocbuffer(ep,nb)
 #  define EP_FREEBUFFER(ep,buf)    (ep)->ops->freebuffer(ep,buf)
 #else
-#  define EP_ALLOCBUFFER(ep,nb)    malloc(nb)
-#  define EP_FREEBUFFER(ep,buf)    free(buf)
+#  define EP_ALLOCBUFFER(ep,nb)    kmm_malloc(nb)
+#  define EP_FREEBUFFER(ep,buf)    kmm_free(buf)
 #endif
 
 /* Submit an I/O request to the endpoint */
@@ -106,16 +91,17 @@
 #define EP_STALL(ep)               (ep)->ops->stall(ep,false)
 #define EP_RESUME(ep)              (ep)->ops->stall(ep,true)
 
-/* USB Device Driver Helpers ********************************************************/
+/* USB Device Driver Helpers ************************************************/
 
 /* Allocate an endpoint:
  *
- *   ep     - 7-bit logical endpoint number (direction bit ignored).  Zero means
- *            that any endpoint matching the other requirements will suffice.  The
- *            assigned endpoint can be found in the eplog field.
+ *   ep     - 7-bit logical endpoint number (direction bit ignored).
+ *            Zero means that any endpoint matching the other requirements
+ *            will suffice.
+ *            The assigned endpoint can be found in the eplog field.
  *   in     - true: IN (device-to-host) endpoint requested
- *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC, USB_EP_ATTR_XFER_BULK,
- *            USB_EP_ATTR_XFER_INT}
+ *   eptype - Endpoint type.  One of {USB_EP_ATTR_XFER_ISOC,
+ *            USB_EP_ATTR_XFER_BULK, USB_EP_ATTR_XFER_INT}
  */
 
 #define DEV_ALLOCEP(dev,ep,in,type) (dev)->ops->allocep(dev,ep,in,type)
@@ -140,9 +126,9 @@
 
 #define DEV_CLRSELFPOWERED(dev)    (dev)->ops->selfpowered(dev, false)
 
-/* Software-controlled connect to USB host. All USB class drivers need to call
- * DEV_CONNECT() when they are ready to be enumerated.  That is, (1) initially when
- * bound to the USB driver, and (2) after a USB reset.
+/* Software-controlled connect to USB host. All USB class drivers need to
+ * call DEV_CONNECT() when they are ready to be enumerated.  That is, (1)
+ * initially when bound to the USB driver, and (2) after a USB reset.
  */
 
 #define DEV_CONNECT(dev)           (dev)->ops->pullup ? (dev)->ops->pullup(dev,true) : -EOPNOTSUPP
@@ -151,9 +137,11 @@
 
 #define DEV_DISCONNECT(dev)        (dev)->ops->pullup ? (dev)->ops->pullup(dev,false) : -EOPNOTSUPP
 
-/* USB Class Driver Helpers *********************************************************/
+/* USB Class Driver Helpers *************************************************/
 
-/* All may be called from interrupt handling logic except bind() and unbind() */
+/* All may be called from interrupt handling logic except bind() and
+ * unbind()
+ */
 
 /* Invoked when the driver is bound to a USB device driver. */
 
@@ -163,7 +151,9 @@
 
 #define CLASS_UNBIND(drvr,dev)    (drvr)->ops->unbind(drvr,dev)
 
-/* Invoked after all transfers have been stopped, when the host is disconnected. */
+/* Invoked after all transfers have been stopped, when the host is
+ * disconnected.
+ */
 
 #define CLASS_DISCONNECT(drvr,dev) (drvr)->ops->disconnect(drvr,dev)
 
@@ -191,11 +181,11 @@
 #define USBDEV_REQFLAGS_NULLPKT   1 /* Bit 0: Terminate w/short packet; null packet if necessary */
                                     /* Bits 1-7: Available */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* USB Controller Structures ********************************************************/
+/* USB Controller Structures ************************************************/
 
 /* usbdev_devinfo_s - describes the low level bindings of an usb device */
 
@@ -257,7 +247,8 @@ struct usbdev_req_s
 
   /* Callback when the transfer completes */
 
-  CODE void (*callback)(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req);
+  CODE void (*callback)(FAR struct usbdev_ep_s *ep,
+                        FAR struct usbdev_req_s *req);
   FAR void  *priv; /* Used only by callee */
 };
 
@@ -341,7 +332,7 @@ struct usbdev_s
   uint8_t dualspeed:1;                /* 1:supports high and full speed operation */
 };
 
-/* USB Device Class Implementations *************************************************/
+/* USB Device Class Implementations *****************************************/
 
 struct usbdevclass_driver_s;
 struct usbdevclass_driverops_s
@@ -367,9 +358,9 @@ struct usbdevclass_driver_s
   uint8_t speed;                  /* Highest speed that the driver handles */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -380,34 +371,35 @@ extern "C"
 #  define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbdevclass_register
  *
  * Description:
- *   Register a USB device class driver. The class driver's bind() method will be
- *   called to bind it to a USB device driver.
+ *   Register a USB device class driver. The class driver's bind() method
+ *   will be called to bind it to a USB device driver.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int usbdev_register(FAR struct usbdevclass_driver_s *driver);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbdev_unregister
  *
  * Description:
- *   Un-register usbdev class driver.If the USB device is connected to a USB host,
- *   it will first disconnect().  The driver is also requested to unbind() and clean
- *   up any device state, before this procedure finally returns.
+ *   Un-register usbdev class driver.If the USB device is connected to a USB
+ *   host, it will first disconnect().
+ *   The driver is also requested to unbind() and clean up any device state,
+ *  before this procedure finally returns.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
 
-/************************************************************************************
+/****************************************************************************
  * Name: usbdev_dma_alloc and usbdev_dma_free
  *
  * Description:
@@ -431,7 +423,7 @@ int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
  *   does require the size of the allocation to be freed; that would need
  *   to be managed in the board-specific logic.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_DMA) && defined(CONFIG_USBDEV_DMAMEMORY)
 FAR void *usbdev_dma_alloc(size_t size);

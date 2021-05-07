@@ -1,71 +1,61 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc4310203050_pinconfig.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4310203050_PINCONF_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4310203050_PINCONF_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
+
 /* NOTES:
  *
- * 1. These settings were taken from the LPC43_10_20_30_50 data sheet and may not be applicable to
- *    any other family members.
+ * 1. These settings were taken from the LPC43_10_20_30_50 data sheet and may
+ *    not be applicable to any other family members.
  *
- * 2. Settings taken from the data sheet include only function, pin set, and pin number.  Additional
- *    settings must be verfied before using these pin configurations (like pull-ups, open-drain,
- *    drive strength, input buffering, etc.).
+ * 2. Settings taken from the data sheet include only function, pin set, and
+ *    pin number.  Additional settings must be verfied before using these pin
+ *    configurations (like pull-ups, open-drain, drive strength, input
+ *    buffering, etc.).
  *
- * 3. Alternative pin selections are provided with a numeric suffix like _1, _2, etc. Drivers,
- *    however, will use the pin selection without the numeric suffix.  Additional definitions are
- *    required in the board.h file to select between the alternative pins.  For example, if CAN1_RD
- *    connects via Pins1[18], then the following definition should appear in the board.h header file
- *    for that board:
+ * 3. Alternative pin selections are provided with a numeric suffix like _1,
+ *    _2, etc. Drivers, however, will use the pin selection without the
+ *    numeric suffix.  Additional definitions are required in the board.h
+ *    file to select between the alternative pins.  For example, if CAN1_RD
+ *    connects via Pins1[18], then the following definition should appear
+ *    in the board.h header file for that board:
  *
- * 4. For ADC pins (PINCONF_ADCNpM), the pin must first be configured configured as a GPIO input.
+ * 4. For ADC pins (PINCONF_ADCNpM), the pin must first be configured
+ *    configured as a GPIO input.
  *    Then SCU's ADC function select register can be used to select the ADC.
  *
  *    #define PINCONF_CAN1_RD PINCONF_CAN1_RD_1
  *
- *    The driver will then automatically configure Pins1[18] as the CAN1 RD pin.
+ *    The driver will then automatically configure Pins1[18] as the CAN1 RD
+ *    pin.
  */
 
 #define PINCONF_ADC0p0           (PINCONF_FUNC0|PINCONF_PINS4|PINCONF_PIN_3)
@@ -974,16 +964,16 @@
 #define CLKCONF_SD_CLK_2         (PINCONF_FUNC4|PINCONF_INBUFFER|PINCONF_CLK2)
 #define CLKCONF_SSP1_SCK         (PINCONF_FUNC6|PINCONF_CLK0)
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4310203050_PINCONF_H */

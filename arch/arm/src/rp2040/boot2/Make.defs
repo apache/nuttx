@@ -1,0 +1,51 @@
+############################################################################
+# arch/arm/src/rp2040/boot2/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+HEAD_ASRC = $(BOOT_STAGE2).S
+
+BOOT_STAGE2 = rp2040_boot_stage2
+
+CONFIG_RP2040_FLASH_CHIP := $(patsubst "%",%,$(strip $(CONFIG_RP2040_FLASH_CHIP)))
+
+BOOT2DIR = $(PICO_SDK_PATH)/src/rp2_common/boot_stage2
+BOOT2SRC = $(BOOT2DIR)/boot2_$(CONFIG_RP2040_FLASH_CHIP).S
+
+BOOT2CFLAGS += -DPICO_BOARD=\"pico\"
+BOOT2CFLAGS += -DPICO_BUILD=1
+BOOT2CFLAGS += -DPICO_NO_HARDWARE=0
+BOOT2CFLAGS += -DPICO_ON_DEVICE=1
+BOOT2CFLAGS += -Ichip/boot2
+BOOT2CFLAGS += -I$(BOOT2DIR)/asminclude
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2040/hardware_regs/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/hardware_base/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/common/pico_base/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/boards/include
+BOOT2CFLAGS += -I$(PICO_SDK_PATH)/src/rp2_common/pico_platform/include
+
+$(BOOT_STAGE2).S: %.S: %.bin
+	python3 $(BOOT2DIR)/pad_checksum -s 0xffffffff $< $@
+
+$(BOOT_STAGE2).bin: %.bin: %.elf
+	$(OBJCOPY) -Obinary $< $@
+
+$(BOOT_STAGE2).elf: $(BOOT2SRC)
+	$(CC) -nostartfiles -nodefaultlibs $(ARCHSCRIPT) $(BOOT2CFLAGS) -o $@ $<
+
+EXTRADELFILE = $(BOOT_STAGE2).*

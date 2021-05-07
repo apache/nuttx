@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/am335x/am335x_gpioirq.c
  *
- *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -198,28 +183,32 @@ static int am335x_gpio_interrupt(uint32_t base, int irq0, void *context)
 #ifdef CONFIG_AM335X_GPIO0_IRQ
 static int am335x_gpio0_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO0_VADDR, AM335X_IRQ_GPIO0P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO0_VADDR,
+                               AM335X_IRQ_GPIO0P0, context);
 }
 #endif
 
 #ifdef CONFIG_AM335X_GPIO1_IRQ
 static int am335x_gpio1_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO1_VADDR, AM335X_IRQ_GPIO1P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO1_VADDR,
+                               AM335X_IRQ_GPIO1P0, context);
 }
 #endif
 
 #ifdef CONFIG_AM335X_GPIO2_IRQ
 static int am335x_gpio2_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO2_VADDR, AM335X_IRQ_GPIO2P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO2_VADDR,
+                               AM335X_IRQ_GPIO2P0, context);
 }
 #endif
 
 #ifdef CONFIG_AM335X_GPIO3_IRQ
 static int am335x_gpio3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return am335x_gpio_interrupt(AM335X_GPIO3_VADDR, AM335X_IRQ_GPIO3P0, context);
+  return am335x_gpio_interrupt(AM335X_GPIO3_VADDR,
+                               AM335X_IRQ_GPIO3P0, context);
 }
 #endif
 
@@ -243,7 +232,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO0_IRQ
   /* Enable GPIO0 clocking */
 
-  //am335x_gpio0_enableclk();
+  /* am335x_gpio0_enableclk(); */
 
   /* Clear and disable all GPIO0 interrupts */
 
@@ -268,7 +257,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO1_IRQ
   /* Enable GPIO1 clocking */
 
-  //am335x_gpio1_enableclk();
+  /* am335x_gpio1_enableclk(); */
 
   /* Clear and disable all GPIO1 interrupts */
 
@@ -293,7 +282,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO2_IRQ
   /* Enable GPIO2 clocking */
 
-  //am335x_gpio2_enableclk();
+  /* am335x_gpio2_enableclk(); */
 
   /* Clear and disable all GPIO2 interrupts */
 
@@ -318,7 +307,7 @@ void am335x_gpio_irqinitialize(void)
 #ifdef CONFIG_AM335X_GPIO3_IRQ
   /* Enable GPIO3 clocking */
 
-  //am335x_gpio3_enableclk();
+  /* am335x_gpio3_enableclk(); */
 
   /* Clear and disable all GPIO3 interrupts */
 
@@ -357,13 +346,13 @@ void am335x_gpioirq(gpio_pinset_t pinset)
   am335x_gpio_lowlevel(pinset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_gpio_irqenable
  *
  * Description:
  *   Enable generation of interrupt from GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void am335x_gpio_irqenable(gpio_pinset_t pinset);
 {
@@ -376,13 +365,13 @@ void am335x_gpio_irqenable(gpio_pinset_t pinset);
   putreg32(GPIO_PIN(pin), AM335X_GPIO_ISSR0(am335x_gpion_vbase(port)));
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: am335x_gpio_irqdisable
  *
  * Description:
  *   Disable generation of interrupt from GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void am335x_gpio_irqdisable(gpio_pinset_t pinset);
 {

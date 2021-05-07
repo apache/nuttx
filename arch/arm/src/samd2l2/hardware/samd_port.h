@@ -1,50 +1,36 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_port.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *   Datasheet", 42129J–SAM–12/2013
  *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
  *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_PORT_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_PORT_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,10 +38,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* PORT register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* PORT register offsets ****************************************************/
 
 #define SAM_PORTA                 (0)
 #define SAM_PORTB                 (1)
@@ -128,7 +115,7 @@
 #define SAM_PORT_PINCFG30_OFFSET  0x005e /* Pin configuration register 30 */
 #define SAM_PORT_PINCFG31_OFFSET  0x005f /* Pin configuration register 31 */
 
-/* PORT register addresses ******************************************************************/
+/* PORT register addresses **************************************************/
 
 #define SAM_PORTN_BASE(n)         (SAM_PORT_BASE+SAM_PORTN_OFFSET(n))
 #define SAM_PORTA_BASE            (SAM_PORT_BASE+SAM_PORTA_OFFSET)
@@ -262,16 +249,16 @@
 #define SAM_PORTB_PINCFG30        (SAM_PORTB_BASE+SAM_PORT_PINCFG30_OFFSET)
 #define SAM_PORTB_PINCFG31        (SAM_PORTB_BASE+SAM_PORT_PINCFG31_OFFSET)
 
-/* PORT register bit definitions ************************************************************/
+/* PORT register bit definitions ********************************************/
 
-/* Data direction, data direction clear,  data direction set, and data direction toggle
- * registers
+/* Data direction, data direction clear,  data direction set, and data
+ * direction toggle registers
  */
 
 #define PORT_DIR(n)               (1 << n) /* Port data n, direction, n=0-31 */
 
-/* Data output value, data output value clear, data output value set, and data output
- * value toggle registers
+/* Data output value, data output value clear, data output value set,
+ * and data output value toggle registers
  */
 
 #define PORT_OUT(n)               (1 << n) /* Port data n output value, n=0-31 */
@@ -318,17 +305,17 @@
 #define PORT_PINCFG_PULLEN        (1 << 2)  /* Bit 2: Pull Enable */
 #define PORT_PINCFG_DRVSTR        (1 << 6)  /* Bit 6: Output Driver Strength Selection */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_PORT_H */

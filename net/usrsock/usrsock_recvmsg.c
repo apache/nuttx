@@ -210,6 +210,12 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
  *   msg      Buffer to receive the message
  *   flags    Receive flags (ignored)
  *
+ * Returned Value:
+ *   On success, returns the number of characters received.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recvfrom() will return 0.  Otherwise, on any failure, a negated errno
+ *   value is returned.
+ *
  ****************************************************************************/
 
 ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,

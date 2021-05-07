@@ -158,7 +158,7 @@ arm_vectorirq:
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	/* Call arm_decodeirq() on the interrupt stack */
 
-	ldr		sp, .Lirqstackbase		/* SP = interrupt stack base */
+	ldr		sp, .Lirqstacktop		/* SP = interrupt stack top */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
@@ -182,7 +182,7 @@ arm_vectorirq:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -211,8 +211,8 @@ arm_vectorirq:
 	ldmia		r0, {r0-r15}^			/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-.Lirqstackbase:
-	.word	g_intstackbase
+.Lirqstacktop:
+	.word	g_intstacktop
 #endif
 	.size	arm_vectorirq, . - arm_vectorirq
 
@@ -310,7 +310,7 @@ arm_vectorsvc:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -452,7 +452,7 @@ arm_vectordata:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -594,7 +594,7 @@ arm_vectorprefetch:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -732,7 +732,7 @@ arm_vectorundefinsn:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -857,7 +857,7 @@ arm_vectorfiq:
 	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-	ldr		sp, .Lfiqstackbase		/* SP = interrupt stack base */
+	ldr		sp, .Lfiqstacktop		/* SP = interrupt stack top */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
@@ -879,7 +879,7 @@ arm_vectorfiq:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
-	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
+	msr		spsr, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_PROTECTED
 	/* Are we leaving in user mode?  If so then we need to restore the
@@ -908,8 +908,8 @@ arm_vectorfiq:
 	ldmia		r0, {r0-r15}^			/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-.Lfiqstackbase:
-	.word	g_fiqstackbase
+.Lfiqstacktop:
+	.word	g_fiqstacktop
 #endif
 
 #else
@@ -918,7 +918,7 @@ arm_vectorfiq:
 	.size	arm_vectorfiq, . - arm_vectorfiq
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
@@ -927,30 +927,28 @@ arm_vectorfiq:
 
 	.globl	g_intstackalloc
 	.type	g_intstackalloc, object
-	.globl	g_intstackbase
-	.type	g_intstackbase, object
+	.globl	g_intstacktop
+	.type	g_intstacktop, object
 
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
-g_intstackbase:
-	.skip	4
-	.size	g_intstackbase, 4
+g_intstacktop:
+	.size	g_intstacktop, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 /****************************************************************************
- *  Name: g_fiqstackalloc/g_fiqstackbase
+ *  Name: g_fiqstackalloc/g_fiqstacktop
  ****************************************************************************/
 
 	.globl	g_fiqstackalloc
 	.type	g_fiqstackalloc, object
-	.globl	g_fiqstackbase
-	.type	g_fiqstackbase, object
+	.globl	g_fiqstacktop
+	.type	g_fiqstacktop, object
 
 g_fiqstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
-g_fiqstackbase:
-	.skip	4
-	.size	g_fiqstackbase, 4
+g_fiqstacktop:
+	.size	g_fiqstacktop, 0
 	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
 
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */

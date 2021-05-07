@@ -311,11 +311,11 @@ int rx65n_sbram_int(void)
           syslog(LOG_INFO, "Fault Logged on %s - Valid\n", buf);
         }
 
-      rv = unlink(HARDFAULT_PATH);
+      rv = nx_unlink(HARDFAULT_PATH);
       if (rv < 0)
         {
-          syslog(LOG_INFO, "rx65n sbram: Failed to unlink Fault Log file [%s"
-                 "] (%d)\n", HARDFAULT_PATH, rv);
+          syslog(LOG_INFO, "rx65n sbram: Failed to unlink Fault Log file"
+                 " [%s] (%d)\n", HARDFAULT_PATH, rv);
         }
     }
 
@@ -401,14 +401,15 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
       pdump->info.stacks.user.sp = currentsp;
     }
 
-  pdump->info.stacks.user.top = (uint32_t) rtcb->adj_stack_ptr;
-  pdump->info.stacks.user.size = (uint32_t) rtcb->adj_stack_size;
+  pdump->info.stacks.user.top = (uint32_t)rtcb->stack_base_ptr +
+                                          rtcb->adj_stack_size;
+  pdump->info.stacks.user.size = (uint32_t)rtcb->adj_stack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   /* Get the limits on the interrupt stack memory */
 
   pdump->info.stacks.interrupt.top = (uint32_t)&istack;
-  pdump->info.stacks.interrupt.size  = (CONFIG_ARCH_INTERRUPTSTACK);
+  pdump->info.stacks.interrupt.size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* If In interrupt Context save the interrupt stack data centered
    * about the interrupt stack pointer

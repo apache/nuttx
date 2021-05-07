@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/s32k1xx/s32k1xx_preriphclocks.h
+/****************************************************************************
+ * arch/arm/src/s32k1xx/s32k1xx_periphclocks.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -50,14 +50,14 @@
  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_PERIPHCLOCKS_H
 #define __ARCH_ARM_SRC_S32K1XX_S32K1XX_PERIPHCLOCKS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -78,9 +78,9 @@
 #  include "s32k14x/s32k14x_clocknames.h"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Values for peripheral_clock_source_t.  An enumeration is not appropriate
  * because some of the values are duplicates.
@@ -165,9 +165,9 @@
 #define HAS_INT_CLOCK_FROM_SYS_CLOCK   (1 << 6) /* Clock is provided by the sys clock */
 #define HAS_INT_CLOCK_FROM_SLOW_CLOCK  (1 << 7) /* Clock is provided by the slow clock */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef uint8_t peripheral_clock_source_t;  /* See CLK_SRC_* definitions */
 
@@ -179,8 +179,8 @@ enum peripheral_clock_frac_e
 
 struct peripheral_clock_config_s
 {
-  /* clkname is the name of the peripheral clock.  It must be one of the values
-   * defined in the chip specific xxxxxx_configname.h header file.
+  /* clkname is the name of the peripheral clock.  It must be one of the
+   * values defined in the chip specific xxxxxx_configname.h header file.
    */
 
   enum clock_names_e clkname;          /* Peripheral clock name */
@@ -192,9 +192,9 @@ struct peripheral_clock_config_s
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -224,11 +224,11 @@ EXTERN const uint16_t g_clkname_mapping[];
 
 EXTERN const uint8_t g_periph_features[];
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_periphclocks
  *
  * Description:
@@ -241,7 +241,7 @@ EXTERN const uint8_t g_periph_features[];
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_periphclocks(unsigned int count,
                           const struct peripheral_clock_config_s *pclks);

@@ -1,55 +1,40 @@
-/************************************************************************************
- * dm320/dm320_memorymap.h
+/****************************************************************************
+ * arch/arm/src/dm320/dm320_memorymap.h
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H
 #define __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <arch/board/board.h>
 #include "arm.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Mapped base of all registers *****************************************************/
+/* Mapped base of all registers *********************************************/
 
 /* DM320 Physical Memory Map, where:
  *
@@ -58,19 +43,20 @@
  *   -- = Neither
  *
  * NOTE:
- * 1. Most DM320 memory sections can be programmed to lie at different locations in
- *    the memory map. Therefore, much of the DM320 physical memory map is really
- *    board-specific and, as such, really belongs in the
+ * 1. Most DM320 memory sections can be programmed to lie at different
+ *    locations in the memory map. Therefore, much of the DM320 physical
+ *    memory map is really board-specific and, as such, really belongs in the
  *    boards/arm/dm320/<board-name>/include/board.h file rather than here.
  *
- *    To handle all cases, this file defines a "default" physical memory map, but
- *    section address for most regions can be overridden if the same setting is
- *    defined in the board.h file (These defaults correspond to the product Neuros
- *    OSD memory configuration).
+ *    To handle all cases, this file defines a "default" physical memory map,
+ *    but section address for most regions can be overridden if the same
+ *    setting is defined in the board.h file (These defaults correspond to
+ *    the product Neuros OSD memory configuration).
  *
- * 2. The DM320 only has a single control line for external peripherals. To support
- *    more than one peripheral, most hardware will use external memory decode logic,
- *    so that physical memory regions is in the board-specific files.
+ * 2. The DM320 only has a single control line for external peripherals. To
+ *    support more than one peripheral, most hardware will use external
+ *    memory decode logic, so that physical memory regions is in the
+ *    board-specific files.
  */
 
 /* Section/Region Name             Phys Address    Size  TLB Entry       CW */
@@ -144,6 +130,7 @@
 /* Section/Region Name               Virt Address  End        Size  CW */
 #define DM320_SDRAM_VSECTION         0x00000000 /* 0x1effffff 496Mb CW */
 #define   DM320_SDRAM_VADDR          0x00000000 /* 0x1effffff 496Mb CW */
+
                                   /* 0x1f000000    0xdfffffff UNMAPPED */
 #define DM320_FLASH_VSECTION         0xc0000000 /* 0xc0ffffff  16Mb -- */
 #define   DM320_EXT_MEM_VADDR        0xc0000000 /* 0xc0ffffff  16Mb -- */
@@ -165,14 +152,17 @@
 #define   DM320_DSP_ONCHIP_RAM_VADDR 0xf0040000 /* 0xf005ffff 128Kb -- */
 #define   DM320_AHB_VADDR            0xf0060000 /* 0xf0060fff   4Kb -- */
 #define   DM320_COPRO_SUB_VADDR      0xf0080000 /* 0xf009ffff 128Kb -- */
+
                                   /* 0xf0100000    0xffefffff UNMAPPED */
 #define DM320_VECTOR_VCOARSE         0xfff00000 /* 0xffffffff   1Mb -- */
+
                                   /* 0xfff00000    0xfffeffff UNMAPPED */
 #define   DM320_VECTOR_VADDR         0xffff0000 /* 0xffff3fff  16Kb -- */
+
                                   /* 0xffff4000    0xffffffff UNMAPPED */
 
-/* The NuttX entry point starts at an offset from the virtual beginning of DRAM.
- * This offset reserves space for the MMU page cache.
+/* The NuttX entry point starts at an offset from the virtual beginning
+ * of DRAM. This offset reserves space for the MMU page cache.
  */
 
 #define NUTTX_START_VADDR            (DM320_SDRAM_VADDR+PGTABLE_SIZE)
@@ -253,9 +243,9 @@
 #define DM320_VLYNQ_REGISTER_BASE   (DM320_AHB_VADDR + 0x0300)         /* VLYNQ */
 #define DM320_AHBBUSC_REGISTER_BASE (DM320_AHB_VADDR + 0x0F00)         /* AHBBUSC */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f411e-disco/src/stm32f411e-disco.h
+ * boards/arm/stm32/nucleo-f412zg/src/nucleo-f412zg.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett

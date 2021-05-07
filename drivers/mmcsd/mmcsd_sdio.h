@@ -1,51 +1,36 @@
-/********************************************************************************************
+/****************************************************************************
  * drivers/mmcsd/mmcsd_sdio.h
  *
- *   Copyright (C) 2009, 2011, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __DRIVERS_MMCSD_MMCSD_SDIO_H
 #define __DRIVERS_MMCSD_MMCSD_SDIO_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* CMD8 Argument:
  *    [31:12]: Reserved (shall be set to '0')
@@ -57,6 +42,7 @@
 #define MMCSD_CMD8VOLTAGE_SHIFT     (8)                    /* Bits 8-11: Supply voltage */
 #define MMCSD_CMD8VOLTAGE_MASK      ((uint32_t)0x0f << MMCSD_CMD8VOLTAGE_SHIFT)
 #  define MMCSD_CMD8VOLTAGE_27      ((uint32_t)0x01 << MMCSD_CMD8VOLTAGE_SHIFT) /* 2.7-3.6V */
+
 #define MMCSD_CMD8ECHO_SHIFT        (0)                    /* Bits 0-7: Check pattern */
 #define MMCSD_CMD8ECHO_MASK         ((uint32_t)0xff << MMCSD_CMD8ECHO_SHIFT)
 #  define MMCSD_CMD8CHECKPATTERN    ((uint32_t)0xaa << MMCSD_CMD8ECHO_SHIFT)
@@ -102,17 +88,22 @@
 #define MMCSD_R1_ERASERESET         ((uint32_t)1 << 13)    /* Reset sequence cleared */
 #define MMCSD_R1_STATE_SHIFT        (9)                    /* Current card state */
 #define MMCSD_R1_STATE_MASK         ((uint32_t)15 << MMCSD_R1_STATE_SHIFT)
-                                                           /* Card identification mode states */
+
+/* Card identification mode states */
+
 #  define MMCSD_R1_STATE_IDLE       ((uint32_t)0 << MMCSD_R1_STATE_SHIFT) /* 0=Idle state */
 #  define MMCSD_R1_STATE_READY      ((uint32_t)1 << MMCSD_R1_STATE_SHIFT) /* 1=Ready state */
 #  define MMCSD_R1_STATE_IDENT      ((uint32_t)2 << MMCSD_R1_STATE_SHIFT) /* 2=Identification state */
-                                                           /* Data transfer states */
+
+/* Data transfer states */
+
 #  define MMCSD_R1_STATE_STBY       ((uint32_t)3 << MMCSD_R1_STATE_SHIFT) /* 3=Standby state */
 #  define MMCSD_R1_STATE_TRAN       ((uint32_t)4 << MMCSD_R1_STATE_SHIFT) /* 4=Transfer state */
 #  define MMCSD_R1_STATE_DATA       ((uint32_t)5 << MMCSD_R1_STATE_SHIFT) /* 5=Sending data state */
 #  define MMCSD_R1_STATE_RCV        ((uint32_t)6 << MMCSD_R1_STATE_SHIFT) /* 6=Receiving data state */
 #  define MMCSD_R1_STATE_PRG        ((uint32_t)7 << MMCSD_R1_STATE_SHIFT) /* 7=Programming state */
 #  define MMCSD_R1_STATE_DIS        ((uint32_t)8 << MMCSD_R1_STATE_SHIFT) /* 8=Disconnect state */
+
 #define MMCSD_R1_READYFORDATA       ((uint32_t)1 << 8)     /* Buffer empty */
 #define MMCSD_R1_APPCMD             ((uint32_t)1 << 5)     /* Next CMD is ACMD */
 #define MMCSD_R1_AKESEQERROR        ((uint32_t)1 << 3)     /* Authentication error */
@@ -161,17 +152,22 @@
 #define MMCSD_R6_ERROR              ((uint32_t)1 << 13)    /* General error */
 #define MMCSD_R6_STATE_SHIFT        (9)                    /* Current card state */
 #define MMCSD_R6_STATE_MASK         ((uint32_t)15 << MMCSD_R6_STATE_SHIFT)
-                                                           /* Card identification mode states */
+
+/* Card identification mode states */
+
 #  define MMCSD_R6_STATE_IDLE       ((uint32_t)0 << MMCSD_R6_STATE_SHIFT) /* 0=Idle state */
 #  define MMCSD_R6_STATE_READY      ((uint32_t)1 << MMCSD_R6_STATE_SHIFT) /* 1=Ready state */
 #  define MMCSD_R6_STATE_IDENT      ((uint32_t)2 << MMCSD_R6_STATE_SHIFT) /* 2=Identification state */
-                                                           /* Data transfer states */
+
+/* Data transfer states */
+
 #  define MMCSD_R6_STATE_STBY       ((uint32_t)3 << MMCSD_R6_STATE_SHIFT) /* 3=Standby state */
 #  define MMCSD_R6_STATE_TRAN       ((uint32_t)4 << MMCSD_R6_STATE_SHIFT) /* 4=Transfer state */
 #  define MMCSD_R6_STATE_DATA       (5(uint32_t) << MMCSD_R6_STATE_SHIFT) /* 5=Sending data state */
 #  define MMCSD_R6_STATE_RCV        ((uint32_t)6 << MMCSD_R6_STATE_SHIFT) /* 6=Receiving data state */
 #  define MMCSD_R6_STATE_PRG        ((uint32_t)7 << MMCSD_R6_STATE_SHIFT) /* 7=Programming state */
-#  define MMCSD_R6_STATE_DIS        ((uint32_t) << MMCSD_R6_STATE_SHIFT) /* 8=Disconnect state */
+#  define MMCSD_R6_STATE_DIS        ((uint32_t) << MMCSD_R6_STATE_SHIFT)  /* 8=Disconnect state */
+
 #define MMCSD_R6_ERRORMASK          ((uint32_t)0x0000e000)  /* Error mask */
 
 /* SD Configuration Register (SCR) encoding */
@@ -188,13 +184,14 @@
 #define MMCSD_R7VOLTAGE_SHIFT       (8)                    /* Bits 8-11: Voltage accepted */
 #define MMCSD_R7VOLTAGE_MASK        ((uint32_t)0x0f << MMCSD_R7VOLTAGE_SHIFT)
 #  define MMCSD_R7VOLTAGE_27        ((uint32_t)0x01 << MMCSD_R7VOLTAGE_SHIFT) /* 2.7-3.6V */
+
 #define MMCSD_R7ECHO_SHIFT          (0)                    /* Bits 0-7: Echoed check pattern */
 #define MMCSD_R7ECHO_MASK           ((uint32_t)0xff << MMCSD_R7ECHO_SHIFT)
 #  define MMCSD_R7CHECKPATTERN      ((uint32_t)0xaa << MMCSD_R7ECHO_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* Decoded Card Identification (CID) register */
 
@@ -284,6 +281,7 @@ struct mmcsd_csd_s
     struct
     {
                                /*  73:70  (reserved) */
+
       uint32_t csize;          /*  69:48  Device size */
                                /*  47:47  (reserved) */
       uint8_t sderblen;        /*  46:46  Erase single block enable (SD) */
@@ -318,9 +316,9 @@ struct mmcsd_scr_s
   uint32_t mfgdata;            /* 31:0  Reserved for manufacturing data */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -331,9 +329,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Definitions
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

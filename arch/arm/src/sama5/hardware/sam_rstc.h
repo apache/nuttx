@@ -66,6 +66,7 @@
 #  define RSTC_SR_RSTTYP_WDOG   (2 << RSTC_SR_RSTTYP_SHIFT) /* Watchdog Reset */
 #  define RSTC_SR_RSTTYP_SWRST  (3 << RSTC_SR_RSTTYP_SHIFT) /* Software Reset */
 #  define RSTC_SR_RSTTYP_NRST   (4 << RSTC_SR_RSTTYP_SHIFT) /* User Reset NRST pin */
+
 #define RSTC_SR_NRSTL           (1 << 16)  /* Bit 16:  NRST Pin Level */
 #define RSTC_SR_SRCMP           (1 << 17)  /* Bit 17:  Software Reset Command in Progress */
 

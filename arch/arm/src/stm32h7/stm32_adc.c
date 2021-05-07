@@ -551,7 +551,8 @@ static void adc_putregm(FAR struct stm32_dev_s *priv, int offset,
 static void adc_modifyregm(FAR struct stm32_dev_s *priv, int offset,
                           uint32_t clrbits, uint32_t setbits)
 {
-  adc_putregm(priv, offset, (adc_getregm(priv, offset) & ~clrbits) | setbits);
+  adc_putregm(priv, offset,
+              (adc_getregm(priv, offset) & ~clrbits) | setbits);
 }
 
 /****************************************************************************
@@ -1568,8 +1569,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
  * Name: adc_sqrbits
  ****************************************************************************/
 
-static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
-                            int offset)
+static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first,
+                            int last, int offset)
 {
   uint32_t bits = 0;
   int i;
@@ -1691,17 +1692,21 @@ static int adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
 
   DEBUGASSERT(priv->nchannels <= ADC_MAX_SAMPLES);
 
-  bits = adc_sqrbits(priv, ADC_SQR4_FIRST, ADC_SQR4_LAST, ADC_SQR4_SQ_OFFSET);
+  bits = adc_sqrbits(priv, ADC_SQR4_FIRST, ADC_SQR4_LAST,
+                     ADC_SQR4_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR4_OFFSET, ~ADC_SQR4_RESERVED, bits);
 
-  bits = adc_sqrbits(priv, ADC_SQR3_FIRST, ADC_SQR3_LAST, ADC_SQR3_SQ_OFFSET);
+  bits = adc_sqrbits(priv, ADC_SQR3_FIRST, ADC_SQR3_LAST,
+                     ADC_SQR3_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR3_OFFSET, ~ADC_SQR3_RESERVED, bits);
 
-  bits = adc_sqrbits(priv, ADC_SQR2_FIRST, ADC_SQR2_LAST, ADC_SQR2_SQ_OFFSET);
+  bits = adc_sqrbits(priv, ADC_SQR2_FIRST, ADC_SQR2_LAST,
+                     ADC_SQR2_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR2_OFFSET, ~ADC_SQR2_RESERVED, bits);
 
   bits = ((uint32_t)priv->nchannels - 1) << ADC_SQR1_L_SHIFT |
-         adc_sqrbits(priv, ADC_SQR1_FIRST, ADC_SQR1_LAST, ADC_SQR1_SQ_OFFSET);
+         adc_sqrbits(priv, ADC_SQR1_FIRST, ADC_SQR1_LAST,
+                     ADC_SQR1_SQ_OFFSET);
   adc_modifyreg(priv, STM32_ADC_SQR1_OFFSET, ~ADC_SQR1_RESERVED, bits);
 
 #ifdef ADC_HAVE_DFSDM
@@ -1835,7 +1840,8 @@ static int adc_interrupt(FAR struct adc_dev_s *dev, uint32_t adcisr)
       value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
       value &= ADC_DR_MASK;
 
-      awarn("WARNING: Analog Watchdog, Value (0x%03x) out of range!\n", value);
+      awarn("WARNING: Analog Watchdog, Value (0x%03x) out of range!\n",
+            value);
 
       /* Stop ADC conversions to avoid continuous interrupts */
 
@@ -1874,7 +1880,9 @@ static int adc_interrupt(FAR struct adc_dev_s *dev, uint32_t adcisr)
           priv->cb->au_receive(dev, priv->chanlist[priv->current], value);
         }
 
-      /* Set the channel number of the next channel that will complete conversion */
+      /* Set the channel number of the next channel that will complete
+       * conversion
+       */
 
       priv->current++;
 
@@ -1988,7 +1996,8 @@ static int adc3_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef ADC_HAVE_DMA
-static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
+static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
+                                FAR void *arg)
 {
   FAR struct adc_dev_s   *dev  = (FAR struct adc_dev_s *)arg;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
@@ -2051,7 +2060,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32h7_adc_initialize(int intf, FAR const uint8_t *chanlist,
+struct adc_dev_s *stm32h7_adc_initialize(int intf,
+                                         FAR const uint8_t *chanlist,
                                          int cchannels)
 {
   FAR struct adc_dev_s   *dev;

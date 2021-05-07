@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_adc.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -32,27 +32,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_ADC_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
-/* Register Offsets for each ADC (ADC1-3).  At offset 0x0000 for master and offset
- * 0x0100 for slave.
+/* Register Offsets for each ADC (ADC1-3).  At offset 0x0000 for master and
+ * offset 0x0100 for slave.
  */
 
 #define STM32L4_ADC_ISR_OFFSET         0x0000  /* ADC interrupt and status register */
@@ -92,7 +92,7 @@
 #  define STM32L4_ADC_CDR_OFFSET       0x000c  /* Common regular data register for dual mode */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32L4_ADC1_ISR               (STM32L4_ADC1_BASE+STM32L4_ADC_ISR_OFFSET)
 #define STM32L4_ADC1_IER               (STM32L4_ADC1_BASE+STM32L4_ADC_IER_OFFSET)
@@ -187,9 +187,11 @@
 #  define STM32L4_ADC_CDR              (STM32L4_ADCCMN_BASE+STM32L4_ADC_CDR_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
-/* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
+/* ADC interrupt and status register (ISR) and
+ * ADC interrupt enable register (IER)
+ */
 
 #define ADC_INT_ADRDY                (1 << 0)  /* Bit 0:  ADC ready */
 #define ADC_INT_EOSMP                (1 << 1)  /* Bit 1:  End of sampling flag */
@@ -236,7 +238,7 @@
 #  define ADC_CFGR_EXTSEL_T1CC1      (0x0 << ADC_CFGR_EXTSEL_SHIFT)    /* 0000: Timer 1 CC1 event */
 #  define ADC_CFGR_EXTSEL_T1CC2      (0x01 << ADC_CFGR_EXTSEL_SHIFT)   /* 0001: Timer 1 CC2 event */
 #  define ADC_CFGR_EXTSEL_T1CC3      (0x02 << ADC_CFGR_EXTSEL_SHIFT)   /* 0010: Timer 1 CC3 event */
-#  define ADC_CFGR_EXTSEL_T2CC2      (0x03 << ADC_CFGR_EXTSEL_SHIFT)   /* 0011: Timer 2 CC2 event */
+#  define ADC_CFGR_EXTSEL_T2CC4      (0x03 << ADC_CFGR_EXTSEL_SHIFT)   /* 0011: Timer 2 CC4 event */
 #  define ADC_CFGR_EXTSEL_T3TRGO     (0x04 << ADC_CFGR_EXTSEL_SHIFT)   /* 0100: Timer 3 TRGO event */
 #  if !defined(CONFIG_STM32L4_STM32L4X3)
 #    define ADC_CFGR_EXTSEL_T4CC4    (0x05 << ADC_CFGR_EXTSEL_SHIFT)   /* 0101: Timer 4 CC4 event */
@@ -269,7 +271,7 @@
 #define ADC_CFGR_DISCEN              (1 << 16)                         /* Bit 16: Discontinuous mode on regular channels */
 #define ADC_CFGR_DISCNUM_SHIFT       (17)                              /* Bits 17-19: Discontinuous mode channel count */
 #define ADC_CFGR_DISCNUM_MASK        (7 << ADC_CFGR_DISCNUM_SHIFT)
-#  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT) 
+#  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT)
                                                                        /* n = 1..8 channels */
 
 #define ADC_CFGR_JDISCEN             (1 << 20) /* Bit 20: Discontinuous mode on injected channels */
@@ -457,7 +459,7 @@
                                                                   /* n=1..4 */
 #define ADC_JSQR_JEXTSEL_SHIFT       (2)                          /* Bits 2-5: External Trigger Selection for injected group */
 #define ADC_JSQR_JEXTSEL_MASK        (15 << ADC_JSQR_JEXTSEL_SHIFT)
-#  define ADC_JSQR_JEXTSEL(event)    ((event) << ADC_JSQR_JEXTSEL_SHIFT) 
+#  define ADC_JSQR_JEXTSEL(event)    ((event) << ADC_JSQR_JEXTSEL_SHIFT)
                                                                   /* Event = 0..15 */
 #  define ADC_JEXTSEL_T1TRGO         ADC_JSQR_JEXTSEL(0)          /* 0000 TIM1_TRGO */
 #  define ADC_JEXTSEL_T1CC4          ADC_JSQR_JEXTSEL(1)          /* 0001 TIM1_CH4 */
@@ -577,7 +579,7 @@
 #    define ADC_CCR_DUAL_ALT         (9 << ADC_CCR_DUAL_SHIFT)   /* Alternate trigger mode only */
 #  define ADC_CCR_DELAY_SHIFT        (8)                         /* Bits 8-11: Delay between 2 sampling phases */
 #  define ADC_CCR_DELAY_MASK         (15 << ADC_CCR_DELAY_SHIFT)
-#    define ADC_CCR_DELAY(n)         (((n)-1) << ADC_CCR_DELAY_SHIFT) 
+#    define ADC_CCR_DELAY(n)         (((n)-1) << ADC_CCR_DELAY_SHIFT)
                                                                  /* n * TADCCLK, 1-13 */
 #  define ADC_CCR_DMACFG             (1 << 13)                   /* Bit 13: DMA configuration (for dual ADC mode) */
 #  define ADC_CCR_MDMA_SHIFT         (14)                        /* Bits 14-15: Direct memory access mode for dual ADC mode */

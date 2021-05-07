@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_nand.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -59,7 +44,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* DMA.  DMA support requires that DMAC0 be enabled.  According to
  * "Table 15-2. SAMA5 Master to Slave Access", DMAC1 does not have access
  * to NFC SRAM.
@@ -91,7 +78,6 @@
 #  endif
 #endif
 
-
 /* Hardware ECC types.  These are extensions to the NANDECC_HWECC value
  * defined in include/nuttx/mtd/nand_raw.h.
  *
@@ -103,6 +89,7 @@
 #define NANDECC_PMECC   (NANDECC_HWECC + 1)
 
 /* Per NAND bank ECC selections */
+
 /* Only CS3 can support NAND.  The rest is a fantasy */
 
 # undef CONFIG_SAMA5_EBICS0_NAND
@@ -293,6 +280,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type represents the state of a raw NAND MTD device on a single chip
  * select.  The struct nand_raw_s must appear at the beginning of the
  * definition so that you can freely cast between pointers to struct
@@ -358,10 +346,10 @@ struct sam_nand_s
 #ifdef CONFIG_SAMA5_NAND_REGDEBUG
   /* Register debug state */
 
-   bool wr;                 /* Last was a write */
-   uint32_t regadddr;       /* Last address */
-   uint32_t regval;         /* Last value */
-   int ntimes;              /* Number of times */
+  bool wr;                 /* Last was a write */
+  uint32_t regadddr;       /* Last address */
+  uint32_t regval;         /* Last value */
+  int ntimes;              /* Number of times */
 #endif
 };
 
@@ -385,7 +373,7 @@ extern "C"
 EXTERN struct sam_nand_s g_nand;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -486,7 +474,8 @@ void board_nand_ce(int cs, bool enable);
  * Name: nand_checkreg
  *
  * Description:
- *   Check if the current HSMC register access is a duplicate of the preceding.
+ *   Check if the current HSMC register access is a duplicate of the
+ *   preceding.
  *
  * Input Parameters:
  *   regval   - The value to be written
@@ -558,7 +547,8 @@ static inline void nand_putreg(uintptr_t regaddr, uint32_t regval)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
-static inline void nand_trimffs_enable(struct sam_nandcs_s *priv, bool enable)
+static inline void nand_trimffs_enable(struct sam_nandcs_s *priv,
+                                       bool enable)
 {
   priv->dropjss = enable;
 }
@@ -603,7 +593,8 @@ static inline bool nand_trrimffs(struct sam_nandcs_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
-static inline void nand_set_trimpage(struct sam_nandcs_s *priv, uint16_t page)
+static inline void nand_set_trimpage(struct sam_nandcs_s *priv,
+                                     uint16_t page)
 {
   priv->trimpage = page;
 }

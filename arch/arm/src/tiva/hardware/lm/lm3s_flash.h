@@ -1,52 +1,37 @@
-/************************************************************************************
- * arch/arm/src/tiva/hardmware/lm/3s_flash.h
+/****************************************************************************
+ * arch/arm/src/tiva/hardware/lm/lm3s_flash.h
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_FLASH_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* FLASH dimensions ****************************************************************/
+/* FLASH dimensions *********************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM4F120) || \
     defined(CONFIG_ARCH_CHIP_LM3S8962) || defined(CONFIG_ARCH_CHIP_LM3S9B96) || \
@@ -54,8 +39,8 @@
     defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB) || defined(CONFIG_ARCH_CHIP_TM4C123GH6PM) || \
     defined(CONFIG_ARCH_CHIP_TM4C123AH6PM)
 
-/* These parts all support a 1KiB erase page size and a total FLASH memory size
- * of 256Kib or 256 pages.
+/* These parts all support a 1KiB erase page size and a total FLASH memory
+ * size of 256Kib or 256 pages.
  */
 
 #  define TIVA_FLASH_NPAGES        256
@@ -64,10 +49,10 @@
 
 #define TIVA_FLASH_SIZE            (TIVA_FLASH_NPAGES * TIVA_FLASH_PAGESIZE)
 
-/* FLASH register offsets ***********************************************************/
+/* FLASH register offsets ***************************************************/
 
-/* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the Flash
- * control base address of TIVA_FLASHCON_BASE.
+/* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the
+ * Flash control base address of TIVA_FLASHCON_BASE.
  */
 
 #define TIVA_FLASH_FMA_OFFSET      0x000 /* Flash memory address */
@@ -77,8 +62,8 @@
 #define TIVA_FLASH_FCIM_OFFSET     0x010 /* Flash controller interrupt mask */
 #define TIVA_FLASH_FCMISC_OFFSET   0x014 /* Flash controller masked interrupt status and clear */
 
-/* The FMPREn, FMPPEn, USECRL, USER_DBG, and USER_REGn registers are relative to the
- * System Control base address of TIVA_SYSCON_BASE
+/* The FMPREn, FMPPEn, USECRL, USER_DBG, and USER_REGn registers are relative
+ * to the System Control base address of TIVA_SYSCON_BASE
  */
 
 #define TIVA_FLASH_FMPRE_OFFSET    0x130 /* Flash memory protection read enable */
@@ -96,10 +81,10 @@
 #define TIVA_FLASH_FMPPE2_OFFSET   0x408 /* Flash Memory Protection Program Enable 2 */
 #define TIVA_FLASH_FMPPE3_OFFSET   0x40c /*  Flash Memory Protection Program Enable 3 */
 
-/* FLASH register addresses *********************************************************/
+/* FLASH register addresses *************************************************/
 
-/* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the Flash
- * control base address of TIVA_FLASHCON_BASE.
+/* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the
+ * Flash control base address of TIVA_FLASHCON_BASE.
  */
 
 #define TIVA_FLASH_FMA             (TIVA_FLASHCON_BASE + TIVA_FLASH_FMA_OFFSET)
@@ -109,8 +94,8 @@
 #define TIVA_FLASH_FCIM            (TIVA_FLASHCON_BASE + TIVA_FLASH_FCIM_OFFSET)
 #define TIVA_FLASH_FCMISC          (TIVA_FLASHCON_BASE + TIVA_FLASH_FCMISC_OFFSET)
 
-/* The FMPREn, FMPPEn, USECRL, USER_DBG, and USER_REGn registers are relative to the
- * System Control base address of TIVA_SYSCON_BASE
+/* The FMPREn, FMPPEn, USECRL, USER_DBG, and USER_REGn registers are relative
+ * to the System Control base address of TIVA_SYSCON_BASE
  */
 
 #define TIVA_FLASH_FMPRE           (TIVA_SYSCON_BASE + TIVA_FLASH_FMPRE_OFFSET)
@@ -128,7 +113,7 @@
 #define TIVA_FLASH_FMPPE2          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE2_OFFSET)
 #define TIVA_FLASH_FMPPE3          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE3_OFFSET)
 
-/* FLASH register bit definitions ***************************************************/
+/* FLASH register bit definitions *******************************************/
 
 #define FLASH_FMA_OFFSET_SHIFT     0         /* Bits 17-0: Address Offset */
 #define FLASH_FMA_OFFSET_MASK      (0x0003ffff << FLASH_FMA_OFFSET_SHIFT)
@@ -147,16 +132,16 @@
 #define FLASH_FMC_WRKEY_MASK       (0xffff << FLASH_FMC_WRKEY_SHIFT)
 #define FLASH_FMC_WRKEY            (0xa442 << FLASH_FMC_WRKEY_SHIFT) /* Magic write key */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_FLASH_H */

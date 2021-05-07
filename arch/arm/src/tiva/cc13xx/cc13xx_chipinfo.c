@@ -1,5 +1,5 @@
-/*****************************************************************************
- * arch/arm/src/tiva/tiv_chipinfo.h
+/****************************************************************************
+ * arch/arm/src/tiva/cc13xx/cc13xx_chipinfo.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -37,11 +37,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,11 +51,11 @@
 #include "hardware/tiva_prcm.h"
 #include "tiva_chipinfo.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_protocols
  *
  * Description:
@@ -64,18 +64,19 @@
  * Returned Value:
  *    Returns a bit set indicating supported protocols.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_protocol_e chipinfo_protocols(void)
 {
   /* Return allowed RTC modes.
-   * REVISIT:  Per fcfg1 header file, the allowed RGC modes are in bits 0-2. */
+   * REVISIT:  Per fcfg1 header file, the allowed RGC modes are in bits 0-2.
+   */
 
-   uint32_t regval = getreg32(TIVA_PRCM_RFCMODEHWOPT);
-   return (enum cc13xx_protocol_e)(regval & 0x0e);
+  uint32_t regval = getreg32(TIVA_PRCM_RFCMODEHWOPT);
+  return (enum cc13xx_protocol_e)(regval & 0x0e);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_packagetype
  *
  * Description:
@@ -84,7 +85,7 @@ enum cc13xx_protocol_e chipinfo_protocols(void)
  * Returned Value:
  *   Returns an enumeration value indicating the package type.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_package_e chipinfo_packagetype(void)
 {
@@ -94,7 +95,7 @@ enum cc13xx_package_e chipinfo_packagetype(void)
   pkgtype = (enum cc13xx_package_e)((regval & FCFG1_USER_ID_PKG_MASK) >>
                                     FCFG1_USER_ID_PKG_SHIFT);
 
-  if (pkgtype < PACKAGE_4x4 || pkgtype > PACKAGE_4x4)
+  if (pkgtype < PACKAGE_4X4 || pkgtype > PACKAGE_4X4)
     {
       pkgtype = PACKAGE_UNKNOWN;
     }
@@ -102,7 +103,7 @@ enum cc13xx_package_e chipinfo_packagetype(void)
   return pkgtype;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_chiptype
  *
  * Description:
@@ -111,7 +112,7 @@ enum cc13xx_package_e chipinfo_packagetype(void)
  * Returned Value:
  *   Returns an enumeration value indicating the chip type
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_chiptype_e chipinfo_chiptype(void)
 {
@@ -131,7 +132,7 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void)
                  FCFG1_USER_ID_PROTOCOL_SHIFT);
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
-  if (chipfamily == FAMILY_CC13x0)
+  if (chipfamily == FAMILY_CC13X0)
     {
       switch (protocol)
         {
@@ -147,13 +148,13 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void)
 
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
 
-   cc13 = ((userid & FCFG1_USER_ID_CC13) != 0); /*  CC13xx device type (vs CC26xx) */
-   pa   = ((userid & FCFG1_USER_ID_PA) != 0);   /*  Supports 20dBM PA */
+  cc13 = ((userid & FCFG1_USER_ID_CC13) != 0); /*  CC13xx device type (vs CC26xx) */
+  pa   = ((userid & FCFG1_USER_ID_PA) != 0);   /*  Supports 20dBM PA */
 
-   if (chipfamily == FAMILY_CC13x2_CC26x2)
-     {
-       switch (protocol)
-         {
+  if (chipfamily == FAMILY_CC13X2_CC26X2)
+    {
+      switch (protocol)
+        {
           case 0xf:
             if (cc13)
               {
@@ -195,7 +196,7 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void)
   return chiptype;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_chipfamily
  *
  * Description:
@@ -204,7 +205,7 @@ enum cc13xx_chiptype_e chipinfo_chiptype(void)
  * Returned Value:
  *   Returns an enumeration value indicating the chip family
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_chipfamily_e chipinfo_chipfamily(void)
 {
@@ -219,29 +220,31 @@ enum cc13xx_chipfamily_e chipinfo_chipfamily(void)
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
   if (waferid == 0xb9be)
     {
-      chipfamily = FAMILY_CC13x0;
-     }
+      chipfamily = FAMILY_CC13X0;
+    }
 
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
   if (waferid == 0xbb41)
     {
-      chipfamily = FAMILY_CC13x2_CC26x2;
-     }
+      chipfamily = FAMILY_CC13X2_CC26X2;
+    }
 #endif
 
-   return chipfamily;
+  return chipfamily;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_hwrevision
  *
  * Description:
- *   Returns an enumeration value indicating the hardware revision of the chip
+ *   Returns an enumeration value indicating the hardware revision of the
+ *   chip
  *
  * Returned Value:
- *   Returns an enumeration value indicating the hardware revision of the chip
+ *   Returns an enumeration value indicating the hardware revision of the
+ *   chip
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 enum cc13xx_revision_e chipinfo_hwrevision(void)
 {
@@ -256,22 +259,23 @@ enum cc13xx_revision_e chipinfo_hwrevision(void)
   hwminorrev = chipinfo_hwminorrev();
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
-  if (chipfamily == FAMILY_CC13x0)
+  if (chipfamily == FAMILY_CC13X0)
     {
       switch (fcg1rev)
         {
-          case 0:  /* CC13x0 PG1.0 */
+          case 0:  /* CC13X0 PG1.0 */
             hwrev = HWREV_1_0;
             break;
 
-          case 2:  /* CC13x0 PG2.0 (or later) */
-            hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_2_0) + hwminorrev);
+          case 2:  /* CC13X0 PG2.0 (or later) */
+            hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_2_0) +
+                     hwminorrev);
             break;
         }
     }
 
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-  if (chipfamily == FAMILY_CC13x2_CC26x2)
+  if (chipfamily == FAMILY_CC13X2_CC26X2)
     {
       switch (fcg1rev)
         {
@@ -281,21 +285,23 @@ enum cc13xx_revision_e chipinfo_hwrevision(void)
             break;
 
           case 2:  /* CC13x2, CC26x2 - PG1.1 (or later) */
-            hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_1_1) + hwminorrev);
+            hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_1_1) +
+                     hwminorrev);
             break;
 
           case 3:  /* CC13x2, CC26x2 - PG2.1 (or later) */
-            hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_2_1) + hwminorrev);
+            hwrev = (enum cc13xx_revision_e)(((uint32_t)HWREV_2_1) +
+                     hwminorrev);
             break;
         }
     }
 
 #endif
 
-   return hwrev;
+  return hwrev;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: chipinfo_verify
  *
  * Description:
@@ -305,7 +311,7 @@ enum cc13xx_revision_e chipinfo_hwrevision(void)
  * Returned Value:
  *   None
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
 void chipinfo_verify(void)
@@ -316,9 +322,9 @@ void chipinfo_verify(void)
   chip_family = chipinfo_chipfamily();
 
 #if defined(CONFIG_ARCH_CHIP_CC13X0)
-  DEBUGASSERT(chip_family == FAMILY_CC13x0);
+  DEBUGASSERT(chip_family == FAMILY_CC13X0);
 #elif defined(CONFIG_ARCH_CHIP_CC13X2)
-  DEBUGASSERT(chip_family == FAMILY_CC13x2_CC26x2);
+  DEBUGASSERT(chip_family == FAMILY_CC13X2_CC26X2);
 #else
   DEBUPANIC();
 #endif

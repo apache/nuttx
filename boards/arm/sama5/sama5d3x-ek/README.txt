@@ -388,7 +388,7 @@ Creating and Using NORBOOT
 
       The norboot program can also be configured to jump directly into
       NOR FLASH without requiring the final halt and go by setting
-      CONFIG_SAMA5D3xEK_NOR_START=y in the NuttX configuration.  However,
+      CONFIG_SAMA5D3XEK_NOR_START=y in the NuttX configuration.  However,
       since I have been debugging the early boot sequence, the above
       sequence has been most convenient for me since it allows me to
       step into the program in NOR.
@@ -817,7 +817,7 @@ Buttons and LEDs
     LED_PANIC            The system has crashed     OFF      Blinking
     LED_IDLE             MCU is is sleep mode       -- Not used  --
 
-  If CONFIG_SAMA5D3xEK_NOREDLED=y, then the red LED is not used by the
+  If CONFIG_SAMA5D3XEK_NOREDLED=y, then the red LED is not used by the
   system and the controls are as follows:
 
     SYMBOL                Meaning                     LED state
@@ -1182,8 +1182,8 @@ AT25 Serial FLASH
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     Board Selection
-      CONFIG_SAMA5D3xEK_AT25_BLOCKMOUNT=y   : Mounts AT25 for NSH
-      CONFIG_SAMA5D3xEK_AT25_FTL=y          : Create block driver for FAT
+      CONFIG_SAMA5D3XEK_AT25_BLOCKMOUNT=y   : Mounts AT25 for NSH
+      CONFIG_SAMA5D3XEK_AT25_FTL=y          : Create block driver for FAT
 
   NOTE that you must close JP1 on the Embest/Ronetix board in order to
   enable the AT25 FLASH chip select.
@@ -1755,7 +1755,7 @@ SDRAM Support
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
 
     Board Selection
-      CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
+      CONFIG_SAMA5D3XEK_MT47H128M16RT=y     : This is the type of DDR2
 
     System Type->Heap Configuration
       CONFIG_SAMA5_DDRCS_HEAP=y             : Add the SDRAM to the heap
@@ -1825,7 +1825,7 @@ SDRAM Support
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
 
     Board Selection
-      CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
+      CONFIG_SAMA5D3XEK_MT47H128M16RT=y     : This is the type of DDR2
 
     System Type->Heap Configuration
       CONFIG_SAMA5_ISRAM_HEAP=n             : These do not apply in this case
@@ -1968,7 +1968,7 @@ NAND Support
 
     Board Selection
       CONFIG_SAMA5D3XEK_NAND_BLOCKMOUNT=y : Enable FS support on NAND
-      CONFIG_SAMA5D3xEK_NAND_NXFFS=y      : Use the NXFFS file system
+      CONFIG_SAMA5D3XEK_NAND_NXFFS=y      : Use the NXFFS file system
 
       Other file systems are not recommended because only NXFFS can handle
       bad blocks and only NXFFS performs wear-levelling.
@@ -1992,7 +1992,7 @@ NAND Support
 
     Board Selection
       CONFIG_SAMA5D3XEK_NAND_BLOCKMOUNT=y : Enable FS support on NAND
-      CONFIG_SAMA5D3xEK_NAND_FTL=y        : Use an flash translation layer
+      CONFIG_SAMA5D3XEK_NAND_FTL=y        : Use an flash translation layer
 
       NOTE:  FTL will require some significant buffering because of
       the large size of the NAND flash blocks.  You will also need
@@ -2010,7 +2010,7 @@ NAND Support
     ---------------------
 
     With the options CONFIG_SAMA5D3XEK_NAND_BLOCKMOUNT=y and
-    CONFIG_SAMA5D3xEK_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
+    CONFIG_SAMA5D3XEK_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
     start-up logic before the NSH prompt appears.  There is no feedback as
     to whether or not the mount was successful.  You can, however, see the
     mounted file systems using the nsh 'mount' command:
@@ -2235,8 +2235,8 @@ AT24 Serial EEPROM
                                             : Other defaults are probably OK
 
     Board Selection
-      CONFIG_SAMA5D3xEK_AT24_BLOCKMOUNT=y   : Mounts AT24 for NSH
-      CONFIG_SAMA5D3xEK_AT24_NXFFS=y        : Mount the AT24 using NXFFS
+      CONFIG_SAMA5D3XEK_AT24_BLOCKMOUNT=y   : Mounts AT24 for NSH
+      CONFIG_SAMA5D3XEK_AT24_NXFFS=y        : Mount the AT24 using NXFFS
 
   You can then format the AT24 EEPROM for a FAT file system and mount the
   file system at /mnt/at24 using these NSH commands:
@@ -2286,12 +2286,12 @@ I2C Tool
     Where <cmd> is one of:
 
       Show help     : ?
-      List buses   : bus
+      List buses    : bus
       List devices  : dev [OPTIONS] <first> <last>
-      Read register : get [OPTIONS] [<repititions>]
+      Read register : get [OPTIONS] [<repetitions>]
       Show help     : help
-      Write register: set [OPTIONS] <value> [<repititions>]
-      Verify access : verf [OPTIONS] [<value>] [<repititions>]
+      Write register: set [OPTIONS] <value> [<repetitions>]
+      Verify access : verf [OPTIONS] [<value>] [<repetitions>]
 
     Where common "sticky" OPTIONS include:
       [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
@@ -2299,7 +2299,7 @@ I2C Tool
       [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
       [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
       [-s|n], send/don't send start between command and data.  Default: -n Current: -n
-      [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+      [-i|j], Auto increment|don't increment regaddr on repetitions.  Default: NO Current: NO
       [-f freq] I2C frequency.  Default: 100000 Current: 100000
 
     NOTES:
@@ -2725,7 +2725,7 @@ Touchscreen Testing
       CONFIG_INPUT=y                      : (automatically selected)
 
     Board Selection:
-       CONFIG_SAMA5D3xEK_TSD_DEVMINOR=0   : Register as /dev/input0
+       CONFIG_SAMA5D3XEK_TSD_DEVMINOR=0   : Register as /dev/input0
 
     Library Support:
       CONFIG_SCHED_WORKQUEUE=y            : Work queue support required
@@ -2966,8 +2966,8 @@ I2S Audio Support
       CONFIG_AUDIO_WM8904=y                 : Build WM8904 driver character driver
 
     Board Selection
-      CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY=400000
-      CONFIG_SAMA5D3xEK_WM8904_SRCMAIN=y    : WM8904 MCLK is the SAMA5D Main Clock
+      CONFIG_SAMA5D3XEK_WM8904_I2CFREQUENCY=400000
+      CONFIG_SAMA5D3XEK_WM8904_SRCMAIN=y    : WM8904 MCLK is the SAMA5D Main Clock
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y              : MW8904 driver needs work queue support
@@ -3063,8 +3063,8 @@ I2S Audio Support
       CONFIG_EXAMPLES_I2SCHAR_DEVINIT=y
 
     Board Selection
-      CONFIG_SAMA5D3xEK_I2SCHAR_MINOR=0
-      CONFIG_SAMA5D3xEK_SSC_PORT=0      : 0 or SSC0, 1 for SSC1
+      CONFIG_SAMA5D3XEK_I2SCHAR_MINOR=0
+      CONFIG_SAMA5D3XEK_SSC_PORT=0      : 0 or SSC0, 1 for SSC1
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
@@ -3304,8 +3304,8 @@ Configurations
      re-configured:
 
        Board Selection -> CPU Frequency
-         CONFIG_SAMA5D3xEK_396MHZ=n     # Disable 396MHz operation
-         CONFIG_SAMA5D3xEK_528MHZ=y     # Enable 528MHz operation
+         CONFIG_SAMA5D3XEK_396MHZ=n     # Disable 396MHz operation
+         CONFIG_SAMA5D3XEK_528MHZ=y     # Enable 528MHz operation
 
      If you switch to 528MHz, you should also check the loop calibration
      value in your .config file.  Of course, it would be best to re-calibrate
@@ -3504,7 +3504,7 @@ Configurations
     2. The default norboot program initializes the NOR memory,
        displays a message and halts.  The norboot program can also be
        configured to jump directly into NOR FLASH without requiring the
-       final halt and go by setting CONFIG_SAMA5D3xEK_NOR_START=y in the
+       final halt and go by setting CONFIG_SAMA5D3XEK_NOR_START=y in the
        NuttX configuration.
 
     3. Be aware that the default norboot also disables the watchdog.

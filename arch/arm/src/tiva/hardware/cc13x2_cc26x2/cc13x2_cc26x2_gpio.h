@@ -1,10 +1,11 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_GPIO_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* GPIO Register Offsets ************************************************************/
+/* GPIO Register Offsets ****************************************************/
 
 #define TIVA_GPIO_DOUT_PIN_OFFSET(n)      ((n) & ~3)
 #  define TIVA_GPIO_DOUT_PIN3_0_OFFSET    0x0000  /* Data Out 0 to 3 */
@@ -71,7 +72,7 @@
 #define TIVA_GPIO_DOE_OFFSET              0x00d0  /* Data Output Enable for DIO 0 to 31 */
 #define TIVA_GPIO_EVFLAGS_OFFSET          0x00e0  /* Event Register for DIO 0 to 31 */
 
-/* GPIO Register Addresses **********************************************************/
+/* GPIO Register Addresses **************************************************/
 
 #define TIVA_GPIO_DOUT_PIN_BASE(n)        (TIVA_GPIO_BASE + TIVA_GPIO_DOUT_PIN_OFFSET(n))
 #  define TIVA_GPIO_DOUT_PIN3_0           (TIVA_GPIO_BASE + TIVA_GPIO_DOUT_PIN3_0_OFFSET)
@@ -90,7 +91,7 @@
 #define TIVA_GPIO_DOE                     (TIVA_GPIO_BASE + TIVA_GPIO_DOE_OFFSET)
 #define TIVA_GPIO_EVFLAGS                 (TIVA_GPIO_BASE + TIVA_GPIO_EVFLAGS_OFFSET)
 
-/* GPIO Register Bitfield Definitions ***********************************************/
+/* GPIO Register Bitfield Definitions ***************************************/
 
 /* Data Out n to n + 3 */
 
@@ -125,16 +126,16 @@
 
 #define GPIO_EVFLAGS(n)                   (1 << (n))
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_GPIO_H */

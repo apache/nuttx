@@ -36,7 +36,6 @@
  * Public Symbols
  ****************************************************************************/
 
-	.cpu	cortex-m0
 	.file	"arm_saveusercontext.S"
 
 /****************************************************************************
@@ -73,7 +72,7 @@ arm_saveusercontext:
 
 	mov		r1, r0			/* R1: regs */
 	mov		r0, #SYS_save_context	/* R0: save context (also return value) */
-	svc		0			/* Force synchronous SVCall (or Hard Fault) */
+	svc		#SYS_syscall		/* Force synchronous SVCall (or Hard Fault) */
 
 	/* There are two return conditions.  On the first return, R0 (the
 	 * return value will be zero.  On the second return we need to

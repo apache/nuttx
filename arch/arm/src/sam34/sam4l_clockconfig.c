@@ -1,37 +1,20 @@
 /****************************************************************************
- * arch/avr/src/sam34/sam4l_clockconfig.c
+ * arch/arm/src/sam34/sam4l_clockconfig.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * This file is derived from nuttx/arch/avr/src/at32uc3/at32uc3_clkinit.c
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -62,13 +45,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARCH_RAMFUNCS
 # error "CONFIG_ARCH_RAMFUNCS must be defined"
 #endif
 
-/* Board/Clock Setup *******************************************************/
+/* Board/Clock Setup ********************************************************/
+
 /* Verify dividers */
 
 #if ((BOARD_CPU_SHIFT > BOARD_PBA_SHIFT) || (BOARD_CPU_SHIFT > BOARD_PBB_SHIFT) || \
@@ -202,8 +187,8 @@
 /* RC80M.  This might be the system clock or the source clock for the DFPLL
  * or it could be the source for GCLK9 that drives PLL0.
  *
- * By selecting CONFIG_SAM34_RC80M, you can also force the clock to be enabled
- * at boot time.
+ * By selecting CONFIG_SAM34_RC80M, you can also force the clock to be
+ * enabled at boot time.
  */
 
 #if defined(CONFIG_SAM34_RC80M) || defined(BOARD_SYSCLK_SOURCE_RC80M) || \
@@ -497,15 +482,15 @@ static inline void sam_enableosc0(void)
 
   /* Enable and configure OSC0 */
 
-  regval = SAM_OSC0_STARTUP_VALUE | SAM_OSC0_GAIN_VALUE | SAM_OSC0_MODE_VALUE |
-           SCIF_OSCCTRL0_OSCEN;
-  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_OSCCTRL0_OFFSET),
-           SAM_SCIF_UNLOCK);
+  regval = SAM_OSC0_STARTUP_VALUE | SAM_OSC0_GAIN_VALUE |
+           SAM_OSC0_MODE_VALUE | SCIF_OSCCTRL0_OSCEN;
+  putreg32(SCIF_UNLOCK_KEY(0xaa) |
+           SCIF_UNLOCK_ADDR(SAM_SCIF_OSCCTRL0_OFFSET), SAM_SCIF_UNLOCK);
   putreg32(regval, SAM_SCIF_OSCCTRL0);
 
   /* Wait for OSC0 to be ready */
 
-  while (getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_OSC0RDY) == 0);
+  while ((getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_OSC0RDY) == 0);
 }
 #endif
 
@@ -524,14 +509,16 @@ static inline void sam_enableosc32(void)
   uint32_t regval;
 
   /* Set up the OSCCTRL32 register using settings from the board.h file.
-   * Also  enable the oscillator and provide bother the 32KHz and 1KHz output.
+   * Also  enable the oscillator and provide bother the 32KHz and 1KHz
+   * output.
    */
 
-  regval = SAM_OSC32_STARTUP_VALUE | BOARD_OSC32_SELCURR | SAM_OSC32_MODE_VALUE |
-           BSCIF_OSCCTRL32_EN1K |  BSCIF_OSCCTRL32_EN32K |
-           BSCIF_OSCCTRL32_OSC32EN;
+  regval = SAM_OSC32_STARTUP_VALUE | BOARD_OSC32_SELCURR |
+           SAM_OSC32_MODE_VALUE | BSCIF_OSCCTRL32_EN1K |
+            BSCIF_OSCCTRL32_EN32K | BSCIF_OSCCTRL32_OSC32EN;
 
-  putreg32(BSCIF_UNLOCK_KEY(0xaa) | BSCIF_UNLOCK_ADDR(SAM_BSCIF_OSCCTRL32_OFFSET),
+  putreg32(BSCIF_UNLOCK_KEY(0xaa) |
+           BSCIF_UNLOCK_ADDR(SAM_BSCIF_OSCCTRL32_OFFSET),
            SAM_BSCIF_UNLOCK);
   putreg32(regval, SAM_BSCIF_OSCCTRL32);
 
@@ -564,7 +551,7 @@ static inline void sam_enablerc80m(void)
 
   /* Wait for OSC32 to be ready */
 
-  while (getreg32(SAM_SCIF_RC80MCR) & SCIF_RC80MCR_EN) == 0);
+  while ((getreg32(SAM_SCIF_RC80MCR) & SCIF_RC80MCR_EN) == 0);
 }
 #endif
 
@@ -588,13 +575,14 @@ static inline void sam_enablercfast(void)
   regval &= ~SCIF_RCFASTCFG_FRANGE_MASK;
   regval |= (SAM_RCFAST_RANGE | SCIF_RCFASTCFG_EN);
 
-  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_RCFASTCFG_OFFSET),
+  putreg32(SCIF_UNLOCK_KEY(0xaa) |
+           SCIF_UNLOCK_ADDR(SAM_SCIF_RCFASTCFG_OFFSET),
            SAM_SCIF_UNLOCK);
   putreg32(regval, SAM_SCIF_RCFASTCFG);
 
   /* Wait for RCFAST to be ready */
 
-  while (getreg32(SAM_SCIF_RCFASTCFG) & SCIF_RCFASTCFG_EN) == 0);
+  while ((getreg32(SAM_SCIF_RCFASTCFG) & SCIF_RCFASTCFG_EN) == 0);
 }
 #endif
 
@@ -618,13 +606,14 @@ static inline void sam_enablerc1m(void)
   regval &= ~BSCIF_RCFASTCFG_FRANGE_MASK;
   regval |= (SAM_RCFAST_RANGE | BSCIF_RCFASTCFG_EN);
 
-  putreg32(BSCIF_UNLOCK_KEY(0xaa) | BSCIF_UNLOCK_ADDR(SAM_BSCIF_RC1MCR_OFFSET),
+  putreg32(BSCIF_UNLOCK_KEY(0xaa) |
+           BSCIF_UNLOCK_ADDR(SAM_BSCIF_RC1MCR_OFFSET),
            SAM_BSCIF_UNLOCK);
   putreg32(regval  | BSCIF_RC1MCR_CLKOEN, SAM_BSCIF_RC1MCR);
 
   /* Wait for RCFAST to be ready */
 
-  while (getreg32(SAM_BSCIF_RC1MCR) & BSCIF_RC1MCR_CLKOEN) == 0);
+  while ((getreg32(SAM_BSCIF_RC1MCR) & BSCIF_RC1MCR_CLKOEN) == 0);
 }
 #endif
 
@@ -645,13 +634,15 @@ static inline void sam_enablerc32k(void)
   /* Configure and enable RC32K */
 
   regval  = getreg32(SAM_BSCIF_RC32KCR);
-  putreg32(BSCIF_UNLOCK_KEY(0xaa) | BSCIF_UNLOCK_ADDR(SAM_BSCIF_RC32KCR_OFFSET),
+  putreg32(BSCIF_UNLOCK_KEY(0xaa) |
+           BSCIF_UNLOCK_ADDR(SAM_BSCIF_RC32KCR_OFFSET),
            SAM_BSCIF_UNLOCK);
-  putreg32(regval | BSCIF_RC32KCR_EN32K | BSCIF_RC32KCR_EN, SAM_BSCIF_RC32KCR);
+  putreg32(regval | BSCIF_RC32KCR_EN32K | BSCIF_RC32KCR_EN,
+           SAM_BSCIF_RC32KCR);
 
   /* Wait for RCFAST to be ready */
 
-  while (getreg32(SAM_BSCIF_RC32KCR) & BSCIF_RC32KCR_EN) == 0);
+  while ((getreg32(SAM_BSCIF_RC32KCR) & BSCIF_RC32KCR_EN) == 0);
 }
 #endif
 
@@ -710,7 +701,9 @@ static inline void sam_enablepll0(void)
   /* Set up the multiers and dividers */
 
   regval  = getreg32(SAM_SCIF_PLL0);
-  regval &= ~(SCIF_PLL0_PLLOSC_MASK | SCIF_PLL0_PLLDIV_MASK | SCIF_PLL0_PLLMUL_MASK);
+  regval &= ~(SCIF_PLL0_PLLOSC_MASK |
+              SCIF_PLL0_PLLDIV_MASK |
+              SCIF_PLL0_PLLMUL_MASK);
   regval |= ((SAM_PLL0_MUL - 1) << SCIF_PLL0_PLLMUL_SHIFT) |
             (BOARD_DFLL0_DIV << SCIF_PLL0_PLLDIV_SHIFT) |
             SCIF_PLL0_PLLCOUNT_MAX | SAM_PLL0_SOURCE;
@@ -814,7 +807,8 @@ static inline void sam_enabledfll0(void)
    * before this function was called.
    */
 
-  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_DFLL0CONF_OFFSET),
+  putreg32(SCIF_UNLOCK_KEY(0xaa) |
+           SCIF_UNLOCK_ADDR(SAM_SCIF_DFLL0CONF_OFFSET),
            SAM_SCIF_UNLOCK);
   putreg32(SCIF_DFLL0CONF_EN, SAM_SCIF_DFLL0CONF);
 
@@ -899,19 +893,24 @@ static inline void sam_setdividers(void)
 
   /* Then set the divider values. */
 
-  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_CPUSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_CPUSEL_OFFSET),
+           SAM_PM_UNLOCK);
   putreg32(cpusel, SAM_PM_CPUSEL);
 
-  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBASEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBASEL_OFFSET),
+           SAM_PM_UNLOCK);
   putreg32(pbasel, SAM_PM_PBASEL);
 
-  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBBSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBBSEL_OFFSET),
+           SAM_PM_UNLOCK);
   putreg32(pbbsel, SAM_PM_PBBSEL);
 
-  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBCSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBCSEL_OFFSET),
+           SAM_PM_UNLOCK);
   putreg32(pbcsel, SAM_PM_PBCSEL);
 
-  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBDSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBDSEL_OFFSET),
+           SAM_PM_UNLOCK);
   putreg32(pbdsel, SAM_PM_PBDSEL);
 }
 
@@ -998,7 +997,8 @@ static inline void sam_flash_readmode(uint32_t command)
  * Description:
  *   Configure FLASH read mode and wait states.
  *
- *   Maximum CPU frequency for 0 and 1 FLASH wait states (FWS) in various modes
+ *   Maximum CPU frequency for 0 and 1 FLASH wait states (FWS) in various
+ *   modes
  *   (Table 42-30 in the big data sheet).
  *
  *     ------- ------------------- ---------- ----------
@@ -1018,7 +1018,8 @@ static inline void sam_flash_readmode(uint32_t command)
  *
  ****************************************************************************/
 
-static inline void sam_flash_config(uint32_t cpuclock, uint32_t psm, bool fastwkup)
+static inline void sam_flash_config(uint32_t cpuclock,
+                                    uint32_t psm, bool fastwkup)
 {
   bool waitstate;
   uint32_t command;
@@ -1195,7 +1196,6 @@ static inline void sam_usbclock(void)
 #endif
 #if SAM_CLOCK_USB_DIV > 0
 
-
   u_avr32_pm_gcctrl.GCCTRL.diven  = diven;
   u_avr32_pm_gcctrl.GCCTRL.div    = div;
 #endif
@@ -1344,7 +1344,7 @@ void sam_clockconfig(void)
    * already running from RCSYS.
    */
 
-  // sam_mainclk(PM_MCCTRL_MCSEL_RCSYS);
+  /* sam_mainclk(PM_MCCTRL_MCSEL_RCSYS); */
 #elif defined(BOARD_SYSCLK_SOURCE_OSC0)
 
   /* Configure FLASH read mode and wait states */

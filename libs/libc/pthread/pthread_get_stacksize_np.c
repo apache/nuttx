@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_get_stacksize_np.c
+ * libs/libc/pthread/pthread_get_stacksize_np.c
  *
  *   Copyright (C) 2018 Geoff Norton. All rights reserved.
  *   Author: Geoff Norton <grompf@gmail.com>

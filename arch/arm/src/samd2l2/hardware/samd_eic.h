@@ -1,48 +1,33 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_eic.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Matt Thompson <matt@extent3d.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Microchip SAMD21 datasheet"
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EIC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EIC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,10 +35,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* EIC register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* EIC register offsets *****************************************************/
 
 #define SAM_EIC_CTRLA_OFFSET         0x0000  /* Control A register */
 #define SAM_EIC_STATUS_OFFSET        0x0001  /* Status register */
@@ -68,7 +54,7 @@
 #define SAM_EIC_CONFIG1_OFFSET       0x001c  /* Configuration 1 register */
 #define SAM_EIC_CONFIG2_OFFSET       0x0020  /* Configuration 2 register */
 
-/* EIC register addresses *******************************************************************/
+/* EIC register addresses ***************************************************/
 
 #define SAM_EIC_CTRLA                (SAM_EIC_BASE+SAM_EIC_CTRLA_OFFSET)
 #define SAM_EIC_STATUS               (SAM_EIC_BASE+SAM_EIC_STATUS_OFFSET)
@@ -83,7 +69,7 @@
 #define SAM_EIC_CONFIG1              (SAM_EIC_BASE+SAM_EIC_CONFIG1_OFFSET)
 #define SAM_EIC_CONFIG2              (SAM_EIC_BASE+SAM_EIC_CONFIG2_OFFSET)
 
-/* EIC register bit definitions *************************************************************/
+/* EIC register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -104,14 +90,16 @@
 #  define EIC_NMICTRL_NMISENSE_BOTH (3 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Both edge detection */
 #  define EIC_NMICTRL_NMISENSE_HIGH (4 << EIC_NVMICTRL_NMISENSE_SHIFT) /* High level detection */
 #  define EIC_NMICTRL_NMISENSE_LOW  (5 << EIC_NVMICTRL_NMISENSE_SHIFT) /* Low level detection */
+
 #define EIC_NMICTRL_NMIFLTEN        (1 << 3)  /* Bit 3: Non-maskable interrupt filter enable */
 
 /* Non-maskable interrupt flas status and clear register */
 
 #define EIC_NMIFLAG_NMI              (1 << 0)  /* Non-maskable interrupt */
 
-/* Event control, Interrupt enable clear, interrupt enable set register, interrupt flag
- * status and clear, and external interrupt wakeup registers.
+/* Event control, Interrupt enable clear, interrupt enable set register,
+ * interrupt flag status and clear, and external interrupt wakeup
+ * registers.
  */
 
 #define EIC_EXTINT_SHIFT             (0)       /* Bits 0-15: External interrupt n */
@@ -174,17 +162,17 @@
 #  define EIC_CONFIG2_SENSE_HIGH(n)  (4 << EIC_CONFIG2_SENSE_SHIFT(n)) /* High level detection */
 #  define EIC_CONFIG2_SENSE_LOW(n)   (5 << EIC_CONFIG2_SENSE_SHIFT(n)) /* Low level detection */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_EIC_H */

@@ -1,55 +1,39 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_lpuart.h
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane<david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LPUART_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LPUART_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_LPUART_BAUD_OFFSET    0x0000 /* Low Power UART Baud Rate Register */
 #define KINETIS_LPUART_STAT_OFFSET    0x0004 /* Low Power UART Status Register */
@@ -64,7 +48,7 @@
 #  define KINETIS_LPUART_WATER_OFFSET 0x001c /* Low Power UART Watermark Register */
 #endif
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_LPUART0_BAUD          (KINETIS_LPUART0_BASE + KINETIS_LPUART_BAUD_OFFSET)
 #define KINETIS_LPUART0_STAT          (KINETIS_LPUART0_BASE + KINETIS_LPUART_STAT_OFFSET)
@@ -131,13 +115,14 @@
 #  define KINETIS_LPUART4_WATER       (KINETIS_LPUART4_BASE + KINETIS_LPUART_WATER_OFFSET)
 #endif
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /*  Low Power UART Baud Rate Register */
 
 #define LPUART_BAUD_SBR_SHIFT         (0)       /* Bits 0-12:  Baud Rate Modulo Divisor */
 #define LPUART_BAUD_SBR_MASK          (0x1fff << LPUART_BAUD_SBR_SHIFT)
 #  define LPUART_BAUD_SBR(n)          (((n) & 0x1fff) << LPUART_BAUD_SBR_SHIFT) /* n= 1..8191*/
+
 #define LPUART_BAUD_SBNS              (1 << 13) /* Bit 13:  Stop Bit Number Select */
 #define LPUART_BAUD_RXEDGIE           (1 << 14) /* Bit 14:  RX Input Active Edge Interrupt Enable */
 #define LPUART_BAUD_LBKDIE            (1 << 15) /* Bit 15:  LIN Break Detect Interrupt Enable */
@@ -149,6 +134,7 @@
 #  define LPUART_BAUD_MATCFG_IMW      (1 << LPUART_BAUD_MATCFG_SHIFT) /* Idle Match Wakeup */
 #  define LPUART_BAUD_MATCFG_MONOFF   (2 << LPUART_BAUD_MATCFG_SHIFT) /* Match On and Match Off */
 #  define LPUART_BAUD_MATCFG_RWU      (3 << LPUART_BAUD_MATCFG_SHIFT) /* Enables RWU on Data Match and Match On/Off for transmitter CTS input */
+
                                                 /* Bit 20:  Reserved */
 #define LPUART_BAUD_RDMAE             (1 << 21) /* Bit 21:  Receiver Full DMA Enable */
                                                 /* Bit 22:  Reserved */
@@ -156,6 +142,7 @@
 #define LPUART_BAUD_OSR_SHIFT         (24)      /* Bits 24-28:  Over Sampling Ratio */
 #define LPUART_BAUD_OSR_MASK          (0x1f << LPUART_BAUD_OSR_SHIFT)
 #define   LPUART_BAUD_OSR(n)          ((((n)-1) & 0x1f) << LPUART_BAUD_OSR_SHIFT) /* n=4..32 */
+
 #define LPUART_BAUD_M10               (1 << 29) /* Bit 29:  10-bit Mode select */
 #define LPUART_BAUD_MAEN2             (1 << 30) /* Bit 30:  Match Address Mode Enable 2 */
 #define LPUART_BAUD_MAEN1             (1 << 31) /* Bit 31:  Match Address Mode Enable 1 */
@@ -202,6 +189,7 @@
 #  define LPUART_CTRL_IDLECFG_32      (5 << LPUART_CTRL_IDLECFG_SHIFT) /* 32  idle characters */
 #  define LPUART_CTRL_IDLECFG_64      (6 << LPUART_CTRL_IDLECFG_SHIFT) /* 64  idle characters */
 #  define LPUART_CTRL_IDLECFG_128     (7 << LPUART_CTRL_IDLECFG_SHIFT) /* 128 idle characters */
+
                                                  /* Bits 11-13:  Reserved */
 #define LPUART_CTRL_MA2IE             (1 << 14)  /* Bit 14:  Match 2 Interrupt Enable */
 #define LPUART_CTRL_MA1IE             (1 << 15)  /* Bit 15:  Match 1 Interrupt Enable */
@@ -245,7 +233,7 @@
 #define LPUART_DATA_FRETSC            (1 << 13)  /* Bit 13:  Frame Error / Transmit Special Character */
 #define LPUART_DATA_PARITYE           (1 << 14)  /* Bit 14:  The current received dataword contained in DATA[R9:R0] was received with a parity error */
 #define LPUART_DATA_NOISY             (1 << 15)  /* Bit 15:  The current received dataword contained in DATA[R9:R0] was received with noise */
-                                               /* Bits 16-31:  This field is reserved */
+                                                 /* Bits 16-31:  This field is reserved */
 
 /* Low Power UART Match Address Register */
 
@@ -273,6 +261,7 @@
 #define LPUART_MODIR_TNP_SHIFT        (16)       /* Bits 16-17:  Transmitter narrow pulse */
 #define LPUART_MODIR_TNP_MASK         (3 << LPUART_MODIR_TNP_SHIFT)
 #  define LPUART_MODIR_TNP(n)         ((uint32_t)((n)-1) << LPUART_MODIR_TNP_SHIFT) /* n=1-4 */
+
 #define LPUART_MODIR_IREN             (1 << 18)  /* Bit 18:  Infrared enable */
                                                  /* Bits 19-31:  Reserved */
 
@@ -289,6 +278,7 @@
 #    define LPUART_FIFO_RXFIFOSIZE_64WDS  (5 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* Transmit FIFO depth = 64 datawords */
 #    define LPUART_FIFO_RXFIFOSIZE_128WDS (6 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* Transmit FIFO depth = 128 datawords */
 #    define LPUART_FIFO_RXFIFOSIZE_256WDS (7 << LPUART_FIFO_RXFIFOSIZE_SHIFT) /* Transmit FIFO depth = 256 datawords */
+
 #  define LPUART_FIFO_RXFE            (1 << 3)   /* Bit 3:  Receive FIFO Enable */
 #  define LPUART_FIFO_TXFIFOSIZE_SHIFT    (4)    /* Bits 4-6: Transmit FIFO buffer depth */
 #  define LPUART_FIFO_TXFIFOSIZE_MASK     (7 << LPUART_FIFO_TXFIFOSIZE_SHIFT)
@@ -300,6 +290,7 @@
 #    define LPUART_FIFO_TXFIFOSIZE_64WDS  (5 << LPUART_FIFO_TXFIFOSIZE_SHIFT) /* Transmit FIFO depth = 64 datawords */
 #    define LPUART_FIFO_TXFIFOSIZE_128WDS (6 << LPUART_FIFO_TXFIFOSIZE_SHIFT) /* Transmit FIFO depth = 128 datawords */
 #    define LPUART_FIFO_TXFIFOSIZE_256WDS (7 << LPUART_FIFO_TXFIFOSIZE_SHIFT) /* Transmit FIFO depth = 256 datawords */
+
 #  define LPUART_FIFO_TXFE            (1 << 7)   /* Bit 7:  Transmit FIFO Enable */
 #  define LPUART_FIFO_RXUFE           (1 << 8)   /* Bit 8:  Receive FIFO Underflow Interrupt Enable */
 #  define LPUART_FIFO_TXOFE           (1 << 9)   /* Bit 9:  Transmit FIFO Overflow Interrupt Enable */
@@ -313,6 +304,7 @@
 #    define LPUART_FIFO_RXIDEN_16CH   (5 << LPUART_FIFO_RXIDEN_SHIFT) /* RDRF when receiver is idle for 16 characters */
 #    define LPUART_FIFO_RXIDEN_32CH   (6 << LPUART_FIFO_RXIDEN_SHIFT) /* RDRF when receiver is idle for 32 characters */
 #    define LPUART_FIFO_RXIDEN_64CH   (7 << LPUART_FIFO_RXIDEN_SHIFT) /* RDRF when receiver is idle for 64 characters */
+
                                                  /* Bit 13: Reserved */
 #  define LPUART_FIFO_RXFLUSH         (1 << 14)  /* Bit 14: Receive FIFO/Buffer Flush */
 #  define LPUART_FIFO_TXFLUSH         (1 << 15)  /* Bit 15: Transmit FIFO/Buffer Flush */
@@ -341,16 +333,16 @@
 #    define LPUART_WATER_RXCOUNT(n)   ((uint32_t)(n) << LPUART_WATER_RXCOUNT_SHIFT)
 #endif
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_LPUART_H */

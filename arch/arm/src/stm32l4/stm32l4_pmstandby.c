@@ -75,6 +75,7 @@ int stm32l4_pmstandby(void)
   /* Clear the Wake-Up Flags by setting the CWUFx bits in the power status
    * clear register
    */
+
   regval = PWR_SCR_CWUF1 | PWR_SCR_CWUF2 | PWR_SCR_CWUF3 |
            PWR_SCR_CWUF4 | PWR_SCR_CWUF5;
   putreg32(regval, STM32L4_PWR_SCR);

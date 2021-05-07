@@ -579,9 +579,10 @@ found:
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
               nwarn("WARNING: ackseq > unackseq\n");
-              nwarn("sndseq=%" PRIu32 " tx_unacked=%u "
-                    "unackseq=%" PRIu32 " ackseq=%" PRIu32 "\n",
-                    tcp_getsequence(conn->sndseq), conn->tx_unacked,
+              nwarn("sndseq=%" PRIu32 " tx_unacked=%" PRIu32
+                    " unackseq=%" PRIu32 " ackseq=%" PRIu32 "\n",
+                    tcp_getsequence(conn->sndseq),
+                    (uint32_t)conn->tx_unacked,
                     unackseq, ackseq);
 
               conn->tx_unacked = 0;
@@ -594,9 +595,9 @@ found:
        */
 
       ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
-            " unackseq: %08" PRIx32 " new tx_unacked: %d\n",
+            " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
             tcp_getsequence(conn->sndseq), ackseq, unackseq,
-            conn->tx_unacked);
+            (uint32_t)conn->tx_unacked);
       tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
@@ -868,13 +869,13 @@ found:
             return;
           }
 
-        /* Check the URG flag. If this is set, the segment carries urgent
+#ifdef CONFIG_NET_TCPURGDATA
+        /* Check the URG flag.  If this is set, the segment carries urgent
          * data that we must pass to the application.
          */
 
         if ((tcp->flags & TCP_URG) != 0)
           {
-#ifdef CONFIG_NET_TCPURGDATA
             dev->d_urglen = (tcp->urgp[0] << 8) | tcp->urgp[1];
             if (dev->d_urglen > dev->d_len)
               {
@@ -883,6 +884,16 @@ found:
                 dev->d_urglen = dev->d_len;
               }
 
+             /* The d_len field contains the length of the incoming data.
+              * d_urgdata points to the "urgent" data at the beginning of
+              * the payload; d_appdata field points to the any "normal" data
+              * that may follow the urgent data.
+              *
+              * NOTE: If the urgent data continues in the next packet, then
+              * d_len will be zero and d_appdata will point past the end of
+              * the payload (which is OK).
+              */
+
             net_incr32(conn->rcvseq, dev->d_urglen);
             dev->d_len     -= dev->d_urglen;
             dev->d_urgdata  = dev->d_appdata;
@@ -890,13 +901,40 @@ found:
           }
         else
           {
+            /* No urgent data */
+
             dev->d_urglen   = 0;
-#else /* CONFIG_NET_TCPURGDATA */
-            dev->d_appdata  = ((FAR uint8_t *)dev->d_appdata) +
-                              ((tcp->urgp[0] << 8) | tcp->urgp[1]);
-            dev->d_len     -= (tcp->urgp[0] << 8) | tcp->urgp[1];
-#endif /* CONFIG_NET_TCPURGDATA */
           }
+
+#else /* CONFIG_NET_TCPURGDATA */
+        /* Check the URG flag.  If this is set, We must gracefully ignore
+         * and discard the urgent data.
+         */
+
+        if ((tcp->flags & TCP_URG) != 0)
+          {
+            uint16_t urglen = (tcp->urgp[0] << 8) | tcp->urgp[1];
+            if (urglen > dev->d_len)
+              {
+                /* There is more urgent data in the next segment to come. */
+
+                urglen = dev->d_len;
+              }
+
+             /* The d_len field contains the length of the incoming data;
+              * The d_appdata field points to the any "normal" data that
+              * may follow the urgent data.
+              *
+              * NOTE: If the urgent data continues in the next packet, then
+              * d_len will be zero and d_appdata will point past the end of
+              * the payload (which is OK).
+              */
+
+            net_incr32(conn->rcvseq, urglen);
+            dev->d_len     -= urglen;
+            dev->d_appdata += urglen;
+          }
+#endif /* CONFIG_NET_TCPURGDATA */
 
 #ifdef CONFIG_NET_TCP_KEEPALIVE
         /* If the established socket receives an ACK or any kind of data

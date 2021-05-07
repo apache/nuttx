@@ -84,7 +84,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int devno)
   g_lcddev = ssd1306_initialize(g_i2c, NULL, devno);
   if (!g_lcddev)
     {
-      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d: %d\n", devno);
+      lcderr("ERROR: Failed to bind I2C port 1 to OLED %d\n", devno);
     }
   else
     {

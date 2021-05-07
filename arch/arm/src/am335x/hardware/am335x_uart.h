@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_uart.h
  *
- *   Copyright (C) 2018 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_UART_RBR_OFFSET       0x0000 /* UART Receive Buffer Register */
 #define AM335X_UART_THR_OFFSET       0x0000 /* UART Transmit Holding Register */
@@ -73,8 +58,7 @@
 #define AM335X_UART_RFL_OFFSET       0x0064 /* UART Received FIFO Level Register */
 #define AM335X_UART_TFL_OFFSET       0x0068 /* UART Transmit FIFO Level Register */
 
-
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define AM335X_UART_RBR(n)           (AM335X_UART_VADDR(n) + AM335X_UART_RBR_OFFSET)
 #define AM335X_UART_THR(n)           (AM335X_UART_VADDR(n) + AM335X_UART_THR_OFFSET)
@@ -244,7 +228,7 @@
 #define AM335X_UART5_RFL             (AM335X_UART5_VADDR + AM335X_UART_RFL_OFFSET)
 #define AM335X_UART5_TFL             (AM335X_UART5_VADDR + AM335X_UART_TFL_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* UART Receive Buffer Register */
 
@@ -295,12 +279,14 @@
 #define UART_FCR_RFIFO_CLEAR         (1 << 1)  /* Bit 1: Clear RX FIFO */
 #define UART_FCR_TFIFO_CLEAR         (1 << 2)  /* Bit 2: Clear TX FIFO */
 #define UART_FCR_DMA_MODE            (1 << 3)  /* Bit 3: DMA Mode */
+
 #define UART_FCR_TFT_SHIFT           (4)  /* Bits 4-5: TX FIFO Trigger Level */
 #define UART_FCR_TFT_MASK            (3 << UART_FCR_TFT_SHIFT)
 #  define UART_FCR_TFT_8CHAR         (0 << UART_FCR_TFT_SHIFT)  /* 8 Chars in FIFO */
 #  define UART_FCR_TFT_16CHAR        (1 << UART_FCR_TFT_SHIFT)  /* 16 Chars in FIFO */
 #  define UART_FCR_TFT_32CHAR        (2 << UART_FCR_TFT_SHIFT)  /* 32 Chars in FIFO */
 #  define UART_FCR_TFT_56CHAR        (3 << UART_FCR_TFT_SHIFT)  /* 56 Chars in FIFO */
+
 #define UART_FCR_RFT_SHIFT           (6)  /* Bits 6-7: RX FIFO Trigger Level */
 #define UART_FCR_RFT_MASK            (3 << UART_FCR_RFT_SHIFT)
 #  define UART_FCR_RFT_8CHAR         (0 << UART_FCR_RFT_SHIFT)  /* 8 Chars in FIFO */
@@ -316,14 +302,19 @@
 #  define UART_LCR_DLS_6BITS         (1 << UART_LCR_DLS_SHIFT)  /* 6 Bits */
 #  define UART_LCR_DLS_7BITS         (2 << UART_LCR_DLS_SHIFT)  /* 7 Bits */
 #  define UART_LCR_DLS_8BITS         (3 << UART_LCR_DLS_SHIFT)  /* 8 Bits */
+
 #define UART_LCR_STOP_SHIFT          (2)  /* Bit 2:  Number of Stop Bits */
+
 #  define UART_LCR_STOP_1BITS        (0 << UART_LCR_STOP_SHIFT)  /* 1 Stop Bit */
 #  define UART_LCR_STOP_2BITS        (1 << UART_LCR_STOP_SHIFT)  /* 2 Stop Bits */
+
 #define UART_LCR_PEN                 (1 << 3)  /* Bit 3:  Parity Enable */
-#define UART_LCR_PARITY_SHIFT        (3)  /* Bit 3-4:  Parity Enable and Parity Select */
+#define UART_LCR_PARITY_SHIFT        (3)       /* Bit 3-4:  Parity Enable and Parity Select */
+
 #  define UART_LCR_PARITY_NONE       (0 << UART_LCR_PARITY_SHIFT)  /* No Parity */
 #  define UART_LCR_PARITY_ODD        (1 << UART_LCR_PARITY_SHIFT)  /* Odd Parity Bit */
 #  define UART_LCR_PARITY_EVEN       (3 << UART_LCR_PARITY_SHIFT)  /* Even Parity Bit */
+
 #define UART_LCR_BC                  (1 << 6)  /* Bit 6:  Break Control Bit */
 #define UART_LCR_DLAB                (1 << 7)  /* Bit 7:  Divisor Latch Access Enable Bit */
 #define UART_LCR_CONFIG_MODE_A       (0x00000080)
@@ -377,6 +368,7 @@
 /* UART Mode Definition 1 Register */
 
 #define UART_MDR1_MODE_SHIFT         (0)  /* Bits 0-2: Operation Mode Selection */
+
 #  define UART_MDR1_MODE_16X         (0 << UART_MDR1_MODE_SHIFT)  /* UART 16x Mode. */
 #  define UART_MDR1_MODE_SIR         (1 << UART_MDR1_MODE_SHIFT)  /* SIR mode */
 #  define UART_MDR1_MODE_16XAUTO     (2 << UART_MDR1_MODE_SHIFT)  /* UART 16x Auto-Baud */

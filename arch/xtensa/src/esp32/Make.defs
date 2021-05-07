@@ -1,35 +1,20 @@
 ############################################################################
-# arch/xtensa/src/lx6/Make.defs
+# arch/xtensa/src/esp32/Make.defs
 #
-#   Copyright (C) 2016 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name NuttX nor the names of its contributors may be
-#    used to endorse or promote products derived from this software
-#    without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
 #
 ############################################################################
 
@@ -103,7 +88,7 @@ endif
 
 CHIP_CSRCS += esp32_rtc.c
 
-ifeq ($(CONFIG_XTENSA_USE_SEPARATE_IMEM),y)
+ifeq ($(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP),y)
 CHIP_CSRCS += esp32_imm.c
 endif
 
@@ -118,6 +103,14 @@ CHIP_CSRCS += esp32_spi.c
   endif
 endif
 
+# SPIFLASH and SPIRAM need spicache.c
+
+ifeq ($(CONFIG_ESP32_SPIFLASH),y)
+CHIP_CSRCS += esp32_spicache.c
+else ifeq ($(CONFIG_ESP32_SPIRAM),y)
+CHIP_CSRCS += esp32_spicache.c
+endif
+
 ifeq ($(CONFIG_ESP32_SPIFLASH),y)
 CHIP_CSRCS += esp32_spiflash.c
 endif
@@ -126,6 +119,12 @@ ifeq ($(CONFIG_ESP32_SPIRAM),y)
 CHIP_CSRCS += esp32_spiram.c
 CHIP_CSRCS += esp32_psram.c
 CHIP_CSRCS += esp32_himem.c
+endif
+
+ifeq ($(CONFIG_ESP32_EFUSE),y)
+CHIP_CSRCS += esp32_efuse.c
+CHIP_CSRCS += esp32_efuse_table.c
+CHIP_CSRCS += esp32_efuse_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32_EMAC),y)
@@ -154,18 +153,25 @@ CHIP_CSRCS += esp32_tim_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_XTENSA_IMEM_PROCFS),y)
-CHIP_CSRCS += esp32_procfs_imm.c
+ifeq ($(CONFIG_ESP32_ONESHOT),y)
+CHIP_CSRCS += esp32_oneshot.c
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += esp32_oneshot_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_ESP32_FREERUN),y)
+CHIP_CSRCS += esp32_freerun.c
 endif
 
 ifeq ($(CONFIG_ESP32_PARTITION),y)
 CHIP_CSRCS += esp32_partition.c
 endif
 
+ifeq ($(CONFIG_ESP32_WDT),y)
+CHIP_CSRCS += esp32_wdt.c
 ifeq ($(CONFIG_WATCHDOG),y)
-CHIP_CSRCS += esp32_wtd_lowerhalf.c
-ifeq ($(CONFIG_ESP32_WTD),y)
-CHIP_CSRCS += esp32_wtd.c
+CHIP_CSRCS += esp32_wdt_lowerhalf.c
 endif
 endif
 
@@ -178,15 +184,19 @@ ifeq ($(CONFIG_ESP32_RT_TIMER),y)
 CHIP_CSRCS += esp32_rt_timer.c
 endif
 
+ifeq ($(CONFIG_ESP32_AES_ACCELERATOR),y)
+CHIP_CSRCS += esp32_aes.c
+endif
+
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
 WIRELESS_DRV_UNPACK  = esp-wireless-drivers-3rdparty
-WIRELESS_DRV_ID      = 5cb6561
+WIRELESS_DRV_ID      = 2b53111
 WIRELESS_DRV_ZIP     = $(WIRELESS_DRV_ID).zip
 WIRELESS_DRV_URL     = https://github.com/espressif/esp-wireless-drivers-3rdparty/archive
 
 $(WIRELESS_DRV_ZIP):
 	$(Q) echo "Downloading: ESP Wireless Drivers"
-	$(Q) wget $(WIRELESS_DRV_URL)/$(WIRELESS_DRV_ZIP) -P chip/
+	$(Q) curl -L $(WIRELESS_DRV_URL)/$(WIRELESS_DRV_ZIP) -o chip/$(WIRELESS_DRV_ZIP)
 
 chip/$(WIRELESS_DRV_UNPACK): $(WIRELESS_DRV_ZIP)
 	$(Q) echo "Unpacking: ESP Wireless Drivers"
@@ -201,9 +211,10 @@ clean_context::
 	$(call DELDIR, chip/$(WIRELESS_DRV_UNPACK))
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include)
-CHIP_CSRCS += esp32_wlan.c esp32_wifi_adapter.c
+INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)include$(DELIM)esp32)
+CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 
-EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs$(DELIM)esp32
 EXTRA_LIBS += -lcore -lrtc -lnet80211 -lpp -lsmartconfig -lcoexist -lespnow -lphy -lwpa_supplicant
 
 # Due to some Wi-Fi related libraries, the option is need to avoid linking too much

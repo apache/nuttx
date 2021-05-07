@@ -1,35 +1,20 @@
 /****************************************************************************
- * arch/z80/src/ez08/z180_scc.c
+ * arch/z80/src/z180/z180_scc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -197,33 +182,33 @@ static const struct z180_dev_s g_escca_priv =
 
 static uart_dev_t g_escca_port =
 {
-  0,                           /* open_count */
-  false,                       /* xmitwaiting */
-  false,                       /* recvwaiting */
+  0,                             /* open_count */
+  false,                         /* xmitwaiting */
+  false,                         /* recvwaiting */
 #ifdef CONFIG_Z180_ESCCA_SERIAL_CONSOLE
-  true,                        /* isconsole */
+  true,                          /* isconsole */
 #else
-  false,                       /* isconsole */
+  false,                         /* isconsole */
 #endif
-  { 0 },                       /* closesem */
-  { 0 },                       /* xmitsem */
-  { 0 },                       /* recvsem */
+  { 0 },                         /* closesem */
+  { 0 },                         /* xmitsem */
+  { 0 },                         /* recvsem */
   {
-    { 0 },                     /* xmit.sem */
-    0,                         /* xmit.head */
-    0,                         /* xmit.tail */
+    { 0 },                       /* xmit.sem */
+    0,                           /* xmit.head */
+    0,                           /* xmit.tail */
     CONFIG_Z180_ESCCA_TXBUFSIZE, /* xmit.size */
-    g_escca_txbuffer,          /* xmit.buffer */
+    g_escca_txbuffer,            /* xmit.buffer */
   },
   {
-    { 0 },                     /* recv.sem */
-    0,                         /* recv.head */
-    0,                         /* recv.tail */
+    { 0 },                       /* recv.sem */
+    0,                           /* recv.head */
+    0,                           /* recv.tail */
     CONFIG_Z180_ESCCA_RXBUFSIZE, /* recv.size */
-    g_escca_rxbuffer,          /* recv.buffer */
+    g_escca_rxbuffer,            /* recv.buffer */
   },
-  &g_uart_ops,                 /* ops */
-  &g_escca_priv,               /* priv */
+  &g_uart_ops,                   /* ops */
+  &g_escca_priv,                 /* priv */
 };
 #endif
 
@@ -255,26 +240,26 @@ static uart_dev_t g_escca_port =
   { 0 },                       /* xmitsem */
   { 0 },                       /* recvsem */
   {
-    { 0 },                     /* xmit.sem */
-    0,                         /* xmit.head */
-    0,                         /* xmit.tail */
+    { 0 },                       /* xmit.sem */
+    0,                           /* xmit.head */
+    0,                           /* xmit.tail */
     CONFIG_Z180_ESCCA_TXBUFSIZE, /* xmit.size */
-    g_escca_txbuffer,          /* xmit.buffer */
+    g_escca_txbuffer,            /* xmit.buffer */
   },
   {
-    { 0 },                     /* recv.sem */
-    0,                         /* recv.head */
-    0,                         /* recv.tail */
+    { 0 },                       /* recv.sem */
+    0,                           /* recv.head */
+    0,                           /* recv.tail */
     CONFIG_Z180_ESCCA_RXBUFSIZE, /* recv.size */
-    g_escca_rxbuffer,          /* recv.buffer */
+    g_escca_rxbuffer,            /* recv.buffer */
   },
   &g_uart_ops,                 /* ops */
   &g_escca_priv,               /* priv */
 };
 #endif
 
-/* Now, which one with be tty0/console and which tty1? NOTE: SCC and ESCCA/B and
- * mutually exclusive.
+/* Now, which one with be tty0/console and which tty1? NOTE: SCC and ESCCA/B
+ * and mutually exclusive.
  */
 
 #undef CONSOLE_DEV
@@ -404,14 +389,15 @@ static void z180_shutdown(struct uart_dev_s *dev)
  * Name: z180_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -425,8 +411,8 @@ static int z180_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 

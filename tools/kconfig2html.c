@@ -1,35 +1,20 @@
 /****************************************************************************
  * tools/kconfig2html.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -192,8 +177,8 @@ struct menu_s
  * Private Data
  ****************************************************************************/
 
-static char g_line[LINE_SIZE+1];
-static char g_scratch[SCRATCH_SIZE+1];
+static char g_line[LINE_SIZE + 1];
+static char g_scratch[SCRATCH_SIZE + 1];
 static FILE *g_outfile;
 static FILE *g_bodyfile;
 static FILE *g_apndxfile;
@@ -240,7 +225,7 @@ static struct reserved_s g_reserved[] =
   {TOKEN_SOURCE,     "source"},
   {TOKEN_IF,         "if"},
   {TOKEN_ENDIF,      "endif"},
-  {TOKEN_NOTRESERVED, NULL}       /* Terminates list */
+  {TOKEN_NOTRESERVED, NULL}   /* Terminates list */
 };
 
 /****************************************************************************
@@ -384,15 +369,20 @@ static void append_file(const char *filename)
 
 static void show_usage(const char *progname, int exitcode)
 {
-  error("USAGE: %s [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]\n", progname);
+  error("USAGE: "
+        "%s [-d] [-a <apps directory>] {-o <out file>] [<Kconfig root>]\n",
+        progname);
   error("       %s [-h]\n\n", progname);
   error("Where:\n\n");
-  error("\t-a : Select relative path to the apps/ directory. Theis path is relative\n");
+  error("\t-a : Select relative path to the apps/ directory."
+        " Theis path is relative\n");
   error("\t     to the <Kconfig directory>.  Default: ../apps\n");
-  error("\t-o : Send output to <out file>.  Default: Output goes to stdout\n");
+  error("\t-o : Send output to <out file>.  "
+        "Default: Output goes to stdout\n");
   error("\t-d : Enable debug output\n");
   error("\t-h : Prints this message and exits\n");
-  error("\t<Kconfig root> is the directory containing the root Kconfig file.\n");
+  error("\t<Kconfig root> "
+        "is the directory containing the root Kconfig file.\n");
   error("\t     Default <Kconfig directory>: .\n");
   exit(exitcode);
 }
@@ -426,11 +416,11 @@ static char *dequote(char *ptr)
   /* Check if there is a trailing quote */
 
   len = strlen(ptr);
-  if (ptr[len-1] == '"')
+  if (ptr[len - 1] == '"')
     {
       /* Yes... replace it with a terminator */
 
-      ptr[len-1] = '\0';
+      ptr[len - 1] = '\0';
       len--;
     }
 
@@ -563,8 +553,8 @@ static char *htmlize_text(const char *src)
 
 static char *htmlize_expression(const char *src)
 {
-  char varname[VAR_SIZE+1];
-  char htmlvar[HTML_VAR_SIZE+1];
+  char varname[VAR_SIZE + 1];
+  char htmlvar[HTML_VAR_SIZE + 1];
   char *dest = g_scratch;
   char ch = '\0';
   char lastc;
@@ -644,7 +634,8 @@ static char *htmlize_expression(const char *src)
 
           /* HTML-ize the name into our bigger, local scratch buffer */
 
-          snprintf(htmlvar, HTML_VAR_SIZE, "<a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
+          snprintf(htmlvar, HTML_VAR_SIZE,
+                   "<a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
                    varname, varname);
 
           /* Then transfer the string into the scratch buffer */
@@ -694,7 +685,7 @@ static char *read_line(FILE *stream)
 
   /* Loop to handle continuation lines */
 
-  for (;;)
+  for (; ; )
     {
       /* How long is the line so far? */
 
@@ -702,7 +693,7 @@ static char *read_line(FILE *stream)
 
       /* Remove any newline character at the end of the buffer */
 
-      if (g_line[len-1] == '\n')
+      if (g_line[len - 1] == '\n')
         {
           len--;
           g_line[len] = '\0';
@@ -713,7 +704,7 @@ static char *read_line(FILE *stream)
        * a line continuation... Don't do that!
        */
 
-      if (g_line[len-1] != '\\')
+      if (g_line[len - 1] != '\\')
         {
           /* No.. return now */
 
@@ -723,7 +714,7 @@ static char *read_line(FILE *stream)
 
       /* Yes.. Replace the backslash with a space delimiter */
 
-      g_line[len-1] = ' ';
+      g_line[len - 1] = ' ';
 
       /* Read the next line into the scratch buffer */
 
@@ -756,11 +747,12 @@ static char *kconfig_line(FILE *stream)
 {
   char *ptr;
 
-  for (;;)
+  for (; ; )
     {
       /* Read the next line from the Kconfig file */
-      /* Is there already valid data in the line buffer?  This can happen while parsing
-       * help text and we read one line too far.
+
+      /* Is there already valid data in the line buffer?  This can happen
+       * while parsing help text and we read one line too far.
        */
 
       if (!g_preread)
@@ -1219,8 +1211,8 @@ static inline void process_help(FILE *stream, output_t outfunc)
   newpara = true;
   preformatted = false;
 
-  for (;;)
-   {
+  for (; ; )
+    {
       /* Read the next line of comment text */
 
       if (!read_line(stream))
@@ -1409,7 +1401,7 @@ static void process_default(FILE *stream, struct default_s *defp)
       /* The rest of the line is the dependency */
 
       defp->d_item[ndx].d_dependency = strdup(g_lnptr);
-   }
+    }
 
   /* Update the number of defaults we have encountered in this block */
 
@@ -1477,7 +1469,8 @@ static void print_default(struct default_s *defp, output_t outfunc)
                 {
                   outfunc("        <p>\n");
                   outfunc("          <i>Dependency:</i>\n");
-                  outfunc("          %s\n", htmlize_expression(item->d_dependency));
+                  outfunc("          %s\n",
+                          htmlize_expression(item->d_dependency));
                   outfunc("        </p>\n");
                 }
             }
@@ -1630,7 +1623,8 @@ static inline char *process_config(FILE *stream, const char *varname,
                 {
                   /* Save the type of the configuration variable */
 
-                  config.c_type = tokid == TOKEN_BOOL ? VALUE_BOOL : VALUE_TRISTATE;
+                  config.c_type = tokid ==
+                                  TOKEN_BOOL ? VALUE_BOOL : VALUE_TRISTATE;
 
                   /* Get the description following the type */
 
@@ -1869,7 +1863,9 @@ static inline char *process_config(FILE *stream, const char *varname,
       outfunc("</li>\n");
     }
 
-  /* Print the default value of the configuration variable auto-selected by this setting */
+  /* Print the default value of the configuration variable auto-selected by
+   * this setting
+   */
 
   if (config.c_select.s_nvar > 0)
     {
@@ -1879,7 +1875,8 @@ static inline char *process_config(FILE *stream, const char *varname,
       for (i = 1; i < config.c_select.s_nvar; i++)
         {
           outfunc(", <a href=\"#CONFIG_%s\"><code>CONFIG_%s</code></a>",
-                  config.c_select.s_varname[i], config.c_select.s_varname[i]);
+                  config.c_select.s_varname[i],
+                  config.c_select.s_varname[i]);
         }
 
       outfunc("</li>\n");
@@ -2061,10 +2058,10 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir,
    * Kconfig.
    */
 
-   body("  <li><i>Kconfig file</i>: <code>%s/%s</code>\n</li>",
-        kconfigdir, kconfigname);
+  body("  <li><i>Kconfig file</i>: <code>%s/%s</code>\n</li>",
+       kconfigdir, kconfigname);
 
-   /* Print any help text */
+  /* Print any help text */
 
   if (help)
     {
@@ -2072,12 +2069,12 @@ static inline char *process_choice(FILE *stream, const char *kconfigdir,
       token = NULL;
     }
 
-   body("</ul>\n");
+  body("</ul>\n");
 
-   /* Then show the choice options */
+  /* Then show the choice options */
 
-   body("<p><b>Choice Options:</b></p>");
-   body("<ul>\n");
+  body("<p><b>Choice Options:</b></p>");
+  body("<ul>\n");
 
   /* Free allocated memory */
 
@@ -2243,7 +2240,8 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir,
  *
  ****************************************************************************/
 
-static void process_kconfigfile(const char *kconfigdir, const char *kconfigname); /* Forward reference */
+static void process_kconfigfile(const char *kconfigdir,
+                                const char *kconfigname); /* Forward reference */
 static char *parse_kconfigfile(FILE *stream, const char *kconfigdir,
                                const char *kconfigname)
 {
@@ -2319,7 +2317,9 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir,
                       free(configname);
                     }
 
-                  /* Set the token string to NULL to indicate that we need to read the next line */
+                  /* Set the token string to NULL to indicate that we need to read
+                   * the next line
+                   */
 
                   token = NULL;
                 }
@@ -2650,7 +2650,9 @@ int main(int argc, char **argv, char **envp)
 
   g_menu_number++;
 
-  /* Increment the paragraph level again:  Everything is included within the main menu. */
+  /* Increment the paragraph level again:
+   * Everything is included within the main menu.
+   */
 
   incr_level();
 
@@ -2723,7 +2725,7 @@ int main(int argc, char **argv, char **envp)
   output("</body>\n");
   output("</html>\n");
 
-  /* Close the output file (if any) and the temporary file*/
+  /* Close the output file (if any) and the temporary file */
 
   if (outfile)
     {

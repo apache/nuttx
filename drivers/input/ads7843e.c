@@ -6,16 +6,6 @@
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
- * References:
- *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
- *    Instruments, SBAS090B, September 2000, Revised May 2002"
- *
- * See also:
- *   "Low Voltage I/O Touch Screen Controller, TSC2046," Burr-Brown Products
- *    from Texas Instruments, SBAS265F, October 2002, Revised August 2007.
- *
- *   "XPT2046 Data Sheet," Shenzhen XPTek Technology Co., Ltd, 2007
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -44,6 +34,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   "Touch Screen Controller, ADS7843," Burr-Brown Products from Texas
+ *    Instruments, SBAS090B, September 2000, Revised May 2002"
+ *
+ * See also:
+ *   "Low Voltage I/O Touch Screen Controller, TSC2046," Burr-Brown Products
+ *    from Texas Instruments, SBAS265F, October 2002, Revised August 2007.
+ *
+ *   "XPT2046 Data Sheet," Shenzhen XPTek Technology Co., Ltd, 2007
+ */
 
 /****************************************************************************
  * Included Files

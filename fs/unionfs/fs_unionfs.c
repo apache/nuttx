@@ -1261,7 +1261,7 @@ static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct unionfs_mountpt_s *um;
   FAR const struct mountpt_operations *ops;
 
-  finfo("filep=%p buf=%p\n");
+  finfo("filep=%p buf=%p\n", filep, buf);
 
   /* Recover the open file data from the struct file instance */
 
@@ -2309,7 +2309,7 @@ static int unionfs_rename(FAR struct inode *mountpt,
   int ret = -ENOENT;
   int tmp;
 
-  finfo("oldrelpath: %s newrelpath\n", oldrelpath, newrelpath);
+  finfo("oldrelpath: %s newrelpath: %s\n", oldrelpath, newrelpath);
 
   /* Recover the union file system data from the struct inode instance */
 

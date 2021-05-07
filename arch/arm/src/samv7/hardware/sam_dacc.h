@@ -1,56 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_dacc.h
- * Digital-to-Analog Converter Controller (DACC) for the SAMV7
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_DACC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_DACC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* DACC register offsets *****************************************************************/
+/* DACC register offsets ****************************************************/
 
 #define SAM_DACC_CR_OFFSET         0x0000 /* Control Register */
 #define SAM_DACC_MR_OFFSET         0x0004 /* Mode Register */
@@ -68,7 +52,7 @@
 #define SAM_DACC_WPMR_OFFSET       0x00e4 /* Write Protect Mode register */
 #define SAM_DACC_WPSR_OFFSET       0x00e8 /* Write Protect Status register */
 
-/* DACC register addresses **************************************************************/
+/* DACC register addresses **************************************************/
 
 #define SAM_DACC_CR                (SAM_DACC_BASE+SAM_DACC_CR_OFFSET)
 #define SAM_DACC_MR                (SAM_DACC_BASE+SAM_DACC_MR_OFFSET)
@@ -86,7 +70,7 @@
 #define SAM_DACC_WPMR              (SAM_DACC_BASE+SAM_DACC_WPMR_OFFSET)
 #define SAM_DACC_WPSR              (SAM_DACC_BASE+SAM_DACC_WPSR_OFFSET)
 
-/* DACC register bit definitions ********************************************************/
+/* DACC register bit definitions ********************************************/
 
 /* Control Register */
 
@@ -94,16 +78,16 @@
 
 /* Mode Register */
 
-#define DACC_MR_MAXS0               (1 << 0) /* Max Speed Mode for Channel 0 */
-#  define DACC_MR_MAXS0_TRIG_EVENT  (0 << 0) /* External trigger mode or Free-running mode enabled */
-#  define DACC_MR_MAXS0_MAXIMUM     (1 << 0) /* Max speed mode enabled */
-#define DACC_MR_MAXS1               (1 << 1) /* Max Speed Mode for Channel 1 */
-#  define DACC_MR_MAXS1_TRIG_EVENT  (0 << 1) /* External trigger mode or Free-running mode enabled */
-#  define DACC_MR_MAXS1_MAXIMUM     (1 << 1) /* Max speed mode enabled */
-#define DACC_MR_WORD                (1 << 4) /* Word Transfer Mode */
-#  define DACC_MR_WORD_DISABLED     (0 << 4) /* One data to convert is written to the FIFO per access to DACC */
-#  define DACC_MR_WORD_ENABLED      (1 << 4) /* Two data to convert are written to the FIFO per access to DACC */
-#define DACC_MR_ZERO                (1 << 5) /* Must always be written to 0 */
+#define DACC_MR_MAXS0               (1 << 0)  /* Max Speed Mode for Channel 0 */
+#  define DACC_MR_MAXS0_TRIG_EVENT  (0 << 0)  /* External trigger mode or Free-running mode enabled */
+#  define DACC_MR_MAXS0_MAXIMUM     (1 << 0)  /* Max speed mode enabled */
+#define DACC_MR_MAXS1               (1 << 1)  /* Max Speed Mode for Channel 1 */
+#  define DACC_MR_MAXS1_TRIG_EVENT  (0 << 1)  /* External trigger mode or Free-running mode enabled */
+#  define DACC_MR_MAXS1_MAXIMUM     (1 << 1)  /* Max speed mode enabled */
+#define DACC_MR_WORD                (1 << 4)  /* Word Transfer Mode */
+#  define DACC_MR_WORD_DISABLED     (0 << 4)  /* One data to convert is written to the FIFO per access to DACC */
+#  define DACC_MR_WORD_ENABLED      (1 << 4)  /* Two data to convert are written to the FIFO per access to DACC */
+#define DACC_MR_ZERO                (1 << 5)  /* Must always be written to 0 */
 #define DACC_MR_DIFF                (1 << 23) /* Differential Mode */
 #  define DACC_MR_DIFF_DISABLED     (0 << 23) /* DAC0 and DAC1 are single-ended outputs */
 #  define DACC_MR_DIFF_ENABLED      (1 << 23) /* DACP and DACN are differential outputs. The differential level is configured by the channel 0 value. */
@@ -192,12 +176,14 @@
 #define DACC_CDR_DATA1_MASK         (0xffffu << DACC_CDR_DATA1_SHIFT) /* Data to Convert for channel 1 */
 #define DACC_CDR_DATA1(value)       ((DACC_CDR_DATA1_MASK & ((value) << DACC_CDR_DATA1_SHIFT)))
 
-/* Interrupt Enable, Interrupt Disable, Interrupt Mask, and Interrupt Status Register */
+/* Interrupt Enable, Interrupt Disable,
+ * Interrupt Mask, and Interrupt Status Register
+ */
 
-#define DACC_INT_TXRDY0             (1 << 0)  /* Transmit Ready Interrupt of channel 0 */
-#define DACC_INT_TXRDY1             (1 << 1)  /* Transmit Ready Interrupt of channel 1 */
-#define DACC_INT_EOC0               (1 << 4)  /* End of Conversion Interrupt of channel 0 */
-#define DACC_INT_EOC1               (1 << 5)  /* End of Conversion Interrupt of channel 1 */
+#define DACC_INT_TXRDY0             (1 << 0)       /* Transmit Ready Interrupt of channel 0 */
+#define DACC_INT_TXRDY1             (1 << 1)       /* Transmit Ready Interrupt of channel 1 */
+#define DACC_INT_EOC0               (1 << 4)       /* End of Conversion Interrupt of channel 0 */
+#define DACC_INT_EOC1               (1 << 5)       /* End of Conversion Interrupt of channel 1 */
 #define DACC_INT_ALL                (0xffffffffu)  /* All interrupts */
 
 /* Analog Current Register */

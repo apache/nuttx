@@ -1,10 +1,11 @@
-/************************************************************************************
- * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_ioc.h
+/****************************************************************************
+ * arch/arm/src/tiva/hardware/cc13x0/cc13x0_ioc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a compatible
+ * BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,25 +37,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2IOC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2IOC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/chip/chip.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define TIVA_NDIO                  32      /* DIO0-31 */
 
-/* IOC register offsets ************************************************************/
+/* IOC register offsets *****************************************************/
 
 #define TIVA_IOC_IOCFG_OFFSET(n)   ((n) << 2)
 #  define TIVA_IOC_IOCFG0_OFFSET   0x0000  /* Configuration of DIO0 */
@@ -90,7 +91,7 @@
 #  define TIVA_IOC_IOCFG30_OFFSET  0x0078  /* Configuration of DIO30 */
 #  define TIVA_IOC_IOCFG31_OFFSET  0x007c  /* Configuration of DIO31 */
 
-/* IOC register addresses **********************************************************/
+/* IOC register addresses ***************************************************/
 
 #define TIVA_IOC_IOCFG(n)          (TIVA_IOC_BASE + TIVA_IOC_IOCFG_OFFSET(n))
 #  define TIVA_IOC_IOCFG0          (TIVA_IOC_BASE + TIVA_IOC_IOCFG0_OFFSET)
@@ -126,36 +127,41 @@
 #  define TIVA_IOC_IOCFG30         (TIVA_IOC_BASE + TIVA_IOC_IOCFG30_OFFSET)
 #  define TIVA_IOC_IOCFG31         (TIVA_IOC_BASE + TIVA_IOC_IOCFG31_OFFSET)
 
-/* IOC register bit settings *******************************************************/
+/* IOC register bit settings ************************************************/
 
 /* Common bitfield for all DIO configuration registers */
 
 #define IOC_IOCFG_PORTID_SHIFT     (0)       /* Bits 0-5:  Selects DIO usage */
 #define IOC_IOCFG_PORTID_MASK      (0x3f << IOC_IOCFG_PORTID_SHIFT)
 #  define IOC_IOCFG_PORTID(n)      ((uint32_t)(n) << IOC_IOCFG_PORTID_SHIFT) /* See PORT ID definitions */
+
 #define IOC_IOCFG_IOSTR_SHIFT      (8)       /* Bits 8-9: I/O drive strength */
 #define IOC_IOCFG_IOSTR_MASK       (3 << IOC_IOCFG_IOSTR_SHIFT)
 #  define IOC_IOCFG_IOSTR_AUTO     (0 << IOC_IOCFG_IOSTR_SHIFT) /* Automatic drive strength */
 #  define IOC_IOCFG_IOSTR_MIN      (1 << IOC_IOCFG_IOSTR_SHIFT) /* Minimum drive strength */
 #  define IOC_IOCFG_IOSTR_MED      (2 << IOC_IOCFG_IOSTR_SHIFT) /* Medium drive strength */
 #  define IOC_IOCFG_IOSTR_MAX      (3 << IOC_IOCFG_IOSTR_SHIFT) /* Maximum drive strength */
+
 #define IOC_IOCFG_IOCURR_SHIFT     (10)      /* Bits 10-11: I/O current mode */
 #define IOC_IOCFG_IOCURR_MASK      (3 << IOC_IOCFG_IOCURR_SHIFT)
 #  define IOC_IOCFG_IOCURR_2MA     (0 << IOC_IOCFG_IOCURR_SHIFT) /* Extended-Current (EC) mode */
 #  define IOC_IOCFG_IOCURR_4MA     (1 << IOC_IOCFG_IOCURR_SHIFT) /* High-Current (HC) mode */
 #  define IOC_IOCFG_IOCURR_8MA     (2 << IOC_IOCFG_IOCURR_SHIFT) /* Low-Current (LC) mode */
+
 #define IOC_IOCFG_SLEW_RED         (1 << 12) /* Bit 12:  Reduces output slew rate */
 #define IOC_IOCFG_PULLCTL_SHIFT    (13)      /* Bits 13-14: Pull Control */
 #define IOC_IOCFG_PULLCTL_MASK     (3 << IOC_IOCFG_PULLCTL_SHIFT)
 #  define IOC_IOCFG_PULLCTL_DIS    (3 << IOC_IOCFG_PULLCTL_SHIFT) /* No pull */
 #  define IOC_IOCFG_PULLCTL_DWN    (1 << IOC_IOCFG_PULLCTL_SHIFT) /* Pull down */
 #  define IOC_IOCFG_PULLCTL_UP     (2 << IOC_IOCFG_PULLCTL_SHIFT) /* Pull up */
+
 #define IOC_IOCFG_EDGEDET_SHIFT    (16)      /* Bits 16-17: Enable edge events generation */
 #define IOC_IOCFG_EDGEDET_MASK     (3 << IOC_IOCFG_EDGEDET_SHIFT)
 #  define IOC_IOCFG_EDGEDET_NONE   (0 << IOC_IOCFG_EDGEDET_SHIFT) /* No edge detection */
 #  define IOC_IOCFG_EDGEDET_NEG    (1 << IOC_IOCFG_EDGEDET_SHIFT) /* Negative edge detection */
 #  define IOC_IOCFG_EDGEDET_POS    (2 << IOC_IOCFG_EDGEDET_SHIFT) /* Positive edge detection */
 #  define IOC_IOCFG_EDGEDET_BOTH   (3 << IOC_IOCFG_EDGEDET_SHIFT) /* Both edge detection */
+
 #define IOC_IOCFG_EDGE_IRQEN       (1 << 18) /* Bit 18: Enable interrupt generation */
 #define IOC_IOCFG_IOMODE_SHIFT     (24)      /* Bits 24-26:  I/O Mode */
 #define IOC_IOCFG_IOMODE_MASK      (7 << IOC_IOCFG_IOMODE_SHIFT)
@@ -165,12 +171,14 @@
 #  define IOC_IOCFG_IOMODE_OPENDRINV  (5 << IOC_IOCFG_IOMODE_SHIFT) /* Open drain, inverted I/O */
 #  define IOC_IOCFG_IOMODE_OPENSRC    (6 << IOC_IOCFG_IOMODE_SHIFT) /* Open source */
 #  define IOC_IOCFG_IOMODE_OPENSRCINV (7 << IOC_IOCFG_IOMODE_SHIFT) /* Open source, inverted I/O */
+
 #define IOC_IOCFG_WUCFG_SHIFT      (27)      /* Bits 27-28:  Wakeup Configuration */
 #define IOC_IOCFG_WUCFG_MASK       (3 << IOC_IOCFG_WUCFG_SHIFT)
 #  define IOC_IOCFG_WUCFG_NONE     (0 << IOC_IOCFG_WUCFG_SHIFT) /* 0, 1: Wakeup disabled */
 #  define IOC_IOCFG_WUCFG_ENABLE   (2 << IOC_IOCFG_WUCFG_SHIFT) /* 2, 3: Wakeup enabled */
 #  define IOC_IOCFG_WUCFG_WAKEUPL  (2 << IOC_IOCFG_WUCFG_SHIFT) /* 2: Wakeup on transition low */
 #  define IOC_IOCFG_WUCFG_WEKUPH   (3 << IOC_IOCFG_WUCFG_SHIFT) /* 3: Wakeup on transition high */
+
 #define IOC_IOCFG_IE               (1 << 29) /* Bit 29: Input enable */
 #define IOC_IOCFG_HYSTEN           (1 << 30) /* Bit 30: Input hysteresis enable */
 
@@ -219,16 +227,16 @@
 #define IOC_IOCFG_PORTID_RFC_SMI_CLOUT 0x37
 #define IOC_IOCFG_PORTID_RFC_SMI_CLIN  0x38
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2IOC_H */

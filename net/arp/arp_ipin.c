@@ -70,7 +70,8 @@
  *   The arp_ipin() function should be called by Ethernet device drivers
  *   whenever an IP packet arrives from the network.  The function will
  *   check if the address is in the ARP cache, and if so the ARP cache entry
- *   will be refreshed. If no ARP cache entry was found, a new one is created.
+ *   will be refreshed. If no ARP cache entry was found, a new one is
+ *   created.
  *
  *   This function expects that an IP packet with an Ethernet header is
  *   present in the d_buf buffer and that the length of the packet is in the

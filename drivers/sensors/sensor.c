@@ -284,7 +284,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
   else
     {
       /* We must make sure that when the semaphore is equal to 1, there must
-       * be events avaliable in the buffer, so we use a while statement to
+       * be events available in the buffer, so we use a while statement to
        * synchronize this case that other read operations consume events
        * that have just entered the buffer.
        */
@@ -316,7 +316,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
       ret = circbuf_read(&upper->buffer, buffer, len);
 
       /* Release some buffer space when current mode isn't batch mode
-       * and last mode is batch mode, and the number of bytes avaliable
+       * and last mode is batch mode, and the number of bytes available
        * in buffer is less than the number of bytes origin.
        */
 
@@ -342,7 +342,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR unsigned int *val = (unsigned int *)(uintptr_t)arg;
   int ret;
 
-  sninfo("cmd=%x arg=%08x\n", cmd, arg);
+  sninfo("cmd=%x arg=%08lx\n", cmd, arg);
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)

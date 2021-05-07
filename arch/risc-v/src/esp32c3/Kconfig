@@ -1,0 +1,486 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESP32C3
+
+comment "ESP32-C3 Configuration Options"
+
+choice
+	prompt "ESP32-C3 Chip Selection"
+	default ARCH_CHIP_ESP32C3WROOM02
+	depends on ARCH_CHIP_ESP32C3
+
+config ARCH_CHIP_ESP32C3X
+	bool "ESP32-C3"
+	select ESP32C3_ESP32C3XXX
+	---help---
+		ESP32 chip with a single RISC-V IMC core, no embedded Flash memory
+
+config ARCH_CHIP_ESP32C3FX4
+	bool "ESP32-C3Fx4"
+	select ESP32C3_ESP32C3XXX
+	select ESP32C3_FLASH_4M
+	---help---
+		ESP32 chip with a single RISC-V IMC core, 4 MB of in-package Flash memory
+
+config ARCH_CHIP_ESP32C3MINI1
+	bool "ESP32-C3-MINI-1"
+	select ESP32C3_ESP32C3XXX
+	select ESP32C3_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-C3Fx4 chip
+
+config ARCH_CHIP_ESP32C3WROOM02
+	bool "ESP32-C3-WROOM-02"
+	select ESP32C3_ESP32C3XXX
+	select ESP32C3_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-C3 chip, 4 MB of Flash memory
+
+endchoice # ESP32-C3 Chip Selection
+
+comment "Selected ESP32-C3 chip without embedded Flash, an external Flash memory is required."
+	depends on ARCH_CHIP_ESP32C3X
+
+config ESP32C3_SINGLE_CPU
+	bool
+	default n
+
+config ESP32C3_DUAL_CPU
+	bool
+	default n
+
+config ESP32C3_ESP32C3XXX
+	bool
+	default n
+	select ESP32C3_SINGLE_CPU
+	select ARCH_HAVE_I2CRESET
+
+config ESP32C3_FLASH_2M
+	bool
+	default n
+
+config ESP32C3_FLASH_4M
+	bool
+	default n
+
+config ESP32C3_FLASH_8M
+	bool
+	default n
+
+config ESP32C3_FLASH_16M
+	bool
+	default n
+
+config ESP32C3_FLASH_DETECT
+	bool "Auto-detect FLASH size (to be used with master esptool)"
+	default n
+	help
+		Auto detect flash size when flashing.
+		Current released version of esptool doesn't support auto-detecting flash size.
+		Use latest master from https://github.com/espressif/esptool.
+
+choice ESP32C3_FLASH_MODE
+	prompt "SPI FLASH mode"
+	default ESP32C3_FLASH_MODE_DIO
+	help
+		These options control how many I/O pins are used for communication with the attached SPI flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32C3_FLASH_MODE_DIO
+		bool "Dual IO (DIO)"
+
+	config ESP32C3_FLASH_MODE_DOUT
+		bool "Dual Output (DOUT)"
+
+	config ESP32C3_FLASH_MODE_QIO
+		bool "Quad IO (QIO)"
+
+	config ESP32C3_FLASH_MODE_QOUT
+		bool "Quad Output (QOUT)"
+
+endchoice # ESP32C3_FLASH_MODE
+
+choice ESP32C3_FLASH_FREQ
+	prompt "SPI FLASH frequency"
+	default ESP32C3_FLASH_FREQ_40M
+	help
+		SPI FLASH frequency
+		
+	config ESP32C3_FLASH_FREQ_80M
+		bool "80 MHz"
+
+	config ESP32C3_FLASH_FREQ_40M
+		bool "40 MHz"
+
+	config ESP32C3_FLASH_FREQ_26M
+		bool "26 MHz"
+
+	config ESP32C3_FLASH_FREQ_20M
+		bool "20 MHz"
+
+endchoice # ESP32C3_FLASH_FREQ
+
+choice ESP32C3_CPU_FREQ
+	prompt "CPU frequency"
+	default ESP32C3_CPU_FREQ_160
+	help
+		CPU frequency to be set on application startup.
+
+config ESP32C3_CPU_FREQ_40
+	bool "40 MHz"
+	help
+		Set the CPU to 40 MHz.  This frequency is obtained from the XTAL.
+
+config ESP32C3_CPU_FREQ_80
+	bool "80 MHz"
+	help
+		Set the CPU to 80 MHz.  This frequency is obtained from the 480 MHz PLL.
+
+config ESP32C3_CPU_FREQ_160
+	bool "160 MHz"
+	help
+		Set the CPU to 160 MHz.  This frequency is obtained from the 480 MHz PLL.
+
+endchoice # CPU frequency
+
+config ESP32C3_CPU_FREQ_MHZ
+	int
+	default 40 if ESP32C3_CPU_FREQ_40
+	default 80 if ESP32C3_CPU_FREQ_80
+	default 160 if ESP32C3_CPU_FREQ_160
+
+config ESP32C3_RT_TIMER
+	bool "Real-time Timer"
+	default n
+
+config ESP32C3_DISABLE_STDC_ATOMIC
+	bool "Disable standard C atomic"
+	default n
+
+menu "ESP32-C3 Peripheral Support"
+
+config ESP32C3_UART
+	bool
+	default n
+
+config ESP32C3_I2C
+	bool
+	default n
+
+config ESP32C3_TIMER
+	bool
+	default n
+
+config ESP32C3_WDT
+	bool
+	default n
+
+config ESP32C3_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+config ESP32C3_UART0
+	bool "UART0"
+	default y
+	select ESP32C3_UART
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32C3_UART1
+	bool "UART1"
+	default n
+	select ESP32C3_UART
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32C3_I2C0
+	bool "I2C 0"
+	default n
+	select ESP32C3_I2C
+
+config ESP32C3_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		ESP32-C3 supports an RNG that passed on Dieharder test suite.
+
+config ESP32C3_TIMER0
+	bool "54-bit Timer 0 (Group 0 Timer 0)"
+	default n
+	select ESP32C3_TIMER
+	---help---
+		Enables Timer 0
+
+config ESP32C3_TIMER1
+	bool "54-bit Timer 0 (Group 1 Timer 0)"
+	default n
+	select ESP32C3_TIMER
+	---help---
+		Enables Timer 1
+
+config ESP32C3_SPIFLASH
+	bool "SPI Flash"
+	default n
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+
+config ESP32C3_MWDT0
+	bool "Main System Watchdog Timer (Group 0)"
+	default n
+	select ESP32C3_WDT
+	---help---
+		Includes MWDT0. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32C3_MWDT1
+	bool "Main System Watchdog Timer (Group 1)"
+	default n
+	select ESP32C3_WDT
+	---help---
+		Includes MWDT1. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32C3_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESP32C3_WDT
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
+
+config ESP32C3_WIRELESS
+	bool "Wireless"
+	default n
+	select NET
+	select ARCH_PHY_INTERRUPT
+	select ESP32C3_RT_TIMER
+	select ESP32C3_TIMER0
+	---help---
+		Enable Wireless support
+
+endmenu # ESP32-C3 Peripheral Support
+
+menu "I2C Configuration"
+	depends on ESP32C3_I2C
+
+if ESP32C3_I2C0
+
+config ESP32C3_I2C0_SCLPIN
+	int "I2C0 SCL Pin"
+	default 6
+	range 0 21
+
+config ESP32C3_I2C0_SDAPIN
+	int "I2C0 SDA Pin"
+	default 5
+	range 0 21
+
+endif # ESP32C3_I2C0
+
+endmenu # I2C configuration
+
+menu "UART configuration"
+	depends on ESP32C3_UART
+
+if ESP32C3_UART0
+
+config ESP32C3_UART0_TXPIN
+	int "UART0 TX Pin"
+	default 21
+
+config ESP32C3_UART0_RXPIN
+	int "UART0 RX Pin"
+	default 20
+
+endif # ESP32C3_UART0
+
+if ESP32C3_UART1
+
+config ESP32C3_UART1_TXPIN
+	int "UART1 TX Pin"
+	default 6
+
+config ESP32C3_UART1_RXPIN
+	int "UART1 RX Pin"
+	default 7
+
+endif # ESP32C3_UART1
+
+config ESP32C3_PARTITION
+	bool "ESP32-C3 Partition"
+	default n
+	select ESP32C3_SPIFLASH
+	---help---
+		Decode partition file and initialize partition as MTD.
+
+endmenu
+
+menu "Real-Time Timer"
+	depends on ESP32C3_RT_TIMER
+
+config ESP32C3_RT_TIMER_TASK_NAME
+	string "Timer task name"
+	default "rt_timer"
+
+config ESP32C3_RT_TIMER_TASK_PRIORITY
+	int "Timer task priority"
+	default 223 # Lower than high priority workqueue
+
+config ESP32C3_RT_TIMER_TASK_STACK_SIZE
+	int "Timer task stack size"
+	default 2048
+
+endmenu # Real-Time Timer
+
+if ESP32C3_TIMER
+menu "Timer/counter Configuration"
+
+config ESP32C3_ONESHOT
+	bool "One-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+endmenu # Timer/counter Configuration
+endif # ESP32C3_TIMER
+
+menu "Wi-Fi configuration"
+	depends on ESP32C3_WIRELESS
+
+choice
+	prompt "ESP32-C3 Wi-Fi mode"
+	default ESP32C3_WIFI_STATION
+
+config ESP32C3_WIFI_STATION
+	bool "Station mode"
+
+config ESP32C3_WIFI_SOFTAP
+	bool "SoftAP mode"
+
+config ESP32C3_WIFI_STATION_SOFTAP_COEXISTENCE
+	bool "Station + SoftAP coexistence"
+
+endchoice # ESP32-C3 Wi-Fi mode
+
+config ESP32C3_WIFI_STATIC_RXBUF_NUM
+	int "Wi-Fi static RX buffer number"
+	default 10
+
+config ESP32C3_WIFI_DYNAMIC_RXBUF_NUM
+	int "Wi-Fi dynamic RX buffer number"
+	default 32
+
+config ESP32C3_WIFI_DYNAMIC_TXBUF_NUM
+	int "Wi-Fi dynamic TX buffer number"
+	default 32
+
+config ESP32C3_WIFI_TX_AMPDU
+	bool "Wi-Fi TX AMPDU"
+	default y
+
+config ESP32C3_WIFI_RX_AMPDU
+	bool "Wi-Fi RX AMPDU"
+	default y
+
+config ESP32C3_WIFI_RXBA_AMPDU_WZ
+	int "Wi-Fi RX BA AMPDU windown size"
+	default 6
+
+config ESP32C3_WLAN_PKTBUF_NUM
+	int "WLAN netcard packet buffer number per netcard"
+	default 16
+
+config ESP32C3_WIFI_CONNECT_TIMEOUT
+	int "Connect timeout by second"
+	default 10
+	help
+		Max waiting time of connecting to AP.
+
+config ESP32C3_WIFI_SCAN_RESULT_SIZE
+	int "Scan result buffer"
+	default 4096
+	help
+		Maximum scan result buffer size.
+
+config ESP32C3_WIFI_SAVE_PARAM
+	bool "Save Wi-Fi Parameters"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	help
+		If you enable this option, Wi-Fi adapter parameters will be saved
+		into the file system instead of computing them each time.
+
+		These parameters mainly contains:
+		  - SSID
+		  - Password
+		  - BSSID
+		  - PMK(compute when connecting)
+		  - Author mode
+		  - MAC address
+		  - Wi-Fi hardware configuration parameters
+
+config ESP32C3_WIFI_FS_MOUNTPT
+	string "Save Wi-Fi Parameters"
+	default "/mnt/esp/wifi"
+	depends on ESP32C3_WIFI_SAVE_PARAM
+	help
+		Mount point of Wi-Fi storage file system.
+
+config ESP32C3_WIFI_STA_DISCONNECT_PM
+	bool "Power Management for station when disconnected"
+	default n
+	---help---
+		Select this option to enable power management for station when disconnected.
+		Chip will do modem-sleep when RF module is not in use anymore.
+
+endmenu # ESP32C3_WIRELESS
+
+menu "SPI Flash configuration"
+	depends on ESP32C3_SPIFLASH
+
+config ESP32C3_MTD_OFFSET
+	hex "MTD base address in SPI Flash"
+	default 0x180000
+	help
+		MTD base address in SPI Flash.
+
+config ESP32C3_MTD_SIZE
+	hex "MTD size in SPI Flash"
+	default 0x100000
+	help
+		MTD size in SPI Flash.
+
+config ESP32C3_SPIFLASH_DEBUG
+	bool "Debug SPI Flash"
+	default n
+	depends on DEBUG_FS_INFO
+	help
+		If this option is enabled, SPI Flash driver read and write functions
+		will output input parameters and return values (if applicable).
+
+endmenu # ESP32C3_SPIFLASH
+
+menu "Partition Configuration"
+        depends on ESP32C3_PARTITION
+
+config ESP32C3_PARTITION_OFFSET
+        hex "Partition offset"
+        default "0x8000"
+
+config ESP32C3_PARTITION_MOUNT
+        string "Partition mount point"
+        default "/dev/esp/partition/"
+
+endmenu # ESP32C3_PARTITION
+
+endif # ARCH_CHIP_ESP32C3

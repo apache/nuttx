@@ -1,57 +1,42 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_sdmmc.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SDMMC_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SDMMC_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
 #define LPC43_TXFIFO_DEPTH               32
 #define LPC43_TXFIFO_WIDTH               4
 #define LPC43_RXFIFO_DEPTH               32
 #define LPC43_RXFIFO_WIDTH               4
 
-/* MCI register offsets (with respect to the MCI base) ******************************************/
+/* MCI register offsets (with respect to the MCI base) **********************/
 
 #define LPC43_SDMMC_CTRL_OFFSET          0x0000 /* Control register */
 #define LPC43_SDMMC_PWREN_OFFSET         0x0004 /* Power Enable Register */
@@ -91,7 +76,7 @@
                                                 /* 0x009c-0x00ff: Reserved */
 #define LPC43_SDMMC_DATA_OFFSET          0x0100 /* Data FIFO read/write (>=) */
 
-/* MCI register (virtual) addresses *************************************************************/
+/* MCI register (virtual) addresses *****************************************/
 
 #define LPC43_SDMMC_CTRL                 (LPC43_SDMMC_BASE+LPC43_SDMMC_CTRL_OFFSET)
 #define LPC43_SDMMC_PWREN                (LPC43_SDMMC_BASE+LPC43_SDMMC_PWREN_OFFSET)
@@ -129,7 +114,7 @@
 #define LPC43_SDMMC_BUFADDR              (LPC43_SDMMC_BASE+LPC43_SDMMC_BUFADDR_OFFSET)
 #define LPC43_SDMMC_DATA                 (LPC43_SDMMC_BASE+LPC43_SDMMC_DATA_OFFSET)
 
-/* MCI register bit definitions *****************************************************************/
+/* MCI register bit definitions *********************************************/
 
 /* Control register CTRL */
 
@@ -153,10 +138,12 @@
                                                    /* Bit 24: Reserved - always write it as 0 */
 #define SDMMC_CTRL_INTDMA                (1 << 25) /* Bit 25: SD/MMC DMA use */
                                                    /* Bits 26-31:  Reserved */
+
 /* Power Enable Register (PWREN) */
 
 #define SDMMC_PWREN                      (1 << 0)  /* Bit 0: Power on/off switch */
-                                                     /* Bits 1-31:  Reserved */
+                                                   /* Bits 1-31:  Reserved */
+
 /* Clock divider register CLKDIV */
 
 #define SDMMC_CLKDIV0_SHIFT               (0)       /* Bits 0-7: Clock divider 0 value */
@@ -180,14 +167,17 @@
 #  define SDMMC_CLKSRC_CLKDIV1            (1 << SDMMC_CLKSRC_SHIFT) /* Clock divider 1 */
 #  define SDMMC_CLKSRC_CLKDIV2            (2 << SDMMC_CLKSRC_SHIFT) /* Clock divider 2 */
 #  define SDMMC_CLKSRC_CLKDIV3            (3 << SDMMC_CLKSRC_SHIFT) /* Clock divider 3 */
+
                                                     /* Bits 2-31:  Reserved */
+
 /* Clock enable register CLKENA */
 
 #define SDMMC_CLKENA_ENABLE               (1 << 0)  /* Bit 0:  Clock enable */
                                                     /* Bits 1-15:  Reserved */
 #define SDMMC_CLKENA_LOWPOWER             (1 << 16) /* Bit 16: Low-power mode */
                                                     /* Bits 17-31:  Reserved */
-/*Timeout register TMOUT */
+
+/* Timeout register TMOUT */
 
 #define SDMMC_TMOUT_RESPONSE_SHIFT        (0)       /* Bits 0-7: Response timeout value */
 #define SDMMC_TMOUT_RESPONSE_MASK         (255 << SDMMC_TMOUT_RESPONSE_SHIFT)
@@ -201,11 +191,13 @@
                                                     /* Bits 1-15:  Reserved */
 #define SDMMC_CTYPE_WIDTH8                (1 << 16) /* Bit 16: 8-bit mode */
                                                     /* Bits 17-31:  Reserved */
+
 /* Blocksize register BLKSIZ */
 
 #define SDMMC_BLKSIZ_SHIFT                (0)       /* Bits 0-15: Block size */
 #define SDMMC_BLKSIZ_MASK                 (0xffff << SDMMC_BLKSIZ_SHIFT)
                                                     /* Bits 16-31:  Reserved */
+
 /* Interrupt mask register INTMASK
  * Masked interrupt status register MINTSTS
  * Raw interrupt status register RINTSTS
@@ -242,6 +234,7 @@
 #  define SDMMC_CMD_NORESPONSE            (0 << SDMMC_CMD_WAITRESP_SHIFT) /* x0: No response */
 #  define SDMMC_CMD_SHORTRESPONSE         (1 << SDMMC_CMD_WAITRESP_SHIFT) /* 01: Short response */
 #  define SDMMC_CMD_LONGRESPONSE          (3 << SDMMC_CMD_WAITRESP_SHIFT) /* 11: Long response */
+
 #define SDMMC_CMD_RESPCRC                 (1 << 8)  /* Bit 8:  Check response CRC */
 #define SDMMC_CMD_DATAXFREXPTD            (1 << 9)  /* Bit 9:  Data transfer expected (read/write) */
 #define SDMMC_CMD_WRITE                   (1 << 10) /* Bit 10: Write to card */
@@ -286,6 +279,7 @@
 #  define SDMMC_STATUS_FSMSTATE_RXEND     (13 << SDMMC_STATUS_FSMSTATE_SHIFT) /* Rx resp end bit */
 #  define SDMMC_STATUS_FSMSTATE_WAITNCC   (14 << SDMMC_STATUS_FSMSTATE_SHIFT) /* Cmd path wait NCC */
 #  define SDMMC_STATUS_FSMSTATE_WAITTURN  (15 << SDMMC_STATUS_FSMSTATE_SHIFT) /* Wait; CMD-to-resp turnaround */
+
 #define SDMMC_STATUS_DAT3                 (1 << 8)  /* Bit 8:  DAT3=1: Card present */
 #define SDMMC_STATUS_DATABUSY             (1 << 9)  /* Bit 9:  Card data busy */
 #define SDMMC_STATUS_MCBUSY               (1 << 10) /* Bit 10: Data transmit/receive state machine busy */
@@ -315,15 +309,19 @@
 #  define SDMMC_FIFOTH_DMABURST_64XFRS    (5 << SDMMC_FIFOTH_DMABURST_SHIFT) /* 64 transfers */
 #  define SDMMC_FIFOTH_DMABURST_128XFRS   (6 << SDMMC_FIFOTH_DMABURST_SHIFT) /* 128 transfers */
 #  define SDMMC_FIFOTH_DMABURST_256XFRS   (7 << SDMMC_FIFOTH_DMABURST_SHIFT) /* 256 transfers */
+
                                                     /* Bit 31: Reserved */
+
 /* Card detect register CDETECT */
 
 #define SDMMC_CDETECT_NOTPRESENT          (1 << 0)  /* Bit 0: Card detect */
                                                     /* Bit 1-31: Reserved */
+
 /* Write protect register WRTPRT */
 
 #define SDMMC_WRTPRT_PROTECTED            (1 << 0)  /* Bit 0: Write protect */
                                                     /* Bit 1-31: Reserved */
+
 /* Debounce count register */
 
 #define SDMMC_DEBNCE_MASK                 0x00ffffff /* Bits 0-23: Debounce count */
@@ -352,7 +350,9 @@
 #  define SDMMC_BMOD_PBL_64XFRS           (5 << SDMMC_BMOD_PBL_SHIFT) /* 64 transfers */
 #  define SDMMC_BMOD_PBL_128XFRS          (6 << SDMMC_BMOD_PBL_SHIFT) /* 128 transfers */
 #  define SDMMC_BMOD_PBL_256XFRS          (7 << SDMMC_BMOD_PBL_SHIFT) /* 256 transfers */
+
                                                     /* Bits 11-31: Reserved */
+
 /* Internal DMAC Status Register */
 
 #define SDMMC_IDSTS_TI                    (1 << 0)  /* Bit 0:  Transmit Interrupt */
@@ -368,6 +368,7 @@
 #define SDMMC_IDSTS_EB_MASK               (7 << SDMMC_IDSTS_EB_SHIFT)
 #  define SDMMC_IDSTS_EB_TXHABORT         (1 << SDMMC_IDSTS_EB_SHIFT) /* Host Abort received during transmission */
 #  define SDMMC_IDSTS_EB_RXHABORT         (2 << SDMMC_IDSTS_EB_SHIFT) /* Host Abort received during reception */
+
 #define SDMMC_IDSTS_FSM_SHIFT             (13)      /* Bits 13-16: DMAC state machine present state */
 #define SDMMC_IDSTS_FSM_MASK              (15 << SDMMC_IDSTS_FSM_SHIFT)
 #  define SDMMC_IDSTS_FSM_DMAIDLE         (0 << SDMMC_IDSTS_FSM_SHIFT) /* DMA_IDLE*/
@@ -379,7 +380,9 @@
 #  define SDMMC_IDSTS_FSM_DMARD           (6 << SDMMC_IDSTS_FSM_SHIFT) /* DMA_RD */
 #  define SDMMC_IDSTS_FSM_DMAWR           (7 << SDMMC_IDSTS_FSM_SHIFT) /* DMA_WR */
 #  define SDMMC_IDSTS_FSM_DMACLOSE        (8 << SDMMC_IDSTS_FSM_SHIFT) /* DESC_CLOSE */
+
                                                     /* Bits 17-31: Reserved */
+
 /* Internal DMAC Interrupt Enable Register */
 
 #define SDMMC_IDINTEN_TI                  (1 << 0)  /* Bit 0:  Transmit Interrupt */
@@ -394,16 +397,16 @@
                                                     /* Bits 10-31: Reserved */
 #define SDMMC_IDINTEN_ALL                 0x00000333
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SDMMC_H */

@@ -51,8 +51,6 @@
  ****************************************************************************/
 
 	.globl		exception_common
-
-	.cpu		cortex-m0
 	.file		"arm_exception.S"
 
 /****************************************************************************
@@ -138,19 +136,13 @@ exception_common:
 
 	mrs		r0, ipsr				/* R0=exception number */
 
-	/* Disable interrupts, select the stack to use for interrupt handling
-	 * and call arm_doirq to handle the interrupt
-	 */
-
-	cpsid	i						/* Disable further interrupts */
-
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will use a special interrupt
 	 * stack pointer.  The way that this is done here prohibits nested interrupts!
 	 * Otherwise, we will use the stack that was current when the interrupt was taken.
 	 */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr		r7, =g_intstackbase			/* R7=Base of the interrupt stack */
+	ldr		r7, =g_intstacktop			/* R7=Top of the interrupt stack */
 	mov		sp, r7					/* Set the new stack point */
 	push		{r1}					/* Save the MSP on the interrupt stack */
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
@@ -246,7 +238,6 @@ exception_common:
 	/* Restore the interrupt state */
 
 	msr		primask, r3				/* Restore interrupts priority masking*/
-	cpsie	i						/* Re-enable interrupts */
 
 	/* Always return with R14 containing the special value that will: (1)
 	 * return to thread mode, and (2) select the correct stack.
@@ -257,7 +248,7 @@ exception_common:
 	.size	exception_common, .-exception_common
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  *
  * Description:
  *   Shouldn't happen
@@ -267,11 +258,11 @@ exception_common:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.global	g_intstackalloc
-	.global	g_intstackbase
+	.global	g_intstacktop
 	.balign	4
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
+g_intstacktop:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 

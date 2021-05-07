@@ -31,8 +31,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <fixedmath.h>
+
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_BATTERY_MONITOR
 
@@ -153,7 +154,7 @@ struct battery_monitor_voltage_s
    * Cell voltages are stored in microvolts (uV)
    * Cell voltages in this array should be ordered according to the
    * physical layout of cells in the system.  Driver should rearrange
-   * voltage values as necssary to present the user with a contiguous
+   * voltage values as necessary to present the user with a contiguous
    * list of cell voltages in the expected order.
    */
 
@@ -283,7 +284,7 @@ struct battery_monitor_operations_s
 
   int (*soc)(struct battery_monitor_dev_s *dev, b16_t *value);
 
-  /* Get the battery pack Couloumb count value*/
+  /* Get the battery pack Coulomb count value */
 
   int (*coulombs)(struct battery_monitor_dev_s *dev, int *value);
 
@@ -306,7 +307,9 @@ struct battery_monitor_operations_s
   int (*setlimits)(struct battery_monitor_dev_s *dev,
       struct battery_monitor_limits_s *limits);
 
-  /* Set the state of charge/discharge switches to allow battery to source/sink power */
+  /* Set the state of charge/discharge switches to allow battery to
+   * source/sink power
+   */
 
   int (*chgdsg)(struct battery_monitor_dev_s *dev,
       struct battery_monitor_switches_s *sw);
@@ -327,7 +330,7 @@ struct battery_monitor_dev_s
   /* Fields required by the upper-half driver */
 
   FAR const struct battery_monitor_operations_s *ops; /* Battery operations */
-  sem_t batsem;  /* Enforce mutually exclusive access */
+  sem_t batsem;                                       /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower-half driver may follow */
 };
@@ -386,7 +389,7 @@ int battery_monitor_register(FAR const char *devpath,
  *
  *   CONFIG_BATTERY_MONITOR - Upper half battery monitor driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_BQ769X0 - And the driver must be explictly selected.
+ *   CONFIG_I2C_BQ769X0 - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
@@ -412,13 +415,10 @@ int battery_monitor_register(FAR const char *devpath,
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_BQ769X0)
 
 struct i2c_master_s;
-FAR struct battery_monitor_dev_s *bq769x0_initialize(FAR struct i2c_master_s *i2c,
-                                                     uint8_t addr,
-                                                     uint32_t frequency,
-                                                     bool crc,
-                                                     uint8_t cellcount,
-                                                     uint8_t chip,
-                                                     uint32_t sense_r);
+FAR struct battery_monitor_dev_s *
+bq769x0_initialize(FAR struct i2c_master_s *i2c,
+                   uint8_t addr, uint32_t frequency, bool crc,
+                   uint8_t cellcount, uint8_t chip, uint32_t sense_r);
 #endif
 
 #undef EXTERN

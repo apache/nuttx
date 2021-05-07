@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/lm/lm3s_timer.h
  *
  * Originally:
@@ -44,23 +44,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_TIMER_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* GPTM register offsets ************************************************************/
+/* GPTM register offsets ****************************************************/
 
 #define TIVA_TIMER_CFG_OFFSET          0x0000 /* GPTM Configuration */
 #define TIVA_TIMER_TAMR_OFFSET         0x0004 /* GPTM Timer A Mode */
@@ -81,7 +81,7 @@
 #define TIVA_TIMER_TAR_OFFSET          0x0048 /* GPTM Timer A */
 #define TIVA_TIMER_TBR_OFFSET          0x004c /* GPTM Timer B */
 
-/* GPTM register addresses **********************************************************/
+/* GPTM register addresses **************************************************/
 
 #if TIVA_NTIMERS > 0
 #define TIVA_TIMER0_CFG                (TIVA_TIMER0_BASE + TIVA_TIMER_CFG_OFFSET)
@@ -251,7 +251,8 @@
 #define TIVA_TIMER7_TBR                (TIVA_TIMER7_BASE + TIVA_TIMER_TBR_OFFSET)
 #endif /* TIVA_NTIMERS > 7 */
 
-/* GPTM register bit definitions ****************************************************/
+/* GPTM register bit definitions ********************************************/
+
 /* GPTM Configuration (CFG) */
 
 #define TIMER_CFG_CFG_SHIFT            0         /* Bits 2-0:  Configuration */
@@ -262,19 +263,24 @@
 
 /* GPTM Timer A/B Mode (TAMR and TBMR) */
 
-#define TIMER_TnMR_TnMR_SHIFT          (0)       /* Bits 1-0:  Timer A/B Mode */
-#define TIMER_TnMR_TnMR_MASK           (3 << TIMER_TnMR_TnMR_SHIFT) /* Bits 1-0:  Timer A/B Mode */
-#  define TIMER_TnMR_TnMR_ONESHOT      (1 << TIMER_TnMR_TnMR_SHIFT) /* One-Shot Timer mode */
-#  define TIMER_TnMR_TnMR_PERIODIC     (2 << TIMER_TnMR_TnMR_SHIFT) /* Periodic Timer mode */
-#  define TIMER_TnMR_TnMR_CAPTURE      (3 << TIMER_TnMR_TnMR_SHIFT) /* Capture mode */
-#define TIMER_TnMR_TnCMR_SHIFT         (2)       /* Bit 2:  Timer A/B Capture Mode */
-#define TIMER_TnMR_TnCMR               (1 << TIMER_TnMR_TnCMR_SHIFT) /* Bit 2:  Timer A/B Capture Mode */
-#  define TIMER_TnMR_TnCMR_EDGECOUNT   (0 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Count mode */
-#  define TIMER_TnMR_TnCMR_EDGETIME    (1 << TIMER_TnMR_TnCMR_SHIFT) /* Edge-Time mode */
-#define TIMER_TnMR_TnAMS_SHIFT         (3)       /* Bit 3:  Timer A/B Alternate Mode Select */
-#define TIMER_TnMR_TnAMS               (1 << TIMER_TnMR_TnAMS_SHIFT) /* Bit 3:  Timer A/B Alternate Mode Select */
-#  define TIMER_TnMR_TnAMS_CAPTURE     (0 << TIMER_TnMR_TnAMS_SHIFT) /* Capture mode is enabled */
-#  define TIMER_TnMR_TnAMS_PWM         (1 << TIMER_TnMR_TnAMS_SHIFT) /* PWM mode is enabled */
+#define TIMER_TNMR_TNMR_SHIFT          (0)       /* Bits 1-0:  Timer A/B Mode */
+
+#define TIMER_TNMR_TNMR_MASK           (3 << TIMER_TNMR_TNMR_SHIFT) /* Bits 1-0:  Timer A/B Mode */
+#  define TIMER_TNMR_TNMR_ONESHOT      (1 << TIMER_TNMR_TNMR_SHIFT) /* One-Shot Timer mode */
+#  define TIMER_TNMR_TNMR_PERIODIC     (2 << TIMER_TNMR_TNMR_SHIFT) /* Periodic Timer mode */
+#  define TIMER_TNMR_TNMR_CAPTURE      (3 << TIMER_TNMR_TNMR_SHIFT) /* Capture mode */
+
+#define TIMER_TNMR_TNCMR_SHIFT         (2)       /* Bit 2:  Timer A/B Capture Mode */
+
+#define TIMER_TNMR_TNCMR               (1 << TIMER_TNMR_TNCMR_SHIFT) /* Bit 2:  Timer A/B Capture Mode */
+#  define TIMER_TNMR_TNCMR_EDGECOUNT   (0 << TIMER_TNMR_TNCMR_SHIFT) /* Edge-Count mode */
+#  define TIMER_TNMR_TNCMR_EDGETIME    (1 << TIMER_TNMR_TNCMR_SHIFT) /* Edge-Time mode */
+
+#define TIMER_TNMR_TNAMS_SHIFT         (3)       /* Bit 3:  Timer A/B Alternate Mode Select */
+
+#define TIMER_TNMR_TNAMS               (1 << TIMER_TNMR_TNAMS_SHIFT) /* Bit 3:  Timer A/B Alternate Mode Select */
+#  define TIMER_TNMR_TNAMS_CAPTURE     (0 << TIMER_TNMR_TNAMS_SHIFT) /* Capture mode is enabled */
+#  define TIMER_TNMR_TNAMS_PWM         (1 << TIMER_TNMR_TNAMS_SHIFT) /* PWM mode is enabled */
 
 /* GPTM Control (CTL) */
 
@@ -285,6 +291,7 @@
 #  define TIMER_CTL_TAEVENT_POS        (0 << TIMER_CTL_TAEVENT_SHIFT) /* Positive edge */
 #  define TIMER_CTL_TAEVENT_NEG        (1 << TIMER_CTL_TAEVENT_SHIFT) /* Negative edge */
 #  define TIMER_CTL_TAEVENT_BOTH       (3 << TIMER_CTL_TAEVENT_SHIFT) /* Both edges */
+
 #define TIMER_CTL_RTCEN                (1 << 4)  /* Bit 4:  GPTM RTC Stall Enable */
 #define TIMER_CTL_TAOTE                (1 << 5)  /* Bit 5:  GPTM Timer A Output Trigger Enable */
 #define TIMER_CTL_TAPWML               (1 << 6)  /* Bit 6:  GPTM Timer A PWM Output Level */
@@ -295,6 +302,7 @@
 #  define TIMER_CTL_TBEVENT_POS        (0 << TIMER_CTL_TBEVENT_SHFIT) /* Positive edge */
 #  define TIMER_CTL_TBEVENT_NEG        (1 << TIMER_CTL_TBEVENT_SHFIT) /* Negative edge */
 #  define TIMER_CTL_TBEVENT_BOTH       (3 << TIMER_CTL_TBEVENT_SHFIT) /* Both edges */
+
 #define TIMER_CTL_TBOTE                (1 << 13) /* Bit 13: GPTM Timer B Output Trigger Enable */
 #define TIMER_CTL_TBPWML               (1 << 14) /* Bit 14: GPTM Timer B PWM Output Level */
 
@@ -313,8 +321,11 @@
 #define TIMER_ALLINTS                  0x00000101
 
 /* GPTM Timer A Interval Load (TAILR) (32-bit value) */
+
 /* GPTM Timer B Interval Load (TBILR) (32-bit value) */
+
 /* GPTM Timer A Match (TAMATCHR) (32-bit value) */
+
 /* GPTM Timer B Match (TBMATCHR) (32-bit value) */
 
 /* GPTM Timer A/B Prescale (TnPR) */
@@ -330,6 +341,7 @@
 #  define TIMER_TnPMR_TnPSMR(n)        ((uint32_t)(n) << TIMER_TnPMR_TnPSMR_SHIFT)
 
 /* GPTM Timer A (TAR) (16/32-bit value) */
+
 /* GPTM Timer B (TBR) (16/32-bit value) */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_TIMER_H */

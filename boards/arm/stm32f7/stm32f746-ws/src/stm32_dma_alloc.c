@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/stm32f746-ws/stc/stm32_dma_alloc.c
+ * boards/arm/stm32f7/stm32f746-ws/src/stm32_dma_alloc.c
  *
  *   Copyright (C) 2016 PX4 Development Team. All rights reserved.
  *
@@ -65,14 +65,16 @@ static GRAN_HANDLE dma_allocator;
 /* The DMA heap size constrains the total number of things that can be
  * ready to do DMA at a time.
  *
- * For example, FAT DMA depends on one sector-sized buffer per filesystem plus
- * one sector-sized buffer per file.
+ * For example, FAT DMA depends on one sector-sized buffer per filesystem
+ * plus one sector-sized buffer per file.
  *
  * We use a fundamental alignment / granule size of 64B; this is sufficient
- * to guarantee alignment for the largest STM32 DMA burst (16 beats x 32bits).
+ * to guarantee alignment for the largest STM32 DMA burst
+ * (16 beats x 32bits).
  */
 
-static uint8_t g_dma_heap[BOARD_DMA_ALLOC_POOL_SIZE] __attribute__((aligned(64)));
+static
+uint8_t g_dma_heap[BOARD_DMA_ALLOC_POOL_SIZE] __attribute__((aligned(64)));
 
 /****************************************************************************
  * Public Functions

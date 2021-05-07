@@ -1,26 +1,20 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_gpio.h
  *
- * Developed for NuttX by:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derives in part from sample code provided by Espressif Systems:
- *
- *   Copyright 2015-2016 Espressif Systems (Shanghai) PTE LTD
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,6 +33,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define MATRIX_DETACH_OUT_SIG     0x100  /* Detach an OUTPUT signal */
+#define MATRIX_DETACH_IN_LOW_PIN  0x30   /* Detach non-inverted INPUT signal */
+#define MATRIX_DETACH_IN_LOW_HIGH 0x38   /* Detach inverted INPUT signal */
 
 /* Bit-encoded input to esp32_configgpio() **********************************/
 
@@ -200,6 +198,33 @@ void esp32_gpioirqdisable(int irq);
 #else
 #  define esp32_gpioirqdisable(irq)
 #endif
+
+/****************************************************************************
+ * Name: esp32_gpio_matrix_in
+ *
+ * Description:
+ *   Set gpio input to a signal
+ *   NOTE: one gpio can input to several signals
+ *   If gpio == 0x30, cancel input to the signal, input 0 to signal
+ *   If gpio == 0x38, cancel input to the signal, input 1 to signal,
+ *   for I2C pad
+ *
+ ****************************************************************************/
+
+void esp32_gpio_matrix_in(uint32_t gpio, uint32_t signal_idx, bool inv);
+
+/****************************************************************************
+ * Name: esp32_gpio_matrix_out
+ *
+ * Description:
+ *   Set signal output to gpio
+ *   NOTE: one signal can output to several gpios
+ *   If signal_idx == 0x100, cancel output put to the gpio
+ *
+ ****************************************************************************/
+
+void esp32_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx, bool out_inv,
+                           bool oen_inv);
 
 #ifdef __cplusplus
 }

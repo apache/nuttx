@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/sama5d3x4x_pio.c
- * General Purpose Input/Output (PIO) logic for the SAMA5D3x and SAMA5D4x
  *
- *   Copyright (C) 2013-2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -93,6 +77,7 @@ const uintptr_t g_piobase[SAM_NPIO] =
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Maps a port number to the standard port character */
 
 #if defined(CONFIG_DEBUG_GPIO_INFO) && SAM_NPIO > 0
@@ -187,6 +172,7 @@ static uint32_t g_forced[SAM_NPIO];
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_piobase
  *
@@ -834,20 +820,22 @@ bool sam_pioread(pio_pinset_t pinset)
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_pio_forceclk
  *
  * Description:
- *   Enable PIO clocking.  This logic is overly conservative and does not enable PIO
- *   clocking unless necessary (PIO input selected, glitch/filtering enable, or PIO
- *   interrupts enabled).  There are, however, certain conditions were we may want
- *   for force the PIO clock to be enabled.  An example is reading the input value
- *   from an open drain output.
+ *   Enable PIO clocking.
+ *   This logic is overly conservative and does not enable PIO clocking
+ *   unless necessary (PIO input selected, glitch/filtering enable, or PIO
+ *   interrupts enabled).  There are, however, certain conditions were we may
+ *   want to force the PIO clock to be enabled.
+ *   An example is reading the input value from an open drain output.
  *
- *   The PIO automatic enable/disable logic is not smart enough enough to know about
- *   these cases.  For those cases, sam_pio_forceclk() is provided.
+ *   The PIO automatic enable/disable logic is not smart enough enough to
+ *   know about these cases.
+ *   For those cases, sam_pio_forceclk() is provided.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
 {
@@ -884,13 +872,14 @@ void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
   leave_critical_section(flags);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumppio
  *
  * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
+ *   Dump all PIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumppio(uint32_t pinset, const char *msg)
@@ -913,36 +902,50 @@ int sam_dumppio(uint32_t pinset, const char *msg)
 
 #ifdef SAM_PIO_ISLR_OFFSET
   gpioinfo("    PSR: %08x   ISLR: %08x    OSR: %08x   IFSR: %08x\n",
-           getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_ISLR_OFFSET),
-           getreg32(base + SAM_PIO_OSR_OFFSET), getreg32(base + SAM_PIO_IFSR_OFFSET));
+           getreg32(base + SAM_PIO_PSR_OFFSET),
+           getreg32(base + SAM_PIO_ISLR_OFFSET),
+           getreg32(base + SAM_PIO_OSR_OFFSET),
+           getreg32(base + SAM_PIO_IFSR_OFFSET));
 #else
   gpioinfo("    PSR: %08x    OSR: %08x   IFSR: %08x\n",
-           getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_OSR_OFFSET),
+           getreg32(base + SAM_PIO_PSR_OFFSET),
+           getreg32(base + SAM_PIO_OSR_OFFSET),
            getreg32(base + SAM_PIO_IFSR_OFFSET));
 #endif
   gpioinfo("   ODSR: %08x   PDSR: %08x    IMR: %08x    ISR: %08x\n",
-           getreg32(base + SAM_PIO_ODSR_OFFSET), getreg32(base + SAM_PIO_PDSR_OFFSET),
-           getreg32(base + SAM_PIO_IMR_OFFSET), getreg32(base + SAM_PIO_ISR_OFFSET));
+           getreg32(base + SAM_PIO_ODSR_OFFSET),
+           getreg32(base + SAM_PIO_PDSR_OFFSET),
+           getreg32(base + SAM_PIO_IMR_OFFSET),
+           getreg32(base + SAM_PIO_ISR_OFFSET));
   gpioinfo("   MDSR: %08x   PUSR: %08x ABDCSR: %08x %08x\n",
-           getreg32(base + SAM_PIO_MDSR_OFFSET), getreg32(base + SAM_PIO_PUSR_OFFSET),
-           getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET));
+           getreg32(base + SAM_PIO_MDSR_OFFSET),
+           getreg32(base + SAM_PIO_PUSR_OFFSET),
+           getreg32(base + SAM_PIO_ABCDSR1_OFFSET),
+           getreg32(base + SAM_PIO_ABCDSR2_OFFSET));
   gpioinfo(" IFSCSR: %08x   SCDR: %08x  PPDSR: %08x   OWSR: %08x\n",
-           getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIO_SCDR_OFFSET),
-           getreg32(base + SAM_PIO_PPDSR_OFFSET), getreg32(base + SAM_PIO_OWSR_OFFSET));
+           getreg32(base + SAM_PIO_IFSCSR_OFFSET),
+           getreg32(base + SAM_PIO_SCDR_OFFSET),
+           getreg32(base + SAM_PIO_PPDSR_OFFSET),
+           getreg32(base + SAM_PIO_OWSR_OFFSET));
 #ifdef SAM_PIO_LOCKSR_OFFSET
   gpioinfo("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x LOCKSR: %08x\n",
-           getreg32(base + SAM_PIO_AIMMR_OFFSET), getreg32(base + SAM_PIO_ELSR_OFFSET),
-           getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET));
+           getreg32(base + SAM_PIO_AIMMR_OFFSET),
+           getreg32(base + SAM_PIO_ELSR_OFFSET),
+           getreg32(base + SAM_PIO_FRLHSR_OFFSET),
+           getreg32(base + SAM_PIO_LOCKSR_OFFSET));
 #else
   gpioinfo("  AIMMR: %08x   ELSR: %08x FRLHSR: %08x\n",
-           getreg32(base + SAM_PIO_AIMMR_OFFSET), getreg32(base + SAM_PIO_ELSR_OFFSET),
+           getreg32(base + SAM_PIO_AIMMR_OFFSET),
+           getreg32(base + SAM_PIO_ELSR_OFFSET),
            getreg32(base + SAM_PIO_FRLHSR_OFFSET));
 #endif
   gpioinfo("SCHMITT: %08x DRIVER: %08x %08x\n",
-           getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DRIVER1_OFFSET),
+           getreg32(base + SAM_PIO_SCHMITT_OFFSET),
+           getreg32(base + SAM_PIO_DRIVER1_OFFSET),
            getreg32(base + SAM_PIO_DRIVER2_OFFSET));
   gpioinfo("   WPMR: %08x   WPSR: %08x\n",
-           getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
+           getreg32(base + SAM_PIO_WPMR_OFFSET),
+           getreg32(base + SAM_PIO_WPSR_OFFSET));
 
   leave_critical_section(flags);
   return OK;

@@ -644,7 +644,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
               return nwritten;
             }
 
-          /* There is more to be written.. wait for data to be removed fro
+          /* There is more to be written.. wait for data to be removed from
            * the pipe
            */
 
@@ -755,7 +755,7 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Change POLLOUT to POLLERR, if no readers and policy 0. */
 
-      if ((eventset | POLLOUT) &&
+      if ((eventset & POLLOUT) &&
           PIPE_IS_POLICY_0(dev->d_flags) &&
           dev->d_nreaders <= 0)
         {

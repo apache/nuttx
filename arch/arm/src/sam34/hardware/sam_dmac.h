@@ -1,56 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_dmac.h
- * DMA Controller (DMAC) definitions for the SAM3U, SAM3X, SAM3A, and SAM4E
  *
- *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_DMAC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_DMAC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* DMAC register offsets ****************************************************************/
+/* DMAC register offsets ****************************************************/
 
 /* Global Registers */
 
@@ -68,6 +52,7 @@
 #define SAM_DMAC_CHDR_OFFSET           0x002c /* DMAC Channel Handler Disable Register */
 #define SAM_DMAC_CHSR_OFFSET           0x0030 /* DMAC Channel Handler Status Register */
                                               /* 0x034-0x38: Reserved */
+
 /* DMA channel registers */
 
 #define SAM_DMACHAN_OFFSET(n)          (0x003c+((n)*0x28))
@@ -84,7 +69,7 @@
 #define SAM_DMACHAN_CTRLA_OFFSET       0x000c /* DMAC Channel Control A Register */
 #define SAM_DMACHAN_CTRLB_OFFSET       0x0010 /* DMAC Channel Control B Register */
 #define SAM_DMACHAN_CFG_OFFSET         0x0014 /* DMAC Channel Configuration Register */
-                                            /* 0x18-0x24: Reserved */
+                                              /* 0x18-0x24: Reserved */
 
 /* More Global Registers */
 
@@ -93,7 +78,7 @@
 #  define SAM_DMAC_WPSR_OFFSET         0x01e8 /* DMAC Write Protect Status Register DMAC_WPSR */
 #endif
 
-/* DMAC register addresses **************************************************************/
+/* DMAC register addresses **************************************************/
 
 /* Global Registers */
 
@@ -162,7 +147,7 @@
 #  define SAM_DMAC_WPSR                  (SAM_DMAC_BASE+SAM_DMAC_WPSR_OFFSET)
 #endif
 
-/* DMAC register bit definitions ********************************************************/
+/* DMAC register bit definitions ********************************************/
 
 /* Global Registers */
 
@@ -252,10 +237,14 @@
 #  define DMAC_LAST_DLAST2             (1 << (DMAC_LAST_DLAST_SHIFT+DMAC_LAST2_SHIFT)
 #  define DMAC_LAST_DLAST3             (1 << (DMAC_LAST_DLAST_SHIFT+DMAC_LAST3_SHIFT)
 
-/* DMAC Error, Buffer Transfer and Chained Buffer Transfer Interrupt Enable Register,
- * DMAC Error, Buffer Transfer and Chained Buffer Transfer Interrupt Disable Register,
- * DMAC Error, Buffer Transfer and Chained Buffer Transfer Interrupt Mask Register, and
- * DMAC Error, Buffer Transfer and Chained Buffer Transfer Status Register common
+/* DMAC Error, Buffer Transfer and Chained Buffer
+ * Transfer Interrupt Enable Register,
+ * DMAC Error, Buffer Transfer and Chained Buffer
+ * Transfer Interrupt Disable Register,
+ * DMAC Error, Buffer Transfer and Chained Buffer
+ * Transfer Interrupt Mask Register, and
+ * DMAC Error, Buffer Transfer and Chained Buffer
+ * Transfer Status Register common
  * bit field definitions
  */
 
@@ -360,10 +349,22 @@
 #  define DMAC_CHSR_STAL3              (1 << (DMAC_CHSR_STAL_SHIFT+3))
 
 /* DMA channel registers */
-/* DMAC Channel n [n = 0..3] Source Address Register -- 32-bit address*/
-/* DMAC Channel n [n = 0..3] Destination Address Register -- 32-bit address*/
-/* DMAC Channel n [n = 0..3] Descriptor Address Register -- 32-bit address*/
-/* DMAC Channel n [n = 0..3] Control A Register */
+
+/* DMAC Channel n [n = 0..3]
+ * Source Address Register -- 32-bit address
+ */
+
+/* DMAC Channel n [n = 0..3]
+ * Destination Address Register -- 32-bit address
+ */
+
+/* DMAC Channel n [n = 0..3]
+ * Descriptor Address Register -- 32-bit address
+ */
+
+/* DMAC Channel n [n = 0..3]
+ * Control A Register
+ */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -411,6 +412,7 @@
 #  define DMACHAN_CTRLB_FC_M2P         (1 << DMACHAN_CTRLB_FC_SHIFT) /* Memory-to-Peripheral */
 #  define DMACHAN_CTRLB_FC_P2M         (2 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Memory  */
 #  define DMACHAN_CTRLB_FC_P2P         (3 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Peripheral */
+
 #define DMACHAN_CTRLB_SRCINCR_SHIFT    (24)      /* Bits 24-25 */
 #define DMACHAN_CTRLB_SRCINCR_MASK     (3 << DMACHAN_CTRLB_SRCINCR_SHIFT)
 #  define DMACHAN_CTRLB_SRCINCR_INCR   (0 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
@@ -418,6 +420,7 @@
 #    define DMACHAN_CTRLB_SRCINCR_DECR (1 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Decrementing address */
 #  endif
 #  define DMACHAN_CTRLB_SRCINCR_FIXED  (2 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Fixed address */
+
 #define DMACHAN_CTRLB_DSTINCR_SHIFT    (28)      /* Bits 28-29 */
 #define DMACHAN_CTRLB_DSTINCR_MASK     (3 << DMACHAN_CTRLB_DSTINCR_SHIFT)
 #  define DMACHAN_CTRLB_DSTINCR_INCR   (0 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
@@ -425,6 +428,7 @@
 #    define DMACHAN_CTRLB_DSTINCR_DECR (1 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Decrementing address */
 #  endif
 #  define DMACHAN_CTRLB_DSTINCR_FIXED  (2 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Fixed address */
+
 #define DMACHAN_CTRLB_IEN              (1 << 30)  /* Bit 30:  Clear sets BTC[n] flag in EBCISR */
 
 /* DMAC Channel n [n = 0..3] Configuration Register */
@@ -469,7 +473,7 @@
 #  define DMAC_WPSR_WPVSRC_MASK    (0xffff << DMAC_WPSR_WPVSRC_SHIFT)
 #endif
 
-/* DMA Hardware interface numbers *******************************************************/
+/* DMA Hardware interface numbers *******************************************/
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 
@@ -512,9 +516,9 @@
 
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
 /* DMA multi buffer transfer link list entry structure */
 
@@ -527,12 +531,12 @@ struct dma_linklist_s
   uint32_t next;   /* Next descriptor address */
 };
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_DMAC_H */

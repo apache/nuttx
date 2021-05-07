@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/sim/src/sim/up_createstack.c
  *
- *   Copyright (C) 2007-2009, 2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -81,8 +66,8 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
- *     the stack pointer.
+ *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
+ *     Arguments has been removed from the stack allocation.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -106,10 +91,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   FAR uint8_t *stack_alloc_ptr;
   int ret = ERROR;
 
-  /* Add the size of the TLS information structure */
-
-  stack_size += sizeof(struct tls_info_s);
-
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
@@ -124,43 +105,25 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Move up to next even word boundary if necessary */
 
-  size_t adj_stack_size  = STACK_ALIGN_UP(stack_size);
+  size_t adj_stack_size = STACK_ALIGN_UP(stack_size);
 
   /* Allocate the memory for the stack */
 
 #ifdef CONFIG_TLS_ALIGNED
-  stack_alloc_ptr = (FAR uint8_t *)kumm_memalign(TLS_STACK_ALIGN,
-                                                 adj_stack_size);
+  stack_alloc_ptr = kumm_memalign(TLS_STACK_ALIGN, adj_stack_size);
 #else
-  stack_alloc_ptr = (FAR uint8_t *)kumm_malloc(adj_stack_size);
+  stack_alloc_ptr = kumm_malloc(adj_stack_size);
 #endif
 
   /* Was the allocation successful? */
 
   if (stack_alloc_ptr)
     {
-#if defined(CONFIG_STACK_COLORATION)
-      uintptr_t stack_base;
-#endif
-
-      /* This is the address of the last aligned word in the allocation.
-       * NOTE that stack_alloc_ptr + adj_stack_size may lie one byte
-       * outside of the stack.  This is okay for an initial state; the
-       * first pushed values will be within the stack allocation.
-       */
-
-      uintptr_t adj_stack_addr =
-        STACK_ALIGN_DOWN((uintptr_t)stack_alloc_ptr + adj_stack_size);
-
       /* Save the values in the TCB */
 
       tcb->adj_stack_size  = adj_stack_size;
       tcb->stack_alloc_ptr = stack_alloc_ptr;
-      tcb->adj_stack_ptr   = (FAR void *)adj_stack_addr;
-
-      /* Initialize the TLS data structure */
-
-      memset(stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
@@ -168,10 +131,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      stack_base = (uintptr_t)tcb->stack_alloc_ptr +
-                   sizeof(struct tls_info_s);
-      stack_size = tcb->adj_stack_size - sizeof(struct tls_info_s);
-      up_stack_color((FAR void *)stack_base, stack_size);
+      up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
 

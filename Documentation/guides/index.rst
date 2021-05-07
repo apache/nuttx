@@ -10,3 +10,4 @@ Guides
   simulator.rst
   drivers.rst
   tasktrace.rst
+  cpp_cmake.rst

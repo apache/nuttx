@@ -1,35 +1,20 @@
 /****************************************************************************
- * include/nuttx/sensors/ltc1867l.h
+ * include/nuttx/analog/ltc1867l.h
  *
- *   Copyright (C) 2017 DS-Automotion GmbH. All rights reserved.
- *   Author: Martin Lederhilger <m.lederhilger@ds-automotion.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -50,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LTC1867L Configuration *******************************************/
+/* LTC1867L Configuration ***************************************************/
 
 #define LTC1867L_CONFIG_BIT_SLP      (1 << 1)
 #define LTC1867L_CONFIG_BIT_UNI      (1 << 2)
@@ -69,26 +54,59 @@ enum ltc1867l_analog_multiplexer_config_e
   LTC1867L_P_CH0_M_CH1 = 0,
   LTC1867L_P_CH2_M_CH3 = LTC1867L_CONFIG_BIT_S0,
   LTC1867L_P_CH4_M_CH5 = LTC1867L_CONFIG_BIT_S1,
-  LTC1867L_P_CH6_M_CH7 = LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH6_M_CH7 = LTC1867L_CONFIG_BIT_S1 |
+                         LTC1867L_CONFIG_BIT_S0,
   LTC1867L_P_CH1_M_CH0 = LTC1867L_CONFIG_BIT_OS,
-  LTC1867L_P_CH3_M_CH2 = LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S0,
-  LTC1867L_P_CH5_M_CH4 = LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S1,
-  LTC1867L_P_CH7_M_CH6 = LTC1867L_CONFIG_BIT_OS |LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH3_M_CH2 = LTC1867L_CONFIG_BIT_OS |
+                         LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH5_M_CH4 = LTC1867L_CONFIG_BIT_OS |
+                         LTC1867L_CONFIG_BIT_S1,
+  LTC1867L_P_CH7_M_CH6 = LTC1867L_CONFIG_BIT_OS |
+                         LTC1867L_CONFIG_BIT_S1 |
+                         LTC1867L_CONFIG_BIT_S0,
   LTC1867L_P_CH0_M_GND = LTC1867L_CONFIG_BIT_SD,
-  LTC1867L_P_CH2_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_S0,
-  LTC1867L_P_CH4_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_S1,
-  LTC1867L_P_CH6_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_S0,
-  LTC1867L_P_CH1_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS,
-  LTC1867L_P_CH3_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S0,
-  LTC1867L_P_CH5_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S1,
-  LTC1867L_P_CH7_M_GND = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_S0,
-  LTC1867L_P_CH0_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_COM,
-  LTC1867L_P_CH2_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_S0 | LTC1867L_CONFIG_BIT_COM,
-  LTC1867L_P_CH4_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_COM,
-  LTC1867L_P_CH6_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_S0 | LTC1867L_CONFIG_BIT_COM,
-  LTC1867L_P_CH1_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_COM,
-  LTC1867L_P_CH3_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S0 | LTC1867L_CONFIG_BIT_COM,
-  LTC1867L_P_CH5_M_CH7COM = LTC1867L_CONFIG_BIT_SD | LTC1867L_CONFIG_BIT_OS | LTC1867L_CONFIG_BIT_S1 | LTC1867L_CONFIG_BIT_COM
+  LTC1867L_P_CH2_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH4_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_S1,
+  LTC1867L_P_CH6_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_S1 |
+                         LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH1_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_OS,
+  LTC1867L_P_CH3_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_OS |
+                         LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH5_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_OS |
+                         LTC1867L_CONFIG_BIT_S1,
+  LTC1867L_P_CH7_M_GND = LTC1867L_CONFIG_BIT_SD |
+                         LTC1867L_CONFIG_BIT_OS |
+                         LTC1867L_CONFIG_BIT_S1 |
+                         LTC1867L_CONFIG_BIT_S0,
+  LTC1867L_P_CH0_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_COM,
+  LTC1867L_P_CH2_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_S0 |
+                            LTC1867L_CONFIG_BIT_COM,
+  LTC1867L_P_CH4_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_S1 |
+                            LTC1867L_CONFIG_BIT_COM,
+  LTC1867L_P_CH6_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_S1 |
+                            LTC1867L_CONFIG_BIT_S0 |
+                            LTC1867L_CONFIG_BIT_COM,
+  LTC1867L_P_CH1_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_OS |
+                            LTC1867L_CONFIG_BIT_COM,
+  LTC1867L_P_CH3_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_OS |
+                            LTC1867L_CONFIG_BIT_S0 |
+                            LTC1867L_CONFIG_BIT_COM,
+  LTC1867L_P_CH5_M_CH7COM = LTC1867L_CONFIG_BIT_SD |
+                            LTC1867L_CONFIG_BIT_OS |
+                            LTC1867L_CONFIG_BIT_S1 |
+                            LTC1867L_CONFIG_BIT_COM
 };
 
 enum ltc1867l_analog_input_mode_e
@@ -130,7 +148,7 @@ begin_packed_struct struct ltc1867l_channel_config_s
 
 int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                       unsigned int devno,
-                      FAR struct ltc1867l_channel_config_s* channel_config,
+                      FAR struct ltc1867l_channel_config_s *channel_config,
                       int channel_config_count);
 
 #endif /* CONFIG_ADC_LTC1867L */

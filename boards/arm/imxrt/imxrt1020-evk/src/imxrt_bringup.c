@@ -40,14 +40,17 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <sys/types.h>
 #include <syslog.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
-#include <nuttx/wireless/bluetooth/bt_uart_shim.h>
+
+#include "hardware/imxrt_pinmux.h"
+#include "hardware/imxrt_ccm.h"
+#include "imxrt_periphclks.h"
 
 #include "imxrt_lpi2c.h"
 #include "imxrt_flexspi_nor_boot.h"
@@ -164,11 +167,6 @@ int imxrt_bringup(void)
    * capabilities.
    */
 
-#include "arm_arch.h"
-#include "hardware/imxrt_pinmux.h"
-#include "hardware/imxrt_ccm.h"
-#include "imxrt_periphclks.h"
-
 #ifdef CONFIG_USBHOST
   ret = imxrt_usbhost_initialize();
   if (ret < 0)
@@ -180,7 +178,7 @@ int imxrt_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);

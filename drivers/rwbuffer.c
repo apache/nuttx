@@ -71,15 +71,18 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
  * Name: rwb_semtake
  ****************************************************************************/
 
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 static int rwb_semtake(FAR sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_forcetake
  ****************************************************************************/
 
+#if defined(CONFIG_DRVR_WRITEBUFFER) && CONFIG_DRVR_WRDELAY != 0
 static int rwb_forcetake(FAR sem_t *sem)
 {
   int result;
@@ -103,6 +106,7 @@ static int rwb_forcetake(FAR sem_t *sem)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_semgive
@@ -311,7 +315,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
           nblocks = 0;
         }
 
-      /* 4. We upate a portion at the end of the write buffer */
+      /* 4. We update a portion at the end of the write buffer */
 
       else if (wrbend >= startblock && wrbend <= newend)
         {
@@ -862,11 +866,12 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
       rwb->rhbuffer = kmm_malloc(allocsize);
       if (!rwb->rhbuffer)
         {
-          ferr("Read-ahead buffer kmm_malloc(%d) failed\n", allocsize);
+          ferr("Read-ahead buffer kmm_malloc(%" PRIu32 ") failed\n",
+          allocsize);
           return -ENOMEM;
         }
 
-      finfo("Read-ahead buffer size: %d bytes\n", allocsize);
+      finfo("Read-ahead buffer size: %" PRIu32 " bytes\n", allocsize);
     }
 #endif /* CONFIG_DRVR_READAHEAD */
 

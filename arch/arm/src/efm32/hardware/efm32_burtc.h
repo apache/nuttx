@@ -1,5 +1,5 @@
-/*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_burtc.h
+/****************************************************************************
+ * arch/arm/src/efm32/hardware/efm32_burtc.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_BURTC_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_BURTC_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,13 +72,13 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #define EFM32_BURTC_NREGS                     128 /* Number of backup retention registers */
 
-/* BURTC Register Offsets ******************************************************************************************************/
+/* BURTC Register Offsets ***************************************************/
 
 #define EFM32_BURTC_CTRL_OFFSET               0x0000  /* Control Register */
 #define EFM32_BURTC_LPMODE_OFFSET             0x0004  /* Low power mode configuration */
@@ -101,7 +101,7 @@
 
 #define EFM32_BURTC_RET_REG_OFFSET(n)         (0x0100 + ((n) << 2))
 
-/* BURTC Register Addresses ****************************************************************************************************/
+/* BURTC Register Addresses *************************************************/
 
 #define EFM32_BURTC_CTRL                      (EFM32_BCKRTC_BASE+EFM32_BURTC_CTRL_OFFSET)
 #define EFM32_BURTC_LPMODE                    (EFM32_BCKRTC_BASE+EFM32_BURTC_LPMODE_OFFSET)
@@ -124,7 +124,7 @@
 
 #define EFM32_BURTC_RET_REG(n)                (EFM32_BCKRTC_BASE+EFM32_BURTC_RET_REG_OFFSET(n))
 
-/* BURTC Register Bit Field Definitions ****************************************************************************************/
+/* BURTC Register Bit Field Definitions *************************************/
 
 /* Bit fields for BURTC CTRL */
 

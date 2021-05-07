@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/arm_exit.c
+ * arch/arm/src/common/arm_exit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -77,13 +77,14 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   filelist = tcb->group->tg_filelist;
   for (i = 0; i < filelist->fl_rows; i++)
     {
-      for (j = 0; j < CONFIG_NFCHUNK_DESCRIPTORS; j++)
+      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
           struct inode *inode = filelist->fl_files[i][j].f_inode;
           if (inode)
             {
               sinfo("      fd=%d refcount=%d\n",
-                    i * CONFIG_NFCHUNK_DESCRIPTORS + j, inode->i_crefs);
+                    i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j,
+                    inode->i_crefs);
             }
         }
     }
@@ -153,6 +154,12 @@ void up_exit(int status)
    */
 
   tcb = this_task();
+
+  /* Adjusts time slice for SCHED_RR & SCHED_SPORADIC cases
+   * NOTE: the API also adjusts the global IRQ control for SMP
+   */
+
+  nxsched_resume_scheduler(tcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running

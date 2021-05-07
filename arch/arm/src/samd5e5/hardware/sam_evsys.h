@@ -1,57 +1,42 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_evsys.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EVSYS_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EVSYS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_EVSYS_NCHANNELS                32      /* 0-31 */
 #define SAM_EVSYS_NUSER                    67      /* 0-66 */
 
-/* EVSYS register offsets *******************************************************************/
+/* EVSYS register offsets ***************************************************/
 
 #define SAM_EVSYS_CTRLA_OFFSET             0x0000  /* Control register */
 #define SAM_EVSYS_SWEVT_OFFSET             0x0004  /* Software event register */
@@ -62,6 +47,7 @@
 #define SAM_EVSYS_READYUSR_OFFSET          0x001c  /* Busy channels register */
 
 #define SAM_EVSYS_CHOFFSET(n)              (0x0020 + ((n) << 3)) /* Channel registers */
+
 #  define SAM_EVSYS_CHANNEL_OFFSET         0x0000  /* Channel control register */
 #  define SAM_EVSYS_CHINTENCLR_OFFSET      0x0004  /* Channel interrupt clear register */
 #  define SAM_EVSYS_CHINTENSET_OFFSET      0x0005  /* Channel interrupt enable register */
@@ -70,7 +56,7 @@
 
 #define SAM_EVSYS_USER_OFFSET(n)           (0x0120 + ((m)) /* User registers */
 
-/* EVSYS register addresses *****************************************************************/
+/* EVSYS register addresses *************************************************/
 
 #define SAM_EVSYS_CTRLA                    (SAM_EVSYS_BASE + SAM_EVSYS_CTRLA_OFFSET)
 #define SAM_EVSYS_SWEVT                    (SAM_EVSYS_BASE + SAM_EVSYS_SWEVT_OFFSET)
@@ -89,7 +75,7 @@
 
 #define SAM_EVSYS_USER(n)                  (SAM_EVSYS_BASE +  SAM_EVSYS_USER_OFFSET(n))
 
-/* EVSYS register bit definitions ***********************************************************/
+/* EVSYS register bit definitions *******************************************/
 
 /* Control register */
 
@@ -138,17 +124,19 @@
 #  define EVSYS_CHANNEL_PATH_SYNCH          (0 << EVSYS_CHANNEL_PATH_SHIFT) /* Synchronous path */
 #  define EVSYS_CHANNEL_PATH_RESYNCH        (1 << EVSYS_CHANNEL_PATH_SHIFT) /* Resynchronized path */
 #  define EVSYS_CHANNEL_PATH_ASYNCH         (2 << EVSYS_CHANNEL_PATH_SHIFT) /* Asynchronous path */
+
 #define EVSYS_CHANNEL_EDGSEL_SHIFT          (10)      /* Bits 10-11: Edge detection selection */
 #define EVSYS_CHANNEL_EDGSEL_MASK           (3 << EVSYS_CHANNEL_EDGSEL_SHIFT)
 #  define EVSYS_CHANNEL_EDGSEL_NONE         (0 << EVSYS_CHANNEL_EDGSEL_SHIFT) /* No event output */
 #  define EVSYS_CHANNEL_EDGSEL_ RISING      (1 << EVSYS_CHANNEL_EDGSEL_SHIFT) /* Event on rising edge */
 #  define EVSYS_CHANNEL_EDGSEL_FALLING      (2 << EVSYS_CHANNEL_EDGSEL_SHIFT) /* Event on falling edge */
 #  define EVSYS_CHANNEL_EDGSEL_BOTH         (3 << EVSYS_CHANNEL_EDGSEL_SHIFT) /* Event on both edges */
+
 #define EVSYS_CHANNEL_RUNSTDBY              (1 << 14) /* Bit 14: Run in standby */
 #define EVSYS_CHANNEL_ONDEMAND              (1 << 15) /* Bit 15: Generic clock on demand */
 
-/* Channel interrupt clear register, Channel interrupt enable register, and Channel interrupt
- * status register
+/* Channel interrupt clear register, Channel interrupt enable register,
+ * and Channel interrupt status register
  */
 
 #define EVSYS_CHINT_OVR                     (1 << 0)  /* Bit 0: Channel overrun */
@@ -159,9 +147,11 @@
 #define EVSYS_CHSTATUS_RDYUSR               (1 << 0)  /* Bit 0: Ready user */
 #define EVSYS_CHSTATUS_BUSYCH               (1 << 1)  /* Bit 1: Busy channel */
 
-/* User registers (8-bit channel number.  See user multiplexor numbers below */
+/* User registers (8-bit channel number.
+ * See user multiplexor numbers below
+ */
 
-/* Event generator channel event selection **************************************************/
+/* Event generator channel event selection **********************************/
 
 #define EVSYS_EVENT_NONE                    0x00  /* No event generator selected */
 #define EVSYS_EVENT_OSCCTRL_XOSC_FAIL0      0x01  /* XOSC fail detection 0 */
@@ -282,9 +272,10 @@
 #define EVSYS_EVENT_CCL_LUTOUT2             0x76  /* CCL LUTOUT 2 */
 #define EVSYS_EVENT_CCL_LUTOUT3             0x77  /* CCL LUTOUT 3 */
 
-/* User multiplexer numbers  ****************************************************************/
-/* These are indices that may be used with the SAM_EVSYS_USER(n) macro to get the address of
- * the correct user register.
+/* User multiplexer numbers  ************************************************/
+
+/* These are indices that may be used with the SAM_EVSYS_USER(n) macro to get
+ * the address of the correct user register.
  */
 
 #define EVSYS_USER_RTC_TAMPER               0   /* RTC Tamper A */
@@ -354,16 +345,16 @@
 #define EVSYS_USER_CCL_LUTIN2               65  /* CCL input 2 */
 #define EVSYS_USER_CCL_LUTIN3               66  /* CCL input 3 */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_EVSYS_H */

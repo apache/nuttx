@@ -1,38 +1,24 @@
 /****************************************************************************
  * drivers/power/bq2425x.h
- * Lower half driver for BQ2425x battery charger
  *
- *   Copyright (C) 2015 Alan Carvalho de Assis. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* Lower half driver for BQ2425x battery charger */
 
 #ifndef __DRIVERS_POWER_BQ2425X_H
 #define __DRIVERS_POWER_BQ2425X_H
@@ -49,7 +35,7 @@
 #define BQ2425X_CURR_MIN  500
 #define BQ2425X_CURR_MAX  2000
 
-/* BQ2425x Register Definitions ********************************************/
+/* BQ2425x Register Definitions *********************************************/
 
 #define BQ2425X_REG_1     0x00
 #define BQ2425X_REG_2     0x01
@@ -96,6 +82,7 @@
 #  define BQ2425X_INP_CURR_LIM_2000MA (5 << BQ2425X_INP_CURR_LIM_SHIFT) /* Charger with 2000mA current limit */
 #  define BQ2425X_INP_CURR_EXT_ILIM   (6 << BQ2425X_INP_CURR_LIM_SHIFT) /* External ILIM current limit */
 #  define BQ2425X_INP_CURR_NO_LIMIT   (7 << BQ2425X_INP_CURR_LIM_SHIFT) /* No input current limit with internal clamp at 3A */
+
 #define BQ2425X_EN_STAT               (1 << 3) /* Enable/Disable STAT pin */
 #define BQ2425X_EN_TERM               (1 << 2) /* Enable/Disable charge termination */
 #define BQ2425X_CE                    (1 << 1) /* Enable/Disable the Charger, inverted logic, 0 enables */
@@ -232,12 +219,14 @@
 /* REG 6 */
 
 #define BQ2425X_2XTMR_EN              (1 << 7) /* Timer slowed 2x when in thermal reg., Vin_dpm or DPPM */
+
 #define BQ2425X_TIMER_SHIFT           6 /* Safety timer time limit */
 #define BQ2425X_TIMER_MASK            (3 << BQ2425X_TIMER_SHIFT)
 #  define BQ2425X_TIMER_0p74H         (0 << BQ2425X_TIMER_SHIFT) /* 0.75 hour fast charge */
 #  define BQ2425X_TIMER_6H            (1 << BQ2425X_TIMER_SHIFT) /* 6 hour fast charge (default 01) */
 #  define BQ2425X_TIMER_9H            (2 << BQ2425X_TIMER_SHIFT) /* 9 hour fast charge */
 #  define BQ2425X_TIMER_DISABLED      (3 << BQ2425X_TIMER_SHIFT) /* Disable safety timers */
+
 #define BQ2425X_SYSOFF                (1 << 4) /* 0 = SYSOFF disabled ; 1 = SYSOFF enabled */
 #define BQ2425X_TS_EN                 (1 << 3) /* 0 = TS function disabled ; 1 = TS function enabled */
 #define BQ2425X_TS_STATUS_SHIFT       0        /* TS Fault Mode */
@@ -263,10 +252,13 @@
 #  define BQ2425X_VOLT_OVP_9p5V       (5 << BQ2425X_VOLT_OVP_SHIFT) /* 9.5V */
 #  define BQ2425X_VOLT_OVP_10p0V      (6 << BQ2425X_VOLT_OVP_SHIFT) /* 10.0V */
 #  define BQ2425X_VOLT_OVP_10p5V      (7 << BQ2425X_VOLT_OVP_SHIFT) /* 10.5V */
+
 #define BQ2425X_CLR_VDP               (1 << 4) /* 0 = Keep D+ voltage ; 1 = Turn off D+ voltage */
 #define BQ2425X_FORCE_BAT_DET         (1 << 3) /* Enter the battery detection routine */
 #define BQ2425X_FORCE_PTM             (1 << 2) /* PTM mode enable */
+
                                       /* bit 1: reserved */
+
                                       /* bit 0: reserved */
 
 #endif /* __DRIVERS_POWER_BQ2425X_H */

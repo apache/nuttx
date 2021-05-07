@@ -1,44 +1,29 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_hsmci.h
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_HSMCI_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_HSMCI_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,11 +31,11 @@
 #include "hardware/sam_pdc.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* HSMCI register offsets ***************************************************************/
+/* HSMCI register offsets ***************************************************/
 
 #define SAM_HSMCI_CR_OFFSET           0x0000 /* Control Register */
 #define SAM_HSMCI_MR_OFFSET           0x0004 /* Mode Register */
@@ -84,7 +69,7 @@
                                              /* 0x0100-0x0124: Reserved for PCD registers */
 #define SAM_HSMCI_FIFO_OFFSET         0x0200 /* 0x0200-0x3ffc FIFO Memory Aperture */
 
-/* HSMCI register addresses *************************************************************/
+/* HSMCI register addresses *************************************************/
 
 #define SAM_HSMCI_CR                  (SAM_HSMCI_BASE+SAM_HSMCI_CR_OFFSET)
 #define SAM_HSMCI_MR                  (SAM_HSMCI_BASE+SAM_HSMCI_MR_OFFSET)
@@ -127,7 +112,7 @@
 #  define SAM_HSMCI_PDC_PTSR          (SAM_HSMCI_BASE+SAM_PDC_PTSR_OFFSET)
 #endif
 
-/* HSMCI register bit definitions *******************************************************/
+/* HSMCI register bit definitions *******************************************/
 
 /* HSMCI Control Register */
 
@@ -206,6 +191,7 @@
 #  define HSMCI_CMDR_RSPTYP_48BIT     (1 << HSMCI_CMDR_RSPTYP_SHIFT) /* 48-bit response */
 #  define HSMCI_CMDR_RSPTYP_136BIT    (2 << HSMCI_CMDR_RSPTYP_SHIFT) /* 136-bit response */
 #  define HSMCI_CMDR_RSPTYP_R1B       (3 << HSMCI_CMDR_RSPTYP_SHIFT) /* R1b response type */
+
 #define HSMCI_CMDR_SPCMD_SHIFT        (8)       /* Bits 8-10: Special Command */
 #define HSMCI_CMDR_SPCMD_MASK         (7 << HSMCI_CMDR_SPCMD_SHIFT)
 #  define HSMCI_CMDR_SPCMD_NORMAL     (0 << HSMCI_CMDR_SPCMD_SHIFT) /* Not a special CMD */
@@ -216,6 +202,7 @@
 #  define HSMCI_CMDR_SPCMD_INTRESP    (5 << HSMCI_CMDR_SPCMD_SHIFT) /* Interrupt response */
 #  define HSMCI_CMDR_SPCMD_BOOTOP     (6 << HSMCI_CMDR_SPCMD_SHIFT) /* Boot Operation Request */
 #  define HSMCI_CMDR_SPCMD_BOOTEND    (7 << HSMCI_CMDR_SPCMD_SHIFT) /* End Boot Operation */
+
 #define HSMCI_CMDR_OPDCMD             (1 << 11) /* Bit 11: Open Drain Command */
 #define HSMCI_CMDR_MAXLAT             (1 << 12) /* Bit 12: Max Latency for Command to Response */
 #define HSMCI_CMDR_TRCMD_SHIFT        (16)      /* Bits 16-17: Transfer Command */
@@ -223,6 +210,7 @@
 #  define HSMCI_CMDR_TRCMD_NONE       (0 << HSMCI_CMDR_TRCMD_SHIFT) /* No data transfer */
 #  define HSMCI_CMDR_TRCMD_START      (1 << HSMCI_CMDR_TRCMD_SHIFT) /* Start data transfer */
 #  define HSMCI_CMDR_TRCMD_STOP       (2 << HSMCI_CMDR_TRCMD_SHIFT) /* Stop data transfer */
+
 #define HSMCI_CMDR_TRDIR              (1 << 18) /* Bit 18: Transfer Direction */
 #  define HSMCI_CMDR_TRDIR_WRITE      (0 << 18)
 #  define HSMCI_CMDR_TRDIR_READ       (1 << 18)
@@ -233,11 +221,13 @@
 #  define HSMCI_CMDR_TRTYP_STREAM     (2 << HSMCI_CMDR_TRTYP_SHIFT) /* MMC Stream */
 #  define HSMCI_CMDR_TRTYP_SDIOBYTE   (4 << HSMCI_CMDR_TRTYP_SHIFT) /* SDIO Byte */
 #  define HSMCI_CMDR_TRTYP_SDIOBLK    (5 << HSMCI_CMDR_TRTYP_SHIFT) /* SDIO Block */
+
 #define HSMCI_CMDR_IOSPCMD_SHIFT      (24)      /* Bits 24-25: SDIO Special Command */
 #define HSMCI_CMDR_IOSPCMD_MASK       (3 << HSMCI_CMDR_IOSPCMD_SHIFT)
 #  define HSMCI_CMDR_IOSPCMD_NORMAL   (0 << HSMCI_CMDR_IOSPCMD_SHIFT) /* Not an SDIO Special Command */
 #  define HSMCI_CMDR_IOSPCMD_SUSP     (1 << HSMCI_CMDR_IOSPCMD_SHIFT) /* SDIO Suspend Command */
 #  define HSMCI_CMDR_IOSPCMD_RESUME   (2 << HSMCI_CMDR_IOSPCMD_SHIFT) /* SDIO Resume Command */
+
 #define HSMCI_CMDR_ATACS              (1 << 26) /* Bit 26: ATA with Command Completion Signal */
 #define HSMCI_CMDR_BOOTACK            (1 << 27) /* Bit 27: Boot Operation Acknowledge */
 
@@ -267,11 +257,14 @@
 #  define HSMCI_CSTOR_CSTOMUL_1048576 (7 << HSMCI_CSTOR_CSTOMUL_SHIFT)
 
 /* HSMCI Response Registers (32-bit data) */
+
 /* HSMCI Receive Data Registers (32-bit data) */
+
 /* HSMCI Transmit Data Registers (32-bit data) */
 
-/* HSMCI Status Register, HSMCI Interrupt Enable Register, HSMCI Interrupt Disable
- * Register, and HSMCI Interrupt Mask Register common bit-field definitions
+/* HSMCI Status Register, HSMCI Interrupt Enable Register,
+ * HSMCI Interrupt Disable Register, and HSMCI Interrupt Mask Register
+ * common bit-field definitions
  */
 
 #define HSMCI_INT_CMDRDY              (1 << 0)  /* Bit 0:  Command Ready */
@@ -351,16 +344,16 @@
 #define HSMCI_WPSR_VSRC_SHIFT         (8)       /* Bits 8-23: Write Protection Violation Source */
 #define HSMCI_WPSR_VSRC_MASK          (0xffff << HSMCI_WPSR_VSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_HSMCI_H */

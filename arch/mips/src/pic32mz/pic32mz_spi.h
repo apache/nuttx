@@ -1,61 +1,46 @@
-/************************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_spi.h
  *
- *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_SPI_H
 #define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_SPI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -66,9 +51,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
 
@@ -88,33 +73,34 @@ struct spi_dev_s;  /* Forward reference */
 
 FAR struct spi_dev_s *pic32mz_spibus_initialize(int port);
 
-/************************************************************************************
+/****************************************************************************
  * Name:  pic32mz_spiNselect, pic32mz_spiNstatus, and pic32mz_spiNcmddata
  *
  * Description:
- *   These external functions must be provided by board-specific logic.  They are
- *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including pic32mz_spibus_initialize()) are provided by common PIC32MZ logic.  To use
- *   this common SPI logic on your board:
+ *   These external functions must be provided by board-specific logic.  They
+ *   are implementations of the select, status, and cmddata methods of the
+ *   SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods including pic32mz_spibus_initialize()) are provided by
+ *   common PIC32MZ logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in pic32mz_boardinitialize() to configure SPI/SSP chip select
- *      pins.
+ *   1. Provide logic in pic32mz_boardinitialize() to configure SPI/SSP chip
+ *      select pins.
  *   2. Provide pic32mz_spiNselect() and pic32mz_spiNstatus() functions
- *      in your board-specific logic.  These functions will perform chip selection
- *      and status operations using GPIOs in the way your board is configured.
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      pic32mz_spiNcmddata() functions in your board-specific logic.  These
- *      functions will perform cmd/data selection operations using GPIOs in the way
- *      your board is configured.
- *   3. Add a call to pic32mz_spibus_initialize() in your low level application
- *      initialization logic
- *   4. The handle returned by pic32mz_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   3. Add a call to pic32mz_spibus_initialize() in your low level
+ *      application initialization logic
+ *   4. The handle returned by pic32mz_spibus_initialize() may then be used
+ *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI1
 void pic32mz_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
@@ -192,32 +178,38 @@ int pic32mz_spi6cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #ifdef CONFIG_SPI_CALLBACK
 #ifdef CONFIG_PIC32MZ_SPI1
-int pic32mz_spi1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi1register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI2
-int pic32mz_spi2register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi2register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI3
-int pic32mz_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi3register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI4
-int pic32mz_spi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi4register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI5
-int pic32mz_spi5register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi5register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 
 #ifdef CONFIG_PIC32MZ_SPI6
-int pic32mz_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
+int pic32mz_spi6register(FAR struct spi_dev_s *dev,
+                         spi_mediachange_t callback,
                          FAR void *arg);
 #endif
 #endif /* CONFIG_SPI_CALLBACK */

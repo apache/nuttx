@@ -110,8 +110,8 @@ uint32_t *minerva_doirq(int irq, uint32_t * regs)
 
   /* If a context switch occurred while processing the interrupt then
    * g_current_regs may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context switch
-   * occurred during interrupt processing.
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
    */
 
   regs = (uint32_t *) g_current_regs;

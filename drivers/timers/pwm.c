@@ -127,7 +127,7 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
               info->channels[i].channel, info->channels[i].duty);
     }
 #else
-  pwminfo(" duty: %08x\n", info->duty);
+  pwminfo(" duty: %08" PRIx32 "\n", info->duty);
 #endif
 
 #ifdef CONFIG_PWM_PULSECOUNT

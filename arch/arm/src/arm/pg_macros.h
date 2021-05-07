@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/arm/pg_macros.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -78,9 +63,9 @@
 #ifndef PGTABLE_BASE_VADDR
 #  define PGTABLE_BASE_VADDR      (PG_LOCKED_VBASE + PG_TEXT_VSIZE + PG_DATA_SIZE)
 
-   /* Virtual base of the address of the L2 page tables need to recalculates
-    * using this new virtual base address of the L2 page table.
-    */
+/* Virtual base of the address of the L2 page tables need to recalculates
+ * using this new virtual base address of the L2 page table.
+ */
 
 #  undef PGTABLE_L2_FINE_VBASE
 #  define PGTABLE_L2_FINE_VBASE   (PGTABLE_BASE_VADDR+PGTABLE_L2_FINE_OFFSET)
@@ -97,20 +82,20 @@
 
 #if CONFIG_PAGING_PAGESIZE == 1024
 
-   /* Base of the L2 page table (aligned to 4Kb byte boundaries) */
+/* Base of the L2 page table (aligned to 4Kb byte boundaries) */
 
 #  define PGTABLE_L2_BASE_PADDR PGTABLE_L2_FINE_PBASE
 #  define PGTABLE_L2_BASE_VADDR PGTABLE_L2_FINE_VBASE
 
-   /* Number of pages in an L2 table per L1 entry */
+/* Number of pages in an L2 table per L1 entry */
 
 #  define PTE_NPAGES            PTE_TINY_NPAGES
 
-   /* Mask to get the page table physical address from an L1 entry */
+/* Mask to get the page table physical address from an L1 entry */
 
 #  define PG_L1_PADDRMASK       PMD_FINE_TEX_MASK
 
-   /* MMU Flags for each memory region */
+/* MMU Flags for each memory region */
 
 #  define MMU_L1_TEXTFLAGS      (PMD_TYPE_FINE|PMD_BIT4)
 #  define MMU_L2_TEXTFLAGS      (PTE_TYPE_TINY|PTE_EXT_AP_UNO_SRO|PTE_CACHEABLE)
@@ -125,20 +110,20 @@
 
 #elif CONFIG_PAGING_PAGESIZE == 4096
 
-   /* Base of the L2 page table (aligned to 1Kb byte boundaries) */
+/* Base of the L2 page table (aligned to 1Kb byte boundaries) */
 
 #  define PGTABLE_L2_BASE_PADDR PGTABLE_L2_COARSE_PBASE
 #  define PGTABLE_L2_BASE_VADDR PGTABLE_L2_COARSE_VBASE
 
-   /* Number of pages in an L2 table per L1 entry */
+/* Number of pages in an L2 table per L1 entry */
 
 #  define PTE_NPAGES            PTE_SMALL_NPAGES
 
-   /* Mask to get the page table physical address from an L1 entry */
+/* Mask to get the page table physical address from an L1 entry */
 
 #  define PG_L1_PADDRMASK       PMD_COARSE_TEX_MASK
 
-   /* MMU Flags for each memory region. */
+/* MMU Flags for each memory region. */
 
 #  define MMU_L1_TEXTFLAGS      (PMD_TYPE_COARSE|PMD_BIT4)
 #  define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
@@ -226,9 +211,9 @@
 /* Vector Mapping ***********************************************************/
 
 /* One page is required to map the vector table.  The vector table could lie
- * at virtual address zero (or at the start of RAM which is aliased to address
- * zero on the ea3131) or at virtual address 0xfff00000.  We only have logic
- * here to support the former case.
+ * at virtual address zero (or at the start of RAM which is aliased to
+ * address zero on the ea3131) or at virtual address 0xfff00000.
+ *  We only have logic here to support the former case.
  *
  * NOTE:  If the vectors are at address zero, the page table will be
  * forced to the highest RAM addresses.  If the vectors are at 0xfff0000,
@@ -271,7 +256,9 @@
 #  define PG_L2_VECT_PADDR      (PGTABLE_L2_BASE_PADDR + PG_L2_VECT_OFFSET)
 #  define PG_L2_VECT_VADDR      (PGTABLE_L2_BASE_VADDR + PG_L2_VECT_OFFSET)
 
-/* Case 3: High vectors or the locked region is not at the beginning or SRAM */
+/* Case 3:
+ * High vectors or the locked region is not at the beginning or SRAM
+ */
 
 #else
 #  error "Logic missing for high vectors in this case"
@@ -334,7 +321,7 @@
  *                            (virtual)address of the backing page memory.
  *
  * These are used as follows:  If a miss occurs at some virtual address, va,
- * A new page index, ndx, is allocated.  PG_POOL_PGPADDR(i) converts the index
+ * A new page index, ndx, is allocated. PG_POOL_PGPADDR(i) converts the index
  * into the physical address of the page memory; PG_POOL_L2VADDR(va) converts
  * the virtual address in the L2 page table there the new mapping will be
  * written.
@@ -371,11 +358,11 @@
  *   written. This macro is used when CONFIG_PAGING is enable.  This case,
  *   it is used as follows:
  *
- *	ldr	r0, =PGTABLE_L2_BASE_PADDR	<-- Address in L2 table
- *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical page memory address
- *	ldr	r2, =CONFIG_PAGING_NLOCKED	<-- number of pages
- *      ldr	r3, =MMUFLAGS			<-- L2 MMU flags
- *	pg_l2map r0, r1, r2, r3, r4
+ *  ldr r0, =PGTABLE_L2_BASE_PADDR      <-- Address in L2 table
+ *  ldr r1, =PG_LOCKED_PBASE            <-- Physical page memory address
+ *  ldr r2, =CONFIG_PAGING_NLOCKED      <-- number of pages
+ *  ld  r3, =MMUFLAGS                   <-- L2 MMU flags
+ *  pg_l2map r0, r1, r2, r3, r4
  *
  * Input Parameters:
  *   l2 - Physical or virtual start address in the L2 page table, depending
@@ -399,37 +386,38 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_l2map, l2, ppage, npages, mmuflags, tmp
-	b	2f
+  .macro  pg_l2map, l2, ppage, npages, mmuflags, tmp
+  b  2f
 1:
-	/* Write the one L2 entries.  First,  get tmp = (ppage | mmuflags),
-	 * the value to write into the L2 PTE
-	 */
+  /* Write the one L2 entries.  First,  get tmp = (ppage | mmuflags),
+   * the value to write into the L2 PTE
+   */
 
-	orr	\tmp, \ppage, \mmuflags
+  orr \tmp, \ppage, \mmuflags
 
-	/* Write value into table at the current table address
-	 * (and increment the L2 page table address by 4)
-	 */
+  /* Write value into table at the current table address
+   * (and increment the L2 page table address by 4)
+   */
 
-	str	\tmp, [\l2], #4
+  str \tmp, [\l2], #4
 
-	/* Update the physical address that will correspond to the next
-	 * table entry.
-	 */
+  /* Update the physical address that will correspond to the next
+   * table entry.
+   */
 
-	add	\ppage, \ppage, #CONFIG_PAGING_PAGESIZE
+  add \ppage, \ppage, #CONFIG_PAGING_PAGESIZE
 
-	/* Decrement the number of pages written */
+  /* Decrement the number of pages written */
 
-	sub	\npages, \npages, #1
+  sub \npages, \npages, #1
 2:
-	/* Check if all of the pages have been written.  If not, then
-	 * loop and write the next PTE.
-	 */
-	cmp	\npages, #0
-	bgt	1b
-	.endm
+  /* Check if all of the pages have been written.
+   * If not, then loop and write the next PTE.
+   */
+
+  cmp \npages, #0
+  bgt 1b
+  .endm
 #endif /* CONFIG_PAGING */
 
 /****************************************************************************
@@ -441,17 +429,19 @@
  *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
  *   follows:
  *
- *	ldr	r0, =PG_L1_PGTABLE_PADDR	<-- Address in the L1 table
- *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table
- *	ldr	r2, =PG_PGTABLE_NPAGES		<-- Total number of pages
- *	ldr	r3, =PG_PGTABLE_NPAGE1		<-- Number of pages in the first PTE
- *      ldr	r4, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
- *	pg_l1span r0, r1, r2, r3, r4, r4
+ * ldr r0, =PG_L1_PGTABLE_PADDR         <-- Address in the L1 table
+ * ldr r1, =PG_L2_PGTABLE_PADDR         <-- Physical address of L2 page table
+ * ldr r2, =PG_PGTABLE_NPAGES           <-- Total number of pages
+ * ldr r3, =PG_PGTABLE_NPAGE1           <-- Number of pages in the first PTE
+ * ldr r4, =MMU_L1_PGTABFLAGS           <-- L1 MMU flags
+ * pg_l1span r0, r1, r2, r3, r4, r4
  *
  * Input Parameters (unmodified unless noted):
- *   l1 - Physical or virtual address in the L1 table to begin writing (modified)
+ *   l1 - Physical or virtual address in the L1 table to begin writing
+ *        (modified)
  *   l2 - Physical start address in the L2 page table (modified)
- *   npages - Number of pages to required to span that memory region (modified)
+ *   npages - Number of pages to required to span that memory region
+ *        (modified)
  *   ppage - The number of pages in page 1 (modified)
  *   mmuflags - L1 MMU flags to use
  *
@@ -472,42 +462,42 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-	.macro	pg_l1span, l1, l2, npages, ppage, mmuflags, tmp
-	b	2f
+  .macro pg_l1span, l1, l2, npages, ppage, mmuflags, tmp
+  b 2f
 1:
-	/* Write the L1 table entry that refers to this (unmapped) coarse page
-	 * table.
-	 *
-	 * tmp = (l2table | mmuflags), the value to write into the page table
-	 */
+  /* Write the L1 table entry that refers to this (unmapped) coarse page
+   * table.
+   *
+   * tmp = (l2table | mmuflags), the value to write into the page table
+   */
 
-	orr	\tmp, \l2, \mmuflags
+  orr \tmp, \l2, \mmuflags
 
-	/* Write the value into the L1 table at the correct offset.
-	 * (and increment the L1 table address by 4)
-	 */
+  /* Write the value into the L1 table at the correct offset.
+   * (and increment the L1 table address by 4)
+   */
 
-	str	\tmp, [\l1], #4
+  str \tmp, [\l1], #4
 
-	/* Update the L2 page table address for the next L1 table entry. */
+  /* Update the L2 page table address for the next L1 table entry. */
 
-	add	\l2, \l2, #PT_SIZE  /* Next L2 page table start address */
+  add \l2, \l2, #PT_SIZE  /* Next L2 page table start address */
 
-	/* Update the number of pages that we have account for (with
-	 * non-mappings).  NOTE that the first page may have fewer than
-	 * the maximum entries per page table.
-	 */
+  /* Update the number of pages that we have account for (with
+   * non-mappings).  NOTE that the first page may have fewer than
+   * the maximum entries per page table.
+   */
 
-	sub	\npages, \npages, \ppage
-	mov	\ppage, #PTE_NPAGES
+  sub \npages, \npages, \ppage
+  mov \ppage, #PTE_NPAGES
 2:
-	/* Check if all of the pages have been written.  If not, then
-	 * loop and write the next L1 entry.
-	 */
+  /* Check if all of the pages have been written.  If not, then
+   * loop and write the next L1 entry.
+   */
 
-	cmp	\npages, #0
-	bgt	1b
-	.endm
+  cmp \npages, #0
+  bgt 1b
+  .endm
 
 #endif /* CONFIG_PAGING */
 #endif /* __ASSEMBLY__ */

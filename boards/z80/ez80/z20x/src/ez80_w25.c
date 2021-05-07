@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
@@ -94,6 +92,7 @@ int ez80_w25_initialize(int minor)
       return ret;
     }
 
+#if defined(CONFIG_BCH)
   /* Create a character device on the block device */
 
   ret = bchdev_register(W25_BLOCKDEV, W25_CHARDEV, false);
@@ -102,6 +101,7 @@ int ez80_w25_initialize(int minor)
       ferr("ERROR: bchdev_register %s failed: %d\n", W25_CHARDEV, ret);
       return ret;
     }
+#endif /* defined(CONFIG_BCH) */
 #endif
 
   return OK;

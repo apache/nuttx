@@ -1,55 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_bscif.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_BSCIF_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_BSCIF_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* BSCIF register offsets ***************************************************************/
+/* BSCIF register offsets ***************************************************/
 
 #define SAM_BSCIF_IER_OFFSET              0x0000 /* Interrupt Enable Register */
 #define SAM_BSCIF_IDR_OFFSET              0x0004 /* Interrupt Disable Register */
@@ -85,7 +70,7 @@
 #define SAM_BSCIF_OSC32IFAVERSION_OFFSET  0x03f8 /* 32 kHz Oscillator Version Register */
 #define SAM_BSCIF_VERSION_OFFSET          0x03fc /* BSCIF Version Register */
 
-/* BSCIF register addresses *************************************************************/
+/* BSCIF register addresses *************************************************/
 
 #define SAM_BSCIF_IER                     (SAM_BSCIF_BASE+SAM_BSCIF_IER_OFFSET)
 #define SAM_BSCIF_IDR                     (SAM_BSCIF_BASE+SAM_BSCIF_IDR_OFFSET)
@@ -121,12 +106,16 @@
 #define SAM_BSCIF_OSC32IFAVERSION         (SAM_BSCIF_BASE+SAM_BSCIF_OSC32IFAVERSION_OFFSET)
 #define SAM_BSCIF_VERSION                 (SAM_BSCIF_BASE+SAM_BSCIF_VERSION_OFFSET)
 
-/* BSCIF register bit definitions *******************************************************/
+/* BSCIF register bit definitions *******************************************/
 
 /* Interrupt Enable Register */
+
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
+
 /* Interrupt Status Register */
+
 /* Interrupt Clear Register */
 
 #define BSCIF_INT_OSC32RDY                (1 << 0)  /* Bit 0 */
@@ -182,6 +171,7 @@
 #  define BSCIF_OSCCTRL32_MODE_XTALAC     (3 << BSCIF_OSCCTRL32_MODE_SHIFT) /* Crystal + amplitude controlled mode */
 #  define BSCIF_OSCCTRL32_MODE_XTALHC     (4 << BSCIF_OSCCTRL32_MODE_SHIFT) /* Crystal + high current mode */
 #  define BSCIF_OSCCTRL32_MODE_XTALHCAC   (5 << BSCIF_OSCCTRL32_MODE_SHIFT) /* Crystal + high current + amplitude controlled mode */
+
 #define BSCIF_OSCCTRL32_SELCURR_SHIFT     (12)      /* Bits 12-15: Current Selection */
 #define BSCIF_OSCCTRL32_SELCURR_MASK      (15 << BSCIF_OSCCTRL32_SELCURR_SHIFT)
 #  define BSCIF_OSCCTRL32_SELCURR_50      (0 << BSCIF_OSCCTRL32_SELCURR_SHIFT)
@@ -200,6 +190,7 @@
 #  define BSCIF_OSCCTRL32_SELCURR_375     (13 << BSCIF_OSCCTRL32_SELCURR_SHIFT)
 #  define BSCIF_OSCCTRL32_SELCURR_400     (14 << BSCIF_OSCCTRL32_SELCURR_SHIFT)
 #  define BSCIF_OSCCTRL32_SELCURR_425     (15 << BSCIF_OSCCTRL32_SELCURR_SHIFT)
+
 #define BSCIF_OSCCTRL32_STARTUP_SHIFT     (16)       /* Bits 16-18: Oscillator Start-up Time */
 #define BSCIF_OSCCTRL32_STARTUP_MASK      (7 << BSCIF_OSCCTRL32_STARTUP_SHIFT)
 #  define BSCIF_OSCCTRL32_STARTUP_0       (7 << BSCIF_OSCCTRL32_STARTUP_SHIFT)
@@ -210,6 +201,7 @@
 #  define BSCIF_OSCCTRL32_STARTUP_128K    (7 << BSCIF_OSCCTRL32_STARTUP_SHIFT) /* 131072 1.1 s */
 #  define BSCIF_OSCCTRL32_STARTUP_256K    (7 << BSCIF_OSCCTRL32_STARTUP_SHIFT) /* 262144 2.3 s */
 #  define BSCIF_OSCCTRL32_STARTUP_512K    (7 << BSCIF_OSCCTRL32_STARTUP_SHIFT) /* 524288 4.6 s */
+
 #define BSCIF_OSCCTRL32_RESERVED          (1 << 31) /* Bit 31: Reserved, must always be written as zero */
 
 /* 32kHz RC Oscillator Control Register */
@@ -230,18 +222,22 @@
 #define BSCIF_RC32KTUNE_COARSE_MASK       (0x7f << BSCIF_RC32KTUNE_COARSE_SHIFT)
 
 /* BOD33 Control Register */
+
 /* BOD18 Control Register */
 
 #define BSCIF_BODCTRL_EN                  (1 << 0)  /* Bit 0:  Enable */
 #define BSCIF_BODCTRL_HYST                (1 << 1)  /* Bit 1:  BOD Hysteresis */
 #define BSCIF_BODCTRL_ACTION_SHIFT        (8)       /* Bits 8-9: Action */
+
 #  define BSCIF_BODCTRL_ACTION_RESET      (1 << BSCIF_BODCTRL_ACTION_SHIFT) /* The BOD generates a reset */
 #  define BSCIF_BODCTRL_ACTION_INTR       (2 << BSCIF_BODCTRL_ACTION_SHIFT) /* The BOD generates an interrupt */
+
 #define BSCIF_BODCTRL_MODE                (1 << 0)  /* Bit 0:  Operation modes */
 #define BSCIF_BODCTRL_FCD                 (1 << 0)  /* Bit 0:  BOD Fuse Calibration Done */
 #define BSCIF_BODCTRL_SFV                 (1 << 0)  /* Bit 0:  BOD Control Register Store Final Value */
 
 /* BOD33 Level Register */
+
 /* BOD18 Level Register */
 
 #define BSCIF_BODLEVEL_CEN                (1 << 0)  /* Bit 0:  Clock Enable */
@@ -250,6 +246,7 @@
 #define BSCIF_BODLEVEL_PSEL_MASK          (15 << BSCIF_BODLEVEL_PSEL_SHIFT)
 
 /* BOD33 Sampling Control Register */
+
 /* BOD18 Sampling Control Register */
 
 #define BSCIF_BODSAMPLING_VAL_SHIFT       (0)       /* Bits 0-5: BOD Value */
@@ -289,11 +286,17 @@
 /* 0x0078-0x0084 Backup register n=0..3 (32-bit data) */
 
 /* Backup Register Interface Version Register */
+
 /* BGREFIF Version Register */
+
 /* Voltage Regulator Version Register */
+
 /* BOD Version Register */
+
 /* 32kHz RC Oscillator Version Register */
+
 /* 32 kHz Oscillator Version Register */
+
 /* BSCIF Version Register */
 
 #define BSCIF_VERSION_SHIFT               (0)        /* Bits 0-11: Version Number */
@@ -301,16 +304,16 @@
 #define BSCIF_VARIANT_SHIFT               (16)       /* Bits 16-19: Variant Number */
 #define BSCIF_VARIANT_MASK                (15 << BSCIF_VARIANT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_BSCIF_H */

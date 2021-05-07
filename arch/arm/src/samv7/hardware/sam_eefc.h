@@ -1,56 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_eefc.h
- * Enhanced Embedded Flash Controller (EEFC) definitions for the SAMV71
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_EEFC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_EEFC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* EEFC register offsets ****************************************************************/
+/* EEFC register offsets ****************************************************/
 
 #define SAM_EEFC_FMR_OFFSET          0x00 /* EEFC Flash Mode Register */
 #define SAM_EEFC_FCR_OFFSET          0x04 /* EEFC Flash Command Register */
@@ -58,7 +42,7 @@
 #define SAM_EEFC_FRR_OFFSET          0x0c /* EEFC Flash Result Register */
 #define SAM_EEFC_WPMR_OFFSET         0xec /* EEFC Write Protection Mode Register */
 
-/* EEFC register addresses **************************************************************/
+/* EEFC register addresses **************************************************/
 
 #define SAM_EEFC_FMR                (SAM_EEFC_BASE+SAM_EEFC_FMR_OFFSET)
 #define SAM_EEFC_FCR                (SAM_EEFC_BASE+SAM_EEFC_FCR_OFFSET)
@@ -66,7 +50,8 @@
 #define SAM_EEFC_FRR                (SAM_EEFC_BASE+SAM_EEFC_FRR_OFFSET)
 #define SAM_EEFC_WPMR               (SAM_EEFC_BASE+SAM_EEFC_WPMR_OFFSET)
 
-/* EEFC register bit definitions ********************************************************/
+/* EEFC register bit definitions ********************************************/
+
 /* EEFC Flash Mode Register */
 
 #define EEFC_FMR_FRDY                (1 << 0)  /* Bit 0:  Ready Interrupt Enable */
@@ -124,6 +109,7 @@
 #  define EEFC_FCR_FCMD_EUS          (19 << EEFC_FCR_FCMD_SHIFT) /* Erase User Signature */
 #  define EEFC_FCR_FCMD_STUS         (20 << EEFC_FCR_FCMD_SHIFT) /* Start Read User Signature */
 #  define EEFC_FCR_FCMD_SPUS         (21 << EEFC_FCR_FCMD_SHIFT) /* Stop Read User Signature */
+
 #define EEFC_FCR_FARG_SHIFT          (8)       /* Bits 8-23:  Flash Command Argument */
 #define EEFC_FCR_FARG_MASK           (0xffff << EEFC_FCR_FARG_SHIFT)
 #  define EEFC_FCR_FARG(arg)         ((uint32_t)(arg) << EEFC_FCR_FARG_SHIFT)
@@ -151,16 +137,16 @@
 #define EEFC_WPMR_WPKEY_MASK         (0x00ffffff << EEFC_WPMR_WPKEY_SHIFT)
 #  define EEFC_WPMR_WPKEY            (0x00454643 << EEFC_WPMR_WPKEY_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_EEFC_H */

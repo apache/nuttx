@@ -1,55 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_dmac.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_DMAC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_DMAC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* DMAC register offsets ****************************************************************/
+/* DMAC register offsets ****************************************************/
 
 /* Global Registers */
 
@@ -67,6 +52,7 @@
 #define SAM_DMAC_CHDR_OFFSET           0x002c /* DMAC Channel Handler Disable Register */
 #define SAM_DMAC_CHSR_OFFSET           0x0030 /* DMAC Channel Handler Status Register */
                                               /* 0x034-0x38: Reserved */
+
 /* DMA channel registers */
 
 #define SAM_DMAC_CH_OFFSET(n)          (0x003c+((n)*0x0028))
@@ -92,7 +78,8 @@
 #define SAM_DMAC_WPSR_OFFSET           0x01e8 /* DMAC Write Protect Status Register */
                                               /* 0x01ec-0x1fc: Reserved */
 
-/* DMAC0 register addresses *************************************************************/
+/* DMAC0 register addresses *************************************************/
+
 /* DMAC0 Global Registers */
 
 #define SAM_DMAC0_GCFG                 (SAM_DMAC0_VBASE+SAM_DMAC_GCFG_OFFSET)
@@ -204,7 +191,8 @@
 #define SAM_DMAC0_CH7_SPIP             (SAM_DMAC0_CH7_BASE+SAM_DMAC_CH_SPIP_OFFSET)
 #define SAM_DMAC0_CH7_DPIP             (SAM_DMAC0_CH7_BASE+SAM_DMAC_CH_DPIP_OFFSET)
 
-/* DMAC1 register addresses *************************************************************/
+/* DMAC1 register addresses *************************************************/
+
 /* DMAC1 Global Registers */
 
 #define SAM_DMAC1_GCFG                 (SAM_DMAC1_VBASE+SAM_DMAC_GCFG_OFFSET)
@@ -316,7 +304,7 @@
 #define SAM_DMAC1_CH7_SPIP             (SAM_DMAC1_CH7_BASE+SAM_DMAC_CH_SPIP_OFFSET)
 #define SAM_DMAC1_CH7_DPIP             (SAM_DMAC1_CH7_BASE+SAM_DMAC_CH_DPIP_OFFSET)
 
-/* DMAC register bit definitions ********************************************************/
+/* DMAC register bit definitions ********************************************/
 
 /* Global Registers */
 
@@ -457,11 +445,14 @@
 #  define DMAC_LAST_DLAST6             (1 << (DMAC_LAST_DLAST_SHIFT+DMAC_LAST6_SHIFT))
 #  define DMAC_LAST_DLAST7             (1 << (DMAC_LAST_DLAST_SHIFT+DMAC_LAST7_SHIFT))
 
-/* DMAC Error, Buffer Transfer and Chained Buffer Transfer Interrupt Enable Register,
- * DMAC Error, Buffer Transfer and Chained Buffer Transfer Interrupt Disable Register,
- * DMAC Error, Buffer Transfer and Chained Buffer Transfer Interrupt Mask Register, and
- * DMAC Error, Buffer Transfer and Chained Buffer Transfer Status Register common
- * bit field definitions
+/* DMAC Error, Buffer Transfer and Chained Buffer Transfer
+ * Interrupt Enable Register,
+ * DMAC Error, Buffer Transfer and Chained Buffer Transfer
+ * Interrupt Disable Register,
+ * DMAC Error, Buffer Transfer and Chained Buffer Transfer
+ * Interrupt Mask Register, and
+ * DMAC Error, Buffer Transfer and Chained Buffer Transfer
+ * Status Register common bit field definitions
  */
 
 #define DMAC_EBC_BTC_SHIFT             (0)       /* Bits 0-7: Buffer Transfer Completed */
@@ -624,7 +615,9 @@
 #  define DMAC_CHSR_STAL7              (1 << (DMAC_CHSR_STAL_SHIFT+7))
 
 /* DMA channel registers */
+
 /* DMAC Channel x [x = 0..7] Source Address Register (32-bit address) */
+
 /* DMAC Channel x [x = 0..7] Destination Address Register (32-bit address) */
 
 /* DMAC Channel x [x = 0..7] Descriptor Address Register */
@@ -634,6 +627,7 @@
 #  define DMAC_CH_DSCR_AHB_IF0         (0 << DMAC_CH_DSCR_IF_SHIFT) /* Fetched via AHB-Lite Interface 0 */
 #  define DMAC_CH_DSCR_AHB_IF1         (1 << DMAC_CH_DSCR_IF_SHIFT) /* Fetched via AHB-Lite Interface 1 */
 #  define DMAC_CH_DSCR_AHB_IF2         (2 << DMAC_CH_DSCR_IF_SHIFT) /* Fetched via AHB-Lite Interface 2 */
+
 #define DMAC_CH_DSCR_MASK              (0xfffffffc) /* Bits 2-31: Buffer Transfer Descriptor Address */
 
 /* DMAC Channel n [n = 0..7] Control A Register */
@@ -674,11 +668,13 @@
 #  define DMAC_CH_CTRLB_SIF_IF0        (0 << DMAC_CH_CTRLB_SIF_SHIFT) /* Via AHB-Lite Interface 0 */
 #  define DMAC_CH_CTRLB_SIF_IF1        (1 << DMAC_CH_CTRLB_SIF_SHIFT) /* Via AHB-Lite Interface 1 */
 #  define DMAC_CH_CTRLB_SIF_IF2        (2 << DMAC_CH_CTRLB_SIF_SHIFT) /* Via AHB-Lite Interface 2 */
+
 #define DMAC_CH_CTRLB_DIF_SHIFT        (4)        /* Bits 4-5: Destination Interface Selection Field */
 #define DMAC_CH_CTRLB_DIF_MASK         (3 << DMAC_CH_CTRLB_DIF_SHIFT)
 #  define DMAC_CH_CTRLB_DIF_IF0        (0 << DMAC_CH_CTRLB_DIF_SHIFT) /* Via AHB-Lite Interface 0 */
 #  define DMAC_CH_CTRLB_DIF_IF1        (1 << DMAC_CH_CTRLB_DIF_SHIFT) /* Via AHB-Lite Interface 1 */
 #  define DMAC_CH_CTRLB_DIF_IF2        (2 << DMAC_CH_CTRLB_DIF_SHIFT) /* Via AHB-Lite Interface 2 */
+
 #define DMAC_CH_CTRLB_SRC_PIP          (1 << 8)  /* Bit 8:  Source Picture-in-Picture Mode */
 #define DMAC_CH_CTRLB_DST_PIP          (1 << 12) /* Bit 12: Destination Picture-in-Picture Mode */
 #define DMAC_CH_CTRLB_SRCDSCR          (1 << 16) /* Bit 16: Source buffer descriptor fetch operation disabled */
@@ -689,16 +685,19 @@
 #  define DMAC_CH_CTRLB_FC_M2P         (1 << DMAC_CH_CTRLB_FC_SHIFT) /* Memory-to-Peripheral */
 #  define DMAC_CH_CTRLB_FC_P2M         (2 << DMAC_CH_CTRLB_FC_SHIFT) /* Peripheral-to-Memory  */
 #  define DMAC_CH_CTRLB_FC_P2P         (3 << DMAC_CH_CTRLB_FC_SHIFT) /* Peripheral-to-Peripheral */
+
 #define DMAC_CH_CTRLB_SRCINCR_SHIFT    (24)      /* Bits 24-25 */
 #define DMAC_CH_CTRLB_SRCINCR_MASK     (3 << DMAC_CH_CTRLB_SRCINCR_SHIFT)
 #  define DMAC_CH_CTRLB_SRCINCR_INCR   (0 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
 #  define DMAC_CH_CTRLB_SRCINCR_DECR   (1 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Decrementing address */
 #  define DMAC_CH_CTRLB_SRCINCR_FIXED  (2 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Fixed address */
+
 #define DMAC_CH_CTRLB_DSTINCR_SHIFT    (28)      /* Bits 28-29 */
 #define DMAC_CH_CTRLB_DSTINCR_MASK     (3 << DMAC_CH_CTRLB_DSTINCR_SHIFT)
 #  define DMAC_CH_CTRLB_DSTINCR_INCR   (0 << DMAC_CH_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
 #  define DMAC_CH_CTRLB_DSTINCR_DECR   (1 << DMAC_CH_CTRLB_DSTINCR_SHIFT) /* Decrementing address */
 #  define DMAC_CH_CTRLB_DSTINCR_FIXED  (2 << DMAC_CH_CTRLB_DSTINCR_SHIFT) /* Fixed address */
+
 #define DMAC_CH_CTRLB_IEN              (1 << 30)  /* Bit 30: Interrupt Enable Not */
 #define DMAC_CH_CTRLB_AUTO             (1 << 31)  /* Bit 31: Automatic Multiple Buffer Transfer*/
 
@@ -720,25 +719,31 @@
 #define DMAC_CH_CFG_LOCKIF             (1 << 20) /* Bit 20: Enable lock interface capability */
 #define DMAC_CH_CFG_LOCKB              (1 << 21) /* Bit 21: Enable AHB Bus Locking capability */
 #define DMAC_CH_CFG_LOCKIFL            (1 << 22) /* Bit 22: Lock Master Interface Arbiter */
+
 #define DMAC_CH_CFG_AHBPROT_SHIFT      (24)      /* Bits 24-26: AHB access privilege */
 #define DMAC_CH_CFG_AHBPROT_MASK       (7 << DMAC_CH_CFG_AHBPROT_SHIFT)
 #  define DMAC_CH_CFG_AHBPROT_PRIV     (1 << DMAC_CH_CFG_AHBPROT_SHIFT) /* Privileged Access */
 #  define DMAC_CH_CFG_AHBPROT_BUFF     (2 << DMAC_CH_CFG_AHBPROT_SHIFT) /* Bufferable */
 #  define DMAC_CH_CFG_AHBPROT_CACHE    (4 << DMAC_CH_CFG_AHBPROT_SHIFT) /* Cacheable  */
+
 #define DMAC_CH_CFG_FIFOCFG_SHIFT      (28)      /* Bits 28-29: FIFO Configuration */
 #define DMAC_CH_CFG_FIFOCFG_MASK       (3 << DMAC_CH_CFG_FIFOCFG_SHIFT)
 #  define DMAC_CH_CFG_FIFOCFG_ALAP     (0 << DMAC_CH_CFG_FIFOCFG_SHIFT) /* Largest length AHB burst */
 #  define DMAC_CH_CFG_FIFOCFG_HALF     (1 << DMAC_CH_CFG_FIFOCFG_SHIFT) /* Half FIFO size */
 #  define DMAC_CH_CFG_FIFOCFG_ASAP     (2 << DMAC_CH_CFG_FIFOCFG_SHIFT) /* Single AHB access ASAP */
 
-/* DMAC Channel n [n = 0..7] Source Picture-in-Picture Configuration Register */
+/* DMAC Channel n [n = 0..7]
+ * Source Picture-in-Picture Configuration Register
+ */
 
 #define DMAC_CH_SPIP_HOLE_SHIFT        (0)       /* Bits 0-15: Source Picture-in-Picture Hole */
 #define DMAC_CH_SPIP_HOLE_MASK         (0xffff << DMAC_CH_SPIP_HOLE_SHIFT)
 #define DMAC_CH_SPIP_BOUNDARY_SHIFT    (16)      /* Bits 16-25: Source Picture-in-Picture Boundary */
 #define DMAC_CH_SPIP_BOUNDARY_MASK     (0x3ff << DMAC_CH_SPIP_BOUNDARY_SHIFT)
 
-/* DMAC Channel n [n = 0..7] Destination Picture-in-Picture Configuration Register */
+/* DMAC Channel n [n = 0..7]
+ * Destination Picture-in-Picture Configuration Register
+ */
 
 #define DMAC_CH_DPIP_HOLE_SHIFT        (0)       /* Bits 0-15: Destination Picture-in-Picture Hole */
 #define DMAC_CH_DPIP_HOLE_MASK         (0xffff << DMAC_CH_DPIP_HOLE_SHIFT)
@@ -758,7 +763,8 @@
 #define DMAC_WPSR_WPVSRC_SHIFT         (8)       /* Bits 8-23:  Write Protect Violation Source */
 #define DMAC_WPSR_WPVSRC_MASK          (0xffff << DMAC_WPSR_WPVSRC_SHIFT)
 
-/* DMA Channel Definitions **************************************************************/
+/* DMA Channel Definitions **************************************************/
+
 /* DMA Controller 0 Channel Definitions */
 
 #define DMAC0_CH_HSMCI0               (0)        /* HSMCI0 Receive/transmit */
@@ -804,9 +810,9 @@
 #define DMAC1_CH_TDES_TX              (20)       /* TDES Transmit */
 #define DMAC1_CH_TDES_RX              (21)       /* TDES Receive */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
 /* DMA multi buffer transfer link list entry structure */
 
@@ -831,12 +837,12 @@ struct dma_crc16_linklist_s
   uint32_t crc16;   /* 20 CRC */
 };
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_DMAC_H */

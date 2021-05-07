@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/input/as726x.h
+ * include/nuttx/sensors/as726x.h
  *
  *   Copyright (C) 2019 Fabian Justi. All rights reserved.
  *   Author: Fabian Justi <Fabian.Justi@gmx.de> and

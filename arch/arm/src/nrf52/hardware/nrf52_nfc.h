@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_nfc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NFC_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NFC_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************/
+/* Register offsets *********************************************************/
 
 #define NRF52_NFC_TASKS_ACTIVATE_OFFSET       0x0000 /* Activate NFCT peripheral */
 #define NRF52_NFC_TASKS_DISABLE_OFFSET        0x0004 /* Disable NFCT peripheral */
@@ -81,7 +81,7 @@
 #define NRF52_NFC_SENSRES_OFFSET              0x05a0 /* NFC-A SENS_RES auto-response settings */
 #define NRF52_NFC_SELRES_OFFSET               0x05a4 /* NFC-A SEL_RES auto-response settings */
 
-/* Register Addresses ***************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define NRF52_NFC_TASKS_ACTIVATE       (NRF52_NFCT_BASE + NRF52_NFC_TASKS_ACTIVATE_OFFSET)
 #define NRF52_NFC_TASKS_DISABLE        (NRF52_NFCT_BASE + NRF52_NFC_TASKS_DISABLE_OFFSET)
@@ -130,6 +130,6 @@
 #define NRF52_NFC_SENSRES              (NRF52_NFCT_BASE + NRF52_NFC_SENSRES_OFFSET)
 #define NRF52_NFC_SELRES               (NRF52_NFCT_BASE + NRF52_NFC_SELRESOFFSET)
 
-/* Register Bitfield Definitions ****************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_NFC_H */

@@ -55,7 +55,8 @@ struct sigwork_s
 };
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /****************************************************************************

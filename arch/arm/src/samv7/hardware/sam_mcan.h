@@ -1,56 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_mcan.h
- * Controller Area Network (MCAN) definitions for the SAMV71
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MCAN_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MCAN_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* MCAN register offsets ****************************************************************/
+/* MCAN register offsets ****************************************************/
 
                                           /* 0x0000-0x0004 Reserved */
 #define SAM_MCAN_CUST_OFFSET       0x0008 /* Customer Register */
@@ -104,7 +88,7 @@
 #define SAM_MCAN_TXEFA_OFFSET      0x00f8 /* Transmit Event FIFO Acknowledge Register */
                                           /* 0x00fc Reserved */
 
-/* MCAN register addresses **************************************************************/
+/* MCAN register addresses **************************************************/
 
 #define SAM_MCAN0_CUST             (SAM_MCAN0_BASE+SAM_MCAN_CUST_OFFSET)
 #define SAM_MCAN0_FBTP             (SAM_MCAN0_BASE+SAM_MCAN_FBTP_OFFSET)
@@ -196,9 +180,9 @@
 #define SAM_MCAN1_TXEFS            (SAM_MCAN1_BASE+SAM_MCAN_TXEFS_OFFSET)
 #define SAM_MCAN1_TXEFA            (SAM_MCAN1_BASE+SAM_MCAN_TXEFA_OFFSET)
 
-/* MCAN register bit definitions ********************************************************/
+/* MCAN register bit definitions ********************************************/
 
-/* Customer Register (32-bit value)*/
+/* Customer Register (32-bit value) */
 
 /* Fast Bit Timing and Prescaler Register */
 
@@ -228,6 +212,7 @@
 #  define MCAN_TEST_TX_SPMON       (1 << MCAN_TEST_TX_SHIFT) /* Sample Point can be monitored at CANTX */
 #  define MCAN_TEST_TX_DOMINANT    (2 << MCAN_TEST_TX_SHIFT) /* Dominant (0) level at CANTX. */
 #  define MCAN_TEST_TX_RECESSIVE   (3 << MCAN_TEST_TX_SHIFT) /* Recessive (1) at CANTX. */
+
 #define MCAN_TEST_RX               (1 << 7)  /* Bit 7:  Receive Pin */
 #define MCAN_TEST_TDCV_SHIFT       (8)       /* Bits 8-13: Transceiver Delay Compensation Value */
 #define MCAN_TEST_TDCV_MASK        (0x3f << MCAN_TEST_TDCV_SHIFT)
@@ -257,12 +242,14 @@
 #  define MCAN_CCCR_CME_ISO11898_1 (0 << MCAN_CCCR_CME_SHIFT) /* CAN operation according to ISO11898-1 enabled */
 #  define MCAN_CCCR_CME_FD         (1 << MCAN_CCCR_CME_SHIFT) /* CAN FD operation enabled */
 #  define MCAN_CCCR_CME_FD_BSW     (2 << MCAN_CCCR_CME_SHIFT) /* CAN FD operation with bit rate switching enabled */
+
 #define MCAN_CCCR_CMR_SHIFT        (10)      /* Bits 10-11: CAN Mode Request */
 #define MCAN_CCCR_CMR_MASK         (3 << MCAN_CCCR_CMR_SHIFT)
 #  define MCAN_CCCR_CMR_NOCHG      (0 << MCAN_CCCR_CMR_SHIFT) /* No mode change */
 #  define MCAN_CCCR_CMR_FD         (1 << MCAN_CCCR_CMR_SHIFT) /* Request CAN FD operation */
 #  define MCAN_CCCR_CMR_FD_BSW     (2 << MCAN_CCCR_CMR_SHIFT) /* Request CAN FD operation with bit rate switching */
 #  define MCAN_CCCR_CMR_ISO11898_1 (3 << MCAN_CCCR_CMR_SHIFT) /* Request CAN operation according ISO11898-1 */
+
 #define MCAN_CCCR_FDO              (1 << 12) /* Bit 12: CAN FD Operation */
 #define MCAN_CCCR_FDBS             (1 << 13) /* Bit 13: CAN FD Bit Rate Switching */
 #define MCAN_CCCR_TXP              (1 << 14) /* Bit 14: Transmit Pause */
@@ -289,6 +276,7 @@
 #  define MCAN_TSCC_TSS_ ZERO      (0 << MCAN_TSCC_TSS_SHIFT) /* Timestamp counter value always 0x0000 */
 #  define MCAN_TSCC_TSS_TCP_INC    (1 << MCAN_TSCC_TSS_SHIFT) /* Timestamp counter value incremented according to TCP */
 #  define MCAN_TSCC_TSS_EXT_TS     (2 << MCAN_TSCC_TSS_SHIFT) /* External timestamp counter value used */
+
 #define MCAN_TSCC_TCP_SHIFT        (16)      /* Bits 16-19: Timestamp Counter Prescaler */
 #define MCAN_TSCC_TCP_MASK         (15 << MCAN_TSCC_TCP_SHIFT)
 #  define MCAN_TSCC_TCP(n)         ((uint32_t)(n) << MCAN_TSCC_TCP_SHIFT)
@@ -306,6 +294,7 @@
 #  define MCAN_TOCC_TOS_TX_TIMEOUT   (1 << MCAN_TOCC_TOS_SHIFT) /* Timeout controlled by Tx Event FIFO */
 #  define MCAN_TOCC_TOS_RX0_TIMEOUT  (2 << MCAN_TOCC_TOS_SHIFT) /* Timeout controlled by Receive FIFO 0 */
 #  define MCAN_TOCC_TOS_RX1_TIMEOUT  (3 << MCAN_TOCC_TOS_SHIFT) /* Timeout controlled by Receive FIFO 1 */
+
 #define MCAN_TOCC_TOP_SHIFT        (16)      /* Bits 16-31: Timeout Period */
 #define MCAN_TOCC_TOP_MASK         (0xffff << MCAN_TOCC_TOP_SHIFT)
 #  define MCAN_TOCC_TOP(n)         ((uint32_t)(n) << MCAN_TOCC_TOP_SHIFT)
@@ -328,6 +317,7 @@
 #  define MCAN_ECR_CEL(n)          ((uint32_t)(n) << MCAN_ECR_CEL_SHIFT)
 
 /* Protocol Status Register */
+
 /* Error codes */
 
 #define MCAN_PSR_EC_NO_ERROR       (0)       /* No error occurred since LEC has been reset */
@@ -342,24 +332,27 @@
 #define MCAN_PSR_LEC_SHIFT         (0)       /* Bits 0-2: Last Error Code */
 #define MCAN_PSR_LEC_MASK          (7 << MCAN_PSR_LEC_SHIFT)
 #  define MCAN_PSR_LEC(n)          ((uint32_t)(n) << MCAN_PSR_LEC_SHIFT) /* See error codes above */
+
 #define MCAN_PSR_ACT_SHIFT         (3)       /* Bits 3-4: Activity */
 #define MCAN_PSR_ACT_MASK          (3 << MCAN_PSR_ACT_SHIFT)
 #  define MCAN_PSR_ACT_SYNCHING    (0 << MCAN_PSR_ACT_SHIFT) /* Node is synchronizing on CAN communication */
 #  define MCAN_PSR_ACT_IDLE        (1 << MCAN_PSR_ACT_SHIFT) /* Node is neither receiver nor transmitter */
 #  define MCAN_PSR_ACT_RECEIVER    (2 << MCAN_PSR_ACT_SHIFT) /* Node is operating as receiver */
 #  define MCAN_PSR_ACT_TRANSMITTER (3 << MCAN_PSR_ACT_SHIFT) /* Node is operating as transmitter */
+
 #define MCAN_PSR_EP                (1 << 5)  /* Bit 5:  Error Passive */
 #define MCAN_PSR_EW                (1 << 6)  /* Bit 6:  Warning Status */
 #define MCAN_PSR_BO                (1 << 7)  /* Bit 7:  Bus_Off Status */
 #define MCAN_PSR_FLEC_SHIFT        (8)       /* Bits 8-10: Fast Last Error Code */
 #define MCAN_PSR_FLEC_MASK         (7 << MCAN_PSR_FLEC_SHIFT)
 #  define MCAN_PSR_FLEC(n)         ((uint32_t)(n) << MCAN_PSR_FLEC_SHIFT) /* See error codes above */
+
 #define MCAN_PSR_RESI              (1 << 11) /* Bit 11: ESI Flag of Last Received CAN FD Message */
 #define MCAN_PSR_RBRS              (1 << 12) /* Bit 12: BRS Flag of Last Received CAN FD Message */
 #define MCAN_PSR_REDL              (1 << 13) /* Bit 13: Received a CAN FD Message */
 
-/* Common bit definitions for Interrupt Register, Interrupt Enable Register, Interrupt
- * Line Select Register
+/* Common bit definitions for Interrupt Register, Interrupt Enable Register,
+ * Interrupt Line Select Register
  */
 
 #define MCAN_INT_RF0N              (1 << 0)  /* Bit 0:  Receive FIFO 0 New Message */
@@ -409,6 +402,7 @@
 #  define MCAN_GFC_ANFE_RX_FIFO0   (0 << MCAN_GFC_ANFE_SHIFT) /* Message stored in Receive FIFO 0  */
 #  define MCAN_GFC_ANFE_RX_FIFO1   (1 << MCAN_GFC_ANFE_SHIFT) /* Message stored in Receive FIFO 1 */
 #  define MCAN_GFC_ANFE_REJECTED   (2 << MCAN_GFC_ANFE_SHIFT) /* 2-3 Message rejected */
+
 #define MCAN_GFC_ANFS_SHIFT        (4)       /* Bits 4-5: Accept Non-matching Frames Standard */
 #define MCAN_GFC_ANFS_MASK         (3 << MCAN_GFC_ANFS_SHIFT)
 #  define MCAN_GFC_ANFS_RX_FIFO0   (0 << MCAN_GFC_ANFS_SHIFT) /* Message stored in Receive FIFO 0  */
@@ -448,6 +442,7 @@
 #  define MCAN_HPMS_MSI_LOST       (1 << MCAN_HPMS_MSI_SHIFT) /* FIFO message. */
 #  define MCAN_HPMS_MSI_FIFO0      (2 << MCAN_HPMS_MSI_SHIFT) /* Message stored in FIFO 0. */
 #  define MCAN_HPMS_MSI_FIFO1      (3 << MCAN_HPMS_MSI_SHIFT) /* Message stored in FIFO 1. */
+
 #define MCAN_HPMS_FIDX_SHIFT       (8)       /* Bits 8-14: Filter Index */
 #define MCAN_HPMS_FIDX_MASK        (0x7f << MCAN_HPMS_FIDX_SHIFT)
 #  define MCAN_HPMS_FIDX(n)        ((uint32_t)(n) << MCAN_HPMS_FIDX_SHIFT)
@@ -546,6 +541,7 @@
 #  define MCAN_RXESC_F0DS_32B      (5 << MCAN_RXESC_F0DS_SHIFT) /* 32-byte data field */
 #  define MCAN_RXESC_F0DS_48B      (6 << MCAN_RXESC_F0DS_SHIFT) /* 48-byte data field */
 #  define MCAN_RXESC_F0DS_64B      (7 << MCAN_RXESC_F0DS_SHIFT) /* 64-byte data field */
+
 #define MCAN_RXESC_F1DS_SHIFT      (4)       /* Bits 4-6: Receive FIFO 1 Data Field Size */
 #define MCAN_RXESC_F1DS_MASK       (7 << MCAN_RXESC_F1DS_SHIFT)
 #  define MCAN_RXESC_F1DS(n)       ((uint32_t)(n) << MCAN_RXESC_F1DS_SHIFT)
@@ -557,6 +553,7 @@
 #  define MCAN_RXESC_F1DS_32B      (5 << MCAN_RXESC_F1DS_SHIFT) /* 32-byte data field */
 #  define MCAN_RXESC_F1DS_48B      (6 << MCAN_RXESC_F1DS_SHIFT) /* 48-byte data field */
 #  define MCAN_RXESC_F1DS_64B      (7 << MCAN_RXESC_F1DS_SHIFT) /* 64-byte data field */
+
 #define MCAN_RXESC_RBDS_SHIFT      (8)       /* Bits 8-10: Receive Buffer Data Field Size */
 #define MCAN_RXESC_RBDS_MASK       (7 << MCAN_RXESC_RBDS_SHIFT)
 #  define MCAN_RXESC_RBDS(n)       ((uint32_t)(n) << MCAN_RXESC_RBDS_SHIFT)
@@ -667,7 +664,8 @@
 
 #define MCAN_TXEFA_MASK            0x0000001f /* Event fifo acknowledge index mask */
 
-/* Message RAM Definitions **************************************************************/
+/* Message RAM Definitions **************************************************/
+
 /* Common Buffer and FIFO element bit definitions:
  *
  *   --------------- ------------------- --------------------------------
@@ -744,6 +742,7 @@
 #  define STDFILTER_S0_DEBUGA      (1 << STDFILTER_S0_ACTION_SHIFT) /* Debug Message A */
 #  define STDFILTER_S0_DEBUGB      (2 << STDFILTER_S0_ACTION_SHIFT) /* Debug Message B */
 #  define STDFILTER_S0_DEBUGC      (3 << STDFILTER_S0_ACTION_SHIFT) /* Debug Message C */
+
 #define STDFILTER_S0_SFID1_SHIFT   (16)      /* Bits 16-26: Standard Filter ID 2 */
 #define STDFILTER_S0_SFID1_MASK    (0x3ff << STDFILTER_S0_SFID1_SHIFT)
 #  define STDFILTER_S0_SFID1(n)    ((uint32_t)(n) << STDFILTER_S0_SFID1_SHIFT)
@@ -757,6 +756,7 @@
 #  define STDFILTER_S0_SFEC_PRIOFIFO0 (5 << STDFILTER_S0_SFEC_SHIFT) /* Set priority and store in FIFO 0 on match */
 #  define STDFILTER_S0_SFEC_PRIOFIFO1 (6 << STDFILTER_S0_SFEC_SHIFT) /* Set priority and store in FIFO 1 on match */
 #  define STDFILTER_S0_SFEC_BUFFER    (7 << STDFILTER_S0_SFEC_SHIFT) /* Store into Rx Buffer or as debug message */
+
 #define STDFILTER_S0_SFT_SHIFT     (30)      /* Bits 30-31: Standard Filter Type */
 #define STDFILTER_S0_SFT_MASK      (3 << STDFILTER_S0_SFT_SHIFT)
 #  define STDFILTER_S0_SFT_RANGE   (0 << STDFILTER_S0_SFT_SHIFT) /* Range filter from SF1ID to SF2ID */
@@ -791,6 +791,7 @@
 #  define EXTFILTER_F1_DEBUGA      (1 << EXTFILTER_F1_ACTION_SHIFT) /* Debug Message A */
 #  define EXTFILTER_F1_DEBUGB      (2 << EXTFILTER_F1_ACTION_SHIFT) /* Debug Message B */
 #  define EXTFILTER_F1_DEBUGC      (3 << EXTFILTER_F1_ACTION_SHIFT) /* Debug Message C */
+
 #define EXTFILTER_F1_EFT_SHIFT     (30)      /* Bits 30-31: Extended Filter Type */
 #define EXTFILTER_F1_EFT_MASK      (3 << EXTFILTER_F1_EFT_SHIFT)
 #  define EXTFILTER_F1_EFT_RANGE   (0 << EXTFILTER_F1_EFT_SHIFT) /* Range filter from SF1ID to SF2ID */
@@ -798,16 +799,16 @@
 #  define EXTFILTER_F1_EFT_CLASSIC (2 << EXTFILTER_F1_EFT_SHIFT) /* Classic filter: SF1ID=filter SF2ID=mask */
 #  define EXTFILTER_F1_EFT_NOXIDAM (2 << EXTFILTER_F1_EFT_SHIFT) /* Range filter from EF1ID to EF2ID, no XIDAM */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MCAN_H */

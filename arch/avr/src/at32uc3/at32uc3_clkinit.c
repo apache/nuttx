@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_clkinit.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -110,7 +95,8 @@ static inline void up_enableosc32(void)
 
   regval = getreg32(AVR32_PM_OSCCTRL32);
   regval &= ~PM_OSCCTRL32_STARTUP_MASK;
-  regval |= PM_OSCCTRL32_EN | (AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
+  regval |= PM_OSCCTRL32_EN |
+            (AVR32_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
   putreg32(regval, AVR32_PM_OSCCTRL32);
 }
 #endif
@@ -128,12 +114,14 @@ static inline void up_enableosc0(void)
 {
   uint32_t regval;
 
-  /* Enable OSC0 in the correct crystal mode by setting the mode value in OSCCTRL0 */
+  /* Enable OSC0 in the correct crystal mode by setting the mode value in
+   * OSCCTRL0
+   */
 
   regval  = getreg32(AVR32_PM_OSCCTRL0);
   regval &= ~PM_OSCCTRL_MODE_MASK;
 #if AVR32_FOSC0 < 900000
-  regval |= PM_OSCCTRL_MODE_XTALp9;  /* Crystal XIN 0.4-0.9MHz */
+  regval |= PM_OSCCTRL_MODE_XTALP9;  /* Crystal XIN 0.4-0.9MHz */
 #elif AVR32_FOSC0 < 3000000
   regval |= PM_OSCCTRL_MODE_XTAL3;   /* Crystal XIN 0.9-3.0MHz */
 #elif AVR32_FOSC0 < 8000000
@@ -143,8 +131,8 @@ static inline void up_enableosc0(void)
 #endif
   putreg32(regval, AVR32_PM_OSCCTRL0);
 
-  /* Enable OSC0 using the startup time provided in board.h.  This startup time
-   * is critical and depends on the characteristics of the crystal.
+  /* Enable OSC0 using the startup time provided in board.h.  This startup
+   * time is critical and depends on the characteristics of the crystal.
    */
 
   regval  = getreg32(AVR32_PM_OSCCTRL0);
@@ -177,12 +165,14 @@ static inline void up_enableosc1(void)
 {
   uint32_t regval;
 
-  /* Enable OSC1 in the correct crystal mode by setting the mode value in OSCCTRL1 */
+  /* Enable OSC1 in the correct crystal mode by setting the mode value in
+   * OSCCTRL1
+   */
 
   regval  = getreg32(AVR32_PM_OSCCTRL1);
   regval &= ~PM_OSCCTRL_MODE_MASK;
 #if AVR32_FOSC1 < 900000
-  regval |= PM_OSCCTRL_MODE_XTALp9;  /* Crystal XIN 0.4-0.9MHz */
+  regval |= PM_OSCCTRL_MODE_XTALP9;  /* Crystal XIN 0.4-0.9MHz */
 #elif AVR32_FOSC1 < 3000000
   regval |= PM_OSCCTRL_MODE_XTAL3;   /* Crystal XIN 0.9-3.0MHz */
 #elif AVR32_FOSC1 < 8000000
@@ -192,8 +182,8 @@ static inline void up_enableosc1(void)
 #endif
   putreg32(regval, AVR32_PM_OSCCTRL1);
 
-  /* Enable OSC1 using the startup time provided in board.h.  This startup time
-   * is critical and depends on the characteristics of the crystal.
+  /* Enable OSC1 using the startup time provided in board.h.  This startup
+   * time is critical and depends on the characteristics of the crystal.
    */
 
   regval  = getreg32(AVR32_PM_OSCCTRL1);
@@ -226,7 +216,9 @@ static inline void up_enablepll0(void)
 {
   /* Setup PLL0 */
 
-  regval = (AVR32_PLL0_DIV << PM_PLL_PLLDIV_SHIFT) | (AVR32_PLL0_MUL << PM_PLL_PLLMUL_SHIFT) | (16 << PM_PLL_PLLCOUNT_SHIFT)
+  regval = (AVR32_PLL0_DIV << PM_PLL_PLLDIV_SHIFT) |
+           (AVR32_PLL0_MUL << PM_PLL_PLLMUL_SHIFT) |
+           (16 << PM_PLL_PLLCOUNT_SHIFT)
 
   /* Select PLL0/1 oscillator */
 
@@ -276,7 +268,9 @@ static inline void up_enablepll1(void)
 {
   /* Setup PLL1 */
 
-  regval = (AVR32_PLL1_DIV << PM_PLL_PLLDIV_SHIFT) | (AVR32_PLL1_MUL << PM_PLL_PLLMUL_SHIFT) | (16 << PM_PLL_PLLCOUNT_SHIFT)
+  regval = (AVR32_PLL1_DIV << PM_PLL_PLLDIV_SHIFT) |
+           (AVR32_PLL1_MUL << PM_PLL_PLLMUL_SHIFT) |
+           (16 << PM_PLL_PLLCOUNT_SHIFT)
 
   /* Select PLL0/1 oscillator */
 
@@ -373,6 +367,7 @@ static void up_fws(uint32_t cpuclock)
     {
       regval &= ~FLASHC_FCR_FWS;
     }
+
   putreg32(regval, AVR32_FLASHC_FCR);
 }
 
@@ -414,7 +409,6 @@ static inline void up_usbclock(void)
   regval |= PM_GCCTRL_OSCSEL;
 #endif
 #if AVR32_CLOCK_USB_DIV > 0
-
 
   u_avr32_pm_gcctrl.GCCTRL.diven  = diven;
   u_avr32_pm_gcctrl.GCCTRL.div    = div;

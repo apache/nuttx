@@ -1,52 +1,37 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_emc.h
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_EMC_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_EMC_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define LPC43_EMC_CONTROL_OFFSET          0x0000 /* EMC Control register */
 #define LPC43_EMC_STATUS_OFFSET           0x0004 /* EMC Status register */
@@ -130,7 +115,7 @@
 #define LPC43_EMC_STATWAITWR3_OFFSET      0x0274 /* Static Memory Write Delay registers CS3 */
 #define LPC43_EMC_STATWAITTURN3_OFFSET    0x0278 /* Static Memory Turn Round Delay register CS3 */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_EMC_CONTROL                 (LPC43_EMC_BASE+LPC43_EMC_CONTROL_OFFSET)
 #define LPC43_EMC_STATUS                  (LPC43_EMC_BASE+LPC43_EMC_STATUS_OFFSET)
@@ -205,7 +190,7 @@
 #define LPC43_EMC_STATWAITWR3             (LPC43_EMC_BASE+LPC43_EMC_STATWAITWR3_OFFSET)
 #define LPC43_EMC_STATWAITTURN3           (LPC43_EMC_BASE+LPC43_EMC_STATWAITTURN3_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* EMC Control register */
 
@@ -213,6 +198,7 @@
 #define EMC_CONTROL_ADDRMIRROR            (1 << 1)  /* Bit 1:  Address mirror */
 #define EMC_CONTROL_LOWPOWER              (1 << 2)  /* Bit 2:  Low-power mode */
                                                     /* Bits 3-31: Reserved */
+
 /* EMC Status register */
 
 #define EMC__
@@ -220,12 +206,14 @@
 #define EMC_STATUS_WB                     (1 << 1)  /* Bit 1:  Write buffer status */
 #define EMC_CONFIG_SA                     (1 << 2)  /* Bit 2:  Self-refresh acknowledge */
                                                     /* Bits 3-31: Reserved */
+
 /* EMC Configuration register */
 
 #define EMC_CONFIG_EM                     (1 << 0)  /* Bit 0:  Endian mode */
                                                     /* Bits 1-7: Reserved */
 #define EMC_CONFIG_CR                     (1 << 8)  /* Bit 8:  Clock Ratio */
                                                     /* Bits 9-31: Reserved */
+
 /* Dynamic Memory Control register */
 
 #define EMC_DYNCONTROL_
@@ -241,12 +229,16 @@
 #  define EMC_DYNCONTROL_SI_MODE          (1 << EMC_DYNCONTROL_SI_SHIFT) /* SDRAM MODE command */
 #  define EMC_DYNCONTROL_SI_PALL          (2 << EMC_DYNCONTROL_SI_SHIFT) /* SDRAM PALL (precharge all) command */
 #  define EMC_DYNCONTROL_SI_ MASK         (3 << EMC_DYNCONTROL_SI_SHIFT) /* SDRAM NOP (no operation) command) */
+
                                                     /* Bits 9-31: Reserved */
+
 /* Dynamic Memory Refresh Timer register */
 
 #define EMC_DYNREFRESH_SHIFT              (0)       /* Bits 0-10: Refresh timer */
 #define EMC_DYNREFRESH_MASK               (0x7ff << EMC_DYNREFRESH_SHIFT)
+
                                                     /* Bits 11-31: Reserved */
+
 /* Dynamic Memory Read Configuration register */
 
 #define EMC_DYNREADCONFIG_SHIFT           (0)       /* Bits 0-1: Read data strategy */
@@ -254,85 +246,113 @@
 #  define EMC_DYNREADCONFIG_0p5CCLK       (1 << EMC_DYNREADCONFIG_SHIFT) /* Command delayed by 0.5 CCLK */
 #  define EMC_DYNREADCONFIG_1p5CCLK       (2 << EMC_DYNREADCONFIG_SHIFT) /* Command delayed by 1.5 CCLK */
 #  define EMC_DYNREADCONFIG_2p5CCLK       (3 << EMC_DYNREADCONFIG_SHIFT) /* Command delayed by 2.5 CCLK */
+
                                                     /* Bits 2-31: Reserved */
+
 /* Dynamic Memory Precharge Command Period register */
 
 #define EMC_DYNRP_SHIFT                   (0)       /* Bits 0-3: Precharge command period */
 #define EMC_DYNRP_MASK                    (15 << EMC_DYNRP_SHIFT)
 #  define EMC_DYNRP(n)                    (((n)-1) << EMC_DYNRP_SHIFT) /* Delay n CCLK cycles */
+
                                                     /* Bits 2-31: Reserved */
+
 /* Dynamic Memory Active to Precharge Command Period register */
 
 #define EMC_DYNRAS_SHIFT                   (0)       /* Bits 0-3: Active to precharge command period */
 #define EMC_DYNRAS_MASK                    (15 << EMC_DYNRAS_SHIFT)
 #  define EMC_DYNRAS(n)                    (((n)-1) << EMC_DYNRAS_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Dynamic Memory Self Refresh Exit Time register */
 
 #define EMC_DYNSREX_SHIFT                  (0)       /* Bits 0-3: Self-refresh exit time */
 #define EMC_DYNSREX_MASK                   (15 << EMC_DYNSREX_SHIFT)
 #  define EMC_DYNSREX(n)                   (((n)-1) << EMC_DYNSREX_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Dynamic Memory Last Data Out to Active Time register */
 
 #define EMC_DYNAPR_SHIFT                   (0)       /* Bits 0-3: Last-data-out to active command time */
 #define EMC_DYNAPR_MASK                    (15 << EMC_DYNAPR_SHIFT)
 #  define EMC_DYNAPR(n)                    (((n)-1) << EMC_DYNAPR_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Dynamic Memory Data In to Active Command Time register */
 
 #define EMC_DYNDAL_SHIFT                   (0)       /* Bits 0-3: Data-in to active command */
 #define EMC_DYNDAL_MASK                    (15 << EMC_DYNDAL_SHIFT)
 #  define EMC_DYNDAL(n)                    (((n)-1) << EMC_DYNDAL_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Dynamic Memory Write Recovery Time register */
 
 #define EMC_DYNWR_SHIFT                    (0)       /* Bits 0-3: Write recovery time */
 #define EMC_DYNWR_MASK                     (15 << EMC_DYNWR_SHIFT)
 #  define EMC_DYNWR(n)                     (((n)-1) << EMC_DYNWR_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Dynamic Memory Active to Active Command Period register */
 
 #define EMC_DYNRC_SHIFT                    (0)       /* Bits 0-4: Active to active command period */
 #define EMC_DYNRC_MASK                     (31 << EMC_DYNRC_SHIFT)
 #  define EMC_DYNRC(n)                     (((n)-1) << EMC_DYNRC_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
+
 /* Dynamic Memory Auto-refresh Period register */
 
 #define EMC_DYNRFC_SHIFT                   (0)       /* Bits 0-4: Auto-refresh period and
                                                       * auto-refresh to active command period */
 #define EMC_DYNRFC_MASK                    (31 << EMC_DYNRFC_SHIFT)
 #  define EMC_DYNRFC(n)                    (((n)-1) << EMC_DYNRFC_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
+
 /* Dynamic Memory Exit Self Refresh register */
 
 #define EMC_DYNXSR_SHIFT                   (0)       /* Bits 0-4: Exit self-refresh to active command time */
 #define EMC_DYNXSR_MASK                    (31 << EMC_DYNXSR_SHIFT)
 #  define EMC_DYNXSR(n)                    (((n)-1) << EMC_DYNXSR_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
+
 /* Dynamic Memory Active Bank A to Active Bank B Time register */
 
 #define EMC_DYNRRD_SHIFT                   (0)       /* Bits 0-3: Active bank A to active bank B latency */
 #define EMC_DYNRRD_MASK                    (15 << EMC_DYNRRD_SHIFT)
 #  define EMC_DYNRRD(n)                    (((n)-1) << EMC_DYNRRD_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Dynamic Memory Load Mode register to Active Command Time */
 
 #define EMC_DYNMRD_SHIFT                   (0)       /* Bits 0-3: Load mode register to active command time */
 #define EMC_DYNMRD_MASK                    (15 << EMC_DYNMRD_SHIFT)
 #  define EMC_DYNMRD(n)                    (((n)-1) << EMC_DYNMRD_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Static Memory Extended Wait register */
 
 #define EMC_STATEXTWAIT_SHIFT              (0)       /* Bits 0-9: Extended wait time out */
 #define EMC_STATEXTWAIT_MASK               (0x3ff << EMC_STATEXTWAIT_SHIFT)
 #  define EMC_STATEXTWAIT(n)               (((n)-1) << EMC_STATEXTWAIT_SHIFT) /* Delay n CCLK cycles */
-                                                     /* Bits 10-31: Reserved */
+
+                                             /* Bits 10-31: Reserved */
+
 /* Dynamic Memory Configuration registers */
+
                                                      /* Bits 0-2: Reserved */
 #define EMC_DYNCONFIG_MD_SHIFT             (3)       /* Bits 3-4: Memory device */
 #define EMC_DYNCONFIG_MD_MASK              (3 << EMC_DYNCONFIG_MD_SHIFT)
 #  define EMC_DYNCONFIG_MD_SDRAM           (0 << EMC_DYNCONFIG_MD_SHIFT) /* SDRAM (POR reset value) */
+
                                                      /* Bits 5-6: Reserved */
 #define EMC_DYNCONFIG_AM0_SHIFT            (7)       /* Bits 7-12: AM0 Address mapping (see user manual) */
 #define EMC_DYNCONFIG_AM0_MASK             (0x3F << EMC_DYNCONFIG_AM0_SHIFT)
@@ -344,6 +364,7 @@
                                                      /* Bits 21-31: Reserved */
 
 /* Dynamic Memory Configuration register  Memory Configuration Values */
+
 /* TODO: complete configuration */
 
 /* Data Bus Width Value in LPC43_EMC_DYNCONFIG register (bit 14) */
@@ -400,40 +421,52 @@
 #  define EMC_DYNRASCAS_RAS_1CCLK          (1 << EMC_DYNRASCAS_RAS_SHIFT) /* One CCLK cycle */
 #  define EMC_DYNRASCAS_RAS_2CCLK          (2 << EMC_DYNRASCAS_RAS_SHIFT) /* Two CCLK cycles */
 #  define EMC_DYNRASCAS_RAS_3CCLK          (3 << EMC_DYNRASCAS_RAS_SHIFT) /* Three CCLK cycles (POR reset value) */
+
                                                      /* Bits 2-7: Reserved */
 #define EMC_DYNRASCAS_CAS_SHIFT            (8)       /* Bits 8-9: CAS latency */
 #define EMC_DYNRASCAS_CAS_MASK             (3 << EMC_DYNRASCAS_CAS_SHIFT)
 #  define EMC_DYNRASCAS_CAS_1CCLK          (1 << EMC_DYNRASCAS_CAS_SHIFT) /* One CCLK cycle */
 #  define EMC_DYNRASCAS_CAS_2CCLK          (2 << EMC_DYNRASCAS_CAS_SHIFT) /* Two CCLK cycles */
 #  define EMC_DYNRASCAS_CAS_3CCLK          (3 << EMC_DYNRASCAS_CAS_SHIFT) /* Three CCLK cycles (POR reset value) */
-                                                     /* Bits 10-31: Reserved */
+
+                                             /* Bits 10-31: Reserved */
 
 /* Dynamic SDRAM mode register definitions */
 
-                                                     /* Bits 0-2: Burst length. All other values are reserved. */
+/*                                        Bits 0-2: Burst length.
+ *                                             All other values are reserved.
+ */
 #define EMC_DYNMODE_BURST_LENGTH_SHIFT     (0)
 #define EMC_DYNMODE_BURST_LENGTH_MASK      (0x7)
 #  define EMC_DYNMODE_BURST_LENGTH_1       (0 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
 #  define EMC_DYNMODE_BURST_LENGTH_2       (1 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
 #  define EMC_DYNMODE_BURST_LENGTH_4       (2 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
 #  define EMC_DYNMODE_BURST_LENGTH_8       (3 << EMC_DYNMODE_BURST_LENGTH_SHIFT)
-                                                     /* Bit 3: Burst mode type */
+                                                 /* Bit 3: Burst mode type */
 #define EMC_DYNMODE_BURST_TYPE_SHIFT            (3)
 #  define EMC_DYNMODE_BURST_TYPE_SEQUENTIAL     (0 << EMC_DYNMODE_BURST_TYPE_SHIFT)       /* burst type sequential */
 #  define EMC_DYNMODE_BURST_TYPE_INTERLEAVED    (1 << EMC_DYNMODE_BURST_TYPE_INTERLEAVED) /* burst type interleaved */
-                                                     /* Bits 4-6: Latency mode. All other values are reserved. */
+
+/*                                          Bits 4-6: Latency mode.
+ *                                             All other values are reserved.
+ */
 #define EMC_DYNMODE_CAS_SHIFT              (4)
 #define EMC_DYNMODE_CAS_MASK               (0x7)
 #  define EMC_DYNMODE_CAS_2                (2 << EMC_DYNMODE_CAS_SHIFT) /* CAS latency of 2 cycles */
 #  define EMC_DYNMODE_CAS_3                (3 << EMC_DYNMODE_CAS_SHIFT) /* CAS latency of 3 cycles */
-                                                     /* Bits 7-8: Operating mode. All other values are reserved. */
+
+/*                                          Bits 7-8: Operating mode.
+ *                                             All other values are reserved.
+ */
 #define EMC_DYNMODE_OPMODE_SHIFT           (7)
 #define EMC_DYNMODE_OPMODE_MASK            (0x3)
 #  define EMC_DYNMODE_OPMODE_STANDARD      (0 << EMC_DYNMODE_OPMODE_SHIFT) /* dynamic standard operation mode */
-                                                    /* Bit 9: Write burst mode */
+
+                                            /* Bit 9: Write burst mode */
 #define EMC_DYNMODE_WBMODE_SHIFT           (9)
 #  define EMC_DYNMODE_WBMODE_PROGRAMMED    (0 << EMC_DYNMODE_WBMODE_SHIFT) /* write burst mode programmed */
 #  define EMC_DYNMODE_WBMODE_SINGLE_LOC    (1 << EMC_DYNMODE_WBMODE_SHIFT) /* write burst mode single loc */
+
                                                     /* Bits 10-11: Reserved */
 
 /* Static Memory Configuration registers */
@@ -453,55 +486,67 @@
 #define EMC_STATCONFIG_BENA                (1 << 19) /* Bit 19: Buffer enable */
 #define EMC_STATCONFIG_WP                  (1 << 20) /* Bit 20: Write protect */
                                                      /* Bits 21-31: Reserved */
+
 /* Static Memory Write Enable Delay registers */
 
 #define EMC_STATWAITWEN_SHIFT              (0)       /* Bits 0-3: Wait write enable */
 #define EMC_STATWAITWEN_MASK               (15 << EMC_STATWAITWEN_SHIFT)
 #  define EMC_STATWAITWEN(n)               (((n)-1) << EMC_STATWAITWEN_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Static Memory Output Enable Delay registers */
 
 #define EMC_STATWAITOEN_SHIFT              (0)       /* Bits 0-3: Wait output enable */
 #define EMC_STATWAITOEN_MASK               (15 << EMC_STATWAITOEN_SHIFT)
 #  define EMC_STATWAITOEN(n)               (((n)-1) << EMC_STATWAITOEN_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 4-31: Reserved */
+
 /* Static Memory Read Delay registers */
 
 #define EMC_STATWAITRD_SHIFT               (0)       /* Bits 0-4: Non-page mode read wait states or
                                                       * asynchronous page mode read first access wait state */
 #define EMC_STATWAITRD_MASK                (31 << EMC_STATWAITRD_SHIFT)
 #  define EMC_STATWAITRD(n)                (((n)-1) << EMC_STATWAITRD_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
+
 /* Static Memory Page Mode Read Delay registers */
 
 #define EMC_STATWAITPAGE_SHIFT             (0)       /* Bits 0-4: Asynchronous page mode read after the
                                                       * first read wait states */
 #define EMC_STATWAITPAGE_MASK              (31 << EMC_STATWAITPAGE_SHIFT)
 #  define EMC_STATWAITPAGE(n)              (((n)-1) << EMC_STATWAITPAGE_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
+
 /* Static Memory Write Delay registers */
 
 #define EMC_STATWAITWR_SHIFT               (0)       /* Bits 0-4: Write wait states */
 #define EMC_STATWAITWR_MASK                (31 << EMC_STATWAITWR_SHIFT)
 #  define EMC_STATWAITWR(n)                (((n)-1) << EMC_STATWAITWR_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
+
 /* Static Memory Turn Round Delay registers */
 
 #define EMC_STATWAITTURN_SHIFT             (0)       /* Bits 0-3: Bus turnaround cycles */
 #define EMC_STATWAITTURN_MASK              (15 << EMC_STATWAITTURN_SHIFT)
 #  define EMC_STATWAITTURN(n)              (((n)-1) << EMC_STATWAITTURN_SHIFT) /* Delay n CCLK cycles */
+
                                                      /* Bits 5-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_EMC_H */

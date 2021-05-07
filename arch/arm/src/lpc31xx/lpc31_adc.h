@@ -1,72 +1,57 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_adc.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_ADC_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_ADC_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* ADC register base address offset into the APB0 domain ****************************************/
+/* ADC register base address offset into the APB0 domain ********************/
 
 #define LPC31_ADC_VBASE                (LPC31_APB0_VADDR+LPC31_APB0_ADC_OFFSET)
 #define LPC31_ADC_PBASE                (LPC31_APB0_PADDR+LPC31_APB0_ADC_OFFSET)
 
-/* ADC register offsets (with respect to the ADC base) ******************************************/
+/* ADC register offsets (with respect to the ADC base) **********************/
 
 #define LPC31_ADC_R0_OFFSET            0x000 /* Data for analog input channel 0 */
 #define LPC31_ADC_R1_OFFSET            0x004 /* Data for analog input channel 1 */
 #define LPC31_ADC_R2_OFFSET            0x008 /* Data for analog input channel 2 */
 #define LPC31_ADC_R3_OFFSET            0x00c /* Data for analog input channel 3 */
-                                               /* 0x010-0x01c: Reserved */
+                                             /* 0x010-0x01c: Reserved */
 #define LPC31_ADC_CON_OFFSET           0x020 /* ADC control register */
 #define LPC31_ADC_CSEL_OFFSET          0x024 /* Configure and select analog input channels */
 #define LPC31_ADC_INTEN_OFFSET         0x028 /* Enable ADC interrupts */
 #define LPC31_ADC_INTST_OFFSET         0x02C /* ADC interrupt status */
 #define LPC31_ADC_INTCLR_OFFSET        0x030 /* Clear ADC interrupt status */
-                                               /* 0x034-: Reserved */
+                                             /* 0x034-: Reserved */
 
-/* ADC register (virtual) addresses *************************************************************/
+/* ADC register (virtual) addresses *****************************************/
 
 #define LPC31_ADC_R0                   (LPC31_ADC_VBASE+LPC31_ADC_R0_OFFSET)
 #define LPC31_ADC_R1                   (LPC31_ADC_VBASE+LPC31_ADC_R1_OFFSET)
@@ -78,9 +63,11 @@
 #define LPC31_ADC_INTST                (LPC31_ADC_VBASE+LPC31_ADC_INTST_OFFSET)
 #define LPC31_ADC_INTCLR               (LPC31_ADC_VBASE+LPC31_ADC_INTCLR_OFFSET)
 
-/* ADC register bit definitions *****************************************************************/
+/* ADC register bit definitions *********************************************/
 
-/* ADC_Rx (ADC_R0, address 0x13002000; ADC_R1, address 0x13002004, ADC_R2, address 0x13002008;
+/* ADC_Rx (ADC_R0, address 0x13002000;
+ *         ADC_R1, address 0x13002004,
+ *         ADC_R2, address 0x13002008;
  *         ADC_R3, address 0x1300200c)
  */
 
@@ -117,16 +104,16 @@
 
 #define ADC_INTCLR_CLEAR                 (1 << 0)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_ADC_H */

@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/lpc31xx/ea3131/src/lpc31_fillpage.c
  *
- *   Copyright (C) 2010, 2012-2013, 20172018 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -183,16 +167,16 @@
 struct pg_source_s
 {
   bool initialized;  /* TRUE: we are initialized */
-  int  fd;           /* File descriptor of the nuttx.bin file */
+  struct file file;  /* File descriptor of the nuttx.bin file */
 };
 #endif
 
-/* State structured needd to support paging through the M25P* MTD interface. */
+/* State structured support paging through the M25P* MTD interface. */
 
 #if defined(CONFIG_PAGING_M25PX) || defined(CONFIG_PAGING_AT45DB)
 struct pg_source_s
 {
-  /* If interrupts or DMA are used, then we will have to defer initialization */
+  /* If interrupts/DMA are used, then we will have to defer initialization */
 
   bool initialized;  /* TRUE: we are initialized */
 
@@ -272,16 +256,16 @@ static inline void lpc31_initsrc(void)
       /* Now mount the file system */
 
       snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_EA3131_PAGING_MINOR);
-      ret = mount(devname, CONFIG_EA3131_PAGING_MOUNTPT, "vfat", MS_RDONLY,
-                  NULL);
+      ret = nx_mount(devname, CONFIG_EA3131_PAGING_MOUNTPT, "vfat",
+                     MS_RDONLY, NULL);
       DEBUGASSERT(ret == OK);
 
 #endif /* CONFIG_EA3131_PAGING_SDSLOT */
 
       /* Open the selected path for read-only access */
 
-      g_pgsrc.fd = nx_open(CONFIG_PAGING_BINPATH, O_RDONLY);
-      DEBUGASSERT(g_pgsrc.fd >= 0);
+      file_open(&g_pgsrc.file, CONFIG_PAGING_BINPATH, O_RDONLY);
+      DEBUGASSERT(g_pgsrc.file.f_inode != NULL);
 
       /* Then we are initialized */
 
@@ -333,7 +317,8 @@ static inline void lpc31_initsrc(void)
       DEBUGASSERT(ret >= 0);
       capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
       pginfo("capacity: %d\n", capacity);
-      DEBUGASSERT(capacity >= (CONFIG_EA3131_PAGING_BINOFFSET + PG_TEXT_VSIZE));
+      DEBUGASSERT(capacity >=
+                  CONFIG_EA3131_PAGING_BINOFFSET + PG_TEXT_VSIZE);
 #endif
 
       /* We are now initialized */
@@ -397,7 +382,8 @@ static inline void lpc31_initsrc(void)
  * Assumptions:
  *   - This function is called from the normal tasking context (but
  *     interrupts siabled).  The implementation must take whatever actions
- *     are necessary to assure that the operation is safe within this context.
+ *     are necessary to assure that the operation is safe within this
+ *     context.
  *   - Upon return, the caller will sleep waiting for the page fill callback
  *     to occur.  The callback function will perform the wakeup.
  *
@@ -419,7 +405,8 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 #endif
 
   pginfo("TCB: %p vpage: %p far: %08x\n", tcb, vpage, tcb->xcp.far);
-  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
+  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE &&
+              tcb->xcp.far < PG_PAGED_VEND);
 
   /* If BINPATH is defined, then it is the full path to a file on a mounted
    * file system.  In this case initialization will be deferred until the
@@ -440,12 +427,12 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   /* Seek to that position */
 
-  pos = lseek(g_pgsrc.fd, offset, SEEK_SET);
+  pos = file_seek(&g_pgsrc.file, offset, SEEK_SET);
   DEBUGASSERT(pos != (off_t)-1);
 
   /* And read the page data from that offset */
 
-  nbytes = nx_read(g_pgsrc.fd, vpage, PAGESIZE);
+  nbytes = file_read(&g_pgsrc.file, vpage, PAGESIZE);
   DEBUGASSERT(nbytes == PAGESIZE);
   return OK;
 
@@ -459,7 +446,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 
-  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_EA3131_PAGING_BINOFFSET;
+  offset = tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_EA3131_PAGING_BINOFFSET;
 
   /* Read the page at the correct offset into the SPI FLASH device */
 
@@ -483,7 +470,8 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage,
                 up_pgcallback_t pg_callback)
 {
   pginfo("TCB: %p vpage: %d far: %08x\n", tcb, vpage, tcb->xcp.far);
-  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE && tcb->xcp.far < PG_PAGED_VEND);
+  DEBUGASSERT(tcb->xcp.far >= PG_PAGED_VBASE &&
+              tcb->xcp.far < PG_PAGED_VEND);
 
 #if defined(CONFIG_PAGING_BINPATH)
 #  error "File system-based paging must always be implemented with blocking calls"
@@ -517,17 +505,17 @@ void weak_function lpc31_pginitialize(void)
    *   lpc31_spidev_initialize(void);
    * - Set up resources to support up_fillpage() operation.  For example,
    *   perhaps the text image is stored in a named binary file.
-   *   In this case, the virtual text addresses might map to offsets into that
-   *   file.
-   * - Do whatever else is necessary to make up_fillpage() ready for the first
-   *   time that it is called.
+   *   In this case, the virtual text addresses might map to offsets into
+   *   that file.
+   * - Do whatever else is necessary to make up_fillpage() ready for the
+   *   first time that it is called.
    *
    * In reality, however, this function is not very useful:
    * This function is called from a low level (before nx_start() is even
-   * called), it may not be possible to perform file system operations or even
-   * to get debug output yet.  Therefore, to keep life simple, initialization
-   * will be deferred in all cases until the first time that up_fillpage()
-   * is called.
+   * called), it may not be possible to perform file system operations or
+   * even to get debug output yet.  Therefore, to keep life simple,
+   * initialization will be deferred in all cases until the first time that
+   * up_fillpage() is called.
    */
 }
 

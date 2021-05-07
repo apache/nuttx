@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/x86/src/i486/up_irq.c
- * arch/x86/src/chip/up_irq.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -112,28 +96,30 @@ static void up_remappic(void)
   idt_outb(PIC1_IMR_ALL, PIC1_IMR);
   idt_outb(PIC2_IMR_ALL, PIC2_IMR);
 
-  /* If the PIC has been reset, it must be initialized with 2 to 4 Initialization
-   * Command Words (ICW) before it will accept and process Interrupt Requests. The
-   * following outlines the four possible Initialization Command Words.
+  /* If the PIC has been reset, it must be initialized with 2 to 4
+   * Initialization Command Words (ICW) before it will accept and process
+   * Interrupt Requests. The following outlines the four possible
+   * Initialization Command Words.
    */
 
   /* Remap the irq table for primary:
    *
    * ICW1 - We will be sending ICW4
    * ICW2 - Address
-   * ICW3    */
+   * ICW3
+   */
 
-  idt_outb(PIC_ICW1_ICW4|PIC_ICW1_ICW1, PIC1_ICW1);
+  idt_outb(PIC_ICW1_ICW4 | PIC_ICW1_ICW1, PIC1_ICW1);
   idt_outb(0x20,                        PIC1_ICW2);
   idt_outb(PIC1_ICW3_IRQ2,              PIC1_ICW3);
-  idt_outb(PIC_ICW4_808xMODE,           PIC1_ICW4);
+  idt_outb(PIC_ICW4_808XMODE,           PIC1_ICW4);
 
   /* Remap irq for slave */
 
-  idt_outb(PIC_ICW1_ICW4|PIC_ICW1_ICW1, PIC2_ICW1);
+  idt_outb(PIC_ICW1_ICW4 | PIC_ICW1_ICW1, PIC2_ICW1);
   idt_outb(0x28,                        PIC2_ICW2);
   idt_outb(PIC_ICW3_SID2,               PIC2_ICW3);
-  idt_outb(PIC_ICW4_808xMODE,           PIC2_ICW4);
+  idt_outb(PIC_ICW4_808XMODE,           PIC2_ICW4);
 
   /* Mask interrupts from PIC */
 
@@ -160,8 +146,8 @@ static void up_idtentry(unsigned int index, uint32_t base, uint16_t sel,
   entry->sel    = sel;
   entry->zero   = 0;
 
-  /* We must uncomment the OR below when we get to using user-mode. It sets the
-   * interrupt gate's privilege level to 3.
+  /* We must uncomment the OR below when we get to using user-mode. It sets
+   * the interrupt gate's privilege level to 3.
    */
 
   entry->flags  = flags /* | 0x60 */;

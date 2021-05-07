@@ -72,9 +72,11 @@
 
 /* This is the clock setup we configure for:
  *
- *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20, pre-divider=1
- *   CCLCK = 480MHz / 6 = 80MHz               -> CCLK divider = 6
+ *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  ->
+ *                                     Select Main oscillator for source
+ *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz ->
+ *                                     PLL0 multipler=20, pre-divider=1
+ *   CCLCK = 480MHz / 6 = 80MHz       -> CCLK divider = 6
  */
 
 #define LPC17_40_CCLK                 80000000 /* 80Mhz */
@@ -141,7 +143,8 @@
 
 /* Ethernet configuration */
 
-//#define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44
+/* #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV44 */
+
 #define ETH_MCFG_CLKSEL_DIV ETH_MCFG_CLKSEL_DIV20
 
 /* LED definitions **********************************************************/
@@ -179,6 +182,7 @@
  * LED 1 is available for use by application software using lpc17_40_led
  * (prototyped below)
  */
+
                                       /* LED1   LED2 */
 #define LED_INIRQ                  4  /*  NC     ON  (momentary) */
 #define LED_SIGNAL                 5  /*  NC     ON  (momentary) */
@@ -346,7 +350,8 @@ extern "C"
  * Name: lpc17_40_led
  *
  * Description:
- *   Once the system has booted, these functions can be used to control LEDs 1
+ *   Once the system has booted,
+ *   these functions can be used to control LEDs 1
  *
  ****************************************************************************/
 

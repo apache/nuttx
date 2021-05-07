@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/tms570_boot.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H
 #define __ARCH_ARM_SRC_TMS570_TMS570_BOOT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -61,48 +46,51 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level initialization
- *   including setup of the console SCI.  This SCI done early so that the serial
- *   console is available for debugging very early in the boot sequence.
+ *   Called at the very beginning of _start.
+ *   Performs low level initialization including setup of the console SCI.
+ *   This SCI done early so that the serial console is available for
+ *   debugging very early in the boot sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tms570_lowsetup(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: tms570_boardinitialize
  *
  * Description:
- *   All TMS570 architectures must provide the following entry point.  This function
- *   is called near the beginning of _start.  This function is called after clocking
- *   has been configured but before caches have been enabled and before any devices
- *   have been initialized.  .data/.bss memory may or may not have been initialized
+ *   All TMS570 architectures must provide the following entry point.  This
+ *   function is called near the beginning of _start.  This function is
+ *   called after clocking has been configured but before caches have been
+ *   enabled and before any devices have been initialized.
+ *   .data/.bss memory may or may not have been initialized
  *   (see the "special precautions" below).
  *
  *   This function must perform low level initialization including
  *
  *   - Initialization of board-specific memory resources (e.g., SDRAM)
  *   - Configuration of board specific resources (GIOs, LEDs, etc).
- *   - Setup of the console SCI.  This SCI done early so that the serial console
- *     is available for debugging very early in the boot sequence.
+ *   - Setup of the console SCI.  This SCI done early so that the serial
+ *     console is available for debugging very early in the boot sequence.
  *
- *   Special precautions must be taken if .data/.bss lie in SRAM.  in that case,
- *   the boot logic cannot initialize .data or .bss.  The function must then:
+ *   Special precautions must be taken if .data/.bss lie in SRAM.  in that
+ *   case, the boot logic cannot initialize .data or .bss.
+ *   The function must then:
  *
- *   - Take precautions to assume that logic does not access any global data that
- *     might lie in SDRAM.
+ *   - Take precautions to assume that logic does not access any global data
+ *     that might lie in SDRAM.
  *   - Call the function arm_data_initialize() as soon as SDRAM has been
  *     properly configured for use.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void tms570_board_initialize(void);
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_dumpstate.c
+ * arch/xtensa/src/common/xtensa_backtrace.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,18 +30,19 @@
 #include "xtensa_abi.h"
 
 /*
- * This is how the stack looks like when calling the function below:
+ * This is how the call stack looks like when calling the function below
+ * from xtensa_dumpstate():
  *
  *         High Addr
  *     ..................
  *     |    i-3 BSA     |
- *     |   i-1 locals   | Function B
+ *     |   i-1 locals   | xtensa_assert()
  *     .................. i-1 SP
  *     |    i-2 BSA     |
- *     |    i locals    | Function A (Start of backtrace)
+ *     |    i locals    | xtensa_dumpstate()
  *     ------------------ i SP
  *     |    i-1 BSA     |
- *     |   i+1 locals   | Backtracing function (e.g. xtensa_btdump())
+ *     |   i+1 locals   | xtensa_btdump()
  *     ------------------ i+1 SP
  *     |     i BSA      |
  *     |   i+2 locals   | xtensa_backtrace_start()
@@ -56,7 +57,7 @@
  * Name: xtensa_backtrace_start
  *
  * Description:
- *   Get the first frame of the current stack's backtrace
+ *   Get the first frame of the current stack's backtrace.
  *
  *   Given the following function call flow (B -> A -> X -> xtensa_backtrace_start),
  *   this function will do the following:
@@ -89,8 +90,8 @@ xtensa_backtrace_start:
   /* a2, a3, a4 should be out arguments for i SP, i PC, i-1 PC respectively.
    * Use a5 and a6 as scratch.
    */
-  
-  l32e    a5, sp, -16     /* Get i PC, which is ret addres of i+1 */
+
+  l32e    a5, sp, -16     /* Get i PC, which is ret address of i+1 */
   s32i    a5, a2, 0       /* Store i PC to arg *pc */
   l32e    a6, sp, -12     /* Get i+1 SP. Used to access i BS */
   l32e    a5, a6, -12     /* Get i SP */

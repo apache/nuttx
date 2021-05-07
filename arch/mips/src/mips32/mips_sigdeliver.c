@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <sched.h>
 #include <syscall.h>
@@ -91,7 +92,7 @@ void up_sigdeliver(void)
    * errno that is needed by the user logic (it is probably EINTR).
    */
 
-  sinfo("Resuming EPC: %08x STATUS: %08x\n",
+  sinfo("Resuming EPC: %08" PRIx32 " STATUS: %08" PRIx32 "\n",
         regs[REG_EPC], regs[REG_STATUS]);
 
   up_irq_save();

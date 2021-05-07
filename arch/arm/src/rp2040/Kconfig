@@ -1,0 +1,207 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RP2040 Configuration Options"
+
+config RP2040_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+if RP2040_UART0
+
+config RP2040_UART0_BAUD
+	int "RP2040 UART0 BAUD"
+	default 115200
+
+config RP2040_UART0_PARITY
+	int "RP2040 UART0 parity"
+	default 0
+	range 0 2
+	---help---
+		RP2040 UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config RP2040_UART0_BITS
+	int "RP2040 UART0 number of bits"
+	default 8
+	range 5 8
+	---help---
+		RP2040 UART0 number of bits.  Default: 8
+
+config RP2040_UART0_2STOP
+	int "RP2040 UART0 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif
+
+config RP2040_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+if RP2040_UART1
+
+config RP2040_UART1_BAUD
+	int "RP2040 UART1 BAUD"
+	default 115200
+
+config RP2040_UART1_PARITY
+	int "RP2040 UART1 parity"
+	default 0
+	range 0 2
+	---help---
+		RP2040 UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config RP2040_UART1_BITS
+	int "RP2040 UART1 number of bits"
+	default 8
+	range 5 8
+	---help---
+		RP2040 UART1 number of bits.  Default: 8
+
+config RP2040_UART1_2STOP
+	int "RP2040 UART1 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif
+
+config RP2040_DMAC
+	bool "DMAC support"
+	default y
+	select ARCH_DMA
+
+config RP2040_SPI
+	bool "SPI"
+	select SPI
+
+if RP2040_SPI
+
+config RP2040_SPI0
+	bool "SPI0"
+
+config RP2040_SPI1
+	bool "SPI1"
+
+config RP2040_SPI_DMA
+	bool "SPI DMA"
+	default y
+	depends on RP2040_DMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config RP2040_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on RP2040_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by RP2040_SPI_DMATHRESHOLD.
+
+config RP2040_SPI_DRIVER
+	bool "SPI character driver"
+	default y
+	select SPI_DRIVER
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may be
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.
+
+endif
+
+config RP2040_I2C
+	bool "I2C"
+	select I2C
+
+if RP2040_I2C
+
+config RP2040_I2C0
+	bool "I2C0"
+
+config RP2040_I2C1
+	bool "I2C1"
+
+config RP2040_I2C_DRIVER
+	bool "I2C character driver"
+	default n
+	select I2C_DRIVER
+	---help---
+		Build in support for a character driver at /dev/i2c[N] that may be
+		used to perform I2C bus transfers from applications.  The intent of
+		this driver is to support I2C testing.  It is not suitable for use
+		in any real driver application.
+
+endif
+
+config RP2040_I2S
+	bool "I2S"
+	select I2S
+
+if RP2040_I2S
+
+config RP2040_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 16
+	---help---
+		This is the total number of transfers that can be enqueue before
+		the caller is required to wait.  This setting determines the number
+		certain queue data structures that will be pre-allocated.
+
+config RP2040_I2S_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config RP2040_I2S_DATA
+	int "I2S DATA GPIO pin assign (0-29)"
+	default 9
+	range 0 29
+
+config RP2040_I2S_CLOCK
+	int "I2S CLOCk GPIO pin assign (0-29)"
+	default 10
+	range 0 29
+
+config RP2040_I2S_PIO
+	int "RP2040 PIO number used for I2S (0-1)"
+	default 0
+	range 0 1
+
+config RP2040_I2S_PIO_SM
+	int "RP2040 PIO state machine number used for I2S (0-3)"
+	default 0
+	range 0 3
+
+endif
+
+menuconfig RP2040_SPISD
+	bool "SPI SD Card"
+	default n
+	select MMCSD_SPI
+
+if RP2040_SPISD
+
+config RP2040_SPISD_SLOT_NO
+	int "SPI SD Card Slot Number"
+	default 0
+	---help---
+		Select spi sd card slot number.
+
+config RP2040_SPISD_SPI_CH
+	int "SPI channel number"
+	default 0
+	range 0 1
+	---help---
+		Select spi channel number to use spi sd card.
+
+endif # SPISD Configuration

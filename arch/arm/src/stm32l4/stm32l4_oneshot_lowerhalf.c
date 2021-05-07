@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c
+ * arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +54,9 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the oneshot timer lower-half driver */
+/* This structure describes the state of the oneshot timer lower-half
+ * driver
+ */
 
 struct stm32l4_oneshot_lowerhalf_s
 {
@@ -69,8 +71,8 @@ struct stm32l4_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   struct stm32l4_oneshot_s oneshot; /* STM32-specific oneshot state */
-  oneshot_callback_t callback;    /* internal handler that receives callback */
-  FAR void *arg;                  /* Argument that is passed to the handler */
+  oneshot_callback_t callback;      /* internal handler that receives callback */
+  FAR void *arg;                    /* Argument that is passed to the handler */
 };
 
 /****************************************************************************

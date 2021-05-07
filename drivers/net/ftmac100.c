@@ -1321,7 +1321,7 @@ static void ftmac100_txavail_work(FAR void *arg)
 
       /* If so, then poll the network for new XMIT data */
 
-      devif_poll(&priv->ft_dev, ftmac100_txpoll);
+      devif_timer(&priv->ft_dev, 0, ftmac100_txpoll);
     }
 
   net_unlock();

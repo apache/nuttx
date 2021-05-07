@@ -1,35 +1,20 @@
 /****************************************************************************
- * arch/arm/src/max32660/max326_gpio.c
+ * arch/arm/src/max326xx/max32660/max32660_gpio.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -255,7 +240,7 @@ int max326_gpio_config(max326_pinset_t pinset)
 
   /* Modification of all registers must be atomic */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   /* First, force the pin configuration to the default generic input state.
    * So that we know we are starting from a known state.
@@ -337,13 +322,13 @@ int max326_gpio_config(max326_pinset_t pinset)
     }
   else
     {
-       /* Four levels of drive strength:  Order by drive strength:
-        *
-        * LO    DS0=0 DS1=0
-        * MEDLO DS0=1 DS1=0
-        * MEDHI DS0=0 DS1=1
-        * HI    DS0=1 DS1=1
-        */
+      /* Four levels of drive strength:  Order by drive strength:
+       *
+       * LO    DS0=0 DS1=0
+       * MEDLO DS0=1 DS1=0
+       * MEDHI DS0=0 DS1=1
+       * HI    DS0=1 DS1=1
+       */
 
       if (subset == GPIO_DRIVE_MEDLO || subset == GPIO_DRIVE_HI)
         {
@@ -416,7 +401,7 @@ int max326_gpio_config(max326_pinset_t pinset)
       putreg32(regval, MAX326_GPIO0_WAKEEN);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -439,7 +424,7 @@ void max326_gpio_write(max326_pinset_t pinset, bool value)
 
   /* Modification of registers must be atomic */
 
-  flags  = spin_lock_irqsave();
+  flags  = spin_lock_irqsave(NULL);
   regval = getreg32(MAX326_GPIO0_OUT);
   if (value)
     {
@@ -451,7 +436,7 @@ void max326_gpio_write(max326_pinset_t pinset, bool value)
     }
 
   putreg32(regval, MAX326_GPIO0_OUT);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -484,7 +469,7 @@ bool max326_gpio_read(max326_pinset_t pinset)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
-int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
+int max326_gpio_dump(max326_pinset_t pinset, const char *msg)
 {
   unsigned int pin;
   uint32_t pinmask;
@@ -513,7 +498,6 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
   afmode |= (regval & pinmask) != 0 ? 2 : 0;
   gpioinfo("           Mode:  %d\n", g_afmode[afmode]);
 
-
   regval = getreg32(MAX326_GPIO0_OUTEN);
   gpioinfo("  Output Enable:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
@@ -527,7 +511,7 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
            (regval & pinmask) != 0 ? "High" : "Low");
 
   regval = getreg32(MAX326_GPIO0_INTMODE);
-  edge   = (regval & pinmask) != 0
+  edge   = (regval & pinmask) != 0;
   gpioinfo("      Intr Mode:  %s\n", edge ? "Yes" : "No");
 
   regval = getreg32(MAX326_GPIO0_INTPOL);
@@ -562,13 +546,13 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
   gpioinfo(" Wakeup Enabled:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
 
-  pullmode = 0
+  pullmode = 0;
   regval   = getreg32(MAX326_GPIO0_PULLEN);
   if ((regval & pinmask) != 0)
     {
       if ((PULLUP_SET & pinmask) == 0)
         {
-          pullmode = 1:
+          pullmode = 1;
         }
       else
         {
@@ -583,9 +567,9 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
   regval = getreg32(MAX326_GPIO0_DS0SEL);
   if ((regval & pinmask) != 0)
     {
-      if (PULLUP_SET & pinmask) == 0)
+      if ((PULLUP_SET & pinmask) == 0)
         {
-          dsmode = 3:
+          dsmode = 3;
         }
       else
         {
@@ -593,10 +577,10 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
           dsmode = (regval & pinmask) != 0 ? 3 : 1;
         }
     }
-  else if (PULLUP_SET & pinmask) != 0)
+  else if ((PULLUP_SET & pinmask) != 0)
     {
       regval = getreg32(MAX326_GPIO0_DS1SEL);
-      if (regval & pinmask) != 0)
+      if ((regval & pinmask) != 0)
         {
           dsmode = 2;
         }
@@ -611,5 +595,7 @@ int max326_gpio_dump(max326_pinset_t pinset, const char *msg);
   regval = getreg32(MAX326_GPIO0_SRSEL);
   gpioinfo("   Slew Enabled:  %s\n",
            (regval & pinmask) != 0 ? "Yes" : "No");
+
+  return 0;
 }
 #endif

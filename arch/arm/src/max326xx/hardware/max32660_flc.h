@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/max326xx/hardware/max32660_flc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_FLC_H
 #define __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_FLC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/max326_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define MAX326_FLC_ADDR_OFFSET      0x0000  /* Flash Controller Address Pointer Register */
 #define MAX326_FLC_CLKDIV_OFFSET    0x0004  /* Flash Controller Clock Divisor Register */
@@ -58,7 +43,7 @@
 #define MAX326_FLC_DATA2_OFFSET     0x0038  /* Flash Controller Data Register 2 */
 #define MAX326_FLC_DATA3_OFFSET     0x003c  /* Flash Controller Data Register 3 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define MAX326_FLC_ADDR             (MAX326_FLC_BASE + MAX326_FLC_ADDR_OFFSET)
 #define MAX326_FLC_CLKDIV           (MAX326_FLC_BASE + MAX326_FLC_CLKDIV_OFFSET)
@@ -69,7 +54,7 @@
 #define MAX326_FLC_DATA2            (MAX326_FLC_BASE + MAX326_FLC_DATA2_OFFSET)
 #define MAX326_FLC_DATA3            (MAX326_FLC_BASE + MAX326_FLC_DATA3_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Flash Controller Address Pointer Register (32-bit FLASH address) */
 
@@ -89,6 +74,7 @@
 #  define FLC_CTRL_ERASECODE_PAGE  (0x55 << FLC_CTRL_ERASECODE_SHIFT) /* Page erase code */
 #  define FLC_CTRL_ERASECODE_MASS  (0xaa << FLC_CTRL_ERASECODE_SHIFT) /* Enable mass erase via
                                                                        * the JTAG debug port */
+
 #define FLC_CTRL_BUSY              (1 << 24) /* Bit 24: Flash Busy Flag */
 #define FLC_CTRL_LVE               (1 << 25) /* Bit 25: Low Voltage Enable */
 #define FLC_CTRL_UNLOCKCODE_SHIFT  (28)      /* Bits 28-31: Flash Unlock */
@@ -107,8 +93,11 @@
                                               * Interrupt Enable */
 
 /* Flash Controller Data Register 0 (32-bit FLASH data) */
+
 /* Flash Controller Data Register 1 (32-bit FLASH data) */
+
 /* Flash Controller Data Register 2 (32-bit FLASH data) */
+
 /* Flash Controller Data Register 3 (32-bit FLASH data) */
 
 #endif /* __ARCH_ARM_SRC_MAX326XX_HARDWARE_MAX32660_FLC_H */

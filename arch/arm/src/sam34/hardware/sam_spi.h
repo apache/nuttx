@@ -1,59 +1,44 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_spi.h
- * Serial Peripheral Interface (SPI) definitions for the SAM3U, SAM4S, SAM4E, and SAM4L
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SPI_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SPI_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* General definitions ******************************************************************/
+ ****************************************************************************/
+
+/* General definitions ******************************************************/
 
 #define SAM_SPI_NCS               4    /* Four chip selects */
 
-/* SPI register offsets *****************************************************************/
+/* SPI register offsets *****************************************************/
 
 #define SAM_SPI_CR_OFFSET         0x0000 /* Control Register */
 #define SAM_SPI_MR_OFFSET         0x0004 /* Mode Register */
@@ -78,7 +63,7 @@
 #endif
                                          /* 0x100-0x124 Reserved for PDC Registers */
 
-/* SPI register addresses ***************************************************************/
+/* SPI register addresses ***************************************************/
 
 #define SAM_SPI0_CR               (SAM_SPI0_BASE+SAM_SPI_CR_OFFSET)   /* Control Register */
 #define SAM_SPI0_MR               (SAM_SPI0_BASE+SAM_SPI_MR_OFFSET)   /* Mode Register */
@@ -120,7 +105,7 @@
 #  define SAM_SPI1_VERSION        (SAM_SPI1_BASE+SAM_SPI_VERSION_OFFSET)
 #endif
 
-/* SPI register bit definitions *********************************************************/
+/* SPI register bit definitions *********************************************/
 
 /* SPI Control Register */
 
@@ -153,6 +138,7 @@
 #  define SPI_MR_PCS1             (1 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_MR_PCS2             (3 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_MR_PCS3             (7 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
+
 #define SPI_MR_DLYBCS_SHIFT       (24)      /* Bits 24-31: Delay Between Chip Selects */
 #define SPI_MR_DLYBCS_MASK        (0xff << SPI_MR_DLYBCS_SHIFT)
 
@@ -177,9 +163,11 @@
 #  define SPI_TDR_PCS1            (1 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_TDR_PCS2            (3 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_TDR_PCS3            (7 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
+
 #define SPI_TDR_LASTXFER          (1 << 24) /* Bit 24: Last Transfer */
 
-/* SPI Status Register, SPI Interrupt Enable Register, SPI Interrupt Disable Register,
+/* SPI Status Register, SPI Interrupt Enable Register,
+ * SPI Interrupt Disable Register,
  * and SPI Interrupt Mask Register (common bit fields)
  */
 
@@ -209,6 +197,7 @@
 #define SPI_CSR_BITS_SHIFT        (4)       /* Bits 4-7: Bits Per Transfer */
 #define SPI_CSR_BITS_MASK         (15 << SPI_CSR_BITS_SHIFT)
 #  define SPI_CSR_BITS(n)         (((n)-8) << SPI_CSR_BITS_SHIFT) /* n, n=8-16 */
+
 #  define SPI_CSR_BITS8           (0 << SPI_CSR_BITS_SHIFT) /* 8 */
 #  define SPI_CSR_BITS9           (1 << SPI_CSR_BITS_SHIFT) /* 9 */
 #  define SPI_CSR_BITS10          (2 << SPI_CSR_BITS_SHIFT) /* 10 */
@@ -218,6 +207,7 @@
 #  define SPI_CSR_BITS14          (6 << SPI_CSR_BITS_SHIFT) /* 14 */
 #  define SPI_CSR_BITS15          (7 << SPI_CSR_BITS_SHIFT) /* 15 */
 #  define SPI_CSR_BITS16          (8 << SPI_CSR_BITS_SHIFT) /* 16 */
+
 #define SPI_CSR_SCBR_SHIFT        (8)       /* Bits 8-15: Serial Clock Baud Rate */
 #define SPI_CSR_SCBR_MASK         (0xff << SPI_CSR_SCBR_SHIFT)
 #  define SPI_CSR_SCBR(n)         ((uint32_t)(n) << SPI_CSR_SCBR_SHIFT)
@@ -275,16 +265,16 @@
 #  define SPI_VERSION_MFN_MASK        (7 << SPI_VERSION_MFN_SHIFT)
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_SPI_H */

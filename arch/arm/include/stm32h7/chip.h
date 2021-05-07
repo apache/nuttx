@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32h7/chip.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -32,20 +32,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_STM32H7_CHIP_H
 #define __ARCH_ARM_INCLUDE_STM32H7_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* STM32H7x3xx  Differences between family members:
  *
@@ -65,8 +65,8 @@
  *
  * Parts STM32H7xxxI have 2048Kb of FLASH
  *
- * The correct FLASH size will be set CONFIG_STM32H7_FLASH_CONFIG_x or overridden
- * with CONFIG_STM32H7_FLASH_OVERRIDE_x
+ * The correct FLASH size will be set CONFIG_STM32H7_FLASH_CONFIG_x or
+ * overridden with CONFIG_STM32H7_FLASH_OVERRIDE_x
  */
 
 #if defined (CONFIG_ARCH_CHIP_STM32H743AG) || \
@@ -211,7 +211,7 @@
 #  define STM32H7_NFMC                     0   /* No FMC memory controller */
 #endif
 
-/* NVIC priority levels *************************************************************/
+/* NVIC priority levels *****************************************************/
 
 /* 16 Programmable interrupt levels */
 

@@ -1,57 +1,42 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_gclk.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_GCLK_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_GCLK_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_NGCLK                    12     /* 12 Clock generators, 0-11 */
 #define SAM_NCHANNELS                48     /* 48 Clock generators, 0..47 */
 
-/* GCLK register offsets ********************************************************************/
+/* GCLK register offsets ****************************************************/
 
 #define SAM_GCLK_CTRLA_OFFSET        0x0000 /* Control register */
 #define SAM_GCLK_SYNCHBUSY_OFFSET    0x0004 /* Status register */
@@ -59,7 +44,7 @@
 #define SAM_GCLK_GENCTRL_OFFSET(n)   (0x0020 + ((n) << 2)) /* General clock generator n */
 #define SAM_GCLK_PCHCTRL_OFFSET(m)   (0x0080 + ((m) << 2)) /* Peripheral channel control m */
 
-/* GCLK register addresses ******************************************************************/
+/* GCLK register addresses **************************************************/
 
 #define SAM_GCLK_CTRLA               (SAM_GCLK_BASE + SAM_GCLK_CTRLA_OFFSET)
 #define SAM_GCLK_SYNCHBUSY           (SAM_GCLK_BASE + SAM_GCLK_SYNCHBUSY_OFFSET)
@@ -67,7 +52,7 @@
 #define SAM_GCLK_GENCTRL(n)          (SAM_GCLK_BASE + SAM_GCLK_GENCTRL_OFFSET(n))
 #define SAM_GCLK_PCHCTRL(n)          (SAM_GCLK_BASE + SAM_GCLK_PCHCTRL_OFFSET(n))
 
-/* GCLK register bit definitions ************************************************************/
+/* GCLK register bit definitions ********************************************/
 
 /* Control register */
 
@@ -76,7 +61,9 @@
 /* Status register */
 
 #define GCLK_SYNCHBUSY_SWRST         (1 << 0)  /* Bit 0:  SWRST synchronization busy */
+
 #define GCLK_SYNCHBUSY_GENCTRL(n)    (1 << ((n) + 2))  /* Bit n+2: Generator control n busy */
+
 #  define GCLK_SYNCHBUSY_GENCTRL0    (1 << 2)  /* Bit 2:  Generator control 0 busy */
 #  define GCLK_SYNCHBUSY_GENCTRL1    (1 << 3)  /* Bit 3:  Generator control 1 busy */
 #  define GCLK_SYNCHBUSY_GENCTRL2    (1 << 4)  /* Bit 4:  Generator control 2 busy */
@@ -104,6 +91,7 @@
 #  define GCLK_GENCTRL_SRC_DFLL      (6 << GCLK_GENCTRL_SRC_SHIFT) /* DFLL oscillator output */
 #  define GCLK_GENCTRL_SRC_DPLL0     (7 << GCLK_GENCTRL_SRC_SHIFT) /* DPLL0 output */
 #  define GCLK_GENCTRL_SRC_DPLL1     (8 << GCLK_GENCTRL_SRC_SHIFT) /* DPLL1 output */
+
 #define GCLK_GENCTRL_GENEN           (1 << 8)  /* Bit 8:  Generator enable */
 #define GCLK_GENCTRL_IDC             (1 << 9)  /* Bit 9:  Improve duty cycle */
 #define GCLK_GENCTRL_OOV             (1 << 10) /* Bit 10: Clock output selection */
@@ -137,7 +125,7 @@
 #define GCLK_PCHCTRL_CHEN            (1 << 6)  /* Bit 6:  Channel enable */
 #define GCLK_PCHCTRL_WRTLOCK         (1 << 7)  /* Bit 7:  Write lock */
 
-/* PCHCTRL channel mapping ******************************************************************/
+/* PCHCTRL channel mapping **************************************************/
 
 #define GCLK_CHAN_OSCCTRL_DFLL       0         /* DFLL input clock source */
 #define GCLK_CHAN_OSCCTRL_DPLL0      1         /* Reference clock for DPLL0 */
@@ -147,7 +135,7 @@
 #define GCLK_CHAN_SDHCn_SLOW         3         /* SDHC0-1 Slow */
 #define GCLK_CHAN_SDHC0_SLOW         3         /* SDHC0 Slow */
 #define GCLK_CHAN_SDHC1_SLOW         3         /* SDHC1 Slow */
-#define GCLK_CHAN_SERCOMn_SLOW       3         /* SERCOM Slow (common) */
+#define GCLK_CHAN_SERCOMN_SLOW       3         /* SERCOM Slow (common) */
 #define GCLK_CHAN_SERCOM0_SLOW       3         /* SERCOM0 Slow */
 #define GCLK_CHAN_SERCOM1_SLOW       3         /* SERCOM1 Slow */
 #define GCLK_CHAN_SERCOM2_SLOW       3         /* SERCOM2 Slow */
@@ -208,16 +196,16 @@
 #define GCLK_CHAN_SDHC1              46        /* SDHC1 */
 #define GCLK_CHAN_CM4_TRACE          47        /* CM4 Trace */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_GCLK_H */

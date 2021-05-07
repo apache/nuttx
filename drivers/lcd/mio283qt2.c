@@ -1,51 +1,38 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/mio283qt2.c
  *
- * This is a driver for the MI0283QT-2 LCD from Multi-Inno Technology Co., Ltd.  This
- * LCD is based on the Himax HX8347-D LCD controller.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* This is a driver for the MI0283QT-2 LCD from Multi-Inno Technology Co.,
+ * Ltd.  This LCD is based on the Himax HX8347-D LCD controller.
  *
  * References:
- * 1) LCD Module Specification, Model : MI0283QT-2, Multi-Inno Technology Co.,
- *    Ltd., Revision 1.0
- * 2) Data Sheet: HX8347-D(T), 240RGB x 320 dot, 262K color, with internal GRAM, TFT
- *    Mobile Single Chip Driver Version 02 March, Doc No. HX8347-D(T)-DS, Himax
- *    Technologies, Inc., 2009,
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- **************************************************************************************/
+ * 1) LCD Module Specification, Model :
+ *    MI0283QT-2, Multi-Inno Technology Co., Ltd., Revision 1.0
+ * 2) Data Sheet:
+ *    HX8347-D(T), 240RGB x 320 dot, 262K color, with internal GRAM, TFT
+ *    Mobile Single Chip Driver Version 02 March, Doc No. HX8347-D(T)-DS,
+ *    Himax Technologies, Inc., 2009,
+ */
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -63,10 +50,11 @@
 
 #ifdef CONFIG_LCD_MIO283QT2
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
-/* Configuration **********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 /* Check contrast selection */
 
@@ -102,7 +90,8 @@
 #  define CONFIG_LCD_LANDSCAPE 1
 #endif
 
-/* Display/Color Properties ***********************************************************/
+/* Display/Color Properties *************************************************/
+
 /* Display Resolution */
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -118,25 +107,30 @@
 #define MIO283QT2_BPP           16
 #define MIO283QT2_COLORFMT      FB_FMT_RGB16_565
 
-/* Hardware LCD/LCD controller definitions ********************************************/
-/* In this driver, I chose to use all literal constants for register address and
- * values.  Some recent experiences have shown me that during LCD bringup, it is more
- * important to know the binary values rather than nice, people friendly names.  Sad,
- * but true.
+/* Hardware LCD/LCD controller definitions **********************************/
+
+/* In this driver, I chose to use all literal constants for register address
+ * and values. Some recent experiences have shown me that during LCD bringup,
+ * it is more important to know the binary values rather than nice, people
+ * friendly names. Sad, but true.
  */
 
 #define HIMAX_ID 0x0047
 
-/* LCD Profiles ***********************************************************************/
-/* Many details of the controller initialization must, unfortunately, vary from LCD to
- * LCD.  I have looked at the spec and at three different drivers for LCDs that have
- * MIO283QT2 controllers.  I have tried to summarize these differences as "LCD profiles"
+/* LCD Profiles *************************************************************/
+
+/* Many details of the controller initialization must, unfortunately, vary
+ * from LCD to LCD.  I have looked at the spec and at three different drivers
+ * for LCDs that have MIO283QT2 controllers.
+ * I have tried to summarize these differences as "LCD profiles"
  *
  * Most of the differences between LCDs are nothing more than a few minor bit
  * settings.  The most significant difference between LCD drivers in is the
- * manner in which the LCD is powered up and in how the power controls are set.
- * My suggestion is that if you have working LCD initialization code, you should
- * simply replace the code in mio283qt2_hwinitialize with your working code.
+ * manner in which the LCD is powered up and in how the power controls are
+ * set.
+ * My suggestion is that if you have working LCD initialization code, you
+ * should simply replace the code in mio283qt2_hwinitialize with your working
+ * code.
  */
 
 #if defined (CONFIG_MIO283QT2_PROFILE2)
@@ -153,16 +147,17 @@
 #  define PWRCTRL2_SETTING MIO283QT2_PWRCTRL2_VRC_5p1V
 
   /* PWRCTRL3: x 2.165
-   * NOTE: Many drivers have bit 8 set which is not defined in the MIO283QT2 spec.
+   * NOTE:
+   * Many drivers have bit 8 set which is not defined in the MIO283QT2 spec.
    */
 
 #  define PWRCTRL3_SETTING MIO283QT2_PWRCTRL3_VRH_x2p165
 
-   /* PWRCTRL4: VDV=9 + VCOMG */
+  /* PWRCTRL4: VDV=9 + VCOMG */
 
 #  define PWRCTRL4_SETTING (MIO283QT2_PWRCTRL4_VDV(9) | MIO283QT2_PWRCTRL4_VCOMG)
 
-   /* PWRCTRL5: VCM=56 + NOTP */
+  /* PWRCTRL5: VCM=56 + NOTP */
 
 #  define PWRCTRL5_SETTING (MIO283QT2_PWRCTRL5_VCM(56) | MIO283QT2_PWRCTRL5_NOTP)
 
@@ -180,16 +175,17 @@
 #  define PWRCTRL2_SETTING MIO283QT2_PWRCTRL2_VRC_5p1V
 
   /* PWRCTRL3: x 2.165
-   * NOTE: Many drivers have bit 8 set which is not defined in the MIO283QT2 spec.
+   * NOTE:
+   * Many drivers have bit 8 set which is not defined in the MIO283QT2 spec.
    */
 
 #  define PWRCTRL3_SETTING MIO283QT2_PWRCTRL3_VRH_x2p165
 
-   /* PWRCTRL4: VDV=9 + VCOMG */
+  /* PWRCTRL4: VDV=9 + VCOMG */
 
 #  define PWRCTRL4_SETTING (MIO283QT2_PWRCTRL4_VDV(9) | MIO283QT2_PWRCTRL4_VCOMG)
 
-   /* PWRCTRL5: VCM=56 + NOTP */
+  /* PWRCTRL5: VCM=56 + NOTP */
 
 #  define PWRCTRL5_SETTING (MIO283QT2_PWRCTRL5_VCM(56) | MIO283QT2_PWRCTRL5_NOTP)
 
@@ -208,24 +204,25 @@
 #  define PWRCTRL2_SETTING MIO283QT2_PWRCTRL2_VRC_5p3V
 
   /* PWRCTRL3: x 2.570
-   * NOTE: Many drivers have bit 8 set which is not defined in the MIO283QT2 spec.
+   * NOTE:
+   * Many drivers have bit 8 set which is not defined in the MIO283QT2 spec.
    */
 
 #  define PWRCTRL3_SETTING MIO283QT2_PWRCTRL3_VRH_x2p570
 
-   /* PWRCTRL4: VDV=12 + VCOMG */
+  /* PWRCTRL4: VDV=12 + VCOMG */
 
 #  define PWRCTRL4_SETTING (MIO283QT2_PWRCTRL4_VDV(12) | MIO283QT2_PWRCTRL4_VCOMG)
 
-   /* PWRCTRL5: VCM=60 + NOTP */
+  /* PWRCTRL5: VCM=60 + NOTP */
 
 #  define PWRCTRL5_SETTING (MIO283QT2_PWRCTRL5_VCM(60) | MIO283QT2_PWRCTRL5_NOTP)
 
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -238,31 +235,36 @@ struct mio283qt2_dev_s
   /* Private LCD-specific information follows */
 
   FAR struct mio283qt2_lcd_s *lcd;  /* The contained platform-specific, LCD interface */
-  uint8_t power;                  /* Current power setting */
+  uint8_t power;                    /* Current power setting */
 
   /* This is working memory allocated by the LCD driver for each LCD device
-   * and for each color plane.  This memory will hold one raster line of data.
+   * and for each color plane.
+   * This memory will hold one raster line of data.
    * The size of the allocated run buffer must therefore be at least
    * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
    * bitwidth of the underlying pixel type.
    *
    * If there are multiple planes, they may share the same working buffer
    * because different planes will not be operate on concurrently.  However,
-   * if there are multiple LCD devices, they must each have unique run buffers.
+   * if there are multiple LCD devices, they must each have unique run
+   * buffers.
    */
 
   uint16_t runbuffer[MIO283QT2_XRES];
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Protototypes
- **************************************************************************************/
+ ****************************************************************************/
+
 /* Low Level LCD access */
 
-static void mio283qt2_putreg(FAR struct mio283qt2_lcd_s *lcd, uint8_t regaddr,
-             uint16_t regval);
+static void mio283qt2_putreg(FAR struct mio283qt2_lcd_s *lcd,
+                             uint8_t regaddr,
+                             uint16_t regval);
 #ifndef CONFIG_LCD_NOGETRUN
-static uint16_t mio283qt2_readreg(FAR struct mio283qt2_lcd_s *lcd, uint8_t regaddr);
+static uint16_t mio283qt2_readreg(FAR struct mio283qt2_lcd_s *lcd,
+                                  uint8_t regaddr);
 #endif
 static inline void mio283qt2_gramwrite(FAR struct mio283qt2_lcd_s *lcd,
              uint16_t rgbcolor);
@@ -273,21 +275,25 @@ static inline uint16_t mio283qt2_gramread(FAR struct mio283qt2_lcd_s *lcd,
              FAR uint16_t *accum);
 #endif
 static void mio283qt2_setarea(FAR struct mio283qt2_lcd_s *lcd,
-                              uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+                              uint16_t x0, uint16_t y0,
+                              uint16_t x1, uint16_t y1);
 
 /* LCD Data Transfer Methods */
 
-static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-             size_t npixels);
-static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-             size_t npixels);
+static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col,
+                            FAR const uint8_t *buffer,
+                            size_t npixels);
+static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col,
+                            FAR uint8_t *buffer,
+                            size_t npixels);
 
 /* LCD Configuration */
 
 static int mio283qt2_getvideoinfo(FAR struct lcd_dev_s *dev,
-             FAR struct fb_videoinfo_s *vinfo);
-static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-             FAR struct lcd_planeinfo_s *pinfo);
+                                  FAR struct fb_videoinfo_s *vinfo);
+static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                  unsigned int planeno,
+                                  FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
 
@@ -306,99 +312,107 @@ static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planen
 static int mio283qt2_getpower(FAR struct lcd_dev_s *dev);
 static int mio283qt2_setpower(FAR struct lcd_dev_s *dev, int power);
 static int mio283qt2_getcontrast(FAR struct lcd_dev_s *dev);
-static int mio283qt2_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast);
+static int mio283qt2_setcontrast(FAR struct lcd_dev_s *dev,
+                                 unsigned int contrast);
 
 /* Initialization */
 
 static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
-/* This driver can support only a signal MIO283QT2 device.  This is due to an
- * unfortunate decision made whent he getrun and putrun methods were designed. The
- * following is the single MIO283QT2 driver state instance:
+/* This driver can support only a signal MIO283QT2 device.
+ * This is due to an unfortunate decision made whent he getrun and
+ * putrun methods were designed.
+ * The following is the single MIO283QT2 driver state instance:
  */
 
 static struct mio283qt2_dev_s g_lcddev;
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_putreg(lcd,
  *
  * Description:
  *   Write to an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void mio283qt2_putreg(FAR struct mio283qt2_lcd_s *lcd,
                              uint8_t regaddr, uint16_t regval)
 {
-  /* Set the index register to the register address and write the register contents */
+  /* Set the index register to the register address and write the register
+   * contents
+   */
 
   lcd->index(lcd, regaddr);
   lcd->write(lcd, regval);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_readreg
  *
  * Description:
  *   Read from an LCD register
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
-static uint16_t mio283qt2_readreg(FAR struct mio283qt2_lcd_s *lcd, uint8_t regaddr)
+static uint16_t mio283qt2_readreg(FAR struct mio283qt2_lcd_s *lcd,
+                                  uint8_t regaddr)
 {
-  /* Set the index register to the register address and read the register contents. */
+  /* Set the index register to the register address and read the register
+   * contents.
+   */
 
   lcd->index(lcd, regaddr);
   return lcd->read(lcd);
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_gramselect
  *
  * Description:
  *   Setup to read or write multiple pixels to the GRAM memory
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void mio283qt2_gramselect(FAR struct mio283qt2_lcd_s *lcd)
 {
   lcd->index(lcd, 0x22);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_gramwrite
  *
  * Description:
  *   Setup to read or write multiple pixels to the GRAM memory
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static inline void mio283qt2_gramwrite(FAR struct mio283qt2_lcd_s *lcd, uint16_t data)
+static inline void mio283qt2_gramwrite(FAR struct mio283qt2_lcd_s *lcd,
+                                       uint16_t data)
 {
   lcd->write(lcd, data);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_readsetup
  *
  * Description:
- *   Prime the operation by reading one pixel from the GRAM memory if necessary for
- *   this LCD type.  When reading 16-bit gram data, there may be some shifts in the
- *   returned data:
+ *   Prime the operation by reading one pixel from the GRAM memory if
+ *   necessary for this LCD type.  When reading 16-bit gram data, there may
+ *   be some shifts in the returned data:
  *
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
 static inline void mio283qt2_readsetup(FAR struct mio283qt2_lcd_s *lcd,
@@ -412,16 +426,17 @@ static inline void mio283qt2_readsetup(FAR struct mio283qt2_lcd_s *lcd,
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_gramread
  *
  * Description:
- *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
- *   data and possibly swapping red and green components.
+ *   Read one correctly aligned pixel from the GRAM memory.
+ *    Possibly shifting the data and possibly swapping red and green
+ *    components.
  *
  *   - ILI932x: Unknown -- assuming colors are in the color order
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_LCD_NOGETRUN
 static inline uint16_t mio283qt2_gramread(FAR struct mio283qt2_lcd_s *lcd,
@@ -433,29 +448,31 @@ static inline uint16_t mio283qt2_gramread(FAR struct mio283qt2_lcd_s *lcd,
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_setarea
  *
  * Description:
- *   Set the cursor position.  In landscape mode, the "column" is actually the physical
+ *   Set the cursor position.
+ *   In landscape mode, the "column" is actually the physical
  *   Y position and the "row" is the physical X position.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static void mio283qt2_setarea(FAR struct mio283qt2_lcd_s *lcd,
-                              uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+                              uint16_t x0, uint16_t y0,
+                              uint16_t x1, uint16_t y1)
 {
-   mio283qt2_putreg(lcd, 0x03, (x0 & 0x00ff)); /* set x0 */
-   mio283qt2_putreg(lcd, 0x02, (x0 >> 8));     /* set x0 */
-   mio283qt2_putreg(lcd, 0x05, (x1 & 0x00ff)); /* set x1 */
-   mio283qt2_putreg(lcd, 0x04, (x1 >> 8));     /* set x1 */
-   mio283qt2_putreg(lcd, 0x07, (y0 & 0x00ff)); /* set y0 */
-   mio283qt2_putreg(lcd, 0x06, (y0 >> 8));     /* set y0 */
-   mio283qt2_putreg(lcd, 0x09, (y1 & 0x00ff)); /* set y1 */
-   mio283qt2_putreg(lcd, 0x08, (y1 >> 8));     /* set y1 */
+  mio283qt2_putreg(lcd, 0x03, (x0 & 0x00ff)); /* set x0 */
+  mio283qt2_putreg(lcd, 0x02, (x0 >> 8));     /* set x0 */
+  mio283qt2_putreg(lcd, 0x05, (x1 & 0x00ff)); /* set x1 */
+  mio283qt2_putreg(lcd, 0x04, (x1 >> 8));     /* set x1 */
+  mio283qt2_putreg(lcd, 0x07, (y0 & 0x00ff)); /* set y0 */
+  mio283qt2_putreg(lcd, 0x06, (y0 >> 8));     /* set y0 */
+  mio283qt2_putreg(lcd, 0x09, (y1 & 0x00ff)); /* set y1 */
+  mio283qt2_putreg(lcd, 0x08, (y1 >> 8));     /* set y1 */
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_dumprun
  *
  * Description:
@@ -464,12 +481,15 @@ static void mio283qt2_setarea(FAR struct mio283qt2_lcd_s *lcd,
  *  run     - The buffer in containing the run read to be dumped
  *  npixels - The number of pixels to dump
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #if 0 /* Sometimes useful */
-static void mio283qt2_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npixels)
+static void mio283qt2_dumprun(FAR const char *msg,
+                              FAR uint16_t *run,
+                              size_t npixels)
 {
-  int i, j;
+  int i;
+  int j;
 
   syslog(LOG_INFO, "\n%s:\n", msg);
   for (i = 0; i < npixels; i += 16)
@@ -486,7 +506,7 @@ static void mio283qt2_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npi
 }
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_putrun
  *
  * Description:
@@ -498,9 +518,10 @@ static void mio283qt2_dumprun(FAR const char *msg, FAR uint16_t *run, size_t npi
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col,
+                            FAR const uint8_t *buffer,
                             size_t npixels)
 {
   FAR struct mio283qt2_dev_s *priv = &g_lcddev;
@@ -534,7 +555,7 @@ static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *b
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_getrun
  *
  * Description:
@@ -546,9 +567,10 @@ static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *b
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col,
+                            FAR uint8_t *buffer,
                             size_t npixels)
 {
 #ifndef CONFIG_LCD_NOGETRUN
@@ -596,13 +618,13 @@ static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #endif
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int mio283qt2_getvideoinfo(FAR struct lcd_dev_s *dev,
                                   FAR struct fb_videoinfo_s *vinfo)
@@ -618,15 +640,16 @@ static int mio283qt2_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev,
+                                  unsigned int planeno,
                                   FAR struct lcd_planeinfo_s *pinfo)
 {
   FAR struct mio283qt2_dev_s *priv = (FAR struct mio283qt2_dev_s *)dev;
@@ -641,14 +664,15 @@ static int mio283qt2_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planen
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int mio283qt2_getpower(FAR struct lcd_dev_s *dev)
 {
@@ -656,14 +680,15 @@ static int mio283qt2_getpower(FAR struct lcd_dev_s *dev)
   return g_lcddev.power;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_poweroff
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int mio283qt2_poweroff(FAR struct mio283qt2_lcd_s *lcd)
 {
@@ -689,14 +714,15 @@ static int mio283qt2_poweroff(FAR struct mio283qt2_lcd_s *lcd)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int mio283qt2_setpower(FAR struct lcd_dev_s *dev, int power)
 {
@@ -744,13 +770,13 @@ static int mio283qt2_setpower(FAR struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int mio283qt2_getcontrast(FAR struct lcd_dev_s *dev)
 {
@@ -758,27 +784,28 @@ static int mio283qt2_getcontrast(FAR struct lcd_dev_s *dev)
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int mio283qt2_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast)
+static int mio283qt2_setcontrast(FAR struct lcd_dev_s *dev,
+                                 unsigned int contrast)
 {
   lcdinfo("contrast: %d\n", contrast);
   return -ENOSYS;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_hwinitialize
  *
  * Description:
  *   Initialize the LCD hardware.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
 {
@@ -896,7 +923,8 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
 
       /* Window setting */
 
-      mio283qt2_setarea(lcd, 0, 0, (MIO283QT2_XRES-1), (MIO283QT2_YRES-1));
+      mio283qt2_setarea(lcd, 0, 0, (MIO283QT2_XRES - 1),
+                       (MIO283QT2_YRES - 1));
       ret = OK;
     }
 #ifndef CONFIG_LCD_NOGETRUN
@@ -913,29 +941,32 @@ static inline int mio283qt2_hwinitialize(FAR struct mio283qt2_dev_s *priv)
   return ret;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_lcdinitialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
+ *   Initialize the LCD video hardware.
+ *   The initial state of the LCD is fully initialized, display memory
+ *   cleared, and the LCD ready to use, but with the power
  *   setting at 0 (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-FAR struct lcd_dev_s *mio283qt2_lcdinitialize(FAR struct mio283qt2_lcd_s *lcd)
+FAR struct lcd_dev_s *mio283qt2_lcdinitialize(
+                                 FAR struct mio283qt2_lcd_s *lcd)
 {
   int ret;
 
   lcdinfo("Initializing\n");
 
-  /* If we ccould support multiple MIO283QT2 devices, this is where we would allocate
-   * a new driver data structure... but we can't.  Why not?  Because of a bad should
-   * the form of the getrun() and putrun methods.
+  /* If we ccould support multiple MIO283QT2 devices, this is where we
+   * would allocate a new driver data structure... but we can't.
+   * Why not?
+   * Because of a bad should the form of the getrun() and putrun methods.
    */
 
   FAR struct mio283qt2_dev_s *priv = &g_lcddev;
@@ -968,16 +999,17 @@ FAR struct lcd_dev_s *mio283qt2_lcdinitialize(FAR struct mio283qt2_lcd_s *lcd)
   return NULL;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  mio283qt2_clear
  *
  * Description:
- *   This is a non-standard LCD interface just for the stm3240g-EVAL board.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all GRAM memory to the specified color.
+ *   This is a non-standard LCD interface just for the stm3240g-EVAL board.
+ *   Because of the various rotations, clearing the display in the normal
+ *   way by writing a sequences of runs that covers the entire display can be
+ *   very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void mio283qt2_clear(FAR struct lcd_dev_s *dev, uint16_t color)
 {
@@ -988,13 +1020,15 @@ void mio283qt2_clear(FAR struct lcd_dev_s *dev, uint16_t color)
   /* Select the LCD and set the drawring area */
 
   lcd->select(lcd);
-  mio283qt2_setarea(lcd, 0, 0, (MIO283QT2_XRES-1), (MIO283QT2_YRES-1));
+  mio283qt2_setarea(lcd, 0, 0, (MIO283QT2_XRES - 1), (MIO283QT2_YRES - 1));
 
   /* Prepare to write GRAM data */
 
   mio283qt2_gramselect(lcd);
 
-  /* Copy color into all of GRAM.  Orientation does not matter in this case. */
+  /* Copy color into all of GRAM.
+   *  Orientation does not matter in this case.
+   */
 
   for (i = 0; i < MIO283QT2_XRES * MIO283QT2_YRES; i++)
     {

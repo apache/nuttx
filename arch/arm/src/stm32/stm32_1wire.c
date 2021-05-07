@@ -56,7 +56,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/drivers/1wire.h>
+#include <nuttx/1wire/1wire.h>
 
 #include <arch/board/board.h>
 

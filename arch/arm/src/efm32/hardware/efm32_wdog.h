@@ -1,5 +1,5 @@
-/*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_wdog.h
+/****************************************************************************
+ * arch/arm/src/efm32/hardware/efm32_wdog.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_WDOG_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,22 +72,23 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
-/* WDOG Register Offsets *******************************************************************************************************/
+ ****************************************************************************/
+
+/* WDOG Register Offsets ****************************************************/
 
 #define EFM32_WDOG_CTRL_OFFSET           0x0000  /* Control Register */
 #define EFM32_WDOG_CMD_OFFSET            0x0004  /* Command Register */
 #define EFM32_WDOG_SYNCBUSY_OFFSET       0x0008  /* Synchronization Busy Register */
 
-/* WDOG Register Addresses *****************************************************************************************************/
+/* WDOG Register Addresses **************************************************/
 
 #define EFM32_WDOG_CTRL                  (EFM32_WDOG_BASE+EFM32_WDOG_CTRL_OFFSET)
 #define EFM32_WDOG_CMD                   (EFM32_WDOG_BASE+EFM32_WDOG_CMD_OFFSET)
 #define EFM32_WDOG_SYNCBUSY              (EFM32_WDOG_BASE+EFM32_WDOG_SYNCBUSY_OFFSET)
 
-/* WDOG Register Bit Field Definitions *****************************************************************************************/
+/* WDOG Register Bit Field Definitions **************************************/
 
 /* Bit fields for WDOG CTRL */
 

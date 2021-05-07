@@ -70,8 +70,6 @@ mbed Configuration Options
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
-
     Individual subsystems can be enabled:
       CONFIG_LPC17_40_MAINOSC=y
       CONFIG_LPC17_40_PLL0=y
@@ -195,6 +193,11 @@ mbed Configuration Options
       Size of one end-user I/O buffer.  This can be zero if the
       application can guarantee that all end-user I/O buffers
       reside in AHB SRAM.
+
+    CONFIG_USERLED
+    CONFIG_USERLED_LOWER
+      Setup the generic driver to support the board leds, and so creates the
+device into /dev/userleds
 
 USB Host Configuration
 ^^^^^^^^^^^^^^^^^^^^^^

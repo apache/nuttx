@@ -1,53 +1,40 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_usb0.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_USB0_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_USB0_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************************/
-                                                    /* 0x000 - 0x0ff: Reserved */
+/* Register Offsets *********************************************************/
+
+                                                /* 0x000 - 0x0ff: Reserved */
+
 /* Device/host capability registers */
 
 #define LPC43_USBOTG_HCCR_OFFSET             0x0100 /* Offset to EHCI Host Controller Capability registers */
@@ -116,7 +103,7 @@
 #define LPC43_USBDEV_ENDPTCTRL4_OFFSET       0x01d0 /* Endpoint control 4 */
 #define LPC43_USBDEV_ENDPTCTRL5_OFFSET       0x01d4 /* Endpoint control 5 */
 
-/* USB0 register (virtual) addresses **********************************************************/
+/* USB0 register (virtual) addresses ****************************************/
 
 /* Device/host capability registers */
 #define LPC43_USBOTG_HCCR_BASE               (LPC43_USB0_BASE+LPC43_USBOTG_HCCR_OFFSET)
@@ -185,9 +172,10 @@
 #define LPC43_USBDEV_ENDPTCTRL4              (LPC43_USB0_BASE+LPC43_USBDEV_ENDPTCTRL4_OFFSET)
 #define LPC43_USBDEV_ENDPTCTRL5              (LPC43_USB0_BASE+LPC43_USBDEV_ENDPTCTRL5_OFFSET)
 
-/* USB0 register bit definitions **************************************************************/
+/* USB0 register bit definitions ********************************************/
 
 /* Device/host capability registers */
+
 /* Capability length register */
 
 #define USBOTG_CAPLENGTH_SHIFT               (0)       /* Bits 0-7: Offset from register base to operational regs */
@@ -195,6 +183,7 @@
 #define USBHOST_HCIVERSION_SHIFT             (8)       /* Bits 8-23: BCD encoding of the EHCI revision number */
 #define USBHOST_HCIVERSION_MASK              (0xffff << USBHOST_HCIVERSION_SHIFT)
                                                        /* Bits 24-31: Reserved */
+
 /* Host controller structural parameters */
 
 #define USBHOST_HCSPARAMS_NPORTS_SHIF        (0)       /* Bits 0-3: Number of downstream ports */
@@ -212,6 +201,7 @@
 #define USBHOST_HCSPARAMS_NTT_SHIFT          (24)      /* Bits 24-27: Number of Transaction Translators */
 #define USBHOST_HCSPARAMS_NTT_MASK           (15 << USBHOST_HCSPARAMS_NTT_SHIFT)
                                                        /* Bits 28-31: Reserved */
+
 /* Host controller capability parameters */
 
 #define USBHOST_HCCPARAMS_ADC                (1 >> 0)  /* Bit 0:  64-bit Addressing Capability */
@@ -222,6 +212,7 @@
 #define USBHOST_HCCPARAMS_EECP_SHIFT         (8)       /* Bits 8-15: EHCI Extended Capabilities Pointer */
 #define USBHOST_HCCPARAMS_EECP_MASK          (255 << USBHOST_HCCPARAMS_EECP_SHIFT)
                                                        /* Bits 16-31: Reserved */
+
 /* Device interface version number */
 
 #define USBDEV_DCIVERSION_SHIFT              (0)       /* Bits 0-15: BCD encoding of the device interface */
@@ -236,7 +227,9 @@
 #define USBDEV_DCCPARAMS_DC                  (1 >> 7)  /* Bit 7:  Device Capable */
 #define USBDEV_DCCPARAMS_HC                  (1 >> 8)  /* Bit 8:  Host Capable */
                                                        /* Bits 9-31: Reserved */
+
 /* Device/host operational registers */
+
 /* USB Command register USBCMD -- Device Mode */
 
 #define USBDEV_USBCMD_RS                     (1 << 0)  /* Bit 0:  0 Run/Stop */
@@ -255,7 +248,9 @@
 #  define USBDEV_USBCMD_ITC16UF              (16 << USBDEV_USBCMD_ITC_SHIFT) /* 16 micro frames */
 #  define USBDEV_USBCMD_ITC32UF              (32 << USBDEV_USBCMD_ITC_SHIFT) /* 32 micro frames */
 #  define USBDEV_USBCMD_ITC64UF              (64 << USBDEV_USBCMD_ITC_SHIFT) /* 64 micro frames */
-                                                       /* Bits 24-31: Reserved */
+
+                                                   /* Bits 24-31: Reserved */
+
 /* USB Command register USBCMD -- Host Mode */
 
 #define USBHOST_USBCMD_RS                    (1 << 0)  /* Bit 0:  Run/Stop */
@@ -282,7 +277,9 @@
 #  define USBHOST_USBCMD_ITC16UF             (16 << USBHOST_USBCMD_ITC_SHIFT) /* 16 micro frames */
 #  define USBHOST_USBCMD_ITC32UF             (32 << USBHOST_USBCMD_ITC_SHIFT) /* 32 micro frames */
 #  define USBHOST_USBCMD_ITC64UF             (64 << USBHOST_USBCMD_ITC_SHIFT) /* 64 micro frames */
-                                                       /* Bits 24-31: Reserved */
+
+                                                   /* Bits 24-31: Reserved */
+
 /* USB Status register USBSTS -- Device Mode */
 
 #define USBDEV_USBSTS_UI                     (1 << 0)  /* Bit 0:  USB interrupt */
@@ -295,6 +292,7 @@
                                                        /* Bits 9-15: Reserved OR not used in device mode */
 #define USBDEV_USBSTS_NAKI                   (1 << 16) /* Bit 16: NAK interrupt bit */
                                                        /* Bits 17-31: Reserved OR not used in device mode */
+
 /* USB Status register USBSTS -- Host Mode */
 
 #define USBHOST_USBSTS_UI                    (1 << 0)  /* Bit 0:  USB interrupt */
@@ -314,6 +312,7 @@
 #define USBHOST_USBSTS_UAI                   (1 << 18) /* Bit 18: USB host asynchronous interrupt */
 #define USBHOST_USBSTS_UPI                   (1 << 19) /* Bit 19: USB host periodic interrupt */
                                                        /* Bits 20-31: Reserved */
+
 /* USB interrupt register USBINTR -- Device Mode */
 
 #define USBDEV_USBINTR_UE                    (1 << 0)  /* Bit 0:  USB interrupt enable */
@@ -326,6 +325,7 @@
                                                        /* Bits 8-15: Reserved */
 #define USBDEV_USBINTR_NAKE                  (1 << 16) /* Bit 16: NAK interrupt enable */
                                                        /* Bits 17-31: Reserved OR Not used in device mode */
+
 /* USB interrupt register USBINTR -- Host Mode */
 
 #define USBHOST_USBINTR_UE                   (1 << 0)  /* Bit 0:  USB interrupt enable */
@@ -340,6 +340,7 @@
 #define USBHOST_USBINTR_UAIE                 (1 << 18) /* Bit 18: USB host asynchronous interrupt enable */
 #define USBHOST_USBINTR_UPIA                 (1 << 19) /* Bit 19: USB host periodic interrupt enable */
                                                        /* Bits 20-31:  Reserved */
+
 /* Frame index register FRINDEX -- Device Mode */
 
 #define USBDEV_FRINDEX_CUFN_SHIFT            (0)       /* Bits 0-2: Current micro frame number */
@@ -347,6 +348,7 @@
 #define USBDEV_FRINDEX_LFN_SHIFT             (3)       /* Bits 3-13: Frame number of last frame transmitted */
 #define USBDEV_FRINDEX_LFN_MASK              (0x7ff << USBDEV_FRINDEX_LFN_SHIFT)
                                                        /* Bits 14-31:  Reserved */
+
 /* Frame index register FRINDEX -- Host Mode */
 
 #define USBHOST_FRINDEX_CUFN_SHIFT           (0)       /* Bits 0-2: Current micro frame number */
@@ -354,29 +356,35 @@
 #define USBHOST_FRINDEX_FLI_SHIFT            (3)       /* Bits 3-12: Frame list current index */
 #define USBHOST_FRINDEX_FLI_MASK             (0x3ff << USBHOST_FRINDEX_FLI_SHIFT)
                                                        /* Bits 13-31:  Reserved */
+
 /* USB Device Address register DEVICEADDR -- Device Mode */
-                                                       /* Bits 0-23:  Reserved */
+
+                                               /* Bits 0-23:  Reserved */
 #define USBDEV_DEVICEADDR_USBADRA            (1 << 24) /* Bit 24: Device address advance */
 #define USBDEV_DEVICEADDR_SHIFT              (25)      /* Bits 25-31: USBADR USB device address */
 #define USBDEV_DEVICEADDR_MASK               (0x3f << USBDEV_DEVICEADDR_SHIFT)
 
 /* USB Periodic List Base register PERIODICLIST -- Host Mode */
-                                                       /* Bits 0-11:  Reserved */
+
+                                               /* Bits 0-11:  Reserved */
 #define USBHOST_PERIODICLIST_PERBASE_SHIFT   (12)      /* Bits 12-31: Base Address (Low) */
 #define USBHOST_PERIODICLIST_PERBASE_MASK    (0x000fffff << USBHOST_PERIODICLIST_PERBASE_SHIFT)
 
 /* USB Endpoint List Address register ENDPOINTLISTADDR -- Device Mode */
-                                                       /* Bits 0-10:  Reserved */
+
+                                               /* Bits 0-10:  Reserved */
 #define USBDEV_ENDPOINTLIST_EPBASE_SHIFT     (11)      /* Bits 11-31: Endpoint list pointer (low) */
 #define USBDEV_ENDPOINTLIST_EPBASE_MASK      (0x001fffff << USBDEV_ENDPOINTLIST_EPBASE_SHIFT)
 
 /* USB Asynchronous List Address register ASYNCLISTADDR -- Host Mode */
-                                                       /* Bits 0-4:  Reserved */
+
+                                               /* Bits 0-4:  Reserved */
 #define USBHOST_ASYNCLISTADDR_ASYBASE_SHIFT  (5)       /* Bits 5-31: Link pointer (Low) LPL */
 #define USBHOST_ASYNCLISTADDR_ASYBASE_MASK   (0x07ffffff << USBHOST_ASYNCLISTADDR_ASYBASE_SHIFT)
 
 /* USB TT Control register TTCTRL -- Host Mode */
-                                                       /* Bits 0-23:  Reserved */
+
+                                               /* Bits 0-23:  Reserved */
 #define USBHOST_TTCTRL_TTHA_SHIFT            (24)      /* Bits 24-30: Hub address */
 #define USBHOST_TTCTRL_TTHA_MASK             (0x7f << USBHOST_TTCTRL_TTHA_SHIFT)
 
@@ -393,6 +401,7 @@
 #define USBDEV_BURSTSIZE_TXPBURST_SHIFT      (8)       /* Bits 8-15: Programmable TX burst length */
 #define USBDEV_BURSTSIZE_TXPBURST_MASK       (255 << USBDEV_BURSTSIZE_TXPBURST_SHIFT)
                                                        /* Bits 16-31: Reserved */
+
 /* USB Transfer buffer Fill Tuning register TXFIFOFILLTUNING -- Host Mode */
 
 #define USBHOST_TXFILLTUNING_SCHOH_SHIFT     (0)       /* Bits 0-7: FIFO burst threshold */
@@ -402,6 +411,7 @@
 #define USBHOST_TXFILLTUNING_FIFOTHRES_SHIFT (16)      /* Bits 16-21: Scheduler overhead */
 #define USBHOST_TXFILLTUNING_FIFOTHRES_MASK  (0x3f << USBHOST_TXFILLTUNING_FIFOTHRES_SHIFT)
                                                        /* Bits 22-31: Reserved */
+
 /* USB BINTERVAL register BINTERVAL -- Device/Host Mode */
 
 #define USBDEV_BINTERVAL_SHIFT               (0)       /* Bits 0-3: bInterval value */
@@ -411,6 +421,7 @@
 #define USBHOST_BINTERVAL_SHIFT              (0)       /* Bits 0-3: bInterval value */
 #define USBHOST_BINTERVAL_MASK               (15 << USBHOST_BINTERVAL_SHIFT)
                                                        /* Bits 4-31: Reserved */
+
 /* USB endpoint NAK register ENDPTNAK -- Device Mode */
 
 #define USBDEV_ENDPTNAK_EPRN_SHIFT           (0)       /* Bits 0-5: Rx endpoint NAK */
@@ -419,6 +430,7 @@
 #define USBDEV_ENDPTNAK_EPTN_SHIFT           (16)      /* Bits 16-21: Tx endpoint NAK */
 #define USBDEV_ENDPTNAK_EPTN_MASK            (0x3f << USBDEV_ENDPTNAK_EPTN_SHIFT)
                                                        /* Bits 22-31: Reserved */
+
 /* USB Endpoint NAK Enable register ENDPTNAKEN -- Device Mode */
 
 #define USBDEV_ENDPTNAK_EPRNE_SHIFT          (0)       /* Bits 0-5: Rx endpoint NAK enable */
@@ -426,7 +438,9 @@
                                                        /* Bits 6-15: Reserved */
 #define USBDEV_ENDPTNAK_EPTNE_SHIFT          (16)      /* Bits 16-21: Tx endpoint NAK enable */
 #define USBDEV_ENDPTNAK_EPTNE_MASK           (0x3f << USBDEV_ENDPTNAK_EPTNE_SHIFT)
-                                                       /* Bits 22-31: Reserved */
+
+                                               /* Bits 22-31: Reserved */
+
 /* Port Status and Control register PRTSC1 -- Device Mode */
 
 #define USBDEV_PRTSC1_CCS                    (1 << 0)  /* Bit 0:  Current connect status */
@@ -443,6 +457,7 @@
 #  define USBDEV_PRTSC1_PIC_OFF              (0 << USBDEV_PRTSC1_PIC_SHIFT) /* 00 Port indicators are off */
 #  define USBDEV_PRTSC1_PIC_AMBER            (1 << USBDEV_PRTSC1_PIC_SHIFT) /* 01 amber */
 #  define USBDEV_PRTSC1_PIC_GREEN            (2 << USBDEV_PRTSC1_PIC_SHIFT) /* 10 green */
+
 #define USBDEV_PRTSC1_PTC_SHIFT              (16)      /* Bits 16-19: 19: Port test control */
 #define USBDEV_PRTSC1_PTC_MASK               (15 << USBDEV_PRTSC1_PTC_SHIFT)
 #  define USBDEV_PRTSC1_PTC_DISABLE          (0 << USBDEV_PRTSC1_PTC_SHIFT) /* TEST_MODE_DISABLE */
@@ -452,7 +467,8 @@
 #  define USBDEV_PRTSC1_PTC_PACKET           (4 << USBDEV_PRTSC1_PTC_SHIFT) /* Packet */
 #  define USBDEV_PRTSC1_PTC_HS               (5 << USBDEV_PRTSC1_PTC_SHIFT) /* FORCE_ENABLE_HS */
 #  define USBDEV_PRTSC1_PTC_FS               (6 << USBDEV_PRTSC1_PTC_SHIFT) /* FORCE_ENABLE_FS */
-                                                       /* Bits 20-22:  Not used in device mode */
+
+                                   /* Bits 20-22:  Not used in device mode */
 #define USBDEV_PRTSC1_PHCD                   (1 << 23) /* Bit 23: PHY low power suspend - clock disable (PLPSCD) */
 #  define USBDEV_PRTSC1_PFSC                 (1 << 24) /* Bit 24: Port force full speed connect */
                                                        /* Bit 25: Reserved */
@@ -461,7 +477,9 @@
 #  define USBDEV_PRTSC1_PSPD_FS              (0 << USBDEV_PRTSC1_PSPD_SHIFT) /* Full-speed */
 #  define USBDEV_PRTSC1_PSPD_LS              (0 << USBDEV_PRTSC1_PSPD_SHIFT) /* Full-speed */
 #  define USBDEV_PRTSC1_PSPD_HS              (2 << USBDEV_PRTSC1_PSPD_SHIFT) /* High-speed */
-                                                       /* Bits 28-31: Reserved */
+
+                                               /* Bits 28-31: Reserved */
+
 /* Port Status and Control register PRTSC1 -- Host Mode */
 
 #define USBHOST_PRTSC1_CCS                   (1 << 0)  /* Bit 0:  Current connect status */
@@ -479,6 +497,7 @@
 #  define USBHOST_PRTSC1_LS_SE0              (0 << USBHOST_PRTSC1_LS_SHIFT) /* SE0 (USB_DP and USB_DM LOW) */
 #  define USBHOST_PRTSC1_LS_JSTATE           (2 << USBHOST_PRTSC1_LS_SHIFT) /* J-state (USB_DP HIGH and USB_DM LOW) */
 #  define USBHOST_PRTSC1_LS_KSTATE           (1 << USBHOST_PRTSC1_LS_SHIFT) /* K-state (USB_DP LOW and USB_DM HIGH) */
+
 #define USBHOST_PRTSC1_PP                    (1 << 12) /* Bit 12: Port power control */
                                                        /* Bit 13: Reserved */
 #define USBHOST_PRTSC1_PIC_SHIFT             (14)      /* Bits 14-15: Port indicator control */
@@ -486,6 +505,7 @@
 #  define USBHOST_PRTSC1_PIC_OFF             (0 << USBHOST_PRTSC1_PIC_SHIFT) /* 00 Port indicators are off */
 #  define USBHOST_PRTSC1_PIC_AMBER           (1 << USBHOST_PRTSC1_PIC_SHIFT) /* 01 Amber */
 #  define USBHOST_PRTSC1_PIC_GREEN           (2 << USBHOST_PRTSC1_PIC_SHIFT) /* 10 Green */
+
 #define USBHOST_PRTSC1_PTC_SHIFT             (16)      /* Bits 16-19: Port test control */
 #define USBHOST_PRTSC1_PTC_MASK              (15 << USBHOST_PRTSC1_PTC_SHIFT)
 #  define USBHOST_PRTSC1_PTC_DISABLE         (0 << USBHOST_PRTSC1_PTC_SHIFT) /* 0000 TEST_MODE_DISABLE */
@@ -496,6 +516,7 @@
 #  define USBHOST_PRTSC1_PTC_HS              (5 << USBHOST_PRTSC1_PTC_SHIFT) /* 0101 FORCE_ENABLE_HS */
 #  define USBHOST_PRTSC1_PTC_FS              (6 << USBHOST_PRTSC1_PTC_SHIFT) /* 0110 FORCE_ENABLE_FS */
 #  define USBHOST_PRTSC1_PTC_LS              (7 << USBHOST_PRTSC1_PTC_SHIFT) /* 0111 FORCE_ENABLE_LS */
+
 #define USBHOST_PRTSC1_WKCN                  (1 << 20) /* Bit 20: Wake on connect enable (WKCNNT_E) */
 #define USBHOST_PRTSC1_WKDC                  (1 << 21) /* Bit 21: Wake on disconnect enable (WKDSCNNT_E) */
 #define USBHOST_PRTSC1_WKOC                  (1 << 22) /* Bit 22: Wake on over-current enable (WKOC_E) */
@@ -507,8 +528,11 @@
 #  define USBHOST_PRTSC1_PSPD_FS             (0 << USBHOST_PRTSC1_PSPD_SHIFT) /* Full-speed */
 #  define USBHOST_PRTSC1_PSPD_LS             (1 << USBHOST_PRTSC1_PSPD_SHIFT) /* Low-speed */
 #  define USBHOST_PRTSC1_PSPD_HS             (2 << USBHOST_PRTSC1_PSPD_SHIFT) /* High-speed */
-                                                       /* Bits 28-31: Reserved */
+
+                                               /* Bits 28-31: Reserved */
+
 /* OTG Status and Control register */
+
 /* OTG controls */
 
 #define USBOTG_OTGSC_VD                      (1 << 0)  /* Bit 0:  VBUS_Discharge */
@@ -530,6 +554,7 @@
 #define USBOTG_OTGSC_1MST                    (1 << 13) /* Bit 13: 1 millisecond timer toggle */
 #define USBOTG_OTGSC_DPS                     (1 << 14) /* Bit 14: Data bus pulsing status */
                                                        /* Bit 15: Reserved */
+
 /* OTG interrupt status */
 
 #define USBOTG_OTGSC_IDIS                    (1 << 16) /* Bit 16: USB ID interrupt status */
@@ -540,6 +565,7 @@
 #define USBOTG_OTGSC_MS1S                    (1 << 21) /* Bit 21: 1 millisecond timer interrupt status */
 #define USBOTG_OTGSC_DPIS                    (1 << 22) /* Bit 22: Data pulse interrupt status */
                                                        /* Bit 23: Reserved */
+
 /* OTG interrupt enable */
 
 #define USBOTG_OTGSC_IDIE                    (1 << 24) /* Bit 24: USB ID interrupt enable */
@@ -550,6 +576,7 @@
 #define USBOTG_OTGSC_MS1E                    (1 << 29) /* Bit 29: 1 millisecond timer interrupt enable */
 #define USBOTG_OTGSC_DPIE                    (1 << 30) /* Bit 30: Data pulse interrupt enable */
                                                        /* Bit 31: Reserved */
+
 /* USB Mode register USBMODE -- Device Mode */
 
 #define USBDEV_USBMODE_CM_SHIFT              (0)       /* Bits 0-1: Controller mode */
@@ -557,6 +584,7 @@
 #  define USBDEV_USBMODE_CM_IDLE             (0 << USBDEV_USBMODE_CM_SHIFT) /* Idle */
 #  define USBDEV_USBMODE_CM_DEVICE           (2 << USBDEV_USBMODE_CM_SHIFT) /* Device controller */
 #  define USBDEV_USBMODE_CM_HOST             (3 << USBDEV_USBMODE_CM_SHIFT) /* Host controller */
+
 #define USBDEV_USBMODE_ES                    (1 << 2)  /* Bit 2:  Endian select */
 #define USBDEV_USBMODE_SLOM                  (1 << 3)  /* Bit 3:  Setup Lockout mode */
 #define USBDEV_USBMODE_SDIS                  (1 << 4)  /* Bit 4:  Stream disable mode */
@@ -569,11 +597,13 @@
 #  define USBHOST_USBMODE_CM_IDLE            (0 << USBHOST_USBMODE_CM_SHIFT) /* Idle */
 #  define USBHOST_USBMODE_CM_DEVICE          (2 << USBHOST_USBMODE_CM_SHIFT) /* Device controller */
 #  define USBHOST_USBMODE_CM_HOST            (3 << USBHOST_USBMODE_CM_SHIFT) /* Host controller */
+
 #define USBHOST_USBMODE_ES                   (1 << 2)  /* Bit 2:  Endian select */
                                                        /* Bit 3:  Not used in host mode */
 #define USBHOST_USBMODE_SDIS                 (1 << 4)  /* Bit 4:  Stream disable mode */
 #define USBHOST_USBMODE_VBPS                 (1 << 5)  /* Bit 5:  VBUS power select */
                                                        /* Bits 6-31: Reserved */
+
 /* Device endpoint registers */
 
 /* USB Endpoint Setup Status register ENDPTSETUPSTAT */
@@ -586,6 +616,7 @@
 #define USBDEV_ENDPTSETSTAT_STAT4            (1 << 4)  /* Bit 4:  Setup EP status for logical EP 4 */
 #define USBDEV_ENDPTSETSTAT_STAT5            (1 << 5)  /* Bit 5:  Setup EP status for logical EP 5 */
                                                        /* Bits 6-31: Reserved */
+
 /* USB Endpoint Prime register ENDPTPRIME */
 
 #define USBDEV_ENDPTPRIM_PERB(n)             (1 << (n))
@@ -604,6 +635,7 @@
 #define USBDEV_ENDPTPRIM_PETB4               (1 << 20) /* Bit 20: Prime EP xmt buffer for physical IN EP 4 */
 #define USBDEV_ENDPTPRIM_PETB5               (1 << 21) /* Bit 21: Prime EP xmt buffer for physical IN EP 5 */
                                                        /* Bits 22-31: Reserved */
+
 /* USB Endpoint Flush register ENDPTFLUSH */
 
 #define USBDEV_ENDPTFLUSH_FERB(n)            (1 << (n))
@@ -622,6 +654,7 @@
 #define USBDEV_ENDPTFLUSH_FETB4              (1 << 20) /* Bit 20: Flush EP xmt buffer for physical IN EP 4 */
 #define USBDEV_ENDPTFLUSH_FETB5              (1 << 21) /* Bit 21: Flush EP xmt buffer for physical IN EP 5 */
                                                        /* Bits 22-31: Reserved */
+
 /* USB Endpoint Status register ENDPTSTATUS */
 
 #define USBDEV_ENDPTSTATUS_ERBR(n)           (1 << (n))
@@ -640,6 +673,7 @@
 #define USBDEV_ENDPTSTATUS_ETBR4             (1 << 20) /* Bit 20: EP xmt buffer ready for physical IN EP 4 */
 #define USBDEV_ENDPTSTATUS_ETBR5             (1 << 21) /* Bit 21: EP xmt buffer ready for physical IN EP 5 */
                                                        /* Bits 22-31: Reserved */
+
 /* USB Endpoint Complete register ENDPTCOMPLETE */
 
 #define USBDEV_ENDPTCOMPLETE_ERCE(n)         (1 << (n))
@@ -658,6 +692,7 @@
 #define USBDEV_ENDPTCOMPLETE_ETCE4           (1 << 20) /* Bit 20: EP xmt complete event for physical IN EP 4 */
 #define USBDEV_ENDPTCOMPLETE_ETCE5           (1 << 21) /* Bit 21: EP xmt complete event for physical IN EP 5 */
                                                        /* Bits 22-31: Reserved */
+
 /* USB Endpoint 0 Control register ENDPTCTRL0 */
 
 #define USBDEV_ENDPTCTRL0_RXS                (1 << 0)  /* Bit 0:  Rx endpoint stall */
@@ -665,7 +700,8 @@
 #define USBDEV_ENDPTCTRL0_RXT_SHIFT          (2)       /* Bits 2-3: Endpoint type */
 #define USBDEV_ENDPTCTR0L_RXT_MASK           (3 << USBDEV_ENDPTCTRL0_RXT_SHIFT)
 #  define USBDEV_ENDPTCTRL0_RXT_CTRL         (0 << USBDEV_ENDPTCTRL0_RXT_SHIFT) /* Control */
-                                                       /* Bits 4-6: Reserved */
+
+                                               /* Bits 4-6: Reserved */
 #define USBDEV_ENDPTCTRL0_RXE                (1 << 7)  /* Bit 7:  Rx endpoint enable */
                                                        /* Bits 8-15: Reserved */
 #define USBDEV_ENDPTCTRL0_TXS                (1 << 16) /* Bit 16: Tx endpoint stall */
@@ -673,8 +709,10 @@
 #define USBDEV_ENDPTCTRL0_TXT_SHIFT          (18)      /* Bits 18-19: Tx endpoint type */
 #define USBDEV_ENDPTCTRL0_TXT_MASK           (3 << USBDEV_ENDPTCTRL0_TXT_SHIFT)
 #  define USBDEV_ENDPTCTRL0_TXT_CTRL         (0 << USBDEV_ENDPTCTRL0_TXT_SHIFT) /* Control */
+
 #define USBDEV_ENDPTCTRL0_TXE                (1 << 23) /* Bit 23: Tx endpoint enable */
                                                        /* Bits 24-31: Reserved */
+
 /* USB Endpoint 1-3 control registers ENDPTCTRL1-ENDPPTCTRL5 */
 
 #define USBDEV_ENDPTCTRL_RXS                 (1 << 0)  /* Bit 0:  Rx endpoint stall */
@@ -685,6 +723,7 @@
 #  define USBDEV_ENDPTCTRL_RXT_ISOC          (1 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Isochronous */
 #  define USBDEV_ENDPTCTRL_RXT_BULK          (2 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Bulk */
 #  define USBDEV_ENDPTCTRL_RXT_INTR          (3 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Interrupt */
+
                                                        /* Bit 4:  Reserved */
 #define USBDEV_ENDPTCTRL_RXI                 (1 << 5)  /* Bit 5:  Rx data toggle inhibit */
 #define USBDEV_ENDPTCTRL_RXR                 (1 << 6)  /* Bit 6:  Rx data toggle reset */
@@ -698,22 +737,23 @@
 #  define USBDEV_ENDPTCTRL_TXT_ISOC          (1 << USBDEV_ENDPTCTRL_TXT_SHIFT) /* Isochronous */
 #  define USBDEV_ENDPTCTRL_TXT_BULK          (2 << USBDEV_ENDPTCTRL_TXT_SHIFT) /* Bulk */
 #  define USBDEV_ENDPTCTRL_TXT_INTR          (3 << USBDEV_ENDPTCTRL_TXT_SHIFT) /* Interrupt */
+
                                                        /* Bit 20: Reserved */
 #define USBDEV_ENDPTCTRL_TXI                 (1 << 21) /* Bit 21: Tx data toggle inhibit */
 #define USBDEV_ENDPTCTRL_TXR                 (1 << 22) /* Bit 22: Tx data toggle reset */
 #define USBDEV_ENDPTCTRL_TXE                 (1 << 23) /* Bit 23: Tx endpoint enable */
                                                        /* Bits 24-31: Reserved */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_USB0_H */

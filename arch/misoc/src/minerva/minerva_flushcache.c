@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/minerva/minerva_flushcache.c
+ * arch/misoc/src/minerva/minerva_flushcache.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>

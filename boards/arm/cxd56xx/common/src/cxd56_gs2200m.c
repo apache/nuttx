@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/cxd56xx/common/src/cxd56_gs2200m.c
  *
- *   Copyright 2019 Sony Home Entertainment & Sound Products Inc.
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
- *    the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,6 +23,7 @@
  ****************************************************************************/
 
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
@@ -61,6 +46,20 @@
 #define DMA_RXCH_CFG   (CXD56_DMA_PERIPHERAL_SPI5_RX)
 #define SPI_TX_MAXSIZE (CONFIG_CXD56_DMAC_SPI5_TX_MAXSIZE)
 #define SPI_RX_MAXSIZE (CONFIG_CXD56_DMAC_SPI5_RX_MAXSIZE)
+
+#if defined(CONFIG_WIFI_BOARD_IS110B_HARDWARE_VERSION_10B)
+/* v1.0b */
+#define GS2200M_GPIO_37          (PIN_UART2_CTS)
+#define GS2200M_EXT_RTC_RESET_IN (PIN_EMMC_DATA3)
+#elif defined(CONFIG_WIFI_BOARD_IS110B_HARDWARE_VERSION_10C)
+/* v1.0c */
+#define GS2200M_GPIO_37          (PIN_EMMC_DATA2)
+#define GS2200M_EXT_RTC_RESET_IN (PIN_EMMC_DATA3)
+#else
+/* v1.0a */
+#define GS2200M_GPIO_37          (PIN_UART2_CTS)
+#define GS2200M_EXT_RTC_RESET_IN (PIN_UART2_RTS)
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -99,7 +98,7 @@ static volatile uint32_t _n_called;
 
 static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 {
-  cxd56_gpioint_config(PIN_UART2_CTS,
+  cxd56_gpioint_config(GS2200M_GPIO_37,
                        GPIOINT_LEVEL_HIGH,
                        handler,
                        arg);
@@ -114,11 +113,12 @@ static void gs2200m_irq_enable(void)
 {
   irqstate_t flags = enter_critical_section();
 
-  wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+         _enable_count, _n_called++);
 
   if (0 == _enable_count)
     {
-      cxd56_gpioint_enable(PIN_UART2_CTS);
+      cxd56_gpioint_enable(GS2200M_GPIO_37);
     }
 
   _enable_count++;
@@ -134,13 +134,14 @@ static void gs2200m_irq_disable(void)
 {
   irqstate_t flags = enter_critical_section();
 
-  wlinfo("== ec:%d called=%d \n", _enable_count, _n_called++);
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+         _enable_count, _n_called++);
 
   _enable_count--;
 
   if (0 == _enable_count)
     {
-      cxd56_gpioint_disable(PIN_UART2_CTS);
+      cxd56_gpioint_disable(GS2200M_GPIO_37);
     }
 
   leave_critical_section(flags);
@@ -154,7 +155,7 @@ static uint32_t gs2200m_dready(int *ec)
 {
   irqstate_t flags = enter_critical_section();
 
-  uint32_t r = cxd56_gpio_read(PIN_UART2_CTS);
+  uint32_t r = cxd56_gpio_read(GS2200M_GPIO_37);
 
   if (ec)
     {
@@ -173,7 +174,7 @@ static uint32_t gs2200m_dready(int *ec)
 
 static void gs2200m_reset(bool reset)
 {
-  cxd56_gpio_write(PIN_UART2_RTS, !reset);
+  cxd56_gpio_write(GS2200M_EXT_RTC_RESET_IN, !reset);
 }
 
 /****************************************************************************
@@ -235,8 +236,8 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus)
       /* Change UART2 to GPIO */
 
       CXD56_PIN_CONFIGS(PINCONFS_UART2_GPIO);
-      cxd56_gpio_config(PIN_UART2_CTS, true);
-      cxd56_gpio_config(PIN_UART2_RTS, false);
+      cxd56_gpio_config(GS2200M_GPIO_37, true);
+      cxd56_gpio_config(GS2200M_EXT_RTC_RESET_IN, false);
 
       /* Initialize spi device */
 

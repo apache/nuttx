@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_ssc.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_SSC_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_SSC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_SSC_CR_OFFSET       0x00 /* Control Register */
 #define AVR32_SSC_CMR_OFFSET      0x04 /* Clock Mode Register */
@@ -65,7 +50,7 @@
 #define AVR32_SSC_IDR_OFFSET      0x48 /* Interrupt Disable Register */
 #define AVR32_SSC_IMR_OFFSET      0x4c /* Interrupt Mask Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_SSC_CR              (AVR32_SSC_BASE+AVR32_SSC_CR_OFFSET)
 #define AVR32_SSC_CMR             (AVR32_SSC_BASE+AVR32_SSC_CMR_OFFSET)
@@ -84,7 +69,7 @@
 #define AVR32_SSC_IDR             (AVR32_SSC_BASE+AVR32_SSC_IDR_OFFSET)
 #define AVR32_SSC_IMR             (AVR32_SSC_BASE+AVR32_SSC_IMR_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Control Register Bit-field Definitions */
 
@@ -106,17 +91,20 @@
 #  define SSC_RCMR_CKS_DIVCLK     (0 << SSC_RCMR_CKS_SHIFT) /* Divided clock */
 #  define SSC_RCMR_CKS_TXCLK      (1 << SSC_RCMR_CKS_SHIFT) /* TX_CLOCK clock signal */
 #  define SSC_RCMR_CKS_RXCLK      (2 << SSC_RCMR_CKS_SHIFT) /* RX_CLOCK pin */
+
 #define SSC_RCMR_CKO_SHIFT        (2)       /* Bits 2-4: Receive Clock Output Mode Selection */
 #define SSC_RCMR_CKO_MASK         (7 << SSC_RCMR_CKO_SHIFT)
 #  define SSC_RCMR_CKO_NONE       (0 << SSC_RCMR_CKO_SHIFT) /* None (Input-only) */
 #  define SSC_RCMR_CKO_CONT       (1 << SSC_RCMR_CKO_SHIFT) /* Continuous receive clock */
 #  define SSC_RCMR_CKO_XFR        (2 << SSC_RCMR_CKO_SHIFT) /* Receive clock only during data transfers */
+
 #define SSC_RCMR_CKI              (1 << 5)  /* Bit 5:  Receive Clock Inversion */
 #define SSC_RCMR_CKG_SHIFT        (6)       /* Bits 6-7: Receive Clock Gating Selection */
 #define SSC_RCMR_CKG_MASK         (3 << SSC_RCMR_CKG_SHIFT)
 #  define SSC_RCMR_CKG_NONE       (0 << SSC_RCMR_CKG_SHIFT) /* None, continuous clock */
 #  define SSC_RCMR_CKG_LOW        (1 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC low */
 #  define SSC_RCMR_CKG_HIGH       (2 << SSC_RCMR_CKG_SHIFT) /* Enable if RX_FRAME_SYNC high */
+
 #define SSC_RCMR_START_SHIFT      (8)       /* Bits 8-11: Receive Start Selection */
 #define SSC_RCMR_START_MASK       (15 << SSC_RCMR_START_SHIFT)
 #  define SSC_RCMR_START_CONT     (0 << SSC_RCMR_START_SHIFT) /* Continuous */
@@ -128,6 +116,7 @@
 #  define SSC_RCMR_START_CHANGE   (6 << SSC_RCMR_START_SHIFT) /* RX_FRAME_SYNC change */
 #  define SSC_RCMR_START_BOTH     (7 << SSC_RCMR_START_SHIFT) /* Any edge RX_FRAME_SYNC */
 #  define SSC_RCMR_START_CMP0     (8 << SSC_RCMR_START_SHIFT) /* Compare 0 */
+
 #define SSC_RCMR_STOP             (1 << 12) /* Bit 12: Receive Stop Selection */
 #define SSC_RCMR_STTDLY_SHIFT     (16)      /* Bits 16-23: Receive Start Delay */
 #define SSC_RCMR_STTDLY_MASK      (0xff << SSC_RCMR_STTDLY_SHIFT)
@@ -152,6 +141,7 @@
 #  define SSC_RFMR_FSOS_LOW       (3 << SSC_RFMR_FSOS_SHIFT) /* Driven Low during data transfer */
 #  define SSC_RFMR_FSOS_HIGH      (4 << SSC_RFMR_FSOS_SHIFT) /* Driven High during data transfer */
 #  define SSC_RFMR_FSOS_TOGGLE    (5 << SSC_RFMR_FSOS_SHIFT) /* Toggling at each start of data transfer */
+
 #define SSC_RFMR_FSEDGE           (1 << 24) /* Bit 24: Receive Frame Sync Edge Detection */
 #define SSC_RFMR_FSLENHI_SHIFT    (28)      /* Bits 28-31: Receive Frame Sync Length High Part */
 #define SSC_RFMR_FSLENHI_MASK     (15 << SSC_RFMR_FSLENHI_SHIFT)
@@ -163,17 +153,20 @@
 #  define SSC_TCMR_CKS_DIVCLK     (0 << SSC_TCMR_CKS_SHIFT) /* Divided clock */
 #  define SSC_TCMR_CKS_TXCLK      (1 << SSC_TCMR_CKS_SHIFT) /* RX_CLOCK clock signal */
 #  define SSC_TCMR_CKS_RXCLK      (2 << SSC_TCMR_CKS_SHIFT) /* TX_CLOCK pin */
+
 #define SSC_TCMR_CKO_SHIFT        (2)       /* Bits 2-4: Transmit Clock Output Mode Selection */
 #define SSC_TCMR_CKO_MASK         (7 << SSC_TCMR_CKO_SHIFT)
 #  define SSC_TCMR_CKO_NONE       (0 << SSC_TCMR_CKO_SHIFT) /* None (Input-only) */
 #  define SSC_TCMR_CKO_CONT       (1 << SSC_TCMR_CKO_SHIFT) /* Continuous transmit clock Output */
 #  define SSC_TCMR_CKO_XFR        (2 << SSC_TCMR_CKO_SHIFT) /* Transmit clock only during data transfers Output */
-#define SSC_TCMR_CKI              (1 << 5)  /* Bit 5:  Transmit Clock Inversion */
+
+#define SSC_TCMR_CKI              (1 << 5) /* Bit 5:  Transmit Clock Inversion */
 #define SSC_TCMR_CKG_SHIFT        (6)      /* Bits 6-7: Transmit Clock Gating Selection */
 #define SSC_TCMR_CKG_MASK         (3 << SSC_TCMR_CKG_SHIFT)
 #  define SSC_TCMR_CKG_NONE       (0 << SSC_TCMR_CKG_SHIFT) /* None, continuous clock */
 #  define SSC_TCMR_CKG_LOW        (1 << SSC_TCMR_CKG_SHIFT) /* Enable if TX_FRAME_SYNC low */
 #  define SSC_TCMR_CKG_HIGH       (2 << SSC_TCMR_CKG_SHIFT) /* Enable if TX_FRAME_SYNC high */
+
 #define SSC_TCMR_START_SHIFT      (8)      /* Bits 8-11: Transmit Start Selection */
 #define SSC_TCMR_START_MASK       (15 << SSC_TCMR_START_SHIFT)
 #  define SSC_TCMR_START_CONT     (0 << SSC_TCMR_START_SHIFT) /* Continuous */
@@ -184,6 +177,7 @@
 #  define SSC_TCMR_START_RISING   (5 << SSC_TCMR_START_SHIFT) /* Rising TX_FRAME_SYNC */
 #  define SSC_TCMR_START_CHANGE   (6 << SSC_TCMR_START_SHIFT) /* TX_FRAME_SYNC change */
 #  define SSC_TCMR_START_BOTH     (7 << SSC_TCMR_START_SHIFT) /* Any edge TX_FRAME_SYNC */
+
 #define SSC_TCMR_STTDLY_SHIFT     (16)      /* Bits 16-23: Transmit Start Delay */
 #define SSC_TCMR_STTDLY_MASK      (0xff << SSC_TCMR_STTDLY_SHIFT)
 #define SSC_TCMR_PERIOD_SHIFT     (24)      /* Bits 24-31: Transmit Period Divider Selection */
@@ -207,12 +201,14 @@
 #  define SSC_TFMR_FSOS_LOW       (3 << SSC_TFMR_FSOS_SHIFT) /* Driven Low during data transfer */
 #  define SSC_TFMR_FSOS_HIGH      (4 << SSC_TFMR_FSOS_SHIFT) /* Driven High during data transfer */
 #  define SSC_TFMR_FSOS_TOGGLE    (5 << SSC_TFMR_FSOS_SHIFT) /* Toggling at each start of data transfer */
+
 #define SSC_TFMR_FSDEN            (1 << 23) /* Bit 23: Transmit Frame Sync Data Enable */
 #define SSC_TFMR_FSEDGE           (1 << 24) /* Bit 24: Transmit Frame Sync Edge Detection */
 #define SSC_TFMR_FSLENHI_SHIFT    (28)      /* Bits 28-31: Transmit Frame Sync Length High Part */
 #define SSC_TFMR_FSLENHI_MASK     (15 << SSC_TFMR_FSLENHI_SHIFT)
 
 /* Receive Holding Register Bit-field Definitions */
+
 /* Transmit Holding Register Bit-field Definitions */
 
 /* These register hold 32-bit values with no bit-fields */
@@ -234,7 +230,9 @@
 #define SSC_RC1R_MASK             (0xffff)
 
 /* Interrupt Enable Register Bit-field Definitions */
+
 /* Interrupt Disable Register Bit-field Definitions */
+
 /* Interrupt Mask Register Bit-field Definitions */
 
 #define SSC_INT_TXRDY             (1 << 0)  /* Bit 0:  Transmit Ready */
@@ -251,16 +249,16 @@
 #define SSC_SR_TXEN               (1 << 16) /* Bit 16: Transmit Enable */
 #define SSC_SR_RXEN               (1 << 17) /* Bit 17: Receive Enable */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_SSC_H */

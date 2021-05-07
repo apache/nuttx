@@ -1,38 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32f7/nucleo-144/include/board.h
  *
- *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Mark Olsson <post@markolsson.se>
- *            David Sidrane <david_s5@nscdg.com>
- *            Bob Feretich <bob.feretich@rafresearch.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -167,7 +149,6 @@
 #define STM32_RCC_DCKCFGR2_SDMMC2SRC  RCC_DCKCFGR2_SDMMC2SEL_48MHZ
 #define STM32_RCC_DCKCFGR2_DSISRC     RCC_DCKCFGR2_DSISEL_PHY
 
-
 /* Several prescalers allow the configuration of the two AHB buses, the
  * high-speed APB (APB2) and the low-speed APB (APB1) domains. The maximum
  * frequency of the two AHB buses is 216 MHz while the maximum frequency of
@@ -179,7 +160,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/4 (54 MHz) */
 
@@ -211,10 +191,10 @@
 #define STM32_APB2_TIM10_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 #define STM32_APB2_TIM11_CLKIN  (2*STM32_PCLK2_FREQUENCY)
 
-/* SDMMC dividers.  Note that slower clocking is required when DMA is disabled
- * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode.  These values have not been
- * tuned!!!
+/* SDMMC dividers.  Note that slower clocking is required when DMA
+ * is disabledin order to avoid RX overrun/TX underrun errors due
+ * to delayed responses to service FIFOs in interrupt driven mode.
+ * These values have not been tuned!!!
  *
  * SDMMCCLK=48MHz, SDMMC_CK=SDMMCCLK/(118+2)=400 KHz
  */
@@ -248,7 +228,7 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channel/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections ********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future if we set aside more DMA channels/streams.
@@ -266,7 +246,6 @@
 
 #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
 #define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
-
 
 /* FLASH wait states
  *
@@ -311,13 +290,14 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-relatedevents as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ----*/
+ * ----------------------  --------------------------  ------ ------ ----
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
@@ -350,6 +330,22 @@
 
 /* TIM */
 
+/* Quadrature encoder
+ * Default is to use timer 8 (16-bit) and encoder on PC6/PC7
+ * We use here TIM2 with a 32-bit counter on PA15/PB3
+ */
+#define GPIO_TIM2_CH1IN GPIO_TIM2_CH1IN_2
+#define GPIO_TIM2_CH2IN GPIO_TIM2_CH2IN_2
+
+/* PWM
+ * Use Timer 3
+ */
+
+#define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
+#define GPIO_TIM3_CH2OUT GPIO_TIM3_CH2OUT_1
+#define GPIO_TIM3_CH3OUT GPIO_TIM3_CH3OUT_1
+#define GPIO_TIM3_CH4OUT GPIO_TIM3_CH4OUT_1
+
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_1
 #define GPIO_TIM2_CH1OUT GPIO_TIM2_CH1OUT_1
 #define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
@@ -359,8 +355,8 @@
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F7
@@ -508,5 +504,10 @@
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
+
+/* CAN Bus:  CAN1 on pin PD0/PD1  */
+
+#define GPIO_CAN1_TX  GPIO_CAN1_TX_3
+#define GPIO_CAN1_RX  GPIO_CAN1_RX_3
 
 #endif /* __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H */

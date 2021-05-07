@@ -2149,12 +2149,12 @@ I2C Tool
     Where <cmd> is one of:
 
       Show help     : ?
-      List buses   : bus
+      List buses    : bus
       List devices  : dev [OPTIONS] <first> <last>
-      Read register : get [OPTIONS] [<repititions>]
+      Read register : get [OPTIONS] [<repetitions>]
       Show help     : help
-      Write register: set [OPTIONS] <value> [<repititions>]
-      Verify access : verf [OPTIONS] [<value>] [<repititions>]
+      Write register: set [OPTIONS] <value> [<repetitions>]
+      Verify access : verf [OPTIONS] [<value>] [<repetitions>]
 
     Where common "sticky" OPTIONS include:
       [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
@@ -2162,7 +2162,7 @@ I2C Tool
       [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
       [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
       [-s|n], send/don't send start between command and data.  Default: -n Current: -n
-      [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+      [-i|j], Auto increment|don't increment regaddr on repetitions.  Default: NO Current: NO
       [-f freq] I2C frequency.  Default: 100000 Current: 100000
 
     NOTES:
@@ -2851,7 +2851,7 @@ Shields
       CONFIG_ANALOG=y                  : Should be automatically selected
       CONFIG_ADC=y                     : Should be automatically selected
       CONFIG_INPUT=y                   : Select input device support
-      CONFIG_AJOYSTICK=y               : Select analog joystick support
+      CONFIG_INPUT_AJOYSTICK=y         : Select analog joystick support
 
     System Type -> ADC Configuration
       CONFIG_SAMA5_ADC_CHAN0=y         : These settings enable the sequencer to collect
@@ -3123,8 +3123,8 @@ Configurations
      re-configured:
 
        Board Selection -> CPU Frequency
-         CONFIG_SAMA5D3xEK_396MHZ=n     # Disable 396MHz operation
-         CONFIG_SAMA5D3xEK_528MHZ=y     # Enable 528MHz operation
+         CONFIG_SAMA5D3XEK_396MHZ=n     # Disable 396MHz operation
+         CONFIG_SAMA5D3XEK_528MHZ=y     # Enable 528MHz operation
 
      If you switch to 528MHz, you should also check the loop calibration
      value in your .config file.  Of course, it would be best to re-calibrate

@@ -1,8 +1,5 @@
 ############################################################################
-# arch/arm/tms570/Make.defs
-#
-#   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+# arch/arm/src/tms570/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_pinsel.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
@@ -36,37 +36,40 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC2378_LPC23XX_PINSEL_H
 #define __ARCH_ARM_SRC_LPC2378_LPC23XX_PINSEL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
-#include "chip.h"
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-#define PINSEL_BASE			0xE002C000
+#include "chip.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define PINSEL_BASE          0xE002C000
 
 #define pinsel_putreg8(v,o)  putreg8( (v), LPC23XX_PINSEL_BASE+(o) )
 #define pinsel_putreg(v,r)   putreg32( (v),LPC23XX_PINSEL_BASE+ (r) )
 #define pinsel_getreg(o)     getreg32( PINSEL_BASE+(o) )
 
-/* Register address definitions *****************************************************/
-#define LPC23XX_PINSEL0		(PINSEL_BASE + PINSEL0_OFFSET)
-#define LPC23XX_PINSEL1		(PINSEL_BASE + PINSEL1_OFFSET)
-#define LPC23XX_PINSEL2		(PINSEL_BASE + PINSEL2_OFFSET)
-#define LPC23XX_PINSEL3		(PINSEL_BASE + PINSEL3_OFFSET)
-#define LPC23XX_PINSEL4		(PINSEL_BASE + PINSEL4_OFFSET)
-#define LPC23XX_PINSEL5		(PINSEL_BASE + PINSEL5_OFFSET)
-#define LPC23XX_PINSEL6		(PINSEL_BASE + PINSEL6_OFFSET)
-#define LPC23XX_PINSEL7		(PINSEL_BASE + PINSEL7_OFFSET)
-#define LPC23XX_PINSEL8		(PINSEL_BASE + PINSEL8_OFFSET)
-#define LPC23XX_PINSEL9		(PINSEL_BASE + PINSEL9_OFFSET)
-#define LPC23XX_PINSEL10	(PINSEL_BASE + PINSEL10_OFFSET)
+/* Register address definitions *********************************************/
+
+#define LPC23XX_PINSEL0    (PINSEL_BASE + PINSEL0_OFFSET)
+#define LPC23XX_PINSEL1    (PINSEL_BASE + PINSEL1_OFFSET)
+#define LPC23XX_PINSEL2    (PINSEL_BASE + PINSEL2_OFFSET)
+#define LPC23XX_PINSEL3    (PINSEL_BASE + PINSEL3_OFFSET)
+#define LPC23XX_PINSEL4    (PINSEL_BASE + PINSEL4_OFFSET)
+#define LPC23XX_PINSEL5    (PINSEL_BASE + PINSEL5_OFFSET)
+#define LPC23XX_PINSEL6    (PINSEL_BASE + PINSEL6_OFFSET)
+#define LPC23XX_PINSEL7    (PINSEL_BASE + PINSEL7_OFFSET)
+#define LPC23XX_PINSEL8    (PINSEL_BASE + PINSEL8_OFFSET)
+#define LPC23XX_PINSEL9    (PINSEL_BASE + PINSEL9_OFFSET)
+#define LPC23XX_PINSEL10   (PINSEL_BASE + PINSEL10_OFFSET)
 
 /* PINSEL 0 */
 #define PSEL0_P00_GPIO      (0x00000000)
@@ -262,7 +265,6 @@
 #define PSEL1_P0_31_RSVD3    (0xc0000000)
 #define PSEL1_P0_31_MASK     (0xc0000000)
 
-
 /* PINSEL 2 */
 #define PSEL2_P1_0_GPIO     (0x00000000)
 #define PSEL2_P1_0_ENET_TXD0 (0x00000001)
@@ -320,7 +322,7 @@
 
 #define PSEL2_P1_9_GPIO     (0x00000000)
 #define PSEL2_P1_9_ENET_RXD0 (0x00040000)
-#define PSEL2_P1_9_RSVD2 	 (0x00080000)
+#define PSEL2_P1_9_RSVD2    (0x00080000)
 #define PSEL2_P1_9_RSVD3    (0x000c0000)
 #define PSEL2_P1_9_MASK     (0x000c0000)
 
@@ -343,7 +345,7 @@
 #define PSEL2_P1_12_MASK     (0x03000000)
 
 #define PSEL2_P1_13_RSVD0    (0x00000000)
-#define PSEL2_P1_13_RSVD1	  (0x04000000)
+#define PSEL2_P1_13_RSVD1    (0x04000000)
 #define PSEL2_P1_13_RSVD2    (0x08000000)
 #define PSEL2_P1_13_RSVD3    (0x0c000000)
 #define PSEL2_P1_13_MASK     (0x0c000000)
@@ -359,7 +361,6 @@
 #define PSEL2_P1_15_RSVD2    (0x80000000)
 #define PSEL2_P1_15_RSVD3    (0xc0000000)
 #define PSEL2_P1_15_MASK     (0xc0000000)
-
 
 /* PINSEL 3 */
 #define PSEL3_P1_16_GPIO     (0x00000000)
@@ -417,7 +418,7 @@
 #define PSEL3_P1_24_MASK     (0x00030000)
 
 #define PSEL3_P1_25_GPIO     (0x00000000)
-#define PSEL3_P1_25_USB_LS1 (0x00040000)/* 2388 only Reserved on 2377/78 */
+#define PSEL3_P1_25_USB_LS1 (0x00040000)   /* 2388 only Reserved on 2377/78 */
 #define PSEL3_P1_25_USB_HSTEN1 (0x00080000)/* 2388 only Reserved on 2377/78 */
 #define PSEL3_P1_25_MAT1_1   (0x000c0000)
 #define PSEL3_P1_25_MASK     (0x000c0000)
@@ -429,7 +430,7 @@
 #define PSEL3_P1_26_MASK     (0x00300000)
 
 #define PSEL3_P1_27_GPIO     (0x00000000)
-#define PSEL3_P1_27_USB_INT1 (0x00400000)/* 2388 only Reserved on 2377/78 */
+#define PSEL3_P1_27_USB_INT1 (0x00400000)  /* 2388 only Reserved on 2377/78 */
 #define PSEL3_P1_27_USB_OVRCR1 (0x00800000)/* 2388 only Reserved on 2377/78 */
 #define PSEL3_P1_27_CAP0_1   (0x00c00000)
 #define PSEL3_P1_27_MASK     (0x00c00000)
@@ -508,7 +509,7 @@
 #define PSEL4_P2_7_MASK    (0x0000c000)
 
 #define PSEL4_P2_8_GPIO     (0x00000000)
-#define PSEL4_P2_8_TD2	  (0x00010000)
+#define PSEL4_P2_8_TD2      (0x00010000)
 #define PSEL4_P2_8_TXD2     (0x00020000)
 #define PSEL4_P2_8_TRACEPKT3 (0x00030000)
 #define PSEL4_P2_8_MASK     (0x00030000)
@@ -538,7 +539,7 @@
 #define PSEL4_P2_12_MASK     (0x03000000)
 
 #define PSEL4_P2_13_GPIO     (0x00000000)
-#define PSEL4_P2_13_EINT3	   (0x04000000)
+#define PSEL4_P2_13_EINT3    (0x04000000)
 #define PSEL4_P2_13_MCIDAT3  (0x08000000)
 #define PSEL4_P2_13_I2STX_SDA (0x0c000000)
 #define PSEL4_P2_13_MASK     (0x0c000000)
@@ -550,13 +551,12 @@
 #define PSEL4_P2_14_MASK     (0x30000000)
 
 #define PSEL4_P2_15_RSVD0    (0x00000000)
-#define PSEL4_P2_15_RSVD1	   (0x40000000)
+#define PSEL4_P2_15_RSVD1    (0x40000000)
 #define PSEL4_P2_15_RSVD2    (0x80000000)
 #define PSEL4_P2_15_RSVD3    (0xc0000000)
 #define PSEL4_P2_15_MASK     (0xc0000000)
 
 /* PINSEL 5  All reserved */
-
 
 /* PINSEL 6 */
 #define PSEL6_P3_0_GPIO      (0x00000000)
@@ -606,9 +606,11 @@
 #define PSEL6_P3_7_RSVD2     (0x00008000)
 #define PSEL6_P3_7_RSVD3     (0x0000c000)
 #define PSEL6_P3_7_MASK      (0x0000c000)
+
 /* Rest of PSEL 6 are reserved */
 
 /* PINSEL 7 */
+
 /* PINSEL 7 bit 0:13 are reserved */
 #define PSEL7_P3_23_GPIO     (0x00000000)
 #define PSEL7_P3_23_RSVD1    (0x00004000)
@@ -633,8 +635,8 @@
 #define PSEL7_P3_26_MAT0_1   (0x00200000)
 #define PSEL7_P3_26_PWM1_3   (0x00300000)
 #define PSEL7_P3_26_MASK     (0x00300000)
-/* PINSEL 7 rest are reserved */
 
+/* PINSEL 7 rest are reserved */
 
 /* PINSEL 8 */
 #define PSEL8_P4_0_GPIO      (0x00000000)
@@ -692,7 +694,7 @@
 #define PSEL8_P4_8_MASK      (0x00030000)
 
 #define PSEL8_P4_9_GPIO      (0x00000000)
-#define PSEL8_P4_9_A9 		  (0x00040000)
+#define PSEL8_P4_9_A9        (0x00040000)
 #define PSEL8_P4_9_RSVD2     (0x00080000)
 #define PSEL8_P4_9_RSVD3     (0x000c0000)
 #define PSEL8_P4_9_MASK      (0x000c0000)
@@ -734,6 +736,7 @@
 #define PSEL8_P4_15_MASK     (0xc0000000)
 
 /* PINSEL 9 */
+
 /* PINSEL 9 bit 0:15 are reserved */
 #define PSEL9_P4_24_GPIO     (0x00000000)
 #define PSEL9_P4_24_OE       (0x00010000)
@@ -777,16 +780,17 @@
 #define PSEL10_ETM (0x00000002)
 
 /* TODO PINMODE pullup/pulldown resistor configuration */
-/************************************************************************************
+
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_PINSEL_H */

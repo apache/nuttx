@@ -4,12 +4,6 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *
- *   SAMV71 Series Data Sheet
- *   NuttX SAMA5 one-shot timer driver
- *   Atmel NoOS sample code.
- *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -43,6 +37,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *
+ *   SAMV71 Series Data Sheet
+ *   NuttX SAMA5 one-shot timer driver
+ *   Atmel NoOS sample code.
+ */
 
 /****************************************************************************
  * Included Files
@@ -245,7 +246,8 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
-  *usec = (0xffffull * USEC_PER_SEC) / (uint64_t)sam_tc_divfreq(oneshot->tch);
+  *usec = (0xffffull * USEC_PER_SEC) /
+          (uint64_t)sam_tc_divfreq(oneshot->tch);
   return OK;
 }
 
@@ -279,7 +281,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
   irqstate_t flags;
 
   tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-          handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+          handler, arg, (unsigned long)ts->tv_sec,
+          (unsigned long)ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
 
   /* Was the oneshot already running? */
@@ -300,7 +303,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC + (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
+         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
   /* Get the timer counter frequency and determine the number of counts
    * needed to achieve the requested delay.

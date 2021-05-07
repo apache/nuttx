@@ -1,40 +1,29 @@
 /****************************************************************************
  * drivers/i2s/i2schar.c
  *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ *
  * This is a simple character driver for testing I2C.  It is not an audio
  * driver but does conform to some of the buffer management heuristics of an
  * audio driver.  It is not suitable for use in any real driver application
  * in its current form.
- *
- *   Copyright (C) 2013, 2017-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -61,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_AUDIO_I2SCHAR_RXTIMEOUT
@@ -88,22 +78,25 @@ struct i2schar_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2S callback function */
 
-static void    i2schar_rxcallback(FAR struct i2s_dev_s *dev,
-                 FAR struct ap_buffer_s *apb, FAR void *arg, int result);
-static void    i2schar_txcallback(FAR struct i2s_dev_s *dev,
-                 FAR struct ap_buffer_s *apb, FAR void *arg,
-                 int result);
+static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
+                               FAR struct ap_buffer_s *apb,
+                               FAR void *arg,
+                               int result);
+static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
+                               FAR struct ap_buffer_s *apb,
+                               FAR void *arg,
+                               int result);
 
 /* Character driver methods */
 
 static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                            size_t buflen);
 static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
-
-static int     i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+                             size_t buflen);
+static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -136,7 +129,7 @@ static const struct file_operations i2schar_fops =
  *
  *   Also, the test buffer is simply freed.  This will work if this driver
  *   has the sole reference to buffer; in that case the buffer will be freed.
- *   Otherwise -- memory leak!  A more efficient design would recyle the
+ *   Otherwise -- memory leak!  A more efficient design would recycle the
  *   audio buffers.
  *
  ****************************************************************************/
@@ -173,7 +166,7 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
  *
  *   NOTE: The test buffer is simply freed.  This will work if this driver
  *   has the sole reference to buffer; in that case the buffer will be freed.
- *   Otherwise -- memory leak!  A more efficient design would recyle the
+ *   Otherwise -- memory leak!  A more efficient design would recycle the
  *   audio buffers.
  *
  ****************************************************************************/
@@ -348,14 +341,13 @@ errout_with_reference:
   return ret;
 }
 
-
-/************************************************************************************
+/****************************************************************************
  * Name: i2char_ioctl
  *
  * Description:
  *   Perform I2S device ioctl if exists
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
@@ -420,7 +412,8 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
   /* Allocate a I2S character device structure */
 
-  priv = (FAR struct i2schar_dev_s *)kmm_zalloc(sizeof(struct i2schar_dev_s));
+  size_t dev_size = sizeof(struct i2schar_dev_s);
+  priv = (FAR struct i2schar_dev_s *)kmm_zalloc(dev_size);
   if (priv)
     {
       /* Initialize the I2S character device structure */
@@ -446,7 +439,6 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
       return OK;
     }
-
 
   return -ENOMEM;
 }

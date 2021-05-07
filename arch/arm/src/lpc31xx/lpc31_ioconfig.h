@@ -1,58 +1,45 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_ioconfig.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_IOCONFIG_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_IOCONFIG_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* IOCONFIG register base address offset into the APB0 domain ***********************************/
+/* IOCONFIG register base address offset into the APB0 domain ***************/
 
 #define LPC31_IOCONFIG_VBASE                (LPC31_APB0_VADDR+LPC31_APB0_IOCONFIG_OFFSET)
 #define LPC31_IOCONFIG_PBASE                (LPC31_APB0_PADDR+LPC31_APB0_IOCONFIG_OFFSET)
 
-/* IOCONFIG function block offsets (with respect to the IOCONFIG register base address) *********/
+/* IOCONFIG function block offsets
+ * (with respect to the IOCONFIG register base address)
+ */
 
 #define LPC31_IOCONFIG_EBIMCI_OFFSET        0x000 /* First set of 32 multiplexed pads */
 #define LPC31_IOCONFIG_EBII2STX0_OFFSET     0X040 /* Second set of 32 of multiplexed pads */
@@ -68,20 +55,22 @@
 #define LPC31_IOCONFIG_PWM_OFFSET           0x2c0 /* PWM function block */
 #define LPC31_IOCONFIG_UART_OFFSET          0x300 /* UART function block */
 
-/* IOCONFIG register offsets (with respect to any function block base address) ******************/
+/* IOCONFIG register offsets
+ * (with respect to any function block base address)
+ */
 
 #define LPC31_IOCONFIG_PINS_OFFSET          0x000 /* WR:           RD: Input pin state */
-                                                    /* 0x004-0x00c: Reserved */
+                                                  /* 0x004-0x00c: Reserved */
 #define LPC31_IOCONFIG_MODE0_OFFSET         0x010 /* WR:Load       RD: */
 #define LPC31_IOCONFIG_MODE0SET_OFFSET      0x014 /* WR:Set Bits   RD:Read Mode 0 */
 #define LPC31_IOCONFIG_MODE0RESET_OFFSET    0x018 /* WR:Reset Bits RD: */
-                                                    /* 0x01c: Reserved */
+                                                  /* 0x01c: Reserved */
 #define LPC31_IOCONFIG_MODE1_OFFSET         0x020 /* WR:Load       RD: */
 #define LPC31_IOCONFIG_MODE1SET_OFFSET      0x024 /* WR:Set Bits   RD:Read Mode 1 */
 #define LPC31_IOCONFIG_MODE1RESET_OFFSET    0x028 /* WR:Reset Bits RD: */
-                                                    /* 0x02c-0x3c: Reserved */
+                                                  /* 0x02c-0x3c: Reserved */
 
-/* IOCONFIG function block (virtual) base addresses *********************************************/
+/* IOCONFIG function block (virtual) base addresses *************************/
 
 #define LPC31_IOCONFIG_EBIMCI               (LPC31_IOCONFIG_VBASE+LPC31_IOCONFIG_EBIMCI_OFFSET)
 #define LPC31_IOCONFIG_EBII2STX0            (LPC31_IOCONFIG_VBASE+LPC31_IOCONFIG_EBII2STX0_OFFSET)
@@ -97,7 +86,7 @@
 #define LPC31_IOCONFIG_PWM                  (LPC31_IOCONFIG_VBASE+LPC31_IOCONFIG_PWM_OFFSET)
 #define LPC31_IOCONFIG_UART                 (LPC31_IOCONFIG_VBASE+LPC31_IOCONFIG_UART_OFFSET)
 
-/* IOCONFIG register (virtual) addresses ********************************************************/
+/* IOCONFIG register (virtual) addresses ************************************/
 
 #define LPC31_IOCONFIG_EBIMCI_PINS          (LPC31_IOCONFIG_EBIMCI+LPC31_IOCONFIG_PINS_OFFSET)
 #define LPC31_IOCONFIG_EBIMCI_MODE0         (LPC31_IOCONFIG_EBIMCI+LPC31_IOCONFIG_MODE0_OFFSET)
@@ -203,9 +192,9 @@
 #define LPC31_IOCONFIG_UART_MODE1SET        (LPC31_IOCONFIG_UART+LPC31_IOCONFIG_MODE1SET_OFFSET)
 #define LPC31_IOCONFIG_UART_MODE1RESET      (LPC31_IOCONFIG_UART+LPC31_IOCONFIG_MODE1RESET_OFFSET)
 
-/* IOCONFIG register bit definitions ************************************************************/
-/* EBI_MCI register bit definitions (all registers) */
+/* IOCONFIG register bit definitions ****************************************/
 
+/* EBI_MCI register bit definitions (all registers) */
 
 #define IOCONFIG_EBIMCI_MGPIO9                (1 << 0)
 #define IOCONFIG_EBIMCI_MGPIO6                (1 << 1)
@@ -342,16 +331,16 @@
 #define IOCONFIG_UART_RXD                     (1 << 0)
 #define IOCONFIG_UART_TXD                     (1 << 1)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_IOCONFIG_H */

@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -130,7 +131,7 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
           getreg32(NVIC_AFAULTS));
 
   up_irq_save();
-  _alert("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
+  _alert("PANIC!!! Hard fault: %08" PRIx32 "\n", getreg32(NVIC_HFAULTS));
   PANIC();
   return OK;
 }

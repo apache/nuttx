@@ -81,16 +81,18 @@
 #define STM32L4_BOARD_USEHSI           1
 
 /* Prescaler common to all PLL inputs; will be 1 (XXX source is implicitly
- as per comment above HSI) */
+ * as per comment above HSI)
+ */
 
 #define STM32L4_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as 16 MHz / 1 * 10 / 2 = 80 MHz
  *
- * XXX NOTE:  currently the main PLL is implicitly turned on and is implicitly
- * the system clock; this should be configurable since not all applications may
- * want things done this way.
+ * XXX NOTE:
+ * currently the main PLL is implicitly turned on and is implicitly the
+ * system clock; this should be configurable since not all applications
+ * may want things done this way.
  */
 
 #define STM32L4_PLLCFG_PLLN             RCC_PLLCFG_PLLN(10)

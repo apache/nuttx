@@ -22,6 +22,9 @@
 # usage: gdb -ix=./tools/nuttx-gdbinit nuttx
 # new commands: info_nxthreads, nxthread pid, nxcontinue, nxthread_all_bt
 
+# Do not stop with SIGUSR1 which is used for the NuttX sim SMP
+handle SIGUSR1 "nostop" "pass" "noprint"
+
 set $_current_tcb = 0x0
 set $_target_examined = 0x0
 
@@ -64,6 +67,9 @@ define _examine_target
 
     set $_target_max_tasks = sizeof(g_pidhash) / sizeof(struct pidhash_s)
 
+    python if (type(gdb.lookup_global_symbol("up_check_tcbstack")) is gdb.Symbol) : \
+    gdb.execute("set $_target_has_stack_coloration = 1")
+
     printf "target examined \n"
     python print("_target_arch.name=" + _target_arch.name())
 
@@ -85,9 +91,15 @@ define _print_thread
     printf "  "
   end
 
-  printf "%d Thread 0x%x  (Name: %s, State: %s, Priority: %d) 0x%x in ", \
+  if ($_target_has_stack_coloration)
+    set $stack_used = up_check_tcbstack($tcb)
+  else
+    set $stack_used = 0
+  end
+
+  printf "%d Thread 0x%x  (Name: %s, State: %s, Priority: %d, Stack: %d/%d) PC: 0x%x in ", \
   $tcb->pid, $tcb, $tcb->name, g_statenames[$tcb->task_state], $tcb->sched_priority, \
-  $tcb->xcp.regs[$_pc_reg_idx]
+  $stack_used, $tcb->adj_stack_size, $tcb->xcp.regs[$_pc_reg_idx]
   python _symbol = gdb.execute("info symbol $tcb->xcp.regs[$_pc_reg_idx]", to_string=True); \
   print(_symbol.split()[0] + "()")
 end

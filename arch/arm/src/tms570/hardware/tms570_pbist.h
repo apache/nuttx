@@ -1,57 +1,43 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_pbist.h
- * Secondary System Control Register Definitions
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller, Technical Reference Manual, Texas
- *   Instruments, Literature Number: SPNU517A, September 2013
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
+ * Technical Reference Manual, Texas Instruments,
+ * Literature Number: SPNU517A, September 2013
+ */
 
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PBIST_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_PBIST_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
+
 /* PBIST RAM Groups */
 
 #define PBIST_PBIST_ROM_GROUP          1   /* ROM */
@@ -72,13 +58,13 @@
 #define PBIST_DCAN1_RAM_RGS            3   /* Dual-port */
 #define PBIST_DCAN2_RAM_RGS            4   /* Dual-port */
 #define PBIST_ESRAM1_RAM_RGS           6   /* Single-port */
-#define PBIST_MIBSPI1_RAM_RGS          7    /* Dual-port */
+#define PBIST_MIBSPI1_RAM_RGS          7   /* Dual-port */
 #define PBIST_VIM_RAM_RGS              8   /* Dual-port */
 #define PBIST_MIBADC_RAM_RGS           9   /* Dual-port */
 #define PBIST_N2HET_RAM_RGS            11  /* Dual-port */
 #define PBIST_HET_TU_RAM_RGS           12  /* Dual-port */
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_PBIST_RAMT_OFFSET       0x0160 /* RAM Configuration Register */
 #define TMS570_PBIST_DLR_OFFSET        0x0164 /* Datalogger Register */
@@ -99,7 +85,7 @@
 #define TMS570_PBIST_RINFOL_OFFSET     0x01c8 /* RAM Info Mask Lower Register */
 #define TMS570_PBIST_RINFOU_OFFSET     0x01cc /* RAM Info Mask Upper Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_PBIST_RAMT              (TMS570_PBIST_BASE+TMS570_PBIST_RAMT_OFFSET)
 #define TMS570_PBIST_DLR               (TMS570_PBIST_BASE+TMS570_PBIST_DLR_OFFSET)
@@ -120,7 +106,7 @@
 #define TMS570_PBIST_RINFOL            (TMS570_PBIST_BASE+TMS570_PBIST_RINFOL_OFFSET)
 #define TMS570_PBIST_RINFOU            (TMS570_PBIST_BASE+TMS570_PBIST_RINFOU_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* RAM Configuration Register */
 
@@ -212,8 +198,8 @@
 
 #define PBIST_ALGO_TripleReadSlow      (1 << 0)
 #define PBIST_ALGO_TripleReadFast      (1 << 1)
-#define PBIST_ALGO_March13N_DP         (1 << 2)
-#define PBIST_ALGO_March13N_SP         (1 << 3)
+#define PBIST_ALGO_MARCH13N_DP         (1 << 2)
+#define PBIST_ALGO_MARCH13N_SP         (1 << 3)
 #define PBIST_ALGO_DOWN1a_DP           (1 << 4)
 #define PBIST_ALGO_DOWN1a_SP           (1 << 5)
 #define PBIST_ALGO_MapColumn_DP        (1 << 6)

@@ -62,6 +62,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type represents the state of the upper-half NAND MTD device.  The
  * struct mtd_dev_s must appear at the beginning of the definition so that
  * you can freely cast between pointers to struct mtd_dev_s and struct

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/xbee/drivers/xbee_netdev.c
+ * drivers/wireless/ieee802154/xbee/xbee_netdev.c
  *
  *   Copyright (C) 2017 Verge Inc. All rights reserved.
  *   Author:  Anthony Merlino <anthony@vergeaero.com>
@@ -876,7 +876,7 @@ static void xbeenet_txavail_work(FAR void *arg)
 
       /* Then poll the network for new XMIT data */
 
-      devif_poll(&priv->xd_dev.r_dev, xbeenet_txpoll_callback);
+      devif_timer(&priv->xd_dev.r_dev, 0, xbeenet_txpoll_callback);
     }
 
   net_unlock();

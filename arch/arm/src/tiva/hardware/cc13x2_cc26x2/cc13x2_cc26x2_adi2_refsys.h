@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_adi2_refsys.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,24 +37,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI2_REFSYS_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_ADI2_REFSYS_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 #include "hardware/tiva_ddi.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* ADI2 REFSYS Register Offsets *************************************************************************************/
+/* ADI2 REFSYS Register Offsets *********************************************/
 
 #define TIVA_ADI2_REFSYS_REFSYSCTL0_OFFSET                   0x0000
 #define TIVA_ADI2_REFSYS_SOCLDOCTL0_OFFSET                   0x0002
@@ -66,7 +67,7 @@
 #define TIVA_ADI2_REFSYS_HPOSCCTL1_OFFSET                    0x000b
 #define TIVA_ADI2_REFSYS_HPOSCCTL2_OFFSET                    0x000c
 
-/* ADI2 REFSYS Register Addresses ***********************************************************************************/
+/* ADI2 REFSYS Register Addresses *******************************************/
 
 #define TIVA_ADI2_REFSYS_REFSYSCTL0                          (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_REFSYSCTL0_OFFSET)
 #define TIVA_ADI2_REFSYS_SOCLDOCTL0                          (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_SOCLDOCTL0_OFFSET)
@@ -79,7 +80,9 @@
 #define TIVA_ADI2_REFSYS_HPOSCCTL1                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL1_OFFSET)
 #define TIVA_ADI2_REFSYS_HPOSCCTL2                           (TIVA_ADI2_BASE + TIVA_ADI2_REFSYS_HPOSCCTL2_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+/* Offsets may also be used in conjunction with access as described in
+ * cc13x2_cc26x2_ddi.h
+ */
 
 #define TIVA_ADI2_REFSYS_DIR                                 (TIVA_ADI2_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_ADI2_REFSYS_SET                                 (TIVA_ADI2_BASE + TIVA_DDI_SET_OFFSET)
@@ -88,7 +91,7 @@
 #define TIVA_ADI2_REFSYS_MASK8B                              (TIVA_ADI2_BASE + TIVA_DDI_MASK8B_OFFSET)
 #define TIVA_ADI2_REFSYS_MASK16B                             (TIVA_ADI2_BASE + TIVA_DDI_MASK16B_OFFSET)
 
-/* ADI2 REFSYS Bitfield Definitions *********************************************************************************/
+/* ADI2 REFSYS Bitfield Definitions *****************************************/
 
 /* TIVA_ADI2_REFSYS_REFSYSCTL0 */
 

@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/a1x/hardware/a1x_timer.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_A1X_HARDWARE_A1X_TIMER_H
 #define __ARCH_ARM_SRC_A1X_HARDWARE_A1X_TIMER_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/a1x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define A1X_TMR_IRQ_EN_OFFSET      0x0000 /* Timer IRQ Enable */
 #define A1X_TMR_IRQ_STA_OFFSET     0x0004 /* Timer Status */
@@ -109,7 +94,7 @@
 
 #define A1X_CPU_CFG_OFFSET         0x0140 /* CPU configuration register */
 
-/* Register virtual addresses *******************************************************/
+/* Register virtual addresses ***********************************************/
 
 #define A1X_TMR_IRQ_EN             (A1X_TIMER_VADDR+A1X_TMR_IRQ_EN_OFFSET)
 #define A1X_TMR_IRQ_STA            (A1X_TIMER_VADDR+A1X_TMR_IRQ_STA_OFFSET)
@@ -171,7 +156,7 @@
 
 #define A1X_CPU_CFG                (A1X_TIMER_VADDR+A1X_CPU_CFG_OFFSET)
 
-/* Register bit field definitions ***************************************************/
+/* Register bit field definitions *******************************************/
 
 /* Timer IRQ Enable and Timer Status */
 
@@ -194,6 +179,7 @@
 #  define TMR01_CTRL_SRC_PLL6DIV6  (2 << TMR_CTRL_SRC_SHIFT) /* PLL6/6 (Timers 0 and 1 only) */
 #  define TMR4_CTRL_SRC_CLKIN0     (2 << TMR_CTRL_SRC_SHIFT) /* External CLKIN0 (Timer 4 only) */
 #  define TMR5_CTRL_SRC_CLKIN1     (2 << TMR_CTRL_SRC_SHIFT) /* External CLKIN1 (Timer 5 only) */
+
 #define TMR_CTRL_CLK_PRES_SHIFT    (4) /* Bits 4-6: Select the pre-scale of timer n clock source */
 #define TMR_CTRL_CLK_PRES_MASK     (7 << TMR_CTRL_CLK_PRES_SHIFT)
 #  define TMR_CTRL_CLK_PRES_DIV1   (0 << TMR_CTRL_CLK_PRES_SHIFT) /* /1 */
@@ -204,6 +190,7 @@
 #  define TMR_CTRL_CLK_PRES_DIV32  (5 << TMR_CTRL_CLK_PRES_SHIFT) /* /32 (Not Timer 0) */
 #  define TMR_CTRL_CLK_PRES_DIV64  (6 << TMR_CTRL_CLK_PRES_SHIFT) /* /64 (Not Timer 0) */
 #  define TMR_CTRL_CLK_PRES_DIV128 (7 << TMR_CTRL_CLK_PRES_SHIFT) /* /128 (Not Timer 0) */
+
 #define TMR_CTRL_MODE              (1 << 7)  /* Bit 7:  Timer n mode, n={0,1,2,4,5} */
 #  define TMR_CTRL_MODE_SINGLE     (1 << 7)  /*         1=single mode */
 #  define TMR_CTRL_MODE_CONTINUOUS (0 << 7)  /*         0=continuous mode */
@@ -211,14 +198,17 @@
 /* Timer 3 Control */
 
 #define TMR3_CTRL_EN               (1 << 0)  /* Bit 0:  Timer 3 Enable*/
+
 #define TMR3_CTRL_CLK_PRES_SHIFT   (2) /* Bits 2-3: Select the pre-scale of timer 3 clock source (LOSC) */
 #define TMR3_CTRL_CLK_PRES_MASK    (7 << TMR3_CTRL_CLK_PRES_SHIFT)
 #  define TMR3_CTRL_CLK_PRES_DIV16 (0 << TMR3_CTRL_CLK_PRES_SHIFT) /* /16 */
 #  define TMR3_CTRL_CLK_PRES_DIV32 (1 << TMR3_CTRL_CLK_PRES_SHIFT) /* /32 */
 #  define TMR3_CTRL_CLK_PRES_DIV64 (2 << TMR3_CTRL_CLK_PRES_SHIFT) /* /64 */
+
 #define TMR3_CTRL_MODE             (1 << 4)  /* Bit 4:  Timer3 mode */
 
 /* Timer Interval Value (32-bit value) */
+
 /* Timer Current Value (32-bit value) */
 
 /* AVS Control Register */
@@ -229,6 +219,7 @@
 #define AVS_CNT1_PS                (1 << 9)  /* Bit 9:  Audio/Video Sync Counter 1 Pause Control */
 
 /* AVS Counter 0 Register (32-bit value) */
+
 /* AVS Counter 1 Register (32-bit value) */
 
 /* AVS Divisor */
@@ -250,16 +241,16 @@
 #define WDOG_MODE_RSTEN            (1 << 1)  /* Bit 1:  Watch-Dog Reset Enable */
 #define WDOG_MODE_INTV_SHIFT       (3)       /* Bits 3-6: Watch-Dog Interval Value */
 #define WDOG_MODE_INTV_MASK        (15 << WDOG_MODE_INTV_SHIFT)
-#  define WDOG_MODE_INTV_0p5SEC    (0 << WDOG_MODE_INTV_SHIFT) /* 0.5 sec */
-#  define WDOG_MODE_INTV_1SEc      (1 << WDOG_MODE_INTV_SHIFT) /* 1 sec */
-#  define WDOG_MODE_INTV_2SEC      (2 << WDOG_MODE_INTV_SHIFT) /* 2 sec */
-#  define WDOG_MODE_INTV_3SEC      (3 << WDOG_MODE_INTV_SHIFT) /* 3 sec */
-#  define WDOG_MODE_INTV_4SEC      (4 << WDOG_MODE_INTV_SHIFT) /* 4 sec */
-#  define WDOG_MODE_INTV_5SEC      (5 << WDOG_MODE_INTV_SHIFT) /* 5 sec */
-#  define WDOG_MODE_INTV_6SEC      (6 << WDOG_MODE_INTV_SHIFT) /* 6 sec */
-#  define WDOG_MODE_INTV_8SEC      (7 << WDOG_MODE_INTV_SHIFT) /* 8 sec */
-#  define WDOG_MODE_INTV_10SEC     (8 << WDOG_MODE_INTV_SHIFT) /* 10 sec */
-#  define WDOG_MODE_INTV_12SEC     (9 << WDOG_MODE_INTV_SHIFT) /* 12 sec */
+#  define WDOG_MODE_INTV_0p5SEC    (0 << WDOG_MODE_INTV_SHIFT)  /* 0.5 sec */
+#  define WDOG_MODE_INTV_1SEc      (1 << WDOG_MODE_INTV_SHIFT)  /* 1 sec */
+#  define WDOG_MODE_INTV_2SEC      (2 << WDOG_MODE_INTV_SHIFT)  /* 2 sec */
+#  define WDOG_MODE_INTV_3SEC      (3 << WDOG_MODE_INTV_SHIFT)  /* 3 sec */
+#  define WDOG_MODE_INTV_4SEC      (4 << WDOG_MODE_INTV_SHIFT)  /* 4 sec */
+#  define WDOG_MODE_INTV_5SEC      (5 << WDOG_MODE_INTV_SHIFT)  /* 5 sec */
+#  define WDOG_MODE_INTV_6SEC      (6 << WDOG_MODE_INTV_SHIFT)  /* 6 sec */
+#  define WDOG_MODE_INTV_8SEC      (7 << WDOG_MODE_INTV_SHIFT)  /* 8 sec */
+#  define WDOG_MODE_INTV_10SEC     (8 << WDOG_MODE_INTV_SHIFT)  /* 10 sec */
+#  define WDOG_MODE_INTV_12SEC     (9 << WDOG_MODE_INTV_SHIFT)  /* 12 sec */
 #  define WDOG_MODE_INTV_14SEC     (10 << WDOG_MODE_INTV_SHIFT) /* 14 sec */
 #  define WDOG_MODE_INTV_16SEC     (11 << WDOG_MODE_INTV_SHIFT) /* 16 sec */
 
@@ -272,12 +263,13 @@
 #  define CNT64_CTRL_SRC_PLL6DIV6  (1 << 2)  /*         1=PLL6/6 */
 
 /* 64-bit Counter low (32-bit value) */
+
 /* 64-bit Counter high (32-bit value) */
 
 /* Low Oscillator Control */
 
 #define LOSC_CTRL_OSC32K_SRCSEL    (1 << 0)  /* Bit 0:  OSC32KHz Clock source Select */
-#define LOSC_CTRL_EXT_GSM_SHIFT    (2)  /* Bits 2-3: External 32768Hz Crystal GSM */
+#define LOSC_CTRL_EXT_GSM_SHIFT    (2)       /* Bits 2-3: External 32768Hz Crystal GSM */
 #define LOSC_CTRL_EXT_GSM_MASK     (3 << LOSC_CTRL_EXT_GSM_SHIFT)
 #  define LOSC_CTRL_EXT_GSM_LOW    (0 << LOSC_CTRL_EXT_GSM_SHIFT)
 #  define LOSC_CTRL_EXT_GSM_MEDLOW (1 << LOSC_CTRL_EXT_GSM_SHIFT)
@@ -364,7 +356,7 @@
 #define ALARM_EN_WK6EN             (1 << 6)  /* Bit 6:  Week 6(Sunday) Alarm Enable */
 #define ALARM_EN_CNTEN             (1 << 8)  /* Bit 8:  Alarm Counter Enable */
 
-/* Alarm IRQ Enable and Alarm IRQ Status*/
+/* Alarm IRQ Enable and Alarm IRQ Status */
 
 #define ALARM_IRQ_CNT              (1 << 0)  /* Bit 0:  Alarm Counter IRQ */
 #define ALARM_IRQ_WK               (1 << 1)  /* Bit 1:  Alarm Week IRQ */

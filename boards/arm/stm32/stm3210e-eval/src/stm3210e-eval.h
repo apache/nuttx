@@ -1,35 +1,20 @@
 /****************************************************************************
- * boards/arm/stm32/stm3210e_eval/src/stm3210e-eval.h
+ * boards/arm/stm32/stm3210e-eval/src/stm3210e-eval.h
  *
- *   Copyright (C) 2009, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,8 +38,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* How many SPI modules does this chip support? Most support 2 SPI modules (others
- * may support more -- in such case, the following must be expanded).
+/* How many SPI modules does this chip support?
+ * Most support 2 SPI modules (others may support more -- in such case,
+ * the following must be expanded).
  */
 
 #if STM32_NSPI < 1
@@ -77,7 +63,8 @@
 #  undef HAVE_I2CTOOL
 #endif
 
-/* STM3210E-EVAL GPIOs **************************************************************/
+/* STM3210E-EVAL GPIOs ******************************************************/
+
 /* LEDs */
 
 #define GPIO_LED1        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
@@ -91,7 +78,7 @@
 
 /* BUTTONS -- NOTE that some have EXTI interrupts configured */
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 #  define MIN_IRQBUTTON  BUTTON_KEY
 #  define MAX_IRQBUTTON  BUTTON_KEY
 #  define NUM_IRQBUTTONS (1)
@@ -163,7 +150,7 @@ struct extmem_save_s
 };
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -174,7 +161,7 @@ struct extmem_save_s
 extern const uint16_t g_commonconfig[NCOMMON_CONFIG];
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -197,7 +184,8 @@ int stm32_bringup(void);
  * Name: stm32_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL board.
+ *   Called to configure SPI chip select GPIO pins for the STM3210E-EVAL
+ *   board.
  *
  ****************************************************************************/
 
@@ -346,8 +334,8 @@ void stm32_ledpminitialize(void);
  * Name: stm32_pmbuttons
  *
  * Description:
- *   Configure all the buttons of the STM3210e-eval board as EXTI, so any button is
- *   able to wakeup the MCU from the PM_STANDBY mode
+ *   Configure all the buttons of the STM3210e-eval board as EXTI, so any
+ *   button is able to wakeup the MCU from the PM_STANDBY mode
  *
  ****************************************************************************/
 
@@ -363,7 +351,7 @@ void stm32_pmbuttons(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DJOYSTICK
+#ifdef CONFIG_INPUT_DJOYSTICK
 int stm32_djoy_initialization(void);
 #endif
 

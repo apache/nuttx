@@ -1,59 +1,44 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_matrix.h
- * Bux matrix definitions for the SAMA5
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_MATRIX_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_MATRIX_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifdef ATSAMA5D2
-/* These are bits maps of PIDs in the H64MX SPSELR registers.  These are used by
- * application code to quickly determine if a given PID is served by H32MX or H64MX
- * which, in turn, is needed to know if the peripheral secured in SPSELR).
+/* These are bits maps of PIDs in the H64MX SPSELR registers.  These are
+ * used by application code to quickly determine if a given PID is served
+ * by H32MX or H64MX which, in turn, is needed to know if the peripheral
+ * secured in SPSELR).
  * Reference: "In Matrix" column of "Table 9-2. Peripheral identifiers."
  *
  * NOTE that these hard-code bit values must match the PID assignments in
@@ -79,9 +64,10 @@
 #ifdef ATSAMA5D4
 #  define H64MX_DDR_SLAVE_PORT0          3
 
-/* These are bits maps of PIDs in the H64MX SPSELR registers.  These are used by
- * application code to quickly determine if a given PID is served by H32MX or H64MX
- * which, in turn, is needed to know if the peripheral secured in SPSELR).
+/* These are bits maps of PIDs in the H64MX SPSELR registers.  These are
+ * used by application code to quickly determine if a given PID is served
+ * by H32MX or H64MX which, in turn, is needed to know if the peripheral
+ * secured in SPSELR).
  * Reference: "In Matrix" column of "Table 9-1. Peripheral identifiers."
  *
  * NOTE that these hard-code bit values must match the PID assignments in
@@ -102,7 +88,7 @@
 
 #endif
 
-/* MATRIX register offsets **************************************************************/
+/* MATRIX register offsets **************************************************/
 
 #define SAM_MATRIX_MCFG_OFFSET(n)        ((n)<<2)
 #define SAM_MATRIX_MCFG0_OFFSET          0x0000 /* Master Configuration Register 0 */
@@ -286,7 +272,7 @@
 #  define SAM_MATRIX_SPSELR3_OFFSET      0x02c8 /* Security Peripheral Select 3 Register */
 #endif
 
-/* MATRIX register addresses ************************************************************/
+/* MATRIX register addresses ************************************************/
 
 #ifdef ATSAMA5D3
 #  define SAM_MATRIX_MCFG(n))            (SAM_MATRIX_VBASE+SAM_MATRIX_MCFG_OFFSET(n))
@@ -696,7 +682,8 @@
 
 #endif /* ATSAMA5D2 || ATSAMA5D4 */
 
-/* MATRIX register bit definitions ******************************************************/
+/* MATRIX register bit definitions ******************************************/
+
 /* Master Configuration Registers */
 
 #define MATRIX_MCFG_ULBT_SHIFT           (0)       /* Bits 0-2:  Undefined Length Burst Type */
@@ -813,8 +800,9 @@
 #endif
 
 #if defined(ATSAMA5D2) || defined(ATSAMA5D4)
-/* Master Error Interrupt Enable Register, Master Error Interrupt Disable Register,
- * Master Error Interrupt Mask Register, and Master Error Status Register
+/* Master Error Interrupt Enable Register, Master Error Interrupt Disable
+ * Register, Master Error Interrupt Mask Register, and Master Error
+ * Status Register
  */
 
 #  define MATRIX_MEINT_MERR(n)           (1 << (n)) /* Master x Access Error, n=0..9 */
@@ -909,27 +897,35 @@
 #  define MATRIX_SASSR_SASPLIT_SHIFT(n) ((n) << 4) /* Security Areas Split for HSELn Security Region, n=0..7 */
 #  define MATRIX_SASSR_SASPLIT_MASK(n)  (15 << MATRIX_SASSR_SASPLIT_SHIFT(n))
 #    define MATRIX_SASSR_SASPLIT(n,v)   ((uint32_t)(v) << MATRIX_SASSR_SASPLIT_SHIFT(n)) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT0_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT0_MASK    (15 << MATRIX_SASSR_SASPLIT0_SHIFT)
 #    define MATRIX_SASSR_SASPLIT0(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT0_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT1_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT1_MASK    (15 << MATRIX_SASSR_SASPLIT1_SHIFT)
 #    define MATRIX_SASSR_SASPLIT1(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT1_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT2_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT2_MASK    (15 << MATRIX_SASSR_SASPLIT2_SHIFT)
 #    define MATRIX_SASSR_SASPLIT2(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT2_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT3_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT3_MASK    (15 << MATRIX_SASSR_SASPLIT3_SHIFT)
 #    define MATRIX_SASSR_SASPLIT3(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT3_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT4_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT4_MASK    (15 << MATRIX_SASSR_SASPLIT4_SHIFT)
 #    define MATRIX_SASSR_SASPLIT4(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT4_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT5_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT5_MASK    (15 << MATRIX_SASSR_SASPLIT5_SHIFT)
 #    define MATRIX_SASSR_SASPLIT5(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT5_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT6_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT6_MASK    (15 << MATRIX_SASSR_SASPLIT6_SHIFT)
 #    define MATRIX_SASSR_SASPLIT6(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT6_SHIFT) /* See definitions above */
+
 #  define MATRIX_SASSR_SASPLIT7_SHIFT   (0)       /* Bits 0-3: Security Areas Split for HSEL0 Security Region */
 #  define MATRIX_SASSR_SASPLIT7_MASK    (15 << MATRIX_SASSR_SASPLIT7_SHIFT)
 #    define MATRIX_SASSR_SASPLIT7(n)    ((uint32_t)(n) << MATRIX_SASSR_SASPLIT7_SHIFT) /* See definitions above */
@@ -956,27 +952,35 @@
 #  define MATRIX_SRTSR_SRTOP_SHIFT(n)   ((n) << 4) /* HSELn Security Region Top, n=0..7 */
 #  define MATRIX_SRTSR_SRTOP_MASK(n)    (15 << MATRIX_SRTSR_SRTOP_SHIFT(n))
 #    define MATRIX_SRTSR_SRTOP(n,v)     ((uint32_t)(v) << MATRIX_SRTSR_SRTOP_SHIFT(n)) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP0_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP0_MASK      (15 << MATRIX_SRTSR_SRTOP0_SHIFT)
 #    define MATRIX_SRTSR_SRTOP0(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP0_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP1_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP1_MASK      (15 << MATRIX_SRTSR_SRTOP1_SHIFT)
 #    define MATRIX_SRTSR_SRTOP1(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP1_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP2_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP2_MASK      (15 << MATRIX_SRTSR_SRTOP2_SHIFT)
 #    define MATRIX_SRTSR_SRTOP2(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP2_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP3_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP3_MASK      (15 << MATRIX_SRTSR_SRTOP3_SHIFT)
 #    define MATRIX_SRTSR_SRTOP3(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP3_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP4_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP4_MASK      (15 << MATRIX_SRTSR_SRTOP4_SHIFT)
 #    define MATRIX_SRTSR_SRTOP4(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP4_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP5_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP5_MASK      (15 << MATRIX_SRTSR_SRTOP5_SHIFT)
 #    define MATRIX_SRTSR_SRTOP5(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP5_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP6_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP6_MASK      (15 << MATRIX_SRTSR_SRTOP6_SHIFT)
 #    define MATRIX_SRTSR_SRTOP6(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP6_SHIFT) /* See definitions above */
+
 #  define MATRIX_SRTSR_SRTOP7_SHIFT     (0)       /* Bits 0-3: HSEL0 Security Region Top */
 #  define MATRIX_SRTSR_SRTOP7_MASK      (15 << MATRIX_SRTSR_SRTOP7_SHIFT)
 #    define MATRIX_SRTSR_SRTOP7(n)      ((uint32_t)(n) << MATRIX_SRTSR_SRTOP7_SHIFT) /* See definitions above */
@@ -994,16 +998,16 @@
 #  define MATRIX_SPSELR3_NSECP(n)       (1 << ((n)-64)) /* PID n Not Secured Peripheral, n=64-96 */
 #endif
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_MATRIX_H */

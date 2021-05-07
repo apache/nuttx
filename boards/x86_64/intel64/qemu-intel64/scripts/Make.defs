@@ -1,5 +1,5 @@
 ############################################################################
-# boards/x86_64/intel64/qemu/scripts/Make.defs
+# boards/x86_64/intel64/qemu-intel64/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,8 +20,6 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-
-HOSTOS = ${shell uname -o 2>/dev/null || echo "Other"}
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
@@ -46,7 +44,7 @@ ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
 
-ifeq ($(HOSTOS),Cygwin)
+ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
 CROSSDEV = i486-nuttx-elf-
 endif
 

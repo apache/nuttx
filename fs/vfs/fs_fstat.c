@@ -234,7 +234,7 @@ int fstat(int fd, FAR struct stat *buf)
   int ret;
 
   /* First, get the file structure.  Note that on failure,
-   * fs_getfilep() will set the errno variable.
+   * fs_getfilep() will return the errno.
    */
 
   ret = fs_getfilep(fd, &filep);

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/hardware/stm32l4_dfsdm.h
  *
  *   Copyright (C) 2017-2018 Haltian Ltd. All rights reserved.
@@ -31,24 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_DFSDM_H
 #define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_DFSDM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
+
 /* Register Offsets for the DFSDM. */
 
 /* DFSDM channel y registers (y=0..7 or y=0..3 on STM32L4X3) */
@@ -99,10 +100,10 @@
 #define STM32L4_DFSDM_CH2WDATR_OFFSET      0x004c  /* DFSDM channel 2 watchdog filter data register */
 #define STM32L4_DFSDM_CH3WDATR_OFFSET      0x006c  /* DFSDM channel 3 watchdog filter data register */
 #ifndef CONFIG_STM32L4_STM32L4X3
-  #define STM32L4_DFSDM_CH4WDATR_OFFSET    0x008c  /* DFSDM channel 4 watchdog filter data register */
-  #define STM32L4_DFSDM_CH5WDATR_OFFSET    0x00ac  /* DFSDM channel 5 watchdog filter data register */
-  #define STM32L4_DFSDM_CH6WDATR_OFFSET    0x00cc  /* DFSDM channel 6 watchdog filter data register */
-  #define STM32L4_DFSDM_CH7WDATR_OFFSET    0x00ec  /* DFSDM channel 7 watchdog filter data register */
+#  define STM32L4_DFSDM_CH4WDATR_OFFSET    0x008c  /* DFSDM channel 4 watchdog filter data register */
+#  define STM32L4_DFSDM_CH5WDATR_OFFSET    0x00ac  /* DFSDM channel 5 watchdog filter data register */
+#  define STM32L4_DFSDM_CH6WDATR_OFFSET    0x00cc  /* DFSDM channel 6 watchdog filter data register */
+#  define STM32L4_DFSDM_CH7WDATR_OFFSET    0x00ec  /* DFSDM channel 7 watchdog filter data register */
 #endif
 
 #define STM32L4_DFSDM_CHDATINR_OFFSET(ch)  (0x10 + 0x20 * (ch)) /* DFSDM channel data input register */
@@ -149,7 +150,7 @@
 #define STM32L4_DFSDM_FLTEXMIN_OFFSET(x)   (0x134 + 0x80 * (x)) /* DFSDM Extremes detector minimum register */
 #define STM32L4_DFSDM_FLTCNVTIMR_OFFSET(x) (0x138 + 0x80 * (x)) /* DFSDM conversion timer register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 /* DFSDM channel y registers (y=0..7 or y=0..3 on STM32L4X3) */
 
@@ -182,15 +183,17 @@
 #define STM32L4_DFSDM_FLTEXMIN(x)        (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTEXMIN_OFFSET(x))
 #define STM32L4_DFSDM_FLTCNVTIMR(x)      (STM32L4_DFSDM_BASE + STM32L4_DFSDM_FLTCNVTIMR_OFFSET(x))
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
+
 /* DFSDM channel configuration y register (DFSDM_CHyCFGR1) */
 
 /* Bits that are present only in DFSDM_CH0CFGR1 register (channel y=0) */
 
 #define DFSDM_CH0CFGR1_CKOUTDIV_SHIFT    (16)      /* Bits 16-23: Output serial clock divider */
 #define DFSDM_CH0CFGR1_CKOUTDIV_MASK     (0xff << DFSDM_CH0CFGR1_CKOUTDIV_SHIFT)
-#  define DFSDM_CH0CFGR1_CKOUTDIV_NONE   (0 << DFSDM_CH0CFGR1_CKOUTDIV_SHIFT) /* Output clock generation disabled */
+#  define DFSDM_CH0CFGR1_CKOUTDIV_NONE   (0 << DFSDM_CH0CFGR1_CKOUTDIV_SHIFT)   /* Output clock generation disabled */
 #  define DFSDM_CH0CFGR1_CKOUTDIV(n)     ((n) << DFSDM_CH0CFGR1_CKOUTDIV_SHIFT) /* Divider = CKOUTDIV+1, n=1..255 */
+
 #define DFSDM_CH0CFGR1_CKOUTSRC          (1 << 30) /* Bit 30: Output serial clock source selection */
 #define DFSDM_CH0CFGR1_DFSDMEN           (1 << 31) /* Bit 31: Global enable for DFSDM */
 
@@ -202,6 +205,7 @@
 #  define DFSDM_CHCFGR1_SPICKSEL_CKOUT     (1 << DFSDM_CHCFGR1_SPICKSEL_SHIFT) /* clock coming from internal CKOUT output, sampling from SITP[1:0] */
 #  define DFSDM_CHCFGR1_SPICKSEL_CKOUTFALL (2 << DFSDM_CHCFGR1_SPICKSEL_SHIFT) /* clock coming from internal CKOUT input, sampling on falling edge */
 #  define DFSDM_CHCFGR1_SPICKSEL_CKOUTRISE (3 << DFSDM_CHCFGR1_SPICKSEL_SHIFT) /* clock coming from internal CKOOUT input, sampling on rising edge */
+
 #define DFSDM_CHCFGR1_SITP_SHIFT           (0)   /* Bits 0-1: Serial interface type for channel y */
 #define DFSDM_CHCFGR1_SITP_MASK            (3 << DFSDM_CHCFGR1_SITP_SHIFT)
 #  define DFSDM_CHCFGR1_SITP_SPIRISE       (0 << DFSDM_CHCFGR1_SITP_SHIFT) /* SPI with rising edge to strobe data */
@@ -219,6 +223,7 @@
 #  define DFSDM_CHCFGR1_DATMPX_ADC       (1 << DFSDM_CHCFGR1_DATMPX_SHIFT) /* ADC: Data to channel y are taken from internal analog to digital converter ADC */
 #  define DFSDM_CHCFGR1_DATMPX_DATINR    (2 << DFSDM_CHCFGR1_DATMPX_SHIFT) /* DATINR: Data to channel y are taken from internal DFSDM_CHyDATINR register by direct CPU/DMA write */
                                                                            /* 3: Reserved */
+
 #define DFSDM_CHCFGR1_DATPACK_SHIFT      (14)      /* Bits 14-15: Data packing mode in DFSDM_CHyDATINR register. */
 #define DFSDM_CHCFGR1_DATPACK_MASK       (3 << DFSDM_CHCFGR1_DATPACK_SHIFT)
 #  define DFSDM_CHCFGR1_DATPACK_STD      (0 << DFSDM_CHCFGR1_DATPACK_SHIFT) /* Standard: input data in DFSDM_CHyDATINR register are stored only in INDAT0[15:0] */
@@ -236,7 +241,9 @@
 #define DFSDM_CHCFGR2_OFFSET_MASK        (0xffffff << DFSDM_CHCFGR2_OFFSET_SHIFT)
 #  define DFSDM_CHCFGR2_OFFSET(n)        ((n) << DFSDM_CHCFGR2_OFFSET_SHIFT)
 
-/* DFSDM channel analog watchdog and short-circuit detector register (DFSDM_CHyAWSCDR) */
+/* DFSDM channel analog watchdog and short-circuit detector register
+ * (DFSDM_CHyAWSCDR)
+ */
 
 #define DFSDM_CHAWSCDR_SCDT_SHIFT        (0)   /* Bits 0-7: short-circuit detector threshold */
 #define DFSDM_CHAWSCDR_SCDT_MASK         (0xff << DFSDM_CHAWSCDR_SCDT_SHIFT)
@@ -246,6 +253,7 @@
 #define DFSDM_CHAWSCDR_AWFOSR_SHIFT      (16)  /* Bits 16-20: Analog watchdog filter oversampling ratio */
 #define DFSDM_CHAWSCDR_AWFOSR_MASK       (0x1f << DFSDM_CHAWSCDR_AWFOSR_SHIFT)
 #  define DFSDM_CHAWSCDR_AWFOSR(n)       ((n) << DFSDM_CHAWSCDR_AWFOSR_SHIFT)  /* n=0..31 */
+
 #define DFSDM_CHAWSCDR_AWFORD_SHIFT      (22)  /* Bits 22-24: Analog watchdog Sinc filter order */
 #define DFSDM_CHAWSCDR_AWFORD_MASK       (3 << DFSDM_CHAWSCDR_AWFORD_SHIFT)
 #  define DFSDM_CHAWSCDR_AWFORD_FASTSINC (0 << DFSDM_CHAWSCDR_AWFORD_SHIFT)
@@ -274,6 +282,7 @@
 #  define DFSDM_CHDLYR_PLSSKP(n)         ((n) << DFSDM_CHDLYR_PLSSKP_SHIFT) /* n=0..63 */
 
 /* DFSDM filter x module registers */
+
 /* DFSDM control register 1 (DFSDM_FLTxCR1) */
 
 #define DFSDM_FLTCR1_DFEN                (1 << 0)  /* Bit 0: DFSDM_FLTx enable */
@@ -286,7 +295,8 @@
 #define DFSDM_FLTCR1_JEXTSEL_MASK        (0x7 << DFSDM_FLTCR1_JEXTSEL_SHIFT)
 #  define DFSDM_FLTCR1_JEXTSEL(event)    ((event) << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* Event = 0..7 */
 
-/* Trigger selections. Note: for RM0351 devices (STM32L4X6) these are valid for FLT0 and FLT1.
+/* Trigger selections.
+ * Note: for RM0351 devices (STM32L4X6) these are valid for FLT0 and FLT1.
  * For subtle differences for FLT2 and FLT3, see the reference manual.
  */
 
@@ -308,6 +318,7 @@
 #  define DFSDM_FLTCR1_JEXTSEL_T6TRGO    (0x05 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0101: Timer 6 TRGO event */
 #  define DFSDM_FLTCR1_JEXTSEL_EXTI11    (0x06 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0110: EXTI line 11 */
 #  define DFSDM_FLTCR1_JEXTSEL_EXTI15    (0x07 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0111: EXTI line 15 */
+
                                                    /* Bits 11-12: Reserved */
 #define DFSDM_FLTCR1_JEXTEN_SHIFT        (13)      /* Bits 13-14: Trigger enable and edge election for injected group */
 #define DFSDM_FLTCR1_JEXTEN_MASK         (3 << DFSDM_FLTCR1_JEXTEN_SHIFT)
@@ -315,6 +326,7 @@
 #  define DFSDM_FLTCR1_JEXTEN_RISING     (1 << DFSDM_FLTCR1_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
 #  define DFSDM_FLTCR1_JEXTEN_FALLING    (2 << DFSDM_FLTCR1_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
 #  define DFSDM_FLTCR1_JEXTEN_BOTH       (3 << DFSDM_FLTCR1_JEXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+
 #define DFSDM_FLTCR1_RSWSTART            (1 << 17) /* Bit 17: Software start of a conversion on the regular channel */
 #define DFSDM_FLTCR1_RCONT               (1 << 18) /* Bit 18: Continuous mode selection for regular conversions */
 #define DFSDM_FLTCR1_RSYNC               (1 << 19) /* Bit 19: Launch regular conversion synchronously with DFSDM_FLT0 */
@@ -322,6 +334,7 @@
 #define DFSDM_FLTCR1_RCH_SHIFT           (24)      /* Bits 24-26: Regular channel selection */
 #define DFSDM_FLTCR1_RCH_MASK            (0x7 << DFSDM_FLTCR1_RCH_SHIFT)
 #define DFSDM_FLTCR1_RCH(ch)             ((ch) << DFSDM_FLTCR1_RCH_SHIFT) /* Channel ch is selected as the regular channel */
+
 #define DFSDM_FLTCR1_FAST                (1 << 29) /* Bit 29: Fast conversion mode selection for regular conversions */
 #define DFSDM_FLTCR1_AWFSEL              (1 << 30) /* Bit 30: Analog watchdog fast mode select */
 
@@ -391,6 +404,7 @@
 #define DFSDM_FLTFCR_FOSR_SHIFT          (16)    /* Bits 16-25: Sinc filter oversampling ratio) */
 #define DFSDM_FLTFCR_FOSR_MASK           (0x3ff << DFSDM_FLTFCR_FOSR_SHIFT)
 #  define DFSDM_FLTFCR_FOSR(n)           ((n) << DFSDM_FLTFCR_FOSR_SHIFT)  /* n=0..1023 */
+
 #define DFSDM_FLTFCR_FORD_SHIFT          (29)    /* Bits 29-31: Sinc filter order */
 #define DFSDM_FLTFCR_FORD_MASK           (7 << DFSDM_FLTFCR_FORD_SHIFT)
 #  define DFSDM_FLTFCR_FORD_FASTSINC     (0 << DFSDM_FLTFCR_FORD_SHIFT)

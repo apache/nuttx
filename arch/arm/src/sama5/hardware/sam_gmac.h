@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/hardware/sam_gmac.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -70,8 +55,10 @@
                                           /* 0x0048-0x007c Reserved */
 #define SAM_GMAC_HRB_OFFSET        0x0080 /* Hash Register Bottom [31:0] */
 #define SAM_GMAC_HRT_OFFSET        0x0084 /* Hash Register Top [63:32] */
+
 #define SAM_GMAC_SAB_OFFSET(n)     (0x0088 + (((n)-1) << 3))  /* n=1..4 */
 #define SAM_GMAC_SAT_OFFSET(n)     (0x008c + (((n)-1) << 3))  /* n=1..4 */
+
 #define SAM_GMAC_SAB1_OFFSET       0x0088 /* Specific Address 1 Bottom [31:0] Register */
 #define SAM_GMAC_SAT1_OFFSET       0x008c /* Specific Address 1 Top [47:32] Register */
 #define SAM_GMAC_SAB2_OFFSET       0x0090 /* Specific Address 2 Bottom [31:0] Register */
@@ -80,7 +67,9 @@
 #define SAM_GMAC_SAT3_OFFSET       0x009c /* Specific Address 3 Top [47:32] Register */
 #define SAM_GMAC_SAB4_OFFSET       0x00a0 /* Specific Address 4 Bottom [31:0] Register */
 #define SAM_GMAC_SAT4_OFFSET       0x00a4 /* Specific Address 4 Top [47:32] Register */
+
 #define SAM_GMAC_TIDM_OFFSET(n)    (0x00a8 + (((n)-1) << 2))  /* n=1..4 */
+
 #define SAM_GMAC_TIDM1_OFFSET      0x00a8 /* Type ID Match 1 Register */
 #define SAM_GMAC_TIDM2_OFFSET      0x00ac /* Type ID Match 2 Register */
 #define SAM_GMAC_TIDM3_OFFSET      0x00b0 /* Type ID Match 3 Register */
@@ -153,7 +142,9 @@
 #define SAM_GMAC_PEFRN_OFFSET      0x01fc /* PTP Peer Event Frame Received Nanoseconds */
                                           /* 0x0200-0x023c Reserved */
                                           /* 0x0280-0x0298 Reserved */
+
 #define SAM_GMAC_ISRPQ_OFFSET(n)   (0x400 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_ISRPQ0_OFFSET     0x400 /* Interrupt Status Register Priority Queue 0 */
 #define SAM_GMAC_ISRPQ1_OFFSET     0x404 /* Interrupt Status Register Priority Queue 1 */
 #define SAM_GMAC_ISRPQ2_OFFSET     0x408 /* Interrupt Status Register Priority Queue 2 */
@@ -161,7 +152,9 @@
 #define SAM_GMAC_ISRPQ4_OFFSET     0x410 /* Interrupt Status Register Priority Queue 4 */
 #define SAM_GMAC_ISRPQ5_OFFSET     0x414 /* Interrupt Status Register Priority Queue 5 */
 #define SAM_GMAC_ISRPQ6_OFFSET     0x418 /* Interrupt Status Register Priority Queue 6 */
+
 #define SAM_GMAC_TBQBAPQ_OFFSET(n) (0x440 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_TBQBAPQ0_OFFSET   0x440 /* Transmit Buffer Queue Base Address Priority Queue 0 */
 #define SAM_GMAC_TBQBAPQ1_OFFSET   0x444 /* Transmit Buffer Queue Base Address Priority Queue 1 */
 #define SAM_GMAC_TBQBAPQ2_OFFSET   0x448 /* Transmit Buffer Queue Base Address Priority Queue 2 */
@@ -169,7 +162,9 @@
 #define SAM_GMAC_TBQBAPQ4_OFFSET   0x450 /* Transmit Buffer Queue Base Address Priority Queue 4 */
 #define SAM_GMAC_TBQBAPQ5_OFFSET   0x454 /* Transmit Buffer Queue Base Address Priority Queue 5 */
 #define SAM_GMAC_TBQBAPQ6_OFFSET   0x458 /* Transmit Buffer Queue Base Address Priority Queue 6 */
+
 #define SAM_GMAC_RBQBAPQ_OFFSET(n) (0x480 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_RBQBAPQ0_OFFSET   0x480 /* Receive Buffer Queue Base Address Priority Queue 0 */
 #define SAM_GMAC_RBQBAPQ1_OFFSET   0x484 /* Receive Buffer Queue Base Address Priority Queue 1 */
 #define SAM_GMAC_RBQBAPQ2_OFFSET   0x488 /* Receive Buffer Queue Base Address Priority Queue 2 */
@@ -177,7 +172,9 @@
 #define SAM_GMAC_RBQBAPQ4_OFFSET   0x490 /* Receive Buffer Queue Base Address Priority Queue 4 */
 #define SAM_GMAC_RBQBAPQ5_OFFSET   0x494 /* Receive Buffer Queue Base Address Priority Queue 5 */
 #define SAM_GMAC_RBQBAPQ6_OFFSET   0x498 /* Receive Buffer Queue Base Address Priority Queue 6 */
+
 #define SAM_GMAC_RBSRPQ_OFFSET(n)  (0x4a0 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_RBSRPQ0_OFFSET    0x4a0 /* Receive Buffer Size Register Priority Queue 0 */
 #define SAM_GMAC_RBSRPQ1_OFFSET    0x4a4 /* Receive Buffer Size Register Priority Queue 1 */
 #define SAM_GMAC_RBSRPQ2_OFFSET    0x4a8 /* Receive Buffer Size Register Priority Queue 2 */
@@ -185,7 +182,9 @@
 #define SAM_GMAC_RBSRPQ4_OFFSET    0x4b0 /* Receive Buffer Size Register Priority Queue 4 */
 #define SAM_GMAC_RBSRPQ5_OFFSET    0x4b4 /* Receive Buffer Size Register Priority Queue 5 */
 #define SAM_GMAC_RBSRPQ6_OFFSET    0x4b8 /* Receive Buffer Size Register Priority Queue 6 */
+
 #define SAM_GMAC_ST1RPQ_OFFSET(n)  (0x500 + ((n) << 2))  /* n=0..15 */
+
 #define SAM_GMAC_ST1RPQ0_OFFSET    0x500 /* Screening Type1 Register Priority Queue 0 */
 #define SAM_GMAC_ST1RPQ1_OFFSET    0x504 /* Screening Type1 Register Priority Queue 1 */
 #define SAM_GMAC_ST1RPQ2_OFFSET    0x508 /* Screening Type1 Register Priority Queue 2 */
@@ -202,7 +201,9 @@
 #define SAM_GMAC_ST1RPQ13_OFFSET   0x534 /* Screening Type1 Register Priority Queue 13 */
 #define SAM_GMAC_ST1RPQ14_OFFSET   0x538 /* Screening Type1 Register Priority Queue 14 */
 #define SAM_GMAC_ST1RPQ15_OFFSET   0x53c /* Screening Type1 Register Priority Queue 15 */
+
 #define SAM_GMAC_ST2RPQ_OFFSET(n)  (0x540 + ((n) << 2))  /* n=0..15 */
+
 #define SAM_GMAC_ST2RPQ0_OFFSET    0x540 /* Screening Type2 Register Priority Queue 0 */
 #define SAM_GMAC_ST2RPQ1_OFFSET    0x544 /* Screening Type2 Register Priority Queue 1 */
 #define SAM_GMAC_ST2RPQ2_OFFSET    0x548 /* Screening Type2 Register Priority Queue 2 */
@@ -219,7 +220,9 @@
 #define SAM_GMAC_ST2RPQ13_OFFSET   0x574 /* Screening Type2 Register Priority Queue 13 */
 #define SAM_GMAC_ST2RPQ14_OFFSET   0x578 /* Screening Type2 Register Priority Queue 14 */
 #define SAM_GMAC_ST2RPQ15_OFFSET   0x57c /* Screening Type2 Register Priority Queue 15 */
+
 #define SAM_GMAC_IERPQ_OFFSET(n)   (0x600 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_IERPQ0_OFFSET     0x600 /* Interrupt Enable Register Priority Queue 0 */
 #define SAM_GMAC_IERPQ1_OFFSET     0x604 /* Interrupt Enable Register Priority Queue 1 */
 #define SAM_GMAC_IERPQ2_OFFSET     0x608 /* Interrupt Enable Register Priority Queue 2 */
@@ -227,7 +230,9 @@
 #define SAM_GMAC_IERPQ4_OFFSET     0x610 /* Interrupt Enable Register Priority Queue 4 */
 #define SAM_GMAC_IERPQ5_OFFSET     0x614 /* Interrupt Enable Register Priority Queue 5 */
 #define SAM_GMAC_IERPQ6_OFFSET     0x618 /* Interrupt Enable Register Priority Queue 6 */
+
 #define SAM_GMAC_IDRPQ_OFFSET(n)   (0x620 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_IDRPQ0_OFFSET     0x620 /* Interrupt Disable Register Priority Queue 0 */
 #define SAM_GMAC_IDRPQ1_OFFSET     0x624 /* Interrupt Disable Register Priority Queue 1 */
 #define SAM_GMAC_IDRPQ2_OFFSET     0x628 /* Interrupt Disable Register Priority Queue 2 */
@@ -235,7 +240,9 @@
 #define SAM_GMAC_IDRPQ4_OFFSET     0x630 /* Interrupt Disable Register Priority Queue 4 */
 #define SAM_GMAC_IDRPQ5_OFFSET     0x630 /* Interrupt Disable Register Priority Queue 5 */
 #define SAM_GMAC_IDRPQ6_OFFSET     0x638 /* Interrupt Disable Register Priority Queue 6 */
+
 #define SAM_GMAC_IMRPQ_OFFSET(n)   (0x640 + ((n) << 2))  /* n=0..6 */
+
 #define SAM_GMAC_IMRPQ0_OFFSET     0x640 /* Interrupt Mask Register Priority Queue 0 */
 #define SAM_GMAC_IMRPQ1_OFFSET     0x644 /* Interrupt Mask Register Priority Queue 1 */
 #define SAM_GMAC_IMRPQ2_OFFSET     0x648 /* Interrupt Mask Register Priority Queue 2 */
@@ -485,10 +492,12 @@
 #  define GMAC_NCFGR_CLK_DIV48    (3 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 48 (MCK up to 120 MHz) */
 #  define GMAC_NCFGR_CLK_DIV64    (4 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 160 MHz) */
 #  define GMAC_NCFGR_CLK_DIV96    (5 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 96 (MCK up to 240 MHz) */
+
 #define GMAC_NCFGR_DBW_SHIFT      (21)      /* Bits 21-22: Data Bus Width */
 #define GMAC_NCFGR_DBW_MASK       (3 << GMAC_NCFGR_DBW_SHIFT)
 #  define GMAC_NCFGR_DBW_32       (0 << GMAC_NCFGR_DBW_SHIFT) /* 32-bit data bus width */
 #  define GMAC_NCFGR_DBW_64       (1 << GMAC_NCFGR_DBW_SHIFT) /* 64-bit data bus width */
+
 #define GMAC_NCFGR_DCPF           (1 << 23) /* Bit 23: Disable Copy of Pause Frames */
 #define GMAC_NCFGR_RXCOEN         (1 << 24) /* Bit 24: Receive Checksum Offload Enable */
 #define GMAC_NCFGR_EFRHD          (1 << 25) /* Bit 25: Enable Frames Received in Half Duplex */
@@ -514,6 +523,7 @@
 #  define GMAC_DCFGR_FBLDO_INCR4  (4 << GMAC_DCFGR_FBLDO_SHIFT)  /* 001xx: Attempt to use INCR4 AHB bursts */
 #  define GMAC_DCFGR_FBLDO_INCR8  (8 << GMAC_DCFGR_FBLDO_SHIFT)  /* 01xxx: Attempt to use INCR8 AHB bursts */
 #  define GMAC_DCFGR_FBLDO_INCR16 (16 << GMAC_DCFGR_FBLDO_SHIFT) /* 1xxxx: Attempt to use INCR16 AHB bursts */
+
 #define GMAC_DCFGR_ESMA           (1 << 6)  /* Bit 6:  Endian Swap Mode Enable for Management Descriptor Accesses */
 #define GMAC_DCFGR_ESPA           (1 << 7)  /* Bit 7:  Endian Swap Mode Enable for Packet Data Accesses */
 #define GMAC_DCFGR_RXBMS_SHIFT    (8)       /* Bits 8-9: Receiver Packet Buffer Memory Size Select */
@@ -522,6 +532,7 @@
 #  define GMAC_DCFGR_RXBMS_QTR    (1 << GMAC_DCFGR_RXBMS_SHIFT) /* 1Kbyte Memory Size */
 #  define GMAC_DCFGR_RXBMS_HALF   (2 << GMAC_DCFGR_RXBMS_SHIFT) /* 2 Kbytes Memory Size */
 #  define GMAC_DCFGR_RXBMS_FULL   (3 << GMAC_DCFGR_RXBMS_SHIFT) /* 4 Kbytes Memory Size */
+
 #define GMAC_DCFGR_TXPBMS         (1 << 10) /* Bit 10: Transmitter Packet Buffer Memory Size Select */
 #define GMAC_DCFGR_TXCOEN         (1 << 11) /* Bit 11: Transmitter Checksum Generation Offload Enable */
 #define GMAC_DCFGR_DRBS_SHIFT     (16)      /* Bits 16-23: DMA Receive Buffer Size */
@@ -556,7 +567,9 @@
 #define GMAC_RSR_RXOVR            (1 << 2)  /* Bit 2:  Receive Overrun */
 #define GMAC_RSR_HNO              (1 << 3)  /* Bit 3:  HRESP Not OK */
 
-/* Interrupt Status Register, Interrupt Enable Register, Interrupt Disable Register */
+/* Interrupt Status Register, Interrupt Enable Register,
+ * Interrupt Disable Register
+ */
 
 #define GMAC_INT_MFS              (1 << 0)  /* Bit 0:  Management Frame Sent */
 #define GMAC_INT_RCOMP            (1 << 1)  /* Bit 1:  Receive Complete */
@@ -630,24 +643,29 @@
 #define GMAC_RPSF_ENRXP           (1 << 31) /* Bit 31: Enable RX Partial Store and Forward Operation */
 
 /* Hash Register Bottom [31:0] (32-bit value) */
+
 /* Hash Register Top [63:32] (32-bit value) */
 
 /* Specific Address 1 Bottom [31:0] Register (32-bit value) */
+
 /* Specific Address 1 Top [47:32] Register */
 
 #define GMAC_SAT1_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 1 [47:32]  */
 
 /* Specific Address 2 Bottom [31:0] Register (32-bit value) */
+
 /* Specific Address 2 Top [47:32] Register */
 
 #define GMAC_SAT2_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 2 [47:32]  */
 
 /* Specific Address 3 Bottom [31:0] Register (32-bit value) */
+
 /* Specific Address 3 Top [47:32] Register */
 
 #define GMAC_SAT3_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 3 [47:32]  */
 
 /* Specific Address 4 Bottom [31:0] Register (32-bit value) */
+
 /* Specific Address 4 Top [47:32] Register */
 
 #define GMAC_SAT4_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 4 [47:32]  */
@@ -696,17 +714,21 @@
 #define GMAC_TPFCP_PQ_MASK        (0xff << GMAC_TPFCP_PQ_SHIFT)
 
 /* Specific Address 1 Mask Bottom [31:0] Register (32-bit mask) */
+
 /* Specific Address 1 Mask Top [47:32] Register */
 
 #define GMAC_SAMT1_MASK           (0x0000ffff) /* Bits 0-15: Specific Address 1 Mask [47:32] */
 
 /* Octets Transmitted [31:0] Register (32-bit value) */
+
 /* Octets Transmitted [47:32] Register */
 
 #define GMAC_OTHI_MASK            (0x0000ffff) /* Bits 0-15: Transmitted Octets [47:32] */
 
 /* Frames Transmitted Register (32-bit value) */
+
 /* Broadcast Frames Transmitted Register (32-bit value) */
+
 /* Multicast Frames Transmitted Register (32-bit value) */
 
 /* Pause Frames Transmitted Register */
@@ -714,11 +736,17 @@
 #define GMAC_PFT_MASK             (0x0000ffff) /* Bits 0-15: Pause Frames Transmitted */
 
 /* 64 Byte Frames Transmitted Register (32-bit value) */
+
 /* 65 to 127 Byte Frames Transmitted Register (32-bit value) */
+
 /* 128 to 255 Byte Frames Transmitted Register (32-bit value) */
+
 /* 256 to 511 Byte Frames Transmitted Register (32-bit value) */
+
 /* 512 to 1023 Byte Frames Transmitted Register (32-bit value) */
+
 /* 1024 to 1518 Byte Frames Transmitted Register (32-bit value) */
+
 /* Greater Than 1518 Byte Frames Transmitted Register (32-bit value) */
 
 /* Transmit Under Runs Register */
@@ -750,23 +778,33 @@
 #define GMAC_CSE_MASK             (0x000003ff) /* Bits 0-9: Carrier Sense Error */
 
 /* Octets Received [31:0] Received (32-bit value) */
+
 /* Octets Received [47:32] Received */
 
 #define GMAC_ORHI_MASK            (0x0000ffff) /* Bits 0-15: Received Octets [47:32] */
 
 /* Frames Received Register (32-bit value) */
+
 /* Broadcast Frames Received Register (32-bit value) */
+
 /* Multicast Frames Received Register (32-bit value) */
+
 /* Pause Frames Received Register */
 
 #define GMAC_PFR_MASK             (0x0000ffff) /* Bits 0-15: Pause Frames Received */
 
 /* 64 Byte Frames Received Register (32-bit value) */
+
 /* 65 to 127 Byte Frames Received Register (32-bit value) */
+
 /* 128 to 255 Byte Frames Received Register (32-bit value) */
+
 /* 256 to 511Byte Frames Received Register (32-bit value) */
+
 /* 512 to 1023 Byte Frames Received Register (32-bit value) */
+
 /* 1024 to 1518 Byte Frames Received Register (32-bit value) */
+
 /* 1519 to Maximum Byte Frames Received Register (32-bit value) */
 
 /* Undersize Frames Received Register */
@@ -818,11 +856,13 @@
 #define GMAC_UCE_MASK             (0x000000ff) /* Bits 0-7: UDP Header Checksum Errors */
 
 /* 1588 Timer Sync Strobe Seconds Register (32-bit value) */
+
 /* 1588 Timer Sync Strobe Nanoseconds Register */
 
 #define GMAC_TSSN_MASK            (0x3fffffff) /* Bits 0-29: Value Timer Nanoseconds Register Capture */
 
 /* 1588 Timer Seconds Register (32-bit value) */
+
 /* 1588 Timer Nanoseconds Register */
 
 #define GMAC_TN_MASK              (0x3fffffff) /* Bits 0-29: Timer Count in Nanoseconds */
@@ -846,21 +886,25 @@
 #  define GMAC_TI_NIT(n)          ((uint32_t)(n) << GMAC_TI_NIT_SHIFT)
 
 /* PTP Event Frame Transmitted Seconds (32-bit value) */
+
 /* PTP Event Frame Transmitted Nanoseconds */
 
 #define GMAC_EFTN_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
 
 /* PTP Event Frame Received Seconds (32-bit value) */
+
 /* PTP Event Frame Received Nanoseconds */
 
 #define GMAC_EFRN_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
 
 /* PTP Peer Event Frame Transmitted Seconds (32-bit value) */
+
 /* PTP Peer Event Frame Transmitted Nanoseconds */
 
 #define GMAC_PEFTN_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
 
 /* PTP Peer Event Frame Received Seconds (32-bit value) */
+
 /* PTP Peer Event Frame Received Nanoseconds */
 
 #define GMAC_PEFRS_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
@@ -921,8 +965,8 @@
 
 /* Receive buffer descriptor:  Address word */
 
-#define GMACRXD_ADDR_OWNER        (1 << 0)  /* Bit 0:  1=Software owns; 0=GMAC owns */
-#define GMACRXD_ADDR_WRAP         (1 << 1)  /* Bit 1:  Last descriptor in list */
+#define GMACRXD_ADDR_OWNER        (1 << 0)     /* Bit 0:  1=Software owns; 0=GMAC owns */
+#define GMACRXD_ADDR_WRAP         (1 << 1)     /* Bit 1:  Last descriptor in list */
 #define GMACRXD_ADDR_MASK         (0xfffffffc) /* Bits 2-31: Aligned buffer address */
 
 /* Receive buffer descriptor:  Control word */
@@ -939,18 +983,21 @@
 #define GMACRXD_STA_VLPRIO_MASK   (7 << GMACRXD_STA_VLANPRIO_SHIFT)
 #define GMACRXD_STA_PRIODET       (1 << 20) /* Bit 20: Priority tag detected */
 #define GMACRXD_STA_VLANTAG       (1 << 21) /* Bit 21: VLAN tag detected */
+
 #define GMACRXD_STA_TYPID_SHIFT   (22) /* Bits 22-23: Type ID register match */
 #define GMACRXD_STA_TYPID_MASK    (3 << GMACRXD_STA_TYPID_SHIFT)
 #  define GMACRXD_STA_TYPID1      (0 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 1 match */
 #  define GMACRXD_STA_TYPID2      (1 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 2 match */
 #  define GMACRXD_STA_TYPID3      (2 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 3 match */
 #  define GMACRXD_STA_TYPID4      (3 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 4 match */
+
 #define GMACRXD_STA_SNAP_SHIFT    (22) /* Bits 22-23: Specific Address Register match */
 #define GMACRXD_STA_SNAP_MASK     (3 << GMACRXD_STA_SNAP_SHIFT)
 #  define GMACRXD_STA_SNAP_NOCHK  (0 << GMACRXD_STA_SNAP_SHIFT) /* Checksum not checked */
 #  define GMACRXD_STA_SNAP_IPCHK  (1 << GMACRXD_STA_SNAP_SHIFT) /* IP header checksum checked */
 #  define GMACRXD_STA_SNAP_TCPCHK (2 << GMACRXD_STA_SNAP_SHIFT) /* IP header and TCP checksum checked */
 #  define GMACRXD_STA_SNAP_UDPCHK (3 << GMACRXD_STA_SNAP_SHIFT) /* IP header and UDP checksum checked */
+
 #define GMACRXD_STA_TYPID         (1 << 24) /* Bit 24: Type ID match found */
 #define GMACRXD_STA_SNAP          (1 << 24) /* Bit 24: Frame was SNAP encoded */
 #define GMACRXD_STA_ADDR_SHIFT    (25)      /* Bits 25-26: Specific Address Register match */
@@ -959,6 +1006,7 @@
 # define GMACRXD_STA_ADDR2_MATCH  (1 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 2 match */
 # define GMACRXD_STA_ADDR3_MATCH  (2 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 3 match */
 # define GMACRXD_STA_ADDR4_MATCH  (3 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 4 match */
+
 #define GMACRXD_STA_ADDRMATCH     (1 << 27) /* Bit 27: Specific Address Register match found */
                                             /* Bit 28: Reserved */
 #define GMACRXD_STA_UCAST         (1 << 29) /* Bit 29: Unicast hash match */
@@ -985,6 +1033,7 @@
 #  define GMACTXD_STA_CKERR_FRAG  (5 << GMACTXD_STA_CKERR_SHIFT) /* Bad packet fragmentation */
 #  define GMACTXD_STA_CKERR_PROTO (6 << GMACTXD_STA_CKERR_SHIFT) /* Not TCP or UDP */
 #  define GMACTXD_STA_CKERR_END   (7 << GMACTXD_STA_CKERR_SHIFT) /* Premature end of packet */
+
                                             /* Bits 23-25: Reserved */
 #define GMACTXD_STA_LCOL          (1 << 26) /* Bit 26: Late collision */
 #define GMACTXD_STA_TFC           (1 << 27) /* Bit 27: Transmit Frame Corruption due to AHB error */

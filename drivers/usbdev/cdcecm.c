@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/net/cdcecm.c
+ * drivers/usbdev/cdcecm.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Michael Jung <mijung@gmx.net>
@@ -765,8 +765,10 @@ static int cdcecm_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -870,7 +872,7 @@ static void cdcecm_txavail_work(FAR void *arg)
 
   if (self->bifup)
     {
-      devif_poll(&self->dev, cdcecm_txpoll);
+      devif_timer(&self->dev, 0, cdcecm_txpoll);
     }
 
   net_unlock();
@@ -1076,7 +1078,7 @@ static int cdcecm_ioctl(FAR struct net_driver_s *dev, int cmd,
       /* Add cases here to support the IOCTL commands */
 
       default:
-        nerr("ERROR: Unrecognized IOCTL command: %d\n", command);
+        nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
         return -ENOTTY;  /* Special return value for this case */
     }
 

@@ -513,7 +513,7 @@ Shields
       CONFIG_ANALOG=y                  : Should be automatically selected
       CONFIG_ADC=y                     : Should be automatically selected
       CONFIG_INPUT=y                   : Select input device support
-      CONFIG_AJOYSTICK=y               : Select analog joystick support
+      CONFIG_INPUT_AJOYSTICK=y         : Select analog joystick support
 
   There is nothing in the configuration that currently uses the joystick.
   For testing, you can add the following configuration options to enable the

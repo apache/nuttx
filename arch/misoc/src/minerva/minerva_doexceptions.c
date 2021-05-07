@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/misoc/src/minerva/minerva_doexception.c
+ * arch/misoc/src/minerva/minerva_doexceptions.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

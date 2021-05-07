@@ -309,7 +309,6 @@ SMP
     +CONFIG_SPINLOCK=y
     +CONFIG_SMP=y
     +CONFIG_SMP_NCPUS=2
-    +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
   And you can enable some additional debug output with:
 
@@ -679,6 +678,39 @@ nettest
      will either need to edit your configuration files to use 10.0.0.1 on the
      "target" (CONFIG_EXAMPLES_NETTEST_*) or edit up_wpcap.c to select the IP
      address that you want to use.
+
+nimble
+
+  This is similar to bthcisock configuration, which uses the exposes the real
+  BLE stack to NuttX, but disables NuttX's own BLE stack and uses nimBLE stack
+  instead (built in userspace).
+
+  This configuration can be tested by running nimBLE example application "nimble"
+  as follows:
+
+    $ sudo setcap 'cap_net_raw,cap_net_admin=eip' nuttx
+    $ ./nuttx
+    NuttShell (NSH) NuttX-9.1.0
+    nsh> ifup bnep0
+    ifup bnep0...OK
+    nsh> nimble
+    hci init
+    port init
+    gap init
+    gatt init
+    ans init
+    ias init
+    lls init
+    tps init
+    hci_sock task init
+    ble_host task init
+    hci sock task
+    host task
+    advertise
+
+  At this point you should be able to detect a "nimble" BLE device when scanning
+  for BLE devices. You can use nRFConnect Android application from Nordic to connect
+  and inspect exposed GATT services.
 
 nsh
 

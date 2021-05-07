@@ -40,12 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <syslog.h>
 
 #include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #include <arch/board/board.h>
 
@@ -78,7 +78,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
@@ -102,8 +102,8 @@ int stm32_bringup(void)
 #endif /* CONFIG_USERLED_LOWER */
 #endif /* CONFIG_USERLED && !CONFIG_ARCH_LEDS */
 
-#ifdef CONFIG_BUTTONS
-#ifdef CONFIG_BUTTONS_LOWER
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");
@@ -116,8 +116,8 @@ int stm32_bringup(void)
   /* Enable BUTTON support for some other purpose */
 
   board_button_initialize();
-#endif /* CONFIG_BUTTONS_LOWER */
-#endif /* CONFIG_BUTTONS */
+#endif /* CONFIG_INPUT_BUTTONS_LOWER */
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef CONFIG_STM32_IWDG
   /* Initialize the watchdog timer */

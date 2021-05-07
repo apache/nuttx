@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/drivers/analog/ads1255.c
+ * drivers/analog/ads1255.c
  *
  *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.

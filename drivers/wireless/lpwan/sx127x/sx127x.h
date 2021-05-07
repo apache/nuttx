@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/lpwan/sx127x.h
+ * drivers/wireless/lpwan/sx127x/sx127x.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -478,7 +478,7 @@
 #  define SX127X_FOM_OSC_CLKOUT_FXOSCd32  (5 << SX127X_FOM_OSC_CLKOUT_SHIFT)
 #  define SX127X_FOM_OSC_CLKOUT_RC        (6 << SX127X_FOM_OSC_CLKOUT_SHIFT)
 #  define SX127X_FOM_OSC_CLKOUT_OFF       (7 << SX127X_FOM_OSC_CLKOUT_SHIFT)
-#define SX127X_FOM_OSC_CLKOUT_RCCALSTART  (3 << 1) /* Bit 3: Trigger the RC oscilator calibration */
+#define SX127X_FOM_OSC_CLKOUT_RCCALSTART  (3 << 1) /* Bit 3: Trigger the RC oscillator calibration */
 
 /* FSK/OOK: Preamble length MSB */
 

@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_pdb.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PDB_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PDB_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_PDB_SC_OFFSET        0x0000 /* Status and Control Register */
 #define KINETIS_PDB_MOD_OFFSET       0x0004 /* Modulus Register */
@@ -56,6 +41,7 @@
 #define KINETIS_PDB_IDLY_OFFSET      0x000c /* Interrupt Delay Register */
 
 #define KINETIS_PDB_CH_OFFSET(n)     (0x0010+(0x28*(n)) /* Channel n */
+
 #define KINETIS_PDB_CHC1_OFFSET      0x0000 /* Channel n Control Register 1 */
 #define KINETIS_PDB_CHS_OFFSET       0x0004 /* Channel n Status Register */
 #define KINETIS_PDB_CHDLY0_OFFSET    0x0008 /* Channel n Delay 0 Register */
@@ -72,6 +58,7 @@
 #define KINETIS_PDB_CH1DLY1_OFFSET   0x0044 /* Channel 1 Delay 1 Register */
 
 #define KINETIS_PDB_INT_OFFSET(n)    (0x0150+((n)<<3) /* DAC Interval n offset */
+
 #define KINETIS_PDB_DACINTC_OFFSET   0x0000 /* DAC Interval Trigger n Control Register */
 #define KINETIS_PDB_DACINT_OFFSET    0x0004 /* DAC Interval n Register */
 
@@ -88,7 +75,7 @@
 #  define KINETIS_PDB_PO2DLY_OFFSET  0x019c /* Pulse-Out 2 Delay Register */
 #endif
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_PDB0_SC              (KINETIS_PDB0_BASE+KINETIS_PDB_SC_OFFSET)
 #define KINETIS_PDB0_MOD             (KINETIS_PDB0_BASE+KINETIS_PDB_MOD_OFFSET)
@@ -128,7 +115,7 @@
 #  define KINETIS_PDB0_PO2DLY        (KINETIS_PDB0_BASE+KINETIS_PDB_PO2DLY_OFFSET)
 #endif
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Status and Control Register */
 
@@ -162,6 +149,7 @@
 #  define PDB_SC_TRGSEL_TRGIN13      (13 << PDB_SC_TRGSEL_SHIFT) /* Trigger-In 3 */
 #  define PDB_SC_TRGSEL_TRGIN14      (14 << PDB_SC_TRGSEL_SHIFT) /* Trigger-In 4 */
 #  define PDB_SC_TRGSEL_TRGSW        (15 << PDB_SC_TRGSEL_SHIFT) /* Software trigger */
+
 #define PDB_SC_PRESCALER_SHIFT       (12)       /* Bits 12-14: Prescaler Divider Select */
 #define PDB_SC_PRESCALER_MASK        (7 << PDB_SC_PRESCALER_SHIFT)
 #  define PDB_SC_PRESCALER_DIVM      (0 << PDB_SC_PRESCALER_SHIFT) /* Peripheral clock / MULT */
@@ -172,6 +160,7 @@
 #  define PDB_SC_PRESCALER_DIV32M    (5 << PDB_SC_PRESCALER_SHIFT) /* Peripheral clock / 32*MULT */
 #  define PDB_SC_PRESCALER_DIV64M    (6 << PDB_SC_PRESCALER_SHIFT) /* Peripheral clock / 64*MULT */
 #  define PDB_SC_PRESCALER_DIV128M   (7 << PDB_SC_PRESCALER_SHIFT) /* Peripheral clock / 128*MULT */
+
 #define PDB_SC_DMAEN                 (1 << 15)  /* Bit 15: DMA Enable */
 #define PDB_SC_SWTRIG                (1 << 16)  /* Bit 16: Software Trigger */
 #define PDB_SC_PDBEIE                (1 << 17)  /* Bit 17: PDB Sequence Error Interrupt Enable */
@@ -181,7 +170,9 @@
 #  define PDB_SC_LDMOD_PDBCNT        (1 << PDB_SC_LDMOD_SHIFT) /* Load when the PDB counter = MOD */
 #  define PDB_SC_LDMOD_TRIGGER       (2 << PDB_SC_LDMOD_SHIFT) /* Load when trigger input event */
 #  define PDB_SC_LDMOD_EITHER        (3 << PDB_SC_LDMOD_SHIFT) /* Load when either occurs */
+
                                                 /* Bits 20-31: Reserved */
+
 /* Modulus Register */
 
                                                 /* Bits 16-31: Reserved */
@@ -209,6 +200,7 @@
 #define PDB_CHC1_BB_MASK              (0xff << PDB_CHC1_BB_SHIFT)
 #  define PDB_CHC1_BB_CHAN(n)         ((1 << (n)) << PDB_CHC1_BB_SHIFT)
                                                 /* Bits 24-31: Reserved */
+
 /* Channel n Status Register */
 
 #define PDB_CHS_ERR_SHIFT             (0)       /* Bits 0-7: PDB Channel Sequence Error Flags */
@@ -219,11 +211,14 @@
 #define PDB_CHS_CF_MASK               (0xff << PDB_CHS_CF_SHIFT)
 #  define PDB_CHS_CF_CHAN(n)          ((1 << (n)) << PDB_CHS_CF_SHIFT)
                                                 /* Bits 24-31: Reserved */
+
 /* Channel n Delay 0 Register */
+
                                                 /* Bits 16-31: Reserved */
 #define PDB_CHDLY0_MASK               (0xffff)  /* Bits 0-15: PDB Channel Delay */
 
 /* Channel n Delay 1 Register */
+
                                                 /* Bits 16-31: Reserved */
 #define PDB_CHDLY1_MASK               (0xffff)  /* Bits 0-15: PDB Channel Delay */
 
@@ -232,7 +227,9 @@
 #define PDB_DACINTC_TOE               (1 << 0)  /* Bit 0:  DAC Interval Trigger Enable */
 #define PDB_DACINTC_EXT               (1 << 1)  /* Bit 1:  DAC External Trigger Input Enable */
                                                 /* Bits 2-31: Reserved */
+
 /* DAC Interval n Register */
+
                                                 /* Bits 16-31: Reserved */
 #define PDB_DACINT_MASK               (0xffff)  /* Bits 0-15: DAC Interval */
 
@@ -248,16 +245,16 @@
 #define PDB_PO0DLY_DLY2_SHIFT         (0)       /* Bits 0-15: PDB Pulse-Out Delay 2 */
 #define PDB_PO0DLY_DLY2_MASK          (0xffff << PDB_PO0DLY_DLY2_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PDB_H */

@@ -1,10 +1,8 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/xmc4/hardware/xmc4_flash.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,36 +35,39 @@
  *
  *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
- * Infineon Technologies AG (Infineon) is supplying this software for use with
- * Infineon's microcontrollers.  This file can be freely distributed within
- * development tools that are supporting such microcontrollers.
+ * Infineon Technologies AG (Infineon) is supplying this software for use
+ * with Infineon's microcontrollers.  This file can be freely distributed
+ * within development tools that are supporting such microcontrollers.
  *
  * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ * SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL,
+ * INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* Reference: XMC4500 Reference Manual V1.5 2014-07 Microcontrollers. */
 
 #ifndef __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_FLASH_H
 #define __ARCH_ARM_SRC_XMC4_HARDWARE_XMC4_FLASH_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/xmc4_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* PMU Registers -- See ID register */
+
 /* Prefetch Registers -- See PCON register */
 
 /* FLASH Registers */
@@ -79,7 +80,7 @@
 #define XMC4_FLASH_PROCON1_OFFSET  0x1024    /* Flash Protection Configuration User 1 */
 #define XMC4_FLASH_PROCON2_OFFSET  0x1028    /* Flash Protection Configuration User 2 */
 
-/* Register Addresses ****************************************************************/
+/* Register Addresses *******************************************************/
 
 /* FLASH Registers */
 
@@ -91,7 +92,7 @@
 #define XMC4_FLASH_PROCON1          (XMC4_FLASH0_BASE+XMC4_FLASH_PROCON1_OFFSET)
 #define XMC4_FLASH_PROCON2          (XMC4_FLASH0_BASE+XMC4_FLASH_PROCON2_OFFSET)
 
-/* Register Bit-Field Definitions **************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* FLASH Registers */
 

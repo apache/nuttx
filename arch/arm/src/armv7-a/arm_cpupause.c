@@ -55,8 +55,8 @@
  * so that it will be ready for the next pause operation.
  */
 
-static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS] SP_SECTION;
-static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -197,9 +197,22 @@ int arm_pause_handler(int irq, FAR void *context, FAR void *arg)
    * been processed then g_cpu_paused[cpu] will not be locked.
    */
 
-  if (spin_islocked(&g_cpu_paused[cpu]))
+  if (up_cpu_pausereq(cpu))
     {
-      return up_cpu_paused(cpu);
+      /* NOTE: The following enter_critical_section() will call
+       * up_cpu_paused() to process a pause request to break a deadlock
+       * because the caller held a critical section. Once up_cpu_paused()
+       * finished, the caller will proceed and release the g_cpu_irqlock.
+       * Then this CPU will acquire g_cpu_irqlock in the function.
+       */
+
+      irqstate_t flags = enter_critical_section();
+
+      /* NOTE: the pause request should not exist here */
+
+      DEBUGVERIFY(!up_cpu_pausereq(cpu));
+
+      leave_critical_section(flags);
     }
 
   return OK;

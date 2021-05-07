@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/sensors.h
+ * include/nuttx/sensors/sensor.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -167,7 +167,7 @@
 
 /* CO2
  * A sensor of this type returns the content of CO2 in the air
- * This vaule is in units (ppm-part per million).
+ * This value is in units (ppm-part per million).
  */
 
 #define SENSOR_TYPE_CO2                             18
@@ -345,7 +345,7 @@ struct sensor_event_gps     /* Type: Gps */
 struct sensor_event_uv      /* Type: Ultraviolet Light */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float uvi;                /* the vaule range is 0 - 15 */
+  float uvi;                /* the value range is 0 - 15 */
 };
 
 struct sensor_event_noise   /* Type: Noise Loudness */
@@ -443,8 +443,11 @@ struct sensor_ops_s
    *
    * Description:
    *   Set the sensor output data period in microseconds for a given sensor.
-   *   If *period_us > max_delay it will be truncated to max_dealy and if
+   *   If *period_us > max_delay it will be truncated to max_delay and if
    *   *period_us < min_delay it will be replaced by min_delay.
+   *
+   *   The lower-half can update update *period_us to reflect the actual
+   *   period in case the value is rounded up to nearest supported value.
    *
    *   Before changing the interval, you need to push the prepared data to
    *   ensure that they are not lost.
@@ -605,7 +608,7 @@ struct sensor_lowerhalf_s
        * Name: push_event
        *
        * Description:
-       *   Lower half driver push sensor event by calling this function.
+       *   Lower half driver pushes a sensor event by calling this function.
        *   It is provided by upper half driver to lower half driver.
        *
        * Input Parameters:
@@ -621,8 +624,9 @@ struct sensor_lowerhalf_s
        * Name: notify_event
        *
        * Description:
-       *   Lower half driver notify sensor data ready and can read by fetch.
-       *   It is provided by upper half driver to lower half driver.
+       *   Lower half driver notifies that sensor data is ready and can be
+       *   read by fetch. It is provided by upper half driver to lower half
+       *   driver.
        *
        *   This api is used when sensor_ops_s::fetch isn't NULL.
        *

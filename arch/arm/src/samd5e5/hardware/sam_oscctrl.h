@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_oscctrl.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_OSCCTRL_H
 #define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_OSCCTRL_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* OSCCTRL register offsets *****************************************************************/
+/* OSCCTRL register offsets *************************************************/
 
 #define SAM_OSCCTRL_EVCTRL_OFFSET         0x0000  /* Event Control */
 #define SAM_OSCCTRL_INTENCLR_OFFSET       0x0004  /* Interrupt enable clear */
@@ -84,7 +69,7 @@
 #define SAM_OSCCTRL_DPLL1SYNCBUSY_OFFSET  0x0050  /* DPLL1 synchronization busy */
 #define SAM_OSCCTRL_DPLL1STATUS_OFFSET    0x0054  /* DPLL1 status */
 
-/* OSCCTRL register addresses ***************************************************************/
+/* OSCCTRL register addresses ***********************************************/
 
 #define SAM_OSCCTRL_EVCTRL                (SAM_OSCCTRL_BASE + SAM_OSCCTRL_EVCTRL_OFFSET)
 #define SAM_OSCCTRL_INTENCLR              (SAM_OSCCTRL_BASE + SAM_OSCCTRL_INTENCLR_OFFSET)
@@ -116,15 +101,15 @@
 #define SAM_OSCCTRL_DPLL1SYNCBUSY         (SAM_OSCCTRL_BASE + SAM_OSCCTRL_DPLL1SYNCBUSY_OFFSET)
 #define SAM_OSCCTRL_DPLL1STATUS           (SAM_OSCCTRL_BASE + SAM_OSCCTRL_DPLL1STATUS_OFFSET)
 
-/* OSCCTRL register bit definitions *********************************************************/
+/* OSCCTRL register bit definitions *****************************************/
 
 /* Event Control */
 
 #define OSCCTRL_EVCTRL_CFDEO0             (1 << 0)  /* Bit 0:  Clock 0 failure detector event output enable */
 #define OSCCTRL_EVCTRL_CFDEO1             (1 << 1)  /* Bit 1:  Clock 1 failure detector event output enable */
 
-/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and clear, and
- * Status registers.
+/* Interrupt enable clear, Interrupt enable set, Interrupt flag status and
+ * clear, and Status registers.
  */
 
 #define OSCCTRL_INT_XOSCRDY0              (1 << 0)  /* Bit 0:  XOSC 0 ready interrupt */
@@ -184,6 +169,7 @@
 #  define OSCCTRL_XOSCCTRL_STARTUP_250MS  (13 << OSCCTRL_XOSCCTRL_STARTUP_SHIFT) /* 250000µs */
 #  define OSCCTRL_XOSCCTRL_STARTUP_500MS  (14 << OSCCTRL_XOSCCTRL_STARTUP_SHIFT) /* 500000µs */
 #  define OSCCTRL_XOSCCTRL_STARTUP_1S     (15 << OSCCTRL_XOSCCTRL_STARTUP_SHIFT) /* 1000000µs */
+
 #define OSCCTRL_XOSCCTRL_CFDPRESC_SHIFT   (24)      /* Bits 24-27: Clock Failure Detector Prescaler */
 #define OSCCTRL_XOSCCTRL_CFDPRESC_MASK    (15 << OSCCTRL_XOSCCTRL_CFDPRESC_SHIFT)
 #  define OSCCTRL_XOSCCTRL_CFDPRESC(n)    ((uint32_t)(n) << OSCCTRL_XOSCCTRL_CFDPRESC_SHIFT)
@@ -234,7 +220,7 @@
 #define OSCCTRL_DFLLSYNC_ENABLE           (1 << 1)  /* Bit 1: ENABLE Synchronization Busy */
 #define OSCCTRL_DFLLSYNC_DFLLCTRLB        (1 << 2)  /* Bit 2: DFLLCTRLB Synchronization Busy */
 #define OSCCTRL_DFLLSYNC_DFLLVAL          (1 << 3)  /* Bit 3: DFLLVAL Synchronization Busy */
-#define OSCCTRL_DFLLSYNC_DFLLMUL         (1 << 4)  /* Bit 4: DFLLMUL Synchronization Busy */
+#define OSCCTRL_DFLLSYNC_DFLLMUL          (1 << 4)  /* Bit 4: DFLLMUL Synchronization Busy */
 
 /* DPLL0/1 control A */
 
@@ -256,7 +242,7 @@
 #define OSCCTRL_DPLLCTRLB_FILTER_SHIFT    (0)       /* Bits 0-3: Proportional integer filter selection */
 #define OSCCTRL_DPLLCTRLB_FILTER_MASK     (15 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT)
 #  define OSCCTRL_DPLLCTRLB_FILTER(n)     ((uint32_t)(n) << OSCCTRL_DPLLCTRLB_FILTER_SHIFT)
-                                                                                /* PLL BW    Damping */
+                                                                                 /* PLL BW    Damping */
 #  define OSCCTRL_DPLLCTRLB_FILTER0       (0  << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* 92.7 kHz  0.76 */
 #  define OSCCTRL_DPLLCTRLB_FILTER1       (1  << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* 131 kHz   1.08 */
 #  define OSCCTRL_DPLLCTRLB_FILTER2       (2  << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* 46.4 kHz  0.38 */
@@ -273,6 +259,7 @@
 #  define OSCCTRL_DPLLCTRLB_FILTER13      (13 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* 92.7 kHz  1.51 */
 #  define OSCCTRL_DPLLCTRLB_FILTER14      (14 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* 32.8 kHz  0.53 */
 #  define OSCCTRL_DPLLCTRLB_FILTER15      (15 << OSCCTRL_DPLLCTRLB_FILTER_SHIFT) /* 46.4 kHz  0.75 */
+
 #define OSCCTRL_DPLLCTRLB_WUF             (1 << 4)  /* Bit 4: Wake up fast */
 #define OSCCTRL_DPLLCTRLB_REFLCK_SHIFT    (5)       /* Bits 5-7: Reference clock selection */
 #define OSCCTRL_DPLLCTRLB_REFLCK_MASK     (3 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT)
@@ -281,6 +268,7 @@
 #  define OSCCTRL_DPLLCTRLB_REFLCK_XOSC32 (1 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT) /* XOSC32K clock reference (default) */
 #  define OSCCTRL_DPLLCTRLB_REFLCK_XOSC0  (2 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT) /* XOSC0 clock reference */
 #  define OSCCTRL_DPLLCTRLB_REFLCK_XOSC1  (3 << OSCCTRL_DPLLCTRLB_REFLCK_SHIFT) /* XOSC2 clock reference */
+
 #define OSCCTRL_DPLLCTRLB_LTIME_SHIFT     (8)       /* Bits 8-10: Lock time */
 #define OSCCTRL_DPLLCTRLB_LTIME_MASK      (7 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT)
 #  define OSCCTRL_DPLLCTRLB_LTIME(n)      ((uint32_t)(n) << OSCCTRL_DPLLCTRLB_LTIME_SHIFT)
@@ -289,11 +277,12 @@
 #  define OSCCTRL_DPLLCTRLB_LTIME_900US   (5 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 900 us */
 #  define OSCCTRL_DPLLCTRLB_LTIME_1MS     (6 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 1MS */
 #  define OSCCTRL_DPLLCTRLB_LTIME_1p1MS   (7 << OSCCTRL_DPLLCTRLB_LTIME_SHIFT) /* Time-out if no locka within 1.1MS */
+
 #define OSCCTRL_DPLLCTRLB_LBYPASS         (1 << 11) /* Bit 11: Lock bypass */
-#define OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT (12)    /* Bits 12-14: Sigma-Delta DCO Filter Selection */
+#define OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT (12)      /* Bits 12-14: Sigma-Delta DCO Filter Selection */
 #define OSCCTRL_DPLLCTRLB_DCOFILTER_MASK  (7 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT)
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER(n)  ((uint32_t)(n) << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT)
-                                                                                  /* Capa pF    BW MHz */
+                                                                                   /* Capa pF    BW MHz */
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER0    (0 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT) /* 0.5        3.21 */
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER1    (1 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT) /* 1          1.6 */
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER2    (2 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT) /* 1.5        1.1 */
@@ -302,6 +291,7 @@
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER5    (5 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT) /* 3          0.55 */
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER6    (6 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT) /* 3.5        0.45 */
 #  define OSCCTRL_DPLLCTRLB_DCOFILTER7    (7 << OSCCTRL_DPLLCTRLB_DCOFILTER_SHIFT) /* 4          0.4 */
+
 #define OSCCTRL_DPLLCTRLB_DCOEN           (1 << 15) /* Bit 15: DCO Filter Enable */
 #define OSCCTRL_DPLLCTRLB_DIV_SHIFT       (16)      /* Bits 16-26: Clock divider */
 #define OSCCTRL_DPLLCTRLB_DIV_MASK        (0x7ff << OSCCTRL_DPLLCTRLB_DIV_SHIFT)
@@ -317,16 +307,16 @@
 #define OSCCTRL_DPLLSTATUS_LOCK           (1 << 0)  /* Bit 0:  DPLL lock status */
 #define OSCCTRL_DPLLSTATUS_CLKRDY         (1 << 1)  /* Bit 1:  Output clock ready */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_OSCCTRL_H */

@@ -1,56 +1,41 @@
-/************************************************************************************************************
- * arch/arm/src/imxrt/hardware/rt105x/imxrt_ccm.h
+/****************************************************************************
+ * arch/arm/src/imxrt/hardware/rt105x/imxrt105x_ccm.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors:  Janne Rosberg <janne@offcode.fi>
- *             David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_CCM_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_CCM_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_CCM_CCR_OFFSET                     0x0000  /* CCM Control Register */
+
                                               /* 0x0004  Reserved */
 #define IMXRT_CCM_CSR_OFFSET                     0x0008  /* CCM Status Register */
 #define IMXRT_CCM_CCSR_OFFSET                    0x000c  /* CCM Clock Switcher Register */
@@ -63,13 +48,18 @@
 #define IMXRT_CCM_CS1CDR_OFFSET                  0x0028  /* CCM Clock Divider Register */
 #define IMXRT_CCM_CS2CDR_OFFSET                  0x002c  /* CCM Clock Divider Register */
 #define IMXRT_CCM_CDCDR_OFFSET                   0x0030  /* CCM D1 Clock Divider Register */
+
                                               /* 0x0034  Reserved */
 #define IMXRT_CCM_CSCDR2_OFFSET                  0x0038  /* CCM Serial Clock Divider Register 2 */
 #define IMXRT_CCM_CSCDR3_OFFSET                  0x003c  /* CCM Serial Clock Divider Register 3 */
+
                                               /* 0x0040  Reserved */
+
                                               /* 0x0044  Reserved */
 #define IMXRT_CCM_CDHIPR_OFFSET                  0x0048  /* CCM Divider Handshake In-Process Register */
+
                                               /* 0x004c  Reserved */
+
                                               /* 0x0050  Reserved */
 #define IMXRT_CCM_CLPCR_OFFSET                   0x0054  /* CCM Low Power Control Register */
 
@@ -84,6 +74,7 @@
 #define IMXRT_CCM_CCGR4_OFFSET                   0x0078  /* CCM Clock Gating Register 4 */
 #define IMXRT_CCM_CCGR5_OFFSET                   0x007c  /* CCM Clock Gating Register 5 */
 #define IMXRT_CCM_CCGR6_OFFSET                   0x0080  /* CCM Clock Gating Register 6 */
+
                                               /* 0x0084  Reserved */
 #define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Override Register */
 
@@ -109,7 +100,7 @@
 #define IMXRT_CCM_ANALOG_MISC1_OFFSET            0x0160  /* Miscellaneous Register 1 */
 #define IMXRT_CCM_ANALOG_MISC2_OFFSET            0x0170  /* Miscellaneous Register 2 */
 
-/* Register addresses ***************************************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_CCM_CCR                            (IMXRT_CCM_BASE + IMXRT_CCM_CCR_OFFSET)
 #define IMXRT_CCM_CSR                            (IMXRT_CCM_BASE + IMXRT_CCM_CSR_OFFSET)
@@ -160,12 +151,12 @@
 #define IMXRT_CCM_ANALOG_MISC1                   (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_MISC1_OFFSET)
 #define IMXRT_CCM_ANALOG_MISC2                   (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_MISC2_OFFSET)
 
-/* Helper Macros ********************************************************************************************/
+/* Helper Macros ************************************************************/
 
 #define CCM_PODF_FROM_DIVISOR(n)                   ((n)-1)  /* PODF Values are divisor-1 */
 #define CCM_PRED_FROM_DIVISOR(n)                   ((n)-1)  /* PRED Values are divisor-1 */
 
-/* Register bit definitions *********************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Control Register */
 
@@ -180,6 +171,7 @@
 #  define CCM_CCR_REG_BYPASS_COUNT(n)            ((uint32_t)(n) << CCM_CCR_REG_BYPASS_COUNT_SHIFT)
 #define CCM_CCR_RBC_EN                           (1 << 27) /* Bit  27:    Enable for REG_BYPASS_COUNTER */
                                                            /* Bits 28-31: Reserved */
+
 /*  Status Register  */
 
 #define CCM_CSR_REF_EN_B                         (1 << 0)  /* Bit 0:      Status of the value of CCM_REF_EN_B */
@@ -188,6 +180,7 @@
                                                            /* Bit 4:      Reserved */
 #define CCM_CSR_COSC_READY                       (5 << 0)  /* Bit 5:      Status indication of on board oscillator */
                                                            /* Bits 6-31:  Reserved */
+
 /* Clock Switcher Register */
 
 #define CCM_CCSR_PLL3_SW_CLK_SEL                 (1 << 0)  /* Bit 0: Selects source to generate pll3_sw_clk */
@@ -200,7 +193,9 @@
 
 /* Bus Clock Divider Register */
 
-                                                           /* Bits 0-5:   Reserved */
+/*                                                            Bits 0-5:
+ *                                                                   Reserved
+ */
 #define CCM_CBCDR_SEMC_CLK_SEL                   (1 << 6)  /* Bit 6:      SEMC clock source select */
 #define CCM_CBCDR_SEMC_ALT_CLK_SEL               (1 << 7)  /* Bit 7:      SEMC alternative clock select */
 #define CCM_CBCDR_SEMC_ALT_CLK_SEL_PLL2          (0 << 7)  /* Bit 7:      PLL2 PFD2 will be selected */
@@ -222,15 +217,19 @@
 #  define CCM_CBCDR_PERIPH_CLK_SEL_PRE_PERIPH    (0)
 #  define CCM_CBCDR_PERIPH_CLK_SEL_PERIPH_CLK2   (1)
 
-                                                           /* Bit 26:     Reserved */
+/*                                                            Bits 26:
+ *                                                                   Reserved
+ */
 #define CCM_CBCDR_PERIPH_CLK2_PODF_SHIFT         (27)      /* Bits 27-29: Divider for periph_clk2_podf */
 #define CCM_CBCDR_PERIPH_CLK2_PODF_MASK          (0x7 << CCM_CBCDR_PERIPH_CLK2_PODF_SHIFT)
 #  define CCM_CBCDR_PERIPH_CLK2_PODF(n)          ((uint32_t)(n) << CCM_CBCDR_PERIPH_CLK2_PODF_SHIFT)
-                                                          /* Bits 30-31: Reserved */
+                                                           /* Bits 30-31: Reserved */
 
 /* Bus Clock Multiplexer Register */
 
-                                                           /* Bits 0-3:   Reserved */
+/*                                                            Bits 0-3:
+ *                                                                   Reserved
+ */
 #define CCM_CBCMR_LPSPI_CLK_SEL_SHIFT            (4)       /* Bits 4-5:   Selector for lpspi clock multiplexer */
 #define CCM_CBCMR_LPSPI_CLK_SEL_MASK             (0x3 << CCM_CBCMR_LPSPI_CLK_SEL_SHIFT)
 #  define CCM_CBCMR_LPSPI_CLK_SEL(n)             ((uint32_t)(n) << CCM_CBCMR_LPSPI_CLK_SEL_SHIFT)
@@ -424,7 +423,9 @@
 
 /* Serial Clock Divider Register 2 */
 
-                                                           /* Bits 0-8:   Reserved */
+/*                                                            Bits 0-8:
+ *                                                                   Reserved
+ */
 #define CCM_CSCDR2_LCDIF_CLK_SEL_SHIFT           (9)       /* Bits 9-11:  Selector for LCDIF root clock multiplexer */
 #define CCM_CSCDR2_LCDIF_CLK_SEL_MASK            (0x7 << CCM_CSCDR2_LCDIF_CLK_SEL_SHIFT)
 #  define CCM_CSCDR2_LCDIF_CLK_SEL(n)            ((uint32_t)(n) << CCM_CSCDR2_LCDIF_CLK_SEL_SHIFT)
@@ -445,6 +446,7 @@
 #  define CCM_CSCDR2_LCDIF_PRE_CLK_SEL_PLL2_PFD0 ((uint32_t)(3) << CCM_CSCDR2_LCDIF_PRE_CLK_SEL_SHIFT)
 #  define CCM_CSCDR2_LCDIF_PRE_CLK_SEL_PLL2_PFD1 ((uint32_t)(4) << CCM_CSCDR2_LCDIF_PRE_CLK_SEL_SHIFT)
 #  define CCM_CSCDR2_LCDIF_PRE_CLK_SEL_PLL3_PFD1 ((uint32_t)(5) << CCM_CSCDR2_LCDIF_PRE_CLK_SEL_SHIFT)
+
 #define CCM_CSCDR2_LPI2C_CLK_SEL                 (1 << 18) /* Bit 18:     Selector for the LPI2C clock multiplexer */
 #  define CCM_CSCDR2_LPI2C_CLK_SEL_PLL3_60M      (0 << 18) /*  derive clock from pll3_60m */
 #  define CCM_CSCDR2_LPI2C_CLK_SEL_OSC_CLK       (1 << 18) /*  derive clock from ock_clk */
@@ -455,7 +457,9 @@
 
 /* Serial Clock Divider Register 3 */
 
-                                                           /* Bits 0-8:   Reserved */
+/*                                                            Bits 0-8:
+ *                                                                  Reserved
+ */
 #define CCM_CSCDR3_CSI_CLK_SEL_SHIFT             (9)       /* Bits 9-10:  Selector for csi_mclk multiplexer */
 #define CCM_CSCDR3_CSI_CLK_SEL_MASK              (0x3 << CCM_CSCDR3_CSI_CLK_SEL_SHIFT)
 #  define CCM_CSCDR3_CSI_CLK_SEL(n)              ((uint32_t)(n) << CCM_CSCDR3_CSI_CLK_SEL_SHIFT)
@@ -487,7 +491,10 @@
 #  define CCM_CLPCR_LPM_RUN                      ((uint32_t)(0) << CCM_CLPCR_LPM_SHIFT) /* Remain in run mode */
 #  define CCM_CLPCR_LPM_WAIT                     ((uint32_t)(1) << CCM_CLPCR_LPM_SHIFT) /* Transfer to wait mode */
 #  define CCM_CLPCR_LPM_STOP                     ((uint32_t)(2) << CCM_CLPCR_LPM_SHIFT) /* Transfer to stop mode */
-                                                           /* Bits 2-4:   Reserved */
+
+/*                                                            Bits 2-4:
+ *                                                                  Reserved
+ */
 #define CCM_CLPCR_ARM_CLK_DIS_ON_LPM             (1 << 5)  /* Bit 5:      ARM clocks disabled on wait mode */
 #define CCM_CLPCR_SBYOS                          (1 << 6)  /* Bit 6:      Standby clock oscillator bit */
 #define CCM_CLPCR_DIS_REF_OSC                    (1 << 7)  /* Bit 7:      external high frequency oscillator disable */
@@ -766,7 +773,9 @@
 
 /* Module Enable Override Register */
 
-                                                           /* Bits 0-4: Reserved */
+/*                                                            Bits 0-4:
+ *                                                                  Reserved
+ */
 #define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Override clock enable signal from GPT */
 #define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Override clock enable signal from PIT */
 #define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Override clock enable signal from USDHC */
@@ -788,6 +797,7 @@
 #define CCM_ANALOG_PLL_ARM_BYPASS_CLK_SRC_MASK          (0x3 << CCM_ANALOG_PLL_ARM_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_ARM_BYPASS_CLK_SRC_REF_24M     ((uint32_t)(0) << CCM_ANALOG_PLL_ARM_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 #  define CCM_ANALOG_PLL_ARM_BYPASS_CLK_SRC_CLK1        ((uint32_t)(1) << CCM_ANALOG_PLL_ARM_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
+
 #define CCM_ANALOG_PLL_ARM_BYPASS                       (1 << 16) /* Bit 16:     Bypass the PLL */
                                                                   /* Bits 17-18  Reserved */
 #define CCM_ANALOG_PLL_ARM_PLL_SEL                      (1 << 39) /* Bit 19:     ? */
@@ -809,6 +819,7 @@
 #  define CCM_ANALOG_PLL_USB1_BYPASS_CLK_SRC_CLK1       ((uint32_t)(1) << CCM_ANALOG_PLL_USB1_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
 #  define CCM_ANALOG_PLL_USB1_BYPASS_CLK_SRC_GPANAIO    ((uint32_t)(2) << CCM_ANALOG_PLL_USB1_BYPASS_CLK_SRC_SHIFT) /*  */
 #  define CCM_ANALOG_PLL_USB1_BYPASS_CLK_SRC_CHRG_DET_B ((uint32_t)(3) << CCM_ANALOG_PLL_USB1_BYPASS_CLK_SRC_SHIFT) /*  */
+
 #define CCM_ANALOG_PLL_USB1_BYPASS                      (1 << 16) /* Bit 16:     Bypass the PLL */
                                                                   /* Bits 17-30  Reserved */
 #define CCM_ANALOG_PLL_USB1_LOCK                        (1 << 31) /* Bit 31:     PLL is currently locked */
@@ -827,6 +838,7 @@
 #define CCM_ANALOG_PLL_USB2_BYPASS_CLK_SRC_MASK         (0x3 << CCM_ANALOG_PLL_USB2_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_USB2_BYPASS_CLK_SRC_REF_24M    ((uint32_t)(0) << CCM_ANALOG_PLL_USB2_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 #  define CCM_ANALOG_PLL_USB2_BYPASS_CLK_SRC_CLK1       ((uint32_t)(1) << CCM_ANALOG_PLL_USB2_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
+
 #define CCM_ANALOG_PLL_USB2_BYPASS                      (1 << 16) /* Bit 16:     Bypass the PLL */
                                                                   /* Bits 17-30  Reserved */
 #define CCM_ANALOG_PLL_USB2_LOCK                        (1 << 31) /* Bit 31:     PLL is currently locked */
@@ -846,6 +858,7 @@
 #  define CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_CLK1        ((uint32_t)(1) << CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
 #  define CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_GPANAIO     ((uint32_t)(2) << CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_SHIFT) /*  */
 #  define CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_CHRG_DET_B  ((uint32_t)(3) << CCM_ANALOG_PLL_SYS_BYPASS_CLK_SRC_SHIFT) /*  */
+
 #define CCM_ANALOG_PLL_SYS_BYPASS                       (1 << 16) /* Bit 16:     Bypass the PLL */
                                                                   /* Bit 17:     Reserved */
 #define CCM_ANALOG_PLL_SYS_PFD_OFFSET_EN                (1 << 18) /* Bit 18:     Enables an offset in the phase frequency detector */
@@ -888,6 +901,7 @@
 #define CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_MASK        (0x3 << CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_REF_24M   ((uint32_t)(0) << CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 #  define CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_CLK1      ((uint32_t)(1) << CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
+
 #define CCM_ANALOG_PLL_AUDIO_BYPASS                     (1 << 16) /* Bit 16:     Bypass the PLL */
                                                                   /* Bit 17:     Reserved */
 #define CCM_ANALOG_PLL_AUDIO_PFD_OFFSET_EN              (1 << 18) /* Bit 18:     Enables an offset in the phase frequency detector */
@@ -912,6 +926,7 @@
 #define CCM_ANALOG_PLL_AUDIO_DENOM_B_MASK               (0x3FFFFFFF << CCM_ANALOG_PLL_AUDIO_DENOM_B_SHIFT)
 #define CCM_ANALOG_PLL_AUDIO_DENOM_B(n)                 ((uint32_t)(n) << CCM_ANALOG_PLL_AUDIO_DENOM_B_SHIFT)
                                                                     /* Bits 30-31:  Reserved */
+
 /*  Analog Video PLL control Register */
 
 #define CCM_ANALOG_PLL_VIDEO_DIV_SELECT_SHIFT           (0)       /* Bits 0-6:    This field controls the PLL loop divider: 27-54 */
@@ -924,6 +939,7 @@
 #define CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_MASK        (0x3 << CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_REF_24M   ((uint32_t)(0) << CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 #  define CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_CLK1      ((uint32_t)(1) << CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
+
 #define CCM_ANALOG_PLL_VIDEO_BYPASS                     (1 << 16) /* Bit 16:     Bypass the PLL */
                                                                   /* Bit 17:     Reserved */
 #define CCM_ANALOG_PLL_VIDEO_PFD_OFFSET_EN              (1 << 18) /* Bit 18:     Enables an offset in the phase frequency detector */
@@ -966,19 +982,20 @@
                                                                   /* Bits 4-11:  Reserved */
 #define CCM_ANALOG_PLL_ENET_POWERDOWN                   (1 << 12) /* Bit 12:     Powers down the PLL */
 #define CCM_ANALOG_PLL_ENET_ENET1_125M_EN               (1 << 13) /* Bit 13:     Enable the PLL providing the ENET1 125 MHz reference clock */
-#define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT       (14)      /* Bits 14-15: Determines the bypass source */
+#define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT       (14)       /* Bits 14-15: Determines the bypass source */
 #define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_MASK        (0x3 << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT)
 #  define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_REF_24M   ((uint32_t)(0) << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT) /* Select 24Mhz Osc as source */
 #  define CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_CLK1      ((uint32_t)(1) << CCM_ANALOG_PLL_ENET_BYPASS_CLK_SRC_SHIFT) /* Select the CLK1_N / CLK1_P as source */
-#define CCM_ANALOG_PLL_ENET_BYPASS                     (1 << 16) /* Bit 16:     Bypass the PLL */
-                                                                 /* Bit 17:     Reserved */
-#define CCM_ANALOG_PLL_ENET_PFD_OFFSET_EN              (1 << 18) /* Bit 18:     Enables an offset in the phase frequency detector */
-#define CCM_ANALOG_PLL_ENET_ENABLE_125M                (1 << 19) /* Bit 19:     */
-#define CCM_ANALOG_PLL_ENET_ENET2_125M_EN              (1 << 20) /* Bit 20:     Enable the PLL providing the ENET2 125 MHz reference clock */
-#define CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN            (1 << 21) /* Bit 21:     Enable the PLL providing ENET 25 MHz reference clock */
-#define CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN           (1 << 22) /* Bit 22:     Enable the PLL providing NET 500 MHz reference clock */
 
-#define CCM_ANALOG_PLL_ENET_LOCK                       (1 << 31) /* Bit 31:     PLL is currently locked */
+#define CCM_ANALOG_PLL_ENET_BYPASS                     (1 << 16)  /* Bit 16:     Bypass the PLL */
+                                                                  /* Bit 17:     Reserved */
+#define CCM_ANALOG_PLL_ENET_PFD_OFFSET_EN              (1 << 18)  /* Bit 18:     Enables an offset in the phase frequency detector */
+#define CCM_ANALOG_PLL_ENET_ENABLE_125M                (1 << 19)  /* Bit 19:     */
+#define CCM_ANALOG_PLL_ENET_ENET2_125M_EN              (1 << 20)  /* Bit 20:     Enable the PLL providing the ENET2 125 MHz reference clock */
+#define CCM_ANALOG_PLL_ENET_ENET_25M_REF_EN            (1 << 21)  /* Bit 21:     Enable the PLL providing ENET 25 MHz reference clock */
+#define CCM_ANALOG_PLL_ENET_ENET_500M_REF_EN           (1 << 22)  /* Bit 22:     Enable the PLL providing NET 500 MHz reference clock */
+
+#define CCM_ANALOG_PLL_ENET_LOCK                       (1 << 31)  /* Bit 31:     PLL is currently locked */
 
 /* 480MHz Clock (PLL3) Phase Fractional Divider Control Register */
 

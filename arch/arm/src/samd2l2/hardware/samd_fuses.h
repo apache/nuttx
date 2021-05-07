@@ -1,40 +1,35 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_fuses.h
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * References:
- *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
- *   Datasheet", 42129J–SAM–12/2013
- *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
- *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
  *
  * Some fuse-related definitions derive from Atmel sample code:
  *
  *   Copyright (c) 2013 Atmel Corporation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- * 3. The name of Atmel may not be used to endorse or promote products derived
- *    from this software without specific prior written permission.
+ * 3. The name of Atmel may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * 4. This software may only be redistributed and used in connection with an
- *    Atmel microcontroller product.
+ * 4. This software may only be redistributed and used in connection with
+ *    an Atmel microcontroller product.
  *
  * THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
- * EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
@@ -42,14 +37,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
+ *   Datasheet", 42129J–SAM–12/2013
+ *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
+ *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_FUSES_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_FUSES_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -57,10 +59,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Fuse definitions *************************************************************************/
+ ****************************************************************************/
+
+/* Fuse definitions *********************************************************/
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD20
 #  define NVMCTRL_FUSES_LOCKFIELD_ADDR       (SAM_LOCKBIT_BASE + 0)
@@ -282,17 +285,17 @@
 #    define SYSCTRL_FUSES_DFLL48MFINE(n)     ((n) << SYSCTRL_FUSES_DFLL48MFINE_SHIFT)
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_FUSES_H */

@@ -4,16 +4,8 @@
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *
- *  "Cortex-A5 MPCore, Technical Reference Manual", Revision: r0p1,
- *   Copyright (c) 2010  ARM. All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
- *   Copyright (c) 1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM
- *   DDI 0406C.b (ID072512)
- *
- * Portions of this file derive from Atmel sample code for the SAMA5D3 Cortex-A5
- * which also has a modified BSD-style license:
+ * Portions of this file derive from Atmel sample code for the SAMA5D3
+ * Cortex-A5 which also has a modified BSD-style license:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *   All rights reserved.
@@ -46,6 +38,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *
+ *  "Cortex-A5 MPCore, Technical Reference Manual", Revision: r0p1,
+ *   Copyright (c) 2010  ARM. All rights reserved. ARM DDI 0434B (ID101810)
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright (c) 1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM
+ *   DDI 0406C.b (ID072512)
+ */
 
 /****************************************************************************
  * Included Files

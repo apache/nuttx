@@ -15,6 +15,7 @@ config ARCH_ARM
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
+	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	---help---
 		The ARM architectures
 
@@ -62,6 +63,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
+	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
@@ -74,6 +76,8 @@ config ARCH_SIM
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_VFORK
+	select ARCH_HAVE_SETJMP
+	select ARCH_SETJMP_H
 	select ALARM_ARCH
 	select ONESHOT
 	select SERIAL_CONSOLE

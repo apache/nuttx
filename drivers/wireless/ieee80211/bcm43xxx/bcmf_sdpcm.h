@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/ieee80211/bcmf_sdpcm.h
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_sdpcm.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -53,7 +53,8 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv);
 int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
                            struct bcmf_frame_s *frame, bool control);
 
-void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv, struct bcmf_frame_s *frame);
+void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv,
+                           struct bcmf_frame_s *frame);
 
 struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
                                             unsigned int len, bool block,

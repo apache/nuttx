@@ -1,59 +1,44 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_afec.h
- * Analog-Front-End Controller (AFEC) definitions for the SAMV71
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_AFEC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_AFEC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
 
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* General definitions ******************************************************************/
+ ****************************************************************************/
+
+/* General definitions ******************************************************/
 
 #define SAM_ADC_NCHANNELS            12     /* 12 ADC Channels */
 
-/* AFEC register offsets ****************************************************************/
+/* AFEC register offsets ****************************************************/
 
 #define SAM_AFEC_CR_OFFSET           0x0000 /* Control Register */
 #define SAM_AFEC_MR_OFFSET           0x0004 /* Mode Register */
@@ -94,7 +79,7 @@
                                             /* 0x00ec-0x00f8 Reserved */
                                             /* 0x0fc Reserved */
 
-/* AFEC register addresses **************************************************************/
+/* AFEC register addresses **************************************************/
 
 #define SAM_AFEC0_CR                 (SAM_AFEC0_BASE+SAM_AFEC_CR_OFFSET)
 #define SAM_AFEC0_MR                 (SAM_AFEC0_BASE+SAM_AFEC_MR_OFFSET)
@@ -158,7 +143,7 @@
 #define SAM_AFEC1_WPMR               (SAM_AFEC1_BASE+SAM_AFEC_WPMR_OFFSET)
 #define SAM_AFEC1_WPSR               (SAM_AFEC1_BASE+SAM_AFEC_WPSR_OFFSET)
 
-/* AFEC register bit definitions *******************************************************/
+/* AFEC register bit definitions ********************************************/
 
 /* Control Register */
 
@@ -177,6 +162,7 @@
 #  define AFEC_MR_TRGSEL_PWM0        (4 << AFEC_MR_TRGSEL_SHIFT) /* PWM Event Line 0 */
 #  define AFEC_MR_TRGSEL_PWM1        (5 << AFEC_MR_TRGSEL_SHIFT) /* PWM Event Line 1 */
 #  define AFEC_MR_TRGSEL_ACMP        (6 << AFEC_MR_TRGSEL_SHIFT) /* Analog comparator */
+
 #define AFEC_MR_SLEEP                (1 << 5)  /* Bit 5:  Sleep Mode */
 #define AFEC_MR_FWUP                 (1 << 6)  /* Bit 6:  Fast Wake Up */
 #define AFEC_MR_FREERUN              (1 << 7)  /* Bit 7:  Free Run Mode */
@@ -201,12 +187,14 @@
 #  define AFEC_MR_STARTUP_832        (13 << AFEC_MR_STARTUP_SHIFT) /* 832 periods of ADCClock */
 #  define AFEC_MR_STARTUP_896        (14 << AFEC_MR_STARTUP_SHIFT) /* 896 periods of ADCClock */
 #  define AFEC_MR_STARTUP_960        (15 << AFEC_MR_STARTUP_SHIFT) /* 960 periods of ADCClock */
+
 #define AFEC_MR_SETTLING_SHIFT       (20)      /* Bits 20-21: Analog Settling Time */
 #define AFEC_MR_SETTLING_MASK        (15 << AFEC_MR_SETTLING_SHIFT)
 #  define AFEC_MR_SETTLING_3         (0 << AFEC_MR_SETTLING_SHIFT) /* 3 periods of ADCClock */
 #  define AFEC_MR_SETTLING_5         (1 << AFEC_MR_SETTLING_SHIFT) /* 5 periods of ADCClock */
 #  define AFEC_MR_SETTLING_9         (2 << AFEC_MR_SETTLING_SHIFT) /* 9 periods of ADCClock */
 #  define AFEC_MR_SETTLING_17        (3 << AFEC_MR_SETTLING_SHIFT) /* 17 periods of ADCClock */
+
 #define AFEC_MR_ONE                  (1 << 23) /* Bit 23: Must be one */
 #define AFEC_MR_TRACKTIM_SHIFT       (24)      /* Bits 24-27: Tracking Time */
 #define AFEC_MR_TRACKTIM_MASK        (15 << AFEC_MR_TRACKTIM_SHIFT)
@@ -224,6 +212,7 @@
 #  define AFEC_EMR_CMPMODE_HIGH      (1 << AFEC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
 #  define AFEC_EMR_CMPMODE_IN        (2 << AFEC_EMR_CMPMODE_SHIFT) /* Event when in comparison window */
 #  define AFEC_EMR_CMPMODE_OUT       (3 << AFEC_EMR_CMPMODE_SHIFT) /* Event when out of comparison window */
+
 #define AFEC_EMR_CMPSEL_SHIFT        (3)       /* Bit 3-7: Comparison Selected Channel */
 #define AFEC_EMR_CMPSEL_MASK         (31 << AFEC_EMR_CMPSEL_SHIFT)
 #  define AFEC_EMR_CMPSEL(n)         ((uint32_t)(n) << AFEC_EMR_CMPSEL_SHIFT)
@@ -238,6 +227,7 @@
 #  define AFEC_EMR_RES_OSR16         (3 << AFEC_EMR_RES_SHIFT) /* 14-bit resolution, AFEC sample rate divided by 16 (averaging) */
 #  define AFEC_EMR_RES_OSR64         (4 << AFEC_EMR_RES_SHIFT) /* 15-bit resolution, AFEC sample rate divided by 64 (averaging) */
 #  define AFEC_EMR_RES_OSR256        (5 << AFEC_EMR_RES_SHIFT) /* 16-bit resolution, AFEC sample rate divided by 256 (averaging) */
+
 #define AFEC_EMR_TAG                 (1 << 24) /* Bit 24: TAG of the AFEC_LDCR register */
 #define AFEC_EMR_STM                 (1 << 25) /* Bit 25: Single Trigger Mode */
 #define AFEC_EMR_SIGNMODE_SHIFT      (28)      /* Bits 28-29: Sign mode */
@@ -333,7 +323,9 @@
 #define AFEC_LCDR_CHANB_SHIFT        (24)      /* Bits 24-27: Channel number */
 #define AFEC_LCDR_CHANB_MASK         (15 << AFEC_LCDR_CHANB_SHIFT)
 
-/* Interrupt Enable, Interrupt Disable, Interrupt Mask, and Interrupt Status Registers */
+/* Interrupt Enable, Interrupt Disable, Interrupt Mask,
+ * and Interrupt Status Registers
+ */
 
 #define AFEC_INT_EOC(n)              (1 << (n))
 #  define AFEC_INT_EOC0              (1 << 0)  /* Bit 0:  End of Conversion 0 */
@@ -424,7 +416,9 @@
 #define AFEC_CGR_GAIN11_MASK         (3 << AFEC_CGR_GAIN11_SHIFT)
 #  define AFEC_CGR_GAIN11(v)         ((uint32_t)(v) << AFEC_CGR_GAIN11_SHIFT)
 
-/* Channel Calibration DC Offset Register (Used in Automatic Calibration Procedure) */
+/* Channel Calibration DC Offset Register
+ * (Used in Automatic Calibration Procedure)
+ */
 
 #define AFEC_CDOR_OFF(n)             (1 << (n))
 #  define AFEC_CDOR_OFF0             (1 << 0)  /* Bit 0:  Offset for channel 0 */
@@ -555,16 +549,16 @@
 #define AFEC_WPSR_WPVSRC_SHIFT       (8)       /* Bits 8-23: Write Protect Violation Source */
 #define AFEC_WPSR_WPVSRC_MASK        (0x0000ffff << AFEC_WPSR_WPVSRC_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_AFEC_H */

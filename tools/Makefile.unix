@@ -143,8 +143,7 @@ endif
 
 # This is the name of the final target (relative to the top level directory)
 
-NUTTXNAME = nuttx
-BIN       = $(NUTTXNAME)$(EXEEXT)
+BIN = nuttx$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
@@ -417,31 +416,31 @@ endif
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
-	$(Q) echo $(BIN) > $(NUTTXNAME).manifest
-	$(Q) printf "%s\n" *.map >> $(NUTTXNAME).manifest
+	$(Q) echo $(BIN) > nuttx.manifest
+	$(Q) printf "%s\n" *.map >> nuttx.manifest
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
-	@echo "CP: $(NUTTXNAME).hex"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) $(NUTTXNAME).hex
-	$(Q) echo $(NUTTXNAME).hex >> $(NUTTXNAME).manifest
+	@echo "CP: nuttx.hex"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O ihex $(BIN) nuttx.hex
+	$(Q) echo nuttx.hex >> nuttx.manifest
 endif
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
-	@echo "CP: $(NUTTXNAME).srec"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) $(NUTTXNAME).srec
-	$(Q) echo $(NUTTXNAME).srec >> $(NUTTXNAME).manifest
+	@echo "CP: nuttx.srec"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O srec $(BIN) nuttx.srec
+	$(Q) echo nuttx.srec >> nuttx.manifest
 endif
 ifeq ($(CONFIG_RAW_BINARY),y)
-	@echo "CP: $(NUTTXNAME).bin"
-	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) $(NUTTXNAME).bin
-	$(Q) echo $(NUTTXNAME).bin >> $(NUTTXNAME).manifest
+	@echo "CP: nuttx.bin"
+	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(BIN) nuttx.bin
+	$(Q) echo nuttx.bin >> nuttx.manifest
 endif
 ifeq ($(CONFIG_UBOOT_UIMAGE),y)
 	@echo "MKIMAGE: uImage"
 	$(Q) mkimage -A $(CONFIG_ARCH) -O linux -C none -T kernel -a $(CONFIG_UIMAGE_LOAD_ADDRESS) \
-		-e $(CONFIG_UIMAGE_ENTRY_POINT) -n $(BIN) -d $(NUTTXNAME).bin uImage
+		-e $(CONFIG_UIMAGE_ENTRY_POINT) -n $(BIN) -d nuttx.bin uImage
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f uImage /tftpboot/uImage; \
 	fi
-	$(Q) echo "uImage" >> $(NUTTXNAME).manifest
+	$(Q) echo "uImage" >> nuttx.manifest
 endif
 	$(call POSTBUILD, $(TOPDIR))
 
@@ -498,7 +497,7 @@ gconfig: apps_preconfig
 
 savedefconfig: apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf --savedefconfig defconfig.tmp Kconfig
-	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
+	$(Q) kconfig-tweak --file defconfig.tmp -u CONFIG_APPS_DIR
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
 	$(Q) grep "CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
@@ -570,10 +569,8 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
-	$(call DELFILE, defconfig.tmp-e)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
-	$(call DELFILE, .config-e)
 	$(call DELFILE, .gdbinit)
 	$(call DELFILE, .clean_context)
 	$(Q) $(MAKE) -C tools -f Makefile.host clean

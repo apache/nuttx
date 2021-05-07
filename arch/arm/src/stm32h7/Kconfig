@@ -124,9 +124,10 @@ config ARCH_CHIP_STM32H747XI
 	bool "STM32H747XI"
 	select STM32H7_STM32H7X7XX
 	select STM32H7_FLASH_CONFIG_I
-# TODO: IO_CONFIG
+	select STM32H7_IO_CONFIG_X
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM
+		TFBGA240
 
 config ARCH_CHIP_STM32H753AI
 	bool "STM32H753AI"
@@ -214,7 +215,6 @@ config STM32H7_STM32H7X3XX
 	default n
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select ARCH_HAVE_SDIO_DELAYED_INVLDT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
@@ -232,7 +232,6 @@ config STM32H7_STM32H7X7XX
 	default n
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select ARCH_HAVE_SDIO_DELAYED_INVLDT
 	select ARMV7M_HAVE_ICACHE
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
@@ -410,6 +409,14 @@ config STM32H7_RTC
 	bool "RTC"
 	default n
 	select RTC
+
+config STM32H7_CSI
+	bool "CSI Low-speed internal oscillator (4MHz)"
+	default n
+
+config STM32H7_HSI48
+	bool "HSI48 High-speed 48MHz internal oscillator"
+	default n
 
 config STM32H7_PWR
 	bool "PWR"
@@ -764,6 +771,42 @@ config STM32H7_UART8
 
 endmenu # STM32H7 U[S]ART Selection
 endmenu # STM32H7 Peripheral Selection
+
+config STM32H7_SYSCFG_IOCOMPENSATION
+	bool "SYSCFG I/O Compensation"
+	default n
+	select STM32H7_CSI
+	---help---
+		By default the I/O compensation cell is not used. However when the I/O
+		output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+		recommended to use the compensation cell for slew rate control on I/O
+		tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+
+		The I/O compensation cell can be used only when the supply voltage ranges
+		from 2.4 to 3.6 V
+
+menu "OTG_HS Configuration"
+	depends on STM32H7_OTGHS
+
+choice
+	prompt "ULPI Selection"
+	default STM32H7_OTGHS_NO_ULPI
+
+config STM32H7_OTGHS_NO_ULPI
+	bool "No External ULPI on board."
+	---help---
+	Select to indicate that there is no external ULPI PHY. This means the OTG_HS
+	peripheral must use the internal full-speed PHY and will be limited to
+	full-speed mode.
+
+config STM32H7_OTGHS_EXTERNAL_ULPI
+	bool "External ULPI"
+	---help---
+		Select to indicate the presence of an external ULPI PHY and use it.
+
+endchoice #"ULPI Selection"
+
+endmenu # OTG_HS Config
 
 menu "I2C Configuration"
 	depends on STM32H7_I2C
@@ -1267,6 +1310,18 @@ config UART8_RXFIFO_THRES
 
 endif # STM32H7_UART8
 
+config STM32H7_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
 config STM32H7_SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
 	default n
@@ -1493,25 +1548,59 @@ endchoice #"RTC clock source"
 
 if STM32H7_RTC_LSECLOCK
 
+config STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+	bool "Automaticaly boost the LSE oscillator drive capability level until it starts-up"
+	default n
+	---help---
+		This will cycle through the correct* values from low to high. To avoid
+		damaging the the crystal. We want to use the lowest setting that gets
+		the OSC running. See app note AN2867
+
+			0 = Low drive capability (default)
+			1 = Medium low drive capability
+			2 = Medium high drive capability
+			3 = High drive capability
+
+		*It will take into account the rev of the silicon and use
+		the correct code points to achive the drive strength.
+		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		selection bits are swapped.
+
 config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
 	int "LSE oscillator drive capability level at LSE start-up"
 	default 0
 	range 0 3
+	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
-		1 = Medium high drive capability
-		2 = Medium low drive capability
+		1 = Medium low drive capability
+		2 = Medium high drive capability
 		3 = High drive capability
+
+		It will take into account the rev of the silicon and use
+		the correct code points tp achive the drive strength.
+		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		selection bits are swapped.
 
 config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 	int "LSE oscillator drive capability level after LSE start-up"
 	default 0
 	range 0 3
+	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	---help---
 		0 = Low drive capability (default)
-		1 = Medium high drive capability
-		2 = Medium low drive capability
+		1 = Medium low drive capability
+		2 = Medium high drive capability
 		3 = High drive capability
+
+		It will take into account the rev of the silicon and use
+		the correct code points tp achive the drive strength.
+		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		selection bits are swapped.
+
+		WARNING this RUN setting does not apear to work!
+		it apears that the LSEDRV bits can not be changes once the OSC
+		is running.
 
 endif # STM32H7_RTC_LSECLOCK
 
@@ -1656,6 +1745,13 @@ config STM32H7_CUSTOM_CLOCKCONFIG
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
+
+config STM32H7_SRAM4EXCLUDE
+	bool "Exclude SRAM4 from the heap"
+	default n
+	---help---
+		Exclude SRAM4 from the HEAP in order to use this 64 KB region
+		for other uses, such as DMA buffers, etc.
 
 config STM32H7_DTCMEXCLUDE
 	bool "Exclude DTCM SRAM from the heap"

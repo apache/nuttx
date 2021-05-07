@@ -78,7 +78,8 @@ static void sig_trampoline(void)
     " pop  {r2}\n"       /* Recover LR in R2 */
     " mov  lr, r2\n"     /* Restore LR */
     " mov  r0, #5\n"     /* SYS_signal_handler_return */
-    " svc #0x900001\n"   /* Return from the signal handler */
+    " svc %0\n"          /* Return from the SYSCALL */
+    ::"i"(SYS_syscall)
   );
 }
 

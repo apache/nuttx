@@ -63,10 +63,38 @@ struct option
  * Public Function Prototypes
  ****************************************************************************/
 
-int getopt_long(int argc, FAR char *const argv[],
-                FAR const char *shortopts,
+/****************************************************************************
+ * Name: getopt_long
+ *
+ * Description:
+ *   The getopt_long() function works like getopt() except that it also
+ *   accepts long options, started with two dashes. (If the program accepts
+ *   only long options, then optstring should be specified as an empty
+ *   string (""), not NULL.) Long option names may be abbreviated if the
+ *   abbreviation is unique or is an exact match for some defined option
+ *
+ ****************************************************************************/
+
+int getopt_long(int argc, FAR char * const argv[],
+                FAR const char *optstring,
                 FAR const struct option *longopts,
-                FAR int *longind);
+                FAR int *longindex);
+
+/****************************************************************************
+ * Name: getopt_long_only
+ *
+ * Description:
+ *   getopt_long_only() is like getopt_long(), but '-' as well as "--" can
+ *   indicate a long option. If an option that starts with '-' (not "--")
+ *   doesn't match a long option, but does match a short option, it is
+ *   parsed as a short option instead.
+ *
+ ****************************************************************************/
+
+int getopt_long_only(int argc, FAR char * const argv[],
+                     FAR const char *optstring,
+                     FAR const struct option *longopts,
+                     FAR int *longindex);
 
 #undef EXTERN
 #if defined(__cplusplus)

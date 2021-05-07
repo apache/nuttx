@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/syslog/syslog.h
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -63,7 +48,8 @@ extern "C"
  */
 
 struct syslog_channel_s; /* Forward reference */
-EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
+EXTERN FAR struct syslog_channel_s *g_syslog_channel
+                                                [CONFIG_SYSLOG_MAX_CHANNELS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -87,16 +73,16 @@ EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
  *
  * Input Parameters:
  *   devpath - The full path to the character device to be used.
- *   oflags  - File open flags
- *   mode    - File open mode (only if oflags include O_CREAT)
+ *   oflags  - File open flags.
+ *   mode    - File open mode (only if oflags include O_CREAT).
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   Returns a newly created SYSLOG channel, or NULL in case of any failure.
  *
  ****************************************************************************/
 
-int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
+FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
+                                                   int oflags, int mode);
 
 /****************************************************************************
  * Name: syslog_dev_uninitialize
@@ -106,7 +92,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  *   a different SYSLOG device. Currently only used for CONFIG_SYSLOG_FILE.
  *
  * Input Parameters:
- *   None
+ *   channel    - Handle to syslog channel to be used.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -118,9 +104,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_FILE
-void syslog_dev_uninitialize(void);
-#endif /* CONFIG_SYSLOG_FILE */
+void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
 
 /****************************************************************************
  * Name: syslog_dev_channel
@@ -231,7 +215,6 @@ int syslog_add_intbuffer(int ch);
  *   to the SYSLOG device.
  *
  * Input Parameters:
- *   channel - The syslog channel to use in performing the flush operation.
  *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
@@ -244,8 +227,7 @@ int syslog_add_intbuffer(int ch);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
-int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
-                           bool force);
+int syslog_flush_intbuffer(bool force);
 #endif
 
 /****************************************************************************
@@ -301,59 +283,6 @@ ssize_t syslog_write(FAR const char *buffer, size_t buflen);
  ****************************************************************************/
 
 int syslog_force(int ch);
-
-/****************************************************************************
- * Name: syslog_dev_write
- *
- * Description:
- *   This is the low-level, multiple byte, system logging interface provided
- *   for the character driver interface.
- *
- * Input Parameters:
- *   buffer - The buffer containing the data to be output
- *   buflen - The number of bytes in the buffer
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller. A negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-ssize_t syslog_dev_write(FAR const char *buffer, size_t buflen);
-
-/****************************************************************************
- * Name: syslog_dev_putc
- *
- * Description:
- *   This is the low-level system logging interface provided for the
- *   character driver interface.
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_dev_putc(int ch);
-
-/****************************************************************************
- * Name: syslog_dev_flush
- *
- * Description:
- *   Flush any buffer data in the file system to media.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_dev_flush(void);
 
 #undef EXTERN
 #ifdef __cplusplus

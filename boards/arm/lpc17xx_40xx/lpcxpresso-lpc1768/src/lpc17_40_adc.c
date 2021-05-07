@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/lpc17xx_40xx/lpcexpresso-1768/src/lpc17_40_adc.c
+ * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpc17_40_adc.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Kannan <code@nuttx.org>

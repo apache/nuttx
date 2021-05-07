@@ -55,12 +55,13 @@
  * Name: stm32_board_clockconfig
  *
  * Description:
- *   I provided this module when I was doing some debugging of a problem I had with
- *   clocking (it was helpful to do A/B tests).  I'm leaving it here in the config
- *   partially because I expect to have similar problems again as I develop more of
- *   the various peripheral support, but also because it may become necessary in the
- *   end for certain project configurations which have specialized clock
- *   configurationsthat aren't appropriate to expose in the 'arch' default code.
+ *   I provided this module when I was doing some debugging of a problem I
+ *   had with clocking (it was helpful to do A/B tests).  I'm leaving it
+ *   here in the config partially because I expect to have similar problems
+ *   again as I develop more of the various peripheral support, but also
+ *   because it may become necessary in the end for certain project
+ *   configurations which have specialized clock configurationsthat aren't
+ *   appropriate to expose in the 'arch' default code.
  *
  ****************************************************************************/
 
@@ -107,6 +108,7 @@ void stm32l4_board_clockconfig(void)
   regval  = getreg32(STM32L4_RCC_PLLCFG);
 
   /* Configure Main PLL */
+
   /* Set the PLL dividers and multipliers to configure the main PLL */
 
   regval = (STM32L4_PLLCFG_PLLM | STM32L4_PLLCFG_PLLN | STM32L4_PLLCFG_PLLP
@@ -163,6 +165,7 @@ void stm32l4_board_clockconfig(void)
   regval  = getreg32(STM32L4_RCC_PLLSAI2CFG);
 
   /* Enable the SAI2 PLL */
+
   /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
   regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |
@@ -181,7 +184,9 @@ void stm32l4_board_clockconfig(void)
     {
     }
 
-  /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
+  /* Enable FLASH prefetch, instruction cache, data cache,
+   * and 5 wait states
+   */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
   regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
@@ -200,7 +205,8 @@ void stm32l4_board_clockconfig(void)
 
   /* Wait until the PLL source is used as the system clock source */
 
-  while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
+  while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+          RCC_CFGR_SWS_PLL)
     {
     }
 
@@ -208,7 +214,7 @@ void stm32l4_board_clockconfig(void)
 
   /* Low speed internal clock source LSI */
 
-   stm32l4_rcc_enablelsi();
+  stm32l4_rcc_enablelsi();
 #endif
 
 #if defined(STM32L4_USE_LSE)

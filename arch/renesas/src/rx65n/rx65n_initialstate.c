@@ -67,7 +67,7 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->adj_stack_ptr   = (void *)g_idle_topstack;
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
@@ -75,7 +75,8 @@ void up_initial_state(struct tcb_s *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  xcp->regs[REG_SP] = (uint32_t)tcb->adj_stack_ptr;
+  xcp->regs[REG_SP] = (uint32_t)tcb->stack_base_ptr +
+                                tcb->adj_stack_size;
   xcp->regs[REG_PC] = (uint32_t)tcb->start;
 
   /* Enable or disable interrupts, based on user configuration */

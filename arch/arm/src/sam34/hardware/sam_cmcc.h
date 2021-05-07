@@ -1,56 +1,42 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_cmcc.h
- * Cortex M Cache Controller (CMCC) for the SAM4E
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CMCC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CMCC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* This information is available in the Cache Type Register.  How every, it is more
- * efficient if we do not to do the decoding on each cache access.
+ ****************************************************************************/
+
+/* This information is available in the Cache Type Register.
+ * How ever, it is more efficient if we do not to do the decoding on each
+ * cache access.
  *
  *  CacheSize = CacheLineSize * NCacheLines * NWays
  *  CacheAddressRange = CacheLineSize * NCacheLines = CacheSize / NWays
@@ -62,7 +48,7 @@
 #  define CMCC_NWAYS                 4
 #endif
 
-/* CMCC register offsets ****************************************************************/
+/* CMCC register offsets ****************************************************/
 
 #define SAM_CMCC_TYPE_OFFSET         0x0000 /* Cache Type Register */
 #define SAM_CMCC_CFG_OFFSET          0x0004 /* Cache Configuration Register */
@@ -77,7 +63,7 @@
 #define SAM_CMCC_MSR_OFFSET          0x0034 /* Cache Monitor Status Register */
                                             /* 0x0038-0x00fc Reserved */
 
-/* CMCC register addresses **************************************************************/
+/* CMCC register addresses **************************************************/
 
 #define SAM_CMCC_TYPE                (SAM_CMCC_BASE+SAM_CMCC_TYPE_OFFSET)
 #define SAM_CMCC_CFG                 (SAM_CMCC_BASE+SAM_CMCC_CFG_OFFSET)
@@ -90,7 +76,7 @@
 #define SAM_CMCC_MCTRL               (SAM_CMCC_BASE+SAM_CMCC_MCTRL_OFFSET)
 #define SAM_CMCC_MSR                 (SAM_CMCC_BASE+SAM_CMCC_MSR_OFFSET)
 
-/* CMCC register bit definitions ********************************************************/
+/* CMCC register bit definitions ********************************************/
 
 /* Cache Type Register */
 
@@ -105,6 +91,7 @@
 #  define CMCC_TYPE_WAYNUM_ARCH2WAY  (1 << CMCC_TYPE_WAYNUM_SHIFT) /* 2-WAY set associative */
 #  define CMCC_TYPE_WAYNUM_ARCH4WAY  (2 << CMCC_TYPE_WAYNUM_SHIFT) /* 4-WAY set associative */
 #  define CMCC_TYPE_WAYNUM_ARCH8WAY  (3 << CMCC_TYPE_WAYNUM_SHIFT) /* 8-WAY set associative */
+
 #define CMCC_TYPE_LCKDOWN            (1 << 7)  /* Bit 7:  Lock Down Supported */
 #define CMCC_TYPE_CSIZE_SHIFT        (8)       /* Bits 8-10: Cache Size */
 #define CMCC_TYPE_CSIZE_MASK         (7 << CMCC_TYPE_CSIZE_SHIFT)
@@ -112,6 +99,7 @@
 #  define CMCC_TYPE_CSIZE_2KB        (1 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 2 Kbytes */
 #  define CMCC_TYPE_CSIZE_4KB        (2 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 4 Kbytes */
 #  define CMCC_TYPE_CSIZE_8KB        (3 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 8 Kbytes */
+
 #define CMCC_TYPE_CLSIZE_SHIFT       (11)      /* Bits 11-13: Cache Line Size */
 #define CMCC_TYPE_CLSIZE_MASK        (7 << CMCC_TYPE_CLSIZE_SHIFT)
 #  define CMCC_TYPE_CLSIZE_4B        (0 << CMCC_TYPE_CLSIZE_SHIFT) /* 4 Bytes */
@@ -166,16 +154,16 @@
 
 /* Cache Monitor Status Register -- 32-bit event count */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_CMCC_H */

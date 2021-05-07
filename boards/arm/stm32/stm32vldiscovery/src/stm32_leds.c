@@ -75,9 +75,9 @@ void stm32_led_initialize(void)
 void board_autoled_on(int led)
 {
   if (led == 1)
-   {
-     stm32_gpiowrite(GPIO_LED1, true);
-   }
+    {
+      stm32_gpiowrite(GPIO_LED1, true);
+    }
 }
 
 /****************************************************************************
@@ -88,7 +88,7 @@ void board_autoled_off(int led)
 {
   if (led == 0)
     {
-      stm32_gpiowrite(GPIO_LED1, false);
+       stm32_gpiowrite(GPIO_LED1, false);
     }
 }
 

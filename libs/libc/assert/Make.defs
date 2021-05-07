@@ -20,6 +20,10 @@
 
 CSRCS += lib_assert.c
 
+ifeq ($(CONFIG_STACK_CANARIES),y)
+CSRCS += lib_stackchk.c
+endif
+
 # Add the assert directory to the build
 
 DEPPATH += --dep-path assert

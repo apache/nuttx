@@ -64,4 +64,5 @@ Character device drivers have these properties:
   watchdog.rst
   keypad.rst
   note.rst
+  foc.rst
 

@@ -1,62 +1,47 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_vim.h
- * Vector Intererrupt Manager (VIM) Register Definitions
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller, Technical Reference Manual, Texas
- *   Instruments, Literature Number: SPNU517A, September 2013
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
+ * Technical Reference Manual, Texas Instruments,
+ * Literature Number: SPNU517A, September 2013
+ */
 
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_VIM_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define VIM_REGNDX(ch)                  ((ch) >> 5)
 #define VIM_REGBIT(ch)                  ((ch) & 31)
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Register Offsets relative to the VIM Parity Frame */
 
@@ -102,7 +87,7 @@
 #define TMS570_VIM_CHANCTRL_INDEX(n)    ((n) >> 2)
 #define TMS570_VIM_CHANCTRL_OFFSET(n)   (0x0080 << (TMS570_VIM_CHANCTRL_INDEX(n) << 2))
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* VIM Parity Frame Registers */
 
@@ -147,14 +132,17 @@
 
 #define TMS570_VIM_CHANCTRL(n)          (TMS570_VIM_BASE+TMS570_VIM_CHANCTRL_OFFSET(n))
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* Interrupt Vector Table Parity Flag Register */
 #define VIM_PARFLG_
+
 /* Interrupt Vector Table Parity Control Register */
 #define VIM_PARCTL_
+
 /* Address Parity Error Register */
 #define VIM_ADDERR_
+
 /* Fall-Back Address Parity Error Register */
 #define VIM_FBPARERR_
 
@@ -168,44 +156,64 @@
 
 /* FIQ/IRQ Program Control Register 0 */
 #define VIM_FIRQPR0_
+
 /* FIQ/IRQ Program Control Register 1 */
 #define VIM_FIRQPR1_
+
 /* FIQ/IRQ Program Control Register 2 */
 #define VIM_FIRQPR2_
+
 /* Pending Interrupt Read Location Register 0 */
 #define VIM_INTREQ0_
+
 /* Pending Interrupt Read Location Register 1 */
 #define VIM_INTREQ1_
+
 /* Pending Interrupt Read Location Register 2 */
 #define VIM_INTREQ2_
+
 /* Interrupt Enable Set Register 0 */
 #define VIM_REQENASET0_
+
 /* Interrupt Enable Set Register 1 */
 #define VIM_REQENASET1_
+
 /* Interrupt Enable Set Register 2 */
 #define VIM_REQENASET2_
+
 /* Interrupt Enable Clear Register 0 */
 #define VIM_REQENACLR0_
+
 /* Interrupt Enable Clear Register 1 */
 #define VIM_REQENACLR1_
+
 /* Interrupt Enable Clear Register 2 */
 #define VIM_REQENACLR2_
+
 /* Wake-up Enable Set Register 0 */
 #define VIM_WAKEENASET0_
+
 /* Wake-up Enable Set Register 1 */
 #define VIM_WAKEENASET1_
+
 /* Wake-up Enable Set Register 2 */
 #define VIM_WAKEENASET2_
+
 /* Wake-up Enable Clear Register 0 */
 #define VIM_WAKEENACLR0_
+
 /* Wake-up Enable Clear Register 1 */
 #define VIM_WAKEENACLR1_
+
 /* Wake-up Enable Clear Register 2 */
 #define VIM_WAKEENACLR2_
+
 /* IRQ Interrupt Vector Register */
 #define VIM_IRQVECREG_
+
 /* FIQ Interrupt Vector Register */
 #define VIM_FIQVECREG_
+
 /* Capture Event Register */
 #define VIM_CAPEVT_
 

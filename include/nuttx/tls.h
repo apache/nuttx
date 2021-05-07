@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <nuttx/lib/getopt.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,6 +71,26 @@
  *
  * The stack memory is fully accessible to user mode threads.  TLS is not
  * available from interrupt handlers (nor from the IDLE thread).
+ *
+ * The following diagram represent the typic stack layout:
+ *
+ *      Push Down             Push Up
+ *   +-------------+      +-------------+ <- Stack memory allocation
+ *   |  TLS Data   |      |  TLS Data   |
+ *   +-------------+      +-------------+
+ *   | Task Data*  |      | Task Data*  |
+ *   +-------------+      +-------------+
+ *   |  Arguments  |      |  Arguments  |
+ *   +-------------+      +-------------+ |
+ *   |             |      |             | v
+ *   | Available   |      | Available   |
+ *   |   Stack     |      |   Stack     |
+ *   |             |      |             |
+ *   |             |      |             |
+ *   |             | ^    |             |
+ *   +-------------+ |    +-------------+
+ *
+ *  Task data is allocated in the main's thread's stack only
  */
 
 struct tls_info_s
@@ -79,6 +99,14 @@ struct tls_info_s
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
   int tl_errno;                        /* Per-thread error number */
+};
+
+struct task_info_s
+{
+  struct tls_info_s ta_tls;    /* Must be first field */
+#ifndef CONFIG_BUILD_KERNEL
+  struct getopt_s   ta_getopt; /* Globals used by getopt() */
+#endif
 };
 
 /****************************************************************************
@@ -187,5 +215,22 @@ int tls_set_value(int tlsindex, uintptr_t tlsvalue);
 #ifndef CONFIG_TLS_ALIGNED
 FAR struct tls_info_s *tls_get_info(void);
 #endif
+
+/****************************************************************************
+ * Name: task_get_info
+ *
+ * Description:
+ *   Return a reference to the task_info_s structure.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   A reference to the task-specific task_info_s structure is return on
+ *   success.  NULL would be returned in the event of any failure.
+ *
+ ****************************************************************************/
+
+FAR struct task_info_s *task_get_info(void);
 
 #endif /* __INCLUDE_NUTTX_TLS_H */

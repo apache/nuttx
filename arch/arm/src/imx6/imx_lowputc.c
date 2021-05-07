@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_lowputc.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -61,6 +46,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef IMX_HAVE_UART_CONSOLE
@@ -98,6 +84,7 @@
 #endif
 
 /* Clocking *****************************************************************/
+
 /* the UART module receives two clocks, a peripheral_clock (ipg_clk) and the
  * module_clock (ipg_perclk).   The peripheral_clock is used as write clock
  * of the TxFIFO, read clock of the RxFIFO and synchronization of the modem
@@ -295,13 +282,13 @@ void imx_lowsetup(void)
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_uart_configure
  *
  * Description:
  *   Configure a UART for non-interrupt driven operation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef IMX_HAVE_UART
 int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
@@ -415,7 +402,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
    */
 
   tmp   = ((uint64_t)refclk << (16 - 4)) / config->baud;
-  DEBUGASSERT(tmp < 0x0000000100000000LL);
+  DEBUGASSERT(tmp < 0x0000000100000000ll);
   ratio = (b16_t)tmp;
 
   /* Pick a scale factor that gives us about 14 bits of accuracy.
@@ -574,26 +561,29 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 }
 #endif /* IMX_HAVE_UART */
 
-/************************************************************************************
+/****************************************************************************
  * Name: imx_lowputc
  *
  * Description:
- *   Output a byte with as few system dependencies as possible.  This will even work
- *   BEFORE the console is initialized if we are booting from U-Boot (and the same
- *   UART is used for the console, of course.)
+ *   Output a byte with as few system dependencies as possible.  This will
+ *   even work BEFORE the console is initialized if we are booting from
+ *   U-Boot (and the same UART is used for the console, of course.)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(IMX_HAVE_UART) && defined(CONFIG_DEBUG_FEATURES)
 void imx_lowputc(int ch)
 {
-  /* Poll the TX fifo trigger level bit of the UART status register. When the TXFE
-   * bit is non-zero, the TX Buffer FIFO is empty.
+  /* Poll the TX fifo trigger level bit of the UART status register. When the
+   * TXFE bit is non-zero, the TX Buffer FIFO is empty.
    */
 
-  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
+          UART_USR2_TXFE) == 0);
 
-  /* If the character to output is a newline, then pre-pend a carriage return */
+  /* If the character to output is a newline, then pre-pend a carriage
+   * return
+   */
 
   if (ch == '\n')
     {
@@ -601,21 +591,23 @@ void imx_lowputc(int ch)
 
       putreg32((uint32_t)'\r', IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 
-      /* Wait for the tranmsit register to be emptied. When the TXFE bit is non-zero,
-       * the TX Buffer FIFO is empty.
+      /* Wait for the tranmsit register to be emptied. When the TXFE bit is
+       * non-zero, the TX Buffer FIFO is empty.
        */
 
-      while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+      while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
+              UART_USR2_TXFE) == 0);
     }
 
   /* Send the character by writing it into the UART_TXD register. */
 
   putreg32((uint32_t)ch, IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 
-  /* Wait for the tranmsit register to be emptied. When the TXFE bit is non-zero,
-   * the TX Buffer FIFO is empty.
+  /* Wait for the tranmsit register to be emptied. When the TXFE bit is
+   * non-zero, the TX Buffer FIFO is empty.
    */
 
-  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) & UART_USR2_TXFE) == 0);
+  while ((getreg32(IMX_CONSOLE_VBASE + UART_USR2_OFFSET) &
+          UART_USR2_TXFE) == 0);
 }
 #endif

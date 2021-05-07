@@ -1,55 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_lcdc.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_LCDC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_LCDC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_LCDC_NCLUT              256    /* Number of entries in the CLUTs */
 
-/* LCDC Register Offsets ************************************************************/
+/* LCDC Register Offsets ****************************************************/
 
 #define SAM_LCDC_LCDCFG0_OFFSET     0x0000 /* LCD Controller Configuration Register 0 */
 #define SAM_LCDC_LCDCFG1_OFFSET     0x0004 /* LCD Controller Configuration Register 1 */
@@ -240,6 +225,7 @@
 #  define SAM_LCDC_PPCFG5_OFFSET    0x0580 /* Post Processing Configuration Register 5 */
 #endif
                                            /* 0x0584-0x05fc Reserved */
+
 /* 0x0600-0x08fc Base CLUT Registers 0-255 */
 
 #define SAM_LCDC_BASECLUT_OFFSET(n) (0x0600 + ((n) << 2))
@@ -262,7 +248,8 @@
 #  define SAM_LCDC_HCRCLUT_OFFSET(n) (0x1600 + ((n) << 2))
 #endif
                                            /* 0x1a00-0x1fe4 Reserved */
-/* LCDC Register Addresses *********************************************************/
+
+/* LCDC Register Addresses **************************************************/
 
 #define SAM_LCDC_LCDCFG0            (SAM_LCDC_VBASE+SAM_LCDC_LCDCFG0_OFFSET)
 #define SAM_LCDC_LCDCFG1            (SAM_LCDC_VBASE+SAM_LCDC_LCDCFG1_OFFSET)
@@ -472,7 +459,7 @@
 #  define SAM_LCDC_HCRCLUT(n)       (SAM_LCDC_VBASE+SAM_LCDC_HCRCLUT_OFFSET(n))
 #endif
 
-/* LCDC Register Bit Definitions ***************************************************/
+/* LCDC Register Bit Definitions ********************************************/
 
 /* LCD Controller Configuration Register 0 */
 
@@ -600,6 +587,7 @@
 #  define LCDC_LCDCFG6_PWMPS_DIV16  (4 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/16 */
 #  define LCDC_LCDCFG6_PWMPS_DIV32  (5 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/32 */
 #  define LCDC_LCDCFG6_PWMPS_DIV64  (6 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/64 */
+
 #define LCDC_LCDCFG6_PWMPOL         (1 << 4)  /* Bit 4: LCD Controller PWM Signal Polarity */
 #define LCDC_LCDCFG6_PWMCVAL_SHIFT  (8)       /* Bits 8-15: LCD Controller PWM Compare Value */
 #define LCDC_LCDCFG6_PWMCVAL_MASK   (0xff << LCDC_LCDCFG6_PWMCVAL_SHIFT)
@@ -631,8 +619,10 @@
 #define LCDC_LCDSR_PWM              (1 << 3)  /* Bit 3:  LCDC PWM Signal Status */
 #define LCDC_LCDSR_SIP              (1 << 4)  /* Bit 4:  Synchronization In Progress */
 
-/* LCD Controller Interrupt Enable Register, LCD Controller Interrupt Disable Register,
- * LCD Controller Interrupt Mask Register, and LCD Controller Interrupt Status Register
+/* LCD Controller Interrupt Enable Register,
+ * LCD Controller Interrupt Disable Register,
+ * LCD Controller Interrupt Mask Register,
+ * and LCD Controller Interrupt Status Register
  */
 
 #define LCDC_LCDINT_SOF             (1 << 0)  /* Bit 0:  Start of Frame Interrupt */
@@ -682,8 +672,10 @@
 #define LCDC_BASECHSR_UPDATE        (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
 #define LCDC_BASECHSR_A2Q           (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
-/* Base Layer Interrupt Enable Register, Base Layer Interrupt Disable Register,
- * Base Layer Interrupt Mask Register, and Base Layer Interrupt Status Register.
+/* Base Layer Interrupt Enable Register,
+ * Base Layer Interrupt Disable Register,
+ * Base Layer Interrupt Mask Register,
+ * and Base Layer Interrupt Status Register.
  */
 
 #define LCDC_BASEINT_DMA            (1 << 2)  /* Bit 2:  End of DMA Transfer */
@@ -697,6 +689,7 @@
 #define LCDC_BASEHEAD_MASK          (0xfffffffc) /* Bits 2-31: DMA Head Pointer */
 
 /* Base DMA Address Register (32-bit address) */
+
 /* Base DMA Control Register */
 
 #define LCDC_BASECTRL_DFETCH        (1 << 0)  /* Bit 0:  Transfer Descriptor Fetch Enable */
@@ -738,6 +731,7 @@
 #  define LCDC_BASECFG1_25BPP_TRGB1888 (11 << LCDC_BASECFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
 #  define LCDC_BASECFG1_32BPP_ARGB8888 (12 << LCDC_BASECFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
 #  define LCDC_BASECFG1_32BPP_RGBA8888 (13 << LCDC_BASECFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
+
 #define LCDC_BASECFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
 #define LCDC_BASECFG1_CLUTMODE_MASK    (3 << LCDC_BASECFG1_CLUTMODE_SHIFT)
 #  define LCDC_BASECFG1_CLUTMODE_1BPP  (0 << LCDC_BASECFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
@@ -746,6 +740,7 @@
 #  define LCDC_BASECFG1_CLUTMODE_8BPP  (3 << LCDC_BASECFG1_CLUTMODE_SHIFT) /* CLUT input 8 bits per pixel */
 
 /* Base Configuration register 2 (32-bit value) */
+
 /* Base Configuration register 3 */
 
 #define LCDC_BASECFG3_BDEF_SHIFT    (0)       /* Bits 0-7: B Default */
@@ -858,6 +853,7 @@
 #  define LCDC_OVR1CFG1_25BPP_TRGB1888 (11 << LCDC_OVR1CFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
 #  define LCDC_OVR1CFG1_32BPP_ARGB8888 (12 << LCDC_OVR1CFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
 #  define LCDC_OVR1CFG1_32BPP_RGBA8888 (13 << LCDC_OVR1CFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
+
 #define LCDC_OVR1CFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
 #define LCDC_OVR1CFG1_CLUTMODE_MASK    (3 << LCDC_OVR1CFG1_CLUTMODE_SHIFT)
 #  define LCDC_OVR1CFG1_CLUTMODE_1BPP  (0 << LCDC_OVR1CFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
@@ -884,6 +880,7 @@
 #  define LCDC_OVR1CFG3_YSIZE(n)    ((uint32_t)(n) << LCDC_OVR1CFG3_YSIZE_SHIFT)
 
 /* Overlay 1 Configuration 4 Register (32-bit horizontal stride value) */
+
 /* Overlay 1 Configuration 5 Register (32-bit pixel stride value) */
 
 /* Overlay 1 Configuration 6 Register */
@@ -1014,6 +1011,7 @@
 #  define LCDC_OVR2CFG1_25BPP_TRGB1888 (11 << LCDC_OVR2CFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
 #  define LCDC_OVR2CFG1_32BPP_ARGB8888 (12 << LCDC_OVR2CFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
 #  define LCDC_OVR2CFG1_32BPP_RGBA8888 (13 << LCDC_OVR2CFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
+
 #define LCDC_OVR2CFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
 #define LCDC_OVR2CFG1_CLUTMODE_MASK    (3 << LCDC_OVR2CFG1_CLUTMODE_SHIFT)
 #  define LCDC_OVR2CFG1_CLUTMODE_1BPP  (0 << LCDC_OVR2CFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
@@ -1040,7 +1038,8 @@
 #  define LCDC_OVR2CFG3_YSIZE(n)    ((uint32_t)(n) << LCDC_OVR2CFG3_YSIZE_SHIFT)
 
 /* Overlay 2 Configuration 4 Register (32-bit horizontal stride value) */
-/* Overlay 2 Configuration 5 Register (32-bit pixel stride value)*/
+
+/* Overlay 2 Configuration 5 Register (32-bit pixel stride value) */
 
 /* Overlay 2 Configuration 6 Register */
 
@@ -1112,8 +1111,10 @@
 #define LCDC_HEOCHSR_UPDATE         (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
 #define LCDC_HEOCHSR_A2Q            (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
-/* High-End Overlay Interrupt Enable Register, High-End Overlay Interrupt Disable Register,
- * High-End Overlay Interrupt Mask Register, and High-End Overlay Interrupt Status Register
+/* High-End Overlay Interrupt Enable Register,
+ * High-End Overlay Interrupt Disable Register,
+ * High-End Overlay Interrupt Mask Register,
+ * and High-End Overlay Interrupt Status Register
  */
 
 #define LCDC_HEOINT_DMA             (1 << 2)  /* Bit 2:  End of DMA Transfer */
@@ -1148,7 +1149,9 @@
 #define LCDC_HEOCTRL_DONEIEN        (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
 
 /* High-End Overlay DMA Next Register (32-bit address) */
+
 /* High-End Overlay U-UV DMA Head Register (32-bit address) */
+
 /* High-End Overlay U-UV DMA Address Register (32-bit address) */
 
 /* High-End Overlay U-UV DMA Control Register */
@@ -1160,7 +1163,9 @@
 #define LCDC_HEOUCTRL_DONEIEN       (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
 
 /* High-End Overlay U-UV DMA Next Register (32-bit address) */
+
 /* High-End Overlay V DMA Head Register (32-bit address) */
+
 /* High-End Overlay V DMA Address Register )32-bit address) */
 
 /* High-End Overlay V DMA Control Register */
@@ -1212,12 +1217,14 @@
 #  define LCDC_HEOCFG1_25BPP_TRGB1888 (11 << LCDC_HEOCFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
 #  define LCDC_HEOCFG1_32BPP_ARGB8888 (12 << LCDC_HEOCFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
 #  define LCDC_HEOCFG1_32BPP_RGBA8888 (13 << LCDC_HEOCFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
+
 #define LCDC_HEOCFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
 #define LCDC_HEOCFG1_CLUTMODE_MASK    (3 << LCDC_HEOCFG1_CLUTMODE_SHIFT)
 #  define LCDC_HEOCFG1_CLUTMODE_1BPP  (0 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
 #  define LCDC_HEOCFG1_CLUTMODE_2BPP  (1 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 2 bits per pixel */
 #  define LCDC_HEOCFG1_CLUTMODE_4BPP  (2 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 4 bits per pixel */
 #  define LCDC_HEOCFG1_CLUTMODE_8BPP  (3 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 8 bits per pixel */
+
 #define LCDC_HEOCFG1_YUVMODE_SHIFT    (12)      /* Bits 12-15: YUV Mode Input Selection */
 #define LCDC_HEOCFG1_YUVMODE_MASK     (15 << LCDC_HEOCFG1_YUVMODE_SHIFT)
 #  define LCDC_HEOCFG1_32BPP_AYCBCR           (0 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 32 bpp AYCbCr 444 */
@@ -1229,6 +1236,7 @@
 #  define LCDC_HEOCFG1_16BPP_YCBCR_PLANAR     (6 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Planar 422 YCbCr */
 #  define LCDC_HEOCFG1_12BPP_YCBCR_SEMIPLANAR (7 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 12 bpp Semiplanar 420 YCbCr */
 #  define LCDC_HEOCFG1_12BPP_YCBCR_PLANAR     (8 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 12 bpp Planar 420 YCbCr */
+
 #define LCDC_HEOCFG1_YUV422ROT        (1 << 16) /* Bit 16: YUV 4:2:2 Rotation */
 #define LCDC_HEOCFG1_YUV422SWP        (1 << 17) /* Bit 17: YUV 4:2:2 SWAP */
 #define LCDC_HEOCFG1_DSCALEOPT        (1 << 20) /* Bit 20: Down Scaling Bandwidth Optimization */
@@ -1260,10 +1268,21 @@
 #define LCDC_HEOCFG4_YMEMSIZE_MASK  (0x7ff << LCDC_HEOCFG4_YMEMSIZE_SHIFT)
 #  define LCDC_HEOCFG4_YMEMSIZE(n)  ((uint32_t)(n) << LCDC_HEOCFG4_YMEMSIZE_SHIFT)
 
-/* High-End Overlay Configuration Register 5 (32-bit horizontal stride value) */
-/* High-End Overlay Configuration Register 6 (32-bit pixel stride value) */
-/* High-End Overlay Configuration Register 7 (32-bit horizontal stride value) */
-/* High-End Overlay Configuration Register 8 (32-bit pixel stride value) */
+/* High-End Overlay Configuration Register 5
+ * (32-bit horizontal stride value)
+ */
+
+/* High-End Overlay Configuration Register 6
+ * (32-bit pixel stride value)
+ */
+
+/* High-End Overlay Configuration Register 7
+ * (32-bit horizontal stride value)
+ */
+
+/* High-End Overlay Configuration Register 8
+ * (32-bit pixel stride value)
+ */
 
 /* High-End Overlay Configuration Register 9 */
 
@@ -1659,8 +1678,10 @@
 #  define LCDC_HCRCHSR_UPDATE       (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
 #  define LCDC_HCRCHSR_A2Q          (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
-/* Hardware Cursor Interrupt Enable Register, Hardware Cursor Interrupt Disable Register,
- * Hardware Cursor Interrupt Mask Register, and Hardware Cursor Interrupt Status Register
+/* Hardware Cursor Interrupt Enable Register,
+ * Hardware Cursor Interrupt Disable Register,
+ * Hardware Cursor Interrupt Mask Register,
+ * and Hardware Cursor Interrupt Status Register
  */
 
 #  define LCDC_HCRINT_DMA           (1 << 2)  /* Bit 2:  End of DMA Transfer */
@@ -1716,6 +1737,7 @@
 #    define LCDC_HCRCFG1_25BPP_TRGB1888 (11 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
 #    define LCDC_HCRCFG1_32BPP_ARGB8888 (12 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
 #    define LCDC_HCRCFG1_32BPP_RGBA8888 (13 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
+
 #  define LCDC_HCRCFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
 #  define LCDC_HCRCFG1_CLUTMODE_MASK    (3 << LCDC_HCRCFG1_CLUTMODE_SHIFT)
 #    define LCDC_HCRCFG1_CLUTMODE_1BPP  (0 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
@@ -1741,7 +1763,9 @@
 #  define LCDC_HCRCFG3_YSIZE_MASK   (0x7ff << LCDC_HCRCFG3_YSIZE_SHIFT)
 #    define LCDC_HCRCFG3_YSIZE(n)   ((uint32_t)(n) << LCDC_HCRCFG3_YSIZE_SHIFT)
 
-/* Hardware Cursor Configuration 4 Register (32-bit horizontal stride value) */
+/* Hardware Cursor Configuration 4 Register
+ * (32-bit horizontal stride value)
+ */
 
 /* Hardware Cursor Configuration 6 Register */
 
@@ -1813,8 +1837,10 @@
 #  define LCDC_PPCHSR_UPDATE        (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
 #  define LCDC_PPCHSR_A2Q           (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
-/* Post Processing Interrupt Enable Register, Post Processing Interrupt Disable Register,
- * Post Processing Interrupt Mask Register, and Post Processing Interrupt Status Register
+/* Post Processing Interrupt Enable Register,
+ * Post Processing Interrupt Disable Register,
+ * Post Processing Interrupt Mask Register,
+ * and Post Processing Interrupt Status Register
  */
 
 #  define LCDC_PPINT_DMA            (1 << 2)  /* Bit 2:  End of DMA Transfer */
@@ -1860,6 +1886,7 @@
 #    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE1 (4 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 1) */
 #    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE2 (5 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 2) */
 #    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE3 (6 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 3) */
+
 #  define LCDC_PPCFG1_ITUBT601                 (1 << 4)  /* Bit 4:  Color Space Conversion U */
 
 /* Post Processing Configuration Register 2 (32-bit horizontal stride) */
@@ -1978,11 +2005,13 @@
 #    define LCDC_HCRCLUT_ACLUT(n)   ((uint32_t)(n) << LCDC_HCRCLUT_ACLUT_SHIFT)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA channel descriptor.  This descriptor must be aligned on a 64-bit boundary. */
+/* DMA channel descriptor.
+ *  This descriptor must be aligned on a 64-bit boundary.
+ */
 
 struct sam_dscr_s
 {

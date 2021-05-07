@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_rtc_lowerhalf.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -113,6 +98,7 @@ struct stm32_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Prototypes for static methods in struct rtc_ops_s */
 
 static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
@@ -125,7 +111,7 @@ static bool stm32_havesettime(FAR struct rtc_lowerhalf_s *lower);
 static int stm32_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
 static int stm32_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo);
+                            FAR const struct lower_setrelative_s *alarminfo);
 static int stm32_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
 static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
@@ -134,13 +120,14 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 
 #ifdef CONFIG_RTC_PERIODIC
 static int stm32_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setperiodic_s *alarminfo);
+                            FAR const struct lower_setperiodic_s *alarminfo);
 static int stm32_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* STM32 RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -286,7 +273,7 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
   ret = up_rtc_gettime(&ts);
   if (ret < 0)
     {
-      goto errout_with_errno;
+      goto errout;
     }
 
   /* Convert the one second epoch time to a struct tm.  This operation
@@ -296,15 +283,15 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime))
     {
-      goto errout_with_errno;
+      ret = -get_errno();
+      goto errout;
     }
 
   return OK;
 
-errout_with_errno:
-  ret = get_errno();
-  DEBUGASSERT(ret > 0);
-  return -ret;
+errout:
+  DEBUGASSERT(ret < 0);
+  return ret;
 
 #else
   time_t timer;
@@ -786,8 +773,9 @@ static int stm32_rdalarm(FAR struct rtc_lowerhalf_s *lower,
  * Name: stm32_periodic_callback
  *
  * Description:
- *   This is the function that is called from the RTC driver when the periodic
- *   wakeup goes off.  It just invokes the upper half drivers callback.
+ *   This is the function that is called from the RTC driver when the
+ *   periodic wakeup goes off.  It just invokes the upper half drivers
+ *   callback.
  *
  * Input Parameters:
  *   None

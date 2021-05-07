@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/nx/nxtk.h
  *
- *   Copyright (C) 2008-2012, 2015, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -47,6 +32,7 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_NXTK_BORDERWIDTH
@@ -193,7 +179,7 @@ int nxtk_block(NXTKWINDOW hfwnd, FAR void *arg);
  * Name: nxtk_synch
  *
  * Description:
- *   This interface can be used to sychronize the window client with the
+ *   This interface can be used to synchronize the window client with the
  *   NX server.  It really just implements an 'echo':  A synch message is
  *   sent from the window client to the server which then responds
  *   immediately by sending the NXEVENT_SYNCHED back to the windows client.
@@ -321,8 +307,8 @@ int nxtk_raise(NXTKWINDOW hfwnd);
  *   bottom of the display.
  *
  * Input Parameters:
- *   hfwnd - the window to be lowered.  This must have been previously created
- *           by nxtk_openwindow().
+ *   hfwnd - the window to be lowered.  This must have been previously
+ *           created by nxtk_openwindow().
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -393,7 +379,8 @@ bool nxtk_ishidden(NXTKWINDOW hfwnd);
  * Name: nxtk_fillwindow
  *
  * Description:
- *  Fill the specified rectangle in the client window with the specified color
+ *  Fill the specified rectangle in the client window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow
@@ -437,7 +424,8 @@ int nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nxtk_filltrapwindow
  *
  * Description:
- *  Fill the specified trapezoid in the client window with the specified color
+ *  Fill the specified trapezoid in the client window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The window handle returned by nxtk_openwindow
@@ -474,9 +462,11 @@ int nxtk_filltrapwindow(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+int nxtk_drawlinewindow(NXTKWINDOW hfwnd,
+                        FAR struct nxgl_vector_s *vector,
                         nxgl_coord_t width,
-                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES], uint8_t caps);
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                                             uint8_t caps);
 
 /****************************************************************************
  * Name: nxtk_drawcirclewindow
@@ -527,7 +517,8 @@ int nxtk_fillcirclewindow(NXWINDOW hfwnd,
  * Name: nxtk_movewindow
  *
  * Description:
- *   Move a rectangular region within the client sub-window of a framed window
+ *   Move a rectangular region within the client sub-window of a framed
+ *   window
  *
  * Input Parameters:
  *   hfwnd   - The client sub-window within which the move is to be done.
@@ -559,8 +550,8 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *   src    - The start of the source image(s). This is an array source
  *            images of size CONFIG_NX_NPLANES.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in sub-window coordinates, however, the
- *            origin may lie outside of the sub-window display.
+ *            Both dest and origin are in sub-window coordinates, however,
+ *             the origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in pixels.
  *
  * Returned Value:
@@ -583,7 +574,8 @@ int nxtk_bitmapwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *dest,
  *   hfwnd  - The handle returned by nxtk_openwindow
  *   height - The requested height of the toolbar in pixels
  *   cb     - Callbacks used to process toolbar events
- *   arg    - User provided value that will be returned with toolbar callbacks.
+ *   arg    - User provided value that will be returned with toolbar
+ *            callbacks.
  *
  * Returned Value:
  *   OK on success; ERROR on failure with errno set appropriately
@@ -636,7 +628,8 @@ int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds);
  * Name: nxtk_filltoolbar
  *
  * Description:
- *  Fill the specified rectangle in the toolbar sub-window with the specified color
+ *  Fill the specified rectangle in the toolbar sub-window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -680,7 +673,8 @@ int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  * Name: nxtk_filltraptoolbar
  *
  * Description:
- *  Fill the specified trapezoid in the toolbar sub-window with the specified color
+ *  Fill the specified trapezoid in the toolbar sub-window with the specified
+ *  color
  *
  * Input Parameters:
  *   hfwnd - The handle returned by nxtk_openwindow
@@ -718,9 +712,11 @@ int nxtk_filltraptoolbar(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
+int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,
+                         FAR struct nxgl_vector_s *vector,
                          nxgl_coord_t width,
-                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES], uint8_t caps);
+                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES],
+                                              uint8_t caps);
 
 /****************************************************************************
  * Name: nxtk_drawcircletoolbar
@@ -771,7 +767,8 @@ int nxtk_fillcircletoolbar(NXWINDOW hfwnd,
  * Name: nxtk_movetoolbar
  *
  * Description:
- *   Move a rectangular region within the toolbar sub-window of a framed window
+ *   Move a rectangular region within the toolbar sub-window of a framed
+ *   window
  *
  * Input Parameters:
  *   hfwnd  - The sub-window containing the toolbar within which the move is
@@ -803,8 +800,8 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
  *            will receive the bit map.
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in sub-window coordinates, however, the
- *            origin may lie outside of the sub-window display.
+ *            Both dest and origin are in sub-window coordinates, however,
+ *            the origin may lie outside of the sub-window display.
  *   stride - The width of the full source image in bytes.
  *
  * Returned Value:

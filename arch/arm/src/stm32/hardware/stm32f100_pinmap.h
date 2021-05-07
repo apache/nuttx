@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f100_pinmap.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
@@ -36,22 +36,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F100_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F100_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Alternate Pin Functions: */
 
@@ -82,10 +82,11 @@
 #endif
 
 /* DAC
- * Note from RM0041, 11.2: "Once the DAC channelx is enabled, the corresponding
- * GPIO pin (PA4 or PA5) is automatically connected to the analog converter
- * output (DAC_OUTx). In order to avoid parasitic consumption, the PA4 or PA5
- * pin should first be configured to analog (AIN)."
+ * Note from RM0041, 11.2: "Once the DAC channelx is enabled, the
+ * corresponding GPIO pin (PA4 or PA5) is automatically connected to the
+ * analog converter output (DAC_OUTx). In order to avoid parasitic
+ * consumption, the PA4 or PA5 pin should first be configured to analog
+ * (AIN)."
  */
 
 #define GPIO_DAC1_OUT1      (GPIO_INPUT|GPIO_CNF_ANALOGIN|GPIO_MODE_INPUT|GPIO_PORTA|GPIO_PIN4)

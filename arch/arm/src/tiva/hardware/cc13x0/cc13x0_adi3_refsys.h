@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_adi3_refsys.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,24 +37,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_ADI3_REFSYS_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_ADI3_REFSYS_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 #include "hardware/tiva_ddi.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* ADI3 REFSYS Register Offsets *************************************************************************************/
+/* ADI3 REFSYS Register Offsets *********************************************/
 
 #define TIVA_ADI3_REFSYS_SPARE0_OFFSET                        0x0001  /* Analog Test Control */
 #define TIVA_ADI3_REFSYS_REFSYSCTL0_OFFSET                    0x0002
@@ -67,7 +68,7 @@
 #define TIVA_ADI3_REFSYS_DCDCCTL4_OFFSET                      0x000a
 #define TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET                      0x000b
 
-/* ADI3 REFSYS Register Addresses ***********************************************************************************/
+/* ADI3 REFSYS Register Addresses *******************************************/
 
 #define TIVA_ADI3_REFSYS_SPARE0                               (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_SPARE0_OFFSET)
 #define TIVA_ADI3_REFSYS_REFSYSCTL0                           (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_REFSYSCTL0_OFFSET)
@@ -81,7 +82,9 @@
 #define TIVA_ADI3_REFSYS_DCDCCTL4                             (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_DCDCCTL4_OFFSET)
 #define TIVA_ADI3_REFSYS_DCDCCTL5                             (TIVA_ADI3_BASE + TIVA_ADI3_REFSYS_DCDCCTL5_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x0_ddi.h */
+/* Offsets may also be used in conjunction with access as described in
+ * cc13x0_ddi.h
+ */
 
 #define TIVA_ADI3_REFSYS_DIR                                  (TIVA_ADI3_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_ADI3_REFSYS_SET                                  (TIVA_ADI3_BASE + TIVA_DDI_SET_OFFSET)
@@ -90,7 +93,7 @@
 #define TIVA_ADI3_REFSYS_MASK8B                               (TIVA_ADI3_BASE + TIVA_DDI_MASK8B_OFFSET)
 #define TIVA_ADI3_REFSYS_MASK16B                              (TIVA_ADI3_BASE + TIVA_DDI_MASK16B_OFFSET)
 
-/* ADI3 REFSYS Bitfield Definitions *********************************************************************************/
+/* ADI3 REFSYS Bitfield Definitions *****************************************/
 
 /* TIVA_ADI3_REFSYS_SPARE0 */
 
@@ -181,7 +184,8 @@
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_DEFAULT              (0 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Default, about 1.63V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_TYPICAL              (5 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT)  /* Typical voltage after trim voltage 1.71V */
 #  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MAX                  (21 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Max voltage 1.96V */
-#  define ADI3_REFS */YS_DCDCCTL0_VDDR_TRIM_MIN               (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
+#  define ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_MIN                  (22 << ADI3_REFSYS_DCDCCTL0_VDDR_TRIM_SHIFT) /* Min voltage 1.47V */
+
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT                  (5)       /* Bits 5-7:  Set charge and re-charge current level */
                                                                         /*            2's complement encoding */
 #define ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_MASK                   (7 << ADI3_REFSYS_DCDCCTL0_GLDO_ISRC_SHIFT)
@@ -200,6 +204,7 @@
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_TYPICAL        (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Typical voltage after trim voltage 1.52V */
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_MAX            (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Max voltage 1.96V */
 #  define ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_MIN            (nn << ADI3_REFSYS_DCDCCTL1_VDDR_TRIM_SLEEP_SHIFT) /* Min voltage 1.47V */
+
 #define ADI3_REFSYS_DCDCCTL1_VDDR_OK_HYST                     (1 << 5)  /* Bit 5:  Increase the hysteresis for when VDDR is considered ok */
                                                                         /*         0: Hysteresis = 60mV; 1: Hysteresis = 70mV */
 #define ADI3_REFSYS_DCDCCTL1_IPTAT_TRIM_SHIFT                 (6)       /* Bits 6-7: Trim GLDO bias current */
@@ -221,6 +226,7 @@
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_PASSGATE               (2 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* Pass transistor gate voltage connected to test bus */
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_IB1U                   (4 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* 1uA bias current connected to test bus */
 #  define ADI3_REFSYS_DCDCCTL2_TESTSEL_VDDROK                 (8 << ADI3_REFSYS_DCDCCTL2_TESTSEL_SHIFT) /* VDDR_OK connected to test bus */
+
 #define ADI3_REFSYS_DCDCCTL2_BIAS_DIS                         (1 << 4)  /* Bit 4:  Disable dummy bias current */
 #define ADI3_REFSYS_DCDCCTL2_TEST_VDDR                        (1 << 5)  /* Bit 5:  Connect VDDR to ATEST bus */
 #define ADI3_REFSYS_DCDCCTL2_TURNON_EA_SW                     (1 << 6)  /* Bit 6: Turns on GLDO error amp switch */

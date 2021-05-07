@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_callback.c
+ * net/can/can_callback.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -135,7 +135,7 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
         }
 #endif
 
-      /* Try to lock the network when successfull send data to the listener */
+      /* Try to lock the network when successful send data to the listener */
 
       if (net_trylock() == OK)
         {

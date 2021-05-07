@@ -519,7 +519,7 @@ config SAMD5E5_TICKLESS_ONESHOT
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the one-shot timer needed by the OS.
-		NOTE: Use even timers (0, 2 or 4) because timers are program 
+		NOTE: Use even timers (0, 2 or 4) because timers are program
 		in 32-bit mode (1, 3 and 5 are slaves).
 
 config SAMD5E5_TICKLESS_FREERUN
@@ -529,7 +529,7 @@ config SAMD5E5_TICKLESS_FREERUN
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the free-running timer needed by the OS.
-		NOTE: Use even timers (0, 2 or 4) because timers are program 
+		NOTE: Use even timers (0, 2 or 4) because timers are program
 		in 32-bit mode (1, 3 and 5 are slaves).
 
 endif

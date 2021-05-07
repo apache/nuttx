@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/nx/nxterm.h
  *
- *   Copyright (C) 2012, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -68,25 +53,28 @@
  * Output text/graphics options:
  *
  * CONFIG_NXTERM_BPP
- *   Currently, NxTerm supports only a single pixel depth. This
- *   configuration setting must be provided to support that single pixel depth.
+ *   Currently, NxTerm supports only a single pixel depth.
+ *   This configuration setting must be provided to support that single
+ *   pixel depth.
  *   Default: The smallest enabled pixel depth. (see CONFIG_NX_DISABLE_*BPP)
  * CONFIG_NXTERM_CURSORCHAR
  *   The bitmap code to use as the cursor.  Default '_'
  * CONFIG_NXTERM_MXCHARS
  *   NxTerm needs to remember every character written to the console so
  *   that it can redraw the window. This setting determines the size of some
- *   internal memory allocations used to hold the character data. Default: 128.
+ *   internal memory allocations used to hold the character data.
+ *   Default: 128.
  * CONFIG_NXTERM_CACHESIZE
  *   NxTerm supports caching of rendered fonts. This font caching is required
  *   for two reasons: (1) First, it improves text performance, but more
- *   importantly (2) it preserves the font memory. Since the NX server runs on
- *   a separate server thread, it requires that the rendered font memory persist
- *   until the server has a chance to render the font. (NOTE: There is still
- *   inherently a race condition in this!). Unfortunately, the font cache would
- *   be quite large if all fonts were saved. The CONFIG_NXTERM_CACHESIZE setting
- *   will control the size of the font cache (in number of glyphs). Only that
- *   number of the most recently used glyphs will be retained. Default: 16.
+ *   importantly (2) it preserves the font memory. Since the NX server runs
+ *   on a separate server thread, it requires that the rendered font memory
+ *   persist until the server has a chance to render the font. (NOTE: There
+ *   is still inherently a race condition in this!). Unfortunately, the font
+ *   cache would be quite large if all fonts were saved.
+ *   The CONFIG_NXTERM_CACHESIZE setting will control the size of the font
+ *   cache (in number of glyphs). Only that number of the most recently
+ *   used glyphs will be retained. Default: 16.
  * CONFIG_NXTERM_LINESEPARATION
  *   This the space (in rows) between each row of test.  Default: 0
  * CONFIG_NXTERM_NOWRAP
@@ -154,8 +142,11 @@
 #    define CONFIG_NXTERM_BPP 8
 #  elif !defined(CONFIG_NX_DISABLE_16BPP)
 #    define CONFIG_NXTERM_BPP 16
-//#elif !defined(CONFIG_NX_DISABLE_24BPP)
-//#    define CONFIG_NXTERM_BPP 24
+
+/* #elif !defined(CONFIG_NX_DISABLE_24BPP)
+ * #    define CONFIG_NXTERM_BPP 24
+ */
+
 #  elif !defined(CONFIG_NX_DISABLE_32BPP)
 #    define CONFIG_NXTERM_BPP 32
 #  else
@@ -325,7 +316,7 @@ NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo,
  *   the boardctl(BOARDIOC_NXTERM) interface.
  *
  * Input Parameters:
- *   hfwnd - A handle that will be used to access the window.  The window must
+ *   hfwnd - A handle that will be used to access the window. The window must
  *     persist and this handle must be valid for the life of the NX console.
  *   wndo - Describes the window and font to be used.  The information in
  *     this structure is copied and the original need not persist after

@@ -1,37 +1,22 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/sam_dac.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -78,7 +63,9 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure represents the internal state of a single SAMV7 DAC module */
+/* This structure represents the internal state of a single SAMV7 DAC
+ * module
+ */
 
 struct sam_dac_s
 {
@@ -149,7 +136,9 @@ static struct sam_chan_s g_dac1priv =
   .dro        = SAM_DACC_CDR0,
 #ifdef CONFIG_SAMV7_DAC_TRIGGER
   .reg_dacc_trigr_clear = DACC_TRIGR_TRGSEL0_MASK,
-  .reg_dacc_trigr_set   = DACC_TRIGR_TRGSEL0(CONFIG_SAMV7_DAC_TRIGGER_SELECT) | DACC_TRIGR_TRGEN0,
+  .reg_dacc_trigr_set   = DACC_TRIGR_TRGSEL0(
+                            CONFIG_SAMV7_DAC_TRIGGER_SELECT) |
+                            DACC_TRIGR_TRGEN0,
 #endif
 };
 
@@ -167,7 +156,9 @@ static struct sam_chan_s g_dac2priv =
   .dro        = SAM_DACC_CDR1,
 #ifdef CONFIG_SAMV7_DAC_TRIGGER
   .reg_dacc_trigr_clear = DACC_TRIGR_TRGSEL1_MASK,
-  .reg_dacc_trigr_set   = DACC_TRIGR_TRGSEL1(CONFIG_SAMV7_DAC_TRIGGER_SELECT) | DACC_TRIGR_TRGEN1,
+  .reg_dacc_trigr_set   = DACC_TRIGR_TRGSEL1(
+                            CONFIG_SAMV7_DAC_TRIGGER_SELECT) |
+                            DACC_TRIGR_TRGEN1,
 #endif
 };
 
@@ -252,8 +243,8 @@ static void dac_reset(FAR struct dac_dev_s *dev)
  * Description:
  *   Configure the DAC. This method is called the first time that the DAC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching DAC interrupts.  Interrupts
- *   are all disabled upon return.
+ *   This setup includes configuring and attaching DAC interrupts.
+ *   Interrupts are all disabled upon return.
  *
  * Input Parameters:
  *
@@ -380,9 +371,9 @@ static int dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
   DEBUGASSERT(priv && (freq_required > 0) && (channel >= 0 && channel <= 2));
 
   /* Set the timer/counter waveform mode the clock input. Use smallest
-   * MCK divisor of 8 to have highest clock resolution thus smallest frequency
-   * error. With 32 bit counter the lowest possible frequency of 1 Hz is easily
-   * supported.
+   * MCK divisor of 8 to have highest clock resolution thus smallest
+   * frequency error. With 32 bit counter the lowest possible frequency of
+   * 1 Hz is easily supported.
    */
 
   /* TODO Add support for TC_CMR_TCCLKS_PCK6 to reduce frequency error */
@@ -398,7 +389,8 @@ static int dac_timer_init(struct sam_dac_s *priv, uint32_t freq_required,
   priv->tc = sam_tc_allocate(channel, mode);
   if (!priv->tc)
     {
-      aerr("ERROR: Failed to allocate channel %d mode %08x\n", channel, mode);
+      aerr("ERROR: Failed to allocate channel %d mode %08x\n",
+            channel, mode);
       return -EINVAL;
     }
 
@@ -633,7 +625,8 @@ FAR struct dac_dev_s *sam_dac_initialize(int intf)
   ret = dac_module_init();
   if (ret < 0)
     {
-      aerr("ERROR: Failed to initialize the DAC peripheral module: %d\n", ret);
+      aerr("ERROR: Failed to initialize the DAC peripheral module: %d\n",
+            ret);
       return NULL;
     }
 

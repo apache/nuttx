@@ -1,35 +1,20 @@
 /****************************************************************************
  * sched/module/mod_insmod.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -79,6 +64,8 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
   binfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
   binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
   binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  binfo("  textalign:    %zu\n",   loadinfo->textalign);
+  binfo("  dataalign:    %zu\n",   loadinfo->dataalign);
   binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
   binfo("  filfd:        %d\n",    loadinfo->filfd);
   binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
@@ -92,8 +79,8 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
   binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
   binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
   binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  binfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  binfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  binfo("  e_phoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_phoff);
+  binfo("  e_shoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_shoff);
   binfo("  e_flags:      %08x\n",  loadinfo->ehdr.e_flags);
   binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
   binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
@@ -108,16 +95,16 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
           binfo("Sections %d:\n", i);
-          binfo("  sh_name:      %08x\n", shdr->sh_name);
-          binfo("  sh_type:      %08x\n", shdr->sh_type);
-          binfo("  sh_flags:     %08x\n", shdr->sh_flags);
-          binfo("  sh_addr:      %08x\n", shdr->sh_addr);
-          binfo("  sh_offset:    %d\n",   shdr->sh_offset);
-          binfo("  sh_size:      %d\n",   shdr->sh_size);
-          binfo("  sh_link:      %d\n",   shdr->sh_link);
-          binfo("  sh_info:      %d\n",   shdr->sh_info);
-          binfo("  sh_addralign: %d\n",   shdr->sh_addralign);
-          binfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          binfo("  sh_name:      %08x\n",  shdr->sh_name);
+          binfo("  sh_type:      %08x\n",  shdr->sh_type);
+          binfo("  sh_flags:     %08jx\n", (uintmax_t)shdr->sh_flags);
+          binfo("  sh_addr:      %08jx\n", (uintmax_t)shdr->sh_addr);
+          binfo("  sh_offset:    %ju\n",   (uintmax_t)shdr->sh_offset);
+          binfo("  sh_size:      %ju\n",   (uintmax_t)shdr->sh_size);
+          binfo("  sh_link:      %d\n",    shdr->sh_link);
+          binfo("  sh_info:      %d\n",    shdr->sh_info);
+          binfo("  sh_addralign: %ju\n",   (uintmax_t)shdr->sh_addralign);
+          binfo("  sh_entsize:   %ju\n",   (uintmax_t)shdr->sh_entsize);
         }
     }
 }
@@ -200,7 +187,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
   if (ret != 0)
     {
       berr("ERROR: Failed to initialize to load module: %d\n", ret);
-      goto errout_with_lock;
+      goto errout_with_loadinfo;
     }
 
   /* Allocate a module registry entry to hold the module data */
@@ -237,12 +224,8 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Save the load information */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
   modp->textalloc   = (FAR void *)loadinfo.textalloc;
   modp->dataalloc   = (FAR void *)loadinfo.datastart;
-#else
-  modp->alloc       = (FAR void *)loadinfo.textalloc;
-#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->textsize    = loadinfo.textsize;
   modp->datasize    = loadinfo.datasize;

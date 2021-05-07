@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_clockconfig.c
- * arch/arm/src/chip/kl_clockconfig.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *           Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -110,10 +93,13 @@ void kl_pllconfig(void)
    * settings in the board.h header file.
    */
 
-  regval32 = (SIM_CLKDIV1_OUTDIV1(BOARD_OUTDIV1) | SIM_CLKDIV1_OUTDIV4(BOARD_OUTDIV4));
+  regval32 = (SIM_CLKDIV1_OUTDIV1(BOARD_OUTDIV1) |
+              SIM_CLKDIV1_OUTDIV4(BOARD_OUTDIV4));
   putreg32(regval32, KL_SIM_CLKDIV1);
 
-  /* System oscillator drives 32 kHz clock for various peripherals (OSC32KSEL=0) */
+  /* System oscillator drives 32 kHz clock for various peripherals
+   * (OSC32KSEL=0)
+   */
 
   regval32  = getreg32(KL_SIM_SOPT1);
   regval32 &= ~(SIM_SOPT1_OSC32KSEL_MASK);
@@ -127,10 +113,12 @@ void kl_pllconfig(void)
   regval32 |= SIM_SOPT2_PLLFLLSEL;
   putreg32(regval32, KL_SIM_SOPT2);
 
-  regval32  = (regval32 & ~(SIM_SOPT2_TPMSRC_OCSERCLK)) | SIM_SOPT2_TPMSRC_MCGCLK;
+  regval32  = (regval32 & ~(SIM_SOPT2_TPMSRC_OCSERCLK)) |
+               SIM_SOPT2_TPMSRC_MCGCLK;
   putreg32(regval32, KL_SIM_SOPT2);
 
   /* PORTA_PCR18: ISF=0, MUX=0 */
+
   /* PORTA_PCR19: ISF=0, MUX=0 */
 
   regval32  = getreg32(KL_PORTA_PCR18);
@@ -142,7 +130,10 @@ void kl_pllconfig(void)
   putreg32(regval32, KL_PORTA_PCR19);
 
   /* Switch to FBE Mode */
-  /* OSC0_CR: ERCLKEN=0, ??=0, EREFSTEN=0, ??=0, SC2P=0, SC4P=0, SC8P=0, SC16P=0 */
+
+  /* OSC0_CR: ERCLKEN=0,
+   * ??=0, EREFSTEN=0, ??=0, SC2P=0, SC4P=0, SC8P=0, SC16P=0
+   */
 
   putreg8(0, KL_OSC_CR);
 
@@ -208,8 +199,7 @@ void kl_pllconfig(void)
 
   /* Wait until PLL output */
 
-  while ((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0C)
-    ;
+  while ((getreg8(KL_MCG_S) & MCG_S_CLKST_MASK) != 0x0c);
 }
 
 /****************************************************************************
@@ -240,6 +230,7 @@ void kl_clockconfig(void)
    * the FlexBus clock.
    */
 
-  //kl_traceconfig();
-  //kl_fbconfig();
+  /* kl_traceconfig(); */
+
+  /* kl_fbconfig(); */
 }

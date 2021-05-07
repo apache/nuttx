@@ -25,12 +25,18 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <malloc.h>
+#include <arch/esp32/memory_layout.h>
 
 #include "xtensa.h"
 
-#if CONFIG_XTENSA_USE_SEPARATE_IMEM
+#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -55,9 +61,18 @@ void xtensa_imm_initialize(void)
   void  *start;
   size_t size;
 
-  start = (FAR void *)&_sheap;
-  size = CONFIG_XTENSA_IMEM_REGION_SIZE;
+  start = (FAR void *)ESP32_IMEM_START;
+  size  = CONFIG_XTENSA_IMEM_REGION_SIZE;
   mm_initialize(&g_iheap, start, size);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  static struct procfs_meminfo_entry_s g_imm_procfs;
+
+  g_imm_procfs.name = "esp32-imem";
+  g_imm_procfs.mallinfo = (void *)mm_mallinfo;
+  g_imm_procfs.user_data = &g_iheap;
+  procfs_register_meminfo(&g_imm_procfs);
+#endif
 }
 
 /****************************************************************************
@@ -68,9 +83,49 @@ void xtensa_imm_initialize(void)
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_malloc(size_t size)
+void *xtensa_imm_malloc(size_t size)
 {
   return mm_malloc(&g_iheap, size);
+}
+
+/****************************************************************************
+ * Name: xtensa_imm_calloc
+ *
+ * Description:
+ *   Calculates the size of the allocation and
+ *   allocate memory the internal heap.
+ *
+ ****************************************************************************/
+
+void *xtensa_imm_calloc(size_t n, size_t elem_size)
+{
+  return mm_calloc(&g_iheap, n, elem_size);
+}
+
+/****************************************************************************
+ * Name: xtensa_imm_realloc
+ *
+ * Description:
+ *   Reallocate memory from the internal heap.
+ *
+ ****************************************************************************/
+
+void *xtensa_imm_realloc(void *ptr, size_t size)
+{
+  return mm_realloc(&g_iheap, ptr, size);
+}
+
+/****************************************************************************
+ * Name: xtensa_imm_zalloc
+ *
+ * Description:
+ *   Allocate and zero memory from the internal heap.
+ *
+ ****************************************************************************/
+
+void *xtensa_imm_zalloc(size_t size)
+{
+  return mm_zalloc(&g_iheap, size);
 }
 
 /****************************************************************************
@@ -99,7 +154,7 @@ void xtensa_imm_free(FAR void *mem)
  *
  ****************************************************************************/
 
-FAR void *xtensa_imm_memalign(size_t alignment, size_t size)
+void *xtensa_imm_memalign(size_t alignment, size_t size)
 {
   return mm_memalign(&g_iheap, alignment, size);
 }
@@ -137,4 +192,4 @@ int xtensa_imm_mallinfo(FAR struct mallinfo *info)
   return mm_mallinfo(&g_iheap, info);
 }
 
-#endif /* CONFIG_XTENSA_USE_SEPARATE_IMEM */
+#endif /* CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP */

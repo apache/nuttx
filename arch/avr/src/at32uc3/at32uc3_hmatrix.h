@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_hmatrix.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_HMATRIX_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_HMATRIX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_HMATRIX_MCFG_OFFSET(n)    (0x0000+((n)<<2))
 #define AVR32_HMATRIX_MCFG0_OFFSET      0x0000 /* Master Configuration Register 0 */
@@ -137,7 +122,7 @@
 #define AVR32_HMATRIX_SFR14_OFFSET      0x0148 /* Special Function Register 14 */
 #define AVR32_HMATRIX_SFR15_OFFSET      0x014c /* Special Function Register 15 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_HMATRIX_MCFG(n)           (AVR32_HMATRIX_BASE+AVR32_HMATRIX_MCFG_OFFSET(n))
 #define AVR32_HMATRIX_MCFG0             (AVR32_HMATRIX_BASE+AVR32_HMATRIX_MCFG0_OFFSET)
@@ -228,7 +213,7 @@
 #define AVR32_HMATRIX_SFR14             (AVR32_HMATRIX_BASE+AVR32_HMATRIX_SFR14_OFFSET)
 #define AVR32_HMATRIX_SFR15             (AVR32_HMATRIX_BASE+AVR32_HMATRIX_SFR15_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* Master Configuration Register Bit-field Definitions */
 
@@ -242,14 +227,14 @@
 
 /* Slave Configuration Register Bit-field Definitions */
 
-#define HMATRIX_SCFG_SLOTCYCLE_SHIFT    (0)       /* Bits 0-7: Maximum Number of Allowed Cycles for a Burst
+#define HMATRIX_SCFG_SLOTCYCLE_SHIFT    (0)       /* Bits 0-7: Maximum Number of Allowed Cycles for a Burst */
 #define HMATRIX_SCFG_SLOTCYCLE_MASK     (0xff << HMATRIX_SCFG_SLOTCYCLE_SHIFT)
-#define HMATRIX_SCFG_DEFMSTRTYPE_SHIFT  (16)      /* Bits 16-17: Default Master Type
+#define HMATRIX_SCFG_DEFMSTRTYPE_SHIFT  (16)      /* Bits 16-17: Default Master Type */
 #define HMATRIX_SCFG_DEFMSTRTYPE_MASK   (3 << HMATRIX_SCFG_DEFMSTRTYPE_SHIFT)
 #  define HMATRIX_SCFG_DEFMSTRTYPE_NONE    (0 << HMATRIX_SCFG_DEFMSTRTYPE_SHIFT)
 #  define HMATRIX_SCFG_DEFMSTRTYPE_LAST    (1 << HMATRIX_SCFG_DEFMSTRTYPE_SHIFT)
 #  define HMATRIX_SCFG_DEFMSTRTYPE_FIXED   (2 << HMATRIX_SCFG_DEFMSTRTYPE_SHIFT)
-#define HMATRIX_SCFG_FIXEDDEFMSTR_SHIFT (18)      /* Bits 18-21: Fixed Default Master
+#define HMATRIX_SCFG_FIXEDDEFMSTR_SHIFT (18)      /* Bits 18-21: Fixed Default Master */
 #define HMATRIX_SCFG_FIXEDDEFMSTR_MASK  (15 << HMATRIX_SCFG_FIXEDDEFMSTR_SHIFT)
 #define HMATRIX_SCFG_ARBT               (1 << 24) /* Bit 24: Arbitration Type */
 
@@ -296,18 +281,19 @@
 #define HMATRIX_PRBS_M15PR_MASK         (3 << HMATRIX_PRBS_M15PR_SHIFT)
 
 /* Special Function Register Bit-field Definitions */
+
 /* This register contains only the 32-bit SFR value and has no bit-fields */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_HMATRIX_H */

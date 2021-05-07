@@ -1,54 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_flexpwm.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_FLEXPWM_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_FLEXPWM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_FLEXPWM_SM0CNT_OFFSET          0x0000  /* Counter Register */
 #define IMXRT_FLEXPWM_SM0INIT_OFFSET         0x0002  /* Initial Count Register */
@@ -235,7 +219,7 @@
 #define IMXRT_FLEXPWM_FTST0_OFFSET           0x0192  /* Fault Test Register */
 #define IMXRT_FLEXPWM_FCTRL20_OFFSET         0x0194  /* Fault Control 2 Register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 /* FLEXPWM1 Register Addresses */
 
@@ -985,7 +969,7 @@
 #define IMXRT_FLEXPWM4_FTST0                 (IMXRT_FLEXPWM4_BASE + IMXRT_FLEXPWM_FTST0_OFFSET)         /* FLEXPWM4 Fault Test Register */
 #define IMXRT_FLEXPWM4_FCTRL20               (IMXRT_FLEXPWM4_BASE + IMXRT_FLEXPWM_FCTRL20_OFFSET)       /* FLEXPWM4 Fault Control 2 Register */
 
-/* Register Bit Definitions *********************************************************
+/* Register Bit Definitions *************************************************
  *
  *   A single FLEXPWM[n] module (where n is 1..4) has submodules 0 - 3
  * FLEXPWM module Base addresses are spaced every 0x4000 bytes starting at
@@ -994,41 +978,42 @@
  *
  *   Each submodule instance is 0x60 bytes.
  *
- *   The address of a register is the sum of a base address and an address offset.
- * The base address is defined as the module IMXRT_FLEXPWMn_BASE (n=1..4), and
- * the address offset is defined at the module level. Each PWM module has a set
- * of registers for each PWM submodule, for the configuration logic, and
- * for each fault channel. While the registers are 16-bits wide, they can be
- * accessed in pairs as 32-bit registers.
+ *   The address of a register is the sum of a base address and an address
+ * offset. The base address is defined as the module IMXRT_FLEXPWMn_BASE
+ * (n=1..4), and the address offset is defined at the module level. Each
+ * PWM module has a set of registers for each PWM submodule, for the
+ * configuration logic, and for each fault channel. While the registers are
+ * 16-bits wide, they can be accessed in pairs as 32-bit registers.
  *
- *   Submodule registers are repeated for each PWM submodule. To designate which
- * submodule they are in, register names are prefixed with SM0, SM1, SM2, and SM3
- * Since all these register definitions are identical the defines herein drops the
- * number 0-3 from the prefix.
+ *   Submodule registers are repeated for each PWM submodule. To designate
+ * which submodule they are in, register names are prefixed with SM0, SM1,
+ * SM2, and SM3 Since all these register definitions are identical the
+ * defines herein drops the number 0-3 from the prefix.
  *
  *   For example the 'Status Register' appears 4 times per module
- * (IMXRT_FLEXPWMn_BASE) as IMXRT_FLEXPWM_SM0STS_OFFSET, IMXRT_FLEXPWM_SM1STS_OFFSET,
- * IMXRT_FLEXPWM_SM2STS_OFFSET and IMXRT_FLEXPWM_SM3STS_OFFSET. But the bit
- * definitions for the  'Status Register' are defined as SMSTS_xxxxx (with the number
- * dropped.
+ * (IMXRT_FLEXPWMn_BASE) as IMXRT_FLEXPWM_SM0STS_OFFSET,
+ * IMXRT_FLEXPWM_SM1STS_OFFSET, IMXRT_FLEXPWM_SM2STS_OFFSET and
+ * IMXRT_FLEXPWM_SM3STS_OFFSET. But the bit definitions for the 'Status
+ * Register' are defined as SMSTS_xxxxx (with the number dropped.
  *
- *   The base address of submodule 0 is the same as the base address for the PWM
- * module as a whole. The base address of submodule 1 is offset 0x60 from the base
- * address for the PWM module as a whole. This 0x60 offset is based on the number
- * of registers in a submodule.  The base address of submodule 2 is equal to the
- * base address of submodule 1 plus this same 0x60 offset. The pattern repeats for
- * the base address of submodule 3
- * .
- *   The base address of the module configuration registers is equal to the base
- * address of the PWM module as a whole plus an offset of 0x180.
+ *   The base address of submodule 0 is the same as the base address for the
+ * PWM module as a whole. The base address of submodule 1 is offset 0x60 from
+ * the base address for the PWM module as a whole. This 0x60 offset is based
+ * on the number of registers in a submodule.  The base address of submodule
+ * 2 is equal to the base address of submodule 1 plus this same 0x60 offset.
+ * The pattern repeats for the base address of submodule 3.
  *
- *   Fault channel registers are repeated for each fault channel. To designate
- * which fault channel they are in, register names are prefixed with F0 and F1. The
- * base address of fault channel 0 is equal to the base address of the PWM module
- * as a whole plus an offset of 0x18C. The base address of fault channel 1 is the
- * base address of fault channel 0 + 4.  This 4 offset is based on the number of
- * registers in a fault channel. Each of the four fields in the fault channel
- * registers corresponds to fault inputs 3-0.
+ *   The base address of the module configuration registers is equal to the
+ * base address of the PWM module as a whole plus an offset of 0x180.
+ *
+ *   Fault channel registers are repeated for each fault channel. To
+ * designate which fault channel they are in, register names are prefixed
+ * with F0 and F1. The base address of fault channel 0 is equal to the base
+ * address of the PWM module as a whole plus an offset of 0x18C. The base
+ * address of fault channel 1 is the base address of fault channel 0 + 4.
+ *  This 4 offset is based on the number of registers in a fault channel.
+ * Each of the four fields in the fault channel registers corresponds to
+ * fault inputs 3-0.
  */
 
 /* Control 2 Register */
@@ -1039,6 +1024,7 @@
 #  define SMCTRL2_CLK_SEL_IPG_CLK            (0 << SMCTRL2_CLK_SEL_SHIFT)  /* The IPBus clock is used as the clock for the local prescaler and counter. */
 #  define SMCTRL2_CLK_SEL_EXT_CLK            (1 << SMCTRL2_CLK_SEL_SHIFT)  /* EXT_CLK is used as the clock for the local prescaler and counter. */
 #  define SMCTRL2_CLK_SEL_AUX_CLK            (2 << SMCTRL2_CLK_SEL_SHIFT)  /* Submodule 0’s clock (AUX_CLK) is used as the source clock for the local prescaler and counter. */
+
 #define SMCTRL2_RELOAD_SEL                   (1 << 2)   /* Bit: 2  Reload Source Select */
 #  define SMCTRL2_RELOAD_SEL_LOCAL           (0 << 2)   /* Reload Source is local */
 #  define SMCTRL2_RELOAD_SEL_SM0             (1 << 2)   /* Reload Source is submodule 0 */
@@ -1053,6 +1039,7 @@
 #  define SMCTRL2_FORCE_SEL_SM0_SYNC         (5 << SMCTRL2_FORCE_SEL_SHIFT)  /* The master sync signal from submodule0 is used to force updates. */
 #  define SMCTRL2_FORCE_SEL_EXT_FORCE        (6 << SMCTRL2_FORCE_SEL_SHIFT)  /* The external force signal, EXT_FORCE, from outside the PWM module causes updates. */
 #  define SMCTRL2_FORCE_SEL_EXT_SYNC         (7 << SMCTRL2_FORCE_SEL_SHIFT)  /* The external sync signal, EXT_SYNC, from outside the PWM module causes updates */
+
 #define SMCTRL2_FORCE                        (1 << 6)   /* Bit: 6  Force Initialization */
 #define SMCTRL2_FRCEN                        (1 << 7)   /* Bit: 7  FRCEN */
 #define SMCTRL2_INIT_SEL_SHIFT               (8)        /* Bits: 8-9  Initialization Control Select */
@@ -1062,6 +1049,7 @@
 #  define SMCTRL2_INIT_SEL_SM0               (1 << SMCTRL2_INIT_SEL_SHIFT)  /* Master reload from submodule 0 causes initialization. */
 #  define SMCTRL2_INIT_SEL_SM0_SYNC          (2 << SMCTRL2_INIT_SEL_SHIFT)  /* Master sync from submodule 0 causes initialization. */
 #  define SMCTRL2_INIT_SEL_EXT_SYNC          (3 << SMCTRL2_INIT_SEL_SHIFT)  /* EXT_SYNC causes initialization. */
+
 #define SMCTRL2_PWMX_INIT                    (1 << 10)  /* Bit: 10 PWM_X Initial Value */
 #define SMCTRL2_PWM45_INIT                   (1 << 11)  /* Bit: 11 PWM45 Initial Value */
 #define SMCTRL2_PWM23_INIT                   (1 << 12)  /* Bit: 12 PWM23 Initial Value */
@@ -1086,12 +1074,14 @@
 #  define SMCTRL_PRSC_DIV32                  (5 << SMCTRL_PRSC_SHIFT)  /* PWM clock frequency = fclk/32 */
 #  define SMCTRL_PRSC_DIV64                  (6 << SMCTRL_PRSC_SHIFT)  /* PWM clock frequency = fclk/64 */
 #  define SMCTRL_PRSC_DIV128                 (7 << SMCTRL_PRSC_SHIFT)  /* PWM clock frequency = fclk/128*/
+
 #define SMCTRL_COMPMODE                      (1 << 7)   /* Bit: 7  Compare Mode */
 #define SMCTRL_DT_SHIFT                      (8)        /* Bits: 8-9  Deadtime */
 #define SMCTRL_DT_MASK                       (3 << SMCTRL_DT_SHIFT)
 #  define SMCTRL_DT(n)                       ((uint32_t)(n) << SMCTRL_DT_SHIFT)
 #  define SMCTRL_DT0                         (1 << SMCTRL_DT_SHIFT)  /* Read Only. These read only bits reflect the sampled values of the PWM_X input */
 #  define SMCTRL_DT1                         (2 << SMCTRL_DT_SHIFT)  /* Sampling occurs at the end of deadtime 0 for DT[0] and the end of deadtime 1 for DT[1]. */
+
 #define SMCTRL_FULL                          (1 << 10)  /* Bit: 10 Full Cycle Reload */
 #define SMCTRL_HALF                          (1 << 11)  /* Bit: 11 Half Cycle Reload */
 #define SMCTRL_LDFQ_SHIFT                    (12)       /* Bits: 12-15  Load Frequency */
@@ -1107,12 +1097,12 @@
 #  define SMCTRL_LDFQ_EVERY8                 (7 << SMCTRL_LDFQ_SHIFT)   /* Every 8 PWM opportunities */
 #  define SMCTRL_LDFQ_EVERY9                 (8 << SMCTRL_LDFQ_SHIFT)   /* Every 9 PWM opportunities */
 #  define SMCTRL_LDFQ_EVERY10                (9 << SMCTRL_LDFQ_SHIFT)   /* Every 10 PWM opportunities */
-#  define SMCTRL_LDFQ_EVERY11                (10 << SMCTRL_LDFQ_SHIFT)  /* Every 11 PWM opportunities  */
-#  define SMCTRL_LDFQ_EVERY12                (11 << SMCTRL_LDFQ_SHIFT)  /* Every 12 PWM opportunities  */
-#  define SMCTRL_LDFQ_EVERY13                (12 << SMCTRL_LDFQ_SHIFT)  /* Every 13 PWM opportunities  */
-#  define SMCTRL_LDFQ_EVERY14                (13 << SMCTRL_LDFQ_SHIFT)  /* Every 14 PWM opportunities  */
-#  define SMCTRL_LDFQ_EVERY15                (14 << SMCTRL_LDFQ_SHIFT)  /* Every 15 PWM opportunities  */
-#  define SMCTRL_LDFQ_EVERY16                (0xf << SMCTRL_LDFQ_SHIFT)  /* Every 16 PWM opportunities */
+#  define SMCTRL_LDFQ_EVERY11                (10 << SMCTRL_LDFQ_SHIFT)  /* Every 11 PWM opportunities */
+#  define SMCTRL_LDFQ_EVERY12                (11 << SMCTRL_LDFQ_SHIFT)  /* Every 12 PWM opportunities */
+#  define SMCTRL_LDFQ_EVERY13                (12 << SMCTRL_LDFQ_SHIFT)  /* Every 13 PWM opportunities */
+#  define SMCTRL_LDFQ_EVERY14                (13 << SMCTRL_LDFQ_SHIFT)  /* Every 14 PWM opportunities */
+#  define SMCTRL_LDFQ_EVERY15                (14 << SMCTRL_LDFQ_SHIFT)  /* Every 15 PWM opportunities */
+#  define SMCTRL_LDFQ_EVERY16                (0xf << SMCTRL_LDFQ_SHIFT) /* Every 16 PWM opportunities */
 
 /* Fractional Value Register 1 */
 
@@ -1164,19 +1154,23 @@
 #  define SMOCTRL_PWMXFS_0                   (0 << SMOCTRL_PWMXFS_SHIFT)  /* Output is forced to logic 0 state prior to consideration of output polarity control. */
 #  define SMOCTRL_PWMXFS_1                   (1 << SMOCTRL_PWMXFS_SHIFT)  /* Output is forced to logic 1 state prior to consideration of output polarity control. */
 #  define SMOCTRL_PWMXFS_TRISTATE            (2 << SMOCTRL_PWMXFS_SHIFT)  /* Output is tristated. */
+
 #define SMOCTRL_PWMBFS_SHIFT                 (2)        /* Bits: 2-3  PWM_B Fault State */
 #define SMOCTRL_PWMBFS_MASK                  (3 << SMOCTRL_PWMBFS_SHIFT)
 #  define SMOCTRL_PWMBFS(n)                  ((uint32_t)(n) << SMOCTRL_PWMBFS_SHIFT)
 #  define SMOCTRL_PWMBFS_0                   (0 << SMOCTRL_PWMBFS_SHIFT)  /* Output is forced to logic 0 state prior to consideration of output polarity control. */
 #  define SMOCTRL_PWMBFS_1                   (1 << SMOCTRL_PWMBFS_SHIFT)  /* Output is forced to logic 1 state prior to consideration of output polarity control. */
 #  define SMOCTRL_PWMBFS_TRISTATE            (2 << SMOCTRL_PWMBFS_SHIFT)  /* Output is tristated. */
+
 #define SMOCTRL_PWMAFS_SHIFT                 (4)        /* Bits: 4-5  PWM_A Fault State */
 #define SMOCTRL_PWMAFS_MASK                  (3 << SMOCTRL_PWMAFS_SHIFT)
 #  define SMOCTRL_PWMAFS(n)                  ((uint32_t)(n) << SMOCTRL_PWMAFS_SHIFT)
 #  define SMOCTRL_PWMAFS_0                   (0 << SMOCTRL_PWMAFS_SHIFT)  /* Output is forced to logic 0 state prior to consideration of output polarity control. */
 #  define SMOCTRL_PWMAFS_1                   (1 << SMOCTRL_PWMAFS_SHIFT)  /* Output is forced to logic 1 state prior to consideration of output polarity control. */
 #  define SMOCTRL_PWMAFS_TRISTATE            (2 << SMOCTRL_PWMAFS_SHIFT)  /* Output is tristated. */
-                                                        /* Bits: 6-7 Reserved */
+
+                                                    /* Bits: 6-7 Reserved */
+
 #define SMOCTRL_POLX                         (1 << 8)   /* Bit: 8  PWM_X Output Polarity */
 #define SMOCTRL_POLB                         (1 << 9)   /* Bit: 9  PWM_B Output Polarity */
 #define SMOCTRL_POLA                         (1 << 10)  /* Bit: 10 PWM_A Output Polarity */
@@ -1196,6 +1190,7 @@
 #  define SMSTS_CMPF_VAL3                    (8 << SMSTS_CMPF_SHIFT)   /* A compare event has occurred for VAL3 value */
 #  define SMSTS_CMPF_VAL4                    (16 << SMSTS_CMPF_SHIFT)  /* A compare event has occurred for VAL4 value */
 #  define SMSTS_CMPF_VAL5                    (32 << SMSTS_CMPF_SHIFT)  /* A compare event has occurred for VAL5 value */
+
 #define SMSTS_CFX0                           (1 << 6)   /* Bit: 6  Capture Flag X0 */
 #define SMSTS_CFX1                           (1 << 7)   /* Bit: 7  Capture Flag X1 */
 #define SMSTS_CFB0                           (1 << 8)   /* Bit: 8  Capture Flag B0 */
@@ -1204,8 +1199,10 @@
 #define SMSTS_CFA1                           (1 << 11)  /* Bit: 11 Capture Flag A1 */
 #define SMSTS_RF                             (1 << 12)  /* Bit: 12 Reload Flag */
 #define SMSTS_REF                            (1 << 13)  /* Bit: 13 Reload Error Flag */
-#define SMSTS_RUF                            (1 << 14)  /* Bit: 14 This read-only flag is set when one of the INIT, VALx,FRACVALx, or CTRL[PRSC] is written */
-                                                        /* Bit: 15 Reserved */
+#define SMSTS_RUF                            (1 << 14)  /* Bit: 14 This read-only flag is set when one of the INIT,
+                                                         * VALx,FRACVALx, or CTRL[PRSC] is written */
+
+                                                    /* Bit: 15 Reserved */
 
 /* Interrupt Enable Register */
 
@@ -1216,8 +1213,9 @@
 #  define SMINTEN_CMPIE_VAL1                 (2 << SMINTEN_CMPIE_SHIFT)  /* A compare event for VAL1 value will generate an interrupt */
 #  define SMINTEN_CMPIE_VAL2                 (4 << SMINTEN_CMPIE_SHIFT)  /* A compare event for VAL2 value will generate an interrupt */
 #  define SMINTEN_CMPIE_VAL3                 (8 << SMINTEN_CMPIE_SHIFT)  /* A compare event for VAL3 value will generate an interrupt */
-#  define SMINTEN_CMPIE_VAL4                 (16 << SMINTEN_CMPIE_SHIFT)  /* A compare event for VAL4 value will generate an interrupt  */
-#  define SMINTEN_CMPIE_VAL5                 (32 << SMINTEN_CMPIE_SHIFT)  /* A compare event for VAL5 value will generate an interrupt  */
+#  define SMINTEN_CMPIE_VAL4                 (16 << SMINTEN_CMPIE_SHIFT) /* A compare event for VAL4 value will generate an interrupt  */
+#  define SMINTEN_CMPIE_VAL5                 (32 << SMINTEN_CMPIE_SHIFT) /* A compare event for VAL5 value will generate an interrupt  */
+
 #define SMINTEN_CX0IE                        (1 << 6)   /* Bit: 6  Capture X 0 Interrupt Enable */
 #define SMINTEN_CX1IE                        (1 << 7)   /* Bit: 7  Capture X 1 Interrupt Enable */
 #define SMINTEN_CB0IE                        (1 << 8)   /* Bit: 8  Capture B 0 Interrupt Enable */
@@ -1226,7 +1224,8 @@
 #define SMINTEN_CA1IE                        (1 << 11)  /* Bit: 11 Capture A 1 Interrupt Enable */
 #define SMINTEN_RIE                          (1 << 12)  /* Bit: 12 Reload Interrupt Enable */
 #define SMINTEN_REIE                         (1 << 13)  /* Bit: 13 Reload Error Interrupt Enable */
-                                                        /* Bits: 14-15 Reserved */
+
+                                                    /* Bits: 14-15 Reserved */
 
 /* DMA Enable Register */
 
@@ -1243,9 +1242,11 @@
 #  define SMDMAEN_CAPTDE_WMT                 (1 << SMDMAEN_CAPTDE_SHIFT)  /* Exceeding a FIFO watermark sets the DMA read request. */
 #  define SMDMAEN_CAPTDE_SYNC                (2 << SMDMAEN_CAPTDE_SHIFT)  /* A local sync (VAL1 matches counter) sets the read DMA request. */
 #  define SMDMAEN_CAPTDE_RELOAD              (3 << SMDMAEN_CAPTDE_SHIFT)  /* A local reload (STS[RF] being set) sets the read DMA request. */
+
 #define SMDMAEN_FAND                         (1 << 8)   /* Bit: 8  FIFO Watermark AND Control */
 #define SMDMAEN_VALDE                        (1 << 9)   /* Bit: 9  Value Registers DMA Enable */
-                                                        /* Bits: 10-15 Reserved */
+
+                                                    /* Bits: 10-15 Reserved */
 
 /* Output Trigger Control Register */
 
@@ -1258,7 +1259,9 @@
 #  define SMT_OUT_TRIG_EN_VAL3               (8 << SMT_OUT_TRIG_EN_SHIFT)   /* PWM_OUT_TRIGx will set when the counter value matches the VAL3 value */
 #  define SMT_OUT_TRIG_EN_VAL4               (16 << SMT_OUT_TRIG_EN_SHIFT)  /* PWM_OUT_TRIGx will set when the counter value matches the VAL4 value */
 #  define SMT_OUT_TRIG_EN_VAL5               (32 << SMT_OUT_TRIG_EN_SHIFT)  /* PWM_OUT_TRIGx will set when the counter value matches the VAL5 value */
-                                                        /* Bits: 6-11 Reserved */
+
+                                                     /* Bits: 6-11 Reserved */
+
 #define SMT_TRGFRQ                           (1 << 12)  /* Bit: 12 Trigger frequency */
                                                         /* Bit: 13 Reserved */
 #define SMT_PWBOT1                           (1 << 14)  /* Bit: 14 Output Trigger 1 Source Select */
@@ -1277,6 +1280,7 @@
 #  define SMD_DIS0A_FAULT1                   (2 << SMD_DIS0A_SHIFT)  /* FAULT1 inputs of fault channel 0. */
 #  define SMD_DIS0A_FAULT2                   (4 << SMD_DIS0A_SHIFT)  /* FAULT2 inputs of fault channel 0. */
 #  define SMD_DIS0A_FAULT3                   (8 << SMD_DIS0A_SHIFT)  /* FAULT3 inputs of fault channel 0. */
+
 #define SMD_DIS0B_SHIFT                      (4)        /* Bits: 4-7  PWM_B Fault Disable Mask 0 */
 #define SMD_DIS0B_MASK                       (0xf << SMD_DIS0B_SHIFT)
 #  define SMD_DIS0B(n)                       ((uint32_t)(n) << SMD_DIS0B_SHIFT)
@@ -1284,6 +1288,7 @@
 #  define SMD_DIS0B_FAULT1                   (2 << SMD_DIS0B_SHIFT)  /* FAULT1 inputs of fault channel 0. */
 #  define SMD_DIS0B_FAULT2                   (4 << SMD_DIS0B_SHIFT)  /* FAULT2 inputs of fault channel 0. */
 #  define SMD_DIS0B_FAULT3                   (8 << SMD_DIS0B_SHIFT)  /* FAULT3 inputs of fault channel 0. */
+
 #define SMD_DIS0X_SHIFT                      (8)        /* Bits: 8-11  PWM_X Fault Disable Mask 0 */
 #define SMD_DIS0X_MASK                       (0xf << SMD_DIS0X_SHIFT)
 #  define SMD_DIS0X(n)                       ((uint32_t)(n) << SMD_DIS0X_SHIFT)
@@ -1291,7 +1296,8 @@
 #  define SMD_DIS0X_FAULT1                   (2 << SMD_DIS0X_SHIFT)  /* FAULT1 inputs of fault channel 0. */
 #  define SMD_DIS0X_FAULT2                   (4 << SMD_DIS0X_SHIFT)  /* FAULT2 inputs of fault channel 0. */
 #  define SMD_DIS0X_FAULT3                   (8 << SMD_DIS0X_SHIFT)  /* FAULT3 inputs of fault channel 0. */
-                                                        /* Bits: 12-15 Reserved */
+
+                                                    /* Bits: 12-15 Reserved */
 
 /* Fault Disable Mapping Register 1 */
 
@@ -1302,6 +1308,7 @@
 #  define SMD_DIS1A_FAULT1                   (2 << SMD_DIS1A_SHIFT)  /* FAULT1 inputs of fault channel 1. */
 #  define SMD_DIS1A_FAULT2                   (4 << SMD_DIS1A_SHIFT)  /* FAULT2 inputs of fault channel 1. */
 #  define SMD_DIS1A_FAULT3                   (8 << SMD_DIS1A_SHIFT)  /* FAULT3 inputs of fault channel 1. */
+
 #define SMD_DIS1B_SHIFT                      (4)        /* Bits: 4-7  PWM_B Fault Disable Mask 1 */
 #define SMD_DIS1B_MASK                       (0xf << SMD_DIS1B_SHIFT)
 #  define SMD_DIS1B(n)                       ((uint32_t)(n) << SMD_DIS1B_SHIFT)
@@ -1309,6 +1316,7 @@
 #  define SMD_DIS1B_FAULT1                   (2 << SMD_DIS1B_SHIFT)  /* FAULT1 inputs of fault channel 1. */
 #  define SMD_DIS1B_FAULT2                   (4 << SMD_DIS1B_SHIFT)  /* FAULT2 inputs of fault channel 1. */
 #  define SMD_DIS1B_FAULT3                   (8 << SMD_DIS1B_SHIFT)  /* FAULT3 inputs of fault channel 1. */
+
 #define SMD_DIS1X_SHIFT                      (8)        /* Bits: 8-11  PWM_X Fault Disable Mask 1 */
 #define SMD_DIS1X_MASK                       (0xf << SMD_DIS1X_SHIFT)
 #  define SMD_DIS1X(n)                       ((uint32_t)(n) << SMD_DIS1X_SHIFT)
@@ -1316,7 +1324,8 @@
 #  define SMD_DIS1X_FAULT1                   (2 << SMD_DIS1X_SHIFT)  /* FAULT1 inputs of fault channel 1. */
 #  define SMD_DIS1X_FAULT2                   (4 << SMD_DIS1X_SHIFT)  /* FAULT2 inputs of fault channel 1. */
 #  define SMD_DIS1X_FAULT3                   (8 << SMD_DIS1X_SHIFT)  /* FAULT3 inputs of fault channel 1. */
-                                                        /* Bits: 12-15 Reserved */
+
+                                                    /* Bits: 12-15 Reserved */
 
 /* Capture Control A Register */
 
@@ -1329,6 +1338,7 @@
 #  define SMC_EDGA0_FALLING                  (1 << SMC_EDGA0_SHIFT)  /* Capture falling edges */
 #  define SMC_EDGA0_RISING                   (2 << SMC_EDGA0_SHIFT)  /* Capture rising edges */
 #  define SMC_EDGA0_BOTH                     (3 << SMC_EDGA0_SHIFT)  /* Capture any edge */
+
 #define SMC_EDGA1_SHIFT                      (4)        /* Bits: 4-5  Edge A 1 */
 #define SMC_EDGA1_MASK                       (3 << SMC_EDGA1_SHIFT)
 #  define SMC_EDGA1(n)                       ((uint32_t)(n) << SMC_EDGA1_SHIFT)
@@ -1336,6 +1346,7 @@
 #  define SMC_EDGA1_FALLING                  (1 << SMC_EDGA1_SHIFT)  /* Capture falling edges */
 #  define SMC_EDGA1_RISING                   (2 << SMC_EDGA1_SHIFT)  /* Capture rising edges */
 #  define SMC_EDGA1_BOTH                     (3 << SMC_EDGA1_SHIFT)  /* Capture any edge */
+
 #define SMC_INP_SELA                         (1 << 6)   /* Bit: 6  Input Select A */
 #define SMC_EDGCNTA_EN                       (1 << 7)   /* Bit: 7  Edge Counter A Enable */
 #define SMC_CFAWM_SHIFT                      (8)        /* Bits: 8-9  Capture A FIFOs Water Mark */
@@ -1345,6 +1356,7 @@
 #  define SMC_CFAWM_2                        (1 << SMC_CFAWM_SHIFT)  /* Water mark level of 2 for capture A FIFOs */
 #  define SMC_CFAWM_3                        (2 << SMC_CFAWM_SHIFT)  /* Water mark level of 3 for capture A FIFOs */
 #  define SMC_CFAWM_4                        (3 << SMC_CFAWM_SHIFT)  /* Water mark level of 4 for capture A FIFOs */
+
 #define SMC_CA0CNT_SHIFT                     (10)       /* Bits: 10-12  Capture A0 FIFO Word Count */
 #define SMC_CA0CNT_MASK                      (7 << SMC_CA0CNT_SHIFT)
 #  define SMC_CA0CNT(n)                      ((uint32_t)(n) << SMC_CA0CNT_SHIFT)
@@ -1356,6 +1368,7 @@
 #  define SMC_CA0CNT_05                      (5 << SMC_CA0CNT_SHIFT)  /* 5 words in the Capture A0 FIFO. */
 #  define SMC_CA0CNT_06                      (6 << SMC_CA0CNT_SHIFT)  /* 6 words in the Capture A0 FIFO. */
 #  define SMC_CA0CNT_07                      (7 << SMC_CA0CNT_SHIFT)  /* 7 words in the Capture A0 FIFO. */
+
 #define SMC_CA1CNT_SHIFT                     (13)       /* Bits: 13-15  Capture A1 FIFO Word Count */
 #define SMC_CA1CNT_MASK                      (7 << SMC_CA1CNT_SHIFT)
 #  define SMC_CA1CNT(n)                      ((uint32_t)(n) << SMC_CA1CNT_SHIFT)
@@ -1388,6 +1401,7 @@
 #  define SMC_EDGB0_FALLING                  (1 << SMC_EDGB0_SHIFT)  /* Capture falling edges */
 #  define SMC_EDGB0_RISING                   (2 << SMC_EDGB0_SHIFT)  /* Capture rising edges */
 #  define SMC_EDGB0_BOTH                     (3 << SMC_EDGB0_SHIFT)  /* Capture any edge */
+
 #define SMC_EDGB1_SHIFT                      (4)        /* Bits: 4-5  Edge B 1 */
 #define SMC_EDGB1_MASK                       (3 << SMC_EDGB1_SHIFT)
 #  define SMC_EDGB1(n)                       ((uint32_t)(n) << SMC_EDGB1_SHIFT)
@@ -1395,6 +1409,7 @@
 #  define SMC_EDGB1_FALLING                  (1 << SMC_EDGB1_SHIFT)  /* Capture falling edges */
 #  define SMC_EDGB1_RISING                   (2 << SMC_EDGB1_SHIFT)  /* Capture rising edges */
 #  define SMC_EDGB1_BOTH                     (3 << SMC_EDGB1_SHIFT)  /* Capture any edge */
+
 #define SMC_INP_SELB                         (1 << 6)   /* Bit: 6  Input Select B */
 #define SMC_EDGCNTB_EN                       (1 << 7)   /* Bit: 7  Edge Counter B Enable */
 #define SMC_CFBWM_SHIFT                      (8)        /* Bits: 8-9  Capture B FIFOs Water Mark */
@@ -1404,6 +1419,7 @@
 #  define SMC_CFBWM_1                        (1 << SMC_CFBWM_SHIFT)  /* Water mark level of 2 for capture B FIFOs */
 #  define SMC_CFBWM_2                        (2 << SMC_CFBWM_SHIFT)  /* Water mark level of 3 for capture B FIFOs */
 #  define SMC_CFBWM_3                        (3 << SMC_CFBWM_SHIFT)  /* Water mark level of 4 for capture B FIFOs */
+
 #define SMC_CB0CNT_SHIFT                     (10)       /* Bits: 10-12  Capture B0 FIFO Word Count */
 #define SMC_CB0CNT_MASK                      (7 << SMC_CB0CNT_SHIFT)
 #  define SMC_CB0CNT(n)                      ((uint32_t)(n) << SMC_CB0CNT_SHIFT)
@@ -1415,6 +1431,7 @@
 #  define SMC_CB0CNT_05                      (5 << SMC_CB0CNT_SHIFT)  /* 5 words in the Capture B0 FIFO. */
 #  define SMC_CB0CNT_06                      (6 << SMC_CB0CNT_SHIFT)  /* 6 words in the Capture B0 FIFO. */
 #  define SMC_CB0CNT_07                      (7 << SMC_CB0CNT_SHIFT)  /* 7 words in the Capture B0 FIFO. */
+
 #define SMC_CB1CNT_SHIFT                     (13)       /* Bits: 13-15  Capture B1 FIFO Word Count */
 #define SMC_CB1CNT_MASK                      (7 << SMC_CB1CNT_SHIFT)
 #  define SMC_CB1CNT(n)                      ((uint32_t)(n) << SMC_CB1CNT_SHIFT)
@@ -1447,6 +1464,7 @@
 #  define SMC_EDGX0_FALLING                  (1 << SMC_EDGX0_SHIFT)  /* Capture falling edges */
 #  define SMC_EDGX0_RISING                   (2 << SMC_EDGX0_SHIFT)  /* Capture rising edges */
 #  define SMC_EDGX0_BOTH                     (3 << SMC_EDGX0_SHIFT)  /* Capture any edge */
+
 #define SMC_EDGX1_SHIFT                      (4)        /* Bits: 4-5  Edge X 1 */
 #define SMC_EDGX1_MASK                       (3 << SMC_EDGX1_SHIFT)
 #  define SMC_EDGX1(n)                       ((uint32_t)(n) << SMC_EDGX1_SHIFT)
@@ -1454,6 +1472,7 @@
 #  define SMC_EDGX1_FALLING                  (1 << SMC_EDGX1_SHIFT)  /* Capture falling edges */
 #  define SMC_EDGX1_RISING                   (2 << SMC_EDGX1_SHIFT)  /* Capture rising edges */
 #  define SMC_EDGX1_BOTH                     (3 << SMC_EDGX1_SHIFT)  /* Capture any edge */
+
 #define SMC_INP_SELX                         (1 << 6)   /* Bit: 6  Input Select X */
 #define SMC_EDGCNTX_EN                       (1 << 7)   /* Bit: 7  Edge Counter X Enable */
 #define SMC_CFXWM_SHIFT                      (8)        /* Bits: 8-9  Capture X FIFOs Water Mark */
@@ -1463,6 +1482,7 @@
 #  define SMC_CFXWM_2                        (1 << SMC_CFXWM_SHIFT)  /* Water mark level of 2 for capture X FIFOs */
 #  define SMC_CFXWM_3                        (2 << SMC_CFXWM_SHIFT)  /* Water mark level of 3 for capture X FIFOs */
 #  define SMC_CFXWM_4                        (3 << SMC_CFXWM_SHIFT)  /* Water mark level of 4 for capture X FIFOs */
+
 #define SMC_CX0CNT_SHIFT                     (10)       /* Bits: 10-12  Capture X0 FIFO Word Count */
 #define SMC_CX0CNT_MASK                      (7 << SMC_CX0CNT_SHIFT)
 #  define SMC_CX0CNT(n)                      ((uint32_t)(n) << SMC_CX0CNT_SHIFT)
@@ -1474,6 +1494,7 @@
 #  define SMC_CX0CNT_05                      (5 << SMC_CX0CNT_SHIFT)  /* 5 words in the Capture X0 FIFO. */
 #  define SMC_CX0CNT_06                      (6 << SMC_CX0CNT_SHIFT)  /* 6 words in the Capture X0 FIFO. */
 #  define SMC_CX0CNT_07                      (7 << SMC_CX0CNT_SHIFT)  /* 7 words in the Capture X0 FIFO. */
+
 #define SMC_CX1CNT_SHIFT                     (13)       /* Bits: 13-15  Capture X1 FIFO Word Count */
 #define SMC_CX1CNT_MASK                      (7 << SMC_CX1CNT_SHIFT)
 #  define SMC_CX1CNT(n)                      ((uint32_t)(n) << SMC_CX1CNT_SHIFT)
@@ -1541,7 +1562,9 @@
 #  define OUTEN_PWMX_EN_SM1                  (2 << OUTEN_PWMX_EN_SHIFT)  /* Enable the PWM_X outputs of submodules 1 */
 #  define OUTEN_PWMX_EN_SM2                  (4 << OUTEN_PWMX_EN_SHIFT)  /* Enable the PWM_X outputs of submodules 2 */
 #  define OUTEN_PWMX_EN_SM3                  (8 << OUTEN_PWMX_EN_SHIFT)  /* Enable the PWM_X outputs of submodules 3 */
+
 #  define OUTEN_PWMX_EN_ALL                  (0xf << OUTEN_PWMX_EN_SHIFT)  /* All enabled */
+
 #define OUTEN_PWMB_EN_SHIFT                  (4)        /* Bits: 4-7  PWM_B Output Enables */
 #define OUTEN_PWMB_EN_MASK                   (0xf << OUTEN_PWMB_EN_SHIFT)
 #  define OUTEN_PWMB_EN(n)                   ((uint32_t)(n) << OUTEN_PWMB_EN_SHIFT)
@@ -1550,7 +1573,9 @@
 #  define OUTEN_PWMB_EN_SM1                  (2 << OUTEN_PWMB_EN_SHIFT)  /* Enable the PWM_B outputs of submodules 1 */
 #  define OUTEN_PWMB_EN_SM2                  (4 << OUTEN_PWMB_EN_SHIFT)  /* Enable the PWM_B outputs of submodules 2 */
 #  define OUTEN_PWMB_EN_SM3                  (8 << OUTEN_PWMB_EN_SHIFT)  /* Enable the PWM_B outputs of submodules 3 */
+
 #  define OUTEN_PWMB_EN_ALL                  (0xf << OUTEN_PWMB_EN_SHIFT)  /* All enabled */
+
 #define OUTEN_PWMA_EN_SHIFT                  (8)        /* Bits: 8-11  PWM_A Output Enables */
 #define OUTEN_PWMA_EN_MASK                   (0xf << OUTEN_PWMA_EN_SHIFT)
 #  define OUTEN_PWMA_EN(n)                   ((uint32_t)(n) << OUTEN_PWMA_EN_SHIFT)
@@ -1559,8 +1584,10 @@
 #  define OUTEN_PWMA_EN_SM1                  (2 << OUTEN_PWMA_EN_SHIFT)  /* Enable the PWM_A outputs of submodules 1 */
 #  define OUTEN_PWMA_EN_SM2                  (4 << OUTEN_PWMA_EN_SHIFT)  /* Enable the PWM_A outputs of submodules 2 */
 #  define OUTEN_PWMA_EN_SM3                  (8 << OUTEN_PWMA_EN_SHIFT)  /* Enable the PWM_A outputs of submodules 3 */
+
 #  define OUTEN_PWMA_EN_ALL                  (0xf << OUTEN_PWMA_EN_SHIFT)  /* All enabled */
-                                                        /* Bits: 12-15 Reserved */
+
+                                                    /* Bits: 12-15 Reserved */
 
 /* Mask Register */
 
@@ -1571,6 +1598,7 @@
 #  define MASK_MASKX_SM1                     (2 << MASK_MASKX_SHIFT)  /* Mask the PWM_X outputs of submodules 1 (forces output to 0) */
 #  define MASK_MASKX_SM2                     (4 << MASK_MASKX_SHIFT)  /* Mask the PWM_X outputs of submodules 2 (forces output to 0) */
 #  define MASK_MASKX_SM3                     (8 << MASK_MASKX_SHIFT)  /* Mask the PWM_X outputs of submodules 3 (forces output to 0) */
+
 #define MASK_MASKB_SHIFT                     (4)        /* Bits: 4-7  PWM_B Masks */
 #define MASK_MASKB_MASK                      (0xf << MASK_MASKB_SHIFT)
 #  define MASK_MASKB(n)                      ((uint32_t)(n) << MASK_MASKB_SHIFT)
@@ -1578,6 +1606,7 @@
 #  define MASK_MASKB_SM1                     (2 << MASK_MASKB_SHIFT)  /* Mask the PWM_B outputs of submodules 1 (forces output to 0) */
 #  define MASK_MASKB_SM2                     (4 << MASK_MASKB_SHIFT)  /* Mask the PWM_B outputs of submodules 2 (forces output to 0) */
 #  define MASK_MASKB_SM3                     (8 << MASK_MASKB_SHIFT)  /* Mask the PWM_B outputs of submodules 3 (forces output to 0) */
+
 #define MASK_MASKA_SHIFT                     (8)        /* Bits: 8-11  PWM_A Masks */
 #define MASK_MASKA_MASK                      (0xf << MASK_MASKB_SHIFT)
 #  define MASK_MASKA(n)                      ((uint32_t)(n) << MASK_MASKA_SHIFT)
@@ -1585,6 +1614,7 @@
 #  define MASK_MASKA_SM1                     (2 << MASK_MASKA_SHIFT)  /* Mask the PWM_A outputs of submodules 1 (forces output to 0) */
 #  define MASK_MASKA_SM2                     (4 << MASK_MASKA_SHIFT)  /* Mask the PWM_A outputs of submodules 2 (forces output to 0) */
 #  define MASK_MASKA_SM3                     (8 << MASK_MASKA_SHIFT)  /* Mask the PWM_A outputs of submodules 3 (forces output to 0) */
+
 #define MASK_UPDATE_MASK_SHIFT               (12)       /* Bits: 12-15  Update Mask Bits Immediately */
 #define MASK_UPDATE_MASK_MASK                (0xf << MASK_UPDATE_MASK_SHIFT)
 #  define MASK_UPDATE_MASK(n)                ((uint32_t)(n) << MASK_UPDATE_MASK_SHIFT)
@@ -1607,7 +1637,7 @@
 
 /* PWM Source Select Register */
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 #define DTSRCSEL_SM0SEL45_SHIFT              (0)        /* Bits: 0-1  Submodule 0 PWM45 Control Select */
 #define DTSRCSEL_SM0SEL45_MASK               (3 << DTSRCSEL_SM0SEL45_SHIFT)
@@ -1616,6 +1646,7 @@
 #  define DTSRCSEL_SM0SEL45_INVERT           (1 << DTSRCSEL_SM0SEL45_SHIFT)  /* Inverted generated SM0PWM45 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM0SEL45_SWCOUT           (2 << DTSRCSEL_SM0SEL45_SHIFT)  /* SWCOUT[SM0OUT45] is used by the deadtime logic. */
 #  define DTSRCSEL_SM0SEL45_PWM0_EXTB        (3 << DTSRCSEL_SM0SEL45_SHIFT)  /* PWM0_EXTB signal is used by the deadtime logic. */
+
 #define DTSRCSEL_SM0SEL23_SHIFT              (2)        /* Bits: 2-3  Submodule 0 PWM23 Control Select */
 #define DTSRCSEL_SM0SEL23_MASK               (3 << DTSRCSEL_SM0SEL23_SHIFT)
 #  define DTSRCSEL_SM0SEL23(n)               ((uint32_t)(n) << DTSRCSEL_SM0SEL23_SHIFT)
@@ -1623,6 +1654,7 @@
 #  define DTSRCSEL_SM0SEL23_INVERT           (1 << DTSRCSEL_SM0SEL23_SHIFT)  /* Inverted generated SM0PWM23 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM0SEL23_SWCOUT           (2 << DTSRCSEL_SM0SEL23_SHIFT)  /* SWCOUT[SM0OUT23] is used by the deadtime logic. */
 #  define DTSRCSEL_SM0SEL23_PWM0_EXTA        (3 << DTSRCSEL_SM0SEL23_SHIFT)  /* PWM0_EXTA signal is used by the deadtime logic. */
+
 #define DTSRCSEL_SM1SEL45_SHIFT              (4)        /* Bits: 4-5  Submodule 1 PWM45 Control Select */
 #define DTSRCSEL_SM1SEL45_MASK               (3 << DTSRCSEL_SM1SEL45_SHIFT)
 #  define DTSRCSEL_SM1SEL45(n)               ((uint32_t)(n) << DTSRCSEL_SM1SEL45_SHIFT)
@@ -1630,6 +1662,7 @@
 #  define DTSRCSEL_SM1SEL45_INVERT           (1 << DTSRCSEL_SM1SEL45_SHIFT)  /* Inverted generated SM1PWM45 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM1SEL45_SWCOUT           (2 << DTSRCSEL_SM1SEL45_SHIFT)  /* SWCOUT[SM1OUT45] is used by the deadtime logic. */
 #  define DTSRCSEL_SM1SEL45_PWM1_EXTB        (3 << DTSRCSEL_SM1SEL45_SHIFT)  /* PWM1_EXTB signal is used by the deadtime logic. */
+
 #define DTSRCSEL_SM1SEL23_SHIFT              (6)        /* Bits: 6-7  Submodule 1 PWM23 Control Select */
 #define DTSRCSEL_SM1SEL23_MASK               (3 << DTSRCSEL_SM1SEL23_SHIFT)
 #  define DTSRCSEL_SM1SEL23(n)               ((uint32_t)(n) << DTSRCSEL_SM1SEL23_SHIFT)
@@ -1637,6 +1670,7 @@
 #  define DTSRCSEL_SM1SEL23_INVERT           (1 << DTSRCSEL_SM1SEL23_SHIFT)  /* Inverted generated SM1PWM23 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM1SEL23_SWCOUT           (2 << DTSRCSEL_SM1SEL23_SHIFT)  /* SWCOUT[SM1OUT23] is used by the deadtime logic. */
 #  define DTSRCSEL_SM1SEL23_PWM1_EXTA        (3 << DTSRCSEL_SM1SEL23_SHIFT)  /* PWM1_EXTA signal is used by the deadtime logic */
+
 #define DTSRCSEL_SM2SEL45_SHIFT              (8)        /* Bits: 8-9  Submodule 2 PWM45 Control Select */
 #define DTSRCSEL_SM2SEL45_MASK               (3 << DTSRCSEL_SM2SEL45_SHIFT)
 #  define DTSRCSEL_SM2SEL45(n)               ((uint32_t)(n) << DTSRCSEL_SM2SEL45_SHIFT)
@@ -1644,6 +1678,7 @@
 #  define DTSRCSEL_SM2SEL45_INVERT           (1 << DTSRCSEL_SM2SEL45_SHIFT)  /* Inverted generated SM2PWM45 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM2SEL45_SWCOUT           (2 << DTSRCSEL_SM2SEL45_SHIFT)  /* SWCOUT[SM2OUT45] is used by the deadtime logic. */
 #  define DTSRCSEL_SM2SEL45_PWM2_EXTB        (3 << DTSRCSEL_SM2SEL45_SHIFT)  /* PWM2_EXTB signal is used by the deadtime logic. */
+
 #define DTSRCSEL_SM2SEL23_SHIFT              (10)       /* Bits: 10-11  Submodule 2 PWM23 Control Select */
 #define DTSRCSEL_SM2SEL23_MASK               (3 << DTSRCSEL_SM2SEL23_SHIFT)
 #  define DTSRCSEL_SM2SEL23(n)               ((uint32_t)(n) << DTSRCSEL_SM2SEL23_SHIFT)
@@ -1651,6 +1686,7 @@
 #  define DTSRCSEL_SM2SEL23_INVERT           (1 << DTSRCSEL_SM2SEL23_SHIFT)  /* Inverted generated SM2PWM23 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM2SEL23_SWCOUT           (2 << DTSRCSEL_SM2SEL23_SHIFT)  /* SWCOUT[SM2OUT23] is used by the deadtime logic. */
 #  define DTSRCSEL_SM2SEL23_PWM2_EXTA        (3 << DTSRCSEL_SM2SEL23_SHIFT)  /* PWM2_EXTA signal is used by the deadtime logic */
+
 #define DTSRCSEL_SM3SEL45_SHIFT              (12)       /* Bits: 12-13  Submodule 3 PWM45 Control Select */
 #define DTSRCSEL_SM3SEL45_MASK               (3 << DTSRCSEL_SM3SEL45_SHIFT)
 #  define DTSRCSEL_SM3SEL45(n)               ((uint32_t)(n) << DTSRCSEL_SM3SEL45_SHIFT)
@@ -1658,6 +1694,7 @@
 #  define DTSRCSEL_SM3SEL45_INVERT           (1 << DTSRCSEL_SM3SEL45_SHIFT)  /* Inverted generated SM3PWM45 signal is used by the deadtime logic. */
 #  define DTSRCSEL_SM3SEL45_SWCOUT           (2 << DTSRCSEL_SM3SEL45_SHIFT)  /* SWCOUT[SM3OUT45] is used by the deadtime logic. */
 #  define DTSRCSEL_SM3SEL45_PWM3_EXTB        (3 << DTSRCSEL_SM3SEL45_SHIFT)  /* PWM3_EXTB signal is used by the deadtime logic. */
+
 #define DTSRCSEL_SM3SEL23_SHIFT              (14)       /* Bits: 14-15  Submodule 3 PWM23 Control Select */
 #define DTSRCSEL_SM3SEL23_MASK               (3 << DTSRCSEL_SM3SEL23_SHIFT)
 #  define DTSRCSEL_SM3SEL23(n)               ((uint32_t)(n) << DTSRCSEL_SM3SEL23_SHIFT)
@@ -1675,6 +1712,7 @@
 #  define MCTRL_LDOK_SM1                     (2 << MCTRL_LDOK_SHIFT)  /* Load prescaler, modulus, and PWM values of submodule 1 */
 #  define MCTRL_LDOK_SM2                     (4 << MCTRL_LDOK_SHIFT)  /* Load prescaler, modulus, and PWM values of submodule 2 */
 #  define MCTRL_LDOK_SM3                     (8 << MCTRL_LDOK_SHIFT)  /* Load prescaler, modulus, and PWM values of submodule 3 */
+
 #define MCTRL_CLDOK_SHIFT                    (4)        /* Bits: 4-7  Clear Load Okay */
 #define MCTRL_CLDOK_MASK                     (15 << MCTRL_CLDOK_SHIFT)
 #  define MCTRL_CLDOK(n)                     ((uint32_t)(n) << MCTRL_CLDOK_SHIFT)
@@ -1682,6 +1720,7 @@
 #  define MCTRL_CLDOK_SM1                    (2 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 1 */
 #  define MCTRL_CLDOK_SM2                    (4 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 2 */
 #  define MCTRL_CLDOK_SM3                    (8 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 3 */
+
 #define MCTRL_RUN_SHIFT                      (8)        /* Bits: 8-11  Run */
 #define MCTRL_RUN_MASK                       (15 << MCTRL_RUN_SHIFT)
 #  define MCTRL_RUN(n)                       ((uint32_t)(n) << MCTRL_RUN_SHIFT)
@@ -1689,6 +1728,7 @@
 #  define MCTRL_RUN_SM1                      (2 << MCTRL_RUN_SHIFT)  /* Enable PWM generator of submodules 1 */
 #  define MCTRL_RUN_SM2                      (4 << MCTRL_RUN_SHIFT)  /* Enable PWM generator of submodules 2 */
 #  define MCTRL_RUN_SM3                      (8 << MCTRL_RUN_SHIFT)  /* Enable PWM generator of submodules 3 */
+
 #define MCTRL_IPOL_SHIFT                     (12)       /* Bits: 12-15  Current Polarity */
 #define MCTRL_IPOL_MASK                      (15 << MCTRL_IPOL_SHIFT)
 #  define MCTRL_IPOL(n)                      ((uint32_t)(n) << MCTRL_IPOL_SHIFT)
@@ -1699,7 +1739,7 @@
 
 /* Master Control 2 Register */
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 #define MCTRL2_MONPLL_SHIFT                  (0)        /* Bits: 0-1  Monitor PLL State */
 #define MCTRL2_MONPLL_MASK                   (3 << MCTRL2_MONPLL_SHIFT)
@@ -1719,6 +1759,7 @@
 #  define FCTRL_FIE_FAULT1                   (2 << FCTRL_FIE_SHIFT)  /* FAULT1 Safe mode. PWM outputs disabled by this fault */
 #  define FCTRL_FIE_FAULT2                   (4 << FCTRL_FIE_SHIFT)  /* FAULT2 Safe mode. PWM outputs disabled by this fault */
 #  define FCTRL_FIE_FAULT3                   (8 << FCTRL_FIE_SHIFT)  /* FAULT3 Safe mode. PWM outputs disabled by this fault */
+
 #define FCTRL0_FSAFE_SHIFT                   (4)        /* Bits: 4-7  Fault Safety Mode */
 #define FCTRL0_FSAFE_MASK                    (15 << FCTRL0_FSAFE_SHIFT)
 #  define FCTRL0_FSAFE(n)                    ((uint32_t)(n) << FCTRL0_FSAFE_SHIFT)
@@ -1727,6 +1768,7 @@
 #  define FCTRL0_FSAFE_FAULT1                (2 << FCTRL0_FSAFE_SHIFT)  /* FAULT1 CPU interrupt requests enabled */
 #  define FCTRL0_FSAFE_FAULT2                (4 << FCTRL0_FSAFE_SHIFT)  /* FAULT2 CPU interrupt requests enabled */
 #  define FCTRL0_FSAFE_FAULT3                (8 << FCTRL0_FSAFE_SHIFT)  /* FAULT3 CPU interrupt requests enabled */
+
 #define FCTRL0_FAUTO_SHIFT                   (8)        /* Bits: 8-11  Automatic Fault Clearing */
 #define FCTRL0_FAUTO_MASK                    (15 << FCTRL0_FAUTO_SHIFT)
 #  define FCTRL0_FAUTO(n)                    ((uint32_t)(n) << FCTRL0_FAUTO_SHIFT)
@@ -1735,6 +1777,7 @@
 #  define FCTRL0_FAUTO_FAULT1                (2 << FCTRL0_FAUTO_SHIFT)  /* FAULT1 Automatic fault clearing. */
 #  define FCTRL0_FAUTO_FAULT2                (4 << FCTRL0_FAUTO_SHIFT)  /* FAULT2 Automatic fault clearing. */
 #  define FCTRL0_FAUTO_FAULT3                (8 << FCTRL0_FAUTO_SHIFT)  /* FAULT3 Automatic fault clearing. */
+
 #define FCTRL0_FLVL_SHIFT                    (12)       /* Bits: 12-15  Fault Level */
 #define FCTRL0_FLVL_MASK                     (15 << FCTRL0_FLVL_SHIFT)
 #  define FCTRL0_FLVL(n)                     ((uint32_t)(n) << FCTRL0_FLVL_SHIFT)
@@ -1754,6 +1797,7 @@
 #  define FSTS_FFLAG_FAULT1                  (2 << FSTS_FFLAG_SHIFT)  /* Fault on the FAULT1 pin */
 #  define FSTS_FFLAG_FAULT2                  (4 << FSTS_FFLAG_SHIFT)  /* Fault on the FAULT2 pin */
 #  define FSTS_FFLAG_FAULT3                  (8 << FSTS_FFLAG_SHIFT)  /* Fault on the FAULT3 pin */
+
 #define FSTS_FFULL_SHIFT                     (4)        /* Bits: 4-7  Full Cycle */
 #define FSTS_FFULL_MASK                      (15 << FSTS_FFULL_SHIFT)
 #  define FSTS_FFULL(n)                      ((uint32_t)(n) << FSTS_FFULL_SHIFT)
@@ -1762,6 +1806,7 @@
 #  define FSTS_FFULL_SM1                     (2 << FSTS_FFULL_SHIFT)  /* SM1 PWM output is re-enabled at the start of a full cycle */
 #  define FSTS_FFULL_SM2                     (4 << FSTS_FFULL_SHIFT)  /* SM2 PWM output is re-enabled at the start of a full cycle */
 #  define FSTS_FFULL_SM3                     (8 << FSTS_FFULL_SHIFT)  /* SM3 PWM output is re-enabled at the start of a full cycle */
+
 #define FSTS_FFPIN_SHIFT                     (8)        /* Bits: 8-11  Filtered Fault Pins */
 #define FSTS_FFPIN_MASK                      (15 << FSTS_FFPIN_SHIFT)
 #  define FSTS_FFPIN(n)                      ((uint32_t)(n) << FSTS_FFPIN_SHIFT)
@@ -1770,6 +1815,7 @@
 #  define FSTS_FFPIN_FAULT1                  (2 << FSTS_FFPIN_SHIFT)  /* This read-only bit reflect the current state of the filtered FAULT1 pin */
 #  define FSTS_FFPIN_FAULT2                  (4 << FSTS_FFPIN_SHIFT)  /* This read-only bit reflect the current state of the filtered FAULT2 pin */
 #  define FSTS_FFPIN_FAULT3                  (8 << FSTS_FFPIN_SHIFT)  /* This read-only bit reflect the current state of the filtered FAULT3 pin */
+
 #define FSTS_FHALF_SHIFT                     (12)       /* Bits: 12-15  Half Cycle Fault Recovery */
 #define FSTS_FHALF_MASK                      (15 << FSTS_FHALF_SHIFT)
 #  define FSTS_FHALF(n)                      ((uint32_t)(n) << FSTS_FHALF_SHIFT)
@@ -1785,6 +1831,7 @@
 #define FFILT_FILT_PER_MASK                  (0xff << FFILT_FILT_PER_SHIFT)
 #  define FFILT_FILT_PER(n)                  ((uint32_t)(n) << FFILT_FILT_PER_SHIFT)
 #define FFILT_FILT_CNT_SHIFT                 (8)        /* Bits: 8-10  Fault Filter Count */
+
 #define FFILT_FILT_CNT_MASK                  (7 << FFILT_FILT_CNT_SHIFT)
 #  define FFILT_FILT_CNT(n)                  ((uint32_t)(n) << FFILT_FILT_CNT_SHIFT)
 #  define FFILT_FILT_CNT_3                   (0 << FFILT_FILT_CNT_SHIFT)  /* */
@@ -1795,7 +1842,9 @@
 #  define FFILT_FILT_CNT_8                   (5 << FFILT_FILT_CNT_SHIFT)  /* */
 #  define FFILT_FILT_CNT_9                   (6 << FFILT_FILT_CNT_SHIFT)  /* */
 #  define FFILT_FILT_CNT_10                  (7 << FFILT_FILT_CNT_SHIFT)  /* */
-                                                        /* Bits: 11-14 Reserved */
+
+                                            /* Bits: 11-14 Reserved */
+
 #define FFILT_GSTR                           (1 << 15)  /* Bit: 15 Fault Glitch Stretch Enable */
 
 /* Fault Test Register */
@@ -1806,6 +1855,7 @@
 /* Fault Control 2 Register */
 
 #define FCTRL20_NOCOMB_SHIFT                 (0)        /* Bits: 0-3  No Combinational Path From Fault Input To PWM Output */
+
 #define FCTRL20_NOCOMB_MASK                  (0xf << FCTRL20_NOCOMB_SHIFT)
 #  define FCTRL20_NOCOMB(n)                  ((uint32_t)(n) << FCTRL20_NOCOMB_SHIFT)
 #  define FCTRL20_NOCOMB_ALL_ENABLED         (0 << FCTRL20_NOCOMB_SHIFT)  /* All combinational link from the fault inputs to the PWM outputs are enabled */

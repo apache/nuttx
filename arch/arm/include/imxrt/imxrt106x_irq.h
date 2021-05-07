@@ -1,55 +1,39 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/include/imxrt/imxrt106x_irq.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H
 #define __ARCH_ARM_INCLUDE_IMXRT_IMXRT106X_IRQ_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* External interrupts (priority levels >= 256) *****************************************/
+/* External interrupts (priority levels >= 256) *****************************/
 
 #define IMXRT_IRQ_EDMA0_16     (IMXRT_IRQ_EXTINT + 0)   /* eDMA Channel 0/16 Transfer Complete */
 #define IMXRT_IRQ_EDMA1_17     (IMXRT_IRQ_EXTINT + 1)   /* eDMA Channel 1/17 Transfer Complete */
@@ -206,21 +190,22 @@
 #define IMXRT_IRQ_ENET2_1588   (IMXRT_IRQ_EXTINT + 153) /* ENET2 MAC 0 1588 Timer Interrupt */
 #define IMXRT_IRQ_CAN3         (IMXRT_IRQ_EXTINT + 154) /* CAN3 interrupt */
 #define IMXRT_IRQ_RESERVED155  (IMXRT_IRQ_EXTINT + 155) /* Reserved */
-#define IMXRT_IRQ_FLEXIO3      (IMXRT_IRQ_EXTINT + 156)  /* IPI compare interrupt */
+#define IMXRT_IRQ_FLEXIO3      (IMXRT_IRQ_EXTINT + 156) /* IPI compare interrupt */
 #define IMXRT_IRQ_GPIO_6789    (IMXRT_IRQ_EXTINT + 157) /* GPIO {6789} or'ed Interrupt */
 #define IMXRT_IRQ_RESERVED158  (IMXRT_IRQ_EXTINT + 158) /* Reserved */
 #define IMXRT_IRQ_RESERVED159  (IMXRT_IRQ_EXTINT + 159) /* Reserved */
 
 #define IMXRT_IRQ_NEXTINT      160
 
-/* GPIO second level interrupt **********************************************************/
+/* GPIO second level interrupt **********************************************/
 
 #define IMXRT_GPIO_IRQ_FIRST   (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT)
 #define _IMXRT_GPIO1_0_15_BASE IMXRT_GPIO_IRQ_FIRST
 
 #ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
   /* GPIO1 has dedicated interrupts for pins 0-7
-   * REVISIT:  I am assuming that you really cannot use the dedicated and the multiplex
+   * REVISIT:
+   * I am assuming that you really cannot use the dedicated and the multiplex
    * interrupts concurrently.
    */
 
@@ -687,25 +672,25 @@
                                 IMXRT_GPIO9_NIRQS )
 #define IMXRT_GPIO_IRQ_LAST    (_IMXRT_GPIO1_0_15_BASE + IMXRT_GPIO_NIRQS)
 
-/* Total number of IRQ numbers **********************************************************/
+/* Total number of IRQ numbers **********************************************/
 
 #define NR_IRQS                (IMXRT_IRQ_EXTINT + IMXRT_IRQ_NEXTINT + IMXRT_GPIO_NIRQS)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Inline functions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus

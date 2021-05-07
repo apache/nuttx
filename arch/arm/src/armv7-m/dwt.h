@@ -1,11 +1,13 @@
-/***************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-m/dwt.h
  *
  *   Copyright (c) 2009 - 2013 ARM LIMITED
  *
  *  All rights reserved.
+ *
  *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+ *  modification, are permitted provided that the following conditions
+ *  are met:
  *
  *  - Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -16,17 +18,17 @@
  *    to endorse or promote products derived from this software without
  *    specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ *  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ *  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS
+ *  AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ *  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ *  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
  *   Author: Pierre-noel Bouteville <pnb990@gmail.com>
@@ -58,22 +60,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7_M_DWT_H
 #define __ARCH_ARM_SRC_ARMV7_M_DWT_H
 
-/***********************************************************************************************
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "arm_arch.h"
+
+/****************************************************************************
  * Pre-processor Definitions
- ***********************************************************************************************/
+ ****************************************************************************/
 
-/* Data Watchpoint and Trace Register (DWT) Definitions ****************************************/
+/* Data Watchpoint and Trace Register (DWT) Definitions *********************/
 
-/* DWT Register Base Address *******************************************************************/
+/* DWT Register Base Address ************************************************/
 
 #define DWT_BASE                     (0xe0001000ul)
 
-/* DWT Register Addresses **********************************************************************/
+/* DWT Register Addresses ***************************************************/
 
 #define DWT_CTRL                     (DWT_BASE + 0x0000)  /* Control Register */
 #define DWT_CYCCNT                   (DWT_BASE + 0x0004)  /* Cycle Count Register */
@@ -95,8 +103,14 @@
 #define DWT_COMP3                    (DWT_BASE + 0x0050)  /* Comparator Register 3 */
 #define DWT_MASK3                    (DWT_BASE + 0x0054)  /* Mask Register 3 */
 #define DWT_FUNCTION3                (DWT_BASE + 0x0058)  /* Function Register 3 */
+#define DWT_LAR                      (DWT_BASE + 0x0FB0)  /* Lock Access Register */
 
-/* DWT Register Bit Field Definitions **********************************************************/
+#define DWT_LAR_ACCESS               (0xC5ACCE55) /* Lock Access Magic Value */
+
+#define DWT_GRANT_ACCESS()           (putreg32(DWT_LAR_ACCESS, DWT_LAR))
+#define DWT_REVOKE_ACCESS()          (putreg32(~DWT_LAR_ACCESS, DWT_LAR))
+
+/* DWT Register Bit Field Definitions ***************************************/
 
 /* DWT CTRL */
 
@@ -187,5 +201,132 @@
 #define DWT_FUNCTION_EMITRANGE_MASK   (0x1ul << DWT_FUNCTION_EMITRANGE_SHIFT)
 #define DWT_FUNCTION_FUNCTION_SHIFT   0
 #define DWT_FUNCTION_FUNCTION_MASK    (0xful << DWT_FUNCTION_FUNCTION_SHIFT)
+
+#define DWT_FUNCTION_WATCHPOINT_RO    (0x05ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#define DWT_FUNCTION_WATCHPOINT_WO    (0x06ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#define DWT_FUNCTION_WATCHPOINT_RW    (0x07ul << DWT_FUNCTION_FUNCTION_SHIFT)
+
+#define DWT_DATAVSIZE_BYTE            (0x00ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#define DWT_DATAVSIZE_HALFWORD        (0x01ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#define DWT_DATAVSIZE_WORD            (0x02ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline void dwt_comparator_setup(int compnum, uint32_t comp,
+                                        uint32_t mask, uint32_t func)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(comp, DWT_COMP0);
+            putreg32(mask, DWT_MASK0);
+            putreg32(func, DWT_FUNCTION0);
+            break;
+        case 1:
+            putreg32(comp, DWT_COMP1);
+            putreg32(mask, DWT_MASK1);
+            putreg32(func, DWT_FUNCTION1);
+            break;
+        case 2:
+            putreg32(comp, DWT_COMP2);
+            putreg32(mask, DWT_MASK2);
+            putreg32(func, DWT_FUNCTION2);
+            break;
+        case 3:
+            putreg32(comp, DWT_COMP3);
+            putreg32(mask, DWT_MASK3);
+            putreg32(func, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+
+static inline void dwt_comparator_reset(int compnum)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(0, DWT_COMP0);
+            putreg32(0, DWT_MASK0);
+            putreg32(0, DWT_FUNCTION0);
+            break;
+        case 1:
+            putreg32(0, DWT_COMP1);
+            putreg32(0, DWT_MASK1);
+            putreg32(0, DWT_FUNCTION1);
+            break;
+        case 2:
+            putreg32(0, DWT_COMP2);
+            putreg32(0, DWT_MASK2);
+            putreg32(0, DWT_FUNCTION2);
+            break;
+        case 3:
+            putreg32(0, DWT_COMP3);
+            putreg32(0, DWT_MASK3);
+            putreg32(0, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+
+static inline uint32_t dwt_comparator_block(int compnum)
+{
+  uint32_t funcval = 0;
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            funcval = getreg32(DWT_FUNCTION0);
+            putreg32(0, DWT_FUNCTION0);
+            break;
+        case 1:
+            funcval = getreg32(DWT_FUNCTION1);
+            putreg32(0, DWT_FUNCTION1);
+            break;
+        case 2:
+            funcval = getreg32(DWT_FUNCTION2);
+            putreg32(0, DWT_FUNCTION2);
+            break;
+        case 3:
+            funcval = getreg32(DWT_FUNCTION3);
+            putreg32(0, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+  return funcval;
+}
+
+static inline void dwt_comparator_restore(int compnum, uint32_t func)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(func, DWT_FUNCTION0);
+            break;
+        case 1:
+            putreg32(func, DWT_FUNCTION1);
+            break;
+        case 2:
+            putreg32(func, DWT_FUNCTION2);
+            break;
+        case 3:
+            putreg32(func, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
 
 #endif /* __ARCH_ARM_SRC_ARMV7_M_DWT_H */

@@ -4,10 +4,6 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
- * References:
- *   SAMA5D3 Series Data Sheet
- *   Atmel NoOS sample code.
- *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -42,6 +38,11 @@
  *
  ****************************************************************************/
 
+/* References:
+ *   SAMA5D3 Series Data Sheet
+ *   Atmel NoOS sample code.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -49,6 +50,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -2388,7 +2390,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
   /* Get the result of the DMA operation */
 
   dmastatus = sam_getreg(SAM_UDPHS_DMASTATUS(epno));
-  uinfo("DMA%d DMASTATUS: %08x\n", epno, dmastatus);
+  uinfo("DMA%d DMASTATUS: %08" PRIx32 "\n", epno, dmastatus);
 
   /* Disable DMA interrupt to avoid receiving 2 (B_EN and TR_EN) */
 

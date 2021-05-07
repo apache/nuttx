@@ -1091,7 +1091,7 @@ static void net_rpmsg_drv_txavail_work(FAR void *arg)
         {
           /* If so, then poll the network for new XMIT data */
 
-          devif_poll(dev, net_rpmsg_drv_txpoll);
+          devif_timer(dev, 0, net_rpmsg_drv_txpoll);
         }
     }
 

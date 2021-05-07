@@ -488,7 +488,7 @@ Shields
       CONFIG_ANALOG=y                  : Should be automatically selected
       CONFIG_ADC=y                     : Should be automatically selected
       CONFIG_INPUT=y                   : Select input device support
-      CONFIG_AJOYSTICK=y               : Select analog joystick support
+      CONFIG_INPUT_AJOYSTICK=y         : Select analog joystick support
 
   There is nothing in the configuration that currently uses the joystick.
   For testing, you can add the following configuration options to enable the
@@ -549,3 +549,91 @@ Configurations
        Pin 33 PA10 USART1_TX    some RS-232 converters
        Pin 20 GND
        Pin 8  U5V
+
+  can:
+  ----
+    This is basically an nsh configuration (see above) with added support
+    for CAN driver. Both CAN 1 (RX: PB_8, TX: PB_9) and CAN 2 (RX: PB_5, TX: PB_6)
+    are turn on.
+
+    Functionality of CAN driver can be tested by calling application
+    "can" in NuttShell. This application sends 100 messages over CAN 1.
+
+  lcd:
+  ----
+    This is basically an nsh configuration (see above) with added support
+    of ILI9225 176x220 TFT display and test framebuffer application.
+
+    Display connection is set to SPI 3 and pinout is following:
+
+    CS    D8
+    RST   D6
+    RS    D7
+    SDA   D4
+    CLK   D3
+
+    Framebuffer application can be started from terminal by typing "fb".
+
+  ihm08m1_f32 and ihm08m1_b16:
+  ----------------------------
+
+    These examples are dedicated for the X-NUCLEO-IHM08M1 expansion board with
+    L6398 gate drivers and discrete transistors.
+
+    WARNING: L6398 gate drivers require channel 2 negative polarisation and
+    negative sign for the deadtime. Make sure that your gate drivers logic
+    is compatible with this configuration.
+
+    X-NUCLEO-IHM08M1 must be configured to work with FOC and 3-shunt
+    resistors. See ST documentation for details.
+
+    Pin configuration for the X-NUCLEO-IHM08M1 (TIM1 configuration):
+
+    Board Function   Chip Function      Chip Pin Number
+    -------------   ----------------   -----------------
+    Phase U high     TIM1_CH1           PA8
+    Phase U low      TIM1_CH1N          PA7
+    Phase V high     TIM1_CH2           PA9
+    Phase V low      TIM1_CH2N          PB0
+    Phase W high     TIM1_CH3           PA10
+    Phase W low      TIM1_CH3N          PB1
+    Current U        ADC1_IN0           PA0
+    Current V        ADC1_IN11          PC1
+    Current W        ADC1_IN10          PC0
+    Temperature      ADC1_IN12          PC2
+    VBUS             ADC1_IN1           PA1
+    BEMF1            (NU)               PC3
+    BEMF2            (NU)               PC4
+    BEMF3            (NU)               PC5
+    LED              GPIO_PB2           PB2
+    +3V3 (CN7_16)
+    GND (CN7_20)
+    GPIO_BEMF        (NU)               PC9
+    ENCO_A/HALL_H1   TIM2_CH1           PA15
+    ENCO_B/HALL_H2   TIM2_CH2           PB3
+    ENCO_Z/HALL_H3   TIM2_CH3           PB10
+    DAC              (NU)               PA5
+    GPIO3            (NU)               PB13
+    CPOUT            (NU)               PA12
+    BKIN1            (NU)               PA6
+    BKIN2            (NU)               PA11
+    BKIN3            (NU)               PB14
+    POT/DAC          DAC1_CH1/ADC1_IN4  PA4
+    CURR_REF         (NU)               PB4
+    DEBUG0           GPIO               PB12
+    DEBUG1           GPIO               PB9
+    DEBUG2           GPIO               PC6
+    DEBUG3           GPIO               PB5
+    DEBUG4           GPIO               PC8
+
+    Current shunt resistance              = 0.01
+    Current sense gain                    = -5.18 (inverted current)
+    Vbus sense gain = 9.31k/(9.31k+169k)  = 0.0522
+    Vbus min                              = 10V
+    Vbus max                              = 48V
+    Iout max                              = 15A RMS
+
+    IPHASE_RATIO = 1/(R_shunt*gain) = -19.3
+    VBUS_RATIO   = 1/VBUS_gain      = 19.152
+
+    For now only 3-shunt resistors configuration is supported.

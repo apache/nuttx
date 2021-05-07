@@ -104,7 +104,7 @@ static int w25_read_hex(FAR uint24_t *len)
   fd = open(W25_CHARDEV, O_WRONLY);
   if (fd < 0)
     {
-      ret = -get_errno();
+      ret = -errno;
       fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
       return ret;
     }
@@ -170,7 +170,7 @@ static int w25_write(int fd, FAR const void *src, size_t len)
       nwritten = write(fd, src, remaining);
       if (nwritten <= 0)
         {
-          int errcode = get_errno();
+          int errcode = errno;
           if (errno != EINTR)
             {
               fprintf(stderr, "ERROR: Write failed: %d\n", errcode);
@@ -207,7 +207,7 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
   fd = open(W25_CHARDEV, O_WRONLY);
   if (fd < 0)
     {
-      ret = -get_errno();
+      ret = -errno;
       fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
       return ret;
     }
@@ -255,7 +255,7 @@ static int w25_read(int fd, FAR void *dest, size_t len)
       nread = read(fd, dest, remaining);
       if (nread <= 0)
         {
-          int errcode = get_errno();
+          int errcode = errno;
           if (errno != EINTR)
             {
               fprintf(stderr, "ERROR: Read failed: %d\n", errcode);
@@ -291,7 +291,7 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
   fd = open(W25_CHARDEV, O_RDONLY);
   if (fd < 0)
     {
-      ret = -get_errno();
+      ret = -errno;
       return ret;
     }
 
@@ -553,7 +553,7 @@ static int w25_boot_program(void)
   ret = tcdrain(1);
   if (ret < 0)
     {
-      ret = -get_errno();
+      ret = -errno;
       fprintf(stderr, "ERROR: tcdrain() failed: %d\n", ret);
       return ret;
     }
@@ -590,7 +590,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
   fd = dup(0);
   if (fd < 0)
     {
-      ret = -get_errno();
+      ret = -errno;
       fprintf(stderr, "ERROR: Failed to dup stdin: %d\n", ret);
       return ret;
     }
@@ -605,7 +605,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 
   if (ret < 0)
     {
-      ret = -get_errno();
+      ret = -errno;
       fprintf(stderr, "ERROR: fcnt() failed: %d\n", ret);
       close(fd) ;
       return ret;
@@ -621,7 +621,9 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
         {
           char tmpch;
 
-          /* Read handling retries.  We get out of this loop if a key is press. */
+          /* Read handling retries.
+           * We get out of this loop if a key is press.
+           */
 
           for (; ; )
             {
@@ -633,7 +635,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 
               if (nread < 0)
                 {
-                  int errcode = get_errno();
+                  int errcode = errno;
 
                   /* If is not an error if a signal occurred or if there is
                    * no key pressed.
@@ -688,7 +690,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 
           /* Delay 50 Milliseconds  */
 
-          usleep(50 * 1000);
+          nxsig_usleep(50 * 1000);
 
           /* Output a dot to stdout every 10 * 50 = 500 milliseconds */
 

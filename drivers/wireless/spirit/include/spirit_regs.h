@@ -1,5 +1,5 @@
-/**********************************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_regs.h
+/****************************************************************************
+ * drivers/wireless/spirit/include/spirit_regs.h
  * This file contains all the SPIRIT registers address and masks.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -9,37 +9,39 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- **********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_REGS_H
 #define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_REGS_H
 
-/**********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **********************************************************************************************/
+ ****************************************************************************/
 
 /* General_Configuration_Registers */
 
@@ -84,8 +86,7 @@
 #define ANA_FUNC_CONF1_SET_BLD_LVL_MASK ((uint8_t)0x03)  /* Mask of the SET_BLD_LV field of
                                                           * ANA_FUNC_CONF1 register (R/W) */
 #define BLD_LVL_2_7                     ((uint8_t)0x00)  /* Sets the Battery Level Detector threshold
-                                                          * to
- 2.7V */
+                                                          * to 2.7V */
 #define BLD_LVL_2_5                     ((uint8_t)0x01)  /* Sets the Battery Level Detector threshold
                                                           * to 2.5V */
 #define BLD_LVL_2_3                     ((uint8_t)0x02)  /* Sets the Battery Level Detector threshold
@@ -105,11 +106,11 @@
  *   4 EXT_REF:          1 - Reference signal from XIN pin
  *                       0 - Reference signal from XO circuit
  *   3 HIGH_POWER_MODE:  1 - SET_SMPS_LEVEL word will be set to the value to
- *                           PM_TEST register in RX state, while in TX state it
- *                           will be fixed to 111 (which programs the SMPS output
- *                           at max value 1.8V)
- *                       0 - SET_SMPS_LEVEL word will hold the value written in the
- *                           PM_TEST register both in RX and TX state
+ *                           PM_TEST register in RX state, while in TX state
+ *                           it will be fixed to 111 (which programs the SMPS
+ *                           output at max value 1.8V)
+ *                       0 - SET_SMPS_LEVEL word will hold the value written
+ *                           in the PM_TEST register both in RX and TX state
  *   2 BROWN_OUT:        1 - Brown_Out Detection enabled
  *                       0 - Brown_Out Detection disabled
  *   1 BATTERY_LEVEL:    1 - Battery level detector enabled
@@ -179,6 +180,7 @@
                                                           * in CUT1.0) */
 
 /* GPIO_Registers */
+
 /* GPIOx_CONF_Registers */
 
 /* GPIOx registers
@@ -224,8 +226,9 @@
  *             1      |      0       |    Digital Output Low Power
  *             1      |      1       |    Digital Output High Power
  *
- *   Note: The Analog mode is used only for temperature sensor indication. This is available only
- *         on GPIO_0 by setting the TS bit in the ANA_FUNC_CONF_0_Register.
+ *   Note: The Analog mode is used only for temperature sensor indication.
+ *   This is available only on GPIO_0 by setting the TS bit in the
+ *   ANA_FUNC_CONF_0_Register.
  */
 
 #define GPIO3_CONF_BASE                 ((uint8_t)0x02)  /* GPIO_3 register address */
@@ -251,15 +254,19 @@
                                                           * of it) */
 #define CONF_GPIO_OUT_TX_State          ((uint8_t)0x28)  /* TX state indication: ‘1’ when
                                                           * Spirit1 is transiting in the TX state */
+
 #define CONF_GPIO_OUT_TX_FIFO_ALMOST_EMPTY ((uint8_t)0x30) /* TX FIFO Almost Empty  Flag */
+
 #define CONF_GPIO_OUT_TX_FIFO_AMOST_FULL ((uint8_t)0x38) /* TX FIFO Almost Full Flag */
 #define CONF_GPIO_OUT_RX_Data           ((uint8_t)0x40)  /* RX data output */
 #define CONF_GPIO_OUT_RX_Clock          ((uint8_t)0x48)  /* RX clock output (recovered from
                                                           * received data) */
 #define CONF_GPIO_OUT_RX_State          ((uint8_t)0x50)  /* RX state indication: ‘1’ when
                                                           * Spirit1 is transiting in the RX state */
+
 #define CONF_GPIO_OUT_RX_FIFO_ALMOST_FULL ((uint8_t)0x58)  /* RX FIFO Almost Full Flag */
 #define CONF_GPIO_OUT_RX_FIFO_ALMOST_EMPTY ((uint8_t)0x60) /* RX FIFO Almost Empty  Flag */
+
 #define CONF_GPIO_OUT_Antenna_Switch    ((uint8_t)0x68)  /* Antenna switch used for antenna
                                                           * diversity */
 #define CONF_GPIO_OUT_Valid_Preamble    ((uint8_t)0x70)  /* Valid Preamble Detected Flag */
@@ -286,14 +293,18 @@
  *   Read Write
  *   Default value: 0x00
  *   7   Reserved.
- *   6:5 CLOCK_TAIL[1:0]: Specifies the number of extra cylces provided before entering in STANDBY state.
+ *   6:5 CLOCK_TAIL[1:0]: Specifies the number of extra cylces provided
+ *                        before entering in STANDBY state.
+ *
  *       CLOCK_TAIL1   |   CLOCK_TAIL0    |  Number of Extra Cycles
  *       ------------------------------------------------------------
  *            0        |        0         |           0
  *            0        |        1         |           64
  *            1        |        0         |           256
  *            1        |        1         |           512
- *   4:1 XO_RATIO[3:0]: Specifies the division ratio when XO oscillator is the clock source
+ *   4:1 XO_RATIO[3:0]: Specifies the division ratio when XO oscillator
+ *                      is the clock source
+ *
  *       XO_RATIO[3:0] |   Division Ratio
  *       -----------------------------------
  *               0     |        1
@@ -312,7 +323,8 @@
  *               13    |       1/96
  *               14    |       1/128
  *               15    |       1/256
- *   0   RCO_RATIO: Specifies the division ratio when RC oscillator is the clock source
+ *   0   RCO_RATIO: Specifies the division ratio when RC oscillator is the
+ *                  clock source
  *                0 - Division Ratio equal to 0
  *                1 - Division Ratio equal to 1/128
  */
@@ -372,31 +384,32 @@
  *   Read Write
  *   Default value: 0x0c
  *
- *   7:5 WCP[2:0]: Set the charge pump current according to the VCO frequency in RX mode.
+ *   7:5 WCP[2:0]: Set the charge pump current according to the VCO
+ *                 frequency in RX mode.
  *
- *         VCO Frequency    |        WCP2      |       WCP1       |       WCP0        |    Charge Pump Current (uA)
- *       ------------------------------------------------------------------------------------------------------------
- *          4644-4678       |         0        |        0         |        0          |             378.4
- *          4708-4772       |         0        |        0         |        1          |             368.9
- *          4772-4836       |         0        |        1         |        0          |             359.5
- *          4836-4902       |         0        |        1         |        1          |             350
- *          4902-4966       |         1        |        0         |        0          |             340.5
- *          4966-5030       |         1        |        0         |        1          |             331.1
- *          5030-5095       |         1        |        1         |        0          |             321.6
- *          5095-5161       |         1        |        1         |        1          |             312.2
- *          5161-5232       |         0        |        0         |        0          |             378.4
- *          5232-5303       |         0        |        0         |        1          |             368.9
- *          5303-5375       |         0        |        1         |        0          |             359.5
- *          5375-5448       |         0        |        1         |        1          |             350
- *          5448-5519       |         1        |        0         |        0          |             340.5
- *          5519-5592       |         1        |        0         |        1          |             331.1
- *          5592-5663       |         1        |        1         |        0          |             321.6
- *          5663-5736       |         1        |        1         |        1          |             312.2
+ *    VCO Frequency |  WCP2 |  WCP1 |  WCP0 |  Charge Pump Current (uA)
+ *    -----------------------------------------------------------------
+ *      4644-4678   |   0   |   0   |   0   |             378.4
+ *      4708-4772   |   0   |   0   |   1   |             368.9
+ *      4772-4836   |   0   |   1   |   0   |             359.5
+ *      4836-4902   |   0   |   1   |   1   |             350
+ *      4902-4966   |   1   |   0   |   0   |             340.5
+ *      4966-5030   |   1   |   0   |   1   |             331.1
+ *      5030-5095   |   1   |   1   |   0   |             321.6
+ *      5095-5161   |   1   |   1   |   1   |             312.2
+ *      5161-5232   |   0   |   0   |   0   |             378.4
+ *      5232-5303   |   0   |   0   |   1   |             368.9
+ *      5303-5375   |   0   |   1   |   0   |             359.5
+ *      5375-5448   |   0   |   1   |   1   |             350
+ *      5448-5519   |   1   |   0   |   0   |             340.5
+ *      5519-5592   |   1   |   0   |   1   |             331.1
+ *      5592-5663   |   1   |   1   |   0   |             321.6
+ *      5663-5736   |   1   |   1   |   1   |             312.2
  *
  *
  *   4:0  SYNT[25:21]: highest 5 bits of the PLL programmable divider
- *                     The valid range depends on fXO and REFDIV settings; for
- *                     fXO=26MHz
+ *                     The valid range depends on fXO and REFDIV settings;
+ *                     for fXO=26MHz
  *                     REFDIV = 0 - SYNT[25:21] = 11...13
  *                     REFDIV = 1 - SYNT[25:21] = 22…27
  */
@@ -448,16 +461,17 @@
  *   Read Write
  *   Default value: 0x51
  *   7:3  SYNT[4:0]: lowest bits of the PLL programmable divider.
- *   2:0  BS[2:0]:   Synthesizer band select. This parameter selects the out-of-loop divide
- *                   factor of the synthesizer according to the formula fxo/(B/2)/D*SYNT/2^18
+ *   2:0  BS[2:0]:   Synthesizer band select. This parameter selects the
+ *                   out-of-loop divide factor of the synthesizer according
+ *                   to the formula fxo/(B/2)/D*SYNT/2^18
  *
- *              BS2        |       BS1       |       BS0        |     value of B
- *       ---------------------------------------------------------------------------
- *               0         |        0        |        1         |       6
- *               0         |        1        |        0         |       8
- *               0         |        1        |        1         |       12
- *               1         |        0        |        0         |       16
- *               1         |        0        |        1         |       32
+ *              BS2        |      BS1      |      BS0       |    value of B
+ *       --------------------------------------------------------------------
+ *               0         |       0       |       1        |       6
+ *               0         |       1       |       0        |       8
+ *               0         |       1       |       1        |       12
+ *               1         |       0       |       0        |       16
+ *               1         |       0       |       1        |       32
  *
  */
 
@@ -484,8 +498,9 @@
  *
  *   Read Write
  *   Default value: 0xfc
- *   7:0  CH_SPACING[7:0]: Channel spacing. From ~793Hz to ~200KHz in 793Hz steps
- *                         (in general, frequency step is fXO/215=26MHz/215~793Hz).
+ *   7:0  CH_SPACING[7:0]: Channel spacing. From ~793Hz to ~200KHz in 793Hz
+ *                         steps (in general, frequency step is
+ *                         fXO/215=26MHz/215~793Hz).
  */
 
 #define CHSPACE_BASE                    ((uint8_t)0x0c)  /* Channel spacing. From ~0.8KHz to
@@ -497,9 +512,10 @@
  *   Read Write
  *   Default value: 0xa3
  *
- *   7:0  IF_OFFSET_DIG[7:0]: Intermediate frequency setting for the digital shift-to-baseband
- *        circuits. According to the formula:
- *        fIF = fXO*(IF_OFFSET_ANA+64)/(12*2^10) = fCLK*(IF_OFFSET_DIG+64)/(12*2^10) Hz.
+ *   7:0  IF_OFFSET_DIG[7:0]: Intermediate frequency setting for the digital
+ *        shift-to-baseband circuits. According to the formula:
+ *        fIF = fXO*(IF_OFFSET_ANA+64)/(12*2^10) = fCLK*(IF_OFFSET_DIG+64)/
+ *                                                 (12*2^10) Hz.
  */
 
 #define IF_OFFSET_DIG_BASE              ((uint8_t)0x0d)  /* Intermediate frequency fIF=
@@ -511,9 +527,10 @@
  *   Read Write
  *   Default value: 0xa3
  *
- *   7:0  IF_OFFSET_ANA[7:0]: Intermediate frequency setting for the digital shift-to-baseband
- *        circuits. According to the formula:
- *        fIF = fXO*(IF_OFFSET_ANA+64)/(12*2^10) = fCLK*(IF_OFFSET_DIG+64)/(12*2^10) Hz.
+ *   7:0  IF_OFFSET_ANA[7:0]: Intermediate frequency setting for the digital
+ *        shift-to-baseband circuits. According to the formula:
+ *        fIF = fXO*(IF_OFFSET_ANA+64)/(12*2^10) = fCLK*(IF_OFFSET_DIG+64)/
+ *                                                    (12*2^10) Hz.
  */
 
 #define IF_OFFSET_ANA_BASE              ((uint8_t)0x07)  /* Intermediate frequency fIF=
@@ -526,11 +543,13 @@
  *   Default value: 0xa3
  *
  *   7:4  Reserved.
- *   3:0  FC_OFFSET[11:8]: Carrier offset. This value is the higher part of a 12-bit 2’s complement integer
- *                         representing an offset in 99Hz(2) units added/subtracted to the
+ *   3:0  FC_OFFSET[11:8]: Carrier offset. This value is the higher part of a
+ *                         12-bit 2’s complement integer representing an
+ *                         offset in 99Hz(2) units added/subtracted to the
  *                         carrier frequency set by registers SYNT3…SYNT0.
- *                         This register can be used to set a fixed correction value
- *                         obtained e.g. from crystal measurements.
+ *                         This register can be used to set a fixed
+ *                         correction value obtained e.g. from crystal
+ *                         measurements.
  */
 
 #define FC_OFFSET1_BASE                 ((uint8_t)0x0e)  /* [3:0] -> [11:8] Carrier offset
@@ -540,10 +559,11 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0  FC_OFFSET[7:0]: Carrier offset. This value is the lower part of a 12-bit 2’s
- *                        complement integer representing an offset in 99Hz(2) units
- *                        added/subtracted to the carrier frequency set by registers
- *                        SYNT3…SYNT0.  This register can be used to set a fixed correction
+ *   7:0  FC_OFFSET[7:0]: Carrier offset. This value is the lower part of a
+ *                        12-bit 2’s complement integer representing an
+ *                        offset in 99Hz(2) units added/subtracted to the
+ *                        carrier frequency set by registers SYNT3…SYNT0.
+ *                        This register can be used to set a fixed correction
  *                        value obtained e.g. from crystal measurements.
  */
 
@@ -560,7 +580,8 @@
 
 /* PA_POWER_x[8:1] registers
  *
- *   Default values from 8 to 1: [0x03, 0x0e, 0x1a, 0x25, 0x35, 0x40, 0x4e, 0x00]
+ *   Default values from 8 to 1:
+ *   [0x03, 0x0e, 0x1a, 0x25, 0x35, 0x40, 0x4e, 0x00]
  *   Read Write
  *
  *   7    Reserved.
@@ -573,7 +594,7 @@
                                                           * ramping or ASK modulation */
 #define PA_POWER6_BASE                  ((uint8_t)0x12)  /* PA Power level for 6th slot of PA
                                                           * ramping or ASK modulation */
-#define PA_POWER5_BASE                   ((uint8_t)0x13)  /* PA Power level for 5th slot of PA
+#define PA_POWER5_BASE                   ((uint8_t)0x13) /* PA Power level for 5th slot of PA
                                                           * ramping or ASK modulation */
 #define PA_POWER4_BASE                  ((uint8_t)0x14)  /* PA Power level for 4th slot of PA
                                                           * ramping or ASK modulation */
@@ -589,8 +610,8 @@
  *   Default value:0x07
  *   Read Write
  *
- *   7:6  CWC[1:0]: Output stage additional load capacitors bank (to be used to
- *                      optimize the PA for different sub-bands).
+ *   7:6  CWC[1:0]: Output stage additional load capacitors bank
+ *                 (to be used to optimize the PA for different sub-bands).
  *
  *         CWC1       |        CWC0      |     Total capacity in pF
  *       ---------------------------------------------------------
@@ -604,14 +625,15 @@
  *                       0 - Disable the power ramping
  *   4:3 PA_RAMP_STEP_WIDTH[1:0]: Step width in bit period
  *
- *         PA_RAMP_STEP_WIDTH1       |        PA_RAMP_STEP_WIDTH0       |     PA ramping time step
- *       -------------------------------------------------------------------------------------------
- *                 0                 |                0                 |        1/8 Bit period
- *                 0                 |                1                 |        2/8 Bit period
- *                 1                 |                0                 |        3/8 Bit period
- *                 1                 |                1                 |        4/8 Bit period
+ *         PA_RAMP_STEP_WIDTH1  | PA_RAMP_STEP_WIDTH0 | PA ramping time step
+ *       -------------------------------------------------------------------
+ *                 0            |        0            |  1/8 Bit period
+ *                 0            |        1            |  2/8 Bit period
+ *                 1            |        0            |  3/8 Bit period
+ *                 1            |        1            |  4/8 Bit period
  *
- *   2:0 PA_LEVEL_MAX_INDEX[2:0]: Fixes the MAX PA LEVEL in PA ramping or ASK modulation
+ *   2:0 PA_LEVEL_MAX_INDEX[2:0]: Fixes the MAX PA LEVEL in PA ramping or
+ *                                ASK modulation
  */
 
 #define PA_POWER0_BASE                  ((uint8_t)0x18)  /* PA ramping settings and additional
@@ -625,15 +647,18 @@
 #define PA_POWER0_CWC_2_4P              ((uint8_t)0x80)  /* 2.4pF additional PA load capacitor */
 #define PA_POWER0_CWC_3_6P              ((uint8_t)0xc0)  /* 3.6pF additional PA load capacitor */
 #define PA_POWER0_PA_RAMP_MASK          ((uint8_t)0x20)  /* The PA power ramping */
+
 #define PA_POWER0_PA_RAMP_STEP_WIDTH_MASK ((uint8_t)0x20)  /* The step width */
 #define PA_POWER0_PA_RAMP_STEP_WIDTH_TB_8 ((uint8_t)0x00)  /* PA ramping time step = 1/8 Bit period */
 #define PA_POWER0_PA_RAMP_STEP_WIDTH_TB_4 ((uint8_t)0x08)  /* PA ramping time step = 2/8 Bit period */
 #define PA_POWER0_PA_RAMP_STEP_WIDTH_3TB_8 ((uint8_t)0x10) /* PA ramping time step = 3/8 Bit period */
 #define PA_POWER0_PA_RAMP_STEP_WIDTH_TB_2 ((uint8_t)0x18)  /* PA ramping time  step = 4/8 Bit period */
+
 #define PA_POWER0_PA_LEVEL_MAX_INDEX    ((uint8_t)0x20)  /* Final level for power ramping */
 #define PA_POWER0_PA_LEVEL_MAX_INDEX_0  ((uint8_t)0x00)  /* */
 #define PA_POWER0_PA_LEVEL_MAX_INDEX_1  ((uint8_t)0x01)  /* Fixes the MAX PA LEVEL in PA ramping or
                                                           * ASK modulation */
+
 #define PA_POWER0_PA_LEVEL_MAX_INDEX_2  ((uint8_t)0x02) /*                   */
 #define PA_POWER0_PA_LEVEL_MAX_INDEX_3  ((uint8_t)0x03) /*         _________ */
 #define PA_POWER0_PA_LEVEL_MAX_INDEX_4  ((uint8_t)0x04) /* PA_LVL2 _| <--|   */
@@ -654,8 +679,8 @@
  *
  *   Read Write
  *   Default value: 0x1a
- *   7  CW:              1 - CW Mode enabled - enables the generation of a continuous wave
- *                           carrier without any modulation
+ *   7  CW:              1 - CW Mode enabled - enables the generation of a
+ *                           continuous wave carrier without any modulation
  *                       0 - CW Mode disabled
  *
  *   6 BT_SEL:  Select BT value for GFSK
@@ -701,13 +726,15 @@
  *
  *   Read Write
  *   Default value: 0x45
- *   7:4  FDEV_E[3:0]:  Exponent of the frequency deviation (allowed values from 0 to 9)
+ *   7:4  FDEV_E[3:0]:  Exponent of the frequency deviation
+ *                      (allowed values from 0 to 9)
  *
  *   3 CLOCK_REC_ALGO_SEL:  Select PLL or DLL mode for clock recovery
  *                       1 - DLL mode
  *                       0 - PLL mode
  *
- *   2:0 FDEV_M[1:0]: Mantissa of the frequency deviation (allowed values from 0 to 7)
+ *   2:0 FDEV_M[1:0]: Mantissa of the frequency deviation
+ *                    (allowed values from 0 to 7)
  */
 
 #define FDEV0_BASE                      ((uint8_t)0x1c)  /* Sets the Mantissa and exponent of
@@ -730,21 +757,23 @@
  *
  *   Read Write
  *   Default value: 0x23
- *   7:4  CHFLT_M[3:0]:       Mantissa of the channel filter BW (allowed values from 0 to 8)
+ *   7:4  CHFLT_M[3:0]:       Mantissa of the channel filter BW
+ *                            (allowed values from 0 to 8)
  *
- *   3:0  CHFLT_E[3:0]:       Exponent of the channel filter BW (allowed values from 0 to 9)
+ *   3:0  CHFLT_E[3:0]:       Exponent of the channel filter BW
+ *                            (allowed values from 0 to 9)
  *
- *         M\E |   0   |   1   |   2   |   3   |   4  |   5  |  6   |   7 |  8  |  9  |
- *        -----+-------+-------+-------+-------+------+------+------+-----+-----+-----+
- *         0   | 800.1 | 450.9 | 224.7 | 112.3 | 56.1 | 28.0 | 14.0 | 7.0 | 3.5 | 1.8 |
- *         1   | 795.1 | 425.9 | 212.4 | 106.2 | 53.0 | 26.5 | 13.3 | 6.6 | 3.3 | 1.7 |
- *         2   | 768.4 | 403.2 | 201.1 | 100.5 | 50.2 | 25.1 | 12.6 | 6.3 | 3.1 | 1.6 |
- *         3   | 736.8 | 380.8 | 190.0 | 95.0  | 47.4 | 23.7 | 11.9 | 5.9 | 3.0 | 1.5 |
- *         4   | 705.1 | 362.1 | 180.7 | 90.3  | 45.1 | 22.6 | 11.3 | 5.6 | 2.8 | 1.4 |
- *         5   | 670.9 | 341.7 | 170.6 | 85.3  | 42.6 | 21.3 | 10.6 | 5.3 | 2.7 | 1.3 |
- *         6   | 642.3 | 325.4 | 162.4 | 81.2  | 40.6 | 20.3 | 10.1 | 5.1 | 2.5 | 1.3 |
- *         7   | 586.7 | 294.5 | 147.1 | 73.5  | 36.7 | 18.4 | 9.2  | 4.6 | 2.3 | 1.2 |
- *         8   | 541.4 | 270.3 | 135.0 | 67.5  | 33.7 | 16.9 | 8.4  | 4.2 | 2.1 | 1.1 |
+ *         M\E |   0  |   1  |   2  |   3  |   4 |   5 |  6  |  7 |  8 |  9 |
+ *        -----+------+------+------+------+-----+-----+-----+----+----+----+
+ *         0   | 800.1| 450.9| 224.7| 112.3| 56.1| 28.0| 14.0| 7.0| 3.5| 1.8|
+ *         1   | 795.1| 425.9| 212.4| 106.2| 53.0| 26.5| 13.3| 6.6| 3.3| 1.7|
+ *         2   | 768.4| 403.2| 201.1| 100.5| 50.2| 25.1| 12.6| 6.3| 3.1| 1.6|
+ *         3   | 736.8| 380.8| 190.0| 95.0 | 47.4| 23.7| 11.9| 5.9| 3.0| 1.5|
+ *         4   | 705.1| 362.1| 180.7| 90.3 | 45.1| 22.6| 11.3| 5.6| 2.8| 1.4|
+ *         5   | 670.9| 341.7| 170.6| 85.3 | 42.6| 21.3| 10.6| 5.3| 2.7| 1.3|
+ *         6   | 642.3| 325.4| 162.4| 81.2 | 40.6| 20.3| 10.1| 5.1| 2.5| 1.3|
+ *         7   | 586.7| 294.5| 147.1| 73.5 | 36.7| 18.4|  9.2| 4.6| 2.3| 1.2|
+ *         8   | 541.4| 270.3| 135.0| 67.5 | 33.7| 16.9|  8.4| 4.2| 2.1| 1.1|
  */
 
 #define CHFLT_BASE                      ((uint8_t)0x1d)  /* RX Channel Filter Bandwidth */
@@ -856,9 +885,10 @@
  *                       1 - AFC Loop closed on 2nd conversion stage.
  *                       0 - AFC Loop closed on slicer
  *
- *   4:0  AFC PD leakage[4:0]: Peak detector leakage. This parameter sets the decay speed of
- *        the min/max frequency peak detector (AFC2 register), the range allowed is 0..31 (0 -
- *        no leakage, 31 - high leakage). The recommended value for this parameter is 4.
+ *   4:0  AFC PD leakage[4:0]: Peak detector leakage. This parameter sets the
+ *        decay speed of the min/max frequency peak detector (AFC2 register),
+ *        the range allowed is 0..31 (0 - no leakage, 31 - high leakage).
+ *        The recommended value for this parameter is 4.
  */
 
 #define AFC2_BASE                       ((uint8_t)0x1e)  /* Automatic frequency compensation
@@ -879,12 +909,14 @@
  *   Read Write
  *   Default value: 0x18
  *
- *   7:0  AFC_FAST_PERIOD: Length of the AFC fast period. this parameter sets the length of the
- *                         fast period in number of samples (AFC1 register), the range allowed
- *                         is 0..255. The recommended setting for this parameter is such that
- *                         the fast period equals the preamble length. Since the algorithm
- *                         operates typically on 2 samples per symbol, the programmed value
- *                         should be twice the number of preamble symbols.
+ *   7:0  AFC_FAST_PERIOD: Length of the AFC fast period. this parameter sets
+ *                         the length of the fast period in number of samples
+ *                         (AFC1 register), the range allowed is 0..255. The
+ *                         recommended setting for this parameter is such
+ *                         that the fast period equals the preamble length.
+ *                         Since the algorithm operates typically on 2
+ *                         samples per symbol, the programmed value should be
+ *                         twice the number of preamble symbols.
  */
 
 #define AFC1_BASE                       ((uint8_t)0x1f)  /* Length of the AFC fast period */
@@ -932,8 +964,8 @@
  *   4   START_MAX_ATTENUATION: Start with max attenuation
  *                       1 - Enable
  *                       0 - Disable
- *   3:0  MEAS_TIME[3:0]: Measure time during which the signal peak is detected (according to
- *        the formula 12/fxo*2^MEAS_TIME)
+ *   3:0  MEAS_TIME[3:0]: Measure time during which the signal peak is
+ *        detected (according to the formula 12/fxo*2^MEAS_TIME)
  */
 
 #define AGCCTRL2_BASE                   ((uint8_t)0x24)  /* AGC freeze strategy, AGC attenuation
@@ -971,7 +1003,8 @@
  *   6   AGC_MODE: Set linear-Binary AGC mode
  *                       1 - Enable
  *                       0 - Disable
- *   5:0 HOLD_TIME[5:0]: Hold time after gain adjustment according to formula 12/fxo*HOLD_TIME
+ *   5:0 HOLD_TIME[5:0]: Hold time after gain adjustment according to formula
+ *                          12/fxo*HOLD_TIME
  */
 
 #define AGCCTRL0_BASE                   ((uint8_t)0x26)  /* Enables AGC, set AGC algo between
@@ -991,9 +1024,10 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0     CH_NUM[7:0]: Channel number. This value is multiplied by the channel spacing and
- *                        added to the synthesizer base frequency to generate the actual RF
- *                        carrier frequency.
+ *   7:0     CH_NUM[7:0]: Channel number. This value is multiplied by the
+ *                        channel spacing and added to the synthesizer base
+ *                        frequency to generate the actual RF carrier
+ *                        frequency.
  */
 
 #define CHNUM_BASE                      ((uint8_t)0x6c)  /* Channel number. This value is
@@ -1036,19 +1070,19 @@
  *
  *   7:6   PCKT_FRMT[1:0]: format of packet
  *
- *          PCKT_FRMT1       |        PCKT_FRMT0       |        Format
- *       ----------------------------------------------------------------------
- *             0             |           0             |        BASIC
- *             1             |           0             |        MBUS
- *             1             |           1             |        STACK
+ *          PCKT_FRMT1       |        PCKT_FRMT0       |      Format
+ *       --------------------------------------------------------------------
+ *             0             |           0             |      BASIC
+ *             1             |           0             |      MBUS
+ *             1             |           1             |      STACK
  *
  *   5:4   RX_MODE[1:0]: length of address 0x30 field in bytes
  *
- *          RX_MODE1       |        RX_MODE0       |            Rx Mode
- *       --------------------------------------------------------------------
- *             0           |           0           |              normal
- *             0           |           1           |       direct through FIFO
- *             1           |           0           |       direct through GPIO
+ *          RX_MODE1       |        RX_MODE0       |           Rx Mode
+ *       -------------------------------------------------------------------
+ *             0           |           0           |            normal
+ *             0           |           1           |      direct through FIFO
+ *             1           |           0           |      direct through GPIO
  *
  *   3:0   LEN_WID[3:0]: length of length field in bits
  */
@@ -1095,12 +1129,12 @@
  *
  *   7:5   CRC_MODE[2:0]: CRC type (0, 8, 16, 24 bits)
  *
- *          CRC_MODE2     |       CRC_MODE1     |        CRC_MODE0     |       CRC Mode  (n. bits - poly)
- *       -------------------------------------------------------------------------------------------------
- *             0           |         0          |          1           |       8 - 0x07
- *             0           |         1          |          0           |       16 -  0x8005
- *             0           |         1          |          1           |       16 - 0x1021
- *             1           |         0          |          0           |       24 - 0x864CBF
+ *          CRC_MODE2 | CRC_MODE1 | CRC_MODE0 | CRC Mode  (n. bits - poly)
+ *       -----------------------------------------------------------------
+ *             0      |     0     |     1     |   8 - 0x07
+ *             0      |     1     |     0     |  16 -  0x8005
+ *             0      |     1     |     1     |  16 - 0x1021
+ *             1      |     0     |     0     |  24 - 0x864CBF
  *
  *   4     WHIT_EN[0]: Enable Whitening
  *                       1 - Enable
@@ -1108,12 +1142,12 @@
  *
  *   3:2   TX_SOURCE[1:0]: length of sync field in bytes
  *
- *          TX_SOURCE1     |        TX_SOURCE0     |        Tx Mode
- *       --------------------------------------------------------------------
- *             0           |           0           |       normal
- *             0           |           1           |       direct through FIFO
- *             1           |           0           |       direct through GPIO
- *             1           |           1           |       pn9
+ *          TX_SOURCE1     |        TX_SOURCE0     |       Tx Mode
+ *       -------------------------------------------------------------------
+ *             0           |           0           |      normal
+ *             0           |           1           |      direct through FIFO
+ *             1           |           0           |      direct through GPIO
+ *             1           |           1           |      pn9
  *
  *   1   NOT_USED
  *
@@ -1217,24 +1251,29 @@
  *   7:0    CONTROLx_MASK[7:0]:   All 0s - no filtering
  */
 
-#define PCKT_FLT_GOALS_CONTROL0_MASK_BASE ((uint8_t)0x42)
-                                                         /* Packet control field #3 mask, all 0s
-                                                          * -> no filtering */
-#define PCKT_FLT_GOALS_CONTROL1_MASK_BASE ((uint8_t)0x43)
-                                                         /* Packet control field #2 mask, all 0s
-                                                          * -> no filtering */
-#define PCKT_FLT_GOALS_CONTROL2_MASK_BASE ((uint8_t)0x44)
-                                                         /* Packet control field #1 mask, all 0s
-                                                          * -> no filtering */
-#define PCKT_FLT_GOALS_CONTROL3_MASK_BASE ((uint8_t)0x45)
-                                                         /* Packet control field #0 mask, all 0s
-                                                          * -> no filtering */
+#define PCKT_FLT_GOALS_CONTROL0_MASK_BASE ((uint8_t)0x42) /* Packet control
+                                                           * field #3 mask,
+                                                           * all 0s ->
+                                                           * no filtering */
+#define PCKT_FLT_GOALS_CONTROL1_MASK_BASE ((uint8_t)0x43) /* Packet control
+                                                           * field #2 mask,
+                                                           * all 0s ->
+                                                           * no filtering */
+#define PCKT_FLT_GOALS_CONTROL2_MASK_BASE ((uint8_t)0x44) /* Packet control
+                                                           * field #1 mask,
+                                                           * all 0s ->
+                                                           * no filtering */
+#define PCKT_FLT_GOALS_CONTROL3_MASK_BASE ((uint8_t)0x45) /* Packet control
+                                                           * field #0 mask,
+                                                           * all 0s ->
+                                                           * no filtering */
 
 /* PCKT_FLT_GOALS_CONTROLx_FIELD registers
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0    CONTROLx_FIELD[7:0]:   Control field (byte x) to be used as reference
+ *   7:0    CONTROLx_FIELD[7:0]:   Control field (byte x) to be used as
+ *                                 reference
  */
 
 #define PCKT_FLT_GOALS_CONTROL0_FIELD_BASE ((uint8_t)0x46)  /* Control field (byte  #3) */
@@ -1246,7 +1285,8 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0    RX_SOURCE_MASK[7:0]:   For received packet only: all 0s - no filtering
+ *   7:0    RX_SOURCE_MASK[7:0]:   For received packet only:
+ *                                 all 0s - no filtering
  */
 
 #define PCKT_FLT_GOALS_SOURCE_MASK_BASE ((uint8_t)0x4a)  /* Source address mask, valid
@@ -1256,7 +1296,8 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0    RX_SOURCE_ADDR[7:0]:  RX packet source / TX packet destination fields
+ *   7:0    RX_SOURCE_ADDR[7:0]:  RX packet source / TX packet destination
+ *                                fields
  */
 
 #define PCKT_FLT_GOALS_SOURCE_ADDR_BASE ((uint8_t)0x4b)  /* Source address */
@@ -1288,7 +1329,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0    TX_SOURCE_ADDR[7:0]:  TX packet source / RX packet destination fields
+ *   7:0    TX_SOURCE_ADDR[7:0]:  TX packet source / RX packet destination
+ *                                fields
  */
 
 #define PCKT_FLT_GOALS_TX_ADDR_BASE     ((uint8_t)0x4e)  /* Address of the destination (also
@@ -1300,19 +1342,25 @@
  *   Read Write
  *
  *   7   Reserved.
- *   6   RX_TIMEOUT_AND_OR_SELECT[0]:  1 - ‘OR’ logical function applied to CS/SQI/PQI
- *                                         values (masked by 7:5 bits in PROTOCOL register)
- *   5   CONTROL_FILTERING[0]:         1 - RX packet accepted if its control fields matches
- *                                         with masked CONTROLx_FIELD registers.
- *   4   SOURCE_FILTERING[0]:          1 - RX packet accepted if its source field
- *                                         matches w/ masked RX_SOURCE_ADDR register.
- *   3   DEST_VS_ SOURCE _ADDR[0]:     1 - RX packet accepted if its destination
- *                                         address matches with TX_SOURCE_ADDR reg.
- *   2   DEST_VS_MULTICAST_ADDR[0]:    1 - RX packet accepted if its destination
- *                                         address matches with MULTICAST register
- *   1   DEST_VS_BROADCAST_ADDR[0]:    1 - RX packet accepted if its destination
- *                                         address matches with BROADCAST register.
- *   0   CRC_CHECK[0]:                 1 - packet discarded if CRC not valid.
+ *   6   RX_TIMEOUT_AND_OR_SELECT[0]: 1 - ‘OR’ logical function applied to
+ *                                        CS/SQI/PQI values (masked by 7:5
+ *                                        bits in PROTOCOL register)
+ *   5   CONTROL_FILTERING[0]:        1 - RX packet accepted if its control
+ *                                        fields matches with masked
+ *                                        CONTROLx_FIELD registers.
+ *   4   SOURCE_FILTERING[0]:         1 - RX packet accepted if its source
+ *                                        field matches w/ masked
+ *                                        RX_SOURCE_ADDR register.
+ *   3   DEST_VS_ SOURCE _ADDR[0]:    1 - RX packet accepted if its
+ *                                        destination address matches with
+ *                                        TX_SOURCE_ADDR reg.
+ *   2   DEST_VS_MULTICAST_ADDR[0]:   1 - RX packet accepted if its
+ *                                        destination address matches with
+ *                                        MULTICAST register
+ *   1   DEST_VS_BROADCAST_ADDR[0]:   1 - RX packet accepted if its
+ *                                        destination address matches with
+ *                                        BROADCAST register.
+ *   0   CRC_CHECK[0]:                1 - packet discarded if CRC not valid.
  */
 
 #define PCKT_FLT_OPTIONS_BASE           ((uint8_t)0x4f)  /* Options relative to packet filtering */
@@ -1347,7 +1395,8 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0     TX_CTRLx[7:0]: Control field value to be used in TX packet as byte n.x
+ *   7:0     TX_CTRLx[7:0]: Control field value to be used in TX packet as
+ *                          byte n.x
  */
 
 #define TX_CTRL_FIELD3_BASE             ((uint8_t)0x68)  /* Control field value to be used in
@@ -1399,7 +1448,8 @@
  *   Default value: 0x00
  *   Read
  *
- *   7:0   RX_PCKT_LEN1[7:0]:  Length (number of bytes) of the received packet:
+ *   7:0   RX_PCKT_LEN1[7:0]:  Length (number of bytes) of the received
+ *                             packet:
  *                             RX_PCKT_LEN=RX_PCKT_LEN1 × 256 + RX_PCKT_LEN0
  *                             This value is packet_length/256
  */
@@ -1412,7 +1462,8 @@
  *   Default value: 0x00
  *   Read
  *
- *   7:0   RX_PCKT_LEN0[7:0]:  Length (number of bytes) of the received packet:
+ *   7:0   RX_PCKT_LEN0[7:0]:  Length (number of bytes) of the received
+ *                             packet:
  *                             RX_PCKT_LEN=RX_PCKT_LEN1 × 256 + RX_PCKT_LEN0
  *                             This value is packet_length%256
  */
@@ -1424,8 +1475,8 @@
  *   Default value: 0x00
  *   Read
  *
- *   7:0   CRC_FIELDx[7:0]:    upper(x=2), middle(x=1) and lower(x=0) part of the crc field of
- *                             the received packet
+ *   7:0   CRC_FIELDx[7:0]:    upper(x=2), middle(x=1) and lower(x=0) part
+ *                             of the crc field of the received packet
  */
 
 #define CRC_FIELD2_BASE                 ((uint8_t)0xcb)  /* CRC2 field of the received packet */
@@ -1437,7 +1488,9 @@
  *   Default value: 0x00
  *   Read
  *
- *   7:0   RX_CTRL_FIELDx[7:0]:    upper(x=3), middle(x=2), middle(x=1) and lower(x=0) part of the control field of the received packet
+ *   7:0   RX_CTRL_FIELDx[7:0]:    upper(x=3), middle(x=2), middle(x=1) and
+ *                                 lower(x=0) part of the control field of
+ *                                 the received packet
  */
 
 #define RX_CTRL_FIELD0_BASE             ((uint8_t)0xce)  /* CRTL3 Control field of the received packet */
@@ -1450,7 +1503,8 @@
  *   Default value: 0x00
  *   Read
  *
- *   7:0   RX_ADDR_FIELDx[7:0]:    source(x=1) and destination(x=0) address field of the received packet
+ *   7:0   RX_ADDR_FIELDx[7:0]:    source(x=1) and destination(x=0) address
+ *                                 field of the received packet
  */
 
 #define RX_ADDR_FIELD1_BASE             ((uint8_t)0xd2)  /* ADDR1 Address field of the received packet */
@@ -1462,14 +1516,16 @@
  *
  *   Default value: 0x06
  *   Read Write
- *   7   CS_TIMEOUT_MASK:              1 - CS value contributes to timeout disabling
- *   6   SQI_TIMEOUT_MASK:             1 - SQI value contributes to timeout disabling
- *   5   PQI_TIMEOUT_MASK:             1 - PQI value contributes to timeout disabling
- *   4:3  TX_SEQ_NUM_RELOAD[1:0]:      TX sequence number to be used when counting reset is
- *                                     required using the related command.
- *   2   RCO_CALIBRATION[0]:           1 - Enables the automatic RCO calibration
- *   1   VCO_CALIBRATION[0]:           1 - Enables the automatic VCO calibration
- *   0   LDCR_MODE[0]:                 1 - LDCR mode enabled
+ *   7   CS_TIMEOUT_MASK:      1 - CS value contributes to timeout disabling
+ *   6   SQI_TIMEOUT_MASK:     1 - SQI value contributes to timeout disabling
+ *   5   PQI_TIMEOUT_MASK:     1 - PQI value contributes to timeout disabling
+ *
+ *   4:3  TX_SEQ_NUM_RELOAD[1:0]: TX sequence number to be used when counting
+ *                              reset is required using the related command.
+ *
+ *   2   RCO_CALIBRATION[0]:   1 - Enables the automatic RCO calibration
+ *   1   VCO_CALIBRATION[0]:   1 - Enables the automatic VCO calibration
+ *   0   LDCR_MODE[0]:         1 - LDCR mode enabled
  */
 
 #define PROTOCOL2_BASE                  ((uint8_t)0x50)  /* Protocol2 regisetr address */
@@ -1490,16 +1546,16 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7   LDCR_RELOAD_ON_SYNC:          1 - LDCR timer will be reloaded with the value stored in
- *                                         the LDCR_RELOAD registers
- *   6   PIGGYBACKING:                 1 - PIGGYBACKING enabled
+ *   7   LDCR_RELOAD_ON_SYNC:   1 - LDCR timer will be reloaded with the
+ *                                  value stored in the LDCR_RELOAD registers
+ *   6   PIGGYBACKING:          1 - PIGGYBACKING enabled
  *   5:4   Reserved.
- *   3   SEED_RELOAD[0]:               1 - Reload the back-off random generator
- *                                         seed using the value written in the
- *                                         BU_COUNTER_SEED_MSByte / LSByte registers
- *   2   CSMA_ON   [0]:                1 - CSMA channel access mode enabled
- *   1   CSMA_PERS_ON[0]:              1 - CSMA persistent (no back-off) enabled
- *   0   AUTO_PCKT_FLT[0]:             1 - automatic packet filtering mode enabled
+ *   3   SEED_RELOAD[0]:        1 - Reload the back-off random generator
+ *                                  seed using the value written in the
+ *                                  BU_COUNTER_SEED_MSByte / LSByte registers
+ *   2   CSMA_ON   [0]:         1 - CSMA channel access mode enabled
+ *   1   CSMA_PERS_ON[0]:       1 - CSMA persistent (no back-off) enabled
+ *   0   AUTO_PCKT_FLT[0]:      1 - automatic packet filtering mode enabled
  */
 
 #define PROTOCOL1_BASE                  ((uint8_t)0x51)  /* Protocol1 register address */
@@ -1522,11 +1578,13 @@
  *
  *   Default value: 0x08
  *   Read Write
- *   7:4   NMAX_RETX[3:0]:             Max number of re-TX.  0 - re-transmission is not performed
- *   3     NACK_TX[0]:                 1 - field NO_ACK=1 on transmitted packet
- *   2     AUTO_ACK[0]:                1 - automatic ack after RX
- *   1     PERS_RX[0]:                 1 - persistent reception enabled
- *   0     PERS_TX[0]:                 1 - persistent transmission enabled
+ *   7:4   NMAX_RETX[3:0]:   Max number of re-TX.
+ *                           0 - re-transmission is not performed
+ *
+ *   3     NACK_TX[0]:        1 - field NO_ACK=1 on transmitted packet
+ *   2     AUTO_ACK[0]:       1 - automatic ack after RX
+ *   1     PERS_RX[0]:        1 - persistent reception enabled
+ *   0     PERS_TX[0]:        1 - persistent transmission enabled
  */
 
 #define PROTOCOL0_BASE                  ((uint8_t)0x52)  /* Persistent RX/TX, autoack, Max
@@ -1543,12 +1601,14 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0   RX_TIMEOUT_PRESCALER[7:0] :  RX operation timeout: prescaler value
+ *   7:0   RX_TIMEOUT_PRESCALER[7:0] :  RX operation timeout:
+ *                                      prescaler value
  */
 
-#define TIMERS5_RX_TIMEOUT_PRESCALER_BASE ((uint8_t)0x53)
-                                                         /* RX operation timeout: prescaler
-                                                          * value */
+#define TIMERS5_RX_TIMEOUT_PRESCALER_BASE ((uint8_t)0x53) /* RX operation
+                                                           * timeout:
+                                                           * prescaler
+                                                           * value */
 
 /* TIMERS4 register
  *
@@ -1563,7 +1623,8 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0   LDCR_PRESCALER[7:0] :  LDC Mode: Prescaler part of the wake-up value
+ *   7:0   LDCR_PRESCALER[7:0] :  LDC Mode:
+ *                                Prescaler part of the wake-up value
  */
 
 #define TIMERS3_LDC_PRESCALER_BASE      ((uint8_t)0x55)  /* LDC Mode: Prescaler of the wake-up
@@ -1582,18 +1643,21 @@
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0   LDCR_RELOAD_PRESCALER[7:0] :  LDC Mode: Prescaler part of the reload value
+ *   7:0   LDCR_RELOAD_PRESCALER[7:0] :  LDC Mode:
+ *                                       Prescaler part of the reload value
  */
 
-#define TIMERS1_LDC_RELOAD_PRESCALER_BASE ((uint8_t)0x57)
-                                                         /* LDC Mode: Prescaler part of the
-                                                          * reload value */
+#define TIMERS1_LDC_RELOAD_PRESCALER_BASE ((uint8_t)0x57) /* LDC Mode:
+                                                           * Prescaler part
+                                                           * of the reload
+                                                           * value */
 
 /* TIMERS0 register
  *
  *   Default value: 0x00
  *   Read Write
- *   7:0   LDCR_RELOAD_COUNTER[7:0] :  LDC Mode: Counter part of the reload value
+ *   7:0   LDCR_RELOAD_COUNTER[7:0] :  LDC Mode:
+ *                                     Counter part of the reload value
  */
 
 #define TIMERS0_LDC_RELOAD_COUNTER_BASE ((uint8_t)0x58)  /* LDC Mode:  Counter part of the
@@ -1603,8 +1667,8 @@
  *
  *   Default value: 0xff
  *   Read Write
- *   7:0     BU_COUNTER_SEED_MSByte: Seed of the random number generator used to apply the BEB
- &           (Binary Exponential Backoff) algorithm (MSB)
+ *   7:0     BU_COUNTER_SEED_MSByte: Seed of the random number generator used
+ *           to apply the BEB (Binary Exponential Backoff) algorithm (MSB)
  */
 
 #define CSMA_CONFIG3_BASE               ((uint8_t)0x64)  /* CSMA/CA:  Seed of the random number
@@ -1617,21 +1681,23 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0     BU_COUNTER_SEED_LSByte: Seed of the random number generator used to apply
- *           the BEB (Binary Exponential Backoff) algorithm (LSB)
+ *   7:0     BU_COUNTER_SEED_LSByte: Seed of the random number generator used
+ *                                   to apply the BEB (Binary Exponential
+ *                                   Backoff) algorithm (LSB)
  */
 
 #define CSMA_CONFIG2_BASE               ((uint8_t)0x65)  /* CSMA/CA: Seed of the random
                                                           * number generator used to apply
                                                           * the BEB (Binary Exponential
-                                                          * Backoff) algorithm (LSB)*/
+                                                          * Backoff) algorithm (LSB) */
 
 /* CSMA_CONFIG1 registers
  *
  *   Default value: 0x04
  *   Read Write
  *   7:2     BU_PRESCALER[5:0]: Used to program the back-off unit BU
- *   1:0     CCA_PERIOD[1:0]: Used to program the Tcca time (64 / 128 /256 / 512 × Tbit.
+ *   1:0     CCA_PERIOD[1:0]: Used to program the Tcca time
+ *                            (64 / 128 /256 / 512 × Tbit.
  */
 
 #define CSMA_CONFIG1_BASE               ((uint8_t)0x66)  /* CSMA/CA: Prescaler of the back-off
@@ -1661,8 +1727,10 @@
  *   Read Write
  *   Default value: 0x02
  *
- *   7:6   SQI_TH[1:0]: SQI threshold according to the formula: 8*SYNC_LEN - 2*SQI_TH
- *   5:2   PQI_TH[3:0]: PQI threshold according to the formula: 4*PQI_THR
+ *   7:6   SQI_TH[1:0]: SQI threshold according to the formula:
+ *                      8*SYNC_LEN - 2*SQI_TH
+ *   5:2   PQI_TH[3:0]: PQI threshold according to the formula:
+ *                      4*PQI_THR
  *   1     SQI_EN[0]:  SQI enable
  *                 1 - Enable
  *                 0 - Disable
@@ -1730,14 +1798,15 @@
  *   7:4  RSSI_FLT[3:0]: Gain of the RSSI filter
  *   3:2  CS_MODE[1:0]: AFC loop gain in slow mode (2's log)
  *
- *          CS_MODE1       |        CS_MODE0       |                     CS Mode
- *       -----------------------------------------------------------------------------------------
- *             0           |           0           |        Static CS
- *             0           |           1           |        Dynamic CS with 6dB dynamic threshold
- *             1           |           0           |        Dynamic CS with 12dB dynamic threshold
- *             1           |           1           |        Dynamic CS with 18dB dynamic threshold
+ *          CS_MODE1     | CS_MODE0  |            CS Mode
+ *       --------------------------------------------------------------------
+ *             0         |     0     | Static CS
+ *             0         |     1     | Dynamic CS with 6dB dynamic threshold
+ *             1         |     0     | Dynamic CS with 12dB dynamic threshold
+ *             1         |     1     | Dynamic CS with 18dB dynamic threshold
  *
- *   1:0   OOK_PEAK_DECAY[1:0]: Peak decay control for OOK: 3 slow decay; 0 fast decay
+ *   1:0   OOK_PEAK_DECAY[1:0]: Peak decay control for OOK:
+ *                              3 slow decay; 0 fast decay
  */
 
 #define RSSI_FLT_BASE                   ((uint8_t)0x21)  /* Gain of the RSSI filter; lower value
@@ -1770,7 +1839,8 @@
  *   Read Write
  *   Default value: 0x24
  *
- *   7:0 RSSI_THRESHOLD [7:0]:  Signal detect threshold in 0.5dB.  -120dBm corresponds to 20
+ *   7:0 RSSI_THRESHOLD [7:0]:  Signal detect threshold in 0.5dB.
+ *                              -120dBm corresponds to 20
  */
 
 #define RSSI_TH_BASE                    ((uint8_t)0x22)  /* Signal detect threshold in 0.5dB
@@ -1859,7 +1929,8 @@
  *   Read Write
  *
  *   7:4     RWT_IN[3:0]:  RaWThermometric word value for the RCO [7:4]
- *   3:0     RFB_IN[4:1]:  ResistorFineBit word value for the RCO (first 4 bits)
+ *   3:0     RFB_IN[4:1]:  ResistorFineBit word value for the RCO
+ *                         (first 4 bits)
  */
 
 #define RCO_VCO_CALIBR_IN2_BASE         ((uint8_t)0x6d)  /* RaWThermometric word value for the
@@ -1897,7 +1968,8 @@
  *   Read
  *
  *   7:4   RWT_OUT[3:0]:  RWT word from internal RCO calibrator
- *   3:0   RFB_OUT[4:1]:  RFB word from internal RCO calibrator (upper part)
+ *   3:0   RFB_OUT[4:1]:  RFB word from internal RCO calibrator
+ *                        (upper part)
  */
 
  #define RCO_VCO_CALIBR_OUT1_BASE       ((uint8_t)0xe4)  /* RaWThermometric RWT word from
@@ -1910,7 +1982,8 @@
  *   Default value: 0x00
  *   Read
  *
- *   7     RFB_OUT[0]:            RFB word from internal RCO calibrator (last bit LSB)
+ *   7     RFB_OUT[0]:            RFB word from internal RCO calibrator
+ *                                (last bit LSB)
  *   6:0   VCO_CALIBR_DATA[6:0]:  Output word from internal VCO calibrator
  */
 
@@ -2005,8 +2078,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_MASK0:  IRQ mask, if the correspondent bit is set and IRQ can be generated
- *                     (according to the next table)
+ *   7:0   INT_MASK0:  IRQ mask, if the correspondent bit is set and IRQ
+ *                     can be generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2036,8 +2109,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_MASK1:  IRQ mask, if the correspondent bit is set and IRQ can be generated
- *                     (according to the next table)
+ *   7:0   INT_MASK1:  IRQ mask, if the correspondent bit is set and IRQ
+ *                     can be generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2067,8 +2140,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_MASK2:  IRQ mask, if the correspondent bit is set and IRQ can be generated
- *                     (according to the next table)
+ *   7:0   INT_MASK2:  IRQ mask, if the correspondent bit is set and IRQ
+ *                     can be generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2104,8 +2177,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_MASK3:  IRQ mask, if the correspondent bit is set and IRQ can be generated
- *                     (according to the next table)
+ *   7:0   INT_MASK3:  IRQ mask, if the correspondent bit is set and IRQ
+ *                     can be generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2139,8 +2212,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_STATUS0:  IRQ status, if the correspondent bit is set and IRQ has been generated
- *                       (according to the next table)
+ *   7:0   INT_STATUS0:  IRQ status, if the correspondent bit is set and IRQ
+ *                       has been generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2172,8 +2245,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_STATUS1:  IRQ status, if the correspondent bit is set and IRQ has been generated
- *                       (according to the next table)
+ *   7:0   INT_STATUS1:  IRQ status, if the correspondent bit is set and IRQ
+ *                       has been generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2208,8 +2281,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_STATUS2:  IRQ status, if the correspondent bit is set and IRQ has been generated
- *                       (according to the next table)
+ *   7:0   INT_STATUS2:  IRQ status, if the correspondent bit is set and IRQ
+ *                       has been generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------
@@ -2240,8 +2313,8 @@
  *   Default value: 0x00
  *   Read Write
  *
- *   7:0   INT_STATUS3:  IRQ status, if the correspondent bit is set and IRQ has been generated
- *                       (according to the next table)
+ *   7:0   INT_STATUS3:  IRQ status, if the correspondent bit is set and IRQ
+ *                       has been generated (according to the next table)
  *
  *            Bit |     Events Group Interrupt Event
  *           -------------------------------------------------------

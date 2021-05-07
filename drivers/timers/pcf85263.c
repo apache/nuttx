@@ -1,41 +1,26 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/timers/pcf85263.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,11 +37,11 @@
 
 #ifdef CONFIG_RTC_PCF85263
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
 /* This RTC implementation supports only date/time RTC hardware */
 
@@ -79,12 +64,12 @@
 
 #define PCF85263_I2C_ADDRESS 0x51
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This structure describes the state of the PCF85263 chip.  Only a single RTC is
- * supported.
+/* This structure describes the state of the PCF85263 chip.
+ * Only a single RTC is supported.
  */
 
 struct pcf85263_dev_s
@@ -92,27 +77,27 @@ struct pcf85263_dev_s
   FAR struct i2c_master_s *i2c;  /* Contained reference to the I2C bus driver */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* g_rtc_enabled is set true after the RTC has successfully initialized */
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The state of the PCF85263 chip.  Only a single RTC is supported */
 
 static struct pcf85263_dev_s g_pcf85263;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_dumptime
  *
  * Description:
@@ -124,7 +109,7 @@ static struct pcf85263_dev_s g_pcf85263;
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC_INFO
 static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
@@ -144,7 +129,7 @@ static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 #  define rtc_dumptime(tp, msg)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_bin2bcd
  *
  * Description:
@@ -156,7 +141,7 @@ static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
  * Returned Value:
  *   The value in BCD representation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint8_t rtc_bin2bcd(int value)
 {
@@ -171,7 +156,7 @@ static uint8_t rtc_bin2bcd(int value)
   return (msbcd << 4) | value;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_bcd2bin
  *
  * Description:
@@ -183,7 +168,7 @@ static uint8_t rtc_bin2bcd(int value)
  * Returned Value:
  *   The value in binary representation
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int rtc_bcd2bin(uint8_t value)
 {
@@ -191,22 +176,24 @@ static int rtc_bcd2bin(uint8_t value)
   return tens + (value & 0x0f);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: pcf85263_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence by board-specific logic.
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence by
+ *   board-specific logic.
  *
- *   After pcf85263_rtc_initialize() is called, the OS function clock_synchronize()
- *   should also be called to synchronize the system timer to a hardware RTC.  That
- *   operation is normally performed automatically by the system during clock
- *   initialization.  However, when an external RTC is used, the board logic will
- *   need to explicitly re-synchronize the system timer to the RTC when the RTC
+ *   After pcf85263_rtc_initialize() is called, the OS function
+ *   clock_synchronize() should also be called to synchronize the system
+ *   timer to a hardware RTC.  That operation is normally performed
+ *   automatically by the system during clock initialization.
+ *   However, when an external RTC is used, the board logic will need to
+ *   explicitly re-synchronize the system timer to the RTC when the RTC
  *   becomes available.
  *
  * Input Parameters:
@@ -215,7 +202,7 @@ static int rtc_bcd2bin(uint8_t value)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c)
 {
@@ -226,20 +213,21 @@ int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime
  *
  * Description:
- *   Get the current date and time from the date/time RTC.  This interface
- *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
- *   are selected (and CONFIG_RTC_HIRES is not).
+ *   Get the current date and time from the date/time RTC.
+ *   This interface is only supported by the date/time RTC hardware
+ *   implementation.
+ *   It is used to replace the system timer.  It is only used by the RTOS
+ *   during initialization to set up the system time when CONFIG_RTC and
+ *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
- *   sub-second accuracy is lost in this interface.  However, since the system time
- *   is reinitialized on each power-up/reset, there will be no timing inaccuracy in
- *   the long run.
+ *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
+ *   That sub-second accuracy is lost in this interface.  However, since the
+ *   system time is reinitialized on each power-up/reset, there will be no
+ *   timing inaccuracy in the long run.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -247,7 +235,7 @@ int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_getdatetime(FAR struct tm *tp)
 {
@@ -257,8 +245,9 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   uint8_t seconds;
   int ret;
 
-  /* If this function is called before the RTC has been initialized (and it will be),
-   * then just return the data/time of the epoch, 12:00 am, Jan 1, 1970.
+  /* If this function is called before the RTC has been initialized
+   * (and it will be), then just return the data/time of the epoch,
+   * 12:00 am, Jan 1, 1970.
    */
 
   if (!g_rtc_enabled)
@@ -311,7 +300,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   msg[3].length    = 1;
 
   /* Perform the transfer.  The transfer may be performed repeatedly of the
-   * seconds values decreases, meaning that that was a rollover in the seconds.
+   * seconds values decreases, meaning that that was a rollover in the
+   * seconds.
    */
 
   do
@@ -352,8 +342,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   tp->tm_mon = rtc_bcd2bin(buffer[5] & PCF85263_RTC_MONTHS_MASK) - 1;
 
-  /* Return the years since 1900.  The RTC will hold years since 1968 (a leap year
-   * like 2000).
+  /* Return the years since 1900.  The RTC will hold years since 1968
+   * (a leap year like 2000).
    */
 
   tp->tm_year = rtc_bcd2bin(buffer[6]) + 68;
@@ -362,12 +352,12 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -375,7 +365,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
@@ -387,8 +377,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
   uint8_t seconds;
   int ret;
 
-  /* If this function is called before the RTC has been initialized then just return
-   * an error.
+  /* If this function is called before the RTC has been initialized then just
+   * return an error.
    */
 
   if (!g_rtc_enabled)

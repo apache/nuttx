@@ -1,55 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_pwm.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_PWM_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_PWM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_PWM_IR_OFFSET      0x0000 /* Interrupt Register */
 #define LPC17_40_PWM_TCR_OFFSET     0x0004 /* Timer Control Register */
@@ -73,7 +58,7 @@
 #define LPC17_40_PWM_LER_OFFSET     0x0050 /* Load Enable Register */
 #define LPC17_40_PWM_CTCR_OFFSET    0x0070 /* Counter/Timer Control Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_PWM1_IR            (LPC17_40_PWM1_BASE+LPC17_40_PWM_IR_OFFSET)
 #define LPC17_40_PWM1_TCR           (LPC17_40_PWM1_BASE+LPC17_40_PWM_TCR_OFFSET)
@@ -97,7 +82,8 @@
 #define LPC17_40_PWM1_LER           (LPC17_40_PWM1_BASE+LPC17_40_PWM_LER_OFFSET)
 #define LPC17_40_PWM1_CTCR          (LPC17_40_PWM1_BASE+LPC17_40_PWM_CTCR_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* Registers holding 32-bit numeric values (no bit field definitions):
  *
  *   Timer Counter (TC)
@@ -129,6 +115,7 @@
 #define PWM_IR_MR5                  (1 << 9)  /* Bit 9:  PWM match channel 5 interrupt */
 #define PWM_IR_MR6                  (1 << 10) /* Bit 10: PWM match channel 6 interrupt */
                                               /* Bits 11-31: Reserved */
+
 /* Timer Control Register */
 
 #define PWM_TCR_CNTREN              (1 << 0)  /* Bit 0:  Counter Enable */
@@ -136,6 +123,7 @@
                                               /* Bit 2: Reserved */
 #define PWM_TCR_PWMEN               (1 << 3)  /* Bit 3:  PWM Enable */
                                               /* Bits 4-31: Reserved */
+
 /* Match Control Register */
 
 #define PWM_MCR_MR0I                (1 << 0)  /* Bit 0:  Interrupt on MR0 */
@@ -160,6 +148,7 @@
 #define PWM_MCR_MR6R                (1 << 19) /* Bit 19: Reset on MR6 */
 #define PWM_MCR_MR6S                (1 << 20) /* Bit 20: Stop on MR6 */
                                               /* Bits 21-31: Reserved */
+
 /* Capture Control Register (Where are CAP2 and 3?) */
 
 #define PWM_CCR_CAP0RE              (1 << 0)  /* Bit 0: Capture on CAPn.0 rising edge */
@@ -169,7 +158,9 @@
 #define PWM_CCR_CAP1FE              (1 << 4)  /* Bit 4: Capture on CAPn.1 falling edg */
 #define PWM_CCR_CAP1I               (1 << 5)  /* Bit 5: Interrupt on CAPn.1 */
                                               /* Bits 6-31: Reserved */
+
 /* PWM Control Register */
+
                                               /* Bits 0-1: Reserved */
 #define PWM_PCR_SEL2                (1 << 2)  /* Bit 2:  PWM2 single edge controlled mode */
 #define PWM_PCR_SEL3                (1 << 3)  /* Bit 3:  PWM3 single edge controlled mode */
@@ -184,6 +175,7 @@
 #define PWM_PCR_ENA5                (1 << 13) /* Bit 13: Enable PWM5 output */
 #define PWM_PCR_ENA6                (1 << 14) /* Bit 14: Enable PWM6 output */
                                               /* Bits 15-31: Reserved */
+
 /* Load Enable Register */
 
 #define PWM_LER_M0EN                (1 << 0)  /* Bit 0:  Enable PWM Match 0 Latch */
@@ -194,6 +186,7 @@
 #define PWM_LER_M5EN                (1 << 5)  /* Bit 5:  Enable PWM Match 5 Latch */
 #define PWM_LER_M6EN                (1 << 6)  /* Bit 6:  Enable PWM Match 6 Latch */
                                               /* Bits 7-31: Reserved */
+
 /* Counter/Timer Control Register */
 
 #define PWM_CTCR_MODE_SHIFT         (0)       /* Bits 0-1: Counter/Timer Mode */
@@ -202,22 +195,24 @@
 #  define PWM_CTCR_MODE_CNTRRE      (1 << PWM_CTCR_MODE_SHIFT) /* Counter Mode, CAP rising edge */
 #  define PWM_CTCR_MODE_CNTRFE      (2 << PWM_CTCR_MODE_SHIFT) /* Counter Mode, CAP falling edge */
 #  define PWM_CTCR_MODE_CNTRBE      (3 << PWM_CTCR_MODE_SHIFT) /* Counter Mode, CAP both edges */
+
 #define PWM_CTCR_INPSEL_SHIFT       (2)       /* Bits 2-3: Count Input Select */
 #define PWM_CTCR_INPSEL_MASK        (3 << PWM_CTCR_INPSEL_SHIFT)
 #  define PWM_CTCR_INPSEL_CAPNp0    (0 << PWM_CTCR_INPSEL_SHIFT) /* CAPn.0 for TIMERn */
 #  define PWM_CTCR_INPSEL_CAPNp1    (1 << PWM_CTCR_INPSEL_SHIFT) /* CAPn.0 for TIMERn */
+
                                               /* Bits 4-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_PWM_H */

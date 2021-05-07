@@ -1,37 +1,20 @@
 /****************************************************************************
  * drivers/sensors/bmg160.c
- * Character driver for the BMG160 3-Axis gyroscope.
  *
- *   Copyright (C) 2016 DS-Automotion GmbH. All rights reserved.
- *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
- *           Thomas Ilk
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -138,7 +121,9 @@ static struct bmg160_dev_s *g_bmg160_list = NULL;
 static void bmg160_read_register(FAR struct bmg160_dev_s *dev,
                                  uint8_t const reg_addr, uint8_t * reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -173,7 +158,9 @@ static void bmg160_write_register(FAR struct bmg160_dev_s *dev,
                                   uint8_t const reg_addr,
                                   uint8_t const reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -257,7 +244,9 @@ static void bmg160_read_gyroscope_data(FAR struct bmg160_dev_s *dev,
                                        uint16_t * x_gyr, uint16_t * y_gyr,
                                        uint16_t * z_gyr)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -311,8 +300,8 @@ static int bmg160_interrupt_handler(int irq, FAR void *context)
   DEBUGASSERT(priv != NULL);
 
   /* Task the worker with retrieving the latest sensor data. We should not do
-   * this in a interrupt since it might take too long. Also we cannot lock the
-   * SPI bus from within an interrupt.
+   * this in a interrupt since it might take too long. Also we cannot lock
+   * the SPI bus from within an interrupt.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
@@ -364,28 +353,30 @@ static int bmg160_open(FAR struct file *filep)
 
   bmg160_write_register(priv,
                         BMG160_RANGE_REG,
-                        BMG160_RANGE_REG_FIX_VAL_bm | BMG160_RANGE_REG_FSR_1_bm |
-                        BMG160_RANGE_REG_FSR_0_bm);
+                        BMG160_RANGE_REG_FIX_VAL_BM |
+                        BMG160_RANGE_REG_FSR_1_BM |
+                        BMG160_RANGE_REG_FSR_0_BM);
 
   /* Enable - the fastest data output rate ODR = 2000 Hz -> BW = 230 Hz */
 
-  bmg160_write_register(priv, BMG160_BW_REG, BMG160_BW_REG_ODR_0_bm);
+  bmg160_write_register(priv, BMG160_BW_REG, BMG160_BW_REG_ODR_0_BM);
 
   /* Enable - new data interrupt 1 */
 
   bmg160_write_register(priv,
-                        BMG160_INT_EN_0_REG, BMG160_INT_EN_0_REG_DATA_EN_bm);
+                        BMG160_INT_EN_0_REG, BMG160_INT_EN_0_REG_DATA_EN_BM);
 
   /* Enable - active high level interrupt 1 - push-pull interrupt */
 
   bmg160_write_register(priv,
-                        BMG160_INT_EN_1_REG, BMG160_INT_EN_1_REG_INT1_LVL_bm);
+                        BMG160_INT_EN_1_REG,
+                        BMG160_INT_EN_1_REG_INT1_LVL_BM);
 
   /* Enable - map new data interrupt to INT1 */
 
   bmg160_write_register(priv,
                         BMG160_INT_MAP_1_REG,
-                        BMG160_INT_MAP_1_REG_INT1_DATA_bm);
+                        BMG160_INT_MAP_1_REG_INT1_DATA_BM);
 
   /* Read measurement data to ensure DRDY is low */
 
@@ -450,7 +441,8 @@ static ssize_t bmg160_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct bmg160_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: "
+            "Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 

@@ -80,18 +80,15 @@
  *   (3) If not in an interrupt handler and the tcb IS the currently
  *       executing task -- just call the signal handler now.
  *
+ * Assumptions:
+ *   Called from critical section
+ *
  ****************************************************************************/
 
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  irqstate_t flags;
-
   sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
   sinfo("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
-
-  /* Make sure that interrupts are disabled */
-
-  flags = enter_critical_section();
 
   /* Refuse to handle nested signal actions */
 
@@ -109,20 +106,23 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           if (!g_current_regs)
             {
-              /* In this case just deliver the signal with a function call now. */
+              /* In this case just deliver the signal with a function call
+               * now.
+               */
 
               sigdeliver(tcb);
             }
 
           /* CASE 2:  We are in an interrupt handler AND the interrupted task
-           * is the same as the one that must receive the signal, then we will
-           * have to modify the return state as well as the state in the TCB.
+           * is the same as the one that must receive the signal, then we
+           * will have to modify the return state as well as the state in the
+           * TCB.
            *
            * Hmmm... there looks like a latent bug here: The following logic
            * would fail in the strange case where we are in an interrupt
-           * handler, the thread is signalling itself, but a context switch to
-           * another task has occurred so that g_current_regs does not refer to
-           * the thread of this_task()!
+           * handler, the thread is signalling itself, but a context switch
+           * to another task has occurred so that g_current_regs does not
+           * refer to the thread of this_task()!
            */
 
           else
@@ -178,8 +178,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_RFLAGS]  = 0;
         }
     }
-
-  leave_critical_section(flags);
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */

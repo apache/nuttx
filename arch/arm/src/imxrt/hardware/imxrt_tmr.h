@@ -1,54 +1,38 @@
-/********************************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_tmr.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_TMR_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_TMR_H
 
-/********************************************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/********************************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_TMR_COMP1_OFFSET               0x0000  /* Timer Channel Compare Register 1 */
 #define IMXRT_TMR_COMP2_OFFSET               0x0002  /* Timer Channel Compare Register 2 */
@@ -295,7 +279,7 @@
 #define IMXRT_TMR4_FILT3_OFFSET              IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_FILT_OFFSET)    /* Timer Channel Input Filter Register */
 #define IMXRT_TMR4_DMA3_OFFSET               IMXRT_TMR_OFFSET(IMXRT_TMR_CH3, IMXRT_TMR_DMA_OFFSET)     /* Timer Channel DMA Enable Register */
 
-/* Register addresses *******************************************************************************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_TMR1_COMP10                   (IMXRT_QTIMER1_BASE + IMXRT_TMR1_COMP10_OFFSET)   /* Timer Channel Compare Register 1 */
 #define IMXRT_TMR1_COMP20                   (IMXRT_QTIMER1_BASE + IMXRT_TMR1_COMP20_OFFSET)   /* Timer Channel Compare Register 2 */
@@ -510,7 +494,7 @@
 #define IMXRT_TMR4_FILT3                    (IMXRT_QTIMER4_BASE + IMXRT_TMR4_FILT3_OFFSET)    /* Timer Channel Input Filter Register */
 #define IMXRT_TMR4_DMA3                     (IMXRT_QTIMER4_BASE + IMXRT_TMR4_DMA3_OFFSET)     /* Timer Channel DMA Enable Register */
 
-/* Register Bit Definitions *****************************************************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Timer Channel Control Register */
 
@@ -525,6 +509,7 @@
 #  define TMR_CTRL_OUTMODE_SET_CLR     (5 << TMR_CTRL_OUTMODE_SHIFT)  /* Set on compare, cleared on secondary source input edge */
 #  define TMR_CTRL_OUTMODE_SET_CLR_ROL (6 << TMR_CTRL_OUTMODE_SHIFT)  /* Set on compare, cleared on counter rollover */
 #  define TMR_CTRL_OUTMODE_GATED       (7 << TMR_CTRL_OUTMODE_SHIFT)  /* Enable gated clock output while counter is active */
+
 #define TMR_CTRL_COINIT                (1 << 3)   /* Bit: 3  Co-Channel Initialization */
 #define TMR_CTRL_DIR                   (1 << 4)   /* Bit: 4  Count Direction */
 #define TMR_CTRL_LENGTH                (1 << 5)   /* Bit: 5  Count Length */
@@ -536,6 +521,7 @@
 #  define TMR_CTRL_SCS_CNTR1           (1 << TMR_CTRL_SCS_SHIFT)  /* Counter 1 input pin */
 #  define TMR_CTRL_SCS_CNTR2           (2 << TMR_CTRL_SCS_SHIFT)  /* Counter 2 input pin */
 #  define TMR_CTRL_SCS_CNTR3           (3 << TMR_CTRL_SCS_SHIFT)  /* Counter 3 input pin */
+
 #define TMR_CTRL_PCS_SHIFT             (9)        /* Bits: 9-12  Primary Count Source */
 #define TMR_CTRL_PCS_MASK              (15 << TMR_CTRL_PCS_SHIFT)
 #  define TMR_CTRL_PCS(n)              ((uint32_t)(n) << TMR_CTRL_PCS_SHIFT)
@@ -549,12 +535,13 @@
 #  define TMR_CTRL_PCS_OUT3            (7 << TMR_CTRL_PCS_SHIFT)  /* Counter 3 output */
 #  define TMR_CTRL_PCS_DIV1            (8 << TMR_CTRL_PCS_SHIFT)  /* IP bus clock divide by 1 prescaler */
 #  define TMR_CTRL_PCS_DIV2            (9 << TMR_CTRL_PCS_SHIFT)  /* IP bus clock divide by 2 prescaler */
-#  define TMR_CTRL_PCS_DIV4            (10 << TMR_CTRL_PCS_SHIFT)  /*IP bus clock divide by 4 prescaler */
-#  define TMR_CTRL_PCS_DIV8            (11 << TMR_CTRL_PCS_SHIFT)  /*IP bus clock divide by 8 prescaler */
-#  define TMR_CTRL_PCS_DIV16           (12 << TMR_CTRL_PCS_SHIFT)  /*IP bus clock divide by 16 prescaler */
-#  define TMR_CTRL_PCS_DIV32           (13 << TMR_CTRL_PCS_SHIFT)  /*IP bus clock divide by 32 prescaler */
-#  define TMR_CTRL_PCS_DIV64           (14 << TMR_CTRL_PCS_SHIFT)  /*IP bus clock divide by 64 prescaler */
-#  define TMR_CTRL_PCS_DIV128          (15 << TMR_CTRL_PCS_SHIFT)  /*IP bus clock divide by 128 prescaler */
+#  define TMR_CTRL_PCS_DIV4            (10 << TMR_CTRL_PCS_SHIFT) /* IP bus clock divide by 4 prescaler */
+#  define TMR_CTRL_PCS_DIV8            (11 << TMR_CTRL_PCS_SHIFT) /* IP bus clock divide by 8 prescaler */
+#  define TMR_CTRL_PCS_DIV16           (12 << TMR_CTRL_PCS_SHIFT) /* IP bus clock divide by 16 prescaler */
+#  define TMR_CTRL_PCS_DIV32           (13 << TMR_CTRL_PCS_SHIFT) /* IP bus clock divide by 32 prescaler */
+#  define TMR_CTRL_PCS_DIV64           (14 << TMR_CTRL_PCS_SHIFT) /* IP bus clock divide by 64 prescaler */
+#  define TMR_CTRL_PCS_DIV128          (15 << TMR_CTRL_PCS_SHIFT) /* IP bus clock divide by 128 prescaler */
+
 #define TMR_CTRL_CM_SHIFT              (13)       /* Bits: 13-15  Count Mode */
 #define TMR_CTRL_CM_MASK               (7 << TMR_CTRL_CM_SHIFT)
 #  define TMR_CTRL_CM(n)               ((uint32_t)(n) << TMR_CTRL_CM_SHIFT)
@@ -582,6 +569,7 @@
 #  define TMR_SCTRL_CAPTURE_RISING     (1 << TMR_SCTRL_CAPTURE_MODE_SHIFT)  /* Load capture register on rising edge (when IPS=0) or falling edge (when IPS=1) of input */
 #  define TMR_SCTRL_CAPTURE_FALLING    (2 << TMR_SCTRL_CAPTURE_MODE_SHIFT)  /* Load capture register on falling edge (when IPS=0) or rising edge (when IPS=1) of input */
 #  define TMR_SCTRL_CAPTURE_BOTH       (3 << TMR_SCTRL_CAPTURE_MODE_SHIFT)  /* Load capture register on both edges of input */
+
 #define TMR_SCTRL_INPUT                (1 << 8)   /* Bit: 8  External Input Signal */
 #define TMR_SCTRL_IPS                  (1 << 9)   /* Bit: 9  Input Polarity Select */
 #define TMR_SCTRL_IEFIE                (1 << 10)  /* Bit: 10 Input Edge Flag Interrupt Enable */
@@ -599,12 +587,14 @@
 #  define TMR_CSCTRL_CL1_DIS           (0 << TMR_CSCTRL_CL1_SHIFT)  /* Never preload */
 #  define TMR_CSCTRL_CL1_COMP1         (1 << TMR_CSCTRL_CL1_SHIFT)  /* Load upon successful compare with the value in COMP1 */
 #  define TMR_CSCTRL_CL1_COMP2         (2 << TMR_CSCTRL_CL1_SHIFT)  /* Load upon successful compare with the value in COMP2 */
+
 #define TMR_CSCTRL_CL2_SHIFT           (2)        /* Bits: 2-3  Compare Load Control 2 */
 #define TMR_CSCTRL_CL2_MASK            (3 << TMR_CSCTRL_CL2_SHIFT)
 #  define TMR_CSCTRL_CL2(n)            ((uint32_t)(n) << TMR_CSCTRL_CL2_SHIFT)
 #  define TMR_CSCTRL_CL2_DIS           (0 << TMR_CSCTRL_CL2_SHIFT)  /* Never preload */
 #  define TMR_CSCTRL_CL2_COMP1         (1 << TMR_CSCTRL_CL2_SHIFT)  /* Load upon successful compare with the value in COMP1 */
 #  define TMR_CSCTRL_CL2_COMP2         (2 << TMR_CSCTRL_CL2_SHIFT)  /* Load upon successful compare with the value in COMP2 */
+
 #define TMR_CSCTRL_TCF1                (1 << 4)   /* Bit: 4  Timer Compare 1 Interrupt Flag */
 #define TMR_CSCTRL_TCF2                (1 << 5)   /* Bit: 5  Timer Compare 2 Interrupt Flag */
 #define TMR_CSCTRL_TCF1EN              (1 << 6)   /* Bit: 6  Timer Compare 1 Interrupt Enable */
@@ -657,6 +647,7 @@
 #  define TMR_ENBL_CHN1                (2 << TMR_ENBL_ENBL_SHIFT)  /* Channel 1 enable */
 #  define TMR_ENBL_CHN3                (4 << TMR_ENBL_ENBL_SHIFT)  /* Channel 2 enable */
 #  define TMR_ENBL_CHN4                (8 << TMR_ENBL_ENBL_SHIFT)  /* Channel 3 enable */
+
                                                   /* Bits: 4-15  Reserved */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_TMR_H */

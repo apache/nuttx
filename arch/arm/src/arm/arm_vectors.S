@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/arm/arm_vectors.S
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -51,19 +36,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-	.data
-g_irqtmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
-
-g_undeftmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
-
-g_aborttmp:
-	.word	0		/* Saved lr */
-	.word	0		/* Saved spsr */
 
 /****************************************************************************
  * Assembly Macros
@@ -96,17 +68,8 @@ arm_vectorirq:
 	 * and r14.
 	 */
 
-	ldr	r13, .Lirqtmp
-	sub	lr, lr, #4
-	str	lr, [r13]		/* Save lr_IRQ */
-	mrs	lr, spsr
-	str	lr, [r13, #4]		/* Save spsr_IRQ */
-
-	/* Then switch back to SVC mode */
-
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	mov	r13, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r13		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -115,15 +78,25 @@ arm_vectorirq:
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
 
-	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+	mov	r0, #(PSR_MODE_IRQ | PSR_I_BIT)
+	msr	cpsr_c, r0			/* Switch back IRQ mode */
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
+	sub	r3, lr, #4
+	mrs	r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	orr	r0, r0, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r0
+
+	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
 	mov	r2, r14
 
-	/* Get the values for r15(pc) and CPSR in r3 and r4 */
-
-	ldr	r0, .Lirqtmp		/* Points to temp storage */
-	ldmia	r0, {r3, r4}		/* Recover r3=lr_IRQ, r4=spsr_IRQ */
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
@@ -134,44 +107,45 @@ arm_vectorirq:
 	mov	r0, sp			/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	ldr	sp, .Lirqstackbase	/* SP = interrupt stack base */
+	/* Call arm_decodeirq() on the interrupt stack */
+
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
 	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_decodeirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
 #else
+	/* Call arm_decodeirq() on the user stack */
+
 	bl	arm_decodeirq		/* Call the handler */
 #endif
 
 	/* Restore the CPSR, SVC mode registers and return */
-.Lnoirqset:
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr	spsr, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
 
-.Lirqtmp:
-	.word	g_irqtmp
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-.Lirqstackbase:
-	.word	g_intstackbase
+.Lirqstacktop:
+	.word	g_intstacktop
 #endif
-
 	.size	arm_vectorirq, . - arm_vectorirq
+
 	.align	5
 
 /****************************************************************************
- * Function: arm_vectorswi
+ * Function: arm_vectorsvc
  *
  * Description:
- *   SWI interrupt. We enter the SWI in SVC mode.
+ *   SVC interrupt. We enter the SVC in SVC mode.
  *
  ****************************************************************************/
 
 	.globl	arm_syscall
-	.globl	arm_vectorswi
-	.type	arm_vectorswi, %function
+	.globl	arm_vectorsvc
+	.type	arm_vectorsvc, %function
 
-arm_vectorswi:
+arm_vectorsvc:
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -180,18 +154,22 @@ arm_vectorswi:
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
 
-	/* Get the correct values of r13(sp), r14(lr), r15(pc)
-	 * and CPSR in r1-r4 */
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
 
-	add	r1, sp, #XCPTCONTEXT_SIZE
-	mov	r2, r14			/* R14 is altered on return from SWI */
 	mov	r3, r14			/* Save r14 as the PC as well */
 	mrs	r4, spsr		/* Get the saved CPSR */
+
+	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
-	/* Then call the SWI handler with interrupts disabled.
+	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
 
@@ -201,10 +179,10 @@ arm_vectorswi:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr	spsr, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
-	.size	arm_vectorswi, . - arm_vectorswi
+	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
 
@@ -228,17 +206,8 @@ arm_vectordata:
 	 * r13 and r14
 	 */
 
-	ldr	r13, .Ldaborttmp	/* Points to temp storage */
-	sub	lr, lr, #8		/* Fixup return */
-	str	lr, [r13]		/* Save in temp storage */
-	mrs	lr, spsr		/* Get SPSR */
-	str	lr, [r13, #4]		/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	mov	r13, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r13		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -247,15 +216,25 @@ arm_vectordata:
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
 
-	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+	mov	r0, #(PSR_MODE_ABT | PSR_I_BIT)
+	msr	cpsr_c, r0		/* Switch back ABT mode */
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
+	sub	r3, lr, #8
+	mrs	r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r0
+
+	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
 	mov	r2, r14
 
-	/* Get the values for r15(pc) and CPSR in r3 and r4 */
-
-	ldr	r0, .Ldaborttmp		/* Points to temp storage */
-	ldmia	r0, {r3, r4}		/* Recover r3=lr_IRQ, r4=spsr_IRQ */
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
@@ -267,19 +246,16 @@ arm_vectordata:
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
 #ifdef CONFIG_PAGING
-	mrc	p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
 	mrc	p15, 0, r1, c6, c0, 0	/* Get R1=FAR */
+	mrc	p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
 #endif
 	bl	arm_dataabort		/* Call the handler */
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr_cxsf, r0
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr	spsr, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
-
-.Ldaborttmp:
-	.word	g_aborttmp
 	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
@@ -304,17 +280,8 @@ arm_vectorprefetch:
 	 * r13 and r14
 	 */
 
-	ldr	r13, .Lpaborttmp	/* Points to temp storage */
-	sub	lr, lr, #4		/* Fixup return */
-	str	lr, [r13]		/* Save in temp storage */
-	mrs	lr, spsr		/* Get SPSR */
-	str	lr, [r13, #4]		/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	mov	r13, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r13		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -323,15 +290,25 @@ arm_vectorprefetch:
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
 
-	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+	mov	r0, #(PSR_MODE_ABT | PSR_I_BIT)
+	msr	cpsr_c, r0		/* Switch back ABT mode */
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
+	sub	r3, lr, #4
+	mrs	r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r0
+
+	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
 	mov	r2, r14
 
-	/* Get the values for r15(pc) and CPSR in r3 and r4 */
-
-	ldr	r0, .Lpaborttmp		/* Points to temp storage */
-	ldmia	r0, {r3, r4}		/* Recover r3=lr_IRQ, r4=spsr_IRQ */
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
@@ -346,12 +323,9 @@ arm_vectorprefetch:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr_cxsf, r0
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr	spsr, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
-
-.Lpaborttmp:
-	.word	g_aborttmp
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
 	.align	5
@@ -374,16 +348,8 @@ arm_vectorundefinsn:
 	 * r13 and r14
 	 */
 
-	ldr	r13, .Lundeftmp		/* Points to temp storage */
-	str	lr, [r13]		/* Save in temp storage */
-	mrs	lr, spsr		/* Get SPSR */
-	str	lr, [r13, #4]		/* Save in temp storage */
-
-	/* Then switch back to SVC mode */
-
-	bic	lr, lr, #MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(SVC_MODE | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	mov	r13, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r13		/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -392,15 +358,25 @@ arm_vectorundefinsn:
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
 
-	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+	mov	r0, #(PSR_MODE_UND | PSR_I_BIT)
+	msr	cpsr_c, r0		/* Switch back UND mode */
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
+	mov	r3, lr
+	mrs	r4, spsr
+
+	/* Then switch back to SVC mode */
+
+	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r0
+
+	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
 	mov	r2, r14
 
-	/* Get the values for r15(pc) and CPSR in r3 and r4 */
-
-	ldr	r0, .Lundeftmp		/* Points to temp storage */
-	ldmia	r0, {r3, r4}		/* Recover r3=lr_IRQ, r4=spsr_IRQ */
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
@@ -415,12 +391,9 @@ arm_vectorundefinsn:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr_cxsf, r0
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr	spsr, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
-
-.Lundeftmp:
-	.word	g_undeftmp
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
 	.align	5
@@ -441,7 +414,7 @@ arm_vectorfiq:
 	.size	arm_vectorfiq, . - arm_vectorfiq
 
 /****************************************************************************
- *  Name: g_intstackalloc/g_intstackbase
+ *  Name: g_intstackalloc/g_intstacktop
  ****************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -450,14 +423,14 @@ arm_vectorfiq:
 
 	.globl	g_intstackalloc
 	.type	g_intstackalloc, object
-	.globl	g_intstackbase
-	.type	g_intstackbase, object
+	.globl	g_intstacktop
+	.type	g_intstacktop, object
 
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
-g_intstackbase:
-	.skip	4
-	.size	g_intstackbase, 4
+g_intstacktop:
+	.size	g_intstacktop, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+
 #endif
 	.end

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/renesas/src/rx65n/up_copystate.c
+ * arch/renesas/src/rx65n/rx65n_copystate.c
  *
  *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
  *   Author: Anjana <anjana@tataelxsi.co.in>

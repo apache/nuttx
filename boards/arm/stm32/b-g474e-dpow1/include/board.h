@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/stm32/b-g474e-dpow1/include/board.h
+ * boards/arm/stm32/b-g474e-dpow1/include/board.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -109,7 +109,6 @@
 
 #define STM32_RCC_CFGR_HPRE            RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY           STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK               STM32_HCLK_FREQUENCY
 
 /* APB1 clock (PCLK1) is HCLK (170MHz) */
 

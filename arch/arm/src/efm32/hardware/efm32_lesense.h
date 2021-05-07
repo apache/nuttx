@@ -1,5 +1,5 @@
-/*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_lesense.h
+/****************************************************************************
+ * arch/arm/src/efm32/hardware/efm32_lesense.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LESENSE_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LESENSE_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,10 +72,11 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
-/* LESENSE Register Offsets ****************************************************************************************************/
+ ****************************************************************************/
+
+/* LESENSE Register Offsets *************************************************/
 
 #define EFM32_LESENSE_CTRL_OFFSET                      0x0000  /* Control Register */
 #define EFM32_LESENSE_TIMCTRL_OFFSET                   0x0004  /* Timing Control Register */
@@ -162,7 +163,7 @@
 #define EFM32_LESENSE_CHn_INTERACT_OFFSET              0x0004  /* Channel n Scan Configuration */
 #define EFM32_LESENSE_CHn_EVAL_OFFSET                  0x0008  /* Channel n Scan Configuration */
 
-/* LESENSE Register Addresses **************************************************************************************************/
+/* LESENSE Register Addresses ***********************************************/
 
 #define EFM32_LESENSE_CTRL                             (EFM32_LESENSE_BASE+EFM32_LESENSE_CTRL_OFFSET)
 #define EFM32_LESENSE_TIMCTRL                          (EFM32_LESENSE_BASE+EFM32_LESENSE_TIMCTRL_OFFSET)
@@ -249,7 +250,7 @@
 #define EFM32_LESENSE_CH_INTERACT(n)                   (EFM32_LESENSE_CH_BASE(n)+EFM32_LESENSE_CHn_INTERACT_OFFSET)
 #define EFM32_LESENSE_CH_EVAL(n)                       (EFM32_LESENSE_CH_BASE(n)+EFM32_LESENSE_CHb_EVAL_OFFSET)
 
-/* LESENSE Register Bit Field Definitions **************************************************************************************/
+/* LESENSE Register Bit Field Definitions ***********************************/
 
 /* Bit fields for LESENSE CTRL */
 

@@ -416,7 +416,7 @@ static FAR struct state_s *gmtptr;
  * Private Functions
  ****************************************************************************/
 
-void tz_semtake(FAR sem_t *sem)
+static void tz_semtake(FAR sem_t *sem)
 {
   int errcode = 0;
   int ret;
@@ -433,7 +433,7 @@ void tz_semtake(FAR sem_t *sem)
   while (ret < 0 && errcode == EINTR);
 }
 
-void tz_semgive(FAR sem_t *sem)
+static void tz_semgive(FAR sem_t *sem)
 {
   DEBUGVERIFY(_SEM_POST(sem));
 }

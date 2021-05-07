@@ -1,52 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_isi.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_ISI_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_ISI_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* ISI Register Offsets *************************************************************/
+ ****************************************************************************/
+
+/* ISI Register Offsets *****************************************************/
 
 #define SAM_ISI_CFG1_OFFSET        0x0000 /* ISI Configuration 1 Register */
 #define SAM_ISI_CFG2_OFFSET        0x0004 /* ISI Configuration 2 Register */
@@ -76,7 +62,7 @@
 #define SAM_ISI_WPSR_OFFSET        000xe8 /* Write Protection Status Register */
                                           /* 0x00ec-0x00fc Reserved */
 
-/* ISI Register Addresses ***********************************************************/
+/* ISI Register Addresses ***************************************************/
 
 #define SAM_ISI_CFG1               (SAM_ISI_VBASE+SAM_ISI_CFG1_OFFSET)
 #define SAM_ISI_CFG2               (SAM_ISI_VBASE+SAM_ISI_CFG2_OFFSET)
@@ -104,7 +90,7 @@
 #define SAM_ISI_WPMR               (SAM_ISI_VBASE+SAM_ISI_WPMR_OFFSET)
 #define SAM_ISI_WPSR               (SAM_ISI_VBASE+SAM_ISI_WPSR_OFFSET)
 
-/* ISI Register Bit Definitions *****************************************************/
+/* ISI Register Bit Definitions *********************************************/
 
 /* ISI Configuration 1 Register */
 
@@ -123,6 +109,7 @@
 #  define ISI_CFG1_THMASK_BEATS4   (0 << ISI_CFG1_THMASK_SHIFT) /* Only 4 beats AHB burst allowed */
 #  define ISI_CFG1_THMASK_BEATS8   (1 << ISI_CFG1_THMASK_SHIFT) /* Only 4 and 8 beats AHB burst allowed */
 #  define ISI_CFG1_THMASK_BEATS16  (2 << ISI_CFG1_THMASK_SHIFT) /* 4, 8 and 16 beats AHB burst allowed */
+
 #define ISI_CFG1_SLD_SHIFT         (16)      /* Bits 16-23: Start of Line Delay */
 #define ISI_CFG1_SLD_MASK          (0xff << ISI_CFG1_SLD_SHIFT)
 #  define ISI_CFG1_SLD(n)          ((uint32_t)(n) << ISI_CFG1_SLD_SHIFT)
@@ -153,6 +140,7 @@
 #  define ISI_CFG2_YCCSWAP_MODE1   (1 << ISI_CFG2_YCCSWAP_SHIFT) /* Cr(i) Y(i) Cb(i) Y(i+1) */
 #  define ISI_CFG2_YCCSWAP_MODE2   (2 << ISI_CFG2_YCCSWAP_SHIFT) /* Y(i) Cb(i) Y(i+1) Cr(i) */
 #  define ISI_CFG2_YCCSWAP_MODE3   (3 << ISI_CFG2_YCCSWAP_SHIFT) /* Y(i) Cr(i) Y(i+1) Cb(i) */
+
 #define ISI_CFG2_RGBCFG_SHIFT      (30)      /* Bits 30-31: Defines RGB Pattern when RGB_MODE is set to 1 */
 #define ISI_CFG2_RGBCFG_MASK       (3 << ISI_CFG2_RGBCFG_SHIFT)
 #  define ISI_CFG2_RGBCFG_DEFAULT  (0 << ISI_CFG2_RGBCFG_SHIFT) /* R/G(MSB) G(LSB)/B R/G(MSB) G(LSB)/B */
@@ -260,8 +248,8 @@
 #define ISI_INT_CRCERR             (1 << 26) /* Bit 26: CRC Synchronization Error */
 #define ISI_INT_FROVR              (1 << 27) /* Bit 27: Frame Rate Overrun */
 
-/* DMA Channel Enable Register, DMA Channel Disable Register, and DMA Channel Status
- * Register
+/* DMA Channel Enable Register, DMA Channel Disable Register,
+ * and DMA Channel Status Register
  */
 
 #define ISI_DMA_PCH                (1 << 0) /* Bit 0:  Preview Channel */
@@ -320,18 +308,21 @@
 #  define ISI_WPSR_WPVSRC_R2Y_SET1 (8 << ISI_WPSR_WPVSRC_SHIFT) /* Write access in ISI_R2Y_SET1 */
 #  define ISI_WPSR_WPVSRC_R2Y_SET2 (9 << ISI_WPSR_WPVSRC_SHIFT) /* Write access in ISI_R2Y_SET2 */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
-/* "The destination frame buffers are defined by a series of Frame Buffer Descriptors
- *  (FBD). Each FBD controls the transfer of one entire frame and then optionally
- *  loads a further FBD to switch the DMA operation at another frame buffer address.
+ ****************************************************************************/
+
+/* "The destination frame buffers are defined by a series of Frame Buffer
+ *  Descriptors (FBD). Each FBD controls the transfer of one entire frame
+ *  and then optionally loads a further FBD to switch the DMA operation at
+ *   another frame buffer address.
  *
- * "The FBD is defined by a series of three words. The first one defines the current
- *  frame buffer address (named DMA_X_ADDR register), the second defines control
- *  information (named DMA_X_CTRL register) and the third defines the next descriptor
- *  address (named DMA_X_DSCR). DMA transfer mode with linked list support is
- *  available for both codec and preview datapath."
+ * "The FBD is defined by a series of three words. The first one defines the
+ *  current frame buffer address (named DMA_X_ADDR register), the second
+ *  defines control information (named DMA_X_CTRL register) and the third
+ *  defines the next descriptor address (named DMA_X_DSCR). DMA transfer
+ *  mode with linked list support is available for both codec and preview
+ *  datapath."
  */
 
 struct isi_dscr_s

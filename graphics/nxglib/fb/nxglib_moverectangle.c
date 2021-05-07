@@ -1,35 +1,20 @@
 /****************************************************************************
  * graphics/nxglib/fb/nxglib_moverectangle.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -55,9 +40,11 @@
  ****************************************************************************/
 
 #if NXGLIB_BITSPERPIXEL < 8
-static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *sline,
+static inline void nxgl_lowresmemcpy(FAR uint8_t *dline,
+                                     FAR const uint8_t *sline,
                                      unsigned int width,
-                                     uint8_t leadmask, uint8_t tailmask)
+                                     uint8_t leadmask,
+                                     uint8_t tailmask)
 {
   FAR const uint8_t *sptr;
   FAR uint8_t *dptr;
@@ -72,29 +59,29 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
   lnlen = width;
 
   if (lnlen > 1 && mask)
-     {
-       dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
-       mask = 0xff;
-       dptr++;
-       sptr++;
-       lnlen--;
-     }
+    {
+      dptr[0] = (dptr[0] & ~mask) | (sptr[0] & mask);
+      mask = 0xff;
+      dptr++;
+      sptr++;
+      lnlen--;
+    }
 
-   /* Handle masking of the fractional final byte */
+  /* Handle masking of the fractional final byte */
 
-   mask &= tailmask;
-   if (lnlen > 0 && mask)
-     {
-       dptr[lnlen-1] = (dptr[lnlen-1] & ~mask) | (sptr[lnlen-1] & mask);
-       lnlen--;
-     }
+  mask &= tailmask;
+  if (lnlen > 0 && mask)
+    {
+      dptr[lnlen - 1] = (dptr[lnlen - 1] & ~mask) | (sptr[lnlen - 1] & mask);
+      lnlen--;
+    }
 
-   /* Handle all of the unmasked bytes in-between */
+  /* Handle all of the unmasked bytes in-between */
 
-   if (lnlen > 0)
-     {
-       NXGL_MEMCPY(dptr, sptr, lnlen);
-     }
+  if (lnlen > 0)
+    {
+      NXGL_MEMCPY(dptr, sptr, lnlen);
+    }
 }
 #endif
 
@@ -113,9 +100,11 @@ static inline void nxgl_lowresmemcpy(FAR uint8_t *dline, FAR const uint8_t *slin
  *
  ****************************************************************************/
 
-void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
-(FAR struct fb_planeinfo_s *pinfo, FAR const struct nxgl_rect_s *rect,
- FAR struct nxgl_point_s *offset)
+void NXGL_FUNCNAME(nxgl_moverectangle, NXGLIB_SUFFIX)
+(
+  FAR struct fb_planeinfo_s *pinfo,
+  FAR const struct nxgl_rect_s *rect,
+  FAR struct nxgl_point_s *offset)
 {
   FAR const uint8_t *sline;
   FAR uint8_t *dline;
@@ -147,14 +136,14 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
    */
 
   leadmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x-1)));
+  tailmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt2.x - 1)));
 # else
   /* Get the mask for pixels that are ordered so that they pack from the
    * LS byte up.
    */
 
   leadmask = (uint8_t)(0xff << (8 - NXGL_REMAINDERX(rect->pt1.x)));
-  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x-1)));
+  tailmask = (uint8_t)(0xff >> (8 - NXGL_REMAINDERX(rect->pt1.x - 1)));
 # endif
 #endif
 
@@ -181,7 +170,8 @@ void NXGL_FUNCNAME(nxgl_moverectangle,NXGLIB_SUFFIX)
      (offset->y < rect->pt1.y && offset->x <= rect->pt1.x))
     {
       /* Yes.. Copy the rectangle from top down (i.e., adding the stride
-       * to move to the next, lower row) */
+       * to move to the next, lower row)
+       */
 
       while (rows--)
         {

@@ -67,10 +67,10 @@
 
 #if 0
 
-#define DMACHAN_SDMMC DMACHAN_SDMMC_1      /* 2 choices * /
+#define DMACHAN_SDMMC DMACHAN_SDMMC_1     /* 2 choices */
 
-#define DMACHAN_SPI1_RX DMACHAN_SPI1_RX_1 /* 2 choices * /
-#define DMACHAN_SPI1_TX DMACHAN_SPI1_TX_1 /* 2 choices * /
+#define DMACHAN_SPI1_RX DMACHAN_SPI1_RX_1 /* 2 choices */
+#define DMACHAN_SPI1_TX DMACHAN_SPI1_TX_1 /* 2 choices */
 
 /* UART RX DMA configurations */
 
@@ -204,7 +204,8 @@
 
 /* LEDs
  *
- * The STM32L476VG-DISCO board provides two user LEDs, LD4 (red) and LD5 (green).
+ * The STM32L476VG-DISCO board provides two user LEDs, LD4 (red) and LD5
+ * (green).
  *
  * PB2 is LD4 (red)
  * PE8 is LD5 (green)
@@ -228,8 +229,8 @@
  * include/board.h and src/stm32_autoleds.c. The LEDs are used to encode
  * OS-related events as follows when the red and green LEDs are available:
  *
- *   SYMBOL                Meaning                  BOARD_LED_GRN  BOARD_LED_RED
- *   -------------------  -----------------------  -----------    ------------
+ *   SYMBOL                Meaning               BOARD_LED_GRN  BOARD_LED_RED
+ *   -------------------  ----------------------  -----------    ------------
  *   LED_STARTED          NuttX has been started
  *   LED_HEAPALLOCATE     Heap has been allocated
  *   LED_IRQSENABLED      Interrupts enabled
@@ -240,9 +241,9 @@
  *   LED_PANIC            The system has crashed                  Blinking
  *   LED_IDLE             MCU is is sleep mode       ON
  *
- * Thus if BOARD_LED_GRN, NuttX has successfully booted and is, apparently, running
- * normally.  If BOARD_LED_RED is flashing at approximately 2Hz, then a fatal error
- * has been detected and the system has halted.
+ * Thus if BOARD_LED_GRN, NuttX has successfully booted and is, apparently,
+ * running normally.  If BOARD_LED_RED is flashing at approximately 2Hz, then
+ * a fatal error has been detected and the system has halted.
  */
 
 #define LED_STARTED      0

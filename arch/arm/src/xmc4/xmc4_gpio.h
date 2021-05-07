@@ -1,35 +1,20 @@
 /****************************************************************************
- *  arch/arm/src/xmc4/xmc4_gpio.h
+ * arch/arm/src/xmc4/xmc4_gpio.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,7 +38,6 @@
  *   TTTT TMPD DDCC VO...  .... .... PPPP BBBB
  */
 
-
 /* This identifies the GPIO pint type:
  *
  *   TTTT T... .... ....  .... .... .... ....
@@ -63,6 +47,7 @@
 #define GPIO_PINTYPE_MASK          (31                  << GPIO_PINTYPE_SHIFT)
 
 /* See chip/xmc4_ports.h for the IOCR definitions */
+
 /* Direct input */
 
 #  define GPIO_INPUT               (IOCR_INPUT_NOPULL   << GPIO_PINTYPE_SHIFT)
@@ -112,6 +97,7 @@
 #define GPIO_PADTYPE_MASK          (7                      << GPIO_PADTYPE_SHIFT)
 
 /* See chip/xmc4_ports.h for the PDR definitions */
+
 /* Pad class A1: */
 
 #  define GPIO_PADA1_MEDIUM        (PDR_PADA1_MEDIUM       << GPIO_PADTYPE_SHIFT)
@@ -146,7 +132,8 @@
 #  define GPIO_PINCTRL_HW0         (HWSEL_HW0              << GPIO_PINCTRL_SHIFT)
 #  define GPIO_PINCTRL_HW1         (HWSEL_HW1              << GPIO_PINCTRL_SHIFT)
 
-/* If the pin is an GPIO output, then this identifies the initial output value:
+/* If the pin is an GPIO output, then this identifies the initial output
+ * value:
  *
  *   .... .... .... V....  .... .... PPPP BBBB
  */
@@ -198,7 +185,6 @@
 #define GPIO_PIN14                 (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15                 (15 << GPIO_PIN_SHIFT)
 
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -208,7 +194,7 @@
 typedef uint32_t gpioconfig_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************

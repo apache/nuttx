@@ -1,51 +1,36 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/sensors/ioctl.h
  *
- *   Copyright (C) 2016-2019 Gregory Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_IOCTL_H
 #define __INCLUDE_NUTTX_SENSORS_IOCTL_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* IOCTL commands unique to the BH1750FVI */
 
@@ -238,49 +223,65 @@
 #define SNIOC_SET_RESOLUTION       _SNIOC(0x0065) /* Arg: uint8_t value */
 #define SNIOC_SET_RANGE            _SNIOC(0x0066) /* Arg: uint8_t value */
 
+/* IOCTL commands unique to the HYS271 */
+
+/* SNIOC_CHANGEADDR */                            /* Arg: uint8_t value */
+
+#define SNIOC_READADDR             SNIOC_READID   /* Arg: uint8_t* pointer */
+
+/* IOCTL commands unique to the DS18B20 */
+
+/* SNIOC_SETRESOLUTION */                          /* Arg: uint8_t value */
+
+#define SNIOC_READROMCODE          _SNIOC(0x0067)  /* Arg: uint64_t* pointer */
+#define SNIOC_SETALARM             _SNIOC(0x0068)  /* Arg: struct ds18b20_alarm_s* */
+
 /* Command:      SNIOC_ACTIVATE
  * Description:  Enable or disable sensor
  * Argument:     true or false.
  */
 
-#define SNIOC_ACTIVATE             _SNIOC(0x0067)
+#define SNIOC_ACTIVATE             _SNIOC(0x0080)
 
 /* Command:      SNIOC_SET_INTERVAL
  * Description:  Set interval between samples
  * Argument:     This is the interval pointer, in microseconds
  */
 
-#define SNIOC_SET_INTERVAL         _SNIOC(0x0068)
+#define SNIOC_SET_INTERVAL         _SNIOC(0x0081)
 
 /* Command:      SNIOC_BATCH
  * Description:  Set batch latency between batch data.
  * Argument:     This is the latency pointer, in microseconds
  */
 
-#define SNIOC_BATCH                _SNIOC(0x0069)
+#define SNIOC_BATCH                _SNIOC(0x0082)
 
 /* Command:      SNIOC_GET_NEVENTBUF
- * Description:  the number of sensor events that sensor buffer of upper half holds.
+ * Description:  the number of sensor events that sensor buffer of upper half
+ *               holds.
  * Argument:     This is the number of events pointer, is output parameter.
- * Note:         Tell the application layer number of sensor events in sensor buffer.
- *               This buffer is used to solve the problem that the application layer
- *               can't read the sensor event in time. Recommend the number of sensor
- *               events in application layer's buffer is same as result by call this
- *               function.
- *               This is number of sensor events rather than the length of buffer.
+ * Note:         Tell the application layer number of sensor events in sensor
+ *               buffer.
+ *               This buffer is used to solve the problem that the
+ *               application layer can't read the sensor event in time.
+ *               Recommend the number of sensor events in application layer's
+ *               buffer is same as result by call this function.
+ *               This is number of sensor events rather than the length of
+ *               buffer.
  *               See sensor.h(struct sensor_lower_half_s buffer_bytes).
  */
 
-#define SNIOC_GET_NEVENTBUF        _SNIOC(0x0070)
+#define SNIOC_GET_NEVENTBUF        _SNIOC(0x0083)
 
 /* Command:      SNIOC_SET_BUFFER_NUMBER
- * Description:  Set the number of events intermediate circualr buffer can hold in
- *               upper half driver.
+ * Description:  Set the number of events intermediate circualr buffer can
+ *               hold in upper half driver.
  * Argument:     This is the number of events that buffer can hold.
- * Note:         The application layer can set number of events intermediate circualr
- *               buffer can hold by this ioctl command.
+ * Note:         The application layer can set number of events intermediate
+ *               circualr buffer can hold by this ioctl command.
  */
 
-#define SNIOC_SET_BUFFER_NUMBER    _SNIOC(0x0071)
+#define SNIOC_SET_BUFFER_NUMBER    _SNIOC(0x0084)
 
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

@@ -4,7 +4,8 @@
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Copyright (C) 2011-2013, 2015 Gregory Nutt. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu> (Original for the F1)
- *           Gregory Nutt <gnutt@nuttx.org> (On-going support and development)
+ *           Gregory Nutt <gnutt@nuttx.org> (On-going support and
+ *                                             development)
  *           dev@ziggurat29.com (adaptations for STM32L4)
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,7 +131,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -173,7 +174,8 @@ bool stm32l4_rtc_is_initialized(void);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
-int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
+int stm32l4_rtc_getdatetime_with_subseconds(FAR struct tm *tp,
+                                            FAR long *nsec);
 #endif
 
 /****************************************************************************
@@ -277,7 +279,8 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid);
  *
  ****************************************************************************/
 
-int stm32l4_rtc_setperiodic(FAR const struct timespec *period, wakeupcb_t callback);
+int stm32l4_rtc_setperiodic(FAR const struct timespec *period,
+                            wakeupcb_t callback);
 
 /****************************************************************************
  * Name: stm32l4_rtc_cancelperiodic

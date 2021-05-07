@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/am335x/hardware/am335x_wdog.h
  *
- *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H
 #define __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/am335x_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AM335X_WDT_IDR_OFFSET           0x0000  /* Watchdog Identification Register */
 #define AM335X_WDT_DSC_OFFSET           0x0010  /* Watchdog System Control Register */
@@ -66,7 +51,7 @@
 #define AM335X_WDT_IRQ_EN_SET_OFFSET    0x005c  /* Watchdog Interrupt Enable Set Register */
 #define AM335X_WDT_IRQ_EN_CLR_OFFSET    0x0060  /* Watchdog Interrupt Enable Clear Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define AM335X_WDT_IDR                  (AM335X_WDT1_VADDR + AM335X_WDT_IDR_OFFSET)
 #define AM335X_WDT_DSC                  (AM335X_WDT1_VADDR + AM335X_WDT_DSC_OFFSET)
@@ -85,16 +70,18 @@
 #define AM335X_WDT_IRQ_EN_SET           (AM335X_WDT1_VADDR + AM335X_WDT_IRQ_EN_SET_OFFSET)
 #define AM335X_WDT_IRQ_EN_CLR           (AM335X_WDT1_VADDR + AM335X_WDT_IRQ_EN_CLR_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Watchdog System Control Register */
 
 #define WDT_DSC_SOFT_RST                (1 << 1)  /* Bit 1:  Watchdog Software Reset */
-#define WDT_DSC_IDLE_SHIFT              (3)  /* Bit 3-4:  Watchdog Idle Mode */
+#define WDT_DSC_IDLE_SHIFT              (3)       /* Bit 3-4:  Watchdog Idle Mode */
+
 #  define WDT_DSC_IDLE_FORCE            (0 << WDT_DSC_IDLE_SHIFT)  /* Force-idle Mode */
 #  define WDT_DSC_IDLE_NO               (1 << WDT_DSC_IDLE_SHIFT)  /* No-idle Mode */
 #  define WDT_DSC_IDLE_SMART            (2 << WDT_DSC_IDLE_SHIFT)  /* Smart-idle Mode */
 #  define WDT_DSC_IDLE_SMART_WKUP       (3 << WDT_DSC_IDLE_SHIFT)  /* Smart-idle Wakeup-capable Mode */
+
 #define WDT_DSC_EMU_FREE                (1 << 5)  /* Bit 5:  Watchdog DEBUG Disable */
 
 /* Watchdog Status Register */

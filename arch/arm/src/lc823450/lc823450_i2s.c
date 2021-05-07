@@ -27,6 +27,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
@@ -431,7 +432,8 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
 
             if (rate[0] != rate[1])
               {
-                audinfo("change output rate: %d -> %d \n", rate[0], rate[1]);
+                audinfo("change output rate: %" PRId32 " -> %" PRId32 " \n",
+                        rate[0], rate[1]);
                 lc823450_i2s_txsamplerate(dev, rate[1]);
               }
 
@@ -454,7 +456,8 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
 
             if (rate[0] != rate[1])
               {
-                audinfo("change input rate: %d -> %d \n", rate[0], rate[1]);
+                audinfo("change input rate: %" PRId32 " -> %" PRId32 " \n",
+                        rate[0], rate[1]);
                 lc823450_i2s_rxsamplerate(dev, rate[1]);
               }
 
@@ -695,7 +698,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   if (0 == decsel && (n & 0x3))
     {
-      auderr("** PCM data is not word-aligned (n=%d) ** \n", n);
+      auderr("** PCM data is not word-aligned (n=%" PRId32 ") ** \n", n);
 
       /* Set size to align on a word boundary */
 
@@ -822,9 +825,9 @@ static void lc823450_dmic_enable(void)
            33 << 8 | 33,
            VOLSP0_CONT);
 
-  audinfo("ASRC_FSIO=%d \n",  getreg32(ASRC_FSO));
-  audinfo("DTCAP(I)=0x%x \n", getreg32(BUF_DTCAP('I')));
-  audinfo("DTCAP(J)=0x%x \n", getreg32(BUF_DTCAP('J')));
+  audinfo("ASRC_FSIO=%" PRId32 " \n",  getreg32(ASRC_FSO));
+  audinfo("DTCAP(I)=0x%" PRIx32 " \n", getreg32(BUF_DTCAP('I')));
+  audinfo("DTCAP(J)=0x%" PRIx32 " \n", getreg32(BUF_DTCAP('J')));
 
   /* Start ASRC */
 
@@ -1009,8 +1012,6 @@ FAR struct i2s_dev_s *lc823450_i2sdev_initialize(void)
   FAR struct lc823450_i2s_s *priv = NULL;
 
   /* The support STM32 parts have only a single I2S port */
-
-  i2sinfo("port: %d\n", port);
 
   /* Allocate a new state structure for this chip select.  NOTE that there
    * is no protection if the same chip select is used in two different

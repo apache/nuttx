@@ -1,41 +1,27 @@
 /****************************************************************************
  * drivers/net/enc28j60.c
  *
- *   Copyright (C) 2010-2012, 2014-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- * - ENC28J60 Data Sheet, Stand-Alone Ethernet Controller with SPI Interface,
- *   DS39662C, 2008 Microchip Technology Inc.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* References:
+ * - ENC28J60 Data Sheet, Stand-Alone Ethernet Controller with SPI Interface,
+ *   DS39662C, 2008 Microchip Technology Inc.
+ */
 
 /****************************************************************************
  * Included Files
@@ -567,7 +553,7 @@ static inline void enc_src(FAR struct enc_driver_s *priv)
    * workaround this condition.
    *
    * Also, "After a System Reset, all PHY registers should not be read or
-   * written to until at least 50 µs have passed since the Reset has ended.
+   * written to until at least 50 us have passed since the Reset has ended.
    * All registers will revert to their Reset default values. The dual
    * port buffer memory will maintain state throughout the System Reset."
    */
@@ -1000,7 +986,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   enc_wrbreg(priv, ENC_MICMD, MICMD_MIIRD);
 
-  /*   3. Wait 10.24 µs. Poll the MISTAT.BUSY bit to be certain that the
+  /*   3. Wait 10.24 us. Poll the MISTAT.BUSY bit to be certain that the
    *      operation is complete. While busy, the host controller should not
    *      start any MIISCAN operations or write to the MIWRH register.
    *
@@ -1068,7 +1054,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
   enc_wrbreg(priv, ENC_MIWRH, phydata >> 8);
 
   /*    The PHY register will be written after the MIIM operation completes,
-   *    which takes 10.24 µs. When the write operation has completed, BUSY
+   *    which takes 10.24 us. When the write operation has completed, BUSY
    *    bit will clear itself.
    *
    *    The host controller should not start any MIISCAN or MIIRD operations
@@ -2081,8 +2067,10 @@ static int enc_ifup(struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2153,8 +2141,10 @@ static int enc_ifdown(struct net_driver_s *dev)
   int ret;
 
   ninfo("Taking down: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Lock the SPI bus so that we have exclusive access */
 
@@ -2229,7 +2219,7 @@ static int enc_txavail(struct net_driver_s *dev)
            * poll the network for new XMIT data
            */
 
-          devif_poll(&priv->dev, enc_txpoll);
+          devif_timer(&priv->dev, 0, enc_txpoll);
         }
     }
 
@@ -2387,7 +2377,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
  *   a slightly modified procedure:
  *
  *   1. Wake-up by clearing ECON2.PWRSV.
- *   2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
+ *   2. Wait at least 300 us for the PHY to stabilize. To accomplish the
  *      delay, the host controller may poll ESTAT.CLKRDY and wait for it
  *      to become set.
  *   3. Restore receive capability by setting ECON1.RXEN.
@@ -2418,7 +2408,7 @@ static void enc_pwrfull(FAR struct enc_driver_s *priv)
 
   enc_bfcgreg(priv, ENC_ECON2, ECON2_PWRSV);
 
-  /* 2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
+  /* 2. Wait at least 300 us for the PHY to stabilize. To accomplish the
    * delay, the host controller may poll ESTAT.CLKRDY and wait for it to
    * become set.
    */

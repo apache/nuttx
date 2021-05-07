@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Tickless OS Support.
  *
@@ -55,6 +56,7 @@
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * STM32L4 Timer Usage
  *
@@ -346,6 +348,7 @@ int up_timer_cancel(FAR struct timespec *ts)
 
 int up_timer_start(FAR const struct timespec *ts)
 {
-  return stm32l4_oneshot_start(&g_tickless.oneshot, stm32l4_oneshot_handler, NULL, ts);
+  return stm32l4_oneshot_start(&g_tickless.oneshot,
+                               stm32l4_oneshot_handler, NULL, ts);
 }
 #endif /* CONFIG_SCHED_TICKLESS */

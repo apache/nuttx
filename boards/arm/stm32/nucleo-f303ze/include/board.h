@@ -1,6 +1,5 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f303ze/include/board.h
- * include/arch/board/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -76,7 +75,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY      /* same as above, to satisfy compiler */
 
 /* APB2 clock (PCLK2) is HCLK (72MHz) */
 

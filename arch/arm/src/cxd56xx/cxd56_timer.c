@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_timer.c
  *
- *   Copyright 2018 Sony Semiconductor Solutions Corporation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name of Sony Semiconductor Solutions Corporation nor
- *    the names of its contributors may be used to endorse or promote
- *    products derived from this software without specific prior written
- *    permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -42,6 +27,7 @@
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <limits.h>
 #include <errno.h>
@@ -351,9 +337,9 @@ static int cxd56_getstatus(FAR struct timer_lowerhalf_s *lower,
   status->timeleft =
     (uint32_t)(remaining * 1000000ULL * TIMER_DIVIDER / priv->clkticks);
 
-  tmrinfo("  flags    : %08x\n", status->flags);
-  tmrinfo("  timeout  : %d\n", status->timeout);
-  tmrinfo("  timeleft : %d\n", status->timeleft);
+  tmrinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  tmrinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  tmrinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -386,7 +372,7 @@ static int cxd56_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EPERM;
     }
 
-  tmrinfo("Entry: timeout=%d\n", timeout);
+  tmrinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   /* Can this timeout be represented? */
 
@@ -410,8 +396,8 @@ static int cxd56_settimeout(FAR struct timer_lowerhalf_s *lower,
   modifyreg32(priv->base + CXD56_TIMER_CONTROL, 0,
               TIMERCTRL_PERIODIC | TIMERCTRL_INTENABLE);
 
-  tmrinfo("clkticks=%d timeout=%d load=%d\n", priv->clkticks, priv->timeout,
-         load);
+  tmrinfo("clkticks=%" PRId32 " timeout=%" PRId32 " load=%" PRId32 "\n",
+          priv->clkticks, priv->timeout, load);
 
   return OK;
 }

@@ -683,7 +683,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_WAITENABLE(dev,eventset)  ((dev)->waitenable(dev,eventset))
+#define SDIO_WAITENABLE(dev,eventset,timeout)  ((dev)->waitenable(dev,eventset,timeout))
 
 /****************************************************************************
  * Name: SDIO_EVENTWAIT
@@ -706,7 +706,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_EVENTWAIT(dev,timeout)  ((dev)->eventwait(dev,timeout))
+#define SDIO_EVENTWAIT(dev)  ((dev)->eventwait(dev))
 
 /****************************************************************************
  * Name: SDIO_CALLBACKENABLE
@@ -807,31 +807,6 @@
 #  define SDIO_DMARECVSETUP(dev,buffer,len) ((dev)->dmarecvsetup(dev,buffer,len))
 #else
 #  define SDIO_DMARECVSETUP(dev,buffer,len) (-ENOSYS)
-#endif
-
-/****************************************************************************
- * Name: SDIO_DMADELYDINVLDT
- *
- * Description:
- *   Delayed D-cache invalidation.
- *   This function should be called after receive DMA completion to perform
- *   D-cache invalidation. This eliminates the need for cache aligned DMA
- *   buffers when the D-cache is in store-through mode.
- *
- * Input Parameters:
- *   dev    - An instance of the SDIO device interface
- *   buffer - The memory to DMA from
- *   buflen - The size of the DMA transfer in bytes
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
-#  define SDIO_DMADELYDINVLDT(dev,buffer,len) ((dev)->dmadelydinvldt(dev,buffer,len))
-#else
-#  define SDIO_DMADELYDINVLDT(dev,buffer,len) (OK)
 #endif
 
 /****************************************************************************
@@ -945,8 +920,9 @@ struct sdio_dev_s
 
   /* Event/Callback support */
 
-  void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset);
-  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev, uint32_t timeout);
+  void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset,
+          uint32_t timeout);
+  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev);
   void  (*callbackenable)(FAR struct sdio_dev_s *dev,
           sdio_eventset_t eventset);
 
@@ -969,10 +945,6 @@ struct sdio_dev_s
           size_t buflen);
   int   (*dmasendsetup)(FAR struct sdio_dev_s *dev,
           FAR const uint8_t *buffer, size_t buflen);
-#ifdef CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT
-  int   (*dmadelydinvldt)(FAR struct sdio_dev_s *dev,
-          FAR const uint8_t *buffer, size_t buflen);
-#endif
 #endif /* CONFIG_SDIO_DMA */
 };
 

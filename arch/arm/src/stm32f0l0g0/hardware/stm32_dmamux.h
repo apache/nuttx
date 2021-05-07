@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_dmamux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,25 +16,25 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_DMAMUX_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_DMAMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define DMAMUX1 0
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_DMAMUX_CXCR_OFFSET(x)  (0x0000+0x0004*(x)) /* DMAMUX1 request line multiplexer channel x configuration register */
 #define STM32_DMAMUX_C0CR_OFFSET     STM32_DMAMUX_CXCR_OFFSET(0)
@@ -57,7 +57,7 @@
 #define STM32_DMAMUX_RGCFR_OFFSET    0x0144 /* DMAMUX1 request generator interrupt clear flag register */
                                             /* 0x148-0x3FC: Reserved */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_DMAMUX1_CXCR(x)  (STM32_DMAMUX1_BASE+STM32_DMAMUX_CXCR_OFFSET(x))
 #define STM32_DMAMUX1_C0CR     (STM32_DMAMUX1_BASE+STM32_DMAMUX_C0CR_OFFSET)
@@ -80,7 +80,7 @@
 #define STM32_DMAMUX1_RGSR     (STM32_DMAMUX1_BASE+STM32_DMAMUX_RGSR_OFFSET)
 #define STM32_DMAMUX1_RGCFR    (STM32_DMAMUX1_BASE+STM32_DMAMUX_RGCFR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* DMAMUX1 request line multiplexer channel x configuration register */
 
@@ -143,9 +143,9 @@
 #define DMAMAP_CONTROLLER(m)      ((m) >> 8 & 0x07)
 #define DMAMAP_REQUEST(m)         ((m) >> 0 & 0xff)
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Import DMAMUX map */
 

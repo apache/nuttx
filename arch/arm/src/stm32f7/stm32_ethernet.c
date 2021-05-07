@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_ethernet.c
  *
- *   Copyright (C) 2015-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -230,6 +216,10 @@
 #endif
 #ifndef CONFIG_STM32F7_ETH_NTXDESC
 #  define CONFIG_STM32F7_ETH_NTXDESC 4
+#endif
+
+#ifndef min
+#  define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 /* We need at least one more free buffer than transmit buffers */
@@ -1085,7 +1075,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+  ninfo("d_len: %d d_buf: %p txhead: %p tdes0: %08" PRIx32 "\n",
         priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & ETH_TDES0_OWN) == 0);
@@ -1700,50 +1690,63 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               dev->d_len = ((rxdesc->rdes0 & ETH_RDES0_FL_MASK) >>
                             ETH_RDES0_FL_SHIFT) - 4;
 
-              /* Get a buffer from the free list.  We don't even check if
-               * this is successful because we already assure the free
-               * list is not empty above.
-               */
+              if (priv->segments > 1 ||
+                  dev->d_len > ALIGNED_BUFSIZE)
+                {
+                  /* The Frame is to big, it spans segments */
 
-              buffer = stm32_allocbuffer(priv);
+                  nerr("ERROR: Dropped, RX descriptor Too big: %d in %d "
+                      "segments\n", dev->d_len, priv->segments);
 
-              /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the network device structure, then
-               * replace the buffer in the RX descriptor with the newly
-               * allocated buffer.
-               */
+                  stm32_freesegment(priv, rxcurr, priv->segments);
+                }
+              else
+                {
+                  /* Get a buffer from the free list.  We don't even check if
+                   * this is successful because we already assure the free
+                   * list is not empty above.
+                   */
 
-              DEBUGASSERT(dev->d_buf == NULL);
-              dev->d_buf    = (uint8_t *)rxcurr->rdes2;
-              rxcurr->rdes2 = (uint32_t)buffer;
+                  buffer = stm32_allocbuffer(priv);
 
-              /* Make sure that the modified RX descriptor is written to
-               * physical memory.
-               */
+                  /* Take the buffer from the RX descriptor of the first free
+                   * segment, put it into the network device structure, then
+                   * replace the buffer in the RX descriptor with the newly
+                   * allocated buffer.
+                   */
 
-              up_clean_dcache((uintptr_t)rxcurr,
-                (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
+                  DEBUGASSERT(dev->d_buf == NULL);
+                  dev->d_buf    = (uint8_t *)rxcurr->rdes2;
+                  rxcurr->rdes2 = (uint32_t)buffer;
 
-              /* Remember where we should re-start scanning and reset the
-               * segment scanning logic
-               */
+                  /* Make sure that the modified RX descriptor is written to
+                   * physical memory.
+                   */
 
-              priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
-              stm32_freesegment(priv, rxcurr, priv->segments);
+                  up_clean_dcache((uintptr_t)rxcurr,
+                    (uintptr_t)rxdesc + sizeof(struct eth_rxdesc_s));
 
-              /* Force the completed RX DMA buffer to be re-read from
-               * physical memory.
-               */
+                  /* Remember where we should re-start scanning and reset the
+                   * segment scanning logic
+                   */
 
-              up_invalidate_dcache((uintptr_t)dev->d_buf,
-                                   (uintptr_t)dev->d_buf + dev->d_len);
+                  priv->rxhead   = (struct eth_rxdesc_s *)rxdesc->rdes3;
+                  stm32_freesegment(priv, rxcurr, priv->segments);
 
-              ninfo("rxhead: %p d_buf: %p d_len: %d\n",
-                    priv->rxhead, dev->d_buf, dev->d_len);
+                  /* Force the completed RX DMA buffer to be re-read from
+                   * physical memory.
+                   */
 
-              /* Return success */
+                  up_invalidate_dcache((uintptr_t)dev->d_buf,
+                                       min(dev->d_len, ALIGNED_BUFSIZE));
 
-              return OK;
+                  ninfo("rxhead: %p d_buf: %p d_len: %d\n",
+                        priv->rxhead, dev->d_buf, dev->d_len);
+
+                  /* Return success */
+
+                  return OK;
+                }
             }
           else
             {
@@ -1751,7 +1754,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
                * scanning logic, and continue scanning with the next frame.
                */
 
-              nwarn("WARNING: DROPPED RX descriptor errors: %08x\n",
+              nwarn("WARNING: DROPPED RX descriptor errors: %08" PRIx32 "\n",
                     rxdesc->rdes0);
               stm32_freesegment(priv, rxcurr, priv->segments);
             }
@@ -1995,7 +1998,8 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
            * TX descriptors.
            */
 
-          ninfo("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+          ninfo("txtail: %p tdes0: %08" PRIx32
+                " tdes2: %08" PRIx32 " tdes3: %08" PRIx32 "\n",
                 txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
@@ -2474,8 +2478,10 @@ static int stm32_ifup(struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",

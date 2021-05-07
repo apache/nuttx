@@ -1,36 +1,20 @@
 /****************************************************************************
  * net/devif/devif_poll.c
  *
- *   Copyright (C) 2007-2010, 2012, 2014, 2016-2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -167,20 +151,24 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 
               if (ipv6->proto == IP_PROTO_ICMP6)
                 {
-                  /* Let 6LoWPAN convert IPv6 ICMPv6 output into radio frames. */
+                  /* Let 6LoWPAN convert IPv6 ICMPv6 output into radio
+                   * frames.
+                   */
 
                   sixlowpan_icmpv6_send(dev, dev, ipv6);
                 }
               else
                 {
-                  nerr("ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
+                  nerr("ERROR: ICMPv6 protocol error: %u..."
+                        "  Packet dropped\n",
                        ipv6->proto);
                 }
             }
           else
 #endif
             {
-              nerr("ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
+              nerr("ERROR: Unhandled packet dropped."
+                    "  pkttype=%u protocol=%u\n",
                     pkttype, ipv6->proto);
             }
 
@@ -212,7 +200,9 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
   FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated packet connections and perform the poll action */
+  /* Traverse all of the allocated packet connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (pkt_conn = pkt_nextconn(pkt_conn)))
     {
@@ -234,7 +224,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Name: devif_poll_pkt_connections
+ * Name: devif_poll_can_connections
  *
  * Description:
  *   Poll all packet connections for available packets to send.
@@ -260,11 +250,14 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
     {
       /* Perform the packet TX poll */
 
-      can_poll(dev, can_conn);
+      if (dev == can_conn->dev)
+        {
+          can_poll(dev, can_conn);
 
-      /* Call back into the driver */
+          /* Call back into the driver */
 
-      bstop = callback(dev);
+          bstop = callback(dev);
+        }
     }
 
   return bstop;
@@ -290,7 +283,9 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
   FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated packet connections and perform the poll action */
+  /* Traverse all of the allocated packet connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (bluetooth_conn = bluetooth_conn_next(bluetooth_conn)))
     {
@@ -326,7 +321,9 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
   FAR struct ieee802154_conn_s *ieee802154_conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated packet connections and perform the poll action */
+  /* Traverse all of the allocated packet connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (ieee802154_conn = ieee802154_conn_next(ieee802154_conn)))
     {
@@ -358,7 +355,9 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
   FAR struct icmp_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated ICMP connections and perform the poll action */
+  /* Traverse all of the allocated ICMP connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (conn = icmp_nextconn(conn)) != NULL)
     {
@@ -394,14 +393,16 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
   FAR struct icmpv6_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated ICMPV6 connections and perform the poll action */
+  /* Traverse all of the allocated ICMPV6 connections and perform the poll
+   * action.
+   */
 
   do
     {
       /* Perform the ICMPV6 poll
-       * Note: conn equal NULL in the first iteration means poll dev's callback list
-       * since icmpv6_autoconfig and icmpv6_neighbor still append it's callback into
-       * this list.
+       * Note: conn equal NULL in the first iteration means poll dev's
+       * callback list since icmpv6_autoconfig and icmpv6_neighbor still
+       * append it's callback into this list.
        */
 
       icmpv6_poll(dev, conn);
@@ -526,7 +527,9 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
   FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated UDP connections and perform the poll action */
+  /* Traverse all of the allocated UDP connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (conn = udp_nextconn(conn)))
     {
@@ -610,7 +613,9 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
-  /* Traverse all of the active TCP connections and perform the poll action. */
+  /* Traverse all of the active TCP connections and perform the poll
+   * action.
+   */
 
   while (!bstop && (conn = tcp_nextconn(conn)))
     {
@@ -652,9 +657,9 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should then send
- *   out the packet.
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero. The device driver should then
+ *   send out the packet.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
@@ -687,7 +692,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 #endif
 #ifdef CONFIG_NET_CAN
     {
-      /* Check for pending packet socket transfer */
+      /* Check for pending CAN socket transfer */
 
       bstop = devif_poll_can_connections(dev, callback);
     }
@@ -772,7 +777,9 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 #endif
 #ifdef CONFIG_NET_IPFORWARD
     {
-      /* Traverse all of the tasks waiting to forward a packet to this device. */
+      /* Traverse all of the tasks waiting to forward a packet to this
+       * device.
+       */
 
       bstop = devif_poll_forward(dev, callback);
     }
@@ -790,7 +797,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  * Name: devif_timer
  *
  * Description:
- *   These function will traverse each active network connection structure and
+ *   This function will traverse each active network connection structure and
  *   perform network timer operations. The Ethernet driver MUST implement
  *   logic to periodically call devif_timer().
  *
@@ -800,9 +807,9 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should then send
- *   out the packet.
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero.  The device driver should then
+ *   send out the packet.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
@@ -817,16 +824,6 @@ int devif_timer(FAR struct net_driver_s *dev, int delay,
   int hsec = TICK2HSEC(delay);
 #endif
   int bstop = false;
-
-#ifdef CONFIG_NET_IPv4_REASSEMBLY
-  /* Increment the timer used by the IP reassembly logic */
-
-  if (g_reassembly_timer != 0 &&
-      g_reassembly_timer < CONFIG_NET_IPv4_REASS_MAXAGE)
-    {
-      g_reassembly_timer += hsec;
-    }
-#endif
 
 #ifdef NET_TCP_HAVE_STACK
   /* Traverse all of the active TCP connections and perform the

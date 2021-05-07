@@ -1,35 +1,20 @@
 /****************************************************************************
  * libs/libc/pthread/pthread_once.c
  *
- *   Copyright (C) 2007, 2009, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,10 +24,10 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <sched.h>
-#include <errno.h>
 #include <debug.h>
 
 /****************************************************************************
@@ -53,14 +38,14 @@
  * Name: pthread_once
  *
  * Description:
- *   The  first call to pthread_once() by any thread with a given
+ *   The first call to pthread_once() by any thread with a given
  *   once_control, will call the init_routine with no arguments. Subsequent
  *   calls to pthread_once() with the same once_control will have no effect.
  *   On return from pthread_once(), init_routine will have completed.
  *
  * Input Parameters:
  *   once_control - Determines if init_routine should be called.
- *     once_control should be declared and initializeed as follows:
+ *     once_control should be declared and initialized as follows:
  *
  *        pthread_once_t once_control = PTHREAD_ONCE_INIT;
  *
@@ -68,8 +53,8 @@
  *   init_routine - The initialization routine that will be called once.
  *
  * Returned Value:
- *   0 (OK) on success or EINVAL if either once_control or init_routine are
- *   invalid
+ *   0 (OK) on success or an error number shall be returned to
+ *   indicate the error.
  *
  * Assumptions:
  *
@@ -80,29 +65,28 @@ int pthread_once(FAR pthread_once_t *once_control,
 {
   /* Sanity checks */
 
-  if (once_control && init_routine)
+  DEBUGASSERT(once_control != NULL);
+  DEBUGASSERT(init_routine != NULL);
+
+  /* Prohibit pre-emption while we test and set the once_control. */
+
+  sched_lock();
+
+  if (!*once_control)
     {
-      /* Prohibit pre-emption while we test and set the once_control */
+      *once_control = true;
 
-      sched_lock();
-      if (!*once_control)
-        {
-          *once_control = true;
-
-          /* Call the init_routine with pre-emption enabled. */
-
-          sched_unlock();
-          init_routine();
-          return OK;
-        }
-
-      /* The init_routine has already been called.  Restore pre-emption and return */
+      /* Call the init_routine with pre-emption enabled. */
 
       sched_unlock();
+      init_routine();
       return OK;
     }
 
-  /* One of the two arguments is NULL */
+  /* The init_routine has already been called.
+   * Restore pre-emption and return.
+   */
 
-  return EINVAL;
+  sched_unlock();
+  return OK;
 }

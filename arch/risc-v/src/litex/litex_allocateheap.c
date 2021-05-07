@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "litex.h"
@@ -33,9 +34,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_addregion
+ * Name: riscv_addregion
+ *
+ * Description:
+ *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
+ *   that may be used for heap.
+ *
  ****************************************************************************/
 
-void up_addregion(void)
+#if CONFIG_MM_REGIONS > 1
+void riscv_addregion(void)
 {
 }
+#endif
+

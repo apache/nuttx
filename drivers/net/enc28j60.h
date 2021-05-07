@@ -1,41 +1,27 @@
 /****************************************************************************
  * drivers/net/enc28j60.h
  *
- *   Copyright (C) 2010, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- * - ENC28J60 Data Sheet, Stand-Alone Ethernet Controller with SPI Interface,
- *   DS39662C, 2008 Microchip Technology Inc.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* References:
+ * - ENC28J60 Data Sheet, Stand-Alone Ethernet Controller with SPI Interface,
+ *   DS39662C, 2008 Microchip Technology Inc.
+ */
 
 #ifndef __DRIVERS_NET_ENC28J60_H
 #define __DRIVERS_NET_ENC28J60_H
@@ -137,6 +123,7 @@
 #  define ECON1_BSEL_BANK1  (1 << ECON1_BSEL_SHIFT) /* Bank 1 */
 #  define ECON1_BSEL_BANK2  (2 << ECON1_BSEL_SHIFT) /* Bank 2 */
 #  define ECON1_BSEL_BANK3  (3 << ECON1_BSEL_SHIFT) /* Bank 3 */
+
 #define ECON1_RXEN          (1 << 2) /* Bit 2: Receive Enable */
 #define ECON1_TXRTS         (1 << 3) /* Bit 3: Transmit Request to Send */
 #define ECON1_CSUMEN        (1 << 4) /* Bit 4: DMA Checksum Enable */
@@ -145,7 +132,9 @@
 #define ECON1_TXRST         (1 << 7) /* Bit 7: Transmit Logic Reset */
 
 /* Ethernet Control 2 Register */
+
                                      /* Bits 0-2: Reserved */
+
 #define ECON2_VRPS          (1 << 3) /* Bit 3: Voltage Regulator Power Save Enable */
                                      /* Bit 4: Reserved */
 #define ECON2_PWRSV         (1 << 5) /* Bit 5: Power Save Enable */
@@ -204,6 +193,7 @@
 #define ENC_EDMACSH     REGADDR(0x17, 0, 0) /* DMA Checksum High Byte (EDMACS<15:8>) */
                                             /* 0x18-0x1a: Reserved */
                                             /* 0x1b-0x1f: EIE, EIR, ESTAT, ECON2, ECON1 */
+
 /* Bank 1 Control Register Addresses */
 
 #define ENC_EHT0        REGADDR(0x00, 1, 0) /* Hash Table Byte 0 (EHT<7:0>) */
@@ -402,6 +392,7 @@
 #define PHIR_PLNKIF       (1 << 4)  /* Bit 4:  PHY Link Change Interrupt */
 
 /* PHLCON Register Bit Definitions */
+
                                     /* Bit 0:  Reserved */
 #define PHLCON_STRCH      (1 << 1)  /* Bit 1:  LED Pulse Stretching Enable */
 #define PHLCON_LFRQ0      (1 << 2)  /* Bit 2:  LED Pulse Stretch Time Configuration */

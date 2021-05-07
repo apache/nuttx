@@ -26,7 +26,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/mount.h>
 #include <stdio.h>
 #include <debug.h>
 #include <string.h>
@@ -38,6 +37,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
+
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_FS_EVFAT
 #  include <nuttx/fs/mkevfatfs.h>
@@ -176,7 +177,7 @@ static int blk_write(const void *buf, int len, const char *path, int offset)
 
 static int install_recovery(const char *srcpath)
 {
-  int rfd;
+  struct file rfile;
   int i;
   int len;
   int rem;
@@ -188,9 +189,9 @@ static int install_recovery(const char *srcpath)
       return -1;
     }
 
-  rfd = open(srcpath, O_RDONLY, 0444);
+  ret = file_open(&rfile, srcpath, O_RDONLY, 0444);
 
-  if (read(rfd, &upg_image, sizeof(upg_image)) != sizeof(upg_image))
+  if (file_read(&rfile, &upg_image, sizeof(upg_image)) != sizeof(upg_image))
     {
       _info("read head");
       ret = -EIO;
@@ -228,7 +229,7 @@ static int install_recovery(const char *srcpath)
       goto err;
     }
 
-  lseek(rfd, upg_image.chunk[i].offset +
+  file_seek(&rfile, upg_image.chunk[i].offset +
         ((void *)&upg_image.chunk[upg_image.chunknum] - (void *)&upg_image),
         SEEK_SET);
 
@@ -236,7 +237,7 @@ static int install_recovery(const char *srcpath)
 
   while (rem > 0)
     {
-      len = read(rfd, copybuf, rem > 512 ? 512 : rem);
+      len = file_read(&rfile, copybuf, rem > 512 ? 512 : rem);
 
       if (len < 0)
         {
@@ -255,7 +256,7 @@ err:
       bchlib_teardown(handle);
     }
 
-  close(rfd);
+  file_close(&rfile);
   _info("DONE\n");
   return ret;
 }
@@ -585,7 +586,7 @@ static int msc_enable(int forced)
 
   /* check recovery kernel update */
 
-  mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
+  nx_mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
   nxsig_usleep(10000);
 
   /* recovery kernel install from UPG.img */
@@ -616,55 +617,6 @@ static int msc_enable(int forced)
 }
 #endif
 
-#ifdef CONFIG_LASTKMSG
-
-/****************************************************************************
- * Name: check_lastkmsg()
- ****************************************************************************/
-
-void check_lastkmsg(void)
-{
-  int ret;
-  FILE *fp;
-
-  if (g_lastksg_buf.sig != LASTKMSG_SIG)
-    {
-      return;
-    }
-
-  ret = mount(CONFIG_MTD_LOG_DEVPATH, "/log", "vfat", 0, NULL);
-
-  if (ret)
-    {
-      _info("mount: ret = %d\n", ret);
-      return;
-    }
-
-  /* log rotate */
-
-  unlink(LASTMSG_LOGPATH ".4");
-  rename(LASTMSG_LOGPATH ".3", LASTMSG_LOGPATH ".4");
-  rename(LASTMSG_LOGPATH ".2", LASTMSG_LOGPATH ".3");
-  rename(LASTMSG_LOGPATH ".1", LASTMSG_LOGPATH ".2");
-  rename(LASTMSG_LOGPATH ".0", LASTMSG_LOGPATH ".1");
-
-  fp = fopen(LASTMSG_LOGPATH ".0", "w");
-
-  if (fp)
-    {
-      lastkmsg_output(fp);
-      fflush(fp);
-      fclose(fp);
-    }
-
-  umount("/log");
-
-  /* XXX: workaround for logfile size = 0 */
-
-  nxsig_usleep(100000);
-}
-#endif /* CONFIG_LASTKMSG */
-
 /****************************************************************************
  * Name: ipl2_main()
  ****************************************************************************/
@@ -674,9 +626,6 @@ int ipl2_main(int argc, char *argv[])
   int ret;
 
   UNUSED(ret); /* Not used in all configurations */
-
-  _info("start: %s\n", CONFIG_CURRENT_REVISION);
-  _info("imgsig: %u\n", IMG_SIGNATURE);
 
 #ifdef CONFIG_CHARGER
   /* NOTE:
@@ -729,7 +678,7 @@ int ipl2_main(int argc, char *argv[])
     {
       /* check recovery kernel update */
 
-      mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
+      nx_mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
       nxsig_usleep(10000);
 
       /* recovery kernel install from UPG.img */

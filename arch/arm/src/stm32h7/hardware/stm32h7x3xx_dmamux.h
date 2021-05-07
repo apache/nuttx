@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_dmamux.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_DMAMUX_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_DMAMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMAMUX1 mapping ******************************************************************/
+/* DMAMUX1 mapping **********************************************************/
 
 /* NOTE: DMAMUX1 channels 0 to 7 are connected to DMA1 channels 0 to 7.
  *       DMAMUX1 channels 8 to 15 are connected to DMA2 channels 0 to 7.
@@ -90,6 +90,7 @@
 #define DMAMUX1_TIM8_UP        (51)
 #define DMAMUX1_TIM8_TRIG      (52)
 #define DMAMUX1_TIM8_COM       (53)
+
 /* DMAMUX1 54: Reserved */
 #define DMAMUX1_TIM5_CH1       (55)
 #define DMAMUX1_TIM5_CH2       (56)
@@ -152,9 +153,10 @@
 #define DMAMUX1_SAI3A          (113)
 #define DMAMUX1_SAI3B          (114)
 #define DMAMUX1_ADC3           (115)
+
 /* DMAMUX1 116-127: Reserved */
 
-/* DMAMUX2 mapping ******************************************************************/
+/* DMAMUX2 mapping **********************************************************/
 
 /* NOTE: DMAMUX2 channels 0 to 7 are connected to BDMA channels 0 to 7 */
 
@@ -241,22 +243,22 @@
 
 /* DMAMAP for DMA1 and DMA2 (DMAMUX1) */
 
-#define DMAMAP_DMA12_REGGEN0_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN0)
-#define DMAMAP_DMA12_REGGEN0_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN0)
-#define DMAMAP_DMA12_REGGEN1_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN1)
-#define DMAMAP_DMA12_REGGEN1_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN1)
-#define DMAMAP_DMA12_REGGEN2_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN2)
-#define DMAMAP_DMA12_REGGEN2_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN2)
-#define DMAMAP_DMA12_REGGEN3_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN3)
-#define DMAMAP_DMA12_REGGEN3_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN3)
-#define DMAMAP_DMA12_REGGEN4_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN4)
-#define DMAMAP_DMA12_REGGEN4_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN4)
-#define DMAMAP_DMA12_REGGEN5_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN5)
-#define DMAMAP_DMA12_REGGEN5_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN5)
-#define DMAMAP_DMA12_REGGEN6_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN6)
-#define DMAMAP_DMA12_REGGEN6_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN6)
-#define DMAMAP_DMA12_REGGEN7_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN7)
-#define DMAMAP_DMA12_REGGEN7_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN7)
+#define DMAMAP_DMA12_REQGEN0_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN0)
+#define DMAMAP_DMA12_REQGEN0_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN0)
+#define DMAMAP_DMA12_REQGEN1_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN1)
+#define DMAMAP_DMA12_REQGEN1_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN1)
+#define DMAMAP_DMA12_REQGEN2_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN2)
+#define DMAMAP_DMA12_REQGEN2_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN2)
+#define DMAMAP_DMA12_REQGEN3_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN3)
+#define DMAMAP_DMA12_REQGEN3_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN3)
+#define DMAMAP_DMA12_REQGEN4_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN4)
+#define DMAMAP_DMA12_REQGEN4_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN4)
+#define DMAMAP_DMA12_REQGEN5_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN5)
+#define DMAMAP_DMA12_REQGEN5_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN5)
+#define DMAMAP_DMA12_REQGEN6_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN6)
+#define DMAMAP_DMA12_REQGEN6_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN6)
+#define DMAMAP_DMA12_REQGEN7_0     DMAMAP_MAP(DMA1, DMAMUX1_REQ_GEN7)
+#define DMAMAP_DMA12_REQGEN7_1     DMAMAP_MAP(DMA2, DMAMUX1_REQ_GEN7)
 #define DMAMAP_DMA12_ADC1_0        DMAMAP_MAP(DMA1, DMAMUX1_ADC1)
 #define DMAMAP_DMA12_ADC1_1        DMAMAP_MAP(DMA2, DMAMUX1_ADC1)
 #define DMAMAP_DMA12_ADC2_0        DMAMAP_MAP(DMA1, DMAMUX1_ADC2)
@@ -468,14 +470,14 @@
 
 /* DMAMAP for BDMA (DMAMUX2) */
 
-#define DMAMAP_BDMA_REGGEN0        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN0)
-#define DMAMAP_BDMA_REGGEN1        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN1)
-#define DMAMAP_BDMA_REGGEN2        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN2)
-#define DMAMAP_BDMA_REGGEN3        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN3)
-#define DMAMAP_BDMA_REGGEN4        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN4)
-#define DMAMAP_BDMA_REGGEN5        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN5)
-#define DMAMAP_BDMA_REGGEN6        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN6)
-#define DMAMAP_BDMA_REGGEN7        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN7)
+#define DMAMAP_BDMA_REQGEN0        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN0)
+#define DMAMAP_BDMA_REQGEN1        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN1)
+#define DMAMAP_BDMA_REQGEN2        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN2)
+#define DMAMAP_BDMA_REQGEN3        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN3)
+#define DMAMAP_BDMA_REQGEN4        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN4)
+#define DMAMAP_BDMA_REQGEN5        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN5)
+#define DMAMAP_BDMA_REQGEN6        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN6)
+#define DMAMAP_BDMA_REQGEN7        DMAMAP_MAP(BDMA, DMAMUX2_REQ_GEN7)
 #define DMAMAP_BDMA_LPUART1_RX     DMAMAP_MAP(BDMA, DMAMUX2_LPUART_RX)
 #define DMAMAP_BDMA_LPUART1_TX     DMAMAP_MAP(BDMA, DMAMUX2_LPUART_TX)
 #define DMAMAP_BDMA_SPI6_RX        DMAMAP_MAP(BDMA, DMAMUX2_SPI6_RX)

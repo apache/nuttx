@@ -49,8 +49,8 @@
  *
  * Description:
  *   The wcscoll() compares the wide-character string pointed to by a to the
- *   wide-character string pointed to by b using an interpretation appropriate
- *   to the current LC_COLLATE state.
+ *   wide-character string pointed to by b using an interpretation
+ *   appropriate to the current LC_COLLATE state.
  *
  *   The current implementation of wcscoll() simply uses wcscmp() and does
  *   not support any language-specific sorting.

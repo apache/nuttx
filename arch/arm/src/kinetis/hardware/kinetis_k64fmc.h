@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k64fmc.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K64FMC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K64FMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_FMC_PFAPR_OFFSET        0x0000 /* Flash Access Protection Register */
 #define KINETIS_FMC_PFB0CR_OFFSET       0x0004 /* Flash Bank 0 Control Register */
@@ -119,7 +104,7 @@
 #define KINETIS_FMC_DATAW3S3U_OFFSET    0x0278 /* Cache Data Storage (upper word) */
 #define KINETIS_FMC_DATAW3S3L_OFFSET    0x027c /* Cache Data Storage (lower word) */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_FMC_PFAPR               (KINETIS_FMC_BASE+KINETIS_FMC_PFAPR_OFFSET)
 #define KINETIS_FMC_PFB0CR              (KINETIS_FMC_BASE+KINETIS_FMC_PFB0CR_OFFSET)
@@ -190,9 +175,10 @@
 #define KINETIS_FMC_DATAW3S3U           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S3U_OFFSET)
 #define KINETIS_FMC_DATAW3S3L           (KINETIS_FMC_BASE+KINETIS_FMC_DATAW3S3L_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Flash Access Protection Register */
+
 /* Access protection bits (all masters) */
 
 #define FMC_PFAPR_NONE                  0 /* No access may be performed by this master */
@@ -225,6 +211,7 @@
 #define FMC_PFAPR_M6PFD                 (1 << 22) /* Bit 22: Master 6 Prefetch Disable */
 #define FMC_PFAPR_M7PFD                 (1 << 23) /* Bit 23: Master 7 Prefetch Disable */
                                                   /* Bits 24-31: Reserved */
+
 /* Flash Bank 0 Control Register */
 
 #define FMC_PFB0CR_B0SEBE               (1 << 0)  /* Bit 0:  Bank 0 Single Entry Buffer Enable */
@@ -237,11 +224,13 @@
 #  define FMC_PFB0CR_CRC_ALL            (0 << FMC_PFB0CR_CRC_SHIFT) /* LRU all four ways */
 #  define FMC_PFB0CR_CRC_I01D23         (2 << FMC_PFB0CR_CRC_SHIFT) /* LRU ifetches 0-1 data 2-3 */
 #  define FMC_PFB0CR_CRC_I012D3         (3 << FMC_PFB0CR_CRC_SHIFT) /* LRU ifetches 0-3 data 3 */
+
                                                   /* Bits 8-16: Reserved */
 #define FMC_PFB0CR_B0MW_SHIFT           (17)      /* Bits 17-18: Bank 0 Memory Width */
 #define FMC_PFB0CR_B0MW_MASK            (3 << FMC_PFB0CR_B0MW_SHIFT)
 #  define FMC_PFB0CR_B0MW_32BITS        (0 << FMC_PFB0CR_B0MW_SHIFT) /* 32 bits */
 #  define FMC_PFB0CR_B0MW_64BITS        (1 << FMC_PFB0CR_B0MW_SHIFT) /* 64 bits */
+
 #define FMC_PFB0CR_S_B_INV              (1 << 19) /* Bit 19:  Invalidate Prefetch Speculation Buffer */
 #define FMC_PFB0CR_CINV_WAY_SHIFT       (20)      /* Bits 20-23: Cache Invalidate Way x */
 #define FMC_PFB0CR_CINV_WAY_MASK        (15 << FMC_PFB0CR_CINV_WAY_SHIFT)
@@ -262,6 +251,7 @@
 #define FMC_PFB1CR_B1MW_MASK            (3 << FMC_PFB1CR_B1MW_SHIFT)
 #  define FMC_PFB1CR_B1MW_32BITS        (0 << FMC_PFB1CR_B1MW_SHIFT) /* 32 bits */
 #  define FMC_PFB1CR_B1MW_64BITS        (1 << FMC_PFB1CR_B1MW_SHIFT) /* 64 bits */
+
                                                   /* Bits 19-27: Reserved */
 #define FMC_PFB1CR_B1RWSC_SHIFT         (28)      /* Bits 28-31: Bank 1 Read Wait State Control */
 #define FMC_PFB1CR_B1RWSC_MASK          (15 << FMC_PFB1CR_B0RWSC_SHIFT)
@@ -278,16 +268,16 @@
  * 64-bit data in two 32-bit registers.
  */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K64FMC_H */

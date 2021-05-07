@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/st7565.c
  *
  * Definitions for the ST7565 128x64 Dot Matrix LCD Driver with C
@@ -45,11 +45,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -67,11 +67,11 @@
 
 #include "st7565.h"
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration **********************************************************************/
+/* Configuration ************************************************************/
 
 /* ST7565 Configuration Settings:
  *
@@ -83,7 +83,8 @@
  *
  * Required LCD driver settings:
  * CONFIG_LCD_ST7565 - Enable ST7565 support
- * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+ * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be
+ * accepted.
  *
  */
 
@@ -128,10 +129,9 @@
 #  warning "Optimal setting of CONFIG_LCD_MAXCONTRAST is 255"
 #endif
 
-/* Color Properties *******************************************************************/
+/* Color Properties *********************************************************/
 
-/* The ST7565 display controller can handle a resolution of 128x64.
- */
+/* The ST7565 display controller can handle a resolution of 128x64. */
 
 /* Display Resolution */
 
@@ -155,9 +155,9 @@
 /* Bytes per logical row andactual device row */
 
 #define ST7565_XSTRIDE      (ST7565_XRES >> 3)  /* Pixels arrange "horizontally
-                                                 * for user" */
+                                                 * for 'user' */
 #define ST7565_YSTRIDE      (ST7565_YRES >> 3)  /* But actual device
-                                                 * arrangement is "vertical" */
+                                                 * arrangement is 'vertical' */
 
 /* The size of the shadow frame buffer */
 
@@ -168,9 +168,9 @@
 #define LS_BIT          (1 << 0)
 #define MS_BIT          (1 << 7)
 
-/**************************************************************************************
+/****************************************************************************
  * Private Type Definition
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This structure describes the state of this driver */
 
@@ -190,14 +190,15 @@ struct st7565_dev_s
 
   /* The ST7565 does not support reading from the display memory in SPI mode.
    * Since there is 1 BPP and access is byte-by-byte, it is necessary to keep
-   * a shadow copy of the framebuffer memory. */
+   * a shadow copy of the framebuffer memory.
+   */
 
   uint8_t fb[ST7565_FBSIZE];
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
 
 /* Drivers helpers */
 
@@ -217,14 +218,16 @@ static inline int st7565_backlight(FAR struct st7565_dev_s *priv, int level);
 
 static int st7565_putrun(fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t * buffer, size_t npixels);
-static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
+static int st7565_getrun(fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t * buffer,
                          size_t npixels);
 
 /* LCD Configuration */
 
 static int st7565_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo);
-static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
@@ -244,15 +247,16 @@ static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int st7565_getpower(struct lcd_dev_s *dev);
 static int st7565_setpower(struct lcd_dev_s *dev, int power);
 static int st7565_getcontrast(struct lcd_dev_s *dev);
-static int st7565_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int st7565_setcontrast(struct lcd_dev_s *dev,
+                              unsigned int contrast);
 
 /* Initialization */
 
 static inline void up_clear(FAR struct st7565_dev_s *priv);
 
-/**************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************/
+ ****************************************************************************/
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -299,6 +303,7 @@ static struct st7565_dev_s g_st7565dev =
     .getplaneinfo = st7565_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -310,11 +315,11 @@ static struct st7565_dev_s g_st7565dev =
   },
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name: st7565_reset
  *
  * Description:
@@ -322,7 +327,7 @@ static struct st7565_dev_s g_st7565dev =
  *
  *   priv - A reference to the driver specific structure
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void st7565_reset(FAR struct st7565_dev_s *priv, bool on)
 {
@@ -332,7 +337,7 @@ static inline void st7565_reset(FAR struct st7565_dev_s *priv, bool on)
     }
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name: st7565_select
  *
  * Description:
@@ -340,14 +345,14 @@ static inline void st7565_reset(FAR struct st7565_dev_s *priv, bool on)
  *
  *   priv - A reference to the driver specific structure
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void st7565_select(FAR struct st7565_dev_s *priv)
 {
   priv->lcd->select(priv->lcd);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_deselect
  *
  * Description:
@@ -355,14 +360,14 @@ static inline void st7565_select(FAR struct st7565_dev_s *priv)
  *
  *   priv - A reference to the driver specific structure
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void st7565_deselect(FAR struct st7565_dev_s *priv)
 {
   priv->lcd->deselect(priv->lcd);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_cmddata
  *
  * Description:
@@ -371,14 +376,14 @@ static inline void st7565_deselect(FAR struct st7565_dev_s *priv)
  *   priv - A reference to the driver specific structure.
  *   cmd  - If true command mode will be selected.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void st7565_cmddata(FAR struct st7565_dev_s *priv, bool cmd)
 {
   priv->lcd->cmddata(priv->lcd, cmd);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_send_one_data
  *
  * Description:
@@ -387,7 +392,7 @@ static inline void st7565_cmddata(FAR struct st7565_dev_s *priv, bool cmd)
  *   priv - A reference to the driver specific structure.
  *   data - Byte to send as data to LCD driver.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline int st7565_send_one_data(FAR struct st7565_dev_s *priv,
                                        uint8_t data)
@@ -395,7 +400,7 @@ static inline int st7565_send_one_data(FAR struct st7565_dev_s *priv,
   return priv->lcd->senddata(priv->lcd, &data, 1);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_send_data_buf
  *
  * Description:
@@ -405,7 +410,7 @@ static inline int st7565_send_one_data(FAR struct st7565_dev_s *priv,
  *   buf    - Buffer sent as data to LCD driver.
  *   size   - Size of buffer in bytes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline int st7565_send_data_buf(FAR struct st7565_dev_s *priv,
                                        FAR const uint8_t * buf, int size)
@@ -413,7 +418,7 @@ static inline int st7565_send_data_buf(FAR struct st7565_dev_s *priv,
   return priv->lcd->senddata(priv->lcd, buf, size);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_backlight
  *
  * Description:
@@ -422,14 +427,14 @@ static inline int st7565_send_data_buf(FAR struct st7565_dev_s *priv,
  *   priv  - A reference to the driver specific structure.
  *   level - Set backlight pwm from 0 CONFIG_LCD_MAXPOWER-1.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline int st7565_backlight(FAR struct st7565_dev_s *priv, int level)
 {
   return priv->lcd->backlight(priv->lcd, level);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_putrun
  *
  * Description:
@@ -441,7 +446,7 @@ static inline int st7565_backlight(FAR struct st7565_dev_s *priv, int level)
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7565_putrun(fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t * buffer, size_t npixels)
@@ -477,14 +482,15 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
       return OK;
     }
 
-  /* Get the page number.  The range of 64 lines is divided up into eight pages
-   * of 8 lines each.
+  /* Get the page number.
+   * The range of 64 lines is divided up into eight pages of 8 lines each.
    */
 
   page = row >> 3;
 
-  /* Update the shadow frame buffer memory. First determine the pixel position
-   * in the frame buffer memory.  Pixels are organized like this:
+  /* Update the shadow frame buffer memory.
+   * First determine the pixel position in the frame buffer memory.
+   * Pixels are organized like this:
    *
    *  --------+---+---+---+---+-...-+-----+
    *  Segment | 0 | 1 | 2 | 3 | ... | 131 |
@@ -580,7 +586,7 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_getrun
  *
  * TODO implement read function that possible in 8080bus
@@ -594,9 +600,10 @@ static int st7565_putrun(fb_coord_t row, fb_coord_t col,
  *  npixels - The number of pixels to read from the LCD
  *            (range: 0 < npixels <= xres-col)
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
+static int st7565_getrun(fb_coord_t row, fb_coord_t col,
+                         FAR uint8_t * buffer,
                          size_t npixels)
 {
   /* Because of this line of code, we will only be able to support a single
@@ -630,14 +637,16 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
     }
 
   /* Then transfer the display data from the shadow frame buffer memory */
-  /* Get the page number.  The range of 64 lines is divided up into eight pages
-   * of 8 lines each.
+
+  /* Get the page number.
+   * The range of 64 lines is divided up into eight pages of 8 lines each.
    */
 
   page = row >> 3;
 
-  /* Update the shadow frame buffer memory. First determine the pixel position
-   * in the frame buffer memory.  Pixels are organized like this:
+  /* Update the shadow frame buffer memory.
+   * First determine the pixel position in the frame buffer memory.
+   * Pixels are organized like this:
    *
    *  --------+---+---+---+---+-...-+-----+
    *  Segment | 0 | 1 | 2 | 3 | ... | 131 |
@@ -676,8 +685,9 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
           *buffer |= usrmask;
         }
 
-      /* Inc/Decrement to the next destination pixel. Hmmmm. It looks like this
-       * logic could write past the end of the user buffer.  Revisit this!
+      /* Inc/Decrement to the next destination pixel.
+       * Hmmmm. It looks like this logic could write past the end of the
+       * user buffer.  Revisit this!
        */
 
 #ifdef CONFIG_LCD_PACKEDMSFIRST
@@ -708,13 +718,13 @@ static int st7565_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t * buffer,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7565_getvideoinfo(FAR struct lcd_dev_s *dev,
                                FAR struct fb_videoinfo_s *vinfo)
@@ -727,15 +737,16 @@ static int st7565_getvideoinfo(FAR struct lcd_dev_s *dev,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev,
+                               unsigned int planeno,
                                FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
@@ -744,38 +755,40 @@ static int st7565_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_getpower
  *
  * Description:
- *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlit LCDs, this setting may correspond to the backlight setting.
+ *   Get the LCD panel power status
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlit LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7565_getpower(struct lcd_dev_s *dev)
 {
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
   DEBUGASSERT(priv);
-  ginfo("powered: %s\n", priv->power_level);
+  ginfo("powered: %d\n", priv->power_level);
   return priv->power_level;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_setpower
  *
  * Description:
- *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full on). On
- *   backlight LCDs, this setting may correspond to the backlight setting.
+ *   Enable/disable LCD panel power
+ *  (0: full off - CONFIG_LCD_MAXPOWER: full on).
+ *   On backlight LCDs, this setting may correspond to the backlight setting.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7565_setpower(struct lcd_dev_s *dev, int power)
 {
   struct st7565_dev_s *priv = (struct st7565_dev_s *)dev;
 
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER);
-  ginfo("power: %s powered: %s\n", power, priv->power_level);
+  ginfo("power: %d powered: %d\n", power, priv->power_level);
 
   /* Select and lock the device */
 
@@ -816,13 +829,13 @@ static int st7565_setpower(struct lcd_dev_s *dev, int power)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7565_getcontrast(struct lcd_dev_s *dev)
 {
@@ -831,13 +844,13 @@ static int st7565_getcontrast(struct lcd_dev_s *dev)
   return (int)priv->contrast;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_setcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static int st7565_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
@@ -875,13 +888,13 @@ static int st7565_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return OK;
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  up_clear
  *
  * Description:
  *   Clear the display.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 static inline void up_clear(FAR struct st7565_dev_s *priv)
 {
@@ -925,11 +938,11 @@ static inline void up_clear(FAR struct st7565_dev_s *priv)
   st7565_deselect(priv);
 }
 
-/**************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  st7565_initialize
  *
  * Description:
@@ -949,7 +962,7 @@ static inline void up_clear(FAR struct st7565_dev_s *priv)
  *   for the specified
  *   OLED.  NULL is returned on any failure.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
                                         unsigned int devno)

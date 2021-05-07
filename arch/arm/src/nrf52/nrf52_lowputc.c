@@ -1,35 +1,20 @@
 /****************************************************************************
- * arch/arm/src/rnf52/nrf52_lowputc.c
+ * arch/arm/src/nrf52/nrf52_lowputc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Janne Rosberg <janne@offcode.fi>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -235,13 +220,11 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
 
   putreg32(br, base + NRF52_UART_BAUDRATE_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_setparity
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 static void nrf52_setparity(uintptr_t base,
                             const struct uart_config_s *config)
 {
@@ -264,7 +247,6 @@ static void nrf52_setparity(uintptr_t base,
 
   putreg32(regval, base + NRF52_UART_CONFIG_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_setstops
@@ -295,7 +277,6 @@ static void nrf52_setstops(uintptr_t base,
  * Name: nrf52_sethwflow
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 static void nrf52_sethwflow(uintptr_t base,
                             const struct uart_config_s *config)
 {
@@ -381,7 +362,6 @@ void nrf52_usart_configure(uintptr_t base,
 
   putreg32(NRF52_UART_ENABLE_ENABLE, base + NRF52_UART_ENABLE_OFFSET);
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_usart_disable
@@ -392,7 +372,6 @@ void nrf52_usart_configure(uintptr_t base,
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
 void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 {
   /* Disable interrupts */
@@ -415,6 +394,36 @@ void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 
   putreg32(UART_PSELTXD_RESET, base + NRF52_UART_PSELTXD_OFFSET);
   putreg32(UART_PSELRXD_RESET, base + NRF52_UART_PSELRXD_OFFSET);
+}
+
+/****************************************************************************
+ * Name: nrf52_usart_setformat
+ *
+ * Description:
+ *   Set the USART line format and speed.
+ *
+ ****************************************************************************/
+
+void nrf52_usart_setformat(uintptr_t base,
+                           FAR const struct uart_config_s *config)
+{
+  /* Configure baud */
+
+  nrf52_setbaud(base, config);
+
+  /* Configure polarity */
+
+  nrf52_setparity(base, config);
+
+#ifdef HAVE_UART_STOPBITS
+  /* Configure STOP bits */
+
+  nrf52_setstops(base, config);
+#endif
+
+  /* Configure hardware flow control */
+
+  nrf52_sethwflow(base, config);
 }
 #endif
 
@@ -439,35 +448,3 @@ void arm_lowputc(char ch)
   putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STOPTX_OFFSET);
 #endif
 }
-
-/****************************************************************************
- * Name: nrf52_usart_setformat
- *
- * Description:
- *   Set the USART line format and speed.
- *
- ****************************************************************************/
-
-#ifdef HAVE_UART_DEVICE
-void nrf52_usart_setformat(uintptr_t base,
-                           FAR const struct uart_config_s *config)
-{
-  /* Configure baud */
-
-  nrf52_setbaud(base, config);
-
-  /* Configure polarity */
-
-  nrf52_setparity(base, config);
-
-#ifdef HAVE_UART_STOPBITS
-  /* Configure STOP bits */
-
-  nrf52_setstops(base, config);
-#endif
-
-  /* Configure hardware flow control */
-
-  nrf52_sethwflow(base, config);
-}
-#endif

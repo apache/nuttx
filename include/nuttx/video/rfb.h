@@ -1,40 +1,20 @@
 /****************************************************************************
  * include/nuttx/video/rfb.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Reference:
- *   The RFB Protocol, Tristan Richardson RealVNC Ltd (formerly of Olivetti
- *   Research Ltd / AT&T Labs Cambridge), Version 3.8,  Last updated
- *   26 November 2010
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -129,9 +109,9 @@ struct rfb_selected_sectype_s
 };
 
 /* "If number-of-security-types is zero, then for some reason the connection
- *  failed (e.g. the server cannot support the desired protocol version).  This
- *  is followed by a string describing the reason (where a string is specified
- *  as a length followed by that many ASCII characters):
+ *  failed (e.g. the server cannot support the desired protocol version).
+ *  This is followed by a string describing the reason (where a string is
+ *  specified as a length followed by that many ASCII characters):
  */
 
 struct rfb_sectype_connfail_s
@@ -154,10 +134,10 @@ struct rfb_sectype_s
 
 /* "Once the security-type has been decided, data specific to that security-
  *  type follows (see section 6.2 for details). At the end of the security
- *  handshaking phase, the protocol normally continues with the SecurityResult
- *  message.  Note that after the security handshaking phase, it is possible
- *  that further protocol data is over an encrypted or otherwise altered
- *  channel."
+ *  handshaking phase, the protocol normally continues with the
+ *  SecurityResult message.  Note that after the security handshaking phase,
+ *  it is possible that further protocol data is over an encrypted or
+ *  otherwise altered channel."
  */
 
 /* 6.1.3 SecurityResult
@@ -289,18 +269,18 @@ struct rfb_serverinit_s
  * "Bits-per-pixel is the number of bits used for each pixel value on the
  *  wire. This must be greater than or equal to the depth which is the number
  *  of useful bits in the pixel value. Currently bits-per-pixel must be 8,
- *  16 or 32—less than 8-bit pixels are not yet supported. Big-endian-flag is
- *  non-zero (true) if multi-byte pixels are interpreted as big endian. Of
- *  course this is meaningless for 8 bits-per-pixel.
+ *  16 or 32—less than 8-bit pixels are not yet supported. Big-endian-flag
+ *  is non-zero (true) if multi-byte pixels are interpreted as big endian.
+ *  Of course this is meaningless for 8 bits-per-pixel.
  *
  * "If true-colour-flag is non-zero (true) then the last six items specify
  *  how to extract the red, green and blue intensities from the pixel value.
- *  Red-max is the maximum red value (= 2n − 1 where n is the number of bits
- *  used for red). Note this value is always in big endian order. Red-shift
- *  is the number of shifts needed to get the red value in a pixel to the
- *  least significant bit. Green-max, green-shift and blue-max, blue-shift
- *  are similar for green and blue. For example, to find the red value
- *  (between 0 and red-max) from a given pixel, do the following:
+ *  Red-max is the maximum red value (= 2n − 1 where n is the number of
+ *  bits used for red). Note this value is always in big endian order.
+ *  Red-shift is the number of shifts needed to get the red value in a pixel
+ *  to the least significant bit. Green-max, green-shift and blue-max,
+ *  blue-shift are similar for green and blue. For example, to find the red
+ *  value (between 0 and red-max) from a given pixel, do the following:
  *
  * - "Swap the pixel value according to big-endian-flag (e.g. if
  *    big-endian-flag is zero (false) and host byte order is big endian,
@@ -440,18 +420,19 @@ struct rfb_keyevent_s
  *
  *   - "The 'shift state' (i.e. whether either of the Shift keysyms are down)
  *      should only be used as a hint when interpreting a keysym. For
- *      example, on a US keyboard the ’#’ character is shifted, but on a UK
- *      keyboard it is not. A server with a US keyboard receiving a ’#’
- *      character from a client with a UK keyboard will not have been sent
- *      any shift presses. In this case, it is likely that the server will
- *      internally need to 'fake' a shift press on its local system, in order
- *      to get a ’#’ character and not, for example, a ’3’.
+ *      example, on a US keyboard the ’#’ character is shifted, but on a
+ *      UK keyboard it is not. A server with a US keyboard receiving a
+ *      ’#’ character from a client with a UK keyboard will not have been
+ *      sentany shift presses.
+ *      In this case, it is likely that the server will internally need to
+ *      'fake' a shift press on its local system, in order to get a ’#’
+ *      character and not, for example, a ’3’.
  *   - "The difference between upper and lower case keysyms is significant.
- *      This is unlike some of the keyboard processing in the X Window System
- *      which treats them as the same. For example, a server receiving an
- *      uppercase ’A’ keysym without any shift presses should interpret it
- *      as an uppercase ’A’. Again this may involve an internal 'fake' shift
- *      press.
+ *      This is unlike some of the keyboard processing in the X Window
+ *      System which treats them as the same. For example, a server receiving
+ *      an uppercase ’A’ keysym without any shift presses should
+ *      interpret it as an uppercase ’A’.
+ *      Again this may involve an internal ’fake’ shift press.
  *   - "Servers should ignore 'lock' keysyms such as CapsLock and NumLock
  *      where possible. Instead they should interpret each character-based
  *      keysym according to its case.
@@ -463,7 +444,7 @@ struct rfb_keyevent_s
  *   - "On a viewer where modifiers like Control and Alt can also be used to
  *      generate character-based keysyms, the viewer may need to send extra
  *      'release' events in order that the keysym is interpreted correctly.
- *      For example, on a German PC keyboard, ctrl-alt-q generates the ’@’
+ *      For example, on a German PC keyboard, ctrl-alt-q generates the "@"
  *      character. In this case, the viewer needs to send 'fake' release
  *      events for Control and Alt in order that the ’@’ character is
  *      interpreted correctly (ctrl-alt-@is likely to mean something
@@ -783,8 +764,8 @@ struct rfb_rrerect32_s
  *  the tile). Otherwise the other bits in the mask are as follows:
  *
  * "BackgroundSpecified - if set, a pixel value follows which specifies the
-*   background colour for this tile:"
-*/
+ *   background colour for this tile:"
+ */
 
 struct rfb_backpixel8_s
 {
@@ -943,7 +924,6 @@ struct rfb_srle_s
 #define RFB_SUBENCODING_RLE      128 /* Plain RLE */
 #define RFB_SUBENCODING_PALRLE   129 /* Palette RLE */
 
-
 /* "Raw pixel data. width x height pixel values follow (where width and
  *  height are the width and height of the tile):"
  */
@@ -1038,7 +1018,8 @@ struct rfb_palette32_s
 };
 
 /* Then as with plain RLE, consists of a number of runs, repeated until the
- * tile is done. A run of length one is represented simply by a palette index:
+ * tile is done. A run of length one is represented simply by a palette
+ * index:
  */
 
 struct rfb_palettendx_s
@@ -1079,9 +1060,9 @@ struct rfb_palettendx_s
  *  that it is capable of coping with a change in the framebuffer width
  *  and/or height. The server changes the desktop size by sending a
  *  pseudo-rectangle with the DesktopSize pseudo-encoding as the last
- *  rectangle in an update. The pseudo-rectangle’s x-position and y-position
- *  are ignored, and width and height indicate the new width and height of
- *  the framebuffer. There is no further data associated with the
+ *  rectangle in an update. The pseudo-rectangle’s x-position and
+ *  y-position are ignored, and width and height indicate the new width and
+ *  height of the framebuffer. There is no further data associated with the
  *  pseudo-rectangle.
  */
 

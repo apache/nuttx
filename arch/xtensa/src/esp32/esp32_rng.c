@@ -103,7 +103,7 @@ uint32_t IRAM_ATTR esp_random(void)
    * actually wait a bit longer due to extra time spent in arithmetic and
    * branch statements.
    *
-   * As a (probably unncessary) precaution to avoid returning the
+   * As a (probably unnecessary) precaution to avoid returning the
    * RNG state as-is, the result is XORed with additional
    * WDEV_RND_REG reads while waiting.
    */
@@ -200,8 +200,6 @@ static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
   /* start RNG and Wait until the buffer is filled */
 
   esp32_rng_start();
-
-  /* Now, got data */
 
   while (buflen > 0)
     {

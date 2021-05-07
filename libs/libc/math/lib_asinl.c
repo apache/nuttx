@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/math/lib_sinl.c
+ * libs/libc/math/lib_asinl.c
  *
  * This file is a part of NuttX:
  *
@@ -43,7 +43,9 @@
 
 static long double asinl_aux(long double x)
 {
-  long double y, y_cos, y_sin;
+  long double y;
+  long double y_cos;
+  long double y_sin;
 
   y = 0.0;
   y_sin = 0.0;

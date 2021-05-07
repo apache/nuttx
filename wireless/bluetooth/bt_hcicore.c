@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/bluetooth/bt_hdicore.c
+ * wireless/bluetooth/bt_hcicore.c
  * HCI core Bluetooth handling.
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -143,7 +143,7 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
 {
   irqstate_t flags;
 
-  flags      = spin_lock_irqsave();
+  flags      = spin_lock_irqsave(NULL);
   buf->flink = list->head;
   if (list->head == NULL)
     {
@@ -151,7 +151,7 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
     }
 
   list->head = buf;
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -176,7 +176,7 @@ static FAR struct bt_buf_s *
   FAR struct bt_buf_s *buf;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   buf   = list->tail;
   if (buf != NULL)
     {
@@ -205,7 +205,7 @@ static FAR struct bt_buf_s *
       buf->flink = NULL;
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return buf;
 }
 
@@ -1749,7 +1749,7 @@ int bt_hci_cmd_send(uint16_t opcode, FAR struct bt_buf_s *buf)
     {
       /* We manage the refcount the same for supplied and created
        * buffers so increment the supplied count so we can manage
-       * it as-if we crated it.
+       * it as-if we created it.
        */
 
       bt_buf_addref(buf);
@@ -2180,7 +2180,6 @@ void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb)
   g_callback_list = cb;
 }
 
-#ifdef CONFIG_DEBUG_WIRELESS_ERROR
 FAR const char *bt_addr_str(FAR const bt_addr_t *addr)
 {
   static char bufs[2][18];
@@ -2206,7 +2205,6 @@ FAR const char *bt_addr_le_str(FAR const bt_addr_le_t *addr)
 
   return str;
 }
-#endif /* CONFIG_DEBUG_WIRELESS_ERROR */
 
 #else
 

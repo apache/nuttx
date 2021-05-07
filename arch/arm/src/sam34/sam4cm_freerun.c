@@ -1,12 +1,8 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_freerun.c
+ * arch/arm/src/sam34/sam4cm_freerun.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * References:
- *
- *   Atmel NoOS sample code.
  *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
@@ -42,6 +38,11 @@
  *
  ****************************************************************************/
 
+/* References:
+ *
+ *   Atmel NoOS sample code.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -64,6 +65,7 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_freerun_handler
  *
@@ -181,7 +183,6 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
    */
 
   freerun->chan     = chan;
-  freerun->running  = false;
   freerun->overflow = 0;
 
   /* Set up to receive the callback when the counter overflow occurs */
@@ -226,8 +227,9 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
 
   DEBUGASSERT(freerun && freerun->tch && ts);
 
-  /* Temporarily disable the overflow counter.  NOTE that we have to be careful
-   * here because  sam_tc_getpending() will reset the pending interrupt status.
+  /* Temporarily disable the overflow counter.
+   * NOTE that we have to be careful here because  sam_tc_getpending()
+   * will reset the pending interrupt status.
    * If we do not handle the overflow here then, it will be lost.
    */
 

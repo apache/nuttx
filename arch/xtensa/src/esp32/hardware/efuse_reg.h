@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/include/esp32/efuse_reg.h
+ * arch/xtensa/src/esp32/hardware/efuse_reg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,6 +20,12 @@
 
 #ifndef __ARCH_XTENSA_INCLUDE_EFUSE_REG_H
 #define __ARCH_XTENSA_INCLUDE_EFUSE_REG_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "esp32_soc.h"
 
 #define EFUSE_BLK0_RDATA0_REG          (DR_REG_EFUSE_BASE + 0x000)
 
@@ -308,7 +314,7 @@
 #define EFUSE_RD_FLASH_CRYPT_CONFIG_S  28
 
 /* EFUSE_RD_DIG_VOL_L6: RO; bitpos:[27:24];
- * Descritpion: This field stores the difference between the digital
+ * Description: This field stores the difference between the digital
  * regulator voltage at level6 and 1.2 V. (RO)
  * BIT[27] is the sign bit, 0: + , 1: -
  * BIT[26:24] is the difference value, unit: 0.017V
@@ -742,7 +748,7 @@
 #define EFUSE_FLASH_CRYPT_CONFIG_S     28
 
 /* EFUSE_DIG_VOL_L6: R/W; bitpos:[27:24];
- * Descritpion: This field stores the difference between the digital
+ * Description: This field stores the difference between the digital
  * regulator voltage at level6 and 1.2 V. (R/W)
  * BIT[27] is the sign bit, 0: + , 1: -
  * BIT[26:24] is the difference value, unit: 0.017V

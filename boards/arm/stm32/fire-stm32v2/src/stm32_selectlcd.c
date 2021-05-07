@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/fire-stm32v2/src/stm32_selectlcd.c
  *
- *   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -73,13 +58,16 @@
 
 /* 2.4" TFT + Touchscreen.  FSMC Bank1
  *
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -------------------------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
+ * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
+ * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60,
+ *                                            SPI 2M FLASH
  * 92  PB6    PB6-I2C1-SCL   2.4" TFT + Touchscreen, AT24C02
  * 93  PB7    PB7-I2C1-SDA   2.4" TFT + Touchscreen, AT24C02
  * 81  PD0    PD0-FSMC_D2    2.4" TFT + Touchscreen
@@ -105,7 +93,9 @@
  * 45  PE14   PE14-FSMC_D11  2.4" TFT + Touchscreen
  * 46  PE15   PE15-FSMC_D12  2.4" TFT + Touchscreen
  *
- * NOTE:  SPI and I2C pin configuration is controlled in the SPI and I2C drivers, respectively.
+ * NOTE:
+ * SPI and I2C pin configuration is controlled in the SPI and I2C drivers,
+ * respectively.
  */
 
 static const uint16_t g_lcdconfig[NCOMMON_CONFIG] =
@@ -174,14 +164,17 @@ void stm32_selectlcd(void)
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(1)|FSMC_BTR_ADDHLD(0)|FSMC_BTR_DATAST(2)|FSMC_BTR_BUSTURN(0)|
-           FSMC_BTR_CLKDIV(0)|FSMC_BTR_DATLAT(0)|FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
+  putreg32(FSMC_BTR_ADDSET(1) | FSMC_BTR_ADDHLD(0) |
+           FSMC_BTR_DATAST(2) | FSMC_BTR_BUSTURN(0) |
+           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
 
   putreg32(0xffffffff, STM32_FSMC_BWTR4);
 
   /* Enable the bank by setting the MBKEN bit */
 
-  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
+  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM |
+           FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
   leave_critical_section(flags);
 }
 

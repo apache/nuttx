@@ -1,66 +1,53 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_lpuart.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_LPUART_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_LPUART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Note: It is envisioned that in the long term as a chip is added. The author of
- * the new chip definitions will either find the exact configuration in an existing
- * chip define and add the new chip to it Or add the LPUART feature configuration
- * #defines to the chip ifdef list below. In either case the author should mark
- * it as "Verified to Document Number:" taken from the reference manual.
+/* Note:
+ * It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an
+ * existing chip define and add the new chip to it Or add the LPUART feature
+ * configuration #defines to the chip ifdef list below. In either case the
+ * author should mark it as "Verified to Document Number:" taken from the
+ * reference manual.
  *
  * To maintain backward compatibility to the version of NuttX prior to
- * 2/22/2017, the catch all KINETIS_LPUART_VERSION_UKN configuration is assigned
- * to all the chips that did not have any conditional compilation based on
- * KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the original code solution.
- * N.B. Each original chip "if"definitions have been left intact so that the
- * complete legacy definitions prior to 2/22/2017 may be filled in completely when
- * vetted.
+ * 2/22/2017, the catch all KINETIS_LPUART_VERSION_UKN configuration is
+ * assigned to all the chips that did not have any conditional compilation
+ * based on KINETIS_K64 or KINETIS_K66. This is  a "No worse" than the
+ * original code solution. N.B. Each original chip "if"definitions have been
+ * left intact so that the complete legacy definitions prior to 2/22/2017 may
+ * be filled in completely when vetted.
  */
 
 /* LPUART Register Configuration
@@ -138,7 +125,9 @@
 #elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || \
       defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
 
-/* Verified to Document Number: Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
+/* Verified to Document Number:
+ * Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017
+ */
 
 #  define KINETIS_LPUART_VERSION KINETIS_LPUART_VERSION_01
 
@@ -256,7 +245,9 @@
 #  error "Unsupported Kinetis chip"
 #endif
 
-/* Use the catch all configuration for the LPUART based on the implementations in nuttx prior 2/3/2017 */
+/* Use the catch all configuration for the LPUART based on the
+ * implementations in nuttx prior 2/3/2017
+ */
 
 #if KINETIS_LPUART_VERSION == KINETIS_LPUART_VERSION_UKN
 

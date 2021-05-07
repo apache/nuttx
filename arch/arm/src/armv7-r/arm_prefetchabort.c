@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/armv7-r/arm_prefetchabort.c
+ * arch/arm/src/armv7-r/arm_prefetchabort.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

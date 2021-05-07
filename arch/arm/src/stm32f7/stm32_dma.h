@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_dma.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32_DMA_H
 #define __ARCH_ARM_SRC_STM32F7_STM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
 
 #include "hardware/stm32_dma.h"
 
-/* These definitions provide the bit encoding of the 'status' parameter passed to the
- * DMA callback function (see dma_callback_t).
+/* These definitions provide the bit encoding of the 'status' parameter
+ * passed to the DMA callback function (see dma_callback_t).
  */
 
 #define DMA_STATUS_FEIF           0                    /* Stream FIFO error (ignored) */
@@ -55,31 +40,31 @@
 #define DMA_STATUS_HTIF           DMA_STREAM_HTIF_BIT  /* Stream Half Transfer */
 #define DMA_STATUS_TCIF           DMA_STREAM_TCIF_BIT  /* Stream Transfer Complete */
 
-#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF|DMA_STATUS_DMEIF|DMA_STATUS_TEIF)
-#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF|DMA_STATUS_HTIF)
+#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF | DMA_STATUS_DMEIF | DMA_STATUS_TEIF)
+#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF | DMA_STATUS_HTIF)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA_HANDLE Provides an opaque are reference that can be used to represent a DMA
- * a DMA stream.
+/* DMA_HANDLE Provides an opaque reference that can be used to represent a
+ * DMA stream.
  */
 
 typedef FAR void *DMA_HANDLE;
 
 /* Description:
  *   This is the type of the callback that is used to inform the user of the
- *   completion of the DMA.  NOTE:  The DMA module does *NOT* perform any cache
- *   operations.  It is the responsibility of the DMA client to invalidate DMA
- *   buffers after completion of the DMA RX operations.
+ *   completion of the DMA.  NOTE:  The DMA module does *NOT* perform any
+ *   cache operations.  It is the responsibility of the DMA client to
+ *   invalidate DMA buffers after completion of the DMA RX operations.
  *
  * Input Parameters:
- *   handle - Refers tot he DMA channel or stream
- *   status - A bit encoded value that provides the completion status.  See the
- *            DMASTATUS_* definitions above.
- *   arg    - A user-provided value that was provided when stm32_dmastart() was
- *            called.
+ *   handle - Refers to the DMA channel or stream
+ *   status - A bit encoded value that provides the completion status.  See
+ *            the DMASTATUS_* definitions above.
+ *   arg    - A user-provided value that was provided when stm32_dmastart()
+ *            was called.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
@@ -96,9 +81,9 @@ struct stm32_dmaregs_s
   uint32_t sfcr;
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -111,9 +96,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_dmachannel
@@ -158,11 +143,13 @@ DMA_HANDLE stm32_dmachannel(unsigned int chan);
  * Name: stm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel
- *   in a call to stm32_dmachannel, then this function will re-assign the
- *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
- *   in this argument must NEVER be used again until stm32_dmachannel() is
- *   called again to re-gain access to the channel.
+ *   Release a DMA channel.  If another thread is waiting for this DMA
+ *   channel in a call to stm32_dmachannel, then this function will re-
+ *   assign the DMA channel to that thread and wake it up.
+ *
+ *   NOTE:  The 'handle' used in this argument must NEVER be used again
+ *          until stm32_dmachannel() is called again to re-gain access to
+ *          the channel.
  *
  * Returned Value:
  *   None
@@ -237,15 +224,15 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
  *   address with the given configuration. This depends on the internal
- *   connections in the ARM bus matrix of the processor. Note that this
- *   only applies to memory addresses, it will return false for any peripheral
+ *   connections in the ARM bus matrix of the processor. Note that this only
+ *   applies to memory addresses, it will return false for any peripheral
  *   address.
  *
  * Input Parameters:
  *
  *   maddr - starting memory address
- *   count - number of unit8 or uint16 or uint32 items as defined by MSIZE of
- *           ccr.
+ *   count - number of unit8 or uint16 or uint32 items as defined by MSIZE
+ *           of ccr.
  *   ccr   - DMA stream configuration register
  *
  * Returned Value:

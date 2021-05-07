@@ -1,58 +1,44 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_adc.h
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_ADC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_ADC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* General definitions ******************************************************************/
+ ****************************************************************************/
+
+/* General definitions ******************************************************/
 
 #define SAM_ADC_NCHANNELS          8    /* 8 ADC Channels */
 
-/* ADC register offsets *****************************************************************/
+/* ADC register offsets *****************************************************/
 
 #define SAM_ADC_CR_OFFSET          0x00 /* Control Register (Both) */
 #define SAM_ADC_MR_OFFSET          0x04 /* Mode Register (Both) */
@@ -78,7 +64,7 @@
 #define SAM_ADC12B_ACR_OFFSET      0x64 /* Analog Control Register (ADC12B only) */
 #define SAM_ADC12B_EMR_OFFSET      0x68 /* Extended Mode Register (ADC12B only) */
 
-/* ADC register addresses ***************************************************************/
+/* ADC register addresses ***************************************************/
 
 #define SAM_ADC12B_CR              (SAM_ADC12B_BASE+SAM_ADC_CR_OFFSET)
 #define SAM_ADC12B_MR              (SAM_ADC12B_BASE+SAM_ADC_MR_OFFSET)
@@ -122,14 +108,18 @@
 #  define SAM_ADC_CDR6             (SAM_ADC_BASE+SAM_ADC_CDR6_OFFSET)
 #  define SAM_ADC_CDR7             (SAM_ADC_BASE+SAM_ADC_CDR7_OFFSET)
 
-/* ADC register bit definitions *********************************************************/
+/* ADC register bit definitions *********************************************/
 
-/* ADC12B Control Register and ADC(10B) Control Register common bit-field definitions */
+/* ADC12B Control Register and ADC(10B) Control Register common bit-field
+ * definitions
+ */
 
 #define ADC_CR_SWRST               (1 << 0)  /* Bit 0:  Software Reset */
 #define ADC_CR_START               (1 << 1)  /* Bit 1:  Start Conversion */
 
-/* ADC12B Mode Register and ADC(10B) Mode Register common bit-field definitions */
+/* ADC12B Mode Register and ADC(10B) Mode Register common bit-field
+ * definitions
+ */
 
 #define ADC_MR_TRGEN               (1 << 0)  /* Bit 0:  Trigger Enable */
 #define ADC_MR_TRGSEL_SHIFT        (1)       /* Bits 1-3: Trigger Selection */
@@ -150,8 +140,9 @@
 #define ADC_MR_SHTIM_MASK          (15 << ADC_MR_SHTIM_SHIFT)
 #  define ADC_MR_SHTIM(n)          ((uint32_t)(n) << ADC_MR_SHTIM_SHIFT)
 
-/* ADC12B Channel Enable Register, ADC12B Channel Disable Register, ADC12B Channel
- * Status Register, ADC(10B) Channel Enable Register, ADC(10B) Channel Disable Register,
+/* ADC12B Channel Enable Register, ADC12B Channel Disable Register,
+ * ADC12B Channel Status Register, ADC(10B) Channel Enable Register,
+ * ADC(10B) Channel Disable Register,
  * and ADC(10B) Channel Status Register common bit-field definitions
  */
 
@@ -183,9 +174,10 @@
 #define ADC12B_EMR_OFFMSTIME_MASK  (0xff << ADC12B_EMR_OFFMSTIME_SHIFT)
 #  define ADC12B_EMR_OFFMSTIME(n)  ((uint32_t)(n) << ADC12B_EMR_OFFMSTIME_SHIFT)
 
-/* ADC12B Status Register , ADC12B Interrupt Enable Register, ADC12B Interrupt
- * Disable Register, ADC12B Interrupt Mask Register, ADC(10B) Status Register,
- * ADC(10B) Interrupt Enable Register, ADC(10B) Interrupt Disable Register, and
+/* ADC12B Status Register , ADC12B Interrupt Enable Register,
+ * ADC12B Interrupt Disable Register, ADC12B Interrupt Mask Register,
+ * ADC(10B) Status Register, ADC(10B) Interrupt Enable Register,
+ * ADC(10B) Interrupt Disable Register, and
  * ADC(10B) Interrupt Mask Register common bit-field definitions
  */
 
@@ -232,16 +224,16 @@
 #define ADC10B_CDR_DATA_SHIFT      (0)       /* Bits 0-9: Converted Data */
 #define ADC10B_CDR_DATA_MASK       (0x1ff << ADC10B_CDR_DATA_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_ADC_H */

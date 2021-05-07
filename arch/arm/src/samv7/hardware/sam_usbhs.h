@@ -1,57 +1,45 @@
-/************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_usbhs.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   SAMV7D3 Series Data Sheet
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_USBHS_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_USBHS_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
 
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
-/* General Definitions **************************************************************************************/
+ ****************************************************************************/
+
+/* General Definitions ******************************************************/
+
 /* Number of endpoints and DMA channels */
 
 #define SAM_USBHS_NENDPOINTS               10                /* EP0-9 */
@@ -63,7 +51,8 @@
 #define SAM_USBHS_NBANKS(ep)              (((unsigned)(ep) < 1) ? 1 : (((unsigned)(ep) < 3) ? 3 : 2))
 #define SAM_USBHS_DMA(ep)                 (((unsigned)(ep) < 1) ? false : (((unsigned)(ep) < 8) ? true : false))
 
-/* Register offsets *****************************************************************************************/
+/* Register offsets *********************************************************/
+
 /* USBHS Device Controller Register Offsets */
 
 #define SAM_USBHS_DEVCTRL_OFFSET           0x0000            /* Device General Control Register */
@@ -127,7 +116,7 @@
 #define SAM_USBHS_SFR_OFFSET               0x080c            /* General Status Set Register */
                                                              /* 0x0810-0x082c: Reserved */
 
-/* Register addresses ***************************************************************************************/
+/* Register addresses *******************************************************/
 
 /* USBHS Device Controller Register Addresses */
 
@@ -191,9 +180,10 @@
 #define SAM_USBHS_SCR                      (SAM_USBHS_BASE+SAM_USBHS_SCR_OFFSET)
 #define SAM_USBHS_SFR                      (SAM_USBHS_BASE+SAM_USBHS_SFR_OFFSET)
 
-/* Register bit-field definitions ***************************************************************************/
+/* Register bit-field definitions *******************************************/
 
 /* USBHS Device Controller Register Bit Field Definitions */
+
 /* Device General Control Register */
 
 #define USBHS_DEVCTRL_UADD_SHIFT           (0)               /* Bits 0-6: USBHS Address */
@@ -302,6 +292,7 @@
 #  define USBHS_DEVEPTCFG_EPBK_1BANK       (0 << USBHS_DEVEPTCFG_EPBK_SHIFT) /* Single-bank endpoint */
 #  define USBHS_DEVEPTCFG_EPBK_2BANK       (1 << USBHS_DEVEPTCFG_EPBK_SHIFT) /* Double-bank endpoint */
 #  define USBHS_DEVEPTCFG_EPBK_3BANK       (2 << USBHS_DEVEPTCFG_EPBK_SHIFT) /* Triple-bank endpoint */
+
 #define USBHS_DEVEPTCFG_EPSIZE_SHIFT       (4)               /* Bits 4-6: Endpoint Size */
 #define USBHS_DEVEPTCFG_EPSIZE_MASK        (7 << USBHS_DEVEPTCFG_EPSIZE_SHIFT)
 #  define USBHS_DEVEPTCFG_EPSIZE_8         (0 << USBHS_DEVEPTCFG_EPSIZE_SHIFT) /* 8 bytes */
@@ -312,6 +303,7 @@
 #  define USBHS_DEVEPTCFG_EPSIZE_256       (5 << USBHS_DEVEPTCFG_EPSIZE_SHIFT) /* 256 bytes */
 #  define USBHS_DEVEPTCFG_EPSIZE_512       (6 << USBHS_DEVEPTCFG_EPSIZE_SHIFT) /* 512 bytes */
 #  define USBHS_DEVEPTCFG_EPSIZE_1024      (7 << USBHS_DEVEPTCFG_EPSIZE_SHIFT) /* 1024 bytes */
+
 #define USBHS_DEVEPTCFG_EPDIR_SHIFT        (8)               /* Bit 8:  Endpoint Direction */
 #define USBHS_DEVEPTCFG_EPDIR_MASK         (1 << 8)          /* Bit 8:  Endpoint Direction */
 #  define USBHS_DEVEPTCFG_EPDIR(n)         ((uint32_t)(n) << 8)
@@ -323,6 +315,7 @@
 #  define USBHS_DEVEPTCFG_EPTYPE_ISO       (1 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Isochronous endpoint */
 #  define USBHS_DEVEPTCFG_EPTYPE_BLK       (2 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Bulk endpoint */
 #  define USBHS_DEVEPTCFG_EPTYPE_INTRPT    (3 << USBHS_DEVEPTCFG_EPTYPE_SHIFT) /* Interrupt endpoint */
+
 #define USBHS_DEVEPTCFG_NBTRANS_SHIFT      (13)              /* Bits 13-14: Number Transaction per uframe */
 #define USBHS_DEVEPTCFG_NBTRANS_MASK       (3 << USBHS_DEVEPTCFG_NBTRANS_SHIFT)
 #  define USBHS_DEVEPTCFG_NBTRANS(n)       ((uint32_t)(n) << USBHS_DEVEPTCFG_NBTRANS_SHIFT)
@@ -352,14 +345,16 @@
 #define USBHS_DEVEPTINT_CRCERRI            (1 << 6)          /* Bit 6: CRC Error Interrupt (3) */
 #define USBHS_DEVEPTINT_SHRTPCKTI          (1 << 7)          /* Bit 7: Short Packet Interrupt */
 
-/* Device Endpoint Mask, Device Endpoint Disable, and Device Endpoint Enable Registers only */
+/* Device Endpoint Mask, Device Endpoint Disable,
+ * and Device Endpoint Enable Registers only
+ */
 
 #define USBHS_DEVEPTINT_MDATAI             (1 << 8)          /* Bit 8:  MData Interrupt (2) */
 #define USBHS_DEVEPTINT_DATAXI             (1 << 9)          /* Bit 9:  DataX Interrupt (2) */
 #define USBHS_DEVEPTINT_ERRORTRANSI        (1 << 10)         /* Bit 10: Transaction Error Interrupt (2) */
 
-/* Device Endpoint Set, Device Endpoint Mask, Device Endpoint Disable, and Device Endpoint Enable
- * Registers only
+/* Device Endpoint Set, Device Endpoint Mask, Device Endpoint Disable,
+ * and Device Endpoint Enable Registers only
  */
 
 #define USBHS_DEVEPTINT_NBUSYBKI           (1 << 12)         /* Bit 12: Number of Busy Banks Interrupt */
@@ -368,7 +363,9 @@
 
 #define USBHS_DEVEPTINT_KILLBKI            (1 << 13)         /* Bit 13: Kill IN Bank */
 
-/* Device Endpoint Mask, Device Endpoint Disable, and Device Endpoint Enable Registers only */
+/* Device Endpoint Mask, Device Endpoint Disable,
+ * and Device Endpoint Enable Registers only
+ */
 
 #define USBHS_DEVEPTINT_FIFOCONI           (1 << 14)         /* Bit 14: FIFO Control */
 #define USBHS_DEVEPTINT_EPDISHDMAI         (1 << 16)         /* Bit 16: Endpoint Interrupts Disable HDMA Request */
@@ -389,6 +386,7 @@
 #  define USBHS_DEVEPTISR_DTSEQ_DATA1      (1 << USBHS_DEVEPTISR_DTSEQ_SHIFT) /* Data1 toggle sequence */
 #  define USBHS_DEVEPTISR_DTSEQ_DATA2      (2 << USBHS_DEVEPTISR_DTSEQ_SHIFT) /* Data1 toggle sequence (2) */
 #  define USBHS_DEVEPTISR_DTSEQ_MDATA      (3 << USBHS_DEVEPTISR_DTSEQ_SHIFT) /* MData toggle sequence (2) */
+
 #define USBHS_DEVEPTISR_ERRORTRANS         (1 << 10)         /* Bit 10: High-bandwidth Isochronous OUT Endpoint Transaction Error Interrupt (2) */
 #define USBHS_DEVEPTISR_NBUSYBK_SHIFT      (12)              /* Bits 12-13:  Number of Busy Banks */
 #define USBHS_DEVEPTISR_NBUSYBK_MASK       (3 << USBHS_DEVEPTISR_NBUSYBK_SHIFT)
@@ -396,11 +394,13 @@
 #  define USBHS_DEVEPTISR_NBUSYBK_1BUSY    (1 << USBHS_DEVEPTISR_NBUSYBK_SHIFT) /* 1 busy bank */
 #  define USBHS_DEVEPTISR_NBUSYBK_2BUSY    (2 << USBHS_DEVEPTISR_NBUSYBK_SHIFT) /* 2 busy banks */
 #  define USBHS_DEVEPTISR_NBUSYBK_3BUSY    (3 << USBHS_DEVEPTISR_NBUSYBK_SHIFT) /* 3 busy banks */
+
 #define USBHS_DEVEPTISR_CURRBK_SHIFT       (14)              /* Bits 14-15: Current Bank */
 #define USBHS_DEVEPTISR_CURRBK_MASK        (3 << USBHS_DEVEPTISR_CURRBK_SHIFT)
 #  define USBHS_DEVEPTISR_CURRBK_BANK0     (0 << USBHS_DEVEPTISR_CURRBK_SHIFT) /* Current bank is bank0 */
 #  define USBHS_DEVEPTISR_CURRBK_BANK1     (1 << USBHS_DEVEPTISR_CURRBK_SHIFT) /* Current bank is bank1 */
 #  define USBHS_DEVEPTISR_CURRBK_BANK2     (2 << USBHS_DEVEPTISR_CURRBK_SHIFT) /* Current bank is bank2 */
+
 #define USBHS_DEVEPTISR_RWALL              (1 << 16)         /* Bit 16:  Read/Write Allowed */
 #define USBHS_DEVEPTISR_CTRLDIR            (1 << 17)         /* Bit 17:  Control Direction (1) */
 #  define USBHS_DEVEPTISR_CTRLDIR_OUT      (0 << 17)         /*   0=Following packet is an OUT packet */
@@ -409,7 +409,10 @@
 #define USBHS_DEVEPTISR_BYCT_SHIFT         (20)              /* Bits 20-30: USBHS Byte Count */
 #define USBHS_DEVEPTISR_BYCT_MASK          (0x7ff << USBHS_DEVEPTISR_BYCT_SHIFT)
 
-/* Device DMA Channel Next Descriptor Address Register (32-bit, 16 byte aligned address) */
+/* Device DMA Channel Next Descriptor Address Register
+ * (32-bit, 16 byte aligned address)
+ */
+
 /* Device DMA Channel Address Register (32-bit address) */
 
 /* Device DMA Channel Control Register */
@@ -418,10 +421,12 @@
 #define USBHS_DEVDMACTRL_CMD_MASK          (3 << USBHS_DEVDMACTRL_CMD_SHIFT)
 #  define USBHS_DEVDMACTRL_CHANNENB        (1 << 0)          /* Bit 0:  Channel Enable Command */
 #  define USBHS_DEVDMACTRL_LDNXTDSC        (1 << 1)          /* Bit 1:  Load Next Channel Transfer Descriptor Enable Command */
+
 #  define USBHS_DEVDMACTRL_STOPNOW         (0 << USBHS_DEVDMACTRL_CMD_SHIFT) /* Stop now */
 #  define USBHS_DEVDMACTRL_RUNSTOP         (1 << USBHS_DEVDMACTRL_CMD_SHIFT) /* Run and stop at end of buffer */
 #  define USBHS_DEVDMACTRL_LOADNEXT        (2 << USBHS_DEVDMACTRL_CMD_SHIFT) /* Load next descriptor now */
 #  define USBHS_DEVDMACTRL_RUNLINK         (3 << USBHS_DEVDMACTRL_CMD_SHIFT) /* Run and link at end of buffer */
+
 #define USBHS_DEVDMACTRL_ENDTREN           (1 << 2)          /* Bit 2:  End of Transfer Enable Control */
 #define USBHS_DEVDMACTRL_ENDBEN            (1 << 3)          /* Bit 3:  End of Buffer Enable Control */
 #define USBHS_DEVDMACTRL_ENDTRIT           (1 << 4)          /* Bit 4:  End of Transfer Interrupt Enable */
@@ -444,6 +449,7 @@
 #  define USBHS_DEVDMASTA_BUFCNT(n)        ((uint32_t)(n) << USBHS_DEVDMASTA_BUFCNT_SHIFT)
 
 /* USBHS Mini-Host Controller Register Bit Field Definitions */
+
 /* Host General Control Register */
 
 #define USBHS_HSTCTRL_SOFE                 (1 << 8)          /* Bit 8:  Start of Frame Generation Enable */
@@ -596,6 +602,7 @@
 #  define USBHS_HSTPIPCFG_PBK_1BANK        (0 << USBHS_HSTPIPCFG_PBK_SHIFT) /* Single-bank pipe */
 #  define USBHS_HSTPIPCFG_PBK_2BANK        (1 << USBHS_HSTPIPCFG_PBK_SHIFT) /* Double-bank pipe */
 #  define USBHS_HSTPIPCFG_PBK_3BANK        (2 << USBHS_HSTPIPCFG_PBK_SHIFT) /* Triple-bank pipe */
+
 #define USBHS_HSTPIPCFG_PSIZE_SHIFT        (4)               /* Bits 4-6: Pipe Size */
 #define USBHS_HSTPIPCFG_PSIZE_MASK         (7 << USBHS_HSTPIPCFG_PSIZE_SHIFT)
 #  define USBHS_HSTPIPCFG_PSIZE_8          (0 << USBHS_HSTPIPCFG_PSIZE_SHIFT) /* 8 bytes */
@@ -606,6 +613,7 @@
 #  define USBHS_HSTPIPCFG_PSIZE_256        (5 << USBHS_HSTPIPCFG_PSIZE_SHIFT) /* 256 bytes */
 #  define USBHS_HSTPIPCFG_PSIZE_512        (6 << USBHS_HSTPIPCFG_PSIZE_SHIFT) /* 512 bytes */
 #  define USBHS_HSTPIPCFG_PSIZE_1024       (7 << USBHS_HSTPIPCFG_PSIZE_SHIFT) /* 1024 bytes */
+
 #define USBHS_HSTPIPCFG_PTOKEN_SHIFT       (8)               /* Bits 8-9: Pipe Token */
 #define USBHS_HSTPIPCFG_PTOKEN_MASK        (3 << USBHS_HSTPIPCFG_PTOKEN_SHIFT)
 #  define USBHS_HSTPIPCFG_PTOKEN_SETUP     (0 << USBHS_HSTPIPCFG_PTOKEN_SHIFT)
@@ -618,6 +626,7 @@
 #  define USBHS_HSTPIPCFG_PTYPE_ISO        (1 << USBHS_HSTPIPCFG_PTYPE_SHIFT) /* Isochronous pipe */
 #  define USBHS_HSTPIPCFG_PTYPE_BLK        (2 << USBHS_HSTPIPCFG_PTYPE_SHIFT) /* Bulk pipe */
 #  define USBHS_HSTPIPCFG_PTYPE_INTRPT     (3 << USBHS_HSTPIPCFG_PTYPE_SHIFT) /* Interrupt pipe */
+
 #define USBHS_HSTPIPCFG_PEPNUM_SHIFT       (16)              /* Bits 16-19: Pipe Endpoint Number */
 #define USBHS_HSTPIPCFG_PEPNUM_MASK        (15 << USBHS_HSTPIPCFG_PEPNUM_SHIFT)
 #  define USBHS_HSTPIPCFG_PEPNUM(n)        ((uint32_t)(n) << USBHS_HSTPIPCFG_PEPNUM_SHIFT)
@@ -643,7 +652,7 @@
  * (3) Isochronous pipes
  */
 
- /* All registers */
+/* All registers */
 
 #define USBHS_HSTPIPINT_RXINI              (1 << 0)          /* Bit 0:  Received IN Data Interrupt */
 #define USBHS_HSTPIPINT_TXOUTI             (1 << 1)          /* Bit 1:  Transmitted OUT Data Interrupt */
@@ -673,17 +682,20 @@
 #define USBHS_HSTPIPISR_DTSEQ_MASK         (3 << USBHS_HSTPIPISR_DTSEQ_SHIFT)
 #  define USBHS_HSTPIPISR_DTSEQ_DATA0      (0 << USBHS_HSTPIPISR_DTSEQ_SHIFT) /* Data0 toggle sequence */
 #  define USBHS_HSTPIPISR_DTSEQ_DATA1      (1 << USBHS_HSTPIPISR_DTSEQ_SHIFT) /* Data1 toggle sequence */
+
 #define USBHS_HSTPIPISR_NBUSYBK_SHIFT      (12)              /* Bits 12-13: Number of Busy Banks */
 #define USBHS_HSTPIPISR_NBUSYBK_MASK       (3 << USBHS_HSTPIPISR_NBUSYBK_SHIFT)
 #  define USBHS_HSTPIPISR_NBUSYBK_0BUSY    (0 << USBHS_HSTPIPISR_NBUSYBK_SHIFT) /* 0 busy bank (all banks free) */
 #  define USBHS_HSTPIPISR_NBUSYBK_1BUSY    (1 << USBHS_HSTPIPISR_NBUSYBK_SHIFT) /* 1 busy bank */
 #  define USBHS_HSTPIPISR_NBUSYBK_2BUSY    (2 << USBHS_HSTPIPISR_NBUSYBK_SHIFT) /* 2 busy banks */
 #  define USBHS_HSTPIPISR_NBUSYBK_3BUSY    (3 << USBHS_HSTPIPISR_NBUSYBK_SHIFT) /* 3 busy banks */
+
 #define USBHS_HSTPIPISR_CURRBK_SHIFT       (14)              /* Bits 14-15: Current Bank */
 #define USBHS_HSTPIPISR_CURRBK_MASK        (3 << USBHS_HSTPIPISR_CURRBK_SHIFT)
 # define USBHS_HSTPIPISR_CURRBK_BANK0      (0 << USBHS_HSTPIPISR_CURRBK_SHIFT) /* Current bank is bank0 */
 # define USBHS_HSTPIPISR_CURRBK_BANK1      (1 << USBHS_HSTPIPISR_CURRBK_SHIFT) /* Current bank is bank1 */
 # define USBHS_HSTPIPISR_CURRBK_BANK2      (2 << USBHS_HSTPIPISR_CURRBK_SHIFT) /* Current bank is bank2 */
+
 #define USBHS_HSTPIPISR_RWALL              (1 << 16)         /* Bit 16: Read/Write Allowed */
 #define USBHS_HSTPIPISR_CFGOK              (1 << 18)         /* Bit 18: Configuration OK Status */
 #define USBHS_HSTPIPISR_PBYCT_SHIFT        (20)              /* Bits 20-30: Pipe Byte Count */
@@ -708,6 +720,7 @@
 #  define USBHS_HSTPIPERR_COUNTER(n)       ((uint32_t)(n) << USBHS_HSTPIPERR_COUNTER_SHIFT)
 
 /* Host DMA Channel Next Descriptor Address Register (32-bit address) */
+
 /* Host DMA Channel Address Register (32-bit address) */
 
 /* Host DMA Channel Control Register */
@@ -716,10 +729,12 @@
 #define USBHS_HSTDMACTRL_CMD_MASK          (3 << USBHS_HSTDMACTRL_CMD_SHIFT)
 #  define USBHS_HSTDMACTRL_CHANNENB        (1 << 0)          /* Bit 0:  Channel Enable Command */
 #  define USBHS_HSTDMACTRL_LDNXTDSC        (1 << 1)          /* Bit 1:  Load Next Channel Transfer Descriptor Enable Command */
+
 #  define USBHS_HSTDMACTRL_STOPNOW         (0 << USBHS_HSTDMACTRL_CMD_SHIFT) /* Stop now */
 #  define USBHS_HSTDMACTRL_RUNSTOP         (1 << USBHS_HSTDMACTRL_CMD_SHIFT) /* Run and stop at end of buffer */
 #  define USBHS_HSTDMACTRL_LOADNEXT        (2 << USBHS_HSTDMACTRL_CMD_SHIFT) /* Load next descriptor now */
 #  define USBHS_HSTDMACTRL_RUNLINK         (3 << USBHS_HSTDMACTRL_CMD_SHIFT) /* Run and link at end of buffer */
+
 #define USBHS_HSTDMACTRL_ENDTREN           (1 << 2)          /* Bit 2:  End of Transfer Enable Control */
 #define USBHS_HSTDMACTRL_ENDBEN            (1 << 3)          /* Bit 3:  End of Buffer Enable Control */
 #define USBHS_HSTDMACTRL_ENDTRIT           (1 << 4)          /* Bit 4:  End of Transfer Interrupt Enable */
@@ -741,6 +756,7 @@
 #  define USBHS_HSTDMASTA_BUFCNT(n)        ((uint32_t)(n) << USBHS_HSTDMASTA_BUFCNT_SHIFT)
 
 /* USBHS General Register Bit Field Definitions */
+
 /* General Control Register */
 
 #define USBHS_CTRL_RDERRE                  (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt Enable */
@@ -762,6 +778,7 @@
 #  define USBHS_SR_SPEED_FULL              (0 << USBHS_SR_SPEED_SHIFT) /* Full-Speed mode */
 #  define USBHS_SR_SPEED_HIGH              (1 << USBHS_SR_SPEED_SHIFT) /* High-Speed mode */
 #  define USBHS_SR_SPEED_LOW               (2 << USBHS_SR_SPEED_SHIFT) /* Low-Speed mode */
+
 #define USBHS_SR_CLKUSABLE                 (1 << 14)         /* Bit 14: UTMI Clock Usable */
 
 /* General Status Clear Register */
@@ -774,16 +791,17 @@
 #define USBHS_SFR_RDERRIS                  (1 << 4)          /* Bit 4:  Remote Device Connection Error Interrupt Set */
 #define USBHS_SFR_VBUSRQS                  (1 << 9)          /* Bit 9:  VBus Request Set */
 
-/************************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/* This structure defines the USBHS DMA Transfer Descriptor.  Instances of DMA transfer
- * descriptors must by aligned to 16-byte address boundaries.
+/* This structure defines the USBHS DMA Transfer Descriptor.
+ * Instances of DMA transfer descriptors must by aligned to 16-byte address
+ * boundaries.
  *
- * Each value contains the next value of each of three USBHS DMA registers.  The first
- * register value (USBHS_xxxDMANXTDSCx) is a link that can be used to chain sequences of
- * DMA transfers.
+ * Each value contains the next value of each of three USBHS DMA registers.
+ * The first register value (USBHS_xxxDMANXTDSCx) is a link that can be
+ * used to chain sequences of DMA transfers.
  */
 
 struct usbhs_dtd_s
@@ -794,12 +812,12 @@ struct usbhs_dtd_s
 };
 #define SIZEOF_USPHS_DTD_S 12
 
-/************************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************************
- * Public Functions
- ************************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_USBHS_H */

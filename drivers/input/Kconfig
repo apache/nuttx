@@ -13,27 +13,32 @@ menuconfig INPUT
 
 if INPUT
 
-config MOUSE
+config INPUT_MOUSE
 	bool "Enable mouse support"
 	default n
 	---help---
 		Enable support for mouse devices.
 
-if MOUSE
+if INPUT_MOUSE
 
-config MOUSE_WHEEL
+config INPUT_MOUSE_WHEEL
 	bool "Enable mouse wheel support"
 	default n
 	---help---
 		Enable support for a 4-button mouse report that includes a while
 		position.
 
-endif # MOUSE
+endif # INPUT_MOUSE
+
+config INPUT_TOUCHSCREEN
+	bool
+	default n
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
 	default n
 	select SPI
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the MAX11802 touchscreen controller
 
@@ -41,6 +46,7 @@ config INPUT_TSC2007
 	bool "TI TSC2007 touchscreen controller"
 	default n
 	select I2C
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the TI TSC2007 touchscreen controller
 
@@ -70,6 +76,7 @@ config INPUT_FT5X06
 	bool "FocalTech FT5x06 multi-touch, capacitive touch panel controller"
 	default n
 	select I2C
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the FocalTech FT5x06 multi-touch, capacitive
 		touch panel controller
@@ -79,6 +86,7 @@ config INPUT_FT5336
 	default n
 	select I2C
 	select INPUT_FT5X06
+	select INPUT_TOUCHSCREEN
 	depends on EXPERIMENTAL
 	---help---
 		Enable support for the FocalTech FT5x06 multi-touch, capacitive
@@ -143,6 +151,7 @@ config INPUT_ADS7843E
 	bool "TI ADS7843/TSC2046 touchscreen controller"
 	default n
 	select SPI
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for the TI/Burr-Brown ADS7842 touchscreen controller.  I believe
 		that driver should be compatible with the TI/Burr-Brown TSC2046 and XPT2046
@@ -214,10 +223,11 @@ config ADS7843E_THRESHY
 		12-bit values the raw ranges are 0-4095. So for example, if your display is
 		320x240, then THRESHX=13 and THRESHY=17 would correspond to one pixel.  Default: 12
 
-endif
+endif # INPUT_ADS7843E
 
 config INPUT_MXT
 	bool "Atmel maXTouch Driver"
+	select INPUT_TOUCHSCREEN
 	default n
 	---help---
 		Enables support for the Atmel maXTouch driver
@@ -275,6 +285,7 @@ endif # INPUT_MXT
 config INPUT_STMPE811
 	bool "STMicro STMPE811 Driver"
 	default n
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enables support for the STMPE811 driver
 
@@ -404,6 +415,7 @@ endif # INPUT_STMPE811
 config INPUT_CYPRESS_MBR3108
 	bool "Enable Cypress MBR3108 CapSense driver"
 	default n
+	select INPUT_TOUCHSCREEN
 	---help---
 		Enable support for Cypress MBR3108 CapSense touch button & proximity
 		input sensor.
@@ -425,15 +437,15 @@ config INPUT_CYPRESS_MBR3108_NPOLLWAITERS
 
 endif # INPUT_CYPRESS_MBR3108
 
-config BUTTONS
+config INPUT_BUTTONS
 	bool "Button Inputs"
 	default n
 	---help---
 		Enable standard button upper half driver.
 
-if BUTTONS
+if INPUT_BUTTONS
 
-config BUTTONS_LOWER
+config INPUT_BUTTONS_LOWER
 	bool "Generic Lower Half Button Driver"
 	default n
 	depends on ARCH_BUTTONS && ARCH_IRQBUTTONS
@@ -454,13 +466,13 @@ config BUTTONS_LOWER
 		board src/ directory and modified for your specific board
 		requirements.
 
-config BUTTONS_NPOLLWAITERS
+config INPUT_BUTTONS_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
 
-endif # BUTTONS
+endif # INPUT_BUTTONS
 
-config DJOYSTICK
+config INPUT_DJOYSTICK
 	bool "Discrete Joystick"
 	default n
 	---help---
@@ -470,15 +482,15 @@ config DJOYSTICK
 		values like buttons (as opposed to integer values like you might
 		obtain from an analog joystick).
 
-if DJOYSTICK
+if INPUT_DJOYSTICK
 
-config DJOYSTICK_NPOLLWAITERS
+config INPUT_DJOYSTICK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
 
-endif # DJOYSTICK
+endif # INPUT_DJOYSTICK
 
-config AJOYSTICK
+config INPUT_AJOYSTICK
 	bool "Analog Joystick"
 	default n
 	---help---
@@ -488,13 +500,13 @@ config AJOYSTICK
 		to-Digital Conversion (ADC).  The analog positional data may also
 		be accompanied by discrete button data.
 
-if AJOYSTICK
+if INPUT_AJOYSTICK
 
-config AJOYSTICK_NPOLLWAITERS
+config INPUT_AJOYSTICK_NPOLLWAITERS
 	int "Max Number of Poll Waiters"
 	default 2
 
-endif # AJOYSTICK
+endif # INPUT_AJOYSTICK
 
 config INPUT_NUNCHUCK
 	bool "Nintendo Wii Nunchuck Joystick (White Model)"
@@ -529,7 +541,7 @@ if INPUT_SPQ10KBD
 
 config SPQ10KBD_DJOY
     bool "Joystick Interface for Buttons"
-	select DJOYSTICK
+	select INPUT_DJOYSTICK
 	default n
 
 config SPQ10KBD_REGDBG

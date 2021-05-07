@@ -1,0 +1,36 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32C3_DEVKIT
+
+config ESP32C3_DEVKIT_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+	---help---
+
+choice
+  prompt "SPIFLASH File System"
+  default ESP32C3_SPIFLASH_SMARTFS
+  depends on ESP32C3_SPIFLASH
+
+  config ESP32C3_SPIFLASH_SMARTFS
+	bool "SmartFS"
+	depends on FS_SMARTFS
+
+  config ESP32C3_SPIFLASH_NXFFS
+	bool "NXFFS"
+	depends on FS_NXFFS
+
+  config ESP32C3_SPIFLASH_SPIFFS
+	bool "SPIFFS"
+	depends on FS_SPIFFS
+
+  config ESP32C3_SPIFLASH_LITTLEFS
+	bool "LittleFS"
+	depends on FS_LITTLEFS
+
+endchoice
+
+endif # ARCH_BOARD_ESP32C3_DEVKIT

@@ -81,14 +81,9 @@ struct onewire_slave_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* CRC helpers from 1wire_crc.c */
+/* Aditional CRC helpers from 1wire_crc.c */
 
-uint8_t onewire_crc8(FAR const uint8_t *input, uint8_t len);
-uint16_t onewire_crc16(FAR const uint8_t *input, uint16_t len,
-                       uint16_t initial_crc);
 bool onewire_valid_rom(uint64_t rom);
-bool onewire_check_crc16(FAR const uint8_t *input, uint16_t len,
-                         FAR const uint8_t *inverted_crc);
 
 /* Rest are from 1wire.c */
 
@@ -116,7 +111,8 @@ int onewire_reset_resume(FAR struct onewire_master_s *master);
  *
  ****************************************************************************/
 
-int onewire_reset_select(FAR struct onewire_slave_s *slave);
+int onewire_reset_select(FAR struct onewire_master_s *master,
+                         uint64_t romcode);
 
 /****************************************************************************
  * Name: onewire_triplet
@@ -146,7 +142,9 @@ int onewire_triplet(FAR struct onewire_master_s *master,
  *
  * Description:
  *   Search all devices from a 1-wire network. This is the 1-wire search
- *   algorithm from Maxim Application Note 187.
+ *   algorithm from Maxim Application Note 187. Note! This is an atomic
+ *   operation. The callback 'cb_search' can't execute any function that will
+ *   lock this bus, because of the locked state as long the search is active.
  *
  * Input Parameters:
  *   master    - Pointer to the allocated 1-wire interface
@@ -166,34 +164,6 @@ int onewire_search(FAR struct onewire_master_s *master,
                    CODE void (*cb_search)(int family,
                                           uint64_t romcode,
                                           FAR void *arg),
-                   FAR  void *arg);
-
-/****************************************************************************
- * Name: onewire_initialize
- *
- * Description:
- *   Return 1-wire bus master from 1-wire lower half device.
- *
- * Input Parameters:
- *   dev       - Pointer to the allocated 1-wire lower half
- *   maxslaves - Maximum number of 1-wire slave devices
- *
- ****************************************************************************/
-
-FAR struct onewire_master_s *
-  onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves);
-
-/****************************************************************************
- * Name: onewire_uninitialize
- *
- * Description:
- *   Release 1-wire bus master.
- *
- * Input Parameters:
- *   master    - Pointer to the allocated 1-wire master
- *
- ****************************************************************************/
-
-int onewire_uninitialize(FAR struct onewire_master_s *master);
+                   FAR void *arg);
 
 #endif /* __DRIVERS_1WIRE_1WIRE_INTERNAL_H */

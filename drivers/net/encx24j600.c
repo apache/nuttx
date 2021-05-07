@@ -2272,11 +2272,8 @@ static int enc_ifup(struct net_driver_s *dev)
       wd_start(&priv->txpoll, ENC_WDDELAY,
                enc_polltimer, (wdparm_t)priv);
 
-      /* Mark the interface up and enable the Ethernet interrupt at the
-       * controller
-       */
+      /* Enable the Ethernet interrupt at the controller */
 
-      priv->ifstate = ENCSTATE_UP;
       priv->lower->enable(priv->lower);
     }
 
@@ -2387,7 +2384,7 @@ static int enc_txavail(struct net_driver_s *dev)
            * poll the network for new XMIT data
            */
 
-          devif_poll(&priv->dev, enc_txpoll);
+          devif_timer(&priv->dev, 0, enc_txpoll);
         }
     }
 

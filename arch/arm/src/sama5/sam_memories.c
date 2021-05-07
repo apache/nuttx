@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_memories.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
@@ -185,8 +171,8 @@ static inline uintptr_t sysc_physregaddr(uintptr_t virtregaddr)
  * Name: isram_physramaddr
  *
  * Description:
- *   Given the virtual address of an internal SRAM memory location, return the
- *   physical address of that location
+ *   Given the virtual address of an internal SRAM memory location, return
+ *   the physical address of that location
  *
  ****************************************************************************/
 
@@ -766,7 +752,7 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
    * address
    */
 
-  serr("ERROR: Bad virtual address: %08lx\n", virtregaddr);
+  serr("ERROR: Bad virtual address: %08" PRIxPTR "\n", virtregaddr);
   DEBUGPANIC();
   return virtregaddr;
 }
@@ -817,8 +803,9 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
    * CONFIG_RAM_VSTART, and CONFIG_RAM_SIZE when CONFIG_SAMA5_BOOT_SDRAM or
    * CONFIG_BOOT_SDRAM_DATA is selected.
    *
-   *   CONFIG_SAMA5_BOOT_SDRAM -- We were booted into DRAM by some bootloader.
-   *      DRAM support is not enabled, SAMA5_DDRCS_SIZE is not valid.
+   *   CONFIG_SAMA5_BOOT_SDRAM -- We were booted into DRAM by some
+   *      bootloader. DRAM support is not enabled, SAMA5_DDRCS_SIZE is not
+   *      valid.
    *   CONFIG_BOOT_SDRAM_DATA -- We are running from NOR or ISRAM, but our
    *      .bss, .data, and primary heap are in DRAM (In this case, I would
    *      expect CONFIG_SAMA5_DDRCS to also be set, however).
@@ -925,7 +912,7 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 
   if (virtramaddr != 0)
     {
-      serr("ERROR: Bad virtual address: %08lx\n", virtramaddr);
+      serr("ERROR: Bad virtual address: %08" PRIxPTR "\n", virtramaddr);
       DEBUGPANIC();
     }
 
@@ -1058,7 +1045,7 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
 
   if (physramaddr != 0)
     {
-      serr("ERROR: Bad physical address: %08lx\n|", physramaddr);
+      serr("ERROR: Bad physical address: %08" PRIxPTR "\n|", physramaddr);
       DEBUGPANIC();
     }
 

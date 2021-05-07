@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_adc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -33,14 +33,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_ADC_H
 #define __ARCH_ARM_SRC_STM32_STM32_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,11 +50,11 @@
 
 #include <nuttx/analog/adc.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Generalized definitions for ADC  *************************************************/
+/* Generalized definitions for ADC  *****************************************/
 
 #if defined(HAVE_IP_ADC_V1)
 #  define STM32_ADC_DMAREG_OFFSET      STM32_ADC_CR2_OFFSET
@@ -97,12 +97,12 @@
 #  define ADC_JEXTREG_JEXTEN_DEFAULT   ADC_JSQR_JEXTEN_RISING
 #endif
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_STM32_TIMn is defined then
- * CONFIG_STM32_TIMn_ADC must also be defined to indicate that timer "n" is intended
- * to be used for that purpose.
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32_TIMn is defined then
+ * CONFIG_STM32_TIMn_ADC must also be defined to indicate that timer "n" is
+ * intended to be used for that purpose.
  */
 
 /* For the STM32 F1 line, timers 1-4 may be used.
@@ -182,9 +182,9 @@
 #  undef CONFIG_STM32_TIM8_ADC4
 #endif
 
-/* Timers 6, 7, 9, 10 used by STM32L15XX family devices. Though there is only ADC
- * presented in specification and in device as well, the ADC1 is used here in code.
- * See definition of the STM32_NADC
+/* Timers 6, 7, 9, 10 used by STM32L15XX family devices. Though there is only
+ * ADC presented in specification and in device as well, the ADC1 is used
+ * here in code. See definition of the STM32_NADC
  */
 
 #if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F30XX)
@@ -598,7 +598,8 @@
 #  undef ADC_HAVE_HRTIM
 #endif
 
-/* NOTE:  The following assumes that all possible combinations of timers and
+/* NOTE:
+ * The following assumes that all possible combinations of timers and
  * values are support EXTSEL.  That is not so and it varies from one STM32
  * to another.  But this (wrong) assumptions keeps the logic as simple as
  * possible.  If unsupported combination is used, an error will show up
@@ -609,7 +610,7 @@
  * for other 3 ADC's
  */
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
+#if defined(HAVE_IP_ADC_V2)
 #  define ADC1_EXTSEL_T1CC1   ADC12_CFGR1_EXTSEL_T1CC1
 #  define ADC1_EXTSEL_T1CC2   ADC12_CFGR1_EXTSEL_T1CC2
 #  define ADC1_EXTSEL_T1CC3   ADC12_CFGR1_EXTSEL_T1CC3
@@ -1101,7 +1102,7 @@
  * NOTE: Assumptions like for EXTSEL definitions (look above)
  */
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
+#if defined(HAVE_IP_ADC_V2)
 #  define ADC1_JEXTSEL_T1CC1   ADC12_JSQR_JEXTSEL_T1CC1
 #  define ADC1_JEXTSEL_T1CC2   ADC12_JSQR_JEXTSEL_T1CC2
 #  define ADC1_JEXTSEL_T1CC3   ADC12_JSQR_JEXTSEL_T1CC3
@@ -1348,9 +1349,10 @@
 #  define ADC2_JEXTSEL_HRTTRG4 ADC12_JSQR_JEXTSEL_HRT1TRG4
 #endif
 
-/* EXTSEL configuration *************************************************************/
+/* EXTSEL configuration *****************************************************/
 
-/* NOTE: this configuration if used only if CONFIG_STM32_TIMx_ADCy is selected.
+/* NOTE:
+ * this configuration if used only if CONFIG_STM32_TIMx_ADCy is selected.
  * You can still connect the ADC with a timer trigger using the
  * CONFIG_STM32_ADCx_EXTSEL option.
  */
@@ -1933,10 +1935,10 @@
 #  define ADC_HAVE_EXTCFG
 #endif
 
-/* JEXTSEL configuration ************************************************************/
+/* JEXTSEL configuration ****************************************************/
 
-/* There is no automatic timer tirgger configuration from Kconfig for injected
- * channels conversion.
+/* There is no automatic timer tirgger configuration from Kconfig for
+ * injected channels conversion.
  */
 
 /* ADC1 HRTIM JEXTSEL trigger */
@@ -1999,7 +2001,7 @@
 #  define ADC_HAVE_JEXTCFG
 #endif
 
-/* ADC interrupts *******************************************************************/
+/* ADC interrupts ***********************************************************/
 
 #if defined(HAVE_IP_ADC_V1)
 #  define ADC_ISR_EOC                  ADC_SR_EOC
@@ -2035,7 +2037,7 @@
 #define ADC_IER_ALLINTS (ADC_IER_EOC | ADC_IER_AWD | ADC_IER_JEOC | \
                          ADC_IER_JEOS | ADC_IER_OVR)
 
-/* Low-level ops helpers ************************************************************/
+/* Low-level ops helpers ****************************************************/
 
 #define STM32_ADC_INT_ACK(adc, source)              \
         (adc)->llops->int_ack(adc, source)
@@ -2072,14 +2074,15 @@
 #define STM32_ADC_SHUTDOWN(adc)                     \
         (adc)->llops->shutdown(adc)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* On STM32F42xx and STM32F43xx devices,VBAT and temperature sensor are connected
- * to the same ADC internal channel (ADC1_IN18). Only one conversion, either
- * temperature sensor or VBAT, must be selected at a time. When both conversion are
- * enabled simultaneously, only the VBAT conversion is performed.
+/* On STM32F42xx and STM32F43xx devices,VBAT and temperature sensor are
+ * connected to the same ADC internal channel (ADC1_IN18).
+ * Only one conversion, either temperature sensor or VBAT, must be selected
+ * at a time. When both conversion are enabled simultaneously,
+ * only the VBAT conversion is performed.
  */
 
 enum adc_io_cmds_e
@@ -2129,7 +2132,9 @@ typedef struct adc_channel_s
 {
   uint8_t channel:5;
 
-  /* Sampling time individually for each channel. It differs between families */
+  /* Sampling time individually for each channel.
+   * It differs between families
+   */
 
   uint8_t sample_time:3;
 } adc_channel_t;
@@ -2195,7 +2200,8 @@ struct stm32_adc_ops_s
 
   /* Register buffer for ADC DMA transfer */
 
-  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev, uint16_t *buffer, uint8_t len);
+  int (*regbuf_reg)(FAR struct stm32_adc_dev_s *dev,
+                    uint16_t *buffer, uint8_t len);
 
   /* Start/stop regular conversion */
 
@@ -2244,9 +2250,9 @@ struct stm32_adc_ops_s
 
 #endif /* CONFIG_STM32_ADC_LL_OPS */
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -2257,7 +2263,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_adcinitialize
  *
  * Description:
@@ -2271,7 +2277,7 @@ extern "C"
  * Returned Value:
  *   Valid ADC device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 struct adc_dev_s;
 struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,

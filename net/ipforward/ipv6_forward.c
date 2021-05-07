@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/ipforward/ipv6_forward.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -609,9 +594,9 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 #if defined(CONFIG_NET_6LOWPAN) /* REVISIT:  Currently only support for 6LoWPAN */
     {
       /* Single network device.  The use case here is where an endpoint acts
-       * as a hub in a star configuration.  This is typical for a wireless star
-       * configuration where not all endpoints are accessible from all other
-       * endpoints, but seems less useful for a wired network.
+       * as a hub in a star configuration.  This is typical for a wireless
+       * star configuration where not all endpoints are accessible from all
+       * other endpoints, but seems less useful for a wired network.
        */
 
       /* Perform any necessary packet conversions.  If the packet was handled
@@ -629,9 +614,11 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
       else if (ret == PACKET_NOT_FORWARDED)
         {
 #ifdef CONFIG_NET_ETHERNET
-          /* REVISIT:  For Ethernet we may have to fix up the Ethernet header:
+          /* REVISIT:
+           *  For Ethernet we may have to fix up the Ethernet header:
            * - source MAC, the MAC of the current device.
-           * - dest MAC, the MAC associated with the destination IPv6 address.
+           * - dest MAC, the MAC associated with the destination IPv6
+           *   address.
            *   This  will involve ICMPv6 and Neighbor Discovery.
            */
 
@@ -653,7 +640,8 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 
 #else /* CONFIG_NET_6LOWPAN */
     {
-      nwarn("WARNING: Packet forwarding not supported in this configuration\n");
+      nwarn(
+         "WARNING: Packet forwarding not supported in this configuration\n");
       ret = -ENOSYS;
       goto drop;
     }

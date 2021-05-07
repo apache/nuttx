@@ -1,37 +1,20 @@
 /****************************************************************************
  * fs/nxffs/nxffs_dump.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References: Linux/Documentation/filesystems/romfs.txt
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -147,8 +130,8 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
   if (doffs < blkinfo->offset + offset + SIZEOF_NXFFS_BLOCK_HDR)
     {
-      /* The first data block begins before the inode header.  This can't can't
-       * be a real inode header (or it is a corrupted one).
+      /* The first data block begins before the inode header.  This can't
+       * can't be a real inode header (or it is a corrupted one).
        */
 
       return ERROR;
@@ -197,7 +180,8 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
   nxffs_wrle32(inode.crc, 0);
 
   crc = crc32((FAR const uint8_t *)&inode, SIZEOF_NXFFS_INODE_HDR);
-  crc = crc32part(&blkinfo->buffer[noffs - blkinfo->offset], inode.namlen, crc);
+  crc = crc32part(&blkinfo->buffer[noffs - blkinfo->offset],
+                  inode.namlen, crc);
 
   if (crc != ecrc)
     {
@@ -273,7 +257,8 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
   nxffs_wrle32(dathdr.crc, 0);
 
   crc = crc32((FAR const uint8_t *)&dathdr, SIZEOF_NXFFS_DATA_HDR);
-  crc = crc32part(&blkinfo->buffer[offset + SIZEOF_NXFFS_DATA_HDR], datlen, crc);
+  crc = crc32part(&blkinfo->buffer[offset + SIZEOF_NXFFS_DATA_HDR],
+                  datlen, crc);
 
   if (crc != ecrc)
     {
@@ -329,7 +314,12 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
         {
           if (blkinfo->verbose)
             {
-              syslog(LOG_NOTICE, g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
+              syslog(LOG_NOTICE,
+                     g_format,
+                     blkinfo->block,
+                     0,
+                     "BLOCK",
+                     "ERASED ",
                      blkinfo->geo.blocksize);
             }
 
@@ -409,8 +399,9 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
  * Name: nxffs_dump
  *
  * Description:
- *   Dump a summary of the contents of an NXFFS file system.  CONFIG_DEBUG_FEATURES
- *   and CONFIG_DEBUG_FS must be enabled for this function to do anything.
+ *   Dump a summary of the contents of an NXFFS file system.
+ *   CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_FS must be enabled
+ *   for this function to do anything.
  *
  * Input Parameters:
  *   mtd - The MTD device that provides the interface to NXFFS-formatted
@@ -435,7 +426,9 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
    */
 
   memset(&blkinfo, 0, sizeof(struct nxffs_blkinfo_s));
-  ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&blkinfo.geo));
+  ret = MTD_IOCTL(mtd,
+                  MTDIOC_GEOMETRY,
+                  (unsigned long)((uintptr_t)&blkinfo.geo));
   if (ret < 0)
     {
       ferr("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);

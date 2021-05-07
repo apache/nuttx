@@ -220,9 +220,9 @@ Image Format
        retrieving revision 1.2
        diff -r1.2 lpchdr.c
        264c264
-       <   g_hdr.imageType       = 0x0000000b;
+       <   g_hdr.imagetype       = 0x0000000b;
        ---
-       >   g_hdr.imageType       = 0x0000000a;
+       >   g_hdr.imagetype       = 0x0000000a;
 
 Image Download to ISRAM
 =======================

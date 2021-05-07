@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_spi.c
  *
- *   Copyright (C) 2012, 2015-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -40,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -475,7 +461,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t actual;
   uint32_t regval;
 
-  spiinfo("Old frequency: %d actual: %d New frequency: %d\n",
+  spiinfo("Old frequency: %" PRId32 " actual: %" PRId32
+          " New frequency: %" PRId32 "\n",
           priv->frequency, priv->actual, frequency);
 
   /* Check if the requested frequency is the same as the frequency
@@ -512,7 +499,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   /* Save the new BRG value */
 
   spi_putreg(priv, PIC32MX_SPI_BRG_OFFSET, regval);
-  spiinfo("PBCLOCK: %d frequency: %d divisor: %d BRG: %d\n",
+  spiinfo("PBCLOCK: %d frequency: %" PRId32 " divisor: %" PRId32
+          " BRG: %" PRId32 "\n",
           BOARD_PBCLOCK, frequency, divisor, regval);
 
   /* Calculate the new actual frequency.
@@ -527,7 +515,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   priv->frequency = frequency;
   priv->actual    = actual;
 
-  spiinfo("New frequency: %d Actual: %d\n", frequency, actual);
+  spiinfo("New frequency: %" PRId32 " Actual: %" PRId32 "\n",
+          frequency, actual);
   return actual;
 }
 
@@ -613,7 +602,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         }
 
       spi_putreg(priv, PIC32MX_SPI_CON_OFFSET, regval);
-      spiinfo("CON: %08x\n", regval);
+      spiinfo("CON: %08" PRIx32 "\n", regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -674,7 +663,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       regval &= ~SPI_CON_MODE_MASK;
       regval |= setting;
       regval = spi_getreg(priv, PIC32MX_SPI_CON_OFFSET);
-      spiinfo("CON: %08x\n", regval);
+      spiinfo("CON: %08" PRIx32 "\n", regval);
 
       /* Save the selection so that subsequent re-configurations will be
        * faster.
@@ -704,7 +693,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct pic32mx_dev_s *priv = (FAR struct pic32mx_dev_s *)dev;
 
-  spiinfo("wd: %04x\n", wd);
+  spiinfo("wd: %04" PRIx32 "\n", wd);
 
   /* Write the data to transmitted to the SPI Data Register */
 
@@ -968,7 +957,7 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port)
   regval |= (SPI_CON_ENHBUF | SPI_CON_RTXISEL_HALF | SPI_CON_STXISEL_HALF);
 #endif
   spi_putreg(priv, PIC32MX_SPI_CON_OFFSET, regval);
-  spiinfo("CON: %08x\n", regval);
+  spiinfo("CON: %08" PRIx32 "\n", regval);
 
   /* Set the initial SPI configuration */
 

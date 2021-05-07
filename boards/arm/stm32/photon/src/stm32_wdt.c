@@ -82,7 +82,7 @@ static int wdog_daemon(int argc, char *argv[])
   ret = file_ioctl(&filestruct, WDIOC_START, 0);
   if (ret < 0)
     {
-      wderr("ERROR: ioctl(WDIOC_START) failed: %d\n", errno);
+      wderr("ERROR: file_ioctl(WDIOC_START) failed: %d\n", ret);
       goto exit_close_dev;
     }
 
@@ -95,7 +95,7 @@ static int wdog_daemon(int argc, char *argv[])
       ret = file_ioctl(&filestruct, WDIOC_KEEPALIVE, 0);
       if (ret < 0)
         {
-          wderr("ERROR: ioctl(WDIOC_KEEPALIVE) failed: %d\n", errno);
+          wderr("ERROR: file_ioctl(WDIOC_KEEPALIVE) failed: %d\n", ret);
           break;
         }
     }
@@ -150,7 +150,7 @@ int photon_watchdog_initialize(void)
 
   if (ret < 0)
     {
-      wderr("ERROR: watchdog configuration failed: %d\n", errno);
+      wderr("ERROR: watchdog configuration failed: %d\n", ret);
       return ret;
     }
 

@@ -81,7 +81,8 @@ struct ltc4151_dev_s
 
 /* I2C Helpers */
 
-static int     ltc4151_read16(FAR struct ltc4151_dev_s *priv, uint8_t regaddr,
+static int     ltc4151_read16(FAR struct ltc4151_dev_s *priv,
+                              uint8_t regaddr,
                               FAR uint16_t *regvalue);
 static int     ltc4151_readpower(FAR struct ltc4151_dev_s *priv,
                                  FAR struct ltc4151_s *buffer);
@@ -126,12 +127,14 @@ static int ltc4151_read_reg(FAR struct ltc4151_dev_s *priv,
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
 
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency = CONFIG_LTC4151_I2C_FREQUENCY;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency =
+                              CONFIG_LTC4151_I2C_FREQUENCY;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr = priv->addr;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].flags = 0;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].buffer = &start_register_address;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].length = 1;
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr = msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr =
+                               msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags = I2C_M_READ;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].buffer = register_value;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].length = data_length;
@@ -245,7 +248,8 @@ static int ltc4151_close(FAR struct file *filep)
  * Name: ltc4151_read
  ****************************************************************************/
 
-static ssize_t ltc4151_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t ltc4151_read(FAR struct file *filep,
+                            FAR char *buffer, size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ltc4151_dev_s *priv   = inode->i_private;
@@ -315,10 +319,11 @@ static int ltc4151_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
- *   i2c - An instance of the I2C interface to use to communicate with LTC4151
- *   addr - The I2C address of the LTC4151.  The base I2C address of the LTC4151
- *   is 0x6f.  Bits 0-3 can be controlled to get 10 unique addresses from 0x66
- *   through 0x6f.
+ *   i2c - An instance of the I2C interface to use to communicate with
+ *         LTC4151
+ *   addr - The I2C address of the LTC4151.  The base I2C address of the
+ *          LTC4151  is 0x6f.  Bits 0-3 can be controlled to get 10 unique
+ *   addresses from 0x66 through 0x6f.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -342,7 +347,8 @@ int ltc4151_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the ltc4151 device structure */
 
-  priv = (FAR struct ltc4151_dev_s *)kmm_malloc(sizeof(struct ltc4151_dev_s));
+  priv = (FAR struct ltc4151_dev_s *)
+                     kmm_malloc(sizeof(struct ltc4151_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

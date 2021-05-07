@@ -1,43 +1,20 @@
 /****************************************************************************
  * include/nuttx/usb/hid.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *   HID Universal Serial Bus (USB), Device Class Definition for Human
- *       Interface Devices (HID), Firmware Specification—6/27/01, Version
- *       1.11.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   HuT Universal Serial Bus (USB), HID Usage Tables, 10/28/2004, Version
- *       1.12
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -56,6 +33,7 @@
  ****************************************************************************/
 
 /* Subclass and Protocol ****************************************************/
+
 /* Subclass codes (HID 4.2) */
 
 #define USBHID_SUBCLASS_NONE              0 /* No subclass */
@@ -71,6 +49,7 @@
 #define USBHID_PROTOCOL_MOUSE             2
 
 /* Descriptor Requests ******************************************************/
+
 /* "When a Get_Descriptor(Configuration) request is issued, it returns the
  *  Configuration descriptor, all Interface descriptors, all Endpoint
  *  descriptors, and the HID descriptor for each interface."
@@ -79,7 +58,8 @@
 /* Standard Requests (HID 7.1)
  * GET_DESCRIPTOR (HID 7.1.1):
  *
- *   bmRequestType (USB_REQ_DIR_IN | USB_REQ_TYPE_STANDARD | USB_REQ_RECIPIENT_INTERFACE)
+ *   bmRequestType (USB_REQ_DIR_IN | USB_REQ_TYPE_STANDARD |
+ *                  USB_REQ_RECIPIENT_INTERFACE)
  *   bRequest      (USB_REQ_GETDESCRIPTOR)
  *   wValue        Descriptor Type (MS) and Descriptor Index (LS)
  *   wIndex        Interface Number
@@ -104,8 +84,9 @@
 
 /* Class-specific requests (HID 7.2)
  *
- *   bmRequestType (                 USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) -or-
- *                 (USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE)
+ *   bmRequestType (USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) -or-
+ *                 (USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
+ *                  USB_REQ_RECIPIENT_INTERFACE)
  *   bRequest      Class-specific request
  *   wValue        Varies according to request
  *   wIndex        Varies according to request
@@ -262,7 +243,7 @@
 #define USBHID_LOCAL_STRINGIDX_PREFIX     0x78 /* String Index */
 #define USBHID_LOCAL_STRINGMIN_PREFIX     0x88 /* String Minimum */
 #define USBHID_LOCAL_STRINGMAX_PREFIX     0x98 /* xx */
-#define USBHID_LOCAL_DELIMITER_PREFIX     0xa8 /*Delimiter */
+#define USBHID_LOCAL_DELIMITER_PREFIX     0xa8 /* Delimiter */
 
 /* Modifier Keys (HID 8.3) */
 
@@ -627,6 +608,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* HID Descriptor (HID 6.2.1) ***********************************************/
 
 struct usbhid_descriptor_s
@@ -652,6 +634,7 @@ struct usbhid_optdesc_s
 };
 
 /* Standard Reports *********************************************************/
+
 /* Keyboard input report (8 bytes) (HID B.1) */
 
 struct usbhid_kbdreport_s
@@ -661,7 +644,9 @@ struct usbhid_kbdreport_s
   uint8_t key[6];    /* Keycode 1-6 */
 };
 
-/* Keyboard output report (1 byte) (HID B.1), see USBHID_KBDOUT_* definitions */
+/* Keyboard output report (1 byte) (HID B.1),
+ * see USBHID_KBDOUT_* definitions
+ */
 
 /* Mouse input report (HID B.2) */
 
@@ -671,7 +656,7 @@ struct usbhid_mousereport_s
   uint8_t xdisp;     /* X displacement */
   uint8_t ydisp;     /* y displacement */
                      /* Device specific additional bytes may follow */
-#ifdef CONFIG_MOUSE_WHEEL
+#ifdef CONFIG_INPUT_MOUSE_WHEEL
   uint8_t wdisp;     /* Wheel displacement */
 #endif
 };

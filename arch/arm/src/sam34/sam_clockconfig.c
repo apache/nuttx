@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_clockconfig.c
  *
- *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -153,7 +138,8 @@ static inline void sam_supcsetup(void)
 
       putreg32((SUPC_CR_XTALSEL | SUPR_CR_KEY), SAM_SUPC_CR);
       for (delay = 0;
-           (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
+           (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 &&
+            delay < UINT32_MAX;
            delay++);
     }
 }
@@ -193,10 +179,10 @@ static inline void sam_pmcsetup(void)
     {
       /* "When the MOSCXTEN bit and the MOSCXTCNT are written in CKGR_MOR to
        *  enable the main oscillator, the MOSCXTS bit in the Power Management
-       *  Controller Status Register (PMC_SR) is cleared and the counter starts
-       *  counting down on the slow clock divided by 8 from the MOSCXTCNT
-       *  value. ... When the counter reaches 0, the MOSCXTS bit is set,
-       *  indicating that the main clock is valid."
+       *  Controller Status Register (PMC_SR) is cleared and the counter
+       *  starts counting down on the slow clock divided by 8 from the
+       *  MOSCXTCNT value. ... When the counter reaches 0, the MOSCXTS bit is
+       *  set, indicating that the main clock is valid."
        */
 
       putreg32(BOARD_CKGR_MOR, SAM_PMC_CKGR_MOR);
@@ -206,9 +192,9 @@ static inline void sam_pmcsetup(void)
   /* "Switch to the main oscillator.  The selection is made by writing the
    *  MOSCSEL bit in the Main Oscillator Register (CKGR_MOR). The switch of
    *  the Main Clock source is glitch free, so there is no need to run out
-   *  of SLCK, PLLACK or UPLLCK in order to change the selection. The MOSCSELS
-   *  bit of the power Management Controller Status Register (PMC_SR) allows
-   *  knowing when the switch sequence is done."
+   *  of SLCK, PLLACK or UPLLCK in order to change the selection. The
+   *  MOSCSELS bit of the power Management Controller Status Register
+   *  (PMC_SR) allows knowing when the switch sequence is done."
    *
    *   MOSCSELS: Main Oscillator Selection Status
    *             0 = Selection is done
@@ -219,12 +205,12 @@ static inline void sam_pmcsetup(void)
   sam_pmcwait(PMC_INT_MOSCSELS);
 
   /* "Select the master clock. "The Master Clock selection is made by writing
-   *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock Register).
-   *  The prescaler supports the division by a power of 2 of the selected clock
-   *  between 1 and 64, and the division by 3. The PRES field in PMC_MCKR programs
-   *  the prescaler. Each time PMC_MCKR is written to define a new Master Clock,
-   *  the MCKRDY bit is cleared in PMC_SR. It reads 0 until the Master Clock is
-   *  established.
+   *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock
+   *  Register). The prescaler supports the division by a power of 2 of the
+   *  selected clock between 1 and 64, and the division by 3. The PRES field
+   *  in PMC_MCKR programs the prescaler. Each time PMC_MCKR is written to
+   *  define a new Master Clock, the MCKRDY bit is cleared in PMC_SR. It
+   *  reads 0 until the Master Clock is established.
    */
 
   regval  = getreg32(SAM_PMC_MCKR);
@@ -240,7 +226,7 @@ static inline void sam_pmcsetup(void)
    * to PLLA_MMAX.
    */
 
-  //putreg32(PMC_PMMR_MASK, SAM_PMC_PMMR);
+  /* putreg32(PMC_PMMR_MASK, SAM_PMC_PMMR); */
 #endif
 
   /* Setup PLLA and wait for LOCKA */
@@ -355,18 +341,18 @@ static inline void sam_disabledefaultmaster(void)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_clockconfig
  *
  * Description:
- *   Called to initialize the SAM3/4.  This does whatever setup is needed to put the
- *   SoC in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.  (After power-on reset, the SAM3/4 is initially running on
- *   a 4MHz internal RC clock).  This function also performs other low-level chip
- *   initialization of the chip including EFC, master clock, IRQ & watchdog
- *   configuration.
+ *   Called to initialize the SAM3/4.  This does whatever setup is needed to
+ *   put the SoC in a usable state.  This includes the initialization of
+ *   clocking using the settings in board.h.  (After power-on reset, the
+ *   SAM3/4 is initially running on a 4MHz internal RC clock).  This
+ *   function also performs other low-level chip initialization of the chip
+ *   including EFC, master clock, IRQ & watchdog configuration.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_clockconfig(void)
 {

@@ -1,60 +1,56 @@
-/************************************************************************************
- * arch/arm/include/efm32s/irq.h
+/****************************************************************************
+ * arch/arm/include/efm32/irq.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through
- * nuttx/irq.h
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
  */
 
 #ifndef __ARCH_ARM_INCLUDE_EFM32_IRQ_H
 #define __ARCH_ARM_INCLUDE_EFM32_IRQ_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
 #include <arch/efm32/chip.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+#if defined(CONFIG_EFM32_EFM32TG)
+#  include <arch/efm32/efm32tg_irq.h>
+#elif defined(CONFIG_EFM32_EFM32G)
+#  include <arch/efm32/efm32g_irq.h>
+#elif defined(CONFIG_EFM32_EFM32GG)
+#  include <arch/efm32/efm32gg_irq.h>
+#else
+#  error "Unsupported EFM32 chip"
+#endif
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+
+/* IRQ numbers.
+ * The IRQ number corresponds vector number and hence map directly to bits in
+ *  the NVIC.  This does, however, waste several words of memory in the IRQ
  * to handle mapping tables.
  */
 
@@ -74,25 +70,18 @@
 #define EFM32_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
 #define EFM32_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
-/* External interrupts (vectors >= 16).  These definitions are chip-specific */
+/* External interrupts (vectors >= 16).
+ * These definitions are chip-specific
+ */
 
 #define EFM32_IRQ_INTERRUPTS  (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_EFM32_EFM32TG)
-#  include <arch/efm32/efm32tg_irq.h>
-#elif defined(CONFIG_EFM32_EFM32G)
-#  include <arch/efm32/efm32g_irq.h>
-#elif defined(CONFIG_EFM32_EFM32GG)
-#  include <arch/efm32/efm32gg_irq.h>
-#else
-#  error "Unsupported EFM32 chip"
-#endif
-
 #ifdef CONFIG_EFM32_GPIO_IRQ
-/* If GPIO interrupt support is enabled then up to 16 additional GPIO interrupt
- * sources are available.  There are actually only two physical interrupt lines:
- * GPIO_EVEN and GPIO_ODD.  However, from the software point of view, there are
- * 16-additional interrupts generated from a second level of decoding.
+/* If GPIO interrupt support is enabled then up to 16 additional GPIO
+ * interrupt sources are available.  There are actually only two physical
+ * interrupt lines: GPIO_EVEN and GPIO_ODD.  However, from the software point
+ * of view, there are 16-additional interrupts generated from a second level
+ * of decoding.
  */
 
 #  define EFM32_IRQ_EXTI0   (EFM32_IRQ_NVECTORS + 0)  /* Port[n], pin0 external interrupt */
@@ -117,13 +106,13 @@
 #  define NR_IRQS           EFM32_IRQ_NVECTORS        /* Total number of interrupts */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -134,9 +123,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

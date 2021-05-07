@@ -157,10 +157,10 @@ int nx_unlink(FAR const char *pathname)
       else if (INODE_IS_PSEUDODIR(inode))
 #endif
         {
-           /* If this is a "dangling" pseudo-file node
-            * (i.e., it has no operations) or a soft link,
-            * then rm should remove the node.
-            */
+          /* If this is a "dangling" pseudo-file node
+           * (i.e., it has no operations) or a soft link,
+           * then rm should remove the node.
+           */
         }
       else
         {

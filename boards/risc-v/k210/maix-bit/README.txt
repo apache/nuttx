@@ -11,8 +11,8 @@
 3. Configure and build NuttX
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://bitbucket.org/nuttx/nuttx.git
-  $ git clone https://bitbucket.org/nuttx/apps.git
+  $ git clone https://github.com/apache/incubator-nuttx.git
+  $ git clone https://github.com/apache/incubator-nuttx-apps.git
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh maix-bit:nsh
@@ -32,8 +32,10 @@
   $ pip3 install kflash
   $ kflash -p /dev/ttyUSB0 -b 1500000 ./nuttx/nuttx.bin
 
+  NOTE: The kflash_gui is not recommended because it's unstable
+
 6. TODO
 
   Support peripherals such as GPIO/SPI/I2C/...
   Support FPU
-  Support memory protection for user mode
+  Support RISC-V U-mode including memory protection

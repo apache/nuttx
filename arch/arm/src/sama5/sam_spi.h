@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_spi.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -51,8 +36,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The SPI port number used as an input to sam_spibus_initialize encodes information
- * about the SPI controller (0 or 1) and the SPI chip select (0-3)
+/* The SPI port number used as an input to sam_spibus_initialize encodes
+ * information about the SPI controller (0 or 1) and the SPI chip select
+ * (0-3)
  */
 
 #define __SPI_CS_SHIFT  (0)      /* Bits 0-1: SPI chip select number */
@@ -128,27 +114,29 @@ struct spi_dev_s *sam_spibus_initialize(int port);
  *   These external functions must be provided by board-specific logic.  They
  *   include:
  *
- *   o sam_spi[0|1]select is a functions tomanage the board-specific chip selects
- *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the status
- *     and cmddata methods of the SPI interface defined by struct spi_ops_
- *     (see include/nuttx/spi/spi.h). All other methods including
+ *   o sam_spi[0|1]select is a functions tomanage the board-specific chip
+ *     selects
+ *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the
+ *     status and cmddata methods of the SPI interface defined by struct
+ *     spi_ops_ (see include/nuttx/spi/spi.h). All other methods including
  *     sam_spibus_initialize()) are provided by common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
- *      specific logic.  These functions will perform chip selection and
- *      status operations using PIOs in the way your board is configured.
+ *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in
+ *      your board- specific logic.  These functions will perform chip
+ *      selection and status operations using PIOs in the way your board is
+ *      configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using PIOs in
  *      the way your board is configured.
  *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by sam_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by sam_spibus_initialize() may then be used to
+ *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

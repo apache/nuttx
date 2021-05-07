@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_wcap.c
+ * arch/sim/src/sim/up_wpcap.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

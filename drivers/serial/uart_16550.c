@@ -1,38 +1,24 @@
 /****************************************************************************
  * drivers/serial/uart_16550.c
- * Serial driver for 16550 UART
  *
- *   Copyright (C) 2011, 2013, 2017-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* Serial driver for 16550 UART */
 
 /****************************************************************************
  * Included Files
@@ -99,8 +85,8 @@ static int  u16550_receive(FAR struct uart_dev_s *dev, unsigned int *status);
 static void u16550_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_rxavailable(FAR struct uart_dev_s *dev);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
-                                 bool upper);
+static bool u16550_rxflowcontrol(struct uart_dev_s *dev,
+                                 unsigned int nbuffered, bool upper);
 #endif
 #ifdef CONFIG_SERIAL_TXDMA
 static void u16550_dmasend(FAR struct uart_dev_s *dev);
@@ -237,7 +223,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_16550_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -275,7 +261,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_16550_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -313,12 +299,11 @@ static uart_dev_t g_uart3port =
   {
     .size   = CONFIG_16550_UART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart3priv,
 };
 #endif
-
 
 /* Which UART with be tty0/console and which tty1? tty2? tty3? */
 
@@ -523,7 +508,8 @@ static uart_dev_t g_uart3port =
  * Name: u16550_serialin
  ****************************************************************************/
 
-static inline uart_datawidth_t u16550_serialin(FAR struct u16550_s *priv, int offset)
+static inline uart_datawidth_t u16550_serialin(FAR struct u16550_s *priv,
+                                               int offset)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
   return *((FAR volatile uart_addrwidth_t *)priv->uartbase + offset);
@@ -746,14 +732,15 @@ static void u16550_shutdown(struct uart_dev_s *dev)
  * Name: u16550_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -784,8 +771,8 @@ static int u16550_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -1137,8 +1124,8 @@ static bool u16550_rxavailable(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool u16550_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
-                                 bool upper)
+static bool u16550_rxflowcontrol(struct uart_dev_s *dev,
+                                 unsigned int nbuffered, bool upper)
 {
 #ifndef CONFIG_16550_SUPRESS_CONFIG
   FAR struct u16550_s *priv = (FAR struct u16550_s *)dev->priv;

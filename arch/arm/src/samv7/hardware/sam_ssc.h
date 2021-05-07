@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_ssc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SSC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SSC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
@@ -47,17 +32,17 @@
 
 #if SAMV7_NSSC > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
- /* The maximum clock speed allowed on the TK and RK pins is the peripheral clock
-  * divided by 2.
-  */
+/* The maximum clock speed allowed on the TK and RK pins is the
+ * peripheral clock divided by 2.
+ */
 
 #define SAM_SSC_MAXPERCLK         (BOARD_MCK_FREQUENCY >> 1)
 
-/* SSC Register Offsets *************************************************************/
+/* SSC Register Offsets *****************************************************/
 
 #define SAM_SSC_CR_OFFSET         0x0000 /* Control Register */
 #define SAM_SSC_CMR_OFFSET        0x0004 /* Clock Mode Register */
@@ -82,7 +67,7 @@
 #define SAM_SSC_WPSR_OFFSET       0x00e8 /* Write Protect Status Register */
                                          /* 0x00ec-0x0124 Reserved */
 
-/* SSC Register Addresses ***********************************************************/
+/* SSC Register Addresses ***************************************************/
 
 #define SAM_SSC0_CR               (SAM_SSC0_BASE+SAM_SSC_CR_OFFSET)
 #define SAM_SSC0_CMR              (SAM_SSC0_BASE+SAM_SSC_CMR_OFFSET)
@@ -124,7 +109,7 @@
 #  define SAM_SSC1_WPSR           (SAM_SSC1_BASE+SAM_SSC_WPSR_OFFSET)
 #endif
 
-/* SSC Register Bit Definitions *****************************************************/
+/* SSC Register Bit Definitions *********************************************/
 
 /* Control Register */
 
@@ -145,17 +130,20 @@
 #  define SSC_RCMR_CKS_MCK        (0 << SSC_RCMR_CKS_SHIFT) /* Divided Clock */
 #  define SSC_RCMR_CKS_TK         (1 << SSC_RCMR_CKS_SHIFT) /* TK Clock signal */
 #  define SSC_RCMR_CKS_RK         (2 << SSC_RCMR_CKS_SHIFT) /* RK pin */
+
 #define SSC_RCMR_CKO_SHIFT        (2)       /* Bits 2-4: Receive Clock Output Mode Selection */
 #define SSC_RCMR_CKO_MASK         (7 << SSC_RCMR_CKO_SHIFT)
 #  define SSC_RCMR_CKO_NONE       (0 << SSC_RCMR_CKO_SHIFT) /* None, RK pin is an input */
 #  define SSC_RCMR_CKO_CONT       (1 << SSC_RCMR_CKO_SHIFT) /* Continuous Receive Clock, RK pin is an output */
 #  define SSC_RCMR_CKO_TRANSFER   (2 << SSC_RCMR_CKO_SHIFT) /* Receive Clock during transfers, RK pin is an output */
+
 #define SSC_RCMR_CKI              (1 << 5)  /* Bit 5:  Receive Clock Inversion */
 #define SSC_RCMR_CKG_SHIFT        (6)       /* Bits 6-7: Receive Clock Gating Selection */
 #define SSC_RCMR_CKG_MASK         (3 << SSC_RCMR_CKG_SHIFT)
 #  define SSC_RCMR_CKG_CONT       (0 << SSC_RCMR_CKG_SHIFT) /* None */
 #  define SSC_RCMR_CKG_ENRFLOW    (2 << SSC_RCMR_CKG_SHIFT) /* Receive Clock enabled only if RF Pin is Low */
 #  define SSC_RCMR_CKG_ENRFHIGH   (3 << SSC_RCMR_CKG_SHIFT) /* Receive Clock enabled only if RF Pin is High */
+
 #define SSC_RCMR_START_SHIFT      (8)       /* Bits 8-11: Receive Start Selection */
 #define SSC_RCMR_START_MASK       (15 << SSC_RCMR_START_SHIFT)
 #  define SSC_RCMR_START_CONT     (0 << SSC_RCMR_START_SHIFT) /* Continuous */
@@ -167,6 +155,7 @@
 #  define SSC_RCMR_START_LEVEL    (6 << SSC_RCMR_START_SHIFT) /* Detection of any level change on RF signal */
 #  define SSC_RCMR_START_EDGE     (7 << SSC_RCMR_START_SHIFT) /* Detection of any edge on RF signal */
 #  define SSC_RCMR_START_CMP0     (8 << SSC_RCMR_START_SHIFT) /* Compare 0 */
+
 #define SSC_RCMR_STOP             (1 << 12) /* Bit 12: Receive Stop Selection */
 #define SSC_RCMR_STTDLY_SHIFT     (16)      /* Bits 16-23: Receive Start Delay */
 #define SSC_RCMR_STTDLY_MASK      (0xff << SSC_RCMR_STTDLY_SHIFT)
@@ -196,6 +185,7 @@
 #  define SSC_RFMR_FSOS_LOW       (3 << SSC_RFMR_FSOS_SHIFT) /* Low during transfer, RF pin is an output */
 #  define SSC_RFMR_FSOS_HIGH      (4 << SSC_RFMR_FSOS_SHIFT) /* High during transfer, RF pin is an output */
 #  define SSC_RFMR_FSOS_TOGGLING  (5 << SSC_RFMR_FSOS_SHIFT) /* Toggling each transfer, RF pin is an output */
+
 #define SSC_RFMR_FSEDGE           (1 << 24) /* Bit 24: Frame Sync Edge Detection */
 #  define SSC_RFMR_FSEDGE_POS     (0)       /* Bit 24: 0=Positive Edge Detection */
 #  define SSC_RFMR_FSEDGE_NEG     (1 << 24) /* Bit 24: 1=Negative Edge Detection */
@@ -210,17 +200,20 @@
 #  define SSC_TCMR_CKS_MCK        (0 << SSC_TCMR_CKS_SHIFT) /* Divided Clock */
 #  define SSC_TCMR_CKS_RK         (1 << SSC_TCMR_CKS_SHIFT) /* RK Clock signal */
 #  define SSC_TCMR_CKS_TK         (2 << SSC_TCMR_CKS_SHIFT) /* TK pin */
+
 #define SSC_TCMR_CKO_SHIFT        (2)       /* Bits 2-4: Transmit Clock Output Mode Selection */
 #define SSC_TCMR_CKO_MASK         (7 << SSC_TCMR_CKO_SHIFT)
 #  define SSC_TCMR_CKO_NONE       (0 << SSC_TCMR_CKO_SHIFT) /* None, TK pin is an input */
 #  define SSC_TCMR_CKO_CONT       (1 << SSC_TCMR_CKO_SHIFT) /* Continuous Transmit Clock, TK pin is an output */
 #  define SSC_TCMR_CKO_TRANSFER   (2 << SSC_TCMR_CKO_SHIFT) /* Transmit Clock during transfers, TK pin is an output */
+
 #define SSC_TCMR_CKI              (1 << 5)  /* Bit 5:  Transmit Clock Inversion */
 #define SSC_TCMR_CKG_SHIFT        (6)       /* Bits 6-7: Transmit Clock Gating Selection */
 #define SSC_TCMR_CKG_MASK         (3 << SSC_TCMR_CKG_SHIFT)
 #  define SSC_TCMR_CKG_CONT       (0 << SSC_TCMR_CKG_SHIFT) /* None */
 #  define SSC_TCMR_CKG_ENTFLOW    (1 << SSC_TCMR_CKG_SHIFT) /* Transmit Clock enabled only if TF pin is Low */
-#  define SSC_TCMR_CKG_ENTFHIGH   (2 << SSC_TCMR_CKG_SHIFT) /*Transmit Clock enabled only if TF pin is High */
+#  define SSC_TCMR_CKG_ENTFHIGH   (2 << SSC_TCMR_CKG_SHIFT) /* Transmit Clock enabled only if TF pin is High */
+
 #define SSC_TCMR_START_SHIFT      (8)       /* Bits 8-11: Transmit Start Selection */
 #define SSC_TCMR_START_MASK       (15 << SSC_TCMR_START_SHIFT)
 #  define SSC_TCMR_START_CONT     (0 << SSC_TCMR_START_SHIFT) /* Continuous */
@@ -231,6 +224,7 @@
 #  define SSC_TCMR_START_RISING   (5 << SSC_TCMR_START_SHIFT) /* Detection of a rising edge on TF signal */
 #  define SSC_TCMR_START_LEVEL    (6 << SSC_TCMR_START_SHIFT) /* Detection of any level change on TF signal */
 #  define SSC_TCMR_START_EDGE     (7 << SSC_TCMR_START_SHIFT) /* Detection of any edge on TF signal */
+
 #define SSC_TCMR_STTDLY_SHIFT     (16)       /* Bits 15-23: Transmit Start Delay */
 #define SSC_TCMR_STTDLY_MASK      (0xff << SSC_TCMR_STTDLY_SHIFT)
 #  define SSC_TCMR_STTDLY(n)      ((uint32_t)(n) << SSC_TCMR_STTDLY_SHIFT)
@@ -259,6 +253,7 @@
 #  define SSC_TFMR_FSOS_LOW       (3 << SSC_TFMR_FSOS_SHIFT) /* TF pin Driven Low during data transfer */
 #  define SSC_TFMR_FSOS_HIGH      (4 << SSC_TFMR_FSOS_SHIFT) /* TF pin Driven High during data transfer */
 #  define SSC_TFMR_FSOS_TOGGLING  (5 << SSC_TFMR_FSOS_SHIFT) /* TF pin Toggles at each start of data transfer */
+
 #define SSC_TFMR_FSDEN            (1 << 23) /* Bit 23: Frame Sync Data Enable */
 #define SSC_TFMR_FSEDGE           (1 << 24) /* Bit 24: Frame Sync Edge Detection */
 #  define SSC_TFMR_FSEDGE_POS     (0)       /* Bit 24: 0=Positive Edge Detection */
@@ -268,6 +263,7 @@
 #  define SSC_TFMR_FSLENEXT(n)    ((uint32_t)(n) << SSC_TFMR_FSLENEXT_SHIFT)
 
 /* Receive Holding Register (32-bit data value) */
+
 /* Transmit Holding Register (32-bit data value) */
 
 /* Receive Sync. Holding Register */
@@ -286,8 +282,8 @@
 
 #define SSC_RC1R_MASK             (0x0000ffff) /* Bit 0-15: Receive Compare Data 1 */
 
-/* Status Register , Interrupt Enable Register, Interrupt Disable Register, and
- * Interrupt Mask Register
+/* Status Register, Interrupt Enable Register,
+ * Interrupt Disable Register, and Interrupt Mask Register
  */
 
 #define SSC_INT_TXRDY             (1 << 0)  /* Bit 0:  Transmit Ready */

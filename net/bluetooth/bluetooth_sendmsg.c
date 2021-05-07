@@ -558,9 +558,9 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
 ssize_t bluetooth_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                           int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
+  FAR const void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr *to = msg->msg_name;
+  FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
 
   /* Validity check, only single iov supported */

@@ -1,6 +1,5 @@
 /****************************************************************************
  * drivers/power/powerled.c
- * Upper-half, character driver for high power LED driver.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Upper-half, character driver for high power LED driver. */
 
 /****************************************************************************
  * Included Files

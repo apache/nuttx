@@ -1,55 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_pdca.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PDCA_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PDCA_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* PDCA channel offsets *****************************************************************/
+/* PDCA channel offsets *****************************************************/
 
 #define SAM_PDCA_CHAN_OFFSET(n) ((n) << 6)
 #define SAM_PDCA_CHAN0_OFFSET    0x0000
@@ -69,7 +54,8 @@
 #define SAM_PDCA_CHAN14_OFFSET   0x0380
 #define SAM_PDCA_CHAN15_OFFSET   0x03c0
 
-/* PDCA register offsets ****************************************************************/
+/* PDCA register offsets ****************************************************/
+
 /* Channel register offsets */
 
 #define SAM_PDCA_MAR_OFFSET      0x0000 /* Memory Address Register */
@@ -89,7 +75,8 @@
 
 #define SAM_PDCA_VERSION_OFFSET  0x834 /* Version Register */
 
-/* PDCA channel addresses ***************************************************************/
+/* PDCA channel addresses ***************************************************/
+
 /* Channel register base addresses */
 
 #define SAM_PDCA_CHAN(n)         (SAM_PDCA_BASE+SAM_PDCA_CHAN_OFFSET(n))
@@ -110,7 +97,8 @@
 #define SAM_PDCA_CHAN14          (SAM_PDCA_BASE+SAM_PDCA_CHAN14_OFFSET)
 #define SAM_PDCA_CHAN15          (SAM_PDCA_BASE+SAM_PDCA_CHAN15_OFFSET)
 
-/* PDCA register addresses **************************************************************/
+/* PDCA register addresses **************************************************/
+
 /* Channel register addresses */
 
 #define SAM_PDCA_MAR(n)          (SAM_PDCA_CHAN(n)+SAM_PDCA_MAR_OFFSET)
@@ -130,7 +118,7 @@
 
 #define SAM_PDCA_VERSION         (SAM_PDCA_BASE+SAM_PDCA_VERSION_OFFSET)
 
-/* PDCA register bit definitions ********************************************************/
+/* PDCA register bit definitions ********************************************/
 
 /* Memory Address Register (32-bit address) */
 
@@ -140,7 +128,7 @@
 
 /* Transfer Counter Register */
 
-#define PDCA_TCR_MASK            0xffff /* Bits 0-15: Transfer Counter Value
+#define PDCA_TCR_MASK            0xffff /* Bits 0-15: Transfer Counter Value */
 
 /* Memory Address Reload Register (32-bit address) */
 
@@ -173,7 +161,9 @@
 #define PDCA_IER_
 
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
+
 /* Interrupt Status Register */
 
 #define PDCA_INT_RCZ             (1 << 2)  /* Bit 0:  Reload Counter Zero */
@@ -189,16 +179,16 @@
 #define PDCA_VARIANT_SHIFT       (16)       /* Bits 16-19: Variant Number */
 #define PDCA_VARIANT_MASK        (15 << PDCA_VARIANT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PDCA_H */

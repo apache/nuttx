@@ -27,6 +27,8 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/serial/uart_rpmsg.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
+#include <nuttx/timers/arch_rtc.h>
+#include <nuttx/timers/rpmsg_rtc.h>
 
 #include "up_internal.h"
 

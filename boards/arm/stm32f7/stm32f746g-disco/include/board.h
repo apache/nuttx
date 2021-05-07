@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f746g-disco/include/board.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -52,12 +37,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *****************************************************************/
+/* Clocking */
 
 /* The STM32F7 Discovery board provides the following clock sources:
  *
- *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module (daughter board)
- *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and Ethernet PHY.
+ *   X1:  24 MHz oscillator for USB OTG HS PHY and camera module
+ *       (daughter board)
+ *   X2:  25 MHz oscillator for STM32F746NGH6 microcontroller and
+ *        Ethernet PHY.
  *   X3:  32.768 KHz crystal for STM32F746NGH6 embedded RTC
  *
  * So we have these clock source available within the STM32
@@ -154,15 +141,22 @@
 
 /* Configure factors for  PLLSAI clock */
 
+#define CONFIG_STM32F7_PLLSAI           1
 #define STM32_RCC_PLLSAICFGR_PLLSAIN    RCC_PLLSAICFGR_PLLSAIN(BOARD_LTDC_PLLSAIN)
 #define STM32_RCC_PLLSAICFGR_PLLSAIP    RCC_PLLSAICFGR_PLLSAIP(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIQ    RCC_PLLSAICFGR_PLLSAIQ(2)
 #define STM32_RCC_PLLSAICFGR_PLLSAIR    RCC_PLLSAICFGR_PLLSAIR(BOARD_LTDC_PLLSAIR)
 
+/* SAIx input frequency = 25 / M * N / Q / P
+ *   25000000 / 25 * 192 / 2 / 1
+ */
+#define STM32F7_SAI1_FREQUENCY           (96000000)
+#define STM32F7_SAI2_FREQUENCY           (96000000)
+
 /* Configure Dedicated Clock Configuration Register */
 
 #define STM32_RCC_DCKCFGR1_PLLI2SDIVQ  RCC_DCKCFGR1_PLLI2SDIVQ(1)
-#define STM32_RCC_DCKCFGR1_PLLSAIDIVQ  RCC_DCKCFGR1_PLLSAIDIVQ(1)
+#define STM32_RCC_DCKCFGR1_PLLSAIDIVQ  RCC_DCKCFGR1_PLLSAIDIVQ(0)
 #define STM32_RCC_DCKCFGR1_PLLSAIDIVR  RCC_DCKCFGR1_PLLSAIDIVR(1)
 #define STM32_RCC_DCKCFGR1_SAI1SRC     RCC_DCKCFGR1_SAI1SEL(0)
 #define STM32_RCC_DCKCFGR1_SAI2SRC     RCC_DCKCFGR1_SAI2SEL(0)
@@ -172,6 +166,7 @@
 
 /* Configure factors for  PLLI2S clock */
 
+#define CONFIG_STM32F7_PLLI2S          1
 #define STM32_RCC_PLLI2SCFGR_PLLI2SN   RCC_PLLI2SCFGR_PLLI2SN(192)
 #define STM32_RCC_PLLI2SCFGR_PLLI2SP   RCC_PLLI2SCFGR_PLLI2SP(2)
 #define STM32_RCC_PLLI2SCFGR_PLLI2SQ   RCC_PLLI2SCFGR_PLLI2SQ(2)
@@ -207,7 +202,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/4 (54 MHz) */
 
@@ -253,16 +247,19 @@
 
 #define BOARD_FLASH_WAITSTATES 7
 
-/* LED definitions **********************************************************/
+/* LED definitions */
 
 /* The STM32F746G-DISCO board has numerous LEDs but only one, LD1 located
  * near the reset button, that can be controlled by software (LD2 is a power
  * indicator, LD3-6 indicate USB status, LD7 is controlled by the ST-Link).
  *
- * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino interface.
- * One end of LD1 is grounded so a high output on PI1 will illuminate the LED.
+ * LD1 is controlled by PI1 which is also the SPI2_SCK at the Arduino
+ * interface.
+ * One end of LD1 is grounded so a high output on PI1 will illuminate the
+ * LED.
  *
- * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any way.
+ * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.
  * The following definitions are used to access individual LEDs.
  */
 
@@ -278,8 +275,8 @@
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *   SYMBOL              Meaning                 LD1
  *   ------------------- ----------------------- ------
@@ -306,7 +303,7 @@
 #define LED_ASSERTION                2 /* LD1=no change */
 #define LED_PANIC                    3 /* LD1=flashing */
 
-/* Button definitions *******************************************************/
+/* Button definitions */
 
 /* The STM32F7 Discovery supports one button:
  * Pushbutton B1, labelled "User", is connected to GPIO PI11.
@@ -317,7 +314,7 @@
 #define NUM_BUTTONS        1
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-/* Alternate function pin selections ****************************************/
+/* Alternate function pin selections */
 
 /* USART6:
  *
@@ -338,7 +335,8 @@
 
 /* USART1:
  *
- * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK controller.
+ * USART1 is connected to the "Virtual Com Port" lines of the ST-LINK
+ * controller.
  *
  *   -------- ---------------
  *               STM32F7
@@ -361,12 +359,13 @@
 
 /* I2C - There is a FT5336 TouchPanel on I2C3 using these pins: */
 
-#define GPIO_I2C3_SCL GPIO_I2C3_SCL_2
-#define GPIO_I2C3_SDA GPIO_I2C3_SDA_2
+#define ADJ_SLEW_RATE(p) (((p) & ~GPIO_SPEED_MASK) | (GPIO_SPEED_100MHz))
+#define GPIO_I2C3_SCL ADJ_SLEW_RATE(GPIO_I2C3_SCL_2)
+#define GPIO_I2C3_SDA ADJ_SLEW_RATE(GPIO_I2C3_SDA_2)
 
 #define GPIO_TP_INT  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTI|GPIO_PIN13)
 
-#define FT5x06_I2C_ADDRESS          0x38
+#define FT5X06_I2C_ADDRESS          (0x70 >> 1)
 
 /* The STM32 F7 connects to a SMSC LAN8742A PHY using these pins:
  *
@@ -394,7 +393,7 @@
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_2
 
-/* LCD definitions **********************************************************/
+/* LCD definitions */
 
 #define BOARD_LTDC_WIDTH                480
 #define BOARD_LTDC_HEIGHT               272
@@ -473,8 +472,8 @@
 
 /* SDMMC */
 
-/* Stream selections are arbitrary for now but might become important in the future
- * if we set aside more DMA channels/streams.
+/* Stream selections are arbitrary for now but might become important in the
+ * future if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDMMC1_1 = Channel 4, Stream 3
@@ -513,4 +512,21 @@
 #  define STM32_SDMMC_SDXFR_CLKDIV   (2 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
 #endif
 
-#endif /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H */
+/* SAI2 pinset */
+#if defined(CONFIG_STM32F7_SAI2) && defined(CONFIG_STM32F7_SAI2_A)
+#define GPIO_SAI2_SD_A                  GPIO_SAI2_SD_A_2
+#define GPIO_SAI2_FS_A                  GPIO_SAI2_FS_A_2
+#define GPIO_SAI2_SCK_A                 GPIO_SAI2_SCK_A_2
+#define GPIO_SAI2_MCLK_A                GPIO_SAI2_MCLK_A_2
+#define GPIO_SAI2_SD_B                  GPIO_SAI2_SD_B_4
+
+#define DMACHAN_SAI2_A                  DMAMAP_SAI2_A
+#define DMACHAN_SAI2_B                  DMAMAP_SAI2_B
+
+#else
+
+#define GPIO_SAI1_SD_B                  GPIO_SAI1_SD_B_1
+#define DMACHAN_SAI1_B                  DMAMAP_SAI1_B
+
+#endif
+#endif

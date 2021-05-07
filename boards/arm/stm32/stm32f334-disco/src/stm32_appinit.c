@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f334-disco/src/stm32_appinitialize.c
+ * boards/arm/stm32/stm32f334-disco/src/stm32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

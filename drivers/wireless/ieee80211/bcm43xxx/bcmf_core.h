@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/ieee80211/bcmf_core.h
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_core.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -36,10 +36,18 @@
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "bcmf_sdio.h"
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 int bcmf_read_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
                           uint8_t *reg, unsigned int len);

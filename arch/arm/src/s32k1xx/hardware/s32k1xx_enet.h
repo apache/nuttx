@@ -1,53 +1,38 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_enet.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_ENET_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_ENET_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/s32k1xx_memorymap.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets **********************************************************/
+/* Register Offsets *********************************************************/
 
 #define S32K1XX_ENET_EIR_OFFSET      0x0004 /* Interrupt Event Register */
 #define S32K1XX_ENET_EIMR_OFFSET     0x0008 /* Interrupt Mask Register */
@@ -102,7 +87,7 @@
 #define S32K1XX_ENET_TCSR3_OFFSET    0x0620 /* Timer Control Status Register */
 #define S32K1XX_ENET_TCCR3_OFFSET    0x0624 /* Timer Compare Capture Register */
 
-/* Register Addresses ********************************************************/
+/* Register Addresses *******************************************************/
 
 #define S32K1XX_ENET_EIR             (S32K1XX_ENET_BASE+S32K1XX_ENET_EIR_OFFSET)
 #define S32K1XX_ENET_EIMR            (S32K1XX_ENET_BASE+S32K1XX_ENET_EIMR_OFFSET)
@@ -155,9 +140,10 @@
 #define S32K1XX_ENET_TCSR3           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCSR3_OFFSET)
 #define S32K1XX_ENET_TCCR3           (S32K1XX_ENET_BASE+S32K1XX_ENET_TCCR3_OFFSET)
 
-/* Register Bit Definitions **************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Interrupt Event Register, Interrupt Mask Register */
+
                                                /* Bits 0-14: Reserved */
 #define ENET_INT_TS_TIMER            (1 << 15) /* Bit 15: Timestamp timer */
 #define ENET_INT_TS_AVAIL            (1 << 16) /* Bit 16: Transmit timestamp available */
@@ -176,14 +162,19 @@
 #define ENET_INT_BABT                (1 << 29) /* Bit 29: Babbling Transmit Error */
 #define ENET_INT_BABR                (1 << 30) /* Bit 30: Babbling Receive Error */
                                                /* Bit 31: Reserved */
+
 /* Receive Descriptor Active Register */
+
                                                /* Bits 0-23: Reserved */
 #define ENET_RDAR                    (1 << 24) /* Bit 24: Receive descriptor active */
                                                /* Bits 25-31: Reserved */
+
 /* Transmit Descriptor Active Register */
+
                                                /* Bits 0-23: Reserved */
 #define ENET_TDAR                    (1 << 24) /* Bit 24: Transmit descriptor active */
                                                /* Bits 25-31: Reserved */
+
 /* Ethernet Control Register */
 
 #define ENET_ECR_RESET               (1 << 0)  /* Bit 0:  Ethernet MAC reset */
@@ -216,10 +207,12 @@
 #  define ENET_MMFR_OP_WRMII         (1 << ENET_MMFR_OP_SHIFT) /* Write frame, MII management frame */
 #  define ENET_MMFR_OP_RDMII         (2 << ENET_MMFR_OP_SHIFT) /* Read frame, MII management frame */
 #  define ENET_MMFR_OP_RdNOTMII      (3 << ENET_MMFR_OP_SHIFT) /* Read frame, not MII compliant */
+
 #define ENET_MMFR_ST_SHIFT           (30)      /* Bits 30-31: Start of frame delimiter */
 #define ENET_MMFR_ST_MASK            (3 << ENET_MMFR_ST_SHIFT)
 
 /* MII Speed Control Register */
+
                                                /* Bit 0: Reserved */
 #define ENET_MSCR_MII_SPEED_SHIFT    (1)       /* Bits 1-6: MII speed */
 #define ENET_MSCR_MII_SPEED_MASK     (63 << ENET_MSCR_MII_SPEED_SHIFT)
@@ -230,9 +223,11 @@
 #  define ENET_MSCR_HOLDTIME_2CYCLES (1 << ENET_MSCR_HOLDTIME_SHIFT) /* 2 internal module clock cycles */
 #  define ENET_MSCR_HOLDTIME_3CYCLES (2 << ENET_MSCR_HOLDTIME_SHIFT) /* 3 internal module clock cycles */
 #  define ENET_MSCR_HOLDTIME_8CYCLES (7 << ENET_MSCR_HOLDTIME_SHIFT) /* 8 internal module clock cycles */
+
                                                /* Bits 11-31: Reserved */
 
 /* MIB Control Register */
+
                                                /* Bits 0-28: Reserved */
 #define ENET_MIBC_MIB_CLEAR          (1 << 29) /* Bit 29: MIB clear */
 #define ENET_MIBC_MIB_IDLE           (1 << 30) /* Bit 30: MIB idle */
@@ -270,11 +265,13 @@
 #define ENET_TCR_ADDSEL_SHIFT        (5)       /* Bits 5-7: Source MAC address select on transmit */
 #define ENET_TCR_ADDSEL_MASK         (7 << ENET_TCR_ADDSEL_SHIFT)
 #  define ENET_TCR_ADDSEL_PADDR12    (0 << ENET_TCR_ADDSEL_SHIFT) /* Node MAC address programmed on PADDR1/2 registers */
+
 #define ENET_TCT_ADDINS              (1 << 8)  /* Bit 8:  Set MAC Address On Transmit */
 #define ENET_TCR_CRCFWD              (1 << 9)  /* Bit 9:  Forward frame from application with CRC */
                                                /* Bits 10-31: Reserved */
 
 /* Physical Address Lower/Upper Register (32-bits of 48-address) */
+
 /* Physical Address Upper Register */
 
 #define ENET_PAUR_TYPE_SHIFT         (0)       /* Bits 0-15: Type field in PAUSE frame */
@@ -289,8 +286,13 @@
 #define ENET_OPD_OPCODE_SHIFT        (16)      /* Bits 16-31: Opcode field in PAUSE frames */
 #define ENET_OPD_OPCODE_MASK         (0xffff << ENET_OPD_OPCODE_SHIFT)
 
-/* Descriptor Individual Upper/Lower Address Register (64-bit address in two 32-bit registers) */
-/* Descriptor Group Upper/Lower Address Register (64-bit address in two 32-bit registers) */
+/* Descriptor Individual Upper/Lower Address Register
+ * (64-bit address in two 32-bit registers)
+ */
+
+/* Descriptor Group Upper/Lower Address Register
+ * (64-bit address in two 32-bit registers)
+ */
 
 /* Transmit Interrupt Coalescing Register */
 
@@ -321,16 +323,19 @@
                                                /* Bits 9-31: Reserved */
 
 /* Receive Descriptor Ring Start Register */
+
                                                /* Bits 0-2: Reserved */
 #define ENET_RDSR_SHIFT              (3)       /* Bits 3-31: Start of the receive buffer descriptor queue */
 #define ENET_RDSR_MASK               (0xfffffff8)
 
 /* Transmit Buffer Descriptor Ring Start Register */
+
                                                /* Bits 0-2: Reserved */
 #define ENET_TDSR_SHIFT              (3)       /* Bits 3-31: Start of the transmit buffer descriptor queue */
 #define ENET_TDSR_MASK               (0xfffffff8)
 
 /* Maximum Receive Buffer Size Register */
+
                                                /* Bits 14-31: Reserved */
 #define ENET_MRBR_SHIFT              (4)       /* Bits 4-13: Receive buffer size in bytes */
 #define ENET_MRBR_MASK               (0x3ff << ENET_MRBR_SHIFT)
@@ -381,6 +386,7 @@
 #define ENET_TAFL_MASK               (0xff << ENET_TAFL_SHIFT)
 
                                                /* Bits 8-31: Reserved */
+
 /* Transmit Inter-Packet Gap */
 
 #define ENET_TIPG_SHIFT              (0)       /* Bits 0-4: Value of the transmit FIFO section empty threshold */
@@ -429,13 +435,17 @@
                                                /* Bits 14-31: Reserved */
 
 /* Timer Value Register (32-bit timer value) */
+
 /* Timer Offset Register (32-bit offset value) */
+
 /* Timer Period Register (32-bit timer period) */
 
 /* Timer Correction Register */
 
 #define ENET_ATCOR_MASK              (0x7fffffff) /* Bits 0-3: Correction counter wrap-around value */
+
                                                /* Bit 31: Reserved */
+
 /* Time-Stamping Clock Period Register */
 
 #define ENET_ATINC_INC_SHIFT         (0)       /* Bits 0-6: Clock period of the timestamping clock (ts_clk) in nanoseconds */
@@ -473,13 +483,15 @@
 #  define ENET_TCSR_TMODE_OCCLRSET   (10 << ENET_TCSR_TMODE_SHIFT) /*  Output Compare, clear on compare, set on overflow */
 #  define ENET_TCSR_TMODE_PCPULSEL   (14 << ENET_TCSR_TMODE_SHIFT) /* Output Compare, pulse low on compare */
 #  define ENET_TCSR_TMODE_PCPULSEH   (15 << ENET_TCSR_TMODE_SHIFT) /* Output Compare, pulse high on compare */
+
 #define ENET_TCSR_TIE                (1 << 6)  /* Bit 6:  Timer interrupt enable */
 #define ENET_TCSR_TF                 (1 << 7)  /* Bit 7:  Timer Flag */
                                                /* Bits 8-31: Reserved */
 
 /* Timer Compare Capture Register (32-bit compare value) */
 
-/* Buffer Descriptors ********************************************************/
+/* Buffer Descriptors *******************************************************/
+
 /* Endian-independent descriptor offsets */
 
 #define DESC_STATUS1_OFFSET          (0)
@@ -625,11 +637,11 @@
 #  define RXDESC_BDU                 (1 << 7)
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Types
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Buffer Descriptors ********************************************************/
+/* Buffer Descriptors *******************************************************/
 
 /* Legacy Buffer Descriptor */
 
@@ -686,12 +698,12 @@ struct enet_desc_s
 #endif /* S32K1XX_USE_DBSWAP */
 #endif /* CONFIG_ENET_ENHANCEDBD */
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
- * Public Functions
- *****************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_ENET_H */

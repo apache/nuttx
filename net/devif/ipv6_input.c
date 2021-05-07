@@ -391,8 +391,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
     {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
 
-      /* Packets sent to ffx0 are reserved, ffx1 are interface-local, and ffx2
-       * are interface-local, and therefore, should not be forwarded
+      /* Packets sent to ffx0 are reserved, ffx1 are interface-local, and
+       * ffx2 are interface-local, and therefore, should not be forwarded
        */
 
       if ((ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff00)) &&
@@ -435,9 +435,11 @@ int ipv6_input(FAR struct net_driver_s *dev)
 #endif
           if (nxthdr != IP_PROTO_UDP)
             {
-              /* Not destined for us and not forwardable... drop the packet. */
+              /* Not destined for us and not forwardable...
+               * drop the packet.
+               */
 
-              nwarn("WARNING: Not destined for us; not forwardable... Dropping!\n");
+              nwarn("WARNING: Not destined for us... Dropping!\n");
               goto drop;
             }
         }

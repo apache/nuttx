@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/fire-stm32v2/src/stm32_enc28j60.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_enc28j60.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,14 +20,14 @@
 
 /* 2MBit SPI FLASH OR ENC28J60
  *
- * --- ------ -------------- -----------------------------------------------------
+ * -- ---- ------------ -----------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -----------------------------------------------------
+ * -- ---- ------------ -----------------------------------------------------
  *
- * 29  PA4    PA4-SPI1-NSS   10Mbit ENC28J60, SPI 2M FLASH
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 29 PA4 PA4-SPI1-NSS  10Mbit ENC28J60, SPI 2M FLASH
+ * 30 PA5 PA5-SPI1-SCK  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 31 PA6 PA6-SPI1-MISO 2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
+ * 32 PA7 PA7-SPI1-MOSI 2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
  */
 
 /****************************************************************************
@@ -62,15 +62,19 @@
 
 /* ENC28J60
  *
- * --- ------ -------------- -----------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  * PIN NAME   SIGNAL         NOTES
- * --- ------ -------------- -----------------------------------------------------
+ * --- ------ -------------- ------------------------------------------------
  *
  * 29  PA4    PA4-SPI1-NSS   10Mbit ENC28J60, SPI 2M FLASH
- * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen, 10Mbit ENC28J60, SPI 2M FLASH
- * 98  PE1    PE1-FSMC_NBL1  2.4" TFT + Touchscreen, 10Mbit EN28J60 Reset
+ * 30  PA5    PA5-SPI1-SCK   2.4" TFT + Touchscreen,
+ *                                    10Mbit ENC28J60, SPI 2M FLASH
+ * 31  PA6    PA6-SPI1-MISO  2.4" TFT + Touchscreen,
+ *                                    10Mbit ENC28J60, SPI 2M FLASH
+ * 32  PA7    PA7-SPI1-MOSI  2.4" TFT + Touchscreen,
+ *                                    10Mbit ENC28J60, SPI 2M FLASH
+ * 98  PE1    PE1-FSMC_NBL1  2.4" TFT + Touchscreen,
+ *                                    10Mbit EN28J60 Reset
  * 4   PE5    (no name)      10Mbps ENC28J60 Interrupt
  */
 
@@ -181,7 +185,8 @@ void arm_netinitialize(void)
 
   /* Assumptions:
    * 1) ENC28J60 pins were configured in up_spi.c early in the boot-up phase.
-   * 2) Clocking for the SPI1 peripheral was also provided earlier in boot-up.
+   * 2) Clocking for the SPI1 peripheral was also provided earlier in
+   *    boot-up.
    */
 
   spi = stm32_spibus_initialize(ENC28J60_SPI_PORTNO);
@@ -191,7 +196,7 @@ void arm_netinitialize(void)
       return;
     }
 
-  /* Take ENC28J60 out of reset (active low)*/
+  /* Take ENC28J60 out of reset (active low) */
 
   stm32_gpiowrite(GPIO_ENC28J60_RESET, true);
 

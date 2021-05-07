@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/sim/src/sim/up_simsmp.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -66,22 +51,7 @@ struct sim_cpuinfo_s
 static pthread_key_t g_cpu_key;
 static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
 
-/* These spinlocks are used in the SMP configuration in order to implement
- * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
- *
- * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
- *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
- * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
- *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
- *    blocks CPUm in the interrupt handler.
- *
- * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
- * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
- * so that it will be ready for the next pause operation.
- */
-
-volatile uint8_t g_cpu_wait[CONFIG_SMP_NCPUS];
-volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
+static pthread_t     g_timer_thread;
 
 /****************************************************************************
  * NuttX domain function prototypes
@@ -92,6 +62,10 @@ void sched_note_cpu_start(struct tcb_s *tcb, int cpu);
 void sched_note_cpu_pause(struct tcb_s *tcb, int cpu);
 void sched_note_cpu_resume(struct tcb_s *tcb, int cpu);
 #endif
+
+void up_irqinitialize(void);
+
+extern uint8_t g_nx_initstate;
 
 /****************************************************************************
  * Private Functions
@@ -121,7 +95,6 @@ static void *sim_idle_trampoline(void *arg)
 {
   struct sim_cpuinfo_s *cpuinfo = (struct sim_cpuinfo_s *)arg;
   uint64_t now = 0;
-  sigset_t set;
   int ret;
 
   /* Set the CPU number for the CPU thread */
@@ -133,16 +106,9 @@ static void *sim_idle_trampoline(void *arg)
       return NULL;
     }
 
-  /* Make sure the SIGUSR1 is not masked */
+  /* Initialize IRQ */
 
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return NULL;
-    }
+  up_irqinitialize();
 
   /* Let up_cpu_start() continue */
 
@@ -173,25 +139,27 @@ static void *sim_idle_trampoline(void *arg)
 }
 
 /****************************************************************************
- * Name: sim_handle_signal
- *
- * Description:
- *   This is the SIGUSR signal handler.  It implements the core logic of
- *   up_cpu_pause() on the thread of execution the simulated CPU.
- *
- * Input Parameters:
- *   arg - Standard sigaction arguments
- *
- * Returned Value:
- *   None
- *
+ * Name: sim_host_timer_handler
  ****************************************************************************/
 
-static void sim_handle_signal(int signo, siginfo_t *info, void *context)
+static void *sim_host_timer_handler(void *arg)
 {
-  int cpu = (int)((uintptr_t)pthread_getspecific(g_cpu_key));
+  /* Wait until OSINIT_OSREADY(5) */
 
-  up_cpu_paused(cpu);
+  while (g_nx_initstate < 5)
+    {
+      host_sleep(10 * 1000); /* 10ms */
+    }
+
+  /* Send a periodic timer event to CPU0 */
+
+  while (1)
+    {
+      pthread_kill(g_cpu_thread[0], SIGUSR1);
+      host_sleep(10 * 1000); /* 10ms */
+    }
+
+  return NULL;
 }
 
 /****************************************************************************
@@ -215,8 +183,6 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
 
 void sim_cpu0_start(void)
 {
-  struct sigaction act;
-  sigset_t set;
   int ret;
 
   g_cpu_thread[0] = pthread_self();
@@ -237,28 +203,12 @@ void sim_cpu0_start(void)
       return;
     }
 
-  /* Register the common signal handler for all threads */
+  /* NOTE: IRQ initialization will be done in up_irqinitialize */
 
-  act.sa_sigaction = sim_handle_signal;
-  act.sa_flags     = SA_SIGINFO;
-  sigemptyset(&act.sa_mask);
+  /* Create timer thread to send a periodic timer event */
 
-  ret = sigaction(SIGUSR1, &act, NULL);
-  if (ret < 0)
-    {
-      return;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return;
-    }
+  ret = pthread_create(&g_timer_thread,
+                       NULL, sim_host_timer_handler, NULL);
 }
 
 /****************************************************************************
@@ -359,81 +309,10 @@ errout_with_cond:
 }
 
 /****************************************************************************
- * Name: up_cpu_pause
- *
- * Description:
- *   Save the state of the current task at the head of the
- *   g_assignedtasks[cpu] task list and then pause task execution on the
- *   CPU.
- *
- *   This function is called by the OS when the logic executing on one CPU
- *   needs to modify the state of the g_assignedtasks[cpu] list for another
- *   CPU.
- *
- * Input Parameters:
- *   cpu - The index of the CPU to be stopped/
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
+ * Name: sim_send_ipi(int cpu)
  ****************************************************************************/
 
-int up_cpu_pause(int cpu)
+void sim_send_ipi(int cpu)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Notify of the pause event */
-
-  sched_note_cpu_pause(up_this_task(), cpu);
-#endif
-
-  /* Take the spinlock that will prevent the CPU thread from running */
-
-  g_cpu_wait[cpu]   = 1;
-  g_cpu_paused[cpu] = 1;
-
-  /* Signal the CPU thread */
-
   pthread_kill(g_cpu_thread[cpu], SIGUSR1);
-
-  /* Spin, waiting for the thread to pause */
-
-  while (g_cpu_paused[cpu] != 0)
-    {
-      sched_yield();
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: up_cpu_resume
- *
- * Description:
- *   Restart the cpu after it was paused via up_cpu_pause(), restoring the
- *   state of the task at the head of the g_assignedtasks[cpu] list, and
- *   resume normal tasking.
- *
- *   This function is called after up_cpu_pause in order resume operation of
- *   the CPU after modifying its g_assignedtasks[cpu] list.
- *
- * Input Parameters:
- *   cpu - The index of the CPU being re-started.
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int up_cpu_resume(int cpu)
-{
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Notify of the resume event */
-
-  sched_note_cpu_resume(up_this_task(), cpu);
-#endif
-
-  /* Release the spinlock that will alloc the CPU thread to continue */
-
-  g_cpu_wait[cpu] = 0;
-  return 0;
 }

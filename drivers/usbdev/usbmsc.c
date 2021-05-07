@@ -1,6 +1,5 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.c
- * Mass storage class device.  Bulk-only with SCSI subclass.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Mass storage class device.  Bulk-only with SCSI subclass. */
 
 /* References:
  *   "Universal Serial Bus Mass Storage Class, Specification Overview,"
@@ -1693,7 +1694,7 @@ int usbmsc_exportluns(FAR void *handle)
   if (priv->thpid <= 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_THREADCREATE),
-               (uint16_t)errno);
+               (uint16_t)priv->thpid);
       goto errout_with_lock;
     }
 

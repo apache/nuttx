@@ -258,6 +258,14 @@ static inline int boardctl_pmctrl(FAR struct boardioc_pm_ctrl_s *ctrl)
         ctrl->state = pm_querystate(ctrl->domain);
         break;
 
+      case BOARDIOC_PM_CHANGESTATE:
+        ret = pm_changestate(ctrl->domain, ctrl->state);
+        break;
+
+      case BOARDIOC_PM_CHECKSTATE:
+        ctrl->state = pm_checkstate(ctrl->domain);
+        break;
+
       default:
         ret = -EINVAL;
     }

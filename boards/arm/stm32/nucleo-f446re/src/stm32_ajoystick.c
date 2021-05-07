@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f446re/src/stm32_ajoystick.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -60,17 +45,17 @@
 
 /* Check for pre-requisites and pin conflicts */
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 #  if !defined(CONFIG_ADC)
 #    error CONFIG_ADC is required for the Itead joystick
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  elif !defined(CONFIG_STM32_ADC1)
 #    error CONFIG_STM32_ADC1 is required for Itead joystick
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  endif
-#endif /* CONFIG_AJOYSTICK */
+#endif /* CONFIG_INPUT_AJOYSTICK */
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 
 /* A no-ADC, buttons only version can be built for testing */
 
@@ -114,13 +99,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower);
+static ajoy_buttonset_t
+ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower);
 static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                        FAR struct ajoy_sample_s *sample);
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower);
-static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
-                         ajoy_buttonset_t press, ajoy_buttonset_t release,
-                         ajoy_handler_t handler, FAR void *arg);
+static ajoy_buttonset_t
+ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower);
+static void
+ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
+            ajoy_buttonset_t press, ajoy_buttonset_t release,
+            ajoy_handler_t handler, FAR void *arg);
 
 static void ajoy_disable(void);
 static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -128,6 +116,7 @@ static int ajoy_interrupt(int irq, FAR void *context, FAR void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Pin configuration for each Itead joystick button.  Index using AJOY_*
  * button definitions in include/nuttx/input/ajoystick.h.
  */
@@ -178,7 +167,8 @@ static FAR void *g_ajoyarg;
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t
+ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
 {
   iinfo("Supported: %02x\n", AJOY_SUPPORTED);
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
@@ -293,7 +283,8 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t
+ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
 {
   ajoy_buttonset_t ret = 0;
   int i;
@@ -494,4 +485,4 @@ int board_ajoy_initialize(void)
   return ret;
 }
 
-#endif /* CONFIG_AJOYSTICK */
+#endif /* CONFIG_INPUT_AJOYSTICK */

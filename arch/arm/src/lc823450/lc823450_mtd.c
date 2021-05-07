@@ -147,7 +147,8 @@ static void mtd_semgive(FAR sem_t *sem)
 static int lc823450_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks)
 {
-  finfo("dev=%s startblock=%d nblocks=%d\n", dev, startblock, nblocks);
+  finfo("dev=%p startblock=%jd nblocks=%zd\n",
+        dev, (intmax_t)startblock, nblocks);
   return OK;
 }
 
@@ -180,8 +181,8 @@ static ssize_t lc823450_bread(FAR struct mtd_dev_s *dev, off_t startblock,
       type = SDDR_RW_INC_BYTE;
     }
 
-  finfo("startblockr=%d, nblocks=%d buf=0x%08p type=%x\n",
-        startblock, nblocks, buf, type);
+  finfo("startblockr=%jd, nblocks=%zd buf=%p type=%lx\n",
+        (intmax_t)startblock, nblocks, buf, type);
 
   DEBUGASSERT(dev && buf);
 
@@ -215,9 +216,9 @@ static ssize_t lc823450_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   if (ret != OK)
     {
-      finfo("ERROR: Failed to read sector, ret=%d startblock=%d "
-            "nblocks=%d\n",
-            ret, startblock, nblocks);
+      finfo("ERROR: Failed to read sector, ret=%d startblock=%jd "
+            "nblocks=%zd\n",
+            ret, (intmax_t)startblock, nblocks);
       return ret;
     }
 
@@ -253,8 +254,8 @@ static ssize_t lc823450_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
       type = SDDR_RW_INC_BYTE;
     }
 
-  finfo("startblockr=%d, nblocks=%d buf=0x%08p type=%x\n",
-        startblock, nblocks, buf, type);
+  finfo("startblockr=%jd, nblocks=%zd buf=%p type=%lx\n",
+        (intmax_t)startblock, nblocks, buf, type);
 
   DEBUGASSERT(dev && buf);
 
@@ -288,9 +289,9 @@ static ssize_t lc823450_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   if (ret != OK)
     {
-      finfo("ERROR: Failed to write sector, ret=%d startblock=%d "
-            "nblocks=%d\n",
-            ret, startblock, nblocks);
+      finfo("ERROR: Failed to write sector, ret=%d startblock=%jd "
+            "nblocks=%zd\n",
+            ret, (intmax_t)startblock, nblocks);
       return ret;
     }
 
@@ -309,7 +310,7 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd,
   FAR struct mtd_geometry_s *geo;
   FAR void **ppv;
 
-  finfo("cmd=%xh, arg=%xh\n", cmd, arg);
+  finfo("cmd=%xh, arg=%lxh\n", cmd, arg);
 
   ret = mtd_semtake(&priv->sem);
   if (ret < 0)
@@ -343,7 +344,8 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd,
             ret = OK;
           }
 
-        finfo("blocksize=%d erasesize=%d neraseblocks=%d\n", geo->blocksize,
+        finfo("blocksize=%" PRId32 " erasesize=%" PRId32
+              " neraseblocks=%" PRId32 "\n", geo->blocksize,
               geo->erasesize, geo->neraseblocks);
         break;
 
@@ -425,8 +427,8 @@ static int mtd_mediainitialize(FAR struct lc823450_mtd_dev_s *dev)
   ret = lc823450_sdc_identifycard(dev->channel);
   if (ret != OK)
     {
-      finfo("ERROR: Failed to identify card: channel=%d ret=%d)\n",
-           dev->channel, ret);
+      finfo("ERROR: Failed to identify card: channel=%" PRId32 " ret=%d)\n",
+            dev->channel, ret);
       goto exit_with_error;
     }
 
@@ -435,7 +437,7 @@ static int mtd_mediainitialize(FAR struct lc823450_mtd_dev_s *dev)
       /* Try to change to High Speed DDR mode */
 
       ret = lc823450_sdc_changespeedmode(dev->channel, 4);
-      finfo("ch=%d DDR mode ret=%d \n", dev->channel, ret);
+      finfo("ch=%" PRId32 " DDR mode ret=%d \n", dev->channel, ret);
     }
   else
     {
@@ -458,7 +460,7 @@ static int mtd_mediainitialize(FAR struct lc823450_mtd_dev_s *dev)
       if (0 == ret)
         {
           ret = lc823450_sdc_setclock(dev->channel, 40000000, sysclk);
-          finfo("ch=%d HS mode ret=%d \n", dev->channel, ret);
+          finfo("ch=%" PRId32 " HS mode ret=%d \n", dev->channel, ret);
         }
     }
 
@@ -473,7 +475,7 @@ get_card_size:
       goto exit_with_error;
     }
 
-  finfo("blocksize=%d nblocks=%d\n", blocksize, nblocks);
+  finfo("blocksize=%ld nblocks=%ld\n", blocksize, nblocks);
 
   dev->nblocks = nblocks;
   dev->blocksize = blocksize;
@@ -487,7 +489,7 @@ get_card_size:
       lc823450_sdc_cachectl(dev->channel, 1);
     }
 
-  finfo("ch=%d size=%lld \n",
+  finfo("ch=%" PRId32 " size=%" PRId64 " \n",
         dev->channel, (uint64_t)blocksize * (uint64_t)nblocks);
 
 exit_with_error:
@@ -609,7 +611,7 @@ int lc823450_mtd_initialize(uint32_t devno)
   g_mtdmaster[ch] = lc823450_mtd_allocdev(ch);
   if (!g_mtdmaster[ch])
     {
-      finfo("Failed to create master partition: ch=%d\n", ch);
+      finfo("Failed to create master partition: ch=%" PRId32 "\n", ch);
       mtd_semgive(&g_sem);
       return -ENODEV;
     }
@@ -617,7 +619,8 @@ int lc823450_mtd_initialize(uint32_t devno)
   ret = mmcl_initialize(devno, g_mtdmaster[ch]);
   if (ret != OK)
     {
-      finfo("Failed to create block device on master partition: ch=%d\n",
+      finfo("Failed to create block device on master partition: "
+            "ch=%" PRId32 "\n",
             ch);
       kmm_free(g_mtdmaster[ch]);
       g_mtdmaster[ch] = NULL;
@@ -771,7 +774,7 @@ int lc823450_mtd_uninitialize(uint32_t devno)
   char devname[16];
   FAR struct lc823450_mtd_dev_s *priv;
   const uint32_t ch = 1;   /* SDC */
-  finfo("slot=%d \n", slot);
+  finfo("devno=%" PRId32 "\n", devno);
 
   DEBUGASSERT(devno == CONFIG_MTD_DEVNO_SDC);
 

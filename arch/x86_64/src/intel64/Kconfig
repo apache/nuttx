@@ -38,7 +38,7 @@ config ARCH_INTEL64_HAVE_XSAVE
     bool "XSAVE support"
     default y
 	---help---
-		Select to enable the use of XSAVE and FPU/SSE/AVX functions 
+		Select to enable the use of XSAVE and FPU/SSE/AVX functions
 		of x86_64
 
 config ARCH_INTEL64_HAVE_PCID
@@ -57,7 +57,7 @@ config ARCH_INTEL64_DISABLE_INT_INIT
     bool "Disable Initialization of 8259/APIC/IO-APIC"
     default n
 	---help---
-		Select to disable all initialization related to interrupt 
+		Select to disable all initialization related to interrupt
 		controllers. This is necessary if those are already
 		initialized, i.e. Jailhouse system.
 

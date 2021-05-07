@@ -1,36 +1,20 @@
 /****************************************************************************
- * sched/sched_removereadytorun.c
+ * sched/sched/sched_removereadytorun.c
  *
- *   Copyright (C) 2007-2009, 2012, 2016-2017 Gregory Nutt.
- *   All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -260,46 +244,11 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
                       &g_cpu_schedlock);
         }
 
-      /* Adjust global IRQ controls.  If irqcount is greater than zero,
-       * then this task/this CPU holds the IRQ lock
+      /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ
+       * controls will be done in the pause handler on the new CPU(cpu).
+       * If the task is scheduled on this CPU(me), do nothing because
+       * this CPU already has a critical section
        */
-
-      if (nxttcb->irqcount > 0)
-        {
-          /* Yes... make sure that scheduling logic on other CPUs knows
-           * that we hold the IRQ lock.
-           */
-
-          spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
-                      &g_cpu_irqlock);
-        }
-
-      /* No.. This CPU will be relinquishing the lock.  But this works
-       * differently if we are performing a context switch from an
-       * interrupt handler and the interrupt handler has established
-       * a critical section.  We can detect this case when
-       * g_cpu_nestcount[me] > 0.
-       */
-
-      else if (g_cpu_nestcount[me] <= 0)
-        {
-          /* Do nothing here
-           * NOTE: spin_clrbit() will be done in sched_resumescheduler()
-           */
-        }
-
-      /* Sanity check.  g_cpu_netcount should be greater than zero
-       * only while we are within the critical section and within
-       * an interrupt handler.  If we are not in an interrupt handler
-       * then there is a problem; perhaps some logic previously
-       * called enter_critical_section() with no matching call to
-       * leave_critical_section(), leaving the non-zero count.
-       */
-
-      else
-        {
-          DEBUGASSERT(up_interrupt_context());
-        }
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;
 

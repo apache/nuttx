@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_xdmac.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -39,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -167,7 +153,7 @@ static const struct sam_pidmap_s g_xdmac_rxchan[] =
   { SAM_PID_TC0,    XDMACH_TC0_RX    }, /* TC0 Receive */
   { SAM_PID_TC1,    XDMACH_TC1_RX    }, /* TC1 Receive */
   { SAM_PID_TC2,    XDMACH_TC2_RX    }, /* TC2 Receive */
-  { SAM_PID_TC3,    XDMACH_TC3_RX    }  /* TC3 Receive */
+  { SAM_PID_TC3,    XDMACH_TC3_RX    }, /* TC3 Receive */
 };
 
 #define NXDMAC_RXCHANNELS (sizeof(g_xdmac_rxchan) / sizeof(struct sam_pidmap_s))
@@ -195,7 +181,7 @@ static const struct sam_pidmap_s g_xdmac_txchan[] =
   { SAM_PID_DACC,   XDMACH_DACC_TX   }, /* DACC Transmit */
   { SAM_PID_SSC0,   XDMACH_SSC_TX    }, /* SSC Transmit */
   { SAM_PID_AES,    XDMACH_AES_TX    }, /* AES Transmit */
-  { SAM_PID_PWM1,   XDMACH_PWM1_TX   }  /* PWM01Transmit */
+  { SAM_PID_PWM1,   XDMACH_PWM1_TX   }, /* PWM01Transmit */
 };
 
 #define NXDMAC_TXCHANNELS (sizeof(g_xdmac_txchan) / sizeof(struct sam_pidmap_s))
@@ -1531,7 +1517,7 @@ static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
             {
               /* Yes... Terminate the transfer with an error? */
 
-              dmaerr("ERROR: DMA failed: %08x\n", chpending);
+              dmaerr("ERROR: DMA failed: %08" PRIx32 "\n", chpending);
               sam_dmaterminate(xdmach, -EIO);
             }
 
@@ -1548,7 +1534,8 @@ static int sam_xdmac_interrupt(int irq, void *context, FAR void *arg)
 
           else
             {
-              dmaerr("ERROR: Unexpected interrupt: %08x\n", chpending);
+              dmaerr("ERROR: Unexpected interrupt: %08" PRIx32 "\n",
+                     chpending);
               DEBUGPANIC();
             }
 
@@ -1956,7 +1943,9 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (xdmach->llhead)
     {
-      /* Save the callback info.  This will be invoked when the DMA completes */
+      /* Save the callback info.  This will be invoked when the DMA
+       * completes
+       */
 
       xdmach->callback = callback;
       xdmach->arg      = arg;

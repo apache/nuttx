@@ -1,46 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_emac.c
  *
- *   Copyright (C) 2014-2015, 2017-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * This logic derives from the SAM34D3 Ethernet driver.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Which used Atmel NoOS sample code for reference (only).  That Atmel
- * sample code has a BSD compatible license that requires this copyright
- * notice:
- *
- *   Copyright (c) 2012, Atmel Corporation
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the names NuttX nor Atmel nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -50,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -1018,7 +993,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
   sam_cmcc_invalidate((uintptr_t)rxdesc,
                       (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
 
-  ninfo("rxndx: %d\n", rxndx);
+  ninfo("rxndx: %" PRId32 "\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -1115,7 +1090,8 @@ static int sam_recvframe(struct sam_emac_s *priv)
               /* Frame size from the EMAC */
 
               dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
-              ninfo("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
+              ninfo("packet %d-%" PRId32 " (%d)\n",
+                    priv->rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor
@@ -1144,7 +1120,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               if (pktlen < dev->d_len)
                 {
-                  nerr("ERROR: Buffer size %d; frame size %d\n",
+                  nerr("ERROR: Buffer size %d; frame size %" PRId32 "\n",
                        dev->d_len, pktlen);
                   return -E2BIG;
                 }
@@ -1471,7 +1447,7 @@ static void sam_interrupt_work(FAR void *arg)
   imr = sam_getreg(priv, SAM_EMAC_IMR);
 
   pending = isr & ~(imr | EMAC_INT_UNUSED);
-  ninfo("isr: %08x pending: %08x\n", isr, pending);
+  ninfo("isr: %08" PRIx32 " pending: %08" PRIx32 "\n", isr, pending);
 
   /* Check for the completion of a transmission.  This should be done before
    * checking for received data (because receiving can cause another
@@ -1497,7 +1473,7 @@ static void sam_interrupt_work(FAR void *arg)
           clrbits = EMAC_TSR_RLE | sam_txinuse(priv);
           sam_txreset(priv);
 
-          nerr("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+          nerr("ERROR: Retry Limit Exceeded TSR: %08" PRIx32 "\n", tsr);
 
           regval = sam_getreg(priv, SAM_EMAC_NCR);
           regval |= EMAC_NCR_TXEN;
@@ -1508,7 +1484,7 @@ static void sam_interrupt_work(FAR void *arg)
 
       if ((tsr & EMAC_TSR_COL) != 0)
         {
-          nerr("ERROR: Collision occurred TSR: %08x\n", tsr);
+          nerr("ERROR: Collision occurred TSR: %08" PRIx32 "\n", tsr);
           clrbits |= EMAC_TSR_COL;
         }
 
@@ -1516,7 +1492,8 @@ static void sam_interrupt_work(FAR void *arg)
 
       if ((tsr & EMAC_TSR_TFC) != 0)
         {
-          nerr("ERROR: Transmit Frame Corruption due to AHB error: %08x\n",
+          nerr("ERROR: Transmit Frame Corruption due to AHB error: "
+               "%08" PRIx32 "\n",
                tsr);
           clrbits |= EMAC_TSR_TFC;
         }
@@ -1532,7 +1509,7 @@ static void sam_interrupt_work(FAR void *arg)
 
       if ((tsr & EMAC_TSR_UND) != 0)
         {
-          nerr("ERROR: Transmit Underrun TSR: %08x\n", tsr);
+          nerr("ERROR: Transmit Underrun TSR: %08" PRIx32 "\n", tsr);
           clrbits |= EMAC_TSR_UND;
         }
 
@@ -1569,7 +1546,7 @@ static void sam_interrupt_work(FAR void *arg)
 
       if ((rsr & EMAC_RSR_RXOVR) != 0)
         {
-          nerr("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          nerr("ERROR: Receiver overrun RSR: %08" PRIx32 "\n", rsr);
           clrbits |= EMAC_RSR_RXOVR;
         }
 
@@ -1586,7 +1563,7 @@ static void sam_interrupt_work(FAR void *arg)
 
       if ((rsr & EMAC_RSR_BNA) != 0)
         {
-          nerr("ERROR: Buffer not available RSR: %08x\n", rsr);
+          nerr("ERROR: Buffer not available RSR: %08" PRIx32 "\n", rsr);
           clrbits |= EMAC_RSR_BNA;
         }
 
@@ -1844,8 +1821,10 @@ static int sam_ifup(struct net_driver_s *dev)
   int ret;
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Configure the EMAC interface for normal operation. */
 

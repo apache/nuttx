@@ -24,6 +24,22 @@ config DRVR_MKRD
 		the selecting this option will also enable the BOARDIOC_MKRD
 		command that will support creation of RAM disks from applications.
 
+# ARCH needs to support memory access while CPU is running to be able to use
+# the LWL CONSOLE
+
+config ARCH_HAVE_RDWR_MEM_CPU_RUN
+	bool
+	default n
+
+config LWL_CONSOLE
+bool "Lightweight Link Console Support"
+	default n
+	depends on DEV_CONSOLE && ARCH_HAVE_RDWR_MEM_CPU_RUN
+	---help---
+		Use the lightweight link console which provides console over a
+		debug channel by means of shared memory.  A terminal application
+		for openocd as the debugger is available in tools/ocdconsole.py.
+
 menu "Buffering"
 
 config DRVR_WRITEBUFFER
@@ -95,6 +111,7 @@ source drivers/mmcsd/Kconfig
 source drivers/modem/Kconfig
 source drivers/mtd/Kconfig
 source drivers/eeprom/Kconfig
+source drivers/efuse/Kconfig
 source drivers/net/Kconfig
 source drivers/note/Kconfig
 source drivers/pipes/Kconfig
@@ -113,3 +130,4 @@ source drivers/syslog/Kconfig
 source drivers/platform/Kconfig
 source drivers/rf/Kconfig
 source drivers/rc/Kconfig
+source drivers/motor/Kconfig

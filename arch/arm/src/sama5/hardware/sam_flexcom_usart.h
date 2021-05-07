@@ -1,56 +1,40 @@
-/************************************************************************************************
- * arch/arm/src/sama5/hardware/sam3u_uart.h
- * Universal Synchronous Asynchronous Receiver Transmitter (FLEXUS) definitions for the SAMA5D2
+/****************************************************************************
+ * arch/arm/src/sama5/hardware/sam_flexcom_usart.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_FLEXUS_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_FLEXUS_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* USART register offsets ***********************************************************************/
+/* USART register offsets ***************************************************/
 
 #define SAM_FLEXUS_CR_OFFSET           0x0200 /* USART Control Register */
 #define SAM_FLEXUS_MR_OFFSET           0x0204 /* USART Mode Register */
@@ -85,7 +69,7 @@
 #define SAM_FLEXUS_WPSR_OFFSET         0x02e8 /* Write Protect Status Register (4) */
                                               /* 0x02ec-0x02fc: Reserved (USART) */
 
-/* USART register addresses **********************************************************************/
+/* USART register addresses *************************************************/
 
 #ifdef CONFIG_SAMA5_HAVE_FLEXCOM0
 #  define SAM_FLEXUS0_CR               (SAM_FLEXCOM0_VBASE+SAM_FLEXUS_CR_OFFSET)
@@ -241,7 +225,8 @@
 #  define SAM_FLEXUS4_WPSR             (SAM_FLEXCOM4_VBASE+SAM_FLEXUS_WPSR_OFFSET)
 #endif
 
-/* USART register bit definitions ****************************************************************/
+/* USART register bit definitions *******************************************/
+
 /* USART Control Register */
 
 #define FLEXUS_CR_RSTRX                (1 << 2)  /* Bit 2:  Reset Receiver */
@@ -281,18 +266,21 @@
 #  define FLEXUS_MR_MODE_IRDA          (8  << FLEXUS_MR_MODE_SHIFT) /* IrDA */
 #  define FLEXUS_MR_MODE_LINMASTER     (10 << FLEXUS_MR_MODE_SHIFT) /* LIN master */
 #  define FLEXUS_MR_MODE_LINSLAVE      (11 << FLEXUS_MR_MODE_SHIFT) /* LIN slave */
+
 #define FLEXUS_MR_USCLKS_SHIFT         (4)       /* Bits 4-5: Clock Selection */
 #define FLEXUS_MR_USCLKS_MASK          (3 << FLEXUS_MR_USCLKS_SHIFT)
 #  define FLEXUS_MR_USCLKS_MCK         (0 << FLEXUS_MR_USCLKS_SHIFT) /* MCK */
 #  define FLEXUS_MR_USCLKS_MCKDIV      (1 << FLEXUS_MR_USCLKS_SHIFT) /* MCK/DIV (DIV = 8) */
 #  define FLEXUS_MR_USCLKS_PMCPCK      (2 << FLEXUS_MR_USCLKS_SHIFT) /* PMC Programmable clock */
 #  define FLEXUS_MR_USCLKS_SCK         (3 << FLEXUS_MR_USCLKS_SHIFT) /* ExtenaleSCK */
+
 #define FLEXUS_MR_CHRL_SHIFT           (6)       /* Bits 6-7: Character Length */
 #define FLEXUS_MR_CHRL_MASK            (3 << FLEXUS_MR_CHRL_SHIFT)
 #  define FLEXUS_MR_CHRL_5BITS         (0 << FLEXUS_MR_CHRL_SHIFT) /* 5 bits */
 #  define FLEXUS_MR_CHRL_6BITS         (1 << FLEXUS_MR_CHRL_SHIFT) /* 6 bits */
 #  define FLEXUS_MR_CHRL_7BITS         (2 << FLEXUS_MR_CHRL_SHIFT) /* 7 bits */
 #  define FLEXUS_MR_CHRL_8BITS         (3 << FLEXUS_MR_CHRL_SHIFT) /* 8 bits */
+
 #define FLEXUS_MR_SYNC                 (1 << 8)  /* Bit 8: Synchronous Mode Select */
 #define FLEXUS_MR_PAR_SHIFT            (9)       /* Bits 9-11: Parity Type */
 #define FLEXUS_MR_PAR_MASK             (7 << FLEXUS_MR_PAR_SHIFT)
@@ -302,17 +290,20 @@
 #  define FLEXUS_MR_PAR_MARK           (3 << FLEXUS_MR_PAR_SHIFT) /* Mark: parity forced to 1 */
 #  define FLEXUS_MR_PAR_NONE           (4 << FLEXUS_MR_PAR_SHIFT) /* No parity */
 #  define FLEXUS_MR_PAR_MULTIDROP      (6 << FLEXUS_MR_PAR_SHIFT) /* Multidrop mode */
+
 #define FLEXUS_MR_NBSTOP_SHIFT         (12)      /* Bits 12-13: Number of Stop Bits */
 #define FLEXUS_MR_NBSTOP_MASK          (3 << FLEXUS_MR_NBSTOP_SHIFT)
 #  define FLEXUS_MR_NBSTOP_1           (0 << FLEXUS_MR_NBSTOP_SHIFT) /* 1 stop bit 1 stop bit */
 #  define FLEXUS_MR_NBSTOP_1p5         (1 << FLEXUS_MR_NBSTOP_SHIFT) /* 1.5 stop bits */
 #  define FLEXUS_MR_NBSTOP_2           (2 << FLEXUS_MR_NBSTOP_SHIFT) /* 2 stop bits 2 stop bits */
+
 #define FLEXUS_MR_CHMODE_SHIFT         (14)      /* Bits 14-15: Channel Mode */
 #define FLEXUS_MR_CHMODE_MASK          (3 << FLEXUS_MR_CHMODE_SHIFT)
 #  define FLEXUS_MR_CHMODE_NORMAL      (0 << FLEXUS_MR_CHMODE_SHIFT) /* Normal Mode */
 #  define FLEXUS_MR_CHMODE_ECHO        (1 << FLEXUS_MR_CHMODE_SHIFT) /* Automatic Echo */
 #  define FLEXUS_MR_CHMODE_LLPBK       (2 << FLEXUS_MR_CHMODE_SHIFT) /* Local Loopback */
 #  define FLEXUS_MR_CHMODE_RLPBK       (3 << FLEXUS_MR_CHMODE_SHIFT) /* Remote Loopback */
+
 #define FLEXUS_MR_MSBF                 (1 << 16) /* Bit 16: Most Significant Bit first */
 #define FLEXUS_MR_MODE9                (1 << 17) /* Bit 17: 9-bit Character Length */
 #define FLEXUS_MR_CLKO                 (1 << 18) /* Bit 18: Clock Output Select */
@@ -329,7 +320,8 @@
 #define FLEXUS_MR_MODSYNC              (1 << 30) /* Bit 30: Manchester Synchronization Mode */
 #define FLEXUS_MR_ONEBIT               (1 << 31) /* Bit 31: Start Frame Delimiter Selector */
 
-/* USART Interrupt Enable Register, USART Interrupt Disable Register, USART Interrupt Mask
+/* USART Interrupt Enable Register,
+ * USART Interrupt Disable Register, USART Interrupt Mask
  * Register, and USART Status Register common bit field definitions
  */
 
@@ -445,6 +437,7 @@
 #  define FLEXUS_MAN_TXPP_ALLZERO      (1 << FLEXUS_MAN_TXPP_SHIFT) /* ALL_ZERO */
 #  define FLEXUS_MAN_TXPP_ZEROONE      (2 << FLEXUS_MAN_TXPP_SHIFT) /* ZERO_ONE */
 #  define FLEXUS_MAN_TXPP_ONEZERO      (3 << FLEXUS_MAN_TXPP_SHIFT) /* ONE_ZERO */
+
 #define FLEXUS_MAN_TXMPOL              (1 << 12) /* Bit 12: Transmitter Manchester Polarity */
 #define FLEXUS_MAN_RXPL_SHIFT          (16)      /* Bits 16-19: Receiver Preamble Length */
 #define FLEXUS_MAN_RXPL_MASK           (15 << FLEXUS_MAN_RXPL_SHIFT)
@@ -455,6 +448,7 @@
 #  define FLEXUS_MAN_RXPP_ALLZERO      (1 << FLEXUS_MAN_RXPP_SHIFT) /* ALL_ZERO */
 #  define FLEXUS_MAN_RXPP_ZEROONE      (2 << FLEXUS_MAN_RXPP_SHIFT) /* ZERO_ONE */
 #  define FLEXUS_MAN_RXPP_ONEZERO      (3 << FLEXUS_MAN_RXPP_SHIFT) /* ONE_ZERO */
+
 #define FLEXUS_MAN_RXMPOL              (1 << 28) /* Bit 28: Receiver Manchester Polarity */
 #define FLEXUS_MAN_ONE                 (1 << 29) /* Bit 29: Must Be Set to 1 */
 #define FLEXUS_MAN_DRIFT               (1 << 30) /* Bit 30: Drift compensation */
@@ -467,6 +461,7 @@
 #  define FLEXUS_LINMR_NACT_PUBLISH    (0 << FLEXUS_LINMR_NACT_SHIFT) /* USART transmits response */
 #  define FLEXUS_LINMR_NACT_SUBSCRIBE  (1 << FLEXUS_LINMR_NACT_SHIFT) /* USART receives response */
 #  define FLEXUS_LINMR_NACT_IGNORE     (2 << FLEXUS_LINMR_NACT_SHIFT) /* USART does not transmit or receive response */
+
 #define FLEXUS_LINMR_PARDIS            (1 << 2)  /* Bit 2:  Parity Disable */
 #define FLEXUS_LINMR_CHKDIS            (1 << 3)  /* Bit 3:  Checksum Disable */
 #define FLEXUS_LINMR_CHKTYP            (1 << 4)  /* Bit 4:  Checksum Type */
@@ -512,11 +507,13 @@
 #  define FLEXUS_FMR_TXRDYM_ONE        (0 << FLEXUS_FMR_TXRDYM_SHIFT) /* TXRDY level 1 when can write one data */
 #  define FLEXUS_FMR_TXRDYM_TWO        (1 << FLEXUS_FMR_TXRDYM_SHIFT) /* TXRDY level 1 when can write two data */
 #  define FLEXUS_FMR_TXRDYM_FOUR       (2 << FLEXUS_FMR_TXRDYM_SHIFT) /* TXRDY level 1 when can write four data */
+
 #define FLEXUS_FMR_RXRDYM_SHIFT        (4)       /* Bits 4-5: Receiver Ready Mode */
 #define FLEXUS_FMR_RXRDYM_MASK         (3 << FLEXUS_FMR_RXRDYM_SHIFT)
 #  define FLEXUS_FMR_RXRDYM_ONE        (0 << FLEXUS_FMR_RXRDYM_SHIFT) /* TXRDY level 1 when can read one data */
 #  define FLEXUS_FMR_RXRDYM_TWO        (1 << FLEXUS_FMR_RXRDYM_SHIFT) /* TXRDY level 1 when can read two data */
 #  define FLEXUS_FMR_RXRDYM_FOUR       (2 << FLEXUS_FMR_RXRDYM_SHIFT) /* TXRDY level 1 when can read four data */
+
 #define FLEXUS_FMR_FRTSC               (1 << 7)  /* Bit 7: FIFO RTS pin Control enable */
 #define FLEXUS_FMR_TXFTHRES_SHIFT      (8)       /* Bits 8-13: Transmit FIFO Threshold */
 #define FLEXUS_FMR_TXFTHRES_MASK       (0x3f << FLEXUS_FMR_TXFTHRES_SHIFT)
@@ -537,7 +534,8 @@
 #define FLEXUS_FLR_RXFL_MASK           (0x3f << FLEXUS_FLR_RXFL_SHIFT)
 #  define FLEXUS_FLR_RXFL(n)           ((uint32_t)(n) << FLEXUS_FLR_RXFL_SHIFT)
 
-/* USART FIFO Interrupt Enable Register,  USART FIFO Interrupt Disable Register, USART FIFO
+/* USART FIFO Interrupt Enable Register,
+ *  USART FIFO Interrupt Disable Register, USART FIFO
  * Interrupt Mask Register, and USART FIFO Event Status Register.
  */
 
@@ -565,16 +563,16 @@
 #define FLEXUS_WPSR_WPVSRC_SHIFT       (8)       /* Bits 8-23: Write Protect Violation Source (USART only) */
 #define FLEXUS_WPSR_WPVSRC_MASK        (0xffff << FLEXUS_WPSR_WPVSRC_SHIFT)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_FLEXUS_H */

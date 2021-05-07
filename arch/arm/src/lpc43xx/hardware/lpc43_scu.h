@@ -1,51 +1,37 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_scu.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_SCU_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_SCU_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 /* Pin Groups */
 
@@ -130,7 +116,7 @@
 #define LPC43_SCU_PINTSEL0_OFFSET     0x0e00
 #define LPC43_SCU_PINTSEL1_OFFSET     0x0e04
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 /* Pin Groups */
 
@@ -186,7 +172,8 @@
 #define LPC43_SCU_PINTSEL0            (LPC43_SCU_BASE + LPC43_SCU_PINTSEL0_OFFSET)
 #define LPC43_SCU_PINTSEL1            (LPC43_SCU_BASE + LPC43_SCU_PINTSEL1_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
+
 /* Common Pin configuration register bit settings */
 
 #define SCU_PIN_MODE_SHIFT            (0)       /* Bits 0-2: Select pin function */
@@ -200,6 +187,7 @@
 #  define SCU_PIN_MODE_FUNC5          (5 << SCU_PIN_MODE_SHIFT) /* Function 5 */
 #  define SCU_PIN_MODE_FUNC6          (6 << SCU_PIN_MODE_SHIFT) /* Function 6 */
 #  define SCU_PIN_MODE_FUNC7          (7 << SCU_PIN_MODE_SHIFT) /* Function 7 */
+
 #define SCU_PIN_EPD                   (1 << 3)  /* Bit 3:  Enable pull-down resistor at pad */
 #define SCU_PIN_EPUN                  (1 << 4)  /* Bit 4:  Disable pull-up resistor at pad */
                                                 /* Bit 5:  Usage varies with pin type */
@@ -207,6 +195,7 @@
 #define SCU_PIN_ZIF                   (1 << 7)  /* Bit 7:  Input glitch filter */
                                                 /* Bits 8-9: Usage varies with pin type */
                                                 /* Bits 10-31: Reserved */
+
 /* Pin configuration registers for normal-drive pins (only):
  *
  *   P0_0 and P0_1
@@ -225,9 +214,11 @@
  *   PE_0 to PE_15
  *   PF_0 to PF_11
  */
-                                                /* Bits 0-4: Same as common bit definitions */
+
+                            /* Bits 0-4: Same as common bit definitions */
 #define SCU_NDPIN_EHS                 (1 << 5)  /* Bit 5:  EHS Select Slew rate */
                                                 /* Bits 6-31: Same as common bit definitions */
+
 /* Pin configuration registers for high-drive pins
  *
  *   P1_17
@@ -235,21 +226,26 @@
  *   P8_0 to P8_2
  *   PA_1 to PA_3
  */
-                                                /* Bits 0-7:  Same as common bit definitions */
+
+                            /* Bits 0-7:  Same as common bit definitions */
 #define SCU_HDPIN_EHD_SHIFT           (8)       /* Bits 8-9: Select drive strength */
 #define SCU_HDPIN_EHD_MASK            (3 << SCU_HDPIN_EHD_SHIFT)
 #  define SCU_HDPIN_EHD_NORMAL        (0 << SCU_HDPIN_EHD_SHIFT) /* Normal-drive: 4 mA drive strength */
 #  define SCU_HDPIN_EHD_MEDIUM        (1 << SCU_HDPIN_EHD_SHIFT) /* Medium-drive: 8 mA drive strength */
 #  define SCU_HDPIN_EHD_HIGH          (2 << SCU_HDPIN_EHD_SHIFT) /* High-drive: 14 mA drive strength */
 #  define SCU_HDPIN_EHD_ULTRA         (3 << SCU_HDPIN_EHD_SHIFT) /* Ultra high-drive: 20 mA drive strength */
+
                                                 /* Bits 10-31:  Reserved */
+
 /* Pin configuration registers for high-speed pins
  *
  * P3_3 and pins CLK0 to CLK3
  */
-                                                /* Bits 0-4: Same as common bit definitions */
+
+                            /* Bits 0-4: Same as common bit definitions */
 #define SCU_HSPIN_EHS                 (1 << 5)  /* Bit 5:  EHS Select Slew rate */
                                                 /* Bits 6-31: Same as common bit definitions */
+
 /* Pin configuration register for USB1 pins USB1_DP/USB1_DM */
 
 #define SCU_SFSUSB_AIM                (1 << 0)  /* Bit 0:  Differential data input AIP/AIM */
@@ -259,6 +255,7 @@
 #define SCU_SFSUSB_EPWR               (1 << 4)  /* Bit 4:  Power mode */
 #define SCU_SFSUSB_VBUS               (1 << 5)  /* Bit 5:  Enable the vbus_valid signal */
                                                 /* Bits 6-31:  Reserved */
+
 /* Pin configuration register for open-drain I2C-bus pins */
 
 #define SCU_SFSI2C0_SCL_EFP           (1 << 0)  /* Bit 0:  Select input glitch filter time constant for the SCL pin */
@@ -274,7 +271,9 @@
                                                 /* Bits 12-14: Reserved */
 #define SCU_SFSI2C0_SDA_ZIF           (1 << 15) /* Bit 15: Enable or disable input glitch filter for the SDA pin */
                                                 /* Bits 16-31: Reserved */
-/* ADC0 function select register.  The following pins are controlled by the ENAIO0 register:
+
+/* ADC0 function select register.
+ * The following pins are controlled by the ENAIO0 register:
  *
  *   Pin   ADC function  ENAIO0 register bit
  *   P4_3  ADC0_0        0
@@ -295,7 +294,8 @@
 #define SCU_ENAI00_ADC0_5             (1 << 5)  /* Select ADC0_5 */
 #define SCU_ENAI00_ADC0_6             (1 << 6)  /* Select ADC0_6 */
 
-/* ADC1 function select register.  The following pins are controlled by the ENAIO1 register:
+/* ADC1 function select register.
+ * The following pins are controlled by the ENAIO1 register:
  *
  *   Pin   ADC function  ENAIO0 register bit
  *   PC_3  ADC1_0        0
@@ -318,7 +318,8 @@
 #define SCU_ENAI01_ADC1_6             (1 << 6)  /* Select ADC1_6 */
 #define SCU_ENAI01_ADC1_7             (1 << 7)  /* Select ADC1_7 */
 
-/* Analog function select register.  The following pins are controlled by the ENAIO2 register:
+/* Analog function select register.
+ * The following pins are controlled by the ENAIO2 register:
  *
  *   Pin   ADC function         ENAIO0 register bit
  *   P4_4  DAC                  0
@@ -328,12 +329,16 @@
 #define SCU_ENAI02_DAC                (1 << 0)  /* Select DAC */
 #define SCU_ENAI02_BG                 (1 << 4)  /* Select band gap output */
 
-/* EMC clock delay register.  The value 0x1111 corresponds to about 0.5 ns of delay */
+/* EMC clock delay register.
+ * The value 0x1111 corresponds to about 0.5 ns of delay
+ */
 
 #define SCU_EMCDELAYCLK_SHIFT         (0)       /* Bits 0-15: EMC_CLKn SDRAM clock output delay */
 #define SCU_EMCDELAYCLK_MASK          (0xffff << SCU_EMCDELAYCLK_SHIFT)
 #  define SCU_EMCDELAYCLK(n)          ((n) << SCU_EMCDELAYCLK_SHIFT) /* 0=no delay, N*0x1111 = N*0.5 ns delay */
+
                                                 /* Bits 16-31:  Reserved */
+
 /* Pin interrupt select register 0 */
 
 #define SCU_GPIO_PORT0                0
@@ -441,16 +446,16 @@
 
 #define LPC43_SDMMC_DELAY_DEFAULT     (SCU_SDMMC_SAMPLE_DELAY(9) | SCU_SDMMC_DRV_DELAY(6))
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_SCU_H */

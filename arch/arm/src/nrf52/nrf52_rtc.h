@@ -50,6 +50,15 @@
 #define NRF52_RTC_ACKINT(d, s)            ((d)->ops->ackint(d, s))
 #define NRF52_RTC_ENABLEEVT(d, s)         ((d)->ops->enableevt(d, s))
 #define NRF52_RTC_DISABLEEVT(d, s)        ((d)->ops->disableevt(d, s))
+#define NRF52_RTC_GETBASE(d)              ((d)->ops->getbase(d))
+
+/* These are defined for direct access to registers, which is needed in some
+ * critical parts where access speed is important
+ */
+
+#define NRF52_RTC_GETCOUNTER_REG(base)    (getreg32(base + NRF52_RTC_COUNTER_OFFSET))
+#define NRF52_RTC_SETCC_REG(base, ch, cc) (putreg32(cc, base + NRF52_RTC_CC_OFFSET(ch)))
+#define NRF52_RTC_GETCC_REG(base, ch)     (getreg32(base + NRF52_RTC_CC_OFFSET(ch)))
 
 /****************************************************************************
  * Public Types
@@ -116,6 +125,10 @@ struct nrf52_rtc_ops_s
 
   CODE int (*enableevt)(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
   CODE int (*disableevt)(FAR struct nrf52_rtc_dev_s *dev, uint8_t evt);
+
+  /* Utility */
+
+  CODE uint32_t (*getbase)(FAR struct nrf52_rtc_dev_s *dev);
 };
 
 /****************************************************************************

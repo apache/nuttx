@@ -743,7 +743,7 @@ struct ieee802154_frame_meta_s
 
   enum ieee802154_uwbprf_e uwbprf;
 
-  /* The UWB preamble symbol repititions
+  /* The UWB preamble symbol repetitions
    *  Should be one of:
    *    0, 16, 64, 1024, 4096
    */
@@ -848,7 +848,7 @@ struct ieee802154_data_ind_s
 
   enum ieee802154_uwbprf_e uwb_prf;
 
-  /* The UWB preamble symbol repititions
+  /* The UWB preamble symbol repetitions
    *  Should be one of:
    *    0, 16, 64, 1024, 4096
    */

@@ -1,60 +1,47 @@
-/********************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_syscreg.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_SYSCREG_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_SYSCREG_H
 
-/********************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/********************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************/
+ ****************************************************************************/
 
-/* SYSCREG register base address offset into the APB0 domain ********************************************/
+/* SYSCREG register base address offset into the APB0 domain ****************/
 
 #define LPC31_SYSCREG_VBASE                    (LPC31_APB0_VADDR+LPC31_APB0_SYSCREG_OFFSET)
 #define LPC31_SYSCREG_PBASE                    (LPC31_APB0_PADDR+LPC31_APB0_SYSCREG_OFFSET)
 
-/* SYSCREG register offsets (with respect to the SYSCREG base) ******************************************/
+/* SYSCREG register offsets (with respect to the SYSCREG base) **************/
+
 /* Miscellaneous system configuration registers, part1 */
-                                                       /* 0x000-0x004: Reserved */
+
+                                             /* 0x000-0x004: Reserved */
 #define LPC31_SYSCREG_EBIMPMCPRIO_OFFSET       0x008 /* Priority of MPMC channel for EBI interface */
 #define LPC31_SYSCREG_EBNANDCPRIO_OFFSET       0x00c /* Priority of NAND controller channel for EBI interface */
 #define LPC31_SYSCREG_EBIUNUSEDPRIO_OFFSET     0x010 /* Priority of unused channel */
@@ -71,7 +58,7 @@
 #define LPC31_SYSCREG_USB_ATXPLLPDREG_OFFSET   0x030 /* Power down register of USB ATX PLL */
 #define LPC31_SYSCREG_USB_OTGCFG_OFFSET        0x034 /* USB OTG configuration register */
 #define LPC31_SYSCREG_USB_OTGPORTINDCTL_OFFSET 0x038 /* USB OTG port indicator LED control outputs */
-                                                       /* 0x03c: Reserved */
+                                                     /* 0x03c: Reserved */
 #define LPC31_SYSCREG_USB_PLLNDEC_OFFSET       0x040 /* USB OTG PLL configuration register NOEC */
 #define LPC31_SYSCREG_USB_PLLMDEC_OFFSET       0x044 /* USB OTG PLL configuration register MDEC */
 #define LPC31_SYSCREG_USB_PLLPDEC_OFFSET       0x048 /* USB OTG PLL configuration register PDEC */
@@ -99,7 +86,8 @@
 
 #define LPC31_SYSCREG_AHB0EXTPRIO_OFFSET       0x080 /* Priority of the AHB masters */
 #define LPC31_SYSCREG_ARM926SHADOWPTR_OFFSET   0x084 /* Memory mapping */
-                                                       /* 0x088-0x08c reserved */
+                                                     /* 0x088-0x08c reserved */
+
 /* Pin multiplexing control registers */
 
 #define LPC31_SYSCREG_MUX_LCDEBISEL_OFFSET     0x090 /* Selects between lcd_interface and EBI pins */
@@ -210,7 +198,8 @@
 #define LPC31_SYSCREG_PAD_ESHCTRLSUP4_OFFSET   0x22c /* Control pad at 1.8 and 3.3V (Nandflash/EBI pads) */
 #define LPC31_SYSCREG_PAD_ESHCTRLSUP8_OFFSET   0x230 /* Control pad at 1.8 and 3.3V (LCD interface/SDRAM pads) */
 
-/* SYSCREG register (virtual) addresses *****************************************************************/
+/* SYSCREG register (virtual) addresses *************************************/
+
 /* Miscellaneous system configuration registers, part1 */
 
 #define LPC31_SYSCREG_EBIMPMCPRIO              (LPC31_SYSCREG_VBASE+LPC31_SYSCREG_EBIMPMCPRIO_OFFSET)
@@ -365,7 +354,8 @@
 #define LPC31_SYSCREG_PAD_ESHCTRLSUP4          (LPC31_SYSCREG_VBASE+LPC31_SYSCREG_PAD_ESHCTRLSUP4_OFFSET)
 #define LPC31_SYSCREG_PAD_ESHCTRLSUP8          (LPC31_SYSCREG_VBASE+LPC31_SYSCREG_PAD_ESHCTRLSUP8_OFFSET)
 
-/* SYSCREG register bit definitions *********************************************************************/
+/* SYSCREG register bit definitions *****************************************/
+
 /* Miscellaneous system configuration registers, part1 */
 
 /* SYSCREG_EBIMPMCPRIO, address 0x13002808
@@ -397,6 +387,7 @@
 #  define SYSCREG_ABCCFG_USBOTG_EXT16            (5 << SYSCREG_ABCCFG_USBOTG_SHIFT)     /* Extend to 16-beat */
 #  define SYSCREG_ABCCFG_USBOTG_SPLIT4W          (6 << SYSCREG_ABCCFG_USBOTG_SHIFT)     /* Split to 4-beat */
 #  define SYSCREG_ABCCFG_USBOTG_EXT32            (7 << SYSCREG_ABCCFG_USBOTG_SHIFT)     /* extend to 32-beat */
+
 #define SYSCREG_ABCCFG_ARM926EJSI_SHIFT          (6)       /* Bits 6-8: ARM926EJS instruction AHB bus bandwidth control */
 #define SYSCREG_ABCCFG_ARM926EJSI_MASK           (7 << SYSCREG_ABCCFG_ARM926EJSI_SHIFT)
 #  define SYSCREG_ABCCFG_ARM926EJSI_NORMAL       (0 << SYSCREG_ABCCFG_ARM926EJSI_SHIFT) /* Normal mode */
@@ -407,6 +398,7 @@
 #  define SYSCREG_ABCCFG_ARM926EJSI_EXT16        (5 << SYSCREG_ABCCFG_ARM926EJSI_SHIFT) /* Extend to 16-beat */
 #  define SYSCREG_ABCCFG_ARM926EJSI_SPLIT4W      (6 << SYSCREG_ABCCFG_ARM926EJSI_SHIFT) /* Split to 4-beat */
 #  define SYSCREG_ABCCFG_ARM926EJSI_EXT32        (7 << SYSCREG_ABCCFG_ARM926EJSI_SHIFT) /* extend to 32-beat */
+
 #define SYSCREG_ABCCFG_ARM926EJSD_SHIFT          (3)       /* Bits 3-5: ARM926EJS data AHB bus bandwidth control */
 #define SYSCREG_ABCCFG_ARM926EJSD_MASK           (7 << SYSCREG_ABCCFG_ARM926EJSD_SHIFT)
 #  define SYSCREG_ABCCFG_ARM926EJSD_NORMAL       (0 << SYSCREG_ABCCFG_ARM926EJSD_SHIFT) /* Normal mode */
@@ -417,6 +409,7 @@
 #  define SYSCREG_ABCCFG_ARM926EJSD_EXT16        (5 << SYSCREG_ABCCFG_ARM926EJSD_SHIFT) /* Extend to 16-beat */
 #  define SYSCREG_ABCCFG_ARM926EJSD_SPLIT4W      (6 << SYSCREG_ABCCFG_ARM926EJSD_SHIFT) /* Split to 4-beat */
 #  define SYSCREG_ABCCFG_ARM926EJSD_EXT32        (7 << SYSCREG_ABCCFG_ARM926EJSD_SHIFT) /* extend to 32-beat */
+
 #define SYSCREG_ABCCFG_DMA_SHIFT                 (0)       /* Bits 0-2: 2:0 DMA AHB bus bandwidth control */
 #define SYSCREG_ABCCFG_DMA_MASK                  (7 << SYSCREG_ABCCFG_DMA_SHIFT)
 #  define SYSCREG_ABCCFG_DMA_NORMAL              (0 << SYSCREG_ABCCFG_DMA_SHIFT)        /* Normal mode */
@@ -440,6 +433,7 @@
 #define SYSCREG_MCIDELAYMODES_DELAYCELLS_MASK    (15 << SYSCREG_MCIDELAYMODES_DELAYCELLS_SHIFT)
 
 /* USB configuration registers */
+
 /* USB_ATXPLLPDREG address 0x13002830 */
 
 #define SYSCREG_USB_ATXPLLPDREG_PWRDOWN          (1 << 0)  /* Bit 0: Powerdown */
@@ -489,6 +483,7 @@
 #define SYSCREG_USB_PLLSELP_MASK                 (15 << SYSCREG_USB_PLLSELP_SHIFT)
 
 /* ISRAM/ISROM configuration registers */
+
 /* SYSCREG_ISRAM0_LATENCYCFG address 0x13002858 */
 
 #define SYSCREG_ISRAM0_LATENCYCFG_SHIFT          (0)       /* Bits 0-1:  Number of waitstates */
@@ -505,6 +500,7 @@
 #define SYSCREG_ISROM_LATENCYCFG_MASK            (3 << SYSCREG_ISROM_LATENCYCFG_SHIFT)
 
 /* MPMC configuration registers */
+
 /* SYSCREG_AHB_MPMC_MISC (address 0x13002864 */
 
 #define SYSCREG_MPMC_MISC_REL1CONFIG             (1 << 8)  /* Bit 8:  Static memory address mode select */
@@ -551,6 +547,7 @@
 #define SYSCREG_MPMC_TESTMODE1_HSENABLE_MASK     (0xff << SYSCREG_MPMC_TESTMODE1_HSENABLE_SHIFT)
 
 /* Miscellaneous system configuration registers, part 2 */
+
 /* AHB0EXTPRIO address 0x13002880 */
 
 #define SYSCREG_AHB0EXTPRIO_USBOTG               (1 << 3)  /* Bit 3:  USBOTG has higher priority */
@@ -559,6 +556,7 @@
 #define SYSCREG_AHB0EXTPRIO_DMA                  (1 << 0)  /* Bit 0:  DMA has higher priority */
 
 /* Pin multiplexing control registers */
+
 /* SYSCREG_MUX_LCDEBISEL address 0x13002890 */
 
 #define SYSCREG_MUX_LCDEBISEL_EBIMPMC            (1 << 0)  /* Bit 0:  Selects between LCD and EBI/MPMC pins */
@@ -580,6 +578,7 @@
 #define SYSCREG_MUX_I2STXPCMSEL_PCM              (1 << 0)  /* Bit 0:  Selects between I2STX_0 and IPINT_1 pins */
 
 /* Pad configuration registers */
+
 /* SYSCREG_PAD_padname addresses 0x130028a4 to 0x13002a28 */
 
 #define SYSCREG_PAD_P2                           (1 << 1)  /* Bit 1: The logic pin p2 of the pad */
@@ -596,16 +595,17 @@
 /* SYSCREG_ESHCTRLSUP8 address 0x13002a2c */
 
 #define SYSCREG_PAD_ESHCTRLSUP8_LESS             (1 << 0)  /* Bit 0: Domain SUP8 switching less noise */
-/********************************************************************************************************
+
+/****************************************************************************
  * Public Types
- ********************************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************************
- * Public Functions
- ********************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_SYSCREG_H */

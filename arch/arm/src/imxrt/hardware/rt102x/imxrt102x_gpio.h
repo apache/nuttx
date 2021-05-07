@@ -1,5 +1,5 @@
-/*****************************************************************************
- * arch/arm/src/imxrt/hardware/rt102x/imxrt105x_gpio.h
+/****************************************************************************
+ * arch/arm/src/imxrt/hardware/rt102x/imxrt102x_gpio.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -33,23 +33,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_GPIO_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_GPIO_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets **********************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_GPIO_DR_OFFSET     0x0000  /* GPIO data register */
 #define IMXRT_GPIO_GDIR_OFFSET   0x0004  /* GPIO direction register */
@@ -63,7 +63,7 @@
 #define IMXRT_GPIO_CLEAR_OFFSET  0x0088  /* GPIO data register CLEAR */
 #define IMXRT_GPIO_TOGGLE_OFFSET 0x008c  /* GPIO data register TOGGLE */
 
-/* Register addresses ********************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_GPIO1_DR           (IMXRT_GPIO1_BASE + IMXRT_GPIO_DR_OFFSET)
 #define IMXRT_GPIO1_GDIR         (IMXRT_GPIO1_BASE + IMXRT_GPIO_GDIR_OFFSET)

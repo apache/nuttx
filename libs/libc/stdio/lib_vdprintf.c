@@ -2,7 +2,7 @@
  * libs/libc/stdio/lib_vdprintf.c
  *
  *   Copyright (C) 2012 Andrew Tridgell. All rights reserved.
- *   Authors: Author: Andrew Tridgell <andrew@tridgell.net>
+ *   Authors: Andrew Tridgell <andrew@tridgell.net>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,6 @@ int vdprintf(int fd, FAR const IPTR char *fmt, va_list ap)
 
   /* Wrap the fd in a stream object and let lib_vsprintf do the work. */
 
-   lib_rawoutstream(&rawoutstream, fd);
-   return lib_vsprintf(&rawoutstream.public, fmt, ap);
+  lib_rawoutstream(&rawoutstream, fd);
+  return lib_vsprintf(&rawoutstream.public, fmt, ap);
 }

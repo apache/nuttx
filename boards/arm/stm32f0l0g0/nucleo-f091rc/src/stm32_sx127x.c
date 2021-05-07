@@ -1,6 +1,5 @@
 /****************************************************************************
  * boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_sx127x.c
- * This logic is specific for RFM98 modules (433MHz)
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/input/ajoystick.h
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -66,11 +51,12 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_AJOYSTICK_NPOLLWAITERS
-#  define CONFIG_AJOYSTICK_NPOLLWAITERS 2
+#ifndef CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS
+#  define CONFIG_INPUT_AJOYSTICK_NPOLLWAITERS 2
 #endif
 
 /* Joystick Interface *******************************************************/
+
 /* These definitions provide the meaning of all of the bits that may be
  * reported in the ajoy_buttonset_t bitset.
  */
@@ -140,9 +126,10 @@
  * Description: Specify the set of button events that can cause a poll()
  *              to awaken.  The default is all button depressions and all
  *              button releases (all supported buttons);
- * Argument:    A read-only pointer to an instance of struct ajoy_pollevents_s
- * Return:      Zero (OK) on success.  Minus one will be returned on failure
- *              with the errno value set appropriately.
+ * Argument:    A read-only pointer to an instance of struct
+ *              ajoy_pollevents_s
+ * Return:      Zero (OK) on success.  Minus one will be returned on
+ *              failure with the errno value set appropriately.
  */
 
 #define AJOYIOC_POLLEVENTS  _AJOYIOC(0x0002)
@@ -169,9 +156,9 @@
 
 typedef uint8_t ajoy_buttonset_t;
 
-/* A reference to this structure is provided with the AJOYIOC_POLLEVENTS IOCTL
- * command and describes the conditions under which the client would like
- * to receive notification.
+/* A reference to this structure is provided with the AJOYIOC_POLLEVENTS
+ * IOCTL command and describes the conditions under which the client would
+ * like to receive notification.
  */
 
 struct ajoy_pollevents_s
@@ -234,24 +221,30 @@ struct ajoy_lowerhalf_s
 {
   /* Return the set of buttons supported on the analog joystick device */
 
-  CODE ajoy_buttonset_t (*al_supported)(FAR const struct ajoy_lowerhalf_s *lower);
+  CODE ajoy_buttonset_t (*al_supported)
+                        (FAR const struct ajoy_lowerhalf_s *lower);
 
-  /* Return the current state of all analog joystick position and button data */
+  /* Return the current state of all analog joystick position
+   * and button data
+   */
 
   CODE int (*al_sample)(FAR const struct ajoy_lowerhalf_s *lower,
                         FAR struct ajoy_sample_s *sample);
 
   /* Return the current state of button data (only) */
 
-  CODE ajoy_buttonset_t (*al_buttons)(FAR const struct ajoy_lowerhalf_s *lower);
+  CODE ajoy_buttonset_t (*al_buttons)
+                        (FAR const struct ajoy_lowerhalf_s *lower);
 
-  /* Enable interrupts on the selected set of joystick buttons.  An empty
-   * set will disable all interrupts.
+  /* Enable interrupts on the selected set of joystick buttons.
+   * An empty set will disable all interrupts.
    */
 
   CODE void (*al_enable)(FAR const struct ajoy_lowerhalf_s *lower,
-                         ajoy_buttonset_t press, ajoy_buttonset_t release,
-                         ajoy_handler_t handler, FAR void *arg);
+                         ajoy_buttonset_t press,
+                         ajoy_buttonset_t release,
+                         ajoy_handler_t handler,
+                         FAR void *arg);
 };
 
 /****************************************************************************

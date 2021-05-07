@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f429i-disco/src/stm32_extmem.c
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -86,17 +71,23 @@
 
 /* GPIO configurations common to most external memories */
 
-static const uint32_t g_sdram_config[] = {
+static const uint32_t g_sdram_config[] =
+{
   /* 16 data lines */
+
   GPIO_FMC_D0, GPIO_FMC_D1, GPIO_FMC_D2, GPIO_FMC_D3,
   GPIO_FMC_D4, GPIO_FMC_D5, GPIO_FMC_D6, GPIO_FMC_D7,
   GPIO_FMC_D8, GPIO_FMC_D9, GPIO_FMC_D10, GPIO_FMC_D11,
   GPIO_FMC_D12, GPIO_FMC_D13, GPIO_FMC_D14, GPIO_FMC_D15,
+
   /* 12 address lines */
+
   GPIO_FMC_A0, GPIO_FMC_A1, GPIO_FMC_A2, GPIO_FMC_A3,
   GPIO_FMC_A4, GPIO_FMC_A5, GPIO_FMC_A6, GPIO_FMC_A7,
   GPIO_FMC_A8, GPIO_FMC_A9, GPIO_FMC_A10, GPIO_FMC_A11,
+
   /* control lines */
+
   GPIO_FMC_SDCKE1, GPIO_FMC_SDNE1, GPIO_FMC_SDNWE, GPIO_FMC_NBL0,
   GPIO_FMC_SDNRAS, GPIO_FMC_NBL1, GPIO_FMC_BA0, GPIO_FMC_BA1,
   GPIO_FMC_SDCLK, GPIO_FMC_SDNCAS,
@@ -127,12 +118,14 @@ void stm32_sdram_initialize(void)
   volatile int count;
 
   /* Enable GPIOs as FMC / memory pins */
+
   for (i = 0; i < NUM_SDRAM_GPIOS; i++)
     {
       stm32_configgpio(g_sdram_config[i]);
     }
 
   /* Enable AHB clocking to the FMC */
+
   stm32_fmc_enable();
 
   /* Configure and enable the SDRAM bank1
@@ -141,6 +134,7 @@ void stm32_sdram_initialize(void)
    *   90MHz = 11,11 ns
    *   All timings from the datasheet for Speedgrade -7 (=7ns)
    */
+
   val = FMC_SDCR_RPIPE_1 |      /* rpipe = 1 hclk */
     FMC_SDCR_SDCLK_2X |         /* sdclk = 2 hclk */
     FMC_SDCR_CAS_LATENCY_3 |    /* cas latency = 3 cycles */
@@ -161,6 +155,7 @@ void stm32_sdram_initialize(void)
   stm32_fmc_sdram_set_timing(2, val);
 
   /* SDRAM Initialization sequence */
+
   stm32_fmc_sdram_command(STM32_SDRAM_CLKEN);   /* Clock enable command */
   for (count = 0; count < 10000; count++);      /* Delay */
   stm32_fmc_sdram_command(STM32_SDRAM_PALL);    /* Precharge ALL command */
@@ -173,8 +168,10 @@ void stm32_sdram_initialize(void)
    * Refresh_Rate = 7.81us
    * Counter = (FMC_CLK * Refresh_Rate) - 20
    */
+
   stm32_fmc_sdram_set_refresh_rate(683);
 
   /* Disable write protection */
-  // stm32_fmc_sdram_write_protect(2, false);
+
+  /* stm32_fmc_sdram_write_protect(2, false); */
 }

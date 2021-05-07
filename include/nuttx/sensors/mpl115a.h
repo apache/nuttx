@@ -1,63 +1,57 @@
-/********************************************************************************************
- * drivers/sensors/mpl115a.h
+/****************************************************************************
+ * include/nuttx/sensors/mpl115a.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_MPL115A_H
 #define __INCLUDE_NUTTX_SENSORS_MPL115A_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* Configuration ****************************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Prerequisites:
  *
  * CONFIG_SENSORS_MPL115A
  *   Enables support for the MPL115A driver
  * CONFIG_MPL115A_REGDEBUG
- *   Enable very low register-level debug output.  Requires CONFIG_DEBUG_FEATURES.
+ *   Enable very low register-level debug output.
+ *  Requires CONFIG_DEBUG_FEATURES.
  */
 
-/* There are two types of MPL115A chips. The MPL115A1 communicates with the target CPU
- * via a SPI interface. The MPL115A2 communicates via I2C interface.
+/* There are two types of MPL115A chips.
+ * The MPL115A1 communicates with the target CPU via a SPI interface.
+ * The MPL115A2 communicates via I2C interface.
  * Note: This driver only supports MPL115A1 (SPI Interface).
  */
 
-/* SPI **************************************************************************************/
+/* SPI **********************************************************************/
+
 /* The device always operates in mode 0 */
 
 #define MPL115A_SPI_MODE            SPIDEV_MODE0 /* Mode 0 */
@@ -66,7 +60,8 @@
 
 #define MPL115A_SPI_MAXFREQUENCY    800000       /* 8MHz */
 
-/* MPL115A Registers ************************************************************************/
+/* MPL115A Registers ********************************************************/
+
 /* Register Addresses */
 
 #define MPL115A_BASE_CMD            0x80
@@ -85,15 +80,15 @@
                                           /* 0x0c - 0x11 are reserved */
 #define MPL115A_CONVERT             0x12  /* Start Pressure and Temperature Conversion */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 struct spi_dev_s;
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

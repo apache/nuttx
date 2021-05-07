@@ -1,36 +1,20 @@
 /****************************************************************************
  * video/videomode/edid_dump.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Derives from logic in FreeBSD which has an compatible 2-clause BSD
- * license:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Copyright (c) 2006 Itronix Inc. All rights reserved.
- *   Written by Garrett D'Amore for Itronix Inc.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE NETBSD FOUNDATION BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -99,19 +83,19 @@ void edid_dump(FAR const struct edid_info_s *edid)
       switch (edid->edid_video_input & EDID_DISPLAY_INPUT_LEVELS_MASK)
         {
         case EDID_DISPLAY_INPUT_LEVEL_1:
-          syslog(LOG_INFO, "%-16s-0.7, 0.3V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-0.7, 0.3V\n", "", "Analog:");
           break;
 
         case EDID_DISPLAY_INPUT_LEVEL_2:
-          syslog(LOG_INFO, "%-16s-0.714, 0.286V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-0.714, 0.286V\n", "", "Analog:");
           break;
 
         case EDID_DISPLAY_INPUT_LEVEL_3:
-          syslog(LOG_INFO, "%-16s-1.0, 0.4V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-1.0, 0.4V\n", "", "Analog:");
           break;
 
         case EDID_DISPLAY_INPUT_LEVEL_4:
-          syslog(LOG_INFO, "%-16s-0.7, 0.0V\n", "", "Analog:");
+          syslog(LOG_INFO, "%-16s%s-0.7, 0.0V\n", "", "Analog:");
           break;
         }
 
@@ -122,7 +106,7 @@ void edid_dump(FAR const struct edid_info_s *edid)
 
       if ((edid->edid_video_input & EDID_DISPLAY_INPUT_SYNC) != 0)
         {
-          syslog(LOG_INFO, " %-16sSeperate syncs\n", "");
+          syslog(LOG_INFO, " %-16sSeparate syncs\n", "");
         }
 
       if ((edid->edid_video_input & EDID_DISPLAY_INPUT_COMPOSITE) != 0)
@@ -143,7 +127,7 @@ void edid_dump(FAR const struct edid_info_s *edid)
 
   syslog(LOG_INFO, "Max Size:      %d cm x %d cm\n",
          edid->edid_max_hsize, edid->edid_max_vsize);
-  syslog(LOG_INFO, "Gamma:         %u.%02\n",
+  syslog(LOG_INFO, "Gamma:         %u.%02u\n",
          edid->edid_gamma / 100, edid->edid_gamma % 100);
 
   syslog(LOG_INFO, "%-16s%02x\n",

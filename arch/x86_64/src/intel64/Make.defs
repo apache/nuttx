@@ -34,7 +34,7 @@ CMN_CSRCS += up_map_region.c
 # Required Intel64 files
 
 CHIP_ASRCS  = intel64_saveusercontext.S intel64_fullcontextrestore.S intel64_vectors.S intel64_head.S
-CHIP_CSRCS  = intel64_handlers.c intel64_idle.c intel64_lowsetup.c 
+CHIP_CSRCS  = intel64_handlers.c intel64_idle.c intel64_lowsetup.c
 CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
 
 # Configuration-dependent intel64 files

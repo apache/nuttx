@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_lowconsole.c
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -110,7 +95,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
-static inline void usart_putreg(uintptr_t usart_base, unsigned int offset, uint32_t value)
+static inline void usart_putreg(uintptr_t usart_base,
+                                unsigned int offset, uint32_t value)
 {
   putreg32(value, usart_base + offset);
 }
@@ -125,7 +111,8 @@ static inline void usart_putreg(uintptr_t usart_base, unsigned int offset, uint3
  ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
-static inline uint32_t usart_getreg(uintptr_t usart_base, unsigned int offset)
+static inline uint32_t usart_getreg(uintptr_t usart_base,
+                                    unsigned int offset)
 {
   return getreg32(usart_base + offset);
 }
@@ -233,7 +220,8 @@ void usart_reset(uintptr_t usart_base)
  ****************************************************************************/
 
 #ifdef HAVE_RS232_DEVICE
-void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
+void usart_configure(uintptr_t usart_base,
+                     uint32_t baud, unsigned int parity,
                      unsigned int nbits, bool stop2)
 {
   uint32_t regval;
@@ -296,8 +284,8 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
  *
  * Description:
  *   Initialize a console for debug output.  This function is called very
- *   early in the initialization sequence to configure the serial console uart
- *   (only).
+ *   early in the initialization sequence to configure the serial console
+ *   uart (only).
  *
  ****************************************************************************/
 
@@ -306,18 +294,23 @@ void up_consoleinit(void)
   uint32_t pbamask = 0;
   uint32_t regval;
 
-  /* Setup GPIO pins fand enable module clocking or each configured USART/UART */
+  /* Setup GPIO pins fand enable module clocking or each configured
+   * USART/UART
+   */
 
 #ifdef CONFIG_AVR32_USART0_RS232
-  /* PINMUX_USART0_RXD and PINMUX_USART0_TXD must be defined in board.h.  It
-   * must define them be be one of {PINMUX_USART0_RXD_1, PINMUX_USART0_RXD_2}
-   * and {PINMUX_USART_0TXD_1, PINMUX_USART0_TXD_2}, respectively.
+  /* PINMUX_USART0_RXD and PINMUX_USART0_TXD must be defined in board.h.
+   * It must define them be be one of {PINMUX_USART0_RXD_1,
+   * PINMUX_USART0_RXD_2} and {PINMUX_USART_0TXD_1, PINMUX_USART0_TXD_2},
+   * respectively.
    */
 
   at32uc3_configgpio(PINMUX_USART0_RXD);
   at32uc3_configgpio(PINMUX_USART0_TXD);
 
-  /* Enable clocking to USART0 (This should be the default state after reset) */
+  /* Enable clocking to USART0
+   * (This should be the default state after reset)
+   */
 
   pbamask |= PM_PBAMASK_USART0;
 
@@ -332,7 +325,9 @@ void up_consoleinit(void)
   at32uc3_configgpio(PINMUX_USART1_RXD);
   at32uc3_configgpio(PINMUX_USART1_TXD);
 
-  /* Enable clocking to USART1 (This should be the default state after reset) */
+  /* Enable clocking to USART1
+   * (This should be the default state after reset)
+   */
 
   pbamask |= PM_PBAMASK_USART1;
 
@@ -346,7 +341,9 @@ void up_consoleinit(void)
   at32uc3_configgpio(PINMUX_USART2_RXD);
   at32uc3_configgpio(PINMUX_USART2_TXD);
 
-  /* Enable clocking to USART2 (This should be the default state after reset) */
+  /* Enable clocking to USART2
+   * (This should be the default state after reset)
+   */
 
   pbamask |= PM_PBAMASK_USART2;
 
@@ -364,8 +361,9 @@ void up_consoleinit(void)
    */
 
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(USE_EARLYSERIALINIT)
-  usart_configure(AVR32_CONSOLE_BASE, AVR32_CONSOLE_BAUD, AVR32_CONSOLE_PARITY,
-                  AVR32_CONSOLE_BITS, (bool)AVR32_CONSOLE_2STOP);
+  usart_configure(AVR32_CONSOLE_BASE, AVR32_CONSOLE_BAUD,
+                  AVR32_CONSOLE_PARITY, AVR32_CONSOLE_BITS,
+                 (bool)AVR32_CONSOLE_2STOP);
 #endif
 }
 
@@ -382,7 +380,8 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX to become ready */
 
-  while ((usart_getreg(AVR32_CONSOLE_BASE, AVR32_USART_CSR_OFFSET) & USART_CSR_TXRDY) == 0);
+  while ((usart_getreg(AVR32_CONSOLE_BASE,
+                       AVR32_USART_CSR_OFFSET) & USART_CSR_TXRDY) == 0);
 
   /* Then send the character */
 

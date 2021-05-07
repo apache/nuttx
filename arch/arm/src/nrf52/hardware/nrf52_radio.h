@@ -447,6 +447,7 @@
 #ifdef HAVE_RADIO_BLELR
 #  define RADIO_MODE_BLELR125KBIT         (0x05 << RADIO_MODE_SHIFT) /* 5: Long range 125 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
 #  define RADIO_MODE_BLELR500KBIT         (0x06 << RADIO_MODE_SHIFT) /* 6: Long range 500 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
+#endif
 #ifdef HAVE_RADIO_IEEE802154
 #  define RADIO_MODE_IEEE802154           (0x0f << RADIO_MODE_SHIFT) /* 15: IEEE 802.15.4-2006 250 kbit/s */
 #endif

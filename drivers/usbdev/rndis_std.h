@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usbdev/rndis.c
+ * drivers/usbdev/rndis_std.h
  *
  *   Copyright (C) 2011-2017 Gregory Nutt. All rights reserved.
  *   Authors: Sakari Kapanen <sakari.m.kapanen@gmail.com>,
@@ -34,7 +34,6 @@
  *
  ****************************************************************************/
 
-
 #ifndef __NUTTX_DRIVERS_USBDEV_RNDIS_STD_H
 #define __NUTTX_DRIVERS_USBDEV_RNDIS_STD_H
 
@@ -44,8 +43,10 @@
 
 /* Definitions for Microsoft RNDIS protocol.
  * Documentation:
- * https://docs.microsoft.com/en-us/windows-hardware/drivers/network/remote-ndis--rndis-2
- * https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/WinArchive/[MS-RNDIS].pdf
+ * https://docs.microsoft.com/en-us/windows-hardware/
+ *         drivers/network/remote-ndis--rndis-2
+ * https://winprotocoldoc.blob.core.windows.net/productionwindowsarchives/
+ *         WinArchive/[MS-RNDIS].pdf
  */
 
 #define RNDIS_MAJOR_VERSION                  1

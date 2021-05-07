@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f20xxx_rcc.c
  *
- *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -54,6 +39,84 @@
  */
 
 #define HSERDY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
+
+/* The FLASH latency depends on the system clock, and voltage input
+ * of the microcontroller. The following macros calculate the correct
+ * wait cycles for every STM32_SYSCLK_FREQUENCY & BOARD_STM32F2_VDD
+ * combination. BOARD_STM32F2_VDD is defined in mV.
+ */
+
+#ifndef BOARD_STM32F2_VDD
+#  define BOARD_STM32F2_VDD 3300
+#endif
+
+#if (BOARD_STM32F2_VDD <= 2100)
+#  if (STM32_SYSCLK_FREQUENCY <= 16000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#  elif (STM32_SYSCLK_FREQUENCY <= 32000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#  elif (STM32_SYSCLK_FREQUENCY <= 48000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#  elif (STM32_SYSCLK_FREQUENCY <= 64000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#  elif (STM32_SYSCLK_FREQUENCY <= 80000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
+#  elif (STM32_SYSCLK_FREQUENCY <= 96000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_5
+#  elif (STM32_SYSCLK_FREQUENCY <= 112000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_6
+#  elif (STM32_SYSCLK_FREQUENCY <= 120000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_7
+#  else
+#    error "STM32_SYSCLK_FREQUENCY is out of range!"
+#  endif
+#elif (BOARD_STM32F2_VDD <= 2400)
+#  if (STM32_SYSCLK_FREQUENCY <= 18000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#  elif (STM32_SYSCLK_FREQUENCY <= 36000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#  elif (STM32_SYSCLK_FREQUENCY <= 54000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#  elif (STM32_SYSCLK_FREQUENCY <= 72000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#  elif (STM32_SYSCLK_FREQUENCY <= 90000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
+#  elif (STM32_SYSCLK_FREQUENCY <= 108000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_5
+#  elif (STM32_SYSCLK_FREQUENCY <= 120000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_6
+#  else
+#    error "STM32_SYSCLK_FREQUENCY is out of range!"
+#  endif
+#elif (BOARD_STM32F2_VDD <= 2700)
+#  if (STM32_SYSCLK_FREQUENCY <= 24000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#  elif (STM32_SYSCLK_FREQUENCY <= 48000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#  elif (STM32_SYSCLK_FREQUENCY <= 72000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#  elif (STM32_SYSCLK_FREQUENCY <= 96000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#  elif (STM32_SYSCLK_FREQUENCY <= 120000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_4
+#  else
+#    error "STM32_SYSCLK_FREQUENCY is out of range!"
+#  endif
+#elif (BOARD_STM32F2_VDD <= 3600)
+#  if (STM32_SYSCLK_FREQUENCY <= 30000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_0
+#  elif (STM32_SYSCLK_FREQUENCY <= 60000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_1
+#  elif (STM32_SYSCLK_FREQUENCY <= 90000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_2
+#  elif (STM32_SYSCLK_FREQUENCY <= 120000000)
+#    define FLASH_ACR_LATENCY_SETTING  FLASH_ACR_LATENCY_3
+#  else
+#    error "STM32_SYSCLK_FREQUENCY is out of range!"
+#  endif
+#else
+#  error "BOARD_STM32F2_VDD is out of range!"
+#endif
 
 /****************************************************************************
  * Private Data
@@ -646,10 +709,10 @@ static void stm32_stdclockconfig(void)
       while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
 
       /* Enable FLASH prefetch, instruction cache, data cache,
-       * and 5 wait states.
+       * and set FLASH wait states.
        */
 
-      regval = (FLASH_ACR_LATENCY_5
+      regval = (FLASH_ACR_LATENCY_SETTING
 #ifdef CONFIG_STM32_FLASH_ICACHE
                 | FLASH_ACR_ICEN
 #endif

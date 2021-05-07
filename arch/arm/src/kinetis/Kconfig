@@ -512,7 +512,7 @@ config KINETIS_RNGB
 	select ARCH_HAVE_RNG
 	---help---
 		Support the random number generator(K6x only)
-		
+
 config KINETIS_FLEXCAN
 	bool
 	default n
@@ -956,7 +956,7 @@ config KINETIS_ENET_NORXER
 	---help---
 		If selected, then the MII/RMII RXER output will be configured as a
 		GPIO and pulled low.
-		
+
 choice
 	prompt "RMII Clock Source"
 	default KINETIS_EMAC_RMIICLKEXTAL
@@ -980,32 +980,32 @@ config FLEXCAN0_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN0_SAMPLEP
 	int "CAN sample point"
 	depends on !NET_CAN_CANFD
 	default 75
-	
+
 config FLEXCAN0_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN0_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN0_DATA_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 4000000
-	
+
 config FLEXCAN0_DATA_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 90
-	
+
 endmenu # KINETIS_FLEXCAN0
 
 menu "Kinetis FLEXCAN1 Configuration"
@@ -1015,32 +1015,32 @@ config FLEXCAN1_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN1_SAMPLEP
 	int "CAN sample point"
 	depends on !NET_CAN_CANFD
 	default 75
-	
+
 config FLEXCAN1_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 1000000
-	
+
 config FLEXCAN1_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 80
-	
+
 config FLEXCAN1_DATA_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
 	default 4000000
-	
+
 config FLEXCAN1_DATA_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
 	depends on NET_CAN_CANFD
 	default 90
-	
+
 endmenu # KINETIS_FLEXCAN1
 
 menu "Kinetis SDHC Configuration"

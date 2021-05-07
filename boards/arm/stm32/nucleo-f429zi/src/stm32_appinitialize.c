@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f4/nucleo-f429zi/src/stm32_appinitialize.c
+ * boards/arm/stm32/nucleo-f429zi/src/stm32_appinitialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,11 +25,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <debug.h>
 #include <syslog.h>
 
 #include "nucleo-144.h"
+#include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
 #ifdef CONFIG_STM32_ROMFS
 #include "stm32_romfs.h"
@@ -71,7 +71,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",

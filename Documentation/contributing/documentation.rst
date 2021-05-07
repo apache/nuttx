@@ -39,6 +39,25 @@ go into ``Documentation`` directory. Then,
 
       $ xdg-open _build/html/index.html
 
+Live Rebuild
+------------
+
+For more comfortable editing and previewing of changes (as ``make html`` will perform a slower full rebuild),
+you can install ``sphinx-autobuild`` which will monitor file changes and rebuild only affected files. To
+install it (within the virtual environment):
+
+.. code-block:: console
+
+  $ pip3 install sphinx-autobuild
+
+To run:
+
+.. code-block:: console
+
+  $ make autobuild
+
+Which will perform an initial clean build and monitor changes from then on.
+
 Contributing
 ============
 
@@ -122,18 +141,9 @@ Linking
 
 To generate internal links, Sphinx's `roles <https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#ref-role>`_ should
 be used. So, use ``:ref:`` instead of standard RST syntax like ```link <target>`_`` for internal links.
-
-Moreover, sphinx is configured to use `autosectionlabel <https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html#confval-autosectionlabel_prefix_document>`_ extension. This means that sections will automatically get a label that can be linked with the
-`:ref:`. For example:
-
-.. code-block:: RST
-
-  This is a Section
-  =================
-
-  :ref:`This is a Section` is a link to this very same section.
-
 If the target is in a different file, you can refer it with: ``:ref:`link text </pathtorst:Section Name>```.
+
+Linking to a specific document can be done with ``:doc:`/path/to/document``` (without ``.rst`` extension).
 
 Notes and TODOS
 ---------------

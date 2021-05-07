@@ -1,54 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_uart_v2.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F0_UART_V2_H
 #define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F0_UART_V2_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_USART_CR1_OFFSET    0x0000  /* Control register 1 */
 #define STM32_USART_CR2_OFFSET    0x0004  /* Control register 2 */
@@ -63,7 +47,7 @@
 #define STM32_USART_TDR_OFFSET    0x0028  /* Transmit data register */
 #define STM32_USART_PRESC_OFFSET  0x002c  /* Prescaler register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NUSART > 0
 #  define STM32_USART1_CR1        (STM32_USART1_BASE + STM32_USART_CR1_OFFSET)
@@ -129,7 +113,7 @@
 #  define STM32_USART4_PRESC      (STM32_USART4_BASE + STM32_USART_PRESC_OFFSET)
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control register 1 */
 
@@ -183,6 +167,7 @@
 #  define USART_CR2_STOP1         (0 << USART_CR2_STOP_SHIFT) /* 00: 1 Stop bit */
 #  define USART_CR2_STOP2         (2 << USART_CR2_STOP_SHIFT) /* 10: 2 Stop bits */
 #  define USART_CR2_STOP1p5       (3 << USART_CR2_STOP_SHIFT) /* 11: 1.5 Stop bit */
+
 #define USART_CR2_LINEN           (1 << 14) /* Bit 14: LIN mode enable */
 #define USART_CR2_SWAP            (1 << 15) /* Bit 15: Swap TX/RX pins */
 #define USART_CR2_RXINV           (1 << 16) /* Bit 16: RX pin active level inversion */
@@ -196,6 +181,7 @@
 #  define USART_CR2_ABRMOD_FALL   (1 << USART_CR2_ABRMOD_SHIFT) /* Falling edge measurement */
 #  define USART_CR2_ABRMOD_7F     (2 << USART_CR2_ABRMOD_SHIFT) /* 0x7F frame detection */
 #  define USART_CR2_ABRMOD_55     (3 << USART_CR2_ABRMOD_SHIFT) /* 0x55 frame detection */
+
 #define USART_CR2_RTOEN           (1 << 23) /* Bit 23: Receiver timeout enable */
 #define USART_CR2_ADD4L_SHIFT     (24)      /* Bits 24-27: Address[3:0]:of the USART node */
 #define USART_CR2_ADD4L_MASK      (15 << USART_CR2_ADD4L_SHIFT)
@@ -237,6 +223,7 @@
 #  define USART_CR3_RXFTCFG_75PCT (3 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 3/4 full */
 #  define USART_CR3_RXFTCFG_88PCT (4 << USART_CR3_RXFTCFG_SHIFT) /* RXFIFO 7/8 full */
 #  define USART_CR3_RXFTCFG_FULL  (5 << USART_CR3_RXFTCFG_SHIFT) /* RXIFO full */
+
 #define USART_CR3_RXFTIE          (1 << 28) /* Bit 28: RXFIFO threshold interrupt enable */
 #define USART_CR3_TXFTCFG_SHIFT   (29)      /* Bits 29-31: TXFIFO threshold configuration */
 #define USART_CR3_TXFTCFG_MASK    (7 << USART_CR3_TXFTCFG_SHIFT)

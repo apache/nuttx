@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_lowputc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -272,6 +257,7 @@
 #  undef USE_OVER8
 
   /* Calculate USART BAUD rate divider */
+
   /* Baud rate for standard USART (SPI mode included):
    *
    * In case of oversampling by 16, the equation is:
@@ -289,7 +275,9 @@
 #  define STM32_USARTDIV16 \
     ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 
-   /* Use oversampling by 8 only if the divisor is small.  But what is small? */
+  /* Use oversampling by 8 only if the divisor is small.  But what is
+   * small?
+   */
 
 #  if STM32_USARTDIV8 > 100
 #    define STM32_BRR_VALUE STM32_USARTDIV16
@@ -337,7 +325,8 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX data register is empty */
 
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) & USART_ISR_TXE) == 0);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
+          USART_ISR_TXE) == 0);
 #ifdef STM32_CONSOLE_RS485_DIR
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
@@ -347,8 +336,10 @@ void arm_lowputc(char ch)
   putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_TDR_OFFSET);
 
 #ifdef STM32_CONSOLE_RS485_DIR
-  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) & USART_ISR_TC) == 0);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
+          USART_ISR_TC) == 0);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
 #endif /* HAVE_CONSOLE */
@@ -391,7 +382,8 @@ void stm32_lowsetup(void)
 
 #ifdef STM32_CONSOLE_RS485_DIR
   stm32_configgpio(STM32_CONSOLE_RS485_DIR);
-  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR, !STM32_CONSOLE_RS485_DIR_POLARITY);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                  !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Enable and configure the selected console device */

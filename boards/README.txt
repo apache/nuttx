@@ -186,6 +186,9 @@ boards/arm/stm32/b-g474e-dpow1
   Initial support for booting NuttX to a functional NSH prompt on the
   STMicro B-G474E-DPOW1 Discovery kit with STM32G474RE MCU.
 
+boards/arm/stm32/nucleo-g431rb
+    STMicro Nucleo G431RB board based on the STMicro STM32G431RB MCU.
+
 boards/arm/stm32f0l0g0/b-l072z-lrwan1
   STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 
@@ -622,9 +625,6 @@ boards/x86/qemu/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardware (Google the Bifferboard).
 
-boards/risc-v/nr5m100/nr5m100-nexys4
-  Port of NuttX to RISC-V platform on IQ-Analog NR5M100 RISC-V FPGA platform.
-
 boards/arm/s32k1xx/s32k118evb
   This directory holds the port of NuttX to the NXP S32K118EVB board
   featuring the S32K118 Cortex-M0+.
@@ -818,6 +818,15 @@ boards/arm/kinetis/teensy-3.x
   Teensy-3.0 has the same schematic (although some pins are not used on the
   Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
   MK30DX128VLH5 with slightly less capability.
+
+boards/arm/imxrt/teensy-4.x
+		This is the port of NuttX to the PJRC Teensy++ 4.x board.  This board is
+		developed by http://pjrc.com/teensy/.  The Teensy++ 4.x is based
+		on an NXP MIMXRT1062DVL6A MCU. The port can support both Teensy 4.0 and
+		Teensy 4.1 boards.
+
+    https://www.pjrc.com/store/teensy40.html
+    https://www.pjrc.com/store/teensy41.html
 
 boards/arm/kl/teensy-lc
   This is the port of nuttx for the Teensy LC board.  The Teensy LC

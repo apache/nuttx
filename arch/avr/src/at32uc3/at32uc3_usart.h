@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_usart.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_AVR_SRC_AT32UC3_AT32UC3_USART_H
 #define __ARCH_AVR_SRC_AT32UC3_AT32UC3_USART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define AVR32_USART_CR_OFFSET      0x0000 /* Control Register */
 #define AVR32_USART_MR_OFFSET      0x0004 /* Mode Register */
@@ -65,7 +50,7 @@
 #define AVR32_USART_MAN_OFFSET     0x0050 /* Manchester Encoder Decoder Register */
 #define AVR32_USART_VERSION_OFFSET 0x00fc /* Version Register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define AVR32_USART0_CR            (AVR32_USART0_BASE+AVR32_USART_CR_OFFSET)
 #define AVR32_USART0_MR            (AVR32_USART0_BASE+AVR32_USART_MR_OFFSET)
@@ -118,7 +103,7 @@
 #define AVR32_USART2_MAN           (AVR32_USART2_BASE+AVR32_USART_MAN_OFFSET)
 #define AVR32_USART2_VERSION       (AVR32_USART2_BASE+AVR32_USART_VERSION_OFFSET)
 
-/* Register Bit-field Definitions ***************************************************/
+/* Register Bit-field Definitions *******************************************/
 
 /* CR Register Bit-field Definitions */
 
@@ -156,11 +141,13 @@
 #  define USART_MR_MODE_IRDA        (8 << USART_MR_MODE_SHIFT)  /* IrDA */
 #  define USART_MR_MODE_MASTER      (14 << USART_MR_MODE_SHIFT) /* SPI Master */
 #  define USART_MR_MODE_SLAVE       (15 << USART_MR_MODE_SHIFT) /* SPI Slave */
+
 #define USART_MR_USCLKS_SHIFT       (4)       /* Bits 4-5:  Clock Selection */
 #define USART_MR_USCLKS_MASK        (3 << USART_MR_USCLKS_SHIFT)
 #  define USART_MR_USCLKS_CLKUSART  (0 << USART_MR_USCLKS_SHIFT) /* CLK_USART */
 #  define USART_MR_USCLKS_DIV       (1 << USART_MR_USCLKS_SHIFT) /* CLK_USART/DIV */
 #  define USART_MR_USCLKS_CLK       (3 << USART_MR_USCLKS_SHIFT) /* CLK */
+
 #define USART_MR_CHRL_SHIFT         (6)       /* Bit 6-7:  Character Length */
 #define USART_MR_CHRL_MASK          (3 << USART_MR_CHRL_SHIFT)
 #  define USART_MR_CHRL_BITS(n)     (((n) - 5) << USART_MR_CHRL_SHIFT)
@@ -168,6 +155,7 @@
 #  define USART_MR_CHRL_6BITS       (1 << USART_MR_CHRL_SHIFT) /* 6 bits */
 #  define USART_MR_CHRL_7BITS       (2 << USART_MR_CHRL_SHIFT) /* 7 bits */
 #  define USART_MR_CHRL_8BITS       (3 << USART_MR_CHRL_SHIFT) /* 8 bits */
+
 #define USART_MR_SYNC               (1 << 8)  /* Bit 8:  Synchronous Mode Select */
 #define USART_MR_CPHA               (1 << 8)  /* Bit 8:  SPI Clock Phase */
 #define USART_MR_PAR_SHIFT          (9)       /* Bits 9-11:  Parity Type */
@@ -178,17 +166,20 @@
 #  define USART_MR_PAR_MARK         (3 << USART_MR_PAR_SHIFT) /* Parity forced to 1 (Mark) */
 #  define USART_MR_PAR_NONE         (4 << USART_MR_PAR_SHIFT) /* No parity */
 #  define USART_MR_PAR_MULTIDROP    (6 << USART_MR_PAR_SHIFT) /* Multidrop mode */
+
 #define USART_MR_NBSTOP_SHIFT       (12)      /* Bits 12-13:  Number of Stop Bits */
 #define USART_MR_NBSTOP_MASK        (3 << USART_MR_NBSTOP_SHIFT)
 #  define USART_MR_NBSTOP_1         (0 << USART_MR_NBSTOP_SHIFT) /* 1 stop bit */
 #  define USART_MR_NBSTOP_1p5       (1 << USART_MR_NBSTOP_SHIFT) /* 1.5 stop bits */
 #  define USART_MR_NBSTOP_2         (2 << USART_MR_NBSTOP_SHIFT) /* 2 stop bits */
+
 #define USART_MR_CHMODE_SHIFT       (14)      /* Bits 14-15:  Channel Mode */
 #define USART_MR_CHMODE_MASK        (3 << USART_MR_CHMODE_SHIFT)
 #  define USART_MR_CHMODE_NORMAL    (0 << USART_MR_CHMODE_SHIFT) /* Normal Mode */
 #  define USART_MR_CHMODE_AUTO      (1 << USART_MR_CHMODE_SHIFT) /* Automatic Echo */
 #  define USART_MR_CHMODE_LLPBK     (2 << USART_MR_CHMODE_SHIFT) /* Local Loopback */
 #  define USART_MR_CHMODE_RLPBK     (3 << USART_MR_CHMODE_SHIFT) /* Remote Loopback */
+
 #define USART_MR_MSBF               (1 << 16) /* Bit 16: Bit Order */
 #define USART_MR_CPOL               (1 << 16) /* Bit 16: SPI Clock Polarity */
 #define USART_MR_MODE9              (1 << 17) /* Bit 17: 9-bit Character Length */
@@ -304,6 +295,7 @@
 #  define USART_MAN_TXPP_ALLZERO    (1 << USART_MAN_TXPP_SHIFT) /* ALL_ZERO */
 #  define USART_MAN_TXPP_ZER0ONE    (2 << USART_MAN_TXPP_SHIFT) /* ZERO_ONE */
 #  define USART_MAN_TXPP_ONEZERO    (3 << USART_MAN_TXPP_SHIFT) /* ONE_ZERO */
+
 #define USART_MAN_TXMPOL            (1 << 12) /* Bit 12: Transmitter Manchester Polarity */
 #define USART_MAN_RXPL_SHIFT        (16)      /* Bits 16-19: Receiver Preamble Length */
 #define USART_MAN_RXPL_MASK         (15 << USART_MAN_RXPL_SHIFT)
@@ -313,6 +305,7 @@
 #  define USART_MAN_RXPP_ALLZERO    (1 << USART_MAN_TXPP_SHIFT) /* ALL_ZERO */
 #  define USART_MAN_RXPP_ZER0ONE    (2 << USART_MAN_TXPP_SHIFT) /* ZERO_ONE */
 #  define USART_MAN_RXPP_ONEZERO    (3 << USART_MAN_TXPP_SHIFT) /* ONE_ZERO */
+
 #define USART_MAN_RXMPOL            (1 << 28) /* Bit 28: Receiver Manchester Polarity */
 #define USART_MAN_DRIFT             (1 << 30) /* Bit 30: Drift compensation */
 
@@ -323,16 +316,16 @@
 #define USART_VARIANT_SHIFT         (16)      /* Bits 16-19: (Reserved) */
 #define USART_VARIANT_MASK          (15 << USART_VARIANT_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_USART_H */

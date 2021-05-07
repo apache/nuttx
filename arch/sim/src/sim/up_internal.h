@@ -1,36 +1,20 @@
 /****************************************************************************
- * arch/sim/src/up_internal.h
+ * arch/sim/src/sim/up_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011-2012, 2014, 2016-2017 Gregory Nutt.
- *     All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -65,75 +49,16 @@
 #  endif
 #endif
 
-/* Context Switching Definitions ********************************************/
-
-#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
-  /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
-
-#  ifdef __ASSEMBLY__
-#    define JB_RBX (0*8)
-#    define JB_RSP (1*8)
-#    define JB_RBP (2*8)
-#    define JB_R12 (3*8)
-#    define JB_R13 (4*8)
-#    define JB_R14 (5*8)
-#    define JB_R15 (6*8)
-#    define JB_RSI (7*8)
-
-#  else
-#    define JB_RBX (0)
-#    define JB_RSP (1)
-#    define JB_RBP (2)
-#    define JB_R12 (3)
-#    define JB_R13 (4)
-#    define JB_R14 (5)
-#    define JB_R15 (6)
-#    define JB_RSI (7)
-
-#  endif /* __ASSEMBLY__ */
-
-/* Compatibility definitions */
-
-#  define JB_FP JB_RBP
-#  define JB_SP JB_RSP
-#  define JB_PC JB_RSI
-
-#elif defined(CONFIG_HOST_X86) || defined(CONFIG_SIM_M32)
-/* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
-
-#  ifdef __ASSEMBLY__
-#    define JB_EBX (0*4)
-#    define JB_ESI (1*4)
-#    define JB_EDI (2*4)
-#    define JB_EBP (3*4)
-#    define JB_SP  (4*4)
-#    define JB_PC  (5*4)
-
-#  else
-#    define JB_EBX (0)
-#    define JB_ESI (1)
-#    define JB_EDI (2)
-#    define JB_EBP (3)
-#    define JB_SP  (4)
-#    define JB_PC  (5)
-
-#  endif /* __ASSEMBLY__ */
-
-/* Compatibility definitions */
-
-#  define JB_FP JB_EBP
-
-#elif defined(CONFIG_HOST_ARM)
-#  define JB_FP 7
-#  define JB_SP 8
-#  define JB_PC 9
-#endif
-
 /* Simulated Heap Definitions ***********************************************/
 
 /* Size of the simulated heap */
 
 #define SIM_HEAP_SIZE (64*1024*1024)
+
+/* Macros to handle saving and restoring interrupt state ********************/
+
+#define up_savestate(regs) up_copyfullstate(regs, (xcpt_reg_t *)CURRENT_REGS)
+#define up_restorestate(regs) (CURRENT_REGS = regs)
 
 /* File System Definitions **************************************************/
 
@@ -210,35 +135,23 @@ extern volatile void *g_current_regs[1];
 
 #endif
 
-#ifdef CONFIG_SMP
-/* These spinlocks are used in the SMP configuration in order to implement
- * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
- *
- * 1. The up_cpu_pause() implementation on CPUn locks both g_cpu_wait[m]
- *    and g_cpu_paused[m].  CPUn then waits spinning on g_cpu_paused[m].
- * 2. CPUm receives the interrupt it (1) unlocks g_cpu_paused[m] and
- *    (2) locks g_cpu_wait[m].  The first unblocks CPUn and the second
- *    blocks CPUm in the interrupt handler.
- *
- * When CPUm resumes, CPUn unlocks g_cpu_wait[m] and the interrupt handler
- * on CPUm continues.  CPUm must, of course, also then unlock g_cpu_wait[m]
- * so that it will be ready for the next pause operation.
- */
-
-extern volatile uint8_t g_cpu_wait[CONFIG_SMP_NCPUS];
-extern volatile uint8_t g_cpu_paused[CONFIG_SMP_NCPUS];
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+/* Context switching */
+
+#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
+void up_copyfullstate(unsigned long *dest, unsigned long *src);
+#else
+void up_copyfullstate(uint32_t *dest, uint32_t *src);
+#endif
+
 void *up_doirq(int irq, void *regs);
 
-/* up_setjmp32.S ************************************************************/
+/* up_head.c ****************************************************************/
 
-int  up_setjmp(void *jb);
-void up_longjmp(void *jb, int val);
+void host_abort(int status);
 
 /* up_hostmemory.c **********************************************************/
 
@@ -250,7 +163,6 @@ void host_free(void *mem);
 void *host_realloc(void *oldmem, size_t size);
 void *host_calloc(size_t n, size_t elem_size);
 void *host_memalign(size_t alignment, size_t size);
-void host_mallinfo(struct host_mallinfo *info);
 
 /* up_hosttime.c ************************************************************/
 
@@ -258,6 +170,10 @@ uint64_t host_gettime(bool rtc);
 void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
 int host_settimer(int *irq);
+
+/* up_sigdeliver.c **********************************************************/
+
+void sim_sigdeliver(void);
 
 /* up_simsmp.c **************************************************************/
 
@@ -271,6 +187,9 @@ void sim_cpu0_start(void);
 void up_cpu_started(void);
 int up_cpu_paused(int cpu);
 struct tcb_s *up_this_task(void);
+int up_cpu_set_pause_handler(int irq);
+void sim_send_ipi(int cpu);
+void sim_timer_handler(void);
 #endif
 
 /* up_oneshot.c *************************************************************/
@@ -329,7 +248,8 @@ int sim_tsc_uninitialize(void);
 
 /* up_eventloop.c ***********************************************************/
 
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_ARCH_BUTTONS)
 void up_x11events(void);
 void up_buttonevent(int x, int y, int buttons);
 #endif
@@ -426,11 +346,11 @@ int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
 #endif
 
-/* up_hcitty.c **************************************************************/
+/* up_btuart.c **************************************************************/
 
-#ifdef CONFIG_SIM_HCITTY
-int bthcitty_register(int dev_id);
-void bthcitty_loop(void);
+#ifdef CONFIG_SIM_BTUART
+int  sim_btuart_register(const char *name, int id);
+void sim_btuart_loop(void);
 #endif
 
 /* up_audio.c ***************************************************************/
@@ -451,6 +371,14 @@ int sim_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #ifdef CONFIG_STACK_COLORATION
 void up_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+/* up_foc.c *****************************************************************/
+
+#ifdef CONFIG_MOTOR_FOC
+struct foc_dev_s;
+FAR struct foc_dev_s *sim_foc_initialize(int inst);
+void sim_foc_update(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

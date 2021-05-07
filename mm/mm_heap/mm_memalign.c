@@ -1,36 +1,20 @@
 /****************************************************************************
  * mm/mm_heap/mm_memalign.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013-2014 Gregory Nutt.
- *   All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -58,8 +42,8 @@
  *   within that chunk that meets the alignment request and then frees any
  *   leading or trailing space.
  *
- *   The alignment argument must be a power of two (not checked).  8-byte
- *   alignment is guaranteed by normal malloc calls.
+ *   The alignment argument must be a power of two.  8-byte alignment is
+ *   guaranteed by normal malloc calls.
  *
  ****************************************************************************/
 
@@ -71,9 +55,24 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   size_t alignedchunk;
   size_t mask = (size_t)(alignment - 1);
   size_t allocsize;
+  size_t newsize;
+
+  /* Make sure that alignment is less than half max size_t */
+
+  if (alignment >= (SIZE_MAX / 2))
+    {
+      return NULL;
+    }
+
+  /* Make sure that alignment is a power of 2 */
+
+  if ((alignment & -alignment) != alignment)
+    {
+      return NULL;
+    }
 
   /* If this requested alinement's less than or equal to the natural
-   * alignment of malloc,then just let malloc do the work.
+   * alignment of malloc, then just let malloc do the work.
    */
 
   if (alignment <= MM_MIN_CHUNK)
@@ -93,8 +92,16 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * not include SIZEOF_MM_ALLOCNODE.
    */
 
-  size      = MM_ALIGN_UP(size);   /* Make multiples of our granule size */
-  allocsize = size + 2*alignment;  /* Add double full alignment size */
+  newsize  = MM_ALIGN_UP(size);   /* Make multiples of our granule size */
+
+  allocsize = newsize + 2 * alignment; /* Add double full alignment size */
+
+  if ((newsize < size) || (allocsize < newsize))
+    {
+      /* Integer overflow */
+
+      return NULL;
+    }
 
   /* Then malloc that size */
 
@@ -133,8 +140,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       next = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size);
 
       /* Make sure that there is space to convert the preceding
-       * mm_allocnode_s into an mm_freenode_s.
-       * I think that this should always be true
+       * mm_allocnode_s into an mm_freenode_s.  I think that this should
+       * always be true
        */
 
       DEBUGASSERT(alignedchunk >= rawchunk + 8);

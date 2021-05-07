@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ * boards/arm/tms570/tms570ls31x-usb-kit/include/nsh_romfsimg.h
  *   Copyright (C) 2013 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

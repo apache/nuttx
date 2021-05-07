@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_aon_rtc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,23 +37,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AON_RTC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_AON_RTC_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* AON RTC Register Offsets *****************************************************************************************/
+/* AON RTC Register Offsets *************************************************/
 
 #define TIVA_AON_RTC_CTL_OFFSET         0x0000  /* Control */
 #define TIVA_AON_RTC_EVFLAGS_OFFSET     0x0004  /* Event Flags, RTC Status */
@@ -67,7 +68,7 @@
 #define TIVA_AON_RTC_CH1CAPT_OFFSET     0x0028  /* Channel 1 Capture Value */
 #define TIVA_AON_RTC_SYNC_OFFSET        0x002c  /* AON Synchronization */
 
-/* AON RTC Register Addresses ***************************************************************************************/
+/* AON RTC Register Addresses ***********************************************/
 
 #define TIVA_AON_RTC_CTL                (TIVA_AON_RTC_BASE + TIVA_AON_RTC_CTL_OFFSET)
 #define TIVA_AON_RTC_EVFLAGS            (TIVA_AON_RTC_BASE + TIVA_AON_RTC_EVFLAGS_OFFSET)
@@ -82,7 +83,7 @@
 #define TIVA_AON_RTC_CH1CAPT            (TIVA_AON_RTC_BASE + TIVA_AON_RTC_CH1CAPT_OFFSET)
 #define TIVA_AON_RTC_SYNC               (TIVA_AON_RTC_BASE + TIVA_AON_RTC_SYNC_OFFSET)
 
-/* AON RTC Bitfield Definitions *************************************************************************************/
+/* AON RTC Bitfield Definitions *********************************************/
 
 /* TIVA_AON_RTC_CTL */
 
@@ -106,6 +107,7 @@
 #  define AON_RTC_CTL_EV_DELAY_D112     (11 << AON_RTC_CTL_EV_DELAY_SHIFT) /* Delay by 112 clock cycles */
 #  define AON_RTC_CTL_EV_DELAY_D128     (12 << AON_RTC_CTL_EV_DELAY_SHIFT) /* Delay by 128 clock cycles */
 #  define AON_RTC_CTL_EV_DELAY_D144     (13 << AON_RTC_CTL_EV_DELAY_SHIFT) /* Delay by 144 clock cycles */
+
 #define AON_RTC_CTL_COMB_EV_MASK_SHIFT  (16)      /* Bits 16-18:  Select how delayed event form combined events */
 #define AON_RTC_CTL_COMB_EV_MASK_MASK   (7 << AON_RTC_CTL_COMB_EV_MASK_SHIFT)
 #  define AON_RTC_CTL_COMB_EV_MASK_NONE (0 << AON_RTC_CTL_COMB_EV_MASK_SHIFT) /* No event for combined event */
@@ -120,7 +122,9 @@
 #define AON_RTC_EVFLAGS_CH2             (1 << 16) /* Bit 16: Channel 2 event flag */
 
 /* TIVA_AON_RTC_SEC (32-bit value, units of seconds) */
+
 /* TIVA_AON_RTC_SUBSEC (32-bit value, b32 fractional seconds) */
+
 /* TIVA_AON_RTC_SUBSECINC (32-bit value) */
 
 /* TIVA_AON_RTC_CHCTL */
@@ -128,14 +132,19 @@
 #define AON_RTC_CHCTL_CH0_EN            (1 << 0)  /* Bit 0:  RTC Channel 0 enable */
 #define AON_RTC_CHCTL_CH1_EN            (1 << 8)  /* Bit 8:  RTC Channel 1 enable */
 #define AON_RTC_CHCTL_CH1_CAPT_EN       (1 << 9)  /* Bit 9:  Channel 1 mode */
+
 #  define AON_RTC_CHCTL_CH1_CAPT_CMP    (0)                        /* Compare mode */
 #  define AON_RTC_CHCTL_CH1_CAPT_CAPT   AON_RTC_CHCTL_CH1_CAPT_EN  /* Capture mode */
+
 #define AON_RTC_CHCTL_CH2_EN            (1 << 16) /* Bit 16: RTC Channel 2 Enable */
 #define AON_RTC_CHCTL_CH2_CONT_EN       (1 << 18) /* Bit 18: Enable Channel 2 Continuous Operation */
 
 /* TIVA_AON_RTC_CH0CMP (32-bit value) */
+
 /* TIVA_AON_RTC_CH1CMP (32-bit value) */
+
 /* TIVA_AON_RTC_CH2CMP (32-bit value) */
+
 /* TIVA_AON_RTC_CH2CMPINC (32-bit value) */
 
 /* TIVA_AON_RTC_CH1CAPT */

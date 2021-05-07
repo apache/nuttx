@@ -282,7 +282,9 @@ static int z8_i2c_read_transfer(FAR struct z8_i2cdev_s *priv,
                   I2CCTL |= I2C_CTL_NAK;
                 }
 
-              /* If this was the last byte, then set STOP and return success */
+              /* If this was the last byte, then set STOP and return
+               * success
+               */
 
               else if (count == 1)
                 {

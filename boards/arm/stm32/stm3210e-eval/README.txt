@@ -558,7 +558,7 @@ Where <subdir> is one of the following:
         you will have to turn local echo on.
     (4) Microsoft holds several patents related to the design of
         long file names in the FAT file system.  Please refer to the
-        details in the top-level COPYING file.  Please do not use FAT
+        details in the top-level NOTICE file.  Please do not use FAT
         long file name unless you are familiar with these patent issues.
     (5) When built as an NSH add-on command (CONFIG_NSH_BUILTIN_APPS=y),
         Caution should be used to assure that the SD drive is not in use when
@@ -723,7 +723,7 @@ Where <subdir> is one of the following:
           Enable the DJoystick driver:
 
             CONFIG_INPUT=y             # Enable input driver support
-            CONFIG_DJOYSTICK=y         # Enable the joystick drivers
+            CONFIG_INPUT_DJOYSTICK=y   # Enable the joystick drivers
                                        # (default parameters should be okay)
           Enable the DJoystick Example:
 

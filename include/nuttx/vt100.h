@@ -1,51 +1,36 @@
-/********************************************************************************************
+/****************************************************************************
  * include/nuttx/vt100.h
  * VT100 Escape Sequences
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_VT100_H
 #define __INCLUDE_NUTTX_VT100_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/ascii.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define VT100_SETNL          {ASCII_ESC, '[', '2', '0', 'h'}  /* Set new line mode */
 #define VT100_SETAPPL        {ASCII_ESC, '[', '?', '1', 'h'}  /* Set cursor key to application */
@@ -129,11 +114,14 @@
 #define VT100_CURSORLF(n)    {ASCII_ESC, '[', (n), 'D'}       /* Move cursor left n lines */
 #define VT100_CURSORHOME     {ASCII_ESC, '[', 'H'}            /* Move cursor to upper left corner */
 #define VT100_CURSORHOME_    {ASCII_ESC, '[', ';', 'H'}       /* Move cursor to upper left corner */
+
 #define VT100_CURSORPOS(v,h) {ASCII_ESC, '[', (v), ';', (h), 'H'} /* Move cursor to screen location v,h */
 
 #define VT100_HVHOME         {ASCII_ESC, '[', 'f'}            /* Move cursor to upper left corner */
 #define VT100_HVHOME_        {ASCII_ESC, '[', ';', 'f'}       /* Move cursor to upper left corner */
+
 #define VT100_HVPOS(v,h)     {ASCII_ESC, '[', (v), ';', (h), 'f'} /* Move cursor to screen location v,h */
+
 #define VT100_INDEX          {ASCII_ESC, 'D'}                 /* Move/scroll window up one line */
 #define VT100_REVINDEX       {ASCII_ESC, 'M'}                 /* Move/scroll window down one line */
 #define VT100_NEXTLINE       {ASCII_ESC, 'E'}                 /* Move to next line */
@@ -165,18 +153,22 @@
 #define VT100_TERMNOK        {ASCII_ESC, '[', '3', 'n'}       /* Response: terminal is not OK */
 
 #define VT100_GETCURSOR      {ASCII_ESC, '[', '6', 'n'}       /* Get cursor position */
+
 #define VT100_CURSORPOSAT    {ASCII_ESC, '[', (v), ';', (h), 'R'}  /* Response: cursor is at v,h */
 
 #define VT100_IDENT          {ASCII_ESC, '[', 'c'}            /* Identify what terminal type */
 #define VT100_IDENT_         {ASCII_ESC, '[', '0', 'c'}       /* Identify what terminal type */
+
 #define VT100_GETTYPE        {ASCII_ESC, '[', '?', '1', ';', (n), '0', 'c'} /* Response: terminal type code n */
 
 #define VT100_RESET RIS      {ASCII_ESC, 'c'}                 /*  Reset terminal to initial state */
 
 #define VT100_ALIGN          {ASCII_ESC, '#', '8'}            /* Screen alignment display */
+
 #define VT100_TESTPU         {ASCII_ESC, '[', '2', ';', '1', 'y'} /* Confidence power up test */
 #define VT100_TESTLB         {ASCII_ESC, '[', '2', ';', '2', 'y'} /* Confidence loopback test */
 #define VT100_TESTPUREP      {ASCII_ESC, '[', '2', ';', '9', 'y'} /* Repeat power up test */
+
 #define VT100_TESTLBREP      {ASCII_ESC, '[', '2', ';', '1', '0', 'y'} /* Repeat loopback test */
 
 #define VT100_LEDSOFF        {ASCII_ESC, '[', '0', 'q'}       /* Turn off all four leds */
@@ -288,12 +280,12 @@
 #define VT100_NUMERIC_ENTER  {ASCII_CR}
 #define VT100_ALT_ENTER      {ASCII_ESC, 'O', 'M'}
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __INCLUDE_NUTTX_VT100_H */

@@ -243,7 +243,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
    * then try the list of messages reserved for interrupt handlers
    */
 
-  flags = spin_lock_irqsave(); /* Always necessary in SMP mode */
+  flags = spin_lock_irqsave(NULL); /* Always necessary in SMP mode */
   if (up_interrupt_context())
     {
 #if CONFIG_BLUETOOTH_BUFFER_PREALLOC > CONFIG_BLUETOOTH_BUFFER_IRQRESERVE
@@ -254,7 +254,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf            = g_buf_free;
           g_buf_free     = buf->flink;
 
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
           pool           = POOL_BUFFER_GENERAL;
         }
       else
@@ -267,13 +267,13 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf            = g_buf_free_irq;
           g_buf_free_irq = buf->flink;
 
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
           pool           = POOL_BUFFER_IRQ;
         }
       else
 #endif
         {
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
           return NULL;
         }
     }
@@ -290,7 +290,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf           = g_buf_free;
           g_buf_free    = buf->flink;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(NULL, flags);
           pool          = POOL_BUFFER_GENERAL;
         }
       else
@@ -300,7 +300,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
            * will have to allocate one from the kernel memory pool.
            */
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(NULL, flags);
           buf = (FAR struct bt_buf_s *)
                     kmm_malloc((sizeof (struct bt_buf_s)));
 
@@ -396,6 +396,8 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
 
   wlinfo("buf %p ref %u type %d\n", buf, buf->ref, buf->type);
 
+  DEBUGASSERT(buf->ref > 0);
+
   if (--buf->ref > 0)
     {
       wlinfo("Remaining references: %d\n", buf->ref);
@@ -428,10 +430,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
        * list from interrupt handlers.
        */
 
-      flags      = spin_lock_irqsave();
+      flags      = spin_lock_irqsave(NULL);
       buf->flink = g_buf_free;
       g_buf_free = buf;
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
   else
 #endif
@@ -447,10 +449,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
        * list from interrupt handlers.
        */
 
-      flags          = spin_lock_irqsave();
+      flags          = spin_lock_irqsave(NULL);
       buf->flink     = g_buf_free_irq;
       g_buf_free_irq = buf;
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
     }
   else
 #endif
@@ -639,7 +641,7 @@ uint16_t bt_buf_get_le16(FAR struct bt_buf_s * buf)
   value = BT_GETUINT16((FAR uint8_t *)buf->data);
   bt_buf_consume(buf, sizeof(value));
 
-  return BT_LE162HOST(value);
+  return value;
 }
 
 /****************************************************************************

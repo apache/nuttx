@@ -240,13 +240,6 @@ config SPINLOCK
 		CONFIG_ARCH_HAVE_MULTICPU.  This permits the use of spinlocks in
 		other novel architectures.
 
-config SPINLOCK_IRQ
-	bool "Support Spinlocks with IRQ control"
-	default n
-	---help---
-		Enables support for spinlocks with IRQ control. This feature can be
-		used to protect data in SMP mode.
-
 config IRQCHAIN
 	bool "Enable multi handler sharing a IRQ"
 	default n
@@ -297,15 +290,6 @@ config SMP_NCPUS
 		for CONFIG_SMP_NCPUS.  This is not normally a valid setting for an
 		SMP configuration.  However, running the SMP logic in a single CPU
 		configuration is useful during certain testing.
-
-config SMP_IDLETHREAD_STACKSIZE
-	int "CPU IDLE stack size"
-	default DEFAULT_TASK_STACKSIZE
-	---help---
-		Each CPU will have its own IDLE task.  System initialization occurs
-		on CPU0 and uses CONFIG_IDLETHREAD_STACKSIZE which will probably be
-		larger than is generally needed.  This setting provides the stack
-		size for the IDLE task on CPUS 1 through (CONFIG_SMP_NCPUS-1).
 
 endif # SMP
 
@@ -726,10 +710,10 @@ config SCHED_CRITMONITOR
 	---help---
 		Enables logic that monitors the duration of time that a thread keeps
 		interrupts or pre-emption disabled.  These global locks can have
-		negative consequences to real timer performance:  Disabling interrupts
-		adds jitter in the time when a interrupt request is asserted until
-		the hardware can responds with the interrupt.  Disabling pre-emption
-		adds jitter in the timer from when the event is posted in the
+		negative consequences to real time performance:  Disabling interrupts
+		adds jitter in the time when an interrupt request is asserted until
+		the hardware can respond with the interrupt.  Disabling pre-emption
+		adds jitter in the time from when the event is posted in the
 		interrupt handler until the task that responds to the event can run.
 
 		If this option is selected, then the following interfaces must be
@@ -749,7 +733,7 @@ config SCHED_CRITMONITOR
 		in unknown units) can be obtained by subtracting a start time from
 		the current time.
 
-		The second interface simple converts an elapsed time into well known
+		The second interface simply converts an elapsed time into well known
 		units for presentation by the ProcFS file system.
 
 config SCHED_CPULOAD
@@ -760,15 +744,15 @@ config SCHED_CPULOAD
 		If this option is selected, the timer interrupt handler will monitor
 		if the system is IDLE or busy at the time of that the timer interrupt
 		occurs.  This is a very coarse measurement, but over a period of time,
-		it can very accurately determined the percentage of the time that the
+		it can very accurately determine the percentage of the time that the
 		CPU is IDLE.
 
-		The statistics collected in this could be used, for example in the
+		The statistics collected in this could be used, for example, in the
 		PROCFS file system to provide CPU load measurements when read.
 
 		Note that in tickless mode of operation (SCHED_TICKLESS) there is
 		no system timer interrupt and CPU load measurements will not be
-		possible unless you provide an alternative clock to driver the
+		possible unless you provide an alternative clock to drive the
 		sampling and select SCHED_CPULOAD_EXTCLK.
 
 if SCHED_CPULOAD
@@ -920,7 +904,7 @@ config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
 	default n
 	---help---
-		When this option is enabled, the board specific logic must implment all
+		When this option is enabled, the board specific logic must implement all
 		callbacks listed in SCHED_INSTRUMENTATION, SCHED_INSTRUMENTATION_CSECTION,
 		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
 		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
@@ -1065,12 +1049,12 @@ config SDCLONE_DISABLE
 	descriptors by task_create() when a new task is started. If
 	set, all sockets will appear to be closed in the new task.
 
-config NFCHUNK_DESCRIPTORS
-	int "The number of file descriptors per row"
+config NFILE_DESCRIPTORS_PER_BLOCK
+	int "The number of file descriptors per block"
 	default 8
 	range 3 99999
 	---help---
-		The number of file descriptors per row (one for each open)
+		The number of file descriptors per block(one for each open)
 
 config FILE_STREAM
 	bool "Enable FILE stream"
@@ -1752,6 +1736,13 @@ endif # SCHED_LPWORK
 endmenu # Work Queue Support
 
 menu "Stack and heap information"
+
+config DEFAULT_TASK_STACKSIZE
+	int "The default stack size for tasks"
+	default 65536 if ARCH_SIM
+	default 2048
+	---help---
+		The default stack size for tasks.
 
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/stm32f334-disco/src/Makefile
+# boards/arm/stm32/stm32f334-disco/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,6 @@ CSRCS = stm32_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)

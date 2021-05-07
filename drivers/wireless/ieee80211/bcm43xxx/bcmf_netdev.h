@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/ieee80211/bcmf_netdev.h
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_netdev.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -36,7 +36,15 @@
 #ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H
 #define __DRIVERS_WIRELESS_IEEE80211_BCMF_NETDEV_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include "bcmf_driver.h"
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 int bcmf_netdev_register(FAR struct bcmf_dev_s *priv);
 

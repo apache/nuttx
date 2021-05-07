@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/lpc2378/irq.h
+ * arch/arm/include/lpc2378/irq.h
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
@@ -55,7 +55,7 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* LPC2378 Interrupts */
@@ -94,12 +94,12 @@
 #define I2C2_IRQ      30 /* I2C 2 */
 #define I2S_IRQ       31 /* I2S */
 
-
 #define IRQ_SYSTIMER  TIMER0_IRQ
 
 #define NR_IRQS             32
 
-/* There are 32 vectored interrupts.  If vectored interrupts are enabled, the
+/* There are 32 vectored interrupts.
+ * If vectored interrupts are enabled, the
  * following will be used by the system.
  */
 #define SYSTIMER_VEC  0 /* System timer */

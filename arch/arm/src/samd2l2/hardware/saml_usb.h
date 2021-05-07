@@ -1,49 +1,34 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_usb.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
  *   Datasheet", Atmel-42385C-SAML21_Datasheet_Preliminary-03/20/15
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
-
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_USB_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_USB_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,11 +36,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAML21) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Capabilities and characteristics of endpoints ********************************************/
+/* Capabilities and characteristics of endpoints ****************************/
 
 /*   EP  EP BANKS  EP SIZE   EP TYPE
  *   --- --------- --------- ---------
@@ -77,7 +62,7 @@
 #define SAM_USB_ISOCHRONOUS(ep)        (true)
 #define SAM_USB_INTERRUPT(ep)          (true)
 
-/* USB register offsets ********************************************************************/
+/* USB register offsets *****************************************************/
 
 /* Common USB Device/Host Register Offsets */
 
@@ -173,7 +158,7 @@
 #define SAM_USBHOST_CTRLPIPE_OFFSET    0x000c /* Host control pipe (Bank 0 only) */
 #define SAM_USBHOST_STATUSPIPE_OFFSET  0x000e /* Host status pipe (Both banks) */
 
-/* USB register addresses ******************************************************************/
+/* USB register addresses ***************************************************/
 
 /* Common USB Device/Host Register Addresses */
 
@@ -236,7 +221,7 @@
 #define SAM_USBHOST_PINTENCLR(n)       (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PINTENCLR_OFFSET)
 #define SAM_USBHOST_PINTENSET(n)       (SAM_USBHOST_PIPE_BASE(n)+SAM_USBHOST_PINTENSET_OFFSET)
 
-/* USB register bit definitions ************************************************************/
+/* USB register bit definitions *********************************************/
 
 /* Common USB Device/Host Register Offsets */
 
@@ -301,6 +286,7 @@
 #  define USBDEV_CTRLB_SPDCONF_LOW     (1 << USBDEV_CTRLB_SPDCONF_SHIFT) /* Low  speed */
 #  define USBDEV_CTRLB_SPDCONF_HIGH    (2 << USBDEV_CTRLB_SPDCONF_SHIFT) /* High speed capable */
 #  define USBDEV_CTRLB_SPDCONF_HIGH_TM (3 << USBDEV_CTRLB_SPDCONF_SHIFT) /* High speed Test Mode */
+
 #define USBDEV_CTRLB_NREPLY            (1 << 4)  /* Bit 4:  No reply except SETUP token */
 #define USBDEV_CTRLB_GNAK              (1 << 9)  /* Bit 9:  Global NAK */
 #define USBDEV_CTRLB_LPMHDSK_SHIFT     (10)      /* Bits 10-11: Link power management handshake */
@@ -322,6 +308,7 @@
 #define USBDEV_STATUS_SPEED_MASK       (3 << USBDEV_STATUS_SPEED_SHIFT)
 #  define USBDEV_STATUS_SPEED_LOW      (0 << USBDEV_STATUS_SPEED_SHIFT) /* Low speed */
 #  define USBDEV_STATUS_SPEED_FULL     (1 << USBDEV_STATUS_SPEED_SHIFT) /* Full speed */
+
 #define USBDEV_STATUS_LNSTATE_SHIFT    (6)       /* Bits 6-7:  USB line status */
 #define USBDEV_STATUS_LNSTATE_MASK     (3 << USBDEV_STATUS_LNSTATE_SHIFT)
 #  define USBDEV_STATUS_LNSTATE_SE0    (0 << USBDEV_STATUS_LNSTATE_SHIFT) /* SE0/RESET */
@@ -336,8 +323,8 @@
 #define USBDEV_FNUM_MASK               (0x7ff << USBDEV_FNUM_SHIFT)
 #define USBDEV_FNUM_FNCERR             (1 << 15) /* Bit 15: Frame number CRC error */
 
-/* Common definitions for Device Interrupt Enable Clear Register, Device interrupt
- * Enable Set Register, and SAM_USBDEV_INTFLAG_OFFSET
+/* Common definitions for Device Interrupt Enable Clear Register, Device
+ * interrupt Enable Set Register, and SAM_USBDEV_INTFLAG_OFFSET
  */
 
 #define USBDEV_INT_SUSPEND             (1 << 0)  /* Bit 0:  Suspend interrupt */
@@ -364,6 +351,7 @@
 #  define USBDEV_EPCCFG_EPTYPE0_BULKOUT  (3 << USBDEV_EPCFG_EPTYPE0_SHIFT) /* Bank 0 bulk OUT */
 #  define USBDEV_EPCCFG_EPTYPE0_INTOUT   (4 << USBDEV_EPCFG_EPTYPE0_SHIFT) /* Bank 0 interrupt OUT */
 #  define USBDEV_EPCCFG_EPTYPE0_DBIN     (5 << USBDEV_EPCFG_EPTYPE0_SHIFT) /* Bank 0 dual bank IN */
+
 #define USBDEV_EPCFG_EPTYPE1_SHIFT       (4)       /* Bits 4-6: Endpoint type for IN direction */
 #define USBDEV_EPCFG_EPTYPE1_MASK        (7 << USBDEV_EPCFG_EPTYPE1_SHIFT)
 #  define USBDEV_EPCCFG_EPTYPE1_DISABLED (0 << USBDEV_EPCFG_EPTYPE1_SHIFT) /* Bank 1 disabled */
@@ -385,8 +373,9 @@
 #define USBDEV_EPSTATUS_BK0RDY         (1 << 6)  /* Bit 6:  Bank 0 ready */
 #define USBDEV_EPSTATUS_BK1RDY         (1 << 7)  /* Bit 7:  Bank 1 ready */
 
-/* Common definitions for Device Endpoint Interrupt Flag Register, Device Endpoint
- * Interrupt Enable Register, and Device Endpoint Interrupt Set Register
+/* Common definitions for Device Endpoint Interrupt Flag Register, Device
+ * Endpoint Interrupt Enable Register, and Device Endpoint Interrupt Set
+ * Register
  */
 
 #define USBDEV_EPINT_TRCPT0            (1 << 0)  /* Bit 0:  Transmit complete 0 interrupt */
@@ -419,6 +408,7 @@
 #  define USBDEV_PKTSIZE_SIZE_256B     (5 << USBDEV_PKTSIZE_SIZE_SHIFT) /* 256 bytes (isoc only) */
 #  define USBDEV_PKTSIZE_SIZE_512B     (6 << USBDEV_PKTSIZE_SIZE_SHIFT) /* 512 bytes (isoc only) */
 #  define USBDEV_PKTSIZE_SIZE_1023B    (7 << USBDEV_PKTSIZE_SIZE_SHIFT) /* 1023 bytes (isoc only) */
+
 #define USBDEV_PKTSIZE_AUTOZLP         (1 << 31) /* Bit 31: Automatic zero length packet */
 
 /* Extended Register (Bank 0 only) */
@@ -443,6 +433,7 @@
 #define USBHOST_CTRLB_SPDCONF_SHIFT    (2)       /* Bits 2-3: Host speed configuration */
 #define USBHOST_CTRLB_SPDCONF_MASK     (3 << USBHOST_CTRLB_SPDCONF_SHIFT)
 #  define USBHOST_CTRLB_SPDCONF_LF     (0 << USBHOST_CTRLB_SPDCONF_SHIFT) /* Low and full capable */
+
 #define USBHOST_CTRLB_TSTJ             (1 << 5)  /* Bit 5:  TSTJ */
 #define USBHOST_CTRLB_TSTK             (1 << 6)  /* Bit 6:  TSTK */
 #define USBHOST_CTRLB_SOFE             (1 << 8)  /* Bit 8:  Start of frame generation enable */
@@ -463,6 +454,7 @@
 #define USBHOST_STATUS_SPEED_MASK      (3 << USBHOST_STATUS_SPEED_SHIFT)
 #  define USBHOST_STATUS_SPEED_LOW     (0 << USBHOST_STATUS_SPEED_SHIFT) /* Full speed mode */
 #  define USBHOST_STATUS_SPEED_FULL    (2 << USBHOST_STATUS_SPEED_SHIFT) /* Low speed mode */
+
 #define USBHOST_STATUS_LNSTATE_SHIFT   (6)       /* Bits 6-7:  USB line status */
 #define USBHOST_STATUS_LNSTATE_MASK    (3 << USBHOST_STATUS_LNSTATE_SHIFT)
 #  define USBHOST_STATUS_LNSTATE_SE0   (0 << USBHOST_STATUS_LNSTATE_SHIFT) /* SE0/RESET */
@@ -476,8 +468,9 @@
 
 /* Host Frame Length Register (8-bit data) */
 
-/* Common definitions for Host Interrupt Enable Clear Register, Host Interrupt Enable
- * Set Register, and Host Interrupt Flag Status and Clear Register
+/* Common definitions for Host Interrupt Enable Clear Register, Host
+ * Interrupt Enable Set Register, and Host Interrupt Flag Status and
+ * Clear Register
  */
 
 #define USBHOST_INT_HSOF               (1 << 2)  /* Bit 2:  Host start of frame interrupt */
@@ -501,8 +494,8 @@
 #  define USBHOST_PCFG_PTOKEN_IN       (1 << USBHOST_PCFG_PTOKEN_SHIFT)
 #  define USBHOST_PCFG_PTOKEN_OUT      (2 << USBHOST_PCFG_PTOKEN_SHIFT)
 #define USBHOST_PCFG_BK                (1 << 2)  /* Bit 2:  Pipe bank */
-  #define USBHOST_PCFG_BK_SINGLE       (0)       /*         0=Single bank endpoint */
-  #define USBHOST_PCFG_BK_DUAL         (1 << 2)  /*         1=Dual bank endpoint */
+#  define USBHOST_PCFG_BK_SINGLE       (0)       /*         0=Single bank endpoint */
+#  define USBHOST_PCFG_BK_DUAL         (1 << 2)  /*         1=Dual bank endpoint */
 #define USBHOST_PCFG_PTYPE_SHIFT       (3)       /* Bits 3-5:  Type of pipe */
 #define USBHOST_PCFG_PTYPE_MASK        (7 << USBHOST_PCFG_PTYPE_SHIFT)
 #  define USBHOST_PCFG_PTYPE_DISABLED  (0 << USBHOST_PCFG_PTYPE_SHIFT) /* Disabled */
@@ -514,8 +507,8 @@
 
 /* Interval for Bulk-OUT/Ping Transaction Register (8-bit data) */
 
-/* Common definitions for Pipe Status Clear Register, Pipe Status Set Register, and
- * Pipe Status Register
+/* Common definitions for Pipe Status Clear Register, Pipe Status Set
+ * Register, and Pipe Status Register
  */
 
 #define USBHOST_PSTATUS_DTGL           (1 << 0)  /* Bit 0:  Data toggle sequence */
@@ -524,8 +517,8 @@
 #define USBHOST_PSTATUS_BK0RDY         (1 << 6)  /* Bit 6:  Bank 0 ready */
 #define USBHOST_PSTATUS_BK1RDY         (1 << 7)  /* Bit 7:  Bank 1 ready */
 
-/* Common definitions for Host Pipe Interrupt Flag Register, Host Pipe Interrupt Clear
- * Register, and Host Pipe Interrupt Set Register
+/* Common definitions for Host Pipe Interrupt Flag Register, Host Pipe
+ * Interrupt Clear Register, and Host Pipe Interrupt Set Register
  */
 
 #define USBHOST_PINTFLAG_TRCPT0        (1 << 0)  /* Bit 0:  Transfer complete 0 interrupt */
@@ -557,6 +550,7 @@
 #  define USBHOST_PKTSIZE_SIZE_256B    (5 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 256 bytes (isoc only) */
 #  define USBHOST_PKTSIZE_SIZE_512B    (6 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 512 bytes (isoc only) */
 #  define USBHOST_PKTSIZE_SIZE_1023B   (7 << USBHOST_PKTSIZE_SIZE_SHIFT) /* 1023 bytes (isoc only) */
+
 #define USBHOST_PKTSIZE_AUTOZLP        (1 << 31) /* Bit 31: Automatic zero length packet */
 
 /* Extended register (Bank 0 only) */
@@ -596,9 +590,9 @@
 #define USBHOST_STATUSPIPE_ERCNT_MASK  (7 << USBHOST_STATUSPIPE_ERCNT_SHIFT)
 #  define USBHOST_STATUSPIPE_ERCNT(n)  ((uint16_t)(n) << USBHOST_STATUSPIPE_ERCNT_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* Device Endpoint Descriptor.  See USBDEV_* bit definitions above. */
 
@@ -624,13 +618,13 @@ struct usbhost_pipedesc_s
   uint16_t statuspipe;  /* 0x000e-0x000f: Host status pipe (Both banks) */
 };
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_USB_H */

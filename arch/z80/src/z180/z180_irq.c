@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/src/z180/z180_irq.c
  *
- *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -61,9 +46,9 @@
 volatile chipreg_t *g_current_regs;
 
 /* This holds the value of the MMU's CBR register.  This value is set to the
- * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR if
- * an interrupt level context switch occurs, and restored on interrupt exit.  In
- * this way, the CBR is always correct on interrupt exit.
+ * interrupted tasks's CBR on interrupt entry, changed to the new task's CBR
+ * if an interrupt level context switch occurs, and restored on interrupt
+ * exit.  In this way, the CBR is always correct on interrupt exit.
  */
 
 uint8_t current_cbr;
@@ -89,8 +74,8 @@ extern uintptr_t up_vectors[16];
 static void z180_seti(uint8_t value) __naked
 {
   __asm
-	ld	a, 4(ix)	; value
-	ld	l, a
+  ld a, 4(ix) ; value
+  ld l, a
   __endasm;
 }
 
@@ -109,11 +94,11 @@ static void z180_seti(uint8_t value) __naked
 irqstate_t up_irq_save(void) __naked
 {
   __asm
-	ld		a, i	; AF Parity bit holds interrupt state
-	di				; Interrupts are disabled
-	push	af		; Return AF in HL
-	pop		hl		;
-	ret				;
+  ld a, i ; AF parity bit holds interrupt state
+  di ; interrupts are disabled
+  push af; return AF in HL
+  pop hl ;
+  ret ;
   __endasm;
 }
 
@@ -128,15 +113,15 @@ irqstate_t up_irq_save(void) __naked
 void up_irq_restore(irqstate_t flags) __naked
 {
   __asm
-	di				; Assume disabled
-	pop		hl		; HL = return address
-	pop		af		; AF Parity bit holds interrupt state
-	jp		po, statedisable
-	ei
+  di ; assume disabled
+  pop hl ; HL = return address
+  pop af ; AF parity bit holds interrupt state
+  jp po, statedisable
+  ei
 statedisable:
-	push	af		; Restore stack
-	push	hl		;
-	ret				; and return
+  push af ; restore stack
+  push hl ;
+  ret ; and return
   __endasm;
 }
 
@@ -151,11 +136,11 @@ statedisable:
 irqstate_t up_irq_enable(void) __naked
 {
   __asm
-	ld		a, i	; AF Parity bit holds interrupt state
-	ei				; Interrupts are enabled
-	push	af		; Return AF in HL
-	pop		hl		;
-	ret				;
+  ld a, i ; AF parity bit holds interrupt state
+  ei ; interrupts are enabled
+  push af ; return AF in HL
+  pop hl ;
+  ret ;
   __endasm;
 }
 

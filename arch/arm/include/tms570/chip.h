@@ -1,50 +1,35 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/tms570/chip.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_TMS570_CHIP_H
 #define __ARCH_ARM_INCLUDE_TMS570_CHIP_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /*                 TMS570LS0432PZ TMS570LS0332PZ TMS570LS0232PZ
  * Package         100 QFP        100 QFP        100 QFP
@@ -182,29 +167,53 @@
 #  undef  TMS570_RTP                     /* No RAM trace port (RTP) */
 #  undef  TMS570_DMM                     /* No DMM */
 
-/*                 TMS570LS1227ZWT TMS570LS0714ZWT TMS570LS0714PGE TMS570LS0714PZ
- * Package         337 BGA         337 BGA         144 QFP         100 QFP
- * CPU             ARM Cortex-R4F  ARM Cortex-R4F  ARM Cortex-R4F  ARM Cortex-R4F
- * Frequency (MHz) 180             180             160             100
- * Flash (KB)      1280            768             768             768
- * RAM (KB)        192             128             128             128
- * Data Flash (KB) 64              64              64              64
- * EMAC            10/100          –               –               –
- * FlexRay         2-ch            –               –               –
- * CAN             3               3               3               2
- * MibADC (CH)     2 (24)          2 (24)          2 (24)          2 (16)
- * N2HET (Ch)      2 (44)          2 (44)          2 (40)          2 (21)
- * ePWM Channels   14              14              14              8
- * eCAP Channels   6               6               6               4
- * eQEP Channels   2               2               2               1
- * MibSPI (CS)     3 (6+6+4)       3 (6+6+4)       3 (5+6+4)       2 (5+1)
- * SPI (CS)        2 (2+1)         2 (2+1)         1 (1)           1 (1)
- * SCI (LIN)       2 (1)           2 (1)           2 (1)           1 (1)
- * I2C             1               1               1               –
- * GPIO (INT)      101 (16)        101 (16)        64 (10)         45 (9)
- * EMIF            16-bit data     –               –               –
- * ETM (Trace)     –               –               –               –
- * RTP/DMM         –               –               –               –
+/*                 TMS570LS1227ZWT TMS570LS0714ZWT
+ * Package         337 BGA         337 BGA
+ * CPU             ARM Cortex-R4F  ARM Cortex-R4F
+ * Frequency (MHz) 180             180
+ * Flash (KB)      1280            768
+ * RAM (KB)        192             128
+ * Data Flash (KB) 64              64
+ * EMAC            10/100          –
+ * FlexRay         2-ch            –
+ * CAN             3               3
+ * MibADC (CH)     2 (24)          2 (24)
+ * N2HET (Ch)      2 (44)          2 (44)
+ * ePWM Channels   14              14
+ * eCAP Channels   6               6
+ * eQEP Channels   2               2
+ * MibSPI (CS)     3 (6+6+4)       3 (6+6+4)
+ * SPI (CS)        2 (2+1)         2 (2+1)
+ * SCI (LIN)       2 (1)           2 (1)
+ * I2C             1               1
+ * GPIO (INT)      101 (16)        101 (16)
+ * EMIF            16-bit data     –
+ * ETM (Trace)     –               –
+ * RTP/DMM         –               –
+ *
+ *                 TMS570LS0714PGE TMS570LS0714PZ
+ * Package         144 QFP         100 QFP
+ * CPU             ARM Cortex-R4F  ARM Cortex-R4F
+ * Frequency (MHz) 160             100
+ * Flash (KB)      768             768
+ * RAM (KB)        128             128
+ * Data Flash (KB) 64              64
+ * EMAC            –               –
+ * FlexRay         –               –
+ * CAN             3               2
+ * MibADC (CH)     2 (24)          2 (16)
+ * N2HET (Ch)      2 (40)          2 (21)
+ * ePWM Channels   14              8
+ * eCAP Channels   6               4
+ * eQEP Channels   2               1
+ * MibSPI (CS)     3 (5+6+4)       2 (5+1)
+ * SPI (CS)        1 (1)           1 (1)
+ * SCI (LIN)       2 (1)           1 (1)
+ * I2C             1               –
+ * GPIO (INT)      64 (10)         45 (9)
+ * EMIF            –               –
+ * ETM (Trace)     –               –
+ * RTP/DMM         –               –
  */
 
 #elif defined(CONFIG_ARCH_CHIP_TMS570LS0714PZ)

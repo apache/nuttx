@@ -50,7 +50,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* INA226 Register Definitions ***********************************************/
+/* INA226 Register Definitions **********************************************/
 
 #define INA226_REG_CONFIG            0  /* See below */
 #define INA226_REG_SHUNT_VOLTAGE     1  /* Shunt voltage in 2.5 uV units */

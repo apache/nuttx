@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/procfs/netdev_statistics.c
+ * mm/iob/iob_statistics.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Anthony Merlino <anthony@vergeeaero.com>
@@ -113,7 +113,8 @@ void iob_stats_onfree(enum iob_user_e producerid)
  * Name: iob_getuserstats
  *
  * Description:
- *   Return a reference to the IOB usage statistics for the IOB consumer/producer
+ *   Return a reference to the IOB usage statistics for the IOB
+ *   consumer/producer
  *
  * Input Parameters:
  *   userid - id representing the IOB producer/consumer

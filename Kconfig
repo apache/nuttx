@@ -27,13 +27,6 @@ config DEFAULT_SMALL
 		have already been selected in your configuration file.  This applies
 		only to new settings that require a default value.
 
-config DEFAULT_TASK_STACKSIZE
-	int "The default stack size for tasks"
-	default 65536 if ARCH_SIM
-	default 2048
-	---help---
-		The default stack size for tasks.
-
 choice
 	prompt "Build Host Platform"
 	default HOST_LINUX
@@ -223,7 +216,7 @@ config BUILD_KERNEL
 		they can be loaded into memory for execution.
 
 		NOTE:  This build configuration requires that the platform support
-		a memory management unit (MPU) and address environments.  Support,
+		a memory management unit (MMU) and address environments.  Support,
 		however, may not be implemented on all platforms.
 
 endchoice # Build configuration
@@ -1716,6 +1709,38 @@ config DEBUG_WATCHDOG_INFO
 		Enable watchdog time informational output to SYSLOG.
 
 endif # DEBUG_WATCHDOG
+
+config DEBUG_MOTOR
+	bool "Motor Debug Features"
+	default n
+	depends on MOTOR
+	---help---
+		Enable motor debug features.
+
+if DEBUG_MOTOR
+
+config DEBUG_MOTOR_ERROR
+	bool "Motor Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable motor error output to SYSLOG.
+
+config DEBUG_MOTOR_WARN
+	bool "Motor Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable motor warning output to SYSLOG.
+
+config DEBUG_MOTOR_INFO
+	bool "Motor Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable motor informational output to SYSLOG.
+
+endif # DEBUG_MOTOR
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK

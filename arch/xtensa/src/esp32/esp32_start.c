@@ -1,25 +1,20 @@
 /****************************************************************************
- * arch/xtensa/src/common/esp32_start.c
+ * arch/xtensa/src/esp32/esp32_start.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Basic initialize sequence derives from logic originally provided by
- * Espressif Systems:
- *
- *   Copyright 2015-2016 Espressif Systems (Shanghai) PTE LTD
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -157,6 +152,14 @@ void IRAM_ATTR __start(void)
       PANIC();
 #  endif
     }
+
+  /* Set external memory bss section to zero */
+
+#  ifdef CONFIG_XTENSA_EXTMEM_BSS
+     memset(&_sbss_extmem, 0,
+            (&_ebss_extmem - &_sbss_extmem) * sizeof(_sbss_extmem));
+#  endif
+
 #endif
 
   /* Initialize onboard resources */

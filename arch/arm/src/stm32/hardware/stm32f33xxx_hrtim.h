@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f33xxx_hrtim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,22 +16,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_HRTIM_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_HRTIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define STM32_HRTIM_MASTER_OFFSET       0x0000      /* HRTIM Master Timer base address offset */
 #define STM32_HRTIM_TIMERA_OFFSET       0x0080      /* HRTIM Timer A base address offset */
@@ -50,7 +50,7 @@
 #define STM32_HRTIM1_TIMERE_BASE        (STM32_HRTIM_TIMERE_OFFSET+STM32_HRTIM1_BASE)
 #define STM32_HRTIM1_CMN_BASE           (STM32_HRTIM_CMN_OFFSET+STM32_HRTIM1_BASE)
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* Register Offsets Common for Master Timer and Timer X */
 
@@ -117,7 +117,7 @@
 #define STM32_HRTIM_CMN_BDTEUPR_OFFSET  0x006C /* HRTIM Timer E Update Register */
 #define STM32_HRTIM_CMN_BDMADR_OFFSET   0x0070 /* HRTIM DMA Data Register */
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Control Register Bits Common to Master Timer and Timer A-E */
 

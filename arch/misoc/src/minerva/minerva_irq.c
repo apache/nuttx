@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/minerva/_irq.c
+ * arch/misoc/src/minerva/minerva_irq.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Ramtin Amin <keytwo@gmail.com>

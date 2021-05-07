@@ -1,45 +1,31 @@
 /****************************************************************************
  * boards/arm/stm32/stm32ldiscovery/src/stm32_lcd.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   - Based on the NuttX LCD1602 driver.
- *   - "STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-based
- *     32-bit MCUs", STMicroelectronics, RM0038
+ *   - "STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced
+ *     ARM-based 32-bit MCUs", STMicroelectronics, RM0038
  *   - "STM32L1 discovery kits: STM32L-DISCOVERY and 32L152CDISCOVERY,"
  *     STMicroelectronics, UM1079
  *   - STM32L-Discovery Firmware Pack V1.0.2 (for character encoding)
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
+ */
 
 /****************************************************************************
  * Included Files
@@ -48,6 +34,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -74,6 +61,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* Define CONFIG_DEBUG_LCD_INFO to enable detailed LCD debug output. */
@@ -93,6 +81,7 @@
 #endif
 
 /* LCD **********************************************************************/
+
 /* LCD.  The STM32L152RBT6 supports either a 4x32 or 8x28.  The STM32L-
  * Discovery has an LCD 24 segments, 4 commons.  See stm32ldiscovery.h for
  * the pin mapping.
@@ -116,7 +105,9 @@
 #define SLCD_NCHARS           6
 #define SLCD_MAXCONTRAST      7
 
-/* An ASCII character may need to be decorated with a colon or decimal point */
+/* An ASCII character may need to be decorated with a colon or decimal
+ * point
+ */
 
 #define SLCD_DP               0x01
 #define SLCD_COLON            0x02
@@ -135,38 +126,77 @@
 
 /* These definitions support the logic of slcd_writemem()
  *
- * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ ------- ------- -----------------------------
- * LCD SIGNAL COM3  COM2  COM1  COM0  RAM BIT CHAR 1 CHAR 2 CHAR 3 CHAR 4 CHAR 5  CHAR 6  MASKS
- *                                             3210   3210   3210   3210  32  10  32  10
- * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ --  --- --  --- -----------------------------
- * LCD SEG0   1N    1P    1D    1E    Bit 0     1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * LCD SEG1   1DP   1COL  1C    1M    Bit 1     1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * LCD SEG2   2N    2P    2D    2E    Bit 2     0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG3   2DP   2COL  2C    2M    Bit 7     0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG4   3N    3P    3D    3E    Bit 8     0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG5   3DP   3COL  3C    3M    Bit 9     0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG6   4N    4P    4D    4E    Bit 10    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG7   4DP   4COL  4C    4M    Bit 11    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG8   5N    5P    5D    5E    Bit 12    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG9   BAR2  BAR3  5C    5M    Bit 13    0      0      0      0     0   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG10  6N    6P    6D    6E    Bit 14    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG11  BAR0  BAR1  6C    6M    Bit 15    0      0      0      0     0   0   0   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG12  6J    6K    6A    6B    Bit 16    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG13  6H    6Q    6F    6G    Bit 17    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
- * LCD SEG14  5J    5K    5A    5B    Bit 18    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG15  5H    5Q    5F    5G    Bit 19    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
- * LCD SEG16  4J    4K    4A    4B    Bit 20    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG17  4H    4Q    4F    4G    Bit 21    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
- * LCD SEG18  3J    3K    3A    3B    Bit 24    0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG19  3H    3Q    3F    3G    Bit 25    0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
- * LCD SEG20  2J    2K    2A    2B    Bit 26    0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG21  2H    2Q    2F    2G    Bit 27    0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
- * LCD SEG22  1J    1K    1A    1B    Bit 28    1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * LCD SEG23  1H    1Q    1F    1G    Bit 29    1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
- * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ ------- ------- -----------------------------
+ * ---------- ----- ----- ----- ----- -------
+ * LCD SIGNAL COM3  COM2  COM1  COM0  RAM BIT
+ *
+ * ---------- ----- ----- ----- ----- -------
+ * LCD SEG0   1N    1P    1D    1E    Bit 0
+ * LCD SEG1   1DP   1COL  1C    1M    Bit 1
+ * LCD SEG2   2N    2P    2D    2E    Bit 2
+ * LCD SEG3   2DP   2COL  2C    2M    Bit 7
+ * LCD SEG4   3N    3P    3D    3E    Bit 8
+ * LCD SEG5   3DP   3COL  3C    3M    Bit 9
+ * LCD SEG6   4N    4P    4D    4E    Bit 10
+ * LCD SEG7   4DP   4COL  4C    4M    Bit 11
+ * LCD SEG8   5N    5P    5D    5E    Bit 12
+ * LCD SEG9   BAR2  BAR3  5C    5M    Bit 13
+ * LCD SEG10  6N    6P    6D    6E    Bit 14
+ * LCD SEG11  BAR0  BAR1  6C    6M    Bit 15
+ * LCD SEG12  6J    6K    6A    6B    Bit 16
+ * LCD SEG13  6H    6Q    6F    6G    Bit 17
+ * LCD SEG14  5J    5K    5A    5B    Bit 18
+ * LCD SEG15  5H    5Q    5F    5G    Bit 19
+ * LCD SEG16  4J    4K    4A    4B    Bit 20
+ * LCD SEG17  4H    4Q    4F    4G    Bit 21
+ * LCD SEG18  3J    3K    3A    3B    Bit 24
+ * LCD SEG19  3H    3Q    3F    3G    Bit 25
+ * LCD SEG20  2J    2K    2A    2B    Bit 26
+ * LCD SEG21  2H    2Q    2F    2G    Bit 27
+ * LCD SEG22  1J    1K    1A    1B    Bit 28
+ * LCD SEG23  1H    1Q    1F    1G    Bit 29
+ * ---------- ----- ----- ----- ----- --------
+
+ * ---------------- ------ ------ ------ ------- ------- --------------------
+ * LCD       CHAR 1 CHAR 2 CHAR 3 CHAR 4 CHAR 5  CHAR 6  MASKS
+ *  SIGNAL    3210   3210   3210   3210  32  10  32  10
+ * --------- ------ ------ ------ ------ --  --- --  --- --------------------
+ * LCD SEG0  1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG1  0      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG2  0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG3  0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG4  0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG5  0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG6  0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG7  0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG8  0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG9  0      0      0      0     0   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG10 0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG11 0      0      0      0     0   0   0   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG12 0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG13 0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/
+ *                                                             0xfffcbfff
+ * LCD SEG14 0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG15 0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/
+ *                                                             0xfff3efff
+ * LCD SEG16 0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG17 0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG18 0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG19 0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG20 0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG21 0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG22 1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG23 1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * --------- ------ ------ ------ ------- ------- ---------------------------
  */
 
-/* SLCD_CHAR1_MASK  COM0-3 0xcffffffc ..11 .... .... .... .... .... .... ..11 */
+/* SLCD_CHAR1_MASK  COM0-3 0xcffffffc ..11 .... .... .... .... .... .... ..11
+ */
 
 #define SLCD_CHAR1_MASK0      0xcffffffc
 #define SLCD_CHAR1_MASK1      SLCD_CHAR1_MASK0
@@ -178,7 +208,8 @@
 #define SLCD_CHAR1_UPDATE2(s) SLCD_CHAR1_UPDATE0(s)
 #define SLCD_CHAR1_UPDATE3(s) SLCD_CHAR1_UPDATE0(s)
 
-/* SLCD_CHAR2_MASK  COM0-3 0xf3ffff03 .... 22.. .... .... .... .... 2... .2.. */
+/* SLCD_CHAR2_MASK  COM0-3 0xf3ffff03 .... 22.. .... .... .... .... 2... .2..
+ */
 
 #define SLCD_CHAR2_MASK0      0xf3ffff7b
 #define SLCD_CHAR2_MASK1      SLCD_CHAR2_MASK0
@@ -191,7 +222,8 @@
 #define SLCD_CHAR2_UPDATE2(s) SLCD_CHAR2_UPDATE0(s)
 #define SLCD_CHAR2_UPDATE3(s) SLCD_CHAR2_UPDATE0(s)
 
-/* SLCD_CHAR3_MASK  COM0-3 0xfcfffcff .... ..33 .... .... .... ..33 .... .... */
+/* SLCD_CHAR3_MASK  COM0-3 0xfcfffcff .... ..33 .... .... .... ..33 .... ....
+ */
 
 #define SLCD_CHAR3_MASK0      0xfcfffcff
 #define SLCD_CHAR3_MASK1      SLCD_CHAR3_MASK0
@@ -203,7 +235,8 @@
 #define SLCD_CHAR3_UPDATE2(s) SLCD_CHAR3_UPDATE0(s)
 #define SLCD_CHAR3_UPDATE3(s) SLCD_CHAR3_UPDATE0(s)
 
-/* SLCD_CHAR4_MASK  COM0-3 0xffcff3ff .... .... ..44 .... .... 44.. .... .... */
+/* SLCD_CHAR4_MASK  COM0-3 0xffcff3ff .... .... ..44 .... .... 44.. .... ....
+ */
 
 #define SLCD_CHAR4_MASK0      0xffcff3ff
 #define SLCD_CHAR4_MASK1      SLCD_CHAR4_MASK0
@@ -274,6 +307,7 @@ struct stm32_slcdstate_s
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+
 /* Debug */
 
 #ifdef CONFIG_DEBUG_LCD_INFO
@@ -302,13 +336,16 @@ static void slcd_action(enum slcdcode_e code, uint8_t count);
 static ssize_t slcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t slcd_write(FAR struct file *, FAR const char *, size_t);
 static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                     bool setup);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This is the driver state structure (there is no retained state information) */
+/* This is the driver state structure (there is no retained state
+ * information)
+ */
 
 static const struct file_operations g_slcdops =
 {
@@ -368,7 +405,9 @@ static const uint16_t g_slcdpunct2[ASCII_A - ASCII_COLON] =
   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000           /*  : ; < = > ? @   */
 };
 
-/* Upper case letters A-Z: 0x41-0x5a.  Also lower case letters a-z: 0x61-0x7a */
+/* Upper case letters A-Z: 0x41-0x5a.  Also lower case letters a-z:
+ * 0x61-0x7a
+ */
 
 static const uint16_t g_slcdalphamap[ASCII_LBRACKET - ASCII_A] =
 {
@@ -387,7 +426,7 @@ static const uint16_t g_slcdpunct3[ASCII_a -  ASCII_LBRACKET] =
 
 /* ASCII punctuation: 0x7b-0x7e */
 
-static const uint16_t g_slcdpunct4[ASCII_DEL -  ASCII_LBRACE]=
+static const uint16_t g_slcdpunct4[ASCII_DEL -  ASCII_LBRACE] =
 {
   0x0000, 0x0000, 0x0000, 0x0000                                    /*  { | } ~  */
 };
@@ -421,11 +460,13 @@ static void slcd_dumpstate(FAR const char *msg)
   lcdinfo("  curpos: %d\n",
           g_slcdstate.curpos);
   lcdinfo("  Display: [%c%c%c%c%c%c]\n",
-          g_slcdstate.buffer[0], g_slcdstate.buffer[1], g_slcdstate.buffer[2],
-          g_slcdstate.buffer[3], g_slcdstate.buffer[4], g_slcdstate.buffer[5]);
+          g_slcdstate.buffer[0], g_slcdstate.buffer[1],
+          g_slcdstate.buffer[2], g_slcdstate.buffer[3],
+          g_slcdstate.buffer[4], g_slcdstate.buffer[5]);
   lcdinfo("  Options: [%d%d%d%d%d%d]\n",
-          g_slcdstate.options[0], g_slcdstate.options[1], g_slcdstate.options[2],
-          g_slcdstate.options[3], g_slcdstate.options[4], g_slcdstate.options[5]);
+          g_slcdstate.options[0], g_slcdstate.options[1],
+          g_slcdstate.options[2], g_slcdstate.options[3],
+          g_slcdstate.options[4], g_slcdstate.options[5]);
   lcdinfo("  Bar:     %02x %02x\n",
           g_slcdstate.bar[0], g_slcdstate.bar[1]);
 }
@@ -495,7 +536,8 @@ static void slcd_clear(void)
 
 static int slcd_getstream(FAR struct lib_instream_s *instream)
 {
-  FAR struct slcd_instream_s *slcdstream = (FAR struct slcd_instream_s *)instream;
+  FAR struct slcd_instream_s *slcdstream = (FAR struct slcd_instream_s *)
+                                           instream;
 
   DEBUGASSERT(slcdstream && slcdstream->buffer);
   if (slcdstream->nbytes > 0)
@@ -539,7 +581,7 @@ static int slcd_setcontrast(uint8_t contrast)
   regval |= contrast << LCD_FCR_CC_SHIFT;
   putreg32(regval, STM32_LCD_FCR);
 
-  lcdinfo("contrast: %d FCR: %08x\n",
+  lcdinfo("contrast: %" PRId32 " FCR: %08x\n",
           getreg32(STM32_LCD_FCR), contrast);
 
   return ret;
@@ -652,7 +694,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
 
   /* Ignore 8-bit ASCII and DEL (this should not happen) */
 
-   return 0x0000;
+  return 0x0000;
 }
 
 /****************************************************************************
@@ -822,7 +864,9 @@ static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
 
   segset = slcd_mapch(ch);
 
-  /* Check if the character should be decorated with a decimal point or colon */
+  /* Check if the character should be decorated with a decimal point or
+   * colon
+   */
 
   if ((options & SLCD_DP) != 0)
     {
@@ -883,15 +927,18 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
         {
           int tmp;
 
-          /* If we are at the home position or if the count is zero, then ignore the action */
+          /* If we are at the home position or if the count is zero, then
+           * ignore the action
+           */
 
           if (g_slcdstate.curpos < 1 || count < 1)
             {
               break;
             }
 
-          /* Otherwise, BACKDEL is like moving the cursor back N characters then doing a
-           * forward deletion.  Decrement the cursor position and fall through.
+          /* Otherwise, BACKDEL is like moving the cursor back N characters
+           * then doing a forward deletion.  Decrement the cursor position
+           * and fall through.
            */
 
            tmp = (int)g_slcdstate.curpos - count;
@@ -921,11 +968,14 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
             nchars = SLCD_NCHARS - g_slcdstate.curpos;
             nmove  = MIN(nchars, count) - 1;
 
-            /* Move all characters after the current cursor position left by 'nmove' characters */
+            /* Move all characters after the current cursor position left
+             * by 'nmove' characters
+             */
 
             for (i = g_slcdstate.curpos + nmove; i < SLCD_NCHARS - 1; i++)
               {
-                slcd_writech(g_slcdstate.buffer[i-nmove], i, g_slcdstate.options[i-nmove]);
+                slcd_writech(g_slcdstate.buffer[i - nmove], i,
+                             g_slcdstate.options[i - nmove]);
               }
 
             /* Erase the last 'nmove' characters on the display */
@@ -953,7 +1003,9 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
                 last = SLCD_NCHARS - 1;
               }
 
-            /* Erase N characters after the current cursor position left by one */
+            /* Erase N characters after the current cursor position left by
+             * one
+             */
 
             for (i = g_slcdstate.curpos; i < last; i++)
               {
@@ -975,7 +1027,9 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
         {
           int i;
 
-          /* Erase characters after the current cursor position to the end of the line */
+          /* Erase characters after the current cursor position to the end
+           * of the line
+           */
 
           for (i = g_slcdstate.curpos; i < SLCD_NCHARS; i++)
             {
@@ -1059,7 +1113,8 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
  * Name: slcd_read
  ****************************************************************************/
 
-static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer,
+                         size_t len)
 {
   int ret = 0;
   int i;
@@ -1076,7 +1131,9 @@ static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
       *buffer++ = g_slcdstate.buffer[i];
       ret++;
 
-      /* Check if the character is decorated with a following period or colon */
+      /* Check if the character is decorated with a following period or
+       * colon
+       */
 
       if (ret < len && g_slcdstate.buffer[i] != 0)
         {
@@ -1148,7 +1205,8 @@ static ssize_t slcd_write(FAR struct file *filep,
 
   /* Now decode and process every byte in the input buffer */
 
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) !=
+         SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);
@@ -1163,8 +1221,8 @@ static ssize_t slcd_write(FAR struct file *filep,
 
               if (ch == ASCII_BS)
                 {
-                  /* If there is a pending character, then output it now before
-                   * performing the action.
+                  /* If there is a pending character, then output it now
+                   * before performing the action.
                    */
 
                   if (valid)
@@ -1180,8 +1238,8 @@ static ssize_t slcd_write(FAR struct file *filep,
                 }
               else if (ch == ASCII_CR)
                 {
-                  /* If there is a pending character, then output it now before
-                   * performing the action.
+                  /* If there is a pending character, then output it now
+                   * before performing the action.
                    */
 
                   if (valid)
@@ -1201,7 +1259,9 @@ static ssize_t slcd_write(FAR struct file *filep,
 
           else if (ch == '.')
             {
-              /* Write the previous character with the decimal point appended */
+              /* Write the previous character with the decimal point
+               * appended
+               */
 
               slcd_appendch(prev, SLCD_DP);
               prev = ' ';
@@ -1292,16 +1352,16 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   switch (cmd)
     {
-
       /* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD
        *
-       * argument:  Pointer to struct slcd_attributes_s in which values will be
-       *            returned
+       * argument:  Pointer to struct slcd_attributes_s in which values
+       *            will be returned
        */
 
       case SLCDIOC_GETATTRIBUTES:
         {
-          FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
+          FAR struct slcd_attributes_s *attr =
+              (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
@@ -1326,7 +1386,8 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_CURPOS:
         {
-          FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
+          FAR struct slcd_curpos_s *curpos =
+              (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_CURPOS: row=0 column=%d\n", g_slcdstate.curpos);
 
@@ -1437,7 +1498,7 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* Data is always available to be read / Data can always be written */
 
-      fds->revents |= (fds->events & (POLLIN|POLLOUT));
+      fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)
         {
           nxsem_post(fds->sem);
@@ -1482,12 +1543,13 @@ int stm32_slcd_initialize(void)
       /* Enable the External Low-Speed (LSE) oscillator and select it as the
        * LCD clock source.
        *
-       * NOTE: LCD clocking should already be enabled in the RCC APB1ENR register.
+       * NOTE: LCD clocking should already be enabled in the RCC APB1ENR
+       * register.
        */
 
       stm32_rcc_enablelse();
 
-      lcdinfo("APB1ENR: %08x CSR: %08x\n",
+      lcdinfo("APB1ENR: %08" PRIx32 " CSR: %08" PRIx32 "\n",
               getreg32(STM32_RCC_APB1ENR), getreg32(STM32_RCC_CSR));
 
       /* Set the LCD prescaler and divider values */
@@ -1499,12 +1561,14 @@ int stm32_slcd_initialize(void)
 
       /* Wait for the FCRSF flag to be set */
 
-      lcdinfo("Wait for FCRSF, FSR: %08x SR: %08x\n",
+      lcdinfo("Wait for FCRSF, FSR: %08" PRIx32 " SR: %08" PRIx32 "\n",
               getreg32(STM32_LCD_FCR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & LCD_SR_FCRSF) == 0);
 
-      /* Set the duty (1/4), bias (1/3), and the internal voltage source (VSEL=0) */
+      /* Set the duty (1/4), bias (1/3), and the internal voltage source
+       * (VSEL=0)
+       */
 
       regval  = getreg32(STM32_LCD_CR);
       regval &= ~(LCD_CR_BIAS_MASK | LCD_CR_DUTY_MASK | LCD_CR_VSEL);
@@ -1536,7 +1600,7 @@ int stm32_slcd_initialize(void)
 
       /* Wait Until the LCD FCR register is synchronized */
 
-      lcdinfo("Wait for FCRSF, FSR: %08x SR: %08x\n",
+      lcdinfo("Wait for FCRSF, FSR: %08" PRIx32 " SR: %08" PRIx32 "\n",
               getreg32(STM32_LCD_FCR), getreg32(STM32_LCD_SR));
 
       while ((getreg32(STM32_LCD_SR) & LCD_SR_FCRSF) == 0);
@@ -1547,10 +1611,12 @@ int stm32_slcd_initialize(void)
 
       /* Wait Until the LCD is enabled and the LCD booster is ready */
 
-      lcdinfo("Wait for LCD_SR_ENS and LCD_SR_RDY, CR: %08x SR: %08x\n",
+      lcdinfo("Wait for LCD_SR_ENS and LCD_SR_RDY, "
+              "CR: %08" PRIx32 " SR: %08" PRIx32 "\n",
               getreg32(STM32_LCD_CR), getreg32(STM32_LCD_SR));
 
-      while ((getreg32(STM32_LCD_SR) & (LCD_SR_ENS | LCD_SR_RDY)) != (LCD_SR_ENS | LCD_SR_RDY));
+      while ((getreg32(STM32_LCD_SR) & (LCD_SR_ENS | LCD_SR_RDY)) !=
+             (LCD_SR_ENS | LCD_SR_RDY));
 
       /* Disable blinking */
 

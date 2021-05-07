@@ -78,25 +78,23 @@ SECTIONS
         _etext = ABSOLUTE(.);
     } > FLASH
 
-    .init_section : ALIGN(4) {
+    .init_section : ALIGN(16) {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
         _einit = ABSOLUTE(.);
     } > FLASH
 
-    .ARM.extab : {
+    .ARM.extab : ALIGN(16) {
         *(.ARM.extab*)
     } > FLASH
 
-    .ARM.exidx : ALIGN(4) {
+    .ARM.exidx : ALIGN(16) {
         __exidx_start = ABSOLUTE(.);
         *(.ARM.exidx*)
         __exidx_end = ABSOLUTE(.);
     } > FLASH
 
-    _eronly = ABSOLUTE(.);
-
-    .data : ALIGN(4) {
+    .data : ALIGN(16) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
@@ -105,7 +103,9 @@ SECTIONS
         _edata = ABSOLUTE(.);
     } > SRAM AT > FLASH
 
-    .bss : ALIGN(4) {
+    _eronly = LOADADDR(.data);
+
+    .bss : ALIGN(16) {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)

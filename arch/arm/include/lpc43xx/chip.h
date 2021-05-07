@@ -1,50 +1,35 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/lpc43xx/chip.h
  *
- *   Copyright (C) 2012-2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_LPC43XX_CHIP_H
 #define __ARCH_ARM_INCLUDE_LPC43XX_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* Per the data sheet: LPC4350/30/20/10 Rev. 3.2 — 4 June 2012 */
 
@@ -80,33 +65,41 @@
 /* Get customizations for each supported chip.
  *
  * SRAM Resources
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * Local SRAM            LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * BANK 0 (0x1000 0000)     96Kb    96Kb   128Kb   128Kb    32Kb    32Kb    32Kb
- * BANK 1 (0x1008 0000)     40Kb    40Kb    72Kb    72Kb    40Kb    40Kb    40Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * SUBTOTAL                136Kb   136Kb   200Kb   200Kb    72Kb    72Kb    72Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * AHB SRAM              LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * BANK 0 (0x2000 0000)     16Kb    48Kb   48Kb    48Kb     48Kb    48Kb    48Kb
- * BANK 1 (0x2000 8000)             NOTE 1 NOTE 1  NOTE 1  NOTE 1  NOTE 1  NOTE 1
- * BANK 2 (0x2000 c000)     16Kb    16Kb   16Kb    16Kb    16Kb    16Kb     16Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * SUBTOTAL                 32Kb    64Kb   64Kb    64Kb     64Kb    64Kb    64Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * TOTAL                   168Kb   200Kb  264Kb   264Kb    136Kb   136Kb   136Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * --------------- -------- ------- ------- ------- ------- ------- -------
+ * Local SRAM      LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
+ * --------------- -------- ------- ------- ------- ------- ------- -------
+ * BANK 0          96Kb    96Kb   128Kb   128Kb    32Kb    32Kb    32Kb
+ * (0x1000 0000)
+ * BANK 1          40Kb    40Kb    72Kb    72Kb    40Kb    40Kb    40Kb
+ * (0x1008 0000)
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * SUBTOTAL        136Kb   136Kb   200Kb   200Kb    72Kb    72Kb    72Kb
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * AHB SRAM        LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * BANK 0          16Kb    48Kb   48Kb    48Kb     48Kb    48Kb    48Kb
+ * (0x2000 0000)
+ * BANK 1                   NOTE 1 NOTE 1  NOTE 1  NOTE 1  NOTE 1  NOTE 1
+ * (0x2000 8000)
+ * BANK 2          16Kb    16Kb   16Kb    16Kb    16Kb    16Kb     16Kb
+ * (0x2000 c000)
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * SUBTOTAL        32Kb    64Kb   64Kb    64Kb     64Kb    64Kb    64Kb
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * TOTAL           168Kb   200Kb  264Kb   264Kb    136Kb   136Kb   136Kb
+ * -------------- -------- ------- ------- ------- ------- ------- -------
  *
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * FLASH                 LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * BANK A (0x1a00 0000)                                    256Kb   512Kb   512Kb
- * BANK B (0x1b00 8000)                                    256Kb   512Kb   512Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
- * TOTAL                   None    None    None    None    512Kb  1024Kb   1024Kb
- * --------------------- -------- ------- ------- ------- ------- ------- -------
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * FLASH          LPC4310  LPC4320 LPC4330 LPC4350 LPC4353 LPC4357 LPC4337
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * BANK A                                           256Kb   512Kb   512Kb
+ * (0x1a00 0000)
+ * BANK B                                           256Kb   512Kb   512Kb
+ * (0x1b00 8000)
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+ * TOTAL            None    None    None    None    512Kb  1024Kb   1024Kb
+ * -------------- -------- ------- ------- ------- ------- ------- -------
+
  *
  * NOTE 1: The 64Kb of AHB of SRAM on the LPC4350/30/20 span all AHB SRAM
  * banks but are treated as two banks of 48 an 16Kb by the NuttX memory
@@ -689,10 +682,10 @@
 #  error "Unsupported LPC43xx chip"
 #endif
 
-/* NVIC priority levels *************************************************************/
+/* NVIC priority levels *****************************************************/
 
-/* Each priority field holds a priority value, 0-31. The lower the value, the greater
- * the priority of the corresponding interrupt.
+/* Each priority field holds a priority value, 0-31. The lower the value, the
+ * greater the priority of the corresponding interrupt.
  *
  * The Cortex-M4 core supports up to 53 interrupts an 8 prgrammable interrupt
  * priority levels; The Cortex-M0 core supports up to 32 interrupts with 4

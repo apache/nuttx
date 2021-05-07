@@ -1,37 +1,22 @@
-/*****************************************************************************
+/****************************************************************************
  * arch/mips/src/pic32mz/pic32mz_dma.h
  *
- *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_DMA_H
 #define __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_DMA_H
@@ -60,7 +45,8 @@
  *
  *     If a start irq is set this function will only enable the channel.
  *     The transfer will be controlled by the start irq.
- *     If start irq is set to PIC32MZ_DMA_NOIRQ then a force start is performed.
+ *     If start irq is set to PIC32MZ_DMA_NOIRQ then a force start is
+ *     performed.
  *
  * 4. Stop and free the channel
  *
@@ -70,9 +56,9 @@
  *    pic32mz_dma_free will free the channel and make it available.
  */
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -80,17 +66,17 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This is used when setting a channel with no start/abort irq */
 
 #define PIC32MZ_DMA_NOIRQ (NR_IRQS + 1)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -202,9 +188,9 @@ struct pic32mz_dmaregs_s
 };
 #endif
 
- /*****************************************************************************
+/****************************************************************************
  * Public Data
- ******************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -215,27 +201,27 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_alloc
  *
  * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and gives
- *   the caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel and
+ *   gives the caller exclusive access to the DMA channel.
  *
  * Returned Value:
  *   On success, this function returns a non-NULL, void* DMA channel handle.
  *   NULL is returned on any failure.
  *   This function can fail only if no DMA channel is available.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_free
  *
  * Description:
@@ -246,11 +232,11 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg);
  * Returned Value:
  *   None
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void pic32mz_dma_free(DMA_HANDLE handle);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_chcfg
  *
  * Description:
@@ -258,33 +244,33 @@ void pic32mz_dma_free(DMA_HANDLE handle);
  *   This config can be done during alloc, however if reconfig is needed,
  *   this functions should be used.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int pic32mz_dma_chcfg(DMA_HANDLE handle,
                       FAR const struct pic32mz_dma_chcfg_s *cfg);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_xfrsetup
  *
  * Description:
  *   Configure DMA for one transfer.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int pic32mz_dma_xfrsetup(DMA_HANDLE handle,
                          FAR const struct pic32mz_dma_xfrcfg_s *cfg);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_start
  *
  * Description:
  *   Start the DMA transfer
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int pic32mz_dma_start(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_stop
  *
  * Description:
@@ -293,17 +279,17 @@ int pic32mz_dma_start(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  *   and pic32mz_dma_xfrsetup() must be called before pic32mz_dma_start()
  *   can be called again.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void pic32mz_dma_stop(DMA_HANDLE handle);
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_sample
  *
  * Description:
  *   Sample DMA register contents
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
 void pic32mz_dma_sample(DMA_HANDLE handle, struct pic32mz_dmaregs_s *regs);
@@ -311,17 +297,18 @@ void pic32mz_dma_sample(DMA_HANDLE handle, struct pic32mz_dmaregs_s *regs);
 #  define pic32mz_dma_sample(handle,regs)
 #endif
 
-/*******************************************************************************
+/****************************************************************************
  * Name: pic32mz_dma_dump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void pic32mz_dma_dump(DMA_HANDLE handle, const struct pic32mz_dmaregs_s *regs,
-                     const char *msg);
+void pic32mz_dma_dump(DMA_HANDLE handle,
+                      const struct pic32mz_dmaregs_s *regs,
+                      const char *msg);
 #else
 #  define pic32mz_dma_dump(handle,regs,msg)
 #endif

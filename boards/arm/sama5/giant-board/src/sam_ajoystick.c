@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/giant-board/src/sam_ajoystick.c
+ * boards/arm/sama5/giant-board/src/sam_ajoystick.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -45,29 +45,29 @@
 
 /* Check for pre-requisites and pin conflicts */
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 #  if !defined(CONFIG_ADC)
 #    error CONFIG_ADC is required for the Itead joystick
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  elif !defined(CONFIG_SAMA5_ADC_CHAN0) || !defined(CONFIG_SAMA5_ADC_CHAN1)
 #    error CONFIG_SAMA5_ADC_CHAN0 and 1 are required for Itead joystick
 #  elif !defined(CONFIG_SAMA5_PIOC_IRQ)
 #    error CONFIG_SAMA5_PIOC_IRQ is required for the Itead joystick
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  elif defined(CONFIG_SAMA5_EMACA)
 #    error EMAC conflicts with the Itead PIO usage
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  elif defined(CONFIG_SAMA5_SSC0)
 #    error SSC0 conflicts with the Itead PIO usage
-#    undef CONFIG_AJOYSTICK
+#    undef CONFIG_INPUT_AJOYSTICK
 #  elif defined(CONFIG_SAMA5_SPI1)
 #    warning SPI1 may conflict with the Itead PIO usage
 #  elif defined(CONFIG_SAMA5_ISI)
 #    warning ISI may conflict with the Itead PIO usage
 #  endif
-#endif /* CONFIG_AJOYSTICK */
+#endif /* CONFIG_INPUT_AJOYSTICK */
 
-#ifdef CONFIG_AJOYSTICK
+#ifdef CONFIG_INPUT_AJOYSTICK
 
 /* Number of Joystick buttons */
 
@@ -434,4 +434,4 @@ int sam_ajoy_initialization(void)
   return ret;
 }
 
-#endif /* CONFIG_AJOYSTICK */
+#endif /* CONFIG_INPUT_AJOYSTICK */

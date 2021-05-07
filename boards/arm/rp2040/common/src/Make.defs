@@ -1,0 +1,59 @@
+#############################################################################
+# boards/arm/rp2040/common/src/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#############################################################################
+
+ifeq ($(CONFIG_RP2040_I2C_DRIVER),y)
+CSRCS += rp2040_i2cdev.c
+endif
+
+ifeq ($(CONFIG_RP2040_SPI_DRIVER),y)
+CSRCS += rp2040_spidev.c
+endif
+
+ifeq ($(CONFIG_RP2040_I2S),y)
+CSRCS += rp2040_i2sdev.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+CSRCS += rp2040_ssd1306.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += rp2040_st7789.c
+endif
+
+ifeq ($(CONFIG_RP2040_SPISD),y)
+  CSRCS += rp2040_spisd.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += rp2040_bmp180.c
+endif
+
+ifeq ($(CONFIG_SENSORS_INA219),y)
+  CSRCS += rp2040_ina219.c
+endif
+
+ifeq ($(CONFIG_ENC28J60),y)
+  CSRCS += rp2040_enc28j60.c
+endif
+
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

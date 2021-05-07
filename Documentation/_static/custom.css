@@ -21,7 +21,7 @@
 /* Make content wider */
 
 .wy-nav-content {
-    max-width: 1200px !important;
+    max-width: 1000px !important;
 }
 
 /* Make links inside C definitions more visible */
@@ -85,4 +85,9 @@ span.menuselection
   padding: 0.1em 0.1em;
   border-radius: 3px;
   border: 1px solid rgb(204, 204, 204);
+}
+
+div.version-selector
+{
+  margin-bottom: 1em;
 }

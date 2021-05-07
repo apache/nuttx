@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/z80/src/z180/z180_iomap.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -45,11 +30,13 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
-/* These registers may be relocated to multiples of 0x40 by setting the IO Control
- * Register (ICR).  Relocatable to 0x40-0x7f, or 0x80-0xbf. The configuration setting,
- * CONFIG_Z180_SFROFFSET, indicates that offset (but is not fully supported yet!)
+/* These registers may be relocated to multiples of 0x40 by setting the IO
+ * Control Register (ICR).  Relocatable to 0x40-0x7f, or 0x80-0xbf. The
+ * configuration setting, CONFIG_Z180_SFROFFSET, indicates that offset
+ * (but is not fully supported yet!)
  */
 
 #ifdef CONFIG_Z180_SFROFFSET
@@ -59,6 +46,7 @@
 #endif
 
 /* Z180 Register Bit addresses ******************************************************/
+
 /* ASCI Registers */
 
 #define Z180_ASCI0_CNTLA     (SFR_OFFSET+0x00) /* ASCI Control Register A Ch 0 */
@@ -120,6 +108,7 @@
 #define Z180_DMA1_MARB       (SFR_OFFSET+0x2a) /* DMA Memory Address Register Ch 1B */
 #define Z180_DMA1_IARL       (SFR_OFFSET+0x2b) /* DMA I/0 Address Register Ch 1L */
 #define Z180_DMA1_IARH       (SFR_OFFSET+0x2c) /* DMA I/0 Address Register Ch 1H */
+
 #ifdef HAVE_Z8S180 /* Z8S180/Z8L180 class processors */
 #  define Z180_DMA1_IARB     (SFR_OFFSET+0x2d) /* DMA I/O Address Register Ch 1B */
 #endif
@@ -153,6 +142,7 @@
 #define Z180_ICR             (SFR_OFFSET+0x3f) /* I/O Control Register */
 
 /* The following registers are not relocatable */
+
 /* Registers unique to Z8x181 class CPUs */
 
 #ifdef HAVE_Z8X181
@@ -256,10 +246,12 @@
 #endif
 
 /* [E]SCC Internal Register Definitions */
-/* Read Registers.  The SCC contains eight read registers. To read the contents
- * of a register (rather than RR0), the program must first initialize a pointer
- * to WR0 in exactly the same manner as a write operation. The next I/O read
- * cycle will place the contents of the selected read registers onto the data bus
+
+/* Read Registers.  The SCC contains eight read registers. To read the
+ * contents of a register (rather than RR0), the program must first
+ * initialize a pointer to WR0 in exactly the same manner as a write
+ * operation. The next I/O read cycle will place the contents of the
+ * selected read registers onto the data bus
  */
 
 #define Z18X_SCC_RR0         0x00 /* Transmit and Receive buffer status and external status */
@@ -274,11 +266,12 @@
 #define Z18X_SCC_RR13        0x0d /* Upper byte of baud rate generator time constant */
 #define Z18X_SCC_RR15        0x0f /* External Status interrupt information */
 
-/* Write Registers. The SCC contains fifteen write registers that are programmed
- * to configure the operating modes of the channel. With the exception of WR0, programming
- * the write registers is a two step operation. The first operation is a pointer written to
- * WR0 that points to the selected register. The second operation is the actual control
- * word that is written into the register to configure the SCC channel
+/* Write Registers. The SCC contains fifteen write registers that are
+ * programmed to configure the operating modes of the channel. With the
+ * exception of WR0, programming the write registers is a two step operation.
+ * The first operation is a pointer written to WR0 that points to the
+ * selected register. The second operation is the actual control word that is
+ * written into the register to configure the SCC channel
  */
 
 #define Z18X_SCC_WR0         0x00 /* Register Pointers, various initialization commands */
@@ -299,8 +292,11 @@
 #define Z18X_SCC_WR15        0x0f /* External status interrupt enable control */
 
 /* Z180 Register Bit definitions ****************************************************/
+
 /* ASCI Registers *******************************************************************/
+
 /* ASCI Control Register A 0 (CNTLA0: 0x00) */
+
 /* ASCI Control Register A 1 (CNTLA1: 0x01) */
 
 #define ASCI_CNTRLA_MPE      (0x80) /* Bit 7: Multi-Processor Mode Enable */
@@ -315,6 +311,7 @@
 #define ASCI_CNTRLA_MOD0     (0x01) /* Bit 0: Parity enabled */
 
 /* ASCI Control Register B 0 (CNTLB0: 0x02) */
+
 /* ASCI Control Register B 1 (CNTLB1: 0x03) */
 
 #define ASCI_CNTRLB_MPBT     (0x80) /* Bit 7: Multiprocessor Bit Transmit */
@@ -336,6 +333,7 @@
 #  define ASCI_CNTRLB_SS_EXT   (7 << ASCI_CNTRLB_SS_SHIFT) /* External clock */
 
 /* ASCI Status Register 0 (STAT0: 0x04) */
+
 /* ASCI Status Register 1 (STAT1: 0x05) */
 
 #define ASCI_STAT_RFRF       (0x80) /* Bit 7: Receive Data Register Full */
@@ -349,12 +347,20 @@
 #define ASCI_STAT_TIE        (0x01) /* Bit 0: Transmit Interrupt Enable */
 
 /* ASCI Transmit Data Register Ch. 0 (TDR0: 0x06) - 8-bit data */
+
 /* ASCI Transmit Data Register Ch. 1 (TDR1: 0x07) - 8-bit data */
+
 /* ASCI Receive Data Register Ch. 0 (RDR0: 0x08) - 8-bit data */
+
 /* ASCI Receive Data Register Ch. 1 (RDR0: 0x09) - 8-bit data */
 
-/* ASCI0 Extension Control Register (I/O Address: 0x12) (Z8S180/L180-Class Processors Only) */
-/* ASCI1 Extension Control Register (I/O Address: 0x13) (Z8S180/L180-Class Processors Only) */
+/* ASCI0 Extension Control Register (I/O Address: 0x12)
+ * (Z8S180/L180-Class Processors Only)
+ */
+
+/* ASCI1 Extension Control Register (I/O Address: 0x13)
+ * (Z8S180/L180-Class Processors Only)
+ */
 
 #ifdef HAVE_Z8S180 /* Z8S180/Z8L180 class processors */
 #  define ASCI_ASEXT_RDRF    (0x80) /* Bit 7: RDRF Interrupt Inhibit */
@@ -367,12 +373,24 @@
 #  define ASCI_ASEXT_SNDBRK  (0x80) /* Bit 0: Send Break */
 #endif
 
-/* ASCI0 Time Constant Low Register (I/O Address: 0x1a) (Z8S180/L180-Class Processors Only) -- 8-bit data */
-/* ASCI0 Time Constant High Register (I/O Address: 0x1b) (Z8S180/L180-Class Processors Only) -- 8-bit data */
-/* ASCI1 Time Constant Low Register (I/O Address: 0x1c) (Z8S180/L180-Class Processors Only) -- 8-bit data */
-/* ASCI1 Time Constant High Register (I/O Address: 0x1d) (Z8S180/L180-Class Processors Only) -- 8-bit data */
+/* ASCI0 Time Constant Low Register (I/O Address: 0x1a)
+ * (Z8S180/L180-Class Processors Only) -- 8-bit data
+ */
+
+/* ASCI0 Time Constant High Register (I/O Address: 0x1b)
+ * (Z8S180/L180-Class Processors Only) -- 8-bit data
+ */
+
+/* ASCI1 Time Constant Low Register (I/O Address: 0x1c)
+ * (Z8S180/L180-Class Processors Only) -- 8-bit data
+ */
+
+/* ASCI1 Time Constant High Register (I/O Address: 0x1d)
+ * (Z8S180/L180-Class Processors Only) -- 8-bit data
+ */
 
 /* CSI/O Registers ******************************************************************/
+
 /* CSI/O Control/Status Register (CNTR: 0x0a) */
 
 #define CSIO_CNTR_EF         (0x80) /* Bit 7: End Flag */
@@ -390,12 +408,17 @@
 #  define CSIO_CNTR_DIV1280  (6 << CSIO_CNTR_SS_SHIFT) /* Divide Ratio: 1280 Baud: 3125 */
 #  define CSIO_CNTR_EXT      (7 << CSIO_CNTR_SS_SHIFT) /* External Clock input (less than 20) */
                                                        /* Baud at Phi = 4 MHz */
+
 /* CSI/O Transmit/Receive Register (TRDR: 0x0b) -- 8-bit data */
 
 /* Timer Registers ******************************************************************/
+
 /* Timer Data Register 0L (TMDR0L: 0x0c) -- 8-bit data */
+
 /* Timer Data Register 0H (TMDR0H: 0x0d) -- 8-bit data */
+
 /* Timer Reload Register Channel 0L (RLDR0L: 0x0e) -- 8-bit data */
+
 /* Timer Reload Register Channel 0H (RLDR0H: 0x0f) -- 8-bit data */
 
 /* Programmable Reload Timer (PTR) Control Register (TCR: 0x10) */
@@ -410,18 +433,36 @@
 #define PRT_TCR_TDE0         (0x01) /* Bit 0: Timer 0 Down Count Enable */
 
 /* Timer Data Register 1L (TMDR1L: 0x14) -- 8-bit data */
+
 /* Timer Data Register 1H (TMDR1H: 0x15) -- 8-bit data */
+
 /* Timer Reload Register Channel 1L (RLDR1L: 0x16) -- 8-bit data */
+
 /* Timer Reload Register Channel 1H (RLDR1H: 0x17) -- 8-bit data */
+
 /* Free Running counter (FRC: 0x18) -- 8-bit data */
 
 /* DMA Registers ********************************************************************/
-/* DMA Destination Address Register Channel 0 (DAR0 I/O Address 0x23 to 0x25) -- 8-bit data */
-/* DMA Byte Count Register Channel 0 (BCR0 I/O Address = 0x26 to 0x27) -- 8-bit data */
-/* DMA Memory Address Register Channel 1 (MAR1: I/O Address = 0x28 to 0x2a) -- 8-bit data */
-/* DMA I/O Address Register Channel 1 (IAR1: I/O Address = 0x2b to 0x2c) -- 8-bit data */
 
-/* DMA I/O Address Register Ch. 1 (IAR1B: 0x2d) (Z8S180/L180-Class Processor Only) */
+/* DMA Destination Address Register Channel 0
+ * (DAR0 I/O Address 0x23 to 0x25) -- 8-bit data
+ */
+
+/* DMA Byte Count Register Channel 0
+ * (BCR0 I/O Address = 0x26 to 0x27) -- 8-bit data
+ */
+
+/* DMA Memory Address Register Channel 1
+ * (MAR1: I/O Address = 0x28 to 0x2a) -- 8-bit data
+ */
+
+/* DMA I/O Address Register Channel 1
+ * (IAR1: I/O Address = 0x2b to 0x2c) -- 8-bit data
+ */
+
+/* DMA I/O Address Register Ch. 1
+ * (IAR1B: 0x2d) (Z8S180/L180-Class Processor Only)
+ */
 
 #ifdef HAVE_Z8S180 /* Z8S180/Z8L180 class processors */
 #  define IAR1B_ALTCH        (0x80) /* Bit 7: Alternating Channels */
@@ -437,7 +478,9 @@
 #    define IAR1B_IO_PIA     (7 << IAR1B_IO_SHIFT) /* DMA1 PIA27-20 (P1284) */
 #endif
 
-/* DMA Byte Count Register Channel 1 (BCR1: I/O Address = 0x2e to 0x2f) -- 8-bit data */
+/* DMA Byte Count Register Channel 1
+ * (BCR1: I/O Address = 0x2e to 0x2f) -- 8-bit data
+ */
 
 /* DMA Status Register (DSTAT: 0x30) */
 
@@ -457,12 +500,14 @@
 #  define DMODE_DM_MEMDECR   (1 << DMODE_DM_SHIFT) /* Memory with address decrement */
 #  define DMODE_DM_MEM       (2 << DMODE_DM_SHIFT) /* Memory with fixed address */
 #  define DMODE_DM_IO        (3 << DMODE_DM_SHIFT) /* I/O */
+
 #define DMODE_SM_SHIFT       (2)    /* Bits 2-3: Source Mode Channel */
 #define DMODE_SM_MASK        (3 << DMODE_SM_SHIFT)
 #  define DMODE_SM_MEMINCR   (0 << DMODE_SM_SHIFT) /* Memory with address increment */
 #  define DMODE_SM_MEMDECR   (1 << DMODE_SM_SHIFT) /* Memory with address decrement */
 #  define DMODE_SM_MEM       (2 << DMODE_SM_SHIFT) /* Memory with fixed address */
 #  define DMODE_SM_IO        (3 << DMODE_SM_SHIFT) /* I/O */
+
 #define DMODE_MMODE          (0x01) /* Bit 0: DMA Memory Mode Channel 0 */
 
 /* DMA/WAIT Control Register (DCNTL: 0x32) */
@@ -483,7 +528,10 @@
 #  define DCNTL_DIM_IO2MD    (3 << DCNTL_DIM_SHIFT) /* I/O to memory, decrement MARI */
 
 /* System Control Registers *********************************************************/
-/* Clock Multiplier Register (CMR: 0x1e) (Z8S180/L180-Class Processors Only) */
+
+/* Clock Multiplier Register (CMR: 0x1e)
+ * (Z8S180/L180-Class Processors Only)
+ */
 
 #ifdef HAVE_Z8S180 /* Z8S180/Z8L180 class processors */
 #  define CMR_CMM            (0x80) /* Bit 7: X2 Clock Multiplier Mode */
@@ -530,6 +578,7 @@
 #  define RCR_CYC1           (2 << RCR_CYC_SHIFT)
 
 /* MMU Common Base Register (CBR: 0x38) - 8-bit base address of Common Area 1 */
+
 /* MMU Bank Base Register (BBR: 0x39) - 8-bit address of Bank area */
 
 /* MMU Common/Bank Area Register (CBAR: 0x3a) */
@@ -557,12 +606,15 @@
 
 #ifdef HAVE_Z8X181
 /* PIA Registers */
+
 /* PIAn Data Direction and Data Registers */
 
 #  define PIA(n)             (1 << (n))
 
 /* CTC Registers */
+
 /* CTC Channel Control/Vector Registers */
+
 /* Control Bit Definitions */
 
 #  define CTC_IE             (0x80) /* Bit 7: Interrupt Enable */
@@ -585,8 +637,11 @@
 /* SCC Registers -- See interface description below */
 
 /* System Control Registers */
+
 /* RAM Upper Boundary Address Register -- 8-bit address (A12-A19) */
+
 /* RAM Lower Boundary Address Register -- 8-bit address (A12-A19) */
+
 /* ROM Address Boundary Register -- 8-bit address (A12-A19) */
 
 /* System Configuration Register */
@@ -602,6 +657,7 @@
 
 #ifdef HAVE_Z8X182
 /* PIA Registers */
+
 /* Pn Data Direction and Data Register */
 
 #  define PIA(n)             (1 << (n))
@@ -620,11 +676,13 @@
 #  define SCR_DC             (0x01) /* Bit 0: Daisy Chain */
 
 /* 16550 MIMIC Registers */
+
 /* To be provided */
 
 #endif
 
 /* [E]SCC Internal Register Definitions *********************************************/
+
 /* Read Registers */
 
 /* RR0: Transmit and Receive buffer status and external status */
@@ -657,7 +715,10 @@
 #define RR3_TX               (0x10) /* Bit 4: Tx IP */
 #define RR3_EXT              (0x08) /* Bit 3: Ext/Status IP */
 
-/* RR6: SDLC FIFO byte counter lower byte (only when enabled) -- 8-bit counter value */
+/* RR6: SDLC FIFO byte counter lower byte (only when enabled) --
+ * 8-bit counter value
+ */
+
 /* RR7: SDLC FIFO byte count and status (only when enabled) */
 
 #define RR7_BC_SHIFT         (0)   /* Bits 0-5 :  Upper 6-bits of counter */
@@ -666,6 +727,7 @@
 #define RR7_FOS              (0x80) /* Bit 7: FIFO Overflow Status */
 
 /* RR8: Receive buffer */
+
 /* RR10: Miscellaneous status bits */
 
 #define RR10_1MISS           (0x80) /* Bit 7: One Clock Missing */
@@ -673,8 +735,13 @@
 #define RR10_SEND            (0x10) /* Bit 4: Loop Sending */
 #define RR10_ON              (0x02) /* Bit 1: On Loop */
 
-/* RR12: Lower byte of baud rate generator time constant --  8-bit time constant value */
-/* RR13: Upper byte of baud rate generator time constant --  8-bit time constant value */
+/* RR12: Lower byte of baud rate generator time constant --
+ *  8-bit time constant value
+ */
+
+/* RR13: Upper byte of baud rate generator time constant --
+ *  8-bit time constant value
+ */
 
 /* RR15: External Status interrupt information */
 
@@ -698,6 +765,7 @@
 #  define WR0_CMD1_RXCRCRST  (1 << WR0_CMD1_SHIFT); /* Reset Rx CRC Checker */
 #  define WR0_CMD1_TXCRCRST  (2 << WR0_CMD1_SHIFT); /* Reset Tx CRC Generator */
 #  define WR0_CMD1_TXURRST   (3 << WR0_CMD1_SHIFT); /* Reset Tx Underrun/EOM Latch */
+
 #define WR0_CMD2_SHIFT       (3)   /* Bits 3-5: Command */
 #define WR0_CMD2_MASK        (3 << WR0_CMD2_SHIFT);
 #  define WR0_CMD2_NULL      (0 << WR0_CMD2_SHIFT); /* Null Code */
@@ -708,6 +776,7 @@
 #  define WR0_CMD2_TXPRST    (5 << WR0_CMD2_SHIFT); /* Reset Tx Int Pending */
 #  define WR0_CMD2_ERRRST    (6 << WR0_CMD2_SHIFT); /* Error Reset */
 #  define WR0_CMD2_IUSRST    (7 << WR0_CMD2_SHIFT); /* Reset Highest IUS */
+
 #define WR0_REG_SHIFT        (0)   /* Bits 0-2 : Register address */
 #define WR0_REG_MASK         (7 << WR0_REG_SHIFT);
 
@@ -722,6 +791,7 @@
 #  define WR1_CMD_RXINT1ST   (1 << WR1_CMD_SHIFT) /* Rx Int On First Character or Special Condition */
 #  define WR1_CMD_RXINTALL   (2 << WR1_CMD_SHIFT) /* Int On All Rx Characters or Special Condition */
 #  define WR1_CMD_RXINTSPEC  (3 << WR1_CMD_SHIFT) /* Rx Int On Special Condition Only */
+
 #define WR1_PSPEC            (0x04) /* Bit 2: Parity is Special Condition */
 #define WR1_TXIE             (0x02) /* Bit 1: Tx Int Enable */
 #define WR1_EXTIE            (0x01) /* Bit 0: Ext Int Enable */
@@ -736,6 +806,7 @@
 #  define WR3_BPC_7          (1 << WR3_BPC_SHIFT) /* Rx 7 Bits/Character */
 #  define WR3_BPC_6          (2 << WR3_BPC_SHIFT) /* Rx 6 Bits/Character */
 #  define WR3_BPC_8          (3 << WR3_BPC_SHIFT) /* Rx 8 Bits/Character */
+
 #define WR3_AE               (0x20) /* Bit 5: Auto Enables */
 #define WR3_EHM              (0x10) /* Bit 4: Enter Hunt Mode */
 #define WR3_RXCRCEN          (0x08) /* Bit 3: Rx CRC Enable */
@@ -751,18 +822,21 @@
 #  define WR4_CM_X16         (1 << WR4_CM_SHIFT) /* X16 Clock Mode */
 #  define WR4_CM_X32         (2 << WR4_CM_SHIFT) /* X32 Clock Mode */
 #  define WR4_CM_X64         (3 << WR4_CM_SHIFT) /* X64 Clock Mode */
+
 #define WR4_SM_SHIFT         (4)   /* Bits 4-5: Sync mode */
 #define WR4_SM_MASK          (3 << WR4_SM_SHIFT)
 #  define WR4_SM_8BIT        (0 << WR4_SM_SHIFT) /* 8-Bit Sync Character */
 #  define WR4_SM_16BIT       (1 << WR4_SM_SHIFT) /* 16-Bit Sync Character */
 #  define WR4_SM_SDLC        (2 << WR4_SM_SHIFT) /* SDLC Mode (01111110 Flag) */
 #  define WR4_SM_EXT         (3 << WR4_SM_SHIFT) /* External Sync Mode */
+
 #define WR4_SB_SHIFT         (2) /* Bits 2-3: Sync mode enables */
 #define WR4_SB_MASK          (3 << WR4_SB_SHIFT)
 #  define WR4_SB_SME         (0 << WR4_SB_SHIFT) /* Sync Modes Enable */
 #  define WR4_SB_STOP1       (1 << WR4_SB_SHIFT) /* 1 Stop Bit/Character */
 #  define WR4_SB_STOP1p5     (2 << WR4_SB_SHIFT) /* 1 1/2 Stop Bits/Character */
 #  define WR4_SB_STOP2       (3 << WR4_SB_SHIFT) /* 2 Stop Bits/Character */
+
 #define WR4_PEO              (0x02) /* Bit 1: Parity EVEN//ODD */
 #define WR4_PEN              (0x01) /* Bit : Parity Enable */
 
@@ -775,14 +849,20 @@
 #  define WR5_TXBITS_7       (1 << WR5_TXBITS_SHIFT) /* Tx 7 Bits/Character */
 #  define WR5_TXBITS_6       (2 << WR5_TXBITS_SHIFT) /* Tx 6 Bits/Character */
 #  define WR5_TXBITS_8       (3 << WR5_TXBITS_SHIFT) /* Tx 8 Bits/Character */
+
 #define WR5_SENDBRK          (0x10) /* Bit 4: Send Break */
 #define WR5_TXEN             (0x08) /* Bit 3: Tx Enable */
 #define WR5_CRC16            (0x04) /* Bit 2: /SDLC/CRC-16 */
 #define WR5_RTS              (0x02) /* Bit 1: RTS */
 #define WR5_TXCRCEN          (0x01) /* Bit 0: Tx CRC Enable */
 
-/* WR6: Sync Character or SDLC address -- 8-bit Monosync, Bisync, or SDLC value */
-/* WR7: Sync Character or SDLC flag -- 8-bit Monosync, Bisync, or SDLC value */
+/* WR6: Sync Character or SDLC address --
+ * 8-bit Monosync, Bisync, or SDLC value
+ */
+
+/* WR7: Sync Character or SDLC flag --
+ * 8-bit Monosync, Bisync, or SDLC value
+ */
 
 #define WR7_SDLC_SYNC        (0x7e)
 
@@ -806,6 +886,7 @@
 #  define WR9_RST_NONE       (0 << WR9_RST_SHIFT) /* No Reset */
 #  define WR9_RST_CHAN       (2 << WR9_RST_SHIFT) /* Channel Reset */
 #  define WR9_RST_HWRST      (3 << WR9_RST_SHIFT) /* Force Hardware Reset */
+
 #ifdef HAVE_Z8X182                  /* ESCC only */
 #  define WR9_INTACKEN       (0x20) /* Bit 5: Software INTACK Enable */
 #endif
@@ -824,6 +905,7 @@
 #  define WR10_NRZI          (1 << WR10_NRZFM_SHIFT) /* NRZI */
 #  define WR10_FM1           (2 << WR10_NRZFM_SHIFT) /* FM1 (Transition = 1) */
 #  define WR10_FM0           (3 << WR10_NRZFM_SHIFT) /* FM0 (Transition = 0) */
+
 #define WR10_ACTPOLL         (0x10) /* Bit 4: Go Active On Poll */
 #define WR10_IDLE            (0x08) /* Bit 3: Mark/Flag Idle */
 #define WR10_URABORT         (0x04) /* Bit 2: Abort/Flag On Underrun */
@@ -839,12 +921,14 @@
 #  define WR11_RCLK_TRXC     (1 << WR11_RCLK_SHIFT) /* Receive Clock = /TRxC Pin */
 #  define WR11_RCLK_BRG      (2 << WR11_RCLK_SHIFT) /* Receive Clock = BR Generator Output */
 #  define WR11_RCLK_DPLL     (3 << WR11_RCLK_SHIFT) /* Receive Clock = DPLL Output */
+
 #define WR11_TCLK_SHIFT      (3) /* Bits 3-4: Transmit Clock */
 #define WR11_TCLK_MASK       (3 << WR11_TCLK_SHIFT)
 #  define WR11_TCLK_RTXC     (0 << WR11_TCLK_SHIFT) /* Transmit Clock = /RTxC Pin */
 #  define WR11_TCLK_TRXC     (1 << WR11_TCLK_SHIFT) /* Transmit Clock = /TRxC Pin */
 #  define WR11_TCLK_BRG      (2 << WR11_TCLK_SHIFT) /* Transmit Clock = BR Generator Output */
 #  define WR11_TCLK_DPLL     (3 << WR11_TCLK_SHIFT) /* Transmit Clock = DPLL Output */
+
 #define WR11_TRXCIO          (0x04) /* Bit 2: /TRxC O/I */
 #define WR11_TRXCO_SHIFT     (0)    /* Bits 0-1 : /TRxC Out */
 #define WR11_TRXO_MASK       (3 << WR11_TRXCO_SHIFT)
@@ -854,6 +938,7 @@
 #  define WR11_TRXO_DPLL     (3 << WR11_TRXCO_SHIFT) /* /TRxC Out = DPLL Output */
 
 /* WR12: Lower byte of baud rate generator -- 8-bit time constant value */
+
 /* WR13: Upper byte of baud rate generator -- 8-bit time constant value */
 
 /* WR14: Miscellaneous control bits */
@@ -868,6 +953,7 @@
 #  define WR14_CMD_SRCRTXC   (5 << WR14_CMD_SHIFT) /* Set Source = /RTxC */
 #  define WR14_CMD_FM        (6 << WR14_CMD_SHIFT) /* Set FM Mode */
 #  define WR14_CMD_NRZI      (7 << WR14_CMD_SHIFT) /* Set NRZI Mode */
+
 #define WR14_LPBK            (0x10) /* Bit 4: Local Loopback */
 #define WR14_AUTOECHO        (0x08) /* Bit 3: Auto Echo */
 #define WR14_DTRREQ          (0x04) /* Bit 2: /DTR/Request Function */

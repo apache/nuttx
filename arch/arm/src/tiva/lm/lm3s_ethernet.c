@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/tiva/lm/lm3s_ethernet.c
  *
- *   Copyright (C) 2009-2010, 2014, 2016, 2018 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -41,6 +25,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_TIVA_ETHERNET)
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -377,7 +362,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0 | SYSCON_RCGC2_EPHY0);
   putreg32(regval, TIVA_SYSCON_RCGC2);
-  ninfo("RCGC2: %08x\n", regval);
+  ninfo("RCGC2: %08" PRIx32 "\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
@@ -393,7 +378,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   regval &= ~(SYSCON_SRCR2_EMAC0 | SYSCON_SRCR2_EPHY0);
   putreg32(regval, TIVA_SYSCON_SRCR2);
-  ninfo("SRCR2: %08x\n", regval);
+  ninfo("SRCR2: %08" PRIx32 "\n", regval);
 
   /* Wait just a bit, again.
    * If we touch the ethernet too soon, we may busfault.
@@ -640,7 +625,7 @@ static int tiva_txpoll(struct net_driver_s *dev)
   ninfo("Poll result: d_len=%d\n", priv->ld_dev.d_len);
   if (priv->ld_dev.d_len > 0)
     {
-      DEBUGASSERT(!!(tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX));
+      DEBUGASSERT(!(tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX));
 
       /* Look up the destination MAC address and add it to the Ethernet
        * header.
@@ -1303,8 +1288,10 @@ static int tiva_ifup(struct net_driver_s *dev)
 #endif
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Enable and reset the Ethernet controller */
 
@@ -1323,7 +1310,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   div = SYSCLK_FREQUENCY / 2 / TIVA_MAX_MDCCLK;
   tiva_ethout(priv, TIVA_MAC_MDV_OFFSET, div);
-  ninfo("MDV:   %08x\n", div);
+  ninfo("MDV:   %08" PRIx32 "\n", div);
 
   /* Then configure the Ethernet Controller for normal operation
    *
@@ -1335,7 +1322,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_TCTCL_CLRBITS;
   regval |= TIVA_TCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
-  ninfo("TCTL:  %08x\n", regval);
+  ninfo("TCTL:  %08" PRIx32 "\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
    * promiscuous mode, disable bad CRC rejection).
@@ -1345,7 +1332,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~TIVA_RCTCL_CLRBITS;
   regval |= TIVA_RCTCL_SETBITS;
   tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
-  ninfo("RCTL:  %08x\n", regval);
+  ninfo("RCTL:  %08" PRIx32 "\n", regval);
 
   /* Setup the time stamp configuration register */
 
@@ -1357,7 +1344,7 @@ static int tiva_ifup(struct net_driver_s *dev)
   regval &= ~(MAC_TS_EN);
 #endif
   tiva_ethout(priv, TIVA_MAC_TS_OFFSET, regval);
-  ninfo("TS:    %08x\n", regval);
+  ninfo("TS:    %08" PRIx32 "\n", regval);
 #endif
 
   /* Wait for the link to come up.  This following is not very conservative
@@ -1460,8 +1447,10 @@ static int tiva_ifdown(struct net_driver_s *dev)
   uint32_t regval;
 
   ninfo("Taking down: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 
   /* Cancel the TX poll timer and TX timeout timers */
 

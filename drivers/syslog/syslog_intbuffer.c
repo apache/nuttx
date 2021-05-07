@@ -1,37 +1,23 @@
 /****************************************************************************
  * drivers/syslog/syslog_intbuffer.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -57,7 +43,8 @@
 /* Extend the size of the interrupt buffer so that a "[truncated]\n"
  * indication can be append to the end.
  *
- * The usable capacity of the interrupt buffer is (CONFIG_SYSLOG_INTBUFSIZE - 1).
+ * The usable capacity of the interrupt buffer is
+ * (CONFIG_SYSLOG_INTBUFSIZE - 1).
  */
 
 #define SYSLOG_BUFOVERRUN_MESSAGE  "[truncated]\n"
@@ -92,7 +79,8 @@ struct g_syslog_intbuffer_s
  ****************************************************************************/
 
 static struct g_syslog_intbuffer_s g_syslog_intbuffer;
-static const char g_overrun_msg[SYSLOG_BUFOVERRUN_SIZE] = SYSLOG_BUFOVERRUN_MESSAGE;
+static const char g_overrun_msg[SYSLOG_BUFOVERRUN_SIZE] =
+                                            SYSLOG_BUFOVERRUN_MESSAGE;
 
 /****************************************************************************
  * Private Data
@@ -241,16 +229,16 @@ int syslog_add_intbuffer(int ch)
     }
   else if (inuse < USABLE_INTBUFSIZE)
     {
-       /* Copy one character */
+      /* Copy one character */
 
-       g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
+      g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
 
-       /* Increment the IN index, handling wrap-around */
+      /* Increment the IN index, handling wrap-around */
 
-       if (++inndx >= SYSLOG_INTBUFSIZE)
-         {
-           inndx -= SYSLOG_INTBUFSIZE;
-         }
+      if (++inndx >= SYSLOG_INTBUFSIZE)
+        {
+          inndx -= SYSLOG_INTBUFSIZE;
+        }
 
       g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
       ret = OK;
@@ -276,7 +264,6 @@ int syslog_add_intbuffer(int ch)
  *   to the SYSLOG device.
  *
  * Input Parameters:
- *   channel - The syslog channel to use in performing the flush operation.
  *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
@@ -288,41 +275,49 @@ int syslog_add_intbuffer(int ch)
  *
  ****************************************************************************/
 
-int syslog_flush_intbuffer(FAR const struct syslog_channel_s *channel,
-                           bool force)
+int syslog_flush_intbuffer(bool force)
 {
   syslog_putc_t putfunc;
   int ch;
-  int ret = OK;
-
-  /* Select which putc function to use for this flush */
-
-  putfunc = force ? channel->sc_putc : channel->sc_force;
+  int i;
 
   /* This logic is performed with the scheduler disabled to protect from
    * concurrent modification by other tasks.
    */
 
   sched_lock();
+
   do
     {
       /* Transfer one character to time.  This is inefficient, but is
        * done in this way to: (1) Deal with concurrent modification of
        * the interrupt buffer from interrupt activity, (2) Avoid keeper
        * interrupts disabled for a long time, and (3) to handler
-       * wraparound of the circular buffer indices.
+       * wrap-around of the circular buffer indices.
        */
 
       ch = syslog_remove_intbuffer();
-      if (ch != EOF)
+
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
         {
-          ret = putfunc(ch);
+          if ((g_syslog_channel[i] == NULL) || (ch == EOF))
+            {
+              break;
+            }
+
+          /* Select which putc function to use for this flush */
+
+          putfunc = force ? g_syslog_channel[i]->sc_ops->sc_force :
+                    g_syslog_channel[i]->sc_ops->sc_putc;
+
+          putfunc(g_syslog_channel[i], ch);
         }
     }
-  while (ch != EOF && ret >= 0);
+  while (ch != EOF);
 
   sched_unlock();
-  return ret;
+
+  return ch;
 }
 
 #endif /* CONFIG_SYSLOG_INTBUFFER */

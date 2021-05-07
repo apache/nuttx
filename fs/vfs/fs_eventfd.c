@@ -1,5 +1,5 @@
 /****************************************************************************
- * vfs/fs_eventfd.c
+ * fs/vfs/fs_eventfd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -625,7 +625,7 @@ int eventfd(unsigned int count, int flags)
 
   /* Try open new device */
 
-  new_fd = open(devpath, O_RDWR |
+  new_fd = nx_open(devpath, O_RDWR |
     (flags & (EFD_NONBLOCK | EFD_SEMAPHORE | EFD_CLOEXEC)));
 
   if (new_fd < 0)

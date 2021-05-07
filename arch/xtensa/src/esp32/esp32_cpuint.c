@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_cpuint.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -150,6 +135,12 @@
 #define ESP32_MAX_PRIORITY     5
 #define ESP32_PRIO_INDEX(p)    ((p) - ESP32_MIN_PRIORITY)
 
+#ifdef CONFIG_ESP32_WIRELESS
+#  define ESP32_WIRELESS_RESERVE_INT  (1 << ESP32_CPUINT_MAC)
+#else
+#  define ESP32_WIRELESS_RESERVE_INT  0
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -179,9 +170,11 @@ static uint32_t g_intenable[1];
  * devices.
  */
 
-static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET;
+static uint32_t g_cpu0_freeints = EPS32_CPUINT_PERIPHSET &
+                                  (~ESP32_WIRELESS_RESERVE_INT);
 #ifdef CONFIG_SMP
-static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET;
+static uint32_t g_cpu1_freeints = EPS32_CPUINT_PERIPHSET &
+                                  (~ESP32_WIRELESS_RESERVE_INT);
 #endif
 
 /* Bitsets for each interrupt priority 1-5 */
@@ -374,6 +367,7 @@ int esp32_cpuint_initialize(void)
    *
    *   CPU interrupt bit           IRQ number
    *   --------------------------- ---------------------
+   *   ESP32_CPUINT_MAC         0  ESP32_IRQ_MAC      4
    *   ESP32_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
    *   ESP32_CPUINT_SOFTWARE0   7  Not yet defined
    *   ESP32_CPUINT_PROFILING  11  Not yet defined
@@ -385,6 +379,13 @@ int esp32_cpuint_initialize(void)
   intmap[ESP32_CPUINT_TIMER0] = XTENSA_IRQ_TIMER0;
   intmap[ESP32_CPUINT_TIMER1] = XTENSA_IRQ_TIMER1;
   intmap[ESP32_CPUINT_TIMER2] = XTENSA_IRQ_TIMER2;
+
+  /* Reserve CPU interrupt for some special drivers */
+
+#ifdef CONFIG_ESP32_WIRELESS
+  intmap[ESP32_CPUINT_MAC]    = ESP32_IRQ_MAC;
+#endif
+
   return OK;
 }
 
@@ -520,7 +521,7 @@ void esp32_free_cpuint(int cpuint)
   uint32_t *freeints;
   uint32_t bitmask;
 
-  DEBUGASSERT(cpuint >= 0 && cpuint < ESP32_CPUINT_NEDGEPERIPHS);
+  DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
 
   /* Mark the CPU interrupt as available */
 

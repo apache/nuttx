@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/sensors/cluster_driver.h
  *
- *   Copyright (C) 2017 RAF Research LLC. All rights reserved.
- *   Author: Bob Feretich <bob.feretich@rafresearch.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -63,8 +48,8 @@
  * interface and is permitted to be called from a kernel task, this function
  * is reused. But rather than being called by the board initialization
  * function, the cluster drivers registration function is called from the
- * board initialization function; and the cluster drivers registration function
- *  calls the leaf driver's registration function.
+ * board initialization function; and the cluster drivers registration
+ * function calls the leaf driver's registration function.
  *
  * To be "cluster driver interface" enabled the leaf driver's registration
  * function must communicate the leaf driver's instance back to the cluster
@@ -91,8 +76,8 @@
  *   leaf_handle (struct spi_dev_s *) field that is also passed as an in/out
  *   parameter in the leaf driver's registration function.
  *
- * With the above information, the sensor cluster driver may efficiently access
- * multiple sensors and aggregate their data.
+ * With the above information, the sensor cluster driver may efficiently
+ * access multiple sensors and aggregate their data.
  *
  ****************************************************************************/
 
@@ -118,9 +103,9 @@ struct sensor_cluster_operations_s
   CODE int (*driver_resume)(FAR void *instance_handle, int32_t arg);
 };
 
-/**************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- **************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -130,7 +115,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: xxxxxx_register   <-- for a leaf driver.
  *
  * Description:
@@ -149,11 +134,11 @@ extern "C"
  * Input Parameters:
  *   devpath  - The full path to the leaf driver to register. E.g.,
  *           "/dev/acl0"
- *   spi      - An instance of the SPI interface to use to communicate with the
- *              leaf driver. Or, it could be the I2C driver instance if the
- *              sensor is on an I2C bus.
- *   config   - configuration struct for the sensor leaf driver. This struct is
- *              defined in the leaf driver's xxxxxx.h file.
+ *   spi      - An instance of the SPI interface to use to communicate with
+ *              the leaf driver. Or, it could be the I2C driver instance if
+ *              the sensor is on an I2C bus.
+ *   config   - configuration struct for the sensor leaf driver.
+ *              This struct is defined in the leaf driver's xxxxxx.h file.
  *
  *  For a SPI sensor, this structure must contain:
  *

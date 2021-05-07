@@ -40,6 +40,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pthread.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -218,6 +219,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
                    pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
   FAR struct pthread_tcb_s *ptcb;
+  FAR struct tls_info_s *info;
   FAR struct join_s *pjoin;
   struct sched_param param;
   int policy;
@@ -291,7 +293,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
     {
       /* Allocate the stack for the TCB */
 
-      ret = up_create_stack((FAR struct tcb_s *)ptcb, attr->stacksize,
+      ret = up_create_stack((FAR struct tcb_s *)ptcb,
+                            sizeof(struct tls_info_s) + attr->stacksize,
                             TCB_FLAG_TTYPE_PTHREAD);
     }
 
@@ -300,6 +303,17 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       errcode = ENOMEM;
       goto errout_with_join;
     }
+
+  /* Initialize thread local storage */
+
+  info = up_stack_frame(&ptcb->cmn, sizeof(struct tls_info_s));
+  if (info == NULL)
+    {
+      errcode = ENOMEM;
+      goto errout_with_join;
+    }
+
+  DEBUGASSERT(info == ptcb->cmn.stack_alloc_ptr);
 
   /* Should we use the priority and scheduler specified in the pthread
    * attributes?  Or should we use the current thread's priority and

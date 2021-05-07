@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k20memorymap.h
  *
- *   Copyright (C) 2011, 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20MEMORYMAP_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,11 +31,12 @@
 
 #ifdef KINETIS_K20
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Memory Map ***********************************************************************/
+/* Memory Map ***************************************************************/
+
 /* K20 Family
  *
  * The memory map for the following parts is defined in Freescale document
@@ -64,13 +50,16 @@
 #  define KINETIS_FLEXNVM_BASE 0x10000000  /* –0x13ffffff FlexNVM */
 #  define KINETIS_FLEXRAM_BASE 0x14000000  /* –0x17ffffff FlexRAM */
 #endif
+
                              /* 0x18000000  * –0x1bffffff Reserved */
 #define KINETIS_SRAML_BASE     0x1c000000  /* –0x1fffffff SRAM_L: Lower SRAM
                                             *             (ICODE/DCODE) */
 #define KINETIS_SRAMU_BASE     0x20000000  /* –0x200fffff SRAM_U: Upper SRAM bitband
                                             *             region */
+
                              /* 0x20100000  * –0x21ffffff Reserved */
 #define KINETIS_SALIAS_BASE    0x22000000  /* –0x23ffffff Aliased to SRAM_U bitband */
+
                              /* 0x24000000  * –0x3fffffff Reserved */
 #define KINETIS_BRIDGE0_BASE   0x40000000  /* –0x4007ffff Bitband region for peripheral
                                             *             bridge 0 (AIPS-Lite0) */
@@ -78,15 +67,18 @@
                                             *             bridge 1 (AIPS-Lite1) */
 #define KINETIS_GPIOBB_BASE    0x400ff000  /* –0x400fffff Bitband region for general
                                             *             purpose input/output (GPIO) */
+
                              /* 0x40100000  * –0x41ffffff Reserved */
 #define KINETIS_PALIAS_BASE    0x42000000  /* –0x43ffffff Aliased to peripheral bridge
                                             *             (AIPS-Lite) and general purpose
                                             *             input/output (GPIO) bitband */
+
                              /* 0x44000000  * –0xdfffffff Reserved */
 #define KINETIS_PERIPH_BASE    0xe0000000  /* –0xe00fffff Private peripherals */
+
                              /* 0xe0100000  * –0xffffffff Reserved */
 
-/* Peripheral Bridge 0 Memory Map ***************************************************/
+/* Peripheral Bridge 0 Memory Map *******************************************/
 
 #define KINETIS_AIPS0_BASE     0x40000000  /* Peripheral bridge 0 (AIPS-Lite 0) */
 #define KINETIS_XBAR_BASE      0x40004000  /* Crossbar switch */
@@ -136,7 +128,7 @@
 #define KINETIS_PMC_BASE       0x4007d000  /* Power management controller (PMC) */
 #define KINETIS_SMC_BASE       0x4007e000  /* System Mode controller (SMC) */
 
-/* Peripheral Bridge 1 Memory Map ***************************************************/
+/* Peripheral Bridge 1 Memory Map *******************************************/
 
 #define KINETIS_AIPS1_BASE     0x40080000  /* Peripheral bridge 1 (AIPS-Lite 1) */
 #define KINETIS_FTM2_BASE      0x400b8000  /* FlexTimer 2 */
@@ -154,7 +146,7 @@
 #define KINETIS_GPIOD_BASE     0x400ff0c0  /* GPIO PORTD registers */
 #define KINETIS_GPIOE_BASE     0x400ff100  /* GPIO PORTE registers */
 
-/* Private Peripheral Bus (PPB) Memory Map ******************************************/
+/* Private Peripheral Bus (PPB) Memory Map **********************************/
 
 #define KINETIS_ITM_BASE       0xe0000000  /* Instrumentation Trace Macrocell (ITM) */
 #define KINETIS_DWT_BASE       0xe0001000  /* Data Watchpoint and Trace (DWT) */
@@ -164,17 +156,17 @@
 #define KINETIS_MCM_BASE       0xe0080000  /* Miscellaneous Control Module (including ETB Almost Full) */
 #define KINETIS_ROMTAB_BASE    0xe00ff000  /* ROM Table - allows auto-detection of debug components */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* KINETIS_K20 */
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K20MEMORYMAP_H */

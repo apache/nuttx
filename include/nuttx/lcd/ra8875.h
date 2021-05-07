@@ -1,4 +1,4 @@
-/**************************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/ra8875.h
  * Definitions for the RAiO Technologies RA8875 LCD controller
  *
@@ -34,49 +34,56 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_LCD_RA8875_H
 #define __INCLUDE_NUTTX_LCD_RA8875_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #ifdef CONFIG_LCD_RA8875
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
-/* Configuration **********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* CONFIG_LCD_RA8875 - Enables support for the RA8875-based LCD.
  * CONFIG_LCD_NOGETRUN
- *   NX components need to know if it can read from the LCD or not. If reading from the
- *   LCD is supported then some graphic operations can be improved. Default: Supported
- * CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape" support. Default is
- *   this 320x240 "landscape" orientation.
- * CONFIG_LCD_RLANDSCAPE - Define for 320x240 display "reverse landscape" support.
- *   Default is this 320x240 "landscape" orientation
- * CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait" orientation support.
- *   Default is this 320x240 "landscape" orientation
- * CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse portrait" orientation
- *   support.  Default is this 320x240 "landscape" orientation
+ *   NX components need to know if it can read from the LCD or not.
+ *   If reading from the LCD is supported then some graphic operations can be
+ *   improved. Default: Supported
+ * CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape" support.
+ *   Default is this 320x240 "landscape" orientation.
+ * CONFIG_LCD_RLANDSCAPE - Define for 320x240 display "reverse landscape"
+ *   support. Default is this 320x240 "landscape" orientation
+ * CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait" orientation
+ *   support. Default is this 320x240 "landscape" orientation
+ * CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse portrait"
+ *   orientation support.  Default is this 320x240 "landscape" orientation
  */
 
-/**************************************************************************************
+/****************************************************************************
  * Public Types
- **************************************************************************************/
+ ****************************************************************************/
 
-/* This structure defines the interface to the LCD provided by the platform.  The
- * nature of this interface is hidden from the RA8875 driver.
+/* This structure defines the interface to the LCD provided by the platform.
+ *  The nature of this interface is hidden from the RA8875 driver.
  */
 
 struct ra8875_lcd_s
 {
-  void (*write_reg)(FAR struct ra8875_lcd_s *dev, uint8_t regnum, uint8_t data);
-  void (*write_reg16)(FAR struct ra8875_lcd_s *dev, uint8_t regnum, uint16_t data);
+  void (*write_reg)(FAR struct ra8875_lcd_s *dev,
+                    uint8_t regnum,
+                    uint8_t data);
+  void (*write_reg16)(FAR struct ra8875_lcd_s *dev,
+                      uint8_t regnum,
+                      uint16_t data);
 
   uint8_t (*read_reg)(FAR struct ra8875_lcd_s *dev, uint8_t regnum);
   uint8_t (*read_status)(FAR struct ra8875_lcd_s *dev);
@@ -95,9 +102,9 @@ struct ra8875_lcd_s
   /* platform-specific data may follow */
 };
 
-/**************************************************************************************
+/****************************************************************************
  * Public Data
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -107,79 +114,84 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_lcdinitialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware. The initial state of the LCD is fully
+ *   initialized, display memory cleared, and the LCD ready to use, but with
+ *   the power setting at 0 (full off).
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lcd_dev_s *ra8875_lcdinitialize(FAR struct ra8875_lcd_s *lcd);
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_clear
  *
  * Description:
  *   This is a non-standard LCD interface just for the RA8875.  Because
- *   of the various rotations, clearing the display in the normal way by writing a
- *   sequences of runs that covers the entire display can be very slow.  Here the
- *   display is cleared by simply setting all video memory to the specified color.
+ *   of the various rotations, clearing the display in the normal way by
+ *   writing a sequences of runs that covers the entire display can be very
+ *   slow.  Here the display is cleared by simply setting all video memory to
+ *   the specified color.
  *
- *   NOTE: This function is not available to applications in the protected or kernel
- *   build modes.
+ *   NOTE: This function is not available to applications in the protected or
+ *   kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void ra8875_clear(FAR struct lcd_dev_s *dev, uint16_t color);
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawrectangle
  *
  * Description:
- *   This is a non-standard function to draw a rectangle on the LCD.  This function is
- *   also used internally as part of the ra8875_clear implementation.
+ *   This is a non-standard function to draw a rectangle on the LCD.
+ *    This function is also used internally as part of the ra8875_clear
+ *    implementation.
  *
  *   NOTE: This non-standard function is not available to applications in the
  *   protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 void ra8875_drawrectangle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,
-                          uint16_t width, uint16_t height, uint16_t color, bool fill);
+                          uint16_t width, uint16_t height,
+                          uint16_t color, bool fill);
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawline
  *
  * Description:
- *   This is a non-standard function to draw a line on the LCD.  This function is
- *   also used internally as part of the ra8875_rectandle implementation.
+ *   This is a non-standard function to draw a line on the LCD. This function
+ *   is also used internally as part of the ra8875_rectandle implementation.
  *
  *   NOTE: This non-standard function is not available to applications in the
  *   protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
-void ra8875_drawline(FAR struct lcd_dev_s *dev, uint16_t x1, uint16_t y1, uint16_t x2,
+void ra8875_drawline(FAR struct lcd_dev_s *dev, uint16_t x1,
+                     uint16_t y1, uint16_t x2,
                      uint16_t y2, uint16_t color);
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawtriangle
  *
  * Description:
- *   This is a non-standard function to draw a triangle on the LCD.  This function is
- *   also used internally as part of the ra8875_rectandle implementation.
+ *   This is a non-standard function to draw a triangle on the LCD.
+ *   This function is also used internally as part of the ra8875_rectandle
+ *   implementation.
  *
  *   NOTE: This non-standard function is not available to applications in the
  *   protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_RA8875_EXTENDED
 void ra8875_drawtriangle(FAR struct lcd_dev_s *dev, uint16_t x0, uint16_t y0,
@@ -187,17 +199,18 @@ void ra8875_drawtriangle(FAR struct lcd_dev_s *dev, uint16_t x0, uint16_t y0,
                          uint16_t color, bool fill);
 #endif
 
-/**************************************************************************************
+/****************************************************************************
  * Name:  ra8875_drawcircle
  *
  * Description:
- *   This is a non-standard function to draw a circle on the LCD.  This function is
- *   also used internally as part of the ra8875_rectandle implementation.
+ *   This is a non-standard function to draw a circle on the LCD.
+ *   This function is also used internally as part of the ra8875_rectandle
+ *   implementation.
  *
  *   NOTE: This non-standard function is not available to applications in the
  *   protected or kernel build modes.
  *
- **************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LCD_RA8875_EXTENDED
 void ra8875_drawcircle(FAR struct lcd_dev_s *dev, uint16_t x, uint16_t y,

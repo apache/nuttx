@@ -297,7 +297,7 @@ Using U-Boot to Run NuttX
 
 The MCIMX6Q-SDB comes with a 8GB SD card containing the U-Boot and Android.
 You simply put the SD card in the SD card slot SD3 (on the bottom of the
-board next to the HDMI connect) and Android will boot.
+board next to the HDMI connect) and Android 4.2.2.1 will boot.
 
 But we need some other way to boot NuttX.  Here are some things that I have
 experimented with.
@@ -308,35 +308,31 @@ Building U-Boot (Failed Attempt #1)
 I have been unsuccessful getting building a working version of u-boot from
 scratch.  It builds, but it does not run.  Here are the things I did:
 
-1. Get a copy of the u-boot i.MX6 code via:
+1. Get a copy of the u-boot i.MX6 code and Android GCC toolchain
 
-    https://github.com/boundarydevices/u-boot-imx6/tree/production
-
-  or
-
-    $ git clone git://git.denx.de/u-boot.git
+    $ git clone https://source.codeaurora.org/external/imx/uboot-imx.git -b nxp/imx_v2009.08
+    $ git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6
 
 2. Build U-Boot for the i.MX6Q Sabre using the following steps.  This
-   assumes that you have the path to your arm-none-eabi- toolchain at the
+   assumes that you have the path to the above toolchain at the
    beginning of your PATH variable:
 
-    $ cd u-boot
+    $ cd uboot-imx
     $ export ARCH=arm
-    $ export CROSS_COMPILE=arm-none-eabi-
-    $ make mx6qsabresd_config
+    $ export CROSS_COMPILE=arm-eabi-
+    $ make mx6q_sabresd_android_config
     $ make
 
-  This should create a number of files, including u-boot.imx
+  This should create a number of files, including u-boot.bin
 
 3. Format an SD card
 
   Create a FAT16 partition at an offset of about 1MB into the SD card.
   This is where we will put nuttx.bin.
 
-4. Put U-Boot on SD.  U-boot should reside at offset 1024B of your SD
-   card. To put it there, do:
+4. Put U-Boot on SD.
 
-    $ dd if=u-boot.imx of=/dev/<your-sd-card> bs=1k seek=1
+    $ dd if=u-boot.bin of=/dev/<your-sd-card> bs=1k
     $ sync
 
   Your SD card device is typically something in /dev/sd<X> or
@@ -437,6 +433,34 @@ of 1MB or so.
      MX6Q SABRESD U-Boot > go 0x10800040
 
 A little hokey, but not such a bad solution.
+
+TFTPBOOT (Successful Attempt #6)
+------------------------------------------
+
+If you can prepare tftp server, this approach would be easy
+
+1. Copy nuttx.bin to the tftp server (e.g. /var/lib/tftpboot/ )
+
+2. Load nuttx.bin from the server and boot
+
+     MX6Q SABRESD U-Boot > setenv ipaddr 192.168.10.103
+     MX6Q SABRESD U-Boot > setenv serverip 192.168.10.16
+     MX6Q SABRESD U-Boot > setenv image nuttx.bin
+     MX6Q SABRESD U-Boot > tftp ${loadaddr} ${image}
+     PHY indentify @ 0x1 = 0x004dd074
+     FEC: Link is Up 796d
+     Using FEC0 device
+     TFTP from server 192.168.10.16; our IP address is 192.168.10.103
+     Filename 'nuttx.bin'.
+     Load address: 0x10800000
+     Loading: ###############
+     done
+     Bytes transferred = 217856 (35300 hex)
+     MX6Q SABRESD U-Boot > go ${loadaddr}
+     ## Starting application at 0x10800000 ...
+
+     NuttShell (NSH) NuttX-10.0.1
+     nsh>
 
 Debugging with the Segger J-Link
 ================================
@@ -687,7 +711,6 @@ be enabled with the following configuration settings:
     CONFIG_SPINLOCK=y
     CONFIG_SMP=y
     CONFIG_SMP_NCPUS=4
-    CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
 Open Issues:
 

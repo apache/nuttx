@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_adc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_EFM32_ADC_H
 #define __ARCH_ARM_SRC_EFM32_EFM32_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,18 +33,20 @@
 
 #include <nuttx/analog/adc.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
-/* Timer devices may be used for different purposes.  One special purpose is to
- * control periodic ADC sampling.  If CONFIG_EFM32_TIMn is defined then
- * CONFIG_EFM32_TIMn_ADC must also be defined to indicate that timer "n" is intended
- * to be used for that purpose.
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_EFM32_TIMn is defined then
+ * CONFIG_EFM32_TIMn_ADC must also be defined to indicate that timer "n" is
+ * intended to be used for that purpose.
  */
 
-/* For the EFM32 F1 line, timers 1-4 may be used.  For EFM32 F4 line, timers 1-5 and
- * 8 may be used.
+/* For the EFM32 F1 line, timers 1-4 may be used.
+ *  For EFM32 F4 line, timers 1-5 and 8 may be used.
  */
 
 #ifndef CONFIG_EFM32_TIM1
@@ -99,7 +86,9 @@
 #  undef CONFIG_EFM32_TIM8_ADC3
 #endif
 
-/* Timers 6, 7, and 10-14 are not used with the ADC by any supported family */
+/* Timers 6, 7,
+ * and 10-14 are not used with the ADC by any supported family
+ */
 
 #undef CONFIG_EFM32_TIM6_ADC
 #undef CONFIG_EFM32_TIM6_ADC1
@@ -156,8 +145,8 @@
 #  warning "DMA is not supported by the current driver"
 #endif
 
-/* Timer configuration:  If a timer trigger is specified, then get information
- * about the timer.
+/* Timer configuration:
+ * If a timer trigger is specified, then get information about the timer.
  */
 
 #if defined(CONFIG_EFM32_TIM1_ADC1)
@@ -283,11 +272,13 @@
 #  undef ADC_HAVE_TIMER
 #endif
 
-/* NOTE:  The following assumes that all possible combinations of timers and
- * values are support EXTSEL.  That is not so and it varies from one EFM32 to another.
- * But this (wrong) assumptions keeps the logic as simple as possible.  If un
- * unsupported combination is used, an error will show up later during compilation
- * although it may be difficult to track it back to this simplification.
+/* NOTE:
+ * The following assumes that all possible combinations of timers and values
+ * are support EXTSEL.  That is not so and it varies from one EFM32 to
+ * another. But this (wrong) assumptions keeps the logic as simple as
+ * possible.  If un unsupported combination is used, an error will show
+ * up later during compilation although it may be difficult to track it back
+ * to this simplification.
  */
 
 #if defined(CONFIG_EFM32_TIM1_ADC1)
@@ -548,14 +539,15 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

@@ -1,54 +1,43 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ssd1305.h
- * Definitions for the Solomon Systech SSD1305 132x64 Dot Matrix OLED/PLED
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Definitions for the Solomon Systech SSD1305 132x64 Dot Matrix OLED/PLED
  * Segment/Common Driver with C
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * References: SSD1305.pdf, "Solomon Systech SSD1305 132x64 Dot Matrix OLED/PLED
- *             Segment/Common Driver with Controller," Solomon Systech Limited,
- *             http://www.solomon-systech.com, May, 2008.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- **************************************************************************************/
+ * References:
+ * SSD1305.pdf, "Solomon Systech SSD1305 132x64 Dot Matrix OLED/PLED
+ * Segment/Common Driver with Controller," Solomon Systech Limited,
+ * http://www.solomon-systech.com, May, 2008.
+ */
 
 #ifndef __DRIVERS_LCD_SSD1305_H
 #define __DRIVERS_LCD_SSD1305_H
 
-/**************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************/
+ ****************************************************************************/
+
 /* General Definitions ******************************************************/
 
 #define SSD1305_COLORA              0
@@ -57,6 +46,7 @@
 #define SSD1305_COLORD              3
 
 /* Fundamental Commands *****************************************************/
+
 #define SSD1305_SETCOLL             0x00 /* 0x00-0x0f: Set lower column address */
 #  define SSD1305_COLL_MASK         0x0f
 #define SSD1305_SETCOLH             0x10 /* 0x10-0x1f: Set higher column address */
@@ -83,6 +73,7 @@
                                          /*   Data 2: Color A: 31-63  */
                                          /*   Data 3: Color B: 31-63 */
                                          /*   Data 4: Color C: 31-63 */
+
 #define SSD1305_SETBANKCOLOR1       0x92      /* 0x92: Set bank 1-16 color */
 #  define SSD1305_SETBANK1(c)       (c)       /* Data 1, Bits 0-1: Bank 1 color */
 #  define SSD1305_SETBANK2(c)       (c << 2)  /* Data 1, Bits 2-3: Bank 2 color */
@@ -117,6 +108,7 @@
 #  define SSD1305_SETBANK30(c)      (c << 2)  /* Data 4, Bits 2-3: Bank 30 color */
 #  define SSD1305_SETBANK31(c)      (c << 4)  /* Data 4, Bits 4-5: Bank 31 color */
 #  define SSD1305_SETBANK32(c)      (c << 6)  /* Data 4, Bits 6-7: Bank 32 color */
+
 #define SSD1305_MAPCOL0             0xa0 /* 0xa0: Column address 0 is mapped to SEG0 */
 #define SSD1305_MAPCOL131           0xa1 /* 0xa1: Column address 131 is mapped to SEG0 */
 #define SSD1305_DISPRAM             0xa4 /* 0xa4: Resume to RAM content display */
@@ -163,9 +155,9 @@
 #  define SSD1305_COMCONFIG_NOREMAP 0x02 /*   Data 1, Bit 5: 0=Disable COM Left/Right remap */
 #  define SSD1305_COMCONFIG_REMAP   0x22 /*   Data 1, Bit 5: 1=Enable COM Left/Right remap */
 #define SSD1305_SETVCOMHDESEL       0xdb /* 0xdb: Set VCOMH delselect level */
-#  define SSD1305_VCOMH_x4p3        0x00 /*   Data 1: ~0.43 x Vcc */
-#  define SSD1305_VCOMH_x7p7        0x34 /*   Data 1: ~0.77 x Vcc */
-#  define SSD1305_VCOMH_x8p3        0x3c /*   Data 1: ~0.83 x Vcc */
+#  define SSD1305_VCOMH_X4P3        0x00 /*   Data 1: ~0.43 x Vcc */
+#  define SSD1305_VCOMH_X7P7        0x34 /*   Data 1: ~0.77 x Vcc */
+#  define SSD1305_VCOMH_X8P3        0x3c /*   Data 1: ~0.83 x Vcc */
 #define SSD1305_ENTER_RMWMODE       0xe0 /* 0xe0: Enter the Read Modify Write mode */
 #define SSD1305_NOP                 0xe3 /* 0xe3: NOP Command for no operation */
 #define SSD1305_EXIT_RMWMODE        0xee /* 0xee: Leave the Read Modify Write mode */

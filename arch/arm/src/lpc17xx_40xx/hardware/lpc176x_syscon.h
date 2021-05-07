@@ -1,55 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc176x_syscon.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC176X_SYSCON_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC176X_SYSCON_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* Flash accelerator module */
 
 #define LPC17_40_SYSCON_FLASHCFG_OFFSET   0x0000 /* Flash Accelerator Configuration Register */
@@ -106,7 +92,9 @@
 #define LPC17_40_SYSCON_PCLKSEL0_OFFSET   0x01a8      /* Peripheral Clock Selection register 0 */
 #define LPC17_40_SYSCON_PCLKSEL1_OFFSET   0x01ac      /* Peripheral Clock Selection register 1 */
 
-/* Device Interrupt Registers (Might be a error in the User Manual, might be at 0x5000c1c0) */
+/* Device Interrupt Registers (Might be a error in the User Manual,
+ * might be at 0x5000c1c0)
+ */
 
 #define LPC17_40_SYSCON_USBINTST_OFFSET   0x01c0      /* USB Interrupt Status  */
 
@@ -118,7 +106,8 @@
 
 #define LPC17_40_SYSCON_CLKOUTCFG_OFFSET  0x01c8 /* Clock Output Configuration Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
+
 /* Flash accelerator module */
 
 #define LPC17_40_SYSCON_FLASHCFG          (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_FLASHCFG_OFFSET)
@@ -175,7 +164,9 @@
 #define LPC17_40_SYSCON_PCLKSEL0          (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_PCLKSEL0_OFFSET)
 #define LPC17_40_SYSCON_PCLKSEL1          (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_PCLKSEL1_OFFSET)
 
-/* Device Interrupt Registers (Might be a error in the User Manual, might be at 0x5000c1c0) */
+/* Device Interrupt Registers
+ * (Might be a error in the User Manual, might be at 0x5000c1c0)
+ */
 
 #define LPC17_40_SYSCON_USBINTST          (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_USBINTST_OFFSET)
 
@@ -187,9 +178,12 @@
 
 #define LPC17_40_SYSCON_CLKOUTCFG         (LPC17_40_SYSCON_BASE+LPC17_40_SYSCON_CLKOUTCFG_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* Flash accelerator module */
-                                                      /* Bits 0-11:  Reserved */
+
+                                                  /* Bits 0-11:  Reserved */
+
 #define SYSCON_FLASHCFG_TIM_SHIFT         (12)        /* Bits 12-15: FLASHTIM Flash access time */
 #define SYSCON_FLASHCFG_TIM_MASK          (15 << SYSCON_FLASHCFG_TIM_SHIFT)
 #  define SYSCON_FLASHCFG_TIM_1           (0 << SYSCON_FLASHCFG_TIM_SHIFT) /* 1 CPU clock <= 20 MHz CPU clock */
@@ -199,14 +193,16 @@
 #  define SYSCON_FLASHCFG_TIM_5           (4 << SYSCON_FLASHCFG_TIM_SHIFT) /* 5 CPU clock <= 100 MHz CPU clock
                                                                             * (Up to 120 MHz for LPC1759/69 only */
 #  define SYSCON_FLASHCFG_TIM_6           (5 << SYSCON_FLASHCFG_TIM_SHIFT) /* "safe" setting for any conditions */
-                                                      /* Bits 16-31:  Reserved */
+
+                                                  /* Bits 16-31:  Reserved */
 
 /* Memory Mapping Control register (MEMMAP - 0x400F C040) */
 
 #define SYSCON_MEMMAP_MAP                 (1 << 0)   /* Bit 0:
                                                       * 0:Boot mode. A portion of the Boot ROM is mapped to address 0.
                                                       * 1:User mode. The on-chip Flash memory is mapped to address 0 */
-                                                      /* Bits 1-31:  Reserved */
+
+                                                  /* Bits 1-31:  Reserved */
 
 /* Clocking and power control -- Clock source selection */
 
@@ -215,14 +211,17 @@
 #  define SYSCON_CLKSRCSEL_INTRC          (0 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = internal RC oscillator */
 #  define SYSCON_CLKSRCSEL_MAIN           (1 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = main oscillator */
 #  define SYSCON_CLKSRCSEL_RTC            (2 << SYSCON_CLKSRCSEL_SHIFT) /* PLL0 source = RTC oscillator */
-                                                      /* Bits 2-31:  Reserved */
+
+                                                  /* Bits 2-31:  Reserved */
 
 /* Clocking and power control - Phase locked loops */
+
 /* PLL0/1 Control register */
 
 #define SYSCON_PLLCON_PLLE                (1 << 0)    /* Bit 0: PLL0/1 Enable */
 #define SYSCON_PLLCON_PLLC                (1 << 1)    /* Bit 1: PLL0/1 Connect */
                                                       /* Bits 2-31:  Reserved */
+
 /* PLL0 Configuration register */
 
 #define SYSCON_PLL0CFG_MSEL_SHIFT         (0)         /* Bit 0-14: PLL0 Multiplier value */
@@ -231,6 +230,7 @@
 #define SYSCON_PLL0CFG_NSEL_SHIFT         (16)        /* Bit 16-23: PLL0 Pre-Divider value */
 #define SYSCON_PLL0CFG_NSEL_MASK          (0xff << SYSCON_PLL0CFG_NSEL_SHIFT)
                                                       /* Bits 24-31:  Reserved */
+
 /* PLL1 Configuration register */
 
 #define SYSCON_PLL1CFG_MSEL_SHIFT         (0)         /* Bit 0-4: PLL1 Multiplier value */
@@ -238,6 +238,7 @@
 #define SYSCON_PLL1CFG_NSEL_SHIFT         (5)         /* Bit 5-6: PLL1 Pre-Divider value */
 #define SYSCON_PLL1CFG_NSEL_MASK          (3 << SYSCON_PLL1CFG_NSEL_SHIFT)
                                                       /* Bits 7-31:  Reserved */
+
 /* PLL0 Status register */
 
 #define SYSCON_PLL0STAT_MSEL_SHIFT        (0)         /* Bit 0-14: PLL0 Multiplier value readback */
@@ -249,6 +250,7 @@
 #define SYSCON_PLL0STAT_PLLC              (1 << 25)   /* Bit 25: PLL0 connect readback */
 #define SYSCON_PLL0STAT_PLOCK             (1 << 26)   /* Bit 26: PLL0 lock status */
                                                       /* Bits 27-31: Reserved */
+
 /* PLL1 Status register */
 
 #define SYSCON_PLL1STAT_MSEL_SHIFT        (0)         /* Bit 0-4: PLL1 Multiplier value readback */
@@ -260,18 +262,23 @@
 #define SYSCON_PLL1STAT_PLLC              (1 << 9)    /* Bit 9:  PLL1 connect readback */
 #define SYSCON_PLL1STAT_PLOCK             (1 << 10)   /* Bit 10: PLL1 lock status */
                                                       /* Bits 11-31: Reserved */
+
 /* PLL0/1 Feed register */
 
 #define SYSCON_PLLFEED_SHIFT              (0)         /* Bit 0-7: PLL0/1 feed sequence */
 #define SYSCON_PLLFEED_MASK               (0xff << SYSCON_PLLFEED_SHIFT)
                                                       /* Bits 8-31: Reserved */
+
 /* Clocking and power control -- Clock dividers */
+
 /* CPU Clock Configuration register */
 
 #define SYSCON_CCLKCFG_SHIFT              (0)         /* 0-7: Divide value for CPU clock (CCLK) */
 #define SYSCON_CCLKCFG_MASK               (0xff << SYSCON_CCLKCFG_SHIFT)
 #  define SYSCON_CCLKCFG_DIV(n)           ((n-1) << SYSCON_CCLKCFG_SHIFT) /* n=2,3,..255 */
-                                                      /* Bits 8-31:  Reserved */
+
+                                                  /* Bits 8-31:  Reserved */
+
 /* USB Clock Configuration register */
 
 #define SYSCON_USBCLKCFG_SHIFT            (0)         /* Bits 0-3: PLL0 divide value USB clock */
@@ -279,7 +286,9 @@
 #  define SYSCON_USBCLKCFG_DIV6           (5 << SYSCON_USBCLKCFG_SHIFT) /* PLL0/6 for PLL0=288 MHz */
 #  define SYSCON_USBCLKCFG_DIV8           (7 << SYSCON_USBCLKCFG_SHIFT) /* PLL0/8 for PLL0=384 MHz */
 #  define SYSCON_USBCLKCFG_DIV10          (9 << SYSCON_USBCLKCFG_SHIFT) /* PLL0/10 for PLL0=480 MHz */
-                                                      /* Bits 8-31:  Reserved */
+
+                                                /* Bits 8-31:  Reserved */
+
 /* Peripheral Clock Selection registers 0 and 1 */
 
 #define SYSCON_PCLKSEL_CCLK4              (0)         /* PCLK_peripheral = CCLK/4 */
@@ -352,6 +361,7 @@
 #define SYSCON_PCLKSEL1_MC_MASK           (3 << SYSCON_PCLKSEL1_MC_SHIFT)
 
 /* Clocking and power control - Peripheral power control registers */
+
 /* Power Control Register */
 
 #define SYSCON_PCON_PM0                   (1 << 0)    /* Bit 0:  Power mode control bit 0 */
@@ -365,6 +375,7 @@
 #define SYSCON_PCON_PDFLAG                (1 << 10)   /* Bit 10: Power-down entry flag */
 #define SYSCON_PCON_DPDFLAG               (1 << 11)   /* Bit 11:  Deep Power-down entry flag */
                                                       /* Bits 12-31:  Reserved */
+
 /* Power Control for Peripherals Register */
 
                                                       /* Bit 0:  Reserved */
@@ -409,13 +420,17 @@
 #  define SYSCON_CLKOUTCFG_SEL_INTRC      (2 << SYSCON_CLKOUTCFG_SEL_SHIFT) /* CLKOUT source=internal RC osc */
 #  define SYSCON_CLKOUTCFG_SEL_USB        (3 << SYSCON_CLKOUTCFG_SEL_SHIFT) /* CLKOUT source=USB clock */
 #  define SYSCON_CLKOUTCFG_SEL_RTC        (4 << SYSCON_CLKOUTCFG_SEL_SHIFT) /* CLKOUT source=RTC osc */
+
 #define SYSCON_CLKOUTCFG_DIV_SHIFT        (4)         /* Bits 4-7:  CLKOUT divisor */
 #define SYSCON_CLKOUTCFG_DIV_MASK         (15 << SYSCON_CLKOUTCFG_DIV_SHIFT)
 #  define SYSCON_CLKOUTCFG_DIV(n)         ((n-1) << SYSCON_CLKOUTCFG_DIV_SHIFT) /* n=1..16 */
+
 #define SYSCON_CLKOUTCFG_EN               (1 << 8)    /* Bit 8:  CLKOUT enable control */
 #define SYSCON_CLKOUTCFG_ACT              (1 << 9)    /* Bit 9:  CLKOUT activity indication */
                                                       /* Bits 10-31: Reserved */
+
 /* System control registers -- External Interrupts */
+
 /* External Interrupt Flag register */
 
 #define SYSCON_EXTINT_EINT0               (1 << 0)    /* Bit 0:  EINT0 */
@@ -423,6 +438,7 @@
 #define SYSCON_EXTINT_EINT2               (1 << 2)    /* Bit 2:  EINT2 */
 #define SYSCON_EXTINT_EINT3               (1 << 3)    /* Bit 3:  EINT3 */
                                                       /* Bits 4-31: Reserved */
+
 /* External Interrupt Mode register */
 
 #define SYSCON_EXTMODE_EINT0              (1 << 0)    /* Bit 0:  1=EINT0 edge sensitive */
@@ -430,6 +446,7 @@
 #define SYSCON_EXTMODE_EINT2              (1 << 2)    /* Bit 2:  1=EINT2 edge sensitive */
 #define SYSCON_EXTMODE_EINT3              (1 << 3)    /* Bit 3:  1=EINT3 edge sensitive */
                                                       /* Bits 4-31: Reserved */
+
 /* External Interrupt Polarity register */
 
 #define SYSCON_EXTPOLAR_EINT0             (1 << 0)    /* Bit 0:  1=EINT0 high active/rising edge */
@@ -437,7 +454,9 @@
 #define SYSCON_EXTPOLAR_EINT2             (1 << 2)    /* Bit 2:  1=EINT2 high active/rising edge */
 #define SYSCON_EXTPOLAR_EINT3             (1 << 3)    /* Bit 3:  1=EINT3 high active/rising edge */
                                                       /* Bits 4-31: Reserved */
+
 /* System control registers -- Reset */
+
 /* Reset Source Identification Register */
 
 #define SYSCON_RSID_POR                   (1 << 0)    /* Bit 0:  Power on reset */
@@ -445,6 +464,7 @@
 #define SYSCON_RSID_WDTR                  (1 << 2)    /* Bit 2:  Watchdog Timer time out w/WDTRESET */
 #define SYSCON_RSID_BODR                  (1 << 3)    /* Bit 3:  Brown out detection */
                                                       /* Bits 4-31: Reserved */
+
 /* System control registers -- Syscon Miscellaneous Registers */
 
                                                       /* Bits 0-3: Reserved */
@@ -452,7 +472,9 @@
 #define SYSCON_SCS_OSCEN                  (1 << 5)    /* Bit 5:  Main oscillator enable */
 #define SYSCON_SCS_OSCSTAT                (1 << 6)    /* Bit 6:  Main oscillator status */
                                                       /* Bits 7-31: Reserved */
+
 /* Device Interrupt Registers */
+
 /* USB Interrupt Status register */
 
 #define SYSCON_USBINTST_REQLP             (1 << 0)    /* Bit 0:  Low priority interrupt line status */
@@ -479,16 +501,16 @@
 #define SYSCON_DMAREQSEL_INP15            (1 << 7)    /* Bit 7:  Input 8 0=UART3 RX 1=Timer 3 match 1 */
                                                       /* Bits 8-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC176X_SYSCON_H */

@@ -1,35 +1,20 @@
 /****************************************************************************
  * tools/mkdeps.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -280,8 +265,8 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "  --obj-suffix <suffix>\n");
   fprintf(stderr, "    If an object path is provided, then the extension\n");
   fprintf(stderr, "    will be assumed to be .o.  This\n");
-  fprintf(stderr, "    default suffix can be overriden with this command\n");
-  fprintf(stderr, "    line option.\n");
+  fprintf(stderr, "    default suffix can be overridden with this\n");
+  fprintf(stderr, "    command line option.\n");
   fprintf(stderr, "  --winnative\n");
   fprintf(stderr, "    By default, a POSIX-style environment is assumed\n");
   fprintf(stderr, "    (e.g., Linux, Cygwin, etc.)  This option is\n");
@@ -449,12 +434,12 @@ static void parse_args(int argc, char **argv)
           /* This condition means "perform shquote for
            * g_cflags, but not g_cc or g_files".
            *
-           * It isn't safe to escape g_cc becuase, for some reasons,
+           * It isn't safe to escape g_cc because, for some reasons,
            * Makefile passes it as a single argument like:
            *
            *    $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS)
            *
-           * It isn't safe to escape g_files becuase
+           * It isn't safe to escape g_files because
            * do_dependency() uses them as bare filenames as well.
            * (In addition to passing them to system().)
            */
@@ -734,6 +719,7 @@ static void do_dependency(const char *file)
     {
       char tmp[NAME_MAX + 6];
       char *dupname;
+      char *objname;
       char *dotptr;
       const char *expanded;
 
@@ -744,14 +730,15 @@ static void do_dependency(const char *file)
           exit(EXIT_FAILURE);
         }
 
-      dotptr = strrchr(dupname, '.');
+      objname = basename(dupname);
+      dotptr  = strrchr(objname, '.');
       if (dotptr)
         {
           *dotptr = '\0';
         }
 
       snprintf(tmp, NAME_MAX + 6, " -MT %s%c%s%s ",
-               g_objpath, separator, dupname, g_suffix);
+               g_objpath, separator, objname, g_suffix);
       expanded = do_expand(tmp);
 
       cmdlen += strlen(expanded);

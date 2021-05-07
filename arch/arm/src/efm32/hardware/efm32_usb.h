@@ -1,5 +1,5 @@
-/*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_usb.h
+/****************************************************************************
+ * arch/arm/src/efm32/hardware/efm32_usb.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USB_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USB_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,9 +72,9 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 /* General definitions */
 
@@ -89,7 +89,7 @@
 #define EFM32_USB_PID_MDATA                        (3)      /* Non-control */
 #define EFM32_USB_PID_SETUP                        (3)      /* Control */
 
-/* USB Register Offsets ********************************************************************************************************/
+/* USB Register Offsets *****************************************************/
 
 #define EFM32_USB_CTRL_OFFSET                      0x00000  /* System Control Register */
 #define EFM32_USB_STATUS_OFFSET                    0x00004  /* System Status Register */
@@ -293,7 +293,7 @@
 #define EFM32_USB_FIFOD_OFFSET(n,d)               (EFM32_USB_FIFO_OFFSET(n) + ((d) << 2))
 #define EFM32_FIFORAM_OFFSET(d)                   (0x5c000 + ((d) << 2))
 
-/* USB Register Addresses ******************************************************************************************************/
+/* USB Register Addresses ***************************************************/
 
 #define EFM32_USB_CTRL                             (EFM32_USB_BASE+EFM32_USB_CTRL_OFFSET)
 #define EFM32_USB_STATUS                           (EFM32_USB_BASE+EFM32_USB_STATUS_OFFSET)
@@ -497,7 +497,7 @@
 #define EFM32_USB_FIFOD(n,d)                       (EFM32_USB_BASE+EFM32_USB_FIFOD_OFFSET(n,d))
 #define EFM32_FIFORAM(d)                           (EFM32_USB_BASE+EFM32_FIFORAM_OFFSET(d))
 
-/* USB Register Bit Field Definitions ******************************************************************************************/
+/* USB Register Bit Field Definitions ***************************************/
 
 /* Bit fields for USB CTRL */
 

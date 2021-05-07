@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/include/core.h
+ * arch/xtensa/include/xtensa/core.h
  *
  * Leveraged to NuttX by:
  *
@@ -30,12 +30,14 @@
  *
  ****************************************************************************/
 
-/* This header file is sometimes referred to as the "compile-time HAL" or CHAL.
- * It pulls definitions tailored for a specific Xtensa processor configuration.
+/* This header file is sometimes referred to as the "compile-time HAL" or
+ * CHAL. It pulls definitions tailored for a specific Xtensa processor
+ * configuration.
  *
- * Sources for binaries meant to be configuration-independent generally avoid
- * including this file (they may use the configuration-specific HAL library).
- * It is normal for the HAL library source itself to include this file.
+ * Sources for binaries meant to be configuration-independent generally
+ * avoid including this file (they may use the configuration-specific HAL
+ * library). It is normal for the HAL library source itself to include this
+ * file.
  */
 
 #ifndef __ARCH_XTENSA_INCUDE_XTENSA_CORE_H
@@ -103,7 +105,10 @@
                                                /* Level of first high-priority
                                                 * interrupt (always 2) */
 
-/* Note:  1 <= LOWPRI_LEVELS <= EXCM_LEVEL < DEBUGLEVEL <= NUM_INTLEVELS < NMILEVEL <= 15 */
+/* Note:
+ * 1 <= LOWPRI_LEVELS <= EXCM_LEVEL < DEBUGLEVEL <=
+ * NUM_INTLEVELS < NMILEVEL <= 15
+ */
 
 /* These values are constant for existing Xtensa processor implementations: */
 
@@ -481,7 +486,9 @@
 
 /* Exceptions and Vectors ***************************************************/
 
-/* For backward compatibility ONLY -- DO NOT USE (will be removed in future release): */
+/* For backward compatibility ONLY -- DO NOT USE
+ * (will be removed in future release):
+ */
 
 #define XCHAL_HAVE_OLD_EXC_ARCH         XCHAL_HAVE_XEA1 /* (DEPRECATED) 1 if
                                                          * old exception
@@ -513,7 +520,9 @@
 #  if XCHAL_HAVE_DEBUG
 #    define XCHAL_DEBUG_VECTOR_VADDR    XCHAL_INTLEVEL_VECTOR_VADDR(XCHAL_DEBUGLEVEL)
 
-/* This one should only get defined if the corresponding intlevel paddr macro exists: */
+/* This one should only get defined if the corresponding intlevel paddr macro
+ * exists:
+ */
 
 #    define XCHAL_DEBUG_VECTOR_PADDR    XCHAL_INTLEVEL_VECTOR_PADDR(XCHAL_DEBUGLEVEL)
 #  endif
@@ -799,7 +808,9 @@
 
 #if XCHAL_HAVE_ICACHE_DYN_WAYS || XCHAL_HAVE_DCACHE_DYN_WAYS
 
-/* NOTE: constant defined this way to allow movi instead of l32r in reset code. */
+/* NOTE:
+ * constant defined this way to allow movi instead of l32r in reset code.
+ */
 
 #  define XCHAL_CACHE_MEMCTL_DEFAULT    0xFFFFFF00  /* Init all possible ways */
 #else
@@ -824,12 +835,14 @@
 
 /* See <xtensa/config/core-matmap.h> for more details. */
 
-/* Has different semantic in open source headers (where it means HAVE_PTP_MMU),
- * so comment out starting with RB-2008.3 release; later, might get
- * get reintroduced as a synonym for XCHAL_HAVE_PTP_MMU instead:
+/* Has different semantic in open source headers (where it means
+ * HAVE_PTP_MMU), so comment out starting with RB-2008.3 release; later,
+ * might get get reintroduced as a synonym for XCHAL_HAVE_PTP_MMU instead:
  */
 
-/* #define XCHAL_HAVE_MMU               XCHAL_HAVE_TLBS*//* (DEPRECATED; use XCHAL_HAVE_TLBS instead) */
+/* #define XCHAL_HAVE_MMU               XCHAL_HAVE_TLBS
+ *                                (DEPRECATED; use XCHAL_HAVE_TLBS instead)
+ */
 
 /* Indexing macros: */
 
@@ -843,7 +856,8 @@
 #define XCHAL_DTLB_SET_E(n,i,what)      _XCHAL_DTLB_SET_E(n,i, _ ## what )
 
 /* Example use:  XCHAL_ITLB_SET(XCHAL_ITLB_ARF_SET0,ENTRIES)
- * to get the value of XCHAL_ITLB_SET<n>_ENTRIES where <n> is the first auto-refill set.
+ * to get the value of XCHAL_ITLB_SET<n>_ENTRIES where <n> is the first
+ * auto-refill set.
  */
 
 /* Number of entries per autorefill way: */
@@ -905,14 +919,14 @@
 #  define XCHAL_SEG_MAPPABLE_VADDR      0x00000000 /* start of largest
                                                     * non-static-mapped virtual
                                                     * addr area */
-#  define XCHAL_SEG_MAPPABLE_SIZE       0xD0000000 /* size in bytes of " */
+#  define XCHAL_SEG_MAPPABLE_SIZE       0xD0000000 /* size in bytes of */
 
 /* define XCHAL_SEG_MAPPABLE2_xxx if more areas present, sorted in order of
  * descending size.
  */
 #endif
 
-/* Misc. ****************************************************
+/* Misc. ********************************************************************/
 
 /* Data alignment required if used for instructions: */
 
@@ -923,8 +937,9 @@
 #endif
 
 /* Names kept for backward compatibility.
- * (Here "RELEASE" is now a misnomer; these are product *versions*, not the releases
- *  under which they are released.  In the T10##.# era there was no distinction.)
+ * (Here "RELEASE" is now a misnomer; these are product *versions*, not the
+ *  releases under which they are released.
+ *  In the T10##.# era there was no distinction.)
  */
 
 #define XCHAL_HW_RELEASE_MAJOR          XCHAL_HW_VERSION_MAJOR
@@ -946,15 +961,15 @@
  * original ptr to next load/store location.
  */
 
-	.macro	xchal_sa_start	continue totofs
-	.ifeq	\continue
-	.set	.Lxchal_pofs_, 0						/* offset from original ptr to current \ptr */
-	.set	.Lxchal_ofs_, 0							/* offset from current \ptr to next load/store location */
-	.endif
-	.if		\totofs + 1								/* if totofs specified (not -1) */
-	.set	.Lxchal_ofs_, \totofs - .Lxchal_pofs_	/* specific offset from original ptr */
-	.endif
-	.endm
+  .macro xchal_sa_start continue totofs
+  .ifeq \continue
+  .set .Lxchal_pofs_, 0 /* offset from original ptr to current \ptr */
+  .set .Lxchal_ofs_, 0  /* offset from current \ptr to next load/store location */
+  .endif
+  .if  \totofs + 1                           /* if totofs specified (not -1) */
+  .set .Lxchal_ofs_, \totofs - .Lxchal_pofs_ /* specific offset from original ptr */
+  .endif
+  .endm
 
 /* Align portion of save area and bring ptr in range if necessary.  Used by
  * save area load/store sequences.  Not usually invoked directly.  Allows
@@ -967,29 +982,30 @@
  * load/store loc (pow of 2)
  */
 
-	.macro  xchal_sa_align  ptr minofs maxofs ofsalign totalign
+  .macro  xchal_sa_align  ptr minofs maxofs ofsalign totalign
 
-	/*  First align where we start accessing the next register
-	 *  per \totalign relative to original ptr (i.e. start of the save area):
-	 */
+  /*  First align where we start accessing the next register
+   *  per \totalign relative to original ptr (i.e. start of the save area):
+   */
 
-	.set    .Lxchal_ofs_, ((.Lxchal_pofs_ + .Lxchal_ofs_ + \totalign - 1) & -\totalign) - .Lxchal_pofs_
+  .set    .Lxchal_ofs_, ((.Lxchal_pofs_ + .Lxchal_ofs_ + \totalign - 1) & -\totalign) - .Lxchal_pofs_
 
-	/*  If necessary, adjust \ptr to bring .Lxchal_ofs_ in acceptable range:  */
+  /*  If necessary, adjust \ptr to bring .Lxchal_ofs_ in acceptable range: */
 
-	.if		(((\maxofs) - .Lxchal_ofs_) & 0xC0000000) | ((.Lxchal_ofs_ - (\minofs)) & 0xC0000000) | (.Lxchal_ofs_ & (\ofsalign-1))
-	.set	.Ligmask, 0xFFFFFFFF    /* TODO: optimize to addmi, per aligns and .Lxchal_ofs_ */
-	addi	\ptr, \ptr, (.Lxchal_ofs_ & .Ligmask)
-	.set	.Lxchal_pofs_, .Lxchal_pofs_ + (.Lxchal_ofs_ & .Ligmask)
-	.set	.Lxchal_ofs_, (.Lxchal_ofs_ & ~.Ligmask)
-	.endif
-	.endm
+  .if (((\maxofs) - .Lxchal_ofs_) & 0xC0000000) | ((.Lxchal_ofs_ - (\minofs)) & 0xC0000000) | (.Lxchal_ofs_ & (\ofsalign-1))
+  .set .Ligmask, 0xFFFFFFFF    /* TODO: optimize to addmi, per aligns and .Lxchal_ofs_ */
+  addi \ptr, \ptr, (.Lxchal_ofs_ & .Ligmask)
+  .set .Lxchal_pofs_, .Lxchal_pofs_ + (.Lxchal_ofs_ & .Ligmask)
+  .set .Lxchal_ofs_, (.Lxchal_ofs_ & ~.Ligmask)
+  .endif
+  .endm
 
 /* We could optimize for addi to expand to only addmi instead of
  * "addmi;addi", where possible.  Here's a partial example how:
  *
  * .set    .Lmaxmask, -(\ofsalign) & -(\totalign)
- * .if (((\maxofs) + ~.Lmaxmask + 1) & 0xFFFFFF00) && ((.Lxchal_ofs_ & ~.Lmaxmask) == 0)
+ * .if (((\maxofs) + ~.Lmaxmask + 1) & 0xFFFFFF00) &&
+ *     ((.Lxchal_ofs_ & ~.Lmaxmask) == 0)
  *  .set    .Ligmask, 0xFFFFFF00
  * .elif ... ditto for negative ofs range ...
  *  .set .Ligmask, 0xFFFFFF00
@@ -997,17 +1013,17 @@
  * .else
  *  .set .Ligmask, 0xFFFFFFFF
  * .endif
- *
+ */
 
 /* Invoke this after xchal_XXX_{load,store} macros to restore \ptr. */
 
-	.macro	xchal_sa_ptr_restore	ptr
-	.if		.Lxchal_pofs_
-	addi	\ptr, \ptr, - .Lxchal_pofs_
-	.set	.Lxchal_ofs_, .Lxchal_ofs_ + .Lxchal_pofs_
-	.set	.Lxchal_pofs_, 0
-	.endif
-	.endm
+  .macro xchal_sa_ptr_restore ptr
+  .if .Lxchal_pofs_
+  addi \ptr, \ptr, - .Lxchal_pofs_
+  .set .Lxchal_ofs_, .Lxchal_ofs_ + .Lxchal_pofs_
+  .set .Lxchal_pofs_, 0
+  .endif
+  .endm
 
 /* Use as eg:
  *   xchal_atmps_store a1, SOMEOFS, XCHAL_SA_NUM_ATMPS, a4, a5
@@ -1023,50 +1039,51 @@
 #define xchal_atmps_store               xchal_atmps_loadstore s32i,
 #define xchal_atmps_load                xchal_atmps_loadstore l32i,
 
-	.macro	xchal_atmps_loadstore	inst ptr offset nreq aa=0 ab=0 ac=0 ad=0
-	.set	.Lnsaved_, 0
-	.irp	reg,\aa,\ab,\ac,\ad
-	.ifeq	0x\reg ; .set .Lnsaved_,.Lnsaved_+1 ; .endif
-	.endr
-	.set	.Laofs_, 0
-	.irp	reg,\aa,\ab,\ac,\ad
-	.ifgt	(\nreq)-.Lnsaved_
-	\inst	\reg, \ptr, .Laofs_+\offset
-	.set	.Laofs_,.Laofs_+4
-	.set	.Lnsaved_,.Lnsaved_+1
-	.endif
-	.endr
-	.endm
+  .macro xchal_atmps_loadstore inst ptr offset nreq aa=0 ab=0 ac=0 ad=0
+  .set .Lnsaved_, 0
+  .irp reg,\aa,\ab,\ac,\ad
+  .ifeq 0x\reg ; .set .Lnsaved_,.Lnsaved_+1 ; .endif
+  .endr
+  .set .Laofs_, 0
+  .irp reg,\aa,\ab,\ac,\ad
+  .ifgt (\nreq)-.Lnsaved_
+  \inst \reg, \ptr, .Laofs_+\offset
+  .set .Laofs_,.Laofs_+4
+  .set .Lnsaved_,.Lnsaved_+1
+  .endif
+  .endr
+  .endm
 
+/* #define xchal_ncp_load_a2         xchal_ncp_load        a2,a3,a4,a5,a6 */
 
-/* #define xchal_ncp_load_a2            xchal_ncp_load		a2,a3,a4,a5,a6 */
-/* #define xchal_ncp_store_a2           xchal_ncp_store		a2,a3,a4,a5,a6 */
-#  define xchal_extratie_load           xchal_ncptie_load
-#  define xchal_extratie_store          xchal_ncptie_store
-#  define xchal_extratie_load_a2        xchal_ncptie_load	a2,a3,a4,a5,a6
-#  define xchal_extratie_store_a2       xchal_ncptie_store	a2,a3,a4,a5,a6
-#  define xchal_extra_load              xchal_ncp_load
-#  define xchal_extra_store             xchal_ncp_store
-#  define xchal_extra_load_a2           xchal_ncp_load		a2,a3,a4,a5,a6
-#  define xchal_extra_store_a2          xchal_ncp_store		a2,a3,a4,a5,a6
-#  define xchal_extra_load_funcbody     xchal_ncp_load		a2,a3,a4,a5,a6
-#  define xchal_extra_store_funcbody    xchal_ncp_store		a2,a3,a4,a5,a6
-#  define xchal_cp0_store_a2            xchal_cp0_store		a2,a3,a4,a5,a6
-#  define xchal_cp0_load_a2             xchal_cp0_load		a2,a3,a4,a5,a6
-#  define xchal_cp1_store_a2            xchal_cp1_store		a2,a3,a4,a5,a6
-#  define xchal_cp1_load_a2             xchal_cp1_load		a2,a3,a4,a5,a6
-#  define xchal_cp2_store_a2            xchal_cp2_store		a2,a3,a4,a5,a6
-#  define xchal_cp2_load_a2             xchal_cp2_load		a2,a3,a4,a5,a6
-#  define xchal_cp3_store_a2            xchal_cp3_store		a2,a3,a4,a5,a6
-#  define xchal_cp3_load_a2             xchal_cp3_load		a2,a3,a4,a5,a6
-#  define xchal_cp4_store_a2            xchal_cp4_store		a2,a3,a4,a5,a6
-#  define xchal_cp4_load_a2             xchal_cp4_load		a2,a3,a4,a5,a6
-#  define xchal_cp5_store_a2            xchal_cp5_store		a2,a3,a4,a5,a6
-#  define xchal_cp5_load_a2             xchal_cp5_load		a2,a3,a4,a5,a6
-#  define xchal_cp6_store_a2            xchal_cp6_store		a2,a3,a4,a5,a6
-#  define xchal_cp6_load_a2             xchal_cp6_load		a2,a3,a4,a5,a6
-#  define xchal_cp7_store_a2            xchal_cp7_store		a2,a3,a4,a5,a6
-#  define xchal_cp7_load_a2             xchal_cp7_load		a2,a3,a4,a5,a6
+/* #define xchal_ncp_store_a2        xchal_ncp_store       a2,a3,a4,a5,a6 */
+
+#  define xchal_extratie_load         xchal_ncptie_load
+#  define xchal_extratie_store        xchal_ncptie_store
+#  define xchal_extratie_load_a2      xchal_ncptie_load    a2,a3,a4,a5,a6
+#  define xchal_extratie_store_a2     xchal_ncptie_store   a2,a3,a4,a5,a6
+#  define xchal_extra_load            xchal_ncp_load
+#  define xchal_extra_store           xchal_ncp_store
+#  define xchal_extra_load_a2         xchal_ncp_load       a2,a3,a4,a5,a6
+#  define xchal_extra_store_a2        xchal_ncp_store      a2,a3,a4,a5,a6
+#  define xchal_extra_load_funcbody   xchal_ncp_load       a2,a3,a4,a5,a6
+#  define xchal_extra_store_funcbody  xchal_ncp_store      a2,a3,a4,a5,a6
+#  define xchal_cp0_store_a2          xchal_cp0_store      a2,a3,a4,a5,a6
+#  define xchal_cp0_load_a2           xchal_cp0_load       a2,a3,a4,a5,a6
+#  define xchal_cp1_store_a2          xchal_cp1_store      a2,a3,a4,a5,a6
+#  define xchal_cp1_load_a2           xchal_cp1_load       a2,a3,a4,a5,a6
+#  define xchal_cp2_store_a2          xchal_cp2_store      a2,a3,a4,a5,a6
+#  define xchal_cp2_load_a2           xchal_cp2_load       a2,a3,a4,a5,a6
+#  define xchal_cp3_store_a2          xchal_cp3_store      a2,a3,a4,a5,a6
+#  define xchal_cp3_load_a2           xchal_cp3_load       a2,a3,a4,a5,a6
+#  define xchal_cp4_store_a2          xchal_cp4_store      a2,a3,a4,a5,a6
+#  define xchal_cp4_load_a2           xchal_cp4_load       a2,a3,a4,a5,a6
+#  define xchal_cp5_store_a2          xchal_cp5_store      a2,a3,a4,a5,a6
+#  define xchal_cp5_load_a2           xchal_cp5_load       a2,a3,a4,a5,a6
+#  define xchal_cp6_store_a2          xchal_cp6_store      a2,a3,a4,a5,a6
+#  define xchal_cp6_load_a2           xchal_cp6_load       a2,a3,a4,a5,a6
+#  define xchal_cp7_store_a2          xchal_cp7_store      a2,a3,a4,a5,a6
+#  define xchal_cp7_load_a2           xchal_cp7_load       a2,a3,a4,a5,a6
 
 /* Empty placeholder macros for undefined coprocessors: */
 
@@ -1117,121 +1134,121 @@
  * Exit:  any register a2-a15 (?) may have been clobbered.
  */
 
-	.macro	xchal_cpi_store_funcbody
+  .macro xchal_cpi_store_funcbody
 #if (XCHAL_CP_MASK & ~XCHAL_CP_PORT_MASK)
 # if XCHAL_CP0_SA_SIZE
-	bnez	a3, 99f
-	xchal_cp0_store_a2
-	j		90f
+  bnez a3, 99f
+  xchal_cp0_store_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP1_SA_SIZE
-	bnei    a3, 1, 99f
-	xchal_cp1_store_a2
-	j		90f
+  bnei    a3, 1, 99f
+  xchal_cp1_store_a2
+  j 290f
 99:
 # endif
 # if XCHAL_CP2_SA_SIZE
-	bnei    a3, 2, 99f
-	xchal_cp2_store_a2
-	j		90f
+  bnei    a3, 2, 99f
+  xchal_cp2_store_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP3_SA_SIZE
-	bnei	a3, 3, 99f
-	xchal_cp3_store_a2
-	j		90f
+  bnei a3, 3, 99f
+  xchal_cp3_store_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP4_SA_SIZE
-	bnei	a3, 4, 99f
-	xchal_cp4_store_a2
-	j		90f
+  bnei a3, 4, 99f
+  xchal_cp4_store_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP5_SA_SIZE
-	bnei	a3, 5, 99f
-	xchal_cp5_store_a2
-	j		90f
+  bnei a3, 5, 99f
+  xchal_cp5_store_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP6_SA_SIZE
-	bnei	a3, 6, 99f
-	xchal_cp6_store_a2
-	j		90f
+  bnei a3, 6, 99f
+  xchal_cp6_store_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP7_SA_SIZE
-	bnei	a3, 7, 99f
-	xchal_cp7_store_a2
-	j		90f
+  bnei a3, 7, 99f
+  xchal_cp7_store_a2
+  j 90f
 99:
 # endif
 90:
 #endif
-	.endm
+  .endm
 
-/* Macro that expands to the body of a function that loads the selected coprocessor's state
- * (registers etc).
+/* Macro that expands to the body of a function that loads the selected
+ * coprocessor's state (registers etc).
  *
  * Entry: a2 = ptr to save area from which to restore cp state
  *        a3 = coprocessor number
  * Exit:  any register a2-a15 (?) may have been clobbered.
  */
 
-	.macro  xchal_cpi_load_funcbody
+  .macro  xchal_cpi_load_funcbody
 #if (XCHAL_CP_MASK & ~XCHAL_CP_PORT_MASK)
 # if XCHAL_CP0_SA_SIZE
-	bnez	a3, 99f
-	xchal_cp0_load_a2
-	j		90f
+  bnez a3, 99f
+  xchal_cp0_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP1_SA_SIZE
-	bnei	a3, 1, 99f
-	xchal_cp1_load_a2
-	j		90f
+  bnei a3, 1, 99f
+  xchal_cp1_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP2_SA_SIZE
-	bnei	a3, 2, 99f
-	xchal_cp2_load_a2
-	j		90f
+  bnei a3, 2, 99f
+  xchal_cp2_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP3_SA_SIZE
-	bnei	a3, 3, 99f
-	xchal_cp3_load_a2
-	j		90f
+  bnei a3, 3, 99f
+  xchal_cp3_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP4_SA_SIZE
-	bnei	a3, 4, 99f
-	xchal_cp4_load_a2
-	j		90f
+  bnei a3, 4, 99f
+  xchal_cp4_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP5_SA_SIZE
-	bnei	a3, 5, 99f
-	xchal_cp5_load_a2
-	j		90f
+  bnei a3, 5, 99f
+  xchal_cp5_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP6_SA_SIZE
-	bnei	a3, 6, 99f
-	xchal_cp6_load_a2
-	j		90f
+  bnei a3, 6, 99f
+  xchal_cp6_load_a2
+  j 90f
 99:
 # endif
 # if XCHAL_CP7_SA_SIZE
-	bnei	a3, 7, 99f
-	xchal_cp7_load_a2
-	j		90f
+  bnei a3, 7, 99f
+  xchal_cp7_load_a2
+  j 90f
 99:
 # endif
 90:
 #endif
-	.endm
+  .endm
 
 #endif /* __ASSEMBLY__ */
 
@@ -1373,8 +1390,9 @@
 /* Because information as to exactly which hardware version is targeted
  * by a given software build is not always available, compile-time HAL
  * Hardware-Release "_AT" macros are fuzzy (return 0, 1, or XCHAL_MAYBE):
- * (Here "RELEASE" is now a misnomer; these are product *versions*, not the releases
- *  under which they are released.  In the T10##.# era there was no distinction.)
+ * (Here "RELEASE" is now a misnomer; these are product *versions*, not the
+ *  releases under which they are released.  In the T10##.# era there was no
+ * distinction.)
  */
 
 #if XCHAL_HW_CONFIGID_RELIABLE
@@ -1396,8 +1414,10 @@
 
 /*  Specific errata: */
 
-/* Erratum T1020.H13, T1030.H7, T1040.H10, T1050.H4 (fixed in T1040.3 and T1050.1;
- * relevant only in XEA1, kernel-vector mode, level-one interrupts and overflows enabled):
+/* Erratum T1020.H13, T1030.H7, T1040.H10, T1050.H4
+ * (fixed in T1040.3 and T1050.1;
+ * relevant only in XEA1, kernel-vector mode,
+ * level-one interrupts and overflows enabled):
  */
 
 #define XCHAL_MAYHAVE_ERRATUM_XEA1KWIN \
@@ -1414,7 +1434,7 @@
 
 #if (XCHAL_HW_MAX_VERSION >= XTENSA_HWVERSION_RE_2013_2 && \
      XCHAL_HW_MIN_VERSION <= XTENSA_HWVERSION_RF_2014_0 && \
-     XCHAL_ICACHE_SIZE != 0 && XCHAL_HAVE_PIF /*covers also AXI/AHB*/ && \
+     XCHAL_ICACHE_SIZE != 0 && XCHAL_HAVE_PIF /* covers also AXI/AHB */ && \
      XCHAL_HAVE_LOOPS && XCHAL_LOOP_BUFFER_SIZE != 0 && \
      XCHAL_CLOCK_GATING_GLOBAL && !defined(_NO_ERRATUM_453))
 #  define XCHAL_ERRATUM_453    1
@@ -1440,4 +1460,4 @@
 #  define XCHAL_ERRATUM_497    0
 #endif
 
-#endif /*__ARCH_XTENSA_INCUDE_XTENSA_CORE_H*/
+#endif /* __ARCH_XTENSA_INCUDE_XTENSA_CORE_H */

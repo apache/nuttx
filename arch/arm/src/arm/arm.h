@@ -1,66 +1,51 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/arm/arm.h
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_COMMON_ARM_H
 #define __ARCH_ARM_SRC_COMMON_ARM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* ARM9EJS **************************************************************************/
+/* ARM9EJS ******************************************************************/
 
 /* PSR bits */
 
-#define MODE_MASK       0x0000001f /* Bits 0-4: Mode bits */
-#  define USR26_MODE    0x00000000 /*   26-bit User mode */
-#  define FIQ26_MODE    0x00000001 /*   26-bit FIQ mode */
-#  define IRQ26_MODE    0x00000002 /*   26-bit IRQ mode */
-#  define SVC26_MODE    0x00000003 /*   26-bit Supervisor mode */
-#  define MODE32_BIT    0x00000010 /*   Bit 4: 32-bit mode */
-#  define USR_MODE      0x00000010 /*   32-bit User mode */
-#  define FIQ_MODE      0x00000011 /*   32-bit FIQ mode */
-#  define IRQ_MODE      0x00000012 /*   32-bit IRQ mode */
-#  define SVC_MODE      0x00000013 /*   32-bit Supervisor mode */
-#  define ABT_MODE      0x00000017 /*   32-bit Abort mode */
-#  define UND_MODE      0x0000001b /*   32-bit Undefined mode */
-#  define SYSTEM_MODE   0x0000001f /*   32-bit System mode */
+#define PSR_MODE_MASK   0x0000001f /* Bits 0-4: Mode bits */
+#define PSR_MODE_USR26  0x00000000 /*   26-bit User mode */
+#define PSR_MODE_FIQ26  0x00000001 /*   26-bit FIQ mode */
+#define PSR_MODE_IRQ26  0x00000002 /*   26-bit IRQ mode */
+#define PSR_MODE_SVC26  0x00000003 /*   26-bit Supervisor mode */
+#define PSR_MODE_MODE32 0x00000010 /*   Bit 4: 32-bit mode */
+#define PSR_MODE_USR    0x00000010 /*   32-bit User mode */
+#define PSR_MODE_FIQ    0x00000011 /*   32-bit FIQ mode */
+#define PSR_MODE_IRQ    0x00000012 /*   32-bit IRQ mode */
+#define PSR_MODE_SVC    0x00000013 /*   32-bit Supervisor mode */
+#define PSR_MODE_ABT    0x00000017 /*   32-bit Abort mode */
+#define PSR_MODE_UND    0x0000001b /*   32-bit Undefined mode */
+#define PSR_MODE_SYS    0x0000001f /*   32-bit System mode */
 #define PSR_T_BIT       0x00000020 /* Bit 5: Thumb state */
 #define PSR_F_BIT       0x00000040 /* Bit 6: FIQ disable */
 #define PSR_I_BIT       0x00000080 /* Bit 7: IRQ disable */
@@ -146,6 +131,7 @@
 /* Level 1 Section Descriptor.  Section descriptors allow fast, single
  * level mapping between 1Mb address regions.
  */
+
                                         /* Bits 1:0:   Type of mapping */
 #define PMD_SECT_BUFFERABLE 0x00000004  /* Bit  2:     1=bufferable */
 #define PMD_SECT_CACHEABLE  0x00000008  /* Bit  3:     1=cacheable */
@@ -171,32 +157,44 @@
 /* Level 1 Coarse Table Descriptor.  Coarse Table Descriptors support
  * two level mapping between 16Kb memory regions.
  */
-                                        /* Bits 1:0:   Type of mapping */
-                                        /* Bits 3:2:   Should be zero */
-                                        /* Bit  4:     Common, must be one */
-                                        /* Bits 8:5:   Common domain control */
-                                        /* Bits 9:     Should be zero */
+
+                                        /* Bits 1:0: Type of mapping */
+
+                                        /* Bits 3:2: Should be zero */
+
+                                        /* Bit  4:   Common, must be one */
+
+                                        /* Bits 8:5: Common domain control */
+
+                                        /* Bits 9:   Should be zero */
+
 #define PMD_COARSE_TEX_MASK 0xfffffc00  /* Bits 31:10: v5, Physical page */
 
 /* Level 1 Fine Table Descriptor.  Coarse Table Descriptors support
  * two level mapping between 4Kb memory regions.
  */
 
-                                        /* Bits 1:0:   Type of mapping */
-                                        /* Bits 3:2:   Should be zero */
-                                        /* Bit  4:     Common, must be one */
-                                        /* Bits 8:5:   Common domain control */
-                                        /* Bits 11:9:  Should be zero */
+                                        /* Bits 1:0: Type of mapping */
+
+                                        /* Bits 3:2: Should be zero */
+
+                                        /* Bit  4:   Common, must be one */
+
+                                        /* Bits 8:5: Common domain control */
+
+                                        /* Bits 11:9: Should be zero */
+
 #define PMD_FINE_TEX_MASK   0xfffff000  /* Bits 31:12: v5, Physical page */
 
-/* Level 2 Table Descriptor (PTE).  A section descriptor provides the base address
- * of a 1MB block of memory. The page table descriptors provide the base address of
- * a page table that contains second-level descriptors. There are two sizes of page
- * table:
+/* Level 2 Table Descriptor (PTE).
+ * A section descriptor provides the base address of a 1MB block of memory.
+ * The page table descriptors provide the base address of a page table that
+ * contains second-level descriptors.
+ * There are two sizes of page table:
  *   - Coarse page tables have 256 entries, splitting the 1MB that the table
  *     describes into 4KB blocks
- *   - Fine/tiny page tables have 1024 entries, splitting the 1MB that the table
- *     describes into 1KB blocks.
+ *   - Fine/tiny page tables have 1024 entries, splitting the 1MB that the
+ *     table describes into 1KB blocks.
  *
  * The following definitions apply to all L2 tables:
  */
@@ -211,8 +209,11 @@
                                         /* Bits 31:4:  Depend on type */
 
 /* Large page -- 64Kb */
-                                         /* Bits: 1:0:  Type of mapping */
-                                         /* Bits: 3:2:  Bufferable/cacheable */
+
+                                        /* Bits: 1:0: Type of mapping */
+
+                                        /* Bits: 3:2: Bufferable/cacheable */
+
 #define PTE_LARGE_AP_MASK    (0xff << 4) /* Bits 11:4   Access permissions */
 #define PTE_LARGE_AP_UNO_SRO (0x00 << 4)
 #define PTE_LARGE_AP_UNO_SRW (0x55 << 4)
@@ -223,8 +224,10 @@
 
 /* Small page -- 4Kb */
 
-                                         /* Bits: 1:0:  Type of mapping */
-                                         /* Bits: 3:2:  Bufferable/cacheable */
+                                        /* Bits: 1:0: Type of mapping */
+
+                                        /* Bits: 3:2: Bufferable/cacheable */
+
 #define PTE_SMALL_AP_MASK    (0xff << 4) /* Bits: 11:4: Access permissions */
 #define PTE_SMALL_AP_UNO_SRO (0x00 << 4)
 #define PTE_SMALL_AP_UNO_SRW (0x55 << 4)
@@ -236,8 +239,10 @@
 
 /* Fine/Tiny page -- 1Kb */
 
-                                        /* Bits: 1:0:  Type of mapping */
-                                        /* Bits: 3:2:  Bufferable/cacheable */
+                                       /* Bits: 1:0: Type of mapping */
+
+                                       /* Bits: 3:2: Bufferable/cacheable */
+
 #define PTE_EXT_AP_MASK      (3 << 4)   /* Bits: 5:4:  Access persions */
 #define PTE_EXT_AP_UNO_SRO   (0 << 4)
 #define PTE_EXT_AP_UNO_SRW   (1 << 4)
@@ -266,18 +271,19 @@
 
 #define SECTION_SIZE          (1 << 20)   /* 1Mb */
 
-/* CP15 register c2 contains a pointer to the base address of a paged table in
- * physical memory.  Only bits 14-31 of the page table address is retained there;
- * The full 30-bit address is formed by ORing in bits 2-13 or the virtual address
- * (MVA).  As a consequence, the page table must be aligned to a 16Kb address in
- * physical memory and could require up to 16Kb of memory.
+/* CP15 register c2 contains a pointer to the base address of a paged table
+ * in physical memory.
+ * Only bits 14-31 of the page table address is retained there;
+ * The full 30-bit address is formed by ORing in bits 2-13 or the virtual
+ * address (MVA).  As a consequence, the page table must be aligned to a 16Kb
+ * address in physical memory and could require up to 16Kb of memory.
  */
 
 #define PGTABLE_SIZE          0x00004000
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -288,7 +294,7 @@ static inline unsigned int get_cp15c1(void)
   unsigned int retval;
   __asm__ __volatile__
     (
-	 "\tmrc	p15, 0, %0, c1, c0"
+     "\tmrc    p15, 0, %0, c1, c0"
      : "=r" (retval)
      :
      : "memory");
@@ -302,12 +308,13 @@ static inline unsigned int get_cp15c2(void)
   unsigned int retval;
   __asm__ __volatile__
     (
-	 "\tmrc	p15, 0, %0, c2, c0"
+     "\tmrc    p15, 0, %0, c2, c0"
      : "=r" (retval)
      :
      : "memory");
   return retval;
 }
+
 /* Get the current value of the CP15 C3 domain access register */
 
 static inline unsigned int get_cp15c3(void)
@@ -315,7 +322,7 @@ static inline unsigned int get_cp15c3(void)
   unsigned int retval;
   __asm__ __volatile__
     (
-	 "\tmrc	p15, 0, %0, c3, c0"
+     "\tmrc    p15, 0, %0, c3, c0"
      : "=r" (retval)
      :
      : "memory");

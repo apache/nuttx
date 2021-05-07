@@ -31,7 +31,7 @@
 #include <debug.h>
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <arpa/inet.h>
 #include <net/if.h>
@@ -56,7 +56,6 @@
 #include "xtensa.h"
 #include "xtensa_attr.h"
 
-#include "rom/esp32_gpio.h"
 #include "hardware/esp32_gpio_sigmap.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
@@ -507,11 +506,11 @@ static void emac_init_gpio(void)
   esp32_configgpio(EMAC_ICLK_PIN, INPUT_FUNCTION_6);
 
   esp32_configgpio(EMAC_MDC_PIN, OUTPUT | FUNCTION_3);
-  gpio_matrix_out(EMAC_MDC_PIN, EMAC_MDC_O_IDX, 0, 0);
+  esp32_gpio_matrix_out(EMAC_MDC_PIN, EMAC_MDC_O_IDX, 0, 0);
 
   esp32_configgpio(EMAC_MDIO_PIN, OUTPUT | INPUT | FUNCTION_3);
-  gpio_matrix_out(EMAC_MDIO_PIN, EMAC_MDO_O_IDX, 0, 0);
-  gpio_matrix_in(EMAC_MDIO_PIN, EMAC_MDI_I_IDX, 0);
+  esp32_gpio_matrix_out(EMAC_MDIO_PIN, EMAC_MDO_O_IDX, 0, 0);
+  esp32_gpio_matrix_in(EMAC_MDIO_PIN, EMAC_MDI_I_IDX, 0);
 
   esp32_configgpio(EMAC_PHYRST_PIN, OUTPUT | PULLUP);
 }
@@ -689,7 +688,7 @@ static void emac_start(void)
  * Name: emac_init_dma
  *
  * Description:
- *   Initailize DMA of EMAC
+ *   Initialize DMA of EMAC
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure
@@ -739,7 +738,7 @@ static void emac_init_dma(struct esp32_emac_s *priv)
  * Name: emac_deinit_dma
  *
  * Description:
- *   Deinitailize DMA of EMAC by force to free RX & TX buffer
+ *   Deinitialize DMA of EMAC by force to free RX & TX buffer
  *
  * Input Parameters:
  *   priv - Reference to the driver state structure

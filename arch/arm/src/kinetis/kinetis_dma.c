@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/kinetis/kinetis_dma.c
+ * arch/arm/src/kinetis/kinetis_dma.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -73,16 +73,16 @@
  * Private Types
  ****************************************************************************/
 
- struct kinetis_dma_ch
- {
-    bool used;
-    uint8_t ind;
-    uint8_t irq;
-    enum kinetis_dma_direction_e dir;
-    enum kinetis_dma_data_sz_e data_sz;
-    dma_callback_t callback;
-    void *arg;
- };
+struct kinetis_dma_ch
+{
+  bool used;
+  uint8_t ind;
+  uint8_t irq;
+  enum kinetis_dma_direction_e dir;
+  enum kinetis_dma_data_sz_e data_sz;
+  dma_callback_t callback;
+  void *arg;
+};
 
 /****************************************************************************
  * Private Data
@@ -145,8 +145,8 @@ size_t kinetis_dmaresidual(DMA_HANDLE handle)
 
   /* Channel Linking Disabled */
 
-  return ((getreg16(KINETIS_DMA_TCD_CITER(ch->ind)) >> DMA_TCD_CITER2_SHIFT) &
-          DMA_TCD_CITER2_MASK);
+  return ((getreg16(KINETIS_DMA_TCD_CITER(ch->ind)) >>
+           DMA_TCD_CITER2_SHIFT) & DMA_TCD_CITER2_MASK);
 }
 
 /****************************************************************************
@@ -207,7 +207,7 @@ void weak_function arm_dma_initialize(void)
   regval |= DMA_CR_ERCA | DMA_CR_ERGA;
   putreg32(regval, KINETIS_DMA_CR);
 
-  /* Enable clocking for the DMA mux*/
+  /* Enable clocking for the DMA mux */
 
   regval  = getreg32(KINETIS_SIM_SCGC6);
   regval |= SIM_SCGC6_DMAMUX0;
@@ -314,8 +314,8 @@ DMA_HANDLE kinetis_dmachannel(uint8_t src, uint32_t per_addr,
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until kinetis_dmachannel() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until kinetis_dmachannel() is called again to
+ *   re-gain a valid handle.
  *
  * Returned Value:
  *   None

@@ -386,8 +386,8 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
-                                 FAR void *pvconn, FAR void *pvpriv,
-                                 uint16_t flags)
+                                FAR void *pvconn, FAR void *pvpriv,
+                                uint16_t flags)
 {
   FAR struct tcp_recvfrom_s *pstate = (struct tcp_recvfrom_s *)pvpriv;
 
@@ -532,8 +532,8 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static uint16_t tcp_ackhandler(FAR struct net_driver_s *dev,
-                                 FAR void *pvconn, FAR void *pvpriv,
-                                 uint16_t flags)
+                               FAR void *pvconn, FAR void *pvpriv,
+                               uint16_t flags)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
@@ -684,9 +684,9 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
                            size_t len, int flags, FAR struct sockaddr *from,
                            FAR socklen_t *fromlen)
 {
+  struct tcp_recvfrom_s  state;
   FAR struct tcp_conn_s *conn;
-  struct tcp_recvfrom_s state;
-  int               ret;
+  int                    ret;
 
   net_lock();
 

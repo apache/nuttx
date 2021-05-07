@@ -1,58 +1,43 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_mpmc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_MPMC_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_MPMC_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* MPMC register base address offset into the MPMC domain ***************************************/
+/* MPMC register base address offset into the MPMC domain *******************/
 
 #define LPC31_MPMC_VBASE                (LPC31_MPMC_VADDR)
 #define LPC31_MPMC_PBASE                (LPC31_MPMC_PADDR)
 
-/* MPMC register offsets (with respect to the base of the MPMC domain) **************************/
+/* MPMC register offsets (with respect to the base of the MPMC domain) ******/
 
 #define LPC31_MPMC_CONTROL_OFFSET       0x000 /* Control Register */
 #define LPC31_MPMC_STATUS_OFFSET        0x004 /* Status Register */
@@ -74,7 +59,8 @@
 #define LPC31_MPMC_STEXTWAIT_OFFSET     0x080 /* Static Memory Extended Wait Register */
 #define LPC31_MPMC_DYNCONFIG0_OFFSET    0x100 /* Dynamic Memory Configuration Registers 0 */
 #define LPC31_MPMC_DYNRASCAS0_OFFSET    0x104 /* Dynamic Memory RAS and CAS Delay Registers 0 */
-                                                /* 0x120-0x164: reserved */
+
+                                    /* 0x120-0x164: reserved */
 #define LPC31_MPMC_STCONFIG0_OFFSET     0x200 /* Static Memory Configuration Registers 0 */
 #define LPC31_MPMC_STWAITWEN0_OFFSET    0x204 /* Static Memory Write Enable Delay Registers 0 */
 #define LPC31_MPMC_STWAITOEN0_OFFSET    0x208 /* Static Memory Output Enable Delay Registers 0 */
@@ -89,9 +75,10 @@
 #define LPC31_MPMC_STWAITPAGE1_OFFSET   0x230 /* Static Memory Page Mode Read Delay Registers 1 */
 #define LPC31_MPMC_STWAITWR1_OFFSET     0x234 /* Static Memory Write Delay Registers 1 */
 #define LPC31_MPMC_STWAITTURN1_OFFSET   0x238 /* Static Memory Turn Round Delay Registers 1 */
-                                                /* 0x240-0x278: Reserved */
 
-/* MPMC register (virtual) addresses ************************************************************/
+                                    /* 0x240-0x278: Reserved */
+
+/* MPMC register (virtual) addresses ****************************************/
 
 #define LPC31_MPMC_CONTROL              (LPC31_MPMC_VBASE+LPC31_MPMC_CONTROL_OFFSET)
 #define LPC31_MPMC_STATUS               (LPC31_MPMC_VBASE+LPC31_MPMC_STATUS_OFFSET)
@@ -128,7 +115,8 @@
 #define LPC31_MPMC_STWAITWR1            (LPC31_MPMC_VBASE+LPC31_MPMC_STWAITWR1_OFFSET)
 #define LPC31_MPMC_STWAITTURN1          (LPC31_MPMC_VBASE+LPC31_MPMC_STWAITTURN1_OFFSET)
 
-/* MPMC register bit definitions ****************************************************************/
+/* MPMC register bit definitions ********************************************/
+
 /* MPMCControl (address 0x17008000) */
 
 #define MPMC_CONTROL_L                    (1 << 2)  /* Bit 2:  Indicates normal or low-power mode */
@@ -155,6 +143,7 @@
 #  define MPMC_DYNCONTROL_IMODE           (1 << MPMC_DYNCONTROL_I_SHIFT) /* SDRAM MODE command */
 #  define MPMC_DYNCONTROL_IPALL           (2 << MPMC_DYNCONTROL_I_SHIFT) /* SDRAM PALL (pre charge all) */
 #  define MPMC_DYNCONTROL_INOP            (3 << MPMC_DYNCONTROL_I_SHIFT) /* SDRAM NOP (no operation) */
+
 #define MPMC_DYNCONTROL_MMC               (1 << 5)  /* Bit 5:  Memory clock control */
 #define MPMC_DYNCONTROL_SR                (1 << 2)  /* Bit 2:  Self-refresh request */
 #define MPMC_DYNCONTROL_CS                (1 << 1)  /* Bit 1:  Dynamic-memory clock control */
@@ -263,6 +252,7 @@
 #  define MPMC_DYNCONFIG_LP16_16MX16      (0x2d << MPMC_DYNCONFIG0_AM_SHIFT) /* 256Mb (16Mx16), 4 banks, row length=13, column length=9 */
 #  define MPMC_DYNCONFIG_LP16_64MX8       (0x30 << MPMC_DYNCONFIG0_AM_SHIFT) /* 512Mb (64Mx8), 4 banks, row length=13, column length=11 */
 #  define MPMC_DYNCONFIG_LP16_32MX16      (0x31 << MPMC_DYNCONFIG0_AM_SHIFT) /* 512Mb (32Mx16), 4 banks, row length=13, column length=10 */
+
 #define MPMC_DYNCONFIG0_MD_SHIFT          (3)       /* Bits 3-4: Memory device */
 #define MPMC_DYNCONFIG0_MD_MASK           (3 << MPMC_DYNCONFIG0_MD_SHIFT)
 #  define MPMC_DYNCONFIG0_MDSDRAM         (0 << MPMC_DYNCONFIG0_MD_SHIFT) /* SDRAM */
@@ -276,13 +266,16 @@
 #  define MPMC_DYNRASCAS0_CAS1CLK         (1 << MPMC_DYNRASCAS0_CAS_SHIFT) /* one clock cycle */
 #  define MPMC_DYNRASCAS0_CAS2CLK         (2 << MPMC_DYNRASCAS0_CAS_SHIFT) /* two clock cycles */
 #  define MPMC_DYNRASCAS0_CAS3CLK         (3 << MPMC_DYNRASCAS0_CAS_SHIFT) /* three clock cycles */
+
 #define MPMC_DYNRASCAS0_RAS_SHIFT         (0)      /* Bits 0-1: RAS latency */
 #define MPMC_DYNRASCAS0_RAS_MASK          (3 << MPMC_DYNRASCAS0_RAS_SHIFT)
 #  define MPMC_DYNRASCAS0_RAS1CLK         (1 << MPMC_DYNRASCAS0_RAS_SHIFT) /* one clock cycle */
 #  define MPMC_DYNRASCAS0_RAS2CLK         (2 << MPMC_DYNRASCAS0_RAS_SHIFT) /* two clock cycles */
 #  define MPMC_DYNRASCAS0_RAS3CLK         (3 << MPMC_DYNRASCAS0_RAS_SHIFT) /* three clock cycles */
 
-/* MPMCStaticConfig0 (address 0x17008120) and MPMCStaticConfig1 (address 0x17008220) */
+/* MPMCStaticConfig0 (address 0x17008120) and
+ * MPMCStaticConfig1 (address 0x17008220)
+ */
 
 #define MPMC_STCONFIG_WP                  (1 << 20) /* Bit 20: Write protect */
 #define MPMC_STCONFIG_B                   (1 << 19) /* Bit 19: Buffer enable */
@@ -295,46 +288,58 @@
 #  define MPMC_STCONFIG_MW8BIT            (0 << MPMC_STCONFIG_MW_SHIFT) /* 8-bit */
 #  define MPMC_STCONFIG_MW16BIT           (1 << MPMC_STCONFIG_MW_SHIFT) /* 16-bit */
 
-/* MPMCStaticWaitWen0 (address 0x17008204) and MPMCStaticWaitWen1 (address 0x17008224) */
+/* MPMCStaticWaitWen0 (address 0x17008204) and
+ * MPMCStaticWaitWen1 (address 0x17008224)
+ */
 
 #define MPMC_STWAITWEN_SHIFT              (0)       /* WAITWEN Delay from chip select to write enable */
 #define MPMC_STWAITWEN_MASK               (15 << MPMC_STWAITWEN_SHIFT)
 
-/* MPMCStaticWaitOen (address 0x17008208) and MPMCStaticWaitOen1 (address 0x17008228) */
+/* MPMCStaticWaitOen (address 0x17008208) and
+ * MPMCStaticWaitOen1 (address 0x17008228)
+ */
 
 #define MPMC_STWAITOEN_SHIFT              (0)       /* WAITOEN Delay from chip select to output enable */
 #define MPMC_STWAITOEN_MASK               (15 << MPMC_STWAITOEN_SHIFT)
 
-/* MPMCStaticWaitRd0 (address 0x1700820c) and MPMCStaticWaitRd1 (address 0x17008022c) */
+/* MPMCStaticWaitRd0 (address 0x1700820c) and
+ * MPMCStaticWaitRd1 (address 0x17008022c)
+ */
 
 #define MPMC_STWAITRD_SHIFT               (0)       /* Read first access wait state */
 #define MPMC_STWAITRD_MASK                (31 << MPMC_STWAITRD_SHIFT)
 
-/* MPMCStaticWaitPage0 (address 0x17008210) and MPMCStaticWaitPage1 (address 0x17008230) */
+/* MPMCStaticWaitPage0 (address 0x17008210) and
+ * MPMCStaticWaitPage1 (address 0x17008230)
+ */
 
 #define MPMC_STWAITPAGE_SHIFT             (0)       /* Read after the first read wait states */
 #define MPMC_STWAITPAGE_MASK              (31 << MPMC_STWAITPAGE_SHIFT)
 
-/* MPMCStaticWaitWr0 (address 0x17008214) and MPMCStaticWaitWr1 (address 0x17008234) */
+/* MPMCStaticWaitWr0 (address 0x17008214) and
+ * MPMCStaticWaitWr1 (address 0x17008234)
+ */
 
 #define MPMC_STWAITWR_SHIFT               (0)       /* Time for write accesses after the first read */
 #define MPMC_STWAITWR_MASK                (31 << MPMC_STWAITWR_SHIFT)
 
-/* MPMCStaticWaitTurn0 (address 0x17008218) and MPMCStaticWaitTurn1 (address 0x17008238) */
+/* MPMCStaticWaitTurn0 (address 0x17008218) and
+ * MPMCStaticWaitTurn1 (address 0x17008238)
+ */
 
 #define MPMC_STWAITTURN_SHIFT             (0)       /* Bus turnaround cycles */
 #define MPMC_STWAITTURN_MASK              (15 << MPMC_STWAITTURN_SHIFT)
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_MPMC_H */

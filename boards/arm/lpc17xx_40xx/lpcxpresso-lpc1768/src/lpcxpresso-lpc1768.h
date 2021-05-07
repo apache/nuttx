@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/src/lpcxpresso-lpc1768.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -85,12 +70,16 @@
 #define LPCXPRESSO_I2C1_EPROM_SDL GPIO_I2C1_SCL_2
 #define LPCXPRESSO_LED (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT0 | GPIO_PIN22)
 
-/* P1[0]/ENET-TXD0                   J6-34?  TXD0            TX-(Ethernet PHY)
- * P1[1]/ENET_TXD1                   J6-35?  TXD1            TX+(Ethernet PHY)
+/* P1[0]/ENET-TXD0                   J6-34?  TXD0            TX-
+ *                                                           (Ethernet PHY)
+ * P1[1]/ENET_TXD1                   J6-35?  TXD1            TX+
+ *                                                           (Ethernet PHY)
  * P1[4]/ENET_TX_EN                          TXEN            N/A
  * P1[8]/ENET_CRS                            CRS_DV/MODE2    N/A
- * P1[9]/ENET_RXD0                   J6-32?  RXD0/MODE0      RD-(Ethernet PHY)
- * P1[10]/ENET_RXD1                  J6-33?  RXD1/MODE1      RD+(Ethernet PHY)
+ * P1[9]/ENET_RXD0                   J6-32?  RXD0/MODE0      RD-
+ *                                                           (Ethernet PHY)
+ * P1[10]/ENET_RXD1                  J6-33?  RXD1/MODE1      RD+
+ *                                                           (Ethernet PHY)
  * P1[14]/ENET_RX_ER                         RXER/PHYAD0     N/A
  * P1[15]/ENET_REF_CLK                       REFCLK          N/A
  * P1[16]/ENET_MDC                           MDC             N/A
@@ -141,8 +130,10 @@
  * SD   Signal      Pin   Pin
  * ---  ----------- ----- --------
  * CS   PIO1_11*     55   P2.2        (See LPCXPRESSO_SD_CS)
- * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/lpcxpresso_ssp.h)
- * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/lpcxpresso_ssp.h)
+ * DIN  PIO0_9-MOSI   5   P0.9 MOSI1  (See GPIO_SSP1_MOSI in chip/
+ *                                     lpcxpresso_ssp.h)
+ * DOUT PIO0_8-MISO   6   P0.8 MISO1  (See GPIO_SSP1_MISO in chip/
+ *                                     lpcxpresso_ssp.h)
  * CLK  PIO2_11-SCK   7   P0.9 SCK1   (See GPIO_SSP1_SCK in board.h)
  * CD   PIO2_10      52   P2.11       (See LPCXPRESSO_SD_CD)
  */
@@ -195,9 +186,12 @@
  *  ----------------------------+-------+-------------- ---------------------
  *  LPC1758 Pin                 | J4/6  | Base Board    Description
  *  ----------------------------+-------+-------------- ---------------------
- *  P2.1/PWM1.2/RXD1            |  43   | PIO1_10       FAN5331 Power Control (SHDN#)
- *  P0.6/I2SRX-SDA/SSEL1/MAT2.0 |   8   | PIO0_2        OLED chip select (CS#)
- *  P2.7/RD2/RTS1               |  49   | PIO2_7        OLED command/data (D/C#)
+ *  P2.1/PWM1.2/RXD1            |  43   | PIO1_10       FAN5331 Power Control
+ *                                                      (SHDN#)
+ *  P0.6/I2SRX-SDA/SSEL1/MAT2.0 |   8   | PIO0_2        OLED chip select
+ *                                                      (CS#)
+ *  P2.7/RD2/RTS1               |  49   | PIO2_7        OLED command/data
+ *                                                      (D/C#)
  *  P0.7/I2STX-CLK/SCK1/MAT2.1  |   7   | PIO2_11-SCK   OLED clock (D0)
  *  P0.9/I2STX-SDA/MOSI1/MAT2.3 |   5   | PIO0_9-MOSI   OLED data in (D1)
  *  ----------------------------+-------+-------------- ---------------------
@@ -212,13 +206,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_i2c.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2CE_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2CE_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_I2C_A1_OFFSET    0x0000 /* I2C Address Register 1 */
 #define KINETIS_I2C_F_OFFSET     0x0001 /* I2C Frequency Divider register */
@@ -63,7 +48,7 @@
 #define KINETIS_I2C_SLTH_OFFSET  0x000a /* I2C SCL Low Timeout Register High */
 #define KINETIS_I2C_SLTL_OFFSET  0x000b /* I2C SCL Low Timeout Register Low */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_I2C0_A1          (KINETIS_I2C0_BASE+KINETIS_I2C_A1_OFFSET)
 #define KINETIS_I2C0_F           (KINETIS_I2C0_BASE+KINETIS_I2C_F_OFFSET)
@@ -108,9 +93,10 @@
 #  define KINETIS_I2C2_SLTL      (KINETIS_I2C2_BASE+KINETIS_I2C_SLTL_OFFSET)
 #endif
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* I2C Address Register 1 (8-bit) */
+
                                            /* Bit 0: Reserved */
 #define I2C_A1_SHIFT             (1)       /* Bits 1-7: Address */
 #define I2C_A1_MASK              (0x7f << I2C_A1_SHIFT)
@@ -126,8 +112,9 @@
 #  define I2C_F_MULT_2           (1 << I2C_F_MULT_SHIFT)
 #  define I2C_F_MULT_4           (2 << I2C_F_MULT_SHIFT)
 
-/* From Table 51-54. I2C divider and hold values.  Duplicate divider values differ in hold
- * times.  Refer to the Table 51-54. in the K64 Sub-Family Reference Manual.
+/* From Table 51-54. I2C divider and hold values.
+ *  Duplicate divider values differ in hold times.
+ *  Refer to the Table 51-54. in the K64 Sub-Family Reference Manual.
  */
 
 #define I2C_F_DIV20              ((uint8_t)0x00)
@@ -258,6 +245,7 @@
 #endif
 
 /* I2C Range Address register (8-bit) */
+
                                            /* Bit 0: Reserved */
 #define I2C_RA_SHIFT             (1)       /* Bits 1-7: Range slave address */
 #define I2C_RA_MASK              (0x7f << I2C_RA_SHIFT)
@@ -274,22 +262,25 @@
 #define I2C_SMB_FACK             (1 << 7)  /* Bit 7:  Fast NACK/ACK enable */
 
 /* I2C Address Register 2 (8-bit) */
+
                                            /* Bit 0: Reserved */
 #define I2C_A2_SHIFT             (1)       /* Bits 1-7: SMBus address */
 #define I2C_A2_MASK              (0x7f << I2C_A2_SHIFT)
 
-/* I2C SCL Low Timeout Register High/Low (16-bit data in two 8-bit registers) */
+/* I2C SCL Low Timeout Register High/Low
+ * (16-bit data in two 8-bit registers)
+ */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2CE_H */

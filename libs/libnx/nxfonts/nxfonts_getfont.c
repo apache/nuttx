@@ -1,35 +1,20 @@
 /****************************************************************************
  * libs/libnx/nxfonts/nxfonts_getfont.c
  *
- *   Copyright (C) 2008-2009, 2011, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT}
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING}
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -179,11 +164,11 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13O
-extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13O_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_6x13o_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13
@@ -191,11 +176,11 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13O
-extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13O_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x13o_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14
@@ -203,7 +188,7 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_7x14b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13
@@ -211,11 +196,11 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13O
-extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13O_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_8x13o_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15
@@ -223,7 +208,7 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x15b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18
@@ -231,7 +216,7 @@ extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18B
-extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18B_package;
+extern const struct nx_fontpackage_s g_x11_misc_fixed_9x18b_package;
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
@@ -244,13 +229,13 @@ extern const struct nx_fontpackage_s g_tom_thumb_4x6_package;
 
 static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 {
-/* MONO */
+  /* MONO */
 
 #ifdef CONFIG_NXFONT_MONO5X8
   &g_mono5x8_package,
 #endif
 
-/* SANS */
+  /* SANS */
 
 #ifdef CONFIG_NXFONT_SANS17X22
   &g_sans17x22_package,
@@ -276,7 +261,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_sans39x48_package,
 #endif
 
-/* SANS-BOLD */
+  /* SANS-BOLD */
 
 #ifdef CONFIG_NXFONT_SANS17X23B
   &g_sans17x23b_package,
@@ -298,7 +283,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_sans40x49b_package,
 #endif
 
-/* SERIF */
+  /* SERIF */
 
 #ifdef CONFIG_NXFONT_SERIF22X29
   &g_serif22x29_package,
@@ -312,7 +297,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_serif38x48_package,
 #endif
 
-/* SERIF-BOLD */
+  /* SERIF-BOLD */
 
 #ifdef CONFIG_NXFONT_SERIF22X28B
   &g_serif22x28b_package,
@@ -326,7 +311,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_serif38x49b_package,
 #endif
 
-/* Pixel fonts */
+  /* Pixel fonts */
 
 #ifdef CONFIG_NXFONT_PIXEL_UNICODE
   &g_pixel_unicode_package,
@@ -336,7 +321,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
   &g_pixel_lcd_machine_package,
 #endif
 
-/* X11 misc fixed fonts */
+  /* X11 misc fixed fonts */
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_4X6
   &g_x11_misc_fixed_4x6_package,
@@ -367,11 +352,11 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13B
-  &g_x11_misc_fixed_6x13B_package,
+  &g_x11_misc_fixed_6x13b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_6X13O
-  &g_x11_misc_fixed_6x13O_package,
+  &g_x11_misc_fixed_6x13o_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13
@@ -379,11 +364,11 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13B
-  &g_x11_misc_fixed_7x13B_package,
+  &g_x11_misc_fixed_7x13b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X13O
-  &g_x11_misc_fixed_7x13O_package,
+  &g_x11_misc_fixed_7x13o_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14
@@ -391,7 +376,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_7X14B
-  &g_x11_misc_fixed_7x14B_package,
+  &g_x11_misc_fixed_7x14b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13
@@ -399,11 +384,11 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13B
-  &g_x11_misc_fixed_8x13B_package,
+  &g_x11_misc_fixed_8x13b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_8X13O
-  &g_x11_misc_fixed_8x13O_package,
+  &g_x11_misc_fixed_8x13o_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15
@@ -411,7 +396,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X15B
-  &g_x11_misc_fixed_9x15B_package,
+  &g_x11_misc_fixed_9x15b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18
@@ -419,14 +404,14 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_9X18B
-  &g_x11_misc_fixed_9x18B_package,
+  &g_x11_misc_fixed_9x18b_package,
 #endif
 
 #ifdef CONFIG_NXFONT_X11_MISC_FIXED_10X20
   &g_x11_misc_fixed_10x20_package,
 #endif
 
-/* Tom Thumb mono-space 4x6 font */
+  /* Tom Thumb mono-space 4x6 font */
 
 #ifdef CONFIG_NXFONT_TOM_THUMB_4X6
   &g_tom_thumb_4x6_package,
@@ -528,9 +513,9 @@ NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)
   /* Handle the default font package */
 
   if (fontid == FONTID_DEFAULT)
-   {
-     fontid = NXFONT_DEFAULT;
-   }
+    {
+      fontid = NXFONT_DEFAULT;
+    }
 
   /* Then search for the font package with this ID */
 

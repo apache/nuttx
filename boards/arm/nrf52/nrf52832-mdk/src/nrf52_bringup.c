@@ -27,12 +27,20 @@
 #include <sys/types.h>
 #include <syslog.h>
 
+#ifdef CONFIG_FS_PROCFS
+#include <nuttx/fs/fs.h>
+#endif
+
 #ifdef CONFIG_NRF52_WDT
 #  include "nrf52_wdt_lowerhalf.h"
 #endif
 
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
+#endif
+
+#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
+#include "nrf52_sdc.h"
 #endif
 
 /****************************************************************************
@@ -57,6 +65,10 @@ int nrf52_bringup(void)
 {
   int ret;
 
+#ifdef CONFIG_FS_PROCFS
+  nx_mount(NULL, "/proc", "procfs", 0, NULL);
+#endif
+
 #ifdef CONFIG_NRF52_WDT
   /* Start Watchdog timer */
 
@@ -74,6 +86,15 @@ int nrf52_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
+  ret = nrf52_sdc_initialize();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
     }
 #endif
 

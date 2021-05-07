@@ -52,19 +52,17 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
   uint8_t *direntry;
   uint8_t oldattributes;
   uint8_t newattributes;
-  int status;
   int ret;
 
   /* Find the inode for this file */
 
   SETUP_SEARCH(&desc, path, false);
 
-  status = inode_find(&desc);
-  if (status < 0)
+  ret = inode_find(&desc);
+  if (ret < 0)
     {
       /* There is no mountpoint that includes in this path */
 
-      ret = -status;
       goto errout;
     }
 
@@ -77,7 +75,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   if (!INODE_IS_MOUNTPT(inode) || !inode->u.i_mops || !inode->i_private)
     {
-      ret = ENXIO;
+      ret = -ENXIO;
       goto errout_with_inode;
     }
 
@@ -115,7 +113,7 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
     {
       /* Ooops.. we found the root directory */
 
-      ret = EACCES;
+      ret = -EACCES;
       goto errout_with_semaphore;
     }
 
@@ -141,7 +139,6 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
       ret = fat_updatefsinfo(fs);
       if (ret != OK)
         {
-          ret = -ret;
           goto errout_with_semaphore;
         }
     }
@@ -166,8 +163,7 @@ errout_with_inode:
 
 errout:
   RELEASE_SEARCH(&desc);
-  set_errno(ret);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************

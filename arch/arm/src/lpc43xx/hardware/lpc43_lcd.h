@@ -1,51 +1,37 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_lcd.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_LCD_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_LCD_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_LCD_TIMH_OFFSET         0x000 /* Horizontal Timing Control register */
 #define LPC43_LCD_TIMV_OFFSET         0x004 /* Vertical Timing Control register */
@@ -80,7 +66,7 @@
 #define LPC43_LCD_CRSR_INTRAW_OFFSET  0xc28 /* Cursor Raw Interrupt Status register */
 #define LPC43_LCD_CRSR_INTSTAT_OFFSET 0xc2c /* Cursor Masked Interrupt Status register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_LCD_TIMH                (LPC43_LCD_BASE+LPC43_LCD_TIMH_OFFSET)
 #define LPC43_LCD_TIMV                (LPC43_LCD_BASE+LPC43_LCD_TIMV_OFFSET)
@@ -115,7 +101,7 @@
 #define LPC43_LCD_CRSR_INTRAW         (LPC43_LCD_BASE+LPC43_LCD_CRSR_INTRAW_OFFSET)
 #define LPC43_LCD_CRSR_INTSTAT        (LPC43_LCD_BASE+LPC43_LCD_CRSR_INTSTAT_OFFSET)
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Horizontal Timing Control register */
 
@@ -129,6 +115,7 @@
 #define LCD_TIMH_HBP_SHIFT            (24)      /* Bits 24-31:  Horizontal back porch */
 #define LCD_TIMH_HBP_MASK             (0xff << LCD_TIMH_HBP_SHIFT)
                                                 /* Bit nn: Reserved */
+
 /* Vertical Timing Control register */
 
 #define LCD_TIMV_LPP_SHIFT            (0)       /* Bits 0-9: Lines per panel */
@@ -155,7 +142,7 @@
 #define LCD_POL_CPL_SHIFT             (16)      /* Bits 16-25: Clocks per line */
 #define LCD_POL_CPL_MASK              (0x3ff << LCD_POL_CPL_SHIFT)
 #define LCD_POL_BCD                   (1 << 26) /* Bit 26: Bypass pixel clock divider */
-#define LCD_POL_PCDHI_SHIFT           (27)       /* Bits 27-31: Upper five bits of panel clock divisor */
+#define LCD_POL_PCDHI_SHIFT           (27)      /* Bits 27-31: Upper five bits of panel clock divisor */
 #define LCD_POL_PCDHI_MASK            (31 << LCD_POL_PCDHI_SHIFT)
 
 /* Line End Control register */
@@ -167,11 +154,13 @@
                                                 /* Bits 17-31: Reserved */
 
 /* Upper Panel Frame Base Address register */
+
                                                 /* Bits 0-2: Reserved */
 #define LCD_UPBASE_SHIFT              (3)       /* Bits 3-31: Upper panel base address */
 #define LCD_UPBASE_MASK               (0xfffffff8)
 
 /* Lower Panel Frame Base Address register */
+
                                                 /* Bits 0-2: Reserved */
 #define LCD_LPBASE_SHIFT              (3)       /* Bits 3-31: Lower panel base address */
 #define LCD_LPBASE_MASK               (0xfffffff8)
@@ -189,6 +178,7 @@
 #  define LCD_CTRL_LCDBPP_24BPP       (5 << LCD_CTRL_LCDBPP_SHIFT) /* 24 bpp (TFT panel only) */
 #  define LCD_CTRL_LCDBPP_RGB565      (6 << LCD_CTRL_LCDBPP_SHIFT) /* 16 bpp, 5:6:5 mode */
 #  define LCD_CTRL_LCDBPP_RGB444      (7 << LCD_CTRL_LCDBPP_SHIFT) /* 12 bpp, 4:4:4 mode */
+
 #define LCD_CTRL_LCDBW                (1 << 4)  /* Bit 4:  STN LCD monochrome/color selection */
 #define LCD_CTRL_LCDTFT               (1 << 5)  /* Bit 5:  LCD panel TFT type selection */
 #define LCD_CTRL_LCDMONO8             (1 << 6)  /* Bit 6:  Monochrome LCD interface width */
@@ -203,14 +193,18 @@
 #  define LCD_CTRL_LCDVCOMP_BACK      (1 << LCD_CTRL_LCDVCOMP_SHIFT) /* Start of back porch */
 #  define LCD_CTRL_LCDVCOMP_ACTIVE    (2 << LCD_CTRL_LCDVCOMP_SHIFT) /* Start of active video */
 #  define LCD_CTRL_LCDVCOMP_FRONT     (3 << LCD_CTRL_LCDVCOMP_SHIFT) /* Start of front porch */
+
                                                 /* Bits 14-15: Reserved */
 #define LCD_INTMSK_WATERMARK          (1 << 16) /* Bit 16: LCD DMA FIFO watermark level */
                                                 /* Bits 17-31: Reserved */
-/* Interrupt Mask register */
-/* Raw Interrupt Status register */
-/* Masked Interrupt Status register */
-/* Interrupt Clear register */
 
+/* Interrupt Mask register */
+
+/* Raw Interrupt Status register */
+
+/* Masked Interrupt Status register */
+
+/* Interrupt Clear register */
 
                                                 /* Bit 0: Reserved */
 #define LCD_INT_FUFI                  (1 << 1)  /* Bit 1:  FIFO underflow interrupt */
@@ -218,7 +212,9 @@
 #define LCD_INT_VCOMPI                (1 << 3)  /* Bit 3:  Vertical compare interrupt enable */
 #define LCD_INT_BERI                  (1 << 4)  /* Bit 4:  AHB master error interrupt enable */
                                                 /* Bits 5-31: Reserved */
+
 /* Upper Panel Current Address Value register (32-bit address) */
+
 /* Lower Panel Current Address Value register (32-bit address) */
 
 /*  256x16-bit Color Palette registers */
@@ -251,11 +247,13 @@
 #  define LCD_CRSR_CTRL_NUM_2         (2 << LCD_CRSR_CTRL_NUM_SHIFT)
 #  define LCD_CRSR_CTRL_NUM_3         (3 << LCD_CRSR_CTRL_NUM_SHIFT)
                                                 /* Bits 6-31: Reserved */
+
 /* Cursor Configuration register */
 
 #define LCD_CRSR_CFG_CRSRSIZE         (1 << 0)  /* Bit 0:  Cursor size selection */
 #define LCD_CRSR_CFG_FRAMESYNC        (1 << 1)  /* Bit 1:  Cursor frame synchronization type */
                                                 /* Bits 2-31: Reserved */
+
 /* Cursor Palette register 0/1 */
 
 #define LCD_CRSR_PAL_RED_SHIFT        (0)       /* Bits 0-7: Red color component */
@@ -265,6 +263,7 @@
 #define LCD_CRSR_PAL_BLUE_SHIFT       (16)       /* Bits 16-23: Blue color component */
 #define LCD_CRSR_PAL_BLUE_MASK        (0xff << LCD_CRSR_PAL_BLUE_SHIFT)
                                                 /* Bits 24-31: Reserved */
+
 /* Cursor XY Position register */
 
 #define LCD_CRSRX_SHIFT               (0)       /* Bits 0-9: X ordinate of the cursor origin measured in pixels */
@@ -273,6 +272,7 @@
 #define LCD_CRSRY_SHIFT               (16)      /* Bits 16-25: Y ordinate of the cursor origin measured in pixels */
 #define LCD_CRSRY_MASK                (0x3ff << LCD_CRSRY_SHIFT)
                                                 /* Bits 26-31: Reserved */
+
 /* Cursor Clip Position register */
 
 #define LCD_CRSR_CLIPX_SHIFT          (0)       /* Bits 0-5: Cursor clip position for X direction */
@@ -281,24 +281,28 @@
 #define LCD_CRSR_CLIPY_SHIFT          (8)       /* Bits 8-13: Cursor clip position for Y direction */
 #define LCD_CRSR_CLIPY_MASK           (0x3f << LCD_CRSR_CLIPY_SHIFT)
                                                 /* Bits 14-31: Reserved */
+
 /* Cursor Interrupt Mask register */
+
 /* Cursor Interrupt Clear register */
+
 /* Cursor Raw Interrupt Status register */
+
 /* Cursor Masked Interrupt Status register */
 
 #define LCD_CRSR_INT                  (1 << 0)  /* CRSRIM Cursor interrupt */
                                                 /* Bits 1-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_LCD_H */

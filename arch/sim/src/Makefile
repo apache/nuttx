@@ -1,36 +1,20 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2012, 2014, 2016, 2018 Gregory Nutt. All
-#     rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name NuttX nor the names of its contributors may be
-#    used to endorse or promote products derived from this software
-#    without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
 #
 ############################################################################
 
@@ -57,17 +41,13 @@ REQUIREDOBJS = $(LINKOBJS)
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
-  ASRCS += up_setjmp32.S
   ASRCS += up_vfork32.S
 else
-  ASRCS += up_setjmp64.S
   ASRCS += up_vfork64.S
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
-  ASRCS += up_setjmp32.S
   ASRCS += up_vfork32.S
 else ifeq ($(CONFIG_HOST_ARM),y)
-  ASRCS += up_setjmp_arm.S
   ASRCS += up_vfork_arm.S
 endif
 
@@ -77,7 +57,9 @@ CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
-CSRCS += up_heap.c up_uart.c
+CSRCS += up_heap.c up_uart.c up_assert.c
+CSRCS += up_copyfullstate.c
+CSRCS += up_sigdeliver.c
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)
@@ -96,7 +78,11 @@ endif
 HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
 STDLIBS += -lpthread
-ifneq ($(CONFIG_HOST_MACOS),y)
+ifeq ($(CONFIG_HOST_MACOS),y)
+ifeq ($(CONFIG_LIBCXX),y)
+  STDLIBS += -lc++abi
+endif
+else
   STDLIBS += -lrt
 endif
 
@@ -155,6 +141,9 @@ else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
   HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
+else ifeq ($(CONFIG_SIM_BUTTONS),y)
+  HOSTCFLAGS += -DCONFIG_SIM_BUTTONS=1
+  HOSTSRCS += up_x11eventloop.c
 endif
 endif
 
@@ -179,10 +168,14 @@ ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
 endif
 
+ifeq ($(CONFIG_SIM_MOTOR_FOC),y)
+CSRCS += up_foc.c
+endif
+
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
-ifneq ($(HOSTOS),Cygwin)
+ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
   HOSTSRCS += up_tapdev.c
 ifeq ($(CONFIG_SIM_NET_BRIDGE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE
@@ -191,10 +184,10 @@ endif
 ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
 endif
-else # HOSTOS != Cygwin
+else # CONFIG_WINDOWS_CYGWIN != y
   HOSTSRCS += up_wpcap.c
-  DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
-endif # HOSTOS != Cygwin
+  STDLIBS = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
+endif # CONFIG_WINDOWS_CYGWIN != y
 else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT_PATH=\"$(CONFIG_SIM_NETDEV_VPNKIT_PATH)\"
@@ -208,9 +201,9 @@ ifeq ($(CONFIG_SIM_HCISOCKET),y)
   CSRCS += up_hcisocket.c
 endif
 
-ifeq ($(CONFIG_SIM_HCITTY),y)
+ifeq ($(CONFIG_SIM_BTUART),y)
   HOSTSRCS += up_hcisocket_host.c
-  CSRCS += up_hcitty.c
+  CSRCS += up_btuart.c
 endif
 
 ifeq ($(CONFIG_I2C_RESET),y)
@@ -253,7 +246,7 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 # Override in Make.defs if linker is not 'ld'
 
-ifneq ($(HOSTOS),Darwin)
+ifneq ($(CONFIG_HOST_MACOS),y)
   ARCHSCRIPT += -T nuttx.ld
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
@@ -327,8 +320,8 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS)
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(DRVLIB) $(STDLIBS))
+	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS),\
+	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map

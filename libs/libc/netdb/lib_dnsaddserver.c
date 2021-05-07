@@ -74,7 +74,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "a+");
   if (stream == NULL)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: Failed to open %s: %d\n",
            CONFIG_NETDB_RESOLVCONF_PATH, ret);
       DEBUGASSERT(ret < 0);
@@ -98,7 +98,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
           if (inet_ntop(AF_INET, &in4->sin_addr, addrstr,
                         DNS_MAX_ADDRSTR) == NULL)
             {
-              ret = -errno;
+              ret = -get_errno();
               nerr("ERROR: inet_ntop failed: %d\n", ret);
               DEBUGASSERT(ret < 0);
               goto errout;
@@ -131,7 +131,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
           if (inet_ntop(AF_INET6, &in6->sin6_addr, addrstr,
                         DNS_MAX_ADDRSTR) == NULL)
             {
-              ret = -errno;
+              ret = -get_errno();
               nerr("ERROR: inet_ntop failed: %d\n", ret);
               DEBUGASSERT(ret < 0);
               goto errout;
@@ -147,8 +147,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   else
 #endif
     {
-      nerr("ERROR: Unsupported family: %d\n",
-            g_dns_server.addr.sa_family);
+      nerr("ERROR: Unsupported family: %d\n", addr->sa_family);
       ret = -ENOSYS;
       goto errout;
     }
@@ -178,7 +177,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       nerr("ERROR: fprintf failed: %d\n", ret);
       DEBUGASSERT(ret < 0);
       goto errout;

@@ -39,7 +39,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/esp32/core-isa.h>
+#include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/xtensa/xtensa_corebits.h>
 

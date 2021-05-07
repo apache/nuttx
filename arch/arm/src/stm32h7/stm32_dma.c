@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_dma.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Authors: Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -41,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -267,89 +253,89 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 #ifdef CONFIG_STM32H7_MDMA
   /* 0 - MDMA */
 
-  {
-    .dma_disable   = stm32_mdma_disable,
-    .dma_interrupt = stm32_mdma_interrupt,
-    .dma_setup     = stm32_mdma_setup,
-    .dma_start     = stm32_mdma_start,
-    .dma_residual  = stm32_mdma_residual,
+    {
+      .dma_disable   = stm32_mdma_disable,
+      .dma_interrupt = stm32_mdma_interrupt,
+      .dma_setup     = stm32_mdma_setup,
+      .dma_start     = stm32_mdma_start,
+      .dma_residual  = stm32_mdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_mdma_capable,
+      .dma_capable   = stm32_mdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_mdma_dump,
+      .dma_dump      = stm32_mdma_dump,
 #endif
-  },
+    },
 #else
-  {
-    NULL
-  },
+    {
+      NULL
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA1
   /* 1 - DMA1 */
 
-  {
-    .dma_disable   = stm32_sdma_disable,
-    .dma_interrupt = stm32_sdma_interrupt,
-    .dma_setup     = stm32_sdma_setup,
-    .dma_start     = stm32_sdma_start,
-    .dma_residual  = stm32_sdma_residual,
+    {
+      .dma_disable   = stm32_sdma_disable,
+      .dma_interrupt = stm32_sdma_interrupt,
+      .dma_setup     = stm32_sdma_setup,
+      .dma_start     = stm32_sdma_start,
+      .dma_residual  = stm32_sdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_sdma_capable,
+      .dma_capable   = stm32_sdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_sdma_dump,
+      .dma_dump      = stm32_sdma_dump,
 #endif
-  },
+    },
 #else
-  {
-    NULL
-  },
+    {
+      NULL
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA2
   /* 2 - DMA2 */
 
-  {
-    .dma_disable   = stm32_sdma_disable,
-    .dma_interrupt = stm32_sdma_interrupt,
-    .dma_setup     = stm32_sdma_setup,
-    .dma_start     = stm32_sdma_start,
-    .dma_residual  = stm32_sdma_residual,
+    {
+      .dma_disable   = stm32_sdma_disable,
+      .dma_interrupt = stm32_sdma_interrupt,
+      .dma_setup     = stm32_sdma_setup,
+      .dma_start     = stm32_sdma_start,
+      .dma_residual  = stm32_sdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_sdma_capable,
+      .dma_capable   = stm32_sdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_sdma_dump,
+      .dma_dump      = stm32_sdma_dump,
 #endif
-  },
+    },
 #else
-  {
-    NULL
-  },
+    {
+      NULL
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_BDMA
   /* 3 - BDMA */
 
-  {
-    .dma_disable   = stm32_bdma_disable,
-    .dma_interrupt = stm32_bdma_interrupt,
-    .dma_setup     = stm32_bdma_setup,
-    .dma_start     = stm32_bdma_start,
-    .dma_residual  = stm32_bdma_residual,
+    {
+      .dma_disable   = stm32_bdma_disable,
+      .dma_interrupt = stm32_bdma_interrupt,
+      .dma_setup     = stm32_bdma_setup,
+      .dma_start     = stm32_bdma_start,
+      .dma_residual  = stm32_bdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
-    .dma_capable   = stm32_bdma_capable,
+      .dma_capable   = stm32_bdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
-    .dma_dump      = stm32_bdma_dump,
+      .dma_dump      = stm32_bdma_dump,
 #endif
-  }
+    }
 #else
-  {
-    NULL
-  }
+    {
+      NULL
+    }
 #endif
 };
 
@@ -357,17 +343,17 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 
 struct stm32_dmamux_s g_dmamux[DMAMUX_NUM] =
 {
-  {
-    .id      = 1,
-    .nchan   = 16,              /* 0-7 - DMA1, 8-15 - DMA2 */
-    .base    = STM32_DMAMUX1_BASE
-  },
+    {
+      .id      = 1,
+      .nchan   = 16,              /* 0-7 - DMA1, 8-15 - DMA2 */
+      .base    = STM32_DMAMUX1_BASE
+    },
 
-  {
-    .id      = 2,
-    .nchan   = 8,               /* 0-7 - BDMA */
-    .base    = STM32_DMAMUX2_BASE
-  }
+    {
+      .id      = 2,
+      .nchan   = 8,               /* 0-7 - BDMA */
+      .base    = STM32_DMAMUX2_BASE
+    }
 };
 
 /* This array describes the state of each controller */
@@ -376,43 +362,43 @@ struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
   /* 0 - MDMA */
 
-  {
-    .base   = STM32_MDMA_BASE,
-    .first  = MDMA_FIRST,
-    .nchan  = MDMA_NCHAN,
-    .dmamux = NULL,              /* No DMAMUX */
-    .dmamux_offset = 0
-  },
+    {
+      .base   = STM32_MDMA_BASE,
+      .first  = MDMA_FIRST,
+      .nchan  = MDMA_NCHAN,
+      .dmamux = NULL,              /* No DMAMUX */
+      .dmamux_offset = 0
+    },
 
   /* 1 - DMA1 */
 
-  {
-    .base   = STM32_DMA1_BASE,
-    .first  = DMA1_FIRST,
-    .nchan  = DMA1_NSTREAMS,
-    .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 0-7 */
-    .dmamux_offset = 0
-  },
+    {
+      .base   = STM32_DMA1_BASE,
+      .first  = DMA1_FIRST,
+      .nchan  = DMA1_NSTREAMS,
+      .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 0-7 */
+      .dmamux_offset = 0
+    },
 
   /* 2 - DMA2 */
 
-  {
-    .base   = STM32_DMA2_BASE,
-    .first  = DMA2_FIRST,
-    .nchan  = DMA2_NSTREAMS,
-    .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 8-15 */
-    .dmamux_offset = 8
-  },
+    {
+      .base   = STM32_DMA2_BASE,
+      .first  = DMA2_FIRST,
+      .nchan  = DMA2_NSTREAMS,
+      .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 8-15 */
+      .dmamux_offset = 8
+    },
 
   /* 3 - BDMA */
 
-  {
-    .base   = STM32_BDMA_BASE,
-    .first  = BDMA_FIRST,
-    .nchan  = BDMA_NCHAN,
-    .dmamux = &g_dmamux[DMAMUX2], /* DMAMUX2 channels 0-7 */
-    .dmamux_offset = 0
-  }
+    {
+      .base   = STM32_BDMA_BASE,
+      .first  = BDMA_FIRST,
+      .nchan  = BDMA_NCHAN,
+      .dmamux = &g_dmamux[DMAMUX2], /* DMAMUX2 channels 0-7 */
+      .dmamux_offset = 0
+    }
 };
 
 /* This array describes the state of each DMA channel.
@@ -425,337 +411,337 @@ static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
 #ifdef CONFIG_STM32H7_MDMA
   /* MDMA */
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 0,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(0),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 0,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 1,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(1),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 1,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 2,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(2),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 2,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 3,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(3),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 3,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 4,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(4),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 4,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 5,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(5),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 5,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 6,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(6),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 6,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 7,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(7),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 7,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(7),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 8,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(8),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 8,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(8),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 9,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(9),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 9,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(9),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 10,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(10),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 10,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(10),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 11,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(11),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 11,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(11),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 12,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(12),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 12,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(12),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 13,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(13),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 13,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(13),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 14,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 14,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
+    },
 
-  {
-    .ctrl     = MDMA,
-    .chan     = 15,
-    .irq      = STM32_IRQ_MDMA,
-    .shift    = 0,
-    .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
-  },
+    {
+      .ctrl     = MDMA,
+      .chan     = 15,
+      .irq      = STM32_IRQ_MDMA,
+      .shift    = 0,
+      .base     = STM32_MDMA_BASE + STM32_MDMA_OFFSET(15),
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA1
   /* DMA1 */
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 0,
-    .irq      = STM32_IRQ_DMA1S0,
-    .shift    = DMA_INT_STREAM0_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(0),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 0,
+      .irq      = STM32_IRQ_DMA1S0,
+      .shift    = DMA_INT_STREAM0_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 1,
-    .irq      = STM32_IRQ_DMA1S1,
-    .shift    = DMA_INT_STREAM1_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(1),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 1,
+      .irq      = STM32_IRQ_DMA1S1,
+      .shift    = DMA_INT_STREAM1_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 2,
-    .irq      = STM32_IRQ_DMA1S2,
-    .shift    = DMA_INT_STREAM2_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(2),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 2,
+      .irq      = STM32_IRQ_DMA1S2,
+      .shift    = DMA_INT_STREAM2_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 3,
-    .irq      = STM32_IRQ_DMA1S3,
-    .shift    = DMA_INT_STREAM3_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(3),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 3,
+      .irq      = STM32_IRQ_DMA1S3,
+      .shift    = DMA_INT_STREAM3_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 4,
-    .irq      = STM32_IRQ_DMA1S4,
-    .shift    = DMA_INT_STREAM4_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(4),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 4,
+      .irq      = STM32_IRQ_DMA1S4,
+      .shift    = DMA_INT_STREAM4_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 5,
-    .irq      = STM32_IRQ_DMA1S5,
-    .shift    = DMA_INT_STREAM5_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(5),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 5,
+      .irq      = STM32_IRQ_DMA1S5,
+      .shift    = DMA_INT_STREAM5_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 6,
-    .irq      = STM32_IRQ_DMA1S6,
-    .shift    = DMA_INT_STREAM6_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(6),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 6,
+      .irq      = STM32_IRQ_DMA1S6,
+      .shift    = DMA_INT_STREAM6_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = DMA1,
-    .chan     = 7,
-    .irq      = STM32_IRQ_DMA1S7,
-    .shift    = DMA_INT_STREAM7_SHIFT,
-    .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
-  },
+    {
+      .ctrl     = DMA1,
+      .chan     = 7,
+      .irq      = STM32_IRQ_DMA1S7,
+      .shift    = DMA_INT_STREAM7_SHIFT,
+      .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_DMA2
   /* DMA2 */
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 0,
-    .irq      = STM32_IRQ_DMA2S0,
-    .shift    = DMA_INT_STREAM0_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(0),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 0,
+      .irq      = STM32_IRQ_DMA2S0,
+      .shift    = DMA_INT_STREAM0_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 1,
-    .irq      = STM32_IRQ_DMA2S1,
-    .shift    = DMA_INT_STREAM1_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(1),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 1,
+      .irq      = STM32_IRQ_DMA2S1,
+      .shift    = DMA_INT_STREAM1_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 2,
-    .irq      = STM32_IRQ_DMA2S2,
-    .shift    = DMA_INT_STREAM2_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(2),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 2,
+      .irq      = STM32_IRQ_DMA2S2,
+      .shift    = DMA_INT_STREAM2_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 3,
-    .irq      = STM32_IRQ_DMA2S3,
-    .shift    = DMA_INT_STREAM3_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(3),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 3,
+      .irq      = STM32_IRQ_DMA2S3,
+      .shift    = DMA_INT_STREAM3_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 4,
-    .irq      = STM32_IRQ_DMA2S4,
-    .shift    = DMA_INT_STREAM4_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(4),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 4,
+      .irq      = STM32_IRQ_DMA2S4,
+      .shift    = DMA_INT_STREAM4_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 5,
-    .irq      = STM32_IRQ_DMA2S5,
-    .shift    = DMA_INT_STREAM5_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(5),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 5,
+      .irq      = STM32_IRQ_DMA2S5,
+      .shift    = DMA_INT_STREAM5_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 6,
-    .irq      = STM32_IRQ_DMA2S6,
-    .shift    = DMA_INT_STREAM6_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(6),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 6,
+      .irq      = STM32_IRQ_DMA2S6,
+      .shift    = DMA_INT_STREAM6_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = DMA2,
-    .chan     = 7,
-    .irq      = STM32_IRQ_DMA2S7,
-    .shift    = DMA_INT_STREAM7_SHIFT,
-    .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(7),
-  },
+    {
+      .ctrl     = DMA2,
+      .chan     = 7,
+      .irq      = STM32_IRQ_DMA2S7,
+      .shift    = DMA_INT_STREAM7_SHIFT,
+      .base     = STM32_DMA2_BASE + STM32_DMA_OFFSET(7),
+    },
 #endif
 
 #ifdef CONFIG_STM32H7_BDMA
   /* BDMA */
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 0,
-    .irq      = STM32_IRQ_BDMACH1,
-    .shift    = BDMA_CHAN_SHIFT(0),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(0),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 0,
+      .irq      = STM32_IRQ_BDMACH1,
+      .shift    = BDMA_CHAN_SHIFT(0),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(0),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 1,
-    .irq      = STM32_IRQ_BDMACH2,
-    .shift    = BDMA_CHAN_SHIFT(1),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(1),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 1,
+      .irq      = STM32_IRQ_BDMACH2,
+      .shift    = BDMA_CHAN_SHIFT(1),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(1),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 2,
-    .irq      = STM32_IRQ_BDMACH3,
-    .shift    = BDMA_CHAN_SHIFT(2),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(2),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 2,
+      .irq      = STM32_IRQ_BDMACH3,
+      .shift    = BDMA_CHAN_SHIFT(2),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(2),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 3,
-    .irq      = STM32_IRQ_BDMACH4,
-    .shift    = BDMA_CHAN_SHIFT(3),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(3),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 3,
+      .irq      = STM32_IRQ_BDMACH4,
+      .shift    = BDMA_CHAN_SHIFT(3),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(3),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 4,
-    .irq      = STM32_IRQ_BDMACH5,
-    .shift    = BDMA_CHAN_SHIFT(4),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(4),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 4,
+      .irq      = STM32_IRQ_BDMACH5,
+      .shift    = BDMA_CHAN_SHIFT(4),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(4),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 5,
-    .irq      = STM32_IRQ_BDMACH6,
-    .shift    = BDMA_CHAN_SHIFT(5),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(5),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 5,
+      .irq      = STM32_IRQ_BDMACH6,
+      .shift    = BDMA_CHAN_SHIFT(5),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(5),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 6,
-    .irq      = STM32_IRQ_BDMACH7,
-    .shift    = BDMA_CHAN_SHIFT(6),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(6),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 6,
+      .irq      = STM32_IRQ_BDMACH7,
+      .shift    = BDMA_CHAN_SHIFT(6),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(6),
+    },
 
-  {
-    .ctrl     = BDMA,
-    .chan     = 7,
-    .irq      = STM32_IRQ_BDMACH8,
-    .shift    = BDMA_CHAN_SHIFT(7),
-    .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(7),
-  },
+    {
+      .ctrl     = BDMA,
+      .chan     = 7,
+      .irq      = STM32_IRQ_BDMACH8,
+      .shift    = BDMA_CHAN_SHIFT(7),
+      .base     = STM32_BDMA_BASE + STM32_BDMA_OFFSET(7),
+    },
 #endif
 };
 
@@ -927,7 +913,6 @@ static void stm32_gdma_limits_get(uint8_t controller, FAR uint8_t *first,
 
 static void stm32_mdma_disable(DMA_CHANNEL dmachan)
 {
-  DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
   uint8_t     controller = dmachan->ctrl;
 
   DEBUGASSERT(controller == MDMA);
@@ -1017,8 +1002,8 @@ static bool stm32_mdma_capable(FAR stm32_dmacfg_t *cfg)
   uint32_t ccr  = cfg->cfg1;
   uint32_t ctcr = cfg->cfg2;
 
-  dmainfo("0x%08x/%u 0x%08x 0x%08x\n", cfg->maddr, cfg->ndata, ccr,
-          ctcr);
+  dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 " 0x%08" PRIx32 "\n",
+          cfg->maddr, cfg->ndata, ccr, ctcr);
 
 #warning stm32_mdma_capable not implemented
 
@@ -1038,29 +1023,29 @@ static void stm32_mdma_dump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(controller == MDMA);
 
-  dmainfo("   CISR:   %08x\n",
+  dmainfo("   CISR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CISR_OFFSET));
-  dmainfo("   CESR:   %08x\n",
+  dmainfo("   CESR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CESR_OFFSET));
-  dmainfo("   CCR:    %08x\n",
+  dmainfo("   CCR:    %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CCR_OFFSET));
-  dmainfo("   CTCR:   %08x\n",
+  dmainfo("   CTCR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CTCR_OFFSET));
-  dmainfo("   CBNDTR: %08x\n",
+  dmainfo("   CBNDTR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CBNDTR_OFFSET));
-  dmainfo("   CSAR:   %08x\n",
+  dmainfo("   CSAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CSAR_OFFSET));
-  dmainfo("   CDAR:   %08x\n",
+  dmainfo("   CDAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CDAR_OFFSET));
-  dmainfo("   CBRUR:  %08x\n",
+  dmainfo("   CBRUR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CBRUR_OFFSET));
-  dmainfo("   CLAR:   %08x\n",
+  dmainfo("   CLAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CLAR_OFFSET));
-  dmainfo("   CTBR:   %08x\n",
+  dmainfo("   CTBR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CTBR_OFFSET));
-  dmainfo("   CMAR:   %08x\n",
+  dmainfo("   CMAR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CMAR_OFFSET));
-  dmainfo("   CMDR:   %08x\n",
+  dmainfo("   CMDR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_MDMACH_CMDR_OFFSET));
 }
 #endif
@@ -1234,7 +1219,8 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
 
   DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
-  dmainfo("paddr: %08x maddr: %08x ndata: %d scr: %08x\n",
+  dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32 " ndata: %" PRIu32 " "
+          "scr: %08" PRIx32 "\n",
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -1472,7 +1458,8 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
   uint32_t mend;
   uint32_t ccr = cfg->cfg1;
 
-  dmainfo("0x%08x/%u 0x%08x\n", cfg->maddr, cfg->ndata, cfg->cfg1);
+  dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 "\n",
+          cfg->maddr, cfg->ndata, cfg->cfg1);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the DMA controller are
@@ -1535,7 +1522,8 @@ static bool stm32_sdma_capable(FAR stm32_dmacfg_t *cfg)
           ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
         {
           dmainfo("stm32_dmacapable: dcache unaligned "
-                  "maddr:0x%08x mend:0x%08x\n", cfg->maddr, mend);
+                  "maddr:0x%08" PRIx32 " mend:0x%08" PRIx32 "\n",
+                  cfg->maddr, mend);
 #if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
@@ -1676,21 +1664,21 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
-  dmainfo("   LISR: %08x\n",
+  dmainfo("   LISR: %08" PRIx32 "\n",
           dmabase_getreg(dmachan, STM32_DMA_LISR_OFFSET));
-  dmainfo("   HISR: %08x\n",
+  dmainfo("   HISR: %08" PRIx32 "\n",
           dmabase_getreg(dmachan, STM32_DMA_HISR_OFFSET));
-  dmainfo("   SCR:  %08x\n",
+  dmainfo("   SCR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SCR_OFFSET));
-  dmainfo("   SNDTR: %08x\n",
+  dmainfo("   SNDTR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SNDTR_OFFSET));
-  dmainfo("   SPAR:  %08x\n",
+  dmainfo("   SPAR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SPAR_OFFSET));
-  dmainfo("   SM0AR: %08x\n",
+  dmainfo("   SM0AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SM0AR_OFFSET));
-  dmainfo("   SM1AR: %08x\n",
+  dmainfo("   SM1AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SM1AR_OFFSET));
-  dmainfo("   SFCR:  %08x\n",
+  dmainfo("   SFCR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_DMA_SFCR_OFFSET));
 
   stm32_dmamux_dump(g_dma[dmachan->ctrl].dmamux,
@@ -1825,7 +1813,8 @@ static void stm32_bdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
   DEBUGASSERT(handle != NULL);
   DEBUGASSERT(dmachan->ctrl == BDMA);
 
-  dmainfo("paddr: %08x maddr: %08x ndata: %d scr: %08x\n",
+  dmainfo("paddr: %08" PRIx32 " maddr: %08" PRIx32 " ndata: %" PRIu32 " "
+          "scr: %08" PRIx32 "\n",
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -1840,6 +1829,10 @@ static void stm32_bdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
    * the stream is ready to be configured. It is therefore necessary to wait
    * for the EN bit to be cleared before starting any stream configuration."
    */
+
+  regval =  dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET);
+  regval &= ~BDMA_CCR_EN;
+  dmachan_putreg(dmachan, STM32_BDMACH_CCR_OFFSET, regval);
 
   while ((dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET) &
           BDMA_CCR_EN) != 0);
@@ -1976,7 +1969,7 @@ static void stm32_bdma_start(DMA_HANDLE handle, dma_callback_t callback,
 static size_t stm32_bdma_residual(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;
-  uint32_t    residual   = 0
+  uint32_t    residual   = 0;
 
   DEBUGASSERT(handle != NULL);
   DEBUGASSERT(dmachan->ctrl == BDMA);
@@ -2001,7 +1994,8 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
   uint32_t maddr = cfg->maddr;
   uint32_t ccr   = cfg->cfg1;
 
-  dmainfo("0x%08x/%u 0x%08x\n", cfg->maddr, cfg->ndata, cfg->cfg1);
+  dmainfo("0x%08" PRIx32 "/%" PRIu32 " 0x%08" PRIx32 "\n",
+          cfg->maddr, cfg->ndata, cfg->cfg1);
 
   /* Verify that the address conforms to the memory transfer size.
    * Transfers to/from memory performed by the BDMA controller are
@@ -2059,8 +2053,9 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
   if ((cfg->maddr & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
       ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
-      dmainfo("stm32_dmacapable: dcache unaligned maddr:0x%08x "
-              "mend:0x%08x\n", cfg->maddr, mend);
+      dmainfo("stm32_dmacapable: dcache unaligned "
+              "maddr:0x%08" PRIx32 " mend:0x%08x\n",
+              cfg->maddr, mend);
 #if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
@@ -2120,17 +2115,17 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(controller == BDMA);
 
-  dmainfo("   ISR:   %08x\n",
+  dmainfo("   ISR:   %08" PRIx32 "\n",
           dmabase_getreg(dmachan, STM32_BDMA_ISR_OFFSET));
-  dmainfo("   CCR:   %08x\n",
+  dmainfo("   CCR:   %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CCR_OFFSET));
-  dmainfo("   CNDTR: %08x\n",
+  dmainfo("   CNDTR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CNDTR_OFFSET));
-  dmainfo("   CPAR:  %08x\n",
+  dmainfo("   CPAR:  %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CPAR_OFFSET));
-  dmainfo("   CM0AR: %08x\n",
+  dmainfo("   CM0AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CM0AR_OFFSET));
-  dmainfo("   CM1AR: %08x\n",
+  dmainfo("   CM1AR: %08" PRIx32 "\n",
           dmachan_getreg(dmachan, STM32_BDMACH_CM1AR_OFFSET));
 
   stm32_dmamux_dump(g_dma[dmachan->ctrl].dmamux, controller);
@@ -2146,22 +2141,22 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg)
 #ifdef CONFIG_DEBUG_DMA_INFO
 static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t chan)
 {
-  dmainfo("DMAMUX%d CH=%d\n", dmamux->id, chan);
-  dmainfo("   CCR:   %08x\n",
+  dmainfo("DMAMUX%" PRIu8 " CH=%" PRIu8 "\n", dmamux->id, chan);
+  dmainfo("   CCR:   %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_CXCR_OFFSET(chan)));
-  dmainfo("   CSR:   %08x\n",
+  dmainfo("   CSR:   %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_CSR_OFFSET));
-  dmainfo("   RG0CR: %08x\n",
+  dmainfo("   RG0CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG0CR_OFFSET));
-  dmainfo("   RG1CR: %08x\n",
+  dmainfo("   RG1CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG1CR_OFFSET));
-  dmainfo("   RG2CR: %08x\n",
+  dmainfo("   RG2CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG2CR_OFFSET));
-  dmainfo("   RG3CR: %08x\n",
+  dmainfo("   RG3CR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RG3CR_OFFSET));
-  dmainfo("   RGSR:  %08x\n",
+  dmainfo("   RGSR:  %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RGSR_OFFSET));
-  dmainfo("   RGCFR: %08x\n",
+  dmainfo("   RGCFR: %08" PRIx32 "\n",
           dmamux_getreg(dmamux, STM32_DMAMUX_RGCFR_OFFSET));
 };
 #endif
@@ -2327,11 +2322,11 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
 
   leave_critical_section(flags);
 
-  dmainfo("ctrl=%d item=%d\n", controller, item);
+  dmainfo("ctrl=%" PRIu8 " item=%d\n", controller, item);
 
   if (item == -1)
     {
-      dmainfo("No available DMA chan for CTRL=%d\n",
+      dmainfo("No available DMA chan for CTRL=%" PRIu8 "\n",
               controller);
 
       /* No available channel */
@@ -2343,7 +2338,8 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
 
   dmachan = &g_dmach[item];
 
-  dmainfo("Get g_dmach[%d] CTRL=%d CH=%d\n", i, controller, dmachan->chan);
+  dmainfo("Get g_dmach[%d] CTRL=%" PRIu8 " CH=%" PRIu8 "\n",
+          i, controller, dmachan->chan);
 
   /* Be sure that we have proper DMA controller */
 
@@ -2359,7 +2355,8 @@ DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
     {
       uint8_t dmamux_chan = dmachan->chan + g_dma[controller].dmamux_offset;
 
-      dmainfo("Get DMAMUX%d CH %d\n", dmamux->id, dmamux_chan);
+      dmainfo("Get DMAMUX%" PRIu8 " CH %" PRIu8 "\n",
+              dmamux->id, dmamux_chan);
 
       /* DMAMUX Set DMA channel source */
 
@@ -2419,7 +2416,8 @@ void stm32_dmafree(DMA_HANDLE handle)
     {
       uint8_t dmamux_chan = dmachan->chan + g_dma[controller].dmamux_offset;
 
-      dmainfo("Free DMAMUX%d CH %d\n", dmamux->id, dmamux_chan);
+      dmainfo("Free DMAMUX%" PRIu8 " CH %" PRIu8 "\n",
+              dmamux->id, dmamux_chan);
 
       /* Clear DMAMUX CCR register associated with channel */
 
@@ -2436,7 +2434,7 @@ void stm32_dmafree(DMA_HANDLE handle)
   dmachan->used = false;
   leave_critical_section(flags);
 
-  dmainfo("Unmapping DMAMUX(%d)\n", dmachan->chan);
+  dmainfo("Unmapping DMAMUX(%" PRIu8 ")\n", dmachan->chan);
 }
 
 /****************************************************************************
@@ -2574,7 +2572,8 @@ void stm32_dmadump(DMA_HANDLE handle, const char *msg)
 
   DEBUGASSERT(controller >= MDMA && controller <= BDMA);
 
-  dmainfo("DMA %d CH%d Registers: %s\n", dmachan->ctrl, dmachan->ctrl, msg);
+  dmainfo("DMA %" PRIu8 " CH%" PRIu8 " Registers: %s\n",
+          dmachan->ctrl, dmachan->ctrl, msg);
 
   g_dma_ops[controller].dma_dump(handle, msg);
 }

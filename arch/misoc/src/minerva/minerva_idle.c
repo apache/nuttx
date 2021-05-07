@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/minerva/minerva_idle.c
+ * arch/misoc/src/minerva/minerva_idle.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,15 +69,5 @@ void up_idle(void)
    */
 
   nxsched_process_timer();
-#else
-
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
-
-#ifdef CONFIG_SCHED_WORKQUEUE
-  irqstate_t flags = enter_critical_section();
-  leave_critical_section(flags);
-#endif
 #endif
 }

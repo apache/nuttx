@@ -42,30 +42,30 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/mount.h>
 #include <debug.h>
 #include <syslog.h>
 
 #include "nucleo-144.h"
+#include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
 
 #include "stm32l4_i2c.h"
 
 /****************************************************************************
  * Private Data
- ***************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32L4_I2C1)
-struct i2c_master_s* i2c1;
+struct i2c_master_s *i2c1;
 #endif
 #if defined(CONFIG_STM32L4_I2C2)
-struct i2c_master_s* i2c2;
+struct i2c_master_s *i2c2;
 #endif
 #if defined(CONFIG_STM32L4_I2C3)
-struct i2c_master_s* i2c3;
+struct i2c_master_s *i2c3;
 #endif
 #if defined(CONFIG_STM32L4_I2C4)
-struct i2c_master_s* i2c4;
+struct i2c_master_s *i2c4;
 #endif
 
 /****************************************************************************
@@ -104,7 +104,7 @@ int board_app_initialize(uintptr_t arg)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
@@ -166,7 +166,8 @@ int board_app_initialize(uintptr_t arg)
   ret = stm32_spidev_bus_test();
   if (ret != OK)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n",
+             ret);
       return ret;
     }
 #endif

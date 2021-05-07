@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_pmc.h
  *
- *   Copyright (C) 2011, 2016, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PMC_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PMC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_PMC_LVDSC1_OFFSET     0x0000 /* Low Voltage Detect Status and Control 1 Register */
 #define KINETIS_PMC_LVDSC2_OFFSET     0x0001 /* Low Voltage Detect Status and Control 2 Register */
@@ -60,7 +45,7 @@
 #  define KINETIS_PMC_SRAMCTL_OFFSET  0x000c /* SRAM VLLS2 Control register */
 #endif
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_PMC_LVDSC1            (KINETIS_PMC_BASE + KINETIS_PMC_LVDSC1_OFFSET)
 #define KINETIS_PMC_LVDSC2            (KINETIS_PMC_BASE + KINETIS_PMC_LVDSC2_OFFSET)
@@ -72,7 +57,7 @@
 #  define KINETIS_PMC_SRAMCTL         (KINETIS_PMC_BASE + KINETIS_PMC_SRAMCTL_OFFSET)
 #endif
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Low Voltage Detect Status and Control 1 Register */
 
@@ -80,6 +65,7 @@
 #define PMC_LVDSC1_LVDV_MASK          (3 << PMC_LVDSC1_LVDV_SHIFT)
 #  define PMC_LVDSC1_LVDV_LOW         (0 << PMC_LVDSC1_LVDV_SHIFT) /* Low trip point selected (VLVD = VLVDL) */
 #  define PMC_LVDSC1_LVDV_HIGH        (1 << PMC_LVDSC1_LVDV_SHIFT) /* High trip point selected (VLVD = VLVDH) */
+
                                                 /* Bits 2-3: Reserved */
 #define PMC_LVDSC1_LVDRE              (1 << 4)  /* Bit 4:  Low-Voltage Detect Reset Enable */
 #define PMC_LVDSC1_LVDIE              (1 << 5)  /* Bit 5:  Low-Voltage Detect Interrupt Enable */
@@ -94,7 +80,8 @@
 #  define PMC_LVDSC2_LVWV_MID1        (1 << PMC_LVDSC2_LVWV_SHIFT) /* Mid 1 trip point selected (VLVW = VLVW2H/L) */
 #  define PMC_LVDSC2_LVWV_MID2        (2 << PMC_LVDSC2_LVWV_SHIFT) /* Mid 2 trip point selected (VLVW = VLVW3H/L) */
 #  define PMC_LVDSC2_LVWV_HIGH        (3 << PMC_LVDSC2_LVWV_SHIFT) /* High trip point selected (VLVW = VLVW4H/L) */
-                                              /* Bits 2-4: Reserved */
+
+                                                /* Bits 2-4: Reserved */
 #define PMC_LVDSC2_LVWIE              (1 << 5)  /* Bit 5:  Low-Voltage Warning Interrupt Enable */
 #define PMC_LVDSC2_LVWACK             (1 << 6)  /* Bit 6:  Low-Voltage Warning Acknowledge */
 #define PMC_LVDSC2_LVWF               (1 << 7)  /* Bit 7:  Low-Voltage Warning Flag */
@@ -138,16 +125,16 @@
 #  define PMC_SRAMCTL_VLLS2PD         (1 << (n)) /* Bits 0-7: SRAM VLLS2 Powerdown */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_PMC_H */

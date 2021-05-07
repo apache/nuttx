@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,20 +16,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/* Include the correct DMA register definitions for selected STM32 DMA IP core:
+/* Include the correct DMA register definitions for
+ * selected STM32 DMA IP core:
  *   - STM32 DMA IP version 1 - F0, F1, F3, G4, L0, L1, L4
  *   - STM32 DMA IP version 2 - F2, F4, F7, H7
  */

@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_serial.c
  *
- *   Copyright (C) 2008-2009, 2012, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -75,15 +60,15 @@ extern uint32_t get_freq(void);
 
 struct z8_uart_s
 {
-  uint8_t volatile far* uartbase; /* Base address of UART registers */
-  uint32_t     baud;              /* Configured baud */
-  bool         rxenabled;         /* RX interrupt enabled */
-  bool         txenabled;         /* TX interrupt enabled */
-  uint8_t      rxirq;             /* RX IRQ associated with this UART */
-  uint8_t      txirq;             /* RX IRQ associated with this UART */
-  uint8_t      parity;            /* 0=none, 1=odd, 2=even */
-  bool         stopbits2;         /* true: Configure with 2 stop bits
-                                   * (instead of 1) */
+  uint8_t volatile far * uartbase; /* Base address of UART registers */
+  uint32_t     baud;               /* Configured baud */
+  bool         rxenabled;          /* RX interrupt enabled */
+  bool         txenabled;          /* TX interrupt enabled */
+  uint8_t      rxirq;              /* RX IRQ associated with this UART */
+  uint8_t      txirq;              /* RX IRQ associated with this UART */
+  uint8_t      parity;             /* 0=none, 1=odd, 2=even */
+  bool         stopbits2;          /* true: Configure with 2 stop bits
+                                    * (instead of 1) */
 };
 
 /****************************************************************************
@@ -270,10 +255,12 @@ static inline uint8_t z8_getuart(FAR struct z8_uart_s *priv, uint8_t offset)
 
 static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
-  uint8_t             state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
-                              priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
+  uint8_t             state = priv->rxenabled ?
+                              STATE_RXENABLED : STATE_DISABLED | \
+                              priv->txenabled ?
+                              STATE_TXENABLED : STATE_DISABLED;
 
   z8_txint(dev, false);
   z8_rxint(dev, false);
@@ -302,7 +289,7 @@ static void z8_restoreuartirq(FAR struct uart_dev_s *dev, uint8_t state)
 
 static void z8_consoleput(uint8_t ch)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)CONSOLE_DEV.priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)CONSOLE_DEV.priv;
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
@@ -312,6 +299,7 @@ static void z8_consoleput(uint8_t ch)
           break;
         }
     }
+
   z8_putuart(priv, ch,  Z8_UART_TXD);
 }
 
@@ -368,7 +356,7 @@ void z8_uartconfigure(void)
 static int z8_setup(FAR struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   uint32_t freq = get_freq();
   uint16_t brg;
   uint8_t ctl0;
@@ -378,7 +366,7 @@ static int z8_setup(FAR struct uart_dev_s *dev)
    * BRG = (freq + baud * 8)/(baud * 16)
    */
 
-  brg = (freq + (priv->baud << 3))/(priv->baud << 4);
+  brg = (freq + (priv->baud << 3)) / (priv->baud << 4);
   z8_putuart(priv, brg >> 8, Z8_UART_BRH);
   z8_putuart(priv, brg & 0xff, Z8_UART_BRL);
 
@@ -394,7 +382,7 @@ static int z8_setup(FAR struct uart_dev_s *dev)
 
   if (priv->parity == 1)
     {
-      ctl0 |= (Z8_UARTCTL0_PEN|Z8_UARTCTL0_PSEL);
+      ctl0 |= (Z8_UARTCTL0_PEN | Z8_UARTCTL0_PSEL);
     }
   else if (priv->parity == 2)
     {
@@ -406,7 +394,7 @@ static int z8_setup(FAR struct uart_dev_s *dev)
 
   /* Enable UART receive (REN) and transmit (TEN) */
 
-  ctl0 |= (Z8_UARTCTL0_TEN|Z8_UARTCTL0_REN);
+  ctl0 |= (Z8_UARTCTL0_TEN | Z8_UARTCTL0_REN);
   z8_putuart(priv, ctl0, Z8_UART_CTL0);
 #endif
   return OK;
@@ -430,20 +418,21 @@ static void z8_shutdown(FAR struct uart_dev_s *dev)
  * Name: z8_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
 static int z8_attach(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   int ret;
 
   /* Attach the RX IRQ */
@@ -459,6 +448,7 @@ static int z8_attach(FAR struct uart_dev_s *dev)
           irq_detach(priv->rxirq);
         }
     }
+
   return ret;
 }
 
@@ -467,14 +457,14 @@ static int z8_attach(FAR struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
 static void z8_detach(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   up_disable_irq(priv->rxirq);
   up_disable_irq(priv->txirq);
   irq_detach(priv->rxirq);
@@ -497,7 +487,7 @@ static int z8_rxinterrupt(int irq, FAR void *context, FAR void *arg)
   uint8_t            status;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct z8_uart_s*)dev->priv;
+  priv = (struct z8_uart_s *)dev->priv;
 
   /* Check the LIN-UART status 0 register to determine whether the source of
    * the interrupt is error, break, or received data
@@ -515,6 +505,7 @@ static int z8_rxinterrupt(int irq, FAR void *context, FAR void *arg)
 
       uart_recvchars(dev);
     }
+
   return OK;
 }
 
@@ -534,7 +525,7 @@ static int z8_txinterrupt(int irq, FAR void *context, FAR void *arg)
   uint8_t            status;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct z8_uart_s*)dev->priv;
+  priv = (struct z8_uart_s *)dev->priv;
 
   /* Verify that the transmit data register is empty */
 
@@ -545,6 +536,7 @@ static int z8_txinterrupt(int irq, FAR void *context, FAR void *arg)
 
       uart_xmitchars(dev);
     }
+
   return OK;
 }
 
@@ -573,7 +565,7 @@ static int z8_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   uint8_t  rxd;
   uint8_t  stat0;
 
@@ -593,7 +585,7 @@ static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
 
 static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
 
   if (enable)
@@ -621,7 +613,7 @@ static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
 
 static bool z8_rxavailable(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_RDA) != 0);
 }
 
@@ -635,7 +627,7 @@ static bool z8_rxavailable(FAR struct uart_dev_s *dev)
 
 static void z8_send(FAR struct uart_dev_s *dev, int ch)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   z8_putuart(priv, ch, Z8_UART_TXD);
 }
 
@@ -649,7 +641,7 @@ static void z8_send(FAR struct uart_dev_s *dev, int ch)
 
 static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
 
   if (enable)
@@ -677,7 +669,7 @@ static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
 
 static bool z8_txready(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_TDRE) != 0);
 }
 
@@ -691,7 +683,7 @@ static bool z8_txready(FAR struct uart_dev_s *dev)
 
 static bool z8_txempty(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv = (struct z8_uart_s*)dev->priv;
+  struct z8_uart_s *priv = (struct z8_uart_s *)dev->priv;
   return ((z8_getuart(priv, Z8_UART_STAT0) & Z8_UARTSTAT0_TXE) != 0);
 }
 
@@ -709,12 +701,13 @@ static bool z8_txempty(FAR struct uart_dev_s *dev)
 
 void z80_serial_initialize(void)
 {
-   /* Disable all UART interrupts */
+  /* Disable all UART interrupts */
 
   z8_disableuartirq(&TTYS0_DEV);
   z8_disableuartirq(&TTYS1_DEV);
 
   /* Initialize the console for early use */
+
   CONSOLE_DEV.isconsole = true;
   z8_setup(&CONSOLE_DEV);
 

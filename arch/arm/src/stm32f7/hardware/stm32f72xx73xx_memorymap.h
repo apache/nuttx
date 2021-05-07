@@ -1,56 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/hardware/stm32f72xx73xx_memorymap.h
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
- *            Bob Feretich <bob.feretich@rafresearch.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XXX_MEMORYMAP_H
 #define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XXX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* STM32F72XX STM32F73XX Address Blocks *********************************************/
+/* STM32F72XX STM32F73XX Address Blocks *************************************/
 
 #define STM32_CODE_BASE      0x00000000     /* 0x00000000-0x1fffffff: 512Mb code block */
 #define STM32_SRAM_BASE      0x20000000     /* 0x20000000-0x3fffffff: 512Mb sram block */
@@ -69,7 +52,7 @@
 #define STM32_IS_SRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
 #define STM32_IS_EXTSRAM(a)  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FMC_BANK1)
 
-/* Code Base Addresses **************************************************************/
+/* Code Base Addresses ******************************************************/
 
 #define STM32_BOOT_BASE      0x00000000     /* 0x00000000-0x000fffff: Aliased boot memory */
 #define STM32_INSTRAM_BASE   0x00000000     /* 0x00000000-0x00003fff: Instruction RAM (ITCM-RAM) */
@@ -79,7 +62,7 @@
 #define STM32_FLASH_BASE     STM32_FLASH_AXIM
 #define STM32_OPTIONS_BASE   0x1fff0000     /* 0x1ff00000-0x1fff001f: Option bytes (AXIM) */
 
-/* Information Addresses ************************************************************/
+/* Information Addresses ****************************************************/
 
 #define STM32_SYSMEM_AXIM    0x1ff00000     /* 0x1ff00000-0x1ff076D7: System memory (AXIM) */
 #define STM32_SYSMEM_UID     0x1ff07A10     /* The 96-bit unique device identifier */
@@ -88,13 +71,13 @@
 #define STM32_OPT_BASE       STM32_OTP_AXIM
 #define STM32_OPT_SIZE       1056
 
-/* SRAM Base Addresses **************************************************************/
+/* SRAM Base Addresses ******************************************************/
 
 #define STM32_DTCRAM_BASE    0x20000000     /* 0x20000000-0x2000ffff: DTCM-RAM on TCM interface */
 #define STM32_SRAM1_BASE     0x20010000     /* 0x20010000-0x2003bfff: System SRAM1 */
 #define STM32_SRAM2_BASE     0x2003C000     /* 0x2003c000-0x2003ffff: System SRAM2 */
 
-/* Peripheral Base Addresses ********************************************************/
+/* Peripheral Base Addresses ************************************************/
 
 #define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x40007fff: APB1 */
 #define STM32_APB2_BASE      0x40010000     /* 0x40010000-0x40016bff: APB2 */
@@ -102,7 +85,7 @@
 #define STM32_AHB2_BASE      0x50000000     /* 0x50000000-0x50060bff: AHB2 */
 #define STM32_AHB3_BASE      0x60000000     /* 0x60000000-0xdfffffff: AHB3 */
 
-/* APB1 Base Addresses **************************************************************/
+/* APB1 Base Addresses ******************************************************/
 
 #define STM32_TIM2_BASE      0x40000000     /* 0x40000000-0x400003ff: TIM2 */
 #define STM32_TIM3_BASE      0x40000400     /* 0x40000400-0x400007ff: TIM3 */
@@ -134,7 +117,7 @@
 #define STM32_UART7_BASE     0x40007800     /* 0x40007800-0x40007bff: UART7 */
 #define STM32_UART8_BASE     0x40007c00     /* 0x40007c00-0x40007fff: UART8 */
 
-/* APB2 Base Addresses **************************************************************/
+/* APB2 Base Addresses ******************************************************/
 
 #define STM32_TIM1_BASE      0x40010000     /* 0x40010000-0x400103ff: TIM1 */
 #define STM32_TIM8_BASE      0x40010400     /* 0x40010400-0x400107ff: TIM8 */
@@ -159,7 +142,7 @@
 #define STM32_SAI2_BASE      0x40015c00     /* 0x40015c00-0x40015fff: SAI2 */
 #define STM32_USBPHYC_BASE   0x40017c00     /* 0x40017C00-0x40017fff: OTG PHY HS */
 
-/* AHB1 Base Addresses **************************************************************/
+/* AHB1 Base Addresses ******************************************************/
 
 #define STM32_GPIO_INCR      0x400          /* 1K spacing between GPIO groups */
 #define STM32_GPIOA_BASE     0x40020000     /* 0x40020000-0x400203ff: GPIOA */
@@ -179,12 +162,12 @@
 #define STM32_DMA2_BASE      0x40026400     /* 0x40026400-0x400267ff: DMA2 */
 #define STM32_USBOTGHS_BASE  0x40040000     /* 0x40040000-0x4007ffff: USB OTG HS */
 
-/* AHB2 Base Addresses **************************************************************/
+/* AHB2 Base Addresses ******************************************************/
 
 #define STM32_USBOTGFS_BASE  0x50000000     /* 0x50000000-0x5003ffff: USB OTG FS */
 #define STM32_RNG_BASE       0x50060800     /* 0x50060800-0x50060bff: RNG */
 
-/* AHB3 Base Addresses **************************************************************/
+/* AHB3 Base Addresses ******************************************************/
 
 #define STM32_FMCBANK1_BASE  0x60000000     /* 0x60000000-0x6fffffff: FMC bank 1 */
 #define STM32_FMCBANK2_BASE  0x70000000     /* 0x70000000-0x7fffffff: FMC bank 2 */
@@ -195,9 +178,11 @@
 #define STM32_FMCBANK5_BASE  0xc0000000     /* 0xc0000000-0xcfffffff: FMC bank 5 */
 #define STM32_FMCBANK6_BASE  0xd0000000     /* 0xd0000000-0xdfffffff: FMC bank 6 */
 
-/* Cortex-M7 Base Addresses *********************************************************/
-/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in this
- * address range  */
+/* Cortex-M7 Base Addresses *************************************************/
+
+/* Other registers -- see armv7-m/nvic.h for standard Cortex-M3 registers in
+ * this address range
+ */
 
 #define STM32_DEBUGMCU_BASE 0xe0042000
 

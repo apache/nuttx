@@ -35,7 +35,6 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "up_internal.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -57,16 +56,16 @@
  *
  *   1) User code calls vfork().  vfork() collects context information and
  *      transfers control up up_vfork().
- *   2) up_vfork()and calls nxtask_setup_vfork().
+ *   2) up_vfork() and calls nxtask_setup_vfork().
  *   3) nxtask_setup_vfork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Setup the input parameters for the task.
- *      - Initialization of the TCB (including call to up_initial_state()
- *   4) up_vfork() provides any additional operating context. up_vfork must:
  *      - Allocate and initialize the stack
+ *      - Setup the input parameters for the task.
+ *      - Initialization of the TCB (including call to up_initial_state())
+ *   4) up_vfork() provides any additional operating context. up_vfork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
  *   5) up_vfork() then calls nxtask_start_vfork()
@@ -90,23 +89,19 @@ pid_t up_vfork(const xcpt_reg_t *context)
 {
   struct tcb_s *parent = this_task();
   struct task_tcb_s *child;
-  size_t stacksize;
-  unsigned char *pout;
-  unsigned char *pin;
-  unsigned long newsp;
-  unsigned long newfp;
-  unsigned long stackutil;
-  size_t argsize;
-  void *argv;
-  int ret;
+  xcpt_reg_t newsp;
+  xcpt_reg_t newfp;
+  xcpt_reg_t newtop;
+  xcpt_reg_t stacktop;
+  xcpt_reg_t stackutil;
 
   sinfo("vfork context [%p]:\n", context);
-  sinfo("  frame pointer:%08" PRIx32 " sp:%08" PRIx32 " pc:%08" PRIx32 "\n",
-        context[JB_FP], context[JB_SP], context[JB_PC]);
+  sinfo("  frame pointer:%08" PRIxPTR " sp:%08" PRIxPTR " pc:%08" PRIxPTR ""
+        "\n", context[JB_FP], context[JB_SP], context[JB_PC]);
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_vfork((start_t)(context[JB_PC]), &argsize);
+  child = nxtask_setup_vfork((start_t)context[JB_PC]);
   if (!child)
     {
       serr("ERROR: nxtask_setup_vfork failed\n");
@@ -115,38 +110,18 @@ pid_t up_vfork(const xcpt_reg_t *context)
 
   sinfo("TCBs: Parent=%p Child=%p\n", parent, child);
 
-  /* Get the size of the parent task's stack. */
-
-  stacksize = parent->adj_stack_size;
-
-  /* Allocate the stack for the TCB */
-
-  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
-                        parent->flags & TCB_FLAG_TTYPE_MASK);
-  if (ret != OK)
-    {
-      serr("ERROR: up_create_stack failed: %d\n", ret);
-      nxtask_abort_vfork(child, -ret);
-      return (pid_t)ERROR;
-    }
-
-  /* Allocate the memory and copy argument from parent task */
-
-  argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
-
-  memcpy(argv, parent->adj_stack_ptr, argsize);
-
   /* How much of the parent's stack was utilized?  The ARM uses
    * a push-down stack so that the current stack pointer should
    * be lower than the initial, adjusted stack pointer.  The
    * stack usage should be the difference between those two.
    */
 
-  DEBUGASSERT((unsigned long)parent->adj_stack_ptr > context[JB_SP]);
-  stackutil = (unsigned long)parent->adj_stack_ptr - context[JB_SP];
+  stacktop = (xcpt_reg_t)parent->stack_base_ptr +
+                         parent->adj_stack_size;
+  DEBUGASSERT(stacktop > context[JB_SP]);
+  stackutil = stacktop - context[JB_SP];
 
-  sinfo("Parent: stacksize:%zu stackutil:%" PRId32 "\n",
-        stacksize, stackutil);
+  sinfo("Parent: stackutil:%" PRIuPTR "\n", stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -155,30 +130,27 @@ pid_t up_vfork(const xcpt_reg_t *context)
    * effort is overkill.
    */
 
-  newsp = (unsigned long)child->cmn.adj_stack_ptr - stackutil;
-  pout = (unsigned char *)newsp;
-  pin  = (unsigned char *)context[JB_SP];
-  while (stackutil-- > 0) *pout++ = *pin++;
+  newtop = (xcpt_reg_t)child->cmn.stack_base_ptr +
+                       child->cmn.adj_stack_size;
+  newsp = newtop - stackutil;
+  memcpy((void *)newsp, (const void *)context[JB_SP], stackutil);
 
   /* Was there a frame pointer in place before? */
 
-  if (context[JB_FP] <= (unsigned long)parent->adj_stack_ptr &&
-      context[JB_FP] >= (unsigned long)parent->adj_stack_ptr -
-                              stacksize)
+  if (context[JB_FP] >= context[JB_SP] && context[JB_FP] < stacktop)
     {
-      unsigned long frameutil = (unsigned long)parent->adj_stack_ptr -
-                                context[JB_FP];
-      newfp = (unsigned long)child->cmn.adj_stack_ptr - frameutil;
+      xcpt_reg_t frameutil = stacktop - context[JB_FP];
+      newfp = newtop - frameutil;
     }
   else
     {
       newfp = context[JB_FP];
     }
 
-  sinfo("Parent: stack base:%p SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        parent->adj_stack_ptr, context[JB_SP], context[JB_FP]);
-  sinfo("Child:  stack base:%p SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        child->cmn.adj_stack_ptr, newsp, newfp);
+  sinfo("Old stack top:%08" PRIxPTR " SP:%08" PRIxPTR " FP:%08" PRIxPTR "\n",
+        stacktop, context[JB_SP], context[JB_FP]);
+  sinfo("New stack top:%08" PRIxPTR " SP:%08" PRIxPTR " FP:%08" PRIxPTR "\n",
+        newtop, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When
    * the child TCB was initialized, all of the values were set to zero.

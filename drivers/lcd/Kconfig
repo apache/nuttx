@@ -573,7 +573,7 @@ if LCD_ST7735
 		bool "132x162 Display Resolution"
 		default n
 		---help---
-			Two resolutions are availabe, either the 132x162 or
+			Two resolutions are available, either the 132x162 or
 			the 128x160
 
 	config LCD_ST7735_BPP
@@ -589,6 +589,49 @@ if LCD_ST7735
 		default 3000000
 
 endif # LCD_ST7735
+
+config LCD_ST7789
+	bool "Sitronix ST7789 TFT Controller"
+	default n
+
+if LCD_ST7789
+	config LCD_ST7789_XRES
+		int "ST7789 X Resolution"
+		default 240
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_ST7789_YRES
+		int "ST7789 Y Resolution"
+		default 320
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_ST7789_XOFFSET
+		int "ST7789 X Offset"
+		default 0
+		---help---
+			Specifies the X offset of the LCD.
+
+	config LCD_ST7789_YOFFSET
+		int "ST7789 Y Offset"
+		default 0
+		---help---
+			Specifies the Y offset of the LCD.
+
+	config LCD_ST7789_BPP
+		int "Bit Per Pixel (12 or 16)"
+		default 16
+
+	config LCD_ST7789_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_ST7789_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_ST7789
 
 config LCD_PCD8544
 	bool "Nokia 5110 LCD Display (Philips PCD8544)"
@@ -914,6 +957,39 @@ config LCD_LPM013M091A
 		This driver doesn't support reading data.
 		Recommended to use DMA to transfer data or displayed image would be
 		broken.
+
+config LCD_ILI9225
+	bool "ILI9225 LCD Single Chip Driver"
+	default n
+	---help---
+		LCD Single Chip Driver, ILI9225, ILI Technology Corp.
+
+if LCD_ILI9225
+	config LCD_ILI9225_XRES
+		int "ILI9225 X Resolution"
+		default 176
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_ILI9225_YRES
+		int "ILI9225 Y Resolution"
+		default 220
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_ILI9225_BPP
+		int "Bit Per Pixel (16)"
+		default 16
+
+	config LCD_ILI9225_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_ILI9225_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_ILI9225
 
 config LCD_ILI9340
 	bool "ILI9340 LCD Single Chip Driver"

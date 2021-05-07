@@ -1,0 +1,85 @@
+############################################################################
+# boards/risc-v/bl602/bl602evb/scripts/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
+
+ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+ARCH_INCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)include
+
+LDSCRIPT = ld.script
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
+else
+  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+  ASARCHCPUFLAGS += -Wa,-g
+endif
+
+MAXOPTIMIZATION = -Os
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce 
+endif
+
+ARCHCPUFLAGS = -march=rv32imafc -mabi=ilp32f -mno-relax
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fshort-enums -fno-omit-frame-pointer
+ARCHCXXFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fshort-enums -fno-omit-frame-pointer -fno-exceptions -fcheck-new -std=c++17 -D__NuttX__ -pipe -nostdinc++
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+
+ifeq ($(CONFIG_STACK_OVERFLOW_CHECK),y)
+  ARCHCFLAGS += -finstrument-functions -ffixed-s11
+endif
+
+ARCHDEFINES += -DARCH_RISCV
+
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS += $(CFLAGS) -D__ASSEMBLY__ $(ASARCHCPUFLAGS)
+
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fno-common
+CXXELFFLAGS = $(CXXFLAGS) -fno-common
+
+LDELFFLAGS = -melf32lriscv -r -e main
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
+else
+  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
+endif
+
+LDFLAGS += --gc-sections -melf32lriscv --cref
+LDFLAGS += -Map=$(TOPDIR)/nuttx.map
+

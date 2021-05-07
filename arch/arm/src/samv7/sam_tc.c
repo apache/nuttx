@@ -1,14 +1,8 @@
 /****************************************************************************
- * arch/arm/src/SAMV7/sam_tc.c
+ * arch/arm/src/samv7/sam_tc.c
  *
  *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * References:
- *
- *   SAMV71 Series Data Sheet
- *   NuttX SAMA5 timer/counter driver
- *   Atmel NoOS sample code for the SAMA5D3.
  *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
@@ -43,6 +37,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *
+ *   SAMV71 Series Data Sheet
+ *   NuttX SAMA5 timer/counter driver
+ *   Atmel NoOS sample code for the SAMA5D3.
+ */
 
 /****************************************************************************
  * Included Files
@@ -562,7 +563,9 @@ static struct sam_tc_s g_tc678;
 static struct sam_tc_s g_tc901;
 #endif
 
-/* TC frequency data.  This table provides the frequency for each selection of TCCLK */
+/* TC frequency data.  This table provides the frequency for each
+ * selection of TCCLK
+ */
 
 #define TC_NDIVIDERS   3
 #define TC_NDIVOPTIONS 4

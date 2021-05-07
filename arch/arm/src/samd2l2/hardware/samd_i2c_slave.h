@@ -1,48 +1,34 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_i2c_slave.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *   Datasheet", 42129J–SAM–12/2013
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_SLAVE_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_SLAVE_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,10 +37,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD20
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* I2C register offsets *********************************************************************/
+ ****************************************************************************/
+
+/* I2C register offsets *****************************************************/
 
 #define SAM_I2C_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_I2C_CTRLB_OFFSET       0x0004  /* Control B register */
@@ -76,7 +63,7 @@
 #  define SAM_I2C_DATA_OFFSET      0x0028  /* Data register */
 #endif
 
-/* I2C register addresses *******************************************************************/
+/* I2C register addresses ***************************************************/
 
 #define SAM_I2C0_CTRLA             (SAM_SERCOM0_BASE+SAM_I2C_CTRLA_OFFSET)
 #define SAM_I2C0_CTRLB             (SAM_SERCOM0_BASE+SAM_I2C_CTRLB_OFFSET)
@@ -162,7 +149,7 @@
 #define SAM_I2C5_ADDR              (SAM_SERCOM5_BASE+SAM_I2C_ADDR_OFFSET)
 #define SAM_I2C5_DATA              (SAM_SERCOM5_BASE+SAM_I2C_DATA_OFFSET)
 
-/* I2C register bit definitions *************************************************************/
+/* I2C register bit definitions *********************************************/
 
 /* Control A register */
 
@@ -171,10 +158,13 @@
 #define I2C_CTRLA_MODE_SHIFT       (2)       /* Bits 2-4: Operating Mode */
 #define I2C_CTRLA_MODE_MASK        (7 << I2C_CTRLA_MODE_SHIFT)
 #  define I2C_CTRLA_MODE_SLAVE     (4 << I2C_CTRLA_MODE_SHIFT) /* I2C slave mode */
+
 #define I2C_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define I2C_CTRLA_PINOUT           (1 << 16) /* Bit 16: Transmit data pinout */
+
 #  define I2C_CTRLA_1WIRE          (0)              /* 4-wire operation disable */
 #  define I2C_CTRLA_4WIRE          I2C_CTRLA_PINOUT /* 4-wire operation enable */
+
 #define I2C_CTRLA_SDAHOLD_SHIFT    (20)      /* Bits 20-21: SDA Hold Time */
 #define I2C_CTRLA_SDAHOLD_MASK     (3 << I2C_CTRLA_SDAHOLD_SHIFT)
 #  define I2C_CTRLA_SDAHOLD_DIS    (0 << I2C_CTRLA_SDAHOLD_SHIFT) /* Disabled */
@@ -189,6 +179,7 @@
 #    define I2C_CTRLA_SPEED_STANDARD  (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard-mode (<=100 kHz) and Fast-mode (<=400 kHz) */
 #    define I2C_CTRLA_SPEED_FAST      (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode Plus (<=1 MHz) */
 #    define I2C_CTRLA_SPEED_HIGHSPEED (2 << I2C_CTRLA_SPEED_SHIFT) /* High-speed mode (<=3.4 MHz) */
+
 #  define I2C_CTRLA_SCLSM          (1 << 27) /* Bit 27: SCL clock stretch mode */
 #endif
 
@@ -208,17 +199,20 @@
 #  define I2C_CRLB_AMODE_MASK      (0 << I2C_CRLB_AMODE_SHIFT) /* ADDRMASK used to mask ADDR */
 #  define I2C_CRLB_AMODE_2ADDRS    (1 << I2C_CRLB_AMODE_SHIFT) /* Slave 2 addresses: ADDR & ADDRMASK */
 #  define I2C_CRLB_AMODE_RANGE     (2 << I2C_CRLB_AMODE_SHIFT) /* Slave range of addresses: ADDRMASK-ADDR */
+
 #define I2C_CTRLB_CMD_SHIFT        (16)      /* Bits 16-17: Command */
 #define I2C_CTRLB_CMD_MASK         (3 << I2C_CTRLB_CMD_SHIFT)
 #  define I2C_CTRLB_CMD_NOACTION   (0 << I2C_CTRLB_CMD_SHIFT) /* No action */
 #  define I2C_CTRLB_CMD_WAITSTART  (2 << I2C_CTRLB_CMD_SHIFT) /* ACK (write) wait for START */
 #  define I2C_CTRLB_CMD_ACKREAD    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK with read (context dependent) */
+
 #define I2C_CTRLB_ACKACT           (1 << 18) /* Bit 18: Acknowledge Action */
+
 #  define I2C_CTRLB_ACK            (0)              /* Send ACK */
 #  define I2C_CTRLB_NCK            I2C_CTRLB_ACKACT /* Send NACK */
 
-/* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
- * status clear registers.
+/* Interrupt enable clear, interrupt enable set, interrupt enable set,
+ * interrupt flag and status clear registers.
  */
 
 #define I2C_INT_PREC               (1 << 0)  /* Bit 0:  Stop received interrupt */
@@ -287,17 +281,17 @@
 
 #define I2C_DATA_MASK              (0xooff)  /* Bits 0-7: Data */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_I2C_SLAVE_H */

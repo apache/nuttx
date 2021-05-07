@@ -1,5 +1,5 @@
-/*******************************************************************************
- * boards/arm/stm32l4/nucleo-l432kc/src/stm32l4_boot.c
+/****************************************************************************
+ * boards/arm/stm32l4/nucleo-l432kc/src/stm32_boot.c
  *
  *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -51,27 +51,28 @@
 #include "arm_arch.h"
 #include "nucleo-l432kc.h"
 
-/*******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/*******************************************************************************
+/****************************************************************************
  * Name: stm32l4_board_initialize
  *
  * Description:
- *   All STM32L4 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory has
- *   been configured and mapped but before any devices have been initialized.
+ *   All STM32L4 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_board_initialize(void)
 {
@@ -91,8 +92,8 @@ void stm32l4_board_initialize(void)
 #endif
 
   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-   * disabled, and 3) the weak function stm32l4_usbinitialize() has been brought
-   * into the build.
+   * disabled, and 3) the weak function stm32l4_usbinitialize() has been
+   * brought into the build.
    */
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32L4_USB)
@@ -106,7 +107,7 @@ void stm32l4_board_initialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
+ *   function called board_late_initialize(). board_late_initialize() will be
  *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.
@@ -117,13 +118,12 @@ void stm32l4_board_initialize(void)
 void board_late_initialize(void)
 {
   /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
+   * alternative NSH initialization is necessary when NSH is ran in
+   * user-space but the initialization function must run in kernel space.
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   board_app_initialize(0);
 #endif
-
 }
 #endif

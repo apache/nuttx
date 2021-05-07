@@ -1,35 +1,20 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_server.c
  *
- *   Copyright (C) 2008-2012, 2017, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -80,7 +65,7 @@ static inline void nxmu_disconnect(FAR struct nxmu_conn_s *conn)
 
   /* Close the outgoing client message queue */
 
-  mq_close(conn->swrmq);
+  nxmq_close(conn->swrmq);
 }
 
 /****************************************************************************
@@ -101,10 +86,10 @@ static inline void nxmu_connect(FAR struct nxmu_conn_s *conn)
    * client
    */
 
-  conn->swrmq  = mq_open(mqname, O_WRONLY);
-  if (conn->swrmq == (mqd_t)-1)
+  conn->swrmq = nxmq_open(mqname, O_WRONLY);
+  if (conn->swrmq < 0)
     {
-      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errno);
+      gerr("ERROR: nxmq_open(%s) failed: %d\n", mqname, conn->swrmq);
       outmsg.msgid = NX_CLIMSG_DISCONNECTED;
     }
 
@@ -205,12 +190,11 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
   attr.mq_msgsize = NX_MXSVRMSGLEN;
   attr.mq_flags   = 0;
 
-  nxmu->conn.crdmq = mq_open(mqname, O_RDONLY | O_CREAT, 0666, &attr);
-  if (nxmu->conn.crdmq == (mqd_t)-1)
+  nxmu->conn.crdmq = nxmq_open(mqname, O_RDONLY | O_CREAT, 0666, &attr);
+  if (nxmu->conn.crdmq < 0)
     {
-      int errcode = get_errno();
-      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errcode);
-      return -errcode;
+      gerr("ERROR: nxmq_open(%s) failed: %d\n", mqname, nxmu->conn.crdmq);
+      return nxmu->conn.crdmq;
     }
 
   /* NOTE that the outgoing client MQ (cwrmq) is not initialized.  The
@@ -222,13 +206,12 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
    * the server message loop.
    */
 
-  nxmu->conn.swrmq = mq_open(mqname, O_WRONLY);
-  if (nxmu->conn.swrmq == (mqd_t)-1)
+  nxmu->conn.swrmq = nxmq_open(mqname, O_WRONLY);
+  if (nxmu->conn.swrmq < 0)
     {
-      int errcode = get_errno();
-      gerr("ERROR: mq_open(%s) failed: %d\n", mqname, errcode);
-      mq_close(nxmu->conn.crdmq);
-      return -errcode;
+      gerr("ERROR: nxmq_open(%s) failed: %d\n", mqname, nxmu->conn.swrmq);
+      nxmq_close(nxmu->conn.crdmq);
+      return nxmu->conn.swrmq;
     }
 
   /* The server is now "connected" to itself via the background window */

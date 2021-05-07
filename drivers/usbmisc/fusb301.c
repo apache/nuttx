@@ -489,7 +489,8 @@ static int fusb301_open(FAR struct file *filep)
   ret = fusb301_getreg(priv, FUSB301_DEV_ID_REG);
   if (ret < 0)
     {
-      fusb301_err("ERROR: No response at given address 0x%02X\n", priv->addr);
+      fusb301_err("ERROR: No response at given address 0x%02X\n",
+                  priv->addr);
       ret = -EFAULT;
     }
   else
@@ -529,7 +530,9 @@ static int fusb301_close(FAR struct file *filep)
  *   This routine is called when the FUSB301 device is read.
  ****************************************************************************/
 
-static ssize_t fusb301_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t fusb301_read(FAR struct file *filep,
+                            FAR char *buffer,
+                            size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct fusb301_dev_s *priv = inode->i_private;
@@ -660,7 +663,9 @@ static int fusb301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   This routine is called during FUSB301 device poll
  ****************************************************************************/
 
-static int fusb301_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+static int fusb301_poll(FAR struct file *filep,
+                        FAR struct pollfd *fds,
+                        bool setup)
 {
   FAR struct inode *inode;
   FAR struct fusb301_dev_s *priv;
@@ -755,10 +760,10 @@ static void fusb301_notify(FAR struct fusb301_dev_s *priv)
 
   int i;
 
-  /* If there are threads waiting on poll() for FUSB301 data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for FUSB301 data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know that they are going to do.  If they all try to
+   * read the data, then some make end up blocking after all.
    */
 
   for (i = 0; i < CONFIG_FUSB301_NPOLLWAITERS; i++)
@@ -811,7 +816,8 @@ int fusb301_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the FUSB301 device structure */
 
-  priv = (FAR struct fusb301_dev_s *)kmm_zalloc(sizeof(struct fusb301_dev_s));
+  priv = (FAR struct fusb301_dev_s *)
+                kmm_zalloc(sizeof(struct fusb301_dev_s));
   if (!priv)
     {
       fusb301_err("ERROR: Failed to allocate instance\n");

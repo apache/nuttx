@@ -174,15 +174,9 @@ static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
 
   /* Check if this module exports a symbol of that name */
 
-#ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-  exportinfo->symbol = symtab_findorderedbyname(modp->modinfo.exports,
-                                                exportinfo->name,
-                                                modp->modinfo.nexports);
-#else
   exportinfo->symbol = symtab_findbyname(modp->modinfo.exports,
                                          exportinfo->name,
                                          modp->modinfo.nexports);
-#endif
 
   if (exportinfo->symbol != NULL)
     {
@@ -381,13 +375,8 @@ int modlib_symvalue(FAR struct module_s *modp,
         if (symbol == NULL)
           {
             modlib_getsymtab(&symbol, &nsymbols);
-#ifdef CONFIG_SYMTAB_ORDEREDBYNAME
-            symbol = symtab_findorderedbyname(symbol, exportinfo.name,
-                                              nsymbols);
-#else
             symbol = symtab_findbyname(symbol, exportinfo.name,
                                        nsymbols);
-#endif
           }
 
         /* Was the symbol found from any exporter? */

@@ -47,7 +47,7 @@ extern "C"
  *   [out] handle_out Handle to be returned
  *
  * returns:
- *   - ESP_OK if succesful
+ *   - ESP_OK if successful
  *   - ESP_ERR_NO_MEM if out of memory
  *   - ESP_ERR_INVALID_SIZE if size is not a multiple of 32K
  */
@@ -65,7 +65,7 @@ int esp_himem_alloc(size_t size, esp_himem_handle_t *handle_out);
  *   [out] handle_out Handle to be returned
  *
  * returns:
- *   - ESP_OK if succesful
+ *   - ESP_OK if successful
  *   - ESP_ERR_NO_MEM if out of memory or address space
  *   - ESP_ERR_INVALID_SIZE if size is not a multiple of 32K
  */
@@ -121,7 +121,7 @@ int esp_himem_map(esp_himem_handle_t handle,
  *   handle Handle to the block of memory, as given by esp_himem_alloc
  *
  * returns:
- *   - ESP_OK if the memory is succesfully freed
+ *   - ESP_OK if the memory is successfully freed
  *   - ESP_ERR_INVALID_ARG if the handle still is (partially) mapped
  */
 
@@ -138,7 +138,7 @@ int esp_himem_free(esp_himem_handle_t handle);
  *   handle Handle to the range block, as given by esp_himem_alloc_map_range
  *
  * returns:
- *   - ESP_OK if the memory is succesfully freed
+ *   - ESP_OK if the memory is successfully freed
  *   - ESP_ERR_INVALID_ARG if the handle still is (partially) mapped to
  */
 
@@ -152,7 +152,7 @@ int esp_himem_free_map_range(esp_himem_rangehandle_t handle);
  *   len   Length of the block to be unmapped. Must be aligned to the SPI RAM
  *         MMU blocksize (32K)
  * returns:
- *   - ESP_OK if the memory is succesfully unmapped,
+ *   - ESP_OK if the memory is successfully unmapped,
  *   - ESP_ERR_INVALID_ARG if ptr or len are invalid.
  */
 

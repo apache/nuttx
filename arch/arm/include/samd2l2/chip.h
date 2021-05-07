@@ -1,58 +1,45 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/samd2l2/chip.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_SAMD2L2_CHIP_H
 #define __ARCH_ARM_INCLUDE_SAMD2L2_CHIP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* Get customizations for each supported chip */
 
-/* SAMD20 Family ********************************************************************/
+/* SAMD20 Family ************************************************************/
+
 /* FEATURE             SAM D20J          SAM D20G           SAM D20E
  * ------------------- ------------------ ------------------ --------
  * No. of pins         64                 48                 32
- * Flash               256/128/64/32/16KB 256/128/64/32/16KB 256/128/64/32/16KB
+ * Flash               256/128/64/        256/128/64/        256/128/64/
+ *                     32/16KB            32/16KB            32/16KB
  * SRAM                32/16/8/4/2KB      32/16/8/4/2KB      32/16/8/4/2KB
  * Max. Freq.          48MHz              48MHz              48MHz
  * Event channels      8                  8                  8
@@ -64,7 +51,8 @@
  * DAC channels        1                  1                  1
  * RTC                 Yes                Yes                Yes
  * RTC alarms          1                  1                  1
- * RTC compare         1 32-bit/2 16-bit  1 32-bit/2 16-bit  1 32-bit/2 16-bit
+ * RTC compare         1 32-bit/          1 32-bit/          1 32-bit/
+ *                     2 16-bit           2 16-bit           2 16-bit
  * External interrupts 16                 16                 16
  * PTC X an Y          16x16              12x10              10x6
  * Packages            QFN/TQFP           QFN/TQFP           QFN/TQFP
@@ -343,7 +331,7 @@
 #  define SAMD2L2_NADC              20            /* 20 ADC channels */
 #  define SAMD2L2_NCMP              2             /* 2 Comparators */
 #  define SAMD2L2_NDAC              1             /* 1 DAC channel */
-#  define SAMD2L2_NOPAMP              0             /* No OpAmps */
+#  define SAMD2L2_NOPAMP            0             /* No OpAmps */
 #  define SAMD2L2_RTC               1             /* Have RTC */
 #  define SAMD2L2_NALARMS           1             /* 1 RTC alarm */
 #  define SAMD2L2_NRTCMP            1             /* RTC compare: 1 32-bit/2 16-bit */
@@ -353,7 +341,8 @@
 #  define SAMD2L2_WDT               1             /* Have watchdog timer */
 #endif
 
-/* SAMD21 Family ********************************************************************/
+/* SAMD21 Family ************************************************************/
+
 /* FEATURE             SAM D21J          SAM D21G           SAM D21E
  * ------------------- ------------------ ------------------ --------
  * No. of pins         64                 48                 32
@@ -375,11 +364,13 @@
  * DAC channels        1                  1                  1
  * RTC                 Yes                Yes                Yes
  * RTC alarms          1                  1                  1
- * RTC compare         1 32-bit/2 16-bit  1 32-bit/2 16-bit  1 32-bit/2 16-bit
+ * RTC compare         1 32-bit/          1 32-bit/          1 32-bit/
+ *                     2 16-bit           2 16-bit           2 16-bit
  * External interrupts 16                 16                 16
  * PTC X an Y          16x16              12x10              10x6
  * Packages            QFN/TQFP           QFN/TQFP/WLCSP     QFN/TQFP/UFBGA
- * Oscillators         XOSC32, XOSC, OSC32K, OSCULP32K, OSC8M, DFLL48M, and FDPLL96M
+ * Oscillators         XOSC32, XOSC, OSC32K, OSCULP32K, OSC8M,
+ *                                                  DFLL48M, and FDPLL96M
  * SW Debug interface  Yes                Yes                Yes
  * Watchdog timer      Yes                Yes                Yes
  */
@@ -658,7 +649,7 @@
 #  define SAMD2L2_NADC              20            /* 20 ADC channels */
 #  define SAMD2L2_NCMP              2             /* 2 Comparators */
 #  define SAMD2L2_NDAC              1             /* 1 DAC channel */
-#  define SAMD2L2_NOPAMP              3             /* 3 OpAmps */
+#  define SAMD2L2_NOPAMP            3             /* 3 OpAmps */
 #  define SAMD2L2_RTC               1             /* Have RTC */
 #  define SAMD2L2_NALARMS           1             /* 1 RTC alarm */
 #  define SAMD2L2_NRTCMP            1             /* RTC compare: 1 32-bit/2 16-bit */
@@ -668,7 +659,8 @@
 #  define SAMD2L2_WDT               1             /* Have watchdog timer */
 #endif
 
-/* SAML21 Family ********************************************************************/
+/* SAML21 Family ************************************************************/
+
 /* FEATURE             SAM L21J          SAM L21G           SAM L21E
  * ------------------- ------------------ ------------------ --------
  * No. of pins         64                 48                 32
@@ -694,12 +686,14 @@
  * OPAMP               3                  3                  3
  * RTC                 Yes                Yes                Yes
  * RTC alarms          1                  1                  1
- * RTC compare         1 32-bit/2 16-bit  1 32-bit/2 16-bit  1 32-bit/2 16-bit
+ * RTC compare         1 32-bit/          1 32-bit/          1 32-bit/
+ *                     2 16-bit           2 16-bit           2 16-bit
  * External interrupts 16                 16                 16
  * PTC X an Y          12x16              8x12               6x10
  *                     16x12              12x8               10x6
  * Packages            QFN/TQFP           QFN/TQFP           QFN/TQFP
- * Oscillators         XOSC32, XOSC, OSC32K, OSCULP32K, OSC16M, DFLL48M, and FDPLL96M
+ * Oscillators         XOSC32, XOSC, OSC32K, OSCULP32K,
+ *                                     OSC16M, DFLL48M, and FDPLL96M
  * SW Debug interface  Yes                Yes                Yes
  * Watchdog timer      Yes                Yes                Yes
  */
@@ -967,10 +961,12 @@
 #  define SAMD2L2_WDT               1             /* Have watchdog timer */
 #endif
 
-/* NVIC priority levels *************************************************************/
-/* Each priority field holds a priority value, 0-3. The lower the value, the greater
- * the priority of the corresponding interrupt. The processor implements only
- * bits[7:6] of each field, bits[5:0] read as zero and ignore writes.
+/* NVIC priority levels *****************************************************/
+
+/* Each priority field holds a priority value, 0-3. The lower the value, the
+ * greater the priority of the corresponding interrupt. The processor
+ * implements only bits[7:6] of each field, bits[5:0] read as zero and ignore
+ * writes.
  */
 
 #define NVIC_SYSH_PRIORITY_MIN      0xc0 /* All bits[7:6] set is minimum priority */
@@ -978,16 +974,16 @@
 #define NVIC_SYSH_PRIORITY_MAX      0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP     0x40 /* Five bits of interrupt priority used */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_INCLUDE_SAMD2L2_CHIP_H */

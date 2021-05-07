@@ -152,7 +152,8 @@ static void stm32aes_setiv(FAR const void *iv)
   putreg32(__builtin_bswap32(*in), STM32_AES_IVR0);
 }
 
-static void stm32aes_encryptblock(FAR void *block_out, FAR const void *block_in)
+static void stm32aes_encryptblock(FAR void *block_out,
+                                  FAR const void *block_in)
 {
   FAR uint32_t *in  = (FAR uint32_t *)block_in;
   FAR uint32_t *out = (FAR uint32_t *)block_out;
@@ -292,7 +293,7 @@ int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
       g_stm32aes_initdone = true;
     }
 
-  if ((size & (AES_BLOCK_SIZE-1)) != 0)
+  if ((size & (AES_BLOCK_SIZE - 1)) != 0)
     {
       return -EINVAL;
     }

@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/risc-v/src/k210/k210_cpuidlestack.c
  *
- *   Copyright (C) 2020 Masayuki Ishikawa. All rights reserved.
- *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -45,8 +30,21 @@
 #include <nuttx/sched.h>
 
 #include "riscv_internal.h"
+#include "k210_memorymap.h"
 
 #ifdef CONFIG_SMP
+
+#define SMP_STACK_MASK       7
+#define SMP_STACK_SIZE       ((CONFIG_IDLETHREAD_STACKSIZE + 7) & ~7)
+#define STACK_ISALIGNED(a)   ((uintptr_t)(a) & ~SMP_STACK_MASK)
+
+#if CONFIG_SMP_NCPUS > 1
+static FAR const uintptr_t g_cpu_stackalloc[CONFIG_SMP_NCPUS] =
+{
+    0
+  , K210_IDLESTACK1_BASE
+};
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -82,8 +80,8 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
- *     the stack pointer.
+ *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
+ *     Arguments has been removed from the stack allocation.
  *
  * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is
@@ -98,7 +96,19 @@
 int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 {
 #if CONFIG_SMP_NCPUS > 1
-  up_create_stack(tcb, stack_size, TCB_FLAG_TTYPE_KERNEL);
+  uintptr_t stack_alloc;
+
+  DEBUGASSERT(cpu > 0 && cpu < CONFIG_SMP_NCPUS && tcb != NULL &&
+              stack_size <= SMP_STACK_SIZE);
+
+  /* Get the top of the stack */
+
+  stack_alloc          = (uintptr_t)g_cpu_stackalloc[cpu];
+  DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
+
+  tcb->adj_stack_size  = SMP_STACK_SIZE;
+  tcb->stack_alloc_ptr = (FAR void *)stack_alloc;
+  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
 #endif
   return OK;
 }

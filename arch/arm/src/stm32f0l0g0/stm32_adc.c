@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_adc.c
+ * arch/arm/src/stm32f0l0g0/stm32_adc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -261,9 +262,7 @@ static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
 static uint32_t adccmn_base_get(FAR struct stm32_dev_s *priv);
 static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
                               uint32_t clrbits, uint32_t setbits);
-#  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset);
-#  endif
 #endif
 #ifdef ADC_HAVE_TIMER
 static uint16_t tim_getreg(FAR struct stm32_dev_s *priv, int offset);
@@ -574,7 +573,6 @@ static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
  * Name: adccmn_getreg
  ****************************************************************************/
 
-#  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 {
   uint32_t base = 0;
@@ -587,7 +585,6 @@ static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
 
   return getreg32(base + offset);
 }
-#  endif
 #endif /* HAVE_ADC_CMN_REGS */
 
 /****************************************************************************
@@ -1648,17 +1645,19 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
 {
   UNUSED(priv);
 
-  ainfo("ISR:  0x%08x IER:  0x%08x CR:   0x%08x CFGR1: 0x%08x\n",
+  ainfo("ISR:  0x%08" PRIx32 " IER:  0x%08" PRIx32
+        " CR:   0x%08" PRIx32 " CFGR1: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_ISR_OFFSET),
         adc_getreg(priv, STM32_ADC_IER_OFFSET),
         adc_getreg(priv, STM32_ADC_CR_OFFSET),
         adc_getreg(priv, STM32_ADC_CFGR1_OFFSET));
 
-  ainfo("SMPR: 0x%08x CHSELR: 0x%08x\n",
+  ainfo("SMPR: 0x%08" PRIx32 " CHSELR: 0x%08" PRIx32 "\n",
         adc_getreg(priv, STM32_ADC_SMPR_OFFSET),
         adc_getreg(priv, STM32_ADC_CHSELR_OFFSET));
 
-  ainfo("CCR:  0x%08x\n", adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
+  ainfo("CCR:  0x%08" PRIx32 "\n",
+        adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 }
 
 /****************************************************************************

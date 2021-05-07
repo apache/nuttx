@@ -1,6 +1,5 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-l152re/include/board.h
- * include/arch/board/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -121,7 +120,6 @@
 
 #define STM32_RCC_CFGR_HPRE      RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY     STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK         STM32_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* APB2 clock (PCLK2) is HCLK (32MHz) */
 
@@ -216,5 +214,11 @@
 
 #define GPIO_USART2_RX GPIO_USART2_RX_1 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_1 /* PA2 */
+
+/* SPI1 */
+
+#define GPIO_SPI1_MOSI   GPIO_SPI1_MOSI_2
+#define GPIO_SPI1_MISO   GPIO_SPI1_MISO_2
+#define GPIO_SPI1_SCK    GPIO_SPI1_SCK_1
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_L152RE_INCLUDE_BOARD_H */

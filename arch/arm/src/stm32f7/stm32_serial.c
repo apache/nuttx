@@ -1,42 +1,26 @@
-/**************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_serial.c
  *
- *   Copyright (C) 2015-2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david.sidrane@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- **************************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************************
+/****************************************************************************
  * Included Files
- **************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -70,11 +54,11 @@
 
 #include <arch/board/board.h>
 
-/**************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- **************************************************************************************************/
+ ****************************************************************************/
 
-/* Some sanity checks *****************************************************************************/
+/* Some sanity checks *******************************************************/
 
 /* Total number of possible serial devices */
 
@@ -105,8 +89,8 @@
 #    endif
 #  endif
 
-/* Currently RS-485 support cannot be enabled when RXDMA is in use due to lack
- * of testing - RS-485 support was developed on STM32F1x
+/* Currently RS-485 support cannot be enabled when RXDMA is in use due to
+ * lack of testing - RS-485 support was developed on STM32F1x
  */
 
 #  if (defined(CONFIG_USART1_RXDMA) && defined(CONFIG_USART1_RS485)) || \
@@ -199,8 +183,8 @@
 #  endif
 #endif
 
-/* Currently RS-485 support cannot be enabled when TXDMA is in use due to lack
- * of testing - RS-485 support was developed on STM32F1x
+/* Currently RS-485 support cannot be enabled when TXDMA is in use due to
+ * lack of testing - RS-485 support was developed on STM32F1x
  */
 
 #if (defined(CONFIG_USART1_TXDMA) && defined(CONFIG_USART1_RS485)) || \
@@ -228,8 +212,9 @@
 
 /* The DMA buffer size when using TX DMA.
  *
- * This TX buffer size should be an even multiple of the Cortex-M7 D-Cache line
- * size, ARMV7M_DCACHE_LINESIZE, so that it can be individually invalidated.
+ * This TX buffer size should be an even multiple of the Cortex-M7 D-Cache
+ * line size, ARMV7M_DCACHE_LINESIZE, so that it can be individually
+ * invalidated.
  *
  * Should there be a Cortex-M7 without a D-Cache, ARMV7M_DCACHE_LINESIZE
  * would be zero!
@@ -244,8 +229,8 @@
 #define TXDMA_BUFFER_SIZE   ((CONFIG_STM32F7_SERIAL_RXDMA_BUFFER_SIZE \
                               + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
 
-/* If built with CONFIG_ARMV7M_DCACHE Buffers need to be aligned and multiples
- * of ARMV7M_DCACHE_LINESIZE
+/* If built with CONFIG_ARMV7M_DCACHE Buffers need to be aligned and
+ * multiples of ARMV7M_DCACHE_LINESIZE
  */
 
 #if defined(CONFIG_ARMV7M_DCACHE)
@@ -431,9 +416,9 @@
 #  endif
 #endif /* CONFIG_STM32F7_FLOWCONTROL_BROKEN */
 
-/**************************************************************************************************
+/****************************************************************************
  * Private Types
- **************************************************************************************************/
+ ****************************************************************************/
 
 struct up_dev_s
 {
@@ -533,9 +518,9 @@ struct pm_config_s
 };
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void up_set_format(struct uart_dev_s *dev);
@@ -591,9 +576,9 @@ static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate);
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Private Data
- **************************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(SERIAL_HAVE_ONLY_DMA)
 static const struct uart_ops_s g_uart_ops =
@@ -1366,22 +1351,22 @@ static struct pm_config_s g_serialpm =
 };
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Private Functions
- **************************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_serialin
- **************************************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
 {
   return getreg32(priv->usartbase + offset);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_serialout
- **************************************************************************************************/
+ ****************************************************************************/
 
 static inline void up_serialout(struct up_dev_s *priv, int offset,
                                 uint32_t value)
@@ -1389,9 +1374,9 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
   putreg32(value, priv->usartbase + offset);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_setusartint
- **************************************************************************************************/
+ ****************************************************************************/
 
 static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
 {
@@ -1401,7 +1386,9 @@ static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
 
   priv->ie = ie;
 
-  /* And restore the interrupt state (see the interrupt enable/usage table above) */
+  /* And restore the interrupt state
+   * (see the interrupt enable/usage table above)
+   */
 
   cr = up_serialin(priv, STM32_USART_CR1_OFFSET);
   cr &= ~(USART_CR1_USED_INTS);
@@ -1414,9 +1401,9 @@ static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
   up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_restoreusartint
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 {
@@ -1429,9 +1416,9 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
   leave_critical_section(flags);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_disableusartint
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 {
@@ -1446,20 +1433,23 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 
       /* USART interrupts:
        *
-       * Enable             Status          Meaning                        Usage
-       * ------------------ --------------- ------------------------------ ----------
-       * USART_CR1_IDLEIE   USART_ISR_IDLE  Idle Line Detected             (not used)
-       * USART_CR1_RXNEIE   USART_ISR_RXNE  Received Data Ready to be Read
-       * "              "   USART_ISR_ORE   Overrun Error Detected
-       * USART_CR1_TCIE     USART_ISR_TC    Transmission Complete          (used only for RS-485)
-       * USART_CR1_TXEIE    USART_ISR_TXE   Transmit Data Register Empty
-       * USART_CR1_PEIE     USART_ISR_PE    Parity Error
+       * Enable           Status         Meaning                Usage
+       * ---------------- -------------- ---------------------- ----------
+       * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected     (not used)
+       * USART_CR1_RXNEIE USART_ISR_RXNE Received Data Ready
+       *                                     to be Read
+       * "              " USART_ISR_ORE  Overrun Error Detected
+       * USART_CR1_TCIE   USART_ISR_TC   Transmission Complete  (used only
+       *                                                          for RS-485)
+       * USART_CR1_TXEIE  USART_ISR_TXE  Transmit Data Register
+       *                                      Empty
+       * USART_CR1_PEIE   USART_ISR_PE   Parity Error
        *
-       * USART_CR2_LBDIE    USART_ISR_LBD   Break Flag                     (not used)
-       * USART_CR3_EIE      USART_ISR_FE    Framing Error
-       * "           "      USART_ISR_NF    Noise Error
-       * "           "      USART_ISR_ORE   Overrun Error Detected
-       * USART_CR3_CTSIE    USART_ISR_CTS   CTS flag                       (not used)
+       * USART_CR2_LBDIE  USART_ISR_LBD  Break Flag              (not used)
+       * USART_CR3_EIE    USART_ISR_FE   Framing Error
+       * "           "    USART_ISR_NF   Noise Error
+       * "           "    USART_ISR_ORE  Overrun Error Detected
+       * USART_CR3_CTSIE  USART_ISR_CTS  CTS flag                 (not used)
        */
 
       cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
@@ -1481,14 +1471,14 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
   leave_critical_section(flags);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_nextrx
  *
  * Description:
  *   Returns the index into the RX FIFO where the DMA will place the next
  *   byte that it receives.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 static int up_dma_nextrx(struct up_dev_s *priv)
@@ -1501,13 +1491,13 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_set_format
  *
  * Description:
  *   Set the serial line format and speed.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void up_set_format(struct uart_dev_s *dev)
@@ -1657,13 +1647,13 @@ static void up_set_format(struct uart_dev_s *dev)
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_setsuspend
  *
  * Description:
  *   Suspend or resume serial peripheral.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
@@ -1703,7 +1693,8 @@ static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
 
       for (passes = 0; passes < 256; passes++)
         {
-          if ((up_serialin(priv, STM32_USART_ISR_OFFSET) & USART_ISR_TC) != 0)
+          if ((up_serialin(priv,
+                           STM32_USART_ISR_OFFSET) & USART_ISR_TC) != 0)
             {
               break;
             }
@@ -1769,13 +1760,13 @@ static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_pm_setsuspend
  *
  * Description:
  *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static void up_pm_setsuspend(bool suspend)
@@ -1805,7 +1796,7 @@ static void up_pm_setsuspend(bool suspend)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_set_apb_clock
  *
  * Description:
@@ -1815,7 +1806,7 @@ static void up_pm_setsuspend(bool suspend)
  *   dev - A reference to the UART driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
 {
@@ -1891,14 +1882,14 @@ static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
     }
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_setup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
  *   first time that the serial port is opened.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static int up_setup(struct uart_dev_s *dev)
 {
@@ -2008,14 +1999,14 @@ static int up_setup(struct uart_dev_s *dev)
   return OK;
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_setup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
  *   first time that the serial port is opened.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
 static int up_dma_setup(struct uart_dev_s *dev)
@@ -2043,7 +2034,8 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
       /* Enable receive Tx DMA for the UART */
 
-      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET, 0, USART_CR3_DMAT);
+      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET,
+                  0, USART_CR3_DMAT);
     }
 #endif
 
@@ -2062,8 +2054,8 @@ static int up_dma_setup(struct uart_dev_s *dev)
                      RXDMA_BUFFER_SIZE,
                      SERIAL_RXDMA_CONTROL_WORD);
 
-      /* Reset our DMA shadow pointer and Rx data availability count to match
-       * the address just programmed above.
+      /* Reset our DMA shadow pointer and Rx data availability count to
+       * match the address just programmed above.
        */
 
       priv->rxdmanext = 0;
@@ -2073,7 +2065,8 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
       /* Enable receive Rx DMA for the UART */
 
-      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET, 0, USART_CR3_DMAR);
+      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET,
+                  0, USART_CR3_DMAR);
 
       /* Start the DMA channel, and arrange for callbacks at the half and
        * full points in the FIFO.  This ensures that we have half a FIFO
@@ -2088,14 +2081,14 @@ static int up_dma_setup(struct uart_dev_s *dev)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_shutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
  *   port is closed
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
@@ -2153,14 +2146,14 @@ static void up_shutdown(struct uart_dev_s *dev)
 #endif
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_shutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
  *   port is closed
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
 static void up_dma_shutdown(struct uart_dev_s *dev)
@@ -2201,21 +2194,21 @@ static void up_dma_shutdown(struct uart_dev_s *dev)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_attach
  *
  * Description:
- *   Configure the USART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the USART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are
- *   called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static int up_attach(struct uart_dev_s *dev)
 {
@@ -2237,15 +2230,15 @@ static int up_attach(struct uart_dev_s *dev)
   return ret;
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_detach
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_detach(struct uart_dev_s *dev)
 {
@@ -2254,7 +2247,7 @@ static void up_detach(struct uart_dev_s *dev)
   irq_detach(priv->irq);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_interrupt
  *
  * Description:
@@ -2264,7 +2257,7 @@ static void up_detach(struct uart_dev_s *dev)
  *   interrupt handling logic must be able to map the 'irq' number into the
  *   appropriate uart_dev_s structure in order to call these functions.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static int up_interrupt(int irq, void *context, FAR void *arg)
 {
@@ -2295,34 +2288,39 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 
       /* USART interrupts:
        *
-       * Enable             Status          Meaning                         Usage
-       * ------------------ --------------- ------------------------------- ----------
-       * USART_CR1_IDLEIE   USART_ISR_IDLE  Idle Line Detected              (not used)
-       * USART_CR1_RXNEIE   USART_ISR_RXNE  Received Data Ready to be Read
-       * "              "   USART_ISR_ORE   Overrun Error Detected
-       * USART_CR1_TCIE     USART_ISR_TC    Transmission Complete           (used only for RS-485)
-       * USART_CR1_TXEIE    USART_ISR_TXE   Transmit Data Register Empty
-       * USART_CR1_PEIE     USART_ISR_PE    Parity Error
+       * Enable           Status          Meaning                Usage
+       * ---------------- -------------- ----------------------- ----------
+       * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected      (not used)
+       * USART_CR1_RXNEIE USART_ISR_RXNE Received Data Ready
+       *                                    to be Read
+       * "              " USART_ISR_ORE  Overrun Error Detected
+       * USART_CR1_TCIE   USART_ISR_TC   Transmission Complete   (used only
+       *                                                         for RS-485)
+       * USART_CR1_TXEIE  USART_ISR_TXE  Transmit Data Register
+       *                                     Empty
+       * USART_CR1_PEIE   USART_ISR_PE   Parity Error
        *
-       * USART_CR2_LBDIE    USART_ISR_LBD   Break Flag                      (not used)
-       * USART_CR3_EIE      USART_ISR_FE    Framing Error
-       * "           "      USART_ISR_NF    Noise Error
-       * "           "      USART_ISR_ORE   Overrun Error Detected
-       * USART_CR3_CTSIE    USART_ISR_CTS   CTS flag                        (not used)
+       * USART_CR2_LBDIE  USART_ISR_LBD  Break Flag               (not used)
+       * USART_CR3_EIE    USART_ISR_FE   Framing Error
+       * "           "    USART_ISR_NF   Noise Error
+       * "           "    USART_ISR_ORE  Overrun Error Detected
+       * USART_CR3_CTSIE  USART_ISR_CTS  CTS flag                 (not used)
        *
-       * NOTE: Some of these status bits must be cleared by explicitly writing
+       * NOTE:
+       * Some of these status bits must be cleared by explicitly writing
        * zero to the SR register: USART_ISR_CTS, USART_ISR_LBD. Note of those
        * are currently being used.
        */
 
 #ifdef HAVE_RS485
       /* Transmission of whole buffer is over - TC is set, TXEIE is cleared.
-       * Note - this should be first, to have the most recent TC bit value from
-       * SR register - sending data affects TC, but without refresh we will not
-       * know that...
+       * Note - this should be first, to have the most recent TC bit value
+       * from SR register - sending data affects TC, but without refresh we
+       * will not know that...
        */
 
-      if ((priv->sr & USART_ISR_TC) != 0 && (priv->ie & USART_CR1_TCIE) != 0 &&
+      if ((priv->sr & USART_ISR_TC) != 0 &&
+          (priv->ie & USART_CR1_TCIE) != 0 &&
           (priv->ie & USART_CR1_TXEIE) == 0)
         {
           stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
@@ -2335,9 +2333,9 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
       if ((priv->sr & USART_ISR_RXNE) != 0 &&
           (priv->ie & USART_CR1_RXNEIE) != 0)
         {
-          /* Received data ready... process incoming bytes.  NOTE the check for
-           * RXNEIE:  We cannot call uart_recvchards of RX interrupts are
-           * disabled.
+          /* Received data ready... process incoming bytes.
+           * NOTE the check for  RXNEIE:  We cannot call
+           * uart_recvchards of RX interrupts are disabled.
            */
 
           uart_recvchars(&priv->dev);
@@ -2348,7 +2346,8 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
        * error conditions.
        */
 
-      else if ((priv->sr & (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE)) != 0)
+      else if ((priv->sr &
+               (USART_ISR_ORE | USART_ISR_NF | USART_ISR_FE)) != 0)
         {
           /* These errors are cleared by writing the corresponding bit to the
            * interrupt clear register (ICR).
@@ -2360,7 +2359,8 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((priv->sr & USART_ISR_TXE) != 0 && (priv->ie & USART_CR1_TXEIE) != 0)
+      if ((priv->sr & USART_ISR_TXE) != 0 &&
+          (priv->ie & USART_CR1_TXEIE) != 0)
         {
           /* Transmit data register empty ... process outgoing bytes */
 
@@ -2372,13 +2372,13 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
   return OK;
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
@@ -2437,13 +2437,17 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) == SER_SINGLEWIRE_PUSHPULL ?
-                                                                   GPIO_PUSHPULL : GPIO_OPENDRAIN;
-            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLUP ?
-                                                            GPIO_PULLUP : GPIO_FLOAT;
-            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLDOWN ?
-                                                            GPIO_PULLDOWN : GPIO_FLOAT;
-            stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | gpio_val);
+            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
+                               SER_SINGLEWIRE_PUSHPULL ?
+                               GPIO_PUSHPULL : GPIO_OPENDRAIN;
+            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
+                               SER_SINGLEWIRE_PULLUP ?
+                               GPIO_PULLUP : GPIO_FLOAT;
+            gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
+                               SER_SINGLEWIRE_PULLDOWN ?
+                               GPIO_PULLDOWN : GPIO_FLOAT;
+            stm32_configgpio((priv->tx_gpio &
+                            ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) | gpio_val);
             cr |= USART_CR3_HDSEL;
           }
         else
@@ -2731,7 +2735,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_receive
  *
  * Description:
@@ -2739,7 +2743,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *   character from the USART.  Error bits associated with the
  *   receipt are provided in the return 'status'.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_RXDMA
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
@@ -2762,13 +2766,13 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_RXDMA
 static void up_rxint(struct uart_dev_s *dev, bool enable)
@@ -2779,17 +2783,18 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   /* USART receive interrupts:
    *
-   * Enable             Status          Meaning                         Usage
-   * ------------------ --------------- ------------------------------- ----------
-   * USART_CR1_IDLEIE   USART_ISR_IDLE  Idle Line Detected              (not used)
-   * USART_CR1_RXNEIE   USART_ISR_RXNE  Received Data Ready to be Read
-   * "              "   USART_ISR_ORE   Overrun Error Detected
-   * USART_CR1_PEIE     USART_ISR_PE    Parity Error
+   * Enable           Status         Meaning                   Usage
+   * ---------------- -------------- ----------------------- ----------
+   * USART_CR1_IDLEIE USART_ISR_IDLE Idle Line Detected       (not used)
+   * USART_CR1_RXNEIE USART_ISR_RXNE Received Data Ready
+   *                                     to be Read
+   * "              " USART_ISR_ORE  Overrun Error Detected
+   * USART_CR1_PEIE   USART_ISR_PE   Parity Error
    *
-   * USART_CR2_LBDIE    USART_ISR_LBD   Break Flag                      (not used)
-   * USART_CR3_EIE      USART_ISR_FE    Framing Error
-   * "           "      USART_ISR_NF    Noise Error
-   * "           "      USART_ISR_ORE   Overrun Error Detected
+   * USART_CR2_LBDIE  USART_ISR_LBD  Break Flag               (not used)
+   * USART_CR3_EIE    USART_ISR_FE   Framing Error
+   * "           "    USART_ISR_NF   Noise Error
+   * "           "    USART_ISR_ORE  Overrun Error Detected
    */
 
   flags = enter_critical_section();
@@ -2820,13 +2825,13 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_RXDMA
 static bool up_rxavailable(struct uart_dev_s *dev)
@@ -2836,7 +2841,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_rxflowcontrol
  *
  * Description:
@@ -2857,7 +2862,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
  * Returned Value:
  *   true if RX flow control activated.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool up_rxflowcontrol(struct uart_dev_s *dev,
@@ -2932,7 +2937,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_receive
  *
  * Description:
@@ -2940,7 +2945,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
  *   character from the USART.  Error bits associated with the
  *   receipt are provided in the return 'status'.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
@@ -3017,13 +3022,13 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_reenable
  *
  * Description:
  *   Call to re-enable RX DMA.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #if defined(SERIAL_HAVE_RXDMA) && defined(CONFIG_PM)
 static void up_dma_reenable(struct up_dev_s *priv)
@@ -3058,13 +3063,13 @@ static void up_dma_reenable(struct up_dev_s *priv)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
@@ -3083,13 +3088,13 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 static bool up_dma_rxavailable(struct uart_dev_s *dev)
@@ -3104,14 +3109,14 @@ static bool up_dma_rxavailable(struct uart_dev_s *dev)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_txcallback
  *
  * Description:
  *   This function clears dma buffer at complete of DMA transfer and wakes up
  *   threads waiting for space in buffer.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
@@ -3146,7 +3151,8 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
           /* Start transmission with the callback on DMA completion */
 
-          stm32_dmastart(priv->txdma, up_dma_txcallback, (void *)priv, false);
+          stm32_dmastart(priv->txdma, up_dma_txcallback,
+                        (void *)priv, false);
 
           return;
         }
@@ -3158,13 +3164,13 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_txavailable
  *
  * Description:
  *        Informs DMA that Tx data is available and is ready for transfer.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txavailable(struct uart_dev_s *dev)
@@ -3180,14 +3186,14 @@ static void up_dma_txavailable(struct uart_dev_s *dev)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_send
  *
  * Description:
  *   Called (usually) from the interrupt level to start DMA transfer.
  *   (Re-)Configures DMA Stream updating buffer and buffer length.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_send(struct uart_dev_s *dev)
@@ -3217,7 +3223,9 @@ static void up_dma_send(struct uart_dev_s *dev)
                       (uintptr_t)dev->dmatx.nbuffer + dev->dmatx.nlength);
     }
 
-  /* Make use of setup function to update buffer and its length for next transfer */
+  /* Make use of setup function to update buffer and its length for next
+   * transfer
+   */
 
   stm32_dmasetup(priv->txdma,
                  priv->usartbase + STM32_USART_TDR_OFFSET,
@@ -3231,13 +3239,13 @@ static void up_dma_send(struct uart_dev_s *dev)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_send
  *
  * Description:
  *   This method will send one byte on the USART
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_send(struct uart_dev_s *dev, int ch)
 {
@@ -3253,13 +3261,13 @@ static void up_send(struct uart_dev_s *dev, int ch)
   up_serialout(priv, STM32_USART_TDR_OFFSET, (uint32_t)ch);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts from the UART.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txint(struct uart_dev_s *dev, bool enable)
@@ -3275,13 +3283,13 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
@@ -3290,11 +3298,13 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
   /* USART transmit interrupts:
    *
-   * Enable             Status          Meaning                      Usage
-   * ------------------ --------------- ---------------------------- ----------
-   * USART_CR1_TCIE     USART_ISR_TC    Transmission Complete        (used only for RS-485)
-   * USART_CR1_TXEIE    USART_ISR_TXE   Transmit Data Register Empty
-   * USART_CR3_CTSIE    USART_ISR_CTS   CTS flag                     (not used)
+   * Enable          Status         Meaning              Usage
+   * --------------- ------------- --------------------- ----------
+   * USART_CR1_TCIE  USART_ISR_TC  Transmission Complete (used only
+   *                                                      for RS-485)
+   * USART_CR1_TXEIE USART_ISR_TXE Transmit Data
+   *                                   Register Empty
+   * USART_CR3_CTSIE USART_ISR_CTS CTS flag               (not used)
    */
 
   flags = enter_critical_section();
@@ -3342,13 +3352,13 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   leave_critical_section(flags);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_txready
  *
  * Description:
  *   Return true if the transmit data register is empty
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 static bool up_txready(struct uart_dev_s *dev)
 {
@@ -3356,14 +3366,14 @@ static bool up_txready(struct uart_dev_s *dev)
   return ((up_serialin(priv, STM32_USART_ISR_OFFSET) & USART_ISR_TXE) != 0);
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_dma_rxcallback
  *
  * Description:
  *   This function checks the current DMA state and calls the generic
  *   serial stack when bytes appear to be available.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
@@ -3377,10 +3387,9 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Get the masked USART status word to check and clear error flags.
    *
-   * When wake-up from low power mode was not fast enough, UART is resumed too
-   * late and sometimes exactly when character was coming over UART, resulting
-   * to frame error.
-
+   * When wake-up from low power mode was not fast enough, UART is resumed
+   * too late and sometimes exactly when character was coming over UART,
+   * resulting to frame error.
    * If error flag is not cleared, Rx DMA will be stuck. Clearing errors
    * will release Rx DMA.
    */
@@ -3395,7 +3404,7 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_pm_notify
  *
  * Description:
@@ -3415,7 +3424,7 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  *   consumption state when when it returned OK to the prepare() call.
  *
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static void up_pm_notify(struct pm_callback_s *cb, int domain,
@@ -3456,7 +3465,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_pm_prepare
  *
  * Description:
@@ -3487,7 +3496,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
  *              return non-zero values when reverting back to higher power
  *              consumption modes!
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static int up_pm_prepare(struct pm_callback_s *cb, int domain,
@@ -3570,13 +3579,13 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 #endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
-/**************************************************************************************************
+/****************************************************************************
  * Public Functions
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef USE_SERIALDRIVER
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: arm_earlyserialinit
  *
  * Description:
@@ -3584,7 +3593,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
  *   serial console will be available during bootup.  This must be called
  *   before arm_serialinit.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT
 void arm_earlyserialinit(void)
@@ -3611,14 +3620,14 @@ void arm_earlyserialinit(void)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: arm_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
  *   that arm_earlyserialinit was called previously.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 void arm_serialinit(void)
 {
@@ -3698,7 +3707,7 @@ void arm_serialinit(void)
 #endif /* HAVE UART */
 }
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: stm32_serial_dma_poll
  *
  * Description:
@@ -3707,7 +3716,7 @@ void arm_serialinit(void)
  *
  *   This function should be called from a timer or other periodic context.
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
 void stm32_serial_dma_poll(void)
@@ -3776,13 +3785,13 @@ void stm32_serial_dma_poll(void)
 }
 #endif
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug writes
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 int up_putc(int ch)
 {
@@ -3809,13 +3818,13 @@ int up_putc(int ch)
 
 #else /* USE_SERIALDRIVER */
 
-/**************************************************************************************************
+/****************************************************************************
  * Name: up_putc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug writes
  *
- **************************************************************************************************/
+ ****************************************************************************/
 
 int up_putc(int ch)
 {

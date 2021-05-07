@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -343,9 +344,8 @@ static int  sam_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
 /* EVENT handler */
 
 static void sam_waitenable(FAR struct sdio_dev_s *dev,
-              sdio_eventset_t eventset);
-static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
-              uint32_t timeout);
+              sdio_eventset_t eventset, uint32_t timeout);
+static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev);
 static void sam_callbackenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
 static int  sam_registercallback(FAR struct sdio_dev_s *dev,
@@ -1023,7 +1023,7 @@ static void sam_transmit(struct sam_dev_s *priv)
    * (PRSSTAT.BWEN)
    */
 
-  mcinfo("Entry: remaining: %d IRQSTAT: %08x\n", priv->remaining,
+  mcinfo("Entry: remaining: %d IRQSTAT: %08" PRIx32 "\n", priv->remaining,
          sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
 
   while (priv->remaining > 0 &&
@@ -1070,7 +1070,7 @@ static void sam_transmit(struct sam_dev_s *priv)
 
   sam_putreg(priv, SDMMC_INT_BWR, SAMA5_SDMMC_IRQSTAT_OFFSET);
 
-  mcinfo("Exit: remaining: %d IRQSTAT: %08x\n", priv->remaining,
+  mcinfo("Exit: remaining: %d IRQSTAT: %08" PRIx32 "\n", priv->remaining,
          sam_getreg16(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
 }
 #endif
@@ -1102,7 +1102,7 @@ static void sam_receive(struct sam_dev_s *priv)
    * read ready (BRR)
    */
 
-  mcinfo("Entry: remaining: %d IRQSTAT: %08x\n", priv->remaining,
+  mcinfo("Entry: remaining: %d IRQSTAT: %08" PRIx32 "\n", priv->remaining,
          sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
 
   /* Clear BRR. It only fires on the first block of data. */
@@ -1147,7 +1147,7 @@ static void sam_receive(struct sam_dev_s *priv)
         }
     }
 
-  mcinfo("Exit: remaining: %d IRQSTAT: %08x\n", priv->remaining,
+  mcinfo("Exit: remaining: %d IRQSTAT: %08" PRIx32 "\n", priv->remaining,
          sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
 }
 #endif
@@ -1319,8 +1319,9 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
   enabled = irqstat & irqsigen;
   pending = enabled & priv->xfrints;
 
-  mcinfo("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x pending: %08x "
-         "xfrints:%08x\n",
+  mcinfo("IRQSTAT: %08" PRIx32 " IRQSIGEN %08" PRIx32
+         " enabled: %08" PRIx32 " pending: %08" PRIx32
+         " xfrints:%08" PRIx32 "\n",
          irqstat, irqsigen, enabled, pending, priv->xfrints);
 
   /* Handle in progress, interrupt driven data transfers ********************/
@@ -1553,7 +1554,8 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   sam_putreg(priv, SDMMC_INT_ALL,  SAMA5_SDMMC_IRQSTATEN_OFFSET);
 
-  mcinfo("SYSCTL: %08x PRSSTAT: %08x IRQSTATEN: %08x\n",
+  mcinfo("SYSCTL: %08" PRIx32 " PRSSTAT: %08" PRIx32
+         " IRQSTATEN: %08" PRIx32 "\n",
          sam_getreg(priv, SAMA5_SDMMC_SYSCTL_OFFSET),
          sam_getreg(priv, SAMA5_SDMMC_PRSSTAT_OFFSET),
          sam_getreg(priv, SAMA5_SDMMC_IRQSTATEN_OFFSET));
@@ -1917,7 +1919,7 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
         /* Clear the prescaler and divisor settings */
 
         sam_putreg(priv, regval,  SAMA5_SDMMC_SYSCTL_OFFSET);
-        mcinfo("DISABLED, SYSCTRL: %08x\n",
+        mcinfo("DISABLED, SYSCTRL: %08" PRIx32 "\n",
                sam_getreg(priv, SAMA5_SDMMC_SYSCTL_OFFSET));
         sam_set_clock(priv, 0);
       }
@@ -2239,7 +2241,8 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval |= SDMMC_XFERTYP_CMDTYP_ABORT;
     }
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32
+         " regval: %08" PRIx32 "\n", cmd, arg, regval);
 
   /* If there has been a response error then perform a reset and wait for it
    * to complete.
@@ -2275,7 +2278,8 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
       elapsed = clock_systime_ticks() - start;
       if (elapsed >= timeout)
         {
-          mcerr("ERROR: Timeout (waiting CIHB) cmd: %08x PRSSTAT: %08x\n",
+          mcerr("ERROR: Timeout (waiting CIHB) "
+                "cmd: %08" PRIx32 " PRSSTAT: %08" PRIx32 "\n",
                 cmd, sam_getreg(priv, SAMA5_SDMMC_PRSSTAT_OFFSET));
           return -EBUSY;
         }
@@ -2319,7 +2323,7 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev,
 {
   FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
 
-  mcinfo("blocklen=%ld, total transfer=%ld (%ld blocks)\n", blocklen,
+  mcinfo("blocklen=%d, total transfer=%d (%d blocks)\n", blocklen,
          blocklen * nblocks, nblocks);
 
   /* Configure block size for next transfer */
@@ -2363,7 +2367,7 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   sam_sampleinit();
 
-  mcinfo("nbytes: %d priv->remaining: %d IRQSTAT: %08x\n", nbytes,
+  mcinfo("nbytes: %zd priv->remaining: %d IRQSTAT: %08" PRIx32 "\n", nbytes,
           priv->remaining,
           sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
   sam_sample(priv, SAMPLENDX_BEFORE_SETUP);
@@ -2377,13 +2381,13 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Then set up the SDIO data path */
 
-  mcinfo("remaining: %d IRQSTAT: %08x\n", priv->remaining,
+  mcinfo("remaining: %d IRQSTAT: %08" PRIx32 "\n", priv->remaining,
          sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
   sam_dataconfig(priv, false, nbytes, SDMMC_DTOCV_MAXTIMEOUT);
 
   /* And enable interrupts */
 
-  mcinfo("remaining: %d IRQSTAT: %08x\n", priv->remaining,
+  mcinfo("remaining: %d IRQSTAT: %08" PRIx32 "\n", priv->remaining,
          sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
   sam_configxfrints(priv, SDMMC_RCVDONE_INTS | SDMMC_XFRDONE_INTS);
   sam_sample(priv, SAMPLENDX_AFTER_SETUP);
@@ -2569,7 +2573,8 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
       elapsed = clock_systime_ticks() - start;
       if (elapsed >= timeout)
         {
-          mcerr("ERROR: Timeout cmd: %08x IRQSTAT: %08x\n", cmd,
+          mcerr("ERROR: Timeout cmd: %08" PRIx32
+                " IRQSTAT: %08" PRIx32 "\n", cmd,
                 sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
           sam_showregs(priv, "After timeout");
           ret = -ETIMEDOUT;
@@ -2582,9 +2587,10 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
   enerrors = sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET) & errors;
   if (enerrors != 0)
     {
-      mcerr("ERROR: cmd: %08x errors: %08x, fired %08x IRQSTAT: %08x\n",
-              cmd, errors, enerrors,
-              sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
+      mcerr("ERROR: cmd: %08" PRIx32 " errors: %08" PRIx32 ", "
+            "fired %08" PRIx32 " IRQSTAT: %08" PRIx32 "\n",
+            cmd, errors, enerrors,
+            sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET));
         ret = -EIO;
     }
 
@@ -2667,12 +2673,12 @@ static int sam_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET);
       if ((regval & SDMMC_INT_CTOE) != 0)
         {
-          mcerr("ERROR: Command timeout: %08x\n", regval);
+          mcerr("ERROR: Command timeout: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if ((regval & SDMMC_INT_CCE) != 0)
         {
-          mcerr("ERROR: CRC failure: %08x\n", regval); ret = -EIO;
+          mcerr("ERROR: CRC failure: %08" PRIx32 "\n", regval); ret = -EIO;
         }
     }
 
@@ -2710,7 +2716,7 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2721,12 +2727,12 @@ static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET);
       if (regval & SDMMC_INT_CTOE)
         {
-          mcerr("ERROR: Timeout IRQSTAT: %08x\n", regval);
+          mcerr("ERROR: Timeout IRQSTAT: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
       else if (regval & SDMMC_INT_CCE)
         {
-          mcerr("ERROR: CRC fail IRQSTAT: %08x\n", regval);
+          mcerr("ERROR: CRC fail IRQSTAT: %08" PRIx32 "\n", regval);
           ret = -EIO;
         }
     }
@@ -2771,7 +2777,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R4_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2784,7 +2790,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
       regval = sam_getreg(priv, SAMA5_SDMMC_IRQSTAT_OFFSET);
       if (regval & SDMMC_INT_CTOE)
         {
-          mcerr("ERROR: Timeout IRQSTAT: %08x\n", regval);
+          mcerr("ERROR: Timeout IRQSTAT: %08" PRIx32 "\n", regval);
           ret = -ETIMEDOUT;
         }
     }
@@ -2824,7 +2830,7 @@ static int sam_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
  ****************************************************************************/
 
 static void sam_waitenable(FAR struct sdio_dev_s *dev,
-                             sdio_eventset_t eventset)
+                             sdio_eventset_t eventset, uint32_t timeout)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t waitints;
@@ -2857,6 +2863,33 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
   /* Enable event-related interrupts */
 
   sam_configwaitints(priv, waitints, eventset, 0);
+
+  /* Check if the timeout event is specified in the event set */
+
+  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
+    {
+      int delay;
+      int ret;
+
+      /* Yes.. Handle a corner case */
+
+      if (!timeout)
+        {
+          priv->wkupevent = SDIOWAIT_TIMEOUT;
+          return;
+        }
+
+      /* Start the watchdog timer */
+
+      delay = MSEC2TICK(timeout);
+      ret = wd_start(&priv->waitwdog, delay,
+                     sam_eventtimeout, (wdparm_t)priv);
+
+      if (ret < 0)
+        {
+          mcerr("ERROR: wd_start failed: %d\n", ret);
+        }
+    }
 }
 
 /****************************************************************************
@@ -2880,11 +2913,10 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
-                                       uint32_t timeout)
+static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  sdio_eventset_t wkupevent = 0; int ret;
+  sdio_eventset_t wkupevent = 0;
 
   /* There is a race condition here... the event may have completed before
    * we get here.  In this case waitevents will be zero, but wkupevents
@@ -2894,31 +2926,6 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
               (priv->waitevents == 0 && priv->wkupevent != 0));
-
-  /* Check if the timeout event is specified in the event set */
-
-  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
-    {
-      int delay;
-
-      /* Yes.. Handle a corner case */
-
-      if (!timeout)
-        {
-          return SDIOWAIT_TIMEOUT;
-        }
-
-      /* Start the watchdog timer */
-
-      delay = MSEC2TICK(timeout);
-      ret = wd_start(&priv->waitwdog, delay,
-                     sam_eventtimeout, (wdparm_t)priv);
-
-      if (ret < 0)
-        {
-          mcerr("ERROR: wd_start failed: %d\n", ret);
-        }
-    }
 
   /* Loop until the event (or the timeout occurs). Race conditions are
    * avoided by calling sam_waitenable prior to triggering the logic

@@ -1,36 +1,20 @@
 /****************************************************************************
  * drivers/sensors/mlx90393.c
- * Character driver for the MLX90393 3-Axis magnetometer.
  *
- *   Copyright (C) 2016 DS-Automotion GmbH. All rights reserved.
- *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -91,7 +75,8 @@ struct mlx90393_dev_s
 static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev);
 static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev);
 static void mlx90393_read_register(FAR struct mlx90393_dev_s *dev,
-                                   uint8_t const reg_addr, uint16_t *reg_data);
+                                   uint8_t const reg_addr,
+                                   uint16_t *reg_data);
 static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
                                     uint8_t const reg_addr,
                                     uint16_t const reg_data);
@@ -102,9 +87,12 @@ static void mlx90393_worker(FAR void *arg);
 static int mlx90393_open(FAR struct file *filep);
 static int mlx90393_close(FAR struct file *filep);
 static ssize_t mlx90393_read(FAR struct file *, FAR char *, size_t);
-static ssize_t mlx90393_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t mlx90393_write(FAR struct file *filep,
+                              FAR const char *buffer,
                               size_t buflen);
-static int mlx90393_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int mlx90393_ioctl(FAR struct file *filep,
+                          int cmd,
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -138,7 +126,9 @@ static struct mlx90393_dev_s *g_mlx90393_list = NULL;
 
 static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -148,7 +138,7 @@ static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev)
 
   /* Start Burst Mode (Continuous Measurement on all channels) */
 
-  SPI_SEND(dev->spi, MLX90393_SB | MLX90393_ZYXT_bm);
+  SPI_SEND(dev->spi, MLX90393_SB | MLX90393_ZYXT_BM);
 
   /* Write an idle byte to retrieve the status byte */
 
@@ -171,7 +161,9 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 {
   int ret;
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -181,7 +173,7 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
   /* Issue command to read measurement data on all channels */
 
-  SPI_SEND(dev->spi, MLX90393_RM | MLX90393_ZYXT_bm);
+  SPI_SEND(dev->spi, MLX90393_RM | MLX90393_ZYXT_BM);
 
   /* Write an idle byte to retrieve the status byte */
 
@@ -243,7 +235,9 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
 static void mlx90393_reset(FAR struct mlx90393_dev_s *dev)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -277,9 +271,12 @@ static void mlx90393_reset(FAR struct mlx90393_dev_s *dev)
  ****************************************************************************/
 
 static void mlx90393_read_register(FAR struct mlx90393_dev_s *dev,
-                                   uint8_t const reg_addr, uint16_t *reg_data)
+                                   uint8_t const reg_addr,
+                                   uint16_t *reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -319,7 +316,9 @@ static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
                                     uint8_t const reg_addr,
                                     uint16_t const reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it at the same
+   * time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -362,8 +361,8 @@ static void mlx90393_write_register(FAR struct mlx90393_dev_s *dev,
 
 static int mlx90393_interrupt_handler(int irq, FAR void *context)
 {
-  /* This function should be called upon a rising edge on the MLX90393 INT pin
-   * since it signals that new data has been measured. (INT = DRDY).
+  /* This function should be called upon a rising edge on the MLX90393 INT
+   * pin since it signals that new data has been measured. (INT = DRDY).
    */
 
   FAR struct mlx90393_dev_s *priv = 0;
@@ -376,8 +375,8 @@ static int mlx90393_interrupt_handler(int irq, FAR void *context)
   DEBUGASSERT(priv != NULL);
 
   /* Task the worker with retrieving the latest sensor data. We should not do
-   * this in a interrupt since it might take too long. Also we cannot lock the
-   * SPI bus from within an interrupt.
+   * this in a interrupt since it might take too long. Also we cannot lock
+   * the SPI bus from within an interrupt.
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
@@ -478,7 +477,8 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct mlx90393_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample\n");
+      snerr("ERROR: "
+            "Not enough memory for reading out a sensor data sample\n");
       return -ENOSYS;
     }
 
@@ -573,7 +573,8 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the MLX90393 device structure */
 
-  priv = (FAR struct mlx90393_dev_s *)kmm_malloc(sizeof(struct mlx90393_dev_s));
+  priv = (FAR struct mlx90393_dev_s *)
+                      kmm_malloc(sizeof(struct mlx90393_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");
@@ -613,8 +614,8 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
       return -ENODEV;
     }
 
-  /* Since we support multiple MLX90393 devices are supported, we will need to
-   * add this new instance to a list of device instances so that it can be
+  /* Since we support multiple MLX90393 devices are supported, we will need
+   * to add this new instance to a list of device instances so that it can be
    * found by the interrupt handler based on the received IRQ number.
    */
 

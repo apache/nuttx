@@ -1,37 +1,20 @@
 /****************************************************************************
  * drivers/mtd/smart.c
  *
- * Sector Mapped Allocation for Really Tiny (SMART) Flash block driver.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2013-2016 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -410,9 +393,9 @@ static int     smart_close(FAR struct inode *inode);
 static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
-                 size_t start_sector, unsigned int nsectors);
+                 blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t smart_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, size_t start_sector,
+                 FAR const unsigned char *buffer, blkcnt_t start_sector,
                  unsigned int nsectors);
 static int     smart_geometry(FAR struct inode *inode,
                  FAR struct geometry *geometry);
@@ -891,11 +874,11 @@ static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
  ****************************************************************************/
 
 static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
-                          size_t start_sector, unsigned int nsectors)
+                          blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct smart_struct_s *dev;
 
-  finfo("SMART: sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("SMART: sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
@@ -915,7 +898,7 @@ static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
 
 static ssize_t smart_write(FAR struct inode *inode,
                 FAR const unsigned char *buffer,
-                size_t start_sector, unsigned int nsectors)
+                blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct smart_struct_s *dev;
   off_t  alignedblock;
@@ -931,7 +914,7 @@ static ssize_t smart_write(FAR struct inode *inode,
   off_t  mtdstartblock;
   off_t  mtdblockcount;
 
-  finfo("sector: %d nsectors: %d\n", start_sector, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
@@ -1062,7 +1045,7 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIi16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
@@ -5945,9 +5928,9 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
               (const char *) (cur + sizeof(struct smart_entry_header_s)),
               dev->namesize);
       entryname[dev->namesize] = '\0';
-#endif
       finfo("Check entry (name=%s flags=%02x logsector=%02x)\n",
             entryname, entry->flags, entry->firstsector);
+#endif
 
       if (entry->flags & SMARTFS_DIRENT_ACTIVE)
         {
@@ -5969,8 +5952,10 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
 
       if (ret != OK)
         {
+#ifdef CONFIG_DEBUG_FS_INFO
           finfo("Remove entry (name=%s flags=%02x)\n",
                 entryname, entry->flags);
+#endif
 
           if ((cur + (2 * entrysize)) <= bottom)
             {
@@ -6362,8 +6347,8 @@ static int smart_losetup(int minor, FAR const char *filename,
       for (x = 0; x < 256; x++)
         {
           snprintf(devpath, sizeof(devpath), "/dev/smart%d", x);
-          ret = stat(devpath, &sb);
-          if (ret != 0)
+          ret = nx_stat(devpath, &sb, 1);
+          if (ret < 0)
             {
               /* We can use this minor number */
 

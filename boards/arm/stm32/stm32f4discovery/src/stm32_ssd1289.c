@@ -1,38 +1,20 @@
 /****************************************************************************
- * boards/arm/stm32/stm32fdiscover/src/stm32_ssd1289.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_ssd1289.c
  *
- * This logic supports the connection of an SSD1289-based LCD to the STM32F4Discovery
- * board.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -66,13 +48,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration **********************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_STM32_FSMC
 #  error "CONFIG_STM32_FSMC is required to use the LCD"
 #endif
 
-/* STM32F4Discovery LCD Hardware Definitions ******************************************/
+/* STM32F4Discovery LCD Hardware Definitions ********************************/
+
 /* LCD /CS is CE1 ==  NOR/SRAM Bank 1
  *
  * Bank 1 = 0x60000000 | 0x00000000
@@ -80,8 +64,8 @@
  * Bank 3 = 0x60000000 | 0x08000000
  * Bank 4 = 0x60000000 | 0x0c000000
  *
- * FSMC address bit 16 is used to distinguish command and data.  FSMC address bits
- * 0-24 correspond to ARM address bits 1-25.
+ * FSMC address bit 16 is used to distinguish command and data.
+ * FSMC address bits 0-24 correspond to ARM address bits 1-25.
  */
 
 #define STM32_LCDBASE ((uintptr_t)(0x60000000 | 0x00000000))
@@ -111,6 +95,7 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* LCD pin mapping (see boards/arm/stm32/stm324discovery/README.txt
  * MAPPING TO STM32 F4:
  *
@@ -142,9 +127,10 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
  *
  *   1 Used for the RED LED
  *   2 Used for the BLUE LED
- *   3 Used for the RED LED and for OTG FS Overcurrent.  It may be okay to use
- *     for the parallel interface if PC0 is held high (or floating).  PC0 enables
- *     the STMPS2141STR IC power switch that drives the OTG FS host VBUS.
+ *   3 Used for the RED LED and for OTG FS Overcurrent.  It may be okay to
+ *     use for the parallel interface if PC0 is held high (or floating).
+ *     PC0 enables the STMPS2141STR IC power switch that drives the OTG FS
+ *     host VBUS.
  *   4 Also the reset pin for the CS43L22 audio Codec.
  */
 
@@ -161,7 +147,9 @@ static const uint32_t g_lcdconfig[] =
 };
 #define NLCD_CONFIG (sizeof(g_lcdconfig)/sizeof(uint32_t))
 
-/* This is the driver state structure (there is no retained state information) */
+/* This is the driver state structure
+ * (there is no retained state information)
+ */
 
 static struct ssd1289_lcd_s g_ssd1289 =
 {
@@ -298,14 +286,17 @@ void stm32_selectlcd(void)
 
   /* Bank1 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) | FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTURN(0) |
-           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) | FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
+  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) |
+           FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTURN(0) |
+           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA, STM32_FSMC_BTR1);
 
   putreg32(0xffffffff, STM32_FSMC_BWTR1);
 
   /* Enable the bank by setting the MBKEN bit */
 
-  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
+  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM |
+           FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR1);
 }
 
 /****************************************************************************
@@ -316,9 +307,9 @@ void stm32_selectlcd(void)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
- *   initialized, display memory cleared, and the LCD ready to use, but with the power
- *   setting at 0 (full off).
+ *   Initialize the LCD video hardware. The initial state of the LCD is fully
+ *   initialized, display memory cleared, and the LCD ready to use, but with
+ *   the power setting at 0 (full off).
  *
  ****************************************************************************/
 
@@ -367,8 +358,8 @@ int board_lcd_initialize(void)
  * Name:  board_lcd_getdev
  *
  * Description:
- *   Return a a reference to the LCD object for the specified LCD.  This allows support
- *   for multiple LCD devices.
+ *   Return a a reference to the LCD object for the specified LCD.
+ *    This allows support for multiple LCD devices.
  *
  ****************************************************************************/
 

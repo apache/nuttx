@@ -123,6 +123,8 @@ const struct procfs_operations meminfo_operations =
   meminfo_stat    /* stat */
 };
 
+FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -268,7 +270,6 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
   FAR struct meminfo_file_s *procfile;
-  struct mallinfo mem;
   size_t linesize;
   size_t copysize;
   size_t totalsize;
@@ -296,51 +297,34 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
   /* Followed by information about the memory resources */
 
-#ifdef CONFIG_MM_KERNEL_HEAP
-  if (totalsize < buflen)
+  FAR const struct procfs_meminfo_entry_s *entry;
+
+  for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
     {
-      buffer    += copysize;
-      buflen    -= copysize;
+      if (totalsize < buflen)
+        {
+          struct mallinfo minfo;
 
-      /* Show kernel heap information */
+          buffer    += copysize;
+          buflen    -= copysize;
 
-      mem        = kmm_mallinfo();
-      linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                   "Kmem:  %11lu%11lu%11lu%11lu%7lu%7lu\n",
-                                   (unsigned long)mem.arena,
-                                   (unsigned long)mem.uordblks,
-                                   (unsigned long)mem.fordblks,
-                                   (unsigned long)mem.mxordblk,
-                                   (unsigned long)mem.aordblks,
-                                   (unsigned long)mem.ordblks);
-      copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
-                                 &offset);
-      totalsize += copysize;
+          /* Show heap information */
+
+          entry->mallinfo(entry->user_data, &minfo);
+          linesize   = snprintf(procfile->line, MEMINFO_LINELEN,
+                                "%12s:  %11lu%11lu%11lu%11lu%7lu%7lu\n",
+                                entry->name,
+                                (unsigned long)minfo.arena,
+                                (unsigned long)minfo.uordblks,
+                                (unsigned long)minfo.fordblks,
+                                (unsigned long)minfo.mxordblk,
+                                (unsigned long)minfo.aordblks,
+                                (unsigned long)minfo.ordblks);
+          copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                                     buflen, &offset);
+          totalsize += copysize;
+        }
     }
-#endif
-
-#if !defined(CONFIG_BUILD_KERNEL)
-  if (totalsize < buflen)
-    {
-      buffer    += copysize;
-      buflen    -= copysize;
-
-      /* Show user heap information */
-
-      mem        = kumm_mallinfo();
-      linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                   "Umem:  %11lu%11lu%11lu%11lu%7lu%7lu\n",
-                                   (unsigned long)mem.arena,
-                                   (unsigned long)mem.uordblks,
-                                   (unsigned long)mem.fordblks,
-                                   (unsigned long)mem.mxordblk,
-                                   (unsigned long)mem.aordblks,
-                                   (unsigned long)mem.ordblks);
-      copysize   = procfs_memcpy(procfile->line, linesize, buffer, buflen,
-                                 &offset);
-      totalsize += copysize;
-    }
-#endif
 
 #ifdef CONFIG_MM_PGALLOC
   if (totalsize < buflen)
@@ -472,5 +456,22 @@ static int meminfo_stat(FAR const char *relpath, FAR struct stat *buf)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: procfs_register_meminfo
+ *
+ * Description:
+ *   Add a new meminfo entry to the procfs file system.
+ *
+ * Input Parameters:
+ *   entry - Describes the entry to be registered.
+ *
+ ****************************************************************************/
+
+void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
+{
+  entry->next = g_procfs_meminfo;
+  g_procfs_meminfo = entry;
+}
 
 #endif /* !CONFIG_FS_PROCFS_EXCLUDE_MEMINFO */

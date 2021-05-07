@@ -45,12 +45,12 @@
  * disabled.
  */
 
-volatile spinlock_t g_cpu_irqlock SP_SECTION = SP_UNLOCKED;
+volatile spinlock_t g_cpu_irqlock = SP_UNLOCKED;
 
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
-volatile cpu_set_t g_cpu_irqset SP_SECTION;
+volatile spinlock_t g_cpu_irqsetlock;
+volatile cpu_set_t g_cpu_irqset;
 
 /* Handles nested calls to enter_critical section from interrupt handlers */
 
@@ -105,7 +105,7 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static inline bool irq_waitlock(int cpu)
+bool irq_waitlock(int cpu)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   FAR struct tcb_s *tcb = current_task(cpu);

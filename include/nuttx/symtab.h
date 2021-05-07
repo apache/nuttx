@@ -1,35 +1,20 @@
 /****************************************************************************
  * include/nuttx/symtab.h
  *
- *   Copyright (C) 2009, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -51,7 +36,7 @@
  ****************************************************************************/
 
 /* struct symbtab_s describes one entry in the symbol table.  A symbol table
- * is a fixed size array of struct symtab_s.  The information is intentionally
+ * is a fixed size array of struct symtab_s. The information is intentionally
  * minimal and supports only:
  *
  * 1. Function pointers as sym_values.  Of other kinds of values need to be
@@ -71,7 +56,7 @@ struct symtab_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
@@ -88,8 +73,9 @@ extern "C"
  *
  * Description:
  *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table is not ordered with respect to symbol
- *   name and, hence, access time will be linear with respect to nsyms.
+ *   The implementation will be linear with respect to nsyms if
+ *   CONFIG_SYMTAB_ORDEREDBYNAME is not selected, and logarithmic
+ *   if it is.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -102,30 +88,13 @@ symtab_findbyname(FAR const struct symtab_s *symtab,
                   FAR const char *name, int nsyms);
 
 /****************************************************************************
- * Name: symtab_findorderedbyname
- *
- * Description:
- *   Find the symbol in the symbol table with the matching name.
- *   This version assumes that table ordered with respect to symbol name.
- *
- * Returned Value:
- *   A reference to the symbol table entry if an entry with the matching
- *   name is found; NULL is returned if the entry is not found.
- *
- ****************************************************************************/
-
-FAR const struct symtab_s *
-symtab_findorderedbyname(FAR const struct symtab_s *symtab,
-                         FAR const char *name, int nsyms);
-
-/****************************************************************************
  * Name: symtab_findbyvalue
  *
  * Description:
  *   Find the symbol in the symbol table whose value closest (but not greater
- *   than), the provided value. This version assumes that table is not ordered
- *   with respect to symbol name and, hence, access time will be linear with
- *   respect to nsyms.
+ *   than), the provided value. This version assumes that table is not
+ *   ordered with respect to symbol value and, hence, access time will be
+ *   linear with respect to nsyms.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching

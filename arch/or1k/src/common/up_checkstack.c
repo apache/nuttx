@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/or1k/src/common/up_checkstack.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -46,7 +31,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/tls.h>
 #include <nuttx/board.h>
 
 #include "sched/sched.h"
@@ -58,13 +42,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack);
+static size_t do_stackcheck(uintptr_t alloc, size_t size);
 
 /****************************************************************************
- * Private Functions
+ * Private Function
  ****************************************************************************/
-
-static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack);
 
 /****************************************************************************
  * Name: do_stackcheck
@@ -83,7 +65,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
+static size_t do_stackcheck(uintptr_t alloc, size_t size)
 {
   FAR uintptr_t start;
   FAR uintptr_t end;
@@ -97,21 +79,8 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 
   /* Get aligned addresses of the top and bottom of the stack */
 
-  if (!int_stack)
-    {
-      /* Skip over the TLS data structure at the bottom of the stack */
-
-#ifdef CONFIG_TLS_ALIGNED
-      DEBUGASSERT((alloc & TLS_STACK_MASK) == 0);
-#endif
-      start = alloc + sizeof(struct tls_info_s);
-    }
-  else
-    {
-      start = alloc & ~3;
-    }
-
-  end   = (alloc + size + 3) & ~3;
+  start = (alloc + 3) & ~3;
+  end   = (alloc + size) & ~3;
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -148,13 +117,12 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size,
-                       false);
+  return do_stackcheck((uintptr_t)tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
 {
-  return (ssize_t)tcb->adj_stack_size - (ssize_t)up_check_tcbstack(tcb);
+  return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }
 
 size_t up_check_stack(void)
@@ -171,8 +139,7 @@ ssize_t up_check_stack_remain(void)
 size_t up_check_intstack(void)
 {
   return do_stackcheck((uintptr_t)&g_intstackalloc,
-                       (CONFIG_ARCH_INTERRUPTSTACK & ~3),
-                       true);
+                       (CONFIG_ARCH_INTERRUPTSTACK & ~3));
 }
 
 size_t up_check_intstack_remain(void)

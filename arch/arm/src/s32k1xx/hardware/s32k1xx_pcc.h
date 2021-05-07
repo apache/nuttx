@@ -1,53 +1,38 @@
-/************************************************************************************
- * arch/arm/src/s32k1xx/chip/s32k1xx_pcc.h
+/****************************************************************************
+ * arch/arm/src/s32k1xx/hardware/s32k1xx_pcc.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PCC_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_PCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <hardware/s32k1xx_memorymap.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* PCC Register Offsets *************************************************************/
+/* PCC Register Offsets *****************************************************/
 
 #define S32K1XX_PCC_FTFC_OFFSET      0x0080  /* PCC FTFC Register */
 #define S32K1XX_PCC_DMAMUX_OFFSET    0x0084  /* PCC DMAMUX Register */
@@ -93,7 +78,7 @@
 #define S32K1XX_PCC_QSPI_OFFSET      0x01d8  /* PCC QSPI Register */
 #define S32K1XX_PCC_ENET_OFFSET      0x01e4  /* PCC ENET Register */
 
-/* PCC Register Addresses ***********************************************************/
+/* PCC Register Addresses ***************************************************/
 
 #define S32K1XX_PCC_FTFC             (S32K1XX_PCC_BASE + S32K1XX_PCC_FTFC_OFFSET)
 #define S32K1XX_PCC_DMAMUX           (S32K1XX_PCC_BASE + S32K1XX_PCC_DMAMUX_OFFSET)
@@ -139,15 +124,16 @@
 #define S32K1XX_PCC_QSPI             (S32K1XX_PCC_BASE + S32K1XX_PCC_QSPI_OFFSET)
 #define S32K1XX_PCC_ENET             (S32K1XX_PCC_BASE + S32K1XX_PCC_ENET_OFFSET)
 
-/* PCC Register Bitfield Definitions ************************************************/
+/* PCC Register Bitfield Definitions ****************************************/
 
-/* The form of each PCC register is the same as follows.  Some register, however, do
- * not support all of the fields:
+/* The form of each PCC register is the same as follows.
+ *  Some register, however, do not support all of the fields:
  *
  * PCD  - ENET
  * FRAC - ENET
- * PCS  - FTM3, ADC0, ADC1, LPSPI0, LPSPI1, LPSPI2, LPIT, FTM0, FTM2, FTM4, FTM6,
- *        FTM7, LPTMR0, FLEXIO, LPI2C0, LPCI2C1, UART0, UART1, UART2, ENET
+ * PCS  - FTM3, ADC0, ADC1, LPSPI0, LPSPI1, LPSPI2, LPIT,
+ *        FTM0, FTM2, FTM4, FTM6, FTM7, LPTMR0, FLEXIO, LPI2C0, LPCI2C1,
+ *        UART0, UART1, UART2, ENET
  * CGC  - All PCC registers
  * PR   - All PCC registers
  */

@@ -1,0 +1,10 @@
+/arm/stm32l*,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+
+/arm/str71x,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+
+/arm/[t-z]*,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
+-eagle100:nxflat
+-eagle100:thttpd
+-launchxl-cc1310:nsh
+-launchxl-tms57004:nsh
+-tms570ls31x-usb-kit:nsh

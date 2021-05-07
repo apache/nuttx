@@ -12,9 +12,9 @@ config FS_MQUEUE_MPATH
 		The path to where POSIX message queues will exist in the VFS namespace.
 
 config FS_MQUEUE_NPOLLWAITERS
-	int "mesage queue number of poll waiters"
+	int "Maximum number of poll waiters"
 	default 4
 	---help---
-		Mesage queue number of poll waiters
+		The maximum number of waiters for the poll operation.
 
 endif # !DISABLE_MQUEUE

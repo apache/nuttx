@@ -1,57 +1,45 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_udphs.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   SAMA5D3 Series Data Sheet
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_UDPHS_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_UDPHS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* General Definitions **********************************************************************/
+ ****************************************************************************/
+
+/* General Definitions ******************************************************/
+
 /* Number of endpoints and DMA channels */
 
 #define SAM_UDPHS_NENDPOINTS            16     /* EP0-15 */
@@ -66,7 +54,7 @@
 #define SAM_UDPHS_DMA(ep) \
    (((unsigned)(ep) < 1) ? false : (((unsigned)(ep) < 8) ? true : false))
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 /* Global Registers */
 
@@ -80,6 +68,7 @@
                                                /* 0x0020-0x00cc Reserved */
 #define SAM_UDPHS_TST_OFFSET            0x00e0 /* UDPHS Test Register */
                                                /* 0x00e4-0x00e8 Reserved */
+
 /* Endpoint Offsets */
 
 #define SAM_UDPHS_EP_OFFSET(ep)         (0x0100+((unsigned int)(ep)<<5))
@@ -129,7 +118,7 @@
 #define SAM_UDPHS_DMACONTROL_OFFSET     0x0008 /* UDPHS DMA Channel Control Register */
 #define SAM_UDPHS_DMASTATUS_OFFSET      0x000c /* UDPHS DMA Channel Status Register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 /* Global Registers */
 
@@ -189,7 +178,7 @@
 #define SAM_UDPHS_DMACONTROL(ch)        (SAM_UDPHS_CH_BASE(ch)+SAM_UDPHS_DMACONTROL_OFFSET)
 #define SAM_UDPHS_DMASTATUS(ch)         (SAM_UDPHS_CH_BASE(ch)+SAM_UDPHS_DMASTATUS_OFFSET)
 
-/* Register bit-field definitions ***********************************************************/
+/* Register bit-field definitions *******************************************/
 
 /* Global Registers */
 
@@ -213,12 +202,13 @@
 #define UDPHS_FNUM_FNUMERR              (1 << 31) /* Bit 31: Frame Number CRC Error */
 
 /* Common interrupt bits */
+
 /* UDPHS Interrupt Status Register (only) */
 
 #define UDPHS_INTSTA_SPEED              (1 << 0)  /* Bit 0:  Speed Status */
 
-/* UDPHS Interrupt Enable Register, UDPHS Interrupt Status Register, and UDPHS Clear
- * Interrupt Register
+/* UDPHS Interrupt Enable Register, UDPHS Interrupt Status Register,
+ * and UDPHS Clear Interrupt Register
  */
 
 #define UDPHS_INT_DETSUSPD              (1 << 1)  /* Bit 1:  Suspend Interrupt */
@@ -234,6 +224,7 @@
 #define UDPHS_INT_EPT_SHIFT             (8)       /* Bits 8-23: Endpoint interrupts */
 #define UDPHS_INT_EPT_MASK              (0xffff << UDPHS_INT_EPT_SHIFT)
 #define UDPHS_INT_EPT(ep)               (1 << +((ep)+8))  /* Endpoint ep Interrupt */
+
 #  define UDPHS_INT_EPT0                (1 << 8)  /* Bit 8: Endpoint 0 Interrupt */
 #  define UDPHS_INT_EPT1                (1 << 9)  /* Bit 9: Endpoint 1 Interrupt */
 #  define UDPHS_INT_EPT2                (1 << 10) /* Bit 10: Endpoint 2 Interrupt */
@@ -253,6 +244,7 @@
 #define UDPHS_INT_DMA_SHIFT             (25)      /* Bits 25-31: Endpoint interrupts */
 #define UDPHS_INT_DMA_MASK              (0x7f << UDPHS_INT_DMA_SHIFT)
 #define UDPHS_INT_DMA(ch)               (1 << ((ch)+24)) /* DMA Channel ch Interrupt */
+
 #  define UDPHS_INT_DMA1                (1 << 25) /* Bit 25: DMA Channel 1 Interrupt */
 #  define UDPHS_INT_DMA2                (1 << 26) /* Bit 26: DMA Channel 2 Interrupt */
 #  define UDPHS_INT_DMA3                (1 << 27) /* Bit 27: DMA Channel 3 Interrupt */
@@ -264,6 +256,7 @@
 /* UDPHS Endpoints Reset Register */
 
 #define UDPHS_EPTRST(ep)                (1 << (ep))  /* Endpoint ep Reset */
+
 #  define UDPHS_EPT0RST                 (1 << 0)  /* Bit 0:  Endpoint 0 Reset */
 #  define UDPHS_EPT1RST                 (1 << 1)  /* Bit 1:  Endpoint 1 Reset */
 #  define UDPHS_EPT2RST                 (1 << 2)  /* Bit 2:  Endpoint 2 Reset */
@@ -288,12 +281,14 @@
 #  define UDPHS_TST_SPEED_NORMAL        (0 << UDPHS_TST_SPEED_SHIFT) /* Normal Mode */
 #  define UDPHS_TST_SPEED_HIGH          (2 << UDPHS_TST_SPEED_SHIFT) /* Force High Speed */
 #  define UDPHS_TST_SPEED_FULL          (3 << UDPHS_TST_SPEED_SHIFT) /* Force Full Speed */
+
 #define UDPHS_TST_TSTJ                  (1 << 2)  /* Bit 2:  Test J Mode */
 #define UDPHS_TST_TSTK                  (1 << 3)  /* Bit 3:  Test K Mode */
 #define UDPHS_TST_TSTPKT                (1 << 4)  /* Bit 4:  Test Packet Mode */
 #define UDPHS_TST_OPMODE2               (1 << 5)  /* Bit 4: OpMode2 */
 
 /* Endpoint registers */
+
 /* UDPHS Endpoint Configuration Register */
 
 #define UDPHS_EPTCFG_SIZE_SHIFT         (0)        /* Bits 0-2: Endpoint Size */
@@ -306,6 +301,7 @@
 #  define UDPHS_EPTCFG_SIZE_256         (5 << UDPHS_EPTCFG_SIZE_SHIFT) /* 256 bytes */
 #  define UDPHS_EPTCFG_SIZE_512         (6 << UDPHS_EPTCFG_SIZE_SHIFT) /* 512 bytes */
 #  define UDPHS_EPTCFG_SIZE_1024        (7 << UDPHS_EPTCFG_SIZE_SHIFT) /* 1024 bytes */
+
 #define UDPHS_EPTCFG_DIR                (1 << 3)  /* Bit 3:  Endpoint Direction */
 #define UDPHS_EPTCFG_TYPE_SHIFT         (4)       /* Bits 4-5: Endpoint Type */
 #define UDPHS_EPTCFG_TYPE_MASK          (3 << UDPHS_EPTCFG_TYPE_SHIFT)
@@ -313,117 +309,143 @@
 #  define UDPHS_EPTCFG_TYPE_ISO         (1 << UDPHS_EPTCFG_TYPE_SHIFT) /* Isochronous endpoint */
 #  define UDPHS_EPTCFG_TYPE_BULK        (2 << UDPHS_EPTCFG_TYPE_SHIFT) /* Bulk endpoint */
 #  define UDPHS_EPTCFG_TYPE_INT         (3 << UDPHS_EPTCFG_TYPE_SHIFT) /* Interrupt endpoint */
+
 #define UDPHS_EPTCFG_BKNUMBER_SHIFT     (6)       /* Bits 6-7: Number of Banks */
 #define UDPHS_EPTCFG_BKNUMBER_MASK      (3 << UDPHS_EPTCFG_BKNUMBER_SHIFT)
 #define UDPHS_EPTCFG_NBTRANS_SHIFT      (8)       /* Bits 8-9: Number Transaction per uframe */
 #define UDPHS_EPTCFG_NBTRANS_MASK       (3 << UDPHS_EPTCFG_NBTRANS_SHIFT)
 #define UDPHS_EPTCFG_MAPD               (1 << 31) /* Bit 31: Endpoint Mapped */
 
-/* UDPHS Endpoint Control Enable Register, UDPHS Endpoint Control Disable Register, and UDPHS
+/* UDPHS Endpoint Control Enable Register,
+ * UDPHS Endpoint Control Disable Register, and UDPHS
  * Endpoint Control Register
  */
-                                                  /* Common bits definitions */
+
+                                  /* Common bits definitions */
+
 #define UDPHS_EPTCTL_EPTENABL           (1 << 0)  /* Bit 0:  Endpoint Enable */
 #define UDPHS_EPTCTL_AUTOVALID          (1 << 1)  /* Bit 1:  Packet Auto-Valid Enable */
 #define UDPHS_EPTCTL_INTDISDMA          (1 << 3)  /* Bit 3:  Interrupts Disable DMA */
-                                                  /*---  Control/Bulk/Interrupt --- */
+
+                                  /* Control/Bulk/Interrupt */
+
 #define UDPHS_EPTCTL_NYETDIS            (1 << 4)  /* Bit 4:  NYET Disable (High Speed Bulk OUT) */
-                                                  /* --- Isochronous Endpoints Only --- */
+
+                                  /* Isochronous Endpoints Only */
+
 #define UDPHS_EPTCTL_DATAXRX            (1 << 8)  /* Bit 8:  Interrupt Enable (Isochronous OUT) */
 #define UDPHS_EPTCTL_MDATARX            (1 << 9)  /* Bit 9:  MDATA Interrupt Enable (Isochronous OUT) */
-                                                  /* --- Common Bit Definitions --- */
+
+                                  /* Common Bit Definitions */
+
 #define UDPHS_EPTCTL_ERROVFLW           (1 << 8)  /* Bit 8:  Overflow Error Interrupt Enable */
 #define UDPHS_EPTCTL_RXRDYTXKL          (1 << 9)  /* Bit 9:  Received OUT Data Interrupt Enable */
 #define UDPHS_EPTCTL_TXCOMPLT           (1 << 10) /* Bit 10: Transmitted IN Data Complete Interrupt Enable */
-                                                  /*---  Control/Bulk/Interrupt --- */
+
+                                  /* Control/Bulk/Interrupt */
+
 #define UDPHS_EPTCTL_TXRDY              (1 << 11) /* Bit 11: TX Packet Ready Interrupt Enable */
 #define UDPHS_EPTCTL_RXSETUP            (1 << 12) /* Bit 12: Received SETUP */
 #define UDPHS_EPTCTL_STALLSNT           (1 << 13) /* Bit 13: Stall Sent Interrupt Enable */
 #define UDPHS_EPTCTL_NAKIN              (1 << 14) /* Bit 14: NAKIN Interrupt Enable */
 #define UDPHS_EPTCTL_NAKOUT             (1 << 15) /* Bit 15: NAKOUT Interrupt Enable */
-                                                  /* --- Isochronous Endpoints Only --- */
+
+                                  /* Isochronous Endpoints Only */
+
 #define UDPHS_EPTCTL_TXRDYTRER          (1 << 11) /* Bit 11: TX Packet Ready/Transaction Error Interrupt Enable */
 #define UDPHS_EPTCTL_ERRFLISO           (1 << 12) /* Bit 12: Error Flow Interrupt Enable */
 #define UDPHS_EPTCTL_ERRCRCNTR          (1 << 13) /* Bit 13: ISO CRC Error/Number of Transaction Error Interrupt Enable */
 #define UDPHS_EPTCTL_ERRFLUSH           (1 << 14) /* Bit 14: Bank Flush Error Interrupt Enable */
-                                                  /* --- Common Bit Definitions --- */
+
+                                  /* Common Bit Definitions */
+
 #define UDPHS_EPTCTL_BUSYBANK           (1 << 18) /* Bit 28: Busy Bank Interrupt Enable */
 #define UDPHS_EPTCTL_SHRTPCKT           (1 << 31) /* Bit 31: Short Packet Send/Short Packet Interrupt Enable */
 
 /* UDPHS Endpoint Set Status Register */
-                                                  /*---  Control/Bulk/Interrupt --- */
+
+                                                  /* Control/Bulk/Interrupt */
 #define UDPHS_EPTSETSTA_FRCESTALL       (1 << 5)  /* Bit 5:  Stall Handshake Request Set */
-                                                  /* --- Common Bit Definitions --- */
+                                                  /* Common Bit Definitions */
 #define UDPHS_EPTSETSTA_RXRDYTXKL       (1 << 9)  /* Bit 9:  KILL Bank Set (IN Endpoint) */
-                                                  /*---  Control/Bulk/Interrupt --- */
+                                                  /* Control/Bulk/Interrupt */
 #define UDPHS_EPTSETSTA_TXRDY           (1 << 11) /* Bit 11: TX Packet Ready Set */
-                                                  /* --- Isochronous Endpoints Only --- */
+                                                  /* Isochronous Endpoints Only */
 #define UDPHS_EPTSETSTA_TXRDYTRER       (1 << 11) /* Bit 11: TX Packet Ready Set */
 
 /* UDPHS Endpoint Clear Status Register */
-                                                  /*---  Control/Bulk/Interrupt --- */
+
+                                                  /* Control/Bulk/Interrupt */
 #define UDPHS_EPTCLRSTA_FRCESTALL       (1 << 5)  /* Bit 5:  Stall Handshake Request Clear */
-                                                  /* --- Common Bit Definitions --- */
+                                                  /* Common Bit Definitions */
 #define UDPHS_EPTCLRSTA_TOGGLESQ        (1 << 6)  /* Bit 6:  Data Toggle Clear */
 #define UDPHS_EPTCLRSTA_RXRDYTXKL       (1 << 9)  /* Bit 9:  Received OUT Data Clear */
 #define UDPHS_EPTCLRSTA_TXCOMPLT        (1 << 10) /* Bit 10: Transmitted IN Data Complete Clear */
-                                                  /*---  Control/Bulk/Interrupt --- */
+                                                  /* Control/Bulk/Interrupt */
 #define UDPHS_EPTCLRSTA_RXSETUP         (1 << 12) /* Bit 12: Received SETUP Clear */
 #define UDPHS_EPTCLRSTA_STALLSNT        (1 << 13) /* Bit 13: Stall Sent Clear */
 #define UDPHS_EPTCLRSTA_NAKIN           (1 << 14) /* Bit 14: NAKIN Clear */
 #define UDPHS_EPTCLRSTA_NAKOUT          (1 << 15) /* Bit 15: NAKOUT Clear */
-                                                  /* --- Isochronous Endpoints Only --- */
+                                                  /* Isochronous Endpoints Only */
 #define UDPHS_EPTCLRSTA_ERRFLISO        (1 << 12) /* Bit 12: Error Flow Clear */
 #define UDPHS_EPTCLRSTA_ERRCRCNTR       (1 << 13) /* Bit 13: Number of Transaction Error Clear */
 #define UDPHS_EPTCLRSTA_ERRFLUSH        (1 << 14) /* Bit 14: Bank Flush Error Clear */
 
 /* UDPHS Endpoint Status Register */
-                                                  /*---  Control/Bulk/Interrupt --- */
+
+                                                  /* Control/Bulk/Interrupt */
 #define UDPHS_EPTSTA_FRCESTALL          (1 << 5)  /* Bit 5:  Stall Handshake Request */
-                                                  /* --- Common Bit Definitions --- */
+                                                  /* Common Bit Definitions */
 #define UDPHS_EPTSTA_TOGGLESQ_SHIFT     (6)       /* Bits 6-7: Toggle Sequencing */
 #define UDPHS_EPTSTA_TOGGLESQ_MASK      (3 << UDPHS_EPTSTA_TOGGLESQ_SHIFT)
 #  define UDPHS_EPTSTA_TOGGLESQ_DATA0   (0 << UDPHS_EPTSTA_TOGGLESQ_SHIFT) /* DATA0 */
 #  define UDPHS_EPTSTA_TOGGLESQ_DATA1   (1 << UDPHS_EPTSTA_TOGGLESQ_SHIFT) /* DATA1 */
 #  define UDPHS_EPTSTA_TOGGLESQ_DATA2   (2 << UDPHS_EPTSTA_TOGGLESQ_SHIFT) /* Isochronous Endpoint */
 #  define UDPHS_EPTSTA_TOGGLESQ_MDATA   (3 << UDPHS_EPTSTA_TOGGLESQ_SHIFT) /* Isochronous Endpoint */
+
 #define UDPHS_EPTSTA_ERROVFLW           (1 << 8)  /* Bit 8:  Overflow Error */
 #define UDPHS_EPTSTA_RXRDYTXKL          (1 << 9)  /* Bit 9:  Received OUT Data/KILL Bank */
 #define UDPHS_EPTSTA_TXCOMPLT           (1 << 10) /* Bit 10: Transmitted IN Data Complete */
-                                                  /*---  Control/Bulk/Interrupt --- */
+                                                  /* Control/Bulk/Interrupt */
 #define UDPHS_EPTSTA_TXRDY              (1 << 11) /* Bit 11: TX Packet Ready */
 #define UDPHS_EPTSTA_RXSETUP            (1 << 12) /* Bit 12: Received SETUP */
 #define UDPHS_EPTSTA_STALLSNT           (1 << 13) /* Bit 13: Stall Sent */
 #define UDPHS_EPTSTA_NAKIN              (1 << 14) /* Bit 14: NAK IN */
 #define UDPHS_EPTSTA_NAKOUT             (1 << 15) /* Bit 15: NAK OUT */
-                                                  /* --- Isochronous Endpoints Only --- */
+                                                  /* Isochronous Endpoints Only */
 #define UDPHS_EPTSTA_TXRDYTRER          (1 << 11) /* Bit 11: TX Packet Ready/Transaction Error */
 #define UDPHS_EPTSTA_ERRFLISO           (1 << 12) /* Bit 12: Error Flow */
 #define UDPHS_EPTSTA_ERRCRCNTR          (1 << 13) /* Bit 13: CRC ISO Error/Number of Transaction Error */
 #define UDPHS_EPTSTA_ERRFLUSH           (1 << 14) /* Bit 14: Bank Flush Error */
-                                                  /*---  Control Only --- */
+                                                  /* Control Only */
 #define UDPHS_EPTSTA_CTLDIR_SHIFT       (16)      /* Bits 16-17: Control Direction */
 #define UDPHS_EPTSTA_CTLDIR_MASK        (3 << UDPHS_EPTSTA_CTLDIR_SHIFT)
 #  define UDPHS_EPTSTA_CTLDIR_WRITE     (0 << UDPHS_EPTSTA_CTLDIR_SHIFT) /* Control Write requested */
 #  define UDPHS_EPTSTA_CTLDIR_READ      (1 << UDPHS_EPTSTA_CTLDIR_SHIFT) /* Control Read requested */
-                                                  /* --- Bulk/Interrupt/Isochronous --- */
+
+                                          /* Bulk/Interrupt/Isochronous */
+
 #define UDPHS_EPTSTA_CURBK_SHIFT        (16)      /* Bits 16-17: Current Bank */
 #define UDPHS_EPTSTA_CURBK_MASK         (3 << UDPHS_EPTSTA_CURBK_SHIFT)
 #  define UDPHS_EPTSTA_CURBK_BANK0      (0 << UDPHS_EPTSTA_CURBK_SHIFT) /* Bank 0 (or single bank) */
 #  define UDPHS_EPTSTA_CURBK_BANK1      (1 << UDPHS_EPTSTA_CURBK_SHIFT) /* Bank 1 */
 #  define UDPHS_EPTSTA_CURBK_BANK2      (2 << UDPHS_EPTSTA_CURBK_SHIFT) /* Bank 2 */
-                                                  /* --- Common Bit Definitions --- */
+
+                                                  /* Common Bit Definitions */
 #define UDPHS_EPTSTA_BUSYBANK_SHIFT     (18)      /* Bits 18-19: Busy Bank Number */
 #define UDPHS_EPTSTA_BUSYBANK_MASK      (3 << UDPHS_EPTSTA_BUSYBANK_SHIFT)
 #  define UDPHS_EPTSTA_BUSYBANK_1       (0 << UDPHS_EPTSTA_BUSYBANK_SHIFT) /* 1 busy bank */
 #  define UDPHS_EPTSTA_BUSYBANK_2       (1 << UDPHS_EPTSTA_BUSYBANK_SHIFT) /* 2 busy banks */
 #  define UDPHS_EPTSTA_BUSYBANK_3       (2 << UDPHS_EPTSTA_BUSYBANK_SHIFT) /* 3 busy banks */
-#define UDPHS_EPTSTA_BYTECNT_SHIFT      (20)      /* Bits 20-30: UDPHS Byte Count */
+
+#define UDPHS_EPTSTA_BYTECNT_SHIFT      (20)       /* Bits 20-30: UDPHS Byte Count */
 #define UDPHS_EPTSTA_BYTECNT_MASK       (0x7ff << UDPHS_EPTSTA_BYTECNT_SHIFT)
 #define UDPHS_EPTSTA_SHRTPCKT           (1 << 31)  /* Bit 31: Short Packet */
 
 /* DMA Channel Registers */
+
 /* UDPHS DMA Next Descriptor Address Register (32-bit address) */
+
 /* UDPHS DMA Channel Address Register (32-bit address) */
 
 /* UDPHS DMA Channel Control Register */
@@ -450,16 +472,17 @@
 #define UDPHS_DMASTATUS_BUFCNT_SHIFT    (16)      /* Bits 16-31: Buffer Byte Counut */
 #define UDPHS_DMASTATUS_BUFCNT_MASK     (0xffff << UDPHS_DMASTATUS_BUFCNT_SHIFT)
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* This structure defines the UDPHS DMA Transfer Descriptor.  Instances of DMA transfer
- * descriptors must by aligned to 16-byte address boundaries.
+/* This structure defines the UDPHS DMA Transfer Descriptor.
+ *  Instances of DMA transfer descriptors must by aligned to 16-byte
+ *  address boundaries.
  *
- * Each value contains the next value of each of three UDPHS DMA registers.  The first
- * register value (UDPHS_DMANXTDSCx) is a link that can be used to chain sequences of
- * DMA transfers.
+ * Each value contains the next value of each of three UDPHS DMA registers.
+ * The first register value (UDPHS_DMANXTDSCx) is a link that can be used
+ * to chain sequences of DMA transfers.
  */
 
 struct udphs_dtd_s
@@ -470,12 +493,12 @@ struct udphs_dtd_s
 };
 #define SIZEOF_USPHS_DTD_S 12
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_UDPHS_H */

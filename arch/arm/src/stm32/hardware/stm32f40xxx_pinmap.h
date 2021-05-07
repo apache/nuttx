@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f40xxx_pinmap.h
  *
  *   Copyright (C) 2011-2012, 2014-2015 Gregory Nutt. All rights reserved.
@@ -34,41 +34,42 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_PINMAP_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_PINMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "stm32_gpio.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Alternate Pin Functions.  All members of the STM32F40xxx family share the same
- * pin multiplexing (although they may differ in the pins physically available).
+/* Alternate Pin Functions.
+ * All members of the STM32F40xxx family share the same pin multiplexing
+ * (although they may differ in the pins physically available).
  *
- * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
- * Drivers, however, will use the pin selection without the numeric suffix.
- * Additional definitions are required in the board.h file.  For example, if
- * CAN1_RX connects via PA11 on some board, then the following definitions should
- * appear in the board.h header file for that board:
+ * Alternative pin selections are provided with a numeric suffix like _1, _2,
+ * etc. Drivers, however, will use the pin selection without the numeric
+ * suffix. Additional definitions are required in the board.h file.  For
+ * example, if CAN1_RX connects via PA11 on some board, then the following
+ * definitions should appear in the board.h header file for that board:
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
  *
  * The driver will then automatically configure PA11 as the CAN1 RX pin.
  */
 
-/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
- * Additional effort is required to select specific GPIO options such as frequency,
- * open-drain/push-pull, and pull-up/down!  Just the basics are defined for most
- * pins in this file.
+/* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
+ * Additional effort is required to select specific GPIO options such as
+ * frequency, open-drain/push-pull, and pull-up/down!
+ *  Just the basics are defined for most pins in this file.
  */
 
 /* ADC */
@@ -134,6 +135,7 @@
 #define GPIO_CAN1_TX_2        (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN9)
 #define GPIO_CAN1_TX_3        (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN1)
 #define GPIO_CAN1_TX_4        (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTH|GPIO_PIN13)
+#define GPIO_CAN1_TX_5        (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTG|GPIO_PIN1)
 
 #define GPIO_CAN2_RX_1        (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN12)
 #define GPIO_CAN2_RX_2        (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN5)
@@ -493,7 +495,7 @@
 #define GPIO_I2C2_SMBA_1      (GPIO_ALT|GPIO_AF4|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN12)
 #define GPIO_I2C2_SMBA_2      (GPIO_ALT|GPIO_AF4|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTF|GPIO_PIN2)
 #define GPIO_I2C2_SMBA_3      (GPIO_ALT|GPIO_AF4|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTH|GPIO_PIN6)
-#if defined(CONFIG_STM32_STM32F411) || defined(CONFIG_STM32_STM32F412)
+#if defined(CONFIG_STM32_STM32F411)
 #  define GPIO_I2C2_SDA_4     (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN3)
 #  define GPIO_I2C2_SDA_5     (GPIO_ALT|GPIO_AF9|GPIO_SPEED_50MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN9)
 #endif
@@ -639,8 +641,8 @@
 /* SDIO
  *
  * Note that the below configures GPIO_SPEED_50MHz I/O, that means for using
- * the SDIO that you must enable I/O Compensation via the configuration option
- * CONFIG_STM32_SYSCFG_IOCOMPENSATION=y.
+ * the SDIO that you must enable I/O Compensation via the configuration
+ * option CONFIG_STM32_SYSCFG_IOCOMPENSATION=y.
  */
 
 #define GPIO_SDIO_CMD         (GPIO_ALT|GPIO_AF12|GPIO_PULLUP|GPIO_SPEED_50MHz|GPIO_PUSHPULL|GPIO_PORTD|GPIO_PIN2)
@@ -989,10 +991,6 @@
 #define GPIO_USART1_RTS       (GPIO_ALT|GPIO_AF7|GPIO_PORTA|GPIO_PIN12)
 #define GPIO_USART1_RX_1      (GPIO_ALT|GPIO_AF7|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTA|GPIO_PIN10)
 #define GPIO_USART1_RX_2      (GPIO_ALT|GPIO_AF7|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN7)
-#if defined(CONFIG_STM32_STM32F412)
-#  define GPIO_USART1_RX_3    (GPIO_ALT|GPIO_AF7|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN3)
-#  define GPIO_USART1_TX_3    (GPIO_ALT|GPIO_AF7|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTA|GPIO_PIN15)
-#endif
 
 #define GPIO_USART1_TX_1      (GPIO_ALT|GPIO_AF7|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTA|GPIO_PIN9)
 #define GPIO_USART1_TX_2      (GPIO_ALT|GPIO_AF7|GPIO_PULLUP|GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN6)

@@ -69,13 +69,13 @@
 	.endm
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Text
- *****************************************************************************/
+ ****************************************************************************/
 
 	.text
 
-/*****************************************************************************
+/****************************************************************************
  * Name: _vector_table
  *
  * Description:
@@ -84,7 +84,7 @@
  *   the vector table is the reset vector and this is the code that
  *   will execute when the processor is reset.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 	.globl	_vector_table
 	.type	_vector_table, %function
@@ -100,7 +100,7 @@ _vector_table:
 
 	.globl	__start
 	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
+	.globl	arm_vectorsvc
 	.globl	arm_vectorprefetch
 	.globl	arm_vectordata
 	.globl	arm_vectorirq
@@ -111,7 +111,7 @@ _vector_table:
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
 .Lswihandler:
-	.long	arm_vectorswi
+	.long	arm_vectorsvc
 .Lprefetchaborthandler:
 	.long	arm_vectorprefetch
 .Ldataaborthandler:
@@ -137,14 +137,14 @@ __start:
 
 	/* Call lowlevel init C-function */
 
-	.extern ConfigurePLL
-	ldr	r0, =ConfigurePLL
+	.extern configure_pll
+	ldr	r0, =configure_pll
 	mov	lr, pc
 	bx	r0
 
 	/* First, setup initial processor mode */
 
-	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT )
 	msr	cpsr, r0
 
 /* Configure the uart so that we can get debug output as soon
@@ -210,7 +210,7 @@ __start:
 
 LC0:	.long	_sbss
 	.long	_ebss
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 
 LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 	.long	_sdata	/* Where .data needs to reside in SDRAM */

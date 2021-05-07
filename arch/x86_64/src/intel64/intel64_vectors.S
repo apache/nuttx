@@ -268,7 +268,7 @@ isr_common:
     /* save xmm registers */
     leaq -512(%rsp), %rsp
     fxsaveq (%rsp)
-    
+
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that in RDI as the input parameter to isr_handler.

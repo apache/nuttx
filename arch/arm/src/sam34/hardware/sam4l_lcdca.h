@@ -1,55 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_lcdca.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_LCDCA_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_LCDCA_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* LCDCA register offsets ************************************************************/
+/* LCDCA register offsets ***************************************************/
 
 #define SAM_LCDCA_CR_OFFSET        0x0000 /* Control Register */
 #define SAM_LCDCA_CFG_OFFSET       0x0004 /* Configuration Register */
@@ -82,7 +67,7 @@
 #define SAM_LCDCA_IMR_OFFSET       0x0060 /* Interrupt Mask Register */
 #define SAM_LCDCA_VERSION_OFFSET   0x0064 /* Version Register */
 
-/* LCDCA register addresses **********************************************************/
+/* LCDCA register addresses *************************************************/
 
 #define SAM_LCDCA_CR               (SAM_LCDCA_BASE+SAM_LCDCA_CR_OFFSET)
 #define SAM_LCDCA_CFG              (SAM_LCDCA_BASE+SAM_LCDCA_CFG_OFFSET)
@@ -115,7 +100,7 @@
 #define SAM_LCDCA_IMR              (SAM_LCDCA_BASE+SAM_LCDCA_IMR_OFFSET)
 #define SAM_LCDCA_VERSION          (SAM_LCDCA_BASE+SAM_LCDCA_VERSION_OFFSET)
 
-/* LCDCA register bit definitions ****************************************************/
+/* LCDCA register bit definitions *******************************************/
 
 /* Control Register */
 
@@ -147,9 +132,11 @@
 #  define LCDCA_CFG_DUTY_STATIC    (1 << LCDCA_CFG_DUTY_SHIFT) /* Static, Static, COM0 */
 #  define LCDCA_CFG_DUTY_1TO2      (2 << LCDCA_CFG_DUTY_SHIFT) /* 1/2, 1/3, COM[0:1] */
 #  define LCDCA_CFG_DUTY_1TO3      (3 << LCDCA_CFG_DUTY_SHIFT) /* 1/3, 1/3, COM[0:2] */
+
 #define LCDCA_CFG_FCST_SHIFT       (16)      /* Bits 16-21: Fine Contrast */
 #define LCDCA_CFG_FCST_MASK        (63 << LCDCA_CFG_FCST_SHIFT)
 #  define LCDCA_CFG_FCST(n)        (((uint32_t)(n) & 63) << LCDCA_CFG_FCST_SHIFT) /* n = -32..31 */
+
 #define LCDCA_CFG_NSU_SHIFT        (24)      /* Bits 24-29: Number of Segment Terminals in Use */
 #define LCDCA_CFG_NSU_MASK         (63 << LCDCA_CFG_NSU_SHIFT)
 #  define LCDCA_CFG_NSU(n)         ((n) << LCDCA_CFG_NSU_SHIFT) /* n=0-40 */
@@ -160,13 +147,16 @@
 #define LCDCA_TIM_CLKDIV_SHIFT     (1)       /* Bits 1-3: LCD Clock Division */
 #define LCDCA_TIM_CLKDIV_MASK      (7 << LCDCA_TIM_CLKDIV_SHIFT)
 #  define LCDCA_TIM_CLKDIV(n)      (((n)-1) << LCDCA_TIM_CLKDIV_SHIFT) /* n=1..8 */
+
 #define LCDCA_TIM_FC0_SHIFT        (8)       /* Bits 8-12: Frame Counter 0 */
 #define LCDCA_TIM_FC0_MASK         (31 << LCDCA_TIM_FC0_SHIFT)
 #  define LCDCA_TIM_FC0(n)         ((n) << LCDCA_TIM_FC0_SHIFT) /* n=0-31 */
+
 #define LCDCA_TIM_FC0PB            (1 << 13) /* Bit 13: Frame Counter 0 Prescaler Bypass */
 #define LCDCA_TIM_FC1_SHIFT        (16)      /* Bits 16-20: Frame Counter 1 */
 #define LCDCA_TIM_FC1_MASK         (31 << LCDCA_TIM_FC1_SHIFT)
 #  define LCDCA_TIM_FC1(n)         ((n) << LCDCA_TIM_FC1_SHIFT) /* n=0-31 */
+
 #define LCDCA_TIM_FC2_SHIFT        (24)      /* Bits 24-28: Frame Counter 2 */
 #define LCDCA_TIM_FC2_MASK         (31 << LCDCA_TIM_FC2_SHIFT)
 #  define LCDCA_TIM_FC2(n)         ((n) << LCDCA_TIM_FC2_SHIFT) /* n=0-31 */
@@ -187,14 +177,14 @@
 
 #define LCDCA_SCR_FC0R             (1 << 0)  /* Bit 0: Frame Counter 0 Rollover */
 
-/* Data Register Low 0-3 (32-bit data, each bit defines a segment value in display
- * memory for segments 0-31).
+/* Data Register Low 0-3 (32-bit data, each bit defines a segment value in
+ * display memory for segments 0-31).
  */
 
 #define LCDCA_DRL_MASK             0xffffffff
 
-/* Data Register High 0-3 (8 bits data, each bit defines a segment value in display
- * memory for segments 32-39)
+/* Data Register High 0-3 (8 bits data, each bit defines a segment value in
+ * display memory for segments 32-39)
  */
 
 #define LCDCA_DRH_MASK             0xff
@@ -236,6 +226,7 @@
 #  define LCDCA_BCFG_FCS0          (0 << LCDCA_BCFG_FCS_SHIFT)
 #  define LCDCA_BCFG_FCS1          (1 << LCDCA_BCFG_FCS_SHIFT)
 #  define LCDCA_BCFG_FCS2          (2 << LCDCA_BCFG_FCS_SHIFT)
+
 #define LCDCA_BCFG_BSS0_SHIFT      (8)       /* Bits 8-11: Blink Segment Selection 0 */
 #define LCDCA_BCFG_BSS0_MASK       (15 << LCDCA_BCFG_BSS0_SHIFT)
 #  define LCDCA_BCFG_BSS0(n)       ((n) << LCDCA_BCFG_BSS0_SHIFT) /* n=bitset */
@@ -243,6 +234,7 @@
 #  define LCDCA_BCFG_BSS01         (0 << LCDCA_BCFG_BSS0_SHIFT)   /* Segment SEG0/COM1 selected */
 #  define LCDCA_BCFG_BSS02         (0 << LCDCA_BCFG_BSS0_SHIFT)   /* Segment SEG0/COM2 selected */
 #  define LCDCA_BCFG_BSS03         (0 << LCDCA_BCFG_BSS0_SHIFT)   /* Segment SEG0/COM3 selected */
+
 #define LCDCA_BCFG_BSS1_SHIFT      (12)      /* Bits 12-15: Blink Segment Selection 1 */
 #define LCDCA_BCFG_BSS1_MASK       (15 << LCDCA_BCFG_BSS1_SHIFT)
 #  define LCDCA_BCFG_BSS1(n)       ((n) << LCDCA_BCFG_BSS1_SHIFT) /* n=bitset */
@@ -260,9 +252,11 @@
 #  define LCDCA_CSRCFG_FCS0        (0 << LCDCA_CSRCFG_FCS_SHIFT)
 #  define LCDCA_CSRCFG_FCS1        (1 << LCDCA_CSRCFG_FCS_SHIFT)
 #  define LCDCA_CSRCFG_FCS2        (2 << LCDCA_CSRCFG_FCS_SHIFT)
+
 #define LCDCA_CSRCFG_SIZE_SHIFT    (3)       /* Bits 3-5: Size */
 #define LCDCA_CSRCFG_SIZE_MASK     (7 << LCDCA_CSRCFG_SIZE_SHIFT)
 #  define LCDCA_CSRCFG_SIZE(n)     (((n)-1) << LCDCA_CSRCFG_SIZE_SHIFT) /* n=1..8 */
+
 #define LCDCA_CSRCFG_DATA_SHIFT    (8)       /* Bits 8-15: Circular Shift Register Value */
 #define LCDCA_CSRCFG_DATA_MASK     (0xff << LCDCA_CSRCFG_DATA_SHIFT)
 #  define LCDCA_CSRCFG_DATA(n)     ((n) << LCDCA_CSRCFG_DATA_SHIFT)
@@ -276,6 +270,7 @@
 #  define LCDCA_CMCFG_TDG_7S4C     (1 << LCDCA_CMCFG_TDG_SHIFT) /* 7-segment with 4 common terminals */
 #  define LCDCA_CMCFG_TDG_14S4C    (2 << LCDCA_CMCFG_TDG_SHIFT) /* 14-segment with 4 common terminals */
 #  define LCDCA_CMCFG_TDG_14S3C    (3 << LCDCA_CMCFG_TDG_SHIFT) /* 16-segment with 3 common terminals */
+
 #define LCDCA_CMCFG_STSEG_SHIFT    (8)       /* Bits 8-13: Start Segment */
 #define LCDCA_CMCFG_STSEG_MASK     (63 << LCDCA_CMCFG_STSEG_SHIFT)
 #  define LCDCA_CMCFG_STSEG(n)     ((n) << LCDCA_CMCFG_STSEG_SHIFT)
@@ -293,6 +288,7 @@
 #  define LCDCA_ACMCFG_FCS0        (0 << LCDCA_ACMCFG_FCS_SHIFT)
 #  define LCDCA_ACMCFG_FCS1        (1 << LCDCA_ACMCFG_FCS_SHIFT)
 #  define LCDCA_ACMCFG_FCS2        (2 << LCDCA_ACMCFG_FCS_SHIFT)
+
 #define LCDCA_ACMCFG_MODE          (1 << 3)  /* Bit 3:  Mode */
 #define LCDCA_ACMCFG_DREV          (1 << 4)  /* Bit 4:  Digit Reverse */
 #define LCDCA_ACMCFG_TDG_SHIFT     (5)       /* Bits 5-6: Type of Digit */
@@ -301,12 +297,15 @@
 #  define LCDCA_ACMCFG_TDG_7S4C    (1 << LCDCA_ACMCFG_TDG_SHIFT) /* 7-segment with 4 common terminals */
 #  define LCDCA_ACMCFG_TDG_14S4C   (2 << LCDCA_ACMCFG_TDG_SHIFT) /* 14-segment with 4 common terminals */
 #  define LCDCA_ACMCFG_TDG_14S3C   (3 << LCDCA_ACMCFG_TDG_SHIFT) /* 16-segment with 3 common terminals */
+
 #define LCDCA_ACMCFG_STSEG_SHIFT   (8)       /* Bits 8-13: Start Segment */
 #define LCDCA_ACMCFG_STSEG_MASK    (63 << LCDCA_ACMCFG_STSEG_SHIFT)
 #  define LCDCA_ACMCFG_STSEG(n)    ((n) << LCDCA_ACMCFG_STSEG_SHIFT)
+
 #define LCDCA_ACMCFG_STEPS_SHIFT   (16)      /* Bits 16-23: Scrolling Steps */
 #define LCDCA_ACMCFG_STEPS_MASK    (0xff << LCDCA_ACMCFG_STEPS_SHIFT)
 #  define LCDCA_ACMCFG_STEPS(n)    ((n) << LCDCA_ACMCFG_STEPS_SHIFT) /* n = string length - DIGN + 1 */
+
 #define LCDCA_ACMCFG_DIGN_SHIFT    (24)      /* Bits 24-27: Digit Number */
 #define LCDCA_ACMCFG_DIGN_MASK     (15 << LCDCA_ACMCFG_DIGN_SHIFT)
 #  define LCDCA_ACMCFG_DIGN(n)     ((n) << LCDCA_ACMCFG_DIGN_SHIFT) /* n=1..15 */
@@ -324,6 +323,7 @@
 #  define LCDCA_ABMCFG_FCS0        (0 << LCDCA_ABMCFG_FCS_SHIFT)
 #  define LCDCA_ABMCFG_FCS1        (1 << LCDCA_ABMCFG_FCS_SHIFT)
 #  define LCDCA_ABMCFG_FCS2        (2 << LCDCA_ABMCFG_FCS_SHIFT)
+
 #define LCDCA_ABMCFG_SIZE_SHIFT    (8)       /* Bits 8-12: Size */
 #define LCDCA_ABMCFG_SIZE_MASK     (31 << LCDCA_ABMCFG_SIZE_SHIFT)
 #  define LCDCA_ABMCFG_SIZE(n)     (((n)-1) << LCDCA_ABMCFG_SIZE_SHIFT) /* n=1..31 */
@@ -357,7 +357,9 @@
 #  define LCDCA_ABMDR_OFF(n)        (31 << LCDCA_ABMDR_OFF_SHIFT)
 
 /* Interrupt Enable Register */
+
 /* Interrupt Disable Register */
+
 /* Interrupt Mask Register */
 
 #define LCDCA_INT_FC0R              (1 << 0)  /* Bit 0: Frame Counter 0 Rollover */
@@ -369,16 +371,16 @@
 #define LCDCA_VARIANT_SHIFT          (16)       /* Bits 16-19: Variant Number */
 #define LCDCA_VARIANT_MASK           (15 << LCDCA_VARIANT_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_LCDCA_H */

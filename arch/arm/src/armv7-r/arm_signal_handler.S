@@ -33,11 +33,6 @@
  ****************************************************************************/
 
 	.file		"arm_signal_handler.S"
-#ifdef CONFIG_ARCH_FPU
-	.cpu	cortex-r4f
-#else
-	.cpu	cortex-r4
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -95,7 +90,7 @@ up_signal_handler:
 	/* Execute the SYS_signal_handler_return SVCall (will not return) */
 
 	mov		r0, #SYS_signal_handler_return
-	svc		0
+	svc		#SYS_syscall
 	nop
 
 	.size	up_signal_handler, .-up_signal_handler

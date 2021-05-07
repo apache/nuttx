@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imxrt/imxrt1060-evk/src/imxrt_usbdev.c
+ * arch/arm/src/imxrt/imxrt_usbdev.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,27 +15,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
- *
- ****************************************************************************/
-
-/****************************************************************************
- * IMXRT USB Device Driver
- *
- *   Authors: Thomas Axelsson <thomas.axelsson@actia.se>
- *            Simon Åström <simon.astrom@actia.se>
- *
- * Part of the NuttX OS and based, mostly, on the LPC43xx USB driver:
- *
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Which, in turn, was based on the LPC31xx USB driver:
- *
- *   Authors: David Hewson
- *            Gregory Nutt <gnutt@nuttx.org>
- *
- * Which, in turn, was based on the LPC2148 USB driver:
- *
- *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  ****************************************************************************/
 

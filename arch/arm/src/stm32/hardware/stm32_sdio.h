@@ -1,46 +1,31 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_sdio.h
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_SDIO_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_SDIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SDIO_POWER_OFFSET   0x0000 /* SDIO power control register */
 #define STM32_SDIO_CLKCR_OFFSET   0x0004 /* SDI clock control register */
@@ -62,7 +47,7 @@
 #define STM32_SDIO_FIFOCNT_OFFSET 0x0048 /* SDIO FIFO counter register */
 #define STM32_SDIO_FIFO_OFFSET    0x0080 /* SDIO data FIFO register */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_SDIO_POWER          (STM32_SDIO_BASE+STM32_SDIO_POWER_OFFSET)
 #define STM32_SDIO_CLKCR          (STM32_SDIO_BASE+STM32_SDIO_CLKCR_OFFSET)
@@ -84,7 +69,7 @@
 #define STM32_SDIO_FIFOCNT        (STM32_SDIO_BASE+STM32_SDIO_FIFOCNT_OFFSET)
 #define STM32_SDIO_FIFO           (STM32_SDIO_BASE+STM32_SDIO_FIFO_OFFSET)
 
-/* Bit-band (BB) base addresses ****************************************************/
+/* Bit-band (BB) base addresses *********************************************/
 
 #define STM32_SDIO_OFFSET         (STM32_SDIO_BASE-STM32_PERIPH_BASE)
 
@@ -108,7 +93,7 @@
 #define STM32_SDIO_FIFOCNT_BB     (STM32_PERIPHBB_BASE+((STM32_SDIO_OFFSET+STM32_SDIO_FIFOCNT_OFFSET)<<5))
 #define STM32_SDIO_FIFO_BB        (STM32_PERIPHBB_BASE+((STM32_SDIO_OFFSET+STM32_SDIO_FIFO_OFFSET)<<5))
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define SDIO_POWER_PWRCTRL_SHIFT       (0)       /* Bits 0-1: Power supply control bits */
 #define SDIO_POWER_PWRCTRL_MASK        (3 << SDIO_POWER_PWRCTRL_SHIFT)
@@ -128,6 +113,7 @@
 #  define SDIO_CLKCR_WIDBUS_D1         (0 << SDIO_CLKCR_WIDBUS_SHIFT) /* 00: Default (SDIO_D0) */
 #  define SDIO_CLKCR_WIDBUS_D4         (1 << SDIO_CLKCR_WIDBUS_SHIFT) /* 01: 4-wide (SDIO_D[3:0]) */
 #  define SDIO_CLKCR_WIDBUS_D8         (2 << SDIO_CLKCR_WIDBUS_SHIFT) /* 10: 8-wide (SDIO_D[7:0]) */
+
 #define SDIO_CLKCR_NEGEDGE             (1 << 13) /* Bit 13: SDIO_CK dephasing selection bit */
 #define SDIO_CLKCR_HWFC_EN             (1 << 14) /* Bit 14: HW Flow Control enable */
 
@@ -147,6 +133,7 @@
 #  define SDIO_CMD_NORESPONSE          (0 << SDIO_CMD_WAITRESP_SHIFT) /* 00/10: No response */
 #  define SDIO_CMD_SHORTRESPONSE       (1 << SDIO_CMD_WAITRESP_SHIFT) /* 01: Short response */
 #  define SDIO_CMD_LONGRESPONSE        (3 << SDIO_CMD_WAITRESP_SHIFT) /* 11: Long response */
+
 #define SDIO_CMD_WAITINT               (1 << 8)  /* Bit 8: CPSM waits for interrupt request */
 #define SDIO_CMD_WAITPEND              (1 << 9)  /* Bit 9: CPSM Waits for ends of data transfer */
 #define SDIO_CMD_CPSMEN                (1 << 10) /* Bit 10: Command path state machine enable */

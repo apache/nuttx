@@ -1,51 +1,36 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4s_memorymap.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4S_MEMORYMAP_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4S_MEMORYMAP_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
 /* Address regions */
 
@@ -62,11 +47,13 @@
 #define SAM_INTFLASH_BASE      0x00400000 /* 0x00400000-0x007fffff: Internal FLASH */
 #define SAM_INTROM_BASE        0x00800000 /* 0x00180000-0x00bfffff: Internal ROM */
                                           /* 0x00c00000-0x1fffffff: Reserved */
+
 /* Internal SRAM memory region */
 
 #define SAM_INTSRAM0_BASE      0x20000000 /* For SAM3U compatibility */
 #define SAM_BBSRAM_BASE        0x22000000 /* 0x22000000-0x23ffffff: 32MB bit-band region */
                                           /* 0x24000000-0x3fffffff: Undefined */
+
 /* Peripherals address region */
 
 #define SAM_HSMCI_BASE         0x40000000 /* 0x40000000-0x400003ff: High Speed Multimedia Card Interface */
@@ -104,6 +91,7 @@
                                           /* 0x40100000-0x4002ffff: Reserved */
 #define SAM_BBPERIPH_BASE      0x42000000 /* 0x42000000-0x43ffffff: 32MB bit-band region */
                                           /* 0x44000000-0x5fffffff: Reserved */
+
 /* System Controller Register Blocks:  0x400e0000-0x4007ffff */
 
 #define SAM_SMC_BASE           0x400e0000 /* 0x400e0000-0x400e01ff: Static Memory Controller */
@@ -127,6 +115,7 @@
 #define SAM_RTC_BASE           0x400e1460 /* 0x400e1460-0x400e148f: Real Time Clock */
 #define SAM_GPBR_BASE          0x400e1490 /* 0x400e1490-0x400e15ff: GPBR */
                                           /* 0x400e1600-0x4007ffff: Reserved */
+
 /* External RAM memory region */
 
 #define SAM_EXTCS_BASE         0x60000000 /* 0x60000000-0x63ffffff: Chip selects */
@@ -136,21 +125,22 @@
 #  define SAM_EXTCS2_BASE      0x62000000 /* 0x62000000-0x62ffffff:   Chip select 2 */
 #  define SAM_EXTCS3_BASE      0x63000000 /* 0x63000000-0x63ffffff:   Chip select 3 */
                                           /* 0x64000000-0x9fffffff: Reserved */
+
 /* System memory region */
 
 #define SAM_PRIVPERIPH_BASE    0xe0000000 /* 0xe0000000-0xe00fffff: Private peripheral bus */
 #define SAM_VENDOR_BASE        0xe0100000 /* 0ex0100000-0xffffffff: Vendor-specific memory */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4S_MEMORYMAP_H */

@@ -1,4 +1,4 @@
-/******************************************************************************************
+/****************************************************************************
  * drivers/usbdev/pl2303.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -18,11 +18,11 @@
  *
  * This logic emulates the Prolific PL2303 serial/USB converter
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,11 +45,11 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-/******************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration **************************************************************************/
+/* Configuration ************************************************************/
 
 /* Number of requests in the write queue */
 
@@ -140,7 +140,7 @@
 #  define CONFIG_USBDEV_MAXPOWER 100
 #endif
 
-/* Descriptors ****************************************************************************/
+/* Descriptors **************************************************************/
 
 /* These settings are not modifiable via the NuttX configuration */
 
@@ -181,7 +181,7 @@
 #define PL2303_MXDESCLEN           (64)
 #define PL2303_MAXSTRLEN           (PL2303_MXDESCLEN-2)
 
-/* Vendor specific control requests *******************************************************/
+/* Vendor specific control requests *****************************************/
 
 #define PL2303_CONTROL_TYPE        (0x20)
 #define PL2303_SETLINEREQUEST      (0x20) /* OUT, Recipient interface */
@@ -194,7 +194,7 @@
 #define PL2303_RWREQUEST_TYPE      (0x40)
 #define PL2303_RWREQUEST           (0x01) /* IN/OUT, Recipient device */
 
-/* Misc Macros ****************************************************************************/
+/* Misc Macros **************************************************************/
 
 /* min/max macros */
 
@@ -206,7 +206,7 @@
 #  define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-/* Trace values ***************************************************************************/
+/* Trace values *************************************************************/
 
 #define PL2303_CLASSAPI_SETUP       TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SETUP)
 #define PL2303_CLASSAPI_SHUTDOWN    TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_SHUTDOWN)
@@ -221,9 +221,9 @@
 #define PL2303_CLASSAPI_TXREADY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXREADY)
 #define PL2303_CLASSAPI_TXEMPTY     TRACE_EVENT(TRACE_CLASSAPI_ID, USBSER_TRACECLASSAPI_TXEMPTY)
 
-/******************************************************************************************
+/****************************************************************************
  * Private Types
- ******************************************************************************************/
+ ****************************************************************************/
 
 /* Container to support a list of requests */
 
@@ -283,11 +283,11 @@ struct pl2303_alloc_s
   struct pl2303_driver_s drvr;
 };
 
-/******************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************************/
+ ****************************************************************************/
 
-/* Transfer helpers ***********************************************************************/
+/* Transfer helpers *********************************************************/
 
 static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv,
                  uint8_t *reqbuf, uint16_t reqlen);
@@ -295,14 +295,14 @@ static int     usbclass_sndpacket(FAR struct pl2303_dev_s *priv);
 static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
                  uint8_t *reqbuf, uint16_t reqlen);
 
-/* Request helpers ************************************************************************/
+/* Request helpers **********************************************************/
 
 static struct  usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
                  uint16_t len);
 static void    usbclass_freereq(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
-/* Configuration **************************************************************************/
+/* Configuration ************************************************************/
 
 static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 #ifdef CONFIG_USBDEV_DUALSPEED
@@ -316,7 +316,7 @@ static void    usbclass_resetconfig(FAR struct pl2303_dev_s *priv);
 static int     usbclass_setconfig(FAR struct pl2303_dev_s *priv,
                  uint8_t config);
 
-/* Completion event handlers **************************************************************/
+/* Completion event handlers ************************************************/
 
 static void    usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
@@ -325,7 +325,7 @@ static void    usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 static void    usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
                  FAR struct usbdev_req_s *req);
 
-/* USB class device ***********************************************************************/
+/* USB class device *********************************************************/
 
 static int     usbclass_bind(FAR struct usbdevclass_driver_s *driver,
                  FAR struct usbdev_s *dev);
@@ -344,7 +344,7 @@ static void    usbclass_resume(FAR struct usbdevclass_driver_s *driver,
                  FAR struct usbdev_s *dev);
 #endif
 
-/* Serial port ****************************************************************************/
+/* Serial port **************************************************************/
 
 static int     usbser_setup(FAR struct uart_dev_s *dev);
 static void    usbser_shutdown(FAR struct uart_dev_s *dev);
@@ -354,11 +354,11 @@ static void    usbser_rxint(FAR struct uart_dev_s *dev, bool enable);
 static void    usbser_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    usbser_txempty(FAR struct uart_dev_s *dev);
 
-/******************************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************************/
+ ****************************************************************************/
 
-/* USB class device ***********************************************************************/
+/* USB class device *********************************************************/
 
 static const struct usbdevclass_driverops_s g_driverops =
 {
@@ -375,7 +375,7 @@ static const struct usbdevclass_driverops_s g_driverops =
 #endif
 };
 
-/* Serial port ****************************************************************************/
+/* Serial port **************************************************************/
 
 static const struct uart_ops_s g_uartops =
 {
@@ -396,7 +396,7 @@ static const struct uart_ops_s g_uartops =
   usbser_txempty        /* txempty */
 };
 
-/* USB descriptor templates these will be copied and modified *****************************/
+/* USB descriptor templates these will be copied and modified ***************/
 
 static const struct usb_devdesc_s g_devdesc =
 {
@@ -492,27 +492,30 @@ static const struct usb_qualdesc_s g_qualdesc =
 };
 #endif
 
-/******************************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_fillrequest
  *
  * Description:
- *   If there is data to send it is copied to the given buffer.  Called either
- *   to initiate the first write operation, or from the completion interrupt handler
- *   service consecutive write operations.
+ *   If there is data to send it is copied to the given buffer. Called either
+ *   to initiate the first write operation, or from the completion interrupt
+ *   handler service consecutive write operations.
  *
- * NOTE: The USB serial driver does not use the serial drivers uart_xmitchars()
- *   API.  That logic is essentially duplicated here because unlike UART hardware,
- *   we need to be able to handle writes not byte-by-byte, but packet-by-packet.
- *   Unfortunately, that decision also exposes some internals of the serial driver
- *   in the following.
+ * NOTE:
+ *   The USB serial driver does not use the serial drivers uart_xmitchars()
+ *   API.  That logic is essentially duplicated here because unlike UART
+ *   hardware, we need to be able to handle writes not byte-by-byte, but
+ *   packet-by-packet.
+ *   Unfortunately, that decision also exposes some internals of the serial
+ *   driver in the following.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
-static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *reqbuf,
+static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv,
+                                     uint8_t *reqbuf,
                                      uint16_t reqlen)
 {
   FAR uart_dev_t *serdev = &priv->serdev;
@@ -524,7 +527,9 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
 
   flags = enter_critical_section();
 
-  /* Transfer bytes while we have bytes available and there is room in the request */
+  /* Transfer bytes while we have bytes available and there is room in the
+   * request
+   */
 
   while (xmit->head != xmit->tail && nbytes < reqlen)
     {
@@ -561,16 +566,16 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
   return nbytes;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_sndpacket
  *
  * Description:
- *   This function obtains write requests, transfers the TX data into the request,
- *   and submits the requests to the USB controller.  This continues untils either
- *   (1) there are no further packets available, or (2) there is not further data
- *   to send.
+ *   This function obtains write requests, transfers the TX data into the
+ *   request, and submits the requests to the USB controller.  This continues
+ *   until either (1) there are no further packets available, or (2) there is
+ *   not further data to send.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
 {
@@ -596,9 +601,9 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
 
   ep = priv->epbulkin;
 
-  /* Loop until either (1) we run out or write requests, or (2) usbclass_fillrequest()
-   * is unable to fill the request with data (i.e., until there is no more data
-   * to be sent).
+  /* Loop until either (1) we run out or write requests, or (2)
+   * usbclass_fillrequest() is unable to fill the request with data
+   * (i.e., until there is no more data to be sent).
    */
 
   uinfo("head=%d tail=%d nwrq=%d empty=%d\n",
@@ -634,7 +639,8 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
           ret          = EP_SUBMIT(ep, req);
           if (ret != OK)
             {
-              usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL), (uint16_t)-ret);
+              usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL),
+                      (uint16_t) - ret);
               break;
             }
         }
@@ -648,18 +654,18 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
   return ret;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_recvpacket
  *
  * Description:
- *   A normal completion event was received by the read completion handler at the
- *   interrupt level (with interrupts disabled).  This function handles the USB packet
- *   and provides the received data to the uart RX buffer.
+ *   A normal completion event was received by the read completion handler at
+ *   the interrupt level (with interrupts disabled).  This function handles
+ *   the USB packet and provides the received data to the uart RX buffer.
  *
  * Assumptions:
  *   Called from the USB interrupt handler with interrupts disabled.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
                                       uint8_t *reqbuf, uint16_t reqlen)
@@ -670,11 +676,12 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
   uint16_t nexthead;
   uint16_t nbytes = 0;
 
-  /* Get the next head index. During the time that RX interrupts are disabled, the
-   * the serial driver will be extracting data from the circular buffer and modifying
-   * recv.tail.  During this time, we should avoid modifying recv.head; Instead we will
-   * use a shadow copy of the index.  When interrupts are restored, the real recv.head
-   * will be updated with this index.
+  /* Get the next head index. During the time that RX interrupts are
+   * disabled, the the serial driver will be extracting data from the
+   * circular buffer and modifying recv.tail.  During this time, we should
+   * avoid modifying recv.head; Instead we will use a shadow copy of the
+   * index.  When interrupts are restored, the real recv.head will be updated
+   * with this index.
    */
 
   if (priv->rxenabled)
@@ -686,9 +693,9 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
       currhead = priv->rxhead;
     }
 
-  /* Pre-calculate the head index and check for wrap around.  We need to do this
-   * so that we can determine if the circular buffer will overrun BEFORE we
-   * overrun the buffer!
+  /* Pre-calculate the head index and check for wrap around.  We need to do
+   * this so that we can determine if the circular buffer will overrun BEFORE
+   * we overrun the buffer!
    */
 
   nexthead = currhead + 1;
@@ -697,9 +704,10 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
       nexthead = 0;
     }
 
-  /* Then copy data into the RX buffer until either: (1) all of the data has been
-   * copied, or (2) the RX buffer is full.  NOTE:  If the RX buffer becomes full,
-   * then we have overrun the serial driver and data will be lost.
+  /* Then copy data into the RX buffer until either: (1) all of the data has
+   * been copied, or (2) the RX buffer is full.
+   * NOTE:  If the RX buffer becomes full, then we have overrun the serial
+   * driver and data will be lost.
    */
 
   while (nexthead != recv->tail && nbytes < reqlen)
@@ -757,13 +765,13 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
   return OK;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_allocreq
  *
  * Description:
  *   Allocate a request instance along with its buffer
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
                                               uint16_t len)
@@ -785,13 +793,13 @@ static struct usbdev_req_s *usbclass_allocreq(FAR struct usbdev_ep_s *ep,
   return req;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_freereq
  *
  * Description:
  *   Free a request instance along with its buffer
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
                              FAR struct usbdev_req_s *req)
@@ -807,13 +815,13 @@ static void usbclass_freereq(FAR struct usbdev_ep_s *ep,
     }
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_mkstrdesc
  *
  * Description:
  *   Construct a string descriptor
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
 {
@@ -876,18 +884,19 @@ static int usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
   return strdesc->len;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_mkepbulkdesc
  *
  * Description:
  *   Construct the endpoint descriptor
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-static inline void usbclass_mkepbulkdesc(const FAR struct usb_epdesc_s *indesc,
-                                         uint16_t mxpacket,
-                                         FAR struct usb_epdesc_s *outdesc)
+static inline void usbclass_mkepbulkdesc(
+                             const FAR struct usb_epdesc_s *indesc,
+                             uint16_t mxpacket,
+                             FAR struct usb_epdesc_s *outdesc)
 {
   /* Copy the canned descriptor */
 
@@ -900,13 +909,13 @@ static inline void usbclass_mkepbulkdesc(const FAR struct usb_epdesc_s *indesc,
 }
 #endif
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_mkcfgdesc
  *
  * Description:
  *   Construct the configuration descriptor
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
@@ -964,9 +973,11 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf)
       bulkmxpacket = 64;
     }
 
-  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, (FAR struct usb_epdesc_s *)buf);
+  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket,
+                        (FAR struct usb_epdesc_s *)buf);
   buf += USB_SIZEOF_EPDESC;
-  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, (FAR struct usb_epdesc_s *)buf);
+  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket,
+                        (FAR struct usb_epdesc_s *)buf);
 #else
   memcpy(buf, &g_epbulkoutdesc, USB_SIZEOF_EPDESC);
   buf += USB_SIZEOF_EPDESC;
@@ -980,13 +991,13 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf)
   return totallen;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_resetconfig
  *
  * Description:
  *   Mark the device as not configured and disable all endpoints.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_resetconfig(FAR struct pl2303_dev_s *priv)
 {
@@ -1016,14 +1027,14 @@ static void usbclass_resetconfig(FAR struct pl2303_dev_s *priv)
     }
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_setconfig
  *
  * Description:
  *   Set the device configuration by allocating and configuring endpoints and
  *   by allocating and queue read and write requests.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 {
@@ -1157,31 +1168,32 @@ errout:
   return ret;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_ep0incomplete
  *
  * Description:
  *   Handle completion of EP0 control operations
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
                                    FAR struct usbdev_req_s *req)
 {
   if (req->result || req->xfrd != req->len)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_REQRESULT), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_REQRESULT),
+              (uint16_t)-req->result);
     }
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_rdcomplete
  *
  * Description:
  *   Handle completion of read request on the bulk OUT endpoint.  This
  *   is handled like the receipt of serial data on the "UART"
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
                                 FAR struct usbdev_req_s *req)
@@ -1221,7 +1233,8 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
       return;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDUNEXPECTED),
+              (uint16_t)-req->result);
       break;
     };
 
@@ -1231,20 +1244,21 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
   ret      = EP_SUBMIT(ep, req);
   if (ret != OK)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSUBMIT),
+              (uint16_t)-req->result);
     }
 
   leave_critical_section(flags);
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_wrcomplete
  *
  * Description:
  *   Handle completion of write request.  This function probably executes
  *   in the context of an interrupt handler.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
                                 FAR struct usbdev_req_s *req)
@@ -1291,27 +1305,29 @@ static void usbclass_wrcomplete(FAR struct usbdev_ep_s *ep,
       break;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16_t)-req->result);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED),
+              (uint16_t)-req->result);
       break;
     }
 }
 
-/******************************************************************************************
+/****************************************************************************
  * USB Class Driver Methods
- ******************************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_bind
  *
  * Description:
  *   Invoked when the driver is bound to a USB device driver
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
                          FAR struct usbdev_s *dev)
 {
-  FAR struct pl2303_dev_s *priv = ((FAR struct pl2303_driver_s *)driver)->dev;
+  FAR struct pl2303_dev_s *priv =
+                         ((FAR struct pl2303_driver_s *)driver)->dev;
   FAR struct pl2303_req_s *reqcontainer;
   irqstate_t flags;
   uint16_t reqlen;
@@ -1353,7 +1369,8 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN interrupt endpoint */
 
-  priv->epintin = DEV_ALLOCEP(dev, PL2303_EPINTIN_ADDR, true, USB_EP_ATTR_XFER_INT);
+  priv->epintin = DEV_ALLOCEP(dev, PL2303_EPINTIN_ADDR,
+                              true, USB_EP_ATTR_XFER_INT);
   if (!priv->epintin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINALLOCFAIL), 0);
@@ -1365,7 +1382,8 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the IN bulk endpoint */
 
-  priv->epbulkin = DEV_ALLOCEP(dev, PL2303_EPINBULK_ADDR, true, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkin = DEV_ALLOCEP(dev, PL2303_EPINBULK_ADDR,
+                               true, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkin)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
@@ -1377,7 +1395,8 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate the OUT bulk endpoint */
 
-  priv->epbulkout = DEV_ALLOCEP(dev, PL2303_EPOUTBULK_ADDR, false, USB_EP_ATTR_XFER_BULK);
+  priv->epbulkout = DEV_ALLOCEP(dev, PL2303_EPOUTBULK_ADDR,
+                                false, USB_EP_ATTR_XFER_BULK);
   if (!priv->epbulkout)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTALLOCFAIL), 0);
@@ -1465,13 +1484,13 @@ errout:
   return ret;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_unbind
  *
  * Description:
  *    Invoked when the driver is unbound from a USB device driver
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
                             FAR struct usbdev_s *dev)
@@ -1590,14 +1609,14 @@ static void usbclass_unbind(FAR struct usbdevclass_driver_s *driver,
   priv->serdev.xmit.tail = 0;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_setup
  *
  * Description:
  *   Invoked for ep0 control requests.  This function probably executes
  *   in the context of an interrupt handler.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                           FAR struct usbdev_s *dev,
@@ -1653,8 +1672,9 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
           {
           case USB_REQ_GETDESCRIPTOR:
             {
-              /* The value field specifies the descriptor type in the MS byte and the
-               * descriptor index in the LS byte (order is little endian)
+              /* The value field specifies the descriptor type in the MS byte
+               * and the descriptor index in the LS byte
+               * (order is little endian)
                */
 
               switch (ctrl->value[1])
@@ -1680,7 +1700,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 case USB_DESC_TYPE_CONFIG:
                   {
 #ifdef CONFIG_USBDEV_DUALSPEED
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf, dev->speed, ctrl->req);
+                    ret = usbclass_mkcfgdesc(ctrlreq->buf,
+                                             dev->speed, ctrl->req);
 #else
                     ret = usbclass_mkcfgdesc(ctrlreq->buf);
 #endif
@@ -1698,7 +1719,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
                 default:
                   {
-                    usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_GETUNKNOWNDESC), value);
+                    usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_GETUNKNOWNDESC),
+                             value);
                   }
                   break;
                 }
@@ -1759,7 +1781,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
              break;
 
           default:
-            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDSTDREQ), ctrl->req);
+            usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDSTDREQ),
+                     ctrl->req);
             break;
           }
       }
@@ -1769,7 +1792,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
     case PL2303_CONTROL_TYPE:
       {
-        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_INTERFACE)
+        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+            USB_REQ_RECIPIENT_INTERFACE)
           {
             switch (ctrl->req)
               {
@@ -1795,7 +1819,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 break;
 
               default:
-                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
+                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ),
+                         ctrl->type);
                 break;
               }
           }
@@ -1804,7 +1829,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
     case PL2303_RWREQUEST_TYPE:
       {
-        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) == USB_REQ_RECIPIENT_DEVICE)
+        if ((ctrl->type & USB_REQ_RECIPIENT_MASK) ==
+             USB_REQ_RECIPIENT_DEVICE)
           {
             if (ctrl->req == PL2303_RWREQUEST)
               {
@@ -1843,7 +1869,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
               }
             else
               {
-                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ), ctrl->type);
+                usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UNSUPPORTEDCLASSREQ),
+                         ctrl->type);
               }
           }
       }
@@ -1874,7 +1901,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   return ret;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_disconnect
  *
  * Description:
@@ -1882,7 +1909,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
  *   disconnected.  This function is probably called from the context of an
  *   interrupt handler.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
                                 FAR struct usbdev_s *dev)
@@ -1939,13 +1966,13 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
   DEV_CONNECT(dev);
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_suspend
  *
  * Description:
  *   Handle the USB suspend event.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_REMOVABLE
 static void usbclass_suspend(FAR struct usbdevclass_driver_s *driver,
@@ -1973,13 +2000,13 @@ static void usbclass_suspend(FAR struct usbdevclass_driver_s *driver,
 }
 #endif
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbclass_resume
  *
  * Description:
  *   Handle the USB resume event.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_REMOVABLE
 static void usbclass_resume(FAR struct usbdevclass_driver_s *driver,
@@ -2012,17 +2039,17 @@ static void usbclass_resume(FAR struct usbdevclass_driver_s *driver,
 }
 #endif
 
-/******************************************************************************************
+/****************************************************************************
  * Serial Device Methods
- ******************************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_setup
  *
  * Description:
  *   This method is called the first time that the serial port is opened.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbser_setup(FAR struct uart_dev_s *dev)
 {
@@ -2055,7 +2082,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
   return OK;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_shutdown
  *
  * Description:
@@ -2065,7 +2092,7 @@ static int usbser_setup(FAR struct uart_dev_s *dev)
  *   usbser_txempty() until that function returns true before calling this
  *   function.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbser_shutdown(FAR struct uart_dev_s *dev)
 {
@@ -2081,13 +2108,13 @@ static void usbser_shutdown(FAR struct uart_dev_s *dev)
 #endif
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_attach
  *
  * Description:
  *   Does not apply to the USB serial class device
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static int usbser_attach(FAR struct uart_dev_s *dev)
 {
@@ -2095,20 +2122,20 @@ static int usbser_attach(FAR struct uart_dev_s *dev)
   return OK;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_detach
  *
  * Description:
  *   Does not apply to the USB serial class device
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbser_detach(FAR struct uart_dev_s *dev)
 {
   usbtrace(PL2303_CLASSAPI_DETACH, 0);
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_rxint
  *
  * Description:
@@ -2123,7 +2150,7 @@ static void usbser_detach(FAR struct uart_dev_s *dev)
  *   3. With enable==false when the port is closed (just before usbser_detach
  *      and usbser_shutdown are called).
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
@@ -2205,7 +2232,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
   leave_critical_section(flags);
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_txint
  *
  * Description:
@@ -2217,7 +2244,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
  *   2. With enable==true when data may be taken from the buffer.
  *   3. With enable==false when the TX buffer is empty
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
 {
@@ -2252,17 +2279,17 @@ static void usbser_txint(FAR struct uart_dev_s *dev, bool enable)
     }
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbser_txempty
  *
  * Description:
  *   Return true when all data has been sent.  This is called from the
  *   serial driver when the driver is closed.  It will call this API
- *   periodically until it reports true.  NOTE that the serial driver takes all
- *   responsibility for flushing TX data through the hardware so we can be
- *   a bit sloppy about that.
+ *   periodically until it reports true.  NOTE that the serial driver takes
+ *   all responsibility for flushing TX data through the hardware so we can
+ *   be a bit sloppy about that.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 static bool usbser_txempty(FAR struct uart_dev_s *dev)
 {
@@ -2285,17 +2312,17 @@ static bool usbser_txempty(FAR struct uart_dev_s *dev)
   return priv->nwrq >= CONFIG_PL2303_NWRREQS;
 }
 
-/******************************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************************
+/****************************************************************************
  * Name: usbdev_serialinitialize
  *
  * Description:
  *   Register USB serial port (and USB serial console if so configured).
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 int usbdev_serialinitialize(int minor)
 {
@@ -2307,7 +2334,8 @@ int usbdev_serialinitialize(int minor)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct pl2303_alloc_s *)kmm_malloc(sizeof(struct pl2303_alloc_s));
+  alloc = (FAR struct pl2303_alloc_s *)
+           kmm_malloc(sizeof(struct pl2303_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_ALLOCDEVSTRUCT), 0);
@@ -2372,7 +2400,8 @@ int usbdev_serialinitialize(int minor)
   ret = uart_register("/dev/console", &priv->serdev);
   if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONSOLEREGISTER), (uint16_t)-ret);
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_CONSOLEREGISTER),
+              (uint16_t)-ret);
       goto errout_with_class;
     }
 #endif

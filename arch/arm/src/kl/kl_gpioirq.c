@@ -1,35 +1,20 @@
 /****************************************************************************
- *  arch/arm/src/kl/kl_gpioirq.c
+ * arch/arm/src/kl/kl_gpioirq.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -56,7 +41,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* The Kinetis port interrupt logic is very flexible and will program
  * interrupts on most all pin events.  In order to keep the memory usage to
  * a minimum, the NuttX port supports enabling interrupts on a per-port
@@ -85,6 +72,7 @@ struct g_portisrs_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Per pin port interrupt vectors.  NOTE:  Not all pins in each port
  * correspond to externally available GPIOs.  However, I believe that the
  * Kinetis will support interrupts even if the pin is not available as
@@ -218,11 +206,13 @@ void kl_gpioirqinitialize(void)
  * Name: kl_gpioirqattach
  *
  * Description:
- *   Attach a pin interrupt handler.  The normal initialization sequence is:
+ *   Attach a pin interrupt handler.
+ *   The normal initialization sequence is:
  *
- *   1. Call kl_gpioconfig() to configure the interrupting pin (pin interrupts
- *      will be disabled.
- *   2. Call kl_gpioirqattach() to attach the pin interrupt handling function.
+ *   1. Call kl_gpioconfig() to configure the interrupting pin (pin
+ *      interrupts will be disabled.
+ *   2. Call kl_gpioirqattach() to attach the pin interrupt handling
+ *      function.
  *   3. Call kl_gpioirqenable() to enable interrupts on the pin.
  *
  * Input Parameters:
@@ -231,11 +221,11 @@ void kl_gpioirqinitialize(void)
  *  - pinarg:  The argument that will accompany the pin interrupt
  *
  * Returned Value:
- * Returned Value:
- *   Zero (OK) is returned on success; On any failure, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero (OK) is returned on success;
+ *   On any failure, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
 {
@@ -278,28 +268,28 @@ int kl_gpioirqattach(uint32_t pinset, xcpt_t pinisr, void *pinarg)
         return NULL;
     }
 
-   /* Get the old PIN ISR and set the new PIN ISR */
+  /* Get the old PIN ISR and set the new PIN ISR */
 
-   isrtab[pin].handler = pinisr;
-   isrtab[pin].arg     = pinarg;
+  isrtab[pin].handler = pinisr;
+  isrtab[pin].arg     = pinarg;
 
-   /* And return the old PIN isr address */
+  /* And return the old PIN isr address */
 
-   leave_critical_section(flags);
-   return OK;
+  leave_critical_section(flags);
+  return OK;
 
 #else
-   return -ENOSYS;
+  return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kl_gpioirqenable(uint32_t pinset)
 {
@@ -367,13 +357,13 @@ void kl_gpioirqenable(uint32_t pinset)
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void kl_gpioirqdisable(uint32_t pinset)
 {

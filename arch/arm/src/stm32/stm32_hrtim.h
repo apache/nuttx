@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_hrtim.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_HRTIM_H
 #define __ARCH_ARM_SRC_STM32_STM32_HRTIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -40,9 +40,9 @@
 #  error
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_STM32_HRTIM_TIMA) || defined(CONFIG_STM32_HRTIM_TIMB) || \
     defined(CONFIG_STM32_HRTIM_TIMC) || defined(CONFIG_STM32_HRTIM_TIMD) || \
@@ -191,7 +191,7 @@
 
 #define HRTIM_CLOCK (HRTIM_MAIN_CLOCK*32ull)
 
-/* Helpers **************************************************************************/
+/* Helpers ******************************************************************/
 
 #define HRTIM_CMP_SET(hrtim, tim, index, cmp)               \
         (hrtim)->hd_ops->cmp_update(hrtim, tim, index, cmp)
@@ -241,9 +241,9 @@
 #define HRTIM_CPT_MAX 0xFFFF
 #define HRTIM_REP_MAX 0xFF
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* HRTIM Timer X index */
 
@@ -1010,8 +1010,10 @@ struct stm32_hrtim_ops_s
 {
   int      (*cmp_update)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                          uint8_t index, uint16_t cmp);
-  int      (*per_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint16_t per);
-  int      (*rep_update)(FAR struct hrtim_dev_s *dev, uint8_t timer, uint8_t rep);
+  int      (*per_update)(FAR struct hrtim_dev_s *dev,
+                         uint8_t timer, uint16_t per);
+  int      (*rep_update)(FAR struct hrtim_dev_s *dev,
+                         uint8_t timer, uint8_t rep);
   uint16_t (*per_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
   uint16_t (*cmp_get)(FAR struct hrtim_dev_s *dev, uint8_t timer,
                       uint8_t index);
@@ -1024,7 +1026,8 @@ struct stm32_hrtim_ops_s
                          bool state);
 
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
-  int      (*irq_ack)(FAR struct hrtim_dev_s *dev, uint8_t timer, int source);
+  int      (*irq_ack)(FAR struct hrtim_dev_s *dev,
+                      uint8_t timer, int source);
   uint16_t (*irq_get)(FAR struct hrtim_dev_s *dev, uint8_t timer);
 #endif
 #ifdef CONFIG_STM32_HRTIM_PWM
@@ -1081,9 +1084,9 @@ struct hrtim_dev_s
   bool initialized;                           /* true: HRTIM driver has been initialized */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -1094,7 +1097,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_hrtiminitialize
  *
  * Description:
@@ -1110,13 +1113,13 @@ extern "C"
  *   1. Clock to the HRTIM block has enabled,
  *   2. Board-specific logic has already configured
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct hrtim_dev_s *stm32_hrtiminitialize(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: hrtim_register
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_STM32_HRTIM_DISABLE_CHARDRV
 int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev);

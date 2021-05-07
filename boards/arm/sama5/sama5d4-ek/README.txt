@@ -2549,12 +2549,12 @@ I2C Tool
     Where <cmd> is one of:
 
       Show help     : ?
-      List buses   : bus
+      List buses    : bus
       List devices  : dev [OPTIONS] <first> <last>
-      Read register : get [OPTIONS] [<repititions>]
+      Read register : get [OPTIONS] [<repetitions>]
       Show help     : help
-      Write register: set [OPTIONS] <value> [<repititions>]
-      Verify access : verf [OPTIONS] [<value>] [<repititions>]
+      Write register: set [OPTIONS] <value> [<repetitions>]
+      Verify access : verf [OPTIONS] [<value>] [<repetitions>]
 
     Where common "sticky" OPTIONS include:
       [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
@@ -2562,7 +2562,7 @@ I2C Tool
       [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
       [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
       [-s|n], send/don't send start between command and data.  Default: -n Current: -n
-      [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+      [-i|j], Auto increment|don't increment regaddr on repetitions.  Default: NO Current: NO
       [-f freq] I2C frequency.  Default: 100000 Current: 100000
 
     NOTES:
@@ -4362,7 +4362,7 @@ Configurations
 
        The FAT file system includes long file name support.  Please be aware
        that Microsoft claims patents against the long file name support (see
-       more discussion in the top-level COPYING file).
+       more discussion in the top-level NOTICE file).
 
          CONFIG_FS_FAT=y        : Enables the FAT file system
          CONFIG_FAT_LCNAMES=y   : Enable lower case 8.3 file names

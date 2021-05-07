@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_usbotg.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_USBOTG_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_USBOTG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_USB_PERID_OFFSET    0x0000 /* Peripheral ID Register */
 #define KINETIS_USB_IDCOMP_OFFSET   0x0004 /* Peripheral ID Complement Register */
@@ -74,6 +59,7 @@
 #define KINETIS_USB_BDTPAGE3_OFFSET 0x00b4 /* BDT Page Register 3 */
 
 #define KINETIS_USB_ENDPT_OFFSET(n) (0x00c0+((n)<<2)) /* Endpoint n Control Register */
+
 #define KINETIS_USB_ENDPT0_OFFSET   0x00c0 /* Endpoint 0 Control Register */
 #define KINETIS_USB_ENDPT1_OFFSET   0x00c4 /* Endpoint 1 Control Register */
 #define KINETIS_USB_ENDPT2_OFFSET   0x00c8 /* Endpoint 2 Control Register */
@@ -103,7 +89,7 @@
 #  define KINETIS_USB_USB0_CLK_RECOVER_INT_STATUS_OFFSET 0x15c /* Clock recovery sperated interrupt status */
 #endif
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_USB0_PERID          (KINETIS_USB0_BASE+KINETIS_USB_PERID_OFFSET)
 #define KINETIS_USB0_IDCOMP         (KINETIS_USB0_BASE+KINETIS_USB_IDCOMP_OFFSET)
@@ -162,9 +148,10 @@
     (KINETIS_USB0_BASE+KINETIS_USB_USB0_CLK_RECOVER_INT_STATUS_OFFSET)
 #endif
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Peripheral ID Register (8-bit) */
+
                                               /* Bits 6-7: Reserved */
 #define USB_PERID_MASK              (0x3f)    /* Bits 0-5: Peripheral identification bits */
 
@@ -216,6 +203,7 @@
 #define USB_OTGSTAT_ID              (1 << 7)  /* Bit 7:  Current state of the ID pin on the USB connector */
 
 /* OTG Control Register (8-bit) */
+
                                               /* Bits 0-1:  Reserved */
 #define USB_OTGCTL_OTGEN            (1 << 2)  /* Bit 2:  On-The-Go pullup/pulldown resistor enable */
                                               /* Bit 3:  Reserved */
@@ -237,7 +225,9 @@
 
 #define USB_INT_ALL                0xFF
 
-/* Error Interrupt Status Register and Error Interrupt Enable Register (8-bit) */
+/* Error Interrupt Status Register and
+ * Error Interrupt Enable Register (8-bit)
+ */
 
 #define USB_ERRSTAT_PIDERR          (1 << 0)  /* Bit 0:  This bit is set when the PID check field fails */
 #define USB_ERRSTAT_CRC5EOF         (1 << 1)  /* Bit 1:  Host data CRC error or End of frame errors */
@@ -276,6 +266,7 @@
 #define USB_ADDR_MASK               (0x7f << USB_ADDR_SHIFT)
 
 /* BDT Page Register 1 (8-bit) */
+
                                               /* Bit 0:  Reserved */
 #define USB_BDTPAGE1_SHIFT          (1)       /* Bits 1-7: Address bits 9-15 of the BDT base address */
 #define USB_BDTPAGE1_MASK           (0x7f << USB_BDTPAGE1_SHIFT)
@@ -283,6 +274,7 @@
 /* Frame Number Register Low (8-bit, bits 0-7 of the 11 bit frame number) */
 #define USB_FRMNUML_MASK            0xFF
 /* Frame Number Register High (8-bit) */
+
                                               /* Bits 3-7:  Reserved */
 #define USB_FRMNUMH_SHIFT           (0)       /* Bits 0-2: Bits 8-10 of the 11-bit frame number */
 #define USB_FRMNUMH_MASK            (7 << USB_FRMNUMH_SHIFT)
@@ -298,6 +290,7 @@
 #  define USB_TOKEN_PID_SETUP       (13 << USB_TOKEN_PID_SHIFT) /* SETUP Token */
 
 /* SOF Threshold Register (8-bit count value) */
+
 /* BDT Page Register 2/3 (16 bit address in two 8-bit registers) */
 
 /* Endpoint n Control Register (8-bit) */
@@ -312,11 +305,13 @@
 #define USB_ENDPT_HOSTWOHUB         (1 << 7)  /* Bit 7:  Allows the host to communicate to a low speed device (host EP0) */
 
 /* USB Control Register (8-bit) */
+
                                               /* Bits 0-5:  Reserved */
 #define USB_USBCTRL_PDE             (1 << 6)  /* Bit 6:  Enables the weak pulldowns on the USB transceiver */
 #define USB_USBCTRL_SUSP            (1 << 7)  /* Bit 7:  Places the USB transceiver into the suspend state */
 
 /* USB OTG Observe Register (8-bit) */
+
                                               /* Bits 0-3:  Reserved */
 #define USB_OBSERVE_DMPD            (1 << 4)  /* Bit 4:  D- Pull Down signal output from the USB OTG module */
                                               /* Bit 5:  Reserved */
@@ -324,9 +319,11 @@
 #define USB_OBSERVE_DPPU            (1 << 7)  /* Bit 7:  D+ Pull Up signal output from the USB OTG module */
 
 /* USB OTG Control Register (8-bit) */
+
                                               /* Bits 0-3:  Reserved */
 #define USB_CONTROL_DPPULLUPNONOTG  (1 << 4)  /* Bit 4:  Controls of the DP PULLUP in the USB OTG module */
                                               /* Bits 5-7:  Reserved */
+
 /* USB Transceiver Control Register 0 (8-bit) */
 
 #define USB_USBTRC0_USBRESET        (1 << 7)  /* Bit 7:  USB reset */
@@ -336,7 +333,8 @@
 #define USB_USBTRC0_SYNC_DET        (1 << 1)  /* Bit 1:  Synchronous USB Interrupt Detect */
 #define USB_USBTRC0_RESUME_INT      (1 << 0)  /* Bit 0:  USB Asynchronous Interrupt */
 
-/* Buffer Descriptor Table (BDT) ****************************************************/
+/* Buffer Descriptor Table (BDT) ********************************************/
+
 /* Offset 0: On write (software->hardware) */
 
 #define USB_BDT_STATUS_MASK        0xfc     /* Bits 2-7: Status bits */
@@ -366,12 +364,12 @@
 #define USB_BDT_WORD_SIZE          2        /* Two 32-bit words per BDT */
 #define USB_NBDTS_PER_EP           4        /* Number of BDTS per endpoint: IN/OUT and EVEN/ODD */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_USBOTG_H */

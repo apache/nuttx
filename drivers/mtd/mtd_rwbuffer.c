@@ -1,43 +1,30 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/mtd_rwbuffer.c
- * MTD driver that contains another MTD driver and provides read-ahead and/or write
- * buffering.
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/* MTD driver that contains another MTD driver and provides read-ahead
+ * and/or write buffering.
+ */
+
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -59,9 +46,9 @@
 
 #if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DRVR_INVALIDATE
 #  error This driver requires CONFIG_DRVR_INVALIDATE
@@ -79,62 +66,79 @@
 #  define CONFIG_MTD_NRDBLOCKS 4
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This type represents the state of the MTD device.  The struct mtd_dev_s must
- * appear at the beginning of the definition so that you can freely cast between
- * pointers to struct mtd_dev_s and struct mtd_rwbuffer_s.
+/* This type represents the state of the MTD device.
+ * The struct mtd_dev_s must appear at the beginning of the definition so
+ * that you can freely cast between  pointers to struct mtd_dev_s and struct
+ * mtd_rwbuffer_s.
  */
 
 struct mtd_rwbuffer_s
 {
-  struct mtd_dev_s          mtd;  /* Our exported MTD interface */
-  FAR struct mtd_dev_s     *dev;  /* Saved lower level MTD interface instance */
-  struct rwbuffer_s         rwb;  /* The rwbuffer state structure */
-  uint16_t                  spb;  /* Number of sectors per block */
+  struct mtd_dev_s       mtd;  /* Our exported MTD interface */
+  FAR struct mtd_dev_s  *dev;  /* Saved lower level MTD interface instance */
+  struct rwbuffer_s      rwb;  /* The rwbuffer state structure */
+  uint16_t               spb;  /* Number of sectors per block */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* rwbuffer callouts */
 
-static ssize_t mtd_reload(FAR void *dev, FAR uint8_t *buffer, off_t startblock,
+static ssize_t mtd_reload(FAR void *dev,
+                          FAR uint8_t *buffer,
+                          off_t startblock,
                           size_t nblocks);
-static ssize_t mtd_flush(FAR void *dev, FAR const uint8_t *buffer, off_t startblock,
+static ssize_t mtd_flush(FAR void *dev,
+                         FAR const uint8_t *buffer,
+                         off_t startblock,
                          size_t nblocks);
 
 /* MTD driver methods */
 
-static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nsectors);
-static ssize_t mtd_bread(FAR struct mtd_dev_s *dev, off_t block,
-                         size_t nsectors, FAR uint8_t *buf);
-static ssize_t mtd_bwrite(FAR struct mtd_dev_s *dev, off_t block,
-                          size_t nsectors, FAR const uint8_t *buf);
-static ssize_t mtd_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
+static int mtd_erase(FAR struct mtd_dev_s *dev,
+                     off_t block,
+                     size_t nsectors);
+static ssize_t mtd_bread(FAR struct mtd_dev_s *dev,
+                         off_t block,
+                         size_t nsectors,
+                         FAR uint8_t *buf);
+static ssize_t mtd_bwrite(FAR struct mtd_dev_s *dev,
+                          off_t block,
+                          size_t nsectors,
+                          FAR const uint8_t *buf);
+static ssize_t mtd_read(FAR struct mtd_dev_s *dev,
+                        off_t offset,
+                        size_t nbytes,
                         FAR uint8_t *buffer);
-static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int mtd_ioctl(FAR struct mtd_dev_s *dev,
+                     int cmd,
+                     unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_reload
  *
  * Description:
  *   Reload the read-ahead buffer
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t mtd_reload(FAR void *dev, FAR uint8_t *buffer, off_t startblock,
+static ssize_t mtd_reload(FAR void *dev,
+                          FAR uint8_t *buffer,
+                          off_t startblock,
                           size_t nblocks)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
@@ -145,15 +149,17 @@ static ssize_t mtd_reload(FAR void *dev, FAR uint8_t *buffer, off_t startblock,
   return priv->dev->bread(priv->dev, startblock, nblocks, buffer);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_flush
  *
  * Description:
  *   Flush the write buffer to hardware
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t mtd_flush(FAR void *dev, FAR const uint8_t *buffer, off_t startblock,
+static ssize_t mtd_flush(FAR void *dev,
+                         FAR const uint8_t *buffer,
+                         off_t startblock,
                          size_t nblocks)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
@@ -164,11 +170,13 @@ static ssize_t mtd_flush(FAR void *dev, FAR const uint8_t *buffer, off_t startbl
   return priv->dev->bwrite(priv->dev, startblock, nblocks, buffer);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
+static int mtd_erase(FAR struct mtd_dev_s *dev,
+                     off_t block,
+                     size_t nblocks)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
   off_t sector;
@@ -197,57 +205,60 @@ static int mtd_erase(FAR struct mtd_dev_s *dev, off_t block, size_t nblocks)
   return priv->dev->erase(priv->dev, block, nblocks);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_bread
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t mtd_bread(FAR struct mtd_dev_s *dev, off_t sector,
                           size_t nsectors, FAR uint8_t *buffer)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
 
-  /* Let the rwbuffer logic do it real work.  It will call out to mtd_reload if is
-   * needs to read any data.
+  /* Let the rwbuffer logic do it real work.
+   * It will call out to mtd_reload if is needs to read any data.
    */
 
   return rwb_read(&priv->rwb, sector, nsectors, buffer);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_bwrite
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t mtd_bwrite(FAR struct mtd_dev_s *dev, off_t block, size_t nsectors,
-                            FAR const uint8_t *buffer)
+static ssize_t mtd_bwrite(FAR struct mtd_dev_s *dev, off_t block,
+                          size_t nsectors,
+                          FAR const uint8_t *buffer)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
 
-  /* Let the rwbuffer logic do it real work.  It will call out to wrb_reload it is
-   * needs to read any data.
+  /* Let the rwbuffer logic do it real work.
+   * It will call out to wrb_reload it is needs to read any data.
    */
 
   return rwb_write(&priv->rwb, block, nsectors, buffer);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t mtd_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer)
+static ssize_t mtd_read(FAR struct mtd_dev_s *dev,
+                        off_t offset,
+                        size_t nbytes,
+                        FAR uint8_t *buffer)
 {
   FAR struct mtd_rwbuffer_s *priv = (FAR struct mtd_rwbuffer_s *)dev;
 
-  /* Let the rwbuffer logic do it real work.  It will call out to mtd_reload it is
-   * needs to read any data.
+  /* Let the rwbuffer logic do it real work.
+   * It will call out to mtd_reload it is needs to read any data.
    */
 
   return rwb_readbytes(&priv->rwb, offset, nbytes, buffer);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
 static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
@@ -264,13 +275,14 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                                            ((uintptr_t)arg);
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks. That is most likely not true, but the
+               * client will expect the device logic to do whatever is
+               * necessary to make it appear so.
                */
 
               geo->blocksize    = priv->rwb.blocksize;
@@ -315,23 +327,23 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: mtd_rwb_initialize
  *
  * Description:
- *   Create an initialized MTD device instance.  This MTD driver contains another
- *   MTD driver and converts a larger sector size to a standard 512 byte sector
- *   size.
+ *   Create an initialized MTD device instance.
+ *   This MTD driver contains another MTD driver and converts a larger
+ *   sector size to a standard 512 byte sector size.
  *
- *   MTD devices are not registered in the file system, but are created as instances
- *   that can be bound to other functions (such as a block or character driver front
- *   end).
+ *   MTD devices are not registered in the file system, but are created as
+ *   instances that can be bound to other functions (such as a block or
+ *   character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
 {
@@ -354,11 +366,12 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH(0) definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same SPI bus.
+   * device (only because of the SPIDEV_FLASH(0) definition) and so would
+   * have to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct mtd_rwbuffer_s *)kmm_zalloc(sizeof(struct mtd_rwbuffer_s));
+  priv = (FAR struct mtd_rwbuffer_s *)
+          kmm_zalloc(sizeof(struct mtd_rwbuffer_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate mtd_rwbuffer\n");

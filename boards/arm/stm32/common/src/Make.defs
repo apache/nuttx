@@ -26,6 +26,10 @@ ifeq ($(CONFIG_LEDS_APA102),y)
   CSRCS += stm32_apa102.c
 endif
 
+ifeq ($(CONFIG_WS2812),y)
+  CSRCS += stm32_ws2812.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MAX6675),y)
   CSRCS += stm32_max6675.c
 endif
@@ -40,6 +44,10 @@ endif
 
 ifeq ($(CONFIG_AUDIO_TONE),y)
   CSRCS += stm32_tone.c
+endif
+
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += stm32_lcd_backpack.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1306),y)
@@ -104,6 +112,18 @@ endif
 
 ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += stm32_lis3dsh.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
+  CSRCS += stm32_ihm07m1.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM08M1),y)
+  CSRCS += stm32_ihm08m1.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM16M1),y)
+  CSRCS += stm32_ihm16m1.c
 endif
 
 DEPPATH += --dep-path src

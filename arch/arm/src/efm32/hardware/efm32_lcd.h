@@ -1,5 +1,5 @@
-/*******************************************************************************************************************************
- * arch/arm/src/efm32/chip/efm32_lcd.h
+/****************************************************************************
+ * arch/arm/src/efm32/hardware/efm32_lcd.h
  *
  *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *
@@ -15,10 +15,10 @@
  *
  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Laboratories, Inc.
  * has no obligation to support this Software. Silicon Laboratories, Inc. is
- * providing the Software "AS IS", with no express or implied warranties of any
- * kind, including, but not limited to, any implied warranties of
- * merchantability or fitness for any particular purpose or warranties against
- * infringement of any proprietary rights of a third party.
+ * providing the Software "AS IS", with no express or implied warranties of
+ * any kind, including, but not limited to, any implied warranties of
+ * merchantability or fitness for any particular purpose or warranties
+ * against infringement of any proprietary rights of a third party.
  *
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
@@ -56,14 +56,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LCD_H
 #define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LCD_H
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Included Files
- *******************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/efm32_memorymap.h"
@@ -72,10 +72,11 @@
 #  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
-/*******************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *******************************************************************************************************************************/
-/* LCD Register Offsets ********************************************************************************************************/
+ ****************************************************************************/
+
+/* LCD Register Offsets *****************************************************/
 
 #define EFM32_LCD_CTRL_OFFSET              0x0000  /* Control Register */
 #define EFM32_LCD_DISPCTRL_OFFSET          0x0004  /* Display Control Register */
@@ -107,7 +108,7 @@
 #define EFM32_LCD_SEGD6L_OFFSET            0x00d4  /* Segment Data Low Register 6 */
 #define EFM32_LCD_SEGD7L_OFFSET            0x00d8  /* Segment Data Low Register 7 */
 
-/* LCD Register Addresses ******************************************************************************************************/
+/* LCD Register Addresses ***************************************************/
 
 #define EFM32_LCD_CTRL                     (EFM32_LCD_BASE+EFM32_LCD_CTRL_OFFSET)
 #define EFM32_LCD_DISPCTRL                 (EFM32_LCD_BASE+EFM32_LCD_DISPCTRL_OFFSET)
@@ -139,7 +140,7 @@
 #define EFM32_LCD_SEGD6L                   (EFM32_LCD_BASE+EFM32_LCD_SEGD6L_OFFSET)
 #define EFM32_LCD_SEGD7L                   (EFM32_LCD_BASE+EFM32_LCD_SEGD7L_OFFSET)
 
-/* LCD Register Bit Field Definitions ******************************************************************************************/
+/* LCD Register Bit Field Definitions ***************************************/
 
 /* Bit fields for LCD CTRL */
 

@@ -1,8 +1,6 @@
 /****************************************************************************
  * drivers/power/bq27426.c
  *
- * Lower half driver for BQ27426 battery fuel gauge
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -19,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Lower half driver for BQ27426 battery fuel gauge */
 
 /****************************************************************************
  * Included Files
@@ -45,7 +45,7 @@
  *
  * CONFIG_BATTERY - Upper half battery driver support
  * CONFIG_I2C - I2C support
- * CONFIG_BQ27426 - And the driver must be explictly selected.
+ * CONFIG_BQ27426 - And the driver must be explicitly selected.
  */
 
 #if defined(CONFIG_BATTERY_GAUGE) && defined(CONFIG_I2C) && \
@@ -416,7 +416,7 @@ static int bq27426_online(struct battery_gauge_dev_s *dev, bool *status)
  *
  *   CONFIG_BATTERY - Upper half battery driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_BQ27426 - And the driver must be explictly selected.
+ *   CONFIG_BQ27426 - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c - An instance of the I2C interface to use to communicate with the bq

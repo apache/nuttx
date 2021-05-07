@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/stm32_dma.h
  *
  *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_STM32_DMA_H
 #define __ARCH_ARM_SRC_STM32_STM32_DMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -47,8 +47,12 @@
 
 #include "hardware/stm32_dma.h"
 
-/* These definitions provide the bit encoding of the 'status' parameter passed to the
- * DMA callback function (see dma_callback_t).
+#ifdef CONFIG_STM32_HAVE_DMAMUX
+#  include "hardware/stm32_dmamux.h"
+#endif
+
+/* These definitions provide the bit encoding of the 'status' parameter
+ * passed to the DMA callback function (see dma_callback_t).
  */
 
 #if defined(HAVE_IP_DMA_V1)
@@ -58,22 +62,22 @@
 #  define DMA_STATUS_HTIF         DMA_CHAN_HTIF_BIT     /* Channel Half Transfer */
 #  define DMA_STATUS_TCIF         DMA_CHAN_TCIF_BIT     /* Channel Transfer Complete */
 #elif defined(HAVE_IP_DMA_V2)
-#  define DMA_STATUS_FEIF         0                    /* Stream FIFO error (ignored) */
-#  define DMA_STATUS_DMEIF        DMA_STREAM_DMEIF_BIT /* Stream direct mode error */
-#  define DMA_STATUS_TEIF         DMA_STREAM_TEIF_BIT  /* Stream Transfer Error */
-#  define DMA_STATUS_HTIF         DMA_STREAM_HTIF_BIT  /* Stream Half Transfer */
-#  define DMA_STATUS_TCIF         DMA_STREAM_TCIF_BIT  /* Stream Transfer Complete */
+#  define DMA_STATUS_FEIF         0                     /* Stream FIFO error (ignored) */
+#  define DMA_STATUS_DMEIF        DMA_STREAM_DMEIF_BIT  /* Stream direct mode error */
+#  define DMA_STATUS_TEIF         DMA_STREAM_TEIF_BIT   /* Stream Transfer Error */
+#  define DMA_STATUS_HTIF         DMA_STREAM_HTIF_BIT   /* Stream Half Transfer */
+#  define DMA_STATUS_TCIF         DMA_STREAM_TCIF_BIT   /* Stream Transfer Complete */
 #endif
 
-#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF|DMA_STATUS_DMEIF|DMA_STATUS_TEIF)
-#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF|DMA_STATUS_HTIF)
+#define DMA_STATUS_ERROR          (DMA_STATUS_FEIF | DMA_STATUS_DMEIF | DMA_STATUS_TEIF)
+#define DMA_STATUS_SUCCESS        (DMA_STATUS_TCIF | DMA_STATUS_HTIF)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent a DMA
- * channel (F1) or a DMA stream (F4).
+/* DMA_HANDLE provides an opaque reference that can be used to represent a
+ * DMA channel (F1) or a DMA stream (F4).
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -83,11 +87,11 @@ typedef FAR void *DMA_HANDLE;
  *   completion of the DMA.
  *
  * Input Parameters:
- *   handle - Refers tot he DMA channel or stream
- *   status - A bit encoded value that provides the completion status.  See the
- *            DMASTATUS_* definitions above.
- *   arg    - A user-provided value that was provided when stm32_dmastart() was
- *            called.
+ *   handle - Refers to the DMA channel or stream
+ *   status - A bit encoded value that provides the completion status.  See
+ *            the DMASTATUS_* definitions above.
+ *   arg    - A user-provided value that was provided when stm32_dmastart()
+ *            was called.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
@@ -120,9 +124,9 @@ struct stm32_dmaregs_s
 #endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -135,9 +139,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_dmachannel
@@ -184,11 +188,13 @@ DMA_HANDLE stm32_dmachannel(unsigned int chan);
  * Name: stm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel
- *   in a call to stm32_dmachannel, then this function will re-assign the
- *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
- *   in this argument must NEVER be used again until stm32_dmachannel() is
- *   called again to re-gain access to the channel.
+ *   Release a DMA channel.  If another thread is waiting for this DMA
+ *   channel in a call to stm32_dmachannel, then this function will re-
+ *   assign the DMA channel to that thread and wake it up.
+ *
+ *   NOTE:  The 'handle' used in this argument must NEVER be used again
+ *   until stm32_dmachannel() is called again to re-gain access to the
+ *   channel.
  *
  * Returned Value:
  *   None
@@ -261,8 +267,8 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
  *   address with the given configuration. This depends on the internal
- *   connections in the ARM bus matrix of the processor. Note that this
- *   only applies to memory addresses, it will return false for any peripheral
+ *   connections in the ARM bus matrix of the processor. Note that this only
+ *   applies to memory addresses, it will return false for any peripheral
  *   address.
  *
  * Returned Value:

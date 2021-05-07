@@ -1,55 +1,40 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_snvs.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SNVS_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SNVS_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 #define IMXRT_SNVS_LP_MAXTAMPER       10
 
-/* Register offsets *************************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_SNVS_HPLR_OFFSET        0x0000  /* SNVS_HP Lock Register */
 #define IMXRT_SNVS_HPCOMR_OFFSET      0x0004  /* SNVS_HP Command Register */
@@ -82,7 +67,7 @@
 #define IMXRT_SNVS_HPVIDR1_OFFSET     0x0bf8  /* SNVS_HP Version ID Register 1 */
 #define IMXRT_SNVS_HPVIDR2_OFFSET     0x0bfc  /* SNVS_HP Version ID Register 2 */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_SNVS_HPLR               (IMXRT_SNVSHP_BASE + IMXRT_SNVS_HPLR_OFFSET)
 #define IMXRT_SNVS_HPCOMR             (IMXRT_SNVSHP_BASE + IMXRT_SNVS_HPCOMR_OFFSET)
@@ -115,7 +100,7 @@
 #define IMXRT_SNVS_HPVIDR1            (IMXRT_SNVSHP_BASE + IMXRT_SNVS_HPVIDR1_OFFSET)
 #define IMXRT_SNVS_HPVIDR2            (IMXRT_SNVSHP_BASE + IMXRT_SNVS_HPVIDR2_OFFSET)
 
-/* Register bit definitions *****************************************************************/
+/* Register bit definitions *************************************************/
 
 /* SNVS_HP Lock Register */
 
@@ -157,6 +142,7 @@
 #  define SNVS_HPCR_HPCALBVAL_M15     (17 << SNVS_HPCR_HPCALBVAL_SHIFT) /* -15 counts per 32768 ticks */
 #  define SNVS_HPCR_HPCALBVAL_M2      (30 << SNVS_HPCR_HPCALBVAL_SHIFT) /* -2  counts per 32768 ticks */
 #  define SNVS_HPCR_HPCALBVAL_M1      (31 << SNVS_HPCR_HPCALBVAL_SHIFT) /* -1  counts per 32768 ticks */
+
                                                 /* Bits 15: Reserved */
 #define SNVS_HPCR_HPTS                (1 << 16) /* Bit 16: LPSRTC time sychronization */
                                                 /* Bits 17-23: Reserved */
@@ -167,6 +153,7 @@
 #  define SNVS_HPCR_BTNCONFIG_RISING  (2 << SNVS_HPCR_BTNCONFIG_SHIFT) /* Button signal active on rising edge */
 #  define SNVS_HPCR_BTNCONFIG_FALLING (3 << SNVS_HPCR_BTNCONFIG_SHIFT) /* Button signal active on falling edge */
 #  define SNVS_HPCR_BTNCONFIG_BOTH    (4 << SNVS_HPCR_BTNCONFIG_SHIFT) /* Button signal active on any edge */
+
 #define SNVS_HPCR_BTNMASK             (1 << 27) /* Bit 27: Button interrupt mask */
                                                 /* Bits 28-31: Reserved */
 
@@ -182,11 +169,13 @@
                                                 /* Bits 8-31: Reserved */
 
 /* SNVS_HP Real Time Counter MSB Register (15-bit MSB of counter) */
+
 /* SNVS_HP Real Time Counter LSB Register (32-bit LSB of counter) */
 
 #define SNVS_HPRTCMR_MASK             0x00007fff /* Bits 0-14: HP Real Time Counter */
 
 /* SNVS_HP Time Alarm MSB Register (15-bit MSB of counter) */
+
 /* SNVS_HP Time Alarm LSB Register (32-bit LSB of counter) */
 
 #define SNVS_HPTAMR_MASK              0x00007fff /* Bits 0-14: HP Time Alarm, most-significant 15 bits */
@@ -222,6 +211,7 @@
 #  define SNVS_LPCR_LPCALBVAL_M15     (17 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -15 counts per 32768 ticks */
 #  define SNVS_LPCR_LPCALBVAL_M2      (30 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -2  counts per 32768 ticks */
 #  define SNVS_LPCR_LPCALBVAL_M1      (31 << SNVS_LPCR_LPCALBVAL_SHIFT) /* -1  counts per 32768 ticks */
+
                                                 /* Bit 15:  Reserved */
 #define SNVS_LPCR_BTNPRESSTIME_SHIFT  (16)      /* Bits 16-17: PMIC button press time out values */
 #define SNVS_LPCR_BTNPRESSTIME_MASK   (3 << SNVS_LPCR_BTNPRESSTIME_SHIFT)
@@ -229,18 +219,21 @@
 #  define SNVS_LPCR_BTNPRESSTIME_10SEC  (1 << SNVS_LPCR_BTNPRESSTIME_SHIFT) /* 10 secs */
 #  define SNVS_LPCR_BTNPRESSTIME_15SEC  (2 << SNVS_LPCR_BTNPRESSTIME_SHIFT) /* 15 secs */
 #  define SNVS_LPCR_BTNPRESSTIME_DESAB  (3 << SNVS_LPCR_BTNPRESSTIME_SHIFT) /* Long press disabled */
+
 #define SNVS_LPCR_DEBOUNCE_SHIFT      (18)      /* Bits 18-19: Debounce time for BTN input signal */
 #define SNVS_LPCR_DEBOUNCE_MASK       (3 << SNVS_LPCR_DEBOUNCE_SHIFT)
 #  define SNVS_LPCR_DEBOUNCE_50MS     (0 << SNVS_LPCR_DEBOUNCE_SHIFT) /* 50msec debounce */
 #  define SNVS_LPCR_DEBOUNCE_100MS    (1 << SNVS_LPCR_DEBOUNCE_SHIFT) /* 100msec debounce */
 #  define SNVS_LPCR_DEBOUNCE_500MS    (2 << SNVS_LPCR_DEBOUNCE_SHIFT) /* 500msec debounce */
 #  define SNVS_LPCR_DEBOUNCE_NONE     (3 << SNVS_LPCR_DEBOUNCE_SHIFT) /* 0msec debounce */
+
 #define SNVS_LPCR_ONTIME_SHIFT        (20)      /* Bits 20-21: ON time configuration */
 #define SNVS_LPCR_ONTIME_MASK         (3 << SNVS_LPCR_ONTIME_SHIFT)
 #  define SNVS_LPCR_ONTIME_500MS      (0 << SNVS_LPCR_ONTIME_SHIFT) /* 500msec off->on transition time */
 #  define SNVS_LPCR_ONTIME_50MS       (1 << SNVS_LPCR_ONTIME_SHIFT) /* 50msec off->on transition time */
 #  define SNVS_LPCR_ONTIME_100MS      (2 << SNVS_LPCR_ONTIME_SHIFT) /* 100msec off->on transition time */
 #  define SNVS_LPCR_ONTIME_NONE       (3 << SNVS_LPCR_ONTIME_SHIFT) /* 0msec off->on transition time */
+
 #define SNVS_LPCR_PKEN                (1 << 22) /* Bit 22: PMIC On Request Enable */
 #define SNVS_LPCR_PKOVERRIDE          (1 << 23) /* Bit 23: PMIC On Request Override */
                                                 /* Bits 24-31: Reserved */
@@ -255,7 +248,10 @@
                                                 /* Bits 19-31: Reserved */
 
 /* SNVS_LP Secure Monotonic Counter MSB Register */
-/* SNVS_LP Secure Monotonic Counter LSB Register (32-bit LSB counter value) */
+
+/* SNVS_LP Secure Monotonic Counter LSB Register
+ * (32-bit LSB counter value)
+ */
 
 #define SNVS_LPSMCMR_MONCOUNTER_SHIFT (0)       /* Bits 0-15: Monotonic Counter most-significant 16 Bits */
 #define SNVS_LPSMCMR_MONCOUNTER_MASK  (0xffff << SNVS_LPSMCMR_MONCOUNTER_SHIFT)
@@ -265,13 +261,21 @@
 #  define SNVS_LPSMCMR_MCERABITS(n)   ((uint32_t)(n) << SNVS_LPSMCMR_MCERABITS_SHIFT)
 
 /* SNVS_LP General Purpose Register 0 (legacy alias) (32-bit value) */
+
 /* NVS_LP General Purpose Registers 0 LPGPR0_alias (32-bit value) */
+
 /* NVS_LP General Purpose Registers 1 LPGPR1_alias (32-bit value) */
+
 /* NVS_LP General Purpose Registers 2 LPGPR2_alias (32-bit value) */
+
 /* NVS_LP General Purpose Registers 3 LPGPR3_alias (32-bit value) */
+
 /* SNVS_LP General Purpose Registers 0 (32-bit value) */
+
 /* SNVS_LP General Purpose Registers 1 (32-bit value) */
+
 /* SNVS_LP General Purpose Registers 2 (32-bit value) */
+
 /* SNVS_LP General Purpose Registers 3 (32-bit value) */
 
 /* SNVS_HP Version ID Register 1 */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_get_stackaddr_np.c
+ * libs/libc/pthread/pthread_get_stackaddr_np.c
  *
  *   Copyright (C) 2018 Geoff Norton. All rights reserved.
  *   Author: Geoff Norton <grompf@gmail.com>
@@ -74,5 +74,5 @@ FAR void *pthread_get_stackaddr_np(pthread_t thread)
       return NULL;
     }
 
-  return stackinfo.adj_stack_ptr;
+  return stackinfo.stack_base_ptr;
 }

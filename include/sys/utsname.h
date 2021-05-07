@@ -46,12 +46,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SYS_NAMELEN      16
+#define SYS_NAMELEN      21
 #define VERSION_NAMELEN  41
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* These are the values returned by uname:
  *
  * FIELD       Default

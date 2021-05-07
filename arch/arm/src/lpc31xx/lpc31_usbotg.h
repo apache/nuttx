@@ -1,61 +1,48 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_usbotg.h
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC31XX_LPC31_USBOTG_H
 #define __ARCH_ARM_SRC_LPC31XX_LPC31_USBOTG_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "lpc31_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
 #define LPC31_EHCI_NRHPORT                1      /* There is only a single root hub port */
 
-/* USBOTG register base address offset into the USBOTG domain ***********************************/
+/* USBOTG register base address offset into the USBOTG domain ***************/
 
 #define LPC31_USBOTG_VBASE                (LPC31_USBOTG_VSECTION)
 #define LPC31_USBOTG_PBASE                (LPC31_USBOTG_PSECTION)
 
-/* USBOTG register offsets (with respect to the base of the USBOTG domain) **********************/
-                                                   /* 0x000 - 0x0ff: Reserved */
+/* USBOTG register offsets (with respect to the base of the USBOTG domain) **/
+
+                                           /* 0x000 - 0x0ff: Reserved */
+
 /* Device/host capability registers */
 
 #define LPC31_USBOTG_HCCR_OFFSET           0x100 /* Offset to EHCI Host Controller Capabiliy registers */
@@ -127,7 +114,7 @@
 #define LPC31_USBDEV_ENDPTCTRL2_OFFSET     0x1C8 /* Endpoint control 2 */
 #define LPC31_USBDEV_ENDPTCTRL3_OFFSET     0x1CC /* Endpoint control 3 */
 
-/* USBOTG register (virtual) addresses **********************************************************/
+/* USBOTG register (virtual) addresses **************************************/
 
 /* Device/host capability registers */
 
@@ -198,9 +185,10 @@
 #define LPC31_USBDEV_ENDPTCTRL2            (LPC31_USBOTG_VBASE+LPC31_USBDEV_ENDPTCTRL2_OFFSET)
 #define LPC31_USBDEV_ENDPTCTRL3            (LPC31_USBOTG_VBASE+LPC31_USBDEV_ENDPTCTRL3_OFFSET)
 
-/* USBOTG register bit definitions **************************************************************/
+/* USBOTG register bit definitions ******************************************/
 
 /* Device/host capability registers */
+
 /* CAPLENGTH (address 0x19000100) */
 
 #define USBOTG_CAPLENGTH_SHIFT               (0)       /* Bits 0-7: Offset from register base to operational regs */
@@ -249,6 +237,7 @@
 #define USBDEV_DCCPARAMS_DEN_MASK            (31 << USBDEV_DCCPARAMS_DEN_SHIFT)
 
 /* Device/host operational registers */
+
 /* USB Command register USBCMD (address 0x19000140) -- Device Mode */
 
 #define USBDEV_USBCMD_ITC_SHIFT              (16)      /* Bits 16-23: Interrupt threshold control */
@@ -261,6 +250,7 @@
 #  define USBDEV_USBCMD_ITC16UF              (16 << USBDEV_USBCMD_ITC_SHIFT) /* 16 micro frames */
 #  define USBDEV_USBCMD_ITC32UF              (32 << USBDEV_USBCMD_ITC_SHIFT) /* 32 micro frames */
 #  define USBDEV_USBCMD_ITC64UF              (64 << USBDEV_USBCMD_ITC_SHIFT) /* 64 micro frames */
+
 #define USBDEV_USBCMD_ATDTW                  (1 << 14) /* Bit 14: Add dTD trip wire */
 #define USBDEV_USBCMD_SUTW                   (1 << 13) /* Bit 13: Setup trip wire */
 #define USBDEV_USBCMD_RST                    (1 << 1)  /* Bit 1:  1 Controller reset */
@@ -278,6 +268,7 @@
 #  define USBHOST_USBCMD_ITC16UF             (16 << USBHOST_USBCMD_ITC_SHIFT) /* 16 micro frames */
 #  define USBHOST_USBCMD_ITC32UF             (32 << USBHOST_USBCMD_ITC_SHIFT) /* 32 micro frames */
 #  define USBHOST_USBCMD_ITC64UF             (64 << USBHOST_USBCMD_ITC_SHIFT) /* 64 micro frames */
+
 #define USBHOST_USBCMD_FS2                   (1 << 15) /* Bit 15: Bit 2 of the Frame List Size bits */
 #define USBHOST_USBCMD_ASPE                  (1 << 11) /* Bit 11: Asynchronous Schedule Park Mode Enable */
 #define USBHOST_USBCMD_ASP_SHIFT             (8)       /* Bits 8-9: Asynchronous schedule park mode */
@@ -350,23 +341,31 @@
 #define USBHOST_FRINDEX_CUFN_SHIFT           (0)       /* Bits 0-2: Current micro frame number */
 #define USBHOST_FRINDEX_CUFN_MASK            (7 << USBHOST_FRINDEX_CUFN_SHIFT)
 
-/* USB Device Address register DEVICEADDR (address 0x19000154) -- Device Mode */
+/* USB Device Address register DEVICEADDR
+ * (address 0x19000154) -- Device Mode
+ */
 
 #define USBDEV_DEVICEADDR_SHIFT              (25)      /* Bits 25-31: USBADR USB device address */
 #define USBDEV_DEVICEADDR_MASK               (0x3c << USBDEV_DEVICEADDR_SHIFT)
 #define USBDEV_DEVICEADDR_USBADRA            (1 << 24) /* Bit 24: Device address advance */
 
-/* USB Periodic List Base register PERIODICLIST (address 0x19000154) -- Host Mode */
+/* USB Periodic List Base register PERIODICLIST
+ * (address 0x19000154) -- Host Mode
+ */
 
 #define USBHOST_PERIODICLIST_PERBASE_SHIFT   (12)      /* Bits 12-31: Base Address (Low) */
 #define USBHOST_PERIODICLIST_PERBASE_MASK    (0x000fffff << USBHOST_PERIODICLIST_PERBASE_SHIFT)
 
-/* USB Endpoint List Address register ENDPOINTLISTADDR (address 0x19000158) -- Device Mode */
+/* USB Endpoint List Address register ENDPOINTLISTADDR
+ * (address 0x19000158) -- Device Mode
+ */
 
 #define USBDEV_ENDPOINTLIST_EPBASE_SHIFT     (11)      /* Bits 11-31: Endpoint list pointer (low) */
 #define USBDEV_ENDPOINTLIST_EPBASE_MASK      (0x001fffff << USBDEV_ENDPOINTLIST_EPBASE_SHIFT)
 
-/* USB Asynchronous List Address register ASYNCLISTADDR- (address 0x19000158) -- Host Mode */
+/* USB Asynchronous List Address register ASYNCLISTADDR-
+ * (address 0x19000158) -- Host Mode
+ */
 
 #define USBHOST_ASYNCLISTADDR_ASYBASE_SHIFT  (5)       /* Bits 5-31: Link pointer (Low) LPL */
 #define USBHOST_ASYNCLISTADDR_ASYBASE_MASK   (0x07ffffff << USBHOST_ASYNCLISTADDR_ASYBASE_SHIFT)
@@ -376,7 +375,9 @@
 #define USBHOST_TTCTRL_TTHA_SHIFT            (24)      /* Bits 24-30: Hub address */
 #define USBHOST_TTCTRL_TTHA_MASK             (0x7f << USBHOST_TTCTRL_TTHA_SHIFT)
 
-/* USB burst size register BURSTSIZE (address 0x19000160) -- Device/Host Mode */
+/* USB burst size register BURSTSIZE
+ * (address 0x19000160) -- Device/Host Mode
+ */
 
 #define USBDEV_BURSTSIZE_TXPBURST_SHIFT      (8)       /* Bits 8-15: Programmable TX burst length */
 #define USBDEV_BURSTSIZE_TXPBURST_MASK       (255 << USBDEV_BURSTSIZE_TXPBURST_SHIFT)
@@ -388,7 +389,9 @@
 #define USBHOST_BURSTSIZE_RXPBURST_SHIFT     (0)       /* Bits 0-7: RXPBURST Programmable RX burst length */
 #define USBHOST_BURSTSIZE_RXPBURST_MASK      (255 << USBHOST_BURSTSIZE_RXPBURST_SHIFT)
 
-/* USB Transfer buffer Fill Tuning register TXFIFOFILLTUNING (address 0x19000164) -- Host Mode */
+/* USB Transfer buffer Fill Tuning register TXFIFOFILLTUNING
+ * (address 0x19000164) -- Host Mode
+ */
 
 #define USBHOST_TXFILLTUNING_FIFOTHRES_SHIFT (16)      /* Bits 16-21: Scheduler overhead */
 #define USBHOST_TXFILLTUNING_FIFOTHRES_MASK  (0x3c << USBHOST_TXFILLTUNING_FIFOTHRES_SHIFT)
@@ -397,7 +400,9 @@
 #define USBHOST_TXFILLTUNING_SCHOH_SHIFT     (0)       /* Bits 0-7: FIFO burst threshold */
 #define USBHOST_TXFILLTUNING_SCHOH_MASK      (0xff << USBHOST_TXFILLTUNING_SCHOH_SHIFT)
 
-/* USB BINTERVAL register BINTERVAL (address 0x19000174) -- Device/Host Mode */
+/* USB BINTERVAL register BINTERVAL
+ * (address 0x19000174) -- Device/Host Mode
+ */
 
 #define USBDEV_BINTERVAL_SHIFT               (0)       /* Bits 0-3: bInterval value */
 #define USBDEV_BINTERVAL_MASK                (15 << USBDEV_BINTERVAL_SHIFT)
@@ -412,20 +417,25 @@
 #define USBDEV_ENDPTNAK_EPRN_SHIFT           (0)       /* Bits 0-3: Rx endpoint NAK */
 #define USBDEV_ENDPTNAK_EPRN_MASK            (15 << USBDEV_ENDPTNAK_EPRN_SHIFT)
 
-/* USB Endpoint NAK Enable register ENDPTNAKEN (address 0x1900017c) -- Device Mode */
+/* USB Endpoint NAK Enable register ENDPTNAKEN
+ * (address 0x1900017c) -- Device Mode
+ */
 
 #define USBDEV_ENDPTNAK_EPTNE_SHIFT          (16)      /* Bits 16-19: Tx endpoint NAK enable */
 #define USBDEV_ENDPTNAK_EPTNE_MASK           (15 << USBDEV_ENDPTNAK_EPTNE_SHIFT)
 #define USBDEV_ENDPTNAK_EPRNE_SHIFT          (0)       /* Bits 0-3: Rx endpoint NAK enable */
 #define USBDEV_ENDPTNAK_EPRNE_MASK           (15 << USBDEV_ENDPTNAK_EPRNE_SHIFT)
 
-/* Port Status and Control register PRTSC1 (address 0x19000184) -- Device Mode */
+/* Port Status and Control register PRTSC1
+ * (address 0x19000184) -- Device Mode
+ */
 
 #define USBDEV_PRTSC1_PSPD_SHIFT             (26)      /* Bits 26-27: Port speed */
 #define USBDEV_PRTSC1_PSPD_MASK              (3 << USBDEV_PRTSC1_PSPD_SHIFT)
 #  define USBDEV_PRTSC1_PSPD_FS              (0 << USBDEV_PRTSC1_PSPD_SHIFT) /* Full-speed */
 #  define USBDEV_PRTSC1_PSPD_LS              (1 << USBDEV_PRTSC1_PSPD_SHIFT) /* Low-speed */
 #  define USBDEV_PRTSC1_PSPD_HS              (2 << USBDEV_PRTSC1_PSPD_SHIFT) /* High-speed */
+
 #define USBDEV_PRTSC1_PFSC                   (1 << 24) /* Bit 24: Port force full speed connect */
 #define USBDEV_PRTSC1_PHCD                   (1 << 23) /* Bit 23: PHY low power suspend - clock disable (PLPSCD) */
 #define USBDEV_PRTSC1_PTC_SHIFT              (16)      /* Bits 16-19: 19: Port test control */
@@ -437,11 +447,13 @@
 #  define USBDEV_PRTSC1_PTC_PACKET           (4 << USBDEV_PRTSC1_PTC_SHIFT) /* Packet */
 #  define USBDEV_PRTSC1_PTC_HS               (5 << USBDEV_PRTSC1_PTC_SHIFT) /* FORCE_ENABLE_HS */
 #  define USBDEV_PRTSC1_PTC_FS               (6 << USBDEV_PRTSC1_PTC_SHIFT) /* FORCE_ENABLE_FS */
+
 #define USBDEV_PRTSC1_PIC_SHIFT              (14)      /* Bits 14-15: Port indicator control */
 #define USBDEV_PRTSC1_PIC_MASK               (3 << USBDEV_PRTSC1_PIC_SHIFT)
 #  define USBDEV_PRTSC1_PIC_OFF              (0 << USBDEV_PRTSC1_PIC_SHIFT) /* 00 Port indicators are off */
 #  define USBDEV_PRTSC1_PIC_AMBER            (1 << USBDEV_PRTSC1_PIC_SHIFT) /* 01 amber */
 #  define USBDEV_PRTSC1_PIC_GREEN            (2 << USBDEV_PRTSC1_PIC_SHIFT) /* 10 green */
+
 #define USBDEV_PRTSC1_HSP                    (1 << 9)  /* Bit 9:  High-speed status */
 #define USBDEV_PRTSC1_PR                     (1 << 8)  /* Bit 8:  Port reset */
 #define USBDEV_PRTSC1_SUSP                   (1 << 7)  /* Bit 7:  Suspend */
@@ -450,13 +462,16 @@
 #define USBDEV_PRTSC1_PE                     (1 << 2)  /* Bit 2:  Port enable */
 #define USBDEV_PRTSC1_CCS                    (1 << 0)  /* Bit 0:  Current connect status */
 
-/* Port Status and Control register PRTSC1 (address 0x19000184) -- Host Mode */
+/* Port Status and Control register PRTSC1
+ * (address 0x19000184) -- Host Mode
+ */
 
 #define USBHOST_PRTSC1_PSPD_SHIFT            (26)      /* Bits 26-27: Port speed */
 #define USBHOST_PRTSC1_PSPD_MASK             (3 << USBHOST_PRTSC1_PSPD_SHIFT)
 #  define USBHOST_PRTSC1_PSPD_FS             (0 << USBHOST_PRTSC1_PSPD_SHIFT) /* Full-speed */
 #  define USBHOST_PRTSC1_PSPD_LS             (1 << USBHOST_PRTSC1_PSPD_SHIFT) /* Low-speed */
 #  define USBHOST_PRTSC1_PSPD_HS             (2 << USBHOST_PRTSC1_PSPD_SHIFT) /* High-speed */
+
 #define USBHOST_PRTSC1_PFSC                  (1 << 24) /* Bit 24: Port force full speed connect */
 #define USBHOST_PRTSC1_PHCD                  (1 << 23) /* Bit 23: PHY low power suspend - clock disable (PLPSCD) */
 #define USBHOST_PRTSC1_WKOC                  (1 << 22) /* Bit 22: Wake on over-current enable (WKOC_E) */
@@ -472,17 +487,20 @@
 #  define USBHOST_PRTSC1_PTC_HS              (5 << USBHOST_PRTSC1_PTC_SHIFT) /* 0101 FORCE_ENABLE_HS */
 #  define USBHOST_PRTSC1_PTC_FS              (6 << USBHOST_PRTSC1_PTC_SHIFT) /* 0110 FORCE_ENABLE_FS */
 #  define USBHOST_PRTSC1_PTC_LS              (7 << USBHOST_PRTSC1_PTC_SHIFT) /* 0111 FORCE_ENABLE_LS */
+
 #define USBHOST_PRTSC1_PIC_SHIFT             (14)      /* Bits 14-15: Port indicator control */
 #define USBHOST_PRTSC1_PIC_MASK              (3 << USBHOST_PRTSC1_PIC_SHIFT)
 #  define USBHOST_PRTSC1_PIC_OFF             (0 << USBHOST_PRTSC1_PIC_SHIFT) /* 00 Port indicators are off */
 #  define USBHOST_PRTSC1_PIC_AMBER           (1 << USBHOST_PRTSC1_PIC_SHIFT) /* 01 Amber */
 #  define USBHOST_PRTSC1_PIC_GREEN           (2 << USBHOST_PRTSC1_PIC_SHIFT) /* 10 Green */
+
 #define USBHOST_PRTSC1_PP                    (1 << 12) /* Bit 12: Port power control */
 #define USBHOST_PRTSC1_LS_SHIFT              (10)      /* Bits 10-11: Line status */
 #define USBHOST_PRTSC1_LS_MASK               (3 << USBHOST_PRTSC1_LS_SHIFT)
 #  define USBHOST_PRTSC1_LS_SE0              (0 << USBHOST_PRTSC1_LS_SHIFT) /* SE0 (USB_DP and USB_DM LOW) */
 #  define USBHOST_PRTSC1_LS_JSTATE           (2 << USBHOST_PRTSC1_LS_SHIFT) /* J-state (USB_DP HIGH and USB_DM LOW) */
 #  define USBHOST_PRTSC1_LS_KSTATE           (1 << USBHOST_PRTSC1_LS_SHIFT) /* K-state (USB_DP LOW and USB_DM HIGH) */
+
 #define USBHOST_PRTSC1_HSP                   (1 << 9)  /* Bit 9:  High-speed status */
 #define USBHOST_PRTSC1_PR                    (1 << 8)  /* Bit 8:  Port reset */
 #define USBHOST_PRTSC1_SUSP                  (1 << 7)  /* Bit 7:  Suspend */
@@ -618,14 +636,18 @@
 #define USBDEV_ENDPTCTRL0_TXT_SHIFT          (18)      /* Bits 18-19: Tx endpoint type */
 #define USBDEV_ENDPTCTRL0_TXT_MASK           (3 << USBDEV_ENDPTCTRL0_TXT_SHIFT)
 #  define USBDEV_ENDPTCTRL0_TXT_CTRL         (0 << USBDEV_ENDPTCTRL0_TXT_SHIFT) /* Control */
+
 #define USBDEV_ENDPTCTRL0_TXS                (1 << 16) /* Bit 16: Tx endpoint stall */
 #define USBDEV_ENDPTCTRL0_RXE                (1 << 7)  /* Bit 7:  Rx endpoint enable */
 #define USBDEV_ENDPTCTRL0_RXT_SHIFT          (2)       /* Bits 2-3: Endpoint type */
 #define USBDEV_ENDPTCTR0L_RXT_MASK           (3 << USBDEV_ENDPTCTRL0_RXT_SHIFT)
 #  define USBDEV_ENDPTCTRL0_RXT_CTRL         (0 << USBDEV_ENDPTCTRL0_RXT_SHIFT) /* Control */
+
 #define USBDEV_ENDPTCTRL0_RXS                (1 << 0)  /* Bit 0:  Rx endpoint stall */
 
-/* USB Endpoint 1-3 control registers ENDPTCTRL1-ENDPPTCTRL3 (address 0x190001c4-0x190001cc) */
+/* USB Endpoint 1-3 control registers ENDPTCTRL1-ENDPPTCTRL3
+ * (address 0x190001c4-0x190001cc)
+ */
 
 #define USBDEV_ENDPTCTRL_TXE                 (1 << 23) /* Bit 23: Tx endpoint enable */
 #define USBDEV_ENDPTCTRL_TXR                 (1 << 22) /* Bit 22: Tx data toggle reset */
@@ -636,6 +658,7 @@
 #  define USBDEV_ENDPTCTRL_TXT_ISOC          (1 << USBDEV_ENDPTCTRL_TXT_SHIFT) /* Isochronous */
 #  define USBDEV_ENDPTCTRL_TXT_BULK          (2 << USBDEV_ENDPTCTRL_TXT_SHIFT) /* Bulk */
 #  define USBDEV_ENDPTCTRL_TXT_INTR          (3 << USBDEV_ENDPTCTRL_TXT_SHIFT) /* Interrupt */
+
 #define USBDEV_ENDPTCTRL_TXS                 (1 << 16) /* Bit 16: Tx endpoint stall */
 #define USBDEV_ENDPTCTRL_RXE                 (1 << 7)  /* Bit 7:  Rx endpoint enable */
 #define USBDEV_ENDPTCTRL_RXR                 (1 << 6)  /* Bit 6:  Rx data toggle reset */
@@ -645,18 +668,19 @@
 #  define USBDEV_ENDPTCTRL_RXT_CTRL          (0 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Control */
 #  define USBDEV_ENDPTCTRL_RXT_ISOC          (1 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Isochronous */
 #  define USBDEV_ENDPTCTRL_RXT_BULK          (2 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Bulk */
+
 #define USBDEV_ENDPTCTRL_RXS                 (1 << 0)  /* Bit 0:  Rx endpoint stall */
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC31XX_LPC31_USBOTG_H */

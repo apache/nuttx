@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -571,9 +572,8 @@ static int  sam_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
 /* EVENT handler */
 
 static void sam_waitenable(FAR struct sdio_dev_s *dev,
-              sdio_eventset_t eventset);
-static sdio_eventset_t
-            sam_eventwait(FAR struct sdio_dev_s *dev, uint32_t timeout);
+              sdio_eventset_t eventset, uint32_t timeout);
+static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev);
 static void sam_callbackenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
 static int  sam_registercallback(FAR struct sdio_dev_s *dev,
@@ -1540,7 +1540,7 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
             {
               /* Yes.. Was it some kind of timeout error? */
 
-              mcerr("ERROR: enabled: %08x pending: %08x\n",
+              mcerr("ERROR: enabled: %08" PRIx32 " pending: %08" PRIx32 "\n",
                     enabled, pending);
               if ((pending & HSMCI_DATA_TIMEOUT_ERRORS) != 0)
                 {
@@ -1618,7 +1618,7 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  mcerr("ERROR: events: %08x SR: %08x\n",
+                  mcerr("ERROR: events: %08" PRIx32 " SR: %08" PRIx32 "\n",
                         priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -2088,7 +2088,8 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
 
   /* Write the fully decorated command to CMDR */
 
-  mcinfo("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
+         cmd, arg, regval);
   sam_putreg(priv, regval, SAM_HSMCI_CMDR_OFFSET);
   sam_cmdsample1(priv, SAMPLENDX_AFTER_CMDR);
   return OK;
@@ -2258,7 +2259,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev,
         {
           /* Some fatal error has occurred */
 
-          lcderr("ERROR: sr %08x\n", sr);
+          lcderr("ERROR: sr %08" PRIx32 "\n", sr);
           return -EIO;
         }
       else if ((sr & HSMCI_INT_TXRDY) != 0)
@@ -2397,8 +2398,9 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
             {
               /* Yes.. Was the error some kind of timeout? */
 
-              lcderr("ERROR: cmd: %08x events: %08x SR: %08x\n",
-                   cmd, priv->cmdrmask, sr);
+              lcderr("ERROR: cmd: %08" PRIx32
+                     " events: %08" PRIx32 " SR: %08" PRIx32 "\n",
+                     cmd, priv->cmdrmask, sr);
 
               if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
                 {
@@ -2429,7 +2431,8 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
        }
       else if (--timeout <= 0)
         {
-          lcderr("ERROR: Timeout cmd: %08x events: %08x SR: %08x\n",
+          lcderr("ERROR: Timeout cmd: %08" PRIx32
+                 " events: %08" PRIx32 " SR: %08" PRIx32 "\n",
                  cmd, priv->cmdrmask, sr);
 
           priv->wkupevent = SDIOWAIT_TIMEOUT;
@@ -2647,7 +2650,7 @@ static int sam_recvnotimpl(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 static void sam_waitenable(FAR struct sdio_dev_s *dev,
-                           sdio_eventset_t eventset)
+                           sdio_eventset_t eventset, uint32_t timeout)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t waitmask;
@@ -2682,6 +2685,41 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
    */
 
   sam_configwaitints(priv, waitmask, eventset);
+
+  /* Check if the timeout event is specified in the event set */
+
+  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
+    {
+      int delay;
+      int ret;
+
+      /* Yes.. Handle a cornercase */
+
+      if (!timeout)
+        {
+          priv->wkupevent = SDIOWAIT_TIMEOUT;
+          return;
+        }
+
+      /* Start the watchdog timer.  I am not sure why this is, but I am
+       * currently seeing some additional delays when DMA is used.
+       */
+
+      if (priv->txbusy)
+        {
+          /* TX transfers can be VERY long in the worst case */
+
+          timeout = MAX(5000, timeout);
+        }
+
+      delay = MSEC2TICK(timeout);
+      ret   = wd_start(&priv->waitwdog, delay,
+                       sam_eventtimeout, (wdparm_t)priv);
+      if (ret < 0)
+        {
+           lcderr("ERROR: wd_start failed: %d\n", ret);
+        }
+    }
 }
 
 /****************************************************************************
@@ -2705,8 +2743,7 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
-                                     uint32_t timeout)
+static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
@@ -2723,44 +2760,6 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
    */
 
   sam_enableints(priv);
-
-  /* There is a race condition here... the event may have completed before
-   * we get here.  In this case waitevents will be zero, but wkupevent will
-   * be non-zero (and, hopefully, the semaphore count will also be non-zero).
-   */
-
-  /* Check if the timeout event is specified in the event set */
-
-  if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
-    {
-      int delay;
-
-      /* Yes.. Handle a cornercase */
-
-      if (!timeout)
-        {
-          return SDIOWAIT_TIMEOUT;
-        }
-
-      /* Start the watchdog timer.  I am not sure why this is, but I am
-       * currently seeing some additional delays when DMA is used.
-       */
-
-      if (priv->txbusy)
-        {
-          /* TX transfers can be VERY long in the worst case */
-
-          timeout = MAX(5000, timeout);
-        }
-
-      delay = MSEC2TICK(timeout);
-      ret   = wd_start(&priv->waitwdog, delay,
-                       sam_eventtimeout, (wdparm_t)priv);
-      if (ret < 0)
-        {
-           lcderr("ERROR: wd_start failed: %d\n", ret);
-        }
-    }
 
   /* Loop until the event (or the timeout occurs). Race conditions are
    * avoided by calling sam_waitenable prior to triggering the logic that
@@ -3330,7 +3329,8 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       return NULL;
     }
 
-  mcinfo("priv: %p base: %08x hsmci: %d dmac: %d pid: %d\n",
+  mcinfo("priv: %p base: %08" PRIx32
+         " hsmci: %d dmac: %d pid: %" PRId32 "\n",
          priv, priv->base, priv->hsmci, dmac, pid);
 
   /* Initialize the HSMCI slot structure */

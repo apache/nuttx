@@ -57,8 +57,8 @@ APIs Exported by Architecture-Specific Logic to NuttX
   -  ``adj_stack_size``: Stack size after adjustment for hardware,
      processor, etc. This value is retained only for debug purposes.
   -  ``stack_alloc_ptr``: Pointer to allocated stack
-  -  ``adj_stack_ptr``: Adjusted ``stack_alloc_ptr`` for HW. The
-     initial value of the stack pointer.
+  -  ``stack_base_ptr``: Adjusted stack base pointer after the TLS Data
+     and Arguments has been removed from the stack allocation.
 
   :param tcb: The TCB of new task.
   :param stack_size: The requested stack size. At least this much
@@ -93,8 +93,8 @@ APIs Exported by Architecture-Specific Logic to NuttX
   -  ``adj_stack_size``: Stack size after adjustment for hardware,
      processor, etc. This value is retained only for debug purposes.
   -  ``stack_alloc_ptr``: Pointer to allocated stack
-  -  ``adj_stack_ptr``: Adjusted ``stack_alloc_ptr`` for HW. The
-     initial value of the stack pointer.
+  -  ``stack_base_ptr``: Adjusted stack base pointer after the TLS Data
+     and Arguments has been removed from the stack allocation.
 
   :param tcb: The TCB of new task.
   :param stack_size: The allocated stack size.
@@ -120,9 +120,24 @@ APIs Exported by Architecture-Specific Logic to NuttX
 
   -  ``adj_stack_size``: Stack size after removal of the stack frame
      from the stack.
-  -  ``adj_stack_ptr``: Adjusted initial stack pointer after the
-     frame has been removed from the stack. This will still be the
-     initial value of the stack pointer when the task is started.
+  -  ``stack_base_ptr``: Adjusted stack base pointer after the TLS Data
+     and Arguments has been removed from the stack allocation.
+
+  Here is the diagram after some allocation(tls, arg):
+
+                   +-------------+ <-stack_alloc_ptr(lowest)
+                   |  TLS Data   |
+                   +-------------+
+                   |  Arguments  |
+  stack_base_ptr-> +-------------+\
+                   |  Available  | +
+                   |    Stack    | |
+                |  |             | |
+                |  |             | +->adj_stack_size
+                v  |             | |
+                   |             | |
+                   |             | +
+                   +-------------+/
 
   :param tcb: The TCB of new task.
   :param frame_size: The size of the stack frame to allocate.

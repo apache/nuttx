@@ -1,38 +1,22 @@
-/************************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_ocotp.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_OCOTP_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_OCOTP_H
@@ -43,18 +27,18 @@
  * OTP, OCOTP Indexes are used.
  */
 
-/************************************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_OCOTP_CTRL_OFFSET               0x0000  /* OTP Controller Control Register */
 #define IMXRT_OCOTP_CTRL_SET_OFFSET           0x0004  /* OTP Controller Control Register */
@@ -74,7 +58,7 @@
 #define IMXRT_OCOTP_VERSION_OFFSET            0x0090  /* OTP Controller Version Register */
 #define IMXRT_OCOTP_TIMING2_OFFSET            0x0100  /* OTP Controller Timing Register */
 
-/* OCOTP Shadow Offsets *************************************************************/
+/* OCOTP Shadow Offsets *****************************************************/
 
 #define IMXRT_OCOTP_LOCK_OFFSET               0x0400  /* Value of OTP Bank0 Word0 (Lock controls) */
 #define IMXRT_OCOTP_CFG0_OFFSET               0x0410  /* Value of OTP Bank0 Word1 (Configuration and Manufacturing */
@@ -140,7 +124,7 @@
 #define IMXRT_OCOTP_GP42_OFFSET               0x08e0  /* Value of OTP Bank7 Word6 (GP4) */
 #define IMXRT_OCOTP_GP43_OFFSET               0x08f0  /* Value of OTP Bank7 Word7 (GP4) */
 
-/* OCOTP Indexes *****************************************************************/
+/* OCOTP Indexes ************************************************************/
 
 #define IMXRT_OCOTP_O2I(offset)               (((offset) - IMXRT_OCOTP_LOCK_OFFSET) >> 4)
 
@@ -210,7 +194,7 @@
 #define IMXRT_OCOTP_GP42_INDEX                IMXRT_OCOTP_O2IP(IMXRT_OCOTP_GP42_OFFSET)         /* Value of OTP Bank7 Word6 (GP4) */
 #define IMXRT_OCOTP_GP43_INDEX                IMXRT_OCOTP_O2IP(IMXRT_OCOTP_GP43_OFFSET)         /* Value of OTP Bank7 Word7 (GP4) */
 
-/* Register addresses ***********************************************************************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_OCOTP_CTRL                      (IMXRT_OCOTP_BASE + IMXRT_OCOTP_CTRL_OFFSET)            /* OTP Controller Control Register */
 #define IMXRT_OCOTP_CTRL_SET                  (IMXRT_OCOTP_BASE + IMXRT_OCOTP_CTRL_SET_OFFSET)        /* OTP Controller Control Register */
@@ -292,7 +276,7 @@
 #define IMXRT_OCOTP_GP42                      (IMXRT_OCOTP_BASE + IMXRT_OCOTP_GP42_OFFSET)            /* Value of OTP Bank7 Word6 (GP4) */
 #define IMXRT_OCOTP_GP43                      (IMXRT_OCOTP_BASE + IMXRT_OCOTP_GP43_OFFSET)            /* Value of OTP Bank7 Word7 (GP4) */
 
-/* Register Bit Definitions *********************************************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* OTP Controller Control Register */
 

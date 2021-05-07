@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/lcd/sd1329.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -48,17 +33,18 @@
  ****************************************************************************/
 
 /* SD1329 Commands **********************************************************/
+
 /* Set column Address.
  *
  * This triple byte command specifies column start address and end address of
  * the display data RAM. This command also sets the column address pointer to
- * column start address. This pointer is used to define the current read/write
- * column address in graphic display data RAM. If horizontal address increment
- * mode is enabled by command 0xa0, after finishing read/write one column data,
- * it is incremented automatically to the next column address. Whenever the
- * column address pointer finishes accessing the end column address, it is
- * reset back to start column address and the row address is incremented to the
- * next row.
+ * column start address. This pointer is used to define the current
+ * read/write column address in graphic display data RAM. If horizontal
+ * address increment mode is enabled by command 0xa0, after finishing
+ * read/write one column data, it is incremented automatically to the next
+ * column address. Whenever the column address pointer finishes accessing the
+ * end column address, it is reset back to start column address and the row
+ * address is incremented to the next row.
  *
  * Byte 1: 0x15
  * Byte 2: A[5:0]: Start Address, range: 0x00-0x3f
@@ -69,14 +55,14 @@
 
 /* Set Row Address.
  *
- * This triple byte command specifies row start address and end address of the
- * display data RAM. This command also sets the row address pointer to row
- * start address. This pointer is used to define the current read/write row
- * address in graphic display data RAM. If vertical address increment mode is
- * enabled by command 0xa0, after finishing read/write one row data, it is
- * incremented automatically to the next row address. Whenever the row address
- * pointer finishes accessing the end row address, it is reset back to start
- * row address.
+ * This triple byte command specifies row start address and end address of
+ * the display data RAM. This command also sets the row address pointer to
+ * row start address. This pointer is used to define the current read/write
+ * row address in graphic display data RAM. If vertical address increment
+ * mode is enabled by command 0xa0, after finishing read/write one row data,
+ * it is incremented automatically to the next row address. Whenever the row
+ * address pointer finishes accessing the end row address, it is reset back
+ * to start row address.
  *
  * Byte 1: 0x75
  * Byte 2: A[6:0]: Start Address, range: 0x00-0x7f
@@ -131,9 +117,9 @@
 
 /* Set Icon Current Range
  *
- * This double byte command is used to set one fix current range for all icons
- * between the range of 0uA and 127.5uA. The uniformity improves as the icon
- * current range increases.
+ * This double byte command is used to set one fix current range for all
+ * icons between the range of 0uA and 127.5uA. The uniformity improves as
+ * the icon current range increases.
  *
  * Byte 1: 0x91
  * Byte 2: A[7:0]: Max icon current:
@@ -147,12 +133,13 @@
 
 /* Set Individual Icon Current
  *
- * This multiple byte command is used to fine tune the current for each of the
- * 64 icons. Command 0x92 followed by 64 single byte data. These 64 byte data
- * have to be entered in order to make this command function. Below is the
- * formula for calculating the icon current.
+ * This multiple byte command is used to fine tune the current for each of
+ * the 64 icons. Command 0x92 followed by 64 single byte data. These 64 byte
+ * data have to be entered in order to make this command function. Below is
+ * the formula for calculating the icon current.
  *
- * Icon Current = Single byte value / 127 x Maximum icon current set with command 0x91
+ * Icon Current = Single byte value / 127 x Maximum icon current set with
+ * command 0x91
  *
  * Byte 1: 0x92
  * Byte 2-65: An[6:0]: icon current for ICSn, range: 0x00-0x7f
@@ -163,8 +150,8 @@
 
 /* Set Individual Icon ON / OFF Register
  *
- * This double byte command is used to select one of the 64 icons and choose the
- * ON, OFF or blinking condition of the selected icon.
+ * This double byte command is used to select one of the 64 icons and choose
+ * the ON, OFF or blinking condition of the selected icon.
  *
  * Byte 1: 0x93
  * Byte 2: A[5:0]: Select one of the 64 icons from ICS0 ~ ICS63
@@ -178,7 +165,8 @@
 
 /* Set Icon ON / OFF Registers
  *
- * This double byte command is used to set the ON / OFF status of all 64 icons.
+ * This double byte command is used to set the ON / OFF status of all 64
+ * icons.
  *
  * Byte 1: 0x94
  * Byte 2: A[7:6]: OFF/ON/BLINK (Same as 0x93)
@@ -213,8 +201,8 @@
 
 /* Set Icon Duty
  *
- * This double byte command is used to set the icon frame frequency and icon AC
- * drive duty ratio.
+ * This double byte command is used to set the icon frame frequency and icon
+ * AC drive duty ratio.
  *
  * Byte 1: 0x96
  * Byte 2:
@@ -238,40 +226,42 @@
  * described as follows:
  *
  * Column Address Remapping (A[0])
- *   This bit is made for increase the flexibility layout of segment signals in
- *   OLED module with segment arranged from left to right (when A[0] is set to 0)
- *   or from right to left (when A[0] is set to 1).
+ *   This bit is made for increase the flexibility layout of segment signals
+ *   in OLED module with segment arranged from left to right (when A[0] is
+ *   set to 0) or from right to left (when A[0] is set to 1).
  *
  * Nibble Remapping (A[1])
- *   When A[1] is set to 1, the two nibbles of the data bus for RAM access are
- *   re-mapped, such that (D7, D6, D5, D4, D3, D2, D1, D0) acts like (D3, D2, D1,
- *   D0, D7, D6, D5, D4) If this feature works together with Column Address
- *   Re-map, it would produce an effect of flipping the outputs from SEG0-127 to
- *   SEG127-SEG0.
+ *   When A[1] is set to 1, the two nibbles of the data bus for RAM access
+ *   are re-mapped, such that (D7, D6, D5, D4, D3, D2, D1, D0) acts like
+ *   (D3, D2, D1, D0, D7, D6, D5, D4) If this feature works together with
+ *   Column Address  Re-map, it would produce an effect of flipping the
+ *   outputs from SEG0-127 to SEG127-SEG0.
  *
  * Address increment mode (A[2])
  *   When A[2] is set to 0, the driver is set as horizontal address incremen
- *   mode. After the display RAM is read/written, the column address pointer is
- *   increased automatically by 1. If the column address pointer reaches column
- *   end address, the column address pointer is reset to column start address and
- *   row address pointer is increased by 1.
+ *   mode. After the display RAM is read/written, the column address pointer
+ *   is increased automatically by 1. If the column address pointer reaches
+ *   column end address, the column address pointer is reset to column start
+ *   address and row address pointer is increased by 1.
  *
- *   When A[2] is set to 1, the driver is set to vertical address increment mode.
- *   After the display RAM is read/written, the row address pointer is increased
- *   automatically by 1. If the row address pointer reaches the row end address,
- *   the row address pointer is reset to row start address and column address
- *   pointer is increased by 1.
+ *   When A[2] is set to 1, the driver is set to vertical address increment
+ *   mode.
+ *   After the display RAM is read/written, the row address pointer is
+ *   increased automatically by 1. If the row address pointer reaches the row
+ *   end address, the row address pointer is reset to row start address and
+ *   column address pointer is increased by 1.
  *
  * COM Remapping (A[4])
- *   This bit defines the scanning direction of the common for flexible layout
- *   of common signals in OLED module either from up to down (when A[4] is set to
- *   0) or from bottom to up (when A[4] is set to 1).
+ *   This bit defines the scanning direction of the common for flexible
+ *   layout of common signals in OLED module either from up to down (when
+ *   A[4] is set to 0) or from bottom to up (when A[4] is set to 1).
  *
  * Splitting of Odd / Even COM Signals (A[6])
- *   This bit is made to match the COM layout connection on the panel. When A[6]
- *   is set to 0, no splitting odd / even of the COM signal is performed. When
- *   A[6] is set to 1, splitting odd / even of the COM signal is performed,
- *   output pin assignment sequence is shown as below (for 128MUX ratio):
+ *   This bit is made to match the COM layout connection on the panel.
+ *   When A[6] is set to 0, no splitting odd / even of the COM signal is
+ *   performed. When A[6] is set to 1, splitting odd / even of the COM signal
+ *   is performed, output pin assignment sequence is shown as below
+ *  (for 128MUX ratio):
  *
  * Byte 1: 0xa0
  * Byte 2: A[7:0]
@@ -287,8 +277,8 @@
 /* Set Display Start Line
  *
  * This double byte command is to set Display Start Line register for
- * determining the starting address of display RAM to be displayed by selecting
- * a value from 0 to 127.
+ * determining the starting address of display RAM to be displayed by
+ * selecting a value from 0 to 127.
  *
  * Byte 1: 0xa1
  * Byte 2: A[6:0]: Vertical scroll by setting the starting address of
@@ -299,9 +289,9 @@
 
 /* Set Display Offset
  *
- * This double byte command specifies the mapping of display start line (it is
- * assumed that COM0 is the display start line, display start line register
- * equals to 0) to one of COM0-COM127.
+ * This double byte command specifies the mapping of display start line
+ * (it is assumed that COM0 is the display start line, display start line
+ * register equals to 0) to one of COM0-COM127.
  *
  * Byte 1: 0xa2
  * Byte 2: A[6:0]: Set vertical offset by COM from 0-127
@@ -311,24 +301,24 @@
 
 /* Set Display Mode - Normal, all on, all off, inverse
  *
- * These are single byte commands and are used to set display status to Normal
- * Display, Entire Display ON, Entire Display OFF or Inverse Display.
+ * These are single byte commands and are used to set display status to
+ * Normal Display, Entire Display ON, Entire Display OFF or Inverse Display.
  *
  * Normal Display (0xa4)
- *   Reset the “Entire Display ON, Entire Display OFF or Inverse Display” effects
- *   and turn the data to ON at the corresponding gray level.
+ *   Reset the “Entire Display ON, Entire Display OFF or Inverse Display”
+ *   effects and turn the data to ON at the corresponding gray level.
  *
  * Set Entire Display ON (0xa5)
- *   Force the entire display to be at gray scale level GS15, regardless of the
- *   contents of the display data RAM.
+ *   Force the entire display to be at gray scale level GS15, regardless
+ *   of the contents of the display data RAM.
  *
  * Set Entire Display OFF (0xa6)
- *   Force the entire display to be at gray scale level GS0, regardless of the
- *   contents of the display data RAM.
+ *   Force the entire display to be at gray scale level GS0, regardless
+ *   of the contents of the display data RAM.
  *
  * Inverse Display (0xa7)
- *   The gray scale level of display data are swapped such that “GS0” <-> “GS15”,
- *   “GS1” <-> “GS14”, etc.
+ *   The gray scale level of display data are swapped such that
+ *   “GS0” <-> “GS15”, “GS1” <-> “GS14”, etc.
  *
  * Byte 1: Display mode command
  */
@@ -352,10 +342,10 @@
 /* Set Sleep mode ON / OFF
  *
  * These single byte commands are used to turn the matrix display on the OLED
- * panel display either ON or OFF. When the sleep mode is set to ON (0xae), the
- * display is OFF, the segment and common output are in high impedance state
- * and circuits will be turned OFF. When the sleep mode is set to OFF (0xaf),
- * the display is ON.
+ * panel display either ON or OFF. When the sleep mode is set to ON (0xae),
+ * the display is OFF, the segment and common output are in high impedance
+ * state and circuits will be turned OFF. When the sleep mode is set to OFF
+ * (0xaf), the display is ON.
  *
  * Byte 1: sleep mode command
  */
@@ -365,13 +355,14 @@
 
 /* Set Phase Length
  *
- * In the second byte of this double command, lower nibble and higher nibble is
- * defined separately. The lower nibble adjusts the phase length of Reset (phase
- * 1). The higher nibble is used to select the phase length of first pre-charge
- * phase (phase 2). The phase length is ranged from 1 to 16 DCLK's. RESET for
- * A[3:0] is set to 3 which means 4 DCLK’s selected for Reset phase. POR for
- * A[7:4] is set to 5 which means 6 DCLK’s is selected for first pre-charge
- * phase. Please refer to Table 9-1 for detail breakdown levels of each step.
+ * In the second byte of this double command, lower nibble and higher nibble
+ * is defined separately. The lower nibble adjusts the phase length of Reset
+ * (phase 1). The higher nibble is used to select the phase length of first
+ * pre-charge phase (phase 2). The phase length is ranged from 1 to 16
+ * DCLK's. RESET for A[3:0] is set to 3 which means 4 DCLK’s selected for
+ * Reset phase. POR for A[7:4] is set to 5 which means 6 DCLK’s is selected
+ * for first pre-charge phase.
+ * Please refer to Table 9-1 for detail breakdown levels of each step.
  *
  * Byte 1: 0xb1
  * Byte 2: A[3:0]: Phase 1 period of 1~16 DCLK’s
@@ -382,9 +373,9 @@
 
 /* Set Frame Frequency
  *
- * This double byte command is used to set the number of DCLK’s per row between
- * the range of 0x14 and 0x7f.  Then the Frame frequency of the matrix display
- * is equal to DCLK frequency / A[6:0].
+ * This double byte command is used to set the number of DCLK’s per row
+ * between the range of 0x14 and 0x7f.  Then the Frame frequency of the
+ * matrix display is equal to DCLK frequency / A[6:0].
  *
  * Byte 1: 0xb2
  * Byte 2: A[6:0]:Total number of DCLK’s per row. Ranging from
@@ -398,7 +389,8 @@
  * This double command is used to set the frequency of the internal display
  * clocks, DCLK's. It is defined by dividing the oscillator frequency by the
  * divide ratio (Value from 1 to 16). Frame frequency is determined by divide
- * ratio, number of display clocks per row, MUX ratio and oscillator frequency.
+ * ratio, number of display clocks per row, MUX ratio and oscillator
+ * frequency.
  * The lower nibble of the second byte is used to select the oscillator
  * frequency. Please refer to Table 9-1 for detail breakdown levels of each
  * step.
@@ -423,7 +415,8 @@
 
 /* Look Up Table for Gray Scale Pulse width
  *
- * This command is used to set each individual gray scale level for the display.
+ * This command is used to set each individual gray scale level for the
+ * display.
  * Except gray scale level GS0 that has no pre-charge and current drive, each
  * gray scale level is programmed in the length of current drive stage pulse
  * width with unit of DCLK. The longer the length of the pulse width, the
@@ -431,9 +424,10 @@
  *
  * The setting of gray scale table entry can perform gamma correction on OLED
  * panel display. Normally, it is desired that the brightness response of the
- * panel is linearly proportional to the image data value in display data RAM.
- * However, the OLED panel is somehow responded in non-linear way. Appropriate
- * gray scale table setting like example below can compensate this effect.
+ * panel is linearly proportional to the image data value in display data
+ * RAM.  However, the OLED panel is somehow responded in non-linear way.
+ * Appropriate gray scale table setting like example below can compensate
+ * this effect.
  *
  * Byte 1: 0xb8
  * Bytes 2-16: An[5:0], value for GSn level Pulse width
@@ -443,9 +437,9 @@
 
 /* Set Second Pre-charge Period
  *
- * This double byte command is used to set the phase 3 second pre-charge period.
- * The period of phase 3 can be programmed by command 0xbb and it is ranged from
- * 0 to 15 DCLK's.
+ * This double byte command is used to set the phase 3 second pre-charge
+ * period. The period of phase 3 can be programmed by command 0xbb and it
+ * is ranged from 0 to 15 DCLK's.
  *
  * Byte 1: 0xbb
  * Byte 2: 0-15 DCLKs
@@ -456,8 +450,8 @@
 /* Set First Precharge voltage, VP
  *
  * This double byte command is used to set phase 2 first pre-charge voltage
- * level. It can be programmed to set the first pre-charge voltage reference to
- * VCC or VCOMH.
+ * level. It can be programmed to set the first pre-charge voltage reference
+ * to VCC or VCOMH.
  *
  * Byte 1: 0xbc
  * Byte 2: A[5] == 0, Pre-charge voltage is (0.30 + A[4:0]) * Vcc
@@ -468,8 +462,8 @@
 
 /* Set VCOMH
  *
- * This double byte command sets the high voltage level of common pins, VCOMH.
- * The level of VCOMH is programmed with reference to VCC.
+ * This double byte command sets the high voltage level of common pins,
+ * VCOMH. The level of VCOMH is programmed with reference to VCC.
  *
  * Byte 1: 0xbe
  * Byte 2: (0.51 + A[5:0]) * Vcc
@@ -509,13 +503,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

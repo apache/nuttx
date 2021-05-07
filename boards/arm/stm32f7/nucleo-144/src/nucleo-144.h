@@ -66,9 +66,9 @@
 
 /* LED
  *
- * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED, LD2 a
- * Blue LED and LD3 a Red LED, that can be controlled by software. The following
- * definitions assume the default Solder Bridges are installed.
+ * The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,
+ * LD2 a Blue LED and LD3 a Red LED, that can be controlled by software.
+ * The following definitions assume the default Solder Bridges are installed.
  */
 
 #define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
@@ -86,12 +86,13 @@
 
 /* BUTTONS
  *
- * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.  A high value
- * will be sensed when the button is depressed.
+ * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.
+ * A high value will be sensed when the button is depressed.
  * Note:
- *    1) That the EXTI is included in the definition to enable an interrupt on this
- *       IO.
- *    2) The following definitions assume the default Solder Bridges are installed.
+ *    1) That the EXTI is included in the definition to enable an interrupt
+ *       on this IO.
+ *    2) The following definitions assume the default Solder Bridges are
+ *       installed.
  */
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
@@ -181,23 +182,34 @@
 
 /* GPIO pins used by the GPIO Subsystem */
 
-#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
-#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
-#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+#define BOARD_NGPIOIN     4   /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    4   /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1   /* Amount of GPIO Input w/ Interruption pins */
 
-#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN0)
-#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
-                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
 #define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTB | GPIO_PIN2)
 
+#define GPIO_IN1          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN8)
+#define GPIO_IN2          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN7)
+#define GPIO_IN3          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN10)
+#define GPIO_IN4          (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN12)
+
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN13)
+#define GPIO_OUT2         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN9)
+#define GPIO_OUT3         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN11)
+#define GPIO_OUT4         (GPIO_OUTPUT | GPIO_OUTPUT | GPIO_SPEED_50MHz | \
+                                          GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN14)
+
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -216,8 +228,8 @@ void stm32_spidev_initialize(void);
  * Name: stm32_spidev_bus_test
  *
  * Description:
- *   Called to create the defined SPI buses and test them by initializing them
- *   and sending the NUCLEO_SPI_TEST (no chip select).
+ *   Called to create the defined SPI buses and test them by initializing
+ *   them and sending the NUCLEO_SPI_TEST (no chip select).
  *
  ****************************************************************************/
 
@@ -246,7 +258,8 @@ int stm32_dma_alloc_init(void);
  * Name: stm32_sdio_initialize
  *
  * Description:
- *   Called at application startup time to initialize the SCMMC functionality.
+ *   Called at application startup time to initialize the SCMMC
+ *   functionality.
  *
  ****************************************************************************/
 
@@ -258,8 +271,8 @@ int stm32_sdio_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the nucleo-144 board.
+ *   Called from stm32_usbinitialize very early in inialization to setup
+ *   USB-related GPIO pins for the nucleo-144 board.
  *
  ****************************************************************************/
 
@@ -297,6 +310,14 @@ int stm32_adc_setup(void);
 
 #ifdef CONFIG_STM32F7_BBSRAM
 int stm32_bbsram_int(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32F746_qencoder_initialize
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_QENCODER
+int stm32f7_qencoder_initialize(FAR const char *devpath, int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */

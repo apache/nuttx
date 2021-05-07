@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/nucleo-f302r8/src/Makefile
+# boards/arm/stm32/nucleo-f302r8/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -33,7 +33,7 @@ CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
@@ -42,6 +42,10 @@ endif
 
 ifeq ($(CONFIG_NUCLEOF302R8_HIGHPRI),y)
 CSRCS += stm32_highpri.c
+endif
+
+ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
+CSRCS += stm32_foc_ihm07m1.c
 endif
 
 DEPPATH += --dep-path board

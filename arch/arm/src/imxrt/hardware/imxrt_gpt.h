@@ -1,54 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_gpt.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_GPT_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_GPT_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define IMXRT_GPT_CR_OFFSET                 0x0000  /* GPT Control Register */
 #define IMXRT_GPT_PR_OFFSET                 0x0004  /* GPT Prescaler Register */
@@ -61,7 +45,7 @@
 #define IMXRT_GPT_ICR2_OFFSET               0x0020  /* GPT Input Capture Register 2 */
 #define IMXRT_GPT_CNT_OFFSET                0x0024  /* GPT Counter Register */
 
-/* Register addresses ***********************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_GPT1_CR                       (IMXRT_GPT1_BASE + IMXRT_GPT1_CR_OFFSET)    /* GPT 1 Control Register */
 #define IMXRT_GPT1_PR                       (IMXRT_GPT1_BASE + IMXRT_GPT1_PR_OFFSET)    /* GPT 1 Prescaler Register */
@@ -86,7 +70,7 @@
 
 /* GPT Control Register */
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 #define GPT_CR_EN                  (1 << 0)   /* Bit: 0  GPT Enable. */
 #define GPT_CR_ENMOD               (1 << 1)   /* Bit: 1  GPT Enable mode. */
@@ -103,6 +87,7 @@
 #  define GPT_CR_CLKSRC_EXT        (3 << GPT_CR_CLKSRC_SHIFT)  /* External Clock */
 #  define GPT_CR_CLKSRC_IPG_LFR    (4 << GPT_CR_CLKSRC_SHIFT)  /* Low Frequency Reference Clock (ipg_clk_32k) */
 #  define GPT_CR_CLKSRC_IPG_24M    (5 << GPT_CR_CLKSRC_SHIFT)  /* Crystal oscillator as Reference Clock (ipg_clk_24M) */
+
 #define GPT_CR_FRR                 (1 << 9)   /* Bit: 9  Free-Run or Restart mode. */
 #define GPT_CR_EN_24M              (1 << 10)  /* Bit: 10 Enable 24 MHz clock input from crystal. */
                                               /* Bits: 11-14  Reserved */
@@ -114,6 +99,7 @@
 #  define GPT_CR_IM1_RISING        (1 << GPT_CR_IM1_SHIFT)  /* Capture on rising edge */
 #  define GPT_CR_IM1_FALLING       (2 << GPT_CR_IM1_SHIFT)  /* Capture on falling edge */
 #  define GPT_CR_IM1_BOTH          (3 << GPT_CR_IM1_SHIFT)  /* Capture on both edges */
+
 #define GPT_CR_IM2_SHIFT           (18)       /* Bits: 18-19  IM2 (bits 19-18, Input Capture Channel 2 operating mode) */
 #define GPT_CR_IM2_MASK            (3 << GPT_CR_IM2_SHIFT)
 #  define GPT_CR_IM2(n)            ((uint32_t)(n) << GPT_CR_IM2_SHIFT)
@@ -121,6 +107,7 @@
 #  define GPT_CR_IM2_RISING        (1 << GPT_CR_IM2_SHIFT)  /* Capture on rising edge */
 #  define GPT_CR_IM2_FALLING       (2 << GPT_CR_IM2_SHIFT)  /* Capture on falling edge */
 #  define GPT_CR_IM2_BOTH          (3 << GPT_CR_IM2_SHIFT)  /* Capture on both edges */
+
 #define GPT_CR_OM1_SHIFT           (20)       /* Bits: 20-22  See OM3 */
 #define GPT_CR_OM1_MASK            (7 << GPT_CR_OM1_SHIFT)
 #  define GPT_CR_OM1(n)            ((uint32_t)(n) << GPT_CR_OM1_SHIFT)
@@ -129,6 +116,7 @@
 #  define GPT_CR_OM1_CLEAR         (2 << GPT_CR_OM1_SHIFT)  /* Clear output pin */
 #  define GPT_CR_OM1_SET           (3 << GPT_CR_OM1_SHIFT)  /* Set output pin */
 #  define GPT_CR_OM1_PULSE         (4 << GPT_CR_OM1_SHIFT)  /* Generate an active low pulse */
+
 #define GPT_CR_OM2_SHIFT           (23)       /* Bits: 23-25  See OM3 */
 #define GPT_CR_OM2_MASK            (7 << GPT_CR_OM2_SHIFT)
 #  define GPT_CR_OM2(n)            ((uint32_t)(n) << GPT_CR_OM2_SHIFT)
@@ -137,6 +125,7 @@
 #  define GPT_CR_OM2_CLEAR         (2 << GPT_CR_OM2_SHIFT)  /* Clear output pin */
 #  define GPT_CR_OM2_SET           (3 << GPT_CR_OM2_SHIFT)  /* Set output pin */
 #  define GPT_CR_OM2_PULSE         (4 << GPT_CR_OM2_SHIFT)  /* Generate an active low pulse */
+
 #define GPT_CR_OM3_SHIFT           (26)       /* Bits: 26-28  OM3 (bits 28-26) controls the Output Compare Channel 3 operating mode. */
 #define GPT_CR_OM3_MASK            (7 << GPT_CR_OM3_SHIFT)
 #  define GPT_CR_OM3(n)            ((uint32_t)(n) << GPT_CR_OM3_SHIFT)
@@ -145,6 +134,7 @@
 #  define GPT_CR_OM3_CLEAR         (2 << GPT_CR_OM3_SHIFT)  /* Clear output pin */
 #  define GPT_CR_OM3_SET           (3 << GPT_CR_OM3_SHIFT)  /* Set output pin */
 #  define GPT_CR_OM3_PULSE         (4 << GPT_CR_OM3_SHIFT)  /* Generate an active low pulse */
+
 #define GPT_CR_FO1                 (1 << 29)  /* Bit: 29 See F03 */
 #define GPT_CR_FO2                 (1 << 30)  /* Bit: 30 See F03 */
 #define GPT_CR_FO3                 (1 << 31)  /* Bit: 31 FO3 Force Output Compare Channel 3 */

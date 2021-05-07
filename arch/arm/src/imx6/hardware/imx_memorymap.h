@@ -1,57 +1,53 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_memorymap.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* Reference:
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual",
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/imx6/chip.h>
 
-/************************************************************************************
+/* i.MX6 Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
- * values unless we force them to unsigned long:
+ ****************************************************************************/
+
+/* Decimal configuration values may exceed 2Gb and, hence, overflow to
+ * negative values unless we force them to unsigned long:
  */
 
 #define __CONCAT(a,b) a ## b
@@ -97,6 +93,7 @@
  ****************************************************************************/
 
 /* i.MX6 Physical (unmapped) Memory Map *************************************/
+
 /* i.MX6 System PSECTIONS */
 
 #define IMX_ROMCP_PSECTION       0x00000000  /* 00000000-00017fff  96 KB Boot ROM (ROMCP) */
@@ -146,6 +143,7 @@
 #define IMX_GPU2D_OFFSET         0x00034000  /* 00034000-00037fff  16 KB GPU 2D (GC320) */
 #define IMX_DTCP_OFFSET          0x00038000  /* 00038000-0003bfff  16 KB DTCP */
                                              /* 0003c000-000fffff 784 KB Reserved */
+
 /* i.MX6 OCRAM PSECTION Offsets */
 
 #define IMX_OCRAM_OFFSET         0x00000000  /* 00000000-0003ffff  0.25 MB OCRAM 256 KB */
@@ -170,7 +168,8 @@
 
 /* i.MX6 AIPS-1 PSECTION Offsets */
 
-                                             /* 00000000 00003fff Reserved for SDMA internal registers 16 KB */
+/* 00000000 00003fff Reserved for SDMA internal registers 16 KB */
+
 #define IMX_SPDIF_OFFSET         0x00004000  /* 00004000 00007fff SPDIF 16 KB */
 #define IMX_ECSPI1_OFFSET        0x00008000  /* 00008000 0000bfff eCSPI1 16 KB */
 #define IMX_ECSPI2_OFFSET        0x0000c000  /* 0000c000 0000ffff eCSPI2 16KB */
@@ -195,7 +194,9 @@
 #define IMX_CAN1_OFFSET          0x00090000  /* 00090000 00093fff CAN1 16 KB */
 #define IMX_CAN2_OFFSET          0x00094000  /* 00094000 00097fff CAN2 16 KB */
 #define IMX_GPT_OFFSET           0x00098000  /* 00098000 0009bfff GPT 16 KB */
+
 #define IMX_GPIO_OFFSET(n)       (0x0009c000 + ((n) << 14)) /* n=0..6 */
+
 #define IMX_GPIO1_OFFSET         0x0009c000  /* 0009c000 0009ffff GPIO1 16 KB */
 #define IMX_GPIO2_OFFSET         0x000a0000  /* 000a0000 000a3fff GPIO2 16 KB */
 #define IMX_GPIO3_OFFSET         0x000a4000  /* 000a4000 000a7fff GPIO3 16 KB */
@@ -228,75 +229,76 @@
                                              /* 000f4000 000f7fff Reserved 16 KB */
                                              /* 000f8000 000fbfff Reserved 16 KB */
                                              /* 000fc000 000fffff AIPS-1 Reserved 16 KB */
+
 /* i.MX6 AIPS-2 PSECTION Offsets */
 
-#define IMX_CAAM_OFFSET          0x00100000  /* 00100000 0210ffff CAAM 64 KB */
-                                             /* 00110000 0213ffff Reserved 192 KB */
-#define IMX_DAP_OFFSET           0x00140000  /* 00140000 00160fff ARM Cortex A9 MPCore / DAP 132 KB (See below) */
-                                             /* 00161000 0017bfff ARM Cortex A9 MPCore - Reserved 108 KB */
-#define IMX_AIPS2CGF_OFFSET      0x0017c000  /* 0017c000 0017ffff AIPS-2 configuration 16 KB */
-                                             /* 00180000 00183fff Reserved 16 KB */
-#define IMX_USBOH3_OFFSET        0x00184000  /* 00184000 00187fff USBOH3 (USB) 16 KB */
-#define IMX_ENET_OFFSET          0x00188000  /* 00188000 0018bfff ENET 16 KB */
-#define IMX_MLB150_OFFSET        0x0018c000  /* 0018c000 0018ffff MLB150 16 KB */
-#define IMX_USDHC1_OFFSET        0x00190000  /* 00190000 00193fff uSDHC1 16 KB */
-#define IMX_USDHC2_OFFSET        0x00194000  /* 00194000 00197fff uSDHC2 16 KB */
-#define IMX_USDHC3_OFFSET        0x00198000  /* 00198000 0019bfff uSDHC3 16 KB */
-#define IMX_USDHC4_OFFSET        0x0019c000  /* 0019c000 0019ffff uSDHC4 16 KB */
-#define IMX_I2C1_OFFSET          0x001a0000  /* 001a0000 001a3fff I2C1 16 KB */
-#define IMX_I2C2_OFFSET          0x001a4000  /* 001a4000 001a7fff I2C2 16 KB */
-#define IMX_I2C3_OFFSET          0x001a8000  /* 001a8000 001abfff I2C3 16 KB */
-#define IMX_ROMCP_OFFSET         0x001ac000  /* 001ac000 001affff ROMCP 16 KB */
-#define IMX_MMDC_OFFSET          0x001b0000  /* 001b0000 001b3fff MMDC 16 KB */
-#define IMX_MMDCP1_OFFSET        0x001b4000  /* 001b4000 001b7fff MMDC (port 1) 16 KB */
-#define IMX_EIM_OFFSET           0x001b8000  /* 001b8000 001bbfff EIM 16 KB */
-#define IMX_OCOTPCTRL_OFFSET     0x001bc000  /* 001bc000 001bffff OCOTPCTRL 16 KB */
-#define IMX_CSU_OFFSET           0x001c0000  /* 001c0000 001c3fff CSU 16 KB */
-                                             /* 001c4000 001c7fff Reserved */
-                                             /* 001c8000 Reserved */
-                                             /* 001cc000 Reserved */
-#define IMX_TZASC1_OFFSET        0x001d0000  /* 001d0000 001d3fff TZASC1 16 KB */
-#define IMX_TZASC2_OFFSET        0x001d4000  /* 001d4000 001d7fff TZASC2 16 KB */
-#define IMX_AUDMUX_OFFSET        0x001d8000  /* 001d8000 001dbfff AUDMUX 16 KB */
-#define IMX_MIPICSI_OFFSET       0x001dc000  /* 001dc000 001dffff MIPI (CSI port) 16 KB */
-#define IMX_MIPIDSI_OFFSET       0x001e0000  /* 001e0000 001e3fff MIPI (DSI port) 16 KB */
-#define IMX_VDOA_OFFSET          0x001e4000  /* 001e4000 001e7fff VDOA 16 KB */
-#define IMX_UART2_OFFSET         0x001e8000  /* 001e8000 001ebfff UART2 16 KB */
-#define IMX_UART3_OFFSET         0x001ec000  /* 001ec000 001effff UART3 16 KB */
-#define IMX_UART4_OFFSET         0x001f0000  /* 001f0000 001f3fff UART4 16 KB */
-#define IMX_UART5_OFFSET         0x001f4000  /* 001f4000 001f7fff UART5 16 KB */
-                                             /* 001f8000 001fbfff Reserved 16 KB */
+#define IMX_CAAM_OFFSET          0x00000000  /* 00000000 0000ffff CAAM 64 KB */
+                                             /* 00010000 0003ffff Reserved 192 KB */
+#define IMX_DAP_OFFSET           0x00040000  /* 00040000 00060fff ARM Cortex A9 MPCore / DAP 132 KB (See below) */
+                                             /* 00061000 0007bfff ARM Cortex A9 MPCore - Reserved 108 KB */
+#define IMX_AIPS2CGF_OFFSET      0x0007c000  /* 0007c000 0007ffff AIPS-2 configuration 16 KB */
+                                             /* 00080000 00083fff Reserved 16 KB */
+#define IMX_USBOH3_OFFSET        0x00084000  /* 00084000 00087fff USBOH3 (USB) 16 KB */
+#define IMX_ENET_OFFSET          0x00088000  /* 00088000 0008bfff ENET 16 KB */
+#define IMX_MLB150_OFFSET        0x0008c000  /* 0008c000 0008ffff MLB150 16 KB */
+#define IMX_USDHC1_OFFSET        0x00090000  /* 00090000 00093fff uSDHC1 16 KB */
+#define IMX_USDHC2_OFFSET        0x00094000  /* 00094000 00097fff uSDHC2 16 KB */
+#define IMX_USDHC3_OFFSET        0x00098000  /* 00098000 0009bfff uSDHC3 16 KB */
+#define IMX_USDHC4_OFFSET        0x0009c000  /* 0009c000 0009ffff uSDHC4 16 KB */
+#define IMX_I2C1_OFFSET          0x000a0000  /* 000a0000 000a3fff I2C1 16 KB */
+#define IMX_I2C2_OFFSET          0x000a4000  /* 000a4000 000a7fff I2C2 16 KB */
+#define IMX_I2C3_OFFSET          0x000a8000  /* 000a8000 000abfff I2C3 16 KB */
+#define IMX_ROMCP_OFFSET         0x000ac000  /* 000ac000 000affff ROMCP 16 KB */
+#define IMX_MMDC_OFFSET          0x000b0000  /* 000b0000 000b3fff MMDC 16 KB */
+#define IMX_MMDCP1_OFFSET        0x000b4000  /* 000b4000 000b7fff MMDC (port 1) 16 KB */
+#define IMX_EIM_OFFSET           0x000b8000  /* 000b8000 000bbfff EIM 16 KB */
+#define IMX_OCOTPCTRL_OFFSET     0x000bc000  /* 000bc000 000bffff OCOTPCTRL 16 KB */
+#define IMX_CSU_OFFSET           0x000c0000  /* 000c0000 000c3fff CSU 16 KB */
+                                             /* 000c4000 000c7fff Reserved */
+                                             /* 000c8000 Reserved */
+                                             /* 000cc000 Reserved */
+#define IMX_TZASC1_OFFSET        0x000d0000  /* 000d0000 000d3fff TZASC1 16 KB */
+#define IMX_TZASC2_OFFSET        0x000d4000  /* 000d4000 000d7fff TZASC2 16 KB */
+#define IMX_AUDMUX_OFFSET        0x000d8000  /* 000d8000 000dbfff AUDMUX 16 KB */
+#define IMX_MIPICSI_OFFSET       0x000dc000  /* 000dc000 000dffff MIPI (CSI port) 16 KB */
+#define IMX_MIPIDSI_OFFSET       0x000e0000  /* 000e0000 000e3fff MIPI (DSI port) 16 KB */
+#define IMX_VDOA_OFFSET          0x000e4000  /* 000e4000 000e7fff VDOA 16 KB */
+#define IMX_UART2_OFFSET         0x000e8000  /* 000e8000 000ebfff UART2 16 KB */
+#define IMX_UART3_OFFSET         0x000ec000  /* 000ec000 000effff UART3 16 KB */
+#define IMX_UART4_OFFSET         0x000f0000  /* 000f0000 000f3fff UART4 16 KB */
+#define IMX_UART5_OFFSET         0x000f4000  /* 000f4000 000f7fff UART5 16 KB */
+                                             /* 000f8000 000fbfff Reserved 16 KB */
 
 /* i.MX6 DAP AIPS-2 PSECTION Offsets */
 
-#define IMX_DAPROM_OFFSET        0x00140000  /* 00140000 00140fff 4 KB DAP ROM Table */
-#define IMX_ETB_OFFSET           0x00141000  /* 00141000 00141fff 4 KB ETB */
-#define IMX_EXTCTI_OFFSET        0x00142000  /* 00142000 00142fff 4 KB ext. CTI */
-#define IMX_TPIU_OFFSET          0x00143000  /* 00143000 00143fff 4 KB TPIU */
-#define IMX_FUNNEL_OFFSET        0x00144000  /* 00144000 00144fff 4 KB FUNNEL */
-                                             /* 00145000 0014efff 40 KB Reserved */
-#define IMX_CA9INTEG_OFFSET      0x0014f000  /* 0014f000 0014ffff 4 KB CA9-INTEG */
-#define IMX_CPUDBG_OFFSET(n)     (0x00150000 + ((n) << 13))
-#define IMX_CPUPMU_OFFSET(n)     (0x00151000 + ((n) << 13))
-#define IMX_CPU0DBG_OFFSET       0x00150000  /* 00150000 00150fff 4 KB CPU0 Debug I/F */
-#define IMX_CPU0PMU_OFFSET       0x00151000  /* 00151000 00151fff 4 KB CPU0 PMU */
-#define IMX_CPU1DBG_OFFSET       0x00152000  /* 00152000 00152fff 4 KB CPU1 Debug I/F */
-#define IMX_CPU1PMC_OFFSET       0x00153000  /* 00153000 00153fff 4 KB CPU1 PMU */
-#define IMX_CPU2DBG_OFFSET       0x00154000  /* 00154000 00154fff 4 KB CPU2 Debug I/F */
-#define IMX_CPU2PMU_OFFSET       0x00155000  /* 00155000 00155fff 4 KB CPU2 PMU */
-#define IMX_CPU3DBG_OFFSET       0x00156000  /* 00156000 00156fff 4 KB CPU3 Debug I/F */
-#define IMX_CPU3PMU_OFFSET       0x00157000  /* 00157000 00157fff 4 KB CPU3 PMU */
-#define IMX_CTI_OFFSET(n)        (0x00158000 + ((n) << 12))
-#define IMX_CTI0_OFFSET          0x00158000  /* 00158000 00158fff 4 KB CTI0 */
-#define IMX_CTI1_OFFSET          0x00159000  /* 00159000 00159fff 4 KB CTI1 */
-#define IMX_CTI2_OFFSET          0x0015a000  /* 0015a000 0015afff 4 KB CTI2 */
-#define IMX_CTI3_OFFSET          0x0015b000  /* 0015b000 0015bfff 4 KB CTI3 */
-#define IMX_PTM_OFFSET(n)        (0x0015c000 + ((n) << 12))
-#define IMX_PTM0_OFFSET          0x0015c000  /* 0015c000 0015cfff 4 KB PTM0 */
-#define IMX_PTM1_OFFSET          0x0015d000  /* 0015d000 0015dfff 4 KB PTM1 */
-#define IMX_PTM2_OFFSET          0x0015e000  /* 0015e000 0015efff 4 KB PTM2 */
-#define IMX_PTM3_OFFSET          0x0015f000  /* 0015f000 0015ffff 4 KB PTM3 */
-#define IMX_PLATCTRL_OFFSET      0x00160000  /* 00160000 00160fff 4 KB Platform Control */
+#define IMX_DAPROM_OFFSET        0x00040000  /* 00040000 00040fff 4 KB DAP ROM Table */
+#define IMX_ETB_OFFSET           0x00041000  /* 00041000 00041fff 4 KB ETB */
+#define IMX_EXTCTI_OFFSET        0x00042000  /* 00042000 00042fff 4 KB ext. CTI */
+#define IMX_TPIU_OFFSET          0x00043000  /* 00043000 00043fff 4 KB TPIU */
+#define IMX_FUNNEL_OFFSET        0x00044000  /* 00044000 00044fff 4 KB FUNNEL */
+                                             /* 00045000 0004efff 40 KB Reserved */
+#define IMX_CA9INTEG_OFFSET      0x0004f000  /* 0004f000 0004ffff 4 KB CA9-INTEG */
+#define IMX_CPUDBG_OFFSET(n)     (0x00050000 + ((n) << 13))
+#define IMX_CPUPMU_OFFSET(n)     (0x00051000 + ((n) << 13))
+#define IMX_CPU0DBG_OFFSET       0x00050000  /* 00050000 00050fff 4 KB CPU0 Debug I/F */
+#define IMX_CPU0PMU_OFFSET       0x00051000  /* 00051000 00051fff 4 KB CPU0 PMU */
+#define IMX_CPU1DBG_OFFSET       0x00052000  /* 00052000 00052fff 4 KB CPU1 Debug I/F */
+#define IMX_CPU1PMC_OFFSET       0x00053000  /* 00053000 00053fff 4 KB CPU1 PMU */
+#define IMX_CPU2DBG_OFFSET       0x00054000  /* 00054000 00054fff 4 KB CPU2 Debug I/F */
+#define IMX_CPU2PMU_OFFSET       0x00055000  /* 00055000 00055fff 4 KB CPU2 PMU */
+#define IMX_CPU3DBG_OFFSET       0x00056000  /* 00056000 00056fff 4 KB CPU3 Debug I/F */
+#define IMX_CPU3PMU_OFFSET       0x00057000  /* 00057000 00057fff 4 KB CPU3 PMU */
+#define IMX_CTI_OFFSET(n)        (0x00058000 + ((n) << 12))
+#define IMX_CTI0_OFFSET          0x00058000  /* 00058000 00058fff 4 KB CTI0 */
+#define IMX_CTI1_OFFSET          0x00059000  /* 00059000 00059fff 4 KB CTI1 */
+#define IMX_CTI2_OFFSET          0x0005a000  /* 0005a000 0005afff 4 KB CTI2 */
+#define IMX_CTI3_OFFSET          0x0005b000  /* 0005b000 0005bfff 4 KB CTI3 */
+#define IMX_PTM_OFFSET(n)        (0x0005c000 + ((n) << 12))
+#define IMX_PTM0_OFFSET          0x0005c000  /* 0005c000 0005cfff 4 KB PTM0 */
+#define IMX_PTM1_OFFSET          0x0005d000  /* 0005d000 0005dfff 4 KB PTM1 */
+#define IMX_PTM2_OFFSET          0x0005e000  /* 0005e000 0005efff 4 KB PTM2 */
+#define IMX_PTM3_OFFSET          0x0005f000  /* 0005f000 0005ffff 4 KB PTM3 */
+#define IMX_PLATCTRL_OFFSET      0x00060000  /* 00060000 00060fff 4 KB Platform Control */
 
 /* i.MX6 SATA PSECTION Offsets */
 
@@ -304,6 +306,7 @@
 #define IMX_OPENVG_OFFSET        0x00204000  /* 00204000-02207fff  16 KB OpenVG (GC355) */
 #define IMX_MIPIHSI_OFFSET       0x00208000  /* 00208000-0220bfff  16 KB MIPIHSI */
                                              /* 0020c000-000fffff   2 MB Reserved */
+
 /* i.MX6 DMA Physical Base Addresses */
 
 #define IMX_CAAMRAM_PBASE        (IMX_DMA_PSECTION+IMX_CAAMRAM_OFFSET)
@@ -478,9 +481,10 @@
                                              /* 0220c000-023fffff   2 MB Reserved */
 #define IMX_IPU1_SECSIZE       (4*1024*1024) /* 02600000-029fffff   4 MB IPU-1 */
 #define IMX_IPU2_SECSIZE       (4*1024*1024) /* 02a00000-02dfffff   4 MB IPU-2 */
+
 #define IMX_EIM_SECSIZE     MKULONG(CONFIG_IMX_EIM_SIZE) /* 08000000-0fffffff 128 MB EIM - (NOR/SRAM) */
 #define IMX_MMDCDDR_SECSIZE MKULONG(CONFIG_IMX_DDR_SIZE) /* 10000000-ffffffff 3840 MB MMDC-DDR Controller */
-                                             /* 10000000-7fffffff 1792 MB */
+                                                         /* 10000000-7fffffff 1792 MB */
 
 /* Convert size in bytes to number of sections (in Mb). */
 
@@ -535,15 +539,6 @@
 #define IMX_IPU2_MMUFLAGS        MMU_IOFLAGS
 #define IMX_EIM_MMUFLAGS         MMU_ROMFLAGS /* REVISIT */
 #define IMX_MMDCDDR_MMUFLAGS     MMU_MEMFLAGS
-
-/* i.MX6 Virtual (mapped) Memory Map
- *
- * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it depends
- * on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
 
 /* i.MX6 Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
@@ -760,7 +755,12 @@
 #  define NUTTX_RAM_SIZE         (NUTTX_RAM_PEND - NUTTX_RAM_PADDR)
 
 #else /* CONFIG_IMX6_BOOT_NOR */
-  /* Must be CONFIG_IMX6_BOOT_OCRAM || CONFIG_IMX6_BOOT_SDRAM || CONFIG_IMX6_BOOT_SRAM */
+
+  /* Must be
+   * CONFIG_IMX6_BOOT_OCRAM ||
+   * CONFIG_IMX6_BOOT_SDRAM ||
+   * CONFIG_IMX6_BOOT_SRAM
+   */
 
   /* Otherwise we are running from some kind of RAM (OCRAM, SRAM, or SDRAM).
    * Setup the RAM region as the NUTTX .txt, .bss, and .data region.
@@ -799,43 +799,44 @@
 #    error "Only one of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is defined"
 #  endif
 
-  /* A sanity check, if the configuration says that the page table is read-only
-   * and pre-initialized (maybe ROM), then it should have also defined both of
-   * the page table base addresses.
-   */
+/* A sanity check, if the configuration says that the page table is read-only
+ * and pre-initialized (maybe ROM), then it should have also defined both of
+ * the page table base addresses.
+ */
 
 #  ifdef CONFIG_ARCH_ROMPGTABLE
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  endif
 
-  /* We must declare the page table at the bottom or at the top of OCRAM. */
-  /* Yes.. do the vectors lie in low memory? */
+/* We must declare the page table at the bottom or at the top of OCRAM.
+ * Yes.. do the vectors lie in low memory?
+ */
 
 #  ifdef CONFIG_ARCH_LOWVECTORS
 
-  /* In this case, page table must lie at the top 16Kb of OCRAM. */
+/* In this case, page table must lie at the top 16Kb of OCRAM. */
 
 #    define PGTABLE_BASE_PADDR    (IMX_OCRAM_PBASE + IMX_OCRAM_SIZE - PGTABLE_SIZE)
 #    define PGTABLE_BASE_VADDR    (IMX_OCRAM_VBASE + IMX_OCRAM_SIZE - PGTABLE_SIZE)
 #    define PGTABLE_IN_HIGHSRAM   1
 
-  /* We will force the IDLE stack to precede the page table */
+/* We will force the IDLE stack to precede the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR - CONFIG_IDLETHREAD_STACKSIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR - CONFIG_IDLETHREAD_STACKSIZE)
 
 #  else /* CONFIG_ARCH_LOWVECTORS */
 
-  /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH,
-   * perhaps elsewhere in OCRAM).  The page table will then be positioned
-   * at the first 16Kb of SRAM.
-   */
+/* Otherwise, the vectors lie at another location (perhaps in NOR FLASH,
+ * perhaps elsewhere in OCRAM).  The page table will then be positioned
+ * at the first 16Kb of SRAM.
+ */
 
 #    define PGTABLE_BASE_PADDR    IMX_OCRAM_PBASE
 #    define PGTABLE_BASE_VADDR    IMX_OCRAM_VBASE
 #    define PGTABLE_IN_LOWSRAM    1
 
-   /* We will force the IDLE stack to follow the page table */
+/* We will force the IDLE stack to follow the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
@@ -867,21 +868,21 @@
 
 #else /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
 
-  /* Sanity check.. if one is defined, both should be defined */
+/* Sanity check.. if one is defined, both should be defined */
 
 #  if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
 #    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is undefined"
 #  endif
 
-  /* The page table then lies at the beginning of the OSSRAM and
-   * the IDLE stack follows immediately.
-   */
+/* The page table then lies at the beginning of the OSSRAM and
+ * the IDLE stack follows immediately.
+ */
 
 #    define PGTABLE_BASE_PADDR    IMX_OCRAM_PBASE
 #    define PGTABLE_BASE_VADDR    IMX_OCRAM_VBASE
 #    define PGTABLE_IN_LOWSRAM    1
 
-   /* We will force the IDLE stack to follow the page table */
+/* We will force the IDLE stack to follow the page table */
 
 #    define IDLE_STACK_PBASE      (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
 #    define IDLE_STACK_VBASE      (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
@@ -898,11 +899,11 @@
  *
  *  (4GB address range / 4 KB per page ) * 4 bytes per entry = 4MB
  *
- * 16KB of memory is reserved hold the page table for the virtual mappings.  A
- * portion of this table is not accessible in the virtual address space (for
- * normal operation with a one-to-one address mapping).   There is this large
- * hole in the physcal address space for which there will never be level 1
- * mappings:
+ * 16KB of memory is reserved hold the page table for the virtual mappings.
+ * A portion of this table is not accessible in the virtual address space
+ * (for normal operation with a one-to-one address mapping).   There is this
+ * large hole in the physcal address space for which there will never be
+ * level 1 mappings:
  *
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *
@@ -989,7 +990,8 @@
  *
  *   IMX_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   IMX_VECTOR_VSRAM - Virtual address of vector table in SRAM
- *   IMX_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ *   IMX_VECTOR_VADDR - Virtual address of vector table
+ *                      (0x00000000 or 0xffff0000)
  */
 
 #define VECTOR_TABLE_SIZE         0x00010000
@@ -1030,17 +1032,5 @@
 #  define IMX_VECTOR_VADDR        0xffff0000
 
 #endif
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_MEMORYMAP_H */

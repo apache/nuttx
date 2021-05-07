@@ -1,50 +1,36 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/samd_usart.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
  *   Datasheet", 42129J–SAM–12/2013
  *   "Atmel SAM D21E / SAM D21G / SAM D21J SMART ARM-Based Microcontroller
  *   Datasheet", Atmel-42181E–SAM-D21_Datasheet–02/2015
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_USART_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_USART_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -53,10 +39,11 @@
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* USART register offsets *******************************************************************/
+ ****************************************************************************/
+
+/* USART register offsets ***************************************************/
 
 #define SAM_USART_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_USART_CTRLB_OFFSET       0x0004  /* Control B register */
@@ -81,8 +68,7 @@
 #  define SAM_USART_DBGCTRL_OFFSET   0x0030  /* Debug control register */
 #endif
 
-
-/* USART register addresses *****************************************************************/
+/* USART register addresses *************************************************/
 
 #define SAM_USART0_CTRLA             (SAM_SERCOM0_BASE+SAM_USART_CTRLA_OFFSET)
 #define SAM_USART0_CTRLB             (SAM_SERCOM0_BASE+SAM_USART_CTRLB_OFFSET)
@@ -204,7 +190,7 @@
 #define SAM_USART5_DATA              (SAM_SERCOM5_BASE+SAM_USART_DATA_OFFSET)
 #define SAM_USART5_DBGCTRL           (SAM_SERCOM5_BASE+SAM_USART_DBGCTRL_OFFSET)
 
-/* USART register bit definitions ***********************************************************/
+/* USART register bit definitions *******************************************/
 
 /* Control A register */
 
@@ -214,6 +200,7 @@
 #define USART_CTRLA_MODE_MASK        (7 << USART_CTRLA_MODE_SHIFT)
 #  define USART_CTRLA_MODE_EXTUSART  (0 << USART_CTRLA_MODE_SHIFT) /* USART with external clock */
 #  define USART_CTRLA_MODE_INTUSART  (1 << USART_CTRLA_MODE_SHIFT) /* USART with internal clock */
+
                                                /* Bits 5-6: reserved */
 #define USART_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define USART_CTRLA_IBON             (1 << 8)  /* Bit 8:  Immediate BUFOVF notification */
@@ -232,6 +219,7 @@
 #    define USART_CTRLA_SAMPR_8XA    (2 << USART_CTRLA_SAMPR_SHIFT) /* 8x oversampling; arithmetic baud */
 #    define USART_CTRLA_SAMPR_8XF    (3 << USART_CTRLA_SAMPR_SHIFT) /* 8x oversampling; fractional baud */
 #    define USART_CTRLA_SAMPR_3XA    (4 << USART_CTRLA_SAMPR_SHIFT) /* 3x oversampling; arithmetic baud */
+
 #  define USART_CTRLA_TXPO_SHIFT     (16)      /* Bits 16-17: Transmit data pinout */
 #  define USART_CTRLA_TXPO_MASK      (3 << USART_CTRLA_TXPO_SHIFT)
 #    define USART_CTRLA_TXPAD0_1     (0 << USART_CTRLA_TXPO_SHIFT) /* TxD=SERCOM PAD[0]; XCK=PAD[1] */
@@ -269,8 +257,10 @@
 #  define USART_CTRLA_ASYNCH         (0)
 #  define USART_CTRLA_SYNCH          USART_CTRLA_CMODE
 #define USART_CTRLA_CPOL             (1 << 29)  /* Bit 29: Clock polarity */
+
 #  define USART_CTRLA_CPOL_NORMAL    (0)              /* Rising XCK edge Falling XCK edge */
 #  define USART_CTRLA_CPOL_INVERTED  USART_CTRLA_CPOL /* Falling XCK edge Rising XCK edge */
+
 #define USART_CTRLA_DORD             (1 << 30)  /* Bit 30: Data order */
 #  define USART_CTRLA_MSBFIRST       (0)
 #  define USART_CTRLA_LSBFIRST       USART_CTRLA_DORD
@@ -284,6 +274,7 @@
 #  define USART_CTRLB_CHSIZE_5BITS   (5 << USART_CTRLB_CHSIZE_SHIFT) /* 5 bits */
 #  define USART_CTRLB_CHSIZE_6BITS   (6 << USART_CTRLB_CHSIZE_SHIFT) /* 6 bits */
 #  define USART_CTRLB_CHSIZE_7BITS   (7 << USART_CTRLB_CHSIZE_SHIFT) /* 7 bits */
+
 #define USART_CTRLB_SBMODE           (1 << 6)  /* Bit 6:  Stop bit mode */
 #  define USART_CTRLB_SBMODE_1       (0)
 #  define USART_CTRLB_SBMODE_2       USART_CTRLB_SBMODE
@@ -307,6 +298,7 @@
 #define USART_CTRLB_RXEN             (1 << 17) /* Bit 17: Receiver enable */
 
 /* Baud register (For SAMD20, this is a 16-bit baud value) */
+
 /* For SAMD20 or for SAMD21 with SAMPR[0]=0 */
 
 #define USART_BAUD_SHIFT             (0)       /* Bits 0-15: Baud Value */
@@ -326,8 +318,8 @@
 
 /* Receive pulse length register (8-bit value) */
 
-/* Interrupt enable clear, interrupt enable set, interrupt enable set, interrupt flag and
- * status clear registers.
+/* Interrupt enable clear, interrupt enable set, interrupt enable set,
+ * interrupt flag and status clear registers.
  */
 
 #define USART_INT_DRE                (1 << 0)  /* Bit 0:  Data register empty interrupt */
@@ -378,17 +370,17 @@
 
 #define USART_DBGCTRL_DBGSTOP        (1 << 0)  /* Bit 0: Debug stop mode */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAMD20 || CONFIG_ARCH_FAMILY_SAMD21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAMD_USART_H */

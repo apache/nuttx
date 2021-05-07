@@ -1,55 +1,40 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_adc.h
  *
- *   Copyright (C) 2010, 2012, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC17_40_ADC_CR_OFFSET      0x0000  /* A/D Control Register */
 #define LPC17_40_ADC_GDR_OFFSET     0x0004  /* A/D Global Data Register */
@@ -68,7 +53,7 @@
 #define LPC17_40_ADC_STAT_OFFSET    0x0030  /* A/D Status Register */
 #define LPC17_40_ADC_TRM_OFFSET     0x0034  /* ADC trim register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC17_40_ADC_CR             (LPC17_40_ADC_BASE+LPC17_40_ADC_CR_OFFSET)
 #define LPC17_40_ADC_GDR            (LPC17_40_ADC_BASE+LPC17_40_ADC_GDR_OFFSET)
@@ -87,7 +72,7 @@
 #define LPC17_40_ADC_STAT           (LPC17_40_ADC_BASE+LPC17_40_ADC_STAT_OFFSET)
 #define LPC17_40_ADC_TRM            (LPC17_40_ADC_BASE+LPC17_40_ADC_TRM_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* A/D Control Register */
 
@@ -109,9 +94,12 @@
 #  define ADC_CR_START_MAT0p3    (5 << ADC_CR_START_SHIFT) /* Start edge on MAT0.3 */
 #  define ADC_CR_START_MAT1p0    (6 << ADC_CR_START_SHIFT) /* Start edge on MAT1.0 */
 #  define ADC_CR_START_MAT1p1    (7 << ADC_CR_START_SHIFT) /* Start edge on MAT1.1 */
+
 #define ADC_CR_EDGE              (1 << 27) /* Bit 27: Start on falling edge  */
                                            /* Bits 28-31: Reserved */
+
 /* A/D Global Data Register AND Channel 0-7 Data Register */
+
                                            /* Bits 0-3: Reserved */
 #define ADC_DR_RESULT_SHIFT      (4)       /* Bits 4-15: Result of conversion (DONE==1) */
 #define ADC_DR_RESULT_MASK       (0x0fff << ADC_DR_RESULT_SHIFT)
@@ -135,6 +123,7 @@
 #define ADC_INTEN_CHAN7          (1 << 7)  /* Bit 7:  Enable ADC chan 7 complete interrupt */
 #define ADC_INTEN_GLOBAL         (1 << 8)  /* Bit 8:  Only the global DONE generates interrupt */
                                            /* Bits 9-31: Reserved */
+
 /* A/D Status Register */
 
 #define ADC_STAT_DONE(n)         (1 << (n))
@@ -157,7 +146,9 @@
 #define ADC_STAT_OVERRUN7        (1 << 15) /* Bit 15: A/D chan 7 OVERRUN */
 #define ADC_STAT_INT             (1 << 16) /* Bit 15: A/D interrupt */
                                            /* Bits 17-31: Reserved */
+
 /* ADC trim register */
+
                                            /* Bits 0-3: Reserved */
 #define ADC_TRM_ADCOFFS_SHIFT    (4)       /* Bits 4-7: A/D offset trim bits */
 #define ADC_TRM_ADCOFFS_MASK     (15 << ADC_TRM_ADCOFFS_SHIFT)
@@ -165,16 +156,16 @@
 #define ADC_TRM_TRIM_MASK        (15 << ADC_TRM_TRIM_SHIFT)
                                            /* Bits 12-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H */

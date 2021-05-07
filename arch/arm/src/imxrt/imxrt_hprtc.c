@@ -1,41 +1,26 @@
-/************************************************************************************
- * arch/arm/src/imxrt/imxrt_lpsrtc.c
+/****************************************************************************
+ * arch/arm/src/imxrt/imxrt_hprtc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -61,9 +46,9 @@
 
 #ifdef CONFIG_IMXRT_SNVS_HPRTC
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Callback to use when the alarm expires */
 
@@ -71,9 +56,9 @@
 static hprtc_alarm_callback_t g_hprtc_alarmcb;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Variable determines the state of the RTC module.
  *
@@ -88,11 +73,11 @@ volatile bool g_rtc_enabled;
 bool g_hprtc_timset;  /* True:  time has been set since power up */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_snvs_interrupt
  *
  * Description:
@@ -105,7 +90,7 @@ bool g_hprtc_timset;  /* True:  time has been set since power up */
  * Returned Value:
  *   Zero (OK) on success; A negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
 static int imxrt_snvs_interrupt(int irq, void *context, FAR void *arg)
@@ -121,7 +106,9 @@ static int imxrt_snvs_interrupt(int irq, void *context, FAR void *arg)
   cb              = g_hprtc_alarmcb;
   g_hprtc_alarmcb = NULL;
 
-  /* Disable the alarm, alarm interrupts, clear pending alarm interrupt status */
+  /* Disable the alarm, alarm interrupts, clear pending alarm interrupt
+   * status
+   */
 
   imxrt_hprtc_alarmdisable();
 
@@ -132,7 +119,7 @@ static int imxrt_snvs_interrupt(int irq, void *context, FAR void *arg)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_enable
  *
  * Description:
@@ -144,7 +131,7 @@ static int imxrt_snvs_interrupt(int irq, void *context, FAR void *arg)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void imxrt_hprtc_enable(void)
 {
@@ -161,12 +148,12 @@ static void imxrt_hprtc_enable(void)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_alarmenable
  *
  * Description:
- *    Enable alarm interrupts.  This is currently only used internally at the time
- *    that alarm interrupts are enabled.
+ *    Enable alarm interrupts.  This is currently only used internally at the
+ *    time that alarm interrupts are enabled.
  *
  * Input Parameters:
  *    None
@@ -174,7 +161,7 @@ static void imxrt_hprtc_enable(void)
  * Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
 static void imxrt_hprtc_alarmenable(void)
@@ -193,25 +180,25 @@ static void imxrt_hprtc_alarmenable(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Functions used only for HPRTC
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_IMXRT_SNVS_LPSRTC
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC
+ *   is set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -219,7 +206,7 @@ static void imxrt_hprtc_alarmenable(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 time_t up_rtc_time(void)
 {
@@ -228,12 +215,12 @@ time_t up_rtc_time(void)
   return imxrt_hprtc_time();
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -241,7 +228,7 @@ time_t up_rtc_time(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *ts)
 {
@@ -283,16 +270,16 @@ int up_rtc_settime(FAR const struct timespec *ts)
 
 #endif /* !CONFIG_IMXRT_SNVS_LPSRTC */
 
-/************************************************************************************
+/****************************************************************************
  * Logic Common to LPSRTC and HPRTC
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -300,7 +287,7 @@ int up_rtc_settime(FAR const struct timespec *ts)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
@@ -346,12 +333,12 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_initialize
  *
  * Description:
- *   Initialize the LPSRTC per the selected configuration.  This function is called
- *   via up_rtc_initialize (see imxrt_hprtc.c).
+ *   Initialize the LPSRTC per the selected configuration.  This function
+ *   is called via up_rtc_initialize (see imxrt_hprtc.c).
  *
  * Input Parameters:
  *   None
@@ -359,7 +346,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int imxrt_hprtc_initialize(void)
 {
@@ -394,7 +381,7 @@ int imxrt_hprtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_synchronize
  *
  * Description:
@@ -406,7 +393,7 @@ int imxrt_hprtc_initialize(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_IMXRT_SNVS_LPSRTC
 void imxrt_hprtc_synchronize(void)
@@ -414,8 +401,8 @@ void imxrt_hprtc_synchronize(void)
   uint32_t regval;
   uint32_t hpcr;
 
-  /* Make sure that the RTC is disabled (it should be at this point in the LPSRTC
-   * initialization sequence).
+  /* Make sure that the RTC is disabled (it should be at this point in the
+   * LPSRTC initialization sequence).
    */
 
   hpcr    = getreg32(IMXRT_SNVS_HPCR);
@@ -439,13 +426,13 @@ void imxrt_hprtc_synchronize(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_time
  *
  * Description:
- *   Get the current time in seconds.  This is the underlying implementation of the
- *   up_rtc_time() function that is used by the RTOS during initialization to set up
- *   the system time.
+ *   Get the current time in seconds.  This is the underlying implementation
+ *   of the up_rtc_time() function that is used by the RTOS during
+ *   initialization to set up the system time.
  *
  * Input Parameters:
  *   None
@@ -453,7 +440,7 @@ void imxrt_hprtc_synchronize(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 uint32_t imxrt_hprtc_time(void)
 {
@@ -479,12 +466,12 @@ uint32_t imxrt_hprtc_time(void)
   return seconds;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_getalarm
  *
  * Description:
- *   Get the current alarm setting in seconds.  This is only used by the lower half
- *   RTC driver.
+ *   Get the current alarm setting in seconds.
+ *   This is only used by the lower half RTC driver.
  *
  * Input Parameters:
  *   None
@@ -492,7 +479,7 @@ uint32_t imxrt_hprtc_time(void)
  * Returned Value:
  *   The current alarm setting in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
 uint32_t imxrt_hprtc_getalarm(void)
@@ -508,12 +495,12 @@ uint32_t imxrt_hprtc_getalarm(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_setalarm
  *
  * Description:
- *   Set the alarm (in seconds) and enable alarm interrupts.  This is only used by
- *   the lower half RTC driver.
+ *   Set the alarm (in seconds) and enable alarm interrupts.
+ *   This is only used by the lower half RTC driver.
  *
  * Input Parameters:
  *   None
@@ -521,7 +508,7 @@ uint32_t imxrt_hprtc_getalarm(void)
  * Returned Value:
  *   The current alarm setting in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
 int imxrt_hprtc_setalarm(FAR struct timespec *ts, hprtc_alarm_callback_t cb)
@@ -536,7 +523,7 @@ int imxrt_hprtc_setalarm(FAR struct timespec *ts, hprtc_alarm_callback_t cb)
    * interrupted or preempted.
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   now = imxrt_hprtc_time();
 
@@ -578,18 +565,18 @@ int imxrt_hprtc_setalarm(FAR struct timespec *ts, hprtc_alarm_callback_t cb)
   /* Unconditionally enable the RTC alarm interrupt */
 
   imxrt_hprtc_alarmenable();
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: imxrt_hprtc_alarmdisable
  *
  * Description:
- *    Disable alarm interrupts.  Used internally after the receipt of the alarm
- *    interrupt.  Also called by the lower-half RTC driver in order to cancel an
- *    alarm.
+ *    Disable alarm interrupts.  Used internally after the receipt of the
+ *    alarm interrupt.  Also called by the lower-half RTC driver in order to
+ *    cancel an alarm.
  *
  * Input Parameters:
  *    None
@@ -597,7 +584,7 @@ int imxrt_hprtc_setalarm(FAR struct timespec *ts, hprtc_alarm_callback_t cb)
  * Returned Value:
  *    None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
 void imxrt_hprtc_alarmdisable(void)

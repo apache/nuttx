@@ -27,7 +27,7 @@
 #include <string.h>
 #include <debug.h>
 #include <stdio.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <nuttx/kmalloc.h>
 
@@ -433,7 +433,7 @@ static ssize_t esp32_part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  *   buffer - data buffer pointer
  *
  * Returned Value:
- *   Writen bytes if success or a negative value if fail.
+ *   Written bytes if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -459,7 +459,7 @@ static ssize_t esp32_part_write(FAR struct mtd_dev_s *dev, off_t offset,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -497,8 +497,8 @@ static int esp32_part_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
   if (!_MTDIOCVALID(cmd))
     {
-      ferr("ERROR: cmd=%d(%x) is error\n", cmd, cmd);
-      return -EINVAL;
+      finfo("INFO: cmd=%d(%x) is error\n", cmd, cmd);
+      return -ENOTTY;
     }
 
   switch (_IOC_NR(cmd))
@@ -567,7 +567,7 @@ int esp32_partition_init(void)
   int ret = 0;
   const int num = PARTITION_MAX_SIZE / sizeof(struct partition_info_priv);
   const char path_base[] = ESP32_PARTITION_MOUNT;
-  char lable[PARTITION_LABEL_LEN + 1];
+  char label[PARTITION_LABEL_LEN + 1];
   char path[PARTITION_LABEL_LEN + sizeof(path_base)];
 
   pbuf = kmm_malloc(PARTITION_MAX_SIZE);
@@ -611,11 +611,11 @@ int esp32_partition_init(void)
           break;
         }
 
-      strncpy(lable, (char *)info->label, PARTITION_LABEL_LEN);
-      lable[PARTITION_LABEL_LEN] = 0;
-      sprintf(path, "%s%s", path_base, lable);
+      strncpy(label, (char *)info->label, PARTITION_LABEL_LEN);
+      label[PARTITION_LABEL_LEN] = 0;
+      sprintf(path, "%s%s", path_base, label);
 
-      finfo("INFO: [label]:   %s\n", lable);
+      finfo("INFO: [label]:   %s\n", label);
       finfo("INFO: [type]:    %d\n", info->type);
       finfo("INFO: [subtype]: %d\n", info->subtype);
       finfo("INFO: [offset]:  0x%08x\n", info->offset);
@@ -639,7 +639,7 @@ int esp32_partition_init(void)
       mtd_priv->mtd.ioctl  = esp32_part_ioctl;
       mtd_priv->mtd.read   = esp32_part_read;
       mtd_priv->mtd.write  = esp32_part_write;
-      mtd_priv->mtd.name   = lable;
+      mtd_priv->mtd.name   = label;
 
       mtd_part = mtd_partition(&mtd_priv->mtd,
                                info->offset / geo.blocksize,

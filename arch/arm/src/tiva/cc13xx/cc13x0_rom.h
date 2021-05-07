@@ -1,10 +1,11 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13x0_rom.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This is a port of TI's setup_rom.h file which has a fully compatible BSD license:
+ * This is a port of TI's setup_rom.h file which has a fully compatible
+ * BSD license:
  *
  *    Copyright (c) 2015-2017, Texas Instruments Incorporated
  *    All rights reserved.
@@ -36,26 +37,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_CC13XX_CC13X0_ROM_H
 #define __ARCH_ARM_SRC_TIVA_CC13XX_CC13X0_ROM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <stdint.h>
 #include <nuttx/irq.h>
 
 #include "hardware/tiva_aux_smph.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Start address of the ROM hard API access table (located after the ROM FW rev
- * field)
+/* Start address of the ROM hard API access table
+ * (located after the ROM FW rev field)
  */
 
 #define ROM_HAPI_TABLE_ADDR 0x10000048
@@ -605,9 +606,9 @@
 #define AUX_WUC_POWER_DOWN    0x00000002
 #define AUX_WUC_POWER_ACTIVE  0x00000004
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* ROM Hard-API function interface types */
 
@@ -659,7 +660,9 @@ typedef void     (*fptr_adccompbin_t)         (uint8_t       /* signal */);
 
 typedef void     (*fptr_compbref_t)           (uint8_t       /* signal */);
 
-/* Types used in the "Safe" interfaces taken from the TI DriverLib hw_types.h */
+/* Types used in the "Safe" interfaces taken from the TI DriverLib
+ * hw_types.h
+ */
 
 typedef void     (*fptr_void_void_t)          (void);
 typedef void     (*fptr_void_uint8_t)         (uint8_t);
@@ -691,9 +694,9 @@ struct hard_api_s
 
 typedef struct hard_api_s hard_api_t;
 
-/************************************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* ROM functions implemented in FLASH */
 
@@ -708,26 +711,29 @@ uint32_t rom_setup_get_trim_xosc_hfibiastherm(void);
 uint32_t rom_setup_get_trim_ampcompth1(void);
 uint32_t rom_setup_get_trim_ampcompth2(void);
 uint32_t rom_setup_get_trim_ampcompctrl(uint32_t fcfg1_revision);
-uint32_t rom_setup_get_trim_dblrloopfilter_resetvoltage(uint32_t fcfg1_revision);
+uint32_t
+rom_setup_get_trim_dblrloopfilter_resetvoltage(uint32_t fcfg1_revision);
 uint32_t rom_setup_get_trim_adcshmodeen(uint32_t fcfg1_revision);
 uint32_t rom_setup_get_trim_adcshvbufen(uint32_t fcfg1_revision);
 uint32_t rom_setup_get_trim_xosc_hfctrl(uint32_t fcfg1_revision);
 uint32_t rom_setup_get_trim_xosc_hffaststart(void);
 uint32_t rom_setup_get_trim_radc_extcfg(uint32_t fcfg1_revision);
 uint32_t rom_setup_get_trim_rcosc_lfibiastrim(uint32_t fcfg1_revision);
-uint32_t rom_setup_get_trim_lfregulator_cmirrwr_ratio(uint32_t fcfg1_revision);
+uint32_t
+rom_setup_get_trim_lfregulator_cmirrwr_ratio(uint32_t fcfg1_revision);
 void     rom_setup_cachemode(void);
 void     rom_setup_aonrtc_subsecinc(uint32_t subsecinc);
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rom_signextend_vddrtrim
  *
  * Description:
- *   Sign extend the VDDR_TRIM setting (special format ranging from -10 to +21)
+ *   Sign extend the VDDR_TRIM setting
+ *   (special format ranging from -10 to +21)
  *
  * Input Parameters
  *   vddrtrim - VDDR_TRIM setting
@@ -735,7 +741,7 @@ void     rom_setup_aonrtc_subsecinc(uint32_t subsecinc);
  * Returned Value:
  *   Returns sign extended VDDR_TRIM setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int32_t rom_signextend_vddrtrim(uint32_t vddrtrim)
 {
@@ -752,7 +758,7 @@ static inline int32_t rom_signextend_vddrtrim(uint32_t vddrtrim)
   return signed_vaddrtrim;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: rom_hapi_void and rom_hapi_auxadiselect
  *
  * Description:
@@ -765,7 +771,7 @@ static inline int32_t rom_signextend_vddrtrim(uint32_t vddrtrim)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 inline static void rom_hapi_void(fptr_void_void_t fptr)
 {
@@ -779,7 +785,8 @@ inline static void rom_hapi_void(fptr_void_void_t fptr)
   leave_critical_section(flags);
 }
 
-inline static void rom_hapi_auxadiselect(fptr_void_uint8_t fptr, uint8_t signal)
+inline static void rom_hapi_auxadiselect(fptr_void_uint8_t fptr,
+                                         uint8_t signal)
 {
   irqstate_t flags = enter_critical_section();
   while (getreg32(TIVA_AUX_SMPH_SMPH0) == 0)

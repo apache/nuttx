@@ -75,10 +75,10 @@ static int     loop_semtake(FAR struct loop_struct_s *dev);
 static int     loop_open(FAR struct inode *inode);
 static int     loop_close(FAR struct inode *inode);
 static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                       size_t start_sector, unsigned int nsectors);
+                       blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t loop_write(FAR struct inode *inode,
                           FAR const unsigned char *buffer,
-                          size_t start_sector, unsigned int nsectors);
+                          blkcnt_t start_sector, unsigned int nsectors);
 static int     loop_geometry(FAR struct inode *inode,
                              FAR struct geometry *geometry);
 
@@ -194,7 +194,7 @@ static int loop_close(FAR struct inode *inode)
  ****************************************************************************/
 
 static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                         size_t start_sector, unsigned int nsectors)
+                         blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct loop_struct_s *dev;
   ssize_t nbytesread;
@@ -248,7 +248,7 @@ static ssize_t loop_read(FAR struct inode *inode, FAR unsigned char *buffer,
 
 static ssize_t loop_write(FAR struct inode *inode,
                           FAR const unsigned char *buffer,
-                          size_t start_sector, unsigned int nsectors)
+                          blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct loop_struct_s *dev;
   ssize_t nbyteswritten;
@@ -275,7 +275,7 @@ static ssize_t loop_write(FAR struct inode *inode,
                                  nsectors * dev->sectsize);
       if (nbyteswritten < 0 && nbyteswritten != -EINTR)
         {
-          ferr("ERROR: nx_write failed: %zd\n", nbyteswritten);
+          ferr("ERROR: file_write failed: %zd\n", nbyteswritten);
           return nbyteswritten;
         }
     }
@@ -344,11 +344,11 @@ int losetup(FAR const char *devname, FAR const char *filename,
 
   /* Get the size of the file */
 
-  ret = stat(filename, &sb);
+  ret = nx_stat(filename, &sb, 1);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to stat %s: %d\n", filename, get_errno());
-      return -get_errno();
+      ferr("ERROR: Failed to stat %s: %d\n", filename, ret);
+      return ret;
     }
 
   /* Check if the file system is big enough for one block */

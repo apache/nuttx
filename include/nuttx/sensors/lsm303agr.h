@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/lsm303agr.h [from the IKS01A2 MEMS board STM]
+ * include/nuttx/sensors/lsm303agr.h
  *
  *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
  *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
@@ -183,12 +183,12 @@ struct lsm303agr_ops_s
 
 struct lsm303agr_dev_s
 {
-  FAR struct i2c_master_s          *i2c; /* I2C interface */
+  FAR struct i2c_master_s          *i2c;  /* I2C interface */
   uint8_t                           addr; /* I2C address */
 
   FAR const struct lsm303agr_ops_s *ops;
 
-  uint8_t                           datareg; /* Output data register of X low byte */
+  uint8_t                           datareg;     /* Output data register of X low byte */
   struct lsm303agr_sensor_data_s    sensor_data; /* Sensor data container */
 };
 

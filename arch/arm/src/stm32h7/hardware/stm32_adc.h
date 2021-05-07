@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_adc.h
  *
  *   Copyright (C) 2017,2019 Gregory Nutt. All rights reserved.
@@ -33,22 +33,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_ADC_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define STM32_ADC1_OFFSET            0x0000
 #define STM32_ADC2_OFFSET            0x0100
@@ -57,9 +57,10 @@
 #define STM32_ADC1_BASE              (STM32_ADC1_OFFSET+STM32_ADC12_BASE) /* ADC1 Master ADC */
 #define STM32_ADC2_BASE              (STM32_ADC2_OFFSET+STM32_ADC12_BASE) /* ADC2 Slave ADC */
 
-/* Register Offsets *****************************************************************/
-/* Register Offsets for each ADC (ADC1-3).  At offset 0x0000 for master and offset 0x0100
- * for slave.
+/* Register Offsets *********************************************************/
+
+/* Register Offsets for each ADC (ADC1-3).
+ * At offset 0x0000 for master and offset 0x0100 for slave.
  */
 
 #define STM32_ADC_ISR_OFFSET         0x0000  /* ADC interrupt and status register */
@@ -108,7 +109,7 @@
 #define STM32_ADC_CDR_OFFSET         (STM32_ADCCMN_OFFSET+STM32_ADCX_CDR_OFFSET)
 #define STM32_ADC_CDR2_OFFSET        (STM32_ADCCMN_OFFSET+STM32_ADCX_CDR2_OFFSET)
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_ADC1_ISR               (STM32_ADC1_BASE+STM32_ADC_ISR_OFFSET)
 #define STM32_ADC1_IER               (STM32_ADC1_BASE+STM32_ADC_IER_OFFSET)
@@ -229,8 +230,11 @@
 #define STM32_ADC3_CDR               (STM32_ADC3_BASE+STM32_ADC_CDR_OFFSET)
 #define STM32_ADC3_CDR2              (STM32_ADC3_BASE+STM32_ADC_CDR2_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
-/* ADC interrupt and status register (ISR) and ADC interrupt enable register (IER) */
+/* Register Bitfield Definitions ********************************************/
+
+/* ADC interrupt and status register (ISR) and
+ * ADC interrupt enable register (IER)
+ */
 
 #define ADC_INT_ADRDY                (1 << 0)  /* Bit 0:  ADC ready */
 #define ADC_INT_EOSMP                (1 << 1)  /* Bit 1:  End of sampling flag */
@@ -289,6 +293,7 @@
 #  define ADC_CFGR_DMNGT_DMA_ONESHOT (1 << ADC_CFGR_DMNGT_SHIFT) /* RDMA One Shot Mode selected */
 #  define ADC_CFGR_DMNGT_DFSDM       (2 << ADC_CFGR_DMNGT_SHIFT) /* DFSDM mode selected */
 #  define ADC_CFGR_DMNGT_DMA_CIR     (3 << ADC_CFGR_DMNGT_SHIFT) /* DMA Circular Mode selected */
+
 #define ADC_CFGR_RES_SHIFT           (2)       /* Bits 2-4: Data resolution */
 #define ADC_CFGR_RES_MASK            (7 << ADC_CFGR_RES_SHIFT)
 #  define ADC_CFGR_RES_16BIT         (0 << ADC_CFGR_RES_SHIFT) /* 16 Bit */
@@ -303,6 +308,7 @@
 #define ADC_CFGR_EXTSEL_SHIFT        (5)       /* Bits 5-9: External Event Select for regular group */
 #define ADC_CFGR_EXTSEL_MASK         (31 << ADC_CFGR_EXTSEL_SHIFT)
 #  define ADC_CFGR_EXTSEL(event)     ((event) << ADC_CFGR_EXTSEL_SHIFT) /* Event = 0..31 */
+
 #  define ADC_CFGR_EXTSEL_T1CC1      (0x00 << ADC_CFGR_EXTSEL_SHIFT) /* 00000: Timer 1 CC1 event */
 #  define ADC_CFGR_EXTSEL_T1CC2      (0x01 << ADC_CFGR_EXTSEL_SHIFT) /* 00001: Timer 1 CC2 event */
 #  define ADC_CFGR_EXTSEL_T1CC3      (0x02 << ADC_CFGR_EXTSEL_SHIFT) /* 00010: Timer 1 CC3 event */
@@ -324,12 +330,14 @@
 #  define ADC_CFGR_EXTSEL_LPTIM1_OUT (0x12 << ADC_CFGR_EXTSEL_SHIFT) /* 10010: LP TIM1 OUT CC4 event */
 #  define ADC_CFGR_EXTSEL_LPTIM2_OUT (0x13 << ADC_CFGR_EXTSEL_SHIFT) /* 10011: LP TIM2 OUT CC4 event */
 #  define ADC_CFGR_EXTSEL_LPTIM3_OUT (0x14 << ADC_CFGR_EXTSEL_SHIFT) /* 10100: LP TIM3 OUT CC4 event */
+
 #define ADC_CFGR_EXTEN_SHIFT         (10)      /* Bits 10-11: External trigger/polarity selection regular channels */
 #define ADC_CFGR_EXTEN_MASK          (3 << ADC_CFGR_EXTEN_SHIFT)
 #  define ADC_CFGR_EXTEN_NONE        (0 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection disabled */
 #  define ADC_CFGR_EXTEN_RISING      (1 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on the rising edge */
 #  define ADC_CFGR_EXTEN_FALLING     (2 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on the falling edge */
 #  define ADC_CFGR_EXTEN_BOTH        (3 << ADC_CFGR_EXTEN_SHIFT) /* Trigger detection on both edges */
+
 #define ADC_CFGR_OVRMOD              (1 << 12) /* Bit 12: Overrun Mode */
 #define ADC_CFGR_CONT                (1 << 13) /* Bit 13: Continuous mode for regular conversions */
 #define ADC_CFGR_AUTDLY              (1 << 14) /* Bit 14: Delayed conversion mode */
@@ -337,6 +345,7 @@
 #define ADC_CFGR_DISCNUM_SHIFT       (17)      /* Bits 17-19: Discontinuous mode channel count */
 #define ADC_CFGR_DISCNUM_MASK        (7 << ADC_CFGR_DISCNUM_SHIFT)
 #  define ADC_CFGR_DISCNUM(n)        (((n) - 1) << ADC_CFGR_DISCNUM_SHIFT) /* n = 1..8 channels */
+
 #define ADC_CFGR_JDISCEN             (1 << 20) /* Bit 20: Discontinuous mode on injected channels */
 #define ADC_CFGR_JQM                 (1 << 21) /* Bit 21: JSQR queue mode */
 #define ADC_CFGR_AWD1SGL             (1 << 22) /* Bit 22: Enable watchdog 1 on single/all channels */
@@ -356,6 +365,7 @@
 #define ADC_CFGR2_OVSS_SHIFT         (5)       /* Bits 5-8: Oversampling shift */
 #define ADC_CFGR2_OVSS_MASK          (0xf << ADC_CFGR2_OVSS_SHIFT)
 #  define ADC_CFGR2_OVSS(value)      ((value) << ADC_CFGR2_OVSS_SHIFT) /* Value = 0..11 */
+
 #define ADC_CFGR2_TROVS              (1 << 9)  /* Bit 9: Triggered Regular Oversampling */
 #define ADC_CFGR2_ROVSM              (1 << 10) /* Bit 10: Regular Oversampling mode */
 #define ADC_CFGR2_RSHIFT1            (1 << 11) /* Bit 11: Right-shift data after Offset 1 correction*/
@@ -366,6 +376,7 @@
 #define ADC_CFGR2_OVSR_SHIFT         (16)      /* Bits 16-25: Oversampling ratio */
 #define ADC_CFGR2_OVSR_MASK          (0x3ff << ADC_CFGR2_OVSR_SHIFT)
 #  define ADC_CFGR2_OVSR(value)      ((value) << ADC_CFGR2_OVSR_SHIFT) /* Value = 0..1024 */
+
                                                /* Bits 26-27: Reserved */
 #define ADC_CFGR2_LSHIFT_SHIFT       (28)      /* Bits 28-31: Left shift factor */
 #define ADC_CFGR2_LSHIFT_MASK        (0xf << ADC_CFGR2_LSHIFT_SHIFT)
@@ -430,6 +441,7 @@
 /* ADC channel preselection register */
 
 #define ADC_PCSEL_PCSEL_ALL          0xfffff /* Bits 0-19: All Channels pre selection */
+
 #define ADC_PCSEL_PCSEL0             (1 << 0)  /* Bit 0: :Channel 0 (VINP[i]) pre selection */
 #define ADC_PCSEL_PCSEL1             (1 << 1)  /* Bit 1: :Channel 1 (VINP[i]) pre selection */
 #define ADC_PCSEL_PCSEL2             (1 << 2)  /* Bit 2: :Channel 2 (VINP[i]) pre selection */
@@ -553,26 +565,32 @@
 #define ADC_JSQR_JL_SHIFT            (0)       /* Bits 0-1: Injected Sequence length */
 #define ADC_JSQR_JL_MASK             (3 << ADC_JSQR_JL_SHIFT)
 #  define ADC_JSQR_JL(n)             (((n)-1) << ADC_JSQR_JL_SHIFT) /* n=1..4 */
+
 #define ADC_JSQR_JEXTSEL_SHIFT       (2)       /* Bits 2-6: External Trigger Selection for injected group */
 #define ADC_JSQR_JEXTSEL_MASK        (31 << ADC_JSQR_JEXTSEL_SHIFT)
 #  define ADC_JSQR_JEXTSEL(event)    ((event) << ADC_JSQR_JEXTSEL_SHIFT) /* Event = 0..31 */
+
 #define ADC_JSQR_JEXTEN_SHIFT        (7)       /* Bits 7-8: External trigger selection for injected greoup */
 #define ADC_JSQR_JEXTEN_MASK         (3 << ADC_JSQR_JEXTEN_SHIFT)
 #  define ADC_JSQR_JEXTEN_NONE       (0 << ADC_JSQR_JEXTEN_SHIFT) /* 00: Trigger detection disabled */
 #  define ADC_JSQR_JEXTEN_RISING     (1 << ADC_JSQR_JEXTEN_SHIFT) /* 01: Trigger detection on the rising edge */
 #  define ADC_JSQR_JEXTEN_FALLING    (2 << ADC_JSQR_JEXTEN_SHIFT) /* 10: Trigger detection on the falling edge */
 #  define ADC_JSQR_JEXTEN_BOTH       (3 << ADC_JSQR_JEXTEN_SHIFT) /* 11: Trigger detection on both the rising and falling edges */
+
 #define ADC_JSQR_JSQ1_SHIFT          (9)       /* Bits 9-13: 1st conversion in injected sequence */
 #define ADC_JSQR_JSQ1_MASK           (0x1f << ADC_JSQR_JSQ1_SHIFT)
 #  define ADC_JSQR_JSQ1(ch)          ((ch) << ADC_JSQR_JSQ1_SHIFT) /* Channel number 0..19 */
+
                                                /* Bit 14: Reserved */
 #define ADC_JSQR_JSQ2_SHIFT          (15)      /* Bits 15-19: 2nd conversion in injected sequence */
 #define ADC_JSQR_JSQ2_MASK           (0x1f << ADC_JSQR_JSQ2_MASK)
 #  define ADC_JSQR_JSQ2(ch)          ((ch) << ADC_JSQR_JSQ2_MASK) /* Channel number 0..19 */
+
                                                /* Bit 20: Reserved */
 #define ADC_JSQR_JSQ3_SHIFT          (21)      /* Bits 21-25: 3rd conversion in injected sequence */
 #define ADC_JSQR_JSQ3_MASK           (0x1f << ADC_JSQR_JSQ3_SHIFT)
 #  define ADC_JSQR_JSQ3(ch)          ((ch) << ADC_JSQR_JSQ3_SHIFT) /* Channel number 0..19 */
+
                                                /* Bit 26: Reserved */
 #define ADC_JSQR_JSQ4_SHIFT          (27)      /* Bits 27-31: 4th conversion in injected sequence */
 #define ADC_JSQR_JSQ4_MASK           (0x1f << ADC_JSQR_JSQ4_SHIFT)
@@ -597,6 +615,7 @@
 #define ADC_AWD2CR_CH_SHIFT          (0)       /* Bits 0-19: Analog watchdog 2 channel selection */
 #define ADC_AWD2CR_CH_MASK           (0xfffff << ADC_AWD2CR_CH_SHIFT)
 #  define ADC_AWD2CR_CH(n)           (1 << (n)) /* Channel n=0..19 */
+
                                                /* Bits 20-31: Reserved */
 
 /* ADC analog watchdog 3 configuration register */
@@ -604,32 +623,36 @@
 #define ADC_AWD3CR_CH_SHIFT         (0)        /* Bits 0-19: Analog watchdog 2 channel selection */
 #define ADC_AWD3CR_CH_MASK          (0xfffff << ADC_AWD3CR_CH_SHIFT)
 #  define ADC_AWD3CR_CH(n)          (1 << (n)) /* Channel n=0..19 */
+
                                                /* Bits 20-31: Reserved */
 
 /* ADC watchdog threshold register 2 Lower */
 
 #define ADC_LTR2_LT_SHIFT            (0)       /* Bits 0-25: Analog watchdog 2 lower threshold */
 #define ADC_LTR2_LT_MASK             (0x03ffffff << ADC_LTR2_LT_SHIFT)
+
                                                /* Bits 26-31: Reserved */
 
 /* ADC watchdog threshold register 2  Higher */
 
 #define ADC_HTR2_HT_SHIFT            (0)      /* Bits 0-25: Analog watchdog 2 higher threshold */
 #define ADC_HTR2_HT_MASK             (0x03ffffff << ADC_HTR2_LT_SHIFT)
+
                                                /* Bits 26-31: Reserved */
 
 /* ADC watchdog threshold register 3 Lower */
 
 #define ADC_LTR3_LT_SHIFT            (0)      /* Bits 0-25: Analog watchdog 3 lower threshold */
 #define ADC_LTR3_LT_MASK             (0x03ffffff << ADC_LTR3_LT_SHIFT)
+
                                                /* Bits 26-31: Reserved */
 
 /* ADC watchdog threshold register 2  Higher */
 
 #define ADC_HTR3_HT_SHIFT            (0)      /* Bits 0-25: Analog watchdog 3 higher threshold */
 #define ADC_HTR3_HT_MASK             (0x03ffffff << ADC_HTR3_LT_SHIFT)
-                                               /* Bits 26-31: Reserved */
 
+                                               /* Bits 26-31: Reserved */
 
 /* ADC differential mode selection register */
 
@@ -691,10 +714,12 @@
 #  define ADC_CCR_DUAL_SIM           (6 << ADC_CCR_DUAL_SHIFT) /* Regular simultaneous mode only */
 #  define ADC_CCR_DUAL_INTERLEAVE    (7 << ADC_CCR_DUAL_SHIFT) /* Interleaved mode only */
 #  define ADC_CCR_DUAL_ALT           (9 << ADC_CCR_DUAL_SHIFT) /* Alternate trigger mode only */
+
                                                /* Bits 5-7: Reserved */
 #define ADC_CCR_DELAY_SHIFT          (8)       /* Bits 8-11: Delay between 2 sampling phases */
 #define ADC_CCR_DELAY_MASK           (15 << ADC_CCR_DELAY_SHIFT)
 #  define ADC_CCR_DELAY(n)           (((n)-1) << ADC_CCR_DELAY_SHIFT) /* n * TADCCLK, 1-13 */
+
                                                /* Bits 12-13: Reserved */
 #define ADC_CCR_DAMDF_SHIFT          (14)      /* Bits 14-15: Dual ADC Mode Data Format */
 #define ADC_CCR_DAMDF_MASK           (3 << ADC_CCR_DAMDF_MASK)
@@ -702,12 +727,14 @@
 #  define ADC_CCR_DAMDF_RESERVD      (1 << ADC_CCR_DAMDF_MASK) /* Reserved. */
 #  define ADC_CCR_DAMDF_32_10        (2 << ADC_CCR_DAMDF_MASK) /* Data formatting mode for 32 down to 10-bit resolution */
 #  define ADC_CCR_DAMDF_8            (3 << ADC_CCR_DAMDF_MASK) /* Data formatting mode for 8-bit resolution */
+
 #define ADC_CCR_CKMODE_SHIFT         (16)      /* Bits 16-17: ADC clock mode */
 #define ADC_CCR_CKMODE_MASK          (3 << ADC_CCR_CKMODE_SHIFT)
 #  define ADC_CCR_CKMODE_ASYCH       (0 << ADC_CCR_CKMODE_SHIFT) /* Asynchronous clock mode */
 #  define ADC_CCR_CKMODE_SYNCH_DIV1  (1 << ADC_CCR_CKMODE_SHIFT) /* Synchronous clock mode divided by 1 */
 #  define ADC_CCR_CKMODE_SYNCH_DIV2  (2 << ADC_CCR_CKMODE_SHIFT) /* Synchronous clock mode divided by 2 */
 #  define ADC_CCR_CKMODE_SYNCH_DIV4  (3 << ADC_CCR_CKMODE_SHIFT) /* Synchronous clock mode divided by 4 */
+
 #define ADC_CCR_PRESC_SHIFT          (18)      /* Bits 18-21: ADC prescaler */
 #define ADC_CCR_PRESC_MASK           (15 << ADC_CCR_PRESC_SHIFT)
 #  define ADC_CCR_PRESC_NOT_DIV      (0 << ADC_CCR_PRESC_SHIFT)  /* Input ADC clock not divided */
@@ -722,6 +749,7 @@
 #  define ADC_CCR_PRESC_DIV64        (9 << ADC_CCR_PRESC_SHIFT)  /* Input ADC clock divided by 64 */
 #  define ADC_CCR_PRESC_DIV128       (10 << ADC_CCR_PRESC_SHIFT) /* Input ADC clock divided by 128 */
 #  define ADC_CCR_PRESC_DIV256       (11 << ADC_CCR_PRESC_SHIFT) /* Input ADC clock divided by 256 */
+
 #define ADC_CCR_VREFEN               (1 << 22) /* Bit 22: VREFINT enable */
 #define ADC_CCR_VSENSEEN             (1 << 23) /* Bit 23: Temperature sensor voltage enable */
 #define ADC_CCR_VBATEN               (1 << 24) /* Bit 24: VBAT enable */

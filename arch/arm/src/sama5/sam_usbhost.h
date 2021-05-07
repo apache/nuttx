@@ -1,76 +1,62 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sam_usbhost.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAM_USBHOST_H
 #define __ARCH_ARM_SRC_SAMA5_SAM_USBHOST_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usbhost_trace.h>
 
 #ifdef CONFIG_USBHOST
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* This is the interface argument for call outs to board-specific functions which
- * need to know which USB host interface is being used.
+ ****************************************************************************/
+
+/* This is the interface argument for call outs to board-specific functions
+ * which need to know which USB host interface is being used.
  */
 
 #define SAM_EHCI_IFACE 0
 #define SAM_OHCI_IFACE 1
 
-/* This is the interface argument for call outs to board-specific functions which
- * need to know which root hub port is being used.
+/* This is the interface argument for call outs to board-specific functions
+ * which need to know which root hub port is being used.
  */
 
 #define SAM_RHPORT1    0
 #define SAM_RHPORT2    1
 #define SAM_RHPORT3    2
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 enum usbhost_trace1codes_e
 {
-  __TRACE1_BASEVALUE = 0,           /* This will force the first value to be 1 */
+  __TRACE1_BASEVALUE = 0,       /* This will force the first value to be 1 */
 
 #ifdef CONFIG_SAMA5_OHCI
   OHCI_TRACE1_DEVDISCONN,           /* OHCI ERROR: RHport Device disconnected */
@@ -207,13 +193,13 @@ enum usbhost_trace1codes_e
 
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -226,20 +212,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_ohci_initialize
  *
  * Description:
  *   Initialize USB OHCI host controller hardware.
  *
  * Input Parameters:
- *   controller -- If the device supports more than one USB OHCI interface, then
- *     this identifies which controller is being initializeed.  Normally, this
- *     is just zero.
+ *   controller -- If the device supports more than one USB OHCI interface,
+ *     then this identifies which controller is being initializeed.
+ *      Normally, this is just zero.
  *
  * Returned Value:
  *   And instance of the USB host interface.  The controlling task should
@@ -253,28 +239,28 @@ extern "C"
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
 struct usbhost_connection_s;
 FAR struct usbhost_connection_s *sam_ohci_initialize(int controller);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_ohci_tophalf
  *
  * Description:
- *   OHCI "Top Half" interrupt handler.  If both EHCI and OHCI are enabled, then
- *   EHCI will manage the common UHPHS interrupt and will forward the interrupt
- *   event to this function.
+ *   OHCI "Top Half" interrupt handler.  If both EHCI and OHCI are enabled,
+ *   then EHCI will manage the common UHPHS interrupt and will forward the
+ *   interrupt event to this function.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
 int sam_ohci_tophalf(int irq, FAR void *context, FAR void *arg);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_ehci_initialize
  *
  * Description:
@@ -282,8 +268,8 @@ int sam_ohci_tophalf(int irq, FAR void *context, FAR void *arg);
  *
  * Input Parameters:
  *   controller -- If the device supports more than one EHCI interface, then
- *     this identifies which controller is being initializeed.  Normally, this
- *     is just zero.
+ *     this identifies which controller is being initializeed.  Normally,
+ *     this is just zero.
  *
  * Returned Value:
  *   And instance of the USB host interface.  The controlling task should
@@ -297,29 +283,30 @@ int sam_ohci_tophalf(int irq, FAR void *context, FAR void *arg);
  * - Class drivers should be initialized prior to calling this function.
  *   Otherwise, there is a race condition if the device is already connected.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_EHCI
 struct usbhost_connection_s;
 FAR struct usbhost_connection_s *sam_ehci_initialize(int controller);
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: sam_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided by
- *   each platform that implements the OHCI or EHCI host interface
+ *   Enable/disable driving of VBUS 5V output.  This function must be
+ *   provided by each platform that implements the OHCI or EHCI host
+ *   interface
  *
  * Input Parameters:
- *   rhport - Selects root hub port to be powered host interface.  See SAM_RHPORT_*
- *            definitions above.
+ *   rhport - Selects root hub port to be powered host interface.
+ *            See SAM_RHPORT_*definitions above.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 void sam_usbhost_vbusdrive(int rhport, bool enable);
 

@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/syslog/syslog_putc.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -70,7 +55,7 @@
 
 int syslog_putc(int ch)
 {
-  DEBUGASSERT(g_syslog_channel != NULL);
+  int i;
 
   /* Is this an attempt to do SYSLOG output from an interrupt handler? */
 
@@ -79,8 +64,9 @@ int syslog_putc(int ch)
 #if defined(CONFIG_SYSLOG_INTBUFFER)
       if (up_interrupt_context())
         {
-          /* Buffer the character in the interrupt buffer.  The interrupt buffer
-           * will be flushed before the next normal, non-interrupt SYSLOG output.
+          /* Buffer the character in the interrupt buffer.
+           * The interrupt buffer will be flushed before the next
+           * normal,non-interrupt SYSLOG output.
            */
 
           return syslog_add_intbuffer(ch);
@@ -88,28 +74,49 @@ int syslog_putc(int ch)
       else
 #endif
         {
-          /* Force the character to the SYSLOG device immediately (if possible).
-           * This means that the interrupt data may not be in synchronization
-           * with output data that may have been buffered by sc_putc().
+          /* Force the character to the SYSLOG device immediately
+           * (if possible).
+           * This means that the interrupt data may not be in
+           * synchronization with output data that may have been
+           * buffered by sc_putc().
            */
 
-          DEBUGASSERT(g_syslog_channel->sc_force != NULL);
+          for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+            {
+              if (g_syslog_channel[i] == NULL)
+                {
+                  break;
+                }
 
-          return g_syslog_channel->sc_force(ch);
+              DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
+
+              g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i],
+                                                    ch);
+            }
         }
     }
   else
     {
-      DEBUGASSERT(g_syslog_channel->sc_putc != NULL);
-
 #ifdef CONFIG_SYSLOG_INTBUFFER
       /* Flush any characters that may have been added to the interrupt
        * buffer.
        */
 
-      syslog_flush_intbuffer(g_syslog_channel, false);
+      syslog_flush_intbuffer(false);
 #endif
 
-      return g_syslog_channel->sc_putc(ch);
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+        {
+          if (g_syslog_channel[i] == NULL)
+            {
+              break;
+            }
+
+          DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_putc != NULL);
+
+          g_syslog_channel[i]->sc_ops->sc_putc(g_syslog_channel[i], ch);
+        }
     }
+
+  return ch;
 }

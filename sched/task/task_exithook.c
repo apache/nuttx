@@ -1,36 +1,20 @@
 /****************************************************************************
  * sched/task/task_exithook.c
  *
- *   Copyright (C) 2011-2013, 2015. 2018-2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -191,7 +175,6 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
                                      int status)
 {
   FAR struct child_status_s *child;
-  FAR struct tcb_s *rtcb = this_task();
 
   /* Check if the parent task group has suppressed retention of
    * child exit status information.
@@ -201,7 +184,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, rtcb->group->tg_task);
+      child = group_find_child(group, getpid());
       if (child)
         {
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
@@ -231,7 +214,6 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
 static inline void nxtask_groupexit(FAR struct task_group_s *group)
 {
   FAR struct child_status_s *child;
-  FAR struct tcb_s *rtcb = this_task();
 
   /* Check if the parent task group has suppressed retention of child exit
    * status information.
@@ -241,7 +223,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
     {
       /* No.. Find the exit status entry for this task in the parent TCB */
 
-      child = group_find_child(group, rtcb->group->tg_task);
+      child = group_find_child(group, getpid());
       if (child)
         {
           /* Mark that all members of the child task group has exited */
@@ -267,7 +249,7 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
 #ifdef HAVE_GROUP_MEMBERS
-static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
+static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
                                    int status)
 {
   FAR struct task_group_s *chgrp = ctcb->group;
@@ -281,14 +263,14 @@ static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
    * this case, the child task group has been orphaned.
    */
 
-  pgrp = group_findby_grpid(pgrpid);
+  pgrp = group_findbypid(ppid);
   if (!pgrp)
     {
       /* Set the task group ID to an invalid group ID.  The dead parent
        * task group ID could get reused some time in the future.
        */
 
-      chgrp->tg_pgrpid = INVALID_GROUP_ID;
+      chgrp->tg_ppid = INVALID_PROCESS_ID;
       return;
     }
 
@@ -323,11 +305,7 @@ static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
       info.si_code            = CLD_EXITED;
       info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
-#ifndef CONFIG_DISABLE_PTHREAD
-      info.si_pid             = chgrp->tg_task;
-#else
-      info.si_pid             = ctcb->pid;
-#endif
+      info.si_pid             = chgrp->tg_pid;
       info.si_status          = status;
 
       /* Send the signal to one thread in the group */
@@ -376,11 +354,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
       info.si_code            = CLD_EXITED;
       info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
-#ifndef CONFIG_DISABLE_PTHREAD
-      info.si_pid             = ctcb->group->tg_task;
-#else
-      info.si_pid             = ctcb->pid;
-#endif
+      info.si_pid             = ctcb->group->tg_pid;
       info.si_status          = status;
 
       /* Send the signal.  We need to use this internal interface so that we
@@ -418,7 +392,7 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
 
   /* Send SIGCHLD to all members of the parent's task group */
 
-  nxtask_sigchild(ctcb->group->tg_pgrpid, ctcb, status);
+  nxtask_sigchild(ctcb->group->tg_ppid, ctcb, status);
   sched_unlock();
 #else
   FAR struct tcb_s *ptcb;
@@ -604,7 +578,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   tcb->cpcount = 0;
 #endif
 
-#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   /* If exit function(s) were registered, call them now before we do any un-
    * initialization.
    *
@@ -622,13 +595,27 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 
   if (!nonblocking)
     {
+#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
       nxtask_atexit(tcb);
 
       /* Call any registered on_exit function(s) */
 
       nxtask_onexit(tcb, status);
-    }
 #endif
+
+      /* If this is the last thread in the group, then flush all streams
+       * (File descriptors will be closed when the TCB is deallocated).
+       *
+       * NOTES:
+       * 1. We cannot flush the buffered I/O if nonblocking is requested.
+       *    that might cause this logic to block.
+       * 2. This function will only be called with non-blocking == true
+       *    only when called through _exit(). _exit() behavior does not
+       *    require that the streams be flushed
+       */
+
+      nxtask_flushstreams(tcb);
+    }
 
   /* If the task was terminated by another task, it may be in an unknown
    * state.  Make some feeble effort to recover the state.
@@ -649,22 +636,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
   /* Wakeup any tasks waiting for this task to exit */
 
   nxtask_exitwakeup(tcb, status);
-
-  /* If this is the last thread in the group, then flush all streams (File
-   * descriptors will be closed when the TCB is deallocated).
-   *
-   * NOTES:
-   * 1. We cannot flush the buffered I/O if nonblocking is requested.
-   *    that might cause this logic to block.
-   * 2. This function will only be called with non-blocking == true
-   *    only when called through _exit(). _exit() behavior does not
-   *    require that the streams be flushed
-   */
-
-  if (!nonblocking)
-    {
-      nxtask_flushstreams(tcb);
-    }
 
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)

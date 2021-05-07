@@ -113,7 +113,7 @@ FAR struct qspi_dev_s *stm32l4_qspi_initialize(int intf);
  *
  ****************************************************************************/
 
-void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s* dev,
+void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s *dev,
                                      const struct qspi_meminfo_s *meminfo,
                                      uint32_t lpto);
 
@@ -131,7 +131,7 @@ void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s* dev,
  *
  ****************************************************************************/
 
-void stm32l4_qspi_exit_memorymapped(struct qspi_dev_s* dev);
+void stm32l4_qspi_exit_memorymapped(struct qspi_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

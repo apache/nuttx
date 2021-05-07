@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/misoc/src/lm32/up_releasestack.c
+ * arch/misoc/src/lm32/lm32_releasestack.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

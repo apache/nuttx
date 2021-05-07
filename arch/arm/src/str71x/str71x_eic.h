@@ -1,54 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/str71x/str71x_eic.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STR71X_STR71X_EIC_H
 #define __ARCH_ARM_SRC_STR71X_STR71X_EIC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <arch/irq.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Enhanced Interrupt Controller (EIC) register offsets *****************************/
+/* Enhanced Interrupt Controller (EIC) register offsets *********************/
 
 #define STR71X_EIC_ICR_OFFSET      (0x0000)  /* 32-bits wide */
 #define STR71X_EIC_CICR_OFFSET     (0x0004)  /* 32-bits wide */
@@ -95,7 +80,7 @@
 #define STR71X_EIC_NCHANNELS       (32)
 #define STR71X_EIC_SIR_BASE        (STR71X_EIC_BASE + STR71X_EIC_SIR_OFFSET)
 
-/* Enhanced Interrupt Controller (EIC) registers ************************************/
+/* Enhanced Interrupt Controller (EIC) registers ****************************/
 
 #define STR71X_EIC_ICR             (STR71X_EIC_BASE + STR71X_EIC_ICR_OFFSET)
 #define STR71X_EIC_CICR            (STR71X_EIC_BASE + STR71X_EIC_CICR_OFFSET)
@@ -140,7 +125,7 @@
 #define STR71X_EIC_SIR30           (STR71X_EIC_BASE + STR71X_EIC_SIR30_OFFSET)
 #define STR71X_EIC_SIR31           (STR71X_EIC_BASE + STR71X_EIC_SIR31_OFFSET)
 
-/* Register bit settings ************************************************************/
+/* Register bit settings ****************************************************/
 
 /* Interrupt control register (ICR) bit definitions */
 
@@ -161,16 +146,16 @@
 #define STR71X_EICSIR_SIPLMASK     (0x0000000f) /* Bits 0-3: Source interrupt priority level */
 #define STR71X_EICSIR_SIVMASK      (0xffff0000) /* Bits 16-31: Source interrupt vector */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STR71X_STR71X_EIC_H */

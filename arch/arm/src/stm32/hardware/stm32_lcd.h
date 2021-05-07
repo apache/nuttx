@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_lcd.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_LCD_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_LCD_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
@@ -47,11 +32,11 @@
 
 #if STM32_NLCD > 0
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_LCD_CR_OFFSET      0x0000 /* LCD control register */
 #define STM32_LCD_FCR_OFFSET     0x0004 /* LCD frame control register */
@@ -79,7 +64,7 @@
 #define STM32_LCD_RAM7L_OFFSET    0x004c /* LCD display memory, COM7, S00-S31 */
 #define STM32_LCD_RAM7H_OFFSET    0x0050 /* LCD display memory, COM7, S32-S39 */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_LCD_CR              (STM32_LCD_BASE+STM32_LCD_CR_OFFSET)
 #define STM32_LCD_FCR             (STM32_LCD_BASE+STM32_LCD_FCR_OFFSET)
@@ -107,7 +92,7 @@
 #define STM32_LCD_RAM7L           (STM32_LCD_BASE+STM32_LCD_RAM7L_OFFSET)
 #define STM32_LCD_RAM7H           (STM32_LCD_BASE+STM32_LCD_RAM7H_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* LCD control register */
 
@@ -120,11 +105,13 @@
 # define LCD_CR_DUTY_1TO3         (2 << LCD_CR_DUTY_SHIFT) /* 010: 1/3 duty */
 # define LCD_CR_DUTY_1TO4         (3 << LCD_CR_DUTY_SHIFT) /* 011: 1/4 duty */
 # define LCD_CR_DUTY_1TO8         (4 << LCD_CR_DUTY_SHIFT) /* 100: 1/8 duty */
+
 #define LCD_CR_BIAS_SHIFT         (5)       /* Bits 5-6: Bias selector */
 #define LCD_CR_BIAS_MASK          (3 << LCD_CR_BIAS_SHIFT)
 #  define LCD_CR_BIAS_1TO4        (0 << LCD_CR_BIAS_SHIFT) /* 00: Bias 1/4 */
 #  define LCD_CR_BIAS_1TO2        (1 << LCD_CR_BIAS_SHIFT) /* 01: Bias 1/2 */
 #  define LCD_CR_BIAS_1TO3        (2 << LCD_CR_BIAS_SHIFT) /* 10: Bias 1/3 */
+
 #define LCD_CR_MUX_SEG            (1 << 7)  /* Bit 7:  Mux segment enable */
                                             /* Bits 8-31 Reserved */
 
@@ -137,13 +124,16 @@
 #define LCD_FCR_PON_SHIFT         (4)       /* Bits 4-6: Pulse ON duration */
 #define LCD_FCR_PON_MASK          (7 << LCD_FCR_PON_SHIFT)
 #  define LCD_FCR_PON(n)          ((n) << LCD_FCR_PON_SHIFT) /* n=0-7 */
+
 #define LCD_FCR_DEAD_SHIFT        (7)       /* Bits 7-9: Dead time duration */
 #define LCD_FCR_DEAD_MASK         (7 << LCD_FCR_DEAD_SHIFT)
 #  define LCD_FCR_DEAD_NONE       (0 << LCD_FCR_DEAD_SHIFT)
 #  define LCD_FCR_DEAD(n)         ((n) << LCD_FCR_DEAD_SHIFT) /* n=1..7 */
+
 #define LCD_FCR_CC_SHIFT          (10)      /* Bits 10-12: Contrast control */
 #define LCD_FCR_CC_MASK           (7 << LCD_FCR_CC_SHIFT)
 #  define LCD_FCR_CC_VLCD(n)      ((n) << LCD_FCR_CC_SHIFT) /* VLCDn, n=0..7 */
+
 #define LCD_FCR_BLINKF_SHIFT      (13)      /* Bits 13-15: Blink frequency selection */
 #define LCD_FCR_BLINKF_MASK       (7 << LCD_FCR_BLINKF_SHIFT)
 #  define LCD_FCR_BLINKF_DIV8     (0 << LCD_FCR_BLINKF_SHIFT) /* 000: fLCD/8 */
@@ -154,15 +144,18 @@
 #  define LCD_FCR_BLINKF_DIV256   (5 << LCD_FCR_BLINKF_SHIFT) /* 101: fLCD/256 */
 #  define LCD_FCR_BLINKF_DIV512   (6 << LCD_FCR_BLINKF_SHIFT) /* 110: fLCD/512 */
 #  define LCD_FCR_BLINKF_DIV1024  (7 << LCD_FCR_BLINKF_SHIFT) /* 111: fLCD/1024 */
+
 #define LCD_FCR_BLINK_SHIFT       (16)      /* Bits 16-17: Blink mode selection */
 #define LCD_FCR_BLINK_MASK        (3 << LCD_FCR_BLINK_SHIFT)
 #  define LCD_FCR_BLINK_DISABLE   (0 << LCD_FCR_BLINK_SHIFT) /* 00: Blink disabled */
 #  define LCD_FCR_BLINK_S0C0      (1 << LCD_FCR_BLINK_SHIFT) /* 01: Blink enabled on SEG[0], COM[0] (1 pixel) */
 #  define LCD_FCR_BLINK_S0CALL    (2 << LCD_FCR_BLINK_SHIFT) /* 10: Blink enabled on SEG[0], all COMs */
 #  define LCD_FCR_BLINK_SALLCALL  (3 << LCD_FCR_BLINK_SHIFT) /* 11: Blink enabled on all SEGs and all COMs */
+
 #define LCD_FCR_DIV_SHIFT         (18)      /* Bits 18-21: DIV clock divider */
 #define LCD_FCR_DIV_MASK          (15 << LCD_FCR_DIV_SHIFT)
 #  define LCD_FCR_DIV(n)          (((n)-16) << LCD_FCR_DIV_SHIFT) /* n=16-31 */
+
 #define LCD_FCR_PS_SHIFT          (22)      /* Bits 22-25: PS 16-bit prescaler */
 #define LCD_FCR_PS_MASK           (15 << LCD_FCR_PS_SHIFT)
 #  define LCD_FCR_PS_DIV1         (0 << LCD_FCR_PS_SHIFT)  /* 0000: ck_ps = LCDCLK */
@@ -181,6 +174,7 @@
 #  define LCD_FCR_PS_DIV8192      (13 << LCD_FCR_PS_SHIFT) /* 0011: ck_ps = LCDCLK/8192 */
 #  define LCD_FCR_PS_DIV16384     (14 << LCD_FCR_PS_SHIFT) /* 0011: ck_ps = LCDCLK/16384 */
 #  define LCD_FCR_PS_DIV32768     (15 << LCD_FCR_PS_SHIFT) /* 0011: ck_ps = LCDCLK/32768 */
+
                                             /* Bits 26-31 Reserved */
 
 /* LCD status register */

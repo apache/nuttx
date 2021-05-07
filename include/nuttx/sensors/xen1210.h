@@ -1,55 +1,41 @@
-/********************************************************************************************
- * include/nuttx/input/xen1210.h
+/****************************************************************************
+ * include/nuttx/sensors/xen1210.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_XEN1210_H
 #define __INCLUDE_NUTTX_SENSORS_XEN1210_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
 #if defined(CONFIG_SENSORS_XEN1210)
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ****************************************************************************/
+/* Configuration ************************************************************/
+
 /* Prerequisites:
  *
  * CONFIG_SCHED_WORKQUEUE - Work queue support is required
@@ -63,7 +49,7 @@
 
 /* The XEN1210 interfaces with the target CPU via a SPI interface. */
 
-/* SPI **************************************************************************************/
+/* SPI **********************************************************************/
 
 /* The device always operates in mode 1 */
 
@@ -73,7 +59,8 @@
 
 #define XEN1210_SPI_MAXFREQUENCY    100000       /* 100KHz */
 
-/* XEN1210 Commands  ************************************************************************/
+/* XEN1210 Commands  ********************************************************/
+
 /* Operation Commands */
 
 #define XEN1210_RESET               0x10  /* System-Reset command */
@@ -100,24 +87,28 @@
 
 #define XEN1210_TESTVALUE           0x3A00 /* Default value to be used with Test command */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Form of the GPIO "interrupt handler" callback. Callbacks do not occur from an interrupt
- * handler but rather from the context of the worker thread with interrupts enabled.
+/* Form of the GPIO "interrupt handler" callback. Callbacks do not occur
+ * from an interrupt handler but rather from the context of the worker thread
+ * with interrupts enabled.
  */
 
 struct xen1210_config_s;
-typedef CODE void (*xen1210_handler_t)(FAR struct xen1210_config_s *config, FAR void *arg);
+typedef CODE void (*xen1210_handler_t)(FAR struct xen1210_config_s *config,
+                                       FAR void *arg);
 
-/* A reference to a structure of this type must be passed to the XEN1210 driver when the
- * driver is instantiated. This structure provides information about the configuration of
- * the XEN1210 and provides some board-specific hooks.
+/* A reference to a structure of this type must be passed to the XEN1210
+ * driver when the driver is instantiated.
+ * This structure provides information about the configuration of the XEN1210
+ *  and provides some board-specific hooks.
  *
- * Memory for this structure is provided by the caller.  It is not copied by the driver
- * and is presumed to persist while the driver is active. The memory must be writeable
- * because, under certain circumstances, the driver may modify the frequency.
+ * Memory for this structure is provided by the caller.
+ * It is not copied by the driver and is presumed to persist while the driver
+ * is active. The memory must be writeable because, under certain
+ * circumstances, the driver may modify the frequency.
  */
 
 struct xen1210_config_s
@@ -135,9 +126,11 @@ struct xen1210_config_s
    * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
-  int  (*attach)(FAR struct xen1210_config_s *state, xen1210_handler_t handler,
+  int  (*attach)(FAR struct xen1210_config_s *state,
+                 xen1210_handler_t handler,
                  FAR void *arg);
-  void (*enable)(FAR struct xen1210_config_s *state, bool enable);
+  void (*enable)(FAR struct xen1210_config_s *state,
+                 bool enable);
   void (*clear)(FAR struct xen1210_config_s *state);
 };
 
@@ -145,9 +138,9 @@ typedef FAR void *XEN1210_HANDLE;
 
 struct spi_dev_s;
 
-/********************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -157,27 +150,29 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/********************************************************************************************
+/****************************************************************************
  * Name: xen1210_instantiate
  *
  * Description:
- *   Instantiate and configure the XEN1210 device driver to use the provided I2C or SPI
- *   device instance.
+ *   Instantiate and configure the XEN1210 device driver to use the provided
+ *   I2C or SPI device instance.
  *
  * Input Parameters:
  *   dev     - A SPI driver instance
  *   config  - Persistent board configuration data
  *
  * Returned Value:
- *   A non-zero handle is returned on success.  This handle may then be used to configure
- *   the XEN1210 driver as necessary.  A NULL handle value is returned on failure.
+ *   A non-zero handle is returned on success.
+ *   This handle may then be used to configure the XEN1210 driver as
+ *   necessary.
+ *   A NULL handle value is returned on failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
                                    FAR struct xen1210_config_s *config);
 
-/********************************************************************************************
+/****************************************************************************
  * Name: xen1210_register
  *
  * Description:
@@ -189,10 +184,11 @@ XEN1210_HANDLE xen1210_instantiate(FAR struct spi_dev_s *dev,
  *   minor     - The input device minor number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is returned to indicate
- *   the nature of the failure.
+ *   Zero is returned on success.
+ *   Otherwise, a negated errno value is returned to indicate the nature
+ *   of the failure.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 int xen1210_register(XEN1210_HANDLE handle, int minor);
 

@@ -1,41 +1,26 @@
-/************************************************************************************
- * arch/arm/src/efm32/efm32_burtc.c
+/****************************************************************************
+ * arch/arm/src/efm32/efm32_rtc_burtc.c
  *
- *   Copyright (C) 2015 Pierre-Noel Bouteville. All rights reserved.
- *   Author: Pierre-Noel Bouteville <pnb990@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,10 +45,11 @@
 #include "efm32_bitband.h"
 #include "clock/clock.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 #  ifndef CONFIG_RTC_FREQUENCY
@@ -130,9 +116,9 @@
 #define __CNT_CARRY_REG         EFM32_BURTC_RET_REG(0)
 #define __CNT_ZERO_REG          EFM32_BURTC_RET_REG(1)
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Callback to use when the alarm expires */
 
@@ -140,9 +126,9 @@
 static alarmcb_t g_alarmcb;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Variable determines the state of the LSE oscillator.
  * Possible errors:
@@ -156,11 +142,11 @@ bool g_efm32_burtc_reseted = false;
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rtc_interrupt
  *
  * Description:
@@ -173,7 +159,7 @@ volatile bool g_rtc_enabled = false;
  * Returned Value:
  *   Zero (OK) on success; A negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int efm32_rtc_burtc_interrupt(int irq, void *context, FAR void *arg)
 {
@@ -210,12 +196,13 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context, FAR void *arg)
 
   /* Clear pending flags, leave RSF high */
 
-  putreg32(BURTC_IFC_OF | BURTC_IFC_COMP0 | BURTC_IFC_LFXOFAIL, EFM32_BURTC_IFC);
+  putreg32(BURTC_IFC_OF | BURTC_IFC_COMP0 |
+           BURTC_IFC_LFXOFAIL, EFM32_BURTC_IFC);
 
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_burtc_init
  *
  * Description:
@@ -225,7 +212,7 @@ static int efm32_rtc_burtc_interrupt(int irq, void *context, FAR void *arg)
  * Note
  *   efm32_rmu_initialize should be called one since boot.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void efm32_rtc_burtc_init(void)
 {
@@ -268,9 +255,11 @@ static void efm32_rtc_burtc_init(void)
 
   /* Restore all not set BURTC registers to default value */
 
-//  putreg32(_BURTC_LPMODE_RESETVALUE,      EFM32_BURTC_LPMODE);
-//  putreg32(_BURTC_LFXOFDET_RESETVALUE,    EFM32_BURTC_LFXOFDET);
-//  putreg32(_BURTC_COMP0_RESETVALUE,       EFM32_BURTC_COMP0);
+  /*  putreg32(_BURTC_LPMODE_RESETVALUE,      EFM32_BURTC_LPMODE); */
+
+  /*  putreg32(_BURTC_LFXOFDET_RESETVALUE,    EFM32_BURTC_LFXOFDET); */
+
+  /*  putreg32(_BURTC_COMP0_RESETVALUE,       EFM32_BURTC_COMP0); */
 
   /* New configuration */
 
@@ -284,7 +273,7 @@ static void efm32_rtc_burtc_init(void)
 
   /* Clear interrupts */
 
-  putreg32(0xFFFFFFFF, EFM32_BURTC_IFC);
+  putreg32(0xffffffff, EFM32_BURTC_IFC);
 
   /* Set new configuration */
 
@@ -348,21 +337,22 @@ static uint64_t efm32_get_burtc_tick(void)
 
   val = (uint64_t)cnt_carry*__CNT_TOP + cnt + cnt_zero;
 
-  rtcinfo("Get Tick carry %u zero %u reg %u\n", cnt_carry, cnt_carry,cnt);
+  rtcinfo("Get Tick carry %u zero %u reg %u\n",
+          cnt_carry, cnt_carry, cnt);
 
   return val;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -370,7 +360,7 @@ static uint64_t efm32_get_burtc_tick(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
@@ -386,15 +376,15 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -402,22 +392,22 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
 {
-  return (time_t)efm32_get_burtc_tick()/CONFIG_RTC_FREQUENCY;
+  return (time_t)efm32_get_burtc_tick() / CONFIG_RTC_FREQUENCY;
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
- *   Get the current time from the high resolution RTC clock/counter.  This interface
- *   is only supported by the high-resolution RTC/counter hardware implementation.
- *   It is used to replace the system timer.
+ *   Get the current time from the high resolution RTC clock/counter.
+ *   This interface is only supported by the high-resolution RTC/counter
+ *   hardware implementation. It is used to replace the system timer.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -425,7 +415,7 @@ time_t up_rtc_time(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 int up_rtc_gettime(FAR struct timespec *tp)
@@ -437,7 +427,8 @@ int up_rtc_gettime(FAR struct timespec *tp)
   /* Then we can save the time in seconds and fractional seconds. */
 
   tp->tv_sec  = val  / CONFIG_RTC_FREQUENCY;
-  tp->tv_nsec = (val % CONFIG_RTC_FREQUENCY)*(NSEC_PER_SEC/CONFIG_RTC_FREQUENCY);
+  tp->tv_nsec = (val % CONFIG_RTC_FREQUENCY) *
+                (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY);
 
   rtcinfo("Get RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);
 
@@ -445,12 +436,12 @@ int up_rtc_gettime(FAR struct timespec *tp)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be
+ *   able to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -458,7 +449,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
@@ -499,7 +490,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rtc_setalarm
  *
  * Description:
@@ -512,7 +503,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 #error "Sorry ! not yet implemented, just copied from STM32"
@@ -557,7 +548,7 @@ int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_rtc_cancelalarm
  *
  * Description:
@@ -569,7 +560,7 @@ int efm32_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 #error "Sorry ! not yet implemented, just copied from STM32"

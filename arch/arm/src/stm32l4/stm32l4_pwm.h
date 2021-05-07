@@ -513,14 +513,17 @@
 /* For each timer that is enabled for PWM usage, we need the following
  * additional configuration settings:
  *
- * CONFIG_STM32L4_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- * PWM_TIMx_CHn - One of the values defined in chip/stm32*_pinmap.h.  In the
- *   case where there are multiple pin selections, the correct setting must be
- *   provided in the arch/board/board.h file.
+ * CONFIG_STM32L4_TIMx_CHANNEL - Specifies the timer output channel
+ * {1,..,4}
+ * PWM_TIMx_CHn - One of the values defined in chip/stm32*_pinmap.h.
+ *   In the case where there are multiple pin selections, the correct
+ *   setting must be provided in the arch/board/board.h file.
  *
- * NOTE: The STM32L4 timers are each capable of generating different signals
- * on each of the four channels with different duty cycles.  That capability
- * is not supported by this driver:  Only one output channel per timer.
+ * NOTE:
+ * The STM32L4 timers are each capable of generating different signals
+ * on each of the four channels with different duty cycles.  That
+ * capability is not supported by this driver:
+ *  Only one output channel per timer.
  */
 
 #ifdef CONFIG_STM32L4_TIM1_PWM
@@ -805,7 +808,7 @@
 #  define HAVE_PWM_COMPLEMENTARY
 #endif
 
-/* Low-level ops helpers ************************************************************/
+/* Low-level ops helpers ****************************************************/
 
 #ifdef CONFIG_STM32L4_PWM_LL_OPS
 
@@ -921,11 +924,17 @@ enum stm32l4_pwm_output_e
   STM32L4_PWM_OUT3  = (1 << 4),
   STM32L4_PWM_OUT3N = (1 << 5),
   STM32L4_PWM_OUT4  = (1 << 6),
+
   /* 1 << 7 reserved - no complementary output for CH4 */
+
   /* Only available inside micro */
+
   STM32L4_PWM_OUT5  = (1 << 8),
+
   /* 1 << 9 reserved - no complementary output for CH5 */
+
   STM32L4_PWM_OUT6  = (1 << 10),
+
   /* 1 << 11 reserved - no complementary output for CH6 */
 };
 
@@ -1033,7 +1042,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************

@@ -38,6 +38,7 @@
 #include "sched/sched.h"
 #include "xtensa.h"
 #include "chip_memory.h"
+#include "chip_macros.h"
 
 #ifdef CONFIG_DEBUG_ALERT
 
@@ -91,11 +92,11 @@ static inline void up_showtasks(void)
  * Name: xtensa_stackdump
  ****************************************************************************/
 
-static void xtensa_stackdump(uint32_t sp, uint32_t stack_base)
+static void xtensa_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack ;
 
-  for (stack = sp & ~0x1f; stack < stack_base; stack += 32)
+  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -290,16 +291,16 @@ void xtensa_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustackbase = (uint32_t)rtcb->stack_base_ptr;
   ustacksize = (uint32_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 #ifdef CONFIG_SMP
-  istackbase = (uint32_t)xtensa_intstack_base();
+  istackbase = (uint32_t)xtensa_intstack_alloc();
 #else
-  istackbase = (uint32_t)&g_intstackbase;
+  istackbase = (uint32_t)&g_intstackalloc;
 #endif
   istacksize = INTSTACK_SIZE;
 
@@ -317,16 +318,16 @@ void xtensa_dumpstate(void)
    * stack?
    */
 
-  if (sp <= istackbase && sp > istackbase - istacksize)
+  if (sp >= istackbase && sp < istackbase + istacksize)
     {
       /* Yes.. dump the interrupt stack */
 
-      xtensa_stackdump(sp, istackbase);
+      xtensa_stackdump(sp, istackbase + istacksize);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      xtensa_stackdump(istackbase - istacksize, istackbase);
+      xtensa_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Extract the user stack pointer if we are in an interrupt handler.
@@ -361,14 +362,14 @@ void xtensa_dumpstate(void)
    * stack memory.
    */
 
-  if (sp > ustackbase || sp <= ustackbase - ustacksize)
+  if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      xtensa_stackdump(ustackbase - ustacksize, ustackbase);
+      xtensa_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
-      xtensa_stackdump(sp, ustackbase);
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      xtensa_stackdump(ustackbase, ustackbase + ustacksize);
     }
 
   /* Dump the state of all tasks (if available) */

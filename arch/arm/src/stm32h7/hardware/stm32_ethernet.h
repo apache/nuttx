@@ -1,43 +1,29 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_ethernet.h
  *
- *   Authors: Jukka Laitinen <jukka.laitinen@iki.fi>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_ETHERNET_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_ETHERNET_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,11 +33,11 @@
 
 #if defined(CONFIG_STM32H7_STM32H7X3XX)
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* MAC Registers */
 
@@ -109,7 +95,7 @@
 #define STM32_ETH_DMACSR_OFFSET      0x1160 /* Ethernet DMA Channel status register */
 #define STM32_ETH_DMACMFCR_OFFSET    0x116C /* Ethernet DMA Channel missed frame count register */
 
-/* Register Base Addresses **************************************************************************/
+/* Register Base Addresses **************************************************/
 
 /* MAC Registers */
 
@@ -164,7 +150,7 @@
 #define STM32_ETH_DMACSR             (STM32_EMAC_BASE+STM32_ETH_DMACSR_OFFSET)
 #define STM32_ETH_DMACMFCR           (STM32_EMAC_BASE+STM32_ETH_DMACMFCR_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* MAC Registers */
 
@@ -177,6 +163,7 @@
 #  define ETH_MACCR_PRELEN_7         (0 << ETH_MACCR_PRELEN_SHIFT) /* 00: 7 bytes of preamble */
 #  define ETH_MACCR_PRELEN_5         (1 << ETH_MACCR_PRELEN_SHIFT) /* 01: 5 bytes of preamble */
 #  define ETH_MACCR_PRELEN_3         (2 << ETH_MACCR_PRELEN_SHIFT) /* 10: 3 bytes of preamble */
+
 #define ETH_MACCR_DC                 (1 << 4)  /* Bit 4:  Deferral check */
 #define ETH_MACCR_BL_SHIFT           (5)       /* Bits 5-6: Back-off limit */
 #define ETH_MACCR_BL_MASK            (3 << ETH_MACCR_BL_SHIFT)
@@ -184,6 +171,7 @@
 #  define ETH_MACCR_BL_8             (1 << ETH_MACCR_BL_SHIFT) /* 01: k = min (n, 8) */
 #  define ETH_MACCR_BL_4             (2 << ETH_MACCR_BL_SHIFT) /* 10: k = min (n, 4) */
 #  define ETH_MACCR_BL_1             (3 << ETH_MACCR_BL_SHIFT) /* 11: k = min (n, 1) */
+
 #define ETH_MACCR_DR                 (1 << 8)  /* Bit 8:  Retry disable */
 #define ETH_MACCR_DCRS               (1 << 9)  /* Bit 9: Carrier sense disable */
 #define ETH_MACCR_DO                 (1 << 10) /* Bit 10: Disable receive own */
@@ -200,6 +188,7 @@
 #define ETH_MACCR_IPG_SHIFT          (24)      /* Bits 24-26: Inter-packet gap */
 #define ETH_MACCR_IPG_MASK           (7 << ETH_MACCR_IPG_SHIFT)
 #  define ETH_MACCR_IPG(n)           ((12-((n) >> 3)) << ETH_MACCR_IPG_SHIFT) /* n bit times, n=40,48,..96 */
+
 #define ETH_MACCR_IPC                (1 << 27) /* Bit 27: IPv4 checksum offload */
 #define ETH_MACCR_SARC_SHIFT         (28)      /* Bits 28-30: Source Address Insertion or Replacement Control */
 #define ETH_MACCR_SARC_MASK          (7 << ETH_MACCR_SARC_SHIFT)
@@ -219,6 +208,7 @@
 #  define ETH_MACPFR_PCF_PAUSE       (1 << ETH_MACPFR_PCF_SHIFT) /* Prevents all except Pause control frames */
 #  define ETH_MACPFR_PCF_ALL         (2 << ETH_MACPFR_PCF_SHIFT) /* Forwards all control frames */
 #  define ETH_MACPFR_PCF_FILTER      (3 << ETH_MACPFR_PCF_SHIFT) /* Forwards all that pass address filter */
+
 #define ETH_MACPFR_SAIF              (1 << 8)  /* Bit 8: Source address inverse filtering */
 #define ETH_MACPFR_SAF               (1 << 9)  /* Bit 9: Source address filter */
 #define ETH_MACPFR_HPF               (1 << 10) /* Bit 10: Hash or perfect filter */
@@ -246,6 +236,7 @@
 #  define ETH_MACQTXFCR_PLT_M144        (3 << ETH_MACQTXFCR_PLT_SHIFT) /* 011 PT - 144 slot times */
 #  define ETH_MACQTXFCR_PLT_M256        (4 << ETH_MACQTXFCR_PLT_SHIFT) /* 100 PT - 256 slot times */
 #  define ETH_MACQTXFCR_PLT_M512        (5 << ETH_MACQTXFCR_PLT_SHIFT) /* 101 PT - 512 slot times */
+
 #define ETH_MACQTXFCR_DZPQ              (1 << 7)  /* Bit 7: Zero-quanta pause disable */
 #define ETH_MACQTXFCR_PT_SHIFT          (16)      /* Bits 16-31: Pause Time */
 #define ETH_MACQTXFCR_PT_MASK           (0xFFFF << ETH_MACQTXFCR_PT_SHIFT)
@@ -284,9 +275,11 @@
 #define ETH_MACMDIOAR_MB              (1 << 0)  /* Bit 0: MII busy */
 #define ETH_MACMDIOAR_C45E            (1 << 1)  /* Bit 1: Clause 45 PHY Enable */
 #define ETH_MACMDIOAR_GOC_SHIFT       (2)       /* Bits 2-3: MII Operation Command */
+
 #  define ETH_MACMDIOAR_GOC_WRITE     (1 << ETH_MACMDIOAR_GOC_SHIFT) /* Write */
 #  define ETH_MACMDIOAR_GOC_PRIA      (2 << ETH_MACMDIOAR_GOC_SHIFT) /* Post Read Increment Address for Clause 45 PHY */
 #  define ETH_MACMDIOAR_GOC_READ      (3 << ETH_MACMDIOAR_GOC_SHIFT) /* Read */
+
 #define ETH_MACMDIOAR_SKAP            (1 << 4)  /* Bit 4: Skip Address Packet */
 #define ETH_MACMDIOAR_CR_SHIFT        (8)       /* Bits 8-11: Clock range */
 #define ETH_MACMDIOAR_CR_MASK         (15 << ETH_MACMDIOAR_CR_SHIFT)
@@ -296,6 +289,7 @@
 #  define ETH_MACMDIOAR_CR_DIV26      (3 << ETH_MACMDIOAR_CR_SHIFT) /* 35-60   MHz HCLK/26 */
 #  define ETH_MACMDIOAR_CR_DIV102     (4 << ETH_MACMDIOAR_CR_SHIFT) /* 150-250 MHz HCLK/102 */
 #  define ETH_MACMDIOAR_CR_DIV124     (5 << ETH_MACMDIOAR_CR_SHIFT) /* 250-300 MHz HCLK/124 */
+
 #define ETH_MACMDIOAR_NTC_SHIFT       (12)       /* Bits 12-14: Number of Training Clocks */
 #define ETH_MACMDIOAR_NTC_MASK        (7 << ETH_MACMDIOAR_NTC_SHIFT)
 #  define ETH_MACMDIOAR_NTC(n)        ((uint32_t)(n) << ETH_MACMDIOAR_NTC_SHIFT)
@@ -396,7 +390,7 @@
 
 /* Ethernet MAC MDIO data register */
 
-/* Ethernet DMA registers ***************************************************************************/
+/* Ethernet DMA registers ***************************************************/
 
 #define ETH_DMAMR_SWR          (1 << 0)  /* Bit 0: Software Reset */
 #define ETH_DMAMR_DA           (1 << 1)  /* Bit 1: DMA Tx or Rx Arbitration Scheme */
@@ -480,10 +474,12 @@
 #define ETH_DMACRXCR_RXPBL(n)        ((n) << ETH_DMACRXCR_RXPBL_SHIFT)
 #define ETH_DMACRXCR_RPF            (1 << 31) /* Bit 31: DMA Rx Channel Packet Flush */
 
-/* DMA Descriptors **********************************************************************************/
+/* DMA Descriptors **********************************************************/
 
-/* TDES0: TDES0 normal descriptor, read-format (header or buf 1 address[31:0])
- * TDES1: TDES1 normal descriptor, read-format (buf2 address[31:0] or buf1 address[63:32]
+/* TDES0: TDES0 normal descriptor, read-format
+ *         (header or buf 1 address[31:0])
+ * TDES1: TDES1 normal descriptor, read-format
+ *         (buf2 address[31:0] or buf1 address[63:32]
  * TDES2: TDES2 normal descriptor, read-format
  */
 
@@ -501,9 +497,11 @@
 #define ETH_TDES3_RD_FL_TPL_SHIFT    (0) /* Packet Length or TCP Payload Length */
 #define ETH_TDES3_RD_FL_TPL_MASK     (0x7fff << ETH_TDES3_RD_FL_TPL_SHIFT)
 #define ETH_TDES3_RD_TPL             (1 << 15) /* Bit 15: Reserved or TCP Payload Length */
+
 #define ETH_TDES3_RD_CIC_TPL_SHIFT   (16) /* Checksum Insertion Control or TCP Payload Length */
 #define ETH_TDES3_RD_CIC_TPL_MASK    (0x3 << ETH_TDES3_RD_CIC_TPL_SHIFT)
 #define ETH_TDES3_RD_TSE             (1 << 18) /* Bit 18: TCP Segmentation Enable */
+
 #define ETH_TDES3_RD_THL_SHIFT       (19) /* TCP Header Length */
 #define ETH_TDES3_RD_THL_MASK        (0xf << ETH_TDES3_RD_THL_SHIFT)
 #define ETH_TDES3_RD_SAIC_SHIFT      (23) /* SA Insertion Control */
@@ -557,6 +555,7 @@
 #define ETH_CTX_TDES3_VT_MASK       (0xffff << ETH_CTX_TDES3_VT_SHIFT)
 #define ETH_CTX_TDES3_VLTV          (1 << 16) /* Bit 16: VLAN Tag Valid */
 #define ETH_CTX_TDES3_IVLTV         (1 << 17) /* Bit 17: Inner VLAN Tag Valid */
+
 #define ETH_CTX_TDES3_IVTIR_SHIFT   (18) /* Inner VLAN Tag Insert or Replace */
 #define ETH_CTX_TDES3_IVTIR_MASK    (0x3 << ETH_CTX_TDES3_IVTIR_SHIFT)
 #define ETH_CTX_TDES3_CDE           (1 << 23) /* Bit 23: Context Descriptor Error */
@@ -566,8 +565,11 @@
 #define ETH_CTX_TDES3_OWN           (1 << 31) /* Bit 31: Own bit */
 
 /* RDES0: Receive descriptor Word0, read-format (Buffer 1 address[31:0])
- * RDES1: Receive descriptor Word1, read-format (Reserved or Header/Buffer 1 Address[63:32] address)
- * RDES2: Receive descriptor Word2, read-format (Payload or Buffer 2 Address[31:0])
+
+ * RDES1: Receive descriptor Word1, read-format
+ *    (Reserved or Header/Buffer 1 Address[63:32] address)
+ * RDES2: Receive descriptor Word2, read-format
+ *    (Payload or Buffer 2 Address[31:0])
  * RDES3: Receive descriptor Word3, read-format
  */
 
@@ -649,9 +651,9 @@
 #define ETH_CTX_RDES3_CTXT          (1 << 30) /* Bit 30: Context Type  */
 #define ETH_CTX_RDES3_OWN           (1 << 31) /* Bit 31: Own bit */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -667,9 +669,9 @@ struct eth_desc_s
   volatile uint32_t des3;
 };
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_STM32H7_STM32H7X3XX */

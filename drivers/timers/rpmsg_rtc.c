@@ -185,6 +185,7 @@ static int rpmsg_rtc_server_setperiodic(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_server_cancelperiodic
               (FAR struct rtc_lowerhalf_s *lower, int alarmid);
 #endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -684,7 +685,8 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
  *   minor  - device minor number
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
+ *   Return the lower half RTC driver instance on success;
+ *   A NULL pointer on failure.
  *
  ****************************************************************************/
 
@@ -718,7 +720,8 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(FAR const char *cpuname,
  *   rpmsg.
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
+ *   Return the lower half RTC driver instance on success;
+ *   A NULL pointer on failure.
  *
  ****************************************************************************/
 

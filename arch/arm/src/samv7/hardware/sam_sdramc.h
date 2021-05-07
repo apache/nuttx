@@ -1,56 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_sdramc.h
- * SDRAM Controller (SDRAMC) definitions for the SAMV71
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SDRAMC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SDRAMC_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <arch/samv7/chip.h>
 
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* SDRAMC register offsets **************************************************************/
+/* SDRAMC register offsets **************************************************/
 
 #define SAM_SDRAMC_MR_OFFSET         0x0000 /* SDRAMC Mode Register */
 #define SAM_SDRAMC_TR_OFFSET         0x0004 /* SDRAMC Refresh Timer Register */
@@ -66,7 +50,7 @@
 #define SAM_SDRAMC_OCMS_KEY1_OFFSET  0x0030 /* SDRAMC OCMS KEY1 Register */
 #define SAM_SDRAMC_OCMS_KEY2_OFFSET  0x0034 /* SDRAMC OCMS KEY2 Register */
 
-/* SDRAMC register addresses ************************************************************/
+/* SDRAMC register addresses ************************************************/
 
 #define SAM_SDRAMC_MR                (SAM_SDRAMC_BASE+SAM_SDRAMC_MR_OFFSET)
 #define SAM_SDRAMC_TR                (SAM_SDRAMC_BASE+SAM_SDRAMC_TR_OFFSET)
@@ -82,7 +66,7 @@
 #define SAM_SDRAMC_OCMS_KEY1         (SAM_SDRAMC_BASE+SAM_SDRAMC_OCMS_KEY1_OFFSET)
 #define SAM_SDRAMC_OCMS_KEY2         (SAM_SDRAMC_BASE+SAM_SDRAMC_OCMS_KEY2_OFFSET)
 
-/* SDRAMC register bit definitions ******************************************************/
+/* SDRAMC register bit definitions ******************************************/
 
 /* SDRAMC Mode Register */
 
@@ -108,11 +92,13 @@
 #  define SDRAMC_CR_NC_COL9          (1 << SDRAMC_CR_NC_SHIFT) /* 9 column bits */
 #  define SDRAMC_CR_NC_COL10         (2 << SDRAMC_CR_NC_SHIFT) /* 10 column bits */
 #  define SDRAMC_CR_NC_COL11         (3 << SDRAMC_CR_NC_SHIFT) /* 11 column bits */
+
 #define SDRAMC_CR_NR_SHIFT           (2)       /* Bits 2-3: Number of Row Bits */
 #define SDRAMC_CR_NR_MASK            (3 << SDRAMC_CR_NR_SHIFT)
 #  define SDRAMC_CR_NR_ROW11         (0 << SDRAMC_CR_NR_SHIFT) /* 11 row bits */
 #  define SDRAMC_CR_NR_ROW12         (1 << SDRAMC_CR_NR_SHIFT) /* 12 row bits */
 #  define SDRAMC_CR_NR_ROW13         (2 << SDRAMC_CR_NR_SHIFT) /* 13 row bits */
+
 #define SDRAMC_CR_NB                 (1 << 4)  /* Bit 4:  Number of Banks */
 #  define SDRAMC_CR_NB_BANK2         (0 << 4)  /*  0=2 banks */
 #  define SDRAMC_CR_NB_BANK4         (1 << 4)  /*  1=4 banks */
@@ -121,6 +107,7 @@
 #  define SDRAMC_CR_CAS_LATENCY1     (0 << SDRAMC_CR_CAS_SHIFT) /* 1 cycle CAS latency */
 #  define SDRAMC_CR_CAS_LATENCY2     (1 << SDRAMC_CR_CAS_SHIFT) /* 2 cycle CAS latency */
 #  define SDRAMC_CR_CAS_LATENCY3     (2 << SDRAMC_CR_CAS_SHIFT) /* 3 cycle CAS latency */
+
 #define SDRAMC_CR_DBW                (1 << 7)  /* Bit 7:  Data Bus Width */
 #define SDRAMC_CR_TWR_SHIFT          (8)       /* Bits 8-11: Write Recovery Delay */
 #define SDRAMC_CR_TWR_MASK           (15 << SDRAMC_CR_TWR_SHIFT)
@@ -149,6 +136,7 @@
 #  define SDRAMC_LPR_LPCB_REFRESH    (1 << SDRAMC_LPR_LPCB_SHIFT) /* Self-refresh to SDRAM device */
 #  define SDRAMC_LPR_LPCB_PWRDOWN    (2 << SDRAMC_LPR_LPCB_SHIFT) /* Power-down to SDRAM after accesses */
 #  define SDRAMC_LPR_LPCB_DPPWRDOWN  (3 << SDRAMC_LPR_LPCB_SHIFT) /* Deep Power-down the SDRAM device */
+
 #define SDRAMC_LPR_PASR_SHIFT        (4)       /* Bits 4-6: Partial Array Self-refresh */
 #define SDRAMC_LPR_PASR_MASK         (7 << SDRAMC_LPR_PASR_SHIFT)
 #define SDRAMC_LPR_TCSR_SHIFT        (8)       /* Bits 8-9:  Temperature Compensated Self-Refresh */
@@ -163,8 +151,8 @@
 #  define SDRAMC_LPR_TIMEOUT_LP64    (1 << SDRAMC_LPR_TIMEOUT_SHIFT) /* SDRAM low-power mode after 64 cycles */
 #  define SDRAMC_LPR_TIMEOUT_LP128   (2 << SDRAMC_LPR_TIMEOUT_SHIFT) /* SDRAM low-power mode 128 cycles */
 
-/* SDRAMC Interrupt Enable Register,  SDRAMC Interrupt Disable Register, SDRAMC
- * Interrupt Mask Register, and SDRAMC Interrupt Status Register.
+/* SDRAMC Interrupt Enable Register,  SDRAMC Interrupt Disable Register,
+ * SDRAMC Interrupt Mask Register, and SDRAMC Interrupt Status Register.
  */
 
 #define SDRAMC_INT_RES               (1 << 0)  /* Bit 0:  Refresh Error */
@@ -190,18 +178,19 @@
 #define SDRAMC_OCMS_SDRSE            (1 << 0)  /* Bit 9:  SDRAM Memory Controller Scrambling Enable */
 
 /* SDRAMC OCMS KEY1 Register (32-bit value) */
+
 /* SDRAMC OCMS KEY2 Register (32-bit value) */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_SDRAMC_H */

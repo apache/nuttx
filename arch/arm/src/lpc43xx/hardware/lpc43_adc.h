@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_adc.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ADC_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define LPC43_ADC_CR_OFFSET      0x0000  /* A/D Control Register */
 #define LPC43_ADC_GDR_OFFSET     0x0004  /* A/D Global Data Register */
@@ -64,7 +49,7 @@
 
 #define LPC43_ADC_STAT_OFFSET    0x0030  /* A/D Status Register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define LPC43_ADC0_CR            (LPC43_ADC0_BASE+LPC43_ADC_CR_OFFSET)
 #define LPC43_ADC0_GDR           (LPC43_ADC0_BASE+LPC43_ADC_GDR_OFFSET)
@@ -94,7 +79,7 @@
 #define LPC43_ADC1_DR7           (LPC43_ADC1_BASE+LPC43_ADC_DR7_OFFSET)
 #define LPC43_ADC1_STAT          (LPC43_ADC1_BASE+LPC43_ADC_STAT_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* A/D Control Register */
 
@@ -114,6 +99,7 @@
 #  define ADC_CR_CLKS_6          (5 << ADC_CR_CLKS_SHIFT) /* 6 clocks / 5 bits */
 #  define ADC_CR_CLKS_5          (6 << ADC_CR_CLKS_SHIFT) /* 5 clocks / 4 bits */
 #  define ADC_CR_CLKS_4          (7 << ADC_CR_CLKS_SHIFT) /* 4 clocks / 3 bits */
+
                                            /* Bit 20: Reserved */
 #define ADC_CR_PDN               (1 << 21) /* Bit 21: A/D converter power-down mode */
                                            /* Bits 22-23: Reserved */
@@ -126,9 +112,12 @@
 #  define ADC_CR_START_ADCTRIG0  (4 << ADC_CR_START_SHIFT) /* Start when edge on ADCTRIG0 */
 #  define ADC_CR_START_ADCTRIG1  (5 << ADC_CR_START_SHIFT) /* Start when edge on ADCTRIG1 */
 #  define ADC_CR_START_MCPWM     (6 << ADC_CR_START_SHIFT) /* Start when edge on MCPWM */
+
 #define ADC_CR_EDGE              (1 << 27) /* Bit 27: Start on falling edge  */
                                            /* Bits 28-31: Reserved */
+
 /* A/D Global Data Register */
+
                                            /* Bits 0-3: Reserved */
 #define ADC_GDR_VVREF_SHIFT      (6)       /* Bits 6-15: Result of conversion (DONE==1) */
 #define ADC_GDR_VVREF_MASK       (0x03ff << ADC_GDR_VVREF_SHIFT)
@@ -152,7 +141,9 @@
 #define ADC_INTEN_CHAN7          (1 << 7)  /* Bit 7:  Enable ADC chan 7 complete interrupt */
 #define ADC_INTEN_GLOBAL         (1 << 8)  /* Bit 8:  Only the global DONE generates interrupt */
                                            /* Bits 9-31: Reserved */
+
 /* Channel 0-7 A/D Data Register */
+
                                            /* Bits 0-3: Reserved */
 #define ADC_DR_VVREF_SHIFT       (6)       /* Bits 6-15: Result of conversion (DONE==1) */
 #define ADC_DR_VVREF_MASK        (0x03ff << ADC_DR_VVREF_SHIFT)
@@ -183,16 +174,16 @@
 #define ADC_STAT_INT             (1 << 16) /* Bit 15: A/D interrupt */
                                            /* Bits 17-31: Reserved */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_ADC_H */

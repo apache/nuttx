@@ -1,56 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_tc.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_TC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_TC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define SAM_TC_NCHANNELS         3          /* Number of channels per TC peripheral */
 #define SAM_TC_MAXPERCLK         66000000   /* Maximum peripheral input clock frequency */
 
-/* TC Register Offsets **************************************************************/
+/* TC Register Offsets ******************************************************/
 
 #define SAM_TC_CHAN_OFFSET(n)    ((n) << 6) /* Channel n offset */
 #define SAM_TC_CCR_OFFSET        0x0000     /* Channel Control Register */
@@ -151,7 +136,7 @@
 
 #define SAM_TC_WPMR_OFFSET       0x00e4     /* Write Protect Mode Register */
 
-/* TC Register Addresses ************************************************************/
+/* TC Register Addresses ****************************************************/
 
 #define SAM_TC012_CHAN_BASE(n)   (SAM_TC012_VBASE+SAM_TC_CHAN_OFFSET(n))
 
@@ -402,7 +387,7 @@
 
 #define SAM_TC678_WPMR           (SAM_TC678_VBASE+SAM_TC_WPMR_OFFSET)
 
-/* TC Register Bit Definitions ******************************************************/
+/* TC Register Bit Definitions **********************************************/
 
 /* Channel Control Register */
 
@@ -423,6 +408,7 @@
 #  define TC_CMR_TCCLKS_XC0      (5 << TC_CMR_TCCLKS_SHIFT) /* XC0 Clock selected */
 #  define TC_CMR_TCCLKS_XC1      (6 << TC_CMR_TCCLKS_SHIFT) /* XC1 Clock selected */
 #  define TC_CMR_TCCLKS_XC2      (7 << TC_CMR_TCCLKS_SHIFT) /* XC2 Clock selected */
+
 #define TC_CMR_CLKI              (1 << 3)  /* Bit 3:  Clock Invert */
 #define TC_CMR_BURST_SHIFT       (4)       /* Bits 4-5: Burst Signal Selection */
 #define TC_CMR_BURST_MASK        (3 << TC_CMR_BURST_SHIFT)
@@ -441,6 +427,7 @@
 #  define TC_CMR_ETRGEDG_RISING  (1 << TC_CMR_ETRGEDG_SHIFT) /* Rising edge */
 #  define TC_CMR_ETRGEDG_FALLING (2 << TC_CMR_ETRGEDG_SHIFT) /* Falling edge */
 #  define TC_CMR_ETRGEDG_BOTH    (3 << TC_CMR_ETRGEDG_SHIFT) /* EDGE Each edge */
+
 #define TC_CMR_ABETRG            (1 << 10) /* Bit 10: TIOA or TIOB External Trigger Selection */
 #define TC_CMR_CPCTRG            (1 << 14) /* Bit 14: RC Compare Trigger Enable */
 #define TC_CMR_CAPTURE           (0)       /* Bit 15:  0=Capture Mode */
@@ -450,6 +437,7 @@
 #  define TC_CMR_LDRA_RISING     (1 << TC_CMR_LDRA_SHIFT) /* Rising edge of TIOA */
 #  define TC_CMR_LDRA_FALLING    (2 << TC_CMR_LDRA_SHIFT) /* Falling edge of TIOA */
 #  define TC_CMR_LDRA_BOTH       (3 << TC_CMR_LDRA_SHIFT) /* Each edge of TIOA */
+
 #define TC_CMR_LDRB_SHIFT        (18)      /* Bits 18-19: RB Loading Edge Selection */
 #define TC_CMR_LDRB_MASK         (3 << TC_CMR_LDRB_SHIFT)
 #  define TC_CMR_LDRB_NONE       (0 << TC_CMR_LDRB_SHIFT) /* None */
@@ -477,12 +465,14 @@
 #  define TC_CMR_EEVTEDG_RISING  (1 << TC_CMR_EEVTEDG_SHIFT) /* Rising edge */
 #  define TC_CMR_EEVTEDG_FALLING (2 << TC_CMR_EEVTEDG_SHIFT) /* Falling edge */
 #  define TC_CMR_EEVTEDG_BOTH    (3 << TC_CMR_EEVTEDG_SHIFT) /* Each edge */
+
 #define TC_CMR_EEVT_SHIFT        (10)      /* Bits 10-11: External Event Selection */
 #define TC_CMR_EEVT_MASK         (3 << TC_CMR_EEVT_SHIFT)
 #  define TC_CMR_EEVT_TIOB       (0 << TC_CMR_EEVT_SHIFT) /* TIOB(1) input */
 #  define TC_CMR_EEVT_XC0        (1 << TC_CMR_EEVT_SHIFT) /* XC0 output */
 #  define TC_CMR_EEVT_XC1        (2 << TC_CMR_EEVT_SHIFT) /* XC1 output */
 #  define TC_CMR_EEVT_XC2        (3 << TC_CMR_EEVT_SHIFT) /* XC2 output */
+
 #define TC_CMR_ENETRG            (1 << 12) /* Bit 12: External Event Trigger Enable */
 #define TC_CMR_WAVSEL_SHIFT      (13)      /* Bits 13-14: Waveform Selection */
 #define TC_CMR_WAVSEL_MASK       (3 << TC_CMR_WAVSEL_SHIFT)
@@ -490,6 +480,7 @@
 #  define TC_CMR_WAVSEL_UPDOWN   (1 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode w/o trigger on RC Compare */
 #  define TC_CMR_WAVSEL_UPRC     (2 << TC_CMR_WAVSEL_SHIFT) /* UP mode w/ trigger on RC Compare */
 #  define TC_CMR_WAVSEL_UPDOWNRC (3 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN w/ with trigger on RC Compare */
+
 #define TC_CMR_WAVE              (1 << 15) /* Bit 15: 1=Waveform Mode */
 #define TC_CMR_ACPA_SHIFT        (16)      /* Bits 16-17: RA Compare Effect on TIOA */
 #define TC_CMR_ACPA_MASK         (3 << TC_CMR_ACPA_SHIFT)
@@ -497,42 +488,49 @@
 #  define TC_CMR_ACPA_SET        (1 << TC_CMR_ACPA_SHIFT) /* Set */
 #  define TC_CMR_ACPA_CLEAR      (2 << TC_CMR_ACPA_SHIFT) /* Clear */
 #  define TC_CMR_ACPA_TOGGLE     (3 << TC_CMR_ACPA_SHIFT) /* Toggle */
+
 #define TC_CMR_ACPC_SHIFT        (18)      /* Bits 18-19: RC Compare Effect on TIOA */
 #define TC_CMR_ACPC_MASK         (3 << TC_CMR_ACPC_SHIFT)
 #  define TC_CMR_ACPC_NONE       (0 << TC_CMR_ACPC_SHIFT) /* None */
 #  define TC_CMR_ACPC_SET        (1 << TC_CMR_ACPC_SHIFT) /* Set */
 #  define TC_CMR_ACPC_CLEAR      (2 << TC_CMR_ACPC_SHIFT) /* Clear */
 #  define TC_CMR_ACPC_TOGGLE     (3 << TC_CMR_ACPC_SHIFT) /* Toggle */
+
 #define TC_CMR_AEEVT_SHIFT       (20)      /* Bits 20-21: External Event Effect on TIOA */
 #define TC_CMR_AEEVT_MASK        (3 << TC_CMR_AEEVT_SHIFT)
 #  define TC_CMR_AEEVT_NONE      (0 << TC_CMR_AEEVT_SHIFT) /* None */
 #  define TC_CMR_AEEVT_SET       (1 << TC_CMR_AEEVT_SHIFT) /* Set */
 #  define TC_CMR_AEEVT_CLEAR     (2 << TC_CMR_AEEVT_SHIFT) /* Clear */
 #  define TC_CMR_AEEVT_TOGGLE    (3 << TC_CMR_AEEVT_SHIFT) /* Toggle */
+
 #define TC_CMR_ASWTRG_SHIFT      (22)      /* Bits 22-23: Software Trigger Effect on TIOA */
 #define TC_CMR_ASWTRG_MASK       (3 << TC_CMR_ASWTRG_SHIFT)
 #  define TC_CMR_ASWTRG_NONE     (0 << TC_CMR_ASWTRG_SHIFT) /* None */
 #  define TC_CMR_ASWTRG_SET      (1 << TC_CMR_ASWTRG_SHIFT) /* Set */
 #  define TC_CMR_ASWTRG_CLEAR    (2 << TC_CMR_ASWTRG_SHIFT) /* Clear */
 #  define TC_CMR_ASWTRG_TOGGLE   (3 << TC_CMR_ASWTRG_SHIFT) /* Toggle */
+
 #define TC_CMR_BCPB_SHIFT        (24)      /* Bits 24-25: RB Compare Effect on TIOB */
 #define TC_CMR_BCPB_MASK         (3 << TC_CMR_BCPB_SHIFT)
 #  define TC_CMR_BCPB_NONE       (0 << TC_CMR_BCPB_SHIFT) /* None */
 #  define TC_CMR_BCPB_SET        (1 << TC_CMR_BCPB_SHIFT) /* Set */
 #  define TC_CMR_BCPB_CLEAR      (2 << TC_CMR_BCPB_SHIFT) /* Clear */
 #  define TC_CMR_BCPB_TOGGLE     (3 << TC_CMR_BCPB_SHIFT) /* Toggle */
+
 #define TC_CMR_BCPC_SHIFT        (26)      /* Bits 26-27: RC Compare Effect on TIOB */
 #define TC_CMR_BCPC_MASK         (3 << TC_CMR_BCPC_SHIFT)
 #  define TC_CMR_BCPC_NONE       (0 << TC_CMR_BCPC_SHIFT) /* None */
 #  define TC_CMR_BCPC_SET        (1 << TC_CMR_BCPC_SHIFT) /* Set */
 #  define TC_CMR_BCPC_CLEAR      (2 << TC_CMR_BCPC_SHIFT) /* Clear */
 #  define TC_CMR_BCPC_TOGGLE     (3 << TC_CMR_BCPC_SHIFT) /* Toggle */
+
 #define TC_CMR_BEEVT_SHIFT       (28)      /* Bits 28-29: External Event Effect on TIOB */
 #define TC_CMR_BEEVT_MASK        (3 << TC_CMR_BEEVT_SHIFT)
 #  define TC_CMR_BEEVT_NONE      (0 << TC_CMR_BEEVT_SHIFT) /* None */
 #  define TC_CMR_BEEVT_SET       (1 << TC_CMR_BEEVT_SHIFT) /* Set */
 #  define TC_CMR_BEEVT_CLEAR     (2 << TC_CMR_BEEVT_SHIFT) /* Clear */
 #  define TC_CMR_BEEVT_TOGGLE    (3 << TC_CMR_BEEVT_SHIFT) /* Toggle */
+
 #define TC_CMR_BSWTRG_SHIFT      (30)      /* Bits 30-31: Software Trigger Effect on TIOB */
 #define TC_CMR_BSWTRG_MASK       (3 << TC_CMR_BSWTRG_SHIFT)
 #  define TC_CMR_BSWTRG_NONE     (0 << TC_CMR_BSWTRG_SHIFT) /* None */
@@ -546,13 +544,17 @@
 #define TC_SMMR_DOWN             (1 << 1)  /* Bit 1:  DOWN Count */
 
 /* Register AB (32-bit capture value) */
+
 /* Counter Value (32-bit counter value) */
+
 /* Register A (32-bit value) */
+
 /* Register B (32-bit value) */
+
 /* Register C (32-bit value) */
 
-/* Status Register, Interrupt Enable Register, Interrupt Disable Register, and
- * Interrupt Mask Register
+/* Status Register, Interrupt Enable Register,
+ * Interrupt Disable Register, and Interrupt Mask Register
  */
 
 #define TC_INT_COVFS             (1 << 0)  /* Bit 0:  Counter Overflow Status */
@@ -576,10 +578,12 @@
 #  define TC_EMR_TRIGSRCA_MASK   (3 << TC_EMR_TRIGSRCA_SHIFT)
 #    define TC_EMR_TRIGSRCA_TIOA (0 << TC_EMR_TRIGSRCA_SHIFT) /* Trigger/capture input A driven by TIOAx */
 #    define TC_EMR_TRIGSRCA_PWM  (1 << TC_EMR_TRIGSRCA_SHIFT) /* Trigger/capture input A driven by PWMx */
+
 #  define TC_EMR_TRIGSRCB_SHIFT  (4)       /* Bits 4-5: Trigger source for input B */
 #  define TC_EMR_TRIGSRCB_MASK   (3 << TC_EMR_TRIGSRCB_SHIFT)
 #    define TC_EMR_TRIGSRCB_TIOB (0 << TC_EMR_TRIGSRCB_SHIFT) /* Trigger/capture input B driven by TIOBx */
 #    define TC_EMR_TRIGSRCB_PWM  (1 << TC_EMR_TRIGSRCB_SHIFT) /* Trigger/capture input B driven PWMx */
+
 #  define TC_EMR_NODIVCLK        (1 << 8)  /* Bit 8: No divided clock */
 #endif
 
@@ -594,16 +598,19 @@
 #  define TC_BMR_TC0XC0S_TCLK0   (0 << TC_BMR_TC0XC0S_SHIFT) /* TCLK0 Signal to XC0 */
 #  define TC_BMR_TC0XC0S_TIOA1   (2 << TC_BMR_TC0XC0S_SHIFT) /* TIOA1 Signal to XC0 */
 #  define TC_BMR_TC0XC0S_TIOA2   (3 << TC_BMR_TC0XC0S_SHIFT) /* TIOA2 Signal to XC0 */
+
 #define TC_BMR_TC1XC1S_SHIFT     (2)       /* Bits 2-3: External Clock Signal 1 Selection */
 #define TC_BMR_TC1XC1S_MASK      (3 << TC_BMR_TC1XC1S_SHIFT)
 #  define TC_BMR_TC1XC1S_TCLK1   (0 << TC_BMR_TC1XC1S_SHIFT) /* TCLK1 Signal to XC1 */
 #  define TC_BMR_TC1XC1S_TIOA0   (2 << TC_BMR_TC1XC1S_SHIFT) /* TIOA0 Signal to XC1 */
 #  define TC_BMR_TC1XC1S_TIOA2   (3 << TC_BMR_TC1XC1S_SHIFT) /* TIOA2 Signal to XC1 */
+
 #define TC_BMR_TC2XC2S_SHIFT     (4)       /* Bits 4-5: External Clock Signal 2 Selection */
 #define TC_BMR_TC2XC2S_MASK      (3 << TC_BMR_TC2XC2S_SHIFT)
 #  define TC_BMR_TC2XC2S_TCLK2   (0 << TC_BMR_TC2XC2S_SHIFT) /* TCLK2 Signal to XC2 */
 #  define TC_BMR_TC2XC2S_TIOA0   (2 << TC_BMR_TC2XC2S_SHIFT) /* TIOA0 Signal to XC2 */
 #  define TC_BMR_TC2XC2S_TIOA1   (3 << TC_BMR_TC2XC2S_SHIFT) /* TIOA1 Signal to XC2 */
+
 #define TC_BMR_QDEN              (1 << 8)  /* Bit 8:  Quadrature Decoder ENabled */
 #define TC_BMR_POSEN             (1 << 9)  /* Bit 9:  POSition ENabled */
 #define TC_BMR_SPEEDEN           (1 << 10) /* Bit 10: SPEED ENabled */
@@ -619,7 +626,8 @@
 #define TC_BMR_MAXFILT_MASK      (63 << TC_BMR_MAXFILT_SHIFT)
 #  define TC_BMR_MAXFILT(n)      ((uint32_t)(n) << TC_BMR_MAXFILT_SHIFT)
 
-/* QDEC Interrupt Enable Register, QDEC Interrupt Disable Register, QDEC Interrupt Mask Register, and QDEC Interrupt Status Register.
+/* QDEC Interrupt Enable Register, QDEC Interrupt Disable Register,
+ * QDEC Interrupt Mask Register, and QDEC Interrupt Status Register.
  */
 
 #define TC_QINT_IDX              (1 << 0)  /* Bit 0:  Index */

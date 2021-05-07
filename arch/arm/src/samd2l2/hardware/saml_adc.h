@@ -1,11 +1,8 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_adc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Alexander Vasiljev <alexvasiljev@gmail.com>
- *
- * References:
- *   "Microchip SAM L21 Family Datasheet", Rev A - 02/2017
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,14 +31,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ *   "Microchip SAM L21 Family Datasheet", Rev A - 02/2017
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_ADC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_ADC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,10 +50,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* ADC register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* ADC register offsets *****************************************************/
 
 #define SAM_ADC_CTRLA_OFFSET       0x0000 /* Control A Register */
 #define SAM_ADC_CTRLB_OFFSET       0x0001 /* Control B Register */
@@ -77,7 +79,7 @@
 #define SAM_ADC_SEQCTRL_OFFSET     0x0028 /* Sequence Control Register */
 #define SAM_ADC_CALIB_OFFSET       0x002C /* Calibration Register */
 
-/* ADC register addresses ******************************************************************/
+/* ADC register addresses ***************************************************/
 
 #define SAM_ADC_CTRLA              (SAM_ADC_BASE + SAM_ADC_CTRLA_OFFSET)
 #define SAM_ADC_CTRLB              (SAM_ADC_BASE + SAM_ADC_CTRLB_OFFSET)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * wireless/ieee802154/mac80215_scan.c
+ * wireless/ieee802154/mac802154_scan.c
  *
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.

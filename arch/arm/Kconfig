@@ -209,8 +209,10 @@ config ARCH_CHIP_NRF52
 	bool "Nordic NRF52"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_TICKLESS
+	select ARMV7M_HAVE_STACKCHECK
 	#select ARCH_HAVE_MPU
 	#select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_SPI_BITORDER
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_SERIAL_TERMIOS
@@ -223,12 +225,23 @@ config ARCH_CHIP_NUC1XX
 	---help---
 		Nuvoton NUC100/120 architectures (ARM Cortex-M0).
 
+config ARCH_CHIP_RP2040
+	bool "Raspberry Pi RP2040"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TESTSET
+	select ARM_HAVE_WFE_SEV
+	---help---
+		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
+
 config ARCH_CHIP_S32K1XX
 	bool "NXP S32K1XX"
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_RAMFUNCS
 	---help---
-		NPX LPC54XX architectures (ARM Cortex-M0+ and Cortex-M4F).
+		NPX S32K1XX architectures (ARM Cortex-M0+ and Cortex-M4F).
 
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
@@ -382,6 +395,20 @@ config ARCH_CHIP_STM32L4
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M4).
+
+config ARCH_CHIP_STM32L5
+	bool "STMicro STM32 L5"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV8M_HAVE_STACKCHECK
+	---help---
+		STMicro STM32 architectures (ARM Cortex-M33).
 
 config ARCH_CHIP_STR71X
 	bool "STMicro STR71x"
@@ -590,6 +617,7 @@ config ARCH_CORTEXM7
 config ARCH_ARMV7A
 	bool
 	default n
+	select ARM_HAVE_WFE_SEV
 
 config ARCH_CORTEXA5
 	bool
@@ -743,6 +771,7 @@ config ARCH_CHIP
 	default "moxart"	if ARCH_CHIP_MOXART
 	default "nrf52"		if ARCH_CHIP_NRF52
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
+	default "rp2040"	if ARCH_CHIP_RP2040
 	default "s32k1xx"	if ARCH_CHIP_S32K1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
 	default "samd2l2"	if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
@@ -754,6 +783,7 @@ config ARCH_CHIP
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32h7"	if ARCH_CHIP_STM32H7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
+	default "stm32l5"	if ARCH_CHIP_STM32L5
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
@@ -788,6 +818,12 @@ config ARM_THUMB
 	bool
 	default n
 	depends on ARCH_ARMV7A
+
+config ARM_HAVE_WFE_SEV
+	bool
+	default n
+	---help---
+		Use WFE and SEV instructions for spinlock to reduce power consumption
 
 config ARM_HAVE_FPU_D32
 	bool
@@ -891,19 +927,6 @@ config ARM_SEMIHOSTING_HOSTFS
 		This doesn't support some directory operations like readdir because
 		of the limitations of semihosting mechanism.
 
-config ARM_LWL_CONSOLE
-	bool "Lightweight Link Console Support"
-	default n
-	depends on DEV_CONSOLE && ARCH_CHIP_STM32
-	---help---
-		Use the lightweight link console which provides console over a
-		debug channel by means of shared memory.  A terminal application
-		for openocd as the debugger is available in tools/ocdconsole.py.
-
-		Currently only available for STM32 architectures, but easily
-		added to other ARM architectures be add up_low_console.c to the
-		architecture Make.defs file.
-
 if ARCH_ARMV6M
 source arch/arm/src/armv6-m/Kconfig
 endif
@@ -994,6 +1017,9 @@ endif
 if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
 endif
+if ARCH_CHIP_RP2040
+source arch/arm/src/rp2040/Kconfig
+endif
 if ARCH_CHIP_SAMA5
 source arch/arm/src/sama5/Kconfig
 endif
@@ -1023,6 +1049,9 @@ source arch/arm/src/stm32h7/Kconfig
 endif
 if ARCH_CHIP_STM32L4
 source arch/arm/src/stm32l4/Kconfig
+endif
+if ARCH_CHIP_STM32L5
+source arch/arm/src/stm32l5/Kconfig
 endif
 if ARCH_CHIP_STR71X
 source arch/arm/src/str71x/Kconfig

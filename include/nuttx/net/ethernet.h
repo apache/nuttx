@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/ethernt.h
+ * include/nuttx/net/ethernet.h
  * Macros and definitions for the Ethernet link layer.
  *
  *   Copyright (C) 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.

@@ -23,11 +23,14 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <assert.h>
 
 #include "esp32_rtc.h"
+#include "esp32_clockconfig.h"
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_i2s.h"
+#include "esp32_rtc.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
 
@@ -77,18 +80,9 @@
 
 #define RTC_FAST_CLK_FREQ_APPROX    8500000
 
-/* Number of cycles to wait from the 32k XTAL oscillator to
- * consider it running. Larger values increase startup delay.
- * Smaller values may cause false positive detection
- * (i.e. oscillator runs for a few cycles and then stops).
- */
-
-#define SLOW_CLK_CAL_CYCLES         1024
-
 /* Disable logging from the ROM code. */
 
 #define RTC_DISABLE_ROM_LOG ((1 << 0) | (1 << 16))
-#define EXT_OSC_FLAG    BIT(3)
 
 /* Default initializer for esp32_rtc_sleep_config_t
  * This initializer sets all fields to "reasonable" values
@@ -133,56 +127,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* RTC SLOW_CLK frequency values */
-
-enum esp32_rtc_slow_freq_e
-{
-  RTC_SLOW_FREQ_RTC = 0,      /* Internal 150 kHz RC oscillator */
-  RTC_SLOW_FREQ_32K_XTAL = 1, /* External 32 kHz XTAL */
-  RTC_SLOW_FREQ_8MD256 = 2,   /* Internal 8 MHz RC oscillator, divided by 256 */
-};
-
-/* RTC FAST_CLK frequency values */
-
-enum esp32_rtc_fast_freq_e
-{
-  RTC_FAST_FREQ_XTALD4 = 0,   /* Main XTAL, divided by 4 */
-  RTC_FAST_FREQ_8M = 1,       /* Internal 8 MHz RC oscillator */
-};
-
-/* This is almost the same as esp32_rtc_slow_freq_e, except that we define
- * an extra enum member for the external 32k oscillator.For convenience,
- * lower 2 bits should correspond to esp32_rtc_slow_freq_e values.
- */
-
-enum esp32_slow_clk_sel_e
-{
-  /* Internal 150 kHz RC oscillator */
-
-  SLOW_CLK_150K = RTC_SLOW_FREQ_RTC,
-
-  /* External 32 kHz XTAL */
-
-  SLOW_CLK_32K_XTAL = RTC_SLOW_FREQ_32K_XTAL,
-
-  /* Internal 8 MHz RC oscillator, divided by 256 */
-
-  SLOW_CLK_8MD256 = RTC_SLOW_FREQ_8MD256,
-
-  /* External 32k oscillator connected to 32K_XP pin */
-
-  SLOW_CLK_32K_EXT_OSC = RTC_SLOW_FREQ_32K_XTAL | EXT_OSC_FLAG
-};
-
-/* Clock source to be calibrated using rtc_clk_cal function */
-
-enum esp32_rtc_cal_sel_e
-{
-  RTC_CAL_RTC_MUX = 0,       /* Currently selected RTC SLOW_CLK */
-  RTC_CAL_8MD256 = 1,        /* Internal 8 MHz RC oscillator, divided by 256 */
-  RTC_CAL_32K_XTAL = 2       /* External 32 kHz XTAL */
-};
 
 /* RTC power and clock control initialization settings */
 
@@ -243,8 +187,6 @@ static void IRAM_ATTR esp32_rtc_clk_fast_freq_set(
                       enum esp32_rtc_fast_freq_e fast_freq);
 static uint32_t IRAM_ATTR esp32_rtc_clk_cal_internal(
                 enum esp32_rtc_cal_sel_e cal_clk, uint32_t slowclk_cycles);
-static uint32_t IRAM_ATTR esp32_rtc_clk_cal(enum esp32_rtc_cal_sel_e cal_clk,
-                                                    uint32_t slowclk_cycles);
 static void IRAM_ATTR esp32_rtc_clk_slow_freq_set(
                       enum esp32_rtc_slow_freq_e slow_freq);
 static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk);
@@ -474,41 +416,6 @@ static uint32_t IRAM_ATTR esp32_rtc_clk_cal_internal(
 }
 
 /****************************************************************************
- * Name: esp32_rtc_clk_cal
- *
- * Description:
- *   Measure RTC slow clock's period, based on main XTAL frequency
- *
- * Input Parameters:
- *   cal_clk        - clock to be measured
- *   slowclk_cycles - number of slow clock cycles to average
- *
- * Returned Value:
- *   Average slow clock period in microseconds, Q13.19 fixed point format
- *   or 0 if calibration has timed out
- *
- ****************************************************************************/
-
-static uint32_t IRAM_ATTR esp32_rtc_clk_cal(enum esp32_rtc_cal_sel_e cal_clk,
-                                                     uint32_t slowclk_cycles)
-{
-  enum esp32_rtc_xtal_freq_e xtal_freq;
-  uint64_t xtal_cycles;
-  uint64_t divider;
-  uint64_t period_64;
-  uint32_t period;
-
-  xtal_freq = esp32_rtc_clk_xtal_freq_get();
-  xtal_cycles = esp32_rtc_clk_cal_internal(cal_clk, slowclk_cycles);
-  divider = ((uint64_t)xtal_freq) * slowclk_cycles;
-  period_64 = ((xtal_cycles << RTC_CLK_CAL_FRACT) + divider / 2 - 1)
-                                                          / divider;
-  period = (uint32_t)(period_64 & UINT32_MAX);
-
-  return period;
-}
-
-/****************************************************************************
  * Name: esp32_rtc_clk_slow_freq_set
  *
  * Description:
@@ -572,6 +479,69 @@ static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: esp32_rtc_get_slow_clk_rtc
+ *
+ * Description:
+ *   Get slow_clk_rtc source.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The clock source:
+ *   -  SLOW_CK
+ *   -  CK_XTAL_32K
+ *   -  CK8M_D256_OUT
+ *
+ ****************************************************************************/
+
+enum esp32_rtc_slow_freq_e IRAM_ATTR esp32_rtc_get_slow_clk(void)
+{
+  enum esp32_rtc_slow_freq_e slow_freq;
+
+  /* Get the clock source for slow_clk_rtc */
+
+  slow_freq = REG_GET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_ANA_CLK_RTC_SEL);
+
+  return slow_freq;
+}
+
+/****************************************************************************
+ * Name: esp32_rtc_clk_cal
+ *
+ * Description:
+ *   Measure RTC slow clock's period, based on main XTAL frequency
+ *
+ * Input Parameters:
+ *   cal_clk        - clock to be measured
+ *   slowclk_cycles - number of slow clock cycles to average
+ *
+ * Returned Value:
+ *   Average slow clock period in microseconds, Q13.19 fixed point format
+ *   or 0 if calibration has timed out
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32_rtc_clk_cal(enum esp32_rtc_cal_sel_e cal_clk,
+                                                     uint32_t slowclk_cycles)
+{
+  enum esp32_rtc_xtal_freq_e xtal_freq;
+  uint64_t xtal_cycles;
+  uint64_t divider;
+  uint64_t period_64;
+  uint32_t period;
+
+  xtal_freq = esp32_rtc_clk_xtal_freq_get();
+  xtal_cycles = esp32_rtc_clk_cal_internal(cal_clk, slowclk_cycles);
+  divider = ((uint64_t)xtal_freq) * slowclk_cycles;
+  period_64 = ((xtal_cycles << RTC_CLK_CAL_FRACT) + divider / 2 - 1)
+                                                          / divider;
+  period = (uint32_t)(period_64 & UINT32_MAX);
+
+  return period;
+}
+
 enum esp32_rtc_xtal_freq_e rtc_get_xtal(void)
                 __attribute__((alias("esp32_rtc_clk_xtal_freq_get")));
 
@@ -622,21 +592,22 @@ void IRAM_ATTR esp32_rtc_update_to_xtal(int freq, int div)
 {
   uint32_t value = (((freq * MHZ) >> 12) & UINT16_MAX)
                    | ((((freq * MHZ) >> 12) & UINT16_MAX) << 16);
-  putreg32(value, RTC_APB_FREQ_REG);
+  esp32_update_cpu_freq(freq);
 
   /* set divider from XTAL to APB clock */
 
   REG_SET_FIELD(APB_CTRL_SYSCLK_CONF_REG, APB_CTRL_PRE_DIV_CNT, div - 1);
 
-  /* switch clock source */
-
-  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
-                RTC_CNTL_SOC_CLK_SEL_XTL);
-
   /* adjust ref_tick */
 
   modifyreg32(APB_CTRL_XTAL_TICK_CONF_REG, 0,
              (freq * MHZ) / REF_CLK_FREQ - 1);
+
+  /* switch clock source */
+
+  REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL,
+                RTC_CNTL_SOC_CLK_SEL_XTL);
+  putreg32(value, RTC_APB_FREQ_REG);
 
   /* lower the voltage */
 
@@ -1153,6 +1124,77 @@ void IRAM_ATTR esp32_rtc_cpu_freq_set_xtal(void)
 }
 
 /****************************************************************************
+ * Name: esp_rtc_clk_get_cpu_freq
+ *
+ * Description:
+ *   Get the currently used CPU frequency configuration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   CPU frequency
+ *
+ ****************************************************************************/
+
+int IRAM_ATTR esp_rtc_clk_get_cpu_freq(void)
+{
+  uint32_t source_freq_mhz;
+  uint32_t div;
+  uint32_t soc_clk_sel;
+  uint32_t cpuperiod_sel;
+  int freq_mhz = 0;
+
+  soc_clk_sel = REG_GET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_SOC_CLK_SEL);
+  switch (soc_clk_sel)
+    {
+      case RTC_CNTL_SOC_CLK_SEL_XTL:
+        {
+          div = REG_GET_FIELD(APB_CTRL_SYSCLK_CONF_REG,
+                              APB_CTRL_PRE_DIV_CNT) + 1;
+          source_freq_mhz = (uint32_t) esp32_rtc_clk_xtal_freq_get();
+          freq_mhz = source_freq_mhz / div;
+        }
+        break;
+
+      case RTC_CNTL_SOC_CLK_SEL_PLL:
+        {
+          cpuperiod_sel = REG_GET_FIELD(DPORT_CPU_PER_CONF_REG,
+                                        DPORT_CPUPERIOD_SEL);
+          if (cpuperiod_sel == DPORT_CPUPERIOD_SEL_80)
+            {
+              freq_mhz = 80;
+            }
+          else if (cpuperiod_sel == DPORT_CPUPERIOD_SEL_160)
+            {
+              freq_mhz = 160;
+            }
+          else if (cpuperiod_sel == DPORT_CPUPERIOD_SEL_240)
+            {
+              freq_mhz = 240;
+            }
+          else
+            {
+              DEBUGASSERT(0);
+            }
+        }
+        break;
+
+      case RTC_CNTL_SOC_CLK_SEL_8M:
+        {
+          freq_mhz = 8;
+        }
+        break;
+
+      case RTC_CNTL_SOC_CLK_SEL_APLL:
+        default:
+          DEBUGASSERT(0);
+    }
+
+  return freq_mhz;
+}
+
+/****************************************************************************
  * Name: esp32_rtc_sleep_init
  *
  * Description:
@@ -1327,6 +1369,17 @@ void IRAM_ATTR esp32_rtc_sleep_init(uint32_t flags)
       modifyreg32(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PU, 0);
     }
 
+  /* Keep the RTC8M_CLK on in light_sleep mode if the
+   * ledc low-speed channel is clocked by RTC8M_CLK.
+   */
+
+  if (!cfg.deep_slp && GET_PERI_REG_MASK(RTC_CNTL_CLK_CONF_REG,
+                                         RTC_CNTL_DIG_CLK8M_EN_M))
+    {
+      REG_CLR_BIT(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PD);
+      REG_SET_BIT(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PU);
+    }
+
   /* enable VDDSDIO control by state machine */
 
   modifyreg32(RTC_CNTL_SDIO_CONF_REG, RTC_CNTL_SDIO_FORCE, 0);
@@ -1353,9 +1406,10 @@ void IRAM_ATTR esp32_rtc_sleep_init(uint32_t flags)
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
+int IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
                                      uint32_t reject_opt)
 {
+  int reject;
   REG_SET_FIELD(RTC_CNTL_WAKEUP_STATE_REG, RTC_CNTL_WAKEUP_ENA, wakeup_opt);
   putreg32((uint32_t)reject_opt, RTC_CNTL_SLP_REJECT_CONF_REG);
 
@@ -1368,6 +1422,8 @@ void IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
 
   /* In deep sleep mode, we never get here */
 
+  reject = REG_GET_FIELD(RTC_CNTL_INT_RAW_REG, RTC_CNTL_SLP_REJECT_INT_RAW);
+
   modifyreg32(RTC_CNTL_INT_CLR_REG, 0,
               RTC_CNTL_SLP_REJECT_INT_CLR | RTC_CNTL_SLP_WAKEUP_INT_CLR);
 
@@ -1375,4 +1431,5 @@ void IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
 
   REG_SET_FIELD(RTC_CNTL_BIAS_CONF_REG, RTC_CNTL_DBG_ATTEN,
                 RTC_CNTL_DBG_ATTEN_DEFAULT);
+  return reject;
 }

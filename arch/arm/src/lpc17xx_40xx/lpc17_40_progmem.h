@@ -1,63 +1,49 @@
-/******************************************************************************
- * arch/arm/src/lpc17xx_40xx/lpc17_40_progmem.c
+/****************************************************************************
+ * arch/arm/src/lpc17xx_40xx/lpc17_40_progmem.h
  *
- *   Copyright (C) 2018 Michael Jung. All rights reserved.
- *   Author: Michael Jung <mijung@gmx.net>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_PROGMEM_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_PROGMEM_H
 
-/******************************************************************************
+/****************************************************************************
  * See NXP UM10360 LPC176x/5x User manual, Rev 4.1, Chapter 32: LPC176x/5x
  * Flash memory interface and programming.
  *
- * The first 16 flash sectors (aka erase blocks) are 4kB in size, followed by
- * up to 14 sectors of 32 kB.  This progmem driver supports just 32 kB sectors.
+ * The first 16 flash sectors (aka erase blocks) are 4kB in size, followed
+ * by up to 14 sectors of 32 kB.
+ * This progmem driver supports just 32 kB sectors.
  *
  * Flash write access is provided by an "In Application Programming" service
- * function stored in boot loader firmware.  Individual write accesses must be
- * 256 byte in size and must be aligned to a 256 byte boundary.
+ * function stored in boot loader firmware.  Individual write accesses must
+ * be 256 byte in size and must be aligned to a 256 byte boundary.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
-* Included Files
-******************************************************************************/
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
 /* The first 16 sectors are 4kB in size and thus not supported as progmem. */
 
@@ -68,9 +54,10 @@
 #define LPC17_40_FLASH_NUM_32K_SECTORS \
   ((LPC17_40_FLASH_SIZE - LPC17_40_FLASH_NUM_4K_SECTORS * 4096) / 32768)
 
-/* The number of 32kB sectors to be used for progmem is configurable.  The
- * sectors at the end of the flash are used for progmem, the rest is left
- * for code and data. */
+/* The number of 32kB sectors to be used for progmem is configurable.
+ * The sectors at the end of the flash are used for progmem, the rest is
+ * left for code and data.
+ */
 
 #define LPC17_40_PROGMEM_START_SECTOR \
   (LPC17_40_FLASH_NUM_4K_SECTORS + LPC17_40_FLASH_NUM_32K_SECTORS - \
@@ -103,7 +90,9 @@
 #define LPC17_40_PROGMEM_PAGES_PER_SECTOR \
   (LPC17_40_PROGMEM_SECTOR_SIZE / LPC17_40_PROGMEM_PAGE_SIZE)
 
-/* LPC17 entry point for In-Application-Programming boot rom service function */
+/* LPC17 entry point for In-Application-Programming boot rom service
+ * function
+ */
 
 #define LPC17_40_IAP_ENTRY_ADDR 0x1fff1ff1
 

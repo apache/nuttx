@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/giant-board/src/sam_bringup.c
+ * boards/arm/sama5/giant-board/src/sam_bringup.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -30,6 +30,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kthread.h>
 #include <nuttx/usb/usbdev.h>
@@ -171,15 +172,15 @@ static int nsh_sdmmc_initialize(void)
 #ifdef CONFIG_SAMA5D27_SDMMC0_MOUNT
   /* Mount the volume on SDMMC0 */
 
-  ret = mount(CONFIG_SAMA5D27_SDMMC0_MOUNT_BLKDEV,
-              CONFIG_SAMA5D27_SDMMC0_MOUNT_MOUNTPOINT,
-              CONFIG_SAMA5D27_SDMMC0_MOUNT_FSTYPE,
-              0, NULL);
+  ret = nx_mount(CONFIG_SAMA5D27_SDMMC0_MOUNT_BLKDEV,
+                 CONFIG_SAMA5D27_SDMMC0_MOUNT_MOUNTPOINT,
+                 CONFIG_SAMA5D27_SDMMC0_MOUNT_FSTYPE,
+                 0, NULL);
 
   if (ret < 0)
     {
       mcerr("ERROR: Failed to mount %s: %d\n",
-           CONFIG_SAMA5D27_SDMMC0_MOUNT_MOUNTPOINT, errno);
+           CONFIG_SAMA5D27_SDMMC0_MOUNT_MOUNTPOINT, ret);
     }
 #endif
 #endif
@@ -207,15 +208,15 @@ static int nsh_sdmmc_initialize(void)
 #ifdef CONFIG_SAMA5D27_SDMMC1_MOUNT
   /* Mount the volume on SDMMC1 */
 
-  ret = mount(CONFIG_SAMA5D27_SDMMC1_MOUNT_BLKDEV,
-              CONFIG_SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT,
-              CONFIG_SAMA5D27_SDMMC1_MOUNT_FSTYPE,
-              0, NULL);
+  ret = nx_mount(CONFIG_SAMA5D27_SDMMC1_MOUNT_BLKDEV,
+                 CONFIG_SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT,
+                 CONFIG_SAMA5D27_SDMMC1_MOUNT_FSTYPE,
+                 0, NULL);
 
   if (ret < 0)
     {
       mcerr("ERROR: Failed to mount %s: %d\n",
-           CONFIG_SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT, errno);
+           CONFIG_SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT, ret);
     }
 #endif
 #endif
@@ -274,14 +275,14 @@ int sam_bringup(void)
     {
       /* Mount the file system */
 
-      ret = mount(CONFIG_GIANT_BOARD_ROMFS_ROMDISK_DEVNAME,
-                  CONFIG_GIANT_BOARD_ROMFS_MOUNT_MOUNTPOINT,
-                  "romfs", MS_RDONLY, NULL);
+      ret = nx_mount(CONFIG_GIANT_BOARD_ROMFS_ROMDISK_DEVNAME,
+                     CONFIG_GIANT_BOARD_ROMFS_MOUNT_MOUNTPOINT,
+                     "romfs", MS_RDONLY, NULL);
       if (ret < 0)
         {
-          fserr("ERROR: mount(%s,%s,romfs) failed: %d\n",
+          fserr("ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
                CONFIG_GIANT_BOARD_ROMFS_ROMDISK_DEVNAME,
-               CONFIG_GIANT_BOARD_ROMFS_MOUNT_MOUNTPOINT, errno);
+               CONFIG_GIANT_BOARD_ROMFS_MOUNT_MOUNTPOINT, ret);
         }
     }
 #endif
@@ -361,7 +362,7 @@ int sam_bringup(void)
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
-  ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  ret = nx_mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
   if (ret < 0)
     {
       ferr("ERROR: Failed to mount procfs at %s: %d\n",

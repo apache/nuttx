@@ -197,7 +197,9 @@ struct lpc31_qh_s
   uint8_t pad[8];                /* Padding to assure 32-byte alignment */
 };
 
-/* Internal representation of the EHCI Queue Element Transfer Descriptor (qTD) */
+/* Internal representation of the EHCI Queue Element Transfer Descriptor
+ * (qTD)
+ */
 
 struct lpc31_qtd_s
 {
@@ -2354,7 +2356,9 @@ static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
           tokenbits |= QTD_TOKEN_PID_IN;
         }
 
-      /* Allocate a new Queue Element Transfer Descriptor (qTD) for the status */
+      /* Allocate a new Queue Element Transfer Descriptor (qTD)
+       * for the status
+       */
 
       qtd = lpc31_qtd_statusphase(tokenbits);
       if (qtd == NULL)
@@ -4166,11 +4170,14 @@ static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
  *
  ****************************************************************************/
 
-static int lpc31_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int lpc31_free(FAR struct usbhost_driver_s *drvr,
+                      FAR uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
-  /* No special action is require to free the transfer/descriptor buffer memory */
+  /* No special action is require to free the transfer/descriptor buffer
+   * memory
+   */
 
   kmm_free(buffer);
   return OK;
@@ -4316,7 +4323,9 @@ static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
         req->index[1], req->index[0], len);
 #endif
 
-  /* We must have exclusive access to the EHCI hardware and data structures. */
+  /* We must have exclusive access to the EHCI hardware and data
+   * structures.
+   */
 
   ret = lpc31_takesem(&g_ehci.exclsem);
   if (ret < 0)
@@ -4324,7 +4333,9 @@ static int lpc31_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       return ret;
     }
 
-  /* Set the request for the IOC event well BEFORE initiating the transfer. */
+  /* Set the request for the IOC event well BEFORE initiating the
+   * transfer.
+   */
 
   ret = lpc31_ioc_setup(rhport, ep0info);
   if (ret != OK)
@@ -4416,7 +4427,9 @@ static ssize_t lpc31_transfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
 
-  /* We must have exclusive access to the EHCI hardware and data structures. */
+  /* We must have exclusive access to the EHCI hardware and data
+   * structures.
+   */
 
   ret = lpc31_takesem(&g_ehci.exclsem);
   if (ret < 0)
@@ -4424,7 +4437,9 @@ static ssize_t lpc31_transfer(FAR struct usbhost_driver_s *drvr,
       return (ssize_t)ret;
     }
 
-  /* Set the request for the IOC event well BEFORE initiating the transfer. */
+  /* Set the request for the IOC event well BEFORE initiating the
+   * transfer.
+   */
 
   ret = lpc31_ioc_setup(rhport, epinfo);
   if (ret != OK)
@@ -4494,15 +4509,15 @@ errout_with_sem:
  * Input Parameters:
  *   drvr     - The USB host driver instance obtained as a parameter from
  *              the call to the class create() method.
- *   ep       - The IN or OUT endpoint descriptor for the device endpoint on
- *              which to perform the transfer.
+ *   ep       - The IN or OUT endpoint descriptor for the device endpoint
+ *              on which to perform the transfer.
  *   buffer   - A buffer containing the data to be sent (OUT endpoint) or
  *              received (IN endpoint).  buffer must have been allocated
  *              using DRVR_ALLOC
  *   buflen   - The length of the data to be sent or received.
  *   callback - This function will be called when the transfer completes.
- *   arg      - The arbitrary parameter that will be passed to the callback
- *              function when the transfer completes.
+ *   arg      - The arbitrary parameter that will be passed to the
+ *              callback function when the transfer completes.
  *
  * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
@@ -4525,7 +4540,9 @@ static int lpc31_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
 
-  /* We must have exclusive access to the EHCI hardware and data structures. */
+  /* We must have exclusive access to the EHCI hardware and data
+   * structures.
+   */
 
   ret = lpc31_takesem(&g_ehci.exclsem);
   if (ret < 0)
@@ -4533,7 +4550,9 @@ static int lpc31_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       return ret;
     }
 
-  /* Set the request for the callback well BEFORE initiating the transfer. */
+  /* Set the request for the callback well BEFORE initiating the
+   * transfer.
+   */
 
   ret = lpc31_ioc_async_setup(rhport, epinfo, callback, arg);
   if (ret != OK)
@@ -4962,7 +4981,9 @@ static int lpc31_reset(void)
       return -ETIMEDOUT;
     }
 
-  /* Now we can set the HCReset bit in the USBCMD register to initiate the reset */
+  /* Now we can set the HCReset bit in the USBCMD register to initiate the
+   * reset
+   */
 
   regval  = lpc31_getreg(&HCOR->usbcmd);
   regval |= EHCI_USBCMD_HCRESET;
@@ -5406,7 +5427,9 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_putreg(regval, &HCOR->usbcmd);
 
-  /* Start the host controller by setting the RUN bit in the USBCMD register. */
+  /* Start the host controller by setting the RUN bit in the USBCMD
+   * register.
+   */
 
   regval  = lpc31_getreg(&HCOR->usbcmd);
   regval |= EHCI_USBCMD_RUN;

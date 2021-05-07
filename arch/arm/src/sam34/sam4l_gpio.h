@@ -1,56 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/sam4l_gpio.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_SAM4L_GPIO_H
 #define __ARCH_ARM_SRC_SAM34_SAM4L_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Bit-encoded input to sam_configgpio() ********************************************/
+/* Bit-encoded input to sam_configgpio() ************************************/
 
-/* 24-bit Encoding.  This could be compacted into 16-bits by making the bit usage
- * mode specific.  However, by giving each bit field a unique position, we handle
- * bad combinations of properties safely.
+/* 24-bit Encoding.  This could be compacted into 16-bits by making the bit
+ * usage mode specific.  However, by giving each bit field a unique position,
+ * we handle bad combinations of properties safely.
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
@@ -173,7 +158,8 @@
  */
 
 #define GPIO_DRIVE_SHIFT           (14)       /* Bits 14-15: Interrupting input control */
-#define GPIO_DRIVE_MASK            (3 << GPIO_INT_SHIFT) /* Lowest drive strength*/
+
+#define GPIO_DRIVE_MASK            (3 << GPIO_INT_SHIFT) /* Lowest drive strength */
 #  define GPIO_DRIVE_LOW           (0 << GPIO_INT_SHIFT)
 #  define GPIO_DRIVE_MEDLOW        (1 << GPIO_INT_SHIFT)
 #  define GPIO_DRIVE_MEDHIGH       (2 << GPIO_INT_SHIFT)
@@ -193,7 +179,8 @@
 
 #define GPIO_SLEW                  (1 << 13)  /* Bit 13: Enable output slew control */
 
-/* If the pin is an GPIO output, then this identifies the initial output value:
+/* If the pin is an GPIO output, then this identifies the initial
+ * output value:
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
@@ -226,10 +213,12 @@
 #  define GPIO_INT_RISING          (1 << GPIO_INT_SHIFT) /* Rising edge */
 #  define GPIO_INT_FALLING         (2 << GPIO_INT_SHIFT) /* Falling edge */
 
-/* These combinations control events.  These help to clean up pin definitions. */
+/* These combinations control events.
+ * These help to clean up pin definitions.
+ */
 
-#define GPIO_EVENT_CHANGE          (GPIO_PERIPH_EVENTS | GPIO_INT_CHANGE) /* Pin change */
-#define GPIO_EVENT_RISING          (GPIO_PERIPH_EVENTS | GPIO_INT_RISING) /* Rising edge */
+#define GPIO_EVENT_CHANGE          (GPIO_PERIPH_EVENTS | GPIO_INT_CHANGE)  /* Pin change */
+#define GPIO_EVENT_RISING          (GPIO_PERIPH_EVENTS | GPIO_INT_RISING)  /* Rising edge */
 #define GPIO_EVENT_FALLING         (GPIO_PERIPH_EVENTS | GPIO_INT_FALLING) /* Falling edge */
 
 /* Enable input/periphal glitch filter
@@ -325,23 +314,23 @@
 #define GPIO_PIN30                 (30 << GPIO_PIN_SHIFT)
 #define GPIO_PIN31                 (31 << GPIO_PIN_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Must be big enough to hold the 24-bit encoding */
 
 typedef uint32_t gpio_pinset_t;
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -352,9 +341,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

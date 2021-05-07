@@ -1,57 +1,43 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imx6/hardware/imx_uart.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Reference:
- *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual," Document Number
- *   IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
+
+/* Reference:
+ *   "i.MX 6Dual/6Quad ApplicationsProcessor Reference Manual",
+ *   Document Number IMX6DQRM, Rev. 3, 07/2015, FreeScale.
+ */
 
 #ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_UART_H
 #define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_UART_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imx_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* UART Register Offsets ************************************************************/
+/* UART Register Offsets ****************************************************/
 
 #define UART_RXD_OFFSET        0x0000 /* UART receiver register */
 #define UART_TXD_OFFSET        0x0040 /* UART receiver register */
@@ -71,7 +57,7 @@
 #define UART_UTS_OFFSET        0x00b4 /* UART test register */
 #define UART_UMCR_OFFSET       0x00b8 /* UART RS-485 Mode Control Register */
 
-/* UART Register Addresses **********************************************************/
+/* UART Register Addresses **************************************************/
 
 #define UART1_RXD              (IMX_UART1_VBASE+UART_RXD_OFFSET)
 #define UART1_TXD              (IMX_UART1_VBASE+UART_TXD_OFFSET)
@@ -163,7 +149,7 @@
 #define UART5_UTS              (IMX_UART5_VBASE+UART_UTS_OFFSET)
 #define UART5_UMCR             (IMX_UART5_VBASE+UART_UMCR_OFFSET)
 
-/* UART Register Bit Definitions ****************************************************/
+/* UART Register Bit Definitions ********************************************/
 
 /* UART Receiver Register */
 
@@ -199,6 +185,7 @@
 #  define UART_UCR1_ICD_8FRMS  (1 << UART_UCR1_ICD_SHIFT) /* Idle for more than 8 frames */
 #  define UART_UCR1_ICD_16FRMS (2 << UART_UCR1_ICD_SHIFT) /* Idle for more than 16 frames */
 #  define UART_UCR1_ICD_32FRMS (3 << UART_UCR1_ICD_SHIFT) /* Idle for more than 32 frames */
+
 #define UART_UCR1_IDEN         (1 << 12) /* Bit 12: Idle condition detected interrupt enable */
 #define UART_UCR1_TRDYEN       (1 << 13) /* Bit 13: Transmitter ready interrupt enable */
 #define UART_UCR1_ADBR         (1 << 14) /* Bit 14: Automatic detection of baud rate */
@@ -220,6 +207,7 @@
 #  define UART_UCR2_RTEC_RISE  (0 << UART_UCR2_RTEC_SHIFT) /* Interrupt on rising edge */
 #  define UART_UCR2_RTEC_FALL  (1 << UART_UCR2_RTEC_SHIFT) /* Interrupt on falling edge */
 #  define UART_UCR2_RTEC_BOTH  (2 << UART_UCR2_RTEC_SHIFT) /* Interrupt on any edge */
+
 #define UART_UCR2_ESCEN        (1 << 11) /* Bit 11: Escape enable */
 #define UART_UCR2_CTS          (1 << 12) /* Bit 12: Clear To Send pin */
 #define UART_UCR2_CTSC         (1 << 13) /* Bit 13: CTS Pin control */
@@ -278,6 +266,7 @@
 #  define UART_UFCR_RFDIV2     (4 << UART_UFCR_RFDIV_SHIFT) /* Divide input clock by 2 */
 #  define UART_UFCR_RFDIV1     (5 << UART_UFCR_RFDIV_SHIFT) /* Divide input clock by 1 */
 #  define UART_UFCR_RFDIV7     (6 << UART_UFCR_RFDIV_SHIFT) /* Divide input clock by 7 */
+
 #define UART_UFCR_TXTL_SHIFT   10        /* Bits 10-15: Transmitter Trigger Level */
 #define UART_UFCR_TXTL_MASK    (0x3f << UART_UFCR_TXTL_SHIFT)
 #  define UART_UFCR_TXTL(n)    ((uint32_t)(n) << UART_UFCR_TXTL_SHIFT)

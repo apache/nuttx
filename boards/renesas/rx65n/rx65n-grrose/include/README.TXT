@@ -60,7 +60,7 @@ README
     gid:    Group ID
     users:  A comma separated list of members of the group
 
-  /etc/init.d/rcS should have the following contents : 
+  /etc/init.d/rcS should have the following contents :
   vi rcS
   echo "This is NuttX"
 

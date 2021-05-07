@@ -68,7 +68,8 @@ static struct lpc43_aes_s *g_aes;
  * Private Functions
  ****************************************************************************/
 
-static int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
+static int aes_init(FAR const void *iv,
+                    FAR const void *key, uint32_t keysize,
                     int mode, int encrypt)
 {
   unsigned int cmd = 0;
@@ -96,40 +97,42 @@ static int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
 
   if (encrypt == CYPHER_ENCRYPT)
     {
-      cmd = mode == AES_MODE_ECB ? AES_API_CMD_ENCODE_ECB : AES_API_CMD_ENCODE_CBC;
+      cmd = mode == AES_MODE_ECB ?
+                    AES_API_CMD_ENCODE_ECB : AES_API_CMD_ENCODE_CBC;
     }
   else
     {
-      cmd = mode == AES_MODE_ECB ? AES_API_CMD_DECODE_ECB : AES_API_CMD_DECODE_CBC;
+      cmd = mode == AES_MODE_ECB ?
+                    AES_API_CMD_DECODE_ECB : AES_API_CMD_DECODE_CBC;
     }
 
-  g_aes->aes_Init();
+  g_aes->aes_init();
 
   if (key != NULL)
     {
-      g_aes->aes_LoadKeySW(key);
+      g_aes->aes_load_key_sw(key);
     }
   else
     {
       switch (keysize)
         {
           case 0:
-            g_aes->aes_LoadKey1();
+            g_aes->aes_load_key1();
             break;
 
           case 1:
-            g_aes->aes_LoadKey2();
+            g_aes->aes_load_key2();
             break;
 
           case 2:
-            g_aes->aes_LoadKeyRNG();
+            g_aes->aes_load_key_rng();
             break;
         }
     }
 
-  g_aes->aes_LoadIV_SW((const unsigned char*)iv);
+  g_aes->aes_load_iv_sw((const unsigned char *)iv);
 
-  ret = g_aes->aes_SetMode(cmd);
+  ret = g_aes->aes_set_mode(cmd);
   switch (ret)
     {
       case AES_API_ERR_WRONG_CMD:
@@ -148,7 +151,8 @@ static int aes_init(FAR const void *iv, FAR const void *key, uint32_t keysize,
   return 0;
 }
 
-static int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in,
+static int aes_update(FAR const void *out,
+                      uint32_t *outl, FAR const void *in,
                       uint32_t inl)
 {
   if (g_aes == NULL)
@@ -166,8 +170,8 @@ static int aes_update(FAR const void *out, uint32_t *outl, FAR const void *in,
       return -EINVAL;
     }
 
-  return g_aes->aes_Operate((unsigned char*)out,
-                            (unsigned char*)in, inl / 16);
+  return g_aes->aes_operate((unsigned char *)out,
+                            (unsigned char *)in, inl / 16);
 }
 
 /****************************************************************************
@@ -180,7 +184,7 @@ int aes_cypher(void *out, const void *in, uint32_t size, const void *iv,
   unsigned int ret = 0;
   uint32_t outl = size;
 
-  g_aes = (struct lpc43_g_aes*)*((uint32_t*)LPC43_ROM_AES_DRIVER_TABLE);
+  g_aes = (struct lpc43_g_aes *) * ((uint32_t *)LPC43_ROM_AES_DRIVER_TABLE);
 
   ret = aes_init(iv, key, keysize, mode, encrypt);
 

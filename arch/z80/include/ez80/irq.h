@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/include/ez80/irq.h
  *
- *   Copyright (C) 2008-2009, 2015, 2020 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -218,23 +203,23 @@
 /* Byte offsets */
 
 #  define XCPT_I_OFFSET  (3*XCPT_I)      /* Offset 0: Saved 24-bit interrupt vector register */
-#    define XCPT_IF_OFFSET (2*XCPT_I+1)  /* Offset 1: Saved flags. P set if interrupts enabled */
-#    define XCPT_IA_OFFSET (2*XCPT_I+2)  /* Offset 2: Saved lower 8-bits of interrupt vector register */
+#    define XCPT_IF_OFFSET (3*XCPT_I+0)  /* Offset 0: Saved flags. P set if interrupts enabled */
+#    define XCPT_IA_OFFSET (3*XCPT_I+1)  /* Offset 1: Saved lower 8-bits of interrupt vector register */
 #  define XCPT_BC_OFFSET   (3*XCPT_BC)   /* Offset 3: Saved 24-bit BC register */
-#    define XCPT_C_OFFSET  (3*XCPT_BC+1) /* Offset 4: Saved 8-bit C register */
-#    define XCPT_B_OFFSET  (3*XCPT_BC+2) /* Offset 5: Saved 8-bit D register */
+#    define XCPT_C_OFFSET  (3*XCPT_BC+0) /* Offset 3: Saved 8-bit C register */
+#    define XCPT_B_OFFSET  (3*XCPT_BC+1) /* Offset 4: Saved 8-bit B register */
 #  define XCPT_DE_OFFSET   (3*XCPT_DE)   /* Offset 6: Saved 24-bit DE register */
-#    define XCPT_E_OFFSET  (3*XCPT_DE+1) /* Offset 7: Saved 8-bit E register */
-#    define XCPT_D_OFFSET  (3*XCPT_DE+2) /* Offset 8: Saved 8-bit D register */
+#    define XCPT_E_OFFSET  (3*XCPT_DE+0) /* Offset 6: Saved 8-bit E register */
+#    define XCPT_D_OFFSET  (3*XCPT_DE+1) /* Offset 7: Saved 8-bit D register */
 #  define XCPT_IX_OFFSET   (3*XCPT_IX)   /* Offset 9: Saved 24-bit IX register */
 #  define XCPT_IY_OFFSET   (3*XCPT_IY)   /* Offset 12: Saved 24-bit IY register */
 #  define XCPT_SP_OFFSET   (3*XCPT_SP)   /* Offset 15: Saved 24-bit SP at time of interrupt */
 #  define XCPT_HL_OFFSET   (3*XCPT_HL)   /* Offset 18: Saved 24-bit HL register */
-#    define XCPT_L_OFFSET  (3*XCPT_HL+1) /* Offset 19: Saved 8-bit L register */
-#    define XCPT_H_OFFSET  (3*XCPT_HL+2) /* Offset 20: Saved 8-bit H register */
+#    define XCPT_L_OFFSET  (3*XCPT_HL+0) /* Offset 18: Saved 8-bit L register */
+#    define XCPT_H_OFFSET  (3*XCPT_HL+1) /* Offset 19: Saved 8-bit H register */
 #  define XCPT_AF_OFFSET   (3*XCPT_AF)   /* Offset 21: Saved AF register */
-#    define XCPT_F_OFFSET  (3*XCPT_AF+1) /* Offset 22: Saved AF register */
-#    define XCPT_A_OFFSET  (3*XCPT_AF+2) /* Offset 23: Saved 8-bit A register */
+#    define XCPT_F_OFFSET  (3*XCPT_AF+0) /* Offset 21: Saved AF register */
+#    define XCPT_A_OFFSET  (3*XCPT_AF+1) /* Offset 22: Saved 8-bit A register */
 #  define XCPT_PC_OFFSET   (3*XCPT_PC)   /* Offset 24: Offset to 24-bit PC at time of interrupt */
 #  define XCPTCONTEXT_SIZE (3*XCPTCONTEXT_REGS)
 #endif

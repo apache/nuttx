@@ -1,10 +1,11 @@
-/************************************************************************************
- * arch/arm/src/tiva/cc13xx/cc13x2_cc26xx2_v1_rom.h
+/****************************************************************************
+ * arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v2_rom.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This is a port of TI's rom.h file which has a fully compatible BSD license:
+ * This is a port of TI's rom.h file which has a fully compatible BSD
+ * license:
  *
  *    Copyright (c) 2015-2017, Texas Instruments Incorporated
  *    All rights reserved.
@@ -36,17 +37,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_CC13XX_CC13X2_CC26X2_V2_ROM_H
 #define __ARCH_ARM_SRC_TIVA_CC13XX_CC13X2_CC26X2_V2_ROM_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Start address of the ROM hard API access table (located after the ROM FW rev
- * field)
+/* Start address of the ROM hard API access table
+ * (located after the ROM FW rev field)
  */
 
 #define ROM_HAPI_TABLE_ADDR 0x10000048
@@ -968,9 +969,9 @@
     ((uint32_t (*)(uint32_t irqFlags)) \
     ROM_API_SHA2_TABLE[5])
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* ROM Hard-API function interface types */
 
@@ -1049,15 +1050,16 @@ struct hard_api_s
 
 typedef struct hard_api_s hard_api_t;
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rom_signextend_vddrtrim
  *
  * Description:
- *   Sign extend the VDDR_TRIM setting (special format ranging from -10 to +21)
+ *   Sign extend the VDDR_TRIM setting
+ *   (special format ranging from -10 to +21)
  *
  * Input Parameters
  *   vddrtrim - VDDR_TRIM setting
@@ -1065,7 +1067,7 @@ typedef struct hard_api_s hard_api_t;
  * Returned Value:
  *  Returns sign extended VDDR_TRIM setting.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int32_t rom_signextend_vddrtrim(uint32_t vddrtrim)
 {

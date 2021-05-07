@@ -19,11 +19,11 @@
  ****************************************************************************/
 
 /* References:
- *  "Cortex-A5™ MPCore, Technical Reference Manual",
- *   Revision: r0p1, Copyright © 2010 ARM.
+ *  "Cortex-A5 MPCore, Technical Reference Manual",
+ *   Revision: r0p1, Copyright 2010 ARM.
  *   All rights reserved. ARM DDI 0434B (ID101810)
- *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
- *   Copyright © 1996-1998, 2000, 2004-2012 ARM.
+ *  "ARM Architecture Reference Manual, ARMv7-A and ARMv7-R edition",
+ *   Copyright 1996-1998, 2000, 2004-2012 ARM.
  *  All rights reserved. ARM DDI 0406C.b (ID072512)
  */
 
@@ -38,7 +38,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Reference: Cortex-A5™ MPCore Paragraph 4.2, "Register summary." */
+/* Reference: Cortex-A5 MPCore Paragraph 4.2, "Register summary." */
 
 /* Main ID Register (MIDR) */
 
@@ -291,27 +291,27 @@
 
 /* Get the device ID */
 
-	.macro	cp15_rdid, id
-	mrc	p15, 0, \id, c0, c0, 0
-	.endm
+.macro cp15_rdid, id
+  mrc p15, 0, \id, c0, c0, 0
+.endm
 
 /* Read/write the system control register (SCTLR) */
 
-	.macro	cp15_rdsctlr, sctlr
-	mrc	p15, 0, \sctlr, c1, c0, 0
-	.endm
+.macro cp15_rdsctlr, sctlr
+  mrc p15, 0, \sctlr, c1, c0, 0
+.endm
 
-	.macro	cp15_wrsctlr, sctlr
-	mcr	p15, 0, \sctlr, c1, c0, 0
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	.endm
+.macro cp15_wrsctlr, sctlr
+  mcr p15, 0, \sctlr, c1, c0, 0
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+.endm
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

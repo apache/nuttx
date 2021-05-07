@@ -120,7 +120,8 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
  *   ipaddr - The IPv6 address to use in the lookup;
  *   laddr  - Location to return the corresponding link layer address.
  *            This address may be NULL.  In that case, this function may be
- *            used simply to determine if the link layer address is available.
+ *            used simply to determine if the link layer address is
+ *            available.
  *
  * Returned Value:
  *   Zero (OK) if the link layer address is returned.  A negated errno value

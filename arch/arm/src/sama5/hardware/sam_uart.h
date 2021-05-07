@@ -1,58 +1,47 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_uart.h
- * Universal Asynchronous Receiver Transmitter (UART) for the SAMA5D2, SAMA5D3, and SAMA5D4 and
- * Universal Synchronous Asynchronous Receiver Transmitter (USART) definitions for the SAMA5D3
- * and SAMAD4
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************/
+ ****************************************************************************/
+
+/* Universal Asynchronous Receiver Transmitter (UART)
+ * for the SAMA5D2, SAMA5D3, and SAMA5D4 and
+ * Universal Synchronous Asynchronous Receiver Transmitter (USART)
+ * definitions for the SAMA5D3 and SAMAD4
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_UART_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_UART_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ****************************************************************************/
 
-/* UART register offsets ************************************************************************/
+/* UART register offsets ****************************************************/
+
 /* Key:
  *   (1) Common to both UART and SAMA5D3/4 USART
  *   (2) SAMA5D3/4 USART only
@@ -92,7 +81,7 @@
 #endif
                                             /* 0x00ec-0xfc: Reserved (USART) */
 
-/* UART register addresses **********************************************************************/
+/* UART register addresses **************************************************/
 
 #define SAM_UART0_CR                 (SAM_UART0_VBASE+SAM_UART_CR_OFFSET)
 #define SAM_UART0_MR                 (SAM_UART0_VBASE+SAM_UART_MR_OFFSET)
@@ -277,7 +266,7 @@
 #  endif
 #endif
 
-/* UART register bit definitions ****************************************************************/
+/* UART register bit definitions ********************************************/
 
 /* UART Control Register */
 
@@ -329,17 +318,20 @@
 #    define UART_MR_MODE_IRDA        (8  << UART_MR_MODE_SHIFT) /* IrDA */
 #    define UART_MR_MODE_SPIMSTR     (14 << UART_MR_MODE_SHIFT) /* SPI Master (SPI mode only) */
 #    define UART_MR_MODE_SPISLV      (15 << UART_MR_MODE_SHIFT) /* SPI Slave (SPI mode only) */
+
 #  define UART_MR_USCLKS_SHIFT       (4)       /* Bits 4-5: Clock Selection (3) */
 #  define UART_MR_USCLKS_MASK        (3 << UART_MR_USCLKS_SHIFT)
 #    define UART_MR_USCLKS_MCK       (0 << UART_MR_USCLKS_SHIFT) /* MCK */
 #    define UART_MR_USCLKS_MCKDIV    (1 << UART_MR_USCLKS_SHIFT) /* MCK/DIV (DIV = 8) */
 #    define UART_MR_USCLKS_SCK       (3 << UART_MR_USCLKS_SHIFT) /* SCK */
+
 #  define UART_MR_CHRL_SHIFT         (6)       /* Bits 6-7: Character Length (3) */
 #  define UART_MR_CHRL_MASK          (3 << UART_MR_CHRL_SHIFT)
 #    define UART_MR_CHRL_5BITS       (0 << UART_MR_CHRL_SHIFT) /* 5 bits */
 #    define UART_MR_CHRL_6BITS       (1 << UART_MR_CHRL_SHIFT) /* 6 bits */
 #    define UART_MR_CHRL_7BITS       (2 << UART_MR_CHRL_SHIFT) /* 7 bits */
 #    define UART_MR_CHRL_8BITS       (3 << UART_MR_CHRL_SHIFT) /* 8 bits */
+
 #  define UART_MR_SYNC               (1 << 8)  /* Bit 8: Synchronous Mode Select (4) */
 #  define UART_MR_CPHA               (1 << 8)  /* Bit 8: SPI Clock Phase (5) */
 #endif
@@ -395,8 +387,10 @@
 #  define UART_MR_ONEBIT             (1 << 31) /* Bit 31: Start Frame Delimiter Selector (4) */
 #endif
 
-/* UART Interrupt Enable Register, UART Interrupt Disable Register, UART Interrupt Mask
- * Register, and UART Status Register common bit field definitions
+/* UART Interrupt Enable Register,
+ * UART Interrupt Disable Register,
+ * UART Interrupt Mask Register, and
+ * UART Status Register common bit field definitions
  *
  * NOTES:
  * (1) Common to UART and USART (all modes)
@@ -530,6 +524,7 @@
 #    define UART_MAN_TXPP_ALLZERO    (1 << UART_MAN_TXPP_SHIFT) /* ALL_ZERO */
 #    define UART_MAN_TXPP_ZEROONE    (2 << UART_MAN_TXPP_SHIFT) /* ZERO_ONE */
 #    define UART_MAN_TXPP_ONEZERO    (3 << UART_MAN_TXPP_SHIFT) /* ONE_ZERO */
+
 #  define UART_MAN_TXMPOL            (1 << 12) /* Bit 12: Transmitter Manchester Polarity (USART only) */
 #  define UART_MAN_RXPL_SHIFT        (16)      /* Bits 16-19: Receiver Preamble Length (USART only) */
 #  define UART_MAN_RXPL_MASK         (15 << UART_MAN_RXPL_SHIFT)
@@ -539,6 +534,7 @@
 #    define UART_MAN_RXPP_ALLZERO    (1 << UART_MAN_RXPP_SHIFT) /* ALL_ZERO */
 #    define UART_MAN_RXPP_ZEROONE    (2 << UART_MAN_RXPP_SHIFT) /* ZERO_ONE */
 #    define UART_MAN_RXPP_ONEZERO    (3 << UART_MAN_RXPP_SHIFT) /* ONE_ZERO */
+
 #  define UART_MAN_RXMPOL            (1 << 28) /* Bit 28: Receiver Manchester Polarity (USART only) */
 #  define UART_MAN_ONE               (1 << 29) /* Bit 29: Must Be Set to 1 */
 #  define UART_MAN_DRIFT             (1 << 30) /* Bit 30: Drift compensation (USART only) */
@@ -553,6 +549,7 @@
 #  define UART_WPMR_WPKEY            (0x00554152 << UART_WPMR_WPKEY_SHIFT) /* "UAR" */
 
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
+
 /* USART Write Protect Status Register (USART only) */
 
 #  define UART_WPSR_WPVS             (1 << 0)  /* Bit 0: Write Protect Violation Status (USART only) */
@@ -560,16 +557,16 @@
 #  define UART_WPSR_WPVSRC_MASK      (0xffff << UART_WPSR_WPVSRC_SHIFT)
 #endif
 
-/************************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************
- * Public Functions
- ************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_UART_H */

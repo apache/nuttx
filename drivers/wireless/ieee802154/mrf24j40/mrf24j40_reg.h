@@ -170,6 +170,7 @@
 /* RXMCR bits */
 
 #define MRF24J40_RXMCR_PROMI       (1 << 0) /* Enable promisc mode (rx all valid packets) */
+
 #define MRF24J40_RXMCR_ERRPKT      0x02 /* Do not check CRC */
 #define MRF24J40_RXMCR_COORD       0x04 /* Enable coordinator mode     ??? DIFFERENCE ??? - not used in datasheet! */
 #define MRF24J40_RXMCR_PANCOORD    0x08 /* Enable PAN coordinator mode ??? DIFFERENCE ??? */
@@ -214,6 +215,7 @@
 /* TXNCON bits */
 
 #define MRF24J40_TXNCON_TXNTRIG    (1 << 0) /* Trigger packet tx, automatically cleared */
+
 #define MRF24J40_TXNCON_TXNSECEN   0x02 /* Enable security */
 #define MRF24J40_TXNCON_TXNACKREQ  0x04 /* An ACK is requested for this pkt */
 #define MRF24J40_TXNCON_INDIRECT   0x08 /* Activate indirect tx bit (for coordinators) */

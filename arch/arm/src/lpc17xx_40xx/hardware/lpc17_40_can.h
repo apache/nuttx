@@ -1,55 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_can.h
  *
- *   Copyright (C) 2010-2012, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_CAN_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* CAN acceptance filter registers */
 
 #define LPC17_40_CANAF_AFMR_OFFSET      0x0000 /* Acceptance Filter Register */
@@ -97,7 +83,8 @@
 #define LPC17_40_CAN_TDA3_OFFSET        0x0058 /* Transmit data bytes 1-4 (Tx Buffer 3) */
 #define LPC17_40_CAN_TDB3_OFFSET        0x005c /* Transmit data bytes 5-8 (Tx Buffer 3) */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
+
 /* CAN acceptance filter registers */
 
 #define LPC17_40_CANAF_AFMR             (LPC17_40_CANAF_BASE+LPC17_40_CANAF_AFMR_OFFSET)
@@ -170,48 +157,64 @@
 #define LPC17_40_CAN2_TDA3              (LPC17_40_CAN2_BASE+LPC17_40_CAN_TDA3_OFFSET)
 #define LPC17_40_CAN2_TDB3              (LPC17_40_CAN2_BASE+LPC17_40_CAN_TDB3_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
+
 /* CAN acceptance filter registers */
+
 /* Acceptance Filter Register */
 
 #define CANAF_AFMR_ACCOFF               (1 << 0)  /* Bit 0:  AF non-operational; All RX messages ignored */
 #define CANAF_AFMR_ACCBP                (1 << 1)  /* Bit 1:  AF bypass: All RX messages accepted */
 #define CANAF_AFMR_EFCAN                (1 << 2)  /* Bit 2:  Enable Full CAN mode */
                                                   /* Bits 3-31: Reserved */
+
 /* Standard Frame Individual Start Address Register */
+
                                                   /* Bits 0-1: Reserved */
 #define CANAF_SFFSA_SHIFT               (2)       /* Bits 2-10: Address of Standard Identifiers in AF Lookup RAM */
 #define CANAF_SFFSA_MASK                (0x01ff << CANAF_SFFSA_SHIFT)
                                                   /* Bits 11-31: Reserved */
+
 /* Standard Frame Group Start Address Register */
+
                                                   /* Bits 0-1: Reserved */
 #define CANAF_SFFGRPSA_SHIFT            (2)       /* Bits 2-10: Address of grouped Standard Identifiers in AF Lookup RAM */
 #define CANAF_SFFGRPSA_MASK             (0x01ff << CANAF_SFFGRPSA_SHIFT)
                                                   /* Bits 11-31: Reserved */
+
 /* Extended Frame Start Address Register */
+
                                                   /* Bits 0-1: Reserved */
 #define CANAF_EFFSA_SHIFT               (2)       /* Bits 2-10: Address of Extended Identifiers in AF Lookup RAM */
 #define CANAF_EFFSA_MASK                (0x01ff << CANAF_EFFSA_SHIFT)
                                                   /* Bits 11-31: Reserved */
+
 /* Extended Frame Group Start Address Register */
+
                                                   /* Bits 0-1: Reserved */
 #define CANAF_EFFGRPSA_SHIFT            (2)       /* Bits 2-10: Address of grouped Extended Identifiers in AF Lookup RAM */
 #define CANAF_EFFGRPSA_MASK             (0x01ff << CANAF_EFFGRPSA_SHIFT)
                                                   /* Bits 11-31: Reserved */
+
 /* End of AF Tables register */
+
                                                   /* Bits 0-1: Reserved */
 #define CANAF_EOT_SHIFT                 (2)       /* Bits 2-10: Last active address in last active AF table */
 #define CANAF_EOT_MASK                  (0x01ff << CANAF_EOT_SHIFT)
                                                   /* Bits 11-31: Reserved */
+
 /* LUT Error Address register */
+
                                                   /* Bits 0-1: Reserved */
 #define CANAF_LUTERRAD_SHIFT            (2)       /* Bits 2-10: Address in AF Lookup RAM of error */
 #define CANAF_LUTERRAD_MASK             (0x01ff << CANAF_EOT_SHIFT)
                                                   /* Bits 11-31: Reserved */
+
 /* LUT Error Register */
 
 #define CANAF_LUTERR_LUTERR             (1 << 0)  /* Bit 0: AF error in AF RAM tables */
                                                   /* Bits 1-31: Reserved */
+
 /* FullCAN interrupt enable register */
 
 #define CANAF_FCANIE_FCANIE             (1 << 0)  /* Bit 0: Global FullCAN Interrupt Enable */
@@ -226,6 +229,7 @@
 #define CANAF_FCANIC1_INTPND(n)         (1 << ((n)-32)) /* n=32,33,...63 */
 
 /* Central CAN registers */
+
 /* CAN Central Transmit Status Register */
 
 #define CAN_TXSR_TS1                    (1 << 0)  /* Bit 0:  CAN1 sending */
@@ -237,6 +241,7 @@
 #define CAN_TXSR_TCS1                   (1 << 16) /* Bit 16:  All CAN1 xmissions completed */
 #define CAN_TXSR_TCS2                   (1 << 17) /* Bit 17:  All CAN2 xmissions completed */
                                                   /* Bits 18-31: Reserved */
+
 /* CAN Central Receive Status Register */
 
 #define CAN_RXSR_RS1                    (1 << 0)  /* Bit 0:  CAN1 receiving */
@@ -248,6 +253,7 @@
 #define CAN_RXSR_DOS1                   (1 << 16) /* Bit 16:  All CAN1 message lost */
 #define CAN_RXSR_DOS2                   (1 << 17) /* Bit 17:  All CAN2 message lost */
                                                   /* Bits 18-31: Reserved */
+
 /* CAN Central Miscellaneous Register */
 
 #define CAN_MSR_E1                      (1 << 0)  /* Bit 0:  CAN1 error counters at limit */
@@ -256,7 +262,9 @@
 #define CAN_MSR_BS1                     (1 << 8)  /* Bit 8:  CAN1 busy */
 #define CAN_MSR_BS2                     (1 << 9)  /* Bit 7:  CAN2 busy */
                                                   /* Bits 10-31: Reserved */
+
 /* CAN1/2 registers */
+
 /* CAN operating mode */
 
 #define CAN_MOD_RM                      (1 << 0)  /* Bit 0:  Reset Mode */
@@ -268,6 +276,7 @@
                                                   /* Bit 6:  Reserved */
 #define CAN_MOD_TM                      (1 << 7)  /* Bit 7:  Test Mode */
                                                   /* Bits 8-31: Reserved */
+
 /* Command bits */
 
 #define CAN_CMR_TR                      (1 << 0)  /* Bit 0:  Transmission Request */
@@ -279,6 +288,7 @@
 #define CAN_CMR_STB2                    (1 << 6)  /* Bit 6:  Select Tx Buffer 2 */
 #define CAN_CMR_STB3                    (1 << 7)  /* Bit 7:  Select Tx Buffer 3 */
                                                   /* Bits 8-31: Reserved */
+
 /* Controller Status and Error Counters */
 
 #define CAN_GSR_RBS                     (1 << 0)  /* Bit 0:  Receive Buffer Status */
@@ -333,6 +343,7 @@
 # define CAN_ICR_ERRBIT_EOF             (26 << CAN_ICR_ERRBIT_SHIFT) /* End of Frame */
 # define CAN_ICR_ERRBIT_ACKDLM          (27 << CAN_ICR_ERRBIT_SHIFT) /* Acknowledge Delimiter */
 # define CAN_ICR_ERRBIT_OVLD            (28 << CAN_ICR_ERRBIT_SHIFT) /* Overload flag */
+
 #define CAN_ICR_ERRDIR                  (1 << 21) /* Bit 21: Direction bit at time of error */
 #define CAN_ICR_ERRC_SHIFT              (22)      /* Bits 22-23: Type of error */
 #define CAN_ICR_ERRC_MASK               (3 << CAN_ICR_ERRC_SHIFT)
@@ -357,6 +368,7 @@
 #define CAN_IER_TIE2                    (1 << 9)  /* Bit 9:  Transmit Interrupt Enable for Buffer2 */
 #define CAN_IER_TIE3                    (1 << 10) /* Bit 10: Transmit Interrupt Enable for Buffer3 */
                                                   /* Bits 11-31: Reserved */
+
 /* Bus Timing */
 
 #define CAN_BTR_BRP_SHIFT               (0)       /* Bits 0-9: Baud Rate Prescaler */
@@ -380,6 +392,7 @@
 #define CAN_EWL_SHIFT                   (0)       /* Bits 0-7: Error warning limit */
 #define CAN_EWL_MASK                    (0xff << CAN_EWL_SHIFT)
                                                   /* Bits 8-31: Reserved */
+
 /* Status Register */
 
 #define CAN_SR_RBS1                     (1 << 0)  /* Bit 0:  Receive Buffer Status */
@@ -407,6 +420,7 @@
 #define CAN_SR_ES3                      (1 << 22) /* Bit 22: Error Status */
 #define CAN_SR_BS3                      (1 << 23) /* Bit 23: Bus Status */
                                                   /* Bits 24-31: Reserved */
+
 /* Receive frame status */
 
 #define CAN_RFS_ID_SHIFT                (0)       /* Bits 0-9: ID Index */
@@ -423,8 +437,10 @@
 
 #define CAN_RID_ID11_MASK               (0x7ff)   /* Bits 0-10: 11-bit Identifier (FF=0) */
                                                   /* Bits 11-31: Reserved */
+
 #define CAN_RID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
-                                                  /* Bits 29-31: Reserved */
+                                                     /* Bits 29-31: Reserved */
+
 /* Received data bytes 1-4 */
 
 #define CAN_RDA_DATA1_SHIFT             (0)       /* Bits 0-7: If CANRFS >= 1 */
@@ -447,7 +463,8 @@
 #define CAN_RDB_DATA8_SHIFT             (24)      /* Bits 24-31: If CANRFS >= 8 */
 #define CAN_RDB_DATA8_MASK              (0x0ff << CAN_RDB_DATA8_SHIFT)
 
-/* Transmit frame info (Tx Buffer 1),  Transmit frame info (Tx Buffer 2), and
+/* Transmit frame info (Tx Buffer 1),
+ * Transmit frame info (Tx Buffer 2), and
  * Transmit frame info (Tx Buffer 3) common bit field definitions
  */
 
@@ -460,16 +477,19 @@
 #define CAN_TFI_RTR                     (1 << 30) /* Bit 30: TX RTR bit */
 #define CAN_TFI_FF                      (1 << 31) /* Bit 31: Message 29-bit vs 11-bit ID */
 
-/* Transmit Identifier (Tx Buffer 1), Transmit Identifier (Tx Buffer 2), and
+/* Transmit Identifier (Tx Buffer 1),
+ * Transmit Identifier (Tx Buffer 2), and
  * Transmit Identifier (Tx Buffer 3) common bit field definitions.
  */
 
 #define CAN_TID_ID11_MASK               (0x7ff)   /* Bits 0-10: 11-bit Identifier (FF=0) */
                                                   /* Bits 11-31: Reserved */
-#define CAN_TID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
-                                                  /* Bits 29-31: Reserved */
 
-/* Transmit data bytes 1-4 (Tx Buffer 1), Transmit data bytes 1-4 (Tx Buffer 2), and
+#define CAN_TID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
+                                                     /* Bits 29-31: Reserved */
+
+/* Transmit data bytes 1-4 (Tx Buffer 1),
+ * Transmit data bytes 1-4 (Tx Buffer 2), and
  * Transmit data bytes 1-4 (Tx Buffer 3) common bit field definitions.
  */
 
@@ -482,7 +502,8 @@
 #define CAN_TDA_DATA4_SHIFT             (24)      /* Bits 24-31: RTR=0 && DLC >= 4 */
 #define CAN_TDA_DATA4_MASK              (0x0ff << CAN_TDA_DATA4_SHIFT)
 
-/* Transmit data bytes 5-8 (Tx Buffer 1), Transmit data bytes 5-8 (Tx Buffer 2), and
+/* Transmit data bytes 5-8 (Tx Buffer 1),
+ * Transmit data bytes 5-8 (Tx Buffer 2), and
  * Transmit data bytes 5-8 (Tx Buffer 3) common bit field definitions.
  */
 
@@ -495,16 +516,16 @@
 #define CAN_RDB_DATA8_SHIFT             (24)      /* Bits 24-31: RTR=0 && DLC >= 8 */
 #define CAN_RDB_DATA8_MASK              (0x0ff << CAN_RDB_DATA8_SHIFT)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_CAN_H */

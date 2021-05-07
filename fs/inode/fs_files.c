@@ -83,7 +83,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
   do
     {
       tmp[i] = kmm_zalloc(sizeof(struct file) *
-                          CONFIG_NFCHUNK_DESCRIPTORS);
+                          CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
       if (tmp[i] == NULL)
         {
           while (--i >= list->fl_rows)
@@ -105,18 +105,6 @@ static int files_extend(FAR struct filelist *list, size_t row)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: files_initialize
- *
- * Description:
- *   This is called from the FS initialization logic to configure the files.
- *
- ****************************************************************************/
-
-void files_initialize(void)
-{
-}
 
 /****************************************************************************
  * Name: files_initlist
@@ -156,7 +144,7 @@ void files_releaselist(FAR struct filelist *list)
 
   for (i = list->fl_rows - 1; i >= 0; i--)
     {
-      for (j = CONFIG_NFCHUNK_DESCRIPTORS - 1; j >= 0; j--)
+      for (j = CONFIG_NFILE_DESCRIPTORS_PER_BLOCK - 1; j >= 0; j--)
         {
           file_close(&list->fl_files[i][j]);
         }
@@ -205,7 +193,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
    * if not, allocate a new filechunk.
    */
 
-  i = minfd / CONFIG_NFCHUNK_DESCRIPTORS;
+  i = minfd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
   if (i >= list->fl_rows)
     {
       ret = files_extend(list, i + 1);
@@ -218,7 +206,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
 
   /* Find free file */
 
-  j = minfd % CONFIG_NFCHUNK_DESCRIPTORS;
+  j = minfd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
   do
     {
       do
@@ -230,10 +218,10 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
               list->fl_files[i][j].f_inode  = inode;
               list->fl_files[i][j].f_priv   = priv;
               _files_semgive(list);
-              return i * CONFIG_NFCHUNK_DESCRIPTORS + j;
+              return i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j;
             }
         }
-      while (++j < CONFIG_NFCHUNK_DESCRIPTORS);
+      while (++j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
 
       j = 0;
     }
@@ -248,7 +236,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
       list->fl_files[i][0].f_pos    = pos;
       list->fl_files[i][0].f_inode  = inode;
       list->fl_files[i][0].f_priv   = priv;
-      ret = i * CONFIG_NFCHUNK_DESCRIPTORS;
+      ret = i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK;
     }
 
   _files_semgive(list);
@@ -279,7 +267,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 
   for (i = 0; i < plist->fl_rows; i++)
     {
-      for (j = 0; j < CONFIG_NFCHUNK_DESCRIPTORS; j++)
+      for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
           FAR struct file *filep;
 #ifdef CONFIG_FDCLONE_STDIO
@@ -291,7 +279,7 @@ int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
            * cloned.  Otherwise all file descriptors will be cloned.
            */
 
-          if (i * CONFIG_NFCHUNK_DESCRIPTORS + j >= 3)
+          if (i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j >= 3)
             {
               goto out;
             }
@@ -363,7 +351,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
       return -EAGAIN;
     }
 
-  if ((unsigned int)fd >= CONFIG_NFCHUNK_DESCRIPTORS * list->fl_rows)
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows)
     {
       return -EBADF;
     }
@@ -377,8 +365,8 @@ int fs_getfilep(int fd, FAR struct file **filep)
   ret = _files_semtake(list);
   if (ret >= 0)
     {
-      *filep = &list->fl_files[fd / CONFIG_NFCHUNK_DESCRIPTORS]
-                              [fd % CONFIG_NFCHUNK_DESCRIPTORS];
+      *filep = &list->fl_files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                              [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
       _files_semgive(list);
     }
 
@@ -413,7 +401,7 @@ int nx_dup2(int fd1, int fd2)
   list = nxsched_get_files();
   DEBUGASSERT(list != NULL);
 
-  if (fd1 < 0 || fd1 >= CONFIG_NFCHUNK_DESCRIPTORS * list->fl_rows ||
+  if (fd1 < 0 || fd1 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows ||
       fd2 < 0)
     {
       return -EBADF;
@@ -427,9 +415,9 @@ int nx_dup2(int fd1, int fd2)
       return ret;
     }
 
-  if (fd2 >= CONFIG_NFCHUNK_DESCRIPTORS * list->fl_rows)
+  if (fd2 >= CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * list->fl_rows)
     {
-      ret = files_extend(list, fd2 / CONFIG_NFCHUNK_DESCRIPTORS + 1);
+      ret = files_extend(list, fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + 1);
       if (ret < 0)
         {
           _files_semgive(list);
@@ -439,10 +427,10 @@ int nx_dup2(int fd1, int fd2)
 
   /* Perform the dup2 operation */
 
-  ret = file_dup2(&list->fl_files[fd1 / CONFIG_NFCHUNK_DESCRIPTORS]
-                                 [fd1 % CONFIG_NFCHUNK_DESCRIPTORS],
-                  &list->fl_files[fd2 / CONFIG_NFCHUNK_DESCRIPTORS]
-                                 [fd2 % CONFIG_NFCHUNK_DESCRIPTORS]);
+  ret = file_dup2(&list->fl_files[fd1 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                                 [fd1 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK],
+                  &list->fl_files[fd2 / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                                 [fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]);
   _files_semgive(list);
 
   return ret < 0 ? ret : fd2;
@@ -515,16 +503,16 @@ int nx_close(int fd)
 
   /* If the file was properly opened, there should be an inode assigned */
 
-  if (fd < 0 || fd >= list->fl_rows * CONFIG_NFCHUNK_DESCRIPTORS ||
-      !list->fl_files[fd / CONFIG_NFCHUNK_DESCRIPTORS]
-                     [fd % CONFIG_NFCHUNK_DESCRIPTORS].f_inode)
+  if (fd < 0 || fd >= list->fl_rows * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK ||
+      !list->fl_files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                     [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK].f_inode)
     {
       _files_semgive(list);
       return -EBADF;
     }
 
-  ret = file_close(&list->fl_files[fd / CONFIG_NFCHUNK_DESCRIPTORS]
-                                  [fd % CONFIG_NFCHUNK_DESCRIPTORS]);
+  ret = file_close(&list->fl_files[fd / CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]
+                                  [fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]);
   _files_semgive(list);
 
   return ret;

@@ -52,8 +52,8 @@
  ****************************************************************************/
 
 /* How many SSI modules does this chip support? The LM3S9B96 supports 2 SSI
- * modules (others may support more than 2 -- in such case, the following must
- * be expanded).
+ * modules (others may support more than 2 -- in such case, the following
+ * must be expanded).
  */
 
 #if TIVA_NSSI == 0
@@ -63,7 +63,7 @@
 #  undef CONFIG_TIVA_SSI1
 #endif
 
-/* EKK-LM3S9B96 Eval Kit ************************************************************/
+/* EKK-LM3S9B96 Eval Kit ****************************************************/
 
 /* GPIO Usage
  *
@@ -92,7 +92,7 @@
 #define LED_GPIO          (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTD | 0)
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

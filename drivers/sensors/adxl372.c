@@ -1,38 +1,22 @@
 /****************************************************************************
  * drivers/sensors/adxl372.c
- * Character driver for the ST ADXL372 Tri-axis accelerometer and gyroscope.
  *
- *   Copyright (C) 2017-2018 RAF Research LLC. All rights reserved.
- *   Author: Bob Feretich <bob.feretich@rafresearch.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright+
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- *****************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -114,17 +98,17 @@ static off_t    adxl372_seek(FAR struct file *filep, off_t offset,
 static int      adxl372_ioctl(FAR struct file *filep, int cmd,
                               unsigned long arg);
 
-static int      adxl372_dvr_open(FAR void *instance_handle, int32_t arg);
-static int      adxl372_dvr_close(FAR void *instance_handle, int32_t arg);
-static ssize_t  adxl372_dvr_read(FAR void *instance_handle,
+static int      adxl372_dvr_open(FAR void *instance, int32_t arg);
+static int      adxl372_dvr_close(FAR void *instance, int32_t arg);
+static ssize_t  adxl372_dvr_read(FAR void *instance,
                                  FAR char *buffer, size_t buflen);
-static ssize_t  adxl372_dvr_write(FAR void *instance_handle,
+static ssize_t  adxl372_dvr_write(FAR void *instance,
                                   FAR const char *buffer, size_t buflen);
-static off_t    adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
+static off_t    adxl372_dvr_seek(FAR void *instance, off_t offset,
                                  int whence);
-static int      adxl372_dvr_ioctl(FAR void *instance_handle, int cmd,
+static int      adxl372_dvr_ioctl(FAR void *instance, int cmd,
                                   unsigned long arg);
-static void     adxl372_dvr_exchange(FAR void *instance_handle,
+static void     adxl372_dvr_exchange(FAR void *instance,
                                      FAR const void *txbuffer,
                                      FAR void *rxbuffer, size_t nwords);
 
@@ -231,7 +215,9 @@ static uint8_t adxl372_read_register(FAR struct adxl372_dev_s *dev,
 {
   uint8_t reg_data;
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -261,16 +247,18 @@ static uint8_t adxl372_read_register(FAR struct adxl372_dev_s *dev,
   return reg_data;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: adxl372_read_registerblk
- ******************************************************************************/
+ ****************************************************************************/
 
 static void adxl372_read_registerblk(FAR struct adxl372_dev_s *dev,
                                      uint8_t reg_addr,
                                      FAR uint8_t *reg_data,
                                      uint8_t xfercnt)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -308,7 +296,9 @@ static void adxl372_read_registerblk(FAR struct adxl372_dev_s *dev,
 static void adxl372_write_register(FAR struct adxl372_dev_s *dev,
                                    uint8_t reg_addr, uint8_t reg_data)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -345,7 +335,9 @@ static void adxl372_write_registerblk(FAR struct adxl372_dev_s *dev,
                                       FAR uint8_t *reg_data,
                                       uint8_t xfercnt)
 {
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(dev->spi, true);
 
@@ -448,9 +440,9 @@ static uint32_t adxl372_read_id(FAR struct adxl372_dev_s *dev)
  * Name: adxl372_dvr_open
  ****************************************************************************/
 
-static int adxl372_dvr_open(FAR void *instance_handle, int32_t arg)
+static int adxl372_dvr_open(FAR void *instance, int32_t arg)
 {
-  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance_handle;
+  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance;
   FAR struct adxl372_reg_pair_s *initp;
   uint32_t pnpid;
   int sz;
@@ -487,7 +479,6 @@ static int adxl372_dvr_open(FAR void *instance_handle, int32_t arg)
       snwarn("ERROR: Invalid ADXL372_ID = 0x%08x\n", pnpid);
 
       priv->readonly = true;
-      set_errno(ENODEV);
     }
   else /* ID matches */
     {
@@ -542,14 +533,14 @@ static int adxl372_dvr_open(FAR void *instance_handle, int32_t arg)
  * Name: adxl372_dvr_close
  ****************************************************************************/
 
-static int adxl372_dvr_close(FAR void *instance_handle, int32_t arg)
+static int adxl372_dvr_close(FAR void *instance, int32_t arg)
 {
-  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance_handle;
+  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance;
 
   DEBUGASSERT(priv != NULL);
   UNUSED(arg);
 
-  /* Perform a reset to place the sensor in standby mode.*/
+  /* Perform a reset to place the sensor in standby mode. */
 
   adxl372_reset(priv);
 
@@ -563,15 +554,16 @@ static int adxl372_dvr_close(FAR void *instance_handle, int32_t arg)
  * Name: adxl372_dvr_read
  ****************************************************************************/
 
-static ssize_t adxl372_dvr_read(FAR void *instance_handle, FAR char *buffer,
+static ssize_t adxl372_dvr_read(FAR void *instance, FAR char *buffer,
                                 size_t buflen)
 {
-  FAR struct adxl372_dev_s *priv = ((FAR struct adxl372_dev_s *)instance_handle);
+  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance;
   union
   {
     int16_t d16;
     char    d8[2];
   } un;
+
   FAR char *p1;
   FAR char *p2;
   int i;
@@ -603,17 +595,16 @@ static ssize_t adxl372_dvr_read(FAR void *instance_handle, FAR char *buffer,
  * Name: adxl372_dvr_write
  ****************************************************************************/
 
-static ssize_t adxl372_dvr_write(FAR void *instance_handle,
+static ssize_t adxl372_dvr_write(FAR void *instance,
                                  FAR const char *buffer, size_t buflen)
 {
-  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance_handle;
+  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance;
 
   DEBUGASSERT(priv != NULL);
 
   if (priv->readonly)
     {
-      set_errno(EROFS);
-      return -1;
+      return -EROFS;
     }
 
   adxl372_write_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
@@ -626,11 +617,11 @@ static ssize_t adxl372_dvr_write(FAR void *instance_handle,
  * Name: adxl372_dvr_seek
  ****************************************************************************/
 
-static off_t adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
+static off_t adxl372_dvr_seek(FAR void *instance, off_t offset,
                               int whence)
 {
   off_t reg;
-  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance_handle;
+  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance;
 
   DEBUGASSERT(priv != NULL);
 
@@ -640,8 +631,7 @@ static off_t adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
         reg = priv->seek_address + offset;
         if (0 > reg || reg > ADXL372_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = reg;
@@ -654,16 +644,14 @@ static off_t adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
       case SEEK_SET:  /* Seek to designated address */
         if (0 > offset || offset > ADXL372_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = offset;
         break;
 
       default:        /* invalid whence */
-        set_errno(-EINVAL);
-        return -1;
+        return -EINVAL;
     }
 
   return priv->seek_address;
@@ -673,7 +661,7 @@ static off_t adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
  * Name: adxl372_dvr_ioctl
  ****************************************************************************/
 
-static int adxl372_dvr_ioctl(FAR void *instance_handle, int cmd,
+static int adxl372_dvr_ioctl(FAR void *instance, int cmd,
                              unsigned long arg)
 {
   int ret = OK;
@@ -698,7 +686,7 @@ static int adxl372_dvr_ioctl(FAR void *instance_handle, int cmd,
  *   Exchange a block of data on SPI using DMA
  *
  * Input Parameters:
- *   instance_handle - Pointer to struct adxl372_dev_s.
+ *   instance - Pointer to struct adxl372_dev_s.
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
  *   nwords   - the length of data to be exchanged in units of words.
@@ -712,14 +700,16 @@ static int adxl372_dvr_ioctl(FAR void *instance_handle, int cmd,
  *
  ****************************************************************************/
 
-static void adxl372_dvr_exchange(FAR void *instance_handle,
+static void adxl372_dvr_exchange(FAR void *instance,
                                  FAR const void *txbuffer,
                                  FAR void *rxbuffer, size_t nwords)
 {
-  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance_handle;
+  FAR struct adxl372_dev_s *priv = (FAR struct adxl372_dev_s *)instance;
   FAR struct spi_dev_s *spi = priv->spi;
 
-  /* Lock the SPI bus so that only one device can access it at the same time */
+  /* Lock the SPI bus so that only one device can access it
+   * at the same time
+   */
 
   SPI_LOCK(spi, true);
 
@@ -857,7 +847,7 @@ int adxl372_register(FAR const char *devpath,
 
   /* Initialize the ADXL372 accelerometer device structure. */
 
-  priv = (FAR struct adxl372_dev_s *)kmm_malloc(sizeof(struct adxl372_dev_s));
+  priv = kmm_malloc(sizeof(struct adxl372_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate accelerometer instance\n");

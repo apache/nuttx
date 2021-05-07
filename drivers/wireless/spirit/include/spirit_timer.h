@@ -1,5 +1,5 @@
 /******************************************************************************
- * include/nuttx/wireless/spirit/include/spirit_timer.h
+ * drivers/wireless/spirit/include/spirit_timer.h
  * Configuration and management of SPIRIT timers.
  *
  *   Copyright(c) 2015 STMicroelectronics
@@ -9,28 +9,30 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
 
@@ -321,7 +323,8 @@ int spirit_timer_get_rxtimeout_setup(FAR struct spirit_library_s *spirit,
  *
  * Description:
  *   Sets the LDCR wake up timer initialization registers with the values of
- *   COUNTER and PRESCALER according to the formula: Twu=(PRESCALER +1)*(COUNTER+1)*Tck,
+ *   COUNTER and PRESCALER according to the formula:
+ *   Twu=(PRESCALER +1)*(COUNTER+1)*Tck,
  *   where Tck = 28.818 us. The minimum vale of the wakeup timeout is 28.818us
  *   (PRESCALER and COUNTER equals to 0) and the maximum value is about 1.89 s
  *   (PRESCALER anc COUNTER equals to 255).
@@ -498,8 +501,9 @@ int spirit_timer_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
  *
  ******************************************************************************/
 
-int spirit_timer_set_wakeuptimer_reloadcounter(FAR struct spirit_library_s *spirit,
-                                               uint8_t counter);
+int spirit_timer_set_wakeuptimer_reloadcounter(
+                                    FAR struct spirit_library_s *spirit,
+                                    uint8_t counter);
 
 /******************************************************************************
  * Name: spirit_timer_set_wakeuptimer_reloadprescaler
@@ -521,8 +525,9 @@ int spirit_timer_set_wakeuptimer_reloadcounter(FAR struct spirit_library_s *spir
  *
  ******************************************************************************/
 
-int spirit_timer_set_wakeuptimer_reloadprescaler(FAR struct spirit_library_s *spirit,
-                                                 uint8_t prescaler);
+int spirit_timer_set_wakeuptimer_reloadprescaler(
+                                     FAR struct spirit_library_s *spirit,
+                                     uint8_t prescaler);
 
 /******************************************************************************
  * Name: spirit_timer_get_wakeuptimer_reload_setup
@@ -548,10 +553,11 @@ int spirit_timer_set_wakeuptimer_reloadprescaler(FAR struct spirit_library_s *sp
  *
  ******************************************************************************/
 
-int spirit_timer_get_wakeuptimer_reload_setup(FAR struct spirit_library_s *spirit,
-                                              FAR float *reload,
-                                              FAR uint8_t *counter,
-                                              FAR uint8_t *prescaler);
+int spirit_timer_get_wakeuptimer_reload_setup(
+                                          FAR struct spirit_library_s *spirit,
+                                          FAR float *reload,
+                                          FAR uint8_t *counter,
+                                          FAR uint8_t *prescaler);
 
 /******************************************************************************
  * Name: spirit_timer_get_rcofrequency
@@ -577,7 +583,8 @@ uint16_t spirit_timer_get_rcofrequency(FAR struct spirit_library_s *spirit);
  *   Computes the values of the wakeup timer counter and prescaler from the
  *   user time expressed in millisecond.  The prescaler and the counter values
  *   are computed maintaining the prescaler value as small as possible in
- *   order to obtain the best resolution, and in the meantime minimizing the error.
+ *   order to obtain the best resolution, and in the meantime minimizing the
+ *   error.
  *
  * Input Parameters:
  *   spirit    - Reference to a Spirit library state structure instance
@@ -642,9 +649,10 @@ void spirit_timer_calc_rxtimeout_values(FAR struct spirit_library_s *spirit,
  *
  ******************************************************************************/
 
-int spirit_timer_set_rxtimeout_stopcondition(FAR struct spirit_library_s *spirit,
-                                             enum spirit_rxtimeout_stopcondition_e
-                                             stopcondition);
+int spirit_timer_set_rxtimeout_stopcondition(
+                                     FAR struct spirit_library_s *spirit,
+                                     enum spirit_rxtimeout_stopcondition_e
+                                     stopcondition);
 
 /******************************************************************************
  * Name: spirit_timer_cmd_reload

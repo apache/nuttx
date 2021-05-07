@@ -1,35 +1,20 @@
 /****************************************************************************
- * graphics/vnc/vnc_color.c
+ * graphics/vnc/server/vnc_color.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -78,7 +63,7 @@ uint8_t vnc_convert_rgb8_222(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 2) & 0x30)  |
                    ((rgb >> 1) & 0x0c)  |
-                   ( rgb       & 0x03));
+                    (rgb       & 0x03));
 }
 
 uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
@@ -206,7 +191,7 @@ uint8_t vnc_convert_rgb8_222(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 18) & 0x00000030)  |
                    ((rgb >> 12) & 0x0000000c)  |
-                    (rgb >> 6)  & 0x00000003));
+                   ((rgb >> 6)  & 0x00000003));
 }
 
 uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
@@ -220,7 +205,7 @@ uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 16) & 0x00000070)  |
                    ((rgb >> 11) & 0x0000001c)  |
-                    (rgb >> 6)  & 0x00000003));
+                   ((rgb >> 6)  & 0x00000003));
 }
 
 uint16_t vnc_convert_rgb16_555(lfb_color_t rgb)
@@ -289,26 +274,33 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb)
  *
  ****************************************************************************/
 
-int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
-               unsigned int maxcolors, FAR lfb_color_t *colors)
+int vnc_colors(FAR struct vnc_session_s *session,
+               FAR struct nxgl_rect_s *rect,
+               unsigned int maxcolors,
+               FAR lfb_color_t *colors)
 {
   FAR const lfb_color_t *rowstart;
   FAR const lfb_color_t *pixptr;
   lfb_color_t pixel;
-  unsigned int counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
   nxgl_coord_t x;
   nxgl_coord_t y;
   int ncolors = 0;
   int pixndx;
   int maxndx;
   int cmpndx;
+  unsigned int counts[8] =
+  {
+    0, 0, 0, 0, 0, 0, 0, 0
+  };
 
-  DEBUGASSERT(session != NULL && rect != NULL && maxcolors <= 8 && colors != NULL);
+  DEBUGASSERT(session != NULL && rect != NULL &&
+              maxcolors <= 8 && colors != NULL);
 
   /* Pointer to the first pixel in the first row in the local framebuffer */
 
   rowstart = (FAR lfb_color_t *)
-    (session->fb + RFB_STRIDE * rect->pt1.y + RFB_BYTESPERPIXEL * rect->pt1.x);
+    (session->fb + RFB_STRIDE * rect->pt1.y +
+     RFB_BYTESPERPIXEL * rect->pt1.x);
 
   /* Loop for each row in the rectangle */
 
@@ -341,7 +333,7 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
               counts[pixndx]++;
             }
 
-           /* Do we have space for another color? */
+          /* Do we have space for another color? */
 
           else if (ncolors >= maxcolors)
             {
@@ -395,6 +387,7 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
       if (maxndx != pixndx)
         {
           /* Otherwise swap color N and color M */
+
           /* Remember color N */
 
           lfb_color_t tmpcolor = colors[pixndx];

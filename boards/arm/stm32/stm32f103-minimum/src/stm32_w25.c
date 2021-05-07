@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f103-minimum/src/stm32_w25.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -38,8 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/mount.h>
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -63,6 +46,7 @@
  ****************************************************************************/
 
 /* Debug ********************************************************************/
+
 /* Non-standard debug that may be enabled just for testing the watchdog
  * timer
  */
@@ -70,6 +54,7 @@
 #define W25_SPI_PORT 1
 
 /* Configuration ************************************************************/
+
 /* Can't support the W25 device if it SPI1 or W25 support is not enabled */
 
 #define HAVE_W25  1
@@ -133,7 +118,7 @@ int stm32_w25initialize(int minor)
     }
 
 #ifndef CONFIG_FS_SMARTFS
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+  /* And use the FTL layer to wrap the MTD driver as a block driver */
 
   ret = ftl_initialize(minor, mtd);
   if (ret < 0)
@@ -154,122 +139,126 @@ int stm32_w25initialize(int minor)
     }
 
 #ifdef CONFIG_STM32F103MINIMUM_FLASH_PART
-  {
-    int partno;
-    int partsize;
-    int partoffset;
-    int partszbytes;
-    int erasesize;
-    const char *partstring = CONFIG_STM32F103MINIMUM_FLASH_PART_LIST;
-    const char *ptr;
-    FAR struct mtd_dev_s *mtd_part;
-    char  partref[4];
+    {
+      int partno;
+      int partsize;
+      int partoffset;
+      int partszbytes;
+      int erasesize;
+      const char *partstring = CONFIG_STM32F103MINIMUM_FLASH_PART_LIST;
+      const char *ptr;
+      FAR struct mtd_dev_s *mtd_part;
+      char  partref[4];
 
-    /* Now create a partition on the FLASH device */
+      /* Now create a partition on the FLASH device */
 
-    partno = 0;
-    ptr = partstring;
-    partoffset = 0;
+      partno = 0;
+      ptr = partstring;
+      partoffset = 0;
 
-    /* Get the Flash erase size */
+      /* Get the Flash erase size */
 
-    erasesize = geo.erasesize;
+      erasesize = geo.erasesize;
 
-    while (*ptr != '\0')
-      {
-        /* Get the partition size */
+      while (*ptr != '\0')
+        {
+          /* Get the partition size */
 
-        partsize = atoi(ptr);
-        partszbytes = (partsize << 10); /* partsize is defined in KB */
+          partsize = atoi(ptr);
+          partszbytes = (partsize << 10); /* partsize is defined in KB */
 
-        /* Check if partition size is bigger then erase block */
+          /* Check if partition size is bigger then erase block */
 
-        if (partszbytes < erasesize)
-          {
-            syslog(LOG_ERR, "ERROR: Partition size is lesser than erasesize!\n");
-            return -1;
-          }
+          if (partszbytes < erasesize)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: Partition size is lesser than erasesize!\n");
+              return -1;
+            }
 
-        /* Check if partition size is multiple of erase block */
+          /* Check if partition size is multiple of erase block */
 
-        if ( (partszbytes % erasesize) != 0 )
-          {
-            syslog(LOG_ERR, "ERROR: Partition size is not multiple of erasesize!\n");
-            return -1;
-          }
+          if ((partszbytes % erasesize) != 0)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: Partition size isn't multiple of erasesize!\n");
+              return -1;
+            }
 
-        mtd_part = mtd_partition(mtd, partoffset,  partszbytes/ erasesize);
-        partoffset += partszbytes / erasesize;
+          mtd_part = mtd_partition(mtd, partoffset, partszbytes / erasesize);
+          partoffset += partszbytes / erasesize;
 
 #ifdef CONFIG_STM32F103MINIMUM_FLASH_CONFIG_PART
-        /* Test if this is the config partition */
+          /* Test if this is the config partition */
 
-        if (CONFIG_STM32F103MINIMUM_FLASH_CONFIG_PART_NUMBER == partno)
-          {
-            /* Register the partition as the config device */
+          if (CONFIG_STM32F103MINIMUM_FLASH_CONFIG_PART_NUMBER == partno)
+            {
+              /* Register the partition as the config device */
 
-            mtdconfig_register(mtd_part);
-          }
-        else
+              mtdconfig_register(mtd_part);
+            }
+          else
 #endif
-          {
-            /* Now initialize a SMART Flash block device and bind it
-             * to the MTD device.
-             */
+            {
+              /* Now initialize a SMART Flash block device and bind it
+               * to the MTD device.
+               */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-            sprintf(partref, "p%d", partno);
-            smart_initialize(CONFIG_STM32F103MINIMUM_FLASH_MINOR, mtd_part, partref);
+              sprintf(partref, "p%d", partno);
+              smart_initialize(CONFIG_STM32F103MINIMUM_FLASH_MINOR,
+                               mtd_part, partref);
 #endif
-          }
+            }
 
-        /* Set the partition name */
+          /* Set the partition name */
 
 #if defined(CONFIG_MTD_PARTITION_NAMES)
-        if (!mtd_part)
-          {
-            syslog(LOG_ERR, "Error: failed to create partition %s\n", partname);
-            return -1;
-          }
+          if (!mtd_part)
+            {
+              syslog(LOG_ERR, "Error: failed to create partition %s\n",
+                     partname);
+              return -1;
+            }
 
-        mtd_setpartitionname(mtd_part, partname);
+          mtd_setpartitionname(mtd_part, partname);
 
-        /* Now skip to next name.  We don't need to split the string here
-         * because the MTD partition logic will only display names up to
-         * the comma, thus allowing us to use a single static name
-         * in the code.
-         */
+          /* Now skip to next name.  We don't need to split the string here
+           * because the MTD partition logic will only display names up to
+           * the comma, thus allowing us to use a single static name
+           * in the code.
+           */
 
-        while (*partname != ',' && *partname != '\0')
-          {
-            /* Skip to next ',' */
+          while (*partname != ',' && *partname != '\0')
+            {
+              /* Skip to next ',' */
 
-            partname++;
-          }
+              partname++;
+            }
 
-        if (*partname == ',')
-          {
-            partname++;
-          }
+          if (*partname == ',')
+            {
+              partname++;
+            }
 #endif
 
-        /* Update the pointer to point to the next size in the list */
+          /* Update the pointer to point to the next size in the list */
 
-        while ((*ptr >= '0') && (*ptr <= '9'))
-          {
-            ptr++;
-          }
+          while ((*ptr >= '0') && (*ptr <= '9'))
+            {
+              ptr++;
+            }
 
-        if (*ptr == ',')
-          {
-            ptr++;
-          }
+          if (*ptr == ',')
+            {
+              ptr++;
+            }
 
-        /* Increment the part number */
+          /* Increment the part number */
 
-        partno++;
-      }
-  }
+          partno++;
+        }
+    }
 #else /* CONFIG_STM32F103MINIMUM_FLASH_PART */
 
   /* Configure the device with no partition support */

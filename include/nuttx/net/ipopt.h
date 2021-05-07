@@ -1,51 +1,36 @@
-/************************************************************************************************************
+/****************************************************************************
  * include/nuttx/net/ipopt.h
  * Defines values for the IPv4 header options
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_NET_IPOPT_H
 #define __INCLUDE_NUTTX_NET_IPOPT_H
 
-/************************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
 /* IP Header Options:
  *
@@ -95,10 +80,11 @@
 #  define IPOPT_TYPE_OPTION_UMP       (24 << IPOPT_TYPE_OPTION_SHIFT) /* Upstream multicast packet */
 #  define IPOPT_TYPE_OPTION_QS        (25 << IPOPT_TYPE_OPTION_SHIFT) /* Quick start (RFC 4782) */
 #  define IPOPT_TYPE_OPTION_EXP3692   (30 << IPOPT_TYPE_OPTION_SHIFT) /* RFC 3692-style experiment (RFC 4782) */
-#define IPOPT_TYPE_CLASS_SHIFT        (5)      /* Bits 5-6: Class */
+#define IPOPT_TYPE_CLASS_SHIFT        (5)                             /* Bits 5-6: Class */
 #define IPOPT_TYPE_CLASS_MASK         (3 << IPOPT_TYPE_CLASS_SHIFT)
 #  define IPOPT_TYPE_CLASS_CTRL       (0 << IPOPT_TYPE_CLASS_SHIFT)   /* Control */
 #  define IPOPT_TYPE_CLASS_MEASURE    (2 << IPOPT_TYPE_CLASS_SHIFT)   /* Debugging and measurement */
+
 #define IPOPT_TYPE_COPIED             (1 << 7) /* Bit 7: IP layer must copy option to each fragment */
 #define IPOPT_TYPE_NOTCOPIED          (0)
 
@@ -113,7 +99,7 @@
    (uint32_t)(ptr)   << 8 | (uint32_t)(data))
 
 /* Option Copy Class Length    Description References
- * ------ ---- ----- --------- ------------------------------------------------
+ * ------ ---- ----- --------- ----------------------------------------------
  *   0     0    0     1        End of options list (RFC 791)
  *   1     0    0     1        NOP (RFC 791
  *   2     1    0     11       Security (RFC 791, RFC 1108)
@@ -235,16 +221,16 @@
 #define IPOPT_QS_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_NOTCOPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_QS)
 
-/************************************************************************************************************
+/****************************************************************************
  * Public Type Definitions
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************************************/
+ ****************************************************************************/
 
 #endif /* __INCLUDE_NUTTX_NET_IPOPT_H */

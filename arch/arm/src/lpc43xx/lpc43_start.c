@@ -1,37 +1,23 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_start.c
  *
- *   Copyright (C) 2012, 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
 /* Power-Up Reset Overview
  * -----------------------
  *
@@ -42,16 +28,20 @@
  * the boot ROM is always executed first.
  *
  * The boot starts after reset is released.  The IRC is selected as CPU clock
- * and the Cortex-M4 starts the boot loader. By default the JTAG access to the
- * chip is disabled at reset.  The boot ROM determines the boot mode based on
- * the OTP BOOT_SRC value or reset state pins.  For flash-based parts, the part
- * boots from internal flash by default.  Otherwise, the boot ROM copies the
- * image to internal SRAM at location 0x1000:0000, sets the ARM's shadow
- * pointer to 0x1000:0000, and jumps to that location.
+ * and the Cortex-M4 starts the boot loader. By default the JTAG access to
+ * the chip is disabled at reset.  The boot ROM determines the boot mode
+ * based on the OTP BOOT_SRC value or reset state pins.  For flash-based
+ * parts, the part boots from internal flash by default.  Otherwise, the boot
+ * ROM copies the image to internal SRAM at location 0x1000:0000, sets the
+ * ARM's shadow pointer to 0x1000:0000, and jumps to that location.
  *
  * However, using JTAG the executable image can be also loaded directly into
  * and executed from SRAM.
  */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -109,7 +99,9 @@
 
 static inline void lpc43_setbootrom(void)
 {
-  /* Set the shadow register to the beginning of the boot ROM (Only bits 12-31) */
+  /* Set the shadow register to the beginning of the boot ROM
+   * (Only bits 12-31)
+   */
 
   putreg32(LPC43_ROM_BASE, LPC43_CREG_M4MEMMAP);
 
@@ -178,7 +170,8 @@ static inline void lpc43_enabuffering(void)
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit while
+ *  either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -212,7 +205,7 @@ static inline void lpc43_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -242,7 +235,7 @@ static inline void lpc43_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -271,9 +264,9 @@ void __start(void)
 
   /* Reset as many of the LPC43 peripherals as possible. This is necessary
    * because the LPC43 does not provide any way of performing a full system
-   * reset under debugger control.  So, if CONFIG_DEBUG_FEATURES is set (indicating
-   * that a debugger is being used?), the boot logic will call this
-   * function on all restarts.
+   * reset under debugger control.  So, if CONFIG_DEBUG_FEATURES is set
+   * (indicating that a debugger is being used?), the boot logic will call
+   * this function on all restarts.
    */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -306,6 +299,7 @@ void __start(void)
     {
       *dest++ = 0;
     }
+
   showprogress('B');
 
   /* Move the initialized data section from his temporary holding spot in
@@ -318,6 +312,7 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+
   showprogress('C');
 
   /* Initialize the FPU (if configured) */

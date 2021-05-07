@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_gpio.c
- * General Purpose Input/Output (GPIO) logic for the SAM3U, SAM4S and SAM4E
  *
- *   Copyright (C) 2010, 2013-2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -72,7 +56,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
-static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
+static const char g_portchar[4]   =
+{
+  'A', 'B', 'C', 'D'
+};
 #endif
 
 /****************************************************************************
@@ -426,6 +413,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
     {
       regval |= pin;
     }
+
   putreg32(regval, base + SAM_PIO_ABCDSR1_OFFSET);
 
   regval = getreg32(base + SAM_PIO_ABCDSR2_OFFSET);
@@ -438,6 +426,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
     {
       regval |= pin;
     }
+
   putreg32(regval, base + SAM_PIO_ABCDSR2_OFFSET);
 
 #else
@@ -456,6 +445,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
     {
       regval |= pin;
     }
+
   putreg32(regval, base + SAM_PIO_ABSR_OFFSET);
 #endif
 
@@ -575,13 +565,14 @@ bool sam_gpioread(gpio_pinset_t pinset)
   return (regval & pin) != 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Function:  sam_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int sam_dumpgpio(uint32_t pinset, const char *msg)
@@ -602,36 +593,53 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   gpioinfo("PIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
   gpioinfo("    PSR: %08x    OSR: %08x   IFSR: %08x   ODSR: %08x\n",
-           getreg32(base + SAM_PIO_PSR_OFFSET), getreg32(base + SAM_PIO_OSR_OFFSET),
-           getreg32(base + SAM_PIO_IFSR_OFFSET), getreg32(base + SAM_PIO_ODSR_OFFSET));
+           getreg32(base + SAM_PIO_PSR_OFFSET),
+           getreg32(base + SAM_PIO_OSR_OFFSET),
+           getreg32(base + SAM_PIO_IFSR_OFFSET),
+           getreg32(base + SAM_PIO_ODSR_OFFSET));
   gpioinfo("   PDSR: %08x    IMR: %08x    ISR: %08x   MDSR: %08x\n",
-           getreg32(base + SAM_PIO_PDSR_OFFSET), getreg32(base + SAM_PIO_IMR_OFFSET),
-           getreg32(base + SAM_PIO_ISR_OFFSET), getreg32(base + SAM_PIO_MDSR_OFFSET));
+           getreg32(base + SAM_PIO_PDSR_OFFSET),
+           getreg32(base + SAM_PIO_IMR_OFFSET),
+           getreg32(base + SAM_PIO_ISR_OFFSET),
+           getreg32(base + SAM_PIO_MDSR_OFFSET));
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
   gpioinfo("   ABSR: %08x SCIFSR: %08x  DIFSR: %08x IFDGSR: %08x\n",
-           getreg32(base + SAM_PIO_ABSR_OFFSET), getreg32(base + SAM_PIO_SCIFSR_OFFSET),
-           getreg32(base + SAM_PIO_DIFSR_OFFSET), getreg32(base + SAM_PIO_IFDGSR_OFFSET));
+           getreg32(base + SAM_PIO_ABSR_OFFSET),
+           getreg32(base + SAM_PIO_SCIFSR_OFFSET),
+           getreg32(base + SAM_PIO_DIFSR_OFFSET),
+           getreg32(base + SAM_PIO_IFDGSR_OFFSET));
 #elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
   gpioinfo(" ABCDSR: %08x %08x         IFSCSR: %08x  PPDSR: %08x\n",
-           getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET),
-           getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIO_PPDSR_OFFSET));
+           getreg32(base + SAM_PIO_ABCDSR1_OFFSET),
+           getreg32(base + SAM_PIO_ABCDSR2_OFFSET),
+           getreg32(base + SAM_PIO_IFSCSR_OFFSET),
+           getreg32(base + SAM_PIO_PPDSR_OFFSET));
 #endif
   gpioinfo("   PUSR: %08x   SCDR: %08x   OWSR: %08x  AIMMR: %08x\n",
-           getreg32(base + SAM_PIO_PUSR_OFFSET), getreg32(base + SAM_PIO_SCDR_OFFSET),
-           getreg32(base + SAM_PIO_OWSR_OFFSET), getreg32(base + SAM_PIO_AIMMR_OFFSET));
+           getreg32(base + SAM_PIO_PUSR_OFFSET),
+           getreg32(base + SAM_PIO_SCDR_OFFSET),
+           getreg32(base + SAM_PIO_OWSR_OFFSET),
+           getreg32(base + SAM_PIO_AIMMR_OFFSET));
   gpioinfo("    ESR: %08x    LSR: %08x   ELSR: %08x FELLSR: %08x\n",
-           getreg32(base + SAM_PIO_ESR_OFFSET), getreg32(base + SAM_PIO_LSR_OFFSET),
-           getreg32(base + SAM_PIO_ELSR_OFFSET), getreg32(base + SAM_PIO_FELLSR_OFFSET));
+           getreg32(base + SAM_PIO_ESR_OFFSET),
+           getreg32(base + SAM_PIO_LSR_OFFSET),
+           getreg32(base + SAM_PIO_ELSR_OFFSET),
+           getreg32(base + SAM_PIO_FELLSR_OFFSET));
   gpioinfo(" FRLHSR: %08x LOCKSR: %08x   WPMR: %08x   WPSR: %08x\n",
-           getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET),
-           getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
+           getreg32(base + SAM_PIO_FRLHSR_OFFSET),
+           getreg32(base + SAM_PIO_LOCKSR_OFFSET),
+           getreg32(base + SAM_PIO_WPMR_OFFSET),
+           getreg32(base + SAM_PIO_WPSR_OFFSET));
 #if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
   gpioinfo("   PCMR: %08x  PCIMR: %08x  PCISR: %08x   PCRHR: %08x\n",
-           getreg32(base + SAM_PIO_PCMR_OFFSET), getreg32(base + SAM_PIO_PCIMR_OFFSET),
-           getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
+           getreg32(base + SAM_PIO_PCMR_OFFSET),
+           getreg32(base + SAM_PIO_PCIMR_OFFSET),
+           getreg32(base + SAM_PIO_PCISR_OFFSET),
+           getreg32(base + SAM_PIO_PCRHR_OFFSET));
 #ifdef CONFIG_ARCH_CHIP_SAM4E
   gpioinfo("SCHMITT: %08x DELAYR:%08x\n",
-           getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DELAYR_OFFSET));
+           getreg32(base + SAM_PIO_SCHMITT_OFFSET),
+           getreg32(base + SAM_PIO_DELAYR_OFFSET));
 #else
   gpioinfo("SCHMITT: %08x\n",
            getreg32(base + SAM_PIO_SCHMITT_OFFSET));

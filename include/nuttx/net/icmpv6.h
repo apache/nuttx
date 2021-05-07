@@ -2,7 +2,8 @@
  * include/nuttx/net/icmpv6.h
  * Header file for the NuttX ICMPv6 stack.
  *
- *   Copyright (C) 2007-2009, 2012, 2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -121,7 +122,7 @@
 /* Prefix option flags */
 
 #define ICMPv6_PRFX_FLAG_L    (1 << 7) /* On-link flag */
-#define ICMPv6_PRFX_FLAG_A    (1 << 6) /* Autonomous address-configuration flag
+#define ICMPv6_PRFX_FLAG_A    (1 << 6) /* Autonomous address-configuration flag */
 
 /* Return with size of an option (in full octects) using the size of a link
  * layer address taking into account a header of the two-bytes.

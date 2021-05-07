@@ -1,5 +1,5 @@
-/********************************************************************************************
- * arch/arm/include/xmc4/xmc4800_.h
+/****************************************************************************
+ * arch/arm/include/xmc4/xmc4800_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* This file should never be included directly but, rather, only indirectly
  * through nuttx/irq.h
@@ -25,21 +25,21 @@
 #ifndef xmc4__ARCH_ARM_INCLUDE_XMC4_XM4800_IRQ_H
 #define xmc4__ARCH_ARM_INCLUDE_XMC4_XM4800_IRQ_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
- * Pre-processor Definitions
- ********************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
  * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
+ * Processor Exceptions (vectors 0-15). These common definitions can be found
  * in the file nuttx/arch/arm/include/kinets/irq.h which includes this file
  *
  * External interrupts (vectors >= 16)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lpc54xx/lpx54_ethernet.c
+ * arch/arm/src/lpc54xx/lpc54_ethernet.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -1807,7 +1807,7 @@ static void lpc54_eth_dopoll(struct lpc54_ethdriver_s *priv)
       priv->eth_dev.d_buf = (uint8_t *)lpc54_pktbuf_alloc(priv);
       if (priv->eth_dev.d_buf != NULL)
         {
-          devif_poll(&priv->eth_dev, lpc54_eth_txpoll);
+          devif_timer(&priv->eth_dev, 0, lpc54_eth_txpoll);
 
           /* Make sure that the Tx buffer remaining after the poll is
            * freed.
@@ -1919,8 +1919,10 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
-        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+        (int)(dev->d_ipaddr & 0xff),
+        (int)((dev->d_ipaddr >> 8) & 0xff),
+        (int)((dev->d_ipaddr >> 16) & 0xff),
+        (int)(dev->d_ipaddr >> 24));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",

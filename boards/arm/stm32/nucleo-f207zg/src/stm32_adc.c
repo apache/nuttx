@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/nucleo-f303ze/src/stm32_adc.c
+ * boards/arm/stm32/nucleo-f207zg/src/stm32_adc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * File: libs/libc/string/lib_vikmemcpy.c
+ * libs/libc/string/lib_vikmemcpy.c
  *
  * This is version of the optimized memcpy by Daniel Vik, adapted to the
  * NuttX environment.
@@ -203,8 +203,8 @@
 
 #define COPY_NO_SHIFT()                                           \
 {                                                                 \
-  UIntN* dstN = (UIntN*)(dst8 PRE_LOOP_ADJUST);                   \
-  UIntN* srcN = (UIntN*)(src8 PRE_LOOP_ADJUST);                   \
+  uintn* dstN = (uintn*)(dst8 PRE_LOOP_ADJUST);                   \
+  uintn* srcN = (uintn*)(src8 PRE_LOOP_ADJUST);                   \
   size_t length = count / TYPE_WIDTH;                             \
                                                                   \
   while (length & 7)                                              \
@@ -240,13 +240,13 @@
 
 #define COPY_SHIFT(shift)                                         \
 {                                                                 \
-  UIntN* dstN  = (UIntN*)((((uintptr_t)dst8) PRE_LOOP_ADJUST) &   \
+  uintn* dstN  = (uintn*)((((uintptr_t)dst8) PRE_LOOP_ADJUST) &   \
                            ~(TYPE_WIDTH - 1));                    \
-  UIntN* srcN  = (UIntN*)((((uintptr_t)src8) PRE_LOOP_ADJUST) &   \
+  uintn* srcN  = (uintn*)((((uintptr_t)src8) PRE_LOOP_ADJUST) &   \
                            ~(TYPE_WIDTH - 1));                    \
   size_t length  = count / TYPE_WIDTH;                            \
-  UIntN srcWord = INC_VAL(srcN);                                  \
-  UIntN dstWord;                                                  \
+  uintn srcWord = INC_VAL(srcN);                                  \
+  uintn dstWord;                                                  \
                                                                   \
   while (length & 7)                                              \
     {                                                             \
@@ -284,16 +284,17 @@
  ****************************************************************************/
 
 #ifdef CONFIG_MEMCPY_64BIT
-typedef uint64_t            UIntN;
+typedef uint64_t            uintn;
 #  define TYPE_WIDTH        8L
 #else
-typedef uint32_t            UIntN;
+typedef uint32_t            uintn;
 #  define TYPE_WIDTH        4L
 #endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: memcpy
  *

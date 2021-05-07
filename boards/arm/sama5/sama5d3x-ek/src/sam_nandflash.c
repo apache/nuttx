@@ -46,13 +46,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 
 #include "arm_arch.h"
@@ -187,11 +187,12 @@ int sam_nand_automount(int minor)
       mtd = sam_nand_initialize(HSMC_CS3);
       if (!mtd)
         {
-          ferr("ERROR: Failed to create the NAND driver on CS%d\n", HSMC_CS3);
+          ferr("ERROR: Failed to create the NAND driver on CS%d\n",
+               HSMC_CS3);
           return -ENODEV;
         }
 
-#if defined(CONFIG_SAMA5D3xEK_NAND_FTL)
+#if defined(CONFIG_SAMA5D3XEK_NAND_FTL)
       /* Use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(NAND_MINOR, mtd);
@@ -201,7 +202,7 @@ int sam_nand_automount(int minor)
           return ret;
         }
 
-#elif defined(CONFIG_SAMA5D3xEK_NAND_NXFFS)
+#elif defined(CONFIG_SAMA5D3XEK_NAND_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
       ret = nxffs_initialize(mtd);
@@ -213,13 +214,14 @@ int sam_nand_automount(int minor)
 
       /* Mount the file system at /mnt/nand */
 
-      ret = mount(NULL, "/mnt/nand", "nxffs", 0, NULL);
+      ret = nx_mount(NULL, "/mnt/nand", "nxffs", 0, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
           return ret;
         }
 #endif
+
       /* Now we are initialized */
 
       initialized = true;

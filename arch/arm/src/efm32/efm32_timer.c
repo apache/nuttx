@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_timer.c
  *
- *   Copyright (C) 2014 Pierre-Noel Bouteville. All rights reserved.
- *   Author: Pierre-Noel Bouteville <pnb990@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -92,15 +77,15 @@ void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
 
   tmrinfo("%s:\n", msg);
   tmrinfo("  CTRL: %04x STATUS: %04x   IEN: %04x     IF: %04x\n",
-          getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
-          getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
-          getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
-          getreg32(base + EFM32_TIMER_IF_OFFSET     ));
+          getreg32(base + EFM32_TIMER_CTRL_OFFSET),
+          getreg32(base + EFM32_TIMER_STATUS_OFFSET),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET),
+          getreg32(base + EFM32_TIMER_IF_OFFSET));
   tmrinfo("   TOP: %04x   TOPB: %04x   CNT: %04x  ROUTE: %04x\n",
-          getreg32(base + EFM32_TIMER_TOP_OFFSET    ),
-          getreg32(base + EFM32_TIMER_TOPB_OFFSET   ),
-          getreg32(base + EFM32_TIMER_CNT_OFFSET    ),
-          getreg32(base + EFM32_TIMER_ROUTE_OFFSET  ));
+          getreg32(base + EFM32_TIMER_TOP_OFFSET),
+          getreg32(base + EFM32_TIMER_TOPB_OFFSET),
+          getreg32(base + EFM32_TIMER_CNT_OFFSET),
+          getreg32(base + EFM32_TIMER_ROUTE_OFFSET));
 
   for (i = 0; i < EFM32_TIMER_NCC; i++)
     {
@@ -108,21 +93,21 @@ void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
 
       tmrinfo("CC%d => CTRL: %04x    CCV:  %04x  CCVP: %04x CCVB: %04x\n",
               i
-              getreg32(base_cc + EFM32_TIMER_CC_CTRL_OFFSET ),
-              getreg32(base_cc + EFM32_TIMER_CC_CCV_OFFSET  ),
-              getreg32(base_cc + EFM32_TIMER_CC_CCVP_OFFSET ),
-              getreg32(base_cc + EFM32_TIMER_CC_CCVB_OFFSET ));
+              getreg32(base_cc + EFM32_TIMER_CC_CTRL_OFFSET),
+              getreg32(base_cc + EFM32_TIMER_CC_CCV_OFFSET),
+              getreg32(base_cc + EFM32_TIMER_CC_CCVP_OFFSET),
+              getreg32(base_cc + EFM32_TIMER_CC_CCVB_OFFSET));
     }
 
   tmrinfo("DTCTRL: %04x DTTIME: %04x  DTFC: %04x DTOGEN:  %04x\n",
-          getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
-          getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
-          getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
-          getreg32(base + EFM32_TIMER_IF_OFFSET     ));
+          getreg32(base + EFM32_TIMER_CTRL_OFFSET),
+          getreg32(base + EFM32_TIMER_STATUS_OFFSET),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET),
+          getreg32(base + EFM32_TIMER_IF_OFFSET));
   tmrinfo("DTFAULT: %04x DTFAULTC: %04x  DTLOCK: %04x \n",
-          getreg32(base + EFM32_TIMER_CTRL_OFFSET   ),
-          getreg32(base + EFM32_TIMER_STATUS_OFFSET ),
-          getreg32(base + EFM32_TIMER_IEN_OFFSET    ),
+          getreg32(base + EFM32_TIMER_CTRL_OFFSET),
+          getreg32(base + EFM32_TIMER_STATUS_OFFSET),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET),
 #endif
 }
 
@@ -150,25 +135,28 @@ void efm32_timer_reset(uintptr_t base)
 
   /* Reset timer register */
 
-  putreg32(_TIMER_CTRL_RESETVALUE,  base + EFM32_TIMER_CTRL_OFFSET     );
-  putreg32(_TIMER_IEN_RESETVALUE,   base + EFM32_TIMER_STATUS_OFFSET   );
-  putreg32(_TIMER_IFC_MASK,         base + EFM32_TIMER_IEN_OFFSET      );
-  putreg32(_TIMER_TOP_RESETVALUE,   base + EFM32_TIMER_IF_OFFSET       );
-  putreg32(_TIMER_TOPB_RESETVALUE,  base + EFM32_TIMER_CTRL_OFFSET     );
-  putreg32(_TIMER_CNT_RESETVALUE,   base + EFM32_TIMER_CMD_OFFSET      );
+  putreg32(_TIMER_CTRL_RESETVALUE,  base + EFM32_TIMER_CTRL_OFFSET);
+  putreg32(_TIMER_IEN_RESETVALUE,   base + EFM32_TIMER_STATUS_OFFSET);
+  putreg32(_TIMER_IFC_MASK,         base + EFM32_TIMER_IEN_OFFSET);
+  putreg32(_TIMER_TOP_RESETVALUE,   base + EFM32_TIMER_IF_OFFSET);
+  putreg32(_TIMER_TOPB_RESETVALUE,  base + EFM32_TIMER_CTRL_OFFSET);
+  putreg32(_TIMER_CNT_RESETVALUE,   base + EFM32_TIMER_CMD_OFFSET);
 
   /* Do not reset route register, setting should be done independently
    * (Note: ROUTE register may be locked by DTLOCK register.)
    */
 
-  //putreg32(_TIMER_ROUTE_RESETVALUE, base + EFM32_TIMER_ROUTE_OFFSET    );
+  /* putreg32(_TIMER_ROUTE_RESETVALUE, base + EFM32_TIMER_ROUTE_OFFSET); */
 
   for (i = 0; i < EFM32_TIMER_NCC; i++)
     {
       uintptr_t base_cc = base + EFM32_TIMER_CC_OFFSET(i);
-      putreg32(_TIMER_CC_CTRL_RESETVALUE, base_cc+EFM32_TIMER_CC_CTRL_OFFSET);
-      putreg32(_TIMER_CC_CCV_RESETVALUE,  base_cc+EFM32_TIMER_CC_CCV_OFFSET );
-      putreg32(_TIMER_CC_CCVB_RESETVALUE, base_cc+EFM32_TIMER_CC_CCVB_OFFSET);
+      putreg32(_TIMER_CC_CTRL_RESETVALUE,
+               base_cc + EFM32_TIMER_CC_CTRL_OFFSET);
+      putreg32(_TIMER_CC_CCV_RESETVALUE,
+               base_cc + EFM32_TIMER_CC_CCV_OFFSET);
+      putreg32(_TIMER_CC_CCVB_RESETVALUE,
+               base_cc + EFM32_TIMER_CC_CCVB_OFFSET);
     }
 
   /* Reset dead time insertion module, no effect on timers without DTI */
@@ -181,7 +169,7 @@ void efm32_timer_reset(uintptr_t base)
   putreg32(_TIMER_DTCTRL_RESETVALUE, base + EFM32_TIMER_DTCTRL_OFFSET);
   putreg32(_TIMER_DTTIME_RESETVALUE, base + EFM32_TIMER_DTTIME_OFFSET);
   putreg32(_TIMER_DTFC_RESETVALUE, base + EFM32_TIMER_DTFC_OFFSET);
-  putreg32(_TIMER_DTOGEN_RESETVALUE,base + EFM32_TIMER_DTOGEN_OFFSET);
+  putreg32(_TIMER_DTOGEN_RESETVALUE, base + EFM32_TIMER_DTOGEN_OFFSET);
   putreg32(_TIMER_DTFAULTC_MASK, base + EFM32_TIMER_DTFAULTC_OFFSET);
 #endif
 }
@@ -226,7 +214,8 @@ int efm32_timer_set_freq(uintptr_t base, uint32_t clk_freq, uint32_t freq)
 
   reload = (clk_freq / prescaler / freq);
 
-  tmrinfo("Source: %4xHz Div: %4x Reload: %4x \n", clk_freq, prescaler, reload);
+  tmrinfo("Source: %4" PRIx32 "Hz Div: %4x Reload: %4x \n",
+          clk_freq, prescaler, reload);
 
   putreg32(reload, base + EFM32_TIMER_TOP_OFFSET);
 

@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/hardware/s32k1xx_lpspi.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -32,23 +32,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_LPSPI_H
 #define __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_LPSPI_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/s32k1xx_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *********************************************************************************/
+/* Register offsets *********************************************************/
 
 #define S32K1XX_LPSPI_VERID_OFFSET       0x0000  /* Version ID Register offset */
 #define S32K1XX_LPSPI_PARAM_OFFSET       0x0004  /* Parameter Register offset */
@@ -68,7 +68,7 @@
 #define S32K1XX_LPSPI_RSR_OFFSET         0x0070  /* Receive Status Register offset */
 #define S32K1XX_LPSPI_RDR_OFFSET         0x0074  /* Receive Data Register offset */
 
-/* Register addresses *******************************************************************************/
+/* Register addresses *******************************************************/
 
 #define S32K1XX_LPSPI0_VERID             (S32K1XX_LPSPI0_BASE + S32K1XX_LPSPI_VERID_OFFSET)
 #define S32K1XX_LPSPI0_PARAM             (S32K1XX_LPSPI0_BASE + S32K1XX_LPSPI_PARAM_OFFSET)
@@ -124,7 +124,7 @@
 #define S32K1XX_LPSPI2_RSR               (S32K1XX_LPSPI2_BASE + S32K1XX_LPSPI_RSR_OFFSET)
 #define S32K1XX_LPSPI2_RDR               (S32K1XX_LPSPI2_BASE + S32K1XX_LPSPI_RDR_OFFSET)
 
-/* Register bit definitions *************************************************************************/
+/* Register bit definitions *************************************************/
 
 /* Version ID Register */
 
@@ -221,6 +221,7 @@
 #define LPSPI_CFGR1_PCSPOL_MASK        (0xf << LPSPI_CFGR1_PCSPOL_SHIFT)
 #    define LPSPI_CFGR1_PCSPOL_LOW     (0 << LPSPI_CFGR1_PCSPOL_SHIFT) /* The Peripheral Chip Select pin PCSx is active low */
 #    define LPSPI_CFGR1_PCSPOL_HIGH    (1 << LPSPI_CFGR1_PCSPOL_SHIFT) /* The Peripheral Chip Select pin PCSx is active high */
+
                                                  /* Bits 12-15:  Reserved */
 #define LPSPI_CFGR1_MATCFG_SHIFT       (16)      /* Bits 16-18: Match Configuration */
 #define LPSPI_CFGR1_MATCFG_MASK        (7 << LPSPI_CFGR1_MATCFG_SHIFT)
@@ -233,13 +234,14 @@
 #  define LPSPI_CFGR1_PINCFG_SOUT_SOUT (2 << LPSPI_CFGR1_PINCFG_SHIFT)  /* SOUT is used for both input and output data */
 #  define LPSPI_CFGR1_PINCFG_SOUT_SIN  (3 << LPSPI_CFGR1_PINCFG_SHIFT)  /* SOUT is used for input data and SIN is used for output data */
 #  define LPSPI_CFGR1_PINCFG(n)        ((uint32_t)(n) << LPSPI_CFGR1_PINCFG_SHIFT)
-#define LPSPI_CFGR1_OUTCFG             (1 << 26) /* Bit 26: Output Config */
-#    define LPSPI_CFGR1_OUTCFG_RETAIN  (0 << 26) /* Output data retains last value when chip select is negated */
+
+#define LPSPI_CFGR1_OUTCFG             (1 << 26)  /* Bit 26: Output Config */
+#    define LPSPI_CFGR1_OUTCFG_RETAIN  (0 << 26)  /* Output data retains last value when chip select is negated */
 #    define LPSPI_CFGR1_OUTCFG_TRISTATE (1 << 26) /* Output data is tristated when chip select is negated */
-#define LPSPI_CFGR1_PCSCFG             (1 << 27) /* Bit 27: Peripheral Chip Select Configuration */
-#    define LPSPI_CFGR1_PCSCFG_EN      (0 << 27) /* PCS[3:2] are enabled */
-#    define LPSPI_CFGR1_PCSCFG_DIS     (1 << 27) /* PCS[3:2] are disabled */
-                                                 /* Bits 28-31:  Reserved */
+#define LPSPI_CFGR1_PCSCFG             (1 << 27)  /* Bit 27: Peripheral Chip Select Configuration */
+#    define LPSPI_CFGR1_PCSCFG_EN      (0 << 27)  /* PCS[3:2] are enabled */
+#    define LPSPI_CFGR1_PCSCFG_DIS     (1 << 27)  /* PCS[3:2] are disabled */
+                                                  /* Bits 28-31:  Reserved */
 
 /* Data Match Register 0 */
 
@@ -303,6 +305,7 @@
 #    define LPSPI_TCR_WIDTH_1BIT       (0 << LPSPI_TCR_WIDTH_SHIFT)  /* 1 bit transfer */
 #    define LPSPI_TCR_WIDTH_2BIT       (1 << LPSPI_TCR_WIDTH_SHIFT)  /* 2 bit transfer */
 #    define LPSPI_TCR_WIDTH_4BIT       (2 << LPSPI_TCR_WIDTH_SHIFT)  /* 4 bit transfer */
+
 #define LPSPI_TCR_TXMSK                (1 << 18) /* Bit 18: Transmit Data Mask */
 #define LPSPI_TCR_RXMSK                (1 << 19) /* Bit 19: Receive Data Mask */
 #define LPSPI_TCR_CONTC                (1 << 20) /* Bit 20: Continuing Command */
@@ -316,6 +319,7 @@
 #    define LPSPI_TCR_PCS_1            (1 << LPSPI_TCR_PCS_SHIFT)  /* Transfer using LPSPI_PCS[1] */
 #    define LPSPI_TCR_PCS_2            (2 << LPSPI_TCR_PCS_SHIFT)  /* Transfer using LPSPI_PCS[2] */
 #    define LPSPI_TCR_PCS_3            (3 << LPSPI_TCR_PCS_SHIFT)  /* Transfer using LPSPI_PCS[3] */
+
                                                  /* Bit 26:  Reserved */
 #define LPSPI_TCR_PRESCALE_SHIFT       (27)      /* Bits 27-29: Prescaler Value */
 #define LPSPI_TCR_PRESCALE_MASK        (7 << LPSPI_TCR_PRESCALE_SHIFT)
@@ -328,6 +332,7 @@
 #    define LPSPI_TCR_PRESCALE_64      (6 << LPSPI_TCR_PRESCALE_SHIFT) /* Divide by 64 */
 #    define LPSPI_TCR_PRESCALE_128     (7 << LPSPI_TCR_PRESCALE_SHIFT) /* Divide by 128 */
 #    define LPSPI_TCR_PRESCALE(n)      ((uint32_t)(n) << LPSPI_TCR_PRESCALE_SHIFT)
+
 #define LPSPI_TCR_CPHA                 (1 << 30) /* Bit 30: Clock Phase */
 #    define LPSPI_TCR_CPHA_CPT_LEAD    (0 << 30) /* Data captured - leading edge of SCK and changed - following edge of SCK */
 #    define LPSPI_TCR_CPHA_CPT_FOLLOW  (1 << 30) /* Data changed - leading edge of SCK and captured - following edge of SCK */

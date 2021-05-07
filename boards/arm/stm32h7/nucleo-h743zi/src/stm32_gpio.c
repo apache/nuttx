@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/nucleo-743zi/src/stm32_gpio.c
+ * boards/arm/stm32h7/nucleo-h743zi/src/stm32_gpio.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author:  Heiko Demlang  <heiko.demlang@feig.de>

@@ -1,52 +1,37 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/tm4c/tm4c123_sysctrl.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCONTROL_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCONTROL_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* System Control Register Offsets **********************************************************/
+/* System Control Register Offsets ******************************************/
 
 #define TIVA_SYSCON_DID0_OFFSET       0x0000 /* Device Identification 0 */
 #define TIVA_SYSCON_DID1_OFFSET       0x0004 /* Device Identification 1 */
@@ -178,7 +163,7 @@
 #define TIVA_SYSCON_PREEPROM_OFFSET   0x0a58 /* EEPROM Peripheral Ready */
 #define TIVA_SYSCON_PRWTIMER_OFFSET   0x0a5c /* 2/64-BitWide Timer Peripheral Ready */
 
-/* System Control Legacy Register Offsets ***************************************************/
+/* System Control Legacy Register Offsets ***********************************/
 
 #define TIVA_SYSCON_DC0_OFFSET        0x0008 /* Device Capabilities 0 */
 #define TIVA_SYSCON_DC1_OFFSET        0x0010 /* Device Capabilities 1 */
@@ -209,7 +194,7 @@
 #define TIVA_SYSCON_DC9_OFFSET        0x0190 /* Device Capabilities */
 #define TIVA_SYSCON_NVMSTAT_OFFSET    0x01a0 /* Non-Volatile Memory Information */
 
-/* System Control Register Addresses ********************************************************/
+/* System Control Register Addresses ****************************************/
 
 #define TIVA_SYSCON_DID0              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID0_OFFSET)
 #define TIVA_SYSCON_DID1              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID1_OFFSET)
@@ -341,7 +326,7 @@
 #define TIVA_SYSCON_PREEPROM          (TIVA_SYSCON_BASE + TIVA_SYSCON_PREEPROM_OFFSET)
 #define TIVA_SYSCON_PRWTIMER          (TIVA_SYSCON_BASE + TIVA_SYSCON_PRWTIMER_OFFSET)
 
-/* System Control Legacy Register Addresses *************************************************/
+/* System Control Legacy Register Addresses *********************************/
 
 #define TIVA_SYSCON_DC0               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC0_OFFSET)
 #define TIVA_SYSCON_DC1               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC1_OFFSET)
@@ -372,7 +357,7 @@
 #define TIVA_SYSCON_DC9               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC9_OFFSET)
 #define TIVA_SYSCON_NVMSTAT           (TIVA_SYSCON_BASE + TIVA_SYSCON_NVMSTAT_OFFSET)
 
-/* System Control Register Bit Definitions **************************************************/
+/* System Control Register Bit Definitions **********************************/
 
 /* Device Identification 0 */
 
@@ -457,6 +442,7 @@
 #  define SYSCON_RCC_OSCSRC_PIOSC     (1 << SYSCON_RCC_OSCSRC_SHIFT) /* Precision internal oscillator (reset) */
 #  define SYSCON_RCC_OSCSRC_PIOSC4    (2 << SYSCON_RCC_OSCSRC_SHIFT) /* Precision internal oscillator / 4 */
 #  define SYSCON_RCC_OSCSRC_LFIOSC    (3 << SYSCON_RCC_OSCSRC_SHIFT) /* Low-frequency internal oscillator */
+
 #define SYSCON_RCC_XTAL_SHIFT         6         /* Bits 10-6: Crystal Value */
 #define SYSCON_RCC_XTAL_MASK          (31 << SYSCON_RCC_XTAL_SHIFT)
 #  define SYSCON_RCC_XTAL4000KHZ      (6 << SYSCON_RCC_XTAL_SHIFT)  /* 4 MHz (NO PLL) */
@@ -480,9 +466,10 @@
 #  define SYSCON_RCC_XTAL20000KHZ     (24 << SYSCON_RCC_XTAL_SHIFT) /* 20.0 MHz (USB) */
 #  define SYSCON_RCC_XTAL24000KHZ     (25 << SYSCON_RCC_XTAL_SHIFT) /* 24.0 MHz (USB) */
 #  define SYSCON_RCC_XTAL25000KHZ     (26 << SYSCON_RCC_XTAL_SHIFT) /* 25.0 MHz (USB) */
+
 #define SYSCON_RCC_BYPASS             (1 << 11) /* Bit 11: PLL Bypass */
 #define SYSCON_RCC_PWRDN              (1 << 13) /* Bit 13: PLL Power Down */
-#define SYSCON_RCC_PWMDIV_SHIFT       17         /* Bits 19-17: PWM Unit Clock Divisor */
+#define SYSCON_RCC_PWMDIV_SHIFT       17        /* Bits 19-17: PWM Unit Clock Divisor */
 #define SYSCON_RCC_PWMDIV_MASK        (7 << SYSCON_RCC_PWMDIV_SHIFT)
 #  define SYSCON_RCC_PWMDIV_2         (0 << SYSCON_RCC_PWMDIV_SHIFT) /* /2 */
 #  define SYSCON_RCC_PWMDIV_4         (1 << SYSCON_RCC_PWMDIV_SHIFT) /* /4 */
@@ -490,6 +477,7 @@
 #  define SYSCON_RCC_PWMDIV_16        (3 << SYSCON_RCC_PWMDIV_SHIFT) /* /16 */
 #  define SYSCON_RCC_PWMDIV_32        (4 << SYSCON_RCC_PWMDIV_SHIFT) /* /32 */
 #  define SYSCON_RCC_PWMDIV_64        (7 << SYSCON_RCC_PWMDIV_SHIFT) /* /64 (default) */
+
 #define SYSCON_RCC_USEPWMDIV          (1 << 20) /* Bit 20: Enable PWM Clock Divisor */
 #define SYSCON_RCC_USESYSDIV          (1 << 22) /* Bit 22: Enable System Clock Divider */
 #define SYSCON_RCC_SYSDIV_SHIFT       23        /* Bits 26-23: System Clock Divisor */
@@ -525,6 +513,7 @@
 #  define SYSCON_RCC2_OSCSRC2_PIOSC4   (2 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Precision internal oscillator / 4 */
 #  define SYSCON_RCC2_OSCSRC2_LFIOSC   (4 << SYSCON_RCC2_OSCSRC2_SHIFT) /* Low-frequency internal oscillator */
 #  define SYSCON_RCC2_OSCSRC2_32768HZ  (7 << SYSCON_RCC2_OSCSRC2_SHIFT) /* 32.768KHz external oscillator */
+
 #define SYSCON_RCC2_BYPASS2            (1 << 11) /* Bit 11: Bypass PLL */
 #define SYSCON_RCC2_PWRDN2             (1 << 13) /* Bit 13: Power-Down PLL */
 #define SYSCON_RCC2_USBPWRDN           (1 << 14) /* Bit 14: Power-Down USB PLL */
@@ -545,13 +534,14 @@
 /* Deep Sleep Clock Configuration */
 
 #define SYSCON_DSLPCLKCFG_PIOSCPD             (1 << 1) /* Bit 1:  PIOSC Power Down Request */
-#define SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT      4 /* Bits 6-4: Clock Source */
+#define SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT      4        /* Bits 6-4: Clock Source */
 #define SYSCON_DSLPCLKCFG_DSOSCSRC_MASK       (7 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT)
 #  define SYSCON_DSLPCLKCFG_DSOSCSRC_MOSC     (0 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT) /* Main oscillator */
 #  define SYSCON_DSLPCLKCFG_DSOSCSRC_PIOSC    (1 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT) /* Precision internal oscillator (reset) */
 #  define SYSCON_DSLPCLKCFG_DSOSCSRC_PIOSC4   (2 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT) /* Precision internal oscillator / 4 */
 #  define SYSCON_DSLPCLKCFG_DSOSCSRC_LFIOSC   (4 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT) /* Low-frequency internal oscillator */
 #  define SYSCON_DSLPCLKCFG_DSOSCSRC_32768KHZ (7 << SYSCON_DSLPCLKCFG_DSOSCSRC_SHIFT) /* 32.768KHz external oscillator */
+
 #define SYSCON_DSLPCLKCFG_DSDIVORIDE_SHIFT    23 /* Bits 28-23: Divider Field Override */
 #define SYSCON_DSLPCLKCFG_DSDIVORIDE_MASK     (0x3f << SYSCON_DSLPCLKCFG_DSDIVORIDE_SHIFT)
 #  define SYSCON_DSLPCLKCFG_DSDIVORIDE(b)     (((n)-1) << SYSCON_DSLPCLKCFG_DSDIVORIDE_SHIFT)
@@ -614,6 +604,7 @@
 #  define SYSCON_SLPPWRCFG_SRAMPM_ACTIVE   (0 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Active Mode */
 #  define SYSCON_SLPPWRCFG_SRAMPM_STANDBY  (1 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Standby Mode */
 #  define SYSCON_SLPPWRCFG_SRAMPM_LOWPWR   (3 << SYSCON_SLPPWRCFG_SRAMPM_SHIFT) /* Low Power Mode */
+
 #define SYSCON_SLPPWRCFG_FLASHPM_SHIFT     (4)  /* Bits 5-4: Flash Power Modes */
 #define SYSCON_SLPPWRCFG_FLASHPM_MASK      (3 << SYSCON_SLPPWRCFG_FLASHPM_SHIFT)
 #  define SYSCON_SLPPWRCFG_FLASHPM_ACTIVE  (0 << SYSCON_SLPPWRCFG_FLASHPM_SHIFT) /* Active Mode */
@@ -626,6 +617,7 @@
 #  define SYSCON_DSLPPWRCFG_SRAMPM_ACTIVE  (0 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Active Mode */
 #  define SYSCON_DSLPPWRCFG_SRAMPM_STANDBY (1 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Standby Mode */
 #  define SYSCON_DSLPPWRCFG_SRAMPM_LOWPWR  (3 << SYSCON_DSLPPWRCFG_SRAMPM_SHIFT) /* Low Power Mode */
+
 #define SYSCON_DSLPPWRCFG_FLASHPM_SHIFT    (4)  /* Bits 5-4: Flash Power Modes */
 #define SYSCON_DSLPPWRCFG_FLASHPM_MASK     (3 << SYSCON_DSLPPWRCFG_FLASHPM_SHIFT)
 #  define SYSCON_DSLPPWRCFG_FLASHPM_ACTIVE (0 << SYSCON_DSLPPWRCFG_FLASHPM_SHIFT) /* Active Mode */
@@ -642,6 +634,7 @@
 #  define SYSCON_LDOSPCTL_VLDO_1p10V  (0x16 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.10 V */
 #  define SYSCON_LDOSPCTL_VLDO_1p15V  (0x17 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.15 V */
 #  define SYSCON_LDOSPCTL_VLDO_1p20V  (0x18 << SYSCON_LDOSPCTL_VLDO_SHIFT) /* 1.20 V */
+
 #define SYSCON_LDOSPCTL_VADJEN        (1 << 31) /* Bit 31: Voltage Adjust Enable */
 
 /* LDO Sleep Power Calibration */
@@ -655,6 +648,7 @@
 #  define SYSCON_LDOSPCAL_NOPLL_1p10V   (0x16 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.10 V */
 #  define SYSCON_LDOSPCAL_NOPLL_1p15V   (0x17 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.15 V */
 #  define SYSCON_LDOSPCAL_NOPLL_1p20V   (0x18 << SYSCON_LDOSPCAL_NOPLL_SHIFT) /* 1.20 V */
+
 #define SYSCON_LDOSPCAL_WITHPLL_SHIFT   (8)     /* Bits 15-8: Sleep with PLL */
 #define SYSCON_LDOSPCAL_WITHPLL_MASK    (0xff << SYSCON_LDOSPCAL_WITHPLL_SHIFT)
 #  define SYSCON_LDOSPCAL_WITHPLL_0p90V (0x12 << SYSCON_LDOSPCAL_WITHPLL_SHIFT) /* 0.90 V */
@@ -676,6 +670,7 @@
 #  define SYSCON_LDODPCTL_VLDO_1p10V  (0x16 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.10 V */
 #  define SYSCON_LDODPCTL_VLDO_1p15V  (0x17 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.15 V */
 #  define SYSCON_LDODPCTL_VLDO_1p20V  (0x18 << SYSCON_LDODPCTL_VLDO_SHIFT) /* 1.20 V */
+
 #define SYSCON_LDODPCTL_VADJEN        (1 << 31) /* Bit 31: Voltage Adjust Enable */
 
 /* LDO Deep-Sleep Power Calibration */
@@ -689,6 +684,7 @@
 #  define SYSCON_LDODPCAL_NOPLL_1p10V (0x16 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.10 V */
 #  define SYSCON_LDODPCAL_NOPLL_1p15V (0x17 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.15 V */
 #  define SYSCON_LDODPCAL_NOPLL_1p20V (0x18 << SYSCON_LDODPCAL_NOPLL_SHIFT) /* 1.20 V */
+
 #define SYSCON_LDODPCAL_30KHZ_SHIFT   (8)       /* Bits 15-8: Deep-Sleep with IOSC */
 #define SYSCON_LDODPCAL_30KHZ_MASK    (0xff << SYSCON_LDODPCAL_30KHZ_SHIFT)
 #  define SYSCON_LDODPCAL_30KHZ_0p90V (0x12 << SYSCON_LDODPCAL_30KHZ_SHIFT) /* 0.90 V */
@@ -875,7 +871,7 @@
 
 #define SYSCON_SRHIB_R0               (1 << 0)   /* Bit 0:  Hibernation Module Software Reset */
 
-/* UART Software Reset*/
+/* UART Software Reset */
 
 #define SYSCON_SRUARTR(n)             (1 << (n)) /* Bit n:  UART Module n Software Reset */
 #  define SYSCON_SRUARTR_R0           (1 << 0)   /* Bit 0:  UART Module 0 Software Reset */
@@ -967,7 +963,7 @@
 #  define SYSCON_RCGCTIMER_R4         (1 << 4)   /* Bit 4:  16/32-Bit General-Purpose Timer 4 Run Mode Clock Gating Control */
 #  define SYSCON_RCGCTIMER_R5         (1 << 5)   /* Bit 5:  16/32-Bit General-Purpose Timer 5 Run Mode Clock Gating Control */
 
-/* GPIO Run Mode Clock Gating Control*/
+/* GPIO Run Mode Clock Gating Control */
 
 #define SYSCON_RCGCGPIO(n)            (1 << (n)) /* Bit n:  16/32-Bit GPIO Port n Run Mode Clock Gating Control */
 #  define SYSCON_RCGCGPIO_R0          (1 << 0)   /* Bit 0:  16/32-Bit GPIO Port A Run Mode Clock Gating Control */
@@ -986,7 +982,7 @@
 #  define SYSCON_RCGCGPIO_R13         (1 << 13)  /* Bit 13: 16/32-Bit GPIO Port P Run Mode Clock Gating Control */
 #  define SYSCON_RCGCGPIO_R14         (1 << 14)  /* Bit 14: 16/32-Bit GPIO Port Q Run Mode Clock Gating Control */
 
-/* uDMA Run Mode Clock Gating Control*/
+/* uDMA Run Mode Clock Gating Control */
 
 #define SYSCON_RCGCDMA_R0             (1 << 0)   /* Bit 0:  μDMA Module Run Mode Clock Gating Control */
 
@@ -994,7 +990,7 @@
 
 #define SYSCON_RCGCHIB_R0             (1 << 0)   /* Bit 0:  Hibernation Module Run Mode Clock Gating Control */
 
-/* UART Run Mode Clock Gating Control*/
+/* UART Run Mode Clock Gating Control */
 
 #define SYSCON_RCGCUART(n)            (1 << (n)) /* Bit n:  UART Module n Run Mode Clock Gating Control */
 #  define SYSCON_RCGCUART_R0          (1 << 0)   /* Bit 0:  UART Module 0 Run Mode Clock Gating Control */
@@ -1006,7 +1002,7 @@
 #  define SYSCON_RCGCUART_R6          (1 << 6)   /* Bit 6:  UART Module 6 Run Mode Clock Gating Control */
 #  define SYSCON_RCGCUART_R7          (1 << 7)   /* Bit 7:  UART Module 7 Run Mode Clock Gating Control */
 
-/* SSI Run Mode Clock Gating Control*/
+/* SSI Run Mode Clock Gating Control */
 
 #define SYSCON_RCGCSSI(n)             (1 << (n)) /* Bit n:  SSI Module n Run Mode Clock Gating Control */
 #  define SYSCON_RCGCSSI_R0           (1 << 0)   /* Bit 0:  SSI Module 0 Run Mode Clock Gating Control */
@@ -1427,7 +1423,8 @@
 #  define SYSCON_PRWTIMER_R4          (1 << 4)   /* Bit 4:  32/64-Bit Wide General-Purpose Timer 4 Peripheral Ready */
 #  define SYSCON_PRWTIMER_R5          (1 << 5)   /* Bit 5:  32/64-Bit Wide General-Purpose Timer 5 Peripheral Ready */
 
-/* System Control Legacy Register Bit Definitions *******************************************/
+/* System Control Legacy Register Bit Definitions ***************************/
+
 /* Device Capabilities 0 */
 
 #define SYSCON_DC0_FLASHSZ_SHIFT      0         /* Bits 15-0: FLASH Size */
@@ -1688,12 +1685,14 @@
 #  define SYSCON_RCGC0_MAXADC0_250KSPS (1 << SYSCON_RCGC0_MAXADC0SPD_SHIFT)
 #  define SYSCON_RCGC0_MAXADC0_500KSPS (2 << SYSCON_RCGC0_MAXADC0SPD_SHIFT)
 #  define SYSCON_RCGC0_MAXADC0_1MSPS   (3 << SYSCON_RCGC0_MAXADC0SPD_SHIFT)
+
 #define SYSCON_RCGC0_MAXADC1SPD_SHIFT (8)       /* Bits 10-11: ADC1 Sample Speed */
 #define SYSCON_RCGC0_MAXADC1SPD_MASK  (3 << SYSCON_RCGC0_MAXADC1SPD_SHIFT)
 #  define SYSCON_RCGC0_MAXADC1_125KSPS (0 << SYSCON_RCGC0_MAXADC1SPD_SHIFT)
 #  define SYSCON_RCGC0_MAXADC1_250KSPS (1 << SYSCON_RCGC0_MAXADC1SPD_SHIFT)
 #  define SYSCON_RCGC0_MAXADC1_500KSPS (2 << SYSCON_RCGC0_MAXADC1SPD_SHIFT)
 #  define SYSCON_RCGC0_MAXADC1_1MSPS   (3 << SYSCON_RCGC0_MAXADC1SPD_SHIFT)
+
 #define SYSCON_RCGC0_ADC0             (1 << 16) /* Bit 16: ADC0 Clock Gating Control */
 #define SYSCON_RCGC0_ADC1             (1 << 17) /* Bit 17: ADC1 Clock Gating Control */
 #define SYSCON_RCGC0_PWM0             (1 << 20) /* Bit 20: PWM0 Clock Gating Control */
@@ -1848,16 +1847,16 @@
 
 #define TIVA_SYSCON_NVMSTAT_FWB         (1 << 0)  /* Bit 0: 32 Word Flash Write Buffer Available */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCONTROL_H */

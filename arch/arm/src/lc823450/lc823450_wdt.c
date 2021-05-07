@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <syslog.h>
 #include <errno.h>
@@ -328,9 +329,9 @@ static int lc823450_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
     (2 * (256 - WT0BCGST) * 1000) / wdt_freq;
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -369,7 +370,7 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   if (wt0pstst < 1 || wt0pstst > 0xffff)
     {
-      wdinfo("Error: timeout= %d < %d > %d\n",
+      wdinfo("Error: timeout= %" PRId32 " < %" PRId32 " > %" PRId32 "\n",
             65536 - 1 * wdt_freq / (2 * (256 - WT0BCGST) * 1000),
             timeout,
             65536 - 0xffff * wdt_freq / (2 * (256 - WT0BCGST) * 1000)); /* 22s */
@@ -394,7 +395,7 @@ static int lc823450_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   lc823450_wdt_start(lower);
 
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
 
   return OK;
 }

@@ -1,36 +1,20 @@
 /****************************************************************************
- * activity_governor.h
+ * drivers/power/activity_governor.h
  *
- *   Copyright (C) 2011-2012, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Matias Nitsche <mnitsche@dc.uba.ar>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -49,9 +33,9 @@
  ****************************************************************************/
 
 /* CONFIG_PM_GOVERNOR_SLICEMS. The activity based governor collects activity
- * counts in time slices.  At the end of the time slice, the count accumulated
- * during that interval is applied to an averaging algorithm to determine
- * the activity level.
+ * counts in time slices.  At the end of the time slice, the count
+ * accumulated during that interval is applied to an averaging algorithm to
+ * determine the activity level.
  *
  * CONFIG_PM_GOVERNOR_SLICEMS provides the duration of that time slice in
  * milliseconds.  Default: 100 Milliseconds
@@ -67,8 +51,8 @@
 
 /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
  * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
- * weight applied to each value, and X is the current activity.  These weights
- * may be negative and a limited to the range of int16_t.
+ * weight applied to each value, and X is the current activity.  These
+ * weights may be negative and a limited to the range of int16_t.
  *
  * CONFIG_PM_GOVERNOR_MEMORY:
  *  provides the memory for the algorithm.  Default: 2

@@ -202,6 +202,7 @@
 #  define LSM9DS1_CTRL_REG1_G_FS_G_245DPS       (0 << LSM9DS1_CTRL_REG1_G_FS_G_SHIFT) /* 245 dps */
 #  define LSM9DS1_CTRL_REG1_G_FS_G_500DPS       (1 << LSM9DS1_CTRL_REG1_G_FS_G_SHIFT) /* 500 dps */
 #  define LSM9DS1_CTRL_REG1_G_FS_G_2000DPS      (3 << LSM9DS1_CTRL_REG1_G_FS_G_SHIFT) /* 2000 dps */
+
 #define LSM9DS1_CTRL_REG1_G_ODR_G_SHIFT         5 /* Gyroscope bandwidth selection */
 #define LSM9DS1_CTRL_REG1_G_ODR_G_MASK          (7 << LSM9DS1_CTRL_REG1_G_ODR_G_SHIFT)
 #  define LSM9DS1_CTRL_REG1_G_ODR_G_POWERDOWN   (0 << LSM9DS1_CTRL_REG1_G_ODR_G_SHIFT) /* Power-down mode */
@@ -267,6 +268,7 @@
 #define LSM9DS1_CTRL_REG5_XL_XEN_XL             (1 << 3) /* Accelerometer's X-axis output enable */
 #define LSM9DS1_CTRL_REG5_XL_YEN_XL             (1 << 4) /* Accelerometer's Y-axis output enable */
 #define LSM9DS1_CTRL_REG5_XL_ZEN_XL             (1 << 5) /* Accelerometer's Z-axis output enable */
+
 #define LSM9DS1_CTRL_REG5_XL_DEC_SHIFT          6 /* Decimation of acceleration data on OUT REG and FIFO  */
 #define LSM9DS1_CTRL_REG5_XL_DEC_MASK           (3 << LSM9DS1_CTRL_REG5_XL_DEC_SHIFT)
 #  define LSM9DS1_CTRL_REG5_XL_DEC_NODEC        (0 << LSM9DS1_CTRL_REG5_XL_DEC_SHIFT) /* No decimation */
@@ -282,13 +284,16 @@
 #  define LSM9DS1_CTRL_REG6_XL_BW_XL_211HZ      (1 << LSM9DS1_CTRL_REG6_XL_BW_XL_SHIFT) /* 211 Hz */
 #  define LSM9DS1_CTRL_REG6_XL_BW_XL_105HZ      (2 << LSM9DS1_CTRL_REG6_XL_BW_XL_SHIFT) /* 105 Hz */
 #  define LSM9DS1_CTRL_REG6_XL_BW_XL_50HZ       (3 << LSM9DS1_CTRL_REG6_XL_BW_XL_SHIFT) /* 50 Hz */
+
 #define LSM9DS1_CTRL_REG6_XL_BW_SCAL_ODR        (1 << 2) /* Bandwidth selection */
+
 #define LSM9DS1_CTRL_REG6_XL_FS_XL_SHIFT        3 /* Accelerometer full-scale selection */
 #define LSM9DS1_CTRL_REG6_XL_FS_XL_MASK         (3 << LSM9DS1_CTRL_REG6_XL_FS_XL_SHIFT)
 #  define LSM9DS1_CTRL_REG6_XL_FS_XL_2G         (0 << LSM9DS1_CTRL_REG6_XL_FS_XL_SHIFT) /* +/- 2 g */
 #  define LSM9DS1_CTRL_REG6_XL_FS_XL_16G        (1 << LSM9DS1_CTRL_REG6_XL_FS_XL_SHIFT) /* +/- 16 g */
 #  define LSM9DS1_CTRL_REG6_XL_FS_XL_4G         (2 << LSM9DS1_CTRL_REG6_XL_FS_XL_SHIFT) /* +/- 4 g */
 #  define LSM9DS1_CTRL_REG6_XL_FS_XL_8G         (3 << LSM9DS1_CTRL_REG6_XL_FS_XL_SHIFT) /* +/- 8 g */
+
 #define LSM9DS1_CTRL_REG6_XL_ODR_XL_SHIFT       5 /* Output data rate and power mode selection */
 #define LSM9DS1_CTRL_REG6_XL_ODR_XL_MASK        (7 << LSM9DS1_CTRL_REG6_XL_ODR_XL_SHIFT)
 #  define LSM9DS1_CTRL_REG6_XL_ODR_XL_POWERDOWN (0 << LSM9DS1_CTRL_REG6_XL_ODR_XL_SHIFT) /* Power-down mode */
@@ -303,6 +308,7 @@
 
 #define LSM9DS1_CTRL_REG7_XL_HPIS1              (1 << 0) /* High-pass filter enabled */
 #define LSM9DS1_CTRL_REG7_XL_FDS                (1 << 2) /* Filtered data selection */
+
 #define LSM9DS1_CTRL_REG7_XL_DCF_SHIFT          5 /* Accelerometer digital filter cutoff frequency selection */
 #define LSM9DS1_CTRL_REG7_XL_DCF_MASK           (3 << LSM9DS1_CTRL_REG7_XL_DCF_SHIFT)
 #  define LSM9DS1_CTRL_REG7_XL_DCF_ODR_DIV50    (0 << LSM9DS1_CTRL_REG7_XL_DCF_SHIFT)
@@ -406,6 +412,7 @@
 
 #define LSM9DS1_CTRL_REG1_M_ST                  (1 << 0) /* Self-test enable */
 #define LSM9DS1_CTRL_REG1_M_FAST_ODR            (1 << 1) /* Enable data rates higher than 80 Hz */
+
 #define LSM9DS1_CTRL_REG1_M_DO_SHIFT            2 /* Output data rate selection */
 #define LSM9DS1_CTRL_REG1_M_DO_MASK             (7 << LSM9DS1_CTRL_REG1_M_DO_SHIFT)
 #  define LSM9DS1_CTRL_REG1_M_DO_0p625HZ        (0 << LSM9DS1_CTRL_REG1_M_DO_SHIFT) /* 0.625 Hz */
@@ -416,18 +423,21 @@
 #  define LSM9DS1_CTRL_REG1_M_DO_20HZ           (5 << LSM9DS1_CTRL_REG1_M_DO_SHIFT) /* 20 Hz */
 #  define LSM9DS1_CTRL_REG1_M_DO_40HZ           (6 << LSM9DS1_CTRL_REG1_M_DO_SHIFT) /* 40 Hz */
 #  define LSM9DS1_CTRL_REG1_M_DO_80HZ           (7 << LSM9DS1_CTRL_REG1_M_DO_SHIFT) /* 80 Hz */
+
 #define LSM9DS1_CTRL_REG1_M_OM_SHIFT            5 /* X and Y axes operative mode selection */
 #define LSM9DS1_CTRL_REG1_M_OM_MASK             (3 << LSM9DS1_CTRL_REG1_M_OM_SHIFT)
 #  define LSM9DS1_CTRL_REG1_M_OM_LOW            (0 << LSM9DS1_CTRL_REG1_M_OM_SHIFT) /* Low-power mode */
 #  define LSM9DS1_CTRL_REG1_M_OM_MEDIUM         (1 << LSM9DS1_CTRL_REG1_M_OM_SHIFT) /* Medium-performance mode */
 #  define LSM9DS1_CTRL_REG1_M_OM_HIGH           (2 << LSM9DS1_CTRL_REG1_M_OM_SHIFT) /* High-performance mode */
 #  define LSM9DS1_CTRL_REG1_M_OM_ULTRAHIGH      (3 << LSM9DS1_CTRL_REG1_M_OM_SHIFT) /* Ultra-high performance mode */
+
 #define LSM9DS1_CTRL_REG1_M_TEMP_COMP           (1 << 7) /* Temperature compensation enable */
 
 /* Magnetometer control register 2 */
 
 #define LSM9DS1_CTRL_REG2_M_SOFT_RST            (1 << 2) /* Configuration register and user register reset */
 #define LSM9DS1_CTRL_REG2_M_REBOOT              (1 << 3) /* Reboot memory content */
+
 #define LSM9DS1_CTRL_REG2_M_FS_SHIFT            5 /* Full-scale configuration */
 #define LSM9DS1_CTRL_REG2_M_FS_MASK             (3 << LSM9DS1_CTRL_REG2_M_FS_SHIFT)
 #  define LSM9DS1_CTRL_REG2_M_FS_4GAUSS         (0 << LSM9DS1_CTRL_REG2_M_FS_SHIFT) /* +/- 4 gauss */
@@ -443,6 +453,7 @@
 #  define LSM9DS1_CTRL_REG3_M_MD_SINGLE         (1 << LSM9DS1_CTRL_REG3_M_MD_SHIFT) /* Single-conversion mode */
 #  define LSM9DS1_CTRL_REG3_M_MD_POWERDOWN      (2 << LSM9DS1_CTRL_REG3_M_MD_SHIFT) /* Power-down mode */
 #  define LSM9DS1_CTRL_REG3_M_MD_POWERDOWN2     (3 << LSM9DS1_CTRL_REG3_M_MD_SHIFT) /* Power-down mode */
+
 #define LSM9DS1_CTRL_REG3_M_SIM                 (1 << 2) /* SPI serial interface mode selection */
 #define LSM9DS1_CTRL_REG3_M_LP                  (1 << 5) /* Low-power mode configuration */
 #define LSM9DS1_CTRL_REG3_M_I2C_DISABLE         (1 << 7) /* Disable I2C interface */
@@ -450,6 +461,7 @@
 /* Magnetometer control register 4 */
 
 #define LSM9DS1_CTRL_REG4_M_BLE                 (1 << 1) /* Big/little endian data selection */
+
 #define LSM9DS1_CTRL_REG4_M_OMZ_SHIFT           2 /* Z-axis operative mode selection */
 #define LSM9DS1_CTRL_REG4_M_OMZ_MASK            (3 << LSM9DS1_CTRL_REG4_M_OMZ_SHIFT)
 #  define LSM9DS1_CTRL_REG4_M_OMZ_LOW           (0 << LSM9DS1_CTRL_REG4_M_OMZ_SHIFT) /* Low-power mode */
@@ -730,8 +742,10 @@ static int lsm9ds1_writereg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static int lsm9ds1_modifyreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
-                              uint8_t clearbits, uint8_t setbits)
+static int lsm9ds1_modifyreg8(FAR struct lsm9ds1_dev_s *priv,
+                              uint8_t regaddr,
+                              uint8_t clearbits,
+                              uint8_t setbits)
 {
   int ret;
   uint8_t regval;
@@ -770,7 +784,8 @@ static int lsm9ds1_modifyreg8(FAR struct lsm9ds1_dev_s *priv, uint8_t regaddr,
 
 static uint32_t lsm9ds1_midpoint(uint32_t a, uint32_t b)
 {
-  return (uint32_t)(((uint64_t)a + (uint64_t)b + (uint64_t)1) / (uint64_t)2);
+  return (uint32_t)(((uint64_t)a +
+         (uint64_t)b + (uint64_t)1) / (uint64_t)2);
 }
 
 /****************************************************************************
@@ -1517,7 +1532,8 @@ static int lsm9ds1_register(FAR const char *devpath,
  *
  ****************************************************************************/
 
-int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+int lsm9ds1accel_register(FAR const char *devpath,
+                          FAR struct i2c_master_s *i2c,
                           uint8_t addr)
 {
   /* Sanity check */
@@ -1544,7 +1560,8 @@ int lsm9ds1accel_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
  *
  ****************************************************************************/
 
-int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+int lsm9ds1gyro_register(FAR const char *devpath,
+                         FAR struct i2c_master_s *i2c,
                          uint8_t addr)
 {
   /* Sanity check */
@@ -1571,7 +1588,8 @@ int lsm9ds1gyro_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
  *
  ****************************************************************************/
 
-int lsm9ds1mag_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
+int lsm9ds1mag_register(FAR const char *devpath,
+                        FAR struct i2c_master_s *i2c,
                         uint8_t addr)
 {
   /* Sanity check */

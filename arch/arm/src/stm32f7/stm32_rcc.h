@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32f7/stm32_rcc.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.orgr>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32F7_STM32_RCC_H
 #define __ARCH_ARM_SRC_STM32F7_STM32_RCC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -46,9 +31,9 @@
 
 #include "hardware/stm32_rcc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -61,29 +46,30 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This symbol references the Cortex-M7 vector table (as positioned by the linker
- * script, ld.script or ld.script.dfu.  The standard location for the vector table is
- * at the beginning of FLASH at address 0x0800:0000.  If we are using the STMicro DFU
- * bootloader, then the vector table will be offset to a different location in FLASH
- * and we will need to set the NVIC vector location to this alternative location.
+/* This symbol references the Cortex-M7 vector table (as positioned by the
+ * linker script, ld.script or ld.script.dfu.  The standard location for the
+ * vector table is at the beginning of FLASH at address 0x0800:0000.
+ * If we are using the STMicro DFU bootloader, then the vector table will
+ * be offset to a different location in FLASH and we will need to set the
+ * NVIC vector location to this alternative location.
  */
 
 extern uint32_t _vectors[];  /* See stm32_vectors.S */
 
-/************************************************************************************
+/****************************************************************************
  * Inline Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mco1config
  *
  * Description:
- *   Selects the clock source to output on MCO1 pin (PA8). PA8 should be configured in
- *   alternate function mode.
+ *   Selects the clock source to output on MCO1 pin (PA8). PA8 should be
+ *   configured in alternate function mode.
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO1 definitions from
@@ -96,24 +82,24 @@ extern uint32_t _vectors[];  /* See stm32_vectors.S */
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_mco1config(uint32_t source, uint32_t div)
 {
   uint32_t regval;
 
   regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO1_MASK|RCC_CFGR_MCO1PRE_MASK);
+  regval &= ~(RCC_CFGR_MCO1_MASK | RCC_CFGR_MCO1PRE_MASK);
   regval |= (source | div);
   putreg32(regval, STM32_RCC_CFGR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_mco2config
  *
  * Description:
- *   Selects the clock source to output on MCO2 pin (PC9). PC9 should be configured in
- *   alternate function mode.
+ *   Selects the clock source to output on MCO2 pin (PC9). PC9 should be
+ *   configured in alternate function mode.
  *
  * Input Parameters:
  *   source - One of the definitions for the RCC_CFGR_MCO2 definitions from
@@ -126,33 +112,33 @@ static inline void stm32_mco1config(uint32_t source, uint32_t div)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32_mco2config(uint32_t source, uint32_t div)
 {
   uint32_t regval;
 
   regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_MCO2_MASK|RCC_CFGR_MCO2PRE_MASK);
+  regval &= ~(RCC_CFGR_MCO2_MASK | RCC_CFGR_MCO2PRE_MASK);
   regval |= (source | div);
   putreg32(regval, STM32_RCC_CFGR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_clockconfig
  *
  * Description:
- *   Called to establish the clock settings based on the values in board.h.  This
- *   function (by default) will reset most everything, enable the PLL, and enable
- *   peripheral clocking for all peripherals enabled in the NuttX configuration
- *   file.
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
  *
- *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking will be enabled
- *   by an externally provided, board-specific function called
+ *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking will be
+ *   enabled by an externally provided, board-specific function called
  *   stm32_board_clockconfig().
  *
  * Input Parameters:
@@ -161,35 +147,35 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_clockconfig(void);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_board_clockconfig
  *
  * Description:
- *   Any STM32 board may replace the "standard" board clock configuration logic with
- *   its own, custom clock configuration logic.
+ *   Any STM32 board may replace the "standard" board clock configuration
+ *   logic with its own, custom clock configuration logic.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32F7_CUSTOM_CLOCKCONFIG
 void stm32_board_clockconfig(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_clockenable
  *
  * Description:
- *   Re-enable the clock and restore the clock settings based on settings in board.h.
- *   This function is only available to support low-power modes of operation:  When
- *   re-awakening from deep-sleep modes, it is necessary to re-enable/re-start the
- *   PLL
+ *   Re-enable the clock and restore the clock settings based on settings in
+ *   board.h. This function is only available to support low-power modes of
+ *   operation:  When re-awakening from deep-sleep modes, it is necessary
+ *   to re-enable/re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32_clockconfig():  It does not reset any devices, and it does not reset the
- *   currently enabled peripheral clocks.
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
+ *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_STM32F7_CUSTOM_CLOCKCONFIG is defined, then clocking will
  *   be enabled by an externally provided, board-specific function called
@@ -201,13 +187,13 @@ void stm32_board_clockconfig(void);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 void stm32_clockenable(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rcc_enablelse
  *
  * Description:
@@ -219,7 +205,7 @@ void stm32_clockenable(void);
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_rcc_enablelse(void);
 

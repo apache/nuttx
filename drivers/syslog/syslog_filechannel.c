@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/syslog/syslog_filechannel.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -42,6 +27,7 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
 
@@ -57,45 +43,12 @@
 #define OPEN_MODE  (S_IROTH | S_IRGRP | S_IRUSR | S_IWUSR)
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/* SYSLOG channel methods */
-
-static int syslog_file_force(int ch);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the SYSLOG channel */
+/* Handle to the SYSLOG channel */
 
-static const struct syslog_channel_s g_syslog_file_channel =
-{
-  syslog_dev_putc,
-  syslog_file_force,
-  syslog_dev_flush,
-#ifdef CONFIG_SYSLOG_WRITE
-  syslog_dev_write,
-#endif
-};
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_file_force
- *
- * Description:
- *   A dummy FORCE method
- *
- ****************************************************************************/
-
-static int syslog_file_force(int ch)
-{
-  return ch;
-}
+FAR static struct syslog_channel_s *g_syslog_file_channel;
 
 /****************************************************************************
  * Public Functions
@@ -153,13 +106,18 @@ int syslog_file_channel(FAR const char *devpath)
 
   /* Uninitialize any driver interface that may have been in place */
 
-  syslog_dev_uninitialize();
+  if (g_syslog_file_channel != NULL)
+    {
+      syslog_dev_uninitialize(g_syslog_file_channel);
+    }
 
   /* Then initialize the file interface */
 
-  ret = syslog_dev_initialize(devpath, OPEN_FLAGS, OPEN_MODE);
-  if (ret < 0)
+  g_syslog_file_channel = syslog_dev_initialize(devpath, OPEN_FLAGS,
+                                                OPEN_MODE);
+  if (g_syslog_file_channel == NULL)
     {
+      ret = -ENOMEM;
       goto errout_with_lock;
     }
 
@@ -167,7 +125,7 @@ int syslog_file_channel(FAR const char *devpath)
    * screwed.
    */
 
-  ret = syslog_channel(&g_syslog_file_channel);
+  ret = syslog_channel(g_syslog_file_channel);
 
 errout_with_lock:
   sched_unlock();

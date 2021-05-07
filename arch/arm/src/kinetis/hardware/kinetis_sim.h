@@ -1,55 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_sim.h
  *
- *   Copyright (C) 2011, 2016-2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SIM_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SIM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_SIM_SOPT1_OFFSET              0x0000  /* System Options Register 1 */
 #if defined (KINETIS_SIM_HAS_SOPT1CFG)
@@ -94,8 +78,10 @@
 #  define KINETIS_SIM_CLKDIV4_OFFSET          0x0068  /* System Clock Divider Register 4 */
 #endif
 
-/* Register Addresses ***************************************************************/
-/* NOTE: The SIM_SOPT1, SIM_SOPT1CFG and SIM_USBPHYCTL registers are located at a
+/* Register Addresses *******************************************************/
+
+/* NOTE:
+ * The SIM_SOPT1, SIM_SOPT1CFG and SIM_USBPHYCTL registers are located at a
  * different base address than the other SIM registers.
  */
 
@@ -142,10 +128,13 @@
 #  define KINETIS_SIM_CLKDIV4                 (KINETIS_SIM_BASE+KINETIS_SIM_CLKDIV4_OFFSET)
 #endif
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* System Options Register 1 */
-                                                         /* Bits 0-11: Reserved */
+
+/*                                                          Bits 0-11:
+ *                                                          Reserved
+ */
 #if defined(KINETIS_SIM_HAS_SOPT1_RAMSIZE)
 #  define SIM_SOPT1_RAMSIZE_SHIFT             (12)       /* Bits 12-15: RAM size */
 #  define SIM_SOPT1_RAMSIZE_MASK              (15 << SIM_SOPT1_RAMSIZE_SHIFT)
@@ -155,7 +144,10 @@
 #    define SIM_SOPT1_RAMSIZE_128KB           (9 << SIM_SOPT1_RAMSIZE_SHIFT)  /* 128 KBytes */
 #    define SIM_SOPT1_RAMSIZE_256KB           (10 << SIM_SOPT1_RAMSIZE_SHIFT) /* 256 KBytes */
 #endif
-                                                         /* Bits 16-18: Reserved */
+
+/*                                                          Bits 16-18:
+ *                                                          Reserved
+ */
 #if defined(KINETIS_SIM_HAS_SOPT1_OSC32KSEL)
 #  define SIM_SOPT1_OSC32KSEL_SHIFT           (20-KINETIS_SIM_HAS_SOPT1_OSC32KSEL_BITS) /* Bit 19 or 18: 32K oscillator clock select */
 #  define SIM_SOPT1_OSC32KSEL_MASK            (KINETIS_SIM_SOPT1_OSC32KSEL_MASK << SIM_SOPT1_OSC32KSEL_SHIFT)
@@ -170,9 +162,15 @@
 #    define SIM_SOPT1_OSC32KSEL_LPO1KZ         (((3 & KINETIS_SIM_SOPT1_OSC32KSEL_MASK)) << SIM_SOPT1_OSC32KSEL_SHIFT)
 #  endif
 #endif
-                                                         /* Bits 20-28: Reserved */
+
+/*                                                          Bits 20-28:
+ *                                                          Reserved
+ */
 #if defined(KINETIS_SIM_HAS_SOPT1_USBVSTBY)
-                                                         /* Bits 24-28: Reserved */
+
+/*                                                          Bits 24-28:
+ *                                                          Reserved
+ */
 #  define SIM_SOPT1_USBVSTBY                  (1 << 29)  /* Bit 29: USB voltage regulator in standby mode during VLPR and VLPW modes */
 #endif
 #if defined(KINETIS_SIM_HAS_SOPT1_USBSSTBY)
@@ -185,7 +183,10 @@
 /* SOPT1 Configuration Register */
 
 #if defined(KINETIS_SIM_HAS_SOPT1CFG)
-                                                         /* Bits 0-22: Reserved */
+
+/*                                                          Bits 0-22:
+ *                                                          Reserved
+ */
 #  if defined(KINETIS_SIM_HAS_SOPT1CFG_URWE)
 #    define SIM_SOPT1CFG_URWE                 (1 << 24)  /* Bit 24: USB voltage regulator enable write enable */
 #  endif
@@ -201,7 +202,10 @@
 /* USB PHY Control Register */
 
 #if defined(KINETIS_SIM_HAS_USBPHYCTL)
-                                                         /* Bits 0-7: Reserved */
+
+/*                                                          Bits 0-7:
+ *                                                          Reserved
+ */
 #  if defined(KINETIS_SIM_HAS_USBPHYCTL_USBVREGSEL)
 #    define SIM_USBPHYCTL_USBVREGSEL          (1 << 8)   /* Bit 8: Selects the default input voltage source */
 #  endif
@@ -221,10 +225,11 @@
 #      define SIM_USBPHYCTL_USB3VOUTTRG_3V310 (6 << SIM_USBPHYCTL_USB3VOUTTRG_SHIFT) /* 3.310V (default) */
 #      define SIM_USBPHYCTL_USB3VOUTTRG_3V662 (7 << SIM_USBPHYCTL_USB3VOUTTRG_SHIFT) /* 3.662V (For Freescale use only, not for customer use) */
 #  endif
+
 #  if defined(KINETIS_SIM_HAS_USBPHYCTL_USBDISILIM)
 #    define SIM_USBPHYCTL_USBDISILIM           (1 << 23)  /* Bit 23: USB Disable Inrush Current Limit */
 #  endif
-                                                         /* Bits 24-31: Reserved */
+                                                          /* Bits 24-31: Reserved */
 #endif
 
 /* System Options Register 2 */
@@ -298,6 +303,7 @@
                                                         /* Bit 19: Reserved */
 #  if defined(KINETIS_SIM_HAS_SOPT2_RMIISRC)
 #    define SIM_SOPT2_RMIISRC_SHIFT           (19)      /* Bit 19: RMII clock source select */
+
 #    define SIM_SOPT2_RMIISRC_EXTAL           (0 << SIM_SOPT2_RMIISRC_SHIFT) /* EXTAL clock */
 #    define SIM_SOPT2_RMIISRC_EXTBYP          (1 << SIM_SOPT2_RMIISRC_SHIFT) /* External bypass clock (ENET_1588_CLKIN) */
 #  endif
@@ -306,7 +312,7 @@
 #    define SIM_SOPT2_TIMESRC_MASK            (3 << SIM_SOPT2_TIMESRC_SHIFT)
 #      define SIM_SOPT2_TIMESRC_CORE          (0 << SIM_SOPT2_TIMESRC_SHIFT) /* Core/system clock */
 #      define SIM_SOPT2_TIMESRC_PLLSEL        (1 << SIM_SOPT2_TIMESRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
-                                                                                  clock as selected by SOPT2[PLLFLLSEL] */
+                                                                              * clock as selected by SOPT2[PLLFLLSEL] */
 #      define SIM_SOPT2_TIMESRC_OSCERCLK      (2 << SIM_SOPT2_TIMESRC_SHIFT) /* OSCERCLK clock */
 #      define SIM_SOPT2_TIMESRC_EXTBYP        (3 << SIM_SOPT2_TIMESRC_SHIFT) /* External bypass clock (ENET_1588_CLKIN) */
 #  endif
@@ -332,9 +338,9 @@
 #    define SIM_SOPT2_TPMSRC_MASK             (3 << SIM_SOPT2_TPMSRC_SHIFT)
 #      define SIM_SOPT2_TPMSRC_CORE           (0 << SIM_SOPT2_TPMSRC_SHIFT) /* Clock disabled */
 #      define SIM_SOPT2_TPMSRC_MCGCLK         (1 << SIM_SOPT2_TPMSRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
-                                                                                     clock as selected by SOPT2[PLLFLLSEL] and then
-                                                                                     divided by the PLLFLLCLK fractional divider
-                                                                                     as configured by SIM_CLKDIV3[PLLFLLFRAC, PLLFLLDIV] */
+                                                                             * clock as selected by SOPT2[PLLFLLSEL] and then
+                                                                             * divided by the PLLFLLCLK fractional divider
+                                                                             * as configured by SIM_CLKDIV3[PLLFLLFRAC, PLLFLLDIV] */
 #      define SIM_SOPT2_TPMSRC_OCSERCLK       (2 << SIM_SOPT2_TPMSRC_SHIFT) /* OSCERCLK clock */
 #      define SIM_SOPT2_TPMSRC_MCGIRCLK       (3 << SIM_SOPT2_TPMSRC_SHIFT) /* MCGIRCLK clock */
 #  endif
@@ -352,9 +358,9 @@
 #    define SIM_SOPT2_LPUARTSRC_MASK          (3 << SIM_SOPT2_LPUARTSRC_SHIFT)
 #      define SIM_SOPT2_LPUARTSRC_CORE        (0 << SIM_SOPT2_LPUARTSRC_SHIFT) /* Clock disabled */
 #      define SIM_SOPT2_LPUARTSRC_MCGCLK      (1 << SIM_SOPT2_LPUARTSRC_SHIFT) /* MCGFLLCLK,MCGPLLCLK,IRC48M,USB1 PFD
-                                                                                  clock as selected by SOPT2[PLLFLLSEL] and then
-                                                                                  divided by the PLLFLLCLK fractional divider
-                                                                                  as configured by SIM_CLKDIV3[PLLFLLFRAC, PLLFLLDIV] */
+                                                                                * clock as selected by SOPT2[PLLFLLSEL] and then
+                                                                                * divided by the PLLFLLCLK fractional divider
+                                                                                * as configured by SIM_CLKDIV3[PLLFLLFRAC, PLLFLLDIV] */
 #      define SIM_SOPT2_LPUARTSRC_OCSERCLK    (2 << SIM_SOPT2_LPUARTSRC_SHIFT) /* OSCERCLK clock */
 #      define SIM_SOPT2_LPUARTSRC_MCGIRCLK    (3 << SIM_SOPT2_LPUARTSRC_SHIFT) /* MCGIRCLK clock */
 #  endif
@@ -365,9 +371,15 @@
 #      define SIM_SOPT2_SDHCSRC_MCGCLK        (1 << SIM_SOPT2_SDHCSRC_SHIFT) /* MCGPLLCLK/MCGFLLCLK clock */
 #      define SIM_SOPT2_SDHCSRC_OCSERCLK      (2 << SIM_SOPT2_SDHCSRC_SHIFT) /* OSCERCLK clock */
 #      define SIM_SOPT2_SDHCSRC_EXTBYP        (3 << SIM_SOPT2_SDHCSRC_SHIFT) /* External bypass clock (SDHC0_CLKIN) */
-                                                        /* Bits 30-31: Reserved */
+
+/*                                                         Bits 30-31:
+ *                                                         Reserved
+ */
 #  endif
-                                                        /* Bits 30-31: Reserved */
+
+/*                                                         Bits 30-31:
+ *                                                         Reserved
+ */
 #  if defined(KINETIS_SIM_HAS_SOPT2_NFCSRC)
 #    define SIM_SOPT2_NFCSRC_SHIFT            (30)      /* Bits 30-31: NFC Flash clock source select */
 #    define SIM_SOPT2_NFCSRC_MASK             (3 << SIM_SOPT2_NFCSRC_SHIFT)
@@ -491,7 +503,11 @@
 #endif
 
 #if defined(KINETIS_SIM_HAS_SOPT5_LPUART1TXSRC)
-                                                        /* Bits 8-15, 18-31: Reserved */
+
+/*                                                         Bits 8-15,
+ *                                                              18-31:
+ *                                                                   Reserved
+ */
 #  define SIM_SOPT5_LPUART1TXSRC_SHIFT        (16)      /* Bit 16:  LPUART1 transmit data source select */
 #  define SIM_SOPT5_LPUART1TXSRC_MASK         (3 << SIM_SOPT5_LPUART1TXSRC_SHIFT)
 #    define SIM_SOPT5_LPUART1TXSRC_TX         (0 << SIM_SOPT5_LPUART1TXSRC_SHIFT) /* LPUART1_TX pin */
@@ -511,9 +527,15 @@
 /* System Options Register 6 */
 
 #if defined(KINETIS_SIM_HAS_SOPT6)
-                                                        /* Bits 0-23: Reserved */
+
+/*                                                         Bits 0-23:
+ *                                                         Reserved
+ */
 #  if defined(KINETIS_SIM_HAS_SOPT6_MCC)
-                                                        /* Bits 16-23: Reserved */
+
+/*                                                         Bits 16-23:
+ *                                                         Reserved
+ */
 #    define SIM_SOPT6_MCC_SHIFT               (0)       /* Bits 0-15: NFC hold cycle in case FlexBus request while NFC is granted */
 #    define SIM_SOPT6_MCC_MASK                (0xffff << SIM_SOPT6_MCC_SHIFT)
 #    define SIM_SOPT6_MCC(n)                  (((n) & 0xffff) << SIM_SOPT6_MCC_SHIFT)
@@ -765,7 +787,10 @@
 /* System Options Register 9 */
 
 #if defined(KINETIS_SIM_HAS_SOPT9)
-                                                        /* Bits 0-17: Reserved */
+
+/*                                                         Bits 0-17:
+ *                                                         Reserved
+ */
 #  if defined(KINETIS_SIM_HAS_SOPT9_TPM1CH0SRC)
 #    define SIM_SOPT9_TPM1CH0SRC_SHIFT        (18)      /* Bits 18-19:  TPM1 channel 0 input capture source select */
 #    define SIM_SOPT9_TPM1CH0SRC_MASK         (3 << SIM_SOPT9_TPM1CH0SRC_SHIFT)
@@ -870,13 +895,18 @@
 #    define SIM_SDID_FAMILYID_K8X             (8 << SIM_SDID_FAMILYID_SHIFT) /* K8x Family */
 #endif
 
-
 /* System Clock Gating Control Register 1 */
 
 #if defined(KINETIS_SIM_HAS_SCGC1)
-                                                        /* Bits 0-9: Reserved */
+
+/*                                                         Bits 0-9:
+ *                                                         Reserved
+ */
 #  if defined(KINETIS_SIM_HAS_SCGC1_OSC1)
-                                                        /* Bits 0-4: Reserved */
+
+/*                                                         Bits 0-4:
+ *                                                         Reserved
+ */
 #    define SIM_SCGC1_OSC1                    (1 << 5)  /* OSC1 clock gate control */
 #  endif
                                                         /* Bits 6-9: Reserved */
@@ -1119,12 +1149,16 @@
 /* System Clock Divider Register 1 */
 
 #if defined(KINETIS_SIM_HAS_CLKDIV1_OUTDIV5)
-                                                        /* Bits 0-15: Reserved */
+
+/*                                                         Bits 0-15:
+ *                                                          Reserved
+ */
 #endif
 #if defined(KINETIS_SIM_HAS_CLKDIV1_OUTDIV4)
 #  define SIM_CLKDIV1_OUTDIV4_SHIFT           (16)      /* Bits 16-19: Clock 4 output divider value */
 #  define SIM_CLKDIV1_OUTDIV4_MASK            (15 << SIM_CLKDIV1_OUTDIV4_SHIFT)
 #    define SIM_CLKDIV1_OUTDIV4(n)            ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV4_SHIFT) /* n=1..16 */
+
 #    define SIM_CLKDIV1_OUTDIV4_1             (0 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 1 */
 #    define SIM_CLKDIV1_OUTDIV4_2             (1 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 2 */
 #    define SIM_CLKDIV1_OUTDIV4_3             (2 << SIM_CLKDIV1_OUTDIV4_SHIFT)  /* Divide by 3 */
@@ -1146,6 +1180,7 @@
 #  define SIM_CLKDIV1_OUTDIV3_SHIFT           (20)      /* Bits 20-23: Clock 3 output divider value */
 #  define SIM_CLKDIV1_OUTDIV3_MASK            (15 << SIM_CLKDIV1_OUTDIV3_SHIFT)
 #    define SIM_CLKDIV1_OUTDIV3(n)            ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV3_SHIFT) /* n=1..16 */
+
 #    define SIM_CLKDIV1_OUTDIV3_1             (0 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 1 */
 #    define SIM_CLKDIV1_OUTDIV3_2             (1 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 2 */
 #    define SIM_CLKDIV1_OUTDIV3_3             (2 << SIM_CLKDIV1_OUTDIV3_SHIFT)  /* Divide by 3 */
@@ -1167,6 +1202,7 @@
 #  define SIM_CLKDIV1_OUTDIV2_SHIFT           (24)      /* Bits 24-27: Clock 2 output divider value */
 #  define SIM_CLKDIV1_OUTDIV2_MASK            (15 << SIM_CLKDIV1_OUTDIV2_SHIFT)
 #    define SIM_CLKDIV1_OUTDIV2(n)            ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV2_SHIFT) /* n=1..16 */
+
 #    define SIM_CLKDIV1_OUTDIV2_1             (0 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 1 */
 #    define SIM_CLKDIV1_OUTDIV2_2             (1 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 2 */
 #    define SIM_CLKDIV1_OUTDIV2_3             (2 << SIM_CLKDIV1_OUTDIV2_SHIFT)  /* Divide by 3 */
@@ -1187,6 +1223,7 @@
 #define SIM_CLKDIV1_OUTDIV1_SHIFT             (28)      /* Bits 28-31: Clock 1 output divider value */
 #define SIM_CLKDIV1_OUTDIV1_MASK              (15 << SIM_CLKDIV1_OUTDIV1_SHIFT)
 #  define SIM_CLKDIV1_OUTDIV1(n)              ((uint32_t)(((n)-1) & 0xf) << SIM_CLKDIV1_OUTDIV1_SHIFT) /* n=1..16 */
+
 #  define SIM_CLKDIV1_OUTDIV1_1               (0 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 1 */
 #  define SIM_CLKDIV1_OUTDIV1_2               (1 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 2 */
 #  define SIM_CLKDIV1_OUTDIV1_3               (2 << SIM_CLKDIV1_OUTDIV1_SHIFT)  /* Divide by 3 */
@@ -1311,6 +1348,7 @@
 #endif
 
 /* Flash Configuration Register 2 */
+
                                                 /* Bits 0-15: Reserved */
 #if defined(KINETIS_SIM_HAS_FCFG2_MAXADDR1)
 #  define SIM_FCFG2_MAXADDR1_SHIFT            (16)      /* Bits 16-[21|22]: Max address block 1 */
@@ -1332,8 +1370,11 @@
 #endif
 
 /* Unique Identification Register High. 32-bit Unique Identification. */
+
 /* Unique Identification Register Mid-High. 32-bit Unique Identification. */
+
 /* Unique Identification Register Mid Low. 32-bit Unique Identification. */
+
 /* Unique Identification Register Low. 32-bit Unique Identification. */
 
 #if defined(KINETIS_SIM_HAS_CLKDIV3)
@@ -1379,22 +1420,25 @@
 /* Misc Control Register */
 
 #if defined(KINETIS_SIM_HAS_MCR)
-                                                            /* Bits 0-28: Reserved */
-#  define SIM_MCR_PDBLOOP                     (1<< 29)      /* Bit 29: PDB Loop Mode */
-                                                            /* Bit 30: Reserved */
-#  define SIM_MCR_TRACECLKDIS                 (1<< 31)      /* Bit 31: Trace clock disable. */
+
+/*                                                        Bits 0-28:
+                                                        * Reserved
+                                                        */
+#  define SIM_MCR_PDBLOOP                     (1<< 29) /* Bit 29: PDB Loop Mode */
+                                                       /* Bit 30: Reserved */
+#  define SIM_MCR_TRACECLKDIS                 (1<< 31) /* Bit 31: Trace clock disable. */
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_SIM_H */

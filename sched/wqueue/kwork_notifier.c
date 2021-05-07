@@ -139,7 +139,7 @@ static uint32_t work_notifier_key(void)
 
   if (++notifier_key == 0)
     {
-      ++notifier_key;
+      notifier_key = 1;
     }
 
   return notifier_key;

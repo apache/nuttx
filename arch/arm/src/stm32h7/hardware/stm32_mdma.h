@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_mdma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,23 +16,23 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_MDMA_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_MDMA_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_MDMA_OFFSET(x)          (0x40+0x40*(x))
 #define STM32_MDMA_GISR0_OFFSET       0x0000 /* MDMA global interrupt/status register */
@@ -286,7 +286,7 @@
 #define STM32_MDMA_C14MDR_OFFSET    STM32_MDMA_CXMDR_OFFSET(14)
 #define STM32_MDMA_C15MDR_OFFSET    STM32_MDMA_CXMDR_OFFSET(15)
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_MDMA_GISR0          (STM32_MDMA_BASE+STM32_MDMA_GISR0_OFFSET)
 
@@ -488,14 +488,14 @@
 #define STM32_MDMA_C14MDR         (STM32_MDMA_BASE+STM32_MDMA_C14MDR_OFFSET)
 #define STM32_MDMA_C15MDR         (STM32_MDMA_BASE+STM32_MDMA_C15MDR_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* MDMA global interrupt/status register */
 
 #define MDMA_CXISR_GIF(x)         (1 << x)
 
-/* MDMA channel x interrupt/status register and channel x interrupt flag clear
- * register
+/* MDMA channel x interrupt/status register and channel x interrupt flag
+ * clear register
  */
 
 #define MDMA_INT_TEIF             (1 << 0) /* Bit 0: Channel X transfer error flag */
@@ -619,7 +619,7 @@
 
 /* MDMA channel x block repeat address update register */
 
-#define MDMA_CBRUR_SUV_SHIFT      (0) /* Bits 0-15: Source address update value */
+#define MDMA_CBRUR_SUV_SHIFT      (0)  /* Bits 0-15: Source address update value */
 #define MDMA_CBRUR_SUV_MASK       (0xff << MDMA_CBRUR_SUV_SHIFT)
 #define MDMA_CBRUR_DUV_SHIFT      (16) /* Bits 16-31: Destination address update value */
 #define MDMA_CBRUR_DUV_MASK       (0xff << MDMA_CBRUR_DUV_SHIFT)

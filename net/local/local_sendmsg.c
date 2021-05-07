@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/local/local_sendmsg.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -75,10 +60,10 @@
  *
  ****************************************************************************/
 
-static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
+static ssize_t local_send(FAR struct socket *psock,
+                          FAR const struct iovec *buf,
                           size_t len, int flags)
 {
-  FAR struct local_conn_s *peer;
   ssize_t ret;
 
   switch (psock->s_type)
@@ -86,6 +71,8 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
 #ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
         {
+          FAR struct local_conn_s *peer;
+
           /* Local TCP packet send */
 
           DEBUGASSERT(psock && psock->s_conn && buf);
@@ -160,10 +147,13 @@ static ssize_t local_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
+static ssize_t local_sendto(FAR struct socket *psock,
+                            FAR const struct iovec *buf,
                             size_t len, int flags,
-                            FAR const struct sockaddr *to, socklen_t tolen)
+                            FAR const struct sockaddr *to,
+                            socklen_t tolen)
 {
+#ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
   FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
   ssize_t ret;
@@ -177,7 +167,6 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
       return -EAFNOSUPPORT;
     }
 
-#ifdef CONFIG_NET_LOCAL_DGRAM
   /* If this is a connected socket, then return EISCONN */
 
   if (psock->s_type != SOCK_DGRAM)
@@ -185,14 +174,6 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
       nerr("ERROR: Connected socket\n");
       return -EISCONN;
     }
-
-  /* Now handle the local UDP sendto() operation */
-
-  /* We keep packet sizes in a uint16_t, so there is a upper limit to the
-   * 'len' that can be supported.
-   */
-
-  DEBUGASSERT(buf && len <= UINT16_MAX);
 
   /* Verify that this is not a connected peer socket.  It need not be
    * bound, however.  If unbound, recvfrom will see this as a nameless
@@ -216,8 +197,8 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (tolen < sizeof(sa_family_t) + 2)
     {
-      /* EFAULT - An invalid user space address was specified for
-       * a parameter
+      /* EFAULT
+       * - An invalid user space address was specified for a parameter
        */
 
       return -EFAULT;
@@ -230,7 +211,7 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = local_create_halfduplex(conn, unaddr->sun_path);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to create FIFO for %s: %d\n",
+      nerr("ERROR: Failed to create FIFO for %s: %zd\n",
            conn->lc_path, ret);
       return ret;
     }
@@ -242,7 +223,7 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
                           (flags & MSG_DONTWAIT) != 0);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to open FIFO for %s: %d\n",
+      nerr("ERROR: Failed to open FIFO for %s: %zd\n",
            unaddr->sun_path, ret);
 
       goto errout_with_halfduplex;
@@ -253,7 +234,7 @@ static ssize_t local_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = local_send_packet(&conn->lc_outfile, buf, len);
   if (ret < 0)
     {
-      nerr("ERROR: Failed to send the packet: %d\n", ret);
+      nerr("ERROR: Failed to send the packet: %zd\n", ret);
     }
 
   /* Now we can close the write-only socket descriptor */
@@ -267,11 +248,10 @@ errout_with_halfduplex:
 
   local_release_halfduplex(conn);
 
-#else
-  ret = -EISCONN;
-#endif /* CONFIG_NET_LOCAL_DGRAM */
-
   return ret;
+#else
+  return -EISCONN;
+#endif /* CONFIG_NET_LOCAL_DGRAM */
 }
 
 /****************************************************************************
@@ -299,9 +279,9 @@ errout_with_halfduplex:
 ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
-  FAR void *buf = msg->msg_iov;
+  FAR const struct iovec *buf = msg->msg_iov;
   size_t len = msg->msg_iovlen;
-  FAR struct sockaddr *to = msg->msg_name;
+  FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
 
   return to ? local_sendto(psock, buf, len, flags, to, tolen) :

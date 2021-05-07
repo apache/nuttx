@@ -1,4 +1,4 @@
-/******************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_k28memorymap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ******************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K28MEMORYMAP_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_K28MEMORYMAP_H
 
-/******************************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -31,11 +31,11 @@
 
 #ifdef KINETIS_K28
 
-/******************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************************/
+ ****************************************************************************/
 
-/* Memory Map *****************************************************************************/
+/* Memory Map ***************************************************************/
 
 /* K28 Family
  *
@@ -90,7 +90,7 @@
                                                  * External Peripheral - Not executable) */
 #  define KINETIS_PERIPH_BASE        0xe0000000 /* Private peripherals */
 
-/* Peripheral Bridge 0 Memory Map *********************************************************/
+/* Peripheral Bridge 0 Memory Map *******************************************/
 
 #  define KINETIS_AIPS0_BASE         0x40000000 /* Peripheral bridge 0 (AIPS-Lite 0) */
 #  define KINETIS_XBAR_BASE          0x40004000 /* Crossbar switch */
@@ -147,7 +147,7 @@
 #  define KINETIS_SMC_BASE           0x4007e000 /* System Mode controller (SMC) */
 #  define KINETIS_RCM_BASE           0x4007f000 /* Reset Control Module (RCM) */
 
-/* Peripheral Bridge 1 Memory Map *********************************************************/
+/* Peripheral Bridge 1 Memory Map *******************************************/
 
 #  define KINETIS_AIPS1_BASE         0x40080000 /* Peripheral bridge 1 (AIPS-Lite 1) */
 #  define KINETIS_RNGA_BASE          0x400a0000 /* True Random Number Generator (TRNG) */
@@ -185,7 +185,7 @@
 #  define KINETIS_GPIOD_BASE         0x400ff0c0 /* GPIO PORTD registers */
 #  define KINETIS_GPIOE_BASE         0x400ff100 /* GPIO PORTE registers */
 
-/* Private Peripheral Bus (PPB) Memory Map ************************************************/
+/* Private Peripheral Bus (PPB) Memory Map **********************************/
 
 #  define KINETIS_ITM_BASE           0xe0000000 /* Instrumentation Trace Macrocell (ITM) */
 #  define KINETIS_DWT_BASE           0xe0001000 /* Data Watchpoint and Trace (DWT) */
@@ -202,10 +202,10 @@
                                                  * of debug components */
 
 #else
-  /* The memory map for other parts is defined in other documents and may or may not
-   * be the same as above (the family members are all very similar)  This error just
-   * means that you have to look at the document and determine for yourself if the
-   * memory map is the same.
+  /* The memory map for other parts is defined in other documents and may or
+   * may not be the same as above (the family members are all very similar)
+   * This error just means that you have to look at the document and
+   * determine for yourself if the memory map is the same.
    */
 
 #  error "No memory map for this K28 part"

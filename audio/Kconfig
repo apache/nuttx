@@ -86,6 +86,18 @@ config AUDIO_FORMAT_PCM
 	---help---
 		Build in support for PCM Audio format.
 
+if AUDIO_FORMAT_PCM
+
+config AUDIO_FORMAT_RAW
+	bool "Raw mode"
+	default n
+	---help---
+		Raw mode makes the PCM decoder skip trying to parse received
+		data for a PCM header. All data is sent to the audio driver
+		directly.
+
+endif
+
 config AUDIO_FORMAT_MP3
 	bool "MPEG 3 Layer 1"
 	default y

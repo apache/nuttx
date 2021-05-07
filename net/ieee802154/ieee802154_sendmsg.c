@@ -298,7 +298,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = (FAR struct ieee802154_sendto_s *)pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %d\n", flags, pstate->is_sent);
+  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & IEEE802154_POLL) != 0)
     {
@@ -637,9 +637,9 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
 ssize_t ieee802154_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                            int flags)
 {
-  FAR void *buf = msg->msg_iov->iov_base;
+  FAR const void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
-  FAR struct sockaddr *to = msg->msg_name;
+  FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
 
   /* Validity check, only single iov supported */

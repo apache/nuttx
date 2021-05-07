@@ -73,7 +73,7 @@
 
 static inline int is_real(float x)
 {
-  const float infinite = 1.0F/0.0F;
+  const float infinite = 1.0F / 0.0F;
   return (x < infinite) && (x >= -infinite);
 }
 
@@ -99,7 +99,7 @@ float strtof(FAR const char *str, FAR char **endptr)
   int n;
   int num_digits;
   int num_decimals;
-  const float infinite = 1.0F/0.0F;
+  const float infinite = 1.0F / 0.0F;
 
   /* Skip leading whitespace */
 
@@ -115,10 +115,14 @@ float strtof(FAR const char *str, FAR char **endptr)
     {
     case '-':
       negative = 1; /* Fall through to increment position */
+
       /* FALLTHROUGH */
+
     case '+':
       p++;
+
       /* FALLTHROUGH */
+
     default:
       break;
     }
@@ -179,10 +183,14 @@ float strtof(FAR const char *str, FAR char **endptr)
         {
         case '-':
           negative = 1;   /* Fall through to increment pos */
+
           /* FALLTHROUGH */
+
         case '+':
           p++;
+
           /* FALLTHROUGH */
+
         default:
           break;
         }

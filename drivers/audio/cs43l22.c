@@ -43,7 +43,6 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
-#include <math.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -2011,7 +2010,7 @@ FAR struct audio_lowerhalf_s *
 
       /* Initialize I2C */
 
-      audinfo("address=%02x frequency=%d\n",
+      audinfo("address=%02x frequency=%" PRId32 "\n",
               lower->address, lower->frequency);
 
       /* Software reset.  This puts all CS43L22 registers back in their

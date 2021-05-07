@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -84,11 +85,12 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 main_t entry, FAR char * const argv[])
 {
   uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
+  FAR struct task_info_s *info;
   int ret;
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Only tasks and kernel threads can be initialized in this way */
 
-#ifndef CONFIG_DISABLE_PTHREAD
   DEBUGASSERT(tcb && ttype != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
@@ -118,13 +120,26 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
     {
       /* Allocate the stack for the TCB */
 
-      ret = up_create_stack(&tcb->cmn, stack_size, ttype);
+      ret = up_create_stack(&tcb->cmn,
+                            sizeof(struct task_info_s) + stack_size,
+                            ttype);
     }
 
   if (ret < OK)
     {
       goto errout_with_group;
     }
+
+  /* Initialize thread local storage */
+
+  info = up_stack_frame(&tcb->cmn, sizeof(struct task_info_s));
+  if (info == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout_with_group;
+    }
+
+  DEBUGASSERT(info == tcb->cmn.stack_alloc_ptr);
 
   /* Initialize the task control block */
 

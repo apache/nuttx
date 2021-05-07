@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32/stm32butterfly2/src/stm32_butterfly2.h
  *
  *   Copyright (C) 2016 Michał Łyszczek. All rights reserved.
@@ -35,13 +35,13 @@
 #ifndef __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
 #define __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include "stm32_gpio.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -57,11 +57,11 @@
 #define GPIO_OTGFS_PWRON (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz |\
                           GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN15)
 
-/*****************************************************************************
- * Public Functions
+/****************************************************************************
+ * Public Functions Definitions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_led_initialize
  *
  * Description:
@@ -70,7 +70,7 @@
 
 void stm32_led_initialize(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
@@ -84,10 +84,12 @@ void stm32_led_initialize(void);
 #ifdef CONFIG_STM32_SPI1
 void stm32_spidev_initialize(void);
 #else
-static inline void stm32_spidev_initialize(void) {}
+static inline void stm32_spidev_initialize(void)
+{
+}
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_mmcsd_initialize
  *
  * Description:
@@ -98,10 +100,15 @@ static inline void stm32_spidev_initialize(void) {}
 #ifdef CONFIG_MMCSD
 int stm32_mmcsd_initialize(int minor);
 #else
-static inline int stm32_mmcsd_initialize(int minor) { (void)minor; return 0; }
+static inline int stm32_mmcsd_initialize(int minor)
+{
+  (void)minor;
+
+  return 0;
+}
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_usb_initialize
  *
  * Description:
@@ -111,10 +118,12 @@ static inline int stm32_mmcsd_initialize(int minor) { (void)minor; return 0; }
 #ifdef CONFIG_STM32_OTGFS
 void stm32_usb_initialize(void);
 #else
-static inline void stm32_usb_initialize(void) {}
+static inline void stm32_usb_initialize(void)
+{
+}
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
@@ -124,7 +133,10 @@ static inline void stm32_usb_initialize(void) {}
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void);
 #else
-static inline int stm32_usbhost_initialize(void) { return 0; }
+static inline int stm32_usbhost_initialize(void)
+{
+  return 0;
+}
 #endif
 
 /****************************************************************************
@@ -138,7 +150,10 @@ static inline int stm32_usbhost_initialize(void) { return 0; }
 #ifdef CONFIG_STM32_ADC
 int stm32_adc_setup(void);
 #else
-static inline int stm32_adc_setup(void) { return 0; }
+static inline int stm32_adc_setup(void)
+{
+  return 0;
+}
 #endif
 
 #endif /* __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H */

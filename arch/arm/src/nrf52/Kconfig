@@ -185,6 +185,7 @@ config NRF52_WDT
 config NRF52_RADIO
 	bool "RADIO"
 	depends on EXPERIMENTAL
+	depends on !NRF52_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF52_NFCT
@@ -198,6 +199,7 @@ config NRF52_SAADC
 config NRF52_TIMER0
 	bool "TIMER0"
 	select NRF52_TIMER
+	depends on !NRF52_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF52_TIMER1
@@ -248,6 +250,7 @@ config NRF52_PPI
 config NRF52_RTC0
 	bool "RTC0"
 	select NRF52_RTC
+	depends on !NRF52_SOFTDEVICE_CONTROLLER
 	default n
 
 config NRF52_RTC1
@@ -355,7 +358,8 @@ if NRF52_SYSTIMER_RTC
 
 config NRF52_SYSTIMER_RTC_INSTANCE
   int "RTC timer instance"
-  default 0
+  default 0 if !NRF52_SOFTDEVICE_CONTROLLER
+  default 1 if NRF52_SOFTDEVICE_CONTROLLER
   range 0 2
   ---help---
     Which RTC instance to use to drive the system timer
@@ -621,8 +625,103 @@ menu "SPI Configuration"
 config NRF52_SPI_MASTER_WORKAROUND_1BYTE_TRANSFER
 	bool "Master 1 Byte transfer anomaly workaround"
 	depends on NRF52_SPI_MASTER && ARCH_CHIP_NRF52832
+	select NRF52_PPI
 	default y
 	---help---
 		Enable the workaround to fix SPI Master 1 byte transfer bug
 		which occurs in NRF52832 revision 1 and revision 2.
 endmenu
+
+menu "I2C Master Configuration"
+
+config NRF52_I2C_MASTER_DISABLE_NOSTART
+	bool "Disable the I2C Master NOSTART flag support"
+	default n
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf52
+		hardware requires these be joined into a single
+		transfer. This can be expensive and some devices
+		can get away with multi-part transfers as separate
+		transfers.  Enable this at your own risk!
+
+config NRF52_I2C_MASTER_COPY_BUF_SIZE
+	int "Static buffer size for NOSTART flag support"
+	depends on !NRF52_I2C_MASTER_DISABLE_NOSTART
+	default 4
+	---help---
+		To combine two i2c messages that are part of a
+		single transaction (NO_STOP-NO_START) the nrf52
+		hardware requires these be joined into a single
+		transfer. This static buffer will be used if the
+		transaction will fit otherwise it will fall back
+		on malloc.
+
+endmenu
+
+menuconfig NRF52_SOFTDEVICE_CONTROLLER
+	bool "SoftDevice Controller"
+	select CONFIG_ARMV7M_USEBASEPRI
+	select CONFIG_ARCH_RAMVECTORS
+	select NRF52_USE_LFCLK
+	select NRF52_LFCLK_XTAL
+	---help---
+		This enables use of Nordic SoftDevice controller
+		(SDC). It is a library version of a subset of 
+		full SoftDevice, which only includes the BLE
+		controller implementation.
+
+		It makes use of RTC0, TIMER0, RADIO and RNG, so
+		these will be unavailable for direct use by user.
+		It also makes use of PPI channel range 17-31.
+
+if NRF52_SOFTDEVICE_CONTROLLER
+
+config NRF52_SDC_CLOCK_ACCURACY
+	int "Clock Accuracy [PPM]"
+	default 250
+	---help---
+		Select the clock accuracy depending on the chosen low-frequency clock
+		source
+
+config NRF52_SDC_SLAVE_COUNT
+	int "Number of slave roles to support (also master)"
+	default 1
+	---help---
+		This controls how many slave connections will be supported. It also
+		determines the number of master roles from the following:
+
+		MASTER_ROLES = CONFIG_BLUETOOTH_MAX_CONN - NRF52_SDC_SLAVE_COUNT
+
+		So by choosing these two variables you can control both capabilities.
+
+config NRF52_SDC_ADVERTISING
+	bool "Support advertising"
+	default y
+
+config NRF52_SDC_SCANNING
+	bool "Support scanning"
+	default y
+
+config NRF52_SDC_LE_2M_PHY
+	bool "Support LE 2M PHY"
+	default y
+
+config NRF52_SDC_LE_CODED_PHY
+	bool "Support LE Coded PHY"
+	default y
+
+config NRF52_SDC_DLE
+	bool "Support Data Length Extension (DLE)"
+	default y
+
+config NRF52_SDC_VERSION
+	int "SoftDevice version"
+	default 132 if ARCH_CHIP_NRF52832
+	default 140 if ARCH_CHIP_NRF52840
+	---help---
+		The softdevice version to use. This depends on the particular chip
+		to use. See official Nordic documentation on which chips are supported
+		in each version.
+endif
+

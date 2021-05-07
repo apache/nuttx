@@ -1,5 +1,5 @@
-/*****************************************************************************
- * arch/arm/src/eoss3/eoss3_clock.h
+/****************************************************************************
+ * arch/arm/src/eoss3/hardware/eoss3_clock.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,23 +15,23 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_EOSS3_HARDWARE_EOSS3_CLOCK_H
 #define __ARCH_ARM_SRC_EOSS3_HARDWARE_EOSS3_CLOCK_H
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets **********************************************************/
+/* Register Offsets *********************************************************/
 
 #define EOSS3_CLK_CONTROL_A_0_OFFSET    0x0000  /* Clock 10 Divisor */
 #define EOSS3_CLK_CONTROL_A_1_OFFSET    0x0004  /* Clock 10 Clock Src Ctrl */
@@ -88,7 +88,7 @@
 #define EOSS3_AIP_OSC_CTRL_1_OFFSET     0x0084  /* AIP Oscillator Control 1 */
 #define EOSS3_AIP_OSC_STA_0_OFFSET      0x00A0  /* AIP OScillator Status 0 */
 
-/* Register Addresses ********************************************************/
+/* Register Addresses *******************************************************/
 
 #define EOSS3_UART_DR             (EOSS3_CLK_BASE + EOSS3_UART_DR_OFFSET)
 #define EOSS3_CLK_CONTROL_A_0     (EOSS3_CLK_BASE + EOSS3_CLK_CONTROL_A_0_OFFSET)
@@ -150,7 +150,7 @@
 
 #define MISC_LOCK_KEY_CTRL     (0x40005310)
 
-/* Register Bitfield Definitions *********************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* EOSS3_AIP_OSC_CTRL_0 Register */
 

@@ -681,7 +681,7 @@ int up_fbinitialize(int display)
  * Description:
  *   Initialize the VNC frame buffer driver.  The VNC frame buffer driver
  *   supports two initialization interfaces:  The standard up_fbinitialize()
- *   that will be called from the graphics layer and this speical
+ *   that will be called from the graphics layer and this special
  *   initialization function that can be used only by VNC aware OS logic.
  *
  *   The two initialization functions may be called separated or together in

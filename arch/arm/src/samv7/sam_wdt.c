@@ -1,35 +1,20 @@
 /****************************************************************************
- * arch/arm/src/samv7/sam_wdg.c
+ * arch/arm/src/samv7/sam_wdt.c
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -56,6 +41,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_DEBUG_WATCHDOG_INFO
@@ -88,6 +74,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
@@ -107,6 +94,7 @@ struct sam_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMV7_WDT_REGDEBUG
@@ -140,6 +128,7 @@ static int      sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct watchdog_ops_s g_wdgops =
@@ -180,8 +169,8 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   uint32_t regval = getreg32(regaddr);
 
-  /* Is this the same value that we read from the same register last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same register last time?
+   *  Are we polling the register?  If so, suppress some of the output.
    */
 
   if (regaddr == prevaddr && regval == preval)
@@ -207,7 +196,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdinfo("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -287,8 +276,8 @@ static int sam_interrupt(int irq, FAR void *context, FAR void *arg)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -301,7 +290,8 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
 
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
-   * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.  Only
+   * NOTE:
+   * The Watchdog Mode Register (WDT_MR) can be written only once.  Only
    * a processor reset resets it.  Writing the WDT_MR register reloads the
    * timer with the newly programmed mode parameters.
    */
@@ -317,8 +307,8 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -329,9 +319,9 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
 {
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
-   * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.  Only
-   * a processor reset resets it.  Writing the WDT_MR register reloads the
-   * timer with the newly programmed mode parameters.
+   * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.
+   * Only a processor reset resets it.  Writing the WDT_MR register reloads
+   * the timer with the newly programmed mode parameters.
    */
 
   wdinfo("Entry\n");
@@ -347,8 +337,8 @@ static int sam_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the atchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -374,8 +364,8 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   stawtus - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -431,8 +421,8 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   timeout - The new timeout value in millisecnds.
  *
  * Returned Value:
@@ -481,7 +471,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    * timeout =  1000 * (reload + 1) / Fwwdg
    */
 
-  priv->timeout = (1000 * reload + WDT_FREQUENCY/2) / WDT_FREQUENCY;
+  priv->timeout = (1000 * reload + WDT_FREQUENCY / 2) / WDT_FREQUENCY;
 
   /* Remember the selected values */
 
@@ -492,22 +482,22 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Set the WDT_MR according to calculated value
    *
-   * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.  Only
-   * a processor reset resets it.  Writing the WDT_MR register reloads the
-   * timer with the newly programmed mode parameters.
+   * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.
+   * Only a processor reset resets it.  Writing the WDT_MR register
+   * reloads the timer with the newly programmed mode parameters.
    *
-   * NOTE: The WDD Value is the lower bound of a so called Forbidden Window
-   * (see Datasheet for further Information).  To disable this Forbidden
-   * Window we have to set the WDD Value greater than or equal to WDV
-   * (according the Datasheet).
+   * NOTE: The WDD Value is the lower bound of a so called Forbidden
+   * Window (see Datasheet for further Information).  To disable this
+   * Forbidden Window we have to set the WDD Value greater than or equal
+   * to WDV (according the Datasheet).
    *
-   * When setting the WDD Value equal to WDV we have to wait at least one clock
-   * pulse of the (very slow) watchdog clock source between two resets (or the
-   * configuration and the first reset) of the watchdog.
+   * When setting the WDD Value equal to WDV we have to wait at least one
+   * clock pulse of the (very slow) watchdog clock source between two resets
+   * (or the configuration and the first reset) of the watchdog.
    *
-   * On fast systems this can lead to a direct hit of the WDD boundary and
-   * thus to a reset of the system.  This is why we program the WDD Value to
-   * WDT_MR_WDD_MAX to truly disable this Forbidden Window Feature.
+   * On fast systems this can lead to a direct hit of the WDD boundary
+   * and thus to a reset of the system.  This is why we program the WDD
+   * Value to WDT_MR_WDD_MAX to truly disable this Forbidden Window Feature.
    */
 
   regval = WDT_MR_WDV(reload) | WDT_MR_WDD(WDT_MR_WDD_MAX);
@@ -561,8 +551,8 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   behavior.
  *
  * Input Parameters:
- *   lower      - A pointer the publicly visible representation of the "lower-half"
- *                driver state structure.
+ *   lower      - A pointer the publicly visible representation of the
+ *                "lower-half" driver state structure.
  *   newhandler - The new watchdog expiration function pointer.  If this
  *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
@@ -595,7 +585,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Save the new handler */
 
-   priv->handler = handler;
+  priv->handler = handler;
 
   /* Are we attaching or detaching the handler? */
 
@@ -625,8 +615,8 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   are forwarded to the lower half driver through this method.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *   cmd   - The ioctol command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular

@@ -80,9 +80,9 @@ struct nfsmount
   uint16_t                  nm_readdirsize;   /* Size of a readdir RPC */
   uint16_t                  nm_buflen;        /* Size of I/O buffer */
 
-  /* Set aside memory on the stack to hold the largest call message.  NOTE
-   * that for the case of the write call message, it is the reply message that
-   * is in this union.
+  /* Set aside memory on the stack to hold the largest call message.
+   * NOTE that for the case of the write call message, it is the reply
+   * message that is in this union.
    */
 
   union
@@ -101,24 +101,26 @@ struct nfsmount
     struct rpc_reply_write  write;
   } nm_msgbuffer;
 
-  /* I/O buffer (must be a aligned to 32-bit boundaries).  This buffer used for all
-   * reply messages EXCEPT for the WRITE RPC. In that case it is used for the WRITE
-   * call message that contains the data to be written.  This buffer must be
-   * dynamically sized based on the characteristics of the server and upon the
-   * configuration of the NuttX network.  It must be sized to hold the largest
-   * possible WRITE call message or READ response message.
+  /* I/O buffer (must be a aligned to 32-bit boundaries).  This buffer used
+   * for all reply messages EXCEPT for the WRITE RPC. In that case it is used
+   * for the WRITE call message that contains the data to be written.  This
+   * buffer must be dynamically sized based on the characteristics of the
+   * server and upon the configuration of the NuttX network.  It must be
+   * sized to hold the largest possible WRITE call message or READ response
+   * message.
    */
 
   uint32_t                  nm_iobuffer[1];   /* Actual size is given by nm_buflen */
 };
 
-/* The size of the nfsmount structure will depend on the size of the allocated I/O
- * buffer.
+/* The size of the nfsmount structure will depend on the size of the
+ * allocated I/O buffer.
  */
 
 #define SIZEOF_nfsmount(n) (sizeof(struct nfsmount) + ((n + 3) & ~3) - sizeof(uint32_t))
 
-/* Mount parameters structure. This structure is use in nfs_decode_args function before one
+/* Mount parameters structure.
+ * This structure is use in nfs_decode_args function before one
  * mount structure is allocated in each NFS mount.
  */
 

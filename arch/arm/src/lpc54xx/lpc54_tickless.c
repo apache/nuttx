@@ -1,37 +1,20 @@
 /****************************************************************************
- *  arch/arm/src/lpc54xx/lpc54_rit.c
+ * arch/arm/src/lpc54xx/lpc54_tickless.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Derives from the LPC43xx tickless mode logic
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -147,7 +130,7 @@ static inline uint64_t lpc54_get_compare(void)
   return g_cached_compare;
 }
 
- static void lpc54_set_mask(uint64_t value)
+static void lpc54_set_mask(uint64_t value)
 {
   irqstate_t flags;
 
@@ -160,7 +143,8 @@ static inline uint64_t lpc54_get_compare(void)
       putreg16((uint32_t)(value >> 32), LPC54_RIT_MASKH);
       putreg32((uint32_t)(value & 0xffffffffllu), LPC54_RIT_MASK);
       leave_critical_section();
-      putreg32(value, );
+      putreg32(value,
+              );
     }
 }
 
@@ -289,7 +273,7 @@ static void lpc54_ts_sub(FAR const struct timespec *ts1,
 
 static inline uint64_t lpc54_ts2tick(FAR const struct timespec *ts)
 {
-  return (uint64_t)ts->tv_sec * LPC54_CCLK +
+  return ((uint64_t)ts->tv_sec * LPC54_CCLK +
           ((uint64_t)ts->tv_nsec / g_min_nsec * g_min_ticks));
 }
 
@@ -301,8 +285,8 @@ static uint64_t lpc54_tick2ts(uint64_t ticks, FAR struct timespec *ts,
 
   if (with_rest)
     {
-      uint64_t ticks_mult = ticks/g_min_ticks;
-      ticks_whole = ticks_mult*g_min_ticks;
+      uint64_t ticks_mult = ticks / g_min_ticks;
+      ticks_whole = ticks_mult * g_min_ticks;
       ticks_rest = ticks - ticks_whole;
     }
   else
@@ -310,7 +294,7 @@ static uint64_t lpc54_tick2ts(uint64_t ticks, FAR struct timespec *ts,
       ticks_whole = ticks;
     }
 
-  ts->tv_sec = ticks_whole/LPC54_CCLK;
+  ts->tv_sec = ticks_whole / LPC54_CCLK;
   ts->tv_nsec = ((ticks_whole % LPC54_CCLK) / g_min_ticks) * g_min_nsec;
 
   return ticks_rest;
@@ -387,9 +371,9 @@ static void lpc54_save_timer(bool from_isr)
       lpc54_set_compare(COUNTER_MAX);
       lpc54_set_mask(0);
       lpc54_clear_interrupt();
-   }
+    }
   else
-   {
+    {
       /* Process reset if any */
 
       uint64_t match = lpc54_get_compare();
@@ -399,7 +383,7 @@ static void lpc54_save_timer(bool from_isr)
       lpc54_set_compare(COUNTER_MAX);
       lpc54_set_mask(0);
 
-     if (from_isr || lpc54_get_interrupt())
+      if (from_isr || lpc54_get_interrupt())
         {
           if (lpc54_get_reset_on_match()) /* Was reset? */
             {
@@ -693,7 +677,9 @@ int up_timer_gettime(FAR struct timespec *ts)
 
       if (reset_after)
         {
-          /* Count should be smaller then COUNTER_MAX-g_to_end -> no overflow */
+          /* Count should be smaller then
+           * COUNTER_MAX-g_to_end -> no overflow
+           */
 
           count += lpc54_get_compare();
         }

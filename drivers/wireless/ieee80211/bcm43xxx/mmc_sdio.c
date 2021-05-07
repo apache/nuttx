@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/bcm43xxx/ieee80211/mmc_sdio.h
+ * drivers/wireless/ieee80211/bcm43xxx/mmc_sdio.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Simon Piriou <spiriou31@gmail.com>
@@ -40,6 +40,7 @@
 #include <nuttx/wireless/ieee80211/mmc_sdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include <nuttx/compiler.h>
@@ -118,8 +119,9 @@ int sdio_sendcmdpoll(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       ret = SDIO_WAITRESPONSE(dev, cmd);
       if (ret != OK)
         {
-          wlerr("ERROR: Wait for response to cmd: %08x failed: %d\n",
-               cmd, ret);
+          wlerr("ERROR: Wait for response to cmd: %08" PRIx32
+                " failed: %d\n",
+                cmd, ret);
         }
     }
 
@@ -227,7 +229,8 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
 
   SDIO_BLOCKSETUP(dev, blocklen, nblocks);
   SDIO_WAITENABLE(dev,
-                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  SDIO_CMD53_TIMEOUT_MS);
 
   if (write)
     {
@@ -240,7 +243,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
           SDIO_DMASENDSETUP(dev, buf, blocklen * nblocks);
           SDIO_SENDCMD(dev, SD_ACMD53, arg.value);
 
-          wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
+          wkupevent = SDIO_EVENTWAIT(dev);
           ret = SDIO_RECVR5(dev, SD_ACMD53, &data);
         }
       else
@@ -249,7 +252,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
           ret = SDIO_RECVR5(dev, SD_ACMD53, &data);
 
           SDIO_DMASENDSETUP(dev, buf, blocklen * nblocks);
-          wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
+          wkupevent = SDIO_EVENTWAIT(dev);
         }
     }
   else
@@ -258,7 +261,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       SDIO_DMARECVSETUP(dev, buf, blocklen * nblocks);
       SDIO_SENDCMD(dev, SD_ACMD53, arg.value);
 
-      wkupevent = SDIO_EVENTWAIT(dev, SDIO_CMD53_TIMEOUT_MS);
+      wkupevent = SDIO_EVENTWAIT(dev);
       ret = SDIO_RECVR5(dev, SD_ACMD53, &data);
     }
 
@@ -374,7 +377,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
       return ret;
     }
 
-  wlinfo("rca is %x\n", data >> 16);
+  wlinfo("rca is %" PRIx32 "\n", data >> 16);
 
   /* Send CMD7 with the argument == RCA in order to select the card
    * and put it in Transfer State.

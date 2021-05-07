@@ -1,52 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam_emac.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_EMAC_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_EMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* EMAC Register Offsets ************************************************************/
+ ****************************************************************************/
+
+/* EMAC Register Offsets ****************************************************/
 
 #define SAM_EMAC_NCR_OFFSET       0x0000 /* Network Control Register */
 #define SAM_EMAC_NCFGR_OFFSET     0x0004 /* Network Configuration Register */
@@ -86,6 +72,7 @@
 #define SAM_EMAC_SAMB1_OFFSET     0x00c8 /* Specific Address 1 Mask Bottom [31:0] Register */
 #define SAM_EMAC_SAMT1_OFFSET     0x00cc /* Specific Address 1 Mask Top [47:32] Register */
                                          /* 0x00fc: Reserved */
+
 /* Statistics registers */
 
 #define SAM_EMAC_OTLO_OFFSET      0x0100 /* Octets Transmitted [31:0] Register */
@@ -152,7 +139,7 @@
 #define SAM_EMAC_PEFRN_OFFSET     0x01fc /* PTP Peer Event Frame Received Nanoseconds */
                                          /* 0x0280-0x0298: Reserved */
 
-/* EMAC Register Addresses **********************************************************/
+/* EMAC Register Addresses **************************************************/
 
 #define SAM_EMAC_NCR              (SAM_EMAC_BASE+SAM_EMAC_NCR_OFFSET)
 #define SAM_EMAC_NCFGR            (SAM_EMAC_BASE+SAM_EMAC_NCFGR_OFFSET)
@@ -255,7 +242,7 @@
 #define SAM_EMAC_PEFRS            (SAM_EMAC_BASE+SAM_EMAC_PEFRS_OFFSET)
 #define SAM_EMAC_PEFRN            (SAM_EMAC_BASE+SAM_EMAC_PEFRN_OFFSET)
 
-/* EMAC Register Bit Definitions ****************************************************/
+/* EMAC Register Bit Definitions ********************************************/
 
 /* Network Control Register */
 
@@ -297,6 +284,7 @@
 #  define EMAC_NCFGR_RXBUFO_1     (1 << EMAC_NCFGR_RXBUFO_SHIFT) /* One-byte offset from RX buffer start */
 #  define EMAC_NCFGR_RXBUFO_2     (2 << EMAC_NCFGR_RXBUFO_SHIFT) /* Two-byte offset from RX buffer start */
 #  define EMAC_NCFGR_RXBUFO_3     (3 << EMAC_NCFGR_RXBUFO_SHIFT) /* Three-byte offset fromRX buffer start */
+
 #define EMAC_NCFGR_LFERD          (1 << 16) /* Bit 16: Length Field Error Frame Discard */
 #define EMAC_NCFGR_RFCS           (1 << 17) /* Bit 17: Remove FCS */
 #define EMAC_NCFGR_CLK_SHIFT      (18)      /* Bits 18-20: MDC clock divider */
@@ -307,9 +295,11 @@
 #  define EMAC_NCFGR_CLK_DIV48    (3 << EMAC_NCFGR_CLK_SHIFT) /* MCK divided by 48 (MCK up to 120 MHz) */
 #  define EMAC_NCFGR_CLK_DIV64    (4 << EMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 160 MHz) */
 #  define EMAC_NCFGR_CLK_DIV96    (5 << EMAC_NCFGR_CLK_SHIFT) /* MCK divided by 96 (MCK up to 240 MHz) */
+
 #define EMAC_NCFGR_DBW_SHIFT      (21)      /* Bit 21-22: Data Bus Width */
 #define EMAC_NCFGR_DBW_MASK       (3 << EMAC_NCFGR_DBW_SHIFT)
 #  define EMAC_NCFGR_DBW_ZERO     (0 << EMAC_NCFGR_DBW_SHIFT) /* Must be zero */
+
 #define EMAC_NCFGR_DCPF           (1 << 23) /* Bit 23: Disable Copy of Pause Frames */
 #define EMAC_NCFGR_RXCOEN         (1 << 24) /* Bit 24: Receive Checksum Offload Enable */
 #define EMAC_NCFGR_EFRHD          (1 << 25) /* Bit 25: Enable Frames Received in Half Duplex */
@@ -331,10 +321,11 @@
 
 #define EMAC_DCFGR_FBLDO_SHIFT    (0)     /* Bits 0-4: Fixed Burst Length for DMA Data Operations */
 #define EMAC_DCFGR_FBLDO_MASK     (31 << EMAC_DCFGR_FBLDO_SHIFT)
-#  define EMAC_DCFGR_FBLDO_SINGLE (1 << EMAC_DCFGR_FBLDO_SHIFT) /* Always use SINGLE AHB bursts */
-#  define EMAC_DCFGR_FBLDO_INCR4  (4 << EMAC_DCFGR_FBLDO_SHIFT) /* Attempt to use INCR4 AHB bursts */
-#  define EMAC_DCFGR_FBLDO_INCR8  (8 << EMAC_DCFGR_FBLDO_SHIFT) /* Attempt to use INCR8 AHB bursts */
+#  define EMAC_DCFGR_FBLDO_SINGLE (1 << EMAC_DCFGR_FBLDO_SHIFT)  /* Always use SINGLE AHB bursts */
+#  define EMAC_DCFGR_FBLDO_INCR4  (4 << EMAC_DCFGR_FBLDO_SHIFT)  /* Attempt to use INCR4 AHB bursts */
+#  define EMAC_DCFGR_FBLDO_INCR8  (8 << EMAC_DCFGR_FBLDO_SHIFT)  /* Attempt to use INCR8 AHB bursts */
 #  define EMAC_DCFGR_FBLDO_INCR16 (16 << EMAC_DCFGR_FBLDO_SHIFT) /* Attempt to use INCR16 AHB bursts */
+
 #define EMAC_DCFGR_ESMA           (1 << 6)  /* Bit 6:  Endian Swap Mode Enable for Management Descriptor Accesses */
 #define EMAC_DCFGR_ESPA           (1 << 7)  /* Bit 7:  Endian Swap Mode Enable for Packet Data Accesses */
 #define EMAC_DCFGR_TXCOEN         (1 << 11) /* Bit 11: Transmitter Checksum Generation Offload Enable */
@@ -367,7 +358,9 @@
 #define EMAC_RSR_RXOVR            (1 << 2)  /* Bit 2:  Receive Overrun */
 #define EMAC_RSR_HNO              (1 << 3)  /* Bit 3:  HRESP Not OK */
 
-/* Interrupt Status Register (ISR), Interrupt Enable Register (IER), Interrupt Disable Register (IDR) and Interrupt Mask Register (IMR) */
+/* Interrupt Status Register (ISR), Interrupt Enable Register (IER),
+ * Interrupt Disable Register (IDR) and Interrupt Mask Register (IMR)
+ */
 
 #define EMAC_INT_MFS              (1 << 0)  /* Bit 0:  Management Frame Sent */
 #define EMAC_INT_RCOMP            (1 << 1)  /* Bit 1:  Receive Complete */
@@ -427,24 +420,29 @@
 #define EMAC_TPQ_MASK             (0x0000ffff) /* Bits 0-15: Transmit Pause Quantum */
 
 /* Hash Register Bottom [31:0] Register (LS 32-bit hash address) */
+
 /* Hash Register Top [63:32] Register (MS 32-bit hash address) */
 
 /* Specific Address 1 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 1 Top [47:32] Register */
 
 #define EMAC_SAT1_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
 
 /* Specific Address 2 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 2 Top [47:32] Register */
 
 #define EMAC_SAT2_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
 
 /* Specific Address 3 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 3 Top [47:32] Register */
 
 #define EMAC_SAT3_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
 
 /* Specific Address 4 Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 4 Top [47:32] Register */
 
 #define EMAC_SAT4_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of the destination address */
@@ -476,6 +474,7 @@
 #define EMAC_TPFCP_PQ_MASK        (0xff << EMAC_TPFCP_PQ_SHIFT)
 
 /* Specific Address 1 Mask Bottom [31:0] Register (LS 32-bit address) */
+
 /* Specific Address 1 Mask Top [47:32] Register (MS 16-bit address) */
 
 #define EMAC_SAMT1_MASK            (0x0000ffff) /* Bits 0-15: Bits 32-47 of Specific Address 1 Mask */
@@ -532,11 +531,13 @@
 /* PTP/1588 Timer Registers */
 
 /* 1588 Timer Sync Strobe Seconds Register (32-bit timer value) */
+
 /* 1588 Timer Sync Strobe Nanoseconds Register (30-bit timer value) */
 
 #define EMAC_TSSN_MASK            (0x3fffffff) /* Bit 0-29: Value Timer Nanoseconds Register Capture */
 
 /* 1588 Timer Seconds Register (32-bit timer value) */
+
 /* 1588 Timer Nanoseconds Register (30-bit timer value) */
 
 #define EMAC_TN_MASK              (0x3fffffff) /* Bit 0-29: Timer Count in Nanoseconds */
@@ -561,31 +562,35 @@
 #  define EMAC_TI_NIT(n)          ((uint32_t)(n) << EMAC_TI_NIT_SHIFT)
 
 /* PTP Event Frame Transmitted Seconds (32-bit timer value) */
+
 /* PTP Event Frame Transmitted Nanoseconds (30-bit timer value) */
 
 #define EMAC_EFTN_MASK            (0x3fffffff) /* Bit 0-29: Register Update */
 
 /* PTP Event Frame Received Seconds (32-bit timer value) */
+
 /* PTP Event Frame Received Nanoseconds (30-bit timer value) */
 
 #define EMAC_EFRN_MASK            (0x3fffffff) /* Bit 0-29: Register Update */
 
 /* PTP Peer Event Frame Transmitted Seconds (32-bit timer value) */
+
 /* PTP Peer Event Frame Transmitted Nanoseconds (30-bit timer value) */
 
 #define EMAC_PEFTN_MASK           (0x3fffffff) /* Bit 0-29: Register Update */
 
 /* PTP Peer Event Frame Received Seconds (32-bit timer value) */
+
 /* PTP Peer Event Frame Received Nanoseconds (30-bit timer value) */
 
 #define EMAC_PEFRN_MASK           (0x3fffffff) /* Bit 0-29: Register Update */
 
-/* Descriptors **********************************************************************/
+/* Descriptors **************************************************************/
 
 /* Receive buffer descriptor:  Address word */
 
-#define EMACRXD_ADDR_OWNER        (1 << 0)  /* Bit 0:  1=Software owns; 0=EMAC owns */
-#define EMACRXD_ADDR_WRAP         (1 << 1)  /* Bit 1:  Last descriptor in list */
+#define EMACRXD_ADDR_OWNER        (1 << 0)     /* Bit 0:  1=Software owns; 0=EMAC owns */
+#define EMACRXD_ADDR_WRAP         (1 << 1)     /* Bit 1:  Last descriptor in list */
 #define EMACRXD_ADDR_MASK         (0xfffffffc) /* Bits 2-31: Aligned buffer address */
 
 /* Receive buffer descriptor:  Control word */
@@ -602,20 +607,22 @@
 #define EMACRXD_STA_VLPRIO_MASK   (7 << EMACRXD_STA_VLANPRIO_SHIFT)
 #define EMACRXD_STA_PRIODET       (1 << 20) /* Bit 20: Priority tag detected */
 #define EMACRXD_STA_VLANTAG       (1 << 21) /* Bit 21: VLAN tag detected */
-#define EMACRXD_STA_TYPEID_SHIFT  (22) /* Bit 22-23: Specific address register */
+#define EMACRXD_STA_TYPEID_SHIFT  (22)      /* Bit 22-23: Specific address register */
 #define EMACRXD_STA_TYPEID_MASK   (3 << EMACRXD_STA_TYPEID_SHIFT)
 #  define EMACRXD_STA_TYPEID1     (0 << EMACRXD_STA_TYPEID_SHIFT) /* Type ID register 1 match */
 #  define EMACRXD_STA_TYPEID2     (1 << EMACRXD_STA_TYPEID_SHIFT) /* Type ID register 2 match */
 #  define EMACRXD_STA_TYPEID3     (2 << EMACRXD_STA_TYPEID_SHIFT) /* Type ID register 3 match */
 #  define EMACRXD_STA_TYPEID4     (3 << EMACRXD_STA_TYPEID_SHIFT) /* Type ID register 4 match */
+
 #define EMACRXD_STA_TYPEIDMATCH   (1 << 24) /* Bit 24: Type ID register match found */
 #define EMACRXD_STA_SNAP          (1 << 24) /* Bit 24: Frame was SNAP encoded */
-#define EMACRXD_STA_ADDR_SHIFT    (25) /* Bit 25-26: Specific address register */
+#define EMACRXD_STA_ADDR_SHIFT    (25)      /* Bit 25-26: Specific address register */
 #define EMACRXD_STA_ADDR_MASK     (3 << EMACRXD_STA_ADDR_SHIFT)
 #  define EMACRXD_STA_ADDR1       (0 << EMACRXD_STA_ADDR_SHIFT) /* Specific address register 1 match */
 #  define EMACRXD_STA_ADDR2       (1 << EMACRXD_STA_ADDR_SHIFT) /* Specific address register 2 match */
 #  define EMACRXD_STA_ADDR3       (2 << EMACRXD_STA_ADDR_SHIFT) /* Specific address register 3 match */
 #  define EMACRXD_STA_ADDR4       (3 << EMACRXD_STA_ADDR_SHIFT) /* Specific address register 4 match */
+
 #define EMACRXD_STA_ADDRMATCH     (1 << 27) /* Bit 27: Specific address match found */
                                             /* Bit 28: Reserved */
 #define EMACRXD_STA_UCAST         (1 << 29) /* Bit 29: Unicast hash match */
@@ -623,6 +630,7 @@
 #define EMACRXD_STA_BCAST         (1 << 31) /* Bit 31: Global all ones broadcast address detected */
 
 /* Transmit buffer descriptor:  Address word (un-aligned, 32-bit address */
+
 /* Transmit buffer descriptor:  Control word */
 
 #define EMACTXD_STA_BUFLEN_SHIFT  (0)       /* Bits 0-13: Length of buffer */
@@ -641,6 +649,7 @@
 #  define EMACTXD_STA_CHKERR_BADFRAG (5 << EMACTXD_STA_CHKERR_SHIFT) /* Unsupported fragmentation */
 #  define EMACTXD_STA_CHKERR_PKTTYPE (6 << EMACTXD_STA_CHKERR_SHIFT) /* Not TCP or UDP */
 #  define EMACTXD_STA_CHKERR_EPKT    (7 << EMACTXD_STA_CHKERR_SHIFT) /* Premature end of packet */
+
                                             /* Bits 23-25: Reserved */
 #define EMACTXD_STA_LCOL          (1 << 26) /* Bit 26: Late collision, transmit error detected */
 #define EMACTXD_STA_TFC           (1 << 27) /* Bit 27: Transmit frame corruption due to AHB error */
@@ -649,9 +658,10 @@
 #define EMACTXD_STA_WRAP          (1 << 30) /* Bit 30: Last descriptor in descriptor list */
 #define EMACTXD_STA_USED          (1 << 31) /* Bit 31: Zero for the EMAC to read from buffer */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Receive buffer descriptor */
 
 struct emac_rxdesc_s

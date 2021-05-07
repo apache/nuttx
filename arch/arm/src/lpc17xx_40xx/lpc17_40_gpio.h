@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_gpio.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_GPIO_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_GPIO_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -63,17 +48,17 @@
 #  error "Unrecognized LPC17xx/LPC40xx family"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
@@ -85,8 +70,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* These tables have global scope only because they are shared between lpc17_40_gpio.c,
- * lpc17_40_gpioint.c, and lpc17_40_gpiodbg.c
+/* These tables have global scope only because they are shared between
+ * lpc17_40_gpio.c, lpc17_40_gpioint.c, and lpc17_40_gpiodbg.c
  */
 
 #ifdef CONFIG_LPC17_40_GPIOIRQ
@@ -98,16 +83,17 @@ EXTERN const uint32_t g_fiobase[GPIO_NPORTS];
 EXTERN const uint32_t g_intbase[GPIO_NPORTS];
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_gpioirqinitialize
  *
  * Description:
- *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *   Initialize logic to support a second level of interrupt decoding for
+   * GPIO pins.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_GPIOIRQ
 void lpc17_40_gpioirqinitialize(void);
@@ -115,43 +101,43 @@ void lpc17_40_gpioirqinitialize(void);
 #  define lpc17_40_gpioirqinitialize()
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lpc17_40_configgpio(lpc17_40_pinset_t cfgset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void lpc17_40_gpiowrite(lpc17_40_pinset_t pinset, bool value);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool lpc17_40_gpioread(lpc17_40_pinset_t pinset);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_GPIOIRQ
 void lpc17_40_gpioirqenable(int irq);
@@ -159,13 +145,13 @@ void lpc17_40_gpioirqenable(int irq);
 #  define lpc17_40_gpioirqenable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC17_40_GPIOIRQ
 void lpc17_40_gpioirqdisable(int irq);
@@ -173,13 +159,14 @@ void lpc17_40_gpioirqdisable(int irq);
 #  define lpc17_40_gpioirqdisable(irq)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Function:  lpc17_40_dumpgpio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all GPIO registers associated with the base address of the provided
+ *   pinset.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 int lpc17_40_dumpgpio(lpc17_40_pinset_t pinset, const char *msg);

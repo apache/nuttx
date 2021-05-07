@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/math/__cos.c
+ * libs/libc/math/__sin.c
  *
  * Ported to NuttX from FreeBSD by Alan Carvalho de Assis:
  *

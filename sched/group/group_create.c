@@ -1,35 +1,20 @@
 /****************************************************************************
- *  sched/group/group_create.c
+ * sched/group/group_create.c
  *
- *   Copyright (C) 2013, 2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -62,16 +47,6 @@
 #define GROUP_INITIAL_MEMBERS 4
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This is counter that is used to generate unique task group IDs */
-
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-static grpid_t g_grpid_counter;
-#endif
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -84,68 +59,6 @@ FAR struct task_group_s *g_grouphead;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: group_assign_grpid
- *
- * Description:
- *   Create a unique group ID.
- *
- * Input Parameters:
- *   tcb - The tcb in need of the task group.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called during task creation in a safe context.  No special precautions
- *   are required here.
- *
- ****************************************************************************/
-
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-static void group_assign_grpid(FAR struct task_group_s *group)
-{
-  irqstate_t flags;
-  grpid_t grpid;
-
-  /* Pre-emption should already be disabled, but let's be paranoid careful */
-
-  sched_lock();
-
-  /* Loop until we create a unique ID */
-
-  for (; ; )
-    {
-      /* Increment the ID counter. It is global data so be extra paranoid. */
-
-      flags = enter_critical_section();
-      grpid = ++g_grpid_counter;
-
-      /* Check for overflow */
-
-      if (grpid <= 0)
-        {
-          g_grpid_counter = 1;            /* One is the IDLE group */
-          leave_critical_section(flags);
-        }
-      else
-        {
-          /* Does a task group with this ID already exist? */
-
-          leave_critical_section(flags);
-          if (group_findby_grpid(grpid) == NULL)
-            {
-              /* No.. Assign this ID to the new group and return */
-
-              group->tg_grpid = grpid;
-              sched_unlock();
-              return;
-            }
-        }
-    }
-}
-#endif /* HAVE_GROUP_MEMBERS */
 
 /****************************************************************************
  * Name: group_inherit_identity
@@ -258,14 +171,6 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   tcb->cmn.group = group;
 
-#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
-  /* Assign the group a unique ID.  If g_grpid_counter were to wrap before we
-   * finish with task creation, that would be a problem.
-   */
-
-  group_assign_grpid(group);
-#endif
-
   /* Inherit the user identity from the parent task group */
 
   group_inherit_identity(group);
@@ -364,7 +269,6 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->flink = g_grouphead;
   g_grouphead = group;
   leave_critical_section(flags);
-
 #endif
 
   /* Save the ID of the main task within the group of threads.  This needed
@@ -373,9 +277,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
    * task has exited.
    */
 
-#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
-  group->tg_task = tcb->cmn.pid;
-#endif
+  group->tg_pid = tcb->cmn.pid;
 
   /* Mark that there is one member in the group, the main task */
 

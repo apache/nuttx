@@ -1,44 +1,29 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/sam_udp.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_SAM_UDP_H
 #define __ARCH_ARM_SRC_SAM34_SAM_UDP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usbdev.h>
@@ -47,9 +32,9 @@
 #include "chip.h"
 #include "hardware/sam_udp.h"
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -62,24 +47,27 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name:  sam_udp_suspend
  *
  * Description:
  *   Board logic must provide the sam_udp_suspend logic if the UDP driver is
- *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   used.  This function is called whenever the USB enters or leaves suspend
+ *   mode.
  *
- *   When 'resume' is false, this function call provides an opportunity to perform
- *   board-specific power-saving actions so that less power is consumed while the
- *   USB is suspended.
+ *   When 'resume' is false, this function call provides an opportunity to
+ *   perform board-specific power-saving actions so that less power is
+ *   consumed while the USB is suspended.
  *
- *   Certain power-saving operations are performed by the UDP driver when it enters
- *   suspend mode:  The USB device peripheral clocks are be switched off.  MCK and
- *   UDPCK are switched off and the USB transceiver is disabled.
+ *   Certain power-saving operations are performed by the UDP driver when it
+ *   enters suspend mode:  The USB device peripheral clocks are be switched
+ *   off.
+ *   MCK and UDPCK are switched off and the USB transceiver is disabled.
  *
- *   When 'resume' is true, normal clocking and operations must all be restored.
+ *   When 'resume' is true, normal clocking and operations must all be
+ *   restored.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume);
 

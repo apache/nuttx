@@ -78,16 +78,20 @@ static int as5048b_readu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
                            uint8_t regaddrlo, FAR uint16_t *regval);
 static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
                            uint8_t regval);
-static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
+static int as5048b_writeu16(FAR struct as5048b_dev_s *priv,
+                            uint8_t regaddrhi,
                             uint8_t regaddrlo, uint16_t regval);
 static int as5048b_readzero(FAR struct as5048b_dev_s *priv,
                             FAR uint16_t *zero);
 static int as5048b_writezero(FAR struct as5048b_dev_s *priv, uint16_t zero);
-static int as5048b_readagc(FAR struct as5048b_dev_s *priv, FAR uint8_t *agc);
+static int as5048b_readagc(FAR struct as5048b_dev_s *priv,
+                           FAR uint8_t *agc);
 static int as5048b_readdiag(FAR struct as5048b_dev_s *priv,
                             FAR uint8_t *diag);
-static int as5048b_readmag(FAR struct as5048b_dev_s *priv, FAR uint16_t *mag);
-static int as5048b_readang(FAR struct as5048b_dev_s *priv, FAR uint16_t *ang);
+static int as5048b_readmag(FAR struct as5048b_dev_s *priv,
+                           FAR uint16_t *mag);
+static int as5048b_readang(FAR struct as5048b_dev_s *priv,
+                           FAR uint16_t *ang);
 
 /* Character Driver Methods */
 
@@ -244,7 +248,8 @@ static int as5048b_writeu8(FAR struct as5048b_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static int as5048b_writeu16(FAR struct as5048b_dev_s *priv, uint8_t regaddrhi,
+static int as5048b_writeu16(FAR struct as5048b_dev_s *priv,
+                            uint8_t regaddrhi,
                             uint8_t regaddrlo, uint16_t regval)
 {
   int ret;
@@ -350,7 +355,8 @@ static int as5048b_readagc(FAR struct as5048b_dev_s *priv, FAR uint8_t *agc)
  *
  ****************************************************************************/
 
-static int as5048b_readdiag(FAR struct as5048b_dev_s *priv, FAR uint8_t *diag)
+static int as5048b_readdiag(FAR struct as5048b_dev_s *priv,
+                            FAR uint8_t *diag)
 {
   int ret;
 
@@ -373,7 +379,8 @@ static int as5048b_readdiag(FAR struct as5048b_dev_s *priv, FAR uint8_t *diag)
  *
  ****************************************************************************/
 
-static int as5048b_readmag(FAR struct as5048b_dev_s *priv, FAR uint16_t *mag)
+static int as5048b_readmag(FAR struct as5048b_dev_s *priv,
+                           FAR uint16_t *mag)
 {
   int ret;
 
@@ -396,7 +403,8 @@ static int as5048b_readmag(FAR struct as5048b_dev_s *priv, FAR uint16_t *mag)
  *
  ****************************************************************************/
 
-static int as5048b_readang(FAR struct as5048b_dev_s *priv, FAR uint16_t *ang)
+static int as5048b_readang(FAR struct as5048b_dev_s *priv,
+                           FAR uint16_t *ang)
 {
   int ret;
 
@@ -529,7 +537,9 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
         }
         break;
 
-      /* Read from the automatic gain control register. Arg: uint8_t* pointer. */
+      /* Read from the automatic gain control register.
+       * Arg: uint8_t* pointer.
+       */
 
       case QEIOC_AUTOGAINCTL:
         {
@@ -592,13 +602,15 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  *   addr - The I2C address of the AS5048B.
  *
  * Returned Value:
- *   A new lower half quadrature encoder interface for the AS5048B on success;
+ *   A new lower half quadrature encoder interface for the AS5048B on
+ *   success;
  *   NULL on failure.
  *
  ****************************************************************************/
 
 FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
-                                              uint8_t addr, uint32_t frequency)
+                                              uint8_t addr,
+                                              uint32_t frequency)
 {
   FAR struct as5048b_dev_s *priv;
 

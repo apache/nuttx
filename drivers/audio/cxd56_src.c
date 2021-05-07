@@ -1,34 +1,20 @@
 /****************************************************************************
  * drivers/audio/cxd56_src.c
  *
- *   Copyright 2020 Sony Semiconductor Solutions Corporation
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -38,7 +24,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <math.h>
 #include <queue.h>
 #include <stdio.h>
 #include <string.h>
@@ -111,8 +96,8 @@ static struct cxd56_srcdata_s g_src;
 #ifdef DUMP_DATA
 static char *dump_name_pre  = "/mnt/sd0/dump/nx_player_dump_pre.pcm";
 static char *dump_name_post = "/mnt/sd0/dump/nx_player_dump_post.pcm";
-int dump_file_pre = -1;
-int dump_file_post = -1;
+static struct file dump_file_pre;
+static struct file dump_file_post;
 #endif
 
 /****************************************************************************
@@ -129,18 +114,18 @@ static struct ap_buffer_s *cxd56_src_get_apb()
   struct ap_buffer_s *src_apb;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
 
   if (dq_count(g_src.inq) == 0)
     {
       size_t bufsize = sizeof(struct ap_buffer_s) +
                               CONFIG_CXD56_AUDIO_BUFFER_SIZE;
 
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       src_apb = kmm_zalloc(bufsize);
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
 
       if (!src_apb)
         {
@@ -162,7 +147,7 @@ static struct ap_buffer_s *cxd56_src_get_apb()
 
 errorout_with_lock:
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return src_apb;
 }
@@ -180,7 +165,7 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
   /* audinfo("SRC: Process (size = %d)\n", apb->nbytes); */
 
 #ifdef DUMP_DATA
-  write(dump_file_pre,
+  file_write(&dump_file_pre,
         (char *) (apb->samp + apb->curbyte),
         apb->nbytes - apb->curbyte);
 #endif
@@ -200,9 +185,9 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
       src_apb->nbytes = apb->nbytes;
       src_apb->flags |= AUDIO_APB_SRC_FINAL;
 
-      flags = spin_lock_irqsave();
+      flags = spin_lock_irqsave(NULL);
       dq_put(g_src.outq, &src_apb->dq_entry);
-      spin_unlock_irqrestore(flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       goto exit;
     }
@@ -304,12 +289,12 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
 
               /* Put in out queue to be DMA'd */
 
-              flags = spin_lock_irqsave();
+              flags = spin_lock_irqsave(NULL);
               dq_put(g_src.outq, &src_apb->dq_entry);
-              spin_unlock_irqrestore(flags);
+              spin_unlock_irqrestore(NULL, flags);
 
 #ifdef DUMP_DATA
-              write(dump_file_post, src_apb->samp, src_apb->nbytes);
+              file_write(&dump_file_post, src_apb->samp, src_apb->nbytes);
 #endif
 
               /* Fetch the next APB to fill up */
@@ -335,9 +320,9 @@ static int cxd56_src_process(FAR struct ap_buffer_s *apb)
 
           src_apb->nbytes += g_src.bytewidth * src_nframes * g_src.channels;
 
-          flags = spin_lock_irqsave();
+          flags = spin_lock_irqsave(NULL);
           dq_put_back(g_src.inq, &src_apb->dq_entry);
-          spin_unlock_irqrestore(flags);
+          spin_unlock_irqrestore(NULL, flags);
 
           apb->curbyte += (float_in_left * g_src.bytewidth);
         }
@@ -460,10 +445,10 @@ int cxd56_src_init(FAR struct cxd56_dev_s *dev,
     }
 
 #ifdef DUMP_DATA
-  unlink(dump_name_pre);
-  unlink(dump_name_post);
-  dump_file_pre = open(dump_name_pre, O_WRONLY | O_CREAT | O_APPEND);
-  dump_file_post = open(dump_name_post, O_WRONLY | O_CREAT | O_APPEND);
+  nx_unlink(dump_name_pre);
+  nx_unlink(dump_name_post);
+  file_open(&dump_file_pre, dump_name_pre, O_WRONLY | O_CREAT | O_APPEND);
+  file_open(&dump_file_post, dump_name_post, O_WRONLY | O_CREAT | O_APPEND);
 #endif
 
   /* Join any old worker threads to prevent memory leaks */
@@ -537,11 +522,11 @@ int cxd56_src_deinit(void)
   src_delete(g_src.src_state);
 
 #ifdef DUMP_DATA
-  if (dump_file_pre)
-    close(dump_file_pre);
+  if (dump_file_pre.f_inode)
+    file_close(&dump_file_pre);
 
-  if (dump_file_post)
-    close(dump_file_post);
+  if (dump_file_post.f_inode)
+    file_close(&dump_file_post);
 #endif
 
   return OK;

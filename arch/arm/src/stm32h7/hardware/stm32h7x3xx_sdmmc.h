@@ -1,48 +1,31 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_sdmmc.h
  *
- *   Copyright (C) 2009, 2011-2016, 2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
- *            Jukka Laitinen <jukka.laitinen@iki.fi>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SDMMC_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_SDMMC_H
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_SDMMC_POWER_OFFSET              0x0000 /* SDMMC power control register */
 #define STM32_SDMMC_CLKCR_OFFSET              0x0004 /* SDMMC clock control register */
@@ -67,7 +50,7 @@
 #define STM32_SDMMC_IDMABASE1R_OFFSET         0x005c /* SDMMC IDMA buffer 1 base register */
 #define STM32_SDMMC_FIFO_OFFSET               0x0080 /* SDMMC data FIFO register */
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 #define STM32_SDMMC_POWER_PWRCTRL_SHIFT       (0)       /* Bits 0-1: Power supply control bits */
 #define STM32_SDMMC_POWER_PWRCTRL_MASK        (3 << STM32_SDMMC_POWER_PWRCTRL_SHIFT)
@@ -79,12 +62,13 @@
 
 #define STM32_SDMMC_CLKCR_CLKDIV_SHIFT        (0)       /* Bits 9-0: Clock divide factor */
 #define STM32_SDMMC_CLKCR_CLKDIV_MASK         (0x3ff << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#define STM32_SDMMC_CLKCR_PWRSAV              (1 << 12)  /* Bit 12: Power saving configuration bit */
+#define STM32_SDMMC_CLKCR_PWRSAV              (1 << 12) /* Bit 12: Power saving configuration bit */
 #define STM32_SDMMC_CLKCR_WIDBUS_SHIFT        (14)      /* Bits 15-14: Wide bus mode enable bits */
 #define STM32_SDMMC_CLKCR_WIDBUS_MASK         (3 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT)
 #  define STM32_SDMMC_CLKCR_WIDBUS_D1         (0 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 00: Default (STM32_SDMMC_D0) */
 #  define STM32_SDMMC_CLKCR_WIDBUS_D4         (1 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 01: 4-wide (STM32_SDMMC_D[3:0]) */
 #  define STM32_SDMMC_CLKCR_WIDBUS_D8         (2 << STM32_SDMMC_CLKCR_WIDBUS_SHIFT) /* 10: 8-wide (STM32_SDMMC_D[7:0]) */
+
 #define STM32_SDMMC_CLKCR_NEGEDGE             (1 << 16) /* Bit 16: STM32_SDMMC_CK dephasing selection bit */
 #define STM32_SDMMC_CLKCR_HWFC_EN             (1 << 17) /* Bit 17: HW Flow Control enable */
 #define STM32_SDMMC_CLKCR_DDR                 (1 << 18) /* Bit 18: Data rate signaling selection */
@@ -110,8 +94,9 @@
 #  define STM32_SDMMC_CMD_SHORTRESPONSE       (1 << STM32_SDMMC_CMD_WAITRESP_SHIFT) /* 01: Short response */
 #  define STM32_SDMMC_CMD_SHORTRESPONSE_NOCRC (2 << STM32_SDMMC_CMD_WAITRESP_SHIFT) /* 01: Short response, no CRC */
 #  define STM32_SDMMC_CMD_LONGRESPONSE        (3 << STM32_SDMMC_CMD_WAITRESP_SHIFT) /* 11: Long response */
-#define STM32_SDMMC_CMD_WAITINT               (1 << 10)  /* Bit 10: CPSM waits for interrupt request */
-#define STM32_SDMMC_CMD_WAITPEND              (1 << 11)  /* Bit 11: CPSM Waits for ends of data transfer */
+
+#define STM32_SDMMC_CMD_WAITINT               (1 << 10) /* Bit 10: CPSM waits for interrupt request */
+#define STM32_SDMMC_CMD_WAITPEND              (1 << 11) /* Bit 11: CPSM Waits for ends of data transfer */
 #define STM32_SDMMC_CMD_CPSMEN                (1 << 12) /* Bit 12: Command path state machine enable */
 #define STM32_SDMMC_CMD_DTHOLD                (1 << 13) /* Bit 13: Hold new data block transmission and reception in the DPSM */
 #define STM32_SDMMC_CMD_BOOTMODE              (1 << 14) /* Bit 14: Select bootmode */
@@ -132,7 +117,7 @@
 
 #define STM32_SDMMC_DCTRL_DTEN                (1 << 0)  /* Bit 0: Data transfer enabled bit */
 #define STM32_SDMMC_DCTRL_DTDIR               (1 << 1)  /* Bit 1: Data transfer direction */
-#define STM32_SDMMC_DCTRL_DTMODE_SHIFT        (2)  /* Bits 2-3: Data transfer mode */
+#define STM32_SDMMC_DCTRL_DTMODE_SHIFT        (2)       /* Bits 2-3: Data transfer mode */
 #define STM32_SDMMC_DCTRL_DTMODE_MASK         (3 << STM32_SDMMC_DCTRL_DTMODE_SHIFT)
 #  define STM32_SDMMC_DCTRL_DTMODE_END        (0 << STM32_SDMMC_DCTRL_DTMODE_SHIFT)
 #  define STM32_SDMMC_DCTRL_DTMODE_SDIO       (1 << STM32_SDMMC_DCTRL_DTMODE_SHIFT)

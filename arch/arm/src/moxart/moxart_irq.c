@@ -114,23 +114,23 @@ void up_irqinitialize(void)
 
   (*(volatile uint32_t *)0x98100008) |= 0x4;
 
-  (*(volatile uint32_t *)0x98800100) = 0xDFF8003F;
+  (*(volatile uint32_t *)0x98800100) = 0xdff8003f;
 
   /* Check board type */
 
   /* Mask all interrupts off */
 
   putreg32(0, IRQ_REG(IRQ__MASK));
-  putreg32(0, IRQ_REG(IRQ__MASK+0x20));
+  putreg32(0, IRQ_REG(IRQ__MASK + 0x20));
   putreg32(0xffffffff, IRQ_REG(IRQ__CLEAR));
-  putreg32(0xffffffff, IRQ_REG(IRQ__CLEAR+0x20));
+  putreg32(0xffffffff, IRQ_REG(IRQ__CLEAR + 0x20));
 
   /* Initial trigger mode and level */
 
   putreg32(0, IRQ_REG(IRQ__MODE));
   putreg32(0, IRQ_REG(IRQ__LEVEL));
-  putreg32(0, IRQ_REG(IRQ__MODE+0x20));
-  putreg32(0, IRQ_REG(IRQ__LEVEL+0x20));
+  putreg32(0, IRQ_REG(IRQ__MODE + 0x20));
+  putreg32(0, IRQ_REG(IRQ__LEVEL + 0x20));
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -147,14 +147,14 @@ void up_irqinitialize(void)
           getreg32(0x98400030), getreg32(0x98400034), getreg32(0x98400038),
           getreg32(0x98400004), getreg32(0x98400000), getreg32(0x98400008));
   irqinfo("IRQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
-          getreg32(0x98800014), getreg32(0x98800004), getreg32(0x9880000C),
+          getreg32(0x98800014), getreg32(0x98800004), getreg32(0x9880000c),
           getreg32(0x98800010));
   irqinfo("FIQ STATUS=%08x MASK=%08x MODE=%08x LEVEL=%08x\n",
-          getreg32(0x98800034), getreg32(0x98800024), getreg32(0x9880002C),
+          getreg32(0x98800034), getreg32(0x98800024), getreg32(0x9880002c),
           getreg32(0x98800020));
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  up_irq_restore(SVC_MODE | PSR_F_BIT);
+  up_irq_restore(PSR_MODE_SVC | PSR_F_BIT);
 #endif
 }
 
@@ -262,7 +262,8 @@ void up_enable_irq(int irq)
 
 static int ffs(uint32_t word)
 {
-  int t, r;
+  int t;
+  int r;
 
   if (word == 0)
     {
@@ -299,7 +300,8 @@ void arm_ack_irq(int irq)
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
-  uint32_t num, status;
+  uint32_t num;
+  uint32_t status;
 
   /* Detect & deliver the IRQ */
 

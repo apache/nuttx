@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/misoc/m32/misoc/src/lm32_boot.c
+ * boards/misoc/lm32/misoc/src/lm32_boot.c
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,9 +52,10 @@
  * Name: lm32_board_initialize
  *
  * Description:
- *   All LM32 architectures must provide the following entry point. This entry
- *   point is called early in the initialization -- after all memory has been
- *   configured and mapped but before any devices have been initialized.
+ *   All LM32 architectures must provide the following entry point. This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 

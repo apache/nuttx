@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/hex2bin/fhex2mem.c
+ * libs/libc/hex2bin/lib_fhex2mem.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

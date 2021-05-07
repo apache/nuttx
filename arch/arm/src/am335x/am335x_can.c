@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/am335x/am335x_can.c
  *
- *   Copyright (C) 2019 Petro Karashchenko. All rights reserved.
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Petro Karashchenko <petro.karashchenko@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -119,10 +103,10 @@
 
 struct up_dev_s
 {
-  uint8_t port; /* CAN port number */
+  uint8_t port;  /* CAN port number */
   uint32_t baud; /* Configured baud */
   uint32_t base; /* CAN register base address */
-  uint8_t irq; /* IRQ associated with this CAN */
+  uint8_t irq;   /* IRQ associated with this CAN */
 };
 
 /****************************************************************************
@@ -490,9 +474,9 @@ static void can_shutdown(FAR struct can_dev_s *dev)
  *
  * Description:
  *   Call to enable or disable RX interrupts.
- *   This function is called two times: from can_open and can_close. Therefore
- *   this function enables and disables not only RX interrupts but all message
- *   objects.
+ *   This function is called two times: from can_open and can_close.
+ *   Therefore this function enables and disables not only RX interrupts
+ *   but all message objects.
  *
  * Input Parameters:
  *   dev - An instance of the "upper half" can driver state structure.
@@ -643,8 +627,9 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   can_putreg(priv, AM335X_DCAN_IF1MSK_OFFSET, 0xffff);
 
-  regval = ((dlc & DCAN_IFMCTL_DLC_MASK) | DCAN_IFMCTL_EOB | DCAN_IFMCTL_TX_RQST
-                      | DCAN_IFMCTL_TX_IE);
+  regval = ((dlc & DCAN_IFMCTL_DLC_MASK) |
+             DCAN_IFMCTL_EOB | DCAN_IFMCTL_TX_RQST |
+             DCAN_IFMCTL_TX_IE);
   can_putreg(priv, AM335X_DCAN_IF1MCTL_OFFSET, regval);
 
   /* Write data to IF1 data registers */
@@ -658,18 +643,24 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   can_putreg(priv, AM335X_DCAN_IF1DATB_OFFSET, regval);
 
 #ifdef CONFIG_CAN_EXTID
-  can_putreg(priv, AM335X_DCAN_IF1ARB_OFFSET, DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL
-                   | DCAN_IFARB_XTD | (id << DCAN_IFARB_ID_SHIFT));
+  can_putreg(priv,
+             AM335X_DCAN_IF1ARB_OFFSET,
+             DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL |
+             DCAN_IFARB_XTD | (id << DCAN_IFARB_ID_SHIFT));
 #else
-  can_putreg(priv, AM335X_DCAN_IF1ARB_OFFSET, DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL
-                   | (id << DCAN_IFARB_ID_SHIFT));
+  can_putreg(priv,
+             AM335X_DCAN_IF1ARB_OFFSET,
+             DCAN_IFARB_DIR | DCAN_IFARB_MSG_VAL |
+             (id << DCAN_IFARB_ID_SHIFT));
 #endif
 
   /* Write to Message RAM */
 
-  regval = (DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK | DCAN_IFCMD_ARB | DCAN_IFCMD_CTL
-                   | DCAN_IFCMD_CLR_INTPND | DCAN_IFCMD_TX_RQST_NEWDAT
-                   | DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB | DCAN_IFCMD_MSG_NUM(txobj));
+  regval = (DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK |
+            DCAN_IFCMD_ARB | DCAN_IFCMD_CTL |
+            DCAN_IFCMD_CLR_INTPND | DCAN_IFCMD_TX_RQST_NEWDAT |
+            DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB |
+            DCAN_IFCMD_MSG_NUM(txobj));
   can_putreg(priv, AM335X_DCAN_IF1CMD_OFFSET, regval);
 
 #ifdef CONFIG_CAN_TXREADY
@@ -764,7 +755,8 @@ static int can_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Read CAN interrupt register */
 
-  uint32_t interrupt = can_getreg(priv, AM335X_DCAN_INT_OFFSET) & DCAN_INT_LINE0_MASK;
+  uint32_t interrupt = can_getreg(priv, AM335X_DCAN_INT_OFFSET) &
+                                  DCAN_INT_LINE0_MASK;
 
   /* Read CAN status register */
 
@@ -885,7 +877,8 @@ static void can_readobj(struct up_dev_s *priv, uint32_t index)
 {
   while (can_getreg(priv, AM335X_DCAN_IF2CMD_OFFSET) & DCAN_IFCMD_BUSY);
 
-  can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET, DCAN_IFCMD_MASK | DCAN_IFCMD_ARB |
+  can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET,
+             DCAN_IFCMD_MASK | DCAN_IFCMD_ARB |
              DCAN_IFCMD_CTL | DCAN_IFCMD_CLR_INTPND | DCAN_IFCMD_DATAA |
              DCAN_IFCMD_DATAB | DCAN_IFCMD_MSG_NUM(index));
 }
@@ -938,12 +931,14 @@ static void can_setuprxobj(struct up_dev_s *priv)
 
   while (can_getreg(priv, AM335X_DCAN_IF2CMD_OFFSET) & DCAN_IFCMD_BUSY);
 
-  can_putreg(priv, AM335X_DCAN_IF2MSK_OFFSET, DCAN_IFMSK_MXTD | DCAN_IFMSK_MDIR);
+  can_putreg(priv, AM335X_DCAN_IF2MSK_OFFSET,
+             DCAN_IFMSK_MXTD | DCAN_IFMSK_MDIR);
   can_putreg(priv, AM335X_DCAN_IF2MCTL_OFFSET, DCAN_IFMCTL_DLC_MASK |
              DCAN_IFMCTL_EOB | DCAN_IFMCTL_RX_IE | DCAN_IFMCTL_UMASK);
 
 #ifdef CONFIG_CAN_EXTID
-  can_putreg(priv, AM335X_DCAN_IF2ARB_OFFSET, DCAN_IFARB_MSG_VAL | DCAN_IFARB_XTD);
+  can_putreg(priv, AM335X_DCAN_IF2ARB_OFFSET,
+             DCAN_IFARB_MSG_VAL | DCAN_IFARB_XTD);
 #else
   can_putreg(priv, AM335X_DCAN_IF2ARB_OFFSET, DCAN_IFARB_MSG_VAL);
 #endif
@@ -951,9 +946,12 @@ static void can_setuprxobj(struct up_dev_s *priv)
   for (i = CAN_RX_OBJ_FIRST; i <= CAN_RX_OBJ_LAST; ++i)
     {
       while (can_getreg(priv, AM335X_DCAN_IF2CMD_OFFSET) & DCAN_IFCMD_BUSY);
-      can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET, DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK |
-                 DCAN_IFCMD_ARB | DCAN_IFCMD_CTL | DCAN_IFCMD_CLR_INTPND |
-                 DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB | DCAN_IFCMD_MSG_NUM(i));
+      can_putreg(priv, AM335X_DCAN_IF2CMD_OFFSET,
+                 DCAN_IFCMD_WR_RD | DCAN_IFCMD_MASK |
+                 DCAN_IFCMD_ARB | DCAN_IFCMD_CTL |
+                 DCAN_IFCMD_CLR_INTPND |
+                 DCAN_IFCMD_DATAA | DCAN_IFCMD_DATAB |
+                 DCAN_IFCMD_MSG_NUM(i));
     }
 }
 

@@ -1,52 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_can.h
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_CAN_H
 #define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 /* 3 TX mailboxes */
 
@@ -68,7 +53,7 @@
 #  define CAN_NFILTERS 14
 #endif
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 /* CAN control and status registers */
 
@@ -141,7 +126,7 @@
 
 #define STM32_CAN_FIR_OFFSET(f,i) (0x240+((f)<<3)+(((i)-1)<<2))
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #if STM32_NCAN > 0
 #  define STM32_CAN1_MCR          (STM32_CAN1_BASE+STM32_CAN_MCR_OFFSET)
@@ -251,7 +236,7 @@
 #  define STM32_CAN2_FIR(b,i)     (STM32_CAN2_BASE+STM32_CAN_FIR_OFFSET(b,i))
 #endif
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* CAN master control register */
 
@@ -344,6 +329,7 @@
 #  define CAN_ESR_BDOMERROR       (5 << CAN_ESR_LEC_SHIFT) /* 101: Bit dominant Error */
 #  define CAN_ESR_CRCERRPR        (6 << CAN_ESR_LEC_SHIFT) /* 110: CRC Error */
 #  define CAN_ESR_SWERROR         (7 << CAN_ESR_LEC_SHIFT) /* 111: Set by software */
+
 #define CAN_ESR_TEC_SHIFT         (16)      /* Bits 23-16: LS byte of the 9-bit Transmit Error Counter */
 #define CAN_ESR_TEC_MASK          (0xff << CAN_ESR_TEC_SHIF)
 #define CAN_ESR_REC_SHIFT         (24)      /* Bits 31-24: Receive Error Counter */
@@ -351,15 +337,15 @@
 
 /* CAN bit timing register */
 
-#define CAN_BTR_BRP_SHIFT         (0)       /* Bits 9-0: Baud Rate Prescaler */
+#define CAN_BTR_BRP_SHIFT         (0)         /* Bits 9-0: Baud Rate Prescaler */
 #define CAN_BTR_BRP_MASK          (0x03ff << CAN_BTR_BRP_SHIFT)
-#define CAN_BTR_TS1_SHIFT         (16)      /* Bits 19-16: Time Segment 1 */
+#define CAN_BTR_TS1_SHIFT         (16)        /* Bits 19-16: Time Segment 1 */
 #define CAN_BTR_TS1_MASK          (0x0f <<  CAN_BTR_TS1_SHIFT)
-#define CAN_BTR_TS2_SHIFT         (20)      /* Bits 22-20: Time Segment 2 */
+#define CAN_BTR_TS2_SHIFT         (20)        /* Bits 22-20: Time Segment 2 */
 #define CAN_BTR_TS2_MASK          (7 << CAN_BTR_TS2_SHIFT)
-#define CAN_BTR_SJW_SHIFT         (24)      /* Bits 25-24: Resynchronization Jump Width */
+#define CAN_BTR_SJW_SHIFT         (24)        /* Bits 25-24: Resynchronization Jump Width */
 #define CAN_BTR_SJW_MASK          (3 << CAN_BTR_SJW_SHIFT)
-#define CAN_BTR_LBKM              (1 << 30) /* Bit 30: Loop Back Mode (Debug) */
+#define CAN_BTR_LBKM              (1 << 30)   /* Bit 30: Loop Back Mode (Debug) */
 #define CAN_BTR_SILM              (1ul << 31) /* Bit 31: Silent Mode (Debug) */
 
 #define CAN_BTR_BRP_MAX           (1024)    /* Maximum BTR value (without decrement) */
@@ -494,16 +480,16 @@
 #  define CAN_FA1R_FACT_MASK      (0x0fffffff << CAN_FA1R_FACT_SHIFT)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_CAN_H */

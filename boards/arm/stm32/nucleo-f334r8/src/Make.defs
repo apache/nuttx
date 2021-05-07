@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/nucleo-f334r8/src/Makefile
+# boards/arm/stm32/nucleo-f334r8/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,6 @@ CSRCS = stm32_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
@@ -40,24 +34,8 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_CAN),y)
-CSRCS += stm32_can.c
-endif
-
 ifeq ($(CONFIG_DAC),y)
 CSRCS += stm32_dac.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_SPI),y)
-CSRCS += stm32_spi.c
-endif
-
-ifeq ($(CONFIG_TIMER),y)
-CSRCS += stm32_timer.c
 endif
 
 ifeq ($(CONFIG_STM32_HRTIM),y)

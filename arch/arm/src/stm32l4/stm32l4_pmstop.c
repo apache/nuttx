@@ -109,7 +109,9 @@ int stm32l4_pmstop(bool lpds)
 {
   uint32_t regval;
 
-  /* Clear Low-Power Mode Selection (LPMS) bits in power control register 1. */
+  /* Clear Low-Power Mode Selection (LPMS) bits in power control
+   * register 1.
+   */
 
   regval  = getreg32(STM32L4_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;

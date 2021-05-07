@@ -1,41 +1,24 @@
 /****************************************************************************
  * drivers/sensors/bmp180.c
- * Character driver for the Freescale BMP1801 Barometer Sensor
  *
- *   Copyright (C) 2015 Alan Carvalho de Assis
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* Character driver for the Freescale BMP1801 Barometer Sensor */
 
 /****************************************************************************
  * Included Files
@@ -43,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <fixedmath.h>
 #include <errno.h>
@@ -135,8 +119,10 @@ struct bmp180_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr);
-static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr);
+static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv,
+                              uint8_t regaddr);
+static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv,
+                                uint8_t regaddr);
 static void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
                            uint8_t regval);
 static void bmp180_updatecaldata(FAR struct bmp180_dev_s *priv);
@@ -223,7 +209,8 @@ static uint8_t bmp180_getreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
  *
  ****************************************************************************/
 
-static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
+static uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv,
+                                uint8_t regaddr)
 {
   struct i2c_config_s config;
   uint16_t msb;
@@ -423,8 +410,8 @@ static void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
   priv->bmp180_upress |= bmp180_getreg8(priv, BMP180_ADC_OUT_XLSB);
   priv->bmp180_upress = priv->bmp180_upress >> (8 - (oss >> 6));
 
-  sninfo("Uncompensated temperature = %d\n", priv->bmp180_utemp);
-  sninfo("Uncompensated pressure = %d\n", priv->bmp180_upress);
+  sninfo("Uncompensated temperature = %" PRId32 "\n", priv->bmp180_utemp);
+  sninfo("Uncompensated pressure = %" PRId32 "\n", priv->bmp180_upress);
 }
 
 /****************************************************************************
@@ -472,12 +459,13 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   /* Calculate true temperature */
 
-  x1   = ((priv->bmp180_utemp - priv->bmp180_cal_ac6) * priv->bmp180_cal_ac5) >> 15;
+  x1   = ((priv->bmp180_utemp - priv->bmp180_cal_ac6) *
+          priv->bmp180_cal_ac5) >> 15;
   x2   = (priv->bmp180_cal_mc << 11) / (x1 + priv->bmp180_cal_md);
   b5   = x1 + x2;
 
   temp = (b5 + 8) >> 4;
-  sninfo("Compensated temperature = %d\n", temp);
+  sninfo("Compensated temperature = %" PRId32 "\n", temp);
   UNUSED(temp);
 
   /* Calculate true pressure */
@@ -508,7 +496,7 @@ static int bmp180_getpressure(FAR struct bmp180_dev_s *priv)
 
   press = press + ((x1 + x2 + 3791) >> 4);
 
-  sninfo("Compressed pressure = %d\n", press);
+  sninfo("Compressed pressure = %" PRId32 "\n", press);
   return press;
 }
 
@@ -557,7 +545,8 @@ static ssize_t bmp180_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen != 4)
     {
-      snerr("ERROR: You can't read something other than 32 bits (4 bytes)\n");
+      snerr("ERROR: You can't read something "
+            "other than 32 bits (4 bytes)\n");
       return -1;
     }
 

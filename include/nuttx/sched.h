@@ -362,12 +362,6 @@ struct pthread_cleanup_s
 #  endif
 #endif
 
-/* type grpid_t *****************************************************************/
-
-/* The task group ID */
-
-typedef int16_t grpid_t;
-
 /* struct dspace_s **************************************************************/
 
 /* This structure describes a reference counted D-Space region.  This must be a
@@ -406,8 +400,9 @@ struct stackinfo_s
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
                                          /* Needed to deallocate stack          */
-  FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
-                                         /* The initial stack pointer value     */
+  FAR void *stack_base_ptr;              /* Adjusted initial stack pointer      */
+                                         /* after the frame has been removed    */
+                                         /* from the stack.                     */
 };
 
 /* struct exitinfo_s ************************************************************/
@@ -466,14 +461,9 @@ struct task_group_s
 {
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   struct task_group_s *flink;       /* Supports a singly linked list            */
-  grpid_t tg_grpid;                 /* The ID of this task group                */
 #endif
-#ifdef HAVE_GROUP_MEMBERS
-  grpid_t tg_pgrpid;                /* The ID of the parent task group          */
-#endif
-#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
-  pid_t tg_task;                    /* The ID of the task within the group      */
-#endif
+  pid_t tg_pid;                     /* The ID of the task within the group      */
+  pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
 
   /* User identity **************************************************************/
@@ -508,16 +498,9 @@ struct task_group_s
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
+#else
+  uint16_t tg_nchildren;                  /* This is the number active children */
 #endif
-
-#ifndef HAVE_GROUP_MEMBERS
-  /* REVISIT: What if parent thread exits?  Should use tg_pgrpid. */
-
-  pid_t    tg_ppid;                 /* This is the ID of the parent thread      */
-#ifndef CONFIG_SCHED_CHILD_STATUS
-  uint16_t tg_nchildren;            /* This is the number active children       */
-#endif
-#endif /* HAVE_GROUP_MEMBERS */
 #endif /* CONFIG_SCHED_HAVE_PARENT */
 
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
@@ -673,8 +656,9 @@ struct tcb_s
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
                                          /* Needed to deallocate stack          */
-  FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
-                                         /* The initial stack pointer value     */
+  FAR void *stack_base_ptr;              /* Adjusted initial stack pointer      */
+                                         /* after the frame has been removed    */
+                                         /* from the stack.                     */
 
   /* External Module Support ****************************************************/
 
@@ -1041,10 +1025,10 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *    - Allocation of the child task's TCB.
  *    - Initialization of file descriptors and streams
  *    - Configuration of environment variables
- *    - Setup the input parameters for the task.
- *    - Initialization of the TCB (including call to up_initial_state()
- * 4) vfork() provides any additional operating context. vfork must:
  *    - Allocate and initialize the stack
+ *    - Setup the input parameters for the task.
+ *    - Initialization of the TCB (including call to up_initial_state())
+ * 4) vfork() provides any additional operating context. vfork must:
  *    - Initialize special values in any CPU registers that were not
  *      already configured by up_initial_state()
  * 5) vfork() then calls nxtask_start_vfork()
@@ -1054,7 +1038,7 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *
  ********************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr, size_t *argsize);
+FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr);
 pid_t nxtask_start_vfork(FAR struct task_tcb_s *child);
 void nxtask_abort_vfork(FAR struct task_tcb_s *child, int errcode);
 
@@ -1341,7 +1325,7 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
  *
  * Input Parameters:
  *   pid       - Identifies the thread to query.  Zero is interpreted as the
- *               the calling thread
+ *               the calling thread, -1 is interpreted as the calling task.
  *   stackinfo - User-provided location to return the stack information.
  *
  * Returned Value:

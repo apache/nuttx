@@ -1,51 +1,37 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_rgu.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_RGU_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_RGU_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
-/* Register Offsets *********************************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_RGU_CTRL0_OFFSET           0x100  /* Reset control register 0 */
 #define LPC43_RGU_CTRL1_OFFSET           0x104  /* Reset control register 1 */
@@ -107,6 +93,7 @@
 /* External Status Registers */
 
 #define LPC43_RGU_EXTSTAT_OFFSET(n)      (0x0400 + ((n) << 2))  /* Reset external status register n=0..63 */
+
 #define LPC43_RGU_EXTSTAT0_OFFSET        0x400  /* Reset external status register 0 for CORE_RST */
 #define LPC43_RGU_EXTSTAT1_OFFSET        0x404  /* Reset external status register 1 for PERIPH_RST */
 #define LPC43_RGU_EXTSTAT2_OFFSET        0x408  /* Reset external status register 2 for MASTER_RST */
@@ -153,7 +140,7 @@
 #define LPC43_RGU_EXTSTAT57_OFFSET       0x4e4  /* Reset external status register 57 for SGPIO_RST */
 #define LPC43_RGU_EXTSTAT58_OFFSET       0x4e8  /* Reset external status register 58 for SPI_RST */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_RGU_CTRL0                  (LPC43_RGU_BASE+LPC43_RGU_CTRL0_OFFSET)
 #define LPC43_RGU_CTRL1                  (LPC43_RGU_BASE+LPC43_RGU_CTRL1_OFFSET)
@@ -261,7 +248,7 @@
 #define LPC43_RGU_EXTSTAT_SGPIO_RST      LPC43_RGU_EXTSTAT57
 #define LPC43_RGU_EXTSTAT_SPI_RST        LPC43_RGU_EXTSTAT58
 
-/* Register Bit Definitions *************************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Reset control register 0 */
 
@@ -291,6 +278,7 @@
 #define RGU_CTRL0_GPIO_RST               (1 << 28)
 #define RGU_CTRL0_FLASHB_RST             (1 << 29)
                                                    /* Bits 30-31:  Reserved */
+
 /* Reset control register 1 */
 
 #define RGU_CTRL1_TIMER0_RST             (1 << 0)
@@ -320,7 +308,8 @@
 #define RGU_CTRL1_M0APP_RST              (1 << 24)
 #define RGU_CTRL1_SGPIO_RST              (1 << 25)
 #define RGU_CTRL1_SPI_RST                (1 << 26)
-                                                    /* Bits 27-31:  Reserved */
+                                                /* Bits 27-31:  Reserved */
+
 /* Reset status register 0 */
 
 #define RGU_RST_NONE                     0          /* No reset activated */
@@ -332,43 +321,54 @@
 #  define RGU_STATUS0_CORE_RST_NONE      (0 << RGU_STATUS0_CORE_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_CORE_RST_HW        (1 << RGU_STATUS0_CORE_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS0_CORE_RST_SW        (3 << RGU_STATUS0_CORE_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS0_PERIPH_RST_SHIFT     (2)        /* Bits 2-3: Status of the PERIPH_RST reset generator output */
 #define RGU_STATUS0_PERIPH_RST_MASK      (3 << RGU_STATUS0_PERIPH_RST_SHIFT)
 #  define RGU_STATUS0_PERIPH_RST_NONE    (0 << RGU_STATUS0_PERIPH_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_PERIPH_RST_HW      (1 << RGU_STATUS0_PERIPH_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS0_PERIPH_RST_SW      (3 << RGU_STATUS0_PERIPH_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS0_MASTER_RST_SHIFT     (4)        /* Bits 4-5: Status of the MASTER_RST reset generator output */
 #define RGU_STATUS0_MASTER_RST_MASK      (3 << RGU_STATUS0_MASTER_RST_SHIFT)
 #  define RGU_STATUS0_MASTER_RST_NONE    (0 << RGU_STATUS0_MASTER_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_MASTER_RST_HW      (1 << RGU_STATUS0_MASTER_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS0_MASTER_RST_SW      (3 << RGU_STATUS0_MASTER_RST_SHIFT) /* Activated by software */
+
                                                     /* Bits 6-7:  Reserved */
 #define RGU_STATUS0_WWDT_RST_SHIFT       (8)        /* Bits 8-9: Status of the WWDT_RST reset generator output */
 #define RGU_STATUS0_WWDT_RST_MASK        (3 << RGU_STATUS0_WWDT_RST_SHIFT)
 #  define RGU_STATUS0_WWDT_RST_NONE      (0 << RGU_STATUS0_WWDT_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_WWDT_RST_HW        (1 << RGU_STATUS0_WWDT_RST_SHIFT) /* Activated by reset generator */
+
 #define RGU_STATUS0_CREG_RST_SHIFT       (10)       /* Bits 10-11: Status of the CREG_RST reset generator output */
 #define RGU_STATUS0_CREG_RST_MASK        (3 << RGU_STATUS0_CREG_RST_SHIFT)
 #  define RGU_STATUS0_CREG_RST_NONE      (0 << RGU_STATUS0_CREG_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_CREG_RST_HW        (1 << RGU_STATUS0_CREG_RST_SHIFT) /* Activated by reset generator */
-                                                    /* Bits 12-15:  Reserved */
+
+                                                /* Bits 12-15:  Reserved */
+
 #define RGU_STATUS0_BUS_RST_SHIFT        (16)       /* Bits 16-17: Status of the BUS_RST reset generator output */
 #define RGU_STATUS0_BUS_RST_MASK         (3 << RGU_STATUS0_BUS_RST_SHIFT)
 #  define RGU_STATUS0_BUS_RST_NONE       (0 << RGU_STATUS0_BUS_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_BUS_RST_HW         (1 << RGU_STATUS0_BUS_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS0_BUS_RST_SW         (3 << RGU_STATUS0_BUS_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS0_SCU_RST_SHIFT        (18)       /* Bits 18-19: Status of the SCU_RST reset generator output */
 #define RGU_STATUS0_SCU_RST_MASK         (3 << RGU_STATUS0_SCU_RST_SHIFT)
 #  define RGU_STATUS0_SCU_RST_NONE       (0 << RGU_STATUS0_SCU_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_SCU_RST_HW         (1 << RGU_STATUS0_SCU_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS0_SCU_RST_SW         (3 << RGU_STATUS0_SCU_RST_SHIFT) /* Activated by software */
-                                                    /* Bits 20-25:  Reserved */
+
+                                                /* Bits 20-25:  Reserved */
+
 #define RGU_STATUS0_M4_RST_SHIFT         (26)       /* Bits 26-27: Status of the M4_RST reset generator output */
 #define RGU_STATUS0_M4_RST_MASK          (3 << RGU_STATUS0_M4_RST_SHIFT)
 #  define RGU_STATUS0_M4_RST_NONE        (0 << RGU_STATUS0_M4_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS0_M4_RST_HW          (1 << RGU_STATUS0_M4_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS0_M4_RST_SW          (3 << RGU_STATUS0_M4_RST_SHIFT) /* Activated by software */
-                                                    /* Bits 29-31:  Reserved */
+
+                                                /* Bits 29-31:  Reserved */
+
 /* Reset status register 1 */
 
 #define RGU_STATUS1_LCD_RST_SHIFT        (0)        /* Bits 0-1: Status of the LCD_RST reset generator output */
@@ -376,57 +376,69 @@
 #  define RGU_STATUS1_LCD_RST_NONE       (0 << RGU_STATUS1_LCD_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_LCD_RST_HW         (1 << RGU_STATUS1_LCD_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_LCD_RST_SW         (3 << RGU_STATUS1_LCD_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_USB0_RST_SHIFT       (2)        /* Bits 2-3: Status of the USB0_RST reset generator output */
 #define RGU_STATUS1_USB0_RST_MASK        (3 << RGU_STATUS1_USB0_RST_SHIFT)
 #  define RGU_STATUS1_USB0_RST_NONE      (0 << RGU_STATUS1_USB0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_USB0_RST_HW        (1 << RGU_STATUS1_USB0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_USB0_RST_SW        (3 << RGU_STATUS1_USB0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_USB1_RST_SHIFT       (4)        /* Bits 4-5: Status of the USB1_RST reset generator output */
 #define RGU_STATUS1_USB1_RST_MASK        (3 << RGU_STATUS1_USB1_RST_SHIFT)
 #  define RGU_STATUS1_USB1_RST_NONE      (0 << RGU_STATUS1_USB1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_USB1_RST_HW        (1 << RGU_STATUS1_USB1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_USB1_RST_SW        (3 << RGU_STATUS1_USB1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_DMA_RST_SHIFT        (6)        /* Bits 6-7: Status of the DMA_RST reset generator output */
 #define RGU_STATUS1_DMA_RST_MASK         (3 << RGU_STATUS1_DMA_RST_SHIFT)
 #  define RGU_STATUS1_DMA_RST_NONE       (0 << RGU_STATUS1_DMA_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_DMA_RST_HW         (1 << RGU_STATUS1_DMA_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_DMA_RST_SW         (3 << RGU_STATUS1_DMA_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_SDIO_RST_SHIFT       (8)        /* Bits 8-9: Status of the SDIO_RST reset generator output */
 #define RGU_STATUS1_SDIO_RST_MASK        (3 << RGU_STATUS1_SDIO_RST_SHIFT)
 #  define RGU_STATUS1_SDIO_RST_NONE      (0 << RGU_STATUS1_SDIO_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_SDIO_RST_HW        (1 << RGU_STATUS1_SDIO_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_SDIO_RST_SW        (3 << RGU_STATUS1_SDIO_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_EMC_RST_SHIFT        (10)       /* Bits 10-11: Status of the EMC_RST reset generator output */
 #define RGU_STATUS1_EMC_RST_MASK         (3 << RGU_STATUS1_EMC_RST_SHIFT)
 #  define RGU_STATUS1_EMC_RST_NONE       (0 << RGU_STATUS1_EMC_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_EMC_RST_HW         (1 << RGU_STATUS1_EMC_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_EMC_RST_SW         (3 << RGU_STATUS1_EMC_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_ETHERNET_RST_SHIFT   (12)       /* Bits 12-13: Status of the ETHERNET_RST reset generator output */
 #define RGU_STATUS1_ETHERNET_RST_MASK    (3 << RGU_STATUS1_ETHERNET_RST_SHIFT)
 #  define RGU_STATUS1_ETHERNET_RST_NONE  (0 << RGU_STATUS1_ETHERNET_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_ETHERNET_RST_HW    (1 << RGU_STATUS1_ETHERNET_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_ETHERNET_RST_SW    (3 << RGU_STATUS1_ETHERNET_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_FLASHA_RST_SHIFT     (18)       /* Bits 18-19: Status of the FLASHA_RST reset generator output */
 #define RGU_STATUS1_FLASHA_RST_MASK      (3 << RGU_STATUS1_FLASHA_RST_SHIFT)
 #  define RGU_STATUS1_FLASHA_RST_NONE    (0 << RGU_STATUS1_FLASHA_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_FLASHA_RST_HW      (1 << RGU_STATUS1_FLASHA_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_FLASHA_RST_SW      (3 << RGU_STATUS1_FLASHA_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_EEPROM_RST_SHIFT     (22)       /* Bits 22-23: Status of the EEPROM_RST reset generator output */
 #define RGU_STATUS1_EEPROM_RST_MASK      (3 << RGU_STATUS1_EEPROM_RST_SHIFT)
 #  define RGU_STATUS1_EEPROM_RST_NONE    (0 << RGU_STATUS1_EEPROM_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_EEPROM_RST_HW      (1 << RGU_STATUS1_EEPROM_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_EEPROM_RST_SW      (3 << RGU_STATUS1_EEPROM_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_GPIO_RST_SHIFT       (24)       /* Bits 24-25: Status of the GPIO_RST reset generator output */
 #define RGU_STATUS1_GPIO_RST_MASK        (3 << RGU_STATUS1_GPIO_RST_SHIFT)
 #  define RGU_STATUS1_GPIO_RST_NONE      (0 << RGU_STATUS1_GPIO_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_GPIO_RST_HW        (1 << RGU_STATUS1_GPIO_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_GPIO_RST_SW        (3 << RGU_STATUS1_GPIO_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS1_FLASHB_RST_SHIFT     (26)       /* Bits 26-27: Status of the FLASHB_RST reset generator output */
 #define RGU_STATUS1_FLASHB_RST_MASK      (3 << RGU_STATUS1_FLASHB_RST_SHIFT)
 #  define RGU_STATUS1_FLASHB_RST_NONE    (0 << RGU_STATUS1_FLASHB_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS1_FLASHB_RST_HW      (1 << RGU_STATUS1_FLASHB_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS1_FLASHB_RST_SW      (3 << RGU_STATUS1_FLASHB_RST_SHIFT) /* Activated by software */
-                                                    /* Bits 28-31:  Reserved */
+
+                                                /* Bits 28-31:  Reserved */
+
 /* Reset status register 2 */
 
 #define RGU_STATUS2_TIMER0_RST_SHIFT     (0)        /* Bits 0-1: 1:0  Status of the TIMER0_RST reset generator output */
@@ -434,72 +446,87 @@
 #  define RGU_STATUS2_TIMER0_RST_NONE    (0 << RGU_STATUS2_TIMER0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_TIMER0_RST_HW      (1 << RGU_STATUS2_TIMER0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_TIMER0_RST_SW      (3 << RGU_STATUS2_TIMER0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_TIMER1_RST_SHIFT     (2)        /* Bits 2-3: 3:2  Status of the TIMER1_RST reset generator output */
 #define RGU_STATUS2_TIMER1_RST_MASK      (3 << RGU_STATUS2_TIMER1_RST_SHIFT)
 #  define RGU_STATUS2_TIMER1_RST_NONE    (0 << RGU_STATUS2_TIMER1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_TIMER1_RST_HW      (1 << RGU_STATUS2_TIMER1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_TIMER1_RST_SW      (3 << RGU_STATUS2_TIMER1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_TIMER2_RST_SHIFT     (4)        /* Bits 4-5: 5:4  Status of the TIMER2_RST reset generator output */
 #define RGU_STATUS2_TIMER2_RST_MASK      (3 << RGU_STATUS2_TIMER2_RST_SHIFT)
 #  define RGU_STATUS2_TIMER2_RST_NONE    (0 << RGU_STATUS2_TIMER2_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_TIMER2_RST_HW      (1 << RGU_STATUS2_TIMER2_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_TIMER2_RST_SW      (3 << RGU_STATUS2_TIMER2_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_TIMER3_RST_SHIFT     (6)        /* Bits 6-7: 7:6  Status of the TIMER3_RST reset generator output */
 #define RGU_STATUS2_TIMER3_RST_MASK      (3 << RGU_STATUS2_TIMER3_RST_SHIFT)
 #  define RGU_STATUS2_TIMER3_RST_NONE    (0 << RGU_STATUS2_TIMER3_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_TIMER3_RST_HW      (1 << RGU_STATUS2_TIMER3_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_TIMER3_RST_SW      (3 << RGU_STATUS2_TIMER3_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_RITIMER_RST_SHIFT    (8)        /* Bits 8-9: 9:8  Status of the RITIMER_RST reset generator output */
 #define RGU_STATUS2_RITIMER_RST_MASK     (3 << RGU_STATUS2_RITIMER_RST_SHIFT)
 #  define RGU_STATUS2_RITIMER_RST_NONE   (0 << RGU_STATUS2_RITIMER_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_RITIMER_RST_HW     (1 << RGU_STATUS2_RITIMER_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_RITIMER_RST_SW     (3 << RGU_STATUS2_RITIMER_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_SCT_RST_SHIFT        (10)       /* Bits 10-11: 11:10  Status of the SCT_RST reset generator output */
 #define RGU_STATUS2_SCT_RST_MASK         (3 << RGU_STATUS2_SCT_RST_SHIFT)
 #  define RGU_STATUS2_SCT_RST_NONE       (0 << RGU_STATUS2_SCT_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_SCT_RST_HW         (1 << RGU_STATUS2_SCT_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_SCT_RST_SW         (3 << RGU_STATUS2_SCT_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_MCPWM_RST_SHIFT      (12)       /* Bits 12-13: 13:12  Status of the MOTOCONPWM_RST reset generator output */
 #define RGU_STATUS2_MCPWM_RST_MASK       (3 << RGU_STATUS2_MCPWM_RST_SHIFT)
 #  define RGU_STATUS2_MCPWM_RST_NONE     (0 << RGU_STATUS2_MCPWM_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_MCPWM_RST_HW       (1 << RGU_STATUS2_MCPWM_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_MCPWM_RST_SW       (3 << RGU_STATUS2_MCPWM_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_QEI_RST_SHIFT        (14)       /* Bits 14-15: 15:14  Status of the QEI_RST reset generator output */
 #define RGU_STATUS2_QEI_RST_MASK         (3 << RGU_STATUS2_QEI_RST_SHIFT)
 #  define RGU_STATUS2_QEI_RST_NONE       (0 << RGU_STATUS2_QEI_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_QEI_RST_HW         (1 << RGU_STATUS2_QEI_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_QEI_RST_SW         (3 << RGU_STATUS2_QEI_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_ADC0_RST_SHIFT       (16)       /* Bits 16-17: 17:16  Status of the ADC0_RST reset generator output */
 #define RGU_STATUS2_ADC0_RST_MASK        (3 << RGU_STATUS2_ADC0_RST_SHIFT)
 #  define RGU_STATUS2_ADC0_RST_NONE      (0 << RGU_STATUS2_ADC0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_ADC0_RST_HW        (1 << RGU_STATUS2_ADC0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_ADC0_RST_SW        (3 << RGU_STATUS2_ADC0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_ADC1_RST_SHIFT       (18)       /* Bits 18-19: 19:18  Status of the ADC1_RST reset generator output */
 #define RGU_STATUS2_ADC1_RST_MASK        (3 << RGU_STATUS2_ADC1_RST_SHIFT)
 #  define RGU_STATUS2_ADC1_RST_NONE      (0 << RGU_STATUS2_ADC1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_ADC1_RST_HW        (1 << RGU_STATUS2_ADC1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_ADC1_RST_SW        (3 << RGU_STATUS2_ADC1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_DAC_RST_SHIFT        (20)       /* Bits 20-21: 21:20  Status of the DAC_RST reset generator output */
 #define RGU_STATUS2_DAC_RST_MASK         (3 << RGU_STATUS2_DAC_RST_SHIFT)
 #  define RGU_STATUS2_DAC_RST_NONE       (0 << RGU_STATUS2_DAC_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_DAC_RST_HW         (1 << RGU_STATUS2_DAC_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_DAC_RST_SW         (3 << RGU_STATUS2_DAC_RST_SHIFT) /* Activated by software */
-                                                   /* Bits 22-23:  Reserved */
+
+                                                /* Bits 22-23:  Reserved */
+
 #define RGU_STATUS2_USART0_RST_SHIFT     (24)       /* Bits 24-24: 25:24  Status of the USART0_RST reset generator output */
 #define RGU_STATUS2_USART0_RST_MASK      (3 << RGU_STATUS2_USART0_RST_SHIFT)
 #  define RGU_STATUS2_USART0_RST_NONE    (0 << RGU_STATUS2_USART0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_USART0_RST_HW      (1 << RGU_STATUS2_USART0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_USART0_RST_SW      (3 << RGU_STATUS2_USART0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_UART1_RST_SHIFT      (26)       /* Bits 26-27: 27:26  Status of the UART1_RST reset generator output */
 #define RGU_STATUS2_UART1_RST_MASK       (3 << RGU_STATUS2_UART1_RST_SHIFT)
 #  define RGU_STATUS2_UART1_RST_NONE     (0 << RGU_STATUS2_UART1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_UART1_RST_HW       (1 << RGU_STATUS2_UART1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_UART1_RST_SW       (3 << RGU_STATUS2_UART1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_USART2_RST_SHIFT     (28)       /* Bits 28-29: 29:28  Status of the USART2_RST reset generator output */
 #define RGU_STATUS2_USART2_RST_MASK      (3 << RGU_STATUS2_USART2_RST_SHIFT)
 #  define RGU_STATUS2_USART2_RST_NONE    (0 << RGU_STATUS2_USART2_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS2_USART2_RST_HW      (1 << RGU_STATUS2_USART2_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS2_USART2_RST_SW      (3 << RGU_STATUS2_USART2_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS2_USART3_RST_SHIFT     (30)       /* Bits 30-31: 31:30  Status of the USART3_RST reset generator output */
 #define RGU_STATUS2_USART3_RST_MASK      (3 << RGU_STATUS2_USART3_RST_SHIFT)
 #  define RGU_STATUS2_USART3_RST_NONE    (0 << RGU_STATUS2_USART3_RST_SHIFT) /* No reset activated */
@@ -513,57 +540,69 @@
 #  define RGU_STATUS3_I2C0_RST_NONE      (0 << RGU_STATUS3_I2C0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_I2C0_RST_HW        (1 << RGU_STATUS3_I2C0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_I2C0_RST_SW        (3 << RGU_STATUS3_I2C0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_I2C1_RST_SHIFT       (2)        /* Bits 2-3: 3:2  Status of the I2C1_RST reset generator output */
 #define RGU_STATUS3_I2C1_RST_MASK        (3 << RGU_STATUS3_I2C1_RST_SHIFT)
 #  define RGU_STATUS3_I2C1_RST_NONE      (0 << RGU_STATUS3_I2C1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_I2C1_RST_HW        (1 << RGU_STATUS3_I2C1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_I2C1_RST_SW        (3 << RGU_STATUS3_I2C1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_SSP0_RST_SHIFT       (4)        /* Bits 4-5: 5:4  Status of the SSP0_RST reset generator output */
 #define RGU_STATUS3_SSP0_RST_MASK        (3 << RGU_STATUS3_SSP0_RST_SHIFT)
 #  define RGU_STATUS3_SSP0_RST_NONE      (0 << RGU_STATUS3_SSP0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_SSP0_RST_HW        (1 << RGU_STATUS3_SSP0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_SSP0_RST_SW        (3 << RGU_STATUS3_SSP0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_SSP1_RST_SHIFT       (6)        /* Bits 6-7: 7:6  Status of the SSP1_RST reset generator output */
 #define RGU_STATUS3_SSP1_RST_MASK        (3 << RGU_STATUS3_SSP1_RST_SHIFT)
 #  define RGU_STATUS3_SSP1_RST_NONE      (0 << RGU_STATUS3_SSP1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_SSP1_RST_HW        (1 << RGU_STATUS3_SSP1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_SSP1_RST_SW        (3 << RGU_STATUS3_SSP1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_I2S_RST_SHIFT        (8)        /* Bits 8-9: 9:8  Status of the I2S_RST reset generator output */
 #define RGU_STATUS3_I2S_RST_MASK         (3 << RGU_STATUS3_I2S_RST_SHIFT)
 #  define RGU_STATUS3_I2S_RST_NONE       (0 << RGU_STATUS3_I2S_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_I2S_RST_HW         (1 << RGU_STATUS3_I2S_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_I2S_RST_SW         (3 << RGU_STATUS3_I2S_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_SPIFI_RST_SHIFT      (10)       /* Bits 10-11: 11:10  Status of the SPIFI_RST reset generator output */
 #define RGU_STATUS3_SPIFI_RST_MASK       (3 << RGU_STATUS3_SPIFI_RST_SHIFT)
 #  define RGU_STATUS3_SPIFI_RST_NONE     (0 << RGU_STATUS3_SPIFI_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_SPIFI_RST_HW       (1 << RGU_STATUS3_SPIFI_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_SPIFI_RST_SW       (3 << RGU_STATUS3_SPIFI_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_CAN1_RST_SHIFT       (12)       /* Bits 12-13: 13:12  Status of the CAN1_RST reset generator output */
 #define RGU_STATUS3_CAN1_RST_MASK        (3 << RGU_STATUS3_CAN1_RST_SHIFT)
 #  define RGU_STATUS3_CAN1_RST_NONE      (0 << RGU_STATUS3_CAN1_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_CAN1_RST_HW        (1 << RGU_STATUS3_CAN1_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_CAN1_RST_SW        (3 << RGU_STATUS3_CAN1_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_CAN0_RST_SHIFT       (14)       /* Bits 14-15: 15:14  Status of the CAN0_RST reset generator output */
 #define RGU_STATUS3_CAN0_RST_MASK        (3 << RGU_STATUS3_CAN0_RST_SHIFT)
 #  define RGU_STATUS3_CAN0_RST_NONE      (0 << RGU_STATUS3_CAN0_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_CAN0_RST_HW        (1 << RGU_STATUS3_CAN0_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_CAN0_RST_SW        (3 << RGU_STATUS3_CAN0_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_M0APP_RST_SHIFT      (16)       /* Bits 16-17: 17:16  Status of the M0APP_RST reset generator output */
 #define RGU_STATUS3_M0APP_RST_MASK       (3 << RGU_STATUS3_M0APP_RST_SHIFT)
 #  define RGU_STATUS3_M0APP_RST_NONE     (0 << RGU_STATUS3_M0APP_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_M0APP_RST_HW       (1 << RGU_STATUS3_M0APP_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_M0APP_RST_SW       (3 << RGU_STATUS3_M0APP_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_SGPIO_RST_SHIFT      (18)       /* Bits 18-19: 19:18  Status of the SGPIO_RST reset generator output */
 #define RGU_STATUS3_SGPIO_RST_MASK       (3 << RGU_STATUS3_SGPIO_RST_SHIFT)
 #  define RGU_STATUS3_SGPIO_RST_NONE     (0 << RGU_STATUS3_SGPIO_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_SGPIO_RST_HW       (1 << RGU_STATUS3_SGPIO_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_SGPIO_RST_SW       (3 << RGU_STATUS3_SGPIO_RST_SHIFT) /* Activated by software */
+
 #define RGU_STATUS3_SPI_RST_SHIFT        (20)       /* Bits 20-21: 21:20  Status of the SPI_RST reset generator output */
 #define RGU_STATUS3_SPI_RST_MASK         (3 << RGU_STATUS3_SPI_RST_SHIFT)
 #  define RGU_STATUS3_SPI_RST_NONE       (0 << RGU_STATUS3_SPI_RST_SHIFT) /* No reset activated */
 #  define RGU_STATUS3_SPI_RST_HW         (1 << RGU_STATUS3_SPI_RST_SHIFT) /* Activated by reset generator */
 #  define RGU_STATUS3_SPI_RST_SW         (3 << RGU_STATUS3_SPI_RST_SHIFT) /* Activated by software */
-                                                    /* Bits 22-31:  Reserved */
+
+                                                /* Bits 22-31:  Reserved */
+
 /* Reset active status register */
 
 #define RGU_ACTIVE0_CORE_RST             (1 << 0)
@@ -592,6 +631,7 @@
 #define RGU_ACTIVE0_GPIO_RST             (1 << 28)
 #define RGU_ACTIVE0_FLASHB_RST           (1 << 29)
                                                    /* Bits 30-31:  Reserved */
+
 /* Reset active status register */
 
 #define RGU_ACTIVE1_TIMER0_RST           (1 << 0)
@@ -621,7 +661,8 @@
 #define RGU_ACTIVE1_M0APP_RST            (1 << 24)
 #define RGU_ACTIVE1_SGPIO_RST            (1 << 25)
 #define RGU_ACTIVE1_SPI_RST              (1 << 26)
-                                                    /* Bits 27-31:  Reserved */
+                                                /* Bits 27-31:  Reserved */
+
 /* Reset external status register 0 for CORE_RST */
 
 #define RGU_EXTSTAT_CORE_EXTRESET        (1 << 0)   /* Bit 0: Reset activated by external reset from reset pin */
@@ -629,41 +670,53 @@
 #define RGU_EXTSTAT_CORE_BODRESET        (1 << 4)   /* Bit 4: Reset activated by BOD reset */
 #define RGU_EXTSTAT_CORE_WWDTRESET       (1 << 5)   /* Bit 5: Reset activated by WWDT time-out */
                                                     /* Bits 6-31: Reserved */
+
 /* Reset external status register 1 for PERIPH_RST */
+
                                                     /* Bit 0: Reserved */
 #define RGU_EXTSTAT_PERIPH_CORERESET     (1 << 1)   /* Bit 1: Reset activated by CORE_RST output */
                                                     /* Bits 2-31: Reserved */
+
 /* Reset external status register 2 for MASTER_RST */
+
                                                     /* Bits 0-1: Reserved */
 #define RGU_EXTSTAT_MASTER_PERIPHRESET   (1 << 2)   /* Bit 2: Reset activated by PERIPHERAL_RST output */
                                                     /* Bits 2-31: Reserved */
+
 /* Reset external status register 4 for WWDT_RST */
+
                                                     /* Bit 0: Reserved */
 #define RGU_EXTSTAT_WWDT_CORERESET       (1 << 1)   /* Bit 1: Reset activated by CORE_RST output */
                                                     /* Bits 2-31: Reserved */
+
 /* Reset external status register 5 for CREG_RST */
+
                                                     /* Bit 0: Reserved */
 #define RGU_EXTSTAT_CREG_CORERESET       (1 << 1)   /* Bit 1: Reset activated by CORE_RST output */
                                                     /* Bits 2-31: Reserved */
+
 /* Reset external status registers for PERIPHERAL_RESET */
+
                                                     /* Bits 0-1: Reserved */
 #define RGU_EXTSTAT_PERIPH_RESET         (1 << 2)   /* Bit 2: Reset activated by PERIPHERAL_RST output */
                                                     /* Bits 2-31: Reserved */
+
 /* Reset external status registers for MASTER_RESET */
+
                                                     /* Bits 0-2: Reserved */
 #define RGU_EXTSTAT_MASTER_RESET         (1 << 3)   /* Bit 3: Reset activated by MASTER_RST output */
                                                     /* Bits 2-31: Reserved */
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_RGU_H */

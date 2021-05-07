@@ -1,8 +1,5 @@
 ############################################################################
-# arch/arm/imx6/Make.defs
-#
-#   Copyright (C) 2016, 2018 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+# arch/arm/src/imx6/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -142,4 +139,8 @@ endif
 
 ifeq ($(CONFIG_IMX6_ECSPI),y)
 CHIP_CSRCS += imx_ecspi.c
+endif
+
+ifeq ($(CONFIG_IMX6_ENET),y)
+CHIP_CSRCS += imx_enet.c
 endif

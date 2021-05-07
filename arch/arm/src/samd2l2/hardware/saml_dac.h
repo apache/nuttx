@@ -1,48 +1,34 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_dac.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "Atmel SAM L21E / SAM L21G / SAM L21J Smart ARM-Based Microcontroller
  *   Datasheet", Atmel-42385C-SAML21_Datasheet_Preliminary-03/20/15
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ */
 
 #ifndef __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_DAC_H
 #define __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_DAC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -50,10 +36,11 @@
 
 #ifdef CONFIG_ARCH_FAMILY_SAML21
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
-/* DAC register offsets ********************************************************************/
+ ****************************************************************************/
+
+/* DAC register offsets *****************************************************/
 
 #define SAM_DAC_CTRLA_OFFSET       0x0000 /* Control A Register */
 #define SAM_DAC_CTRLB_OFFSET       0x0001 /* Control B Register */
@@ -71,7 +58,7 @@
 #define SAM_DAC_DATABUF1_OFFSET    0x0016 /* Data Buffer DAC1 Register */
 #define SAM_DAC_DBCTRL_OFFSET      0x0017 /* Debug Control Register */
 
-/* DAC register addresses ******************************************************************/
+/* DAC register addresses ***************************************************/
 
 #define SAM_DAC_CTRLA              (SAM_DAC_BASE+SAM_DAC_CTRLA_OFFSET)
 #define SAM_DAC_CTRLB              (SAM_DAC_BASE+SAM_DAC_CTRLB_OFFSET)
@@ -89,7 +76,7 @@
 #define SAM_DAC_DATABUF1           (SAM_DAC_BASE+SAM_DAC_DATABUF1_OFFSET)
 #define SAM_DAC_DBCTRL              (SAM_DAC_BASE+SAM_DAC_DBCTRL_OFFSET)
 
-/* DAC register bit definitions ************************************************************/
+/* DAC register bit definitions *********************************************/
 
 /* Control A Register */
 
@@ -115,8 +102,9 @@
 #define DAC_EVCTRL_INVEI0          (1 << 4)  /* Bit 4:  Enable inversion of DAC0 input event */
 #define DAC_EVCTRL_INVEI1          (1 << 5)  /* Bit 5:  Enable inversion of DAC1 input event */
 
-/* Common bit definitions for Interrupt Enable Clear Register, Interrupt Enable Set
- * Register, and Interrupt Flag Status and Clear Register
+/* Common bit definitions for Interrupt Enable Clear Register,
+ * Interrupt Enable Set Register,
+ * and Interrupt Flag Status and Clear Register
  */
 
 #define DAC_INT_UNDERRUN0          (1 << 0)  /* Bit 0:  Underrun interrupt for DAC2 */
@@ -150,6 +138,7 @@
 #  define DAC_DACCTRL_CCTRL_CC100K (0 << DAC_DACCTRL_CCTRL_SHIFT) /* GCLK_DAC <= 1.2MHz */
 #  define DAC_DACCTRL_CCTRL_CC1M   (1 << DAC_DACCTRL_CCTRL_SHIFT) /* 1.2MHz < GCLK_DAC <= 6MHz */
 #  define DAC_DACCTRL_CCTRL_CC2M   (2 << DAC_DACCTRL_CCTRL_SHIFT) /* 6MHz < GCLK_DAC <= 12MHz */
+
 #define DAC_DACCTRL_RUNSTDBY       (1 << 6)  /* Bit 6:  Run in standby */
 #define DAC_DACCTRL_DITHER         (1 << 7)  /* Bit 7:  Dithering mode */
 #define DAC_DACCTRL_REFRESH_SHIFT  (8)       /* Bit 8-11: Refresh period */
@@ -157,23 +146,24 @@
 #  define DAC_DACCTRL_REFRESH(n)   ((uin16_t)(n) << DAC_DACCTRL_REFRESH_SHIFT)
 
 /* Data DAC0/1 Register (16-bit data) */
+
 /* Data Buffer DAC0/1 Register (16-bit data) */
 
 /* Debug Control Register */
 
 #define DAC_DBCTRL_DBGRUN          (1 << 0)  /* Bit 0:  Debug run */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* CONFIG_ARCH_FAMILY_SAML21 */
 #endif /* __ARCH_ARM_SRC_SAMD2L2_HARDWARE_SAML_DAC_H */

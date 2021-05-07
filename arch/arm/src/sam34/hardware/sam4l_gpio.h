@@ -1,55 +1,40 @@
-/****************************************************************************************
+/****************************************************************************
  * arch/arm/src/sam34/hardware/sam4l_gpio.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_GPIO_H
 #define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_GPIO_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
+ ****************************************************************************/
 
-/* PIO register offsets *****************************************************************/
+/* PIO register offsets *****************************************************/
 
 #define SAM_GPIO_GPER_OFFSET       0x0000 /* GPIO Enable Register Read/Write */
 #define SAM_GPIO_GPERS_OFFSET      0x0004 /* GPIO Enable Register Set */
@@ -63,10 +48,11 @@
  *   010 C    110 G
  *   011 D    111 H
  *
- * NOTE:  Labeling in the data sheet is inconsistent.  In the pin multiplexing table,
- * It shows GPIO functions A-G with 000 apparently corresponding to the GPIO.  In the
- * register description, it should A-H with presumably A corresponding to 000.  Here
- * we adopt the above convention.
+ * NOTE:
+ * Labeling in the data sheet is inconsistent. In the pin multiplexing table,
+ * It shows GPIO functions A-G with 000 apparently corresponding to the GPIO.
+ * In the register description, it should A-H with presumably A
+ * corresponding to 000.  Here we adopt the above convention.
  */
 
 #define SAM_GPIO_PMR0_OFFSET       0x0010 /* Peripheral Mux Register 0 Read/Write */
@@ -181,7 +167,7 @@
 #define SAM_GPIO_PARAMETER_OFFSET  0x01f8 /* Parameter Register Read */
 #define SAM_GPIO_VERSION_OFFSET    0x01fc /* Version Register Read */
 
-/* GPIO port offsets and addresses ******************************************************/
+/* GPIO port offsets and addresses ******************************************/
 
 #define SAM_GPIOA                  0
 #define SAM_GPIOB                  1
@@ -194,7 +180,7 @@
 #define SAM_GPIOB_BASE             SAM_GPION_BASE(SAM_GPIOB)
 #define SAM_GPIOC_BASE             SAM_GPION_BASE(SAM_GPIOC)
 
-/* GPIO register addresses **************************************************************/
+/* GPIO register addresses **************************************************/
 
 #define SAM_GPIO_GPER(n)           (SAM_GPION_BASE(n)+SAM_GPIO_GPER_OFFSET)
 #define SAM_GPIO_GPERS(n)          (SAM_GPION_BASE(n)+SAM_GPIO_GPERS_OFFSET)
@@ -289,7 +275,7 @@
 #define SAM_GPIO_PARAMETER(n)      (SAM_GPION_BASE(n)+SAM_GPIO_PARAMETER_OFFSET)
 #define SAM_GPIO_VERSION (n)       (SAM_GPION_BASE(n)+SAM_GPIO_VERSION_OFFSET)
 
-/* GPIO PORTA register addresses ********************************************************/
+/* GPIO PORTA register addresses ********************************************/
 
 #define SAM_GPIOA_GPER             (SAM_GPIOA_BASE+SAM_GPIO_GPER_OFFSET)
 #define SAM_GPIOA_GPERS            (SAM_GPIOA_BASE+SAM_GPIO_GPERS_OFFSET)
@@ -384,7 +370,7 @@
 #define SAM_GPIOA_PARAMETER        (SAM_GPIOA_BASE+SAM_GPIO_PARAMETER_OFFSET)
 #define SAM_GPIOA_VERSION          (SAM_GPIOA_BASE+SAM_GPIO_VERSION_OFFSET)
 
-/* GPIO PORTB register addresses ********************************************************/
+/* GPIO PORTB register addresses ********************************************/
 
 #define SAM_GPIOB_GPER             (SAM_GPIOB_BASE+SAM_GPIO_GPER_OFFSET)
 #define SAM_GPIOB_GPERS            (SAM_GPIOB_BASE+SAM_GPIO_GPERS_OFFSET)
@@ -479,7 +465,7 @@
 #define SAM_GPIOB_PARAMETER        (SAM_GPIOB_BASE+SAM_GPIO_PARAMETER_OFFSET)
 #define SAM_GPIOB_VERSION          (SAM_GPIOB_BASE+SAM_GPIO_VERSION_OFFSET)
 
-/* GPIO PORTC register addresses ********************************************************/
+/* GPIO PORTC register addresses ********************************************/
 
 #define SAM_GPIOC_GPER             (SAM_GPIOC_BASE+SAM_GPIO_GPER_OFFSET)
 #define SAM_GPIOC_GPERS            (SAM_GPIOC_BASE+SAM_GPIO_GPERS_OFFSET)
@@ -574,22 +560,22 @@
 #define SAM_GPIOC_PARAMETER        (SAM_GPIOC_BASE+SAM_GPIO_PARAMETER_OFFSET)
 #define SAM_GPIOC_VERSION          (SAM_GPIOC_BASE+SAM_GPIO_VERSION_OFFSET)
 
-/* GPIO register bit definitions ********************************************************/
+/* GPIO register bit definitions ********************************************/
 
 /* Common bit definitions for all GPIO registers */
 
 #define PIN(n)                     (1 << (n)) /* Bit n: PIO n */
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_GPIO_H */

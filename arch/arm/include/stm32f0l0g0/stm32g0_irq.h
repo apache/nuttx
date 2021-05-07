@@ -1,4 +1,4 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/include/stm32f0l0g0/stm32g0_irq.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -32,31 +32,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly through nuttx/irq.h */
+/* This file should never be included directly but, rather, only indirectly
+ * through nuttx/irq.h
+ */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32F0L0G0_STM32G0_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32F0L0G0_STM32G0_IRQ_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include <arch/stm32f0l0g0/chip.h>
 
-/****************************************************************************************************
- * Pre-processor Definitions
- ****************************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
- * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
- * to handle mapping tables.
+/* IRQ numbers.  The IRQ number corresponds vector number and hence map
+ * directly to bits in the NVIC.  This does, however, waste several words of
+ * memory in the IRQ to handle mapping tables.
  *
- * Processor Exceptions (vectors 0-15).  These common definitions can be found
- * in nuttx/arch/arm/include/stm32f0l0g0/irq.h
+ * Processor Exceptions (vectors 0-15).  These common definitions can be
+ * found in nuttx/arch/arm/include/stm32f0l0g0/irq.h
  */
 
 #define STM32_IRQ_WWDG         (STM32_IRQ_EXTINT + 0)  /* 0: Window Watchdog interrupt */
@@ -97,6 +99,7 @@
 #if defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
     defined(CONFIG_ARCH_CHIP_STM32G070RB)
 /* No STM32_IRQ_COMP */
+
 #else
 #  define STM32_IRQ_COMP       (STM32_IRQ_EXTINT + 12) /* 12: COMP */
 #endif
@@ -117,7 +120,9 @@
 #if defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
     defined(CONFIG_ARCH_CHIP_STM32G070RB)
 /* No STM32_IRQ_DAC */
+
 /* No STM32_IRQ_LPTIM1 */
+
 #else
 #  define STM32_IRQ_DAC        (STM32_IRQ_EXTINT + 17) /* 17: DAC */
 #  define STM32_IRQ_LPTIM1     (STM32_IRQ_EXTINT + 17) /* 17: LPTIM1 */
@@ -128,6 +133,7 @@
 #if defined(CONFIG_ARCH_CHIP_STM32G070KB) || defined(CONFIG_ARCH_CHIP_STM32G070CB) || \
     defined(CONFIG_ARCH_CHIP_STM32G070RB)
 /* No STM32_IRQ_LPTIM2 */
+
 #else
 #  define STM32_IRQ_LPTIM2     (STM32_IRQ_EXTINT + 18) /* 18: LPTIM2 */
 #endif
@@ -161,16 +167,15 @@
 #  define STM32_IRQ_RNG        (STM32_IRQ_EXTINT + 31) /* 31: RNG */
 #endif
 
-
 #define STM32_IRQ_NEXTINT      (32)
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************************
+/****************************************************************************
  * Public Data
-****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
@@ -181,9 +186,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************************************
- * Public Functions
- ****************************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

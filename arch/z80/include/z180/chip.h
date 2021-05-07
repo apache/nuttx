@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/include/z180/chip.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -58,6 +43,7 @@
 #define Z180_S_FLAG      0x80       /* Bit 7: Sign flag */
 
 /* Z180 Chip Definitions ****************************************************/
+
 /* Z800180
  *
  * The 8-bit Z80180 MPU provides the benefits of reduced system costs and
@@ -136,10 +122,10 @@
 #  define HAVE_NPAR8     0                        /* No 8-bit parallel ports */
 #  undef  HAVE_IEEE1284                           /* No bidirectional centronics interface (IEEE 1284) */
 
-#elif defined(CONFIG_ARCH_CHIP_Z8018000XSO)
-      defined(CONFIG_ARCH_CHIP_Z8018010FEG)
-      defined(CONFIG_ARCH_CHIP_Z8018000WSO)
-      defined(CONFIG_ARCH_CHIP_Z8018008PEG)
+#elif defined(CONFIG_ARCH_CHIP_Z8018000XSO)|| \
+      defined(CONFIG_ARCH_CHIP_Z8018010FEG)|| \
+      defined(CONFIG_ARCH_CHIP_Z8018000WSO)|| \
+      defined(CONFIG_ARCH_CHIP_Z8018008PEG)||
 
 #  undef  HAVE_Z8S180                             /* Not Z8S180 (5V) or Z8L180 (3.3V) core */
 #  define HAVE_Z8X180    1                        /* Z8x180 registers */
@@ -161,10 +147,11 @@
 
 /* Z80181
  *
- * The Z80181 SAC Smart Access Controller is an 8-bit CMOS microprocessor that
- * combines a Z180-compatible MPU, one channel of the Z85C30 Serial Communications
- * Controller, a Z80 CTC, two 8-bit general-purpose parallel ports, and two Chip
- * Select signals, into a single 100-pin Quad Flat Pack package.
+ * The Z80181 SAC Smart Access Controller is an 8-bit CMOS microprocessor
+ * that combines a Z180-compatible MPU, one channel of the Z85C30 Serial
+ * Communications Controller, a Z80 CTC, two 8-bit general-purpose parallel
+ * ports, and two Chip Select signals, into a single 100-pin Quad Flat Pack
+ * package.
  *
  * Z80181 Features
  *
@@ -202,11 +189,11 @@
 
 /* Z80182
  *
- * The Z80182 and Z8L182 MPUs are smart peripheral controller ICs for modems, fax,
- * voice messaging, and other communications applications. It uses the Z80180
- * microprocessor linked with two channels of the industry-standard Z85230 ESCC,
- * 24 bits of parallel I/O, and a 16550 MIMIC for direct connection to the IBM PC,
- * XT, or AT bus
+ * The Z80182 and Z8L182 MPUs are smart peripheral controller ICs for modems,
+ * fax, voice messaging, and other communications applications. It uses the
+ * Z80180 microprocessor linked with two channels of the industry-standard
+ * Z85230 ESCC, 24 bits of parallel I/O, and a 16550 MIMIC for direct
+ * connection to the IBM PC, XT, or AT bus
  *
  * Z80182 Features
  *
@@ -218,7 +205,8 @@
  *   Clock Serial I/O
  *   Power-Down Mode
  *   Divide-by-One/Divide-by-Two/Multiply-by-Two Clock Options
- *   Enhanced Serial Communication Controller (ESCC) (2 Channels) with 32-Bit CRC
+ *   Enhanced Serial Communication Controller (ESCC)
+ *             (2 Channels) with 32-Bit CRC
  *   16550 MIMIC
  *   24 Parallel I/O
  *   3.3 V and 5 V Version
@@ -250,11 +238,12 @@
 
 /* Z80195
  *
- * The Z80195 MPU is a smart peripheral controller device designed for general data
- * communications applications, and architected specifically to accommodate all
- * input and output (I/O) requirements for serial and parallel connectivity.
- * Combining a high-performance CPU core with a variety of system and I/O
- * resources, the Z80195 is useful in a broad range of applications.
+ * The Z80195 MPU is a smart peripheral controller device designed for
+ * general data communications applications, and architected specifically
+ * to accommodate all input and output (I/O) requirements for serial and
+ * parallel connectivity. Combining a high-performance CPU core with a
+ * variety of system and I/O resources, the Z80195 is useful in a broad
+ * range of applications.
  *
  * Z80195 Features
  *
@@ -292,10 +281,10 @@
 
 /* Z8L180
  *
- * The enhanced Z8S180/Z8L180 significantly improves on previous Z80180 models,
- * while still providing full backward compatibility with existing ZiLOG Z80
- * devices. The Z8S180/Z8L180 now offers faster execution speeds, power-saving
- * modes, and EMI noise reduction.
+ * The enhanced Z8S180/Z8L180 significantly improves on previous Z80180
+ * models, while still providing full backward compatibility with existing
+ * ZiLOG Z80 devices. The Z8S180/Z8L180 now offers faster execution speeds,
+ * power-saving modes, and EMI noise reduction.
  *
  * Z8L180 Features
  *
@@ -337,12 +326,12 @@
 
 /* Z8L182
  *
- * The Z80182/Z8L182 is a smart peripheral controller IC for modem (in particular
- * V. Fast applications), fax, voice messaging and other communications
- * applications. It uses the Z80180 microprocessor (Z8S180 MPU core) linked with
- * two channels of the industry standard Z85230 ESCC (Enhanced Serial
- * Communications Controller), 24 bits of parallel I/O, and a 16550 MIMIC for
- * direct connection to the IBM PC, XT, AT bus.
+ * The Z80182/Z8L182 is a smart peripheral controller IC for modem (in
+ * particular V. Fast applications), fax, voice messaging and other
+ * communications applications. It uses the Z80180 microprocessor (Z8S180
+ * MPU core) linked with two channels of the industry standard Z85230 ESCC
+ * (Enhanced Serial Communications Controller), 24 bits of parallel I/O,
+ * and a 16550 MIMIC for direct connection to the IBM PC, XT, AT bus.
  *
  * Z8L182 Features
  *
@@ -384,14 +373,14 @@
 
 /* Z8SL180
  *
- * The enhanced Z8S180/Z8L180 significantly improves on previous Z80180 models,
- * while still providing full backward compatibility with existing ZiLOG Z80
- * devices. The Z8S180/Z8L180 now offers faster execution speeds, power-saving
- * modes, and EMI noise reduction.This enhanced Z180 design also incorporates
- * additional feature enhancements to the ASCIs, DMAs, and STANDBY mode power
- * consumption. With the addition of ESCC-like Baud Rate Generators (BRGs), the
- * two ASCIs offer the flexibility and capability to transfer data
- * asynchronously at rates of up to 512 Kbps.
+ * The enhanced Z8S180/Z8L180 significantly improves on previous Z80180
+ * models, while still providing full backward compatibility with existing
+ * ZiLOG Z80 devices. The Z8S180/Z8L180 now offers faster execution speeds,
+ * power-saving modes, and EMI noise reduction.This enhanced Z180 design
+ * also incorporates additional feature enhancements to the ASCIs, DMAs,
+ * and STANDBY mode power consumption. With the addition of ESCC-like
+ * Baud Rate Generators (BRGs), the two ASCIs offer the flexibility and
+ * capability to transfer data asynchronously at rates of up to 512 Kbps.
  *
  * Z8S180 Features
  *

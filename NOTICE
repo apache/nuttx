@@ -58,3 +58,12 @@ NXP Restriction for SPIFI code
    is used in conjunction with NXP Semiconductors microcontrollers. This
    copyright, permission, and disclaimer notice must appear in all copies of
    this code.
+
+Documentation
+=============
+
+- nRF52832-MDK board pinout image is obtained from MakerDiary GitHub repository,
+  under the terms of the MIT license, Copyright (c) 2019 makerdiary.com
+- Sparkfun nRF52832 breakout board image is licensed under CC-BY 2.0 terms
+- Espressif ESP32 DevKitC images are licensed under the terms of Apache 2.0,
+  Copyright (C) 2015-2019 Espressif Systems

@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_irq.c
- * arch/arm/src/chip/lpc31_irq.c
  *
- *   Copyright (C) 2009-2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -96,7 +80,9 @@ void up_irqinitialize(void)
   lpc31_enableclock(CLKID_AHB2INTCCLK);  /*  AHB_TO_INTC_CLK */
   lpc31_enableclock(CLKID_INTCCLK);      /*  INTC_CLK */
 
-  /* Set the vector base. We don't use direct vectoring, so these are set to 0. */
+  /* Set the vector base. We don't use direct vectoring,
+   * so these are set to 0.
+   */
 
   putreg32(0, LPC31_INTC_VECTOR0);
   putreg32(0, LPC31_INTC_VECTOR1);
@@ -116,11 +102,10 @@ void up_irqinitialize(void)
        * Set priority level to 1 (= lowest) for all the interrupt lines
        */
 
-      uint32_t address = LPC31_INTC_REQUEST(irq+1);
+      uint32_t address = LPC31_INTC_REQUEST(irq + 1);
       putreg32(INTC_REQUEST_WEACTLOW | INTC_REQUEST_WEENABLE |
                INTC_REQUEST_TARGET_IRQ | INTC_REQUEST_PRIOLEVEL(1) |
                INTC_REQUEST_WEPRIO, address);
-
     }
 
   /* currents_regs is non-NULL only while processing an interrupt */
@@ -130,7 +115,7 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
-  up_irq_restore(SVC_MODE | PSR_F_BIT);
+  up_irq_restore(PSR_MODE_SVC | PSR_F_BIT);
 #endif
 }
 
@@ -148,7 +133,7 @@ void up_disable_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC31_INTC_REQUEST(irq+1);
+  uint32_t address = LPC31_INTC_REQUEST(irq + 1);
 
   /* Clear the ENABLE bit with WE_ENABLE=1.  Configuration settings will be
    * preserved because WE_TARGET is zero.
@@ -171,7 +156,7 @@ void up_enable_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC31_INTC_REQUEST(irq+1);
+  uint32_t address = LPC31_INTC_REQUEST(irq + 1);
 
   /* Set the ENABLE bit with WE_ENABLE=1.  Configuration settings will be
    * preserved because WE_TARGET is zero.
@@ -194,7 +179,7 @@ void arm_ack_irq(int irq)
    * interrupt source
    */
 
-  uint32_t address = LPC31_INTC_REQUEST(irq+1);
+  uint32_t address = LPC31_INTC_REQUEST(irq + 1);
 
   /* Clear the pending interrupt (INTC_REQUEST_CLRSWINT=1) while keeping
    * interrupts enabled (ENABLE=1 && WE_ENABLE=1). Configuration settings

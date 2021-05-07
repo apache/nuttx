@@ -52,13 +52,13 @@ FAR char *realpath(FAR const char *path, FAR char *resolved)
 
   if (path == NULL)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return NULL;
     }
 
   if (*path == '\0')
     {
-      errno = ENOENT;
+      set_errno(ENOENT);
       return NULL;
     }
 
@@ -159,7 +159,7 @@ loop:
 
   if (p - resolved + 1 + q - path + 1 > PATH_MAX)
     {
-      errno = ENAMETOOLONG;
+      set_errno(ENAMETOOLONG);
       goto out;
     }
 
@@ -181,7 +181,7 @@ loop:
     {
       if (nlnk++ >= SYMLOOP_MAX)
         {
-          errno = ELOOP;
+          set_errno(ELOOP);
           goto out;
         }
 
@@ -190,7 +190,7 @@ loop:
         {
           if (n == 0)
             {
-              errno = ENOENT;
+              set_errno(ENOENT);
             }
 
           goto out;
@@ -200,7 +200,7 @@ loop:
 
       if (n + (len = strlen(q)) + 1 > sizeof(wbuf[0]))
         {
-          errno = ENAMETOOLONG;
+          set_errno(ENAMETOOLONG);
           goto out;
         }
 
@@ -221,7 +221,7 @@ loop:
 
   if (*q == '/' && !S_ISDIR(sb.st_mode))
     {
-      errno = ENOTDIR;
+      set_errno(ENOTDIR);
       goto out;
     }
 

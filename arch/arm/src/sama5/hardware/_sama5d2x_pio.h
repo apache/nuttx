@@ -1,55 +1,40 @@
-/****************************************************************************************
- * arch/arm/src/samv7/chip/_sama5d2x_pio.h
- * Parallel Input/Output (PIO) Controller definitions for the SAMA5D2
+/****************************************************************************
+ * arch/arm/src/sama5/hardware/_sama5d2x_pio.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PIO_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PIO_H
 
-/****************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/****************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************/
-/* Misc Helper Definitions **************************************************************/
+ ****************************************************************************/
+
+/* Misc Helper Definitions **************************************************/
 
 #define PIOA                       (0)
 #define PIOB                       (1)
@@ -57,7 +42,7 @@
 #define PIOD                       (3)
 #define PIOE                       (4)
 
-/* PIO register offsets *****************************************************************/
+/* PIO register offsets *****************************************************/
 
 #define SAM_PIO_IOGROUP_OFFSET(n)  (0x0000 + ((n) << 6))
 #  define SAM_PIO_IOGROUPA_OFFSET  0x0000
@@ -114,7 +99,7 @@
 #define SAM_SPIO_WPMR_OFFSET       0x15e0 /* Secure PIO Write Protection Mode Register */
 #define SAM_SPIO_WPSR_OFFSET       0x15e4 /* Secure PIO Write Protection Status Register */
 
-/* PIO register addresses ***************************************************************/
+/* PIO register addresses ***************************************************/
 
 #define SAM_PIO_IOGROUP_VBASE(n)   (SAM_PIO_VBASE+SAM_PIO_IOGROUP_OFFSET(n))
 #  define SAM_PIO_IOGROUPA_VBASE   (SAM_PIO_VBASE+SAM_PIO_IOGROUPA_OFFSET)
@@ -251,7 +236,7 @@
 #define SAM_SPIO_WPMR              (SAM_PIO_VBASE+SAM_SPIO_WPMR_OFFSET)
 #define SAM_SPIO_WPSR              (SAM_PIO_VBASE+SAM_SPIO_WPSR_OFFSET)
 
-/* PIO register bit definitions *********************************************************/
+/* PIO register bit definitions *********************************************/
 
 /* Common bit definitions for many IO registers (exceptions follow) */
 
@@ -270,6 +255,7 @@
 #  define PIO_CFGR_FUNC_PERIPHE    (5 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral E */
 #  define PIO_CFGR_FUNC_PERIPHF    (6 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral F */
 #  define PIO_CFGR_FUNC_PERIPHG    (7 << PIO_CFGR_FUNC_SHIFT) /* Select peripheral G */
+
 #define PIO_CFGR_DIR               (1 << 8)  /* Bit 8:  Direction */
 #  define PIO_CFGR_DIR_INPUT       (0)       /*         0=Input */
 #  define PIO_CFGR_DIR_OUTPUT      (1 << 8)  /*         1=Output */
@@ -284,6 +270,7 @@
 #  define PIO_CFGR_DRVSTR_LOW      (0 << PIO_CFGR_DRVSTR_SHIFT) /* Low drive */
 #  define PIO_CFGR_DRVSTR_MED      (2 << PIO_CFGR_DRVSTR_SHIFT) /* Medium drive */
 #  define PIO_CFGR_DRVSTR_HIGH     (3 << PIO_CFGR_DRVSTR_SHIFT) /* High drive */
+
 #define PIO_CFGR_EVTSEL_SHIFT      (24)       /* Bits 24-26: Event Selection */
 #define PIO_CFGR_EVTSEL_MASK       (7 << PIO_CFGR_EVTSEL_SHIFT)
 #  define PIO_CFGR_EVTSEL_FALLING  (0 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on input falling edge */
@@ -291,6 +278,7 @@
 #  define PIO_CFGR_EVTSEL_BOTH     (2 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on input both edge */
 #  define PIO_CFGR_EVTSEL_LOW      (3 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on low level input */
 #  define PIO_CFGR_EVTSEL_HIGH     (4 << PIO_CFGR_EVTSEL_SHIFT) /* Event detection on high level input */
+
 #define PIO_CFGR_PCFS              (1 << 29) /* Bit 29: Physical Configuration Freeze Status */
 #define PIO_CFGR_ICFS              (1 << 30) /* Bit 30: Interrupt Configuration Freeze Status */
 
@@ -302,7 +290,9 @@
 #define PIO_IOFR_FRZKEY_MASK       (0x00ffffff << PIO_IOFR_FRZKEY_SHIFT)
 #  define PIO_IOFR_FRZKEY          (0x00494F46 << PIO_IOFR_FRZKEY_SHIFT) /* ""IOF" */
 
-/* PIO Write Protection Mode Register and Secure PIO Write Protection Mode Register */
+/* PIO Write Protection Mode Register and Secure PIO Write Protection Mode
+ * Register
+ */
 
 #define PIO_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protection Enable */
 #define PIO_WPMR_WPITEN            (1 << 1)  /* Bit 1:  Write Protection Interrupt Enable */
@@ -310,7 +300,9 @@
 #define PIO_WPMR_WPKEY_MASK        (0x00ffffff << PIO_WPMR_WPKEY_SHIFT)
 #  define PIO_WPMR_WPKEY           (0x0050494f << PIO_WPMR_WPKEY_SHIFT) /* "PIO" */
 
-/* PIO Write Protection Status Register and Secure PIO Write Protection Status Register*/
+/* PIO Write Protection Status Register and Secure PIO Write Protection
+ * Status Register
+ */
 
 #define PIO_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protection Violation Status */
 #define PIO_WPSR_WPVSRC_SHIFT      (8)       /* Bits 8-23: Write Protection Violation Source */
@@ -322,16 +314,16 @@
 #define SPIO_SCDR_DIV_MASK         (0x3fff << SPIO_SCDR_DIV_SHIFT)
 #  define SPIO_SCDR_DIV(n)         ((uint32_t)(n) << SPIO_SCDR_DIV_SHIFT)
 
-/****************************************************************************************
+/****************************************************************************
  * Public Types
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
+/****************************************************************************
  * Public Data
- ****************************************************************************************/
+ ****************************************************************************/
 
-/****************************************************************************************
- * Public Functions
- ****************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_PIO_H */

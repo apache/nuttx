@@ -1,57 +1,42 @@
-/****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tms570/hardware/tms570_gio.h
- * Secondary System Control Register Definitions
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- *   TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller, Technical Reference Manual, Texas
- *   Instruments, Literature Number: SPNU517A, September 2013
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************************************/
+ ****************************************************************************/
+
+/* References:
+ * TMS570LS04x/03x 16/32-Bit RISC Flash Microcontroller,
+ * Technical Reference Manual, Texas Instruments,
+ * Literature Number: SPNU517A, September 2013
+ */
 
 #ifndef __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H
 #define __ARCH_ARM_SRC_TMS570_HARDWARE_TMS570_GIO_H
 
-/****************************************************************************************************
+/****************************************************************************
  * Included Files
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tms570_memorymap.h"
 
-/****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************************************/
+ ****************************************************************************/
 
 #define TMS570_GIOA                    0
 #define TMS570_GIOB                    1
@@ -65,7 +50,7 @@
 #define TMS570_NPORTS                  8
 #define TMS570_NIRQPORTS               4
 
-/* Register Offsets *********************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define TMS570_GIO_GCR0_OFFSET         0x0000 /* GIO Global Control Register */
 #define TMS570_GIO_INTDET_OFFSET       0x0008 /* GIO Interrupt Detect Register */
@@ -162,7 +147,7 @@
 #define TMS570_GIOH_PULDIS_OFFSET      0x012c /* GIOH Pull Disable Register */
 #define TMS570_GIOH_PSL_OFFSET         0x0130 /* GIOH Pull Select Register */
 
-/* Register Addresses *******************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define TMS570_GIO_GCR0                (TMS570_GIO_BASE+TMS570_GIO_GCR0_OFFSET)
 #define TMS570_GIO_INTDET              (TMS570_GIO_BASE+TMS570_GIO_INTDET_OFFSET)
@@ -259,7 +244,7 @@
 #define TMS570_GIOH_PULDIS             (TMS570_GIO_BASE+TMS570_GIOH_PULDIS_OFFSET)
 #define TMS570_GIOH_PSL                (TMS570_GIO_BASE+TMS570_GIOH_PSL_OFFSET)
 
-/* Register Bit-Field Definitions *******************************************************************/
+/* Register Bit-Field Definitions *******************************************/
 
 /* GIO Global Control Register */
 
@@ -435,9 +420,14 @@
 #  define GIO_OFF_GIOD6                (0x1f)    /*   GIOD6 interrupt pending */
 #  define GIO_OFF_GIOD7                (0x20)    /*   GIOD7 interrupt pending */
 
-/* GIO Data Direction Register, GIO Data Input Register, GIO Data Output Register,
- * GIO Data Set Register, GIO Data Clear Register, GIO Open Drain Register,
- * GIO Pull Disable Register, and GIO Pull Select Register
+/* GIO Data Direction Register,
+ * GIO Data Input Register,
+ * GIO Data Output Register,
+ * GIO Data Set Register,
+ * GIO Data Clear Register,
+ * GIO Open Drain Register,
+ * GIO Pull Disable Register,
+ * and GIO Pull Select Register
  */
 
 #define GIO_PIN(n)                     (1 << (n)) /* Bit n:  Corresponds to pin n */

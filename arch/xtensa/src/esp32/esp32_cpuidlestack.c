@@ -1,26 +1,20 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_cpuidlestack.c
  *
- * Mofidifed by use in NuttX by:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derives from software originally provided by Espressif Systems:
- *
- * Copyright 2015-2016 Espressif Systems (Shanghai) PTE LTD
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -79,8 +73,8 @@ uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS]
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
- *     the stack pointer.
+ *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
+ *     Arguments has been removed from the stack allocation.
  *
  * Input Parameters:
  *   - cpu:         CPU index that indicates which CPU the IDLE task is
@@ -88,14 +82,12 @@ uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS]
  *   - tcb:         The TCB of new CPU IDLE task
  *   - stack_size:  The requested stack size for the IDLE task.  At least
  *                  this much must be allocated.  This should be
- *                  CONFIG_SMP_IDLETHREAD_STACKSIZE.
+ *                  CONFIG_IDLETHREAD_STACKSIZE.
  *
  ****************************************************************************/
 
 int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 {
-  uintptr_t topofstack;
-
   /* XTENSA uses a push-down stack:  the stack grows toward lower* addresses
    * in memory.  The stack pointer register points to the lowest, valid
    * working address (the "top" of the stack).  Items on the stack are
@@ -106,9 +98,7 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 
   tcb->stack_alloc_ptr = g_cpu1_idlestack;
   tcb->adj_stack_size  = CPU1_IDLETHREAD_STACKSIZE;
-  topofstack           = (uintptr_t)g_cpu1_idlestack +
-                         CPU1_IDLETHREAD_STACKSIZE;
-  tcb->adj_stack_ptr   = (uint32_t *)topofstack;
+  tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
 
 #if XCHAL_CP_NUM > 0
   /* REVISIT: Does it make since to have co-processors enabled on the IDLE

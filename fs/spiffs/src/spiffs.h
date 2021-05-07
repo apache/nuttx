@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs.h
+ * fs/spiffs/src/spiffs.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -102,7 +102,9 @@ typedef int32_t(*spiffs_read_t)(uint32_t addr, uint32_t size, uint8_t * dst);
 
 /* spi write call function type */
 
-typedef int32_t(*spiffs_write_t)(uint32_t addr, uint32_t size, uint8_t * src);
+typedef int32_t(*spiffs_write_t)(uint32_t addr,
+                                 uint32_t size,
+                                 uint8_t * src);
 
 /* spi erase call function type */
 

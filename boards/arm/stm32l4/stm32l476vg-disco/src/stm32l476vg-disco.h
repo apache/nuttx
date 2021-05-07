@@ -53,7 +53,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ********************************************************************/
+
+/* Configuration ************************************************************/
 
 #define HAVE_PROC             1
 #define HAVE_RTC_DRIVER       1
@@ -134,14 +135,12 @@
 #ifndef CONFIG_STM32L4_OTGFS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
-#  undef HAVE_USBMONITOR
 #endif
 
-/* Can't support USB device monitor if USB device is not enabled */
+/* Can't support USB device if USB device is not enabled */
 
 #ifndef CONFIG_USBDEV
 #  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
 #endif
 
 /* Can't support USB host is USB host is not enabled */
@@ -152,7 +151,19 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#ifndef CONFIG_USBMONITOR
+#  undef HAVE_USBMONITOR
+#endif
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#ifndef HAVE_USBHOST
+#  undef CONFIG_USBHOST_TRACE
+#endif
+
+#if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -217,6 +228,7 @@
   (GPIO_INPUT |GPIO_PULLDOWN |GPIO_EXTI | GPIO_PORTA | GPIO_PIN3)
 
 /* SPI1 off */
+
 /* XXX is this used on disco? */
 
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
@@ -251,7 +263,7 @@ extern struct spi_dev_s *g_spi2;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************

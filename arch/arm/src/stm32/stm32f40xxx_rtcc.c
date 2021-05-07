@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f40xxx_rtcc.c
  *
- *   Copyright (C) 2012-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Modified: Neil Hancock
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -40,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <sched.h>
 #include <time.h>
@@ -247,8 +232,8 @@ static void rtc_wprunlock(void)
 
   stm32_pwr_enablebkp(true);
 
-  /* The following steps are required to unlock the write protection on all the
-   * RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR).
+  /* The following steps are required to unlock the write protection on all
+   * the RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and RTC_BKPxR):
    *
    * 1. Write 0xCA into the RTC_WPR register.
    * 2. Write 0x53 into the RTC_WPR register.
@@ -750,7 +735,7 @@ static int rtchw_set_alrmar(rtc_alarmreg_t alarmreg)
   /* Set the RTC Alarm register */
 
   putreg32(alarmreg, STM32_RTC_ALRMAR);
-  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32_RTC_ALRMAR));
+  rtcinfo("  ALRMAR: %08" PRIx32 "\n", getreg32(STM32_RTC_ALRMAR));
 
   /* Enable RTC alarm */
 
@@ -867,16 +852,20 @@ static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
    * ranges of values correspond between struct tm and the time register.
    */
 
-  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >> RTC_ALRMR_SU_SHIFT;
+  tmp = (data & (RTC_ALRMR_SU_MASK | RTC_ALRMR_ST_MASK)) >>
+        RTC_ALRMR_SU_SHIFT;
   tp->tm_sec = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >> RTC_ALRMR_MNU_SHIFT;
+  tmp = (data & (RTC_ALRMR_MNU_MASK | RTC_ALRMR_MNT_MASK)) >>
+        RTC_ALRMR_MNU_SHIFT;
   tp->tm_min = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >> RTC_ALRMR_HU_SHIFT;
+  tmp = (data & (RTC_ALRMR_HU_MASK | RTC_ALRMR_HT_MASK)) >>
+        RTC_ALRMR_HU_SHIFT;
   tp->tm_hour = rtc_bcd2bin(tmp);
 
-  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >> RTC_ALRMR_DU_SHIFT;
+  tmp = (data & (RTC_ALRMR_DU_MASK | RTC_ALRMR_DT_MASK)) >>
+        RTC_ALRMR_DU_SHIFT;
   tp->tm_mday = rtc_bcd2bin(tmp);
 
   return OK;
@@ -981,13 +970,16 @@ int up_rtc_initialize(void)
 #if defined(CONFIG_STM32_RTC_HSECLOCK)
           /* Change to the new clock as the input to the RTC block */
 
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_HSE);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK,
+                      RCC_XXX_RTCSEL_HSE);
 
 #elif defined(CONFIG_STM32_RTC_LSICLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSI);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK,
+                      RCC_XXX_RTCSEL_LSI);
 
 #elif defined(CONFIG_STM32_RTC_LSECLOCK)
-          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK, RCC_XXX_RTCSEL_LSE);
+          modifyreg32(STM32_RCC_XXX, RCC_XXX_RTCSEL_MASK,
+                      RCC_XXX_RTCSEL_LSE);
 #endif
 
           putreg32(tr_bkp, STM32_RTC_TR);
@@ -997,7 +989,9 @@ int up_rtc_initialize(void)
 
           putreg32(RTC_MAGIC, RTC_MAGIC_REG);
 
-          /* Enable the RTC Clock by setting the RTCEN bit in the RCC register */
+          /* Enable the RTC Clock by setting the RTCEN bit in the RCC
+           * register
+           */
 
           modifyreg32(STM32_RCC_XXX, 0, RCC_XXX_RTCEN);
         }

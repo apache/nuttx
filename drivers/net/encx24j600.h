@@ -70,9 +70,9 @@
 /* Single-Byte Instructions */
 
 /* Because all single byte instructions are fixed length with no optional
- * parameters, it is possible to execute any instruction immediately following
- * the execution of any single byte instruction without deasserting the chip
- * select line in between.
+ * parameters, it is possible to execute any instruction immediately
+ * following the execution of any single byte instruction without deasserting
+ * the chip select line in between.
  */
 
 #define ENC_B0SEL       (0xc0)  /* Selects SFR Bank 0 */
@@ -342,8 +342,8 @@
 /* Unbanked Register Addresses */
 
 #if 0
-/* Disabled to prevent accidental use. All unbanked operations are implemented
- * using the specific manipulation commands.
+/* Disabled to prevent accidental use. All unbanked operations are
+ * implemented using the specific manipulation commands.
  */
 #define ENC_EGPDATA     0x80
 #define ENC_ERXDATA     0x82

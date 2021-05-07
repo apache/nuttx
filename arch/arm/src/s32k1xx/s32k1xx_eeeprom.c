@@ -1,41 +1,26 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_eeeprom.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Included Files
- ******************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -61,9 +46,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
-/******************************************************************************
+/****************************************************************************
  * Private Types
- ******************************************************************************/
+ ****************************************************************************/
 
 struct eeed_struct_s
 {
@@ -75,9 +60,9 @@ struct eeed_struct_s
   FAR uint8_t *eeed_buffer;       /* FlexRAM memory */
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     eeed_open(FAR struct inode *inode);
@@ -85,9 +70,9 @@ static int     eeed_close(FAR struct inode *inode);
 #endif
 
 static ssize_t eeed_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                 size_t start_sector, unsigned int nsectors);
+                 blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t eeed_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, size_t start_sector,
+                 FAR const unsigned char *buffer, blkcnt_t start_sector,
                  unsigned int nsectors);
 
 static int     eeed_geometry(FAR struct inode *inode,
@@ -99,9 +84,9 @@ static int     eeed_ioctl(FAR struct inode *inode, int cmd,
 static int     eeed_unlink(FAR struct inode *inode);
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Private Data
- ******************************************************************************/
+ ****************************************************************************/
 
 static const struct block_operations g_bops =
 {
@@ -121,9 +106,9 @@ static const struct block_operations g_bops =
 #endif
 };
 
-/******************************************************************************
+/****************************************************************************
  * Private Functions
- ******************************************************************************/
+ ****************************************************************************/
 
 static inline void wait_ftfc_ready()
 {
@@ -157,12 +142,12 @@ static uint32_t execute_ftfc_command()
   return retval;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_open
  *
  * Description: Open the block device
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_open(FAR struct inode *inode)
@@ -182,12 +167,12 @@ static int eeed_open(FAR struct inode *inode)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_close
  *
  * Description: close the block device
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_close(FAR struct inode *inode)
@@ -207,23 +192,23 @@ static int eeed_close(FAR struct inode *inode)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_read
  *
  * Description:  Read the specified number of sectors
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
-                       size_t start_sector, unsigned int nsectors)
+                       blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct eeed_struct_s *dev;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %d nsectors: %d sectorsize: %d\n",
-        start_sector, dev->eeed_sectsize, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+        start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
       start_sector + nsectors <= dev->eeed_nsectors)
@@ -243,23 +228,24 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_write
  *
  * Description: Write the specified number of sectors
  *
- ******************************************************************************/
+ ****************************************************************************/
 
-static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, unsigned int nsectors)
+static ssize_t eeed_write(FAR struct inode *inode,
+                          const unsigned char *buffer,
+                          blkcnt_t start_sector, unsigned int nsectors)
 {
   struct eeed_struct_s *dev;
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %d nsectors: %d sectorsize: %d\n",
-        start_sector, dev->eeed_sectsize, nsectors);
+  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+        start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
            start_sector + nsectors <= dev->eeed_nsectors)
@@ -287,12 +273,12 @@ static ssize_t eeed_write(FAR struct inode *inode, const unsigned char *buffer,
   return -EFBIG;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_geometry
  *
  * Description: Return device geometry
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
 {
@@ -312,7 +298,7 @@ static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %d sectorsize: %d\n",
+      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIu16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
@@ -321,13 +307,13 @@ static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
   return -EINVAL;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_ioctl
  *
  * Description:
  *   Return device geometry
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 static int eeed_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
@@ -351,13 +337,13 @@ static int eeed_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   return -ENOTTY;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: eeed_unlink
  *
  * Description:
  *   The block driver has been unlinked.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int eeed_unlink(FAR struct inode *inode)
@@ -375,24 +361,24 @@ static int eeed_unlink(FAR struct inode *inode)
 }
 #endif
 
-/******************************************************************************
+/****************************************************************************
  * Public Functions
- ******************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
+/****************************************************************************
  * Name: s32k1xx_eeeprom_register
  *
  * Description:
  *   Non-standard function to register a eeeprom
  *
  * Input Parameters:
- *   minor:         Selects suffix of device named /dev/eeepromN, N={1,2,3...}
- *   size:          The size of eeprom in bytes
+ *   minor:     Selects suffix of device named /dev/eeepromN, N={1,2,3...}
+ *   size:      The size of eeprom in bytes
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_eeeprom_register(int minor, uint32_t size)
 {
@@ -428,14 +414,14 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
   return ret;
 }
 
-/******************************************************************************
+/****************************************************************************
  * Name: s32k1xx_eeeprom_init
  *
  * Description:
  *   Init FTFC flash controller to run in Enhanced EEPROM mode
  *
  *
- ******************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_eeeprom_init()
 {

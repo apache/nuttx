@@ -454,9 +454,9 @@ config BQ27426
 	select I2C
 	depends on BATTERY_GAUGE
 	---help---
-		The bq27426 battery fuel gauge accurately predicts the battery capacity and other 
-		operational characteristics of a single, Li-based, rechargeable cell. 
-		It can be interrogated by a system processor to provide cell information, 
+		The bq27426 battery fuel gauge accurately predicts the battery capacity and other
+		operational characteristics of a single, Li-based, rechargeable cell.
+		It can be interrogated by a system processor to provide cell information,
 		such as state-of-charge (SOC).
 
 if BQ27426
@@ -480,11 +480,11 @@ config I2C_BQ2429X
 config I2C_MAX1704X
 	bool
 	default y if MAX1704X
-	
+
 config BATTERY_MONITOR
 	bool "Battery Monitor/Management support"
 	default n
-	
+
 config BQ769X0
 	bool "BQ769X0 Battery monitor support"
 	default n
@@ -494,7 +494,7 @@ config BQ769X0
 	---help---
 		The BQ76920/BQ76930/BQ76940 provide monitoring, balancing, and
 		protection features for up to 15 cells in series.
-		
+
 config I2C_BQ769X0
 	bool
 	default y if BQ769X0

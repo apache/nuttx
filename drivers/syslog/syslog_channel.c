@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/syslog/syslog_channel.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -44,6 +29,7 @@
 #include <errno.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/compiler.h>
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
@@ -59,9 +45,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_LOWPUTC)
-#  define HAVE_LOWPUTC
-#elif !defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_RPMSG)
+#if !defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_RPMSG)
 #  define NEED_LOWPUTC
 #endif
 
@@ -70,7 +54,8 @@
  ****************************************************************************/
 
 #ifdef NEED_LOWPUTC
-static int syslog_default_putc(int ch);
+static int syslog_default_putc(FAR struct syslog_channel_s *channel,
+                               int ch);
 #endif
 
 /****************************************************************************
@@ -78,36 +63,39 @@ static int syslog_default_putc(int ch);
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
-static const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   ramlog_putc,
-  ramlog_putc,
+  ramlog_putc
 };
 #elif defined(CONFIG_SYSLOG_RPMSG)
-static const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_rpmsg_putc,
   syslog_rpmsg_putc,
   syslog_rpmsg_flush,
   syslog_rpmsg_write
 };
-#elif defined(HAVE_LOWPUTC)
-static const struct syslog_channel_s g_default_channel =
-{
-  up_putc,
-  up_putc,
-};
 #else
-static const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_default_putc,
-  syslog_default_putc,
+  syslog_default_putc
 };
 #endif
 
+static struct syslog_channel_s g_default_channel =
+{
+  &g_default_channel_ops
+};
+
 /* This is the current syslog channel in use */
 
-FAR const struct syslog_channel_s *g_syslog_channel = &g_default_channel;
+FAR struct syslog_channel_s
+*g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
+{
+  &g_default_channel
+};
 
 /****************************************************************************
  * Private Functions
@@ -117,13 +105,20 @@ FAR const struct syslog_channel_s *g_syslog_channel = &g_default_channel;
  * Name: syslog_default_putc and syslog_default_flush
  *
  * Description:
- *   Dummy, no-nothing channel interface methods
+ *   If the arch supports a low-level putc function, output will be
+ *   redirected there. Else acts as a dummy, no-nothing channel.
  *
  ****************************************************************************/
 
 #ifdef NEED_LOWPUTC
-static int syslog_default_putc(int ch)
+static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 {
+  UNUSED(channel);
+
+#if defined(CONFIG_ARCH_LOWPUTC)
+  return up_putc(ch);
+#endif
+
   return ch;
 }
 #endif
@@ -148,16 +143,85 @@ static int syslog_default_putc(int ch)
  *
  ****************************************************************************/
 
-int syslog_channel(FAR const struct syslog_channel_s *channel)
+int syslog_channel(FAR struct syslog_channel_s *channel)
 {
+#if (CONFIG_SYSLOG_MAX_CHANNELS != 1)
+  int i;
+#endif
+
   DEBUGASSERT(channel != NULL);
 
   if (channel != NULL)
     {
-      DEBUGASSERT(channel->sc_putc != NULL && channel->sc_force != NULL);
+      DEBUGASSERT(channel->sc_ops->sc_putc != NULL &&
+                  channel->sc_ops->sc_force != NULL);
 
-      g_syslog_channel = channel;
+#if (CONFIG_SYSLOG_MAX_CHANNELS == 1)
+      g_syslog_channel[0] = channel;
       return OK;
+#else
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+        {
+          if (g_syslog_channel[i] == NULL)
+            {
+              g_syslog_channel[i] = channel;
+              return OK;
+            }
+          else if (g_syslog_channel[i] == channel)
+            {
+              return OK;
+            }
+        }
+#endif
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: syslog_channel_remove
+ *
+ * Description:
+ *   Removes an already configured SYSLOG channel from the list of used
+ *   channels.
+ *
+ * Input Parameters:
+ *   channel - Provides the interface to the channel to be removed.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int syslog_channel_remove(FAR struct syslog_channel_s *channel)
+{
+  int i;
+
+  DEBUGASSERT(channel != NULL);
+
+  if (channel != NULL)
+    {
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
+        {
+          if (g_syslog_channel[i] == channel)
+            {
+              /* Get the rest of the channels one position back
+               * to ensure that there are no holes in the list.
+               */
+
+              while (i < (CONFIG_SYSLOG_MAX_CHANNELS - 1) &&
+                     g_syslog_channel[i + 1] != NULL)
+                {
+                  g_syslog_channel[i] = g_syslog_channel[i + 1];
+                  i++;
+                }
+
+              g_syslog_channel[i] = NULL;
+
+              return OK;
+            }
+        }
     }
 
   return -EINVAL;

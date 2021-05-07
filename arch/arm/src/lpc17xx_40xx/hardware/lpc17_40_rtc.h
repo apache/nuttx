@@ -1,55 +1,41 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_rtc.h
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_RTC_H
 #define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_RTC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/lpc17_40_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
+
 /* Miscellaneous registers */
 
 #define LPC17_40_RTC_ILR_OFFSET     0x0000 /* Interrupt Location Register */
@@ -96,7 +82,8 @@
 #define LPC17_40_RTC_ALMON_OFFSET   0x0078 /* Alarm value for Months  */
 #define LPC17_40_RTC_ALYEAR_OFFSET  0x007c /* Alarm value for Year */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
+
 /* Miscellaneous registers */
 
 #define LPC17_40_RTC_ILR            (LPC17_40_RTC_BASE+LPC17_40_RTC_ILR_OFFSET)
@@ -143,8 +130,10 @@
 #define LPC17_40_RTC_ALMON          (LPC17_40_RTC_BASE+LPC17_40_RTC_ALMON_OFFSET)
 #define LPC17_40_RTC_ALYEAR         (LPC17_40_RTC_BASE+LPC17_40_RTC_ALYEAR_OFFSET)
 
-/* Register bit definitions *********************************************************/
-/* The following registers hold 32-bit values and have no bit fields to be defined:
+/* Register bit definitions *************************************************/
+
+/* The following registers hold 32-bit values and have no bit fields to be
+ * defined:
  *
  *   General Purpose Register 0
  *   General Purpose Register 1
@@ -154,11 +143,13 @@
  */
 
 /* Miscellaneous registers */
+
 /* Interrupt Location Register */
 
 #define RTC_ILR_RTCCIF              (1 << 0)  /* Bit 0:  Counter Increment Interrupt */
 #define RTC_ILR_RTCALF              (1 << 1)  /* Bit 1:  Alarm interrupt */
                                               /* Bits 2-31: Reserved */
+
 /* Clock Control Register */
 
 #define RTC_CCR_CLKEN               (1 << 0)  /* Bit 0:  Clock Enable */
@@ -166,6 +157,7 @@
                                               /* Bits 2-3: Internal test mode controls */
 #define RTC_CCR_CCALEN              (1 << 4)  /* Bit 4:  Calibration counter enable */
                                               /* Bits 5-31: Reserved */
+
 /* Counter Increment Interrupt Register */
 
 #define RTC_CIIR_IMSEC              (1 << 0)  /* Bit 0:  Second interrupt */
@@ -177,6 +169,7 @@
 #define RTC_CIIR_IMMON              (1 << 6)  /* Bit 6:  Month interrupt */
 #define RTC_CIIR_IMYEAR             (1 << 7)  /* Bit 7:  Yearinterrupt */
                                               /* Bits 8-31: Reserved */
+
 /* Alarm Mask Register */
 
 #define RTC_AMR_SEC                 (1 << 0)  /* Bit 0:  Second not compared for alarm */
@@ -190,6 +183,7 @@
                                               /* Bits 8-31: Reserved */
 
 /* RTC Auxiliary Control Register */
+
                                               /* Bits 0-3: Reserved */
 #define RTC_AUXEN_RTCOSCF           (1 << 4)  /* Bit 4:  RTC Oscillator Fail detect flag */
 #ifdef LPC178x_40xx
@@ -199,11 +193,13 @@
 #endif
 
 /* RTC Auxiliary Enable Register */
+
                                               /* Bits 0-3: Reserved */
 #define RTC_AUX_OSCFEN              (1 << 4)  /* Bit 4:  Oscillator Fail Detect interrupt enable */
                                               /* Bits 5-31: Reserved */
 
 /* Consolidated Time Registers */
+
 /* Consolidated Time Register 0 */
 
 #define RTC_CTIME0_SEC_SHIFT        (0)       /* Bits 0-5: Seconds */
@@ -218,6 +214,7 @@
 #define RTC_CTIME0_DOW_SHIFT        (24)      /* Bits 24-26: Day of Week */
 #define RTC_CTIME0_DOW_MASK         (7 << RTC_CTIME0_DOW_SHIFT)
                                               /* Bits 27-31: Reserved */
+
 /* Consolidated Time Register 1 */
 
 #define RTC_CTIME1_DOM_SHIFT        (0)       /* Bits 0-4: Day of Month */
@@ -229,11 +226,13 @@
 #define RTC_CTIME1_YEAR_SHIFT       (16)      /* Bits 16-27: Year */
 #define RTC_CTIME1_YEAR_MASK        (0x0fff << RTC_CTIME1_YEAR_SHIFT)
                                               /* Bits 28-31: Reserved */
+
 /* Consolidated Time Register 2 */
 
 #define RTC_CTIME2_DOY_SHIFT        (0)       /* Bits 0-11: Day of Year */
 #define RTC_CTIME2_DOY_MASK         (0x0fff << RTC_CTIME2_DOY_SHIFT)
                                               /* Bits 12-31: Reserved */
+
 /* Time counter registers */
 
 #define RTC_SEC_MASK                (0x003f)
@@ -251,6 +250,7 @@
 #define RTC_CALIB_CALVAL_MASK       (0xffff << RTC_CALIB_CALVAL_SHIFT)
 #define RTC_CALIB_CALDIR            (1 << 17) /* Bit 17: Calibration direction */
                                               /* Bits 18-31: Reserved */
+
 /* Alarm register group */
 
 #define RTC_ALSEC_MASK              (0x003f)
@@ -262,16 +262,16 @@
 #define RTC_ALMON_MASK              (0x000f)
 #define RTC_ALYEAR_MASK             (0x0fff)
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_RTC_H */

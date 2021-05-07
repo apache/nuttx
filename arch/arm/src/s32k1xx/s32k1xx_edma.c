@@ -92,7 +92,9 @@
 #  define EDMA_ALIGN_UP(n)  (((n) + EDMA_ALIGN_MASK) & ~EDMA_ALIGN_MASK)
 
 #else
-/* Special alignment is not required in this case, but we will align to 8-bytes */
+/* Special alignment is not required in this case,
+ * but we will align to 8-bytes
+ */
 
 #  define EDMA_ALIGN        8
 #  define EDMA_ALIGN_MASK   7
@@ -266,10 +268,10 @@ static void s32k1xx_tcd_free(struct s32k1xx_edmatcd_s *tcd)
    * a TCD.
    */
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
   s32k1xx_givedsem();
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif
 
@@ -1192,7 +1194,7 @@ int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 
   /* Save the callback info.  This will be invoked when the DMA completes */
 
-  flags           = spin_lock_irqsave();
+  flags           = spin_lock_irqsave(NULL);
   dmach->callback = callback;
   dmach->arg      = arg;
   dmach->state    = S32K1XX_DMA_ACTIVE;
@@ -1216,7 +1218,7 @@ int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
       putreg8(regval8, S32K1XX_EDMA_SERQ_OFFSET);
     }
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -1244,9 +1246,9 @@ void s32k1xx_dmach_stop(DMACH_HANDLE handle)
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = spin_lock_irqsave();
+  flags = spin_lock_irqsave(NULL);
   s32k1xx_dmaterminate(dmach, -EINTR);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1344,7 +1346,7 @@ void s32k1xx_dmasample(DMACH_HANDLE handle, struct s32k1xx_dmaregs_s *regs)
 
   /* eDMA Global Registers */
 
-  flags          = spin_lock_irqsave();
+  flags          = spin_lock_irqsave(NULL);
 
   regs->cr       = getreg32(S32K1XX_EDMA_CR);   /* Control */
   regs->es       = getreg32(S32K1XX_EDMA_ES);   /* Error Status */
@@ -1379,7 +1381,7 @@ void s32k1xx_dmasample(DMACH_HANDLE handle, struct s32k1xx_dmaregs_s *regs)
   regaddr        = S32K1XX_DMAMUX_CHCFG(chan);
   regs->dmamux   = getreg32(regaddr);         /* Channel configuration */
 
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 

@@ -39,7 +39,7 @@
 #ifndef __INCLUDE_NUTTX_NET_FTMAC100_H
 #define __INCLUDE_NUTTX_NET_FTMAC100_H
 
-/****************************************************************************'
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -47,11 +47,11 @@
 
 #ifdef CONFIG_NET_FTMAC100
 
-/****************************************************************************'
+/****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
 
-/* Interrupt status register & interrupt mask register definitions*/
+/* Interrupt status register & interrupt mask register definitions */
 
 #define FTMAC100_INT_RPKT_FINISH      (1 << 0)
 #define FTMAC100_INT_NORXBUF          (1 << 1)
@@ -146,7 +146,7 @@
 #define FTMAC100_RXDES1_RXBUF_SIZE(x) ((x) & 0x7ff)
 #define FTMAC100_RXDES1_EDORR         (1 << 31)
 
-/****************************************************************************'
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -194,25 +194,25 @@ struct ftmac100_register_s
 
 /* Transmit descriptor, aligned to 16 bytes */
 
-struct ftmac100_txdes_s
+struct __attribute__ ((aligned(16))) ftmac100_txdes_s
 {
   uint32_t txdes0;
   uint32_t txdes1;
   uint32_t txdes2;  /* TXBUF_BADR */
   uint32_t txdes3;  /* not used by HW */
-} __attribute__ ((aligned(16)));
+};
 
 /* Receive descriptor, aligned to 16 bytes */
 
-struct ftmac100_rxdes_s
+struct __attribute__ ((aligned(16))) ftmac100_rxdes_s
 {
   uint32_t rxdes0;
   uint32_t rxdes1;
   uint32_t rxdes2;  /* RXBUF_BADR */
   uint32_t rxdes3;  /* not used by HW */
-} __attribute__ ((aligned(16)));
+};
 
-/****************************************************************************'
+/****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
 

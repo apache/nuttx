@@ -1147,7 +1147,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
   len   = GETUINT16(ctrl->len);
 
   uinfo("type=%02x req=%02x value=%04x index=%04x len=%04x\n",
-        ctrl->type, ctrl->req, value, index, len);
+        ctrl->type, ctrl->req, value, GETUINT16(ctrl->index), len);
 
   switch (ctrl->type & USB_REQ_TYPE_MASK)
     {
@@ -1294,7 +1294,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
         }
     }
 #else
-  /* Composite should send only one resquest for USB_REQ_SETCONFIGURATION.
+  /* Composite should send only one request for USB_REQ_SETCONFIGURATION.
    * Hence ADB driver cannot submit to ep0; composite has to handle it.
    */
 

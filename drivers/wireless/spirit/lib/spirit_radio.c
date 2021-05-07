@@ -10,28 +10,30 @@
  *   Adapted for NuttX by:
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
 
@@ -101,13 +103,13 @@ static const uint16_t g_vectn_bandwidth[90] =
   8001, 7951, 7684, 7368, 7051, 6709, 6423, 5867, 5414,
   4509, 4259, 4032, 3808, 3621, 3417, 3254, 2945, 2703,
   2247, 2124, 2015, 1900, 1807, 1706, 1624, 1471, 1350,
-  1123, 1062, 1005,  950,  903,  853,  812,  735,  675,
-   561,  530,  502,  474,  451,  426,  406,  367,  337,
-   280,  265,  251,  237,  226,  213,  203,  184,  169,
-   140,  133,  126,  119,  113,  106,  101,   92,   84,
-    70,   66,   63,   59,   56,   53,   51,   46,   42,
-    35,   33,   31,   30,   28,   27,   25,   23,   21,
-    18,   17,   16,   15,   14,   13,   13,   12,   11
+  1123, 1062, 1005, 950,  903,  853,  812,  735,  675,
+  561,  530,  502,  474,  451,  426,  406,  367,  337,
+  280,  265,  251,  237,  226,  213,  203,  184,  169,
+  140,  133,  126,  119,  113,  106,  101,  92,   84,
+  70,   66,   63,   59,   56,   53,   51,   46,   42,
+  35,   33,   31,   30,   28,   27,   25,   23,   21,
+  18,   17,   16,   15,   14,   13,   13,   12,   11
 };
 
 /* These values are used to interpolate the power curves.  Interpolation
@@ -246,7 +248,8 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
   else
     {
       ret = spirit_radio_enable_digdivider(spirit, S_ENABLE);
-      DEBUGASSERT(IS_CH_BW(radioinit->bandwidth, (spirit->xtal_frequency >> 1)));
+      DEBUGASSERT(IS_CH_BW(radioinit->bandwidth,
+                 (spirit->xtal_frequency >> 1)));
     }
 
   if (ret < 0)
@@ -490,8 +493,9 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance
- *   radioinit pointer to a struct radio_init_s that
- *         contains the configuration information for the analog radio part of SPIRIT.
+ *   radioinit pointer to a struct radio_init_s thatcontains the
+ *              configuration information for the analog radio part of
+ *              SPIRIT.
  *
  * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on any
@@ -1165,7 +1169,8 @@ int spirit_radio_set_foffset_ppm(FAR struct spirit_library_s *spirit,
  * Name: spirit_radio_set_foffset_hz
  *
  * Description:
- *   Sets the FC OFFSET register starting from frequency offset expressed in Hz.
+ *   Sets the FC OFFSET register starting from frequency offset expressed in
+ *   Hz.
  *
  * Input Parameters:
  *   spirit  - Reference to a Spirit library state structure instance
@@ -1374,7 +1379,8 @@ int spirit_radio_set_basefrequency(FAR struct spirit_library_s *spirit,
   anaregs[0] = (uint8_t)(((synthword >> 21) & 0x0000001f) | (wcp << 5));
   anaregs[1] = (uint8_t)((synthword >> 13) & 0x000000ff);
   anaregs[2] = (uint8_t)((synthword >> 5) & 0x000000ff);
-  anaregs[3] = (uint8_t)(((synthword & 0x0000001f) << 3) | g_vectc_bandval[band]);
+  anaregs[3] = (uint8_t)(((synthword & 0x0000001f) << 3) |
+                           g_vectc_bandval[band]);
 
   /* Configures the needed Analog Radio registers */
 
@@ -1411,7 +1417,7 @@ int spirit_radio_set_basefrequency(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 void spirit_radio_enable_wavco_calibration(FAR struct spirit_library_s *spirit,
-                                           enum spirit_functional_state_e newstate)
+                                       enum spirit_functional_state_e newstate)
 {
   spirit->vcocalib = newstate;
 }
@@ -1749,8 +1755,8 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
  *              [100 500000].
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errnor value is returned on any
- *   failure.
+ *   Zero (OK) is returned on success; a negated errnor value is returned on
+ *   any failure.
  *
  ******************************************************************************/
 
@@ -1830,8 +1836,8 @@ uint32_t spirit_radio_get_datarate(FAR struct spirit_library_s *spirit)
  *            is in the correct range [F_Xo*8/2^18, F_Xo*7680/2^18] Hz.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errnor value is returned on any
- *   failure.
+ *   Zero (OK) is returned on success; a negated errnor value is returned on
+ *   any failure.
  *
  ******************************************************************************/
 
@@ -1924,8 +1930,8 @@ uint32_t spirit_radio_get_freqdev(FAR struct spirit_library_s *spirit)
  *               spirit_radio_get_chfilterbw() API.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errnor value is returned on any
- *   failure.
+ *   Zero (OK) is returned on success; a negated errnor value is returned on
+ *   any failure.
  *
  ******************************************************************************/
 
@@ -2006,8 +2012,8 @@ uint32_t spirit_radio_get_chfilterbw(FAR struct spirit_library_s *spirit)
  *   modulation - Modulation to set.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errnor value is returned on any
- *   failure.
+ *   Zero (OK) is returned on success; a negated errnor value is returned on
+ *   any failure.
  *
  ******************************************************************************/
 
@@ -2074,8 +2080,8 @@ enum modulation_select_e
  *              or S_DISABLE .
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errnor value is returned on any
- *   failure.
+ *   Zero (OK) is returned on success; a negated errnor value is returned on
+ *   any failure.
  *
  ******************************************************************************/
 
@@ -2122,8 +2128,8 @@ int spirit_radio_enable_cwtxmode(FAR struct spirit_library_s *spirit,
  *   ookdelay - Peak decay control for OOK.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errnor value is returned on any
- *   failure.
+ *   Zero (OK) is returned on success; a negated errnor value is returned on
+ *   any failure.
  *
  ******************************************************************************/
 
@@ -2405,10 +2411,11 @@ int spirit_radio_config_patable_dbm(FAR struct spirit_library_s *spirit,
  *   spirit  - Reference to a Spirit library state structure instance
  *   nlevels - Pointer to the number of levels settled. This parameter must
  *             be in the range [0:7].
- *   table   - Pointer to an array of 8 elements containing the PA value in dbm.
+ *   table   - Pointer to an array of 8 elements containing the PA value in
+ *             dbm.
  *             The first element will be the PA_LEVEL_0 and the last element
- *             will be PA_LEVEL_7. Any value higher than PA_UPPER_LIMIT implies
- *             no output power (output stage is in high impedance).
+ *             will be PA_LEVEL_7. Any value higher than PA_UPPER_LIMIT
+ *             implies no output power (output stage is in high impedance).
  *
  * Returned Value:
  *   Zero (OK) on success.  A negated errno value is returned on any failure.
@@ -2495,8 +2502,9 @@ int spirit_radio_set_palevel_dbm(FAR struct spirit_library_s *spirit,
  * Description:
  *   Returns a specific PA_LEVEL register, returning a value in dBm.
  *
- *   NOTE: This function makes use of the @ref spirit_radio_convert_reg2power fcn to
- *   interpolate the power value.
+ * NOTE:
+ *   This function makes use of the @ref spirit_radio_convert_reg2power fcn
+ *   to interpolate the power value.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
@@ -2527,8 +2535,8 @@ float spirit_radio_get_palevel_dbm(FAR struct spirit_library_s *spirit,
   spirit_reg_read(spirit, regaddr, &value, 1);
 
   return spirit_radio_convert_reg2power(spirit,
-                                        spirit_radio_get_basefrequency(spirit),
-                                        value);
+                                    spirit_radio_get_basefrequency(spirit),
+                                    value);
 }
 
 /******************************************************************************
@@ -2726,7 +2734,8 @@ uint8_t spirit_radio_get_palevel(FAR struct spirit_library_s *spirit,
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
- *   load one of the possible value of the enum type enum spirit_paload_capacitor_e.
+ *   load one of the possible value of the enum type enum
+ *   spirit_paload_capacitor_e.
  *         LOAD_0_PF    No additional PA load capacitor
  *         LOAD_1_2_PF  1.2pF additional PA load capacitor
  *         LOAD_2_4_PF  2.4pF additional PA load capacitor
@@ -3641,7 +3650,9 @@ enum spirit_agcmode_e
 {
   uint8_t regval;
 
-  /* Read the AGCCTRL_0 register, mask the AGC Mode field and return the value */
+  /* Read the AGCCTRL_0 register, mask the AGC Mode field and return the
+   * value
+   */
 
   spirit_reg_read(spirit, AGCCTRL0_BASE, &regval, 1);
 
@@ -3664,7 +3675,7 @@ enum spirit_agcmode_e
  ******************************************************************************/
 
 int spirit_radio_enable_agcfreeze_steady(FAR struct spirit_library_s *spirit,
-                                         enum spirit_functional_state_e newstate)
+                                     enum spirit_functional_state_e newstate)
 {
   uint8_t regval = 0;
   int ret;
@@ -3758,7 +3769,7 @@ int spirit_radio_enable_agcfreeze_sync(FAR struct spirit_library_s *spirit,
  ******************************************************************************/
 
 int spirit_radio_enable_agcfreeze_maxatten(FAR struct spirit_library_s *spirit,
-                                           enum spirit_functional_state_e newstate)
+                                       enum spirit_functional_state_e newstate)
 {
   uint8_t regval = 0;
   int ret;
@@ -3875,7 +3886,8 @@ uint16_t spirit_radio_get_agcmeasure_us(FAR struct spirit_library_s *spirit)
 
   /* Calculates the measure time value to write in the register */
 
-  return (uint16_t)((12.0 / spirit->xtal_frequency) * (float)pow(2, measure) * 1e6);
+  return (uint16_t)((12.0 / spirit->xtal_frequency) *
+                    (float)pow(2, measure) * 1e6);
 }
 
 /******************************************************************************

@@ -1,54 +1,39 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_wdog.h
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_WDOG_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_WDOG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *************************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_WDOG_STCTRLH_OFFSET  0x0000 /* Watchdog Status and Control Register High */
 #define KINETIS_WDOG_STCTRLL_OFFSET  0x0002 /* Watchdog Status and Control Register Low */
@@ -63,7 +48,7 @@
 #define KINETIS_WDOG_RSTCNT_OFFSET   0x0014 /* Watchdog Reset Count Register */
 #define KINETIS_WDOG_PRESC_OFFSET    0x0016 /* Watchdog Prescaler Register */
 
-/* Register Addresses ***********************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_WDOG_STCTRLH         (KINETIS_WDOG_BASE+KINETIS_WDOG_STCTRLH_OFFSET)
 #define KINETIS_WDOG_STCTRLL         (KINETIS_WDOG_BASE+KINETIS_WDOG_STCTRLL_OFFSET)
@@ -78,7 +63,7 @@
 #define KINETIS_WDOG_RSTCNT          (KINETIS_WDOG_BASE+KINETIS_WDOG_RSTCNT_OFFSET)
 #define KINETIS_WDOG_PRESC           (KINETIS_WDOG_BASE+KINETIS_WDOG_PRESC_OFFSET)
 
-/* Register Bit Definitions *****************************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Watchdog Status and Control Register High (16-bit) */
 
@@ -102,36 +87,44 @@
 #  define WDOG_STCTRLH_BYTESEL_BYTE1 (1 << WDOG_STCTRLH_BYTESEL_SHIFT) /* Byte 1 selected */
 #  define WDOG_STCTRLH_BYTESEL_BYTE2 (2 << WDOG_STCTRLH_BYTESEL_SHIFT) /* Byte 2 selected */
 #  define WDOG_STCTRLH_BYTESEL_BYTE3 (3 << WDOG_STCTRLH_BYTESEL_SHIFT) /* Byte 3 selected */
+
 #define WDOG_STCTRLH_DISTESTWDOG     (1 << 14) /* Bit 14: Disable WDOG’s functional test mode */
                                                /* Bit 15: Reserved */
+
 /* Watchdog Status and Control Register Low (16-bit) */
 
 #define WDOG_STCTRLL_INTFLG          (1 << 15) /* Bit 15: Interrupt flag */
                                                /* Bits 0-14: Reserved */
 
 /* Watchdog Time-out Value Register High/Low (16-bit timeout values) */
+
 /* Watchdog Window Register High/Low (16-bit window values) */
+
 /* Watchdog Refresh Register (16-bit, 0xa602 followed by 0xb480) */
+
 /* Watchdog Unlock Register (16-bit, 0xc520 followed by 0xd928) */
+
 /* Watchdog Timer Output Register High/Low (16-bit timer values) */
+
 /* Watchdog Reset Count Register (16-bit reset count) */
 
 /* Watchdog Prescaler Register (16-bit) */
+
                                                /* Bits 0-7: Reserved */
 #define WDOG_PRESC_PRESCVAL_SHIFT    (8)       /* Bits 8-10: Watchdog clock source prescaler */
 #define WDOG_PRESC_PRESCVAL_MASK     (7 << WDOG_PRESC_PRESCVAL_SHIFT)
                                                /* Bits 11-15: Reserved */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_WDOG_H */

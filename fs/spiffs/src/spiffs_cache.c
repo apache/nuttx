@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_cache.c
+ * fs/spiffs/src/spiffs_cache.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -193,7 +193,8 @@ static int spiffs_cache_page_remove_oldest(FAR struct spiffs_s *fs,
 
   /* Don't remove any cache pages unless there are no free cache pages */
 
-  if ((cache->cpage_use_map & cache->cpage_use_mask) != cache->cpage_use_mask)
+  if ((cache->cpage_use_map & cache->cpage_use_mask) !=
+       cache->cpage_use_mask)
     {
       /* At least one free cpage */
 
@@ -463,9 +464,9 @@ ssize_t spiffs_cache_read(FAR struct spiffs_s *fs, uint8_t op, int16_t objid,
                                cp->cpndx, cp->pgndx);
 
               ret = spiffs_mtd_read(fs, addr -
-                                    SPIFFS_PADDR_TO_PAGE_OFFSET(fs, addr),
-                                    SPIFFS_GEO_PAGE_SIZE(fs),
-                                    spiffs_get_cache_page(fs, cache, cp->cpndx));
+                                SPIFFS_PADDR_TO_PAGE_OFFSET(fs, addr),
+                                SPIFFS_GEO_PAGE_SIZE(fs),
+                                spiffs_get_cache_page(fs, cache, cp->cpndx));
 
               mem = spiffs_get_cache_page(fs, cache, cp->cpndx);
               memcpy(dest, &mem[SPIFFS_PADDR_TO_PAGE_OFFSET(fs, addr)], len);
@@ -705,7 +706,8 @@ void spiffs_cache_page_release(FAR struct spiffs_s *fs,
 
       for (fobj  = (FAR struct spiffs_file_s *)dq_peek(&fs->objq);
            fobj != NULL;
-           fobj  = (FAR struct spiffs_file_s *)dq_next((FAR dq_entry_t *)fobj))
+           fobj  =
+                 (FAR struct spiffs_file_s *)dq_next((FAR dq_entry_t *)fobj))
         {
           /* "Unrefer" the cache page */
 

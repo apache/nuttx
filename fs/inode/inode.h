@@ -368,16 +368,6 @@ void inode_release(FAR struct inode *inode);
 int foreach_inode(foreach_inode_t handler, FAR void *arg);
 
 /****************************************************************************
- * Name: files_initialize
- *
- * Description:
- *   This is called from the FS initialization logic to configure the files.
- *
- ****************************************************************************/
-
-void weak_function files_initialize(void);
-
-/****************************************************************************
  * Name: files_allocate
  *
  * Description:

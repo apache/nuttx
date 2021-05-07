@@ -1,78 +1,68 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_mcg.h
  *
- *   Copyright (C) 2017, 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_MCG_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_MCG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Note: It is envisioned that in the long term as a chip is added. The author of
- * the new chip definitions will either find the exact configuration in an existing
- * chip define and add the new chip to it Or add the MCG feature configuration
- * #defines to the chip ifdef list below. In either case the author should mark
- * it as "Verified to Document Number:" taken from the reference manual.
+/* Note:
+ * It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an
+ * existing chip define and add the new chip to it Or add the MCG feature
+ * configuration #defines to the chip ifdef list below. In either case the
+ * author should mark it as "Verified to Document Number:" taken from the
+ * reference manual.
  *
  * To maintain backward compatibility to the version of NuttX prior to
  * 2/5/2017, the catch all KINETIS_MCG_VERSION_UKN configuration is assigned
  * to all the chips that did not have any conditional compilation based on
- * NEW_MCG or KINETIS_K64. This is  a "No worse" than the original code solution.
- * N.B. Each original chip "if"definitions have been left intact so that the
- * complete legacy definitions prior to 2/5/2017 may be filled in completely when
- * vetted.
+ * NEW_MCG or KINETIS_K64. This is  a "No worse" than the original code
+ * solution. N.B. Each original chip "if"definitions have been left intact so
+ * that the complete legacy definitions prior to 2/5/2017 may be filled in
+ * completely when vetted.
  */
 
 /* MCG Configuration Parameters
  *
  * KINETIS_MCG_PLL_REF_MIN           - OSCCLK/PLL_R minimum
  * KINETIS_MCG_PLL_REF_MAX           - OSCCLK/PLL_R maximum
- * KINETIS_MCG_PLL_INTERNAL_DIVBY    - The PLL clock is divided by n before VCO divider
- * KINETIS_MCG_HAS_PLL_EXTRA_DIVBY   - Is PLL clock divided by n before MCG PLL/FLL
+ * KINETIS_MCG_PLL_INTERNAL_DIVBY    - The PLL clock is divided by n
+ *                                     before VCO divider
+ * KINETIS_MCG_HAS_PLL_EXTRA_DIVBY   - Is PLL clock divided by n
+ *                                     before MCG PLL/FLL
  *                                     clock selection in the SIM module
  * KINETIS_MCG_FFCLK_DIVBY           - MCGFFCLK divided by n
- * KINETIS_MCG_HAS_IRC_48M           -  Has 48MHz internal oscillator
- * KINETIS_MCG_HAS_LOW_FREQ_IRC      - Has LTRIMRNG, LFRIM, LSTRIM and bit MC[LIRC_DIV2]
- * KINETIS_MCG_HAS_HIGH_FREQ_IRC     - Has HCTRIM, HTTRIM, HFTRIM and bit MC[HIRCEN]
+ * KINETIS_MCG_HAS_IRC_48M           - Has 48MHz internal oscillator
+ * KINETIS_MCG_HAS_LOW_FREQ_IRC      - Has LTRIMRNG, LFRIM,
+ *                                     LSTRIM and bit MC[LIRC_DIV2]
+ * KINETIS_MCG_HAS_HIGH_FREQ_IRC     - Has HCTRIM, HTTRIM,
+ *                                     HFTRIM and bit MC[HIRCEN]
  * KINETIS_MCG_HAS_PLL_INTERNAL_MODE - Has PEI mode or PBI mode
  * KINETIS_MCG_HAS_RESET_IS_BLPI     - Has Reset clock mode is BLPI
  *
@@ -81,7 +71,8 @@
  * KINETIS_MCG_HAS_C1                - SoC has C1 Register
  * KINETIS_MCG_HAS_C1_IREFS          - SoC has C1[IREFS]
  * KINETIS_MCG_HAS_C1_FRDIV          - SoC has C1[FRDIV]
- * KINETIS_MCG_C1_FRDIV_MAX          - C1[FRDIV] maximum value 5=1024, 6=1280 7=1536
+ * KINETIS_MCG_C1_FRDIV_MAX          - C1[FRDIV] maximum value
+ *                                     5=1024, 6=1280 7=1536
  * KINETIS_MCG_HAS_C2                - SoC has C2 Register
  * KINETIS_MCG_HAS_C2_HGO            - SoC has C2[HGO]
  * KINETIS_MCG_HAS_C2_RANGE          - SoC has C2[RANG]
@@ -91,13 +82,16 @@
  * KINETIS_MCG_HAS_C4                - SoC has C4 Register
  * KINETIS_MCG_HAS_C5                - SoC has C5 Register
  * KINETIS_MCG_HAS_C5_PRDIV          - SoC has C5[PRDIV]
- * KINETIS_MCG_C5_PRDIV_BASE         - PRDIV base value corresponding to 0 in C5[PRDIV]
+ * KINETIS_MCG_C5_PRDIV_BASE         - PRDIV base value
+ *                                     corresponding to 0 in C5[PRDIV]
  * KINETIS_MCG_C5_PRDIV_MAX          - The Maximum value of C5[PRVDIV])
- * KINETIS_MCG_C5_PRDIV_BITS         - Has n bits of phase-locked loop (PLL) PRDIV (register C5[PRDIV]
+ * KINETIS_MCG_C5_PRDIV_BITS         - Has n bits of phase-locked loop
+ *                                     (PLL) PRDIV (register C5[PRDIV]
  * KINETIS_MCG_HAS_C5_PLLREFSEL0     - SoC has C5[PLLREFSEL0]
  * KINETIS_MCG_HAS_C6                - SoC has C6 Register
  * KINETIS_MCG_HAS_C6_VDIV           - SoC has C6[VDIV]
- * KINETIS_MCG_C6_VDIV_BASE          - VDIV base value corresponding to 0 in C6[VDIV]
+ * KINETIS_MCG_C6_VDIV_BASE          - VDIV base value
+ *                                     corresponding to 0 in C6[VDIV]
  * KINETIS_MCG_C6_VDIV_MAX           - The Maximum value of C6[VDIV]
  * KINETIS_MCG_HAS_C6_CME            - SoC has C6[CME]
  * KINETIS_MCG_HAS_C6_PLLS           - SoC has C6[PLLS]
@@ -128,12 +122,14 @@
  * KINETIS_MCG_HAS_C10               - SoC has C10 Register
  * KINETIS_MCG_HAS_C10_LOCS1         - SoC has C10[LOCS1]
  * KINETIS_MCG_HAS_C11               - SoC has C11 Register
- * KINETIS_MCG_HAS_C11_PLL1OSC1      - SoC has C1[PRDIV1], C11[PLLSTEN1], C11[PLLCLKEN1], C11[PLLREFSEL1],
+ * KINETIS_MCG_HAS_C11_PLL1OSC1      - SoC has C1[PRDIV1], C11[PLLSTEN1],
+ *                                     C11[PLLCLKEN1], C11[PLLREFSEL1],
  * KINETIS_MCG_HAS_C11_PLLCS         - SoC has C11[PLLCS]
  * KINETIS_MCG_HAS_C11_PLLREFSEL1    - SoC has C11[PLLREFSEL1]
  * KINETIS_MCG_HAS_C12               - SoC has C12 Register
  * KINETIS_MCG_HAS_S2                - SoC has S2 Register
- * KINETIS_MCG_HAS_S2_PLL1OSC1       - SoC has S2[LOCS2], S2[OSCINIT1], S2[LOCK1], S2[LOLS1]
+ * KINETIS_MCG_HAS_S2_PLL1OSC1       - SoC has S2[LOCS2],
+ *                                     S2[OSCINIT1], S2[LOCK1], S2[LOLS1]
  * KINETIS_MCG_HAS_S2_PLLCST         - SoC has S2[PLLCST]
  */
 
@@ -208,7 +204,9 @@
 
 #elif defined(CONFIG_ARCH_CHIP_MK28FN2M0VMI15) || defined(CONFIG_ARCH_CHIP_MK28FN2M0CAU15R)
 
-/* Verified to Document Number: K28P210M150SF5RM Rev. 4, August 2017 */
+/* Verified to Document Number:
+ * K28P210M150SF5RM Rev. 4, August 2017
+ */
 
 #  define KINETIS_MCG_VERSION KINETIS_MCG_VERSION_06
 
@@ -217,9 +215,10 @@
 #  define KINETIS_MCG_PLL_REF_MIN            8000000   /* OSCCLK/PLL_R minimum */
 #  define KINETIS_MCG_PLL_REF_MAX            16000000  /* OSCCLK/PLL_R maximum */
 
-/* TODO: The following configuration parameters have not been verified.  They were
- * taken wholesale from the K66F.  The K66F is very similar and, most likely, the
- * settings are corred.
+/* TODO:
+ * The following configuration parameters have not been verified.  They were
+ * taken wholesale from the K66F.  The K66F is very similar and, most likely,
+ * the settings are corred.
  */
 
 #  define KINETIS_MCG_PLL_INTERNAL_DIVBY     2         /* The PLL clock is divided by 2 before VCO divider */
@@ -562,7 +561,9 @@
 #elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
       defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
 
-/* Verified to Document Number: Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+/* Verified to Document Number:
+ * Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015
+ */
 
 #  define KINETIS_MCG_VERSION KINETIS_MCG_VERSION_06
 
@@ -662,7 +663,9 @@
 #  error "Unsupported Kinetis chip"
 #endif
 
-/* Use the catch all configuration for the MCG based on the implementations in nuttx prior 2/3/2017 */
+/* Use the catch all configuration for the MCG based on
+ * the implementations in nuttx prior 2/3/2017
+ */
 
 #if KINETIS_MCG_VERSION == KINETIS_MCG_VERSION_UKN
 

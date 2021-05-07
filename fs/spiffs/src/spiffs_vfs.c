@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs/spiffs.c
+ * fs/spiffs/src/spiffs_vfs.c
  * Interface between SPIFFS and the NuttX VFS
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -55,6 +55,7 @@
 #include <assert.h>
 #include <queue.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -237,7 +238,7 @@ static void spiffs_unlock_reentrant(FAR struct spiffs_sem_s *rsem)
 }
 
 /****************************************************************************
- * Name: spiffs_readdir_callback
+ * Name: spiffs_consistency_check
  ****************************************************************************/
 
 static int spiffs_consistency_check(FAR struct spiffs_s *fs)
@@ -330,7 +331,18 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
       DEBUGASSERT(dir != NULL);
       entryp = &dir->fd_dir;
 
-      strncpy(entryp->d_name, (FAR char *)objhdr.name, NAME_MAX);
+#ifdef CONFIG_SPIFFS_LEADING_SLASH
+      /* Skip the leading '/'. */
+
+      if (objhdr.name[0] != '/')
+        {
+          return -EINVAL; /* The filesystem is corrupted */
+        }
+#endif
+
+      strncpy(entryp->d_name,
+              (FAR char *)objhdr.name + SPIFFS_LEADING_SLASH_SIZE,
+              NAME_MAX);
       entryp->d_type = objhdr.type;
       return OK;
     }
@@ -648,8 +660,8 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
   off_t offset;
   int ret;
 
-  finfo("filep=%p buffer=%p buflen=%lu\n",
-        filep, buffer, (unsigned long)buflen);
+  finfo("filep=%p buffer=%p buflen=%zu\n",
+        filep, buffer, buflen);
   DEBUGASSERT(filep->f_priv != NULL && filep->f_inode != NULL);
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -715,7 +727,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
                    */
 
                   spiffs_cacheinfo("Cache page=%d for fobj ID=%d "
-                                   "Boundary violation, offset=%d size=%d\n",
+                         "Boundary violation, offset=%" PRIu32 " size=%d\n",
                                    fobj->cache_page->cpndx, fobj->objid,
                                    fobj->cache_page->offset,
                                    fobj->cache_page->size);
@@ -765,9 +777,10 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
               offset_in_cpage = offset - fobj->cache_page->offset;
 
               spiffs_cacheinfo("Storing to cache page %d for fobj %d "
-                               "offset=%d:%d buflen=%d\n",
-                               fobj->cache_page->cpndx, fobj->objid, offset,
-                               offset_in_cpage, buflen);
+                               "offset=%jd:%jd buflen=%zu\n",
+                               fobj->cache_page->cpndx, fobj->objid,
+                               (intmax_t)offset,
+                               (intmax_t)offset_in_cpage, buflen);
 
               cache      = spiffs_get_cache(fs);
               cpage_data = spiffs_get_cache_page(fs, cache,
@@ -803,7 +816,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
               /* Write back cache first */
 
               spiffs_cacheinfo("Cache page=%d for fobj ID=%d "
-                               "Boundary violation, offset=%d size=%d\n",
+                  "Boundary violation, offset=%" PRIu32 " size=%d\n",
                                fobj->cache_page->cpndx, fobj->objid,
                                fobj->cache_page->offset,
                                fobj->cache_page->size);
@@ -1004,7 +1017,7 @@ static int spiffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return ret;
     }
 
-  /* Handle the IOCTL according tot he command */
+  /* Handle the IOCTL according to the command */
 
   switch (cmd)
     {
@@ -1505,7 +1518,7 @@ static int spiffs_bind(FAR struct inode *mtdinode, FAR const void *data,
         (unsigned int)SPIFFS_GEO_PAGE_SIZE(fs));
   finfo("object lookup pages:         %u\n",
         (unsigned int)SPIFFS_OBJ_LOOKUP_PAGES(fs));
-  finfo("page pages per block:        %u\n",
+  finfo("pages per block:             %u\n",
         (unsigned int)SPIFFS_GEO_PAGES_PER_BLOCK(fs));
   finfo("page header length:          %u\n",
         (unsigned int)sizeof(struct spiffs_page_header_s));

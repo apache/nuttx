@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/nrf52/nrf52_wdt_lowerhalf.c
+ * arch/arm/src/nrf52/nrf52_wdt_lowerhalf.h
  *
  *   Copyright (C) 2018 Zglue Inc. All rights reserved.
  *   Author: Levin Li <zhiqiang@zglue.com>

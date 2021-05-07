@@ -152,7 +152,8 @@ int stm32_rtc_cancelalarm(enum alm_id_e alarmid);
  *
  ****************************************************************************/
 
-int stm32_rtc_setperiodic(FAR const struct timespec *period, wakeupcb_t callback);
+int stm32_rtc_setperiodic(FAR const struct timespec *period,
+                          wakeupcb_t callback);
 
 /****************************************************************************
  * Name: stm32_rtc_cancelperiodic

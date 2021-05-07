@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/up_usestack.c
+ * arch/x86_64/src/intel64/up_usestack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -53,8 +53,8 @@
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
- *     initial value of the stack pointer.
+ *   - stack_base_ptr: Adjusted stack base pointer after the TLS Data and
+ *     Arguments has been removed from the stack allocation.
  *
  * Input Parameters:
  *   - tcb: The TCB of new task
@@ -69,7 +69,7 @@
 
 int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 {
-  size_t top_of_stack;
+  uintptr_t top_of_stack;
   size_t size_of_stack;
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -105,7 +105,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * referenced as positive word offsets from sp.
    */
 
-  top_of_stack = (uint64_t)tcb->stack_alloc_ptr + stack_size - 8;
+  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
 
   /* The intel64 stack must be aligned at word (16 byte) boundaries. If
    * necessary top_of_stack must be rounded down to the next boundary.
@@ -113,18 +113,13 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * frame pointer will be pushed, not instruction pointer.
    */
 
-  top_of_stack &= ~0xff;
-  top_of_stack -= 0x8;
-  size_of_stack = top_of_stack - (uint64_t)tcb->stack_alloc_ptr + 8;
+  top_of_stack &= ~0x0f;
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->adj_stack_ptr  = (uint64_t *)top_of_stack;
+  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
   tcb->adj_stack_size = size_of_stack;
-
-  /* Initialize the TLS data structure */
-
-  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
 
   return OK;
 }

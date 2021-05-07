@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sam34/sam4e-ek/src/sam_ili9335.c
+ * boards/arm/sam34/sam4e-ek/src/sam_ili9325.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -401,10 +401,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sam_putrun,            /* Put a run into LCD memory */
-  .getrun = sam_getrun,            /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SAM_BPP,               /* Bits-per-pixel */
+  .putrun = sam_putrun,             /* Put a run into LCD memory */
+  .getrun = sam_getrun,             /* Get a run from LCD memory */
+  .buffer = (uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SAM_BPP,                /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
@@ -582,6 +582,7 @@ static void sam_dumprun(FAR const char *msg, FAR uint16_t *run,
         {
           syslog(LOG_DEBUG, " %04x", *run++);
         }
+
       up_putc('\n');
     }
 }
@@ -607,7 +608,8 @@ static void sam_disable_backlight(void)
  * Name:  sam_set_backlight
  *
  * Description:
- *   The the backlight to the level associated with the specified power value.
+ *   The the backlight to the level associated with the specified power
+ *   value.
  *
  ****************************************************************************/
 
@@ -691,11 +693,11 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
                       size_t npixels)
 {
 #if defined(CONFIG_SAM4EEK_LCD_RGB565)
-  FAR const uint16_t *src = (FAR const uint16_t*)buffer;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
 #elif defined(CONFIG_SAM4EEK_LCD_RGB24)
-  FAR const uint8_t  *src = (FAR const uint8_t*)buffer;
+  FAR const uint8_t  *src = (FAR const uint8_t *)buffer;
 #elif defined(CONFIG_SAM4EEK_LCD_RGB32)
-  FAR const uint32_t *src = (FAR const uint32_t*)buffer;
+  FAR const uint32_t *src = (FAR const uint32_t *)buffer;
 #endif
 
   /* Buffer must be provided and aligned to a 16-bit address boundary */
@@ -1133,7 +1135,8 @@ static void sam_lcd9325_initialize(void)
   sam_write_reg(ILI9325_GAMMA_CTRL9,
                 ILI9325_GAMMA_CTRL9_RN1(7) | ILI9325_GAMMA_CTRL9_RN0(1));
   sam_write_reg(ILI9325_GAMMA_CTRL10,
-                ILI9325_GAMMA_CTRL10_VRN1(0) | ILI9325_GAMMA_CTRL10_VRN0(14));
+                ILI9325_GAMMA_CTRL10_VRN1(0) |
+                ILI9325_GAMMA_CTRL10_VRN0(14));
 
   /* Set the Entry Mode:
    *

@@ -113,9 +113,11 @@ struct ina3221_dev_s
 
 /* I2C Helpers */
 
-static int     ina3221_write16(FAR struct ina3221_dev_s *priv, uint8_t regaddr,
-                              FAR uint16_t regvalue);
-static int     ina3221_read16(FAR struct ina3221_dev_s *priv, uint8_t regaddr,
+static int     ina3221_write16(FAR struct ina3221_dev_s *priv,
+                               uint8_t regaddr,
+                               FAR uint16_t regvalue);
+static int     ina3221_read16(FAR struct ina3221_dev_s *priv,
+                              uint8_t regaddr,
                               FAR uint16_t *regvalue);
 static int     ina3221_readpower(FAR struct ina3221_dev_s *priv,
                                  FAR struct ina3221_s *buffer);
@@ -160,15 +162,18 @@ static int ina3221_access(FAR struct ina3221_dev_s *priv,
   struct i2c_msg_s msg[I2C_NOSTARTSTOP_MSGS];
   int ret;
 
-  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency = CONFIG_INA3221_I2C_FREQUENCY;
+  msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].frequency =
+                                 CONFIG_INA3221_I2C_FREQUENCY;
 
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr      = priv->addr;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].flags     = 0;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].buffer    = &start_register_address;
   msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].length    = 1;
 
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr         = msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
-  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags        = reading ? I2C_M_READ : 0;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].addr         =
+                                 msg[I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX].addr;
+  msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].flags        =
+                                reading ? I2C_M_READ : 0;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].buffer       = register_value;
   msg[I2C_NOSTARTSTOP_DATA_MSG_INDEX].length       = data_length;
 
@@ -399,7 +404,8 @@ static int ina3221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/pwrmntr0"
- *   i2c - An instance of the I2C interface to use to communicate with INA3221
+ *   i2c - An instance of the I2C interface to use to communicate with
+ *         INA3221
  *   config - Configuration including I2C address, shunt values, and INA3221
  *            configuration mask.
  *
@@ -420,7 +426,8 @@ int ina3221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Initialize the ina3221 device structure */
 
-  priv = (FAR struct ina3221_dev_s *)kmm_malloc(sizeof(struct ina3221_dev_s));
+  priv = (FAR struct ina3221_dev_s *)
+                      kmm_malloc(sizeof(struct ina3221_dev_s));
   if (priv == NULL)
     {
       snerr("ERROR: Failed to allocate instance\n");

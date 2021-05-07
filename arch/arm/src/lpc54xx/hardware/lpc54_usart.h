@@ -1,55 +1,40 @@
-/*****************************************************************************************************
- * arch/arm/src/lpc54xx/chip/lpc54_usart.h
+/****************************************************************************
+ * arch/arm/src/lpc54xx/hardware/lpc54_usart.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USART_H
 #define __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_USART_H
 
-/*****************************************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/lpc54_memorymap.h"
 
-/*****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************************/
+ ****************************************************************************/
 
 #define LPC54_USART_FIFO_DEPTH          8       /* All FIFOs are 16x8-bits */
 
-/* USART Register Offsets ***************************************************************************/
+/* USART Register Offsets ***************************************************/
 
 /* Registers for the USART function: */
 
@@ -78,7 +63,7 @@
 
 #define LPC54_USART_ID_OFFSET           0x0ffc  /* USART module Identification */
 
-/* USART Register Adreesses **************************************************************************/
+/* USART Register Adreesses *************************************************/
 
 #define LPC54_USART0_CFG                (LPC54_FLEXCOMM0_BASE + LPC54_USART_CFG_OFFSET)
 #define LPC54_USART0_CTL                (LPC54_FLEXCOMM0_BASE + LPC54_USART_CTL_OFFSET)
@@ -270,7 +255,7 @@
 #define LPC54_USART9_FIFORDNOPOP        (LPC54_FLEXCOMM9_BASE + LPC54_USART_FIFORDNOPOP_OFFSET)
 #define LPC54_USART9_ID                 (LPC54_FLEXCOMM9_BASE + LPC54_USART_ID_OFFSET)
 
-/* USART Register Bitfield Definitions ***************************************************************/
+/* USART Register Bitfield Definitions **************************************/
 
 /* USART Configuration register */
 
@@ -280,11 +265,13 @@
 #  define USART_CFG_DATALEN_7BIT        (0 << USART_CFG_DATALEN_SHIFT) /* 7 bit Data length */
 #  define USART_CFG_DATALEN_8BIT        (1 << USART_CFG_DATALEN_SHIFT) /* 8 bit Data length */
 #  define USART_CFG_DATALEN_9BIT        (2 << USART_CFG_DATALEN_SHIFT) /* 9 bit data length */
+
 #define USART_CFG_PARITYSEL_SHIFT       (4)       /* Bits 4-5: Selects what type of parity is used by the USART */
 #define USART_CFG_PARITYSEL_MASK        (3 << USART_CFG_PARITYSEL_SHIFT)
 #  define USART_CFG_PARITYSEL_NONE      (0 << USART_CFG_PARITYSEL_SHIFT) /* No parity */
 #  define USART_CFG_PARITYSEL_EVEN      (2 << USART_CFG_PARITYSEL_SHIFT) /* Even parity */
 #  define USART_CFG_PARITYSEL_ODD       (3 << USART_CFG_PARITYSEL_SHIFT) /* Odd parity */
+
 #define USART_CFG_STOPLEN               (1 << 6)  /* Bit 6  Number of stop bits appended to transmitted data */
 #define USART_CFG_MODE32K               (1 << 7)  /* Bit 7  Selects standard or 32 kHz clocking mode */
 #define USART_CFG_LINMODE               (1 << 8)  /* Bit 8  LIN break mode enable */
@@ -309,7 +296,9 @@
 #define USART_CTL_CLRCCONRX             (1 << 9)  /* Bit 9:  Clear Continuous Clock */
 #define USART_CTL_AUTOBAUD              (1 << 16) /* Bit 16: Autobaud enable */
 
-/* USART Status register, USART Interrupt Enable read and Set register, and USART Interrupt Enable Clear register */
+/* USART Status register, USART Interrupt Enable read and Set register,
+ * and USART Interrupt Enable Clear register
+ */
 
 #define USART_INTSTAT_RXIDLE            (1 << 1)  /* Bit 1:  Receiver Idle (Status only) */
 #define USART_INT_TXIDLE                (1 << 3)  /* Bit 3:  Transmitter Idle */
@@ -343,6 +332,7 @@
 #define USART_FIFOCFG_SIZE_SHIFT        (4)       /* Bits 4-5:  FIFO size configuration */
 #define USART_FIFOCFG_SIZE_MASK         (3 << USART_FIFOCFG_SIZE_SHIFT)
 #  define USART_FIFOCFG_SIZE_16x8       (0 << USART_FIFOCFG_SIZE_SHIFT) /* FIFO is 16 entries x 8 bits */
+
 #define USART_FIFOCFG_DMATX             (1 << 12) /* Bit 12: DMA configuration for transmit */
 #define USART_FIFOCFG_DMARX             (1 << 13) /* Bit 13: DMA configuration for receive */
 #define USART_FIFOCFG_WAKETX            (1 << 14) /* Bit 14: Wake-up for transmit FIFO level */
@@ -379,8 +369,9 @@
 #  define USART_FIFOTRIG_RXLVL_NOTEMPY   USART_FIFOTRIG_RXLVL(0)
 #  define USART_FIFOTRIG_RXLVL_FULL      USART_FIFOTRIG_RXLVL(15)
 
-/* FIFO interrupt status register, FIFO interrupt enable set (enable), and read register and FIFO interrupt enable
- * clear (disable) and read register
+/* FIFO interrupt status register, FIFO interrupt enable set (enable),
+ * and read register and FIFO interrupt enable clear (disable) and read
+ * register
  */
 
 #define USART_FIFOINT_TXERR             (1 << 0)  /* Bit 0:  Transmit FIFO error interrupt */

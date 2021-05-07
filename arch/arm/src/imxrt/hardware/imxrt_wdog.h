@@ -1,53 +1,38 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_wdog.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author:  Janne Rosberg <janne@offcode.fi>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_WDOG_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_WDOG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/imxrt_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register offsets *****************************************************************/
+/* Register offsets *********************************************************/
 
 #define IMXRT_WDOG_WCR_OFFSET       0x0000  /* Watchdog control register */
 #define IMXRT_WDOG_WSR_OFFSET       0x0002  /* Watchdog service register */
@@ -60,7 +45,7 @@
 #define IMXRT_RTWDOG_TOVAL_OFFSET   0x0008  /* Watchdog timeout value register */
 #define IMXRT_RTWDOG_WIN_OFFSET     0x000c  /* Watchdog window register */
 
-/* Register addresses ***************************************************************/
+/* Register addresses *******************************************************/
 
 #define IMXRT_WDOG1_WCR             (IMXRT_WDOG1_BASE + IMXRT_WDOG_WCR_OFFSET)
 #define IMXRT_WDOG1_WSR             (IMXRT_WDOG1_BASE + IMXRT_WDOG_WSR_OFFSET)
@@ -78,7 +63,7 @@
 #define IMXRT_RTWDOG_TOVAL          (IMXRT_WDOG3_BASE + IMXRT_RTWDOG_TOVAL_OFFSET)
 #define IMXRT_RTWDOG_WIN            (IMXRT_WDOG3_BASE + IMXRT_RTWDOG_WIN_OFFSET)
 
-/* Register bit definitions *********************************************************/
+/* Register bit definitions *************************************************/
 
 /* Watchdog control and status register */
 
@@ -102,7 +87,8 @@
                                               /* Bits 2-3: reserved */
 #define WDOG_WRSR_POR               (1 << 4)  /* Bit 4:  Power on reset */
                                               /* Bits 5-15: Reserved */
-/* Watchdog interrupt control  */
+
+/* Watchdog interrupt control */
 
 #define WDOG_WICR_WICT_SHIFT        (0)       /* Bits 0-7: Watchdog Interrupt Count Time-out */
 #define WDOG_WICR_WICT_MASK         (0xff << WDOG_WCR_WT_SHIFT)
@@ -115,6 +101,7 @@
 
 #define WDOG_WMCR_PDE               (1 << 0)  /* Bit 0:  Power Down Enable */
                                               /* Bits 1-15: Reserved */
+
 /* RT Watchdog Control and Status Register */
 
 #define RTWDOG_CS_STOP              (1 << 0)  /* Bit 0:  Stop enable */

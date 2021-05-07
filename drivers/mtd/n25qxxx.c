@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * drivers/mtd/n25qxxx.c
  * Driver for QuadSPI-based N25QxxxA
  *
@@ -32,16 +32,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -57,15 +58,16 @@
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
+
 /* QuadSPI Mode.  Per data sheet, either Mode 0 or Mode 3 may be used. */
 
 #ifndef CONFIG_N25QXXX_QSPIMODE
-#  define CONFIG_N25QXXX_QSPIMODE QSPIDEV_MODE0
+#define CONFIG_N25QXXX_QSPIMODE QSPIDEV_MODE0
 #endif
 
 /* QuadSPI Frequency per data sheet:
@@ -74,197 +76,211 @@
  */
 
 #ifndef CONFIG_N25QXXX_QSPI_FREQUENCY
-/* If you haven't specified frequency, default to 40 MHz which will work with all
- * commands.
+/* If you haven't specified frequency, default to 40 MHz which will work with
+ * all commands.
  */
-#  define CONFIG_N25QXXX_QSPI_FREQUENCY 40000000
+#define CONFIG_N25QXXX_QSPI_FREQUENCY 40000000
 #endif
 
 #ifndef CONFIG_N25QXXX_DUMMIES
-/* If you haven't specified the number of dummy cycles for quad reads, provide a
- * reasonable default.  The actual number of dummies needed is clock and IO command
- * dependent.
+/* If you haven't specified the number of dummy cycles for quad reads,
+ * provide a reasonable default.
+ * The actual number of dummies needed is clock and IO command dependent.
  */
-#  define CONFIG_N25QXXX_DUMMIES 6
+#define CONFIG_N25QXXX_DUMMIES 6
 #endif
 
-/* N25QXXX Commands *****************************************************************/
-/* Configuration, Status, Erase, Program Commands ***********************************/
-/*      Command                    Value    Description:                            */
-/*                                            Data sequence                         */
-#define N25QXXX_READ_STATUS        0x05  /* Read status register:                   *
-                                          *   0x05 | SR                             */
-#define N25QXXX_WRITE_STATUS       0x01  /* Write status register:                  *
-                                          *   0x01 | SR                             */
-#define N25QXXX_READ_VOLCFG        0x85  /* Read volatile configuration register:   *
-                                          *   0x85 | VCR                            */
-#define N25QXXX_WRITE_VOLCFG       0x81  /* Write svolatile configuration register: *
-                                          *   0x81 | VCR                            */
-#define N25QXXX_WRITE_ENABLE       0x06  /* Write enable:                           *
-                                          *   0x06                                  */
-#define N25QXXX_WRITE_DISABLE      0x04  /* Write disable command code:             *
-                                          *   0x04                                  */
-#define N25QXXX_PAGE_PROGRAM       0x02  /* Page Program:                           *
-                                          *   0x02 | ADDR(MS) | ADDR(MID) |         *
-                                          *   ADDR(LS) | data                       */
-#define N25QXXX_SUBSECTOR_ERASE    0x20  /* Sub-sector Erase (4 kB)                 *
-                                          *   0x20 | ADDR(MS) | ADDR(MID) |         *
-                                          *   ADDR(LS)                              */
-#define N25QXXX_BULK_ERASE         0xc7  /* Bulk erase:                             *
-                                          *   0xc7                                  */
+/* N25QXXX Commands *********************************************************/
 
-/* Read Commands ********************************************************************/
-/*      Command                    Value    Description:                            */
-/*                                            Data sequence                         */
-#define N25QXXX_FAST_READ_QUADIO   0xeb  /* Fast Read Quad I/O:                     *
-                                          *   0xeb | ADDR | data...                 */
+/* Configuration, Status, Erase, Program Commands ***************************/
 
-/* Reset Commands *******************************************************************/
-/*      Command                    Value    Description:                            */
-/*                                            Data sequence                         */
+/*      Command                 Value    Description:                       */
 
-/* ID/Security Commands *************************************************************/
-/*      Command                    Value    Description:                            */
-/*                                            Data sequence                         */
-#define N25QXXX_JEDEC_ID           0x9f  /* JEDEC ID:                               *
-                                          *   0x9f | Manufacturer | MemoryType |    *
-                                          *   Capacity                              */
+/*                                       Data sequence                      */
+
+#define N25QXXX_READ_STATUS     0x05  /* Read status register:              *
+                                       *   0x05 | SR                        */
+#define N25QXXX_WRITE_STATUS    0x01  /* Write status register:             *
+                                       *   0x01 | SR                        */
+#define N25QXXX_READ_VOLCFG     0x85  /* Read volatile configuration register:   *
+                                       *   0x85 | VCR                       */
+#define N25QXXX_WRITE_VOLCFG    0x81  /* Write svolatile configuration register: *
+                                       *   0x81 | VCR                       */
+#define N25QXXX_WRITE_ENABLE    0x06  /* Write enable:                      *
+                                       *   0x06                             */
+#define N25QXXX_WRITE_DISABLE   0x04  /* Write disable command code:        *
+                                       *   0x04                             */
+#define N25QXXX_PAGE_PROGRAM    0x02  /* Page Program:
+                                       *   0x02 | ADDR(MS) | ADDR(MID) |
+                                       *   ADDR(LS) | data                  */
+#define N25QXXX_SUBSECTOR_ERASE 0x20  /* Sub-sector Erase (4 kB)            *
+                                       *   0x20 | ADDR(MS) | ADDR(MID) |    *
+                                       *   ADDR(LS)                         */
+#define N25QXXX_BULK_ERASE      0xc7  /* Bulk erase:                        *
+                                       *   0xc7                             */
+
+/* Read Commands ************************************************************/
+
+/*      Command                  Value    Description:                      */
+
+/*                                            Data sequence                 */
+#define N25QXXX_FAST_READ_QUADIO 0xeb  /* Fast Read Quad I/O:               *
+                                        *   0xeb | ADDR | data...           */
+
+/* Reset Commands ***********************************************************/
+
+/*      Command                  Value    Description:                      */
+
+/*                                            Data sequence                 */
+
+/* ID/Security Commands *****************************************************/
+
+/*      Command                  Value    Description:                      */
+
+/*                                          Data sequence                   */
+#define N25QXXX_JEDEC_ID        0x9f  /* JEDEC ID:                          *
+                                       * 0x9f | Manufacturer | MemoryType | *
+                                       * Capacity                           */
 
 /* Flash Manufacturer JEDEC IDs */
 
-#define N25QXXX_JEDEC_ID_SPANSION   0x01
-#define N25QXXX_JEDEC_ID_ATMEL      0x1f
-#define N25QXXX_JEDEC_ID_ST         0x20
-#define N25QXXX_JEDEC_ID_SST        0xbf
-#define N25QXXX_JEDEC_ID_MACRONIX   0xc2
-#define N25QXXX_JEDEC_ID_WINBOND    0xef
+#define N25QXXX_JEDEC_ID_SPANSION  0x01
+#define N25QXXX_JEDEC_ID_ATMEL     0x1f
+#define N25QXXX_JEDEC_ID_ST        0x20
+#define N25QXXX_JEDEC_ID_SST       0xbf
+#define N25QXXX_JEDEC_ID_MACRONIX  0xc2
+#define N25QXXX_JEDEC_ID_WINBOND   0xef
 
 /* N25QXXX JEDIC IDs */
 
 #define N25QXXX3V_JEDEC_DEVICE_TYPE 0xba  /* 3v memory device type */
 #define N25QXXX2V_JEDEC_DEVICE_TYPE 0xbb  /* 2v memory device type */
 
-#define N25Q016_JEDEC_CAPACITY      0x15  /* N25Q016 (2 MB) memory capacity */
-#define N25Q032_JEDEC_CAPACITY      0x16  /* N25Q032 (4 MB) memory capacity */
-#define N25Q064_JEDEC_CAPACITY      0x17  /* N25Q064 (8 MB) memory capacity */
-#define N25Q128_JEDEC_CAPACITY      0x18  /* N25Q128 (16 MB) memory capacity */
-#define N25Q256_JEDEC_CAPACITY      0x19  /* N25Q256 (32 MB) memory capacity */
-#define N25Q512_JEDEC_CAPACITY      0x20  /* N25Q512 (64 MB) memory capacity */
-#define N25Q00_JEDEC_CAPACITY       0x21  /* N25Q00 (128 MB) memory capacity */
+#define N25Q016_JEDEC_CAPACITY    0x15  /* N25Q016 (2 MB) memory capacity */
+#define N25Q032_JEDEC_CAPACITY    0x16  /* N25Q032 (4 MB) memory capacity */
+#define N25Q064_JEDEC_CAPACITY    0x17  /* N25Q064 (8 MB) memory capacity */
+#define N25Q128_JEDEC_CAPACITY    0x18  /* N25Q128 (16 MB) memory capacity */
+#define N25Q256_JEDEC_CAPACITY    0x19  /* N25Q256 (32 MB) memory capacity */
+#define N25Q512_JEDEC_CAPACITY    0x20  /* N25Q512 (64 MB) memory capacity */
+#define N25Q00_JEDEC_CAPACITY     0x21  /* N25Q00 (128 MB) memory capacity */
 
-/* N25QXXX Registers ****************************************************************/
-/* Status register bit definitions                                                  */
+/* N25QXXX Registers ********************************************************/
 
-#define STATUS_BUSY_MASK           (1 << 0) /* Bit 0: Device ready/busy status      */
-#  define STATUS_READY             (0 << 0) /*   0 = Not Busy                       */
-#  define STATUS_BUSY              (1 << 0) /*   1 = Busy                           */
-#define STATUS_WEL_MASK            (1 << 1) /* Bit 1: Write enable latch status     */
-#  define STATUS_WEL_DISABLED      (0 << 1) /*   0 = Not Write Enabled              */
-#  define STATUS_WEL_ENABLED       (1 << 1) /*   1 = Write Enabled                  */
-#define STATUS_BP_SHIFT            (2)      /* Bits 2-4: Block protect bits         */
-#define STATUS_BP_MASK             (7 << STATUS_BP_SHIFT)
-#  define STATUS_BP_NONE           (0 << STATUS_BP_SHIFT)
-#  define STATUS_BP_ALL            (7 << STATUS_BP_SHIFT)
-#define STATUS_TB_MASK             (1 << 5) /* Bit 5: Top / Bottom Protect          */
-#  define STATUS_TB_TOP            (0 << 5) /*   0 = BP2-BP0 protect Top down       */
-#  define STATUS_TB_BOTTOM         (1 << 5) /*   1 = BP2-BP0 protect Bottom up      */
-#define STATUS_BP3_MASK            (1 << 5) /* Bit 6: BP3                           */
-#define STATUS_SRP0_MASK           (1 << 7) /* Bit 7: Status register protect 0     */
-#  define STATUS_SRP0_UNLOCKED     (0 << 7) /*   0 = WP# no effect / PS Lock Down   */
-#  define STATUS_SRP0_LOCKED       (1 << 7) /*   1 = WP# protect / OTP Lock Down    */
+/* Status register bit definitions                                          */
 
-/* Chip Geometries ******************************************************************/
-/* All members of the family support uniform 4K-byte 'sub sectors'; they also support
- * 64k (and sometimes 32k) 'sectors' proper, but we won't be using those here.
+#define STATUS_BUSY_MASK     (1 << 0) /* Bit 0: Device ready/busy status    */
+#define STATUS_READY         (0 << 0) /*   0 = Not Busy                     */
+#define STATUS_BUSY          (1 << 0) /*   1 = Busy                         */
+#define STATUS_WEL_MASK      (1 << 1) /* Bit 1: Write enable latch status   */
+#define STATUS_WEL_DISABLED  (0 << 1) /*   0 = Not Write Enabled            */
+#define STATUS_WEL_ENABLED   (1 << 1) /*   1 = Write Enabled                */
+#define STATUS_BP_SHIFT      (2)      /* Bits 2-4: Block protect bits       */
+#define STATUS_BP_MASK       (7 << STATUS_BP_SHIFT)
+#define STATUS_BP_NONE       (0 << STATUS_BP_SHIFT)
+#define STATUS_BP_ALL        (7 << STATUS_BP_SHIFT)
+#define STATUS_TB_MASK       (1 << 5) /* Bit 5: Top / Bottom Protect        */
+#define STATUS_TB_TOP        (0 << 5) /*   0 = BP2-BP0 protect Top down     */
+#define STATUS_TB_BOTTOM     (1 << 5) /*   1 = BP2-BP0 protect Bottom up    */
+#define STATUS_BP3_MASK      (1 << 5) /* Bit 6: BP3                         */
+#define STATUS_SRP0_MASK     (1 << 7) /* Bit 7: Status register protect 0   */
+#define STATUS_SRP0_UNLOCKED (0 << 7) /*   0 = WP# no effect / PS Lock Down */
+#define STATUS_SRP0_LOCKED   (1 << 7) /*   1 = WP# protect / OTP Lock Down  */
+
+/* Chip Geometries **********************************************************/
+
+/* All members of the family support uniform 4K-byte 'sub sectors'; they also
+ * support 64k (and sometimes 32k) 'sectors' proper, but we won't be using
+ * those here.
  */
 
 /* N25Q016 (2 MB) memory capacity */
 
-#define N25Q016_SECTOR_SIZE         (4*1024)
-#define N25Q016_SECTOR_SHIFT        (12)
-#define N25Q016_SECTOR_COUNT        (512)
-#define N25Q016_PAGE_SIZE           (256)
-#define N25Q016_PAGE_SHIFT          (8)
+#define N25Q016_SECTOR_SIZE   (4*1024)
+#define N25Q016_SECTOR_SHIFT  (12)
+#define N25Q016_SECTOR_COUNT  (512)
+#define N25Q016_PAGE_SIZE     (256)
+#define N25Q016_PAGE_SHIFT    (8)
 
 /* N25Q032 (4 MB) memory capacity */
 
-#define N25Q032_SECTOR_SIZE         (4*1024)
-#define N25Q032_SECTOR_SHIFT        (12)
-#define N25Q032_SECTOR_COUNT        (1024)
-#define N25Q032_PAGE_SIZE           (256)
-#define N25Q032_PAGE_SHIFT          (8)
+#define N25Q032_SECTOR_SIZE   (4*1024)
+#define N25Q032_SECTOR_SHIFT  (12)
+#define N25Q032_SECTOR_COUNT  (1024)
+#define N25Q032_PAGE_SIZE     (256)
+#define N25Q032_PAGE_SHIFT    (8)
 
 /* N25Q064 (8 MB) memory capacity */
 
-#define N25Q064_SECTOR_SIZE         (4*1024)
-#define N25Q064_SECTOR_SHIFT        (12)
-#define N25Q064_SECTOR_COUNT        (2048)
-#define N25Q064_PAGE_SIZE           (256)
-#define N25Q064_PAGE_SHIFT          (8)
+#define N25Q064_SECTOR_SIZE   (4*1024)
+#define N25Q064_SECTOR_SHIFT  (12)
+#define N25Q064_SECTOR_COUNT  (2048)
+#define N25Q064_PAGE_SIZE     (256)
+#define N25Q064_PAGE_SHIFT    (8)
 
 /* N25Q128 (16 MB) memory capacity */
 
-#define N25Q128_SECTOR_SIZE         (4*1024)
-#define N25Q128_SECTOR_SHIFT        (12)
-#define N25Q128_SECTOR_COUNT        (4096)
-#define N25Q128_PAGE_SIZE           (256)
-#define N25Q128_PAGE_SHIFT          (8)
+#define N25Q128_SECTOR_SIZE   (4*1024)
+#define N25Q128_SECTOR_SHIFT  (12)
+#define N25Q128_SECTOR_COUNT  (4096)
+#define N25Q128_PAGE_SIZE     (256)
+#define N25Q128_PAGE_SHIFT    (8)
 
 /* N25Q256 (32 MB) memory capacity */
 
-#define N25Q256_SECTOR_SIZE         (4*1024)
-#define N25Q256_SECTOR_SHIFT        (12)
-#define N25Q256_SECTOR_COUNT        (8196)
-#define N25Q256_PAGE_SIZE           (256)
-#define N25Q256_PAGE_SHIFT          (8)
+#define N25Q256_SECTOR_SIZE   (4*1024)
+#define N25Q256_SECTOR_SHIFT  (12)
+#define N25Q256_SECTOR_COUNT  (8196)
+#define N25Q256_PAGE_SIZE     (256)
+#define N25Q256_PAGE_SHIFT    (8)
 
 /* N25Q512 (64 MB) memory capacity */
 
-#define N25Q512_SECTOR_SIZE         (4*1024)
-#define N25Q512_SECTOR_SHIFT        (12)
-#define N25Q512_SECTOR_COUNT        (16384)
-#define N25Q512_PAGE_SIZE           (256)
-#define N25Q512_PAGE_SHIFT          (8)
+#define N25Q512_SECTOR_SIZE   (4*1024)
+#define N25Q512_SECTOR_SHIFT  (12)
+#define N25Q512_SECTOR_COUNT  (16384)
+#define N25Q512_PAGE_SIZE     (256)
+#define N25Q512_PAGE_SHIFT    (8)
 
 /* N25Q00 (128 MB) memory capacity */
 
-#define N25Q00_SECTOR_SIZE          (4*1024)
-#define N25Q00_SECTOR_SHIFT         (12)
-#define N25Q00_SECTOR_COUNT         (32768)
-#define N25Q00_PAGE_SIZE            (256)
-#define N25Q00_PAGE_SHIFT           (8)
+#define N25Q00_SECTOR_SIZE    (4*1024)
+#define N25Q00_SECTOR_SHIFT   (12)
+#define N25Q00_SECTOR_COUNT   (32768)
+#define N25Q00_PAGE_SIZE      (256)
+#define N25Q00_PAGE_SHIFT     (8)
 
-/* Cache flags **********************************************************************/
+/* Cache flags **************************************************************/
 
-#define N25QXXX_CACHE_VALID         (1 << 0)  /* 1=Cache has valid data */
-#define N25QXXX_CACHE_DIRTY         (1 << 1)  /* 1=Cache is dirty */
-#define N25QXXX_CACHE_ERASED        (1 << 2)  /* 1=Backing FLASH is erased */
+#define N25QXXX_CACHE_VALID   (1 << 0)  /* 1=Cache has valid data */
+#define N25QXXX_CACHE_DIRTY   (1 << 1)  /* 1=Cache is dirty */
+#define N25QXXX_CACHE_ERASED  (1 << 2)  /* 1=Backing FLASH is erased */
 
-#define IS_VALID(p)                 ((((p)->flags) & N25QXXX_CACHE_VALID) != 0)
-#define IS_DIRTY(p)                 ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
-#define IS_ERASED(p)                ((((p)->flags) & N25QXXX_CACHE_ERASED) != 0)
+#define IS_VALID(p)           ((((p)->flags) & N25QXXX_CACHE_VALID) != 0)
+#define IS_DIRTY(p)           ((((p)->flags) & N25QXXX_CACHE_DIRTY) != 0)
+#define IS_ERASED(p)          ((((p)->flags) & N25QXXX_CACHE_ERASED) != 0)
 
-#define SET_VALID(p)                do { (p)->flags |= N25QXXX_CACHE_VALID; } while (0)
-#define SET_DIRTY(p)                do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
-#define SET_ERASED(p)               do { (p)->flags |= N25QXXX_CACHE_ERASED; } while (0)
+#define SET_VALID(p)          do { (p)->flags |= N25QXXX_CACHE_VALID; } while (0)
+#define SET_DIRTY(p)          do { (p)->flags |= N25QXXX_CACHE_DIRTY; } while (0)
+#define SET_ERASED(p)         do { (p)->flags |= N25QXXX_CACHE_ERASED; } while (0)
 
-#define CLR_VALID(p)                do { (p)->flags &= ~N25QXXX_CACHE_VALID; } while (0)
-#define CLR_DIRTY(p)                do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
-#define CLR_ERASED(p)               do { (p)->flags &= ~N25QXXX_CACHE_ERASED; } while (0)
+#define CLR_VALID(p)          do { (p)->flags &= ~N25QXXX_CACHE_VALID; } while (0)
+#define CLR_DIRTY(p)          do { (p)->flags &= ~N25QXXX_CACHE_DIRTY; } while (0)
+#define CLR_ERASED(p)         do { (p)->flags &= ~N25QXXX_CACHE_ERASED; } while (0)
 
-/* 512 byte sector support **********************************************************/
+/* 512 byte sector support **************************************************/
 
 #define N25QXXX_SECTOR512_SHIFT     9
 #define N25QXXX_SECTOR512_SIZE      (1 << 9)
 #define N25QXXX_ERASED_STATE        0xff
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/* This type represents the state of the MTD device.  The struct mtd_dev_s must
- * appear at the beginning of the definition so that you can freely cast between
- * pointers to struct mtd_dev_s and struct n25qxxx_dev_s.
+/* This type represents the state of the MTD device.
+ * The struct mtd_dev_s must appear at the beginning of the definition
+ * so that you can freely cast between pointers to struct mtd_dev_s and
+ * struct n25qxxx_dev_s.
  */
 
 struct n25qxxx_dev_s
@@ -284,9 +300,9 @@ struct n25qxxx_dev_s
 #endif
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Locking */
 
@@ -296,12 +312,18 @@ static inline void n25qxxx_unlock(FAR struct qspi_dev_s *qspi);
 /* Low-level message helpers */
 
 static int  n25qxxx_command(FAR struct qspi_dev_s *qspi, uint8_t cmd);
-static int  n25qxxx_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
-              off_t addr, uint8_t addrlen);
-static int  n25qxxx_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
-              FAR void *buffer, size_t buflen);
-static int  n25qxxx_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
-              FAR const void *buffer, size_t buflen);
+static int  n25qxxx_command_address(FAR struct qspi_dev_s *qspi,
+                                    uint8_t cmd,
+                                    off_t addr,
+                                    uint8_t addrlen);
+static int  n25qxxx_command_read(FAR struct qspi_dev_s *qspi,
+                                 uint8_t cmd,
+                                 FAR void *buffer,
+                                 size_t buflen);
+static int  n25qxxx_command_write(FAR struct qspi_dev_s *qspi,
+                                  uint8_t cmd,
+                                  FAR const void *buffer,
+                                  size_t buflen);
 static uint8_t n25qxxx_read_status(FAR struct n25qxxx_dev_s *priv);
 static void n25qxxx_write_status(FAR struct n25qxxx_dev_s *priv);
 static uint8_t n25qxxx_read_volcfg(FAR struct n25qxxx_dev_s *priv);
@@ -311,62 +333,83 @@ static void n25qxxx_write_disable(FAR struct n25qxxx_dev_s *priv);
 
 static int  n25qxxx_readid(FAR struct n25qxxx_dev_s *priv);
 static int  n25qxxx_protect(FAR struct n25qxxx_dev_s *priv,
-              off_t startblock, size_t nblocks);
+                            off_t startblock,
+                            size_t nblocks);
 static int  n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
-              off_t startblock, size_t nblocks);
+                              off_t startblock,
+                              size_t nblocks);
 static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv,
-              uint8_t status, off_t address);
-static int  n25qxxx_erase_sector(FAR struct n25qxxx_dev_s *priv, off_t offset);
+                                uint8_t status,
+                                off_t address);
+static int  n25qxxx_erase_sector(FAR struct n25qxxx_dev_s *priv,
+                                 off_t offset);
 static int  n25qxxx_erase_chip(FAR struct n25qxxx_dev_s *priv);
-static int  n25qxxx_read_byte(FAR struct n25qxxx_dev_s *priv, FAR uint8_t *buffer,
-              off_t address, size_t nbytes);
+static int  n25qxxx_read_byte(FAR struct n25qxxx_dev_s *priv,
+                              FAR uint8_t *buffer,
+                              off_t address,
+                              size_t nbytes);
 static int  n25qxxx_write_page(FAR struct n25qxxx_dev_s *priv,
-              FAR const uint8_t *buffer, off_t address, size_t nbytes);
+                               FAR const uint8_t *buffer,
+                               off_t address,
+                               size_t nbytes);
 #ifdef CONFIG_N25QXXX_SECTOR512
 static int  n25qxxx_flush_cache(struct n25qxxx_dev_s *priv);
-static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv, off_t sector);
-static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector);
+static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv,
+                                       off_t sector);
+static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv,
+                                off_t sector);
 static int  n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
-              FAR const uint8_t *buffer,  off_t sector, size_t nsectors);
+                                FAR const uint8_t *buffer,
+                                off_t sector,
+                                size_t nsectors);
 #endif
 
 /* MTD driver methods */
 
-static int  n25qxxx_erase(FAR struct mtd_dev_s *dev, off_t startblock,
-              size_t nblocks);
-static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-              size_t nblocks, FAR uint8_t *buf);
-static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-              size_t nblocks, FAR const uint8_t *buf);
-static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-              FAR uint8_t *buffer);
-static int  n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int  n25qxxx_erase(FAR struct mtd_dev_s *dev,
+                          off_t startblock,
+                          size_t nblocks);
+static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev,
+                             off_t startblock,
+                             size_t nblocks,
+                             FAR uint8_t *buf);
+static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev,
+                              off_t startblock,
+                              size_t nblocks,
+                              FAR const uint8_t *buf);
+static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev,
+                            off_t offset,
+                            size_t nbytes,
+                            FAR uint8_t *buffer);
+static int  n25qxxx_ioctl(FAR struct mtd_dev_s *dev,
+                          int cmd,
+                          unsigned long arg);
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_lock
- ************************************************************************************/
+ ****************************************************************************/
 
 static void n25qxxx_lock(FAR struct qspi_dev_s *qspi)
 {
-  /* On QuadSPI buses where there are multiple devices, it will be necessary to
-   * lock QuadSPI to have exclusive access to the buses for a sequence of
+  /* On QuadSPI buses where there are multiple devices, it will be necessary
+   * to lock QuadSPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusive access to
-   * the QuadSPI bus.  We will retain that exclusive access until the bus is
-   * unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the QuadSPI bus.  We will retain that exclusive access until
+   * the bus is unlocked.
    */
 
   QSPI_LOCK(qspi, true);
 
-  /* After locking the QuadSPI bus, the we also need call the setfrequency, setbits,
-   * and setmode methods to make sure that the QuadSPI is properly configured for
-   * the device. If the QuadSPI bus is being shared, then it may have been left in
-   * an incompatible state.
+  /* After locking the QuadSPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the QuadSPI is properly
+   * configured for the device. If the QuadSPI bus is being shared, then it
+   * may have been left in an incompatible state.
    */
 
   QSPI_SETMODE(qspi, CONFIG_N25QXXX_QSPIMODE);
@@ -374,18 +417,18 @@ static void n25qxxx_lock(FAR struct qspi_dev_s *qspi)
   QSPI_SETFREQUENCY(qspi, CONFIG_N25QXXX_QSPI_FREQUENCY);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void n25qxxx_unlock(FAR struct qspi_dev_s *qspi)
 {
   QSPI_LOCK(qspi, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_command
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
 {
@@ -403,16 +446,19 @@ static int n25qxxx_command(FAR struct qspi_dev_s *qspi, uint8_t cmd)
   return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_command_address
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                   off_t addr, uint8_t addrlen)
 {
   struct qspi_cmdinfo_s cmdinfo;
 
-  finfo("CMD: %02x Address: %04lx addrlen=%d\n", cmd, (unsigned long)addr, addrlen);
+  finfo("CMD: %02x Address: %04lx addrlen=%d\n",
+        cmd,
+        (unsigned long)addr,
+        addrlen);
 
   cmdinfo.flags   = QSPICMD_ADDRESS;
   cmdinfo.addrlen = addrlen;
@@ -424,9 +470,9 @@ static int n25qxxx_command_address(FAR struct qspi_dev_s *qspi, uint8_t cmd,
   return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_command_read
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                 FAR void *buffer, size_t buflen)
@@ -445,9 +491,9 @@ static int n25qxxx_command_read(FAR struct qspi_dev_s *qspi, uint8_t cmd,
   return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_command_write
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
                                  FAR const void *buffer, size_t buflen)
@@ -466,9 +512,9 @@ static int n25qxxx_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
   return QSPI_COMMAND(qspi, &cmdinfo);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_read_status
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint8_t n25qxxx_read_status(FAR struct n25qxxx_dev_s *priv)
 {
@@ -477,9 +523,9 @@ static uint8_t n25qxxx_read_status(FAR struct n25qxxx_dev_s *priv)
   return priv->readbuf[0];
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_write_status
- ************************************************************************************/
+ ****************************************************************************/
 
 static void n25qxxx_write_status(FAR struct n25qxxx_dev_s *priv)
 {
@@ -494,9 +540,9 @@ static void n25qxxx_write_status(FAR struct n25qxxx_dev_s *priv)
   n25qxxx_write_disable(priv);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_read_volcfg
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint8_t n25qxxx_read_volcfg(FAR struct n25qxxx_dev_s *priv)
 {
@@ -505,9 +551,9 @@ static uint8_t n25qxxx_read_volcfg(FAR struct n25qxxx_dev_s *priv)
   return priv->readbuf[0];
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_write_volcfg
- ************************************************************************************/
+ ****************************************************************************/
 
 static void n25qxxx_write_volcfg(FAR struct n25qxxx_dev_s *priv)
 {
@@ -517,9 +563,9 @@ static void n25qxxx_write_volcfg(FAR struct n25qxxx_dev_s *priv)
   n25qxxx_write_disable(priv);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_write_enable
- ************************************************************************************/
+ ****************************************************************************/
 
 static void n25qxxx_write_enable(FAR struct n25qxxx_dev_s *priv)
 {
@@ -533,9 +579,9 @@ static void n25qxxx_write_enable(FAR struct n25qxxx_dev_s *priv)
   while ((status & STATUS_WEL_MASK) != STATUS_WEL_ENABLED);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_write_disable
- ************************************************************************************/
+ ****************************************************************************/
 
 static void n25qxxx_write_disable(FAR struct n25qxxx_dev_s *priv)
 {
@@ -549,9 +595,9 @@ static void n25qxxx_write_disable(FAR struct n25qxxx_dev_s *priv)
   while ((status & STATUS_WEL_MASK) != STATUS_WEL_DISABLED);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_readid
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline int n25qxxx_readid(struct n25qxxx_dev_s *priv)
 {
@@ -635,9 +681,9 @@ static inline int n25qxxx_readid(struct n25qxxx_dev_s *priv)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_protect
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_protect(FAR struct n25qxxx_dev_s *priv,
                           off_t startblock, size_t nblocks)
@@ -683,9 +729,9 @@ static int n25qxxx_protect(FAR struct n25qxxx_dev_s *priv,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_unprotect
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
                             off_t startblock, size_t nblocks)
@@ -694,7 +740,7 @@ static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
 
   priv->cmdbuf[0] = n25qxxx_read_status(priv);
 
-  if ((priv->cmdbuf[0] & (STATUS_BP3_MASK|STATUS_BP_MASK)) == 0 )
+  if ((priv->cmdbuf[0] & (STATUS_BP3_MASK | STATUS_BP_MASK)) == 0)
     {
       /* Protection already disabled */
 
@@ -705,8 +751,8 @@ static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
 
   if ((priv->cmdbuf[0] & STATUS_SRP0_MASK) == STATUS_SRP0_LOCKED)
     {
-      /* the SRP bit is one time programmable; if it's set, there's nothing that
-       * you can do to unset it.
+      /* the SRP bit is one time programmable; if it's set, there's nothing
+       * that you can do to unset it.
        */
 
       return -EACCES;
@@ -717,13 +763,14 @@ static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
    * necessary to unprotect the range of sectors.
    */
 
-  priv->cmdbuf[0] &= ~(STATUS_BP3_MASK|STATUS_BP_MASK);
+  priv->cmdbuf[0] &= ~(STATUS_BP3_MASK | STATUS_BP_MASK);
   n25qxxx_write_status(priv);
 
   /* Check the new status */
 
   priv->cmdbuf[0] = n25qxxx_read_status(priv);
-  if ((priv->cmdbuf[0] & (STATUS_SRP0_MASK | STATUS_BP3_MASK | STATUS_BP_MASK)) != 0)
+  if ((priv->cmdbuf[0] &
+      (STATUS_SRP0_MASK | STATUS_BP3_MASK | STATUS_BP_MASK)) != 0)
     {
       return -EACCES;
     }
@@ -731,12 +778,13 @@ static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_isprotected
- ************************************************************************************/
+ ****************************************************************************/
 
-static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv, uint8_t status,
-                               off_t address)
+static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv,
+                                uint8_t status,
+                                off_t address)
 {
   off_t protstart;
   off_t protend;
@@ -751,11 +799,11 @@ static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv, uint8_t status,
       bp |= 8;
     }
 
-  /* the BP field is essentially the power-of-two of the number of 64k sectors,
-   * saturated to the device size.
+  /* the BP field is essentially the power-of-two of the number of 64k
+   * sectors, saturated to the device size.
    */
 
-  if ( 0 == bp )
+  if (0 == bp)
     {
       return false;
     }
@@ -763,7 +811,7 @@ static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv, uint8_t status,
   protsize = 0x00010000;
   protsize <<= (protsize << (bp - 1));
   protend = (1 << priv->sectorshift) * priv->nsectors;
-  if ( protsize > protend )
+  if (protsize > protend)
     {
       protsize = protend;
     }
@@ -780,15 +828,16 @@ static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv, uint8_t status,
   else
     {
       protstart = protend - protsize;
+
       /* protend already computed above */
     }
 
   return (address >= protstart && address < protend);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_erase_sector
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_erase_sector(struct n25qxxx_dev_s *priv, off_t sector)
 {
@@ -810,7 +859,7 @@ static int n25qxxx_erase_sector(struct n25qxxx_dev_s *priv, off_t sector)
 
   address = (off_t)sector << priv->sectorshift;
 
-  if ((status & (STATUS_BP3_MASK|STATUS_BP_MASK)) != 0 &&
+  if ((status & (STATUS_BP3_MASK | STATUS_BP_MASK)) != 0 &&
       n25qxxx_isprotected(priv, status, address))
     {
       ferr("ERROR: Flash protected: %02x", status);
@@ -829,9 +878,9 @@ static int n25qxxx_erase_sector(struct n25qxxx_dev_s *priv, off_t sector)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_erase_chip
- ************************************************************************************/
+ ****************************************************************************/
 
 static int n25qxxx_erase_chip(struct n25qxxx_dev_s *priv)
 {
@@ -840,7 +889,7 @@ static int n25qxxx_erase_chip(struct n25qxxx_dev_s *priv)
   /* Check if the FLASH is protected */
 
   status = n25qxxx_read_status(priv);
-  if ((status & (STATUS_BP3_MASK|STATUS_BP_MASK)) != 0)
+  if ((status & (STATUS_BP3_MASK | STATUS_BP_MASK)) != 0)
     {
       ferr("ERROR: FLASH is Protected: %02x", status);
       return -EACCES;
@@ -856,19 +905,21 @@ static int n25qxxx_erase_chip(struct n25qxxx_dev_s *priv)
   status = n25qxxx_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      nxsig_usleep(200*1000);
+      nxsig_usleep(200 * 1000);
       status = n25qxxx_read_status(priv);
     }
 
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_read_byte
- ************************************************************************************/
+ ****************************************************************************/
 
-static int n25qxxx_read_byte(FAR struct n25qxxx_dev_s *priv, FAR uint8_t *buffer,
-                            off_t address, size_t buflen)
+static int n25qxxx_read_byte(FAR struct n25qxxx_dev_s *priv,
+                             FAR uint8_t *buffer,
+                             off_t address,
+                             size_t buflen)
 {
   struct qspi_meminfo_s meminfo;
 
@@ -885,12 +936,14 @@ static int n25qxxx_read_byte(FAR struct n25qxxx_dev_s *priv, FAR uint8_t *buffer
   return QSPI_MEMORY(priv->qspi, &meminfo);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name:  n25qxxx_write_page
- ************************************************************************************/
+ ****************************************************************************/
 
-static int n25qxxx_write_page(struct n25qxxx_dev_s *priv, FAR const uint8_t *buffer,
-                             off_t address, size_t buflen)
+static int n25qxxx_write_page(struct n25qxxx_dev_s *priv,
+                              FAR const uint8_t *buffer,
+                              off_t address,
+                              size_t buflen)
 {
   struct qspi_meminfo_s meminfo;
   unsigned int pagesize;
@@ -898,7 +951,9 @@ static int n25qxxx_write_page(struct n25qxxx_dev_s *priv, FAR const uint8_t *buf
   int ret;
   int i;
 
-  finfo("address: %08lx buflen: %u\n", (unsigned long)address, (unsigned)buflen);
+  finfo("address: %08lx buflen: %u\n",
+       (unsigned long)address,
+       (unsigned)buflen);
 
   npages   = (buflen >> priv->pageshift);
   pagesize = (1 << priv->pageshift);
@@ -928,8 +983,8 @@ static int n25qxxx_write_page(struct n25qxxx_dev_s *priv, FAR const uint8_t *buf
 
       if (ret < 0)
         {
-          ferr("ERROR: QSPI_MEMORY failed writing address=%06x\n",
-               address);
+          ferr("ERROR: QSPI_MEMORY failed writing address=%06jx\n",
+               (intmax_t)address);
           return ret;
         }
 
@@ -949,18 +1004,18 @@ static int n25qxxx_write_page(struct n25qxxx_dev_s *priv, FAR const uint8_t *buf
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_flush_cache
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
 static int n25qxxx_flush_cache(struct n25qxxx_dev_s *priv)
 {
   int ret = OK;
 
-  /* If the cache is dirty (meaning that it no longer matches the old FLASH contents)
-   * or was erased (with the cache containing the correct FLASH contents), then write
-   * the cached erase block to FLASH.
+  /* If the cache is dirty (meaning that it no longer matches the old FLASH
+   * contents) or was erased (with the cache containing the correct FLASH
+   * contents), then write the cached erase block to FLASH.
    */
 
   if (IS_DIRTY(priv) || IS_ERASED(priv))
@@ -973,7 +1028,8 @@ static int n25qxxx_flush_cache(struct n25qxxx_dev_s *priv)
 
       /* Write entire erase block to FLASH */
 
-      ret = n25qxxx_write_page(priv, priv->sector, address, 1 << priv->sectorshift);
+      ret = n25qxxx_write_page(priv, priv->sector,
+                               address, 1 << priv->sectorshift);
       if (ret < 0)
         {
           ferr("ERROR: n25qxxx_write_page failed: %d\n", ret);
@@ -989,26 +1045,29 @@ static int n25qxxx_flush_cache(struct n25qxxx_dev_s *priv)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_read_cache
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
-static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv, off_t sector)
+static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv,
+                                       off_t sector)
 {
   off_t esectno;
   int   shift;
   int   index;
   int   ret;
 
-  /* Convert from the 512 byte sector to the erase sector size of the device.  For
-   * example, if the actual erase sector size is 4Kb (1 << 12), then we first
-   * shift to the right by 3 to get the sector number in 4096 increments.
+  /* Convert from the 512 byte sector to the erase sector size of the device.
+   * For example, if the actual erase sector size is 4Kb (1 << 12), then we
+   * first shift to the right by 3 to get the sector number in 4096
+   * increments.
    */
 
   shift    = priv->sectorshift - N25QXXX_SECTOR512_SHIFT;
   esectno  = sector >> shift;
-  finfo("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
+  finfo("sector: %jd esectno: %jd shift=%d\n",
+        (intmax_t)sector, (intmax_t)esectno, shift);
 
   /* Check if the requested erase block is already in the cache */
 
@@ -1038,12 +1097,14 @@ static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv, off_t sector)
 
       priv->esectno = esectno;
 
-      SET_VALID(priv);          /* The data in the cache is valid */
-      CLR_DIRTY(priv);          /* It should match the FLASH contents */
-      CLR_ERASED(priv);         /* The underlying FLASH has not been erased */
+      SET_VALID(priv);      /* The data in the cache is valid */
+      CLR_DIRTY(priv);      /* It should match the FLASH contents */
+      CLR_ERASED(priv);     /* The underlying FLASH has not been erased */
     }
 
-  /* Get the index to the 512 sector in the erase block that holds the argument */
+  /* Get the index to the 512 sector in the erase block that holds the
+   * argument
+   */
 
   index = sector & ((1 << shift) - 1);
 
@@ -1053,17 +1114,17 @@ static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv, off_t sector)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_erase_cache
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
 static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector)
 {
   FAR uint8_t *dest;
 
-  /* First, make sure that the erase block containing the 512 byte sector is in
-   * the cache.
+  /* First, make sure that the erase block containing the 512 byte sector is
+   * in the cache.
    */
 
   dest = n25qxxx_read_cache(priv, sector);
@@ -1075,16 +1136,18 @@ static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector)
 
   if (!IS_ERASED(priv))
     {
-      off_t esectno  = sector >> (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
-      finfo("sector: %ld esectno: %d\n", sector, esectno);
+      off_t esectno  = sector >>
+                       (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
+      finfo("sector: %jd esectno: %jd\n",
+            (intmax_t)sector, (intmax_t)esectno);
 
       DEBUGVERIFY(n25qxxx_erase_sector(priv, esectno));
       SET_ERASED(priv);
     }
 
-  /* Put the cached sector data into the erase state and mark the cache as dirty
-   * (but don't update the FLASH yet.  The caller will do that at a more optimal
-   * time).
+  /* Put the cached sector data into the erase state and mark the cache as
+   * dirty (but don't update the FLASH yet.  The caller will do that at a
+   * more optimal time).
    */
 
   memset(dest, N25QXXX_ERASED_STATE, N25QXXX_SECTOR512_SIZE);
@@ -1092,9 +1155,9 @@ static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_write_cache
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
 static int n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
@@ -1106,21 +1169,23 @@ static int n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
 
   for (; nsectors > 0; nsectors--)
     {
-      /* First, make sure that the erase block containing 512 byte sector is in
-       * memory.
+      /* First, make sure that the erase block containing 512 byte sector is
+       * in memory.
        */
 
       dest = n25qxxx_read_cache(priv, sector);
 
       /* Erase the block containing this sector if it is not already erased.
-       * The erased indicated will be cleared when the data from the erase sector
-       * is read into the cache and set here when we erase the sector.
+       * The erased indicated will be cleared when the data from the erase
+       * sector is read into the cache and set here when we erase the sector.
        */
 
       if (!IS_ERASED(priv))
         {
-          off_t esectno  = sector >> (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
-          finfo("sector: %ld esectno: %d\n", sector, esectno);
+          off_t esectno  = sector >>
+                           (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
+          finfo("sector: %jd esectno: %jd\n",
+                (intmax_t)sector, (intmax_t)esectno);
 
           ret = n25qxxx_erase_sector(priv, esectno);
           if (ret < 0)
@@ -1149,11 +1214,13 @@ static int n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_erase
- ************************************************************************************/
+ ****************************************************************************/
 
-static int n25qxxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks)
+static int n25qxxx_erase(FAR struct mtd_dev_s *dev,
+                         off_t startblock,
+                         size_t nblocks)
 {
   FAR struct n25qxxx_dev_s *priv = (FAR struct n25qxxx_dev_s *)dev;
   size_t blocksleft = nblocks;
@@ -1194,9 +1261,9 @@ static int n25qxxx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
   return (int)nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_bread
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks, FAR uint8_t *buffer)
@@ -1208,7 +1275,9 @@ static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* On this device, we can handle the block read just like the byte-oriented read */
+  /* On this device, we can handle the block read just like the byte-oriented
+   * read
+   */
 
 #ifdef CONFIG_N25QXXX_SECTOR512
   nbytes = n25qxxx_read(dev, startblock << N25QXXX_SECTOR512_SHIFT,
@@ -1229,9 +1298,9 @@ static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   return nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_bwrite
- ************************************************************************************/
+ ****************************************************************************/
 
 static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks, FAR const uint8_t *buffer)
@@ -1266,12 +1335,14 @@ static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   return ret < 0 ? ret : nblocks;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_read
- ************************************************************************************/
+ ****************************************************************************/
 
-static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                           FAR uint8_t *buffer)
+static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev,
+                            off_t offset,
+                            size_t nbytes,
+                            FAR uint8_t *buffer)
 {
   FAR struct n25qxxx_dev_s *priv = (FAR struct n25qxxx_dev_s *)dev;
   int ret;
@@ -1294,11 +1365,13 @@ static ssize_t n25qxxx_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbyt
   return (ssize_t)nbytes;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_ioctl
- ************************************************************************************/
+ ****************************************************************************/
 
-static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
+static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev,
+                         int cmd,
+                         unsigned long arg)
 {
   FAR struct n25qxxx_dev_s *priv = (FAR struct n25qxxx_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
@@ -1314,19 +1387,22 @@ static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks.  That is most likely not true, but
+               * the client will expect the device logic to do whatever is
+               * necessary to make it appear so.
                */
 
 #ifdef CONFIG_N25QXXX_SECTOR512
               geo->blocksize    = (1 << N25QXXX_SECTOR512_SHIFT);
               geo->erasesize    = (1 << N25QXXX_SECTOR512_SHIFT);
-              geo->neraseblocks = priv->nsectors << (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);
+              geo->neraseblocks = priv->nsectors <<
+                                  (priv->sectorshift -
+                                   N25QXXX_SECTOR512_SHIFT);
 #else
               geo->blocksize    = (1 << priv->pageshift);
               geo->erasesize    = (1 << priv->sectorshift);
@@ -1334,7 +1410,8 @@ static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+                    " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
         }
@@ -1379,24 +1456,25 @@ static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: n25qxxx_initialize
  *
  * Description:
  *   Create an initialize MTD device instance for the QuadSPI-based n25Qxxx
  *   FLASH part.
  *
- *   MTD devices are not registered in the file system, but are created as instances
- *   that can be bound to other functions (such as a block or character driver front
- *   end).
+ *   MTD devices are not registered in the file system, but are created as
+ *   instances that can be bound to other functions (such as a block or
+ *   character driver front end).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unprotect)
+FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi,
+                                         bool unprotect)
 {
   FAR struct n25qxxx_dev_s *priv;
   int ret;
@@ -1407,11 +1485,13 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
    * The current implementation would handle only one FLASH part per QuadSPI
-   * device (only because of the QSPIDEV_FLASH(0) definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same QuadSPI bus.
+   * device (only because of the QSPIDEV_FLASH(0) definition) and so would
+   * have to be extended to handle multiple FLASH parts on the same QuadSPI
+   * bus.
    */
 
-  priv = (FAR struct n25qxxx_dev_s *)kmm_zalloc(sizeof(struct n25qxxx_dev_s));
+  priv = (FAR struct n25qxxx_dev_s *)
+          kmm_zalloc(sizeof(struct n25qxxx_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were
@@ -1449,20 +1529,22 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
       ret = n25qxxx_readid(priv);
       if (ret != OK)
         {
-          /* Unrecognized! Discard all of that work we just did and return NULL */
+          /* Unrecognized! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR Unrecognized QSPI device\n");
           goto errout_with_readbuf;
         }
 
-        /* Specify the number of dummy cycles via the 'volatile configuration
-         * register'
-         */
+      /* Specify the number of dummy cycles via the 'volatile
+       * configuration register'
+       */
 
-        priv->cmdbuf[0] = n25qxxx_read_volcfg(priv);
-        priv->cmdbuf[0] &= 0x0f;
-        priv->cmdbuf[0] |= (CONFIG_N25QXXX_DUMMIES<<4);
-        n25qxxx_write_volcfg(priv);
+      priv->cmdbuf[0] = n25qxxx_read_volcfg(priv);
+      priv->cmdbuf[0] &= 0x0f;
+      priv->cmdbuf[0] |= (CONFIG_N25QXXX_DUMMIES << 4);
+      n25qxxx_write_volcfg(priv);
 
       /* Unprotect FLASH sectors if so requested. */
 
@@ -1481,7 +1563,9 @@ FAR struct mtd_dev_s *n25qxxx_initialize(FAR struct qspi_dev_s *qspi, bool unpro
       priv->sector = (FAR uint8_t *)QSPI_ALLOC(qspi, 1 << priv->sectorshift);
       if (priv->sector == NULL)
         {
-          /* Allocation failed! Discard all of that work we just did and return NULL */
+          /* Allocation failed! Discard all of that work we just did and
+           * return NULL
+           */
 
           ferr("ERROR: Sector allocation failed\n");
           goto errout_with_readbuf;

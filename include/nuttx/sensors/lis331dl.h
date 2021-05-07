@@ -1,51 +1,38 @@
 /****************************************************************************
  * include/nuttx/sensors/lis331dl.h
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Authors: Uros Platise <uros.platise@isotel.eu>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 #define __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 
+#if defined(CONFIG_I2C) && defined(CONFIG_LIS331DL)
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_LIS331DL)
-
-/************************************************************************************
+/****************************************************************************
  * Pre-Processor Declarations
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -58,9 +45,9 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct lis331dl_dev_s;
 
@@ -73,11 +60,11 @@ struct lis331dl_vector_s
 
 struct i2c_master_s;
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_init
  *
  * Description:
@@ -88,58 +75,59 @@ struct i2c_master_s;
  *   address - I2C Address of the proposed device
  *
  * Returned Value:
- *   Pointer to newly allocated ST LIS331DL structure or NULL on error with errno
- *   set.
+ *   Pointer to newly allocated ST LIS331DL structure or NULL on error with
+ *   errno set.
  *
  * Possible errno as set by this function on error:
- *  - ENODEV: When device addressed on given address is not compatible or it is not
- *    a LIS331DL
+ *  - ENODEV: When device addressed on given address is not compatible or it
+ *    is not a LIS331DL
  *  - EFAULT: When there is no device at given address.
  *  - EBUSY: When device is already addressed by other device driver (not yet
  *    supported by low-level driver)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_master_s *i2c,
                                          uint16_t address);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_deinit
  *
  * Description:
  *   Uninitialize ST LIS331DL Chip
  *
  * Input Parameters:
- *   dev - Device to LIS331DL device structure, as returned by the lis331dl_init()
+ *   dev - Device to LIS331DL device structure, as returned by the
+ *         lis331dl_init()
  *
  * Returned Value:
  *   OK On success
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lis331dl_deinit(FAR struct lis331dl_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_powerup
  *
  * Description:
  *   Power up device, start conversion
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lis331dl_powerup(FAR struct lis331dl_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_powerdown
  *
  * Description:
  *   Power down device, stop conversion
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lis331dl_powerdown(FAR struct lis331dl_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_setconversion
  *
  * Description:
@@ -153,11 +141,13 @@ int lis331dl_powerdown(FAR struct lis331dl_dev_s *dev);
  * Returned Value:
  *   OK on success or errno is set
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int lis331dl_setconversion(FAR struct lis331dl_dev_s *dev, bool full, bool fast);
+int lis331dl_setconversion(FAR struct lis331dl_dev_s *dev,
+                           bool full,
+                           bool fast);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_getprecision
  *
  * Description:
@@ -166,11 +156,11 @@ int lis331dl_setconversion(FAR struct lis331dl_dev_s *dev, bool full, bool fast)
  * Returned Value:
  *   Precision of 1 LSB in terms of unit [mg]
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lis331dl_getprecision(FAR struct lis331dl_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_getsamplerate
  *
  * Description:
@@ -179,11 +169,11 @@ int lis331dl_getprecision(FAR struct lis331dl_dev_s *dev);
  * Returned Value:
  *   Sample rate in units of [Hz]
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int lis331dl_getsamplerate(FAR struct lis331dl_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Name: lis331dl_getreadings
  *
  * Description:
@@ -193,11 +183,11 @@ int lis331dl_getsamplerate(FAR struct lis331dl_dev_s *dev);
  *   dev - Device to LIS331DL device structure
  *
  * Returned Value:
- *   Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno
- *   set.  If data is not yet ready to be read from the LIS331 then errno is set
- *   to EAGAIN otherwise errno is set by I2C_TRANSFER().
+ *   Ptr to vector acceleration [x,y,z] on success, or NULL on error with
+ *   errno set.  If data is not yet ready to be read from the LIS331 then
+ *   errno is set to EAGAIN otherwise errno is set by I2C_TRANSFER().
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR const struct lis331dl_vector_s *
   lis331dl_getreadings(FAR struct lis331dl_dev_s *dev);

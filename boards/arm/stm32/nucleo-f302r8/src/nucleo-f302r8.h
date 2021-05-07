@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo F302R8 board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -72,6 +73,7 @@
 #define LED_DRIVER_PATH "/dev/userleds"
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo F302R8 supports two buttons; only one button is controllable
  * by software:
  *
@@ -101,6 +103,26 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ *   CONFIG_LIB_BOARDCTL=y:
+ *     If CONFIG_NSH_ARCHINITIALIZE=y:
+ *       Called from the NSH library (or other application)
+ *     Otherwise, assumed to be called from some other application.
+ *
+ *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
+ *     Called from board_late_initialize().
+ *
+ *   Otherwise, bad news:  Never called
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32_pwm_setup
  *
  * Description:
@@ -110,6 +132,30 @@
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_foc_setup
+ *
+ * Description:
+ *  Initialize FOC peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_FOC
+int stm32_foc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int stm32_adc_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_F302R8_SRC_NUCLEO_F302R8_H */

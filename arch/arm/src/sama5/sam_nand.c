@@ -4,10 +4,6 @@
  *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   SAMA5D3 Series Data Sheet
- *   Atmel NoOS sample code.
- *
  * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
@@ -41,6 +37,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
+/* References:
+ *   SAMA5D3 Series Data Sheet
+ *   Atmel NoOS sample code.
+ */
 
 /****************************************************************************
  * Included Files
@@ -422,7 +423,9 @@ static int nand_operation_complete(struct sam_nandcs_s *priv)
   nand_nfc_cleale(priv, 0, COMMAND_STATUS, 0, 0, 0);
   status = READ_DATA8(&priv->raw);
 
-  /* On successful completion, the NAND will be READY with no ERROR conditions */
+  /* On successful completion,
+   * the NAND will be READY with no ERROR conditions
+   */
 
   if ((status & STATUS_ERROR) != 0)
     {
@@ -738,7 +741,9 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_CMDDONE);
   leave_critical_section(flags);
 #else
-  /* Just sample and clear any pending NFC status, then clear CMDDONE status */
+  /* Just sample and clear any pending NFC status,
+   * then clear CMDDONE status
+   */
 
   nand_nfc_poll();
   g_nand.cmddone = false;
@@ -824,7 +829,9 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_XFRDONE);
   leave_critical_section(flags);
 #else
-  /* Just sample and clear any pending NFC status, then clear XFRDONE status */
+  /* Just sample and clear any pending NFC status,
+   * then clear XFRDONE status
+   */
 
   nand_nfc_poll();
   g_nand.xfrdone = false;
@@ -910,7 +917,9 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_RBEDGE0);
   leave_critical_section(flags);
 #else
-  /* Just sample and clear any pending NFC status, then clear RBEDGE0 status */
+  /* Just sample and clear any pending NFC status,
+   * then clear RBEDGE0 status
+   */
 
   nand_nfc_poll();
   g_nand.rbedge = false;
@@ -2863,7 +2872,9 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   finfo("CS%d\n", cs);
 
-  /* Select the device structure (In SAMA5D3, NAND is only supported on CS3). */
+  /* Select the device structure
+   * (In SAMA5D3, NAND is only supported on CS3).
+   */
 
 #ifdef CONFIG_SAMA5_EBICS0_NAND
   if (cs == HSMC_CS0)

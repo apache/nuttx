@@ -1,55 +1,39 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kinetis/hardware/kinetis_mcg.h
  *
- *   Copyright (C) 2011, 2016-2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MCG_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MCG_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define KINETIS_MCG_C1_OFFSET       0x0000 /* MCG Control 1 Register */
 #define KINETIS_MCG_C2_OFFSET       0x0001 /* MCG Control 2 Register */
@@ -97,7 +81,7 @@
 #  define KINETIS_MCG_T3_OFFSET     0x0013 /* MCG Control T3 Register */
 #endif
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define KINETIS_MCG_C1            (KINETIS_MCG_BASE+KINETIS_MCG_C1_OFFSET)
 #define KINETIS_MCG_C2            (KINETIS_MCG_BASE+KINETIS_MCG_C2_OFFSET)
@@ -143,7 +127,7 @@
 #  define KINETIS_MCG_T3          (KINETIS_MCG_BASE+KINETIS_MCG_T3_OFFSET)
 #endif
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* MCG Control 1 Register (8-bit) */
 
@@ -176,6 +160,7 @@
 #      define MCG_C1_FRDIV_DIV1536  (7 << MCG_C1_FRDIV_SHIFT) /* RANGE!=0 divider=1536 */
 #    endif
 #endif /* defined (KINETIS_MCG_HAS  _C1_FRDIV) */
+
 #define MCG_C1_CLKS_SHIFT           (6)       /* Bits 6-7: Clock Source Select */
 #define MCG_C1_CLKS_MASK            (3 << MCG_C1_CLKS_SHIFT)
 #  define MCG_C1_CLKS_PLL           (0 << MCG_C1_CLKS_SHIFT) /* FLL or PLL output */
@@ -197,6 +182,7 @@
 #    define MCG_C2_RANGE_HIGH       (1 << MCG_C2_RANGE_SHIFT) /* Oscillator of 1 MHz to 8 MHz */
 #    define MCG_C2_RANGE_VHIGH      (2 << MCG_C2_RANGE_SHIFT) /* Oscillator of 8 MHz to 32 MHz */
 #endif
+
 #if defined(KINETIS_MCG_HAS_C2_FCFTRIM)
 #  define MCG_C2_FCFTRIM            (1 << 6)  /* Bit 6:  Fast Internal Reference Clock Fine Trim */
 #endif
@@ -204,7 +190,9 @@
 #  define MCG_C2_LOCRE0             (1 << 7)  /* Bit 7: Loss of Clock Reset Enable */
 #endif
 
-/* MCG Control 3 Register (8-bit Slow Internal Reference Clock Trim Setting) */
+/* MCG Control 3 Register
+ * (8-bit Slow Internal Reference Clock Trim Setting)
+ */
 
 /* MCG Control 4 Register (8-bit) */
 
@@ -260,7 +248,9 @@
 #    define MCG_S_CLKST_INTREF      (1 << MCG_S_CLKST_SHIFT) /* Internal reference clock */
 #    define MCG_S_CLKST_EXTREF      (2 << MCG_S_CLKST_SHIFT) /* External reference clock */
 #    define MCG_S_CLKST_PLL         (3 << MCG_S_CLKST_SHIFT) /* Output of the PLL */
+
 #  define MCG_S_IREFST              (1 << 4)  /* Bit 4:  Internal Reference Status */
+
 #  if defined(KINETIS_MCG_HAS_S_PLLST)
 #    define MCG_S_PLLST             (1 << 5)  /* Bit 5:  PLL Select Status */
 #  endif
@@ -288,6 +278,7 @@
 #  define MCG_SC_FCRDIV_SHIFT       (1)       /* Bits 1-3: Fast Clock Internal Reference Divider */
 #  define MCG_SC_FCRDIV_MASK        (7 << MCG_SC_FLTPRSRV_SHIFT)
 #  define MCG_SC_FCRDIV(n)          (((n)) << MCG_SC_FLTPRSRV_SHIFT)  /* n=0..7 */
+
 #  define MCG_SC_FCRDIV_1           (0 << MCG_SC_FLTPRSRV_SHIFT)  /* Divide Factor is 1 */
 #  define MCG_SC_FCRDIV_2           (1 << MCG_SC_FLTPRSRV_SHIFT)  /* Divide Factor is 2 */
 #  define MCG_SC_FCRDIV_4           (2 << MCG_SC_FLTPRSRV_SHIFT)  /* Divide Factor is 4 */
@@ -296,6 +287,7 @@
 #  define MCG_SC_FCRDIV_32          (5 << MCG_SC_FLTPRSRV_SHIFT)  /* Divide Factor is 32 */
 #  define MCG_SC_FCRDIV_64          (6 << MCG_SC_FLTPRSRV_SHIFT)  /* Divide Factor is 64 */
 #  define MCG_SC_FCRDIV_128         (7 << MCG_SC_FLTPRSRV_SHIFT)  /* Divide Factor is 128 */
+
 #  define MCG_SC_FLTPRSRV           (1 << 4)  /* Bit 4:  FLL Filter Preserve Enable */
 #  if defined(KINETIS_MCG_HAS_SC_ATMF)
 #    define MCG_SC_ATMF             (1 << 5)  /* Bit 5:  Automatic Trim machine Fail Flag */
@@ -314,10 +306,10 @@
 #  if defined(KINETIS_MCG_HAS_C7_OSCSEL)
 #    define MCG_C7_OSCSEL_SHIFT    (0)        /* Bits 0-[1]: MCG OSC Clock Select */
 #    define MCG_C7_OSCSEL_MASK     (KINETIS_MCG_C7_OSCSEL_MASK << MCG_C7_OSCSEL_SHIFT)
-#    define MCG_C7_OSCSEL_OSCCLK   (0 << MCG_C7_OSCSEL_SHIFT)  /* Selects Oscillator (OSCCLK) */
-#    define MCG_C7_OSCSEL_32KHZ    (1 << MCG_C7_OSCSEL_SHIFT)  /* Selects 32 kHz RTC Oscillator */
+#    define MCG_C7_OSCSEL_OSCCLK   (0 << MCG_C7_OSCSEL_SHIFT)   /* Selects Oscillator (OSCCLK) */
+#    define MCG_C7_OSCSEL_32KHZ    (1 << MCG_C7_OSCSEL_SHIFT)   /* Selects 32 kHz RTC Oscillator */
 #    if (KINETIS_MCG_C7_OSCSEL_MASK & 2) != 0
-#      define MCG_C7_OSCSEL_OSCCLK1  (2 << MCG_C7_OSCSEL_SHIFT)  /* Selects Oscillator (OSCCLK1). */
+#      define MCG_C7_OSCSEL_OSCCLK1  (2 << MCG_C7_OSCSEL_SHIFT) /* Selects Oscillator (OSCCLK1). */
 #    endif
 #  endif
 #endif
@@ -370,6 +362,7 @@
 #    define MCG_C10_RANGE_LOW       (0 << MCG_C10_RANGE_SHIFT) /* Oscillator of 32 kHz to 40 kHz  */
 #    define MCG_C10_RANGE_HIGH      (1 << MCG_C10_RANGE_SHIFT) /* Oscillator of 1 MHz to 8 MHz */
 #    define MCG_C10_RANGE_VHIGH     (2 << MCG_C10_RANGE_SHIFT) /* Oscillator of 8 MHz to 32 MHz */
+
                                               /* Bit 6: Reserved */
 #  define MCG_C10_LOCRE2            (1 << 7)  /* Bit 7: OSC1 Loss of Clock Reset Enable */
 #endif
@@ -401,6 +394,7 @@
 #  define MCG_C12_VDIV1_SHIFT       (0)       /* Bits 0-4: VCO Divider */
 #  define MCG_C12_VDIV1_MASK        (31 << MCG_C12_VDIV1_SHIFT)
 #  define MCG_C12_VDIV(n)           (((n)-16) << MCG_C12_VDIV1_SHIFT) /* n=16..47 */
+
 #  define MCG_C12_CME2              (1 << 5)  /* Bit 5:  Clock Monitor Enable2 */
                                               /* Bit 6: Reserved */
 #  define MCG_C12_LOLIE1            (1 << 7)  /* Bit 7:  PLL1 Loss of Lock Interrupt Enable */
@@ -424,16 +418,16 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_MCG_H */

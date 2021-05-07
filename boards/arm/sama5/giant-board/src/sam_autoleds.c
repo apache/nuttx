@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/giant-board/src/sam_autoleds.c
+ * boards/arm/sama5/giant-board/src/sam_autoleds.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with

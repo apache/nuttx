@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/esp32_serial.c
  *
- *   Copyright (C) 2016-2017, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -63,7 +48,6 @@
 #include "hardware/esp32_iomux.h"
 #include "hardware/esp32_gpio_sigmap.h"
 #include "hardware/esp32_uart.h"
-#include "rom/esp32_gpio.h"
 #include "esp32_config.h"
 #include "esp32_gpio.h"
 #include "esp32_cpuint.h"
@@ -529,17 +513,17 @@ static int esp32_setup(struct uart_dev_s *dev)
    */
 
   esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
-  gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
+  esp32_gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
 
   esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
-  gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
+  esp32_gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
   esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
-  gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
+  esp32_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
 
   esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
-  gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
+  esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
 #endif
 
   /* Enable RX and error interrupts.  Clear and pending interrtupt */
@@ -596,17 +580,20 @@ static void esp32_shutdown(struct uart_dev_s *dev)
   /* Revert pins to inputs and detach UART signals */
 
   esp32_configgpio(priv->config->txpin, INPUT);
-  gpio_matrix_out(priv->config->txsig, MATRIX_DETACH_OUT_SIG, true, false);
+  esp32_gpio_matrix_out(priv->config->txsig,
+                        MATRIX_DETACH_OUT_SIG, true, false);
 
   esp32_configgpio(priv->config->rxpin, INPUT);
-  gpio_matrix_in(priv->config->rxsig, MATRIX_DETACH_IN_LOW_PIN, false);
+  esp32_gpio_matrix_in(priv->config->rxsig, MATRIX_DETACH_IN_LOW_PIN, false);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
   esp32_configgpio(priv->config->rtspin, INPUT);
-  gpio_matrix_out(priv->config->rtssig, MATRIX_DETACH_OUT_SIG, true, false);
+  esp32_gpio_matrix_out(priv->config->rtssig,
+                        MATRIX_DETACH_OUT_SIG, true, false);
 
   esp32_configgpio(priv->config->ctspin, INPUT);
-  gpio_matrix_in(priv->config->ctssig, MATRIX_DETACH_IN_LOW_PIN, false);
+  esp32_gpio_matrix_in(priv->config->ctssig,
+                       MATRIX_DETACH_IN_LOW_PIN, false);
 #endif
 
   /* Unconfigure and disable the UART */
@@ -1154,10 +1141,13 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 
 static bool esp32_txready(struct uart_dev_s *dev)
 {
+  uint32_t txcnt;
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_TXFIFO_CNT_M) <
-          0x7f);
+  txcnt = (esp32_serialin(priv, UART_STATUS_OFFSET) >> UART_TXFIFO_CNT_S) &
+          UART_TXFIFO_CNT_V;
+
+  return txcnt < 0x7f;
 }
 
 /****************************************************************************

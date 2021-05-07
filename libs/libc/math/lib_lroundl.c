@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/math/lib_lroundl.c
+ * libs/libc/math/lib_lroundl.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

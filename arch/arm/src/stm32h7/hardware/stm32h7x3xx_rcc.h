@@ -1,54 +1,37 @@
-/***************************************************************************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_rcc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
- *            Mateusz Szafoni <raiden00@railab.me>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ***************************************************************************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_RCC_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_RCC_H
 
-/***************************************************************************************************************************************************************************
+/****************************************************************************
  * Included Files
- ***************************************************************************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/***************************************************************************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************************************************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets ********************************************************************************************************************************************************/
+/* Register Offsets *********************************************************/
 
 /* TODO: Complete comments */
 
@@ -107,7 +90,7 @@
 #define STM32_RCC_APB3LPENR_OFFSET      0x010c  /* RCC APB3 low power mode peripheral clock enable register */
 #define STM32_RCC_APB4LPENR_OFFSET      0x011c  /* RCC APB4 low power mode peripheral clock enable register */
 
-/* Register Addresses ******************************************************************************************************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_RCC_CR                    (STM32_RCC_BASE + STM32_RCC_CR_OFFSET)
 #define STM32_RCC_ICSCR                 (STM32_RCC_BASE + STM32_RCC_ICSCR_OFFSET)
@@ -164,7 +147,7 @@
 #define STM32_RCC_APB3LPENR             (STM32_RCC_BASE + STM32_RCC_APB3LPENR_OFFSET)
 #define STM32_RCC_APB4LPENR             (STM32_RCC_BASE + STM32_RCC_APB4LPENR_OFFSET)
 
-/* Register Bitfield Definitions *******************************************************************************************************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Source Control Register */
 
@@ -1132,10 +1115,12 @@
 #define RCC_BDCR_LSERDY                 (1 << 1)                     /* Bit 1: External Low Speed oscillator Ready */
 #define RCC_BDCR_LSEBYP                 (1 << 2)                     /* Bit 2: External Low Speed oscillator Bypass */
 #define RCC_BDCR_LSEDRV_SHIFT           (3)                          /* Bits 4:3: LSE oscillator Drive selection */
-#define RCC_BDCR_LSEDRV_MASK            (3 << RCC_BDCR_LSEDRV_SHIFT)
+#define RCC_BDCR_LSEDRV_MASK            (3 << RCC_BDCR_LSEDRV_SHIFT) /* See errata ES0392 Rev 7. 2.2.14 */
 #  define RCC_BDCR_LSEDRV_LOW           (0 << RCC_BDCR_LSEDRV_SHIFT) /* 00: Low driving capability */
-#  define RCC_BDCR_LSEDRV_MEDHI         (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability */
-#  define RCC_BDCR_LSEDRV_MEDLO         (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability */
+#  define RCC_BDCR_LSEDRV_MEDHI_Y       (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium high driving capability rev y */
+#  define RCC_BDCR_LSEDRV_MEDHI         (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium high driving capability */
+#  define RCC_BDCR_LSEDRV_MEDLO_Y       (2 << RCC_BDCR_LSEDRV_SHIFT) /* 10: Medium low driving capability rev y */
+#  define RCC_BDCR_LSEDRV_MEDLO         (1 << RCC_BDCR_LSEDRV_SHIFT) /* 01: Medium low driving capability */
 #  define RCC_BDCR_LSEDRV_HIGH          (3 << RCC_BDCR_LSEDRV_SHIFT) /* 11: High driving capability */
 #define RCC_BDCR_LSECSSON               (1 << 5)                     /* Bit 5: LSE clock security system enable */
 #define RCC_BDCR_LSECSSD                (1 << 6)                     /* Bit 6: LSE clock security system failure detection */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32l4/stm32l476vg-disco/src/stm32l476vg-disco.h
+ * boards/arm/stm32l4/stm32l4r9ai-disco/src/stm32l4r9ai-disco.h
  *
  *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
  *   Authors: Frank Bennett
@@ -86,14 +86,12 @@
 #ifndef CONFIG_STM32L4_OTGFS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
-#  undef HAVE_USBMONITOR
 #endif
 
-/* Can't support USB device monitor if USB device is not enabled */
+/* Can't support USB device if USB device is not enabled */
 
 #ifndef CONFIG_USBDEV
 #  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
 #endif
 
 /* Can't support USB host is USB host is not enabled */
@@ -104,7 +102,19 @@
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#ifndef CONFIG_USBMONITOR
+#  undef HAVE_USBMONITOR
+#endif
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#ifndef HAVE_USBHOST
+#  undef CONFIG_USBHOST_TRACE
+#endif
+
+#if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -169,6 +179,7 @@
   (GPIO_INPUT |GPIO_PULLDOWN |GPIO_EXTI | GPIO_PORTB | GPIO_PIN1)
 
 /* SPI1 off */
+
 /* XXX is this used on disco? */
 
 #define GPIO_SPI1_MOSI_OFF (GPIO_INPUT | GPIO_PULLDOWN | \
@@ -201,7 +212,7 @@ extern struct spi_dev_s *g_spi2;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -222,7 +233,9 @@ int stm32l4_adc_setup(void);
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat, uint32_t *vext);
+int stm32l4_adc_measure_voltages(uint32_t *vrefint,
+                                 uint32_t *vbat,
+                                 uint32_t *vext);
 
 /****************************************************************************
  * Name: stm32l4_dac_setup

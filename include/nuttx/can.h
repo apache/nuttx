@@ -1,45 +1,29 @@
-/************************************************************************************
- * include/nuttx/can/can.h
+/****************************************************************************
+ * include/nuttx/can.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012, 2015-2017, 2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_CAN_CAN_H
 #define __INCLUDE_NUTTX_CAN_CAN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_CAN_TXREADY
 #  include <nuttx/wqueue.h>
@@ -49,19 +33,21 @@
 
 #ifdef CONFIG_NET_CAN
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Ioctl Commands *******************************************************************/
+/* Ioctl Commands ***********************************************************/
 
 /* Ioctl commands supported by the upper half CAN driver.
  *
  * CANIOC_RTR:
- *   Description:  Send the remote transmission request and wait for the response.
+ *   Description:  Send the remote transmission request and wait for the
+ *                 response.
  *   Argument:     A reference to struct canioc_rtr_s
  *
- * Ioctl commands that may or may not be supported by the lower half CAN driver.
+ * Ioctl commands that may or may not be supported by the lower half CAN
+ * driver.
  *
  * CANIOC_ADD_STDFILTER:
  *   Description:    Add an address filter for a standard 11 bit address.
@@ -120,7 +106,8 @@
  * CANIOC_GET_CONNMODES:
  *   Description:    Get the current bus connection modes
  *   Argument:       A pointer to a write-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes will be returned.
+ *                   canioc_connmodes_s in which the new bus modes will be
+ *                   returned.
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
@@ -129,7 +116,8 @@
  * CANIOC_SET_CONNMODES:
  *   Description:    Set new bus connection modes values
  *   Argument:       A pointer to a read-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes are provided.
+ *                   canioc_connmodes_s in which the new bus modes are
+ *                   provided.
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
@@ -159,29 +147,30 @@
 #define CAN_NCMDS                 10             /* Ten common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
- * method fo the CAN lower-half interface.  However, the lower-half driver
- * must reserve a block of commands as follows in order prevent IOCTL
- * command numbers from overlapping.
+ * by the upper-half CAN driver to the lower-half CAN driver via the
+ * co_ioctl()  method fo the CAN lower-half interface.
+ * However, the lower-half driver must reserve a block of commands as follows
+ * in order prevent IOCTL command numbers from overlapping.
  *
- * This is generally done as follows.  The first reservation for CAN driver A would
- * look like:
+ * This is generally done as follows.  The first reservation for CAN driver A
+ * would look like:
  *
- *   CAN_A_FIRST                 (CAN_FIRST + CAN_NCMDS)     <- First command
- *   CAN_A_NCMDS                 42                          <- Number of commands
+ *   CAN_A_FIRST                (CAN_FIRST + CAN_NCMDS) <- First command
+ *   CAN_A_NCMDS                42                      <- Number of commands
  *
- * IOCTL commands for CAN driver A would then be defined in a CAN A header file like:
+ * IOCTL commands for CAN driver A would then be defined in a CAN A header
+ * file like:
  *
- *   CANIOC_A_CMD1               _CANIOC(CAN_A_FIRST+0)
- *   CANIOC_A_CMD2               _CANIOC(CAN_A_FIRST+1)
- *   CANIOC_A_CMD3               _CANIOC(CAN_A_FIRST+2)
+ *   CANIOC_A_CMD1       _CANIOC(CAN_A_FIRST+0)
+ *   CANIOC_A_CMD2       _CANIOC(CAN_A_FIRST+1)
+ *   CANIOC_A_CMD3       _CANIOC(CAN_A_FIRST+2)
  *   ...
- *   CANIOC_A_CMD42              _CANIOC(CAN_A_FIRST+41)
+ *   CANIOC_A_CMD42      _CANIOC(CAN_A_FIRST+41)
  *
  * The next reservation would look like:
  *
- *   CAN_B_FIRST                 (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
- *   CAN_B_NCMDS                 77                          <- Number of commands
+ *   CAN_B_FIRST           (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
+ *   CAN_B_NCMDS           77                          <- Number of commands
  */
 
 /* CAN payload length and DLC definitions according to ISO 11898-1 */
@@ -196,18 +185,20 @@
 
 /* Defined bits for canfd_frame.flags
  *
- * The use of struct canfd_frame implies the Extended Data Length (EDL) bit to
- * be set in the CAN frame bitstream on the wire. The EDL bit switch turns
+ * The use of struct canfd_frame implies the Extended Data Length (EDL) bit
+ * to be set in the CAN frame bitstream on the wire. The EDL bit switch turns
  * the CAN controllers bitstream processor into the CAN FD mode which creates
  * two new options within the CAN FD frame specification:
  *
  * Bit Rate Switch - to indicate a second bitrate is/was used for the payload
- * Error State Indicator - represents the error state of the transmitting node
+ * Error State Indicator - represents the error state of the transmitting
+ * node
  *
  * As the CANFD_ESI bit is internally generated by the transmitting CAN
- * controller only the CANFD_BRS bit is relevant for real CAN controllers when
- * building a CAN FD frame for transmission. Setting the CANFD_ESI bit can make
- * sense for virtual CAN interfaces to test applications with echoed frames.
+ * controller only the CANFD_BRS bit is relevant for real CAN controllers
+ * when building a CAN FD frame for transmission. Setting the CANFD_ESI bit
+ * can make sense for virtual CAN interfaces to test applications with echoed
+ * frames.
  */
 
 #define CANFD_BRS 0x01 /* bit rate switch (second bitrate for payload data) */
@@ -215,9 +206,9 @@
 
 #define CAN_INV_FILTER     0x20000000U /* to be set in can_filter.can_id */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef FAR void *CAN_HANDLE;
 
@@ -297,9 +288,9 @@ struct can_filter
   canid_t can_mask;
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

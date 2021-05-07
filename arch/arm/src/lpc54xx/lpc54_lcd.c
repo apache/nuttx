@@ -1,40 +1,26 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_lcd.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * This driver derives from the LPC1788 LCD driver.  The LPC1788 LCD is
- * identical tot he LPC54628 LCD other than some minor clocking differences.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* This driver derives from the LPC1788 LCD driver.  The LPC1788 LCD is
+ * identical to the LPC54628 LCD other than some minor clocking differences.
+ */
 
 /****************************************************************************
  * Included Files
@@ -275,11 +261,11 @@ static int lpc54_getcmap(FAR struct fb_vtable_s *vtable,
         {
           /* Save the even palette value */
 
-          cmap->red[i+1]    = (rgb & LCD_PAL_R1_MASK) >> LCD_PAL_R1_SHIFT;
-          cmap->green[i+1]  = (rgb & LCD_PAL_G1_MASK) >> LCD_PAL_G1_SHIFT;
-          cmap->blue[i+1]   = (rgb & LCD_PAL_B1_MASK) >> LCD_PAL_B1_SHIFT;
+          cmap->red[i + 1]    = (rgb & LCD_PAL_R1_MASK) >> LCD_PAL_R1_SHIFT;
+          cmap->green[i + 1]  = (rgb & LCD_PAL_G1_MASK) >> LCD_PAL_G1_SHIFT;
+          cmap->blue[i + 1]   = (rgb & LCD_PAL_B1_MASK) >> LCD_PAL_B1_SHIFT;
 #ifdef CONFIG_FB_TRANSPARENCY
-          cmap->transp[i+1] = 0;
+          cmap->transp[i + 1] = 0;
 #endif
         }
     }
@@ -316,7 +302,8 @@ static int lpc54_putcmap(FAR struct fb_vtable_s *vtable,
   if ((i & 1) != 0)
     {
       rgb0  = *pal;
-      rgb0 &= (LCD_PAL_R0_MASK | LCD_PAL_G0_MASK | LCD_PAL_B0_MASK | LCD_PAL_I0);
+      rgb0 &= (LCD_PAL_R0_MASK | LCD_PAL_G0_MASK | LCD_PAL_B0_MASK |
+               LCD_PAL_I0);
       rgb1 |= ((uint32_t)cmap->red[i]   << LCD_PAL_R0_SHIFT |
                (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
                (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
@@ -340,13 +327,14 @@ static int lpc54_putcmap(FAR struct fb_vtable_s *vtable,
       if ((i + 1) >= last)
         {
           rgb1  = *pal;
-          rgb1 &= (LCD_PAL_R1_MASK | LCD_PAL_G1_MASK | LCD_PAL_B1_MASK | LCD_PAL_I1);
+          rgb1 &= (LCD_PAL_R1_MASK | LCD_PAL_G1_MASK | LCD_PAL_B1_MASK |
+                   LCD_PAL_I1);
         }
       else
         {
-          rgb1  = ((uint32_t)cmap->red[i+1]   << LCD_PAL_R1_SHIFT |
-                   (uint32_t)cmap->green[i+1] << LCD_PAL_G1_SHIFT |
-                   (uint32_t)cmap->blue[i+1]  << LCD_PAL_B1_SHIFT);
+          rgb1  = ((uint32_t)cmap->red[i + 1]   << LCD_PAL_R1_SHIFT |
+                   (uint32_t)cmap->green[i + 1] << LCD_PAL_G1_SHIFT |
+                   (uint32_t)cmap->blue[i + 1]  << LCD_PAL_B1_SHIFT);
         }
 
       /* Save the new palette value */
@@ -408,6 +396,7 @@ static int lpc54_setcursor(FAR struct fb_vtable_s *vtable,
           g_cpos = settings->pos;
           lcdinfo("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
         }
+
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
@@ -415,6 +404,7 @@ static int lpc54_setcursor(FAR struct fb_vtable_s *vtable,
           lcdinfo("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
         }
 #endif
+
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
@@ -423,6 +413,7 @@ static int lpc54_setcursor(FAR struct fb_vtable_s *vtable,
                   settings->img.image);
         }
 #endif
+
       return OK;
     }
 
@@ -459,6 +450,7 @@ int up_fbinitialize(int display)
   int i;
 
   /* Configure pins */
+
   /* LCD panel data. Pins used depend on the panel configuration:
    *
    * STN  4BPP: VD0-VD3           (single panel)
@@ -468,7 +460,7 @@ int up_fbinitialize(int display)
    * TFT 12BPP: VD4-VD7, VD12-VD15, VD20-VD23
    * TFT 16BPP: VD3-VD7, VD10-VD15, VD19-VD23
    * TFT 24BPP: VD0-VD23
-  */
+   */
 
   lcdinfo("Configuring pins\n");
 
@@ -650,10 +642,10 @@ int up_fbinitialize(int display)
 
   putreg32(0, LPC54_LCD_TIMH);
 
-  regval = (((CONFIG_LPC54_LCD_HWIDTH/16) - 1) << LCD_TIMH_PPL_SHIFT |
-            (CONFIG_LPC54_LCD_HPULSE - 1)      << LCD_TIMH_HSW_SHIFT |
-            (CONFIG_LPC54_LCD_HFRONTPORCH - 1) << LCD_TIMH_HFP_SHIFT |
-            (CONFIG_LPC54_LCD_HBACKPORCH - 1)  << LCD_TIMH_HBP_SHIFT);
+  regval = (((CONFIG_LPC54_LCD_HWIDTH / 16) - 1) << LCD_TIMH_PPL_SHIFT |
+            (CONFIG_LPC54_LCD_HPULSE - 1)        << LCD_TIMH_HSW_SHIFT |
+            (CONFIG_LPC54_LCD_HFRONTPORCH - 1)   << LCD_TIMH_HFP_SHIFT |
+            (CONFIG_LPC54_LCD_HBACKPORCH - 1)    << LCD_TIMH_HBP_SHIFT);
   putreg32(regval, LPC54_LCD_TIMH);
 
   /* Initialize vertical timing */
@@ -800,7 +792,8 @@ int up_fbinitialize(int display)
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
@@ -895,16 +888,18 @@ void lpc54_lcdclear(nxgl_mxpixel_t color)
 #if LPC54_BPP > 16
   uint32_t *dest = (uint32_t *)CONFIG_LPC54_LCD_VRAMBASE;
 
-  lcdinfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
-          color, CONFIG_LPC54_LCD_VRAMBASE,
-          CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT * sizeof(uint32_t));
+  lcdinfo("Clearing display: color=%08jx VRAM=%08x size=%d\n",
+          (uintmax_t)color, CONFIG_LPC54_LCD_VRAMBASE,
+          CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT *
+          sizeof(uint32_t));
 
 #else
   uint16_t *dest = (uint16_t *)CONFIG_LPC54_LCD_VRAMBASE;
 
-  lcdinfo("Clearing display: color=%08x VRAM=%08x size=%d\n",
-          color, CONFIG_LPC54_LCD_VRAMBASE,
-          CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT * sizeof(uint16_t));
+  lcdinfo("Clearing display: color=%08jx VRAM=%08x size=%d\n",
+          (uintmax_t)color, CONFIG_LPC54_LCD_VRAMBASE,
+          CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT *
+          sizeof(uint16_t));
 #endif
 
   for (i = 0; i < (CONFIG_LPC54_LCD_HWIDTH * CONFIG_LPC54_LCD_VHEIGHT); i++)

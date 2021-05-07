@@ -1,35 +1,20 @@
 /****************************************************************************
- * boards/arm/sam34/sam4l-xlplained/src/sam_slcd.c
+ * boards/arm/sam34/sam4l-xplained/src/sam_slcd.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -355,24 +340,44 @@ static const uint8_t g_startseg[SLCD_NCHARS] =
 
 static const struct slcd_pixel_s g_binfo[SLCD_NB] =
 {
-  {17, 0}, {13, 0}, {9, 0},  {5, 0},  {6, 3},
-  {10, 3}, {14, 3}, {18, 3}, {21, 0}, {22, 3}
+  {17, 0},
+  {13, 0},
+  {9, 0},
+  {5, 0},
+  {6, 3},
+  {10, 3},
+  {14, 3},
+  {18, 3},
+  {21, 0},
+  {22, 3}
 };
 
 /* Pixel position for each 'G' segment */
 
 static const struct slcd_pixel_s g_ginfo[SLCD_NG] =
 {
-  {1, 0},  {0, 0},  {0, 1},  {0, 3},  {0, 2},
-  {1, 3},  {1, 1},  {1, 2}
+  {1, 0},
+  {0, 0},
+  {0, 1},
+  {0, 3},
+  {0, 2},
+  {1, 3},
+  {1, 1},
+  {1, 2}
 };
 
 /* Pixel position for each 'E' segment */
 
 static const struct slcd_pixel_s g_einfo[SLCD_NE] =
 {
-  {3, 3},  {2, 3},  {3, 2},  {2, 2},  {3, 1},
-  {2, 1},  {3, 0},  {2, 0}
+  {3, 3},
+  {2, 3},
+  {3, 2},
+  {2, 2},
+  {3, 1},
+  {2, 1},
+  {3, 0},
+  {2, 0}
 };
 
 /****************************************************************************
@@ -515,7 +520,8 @@ static inline void slcd_clrdp(uint8_t curpos)
 
 static int slcd_getstream(FAR struct lib_instream_s *instream)
 {
-  FAR struct slcd_instream_s *slcdstream = (FAR struct slcd_instream_s *)instream;
+  FAR struct slcd_instream_s *slcdstream =
+                                 (FAR struct slcd_instream_s *)instream;
 
   DEBUGASSERT(slcdstream && slcdstream->buffer);
   if (slcdstream->nbytes > 0)
@@ -848,7 +854,8 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
  * Name: slcd_read
  ****************************************************************************/
 
-static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t slcd_read(FAR struct file *filep,
+                         FAR char *buffer, size_t len)
 {
   int ret = 0;
   int i;
@@ -909,7 +916,8 @@ static ssize_t slcd_write(FAR struct file *filep,
   /* Decode and process every byte in the input buffer */
 
   options = 0;
-  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
+  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) !=
+          SLCDRET_EOF)
     {
       lcdinfo("slcd_decode returned result=%d char=%d count=%d\n",
               result, ch, count);
@@ -1011,7 +1019,8 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_GETATTRIBUTES:
         {
-          FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
+          FAR struct slcd_attributes_s *attr =
+                            (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_GETATTRIBUTES:\n");
 
@@ -1036,7 +1045,8 @@ static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SLCDIOC_CURPOS:
         {
-          FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
+          FAR struct slcd_curpos_s *curpos =
+                                (FAR struct slcd_curpos_s *)((uintptr_t)arg);
 
           lcdinfo("SLCDIOC_CURPOS: row=0 column=%d\n", g_slcdstate.curpos);
 
@@ -1172,8 +1182,8 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Name: sam_slcd_initialize
  *
  * Description:
- *   Initialize the SAM4L Xplained Pro LCD hardware and register the character
- *   driver as /dev/slcd0.
+ *   Initialize the SAM4L Xplained Pro LCD hardware and register the
+ *   character driver as /dev/slcd0.
  *
  ****************************************************************************/
 

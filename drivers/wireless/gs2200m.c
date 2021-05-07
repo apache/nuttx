@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/wireless/gs2200m.c
  *
- *   Copyright 2019 Sony Home Entertainment & Sound Products Inc.
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -49,6 +34,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -664,7 +650,7 @@ static bool _copy_data_from_pkt(FAR struct gs2200m_dev_s *dev,
 
   pkt_dat->remain -= len;
 
-  if (0 == pkt_dat->remain)
+  if (0 == pkt_dat->remain || TYPE_BULK_DATA_UDP == pkt_dat->type)
     {
       _remove_and_free_pkt(dev, c);
     }
@@ -842,19 +828,17 @@ static void _write_data(FAR struct gs2200m_dev_s *dev,
 
 /****************************************************************************
  * Name: _read_data
- * NOTE: See 3.2.2.1 SPI Byte Stuffing for the idle character
+ * NOTE: See 3.2.2.2 SPI Command Response (SPI-DMA)
  ****************************************************************************/
 
 static void _read_data(FAR struct gs2200m_dev_s *dev,
                        FAR uint8_t  *buff,
                        FAR uint16_t len)
 {
-  uint8_t req = 0xf5; /* idle character */
-
   memset(buff, 0, len);
 
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
-  SPI_EXCHANGE(dev->spi, &req, buff, len);
+  SPI_RECVBLOCK(dev->spi, buff, len);
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
 
@@ -879,18 +863,18 @@ retry:
 
   _write_data(dev, hdr, sizeof(hdr));
 
+  /* NOTE: busy wait 30us
+   * workaround to avoid an invalid frame response
+   */
+
+  up_udelay(30);
+
   /* Wait for data ready */
 
   while (!dev->lower->dready(NULL))
     {
       /* TODO: timeout */
     }
-
-  /* NOTE: busy wait 50us
-   * workaround to avoid an invalid frame response
-   */
-
-  up_udelay(50);
 
   /* Read frame response */
 
@@ -985,11 +969,12 @@ retry:
 
   _read_data(dev, res, sizeof(res));
 
-  /* In case of NOK, retry */
+  /* In case of NOK or 0x0, retry */
 
-  if (WR_RESP_NOK == res[1])
+  if (WR_RESP_NOK == res[1] || 0x0 == res[1])
     {
-      wlwarn("*** warning: WR_RESP_NOK received.. retrying. (n=%d) \n", n);
+      wlwarn("*** warning: 0x%x received.. retrying. (n=%d) \n",
+             res[1], n);
       nxsig_usleep(10 * 1000);
 
       if (WR_MAX_RETRY < n)
@@ -1584,6 +1569,27 @@ errout:
 }
 
 /****************************************************************************
+ * Name: gs2200m_send_cmd2
+ ****************************************************************************/
+
+static enum pkt_type_e gs2200m_send_cmd2(FAR struct gs2200m_dev_s *dev,
+                                         FAR char *cmd)
+{
+  struct pkt_dat_s pkt_dat;
+  enum pkt_type_e  r;
+
+  /* Initialize pkt_dat and send */
+
+  memset(&pkt_dat, 0, sizeof(pkt_dat));
+  r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
+
+  /* Release the pkt_dat */
+
+  _release_pkt_dat(dev, &pkt_dat);
+  return r;
+}
+
+/****************************************************************************
  * Name: gs2200m_set_opmode
  * NOTE: See 5.1.2 Operation Mode
  ****************************************************************************/
@@ -1595,7 +1601,7 @@ static enum pkt_type_e gs2200m_set_opmode(FAR struct gs2200m_dev_s *dev,
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+WM=%d\r\n", mode);
-  t = gs2200m_send_cmd(dev, cmd, NULL);
+  t = gs2200m_send_cmd2(dev, cmd);
 
   if (TYPE_OK == t)
     {
@@ -1651,7 +1657,7 @@ errout:
 
 static enum pkt_type_e gs2200m_disassociate(FAR struct gs2200m_dev_s *dev)
 {
-  return gs2200m_send_cmd(dev, (char *)"AT+WD\r\n", NULL);
+  return gs2200m_send_cmd2(dev, (char *)"AT+WD\r\n");
 }
 
 /****************************************************************************
@@ -1665,7 +1671,7 @@ static enum pkt_type_e gs2200m_enable_dhcpc(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+NDHCP=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1679,7 +1685,7 @@ static enum pkt_type_e gs2200m_calc_key(FAR struct gs2200m_dev_s *dev,
   char cmd[80];
 
   snprintf(cmd, sizeof(cmd), "AT+WPAPSK=%s,%s\r\n", ssid, psk);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1693,7 +1699,7 @@ static enum pkt_type_e gs2200m_set_security(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+WSEC=%d\r\n", mode);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1764,7 +1770,8 @@ static enum pkt_type_e gs2200m_set_addresses(FAR struct gs2200m_dev_s *dev,
 
   snprintf(cmd, sizeof(cmd), "AT+NSET=%s,%s,%s\r\n",
            address, netmask, gateway);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1778,7 +1785,7 @@ static enum pkt_type_e gs2200m_enable_dhcps(FAR struct gs2200m_dev_s *dev,
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+DHCPSRVR=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -1792,7 +1799,7 @@ static enum pkt_type_e gs2200m_set_auth(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+WAUTH=%d\r\n", mode);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 #ifdef CONFIG_WL_GS2200M_ENABLE_WEP
@@ -1808,7 +1815,7 @@ static enum pkt_type_e gs2200m_set_wepkey(FAR struct gs2200m_dev_s *dev,
   char cmd[32];
 
   snprintf(cmd, sizeof(cmd), "AT+WWEP1=%s\r\n", key);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 #else
@@ -1824,7 +1831,7 @@ static enum pkt_type_e gs2200m_set_wpa2pf(FAR struct gs2200m_dev_s *dev,
   char cmd[64];
 
   snprintf(cmd, sizeof(cmd), "AT+WWPA=%s\r\n", key);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 #endif /* CONFIG_WL_GS2200M_ENABLE_WEP */
@@ -1909,8 +1916,8 @@ gs2200m_create_clnt(FAR struct gs2200m_dev_s *dev,
 
   if (r != TYPE_OK || pkt_dat.n == 0)
     {
-      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
-             r, pkt_dat.msg[0]);
+      wlerr("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+            r, pkt_dat.msg[0]);
       goto errout;
     }
 
@@ -2053,21 +2060,10 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 static enum pkt_type_e gs2200m_close_conn(FAR struct gs2200m_dev_s *dev,
                                           char cid)
 {
-  struct pkt_dat_s pkt_dat;
-  enum pkt_type_e   r;
   char cmd[15];
 
-  /* Prepare cmd */
-
   snprintf(cmd, sizeof(cmd), "AT+NCLOSE=%c\r\n", cid);
-
-  /* Initialize pkt_dat and send */
-
-  memset(&pkt_dat, 0, sizeof(pkt_dat));
-  r = gs2200m_send_cmd(dev, cmd, &pkt_dat);
-
-  _release_pkt_dat(dev, &pkt_dat);
-  return r;
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2081,7 +2077,7 @@ static enum pkt_type_e gs2200m_enable_bulk(FAR struct gs2200m_dev_s *dev,
   char cmd[20];
 
   snprintf(cmd, sizeof(cmd), "AT+BDATA=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2095,7 +2091,7 @@ static enum pkt_type_e gs2200m_enable_echo(FAR struct gs2200m_dev_s *dev,
   char cmd[8];
 
   snprintf(cmd, sizeof(cmd), "ATE%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2109,7 +2105,7 @@ static enum pkt_type_e gs2200m_activate_wrx(FAR struct gs2200m_dev_s *dev,
   char cmd[30];
 
   snprintf(cmd, sizeof(cmd), "AT+WRXACTIVE=%d\r\n", on);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 
 /****************************************************************************
@@ -2124,7 +2120,7 @@ static enum pkt_type_e gs2200m_set_gpio(FAR struct gs2200m_dev_s *dev,
   char cmd[24];
 
   snprintf(cmd, sizeof(cmd), "AT+DGPIO=%d,%d\r\n", n, val);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
 
@@ -2140,7 +2136,7 @@ static enum pkt_type_e gs2200m_set_loglevel(FAR struct gs2200m_dev_s *dev,
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+LOGLVL=%d\r\n", level);
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
 
@@ -2154,7 +2150,7 @@ static enum pkt_type_e gs2200m_get_version(FAR struct gs2200m_dev_s *dev)
   char cmd[16];
 
   snprintf(cmd, sizeof(cmd), "AT+VER=??\r\n");
-  return gs2200m_send_cmd(dev, cmd, NULL);
+  return gs2200m_send_cmd2(dev, cmd);
 }
 #endif
 
@@ -2179,8 +2175,8 @@ static enum pkt_type_e gs2200m_get_cstatus(FAR struct gs2200m_dev_s *dev,
 
   if (r != TYPE_OK || pkt_dat.n <= 2)
     {
-      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
-             r, pkt_dat.msg[0]);
+      wlerr("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+            r, pkt_dat.msg[0]);
 
       goto errout;
     }
@@ -2751,8 +2747,8 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
 
   if (r != TYPE_OK || pkt_dat.n <= 7)
     {
-      wlinfo("+++ error: r=%d pkt_dat.msg[0]=%s \n",
-             r, pkt_dat.msg[0]);
+      wlerr("+++ error: r=%d pkt_dat.msg[0]=%s \n",
+            r, pkt_dat.msg[0]);
 
       goto errout;
     }
@@ -2763,7 +2759,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
     {
       if (strstr(pkt_dat.msg[2], "BSSID=") == NULL)
         {
-          wlinfo("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
+          wlerr("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
           goto errout;
         }
 
@@ -2782,20 +2778,20 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
     {
       if (strstr(pkt_dat.msg[2], "CHANNEL=") == NULL)
         {
-          wlinfo("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
+          wlerr("+++ error: pkt_dat.msg[2]=%s \n", pkt_dat.msg[2]);
           goto errout;
         }
 
       n = sscanf(pkt_dat.msg[2], "%s CHANNEL=%" SCNd32 " %s",
                  cmd, &res->u.freq.m, cmd2);
       ASSERT(3 == n);
-      wlinfo("CHANNEL:%d\n", res->u.freq.m);
+      wlinfo("CHANNEL:%" PRId32 "\n", res->u.freq.m);
     }
   else if (msg->cmd == SIOCGIWSENS)
     {
       if (strstr(pkt_dat.msg[3], "RSSI=") == NULL)
         {
-          wlinfo("+++ error: pkt_dat.msg[3]=%s \n", pkt_dat.msg[3]);
+          wlerr("+++ error: pkt_dat.msg[3]=%s \n", pkt_dat.msg[3]);
           goto errout;
         }
 
@@ -2828,7 +2824,7 @@ static int gs2200m_ioctl_ifreq(FAR struct gs2200m_dev_s *dev,
   bool getreq = false;
   int ret = OK;
 
-  wlinfo("+++ start: cmd=%x \n", msg->cmd);
+  wlinfo("+++ start: cmd=%" PRIx32 " \n", msg->cmd);
 
   inaddr = (FAR struct sockaddr_in *)&msg->ifr.ifr_addr;
 
@@ -3209,8 +3205,8 @@ repeat:
     {
       /* An error event? */
 
-      wlinfo("=== ignore (type=%d msg[0]=%s|) \n",
-             pkt_dat->type, pkt_dat->msg[0]);
+      wlerr("=== ignore (type=%d msg[0]=%s|) \n",
+            pkt_dat->type, pkt_dat->msg[0]);
 
       ignored = true;
       goto errout;

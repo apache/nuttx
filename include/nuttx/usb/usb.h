@@ -1,56 +1,42 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/usb/usb.h
  *
- *   Copyright (C) 2008, 2009-2010, 2012, 2008 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_USB_USB_H
 #define __INCLUDE_NUTTX_USB_USB_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <stdint.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* A packet identifier (PID) immediately follows the SYNC field of every USB packet.
- * A PID consists of a four-bit packet type field followed by a four-bit check field
- * USB Tokens (See Table 8-1 in the USB specification)
+/* A packet identifier (PID) immediately follows the SYNC field of every USB
+ * packet.
+ * A PID consists of a four-bit packet type field followed by a four-bit
+ * check field USB Tokens (See Table 8-1 in the USB specification)
  */
 
 #define USB_PID_OUT_TOKEN                       (0x01) /* Tokens */
@@ -267,9 +253,9 @@
 #define MSFTOSDESC_INDEX_FUNCTION               4
 #define MSFTOSDESC_INDEX_EXTPROP                5
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This structure is used to send control requests to a USB device. */
 
@@ -412,12 +398,12 @@ struct usb_qualdesc_s
 
 /* Interface association descriptor
  *
- * The Universal Serial Bus Specification, revision 2.0, does not support grouping
- * more than one interface of a composite device within a single function. However,
- * the USB Device Working Group (DWG) created USB device classes that allow for
- * functions with multiple interfaces, and the USB Implementor's Forum issued an
- * Engineering Change Notification (ECN) that defines a mechanism for grouping
- * interfaces.
+ * The Universal Serial Bus Specification, revision 2.0, does not support
+ * grouping more than one interface of a composite device within a single
+ * function. However, the USB Device Working Group (DWG) created USB device
+ * classes that allow for functions with multiple interfaces, and the USB
+ * Implementor's Forum issued an Engineering Change Notification (ECN) that
+ * defines a mechanism for grouping interfaces.
  */
 
 struct usb_iaddesc_s
@@ -435,15 +421,17 @@ struct usb_iaddesc_s
 #define USB_SIZEOF_IADDESC 8
 
 /* Microsoft OS function descriptor.
- * This can be used to request a specific driver (such as WINUSB) to be loaded
- * on Windows. Unlike other descriptors, it is requested by a special request
- * USB_REQ_GETMSFTOSDESCRIPTOR.
- * More details: https://msdn.microsoft.com/en-us/windows/hardware/gg463179
- * And excellent explanation: https://github.com/pbatard/libwdi/wiki/WCID-Devices
+ * This can be used to request a specific driver (such as WINUSB) to be
+ * loaded on Windows. Unlike other descriptors, it is requested by a special
+ * request USB_REQ_GETMSFTOSDESCRIPTOR.
+ * More details:
+ *       https://msdn.microsoft.com/en-us/windows/hardware/gg463179
+ * And excellent explanation:
+ *       https://github.com/pbatard/libwdi/wiki/WCID-Devices
  *
  * The device will have exactly one "Extended Compat ID Feature Descriptor",
- * which may contain multiple "Function Descriptors" associated with different
- * interfaces.
+ * which may contain multiple "Function Descriptors" associated with
+ * different interfaces.
  */
 
 struct usb_msft_os_function_desc_s
@@ -466,11 +454,12 @@ struct usb_msft_os_feature_desc_s
 };
 
 /* Microsoft OS extended property descriptor.
- * This can be used to set specific registry values, such as interface GUID for
- * a device. It is requested per-interface by special request USB_REQ_GETMSFTOSDESCRIPTOR.
+ * This can be used to set specific registry values, such as interface GUID
+ * for a device. It is requested per-interface by special request
+ * USB_REQ_GETMSFTOSDESCRIPTOR.
  *
- * The interface will have one extended properties descriptor, which may contain
- * multiple properties inside it.
+ * The interface will have one extended properties descriptor, which may
+ * contain multiple properties inside it.
  */
 
 struct usb_msft_os_extprop_hdr_s
@@ -490,12 +479,12 @@ struct usb_msft_os_extprop_hdr_s
    */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Definitions
+ ****************************************************************************/
 
 #endif /* __INCLUDE_NUTTX_USB_USB_H */

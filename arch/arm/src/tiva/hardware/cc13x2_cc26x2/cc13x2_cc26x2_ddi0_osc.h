@@ -1,10 +1,11 @@
-/********************************************************************************************************************
+/****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_ddi0_osc.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
- * Technical content derives from a TI header file that has a compatible BSD license:
+ * Technical content derives from a TI header file that has a
+ * compatible BSD license:
  *
  *   Copyright (c) 2015-2017, Texas Instruments Incorporated
  *   All rights reserved.
@@ -36,24 +37,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_DDI0_OSC_H
 #define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_DDI0_OSC_H
 
-/********************************************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/tiva_memorymap.h"
 #include "hardware/tiva_ddi.h"
 
-/********************************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************************************/
+ ****************************************************************************/
 
-/* DDI0 OSC Register Offsets ****************************************************************************************/
+/* DDI0 OSC Register Offsets ************************************************/
 
 #define TIVA_DDI0_OSC_CTL0_OFFSET                 0x0000  /* Control 0 */
 #define TIVA_DDI0_OSC_CTL1_OFFSET                 0x0004  /* Control 1 */
@@ -73,7 +74,8 @@
 #define TIVA_DDI0_OSC_STAT1_OFFSET                0x0040  /* Status 1 */
 #define TIVA_DDI0_OSC_STAT2_OFFSET                0x0044  /* Status 2 */
 
-/* DDI0 OSC Register Addresses **************************************************************************************/
+/* DDI0 OSC Register Addresses **********************************************/
+
 /* Direct access */
 
 #define TIVA_DDI0_OSC_CTL0                        (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI0_OSC_CTL0_OFFSET)
@@ -94,7 +96,9 @@
 #define TIVA_DDI0_OSC_STAT1                       (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI0_OSC_STAT1_OFFSET)
 #define TIVA_DDI0_OSC_STAT2                       (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI0_OSC_STAT2_OFFSET)
 
-/* Offsets may also be used in conjunction with access as described in cc13x2_cc26x2_ddi.h */
+/* Offsets may also be used in conjunction with access as described in
+ * cc13x2_cc26x2_ddi.h
+ */
 
 #define TIVA_DDI0_OSC_DIR                        (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_DIR_OFFSET)
 #define TIVA_DDI0_OSC_SET                        (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_SET_OFFSET)
@@ -103,13 +107,15 @@
 #define TIVA_DDI0_OSC_MASK8B                     (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK8B_OFFSET)
 #define TIVA_DDI0_OSC_MASK16B                    (TIVA_AUX_DDI0_OSC_BASE + TIVA_DDI_MASK16B_OFFSET)
 
-/* DDI0 OSC Bitfield Definitions ************************************************************************************/
+/* DDI0 OSC Bitfield Definitions ********************************************/
 
 /* DDI0_OSC_CTL0 */
 
 #define DDI0_OSC_CTL0_SCLK_HF_SRC_SEL               (1 << 0)  /* Bit 0:  Source select for sclk_hf */
 #  define DDI0_OSC_CTL0_SCLK_HF_SRC_RCOSC           (0)       /* High frequency RCOSC clock */
+
 #  define DDI0_OSC_CTL0_SCLK_HF_SRC_XOSC            DDI0_OSC_CTL0_SCLK_HF_SRC_SEL /* High frequency XOSC clock */
+
 #define DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_SHIFT         (2)       /* Bits 2-3: Source select for sclk_lf */
 #define DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_MASK          (3 << DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_SHIFT)
 #  define DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_XOSCHFDLF   (1 << DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_SHIFT) /* Low frequency clock derived
@@ -118,6 +124,7 @@
                                                                                                 * from High Frequency RCOSC */
 #  define DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_RCOSCLF     (2 << DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_SHIFT) /* Low frequency RCOSC */
 #  define DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_XOSCLF      (3 << DDI0_OSC_CTL0_SCLK_LF_SRC_SEL_SHIFT) /* Low frequency XOSC */
+
 #define DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT        (4)       /* Bits 4-6:  Source select for aclk_ref */
 #define DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_MASK         (7 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT)
 #  define DDI0_OSC_CTL0_ACLK_REF_SRC_RCOSCHF        (0 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT) /* RCOSC_HF derived (31.25kHz) */
@@ -125,20 +132,25 @@
 #  define DDI0_OSC_CTL0_ACLK_REF_SRC_RCOSCLF        (2 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT) /* RCOSC_LF (32kHz) */
 #  define DDI0_OSC_CTL0_ACLK_REF_SRC_XOSCLF         (3 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT) /*  XOSC_LF (32.768kHz) */
 #  define DDI0_OSC_CTL0_ACLK_REF_SRC_RCOSCMF        (4 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT) /* RCOSC_MF (2MHz) */
+
 #define DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT        (7)       /* Bits 7-8: ource select for aclk_tdc */
 #define DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_MASK         (3 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT)
 #  define DDI0_OSC_CTL0_ACLK_TDC_SRC_RCOSCHF48      (0 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT) /* RCOSC_HF (48MHz) */
 #  define DDI0_OSC_CTL0_ACLK_TDC_SRC_RCOSCHF24      (1 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT) /* RCOSC_HF (24MHz) */
 #  define DDI0_OSC_CTL0_ACLK_TDC_SRC_XOSCHF24       (2 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT) /* XOSC_HF (24MHz) */
+
 #define DDI0_OSC_CTL0_CLK_LOSS_EN                   (1 << 9)  /* Bit 9:  Enable SCLK_HF, SCLK_MF and SCLK_LF clock
                                                                * loss detection and indicators to the system
                                                                * controller */
+
 #define DDI0_OSC_CTL0_XOSC_LF_DIG_BYPASS            (1 << 10) /* Bit 10: Bypass XOSC_LF and use the digital
                                                                * input clock from AON for the xosc_lf */
+
 #  define DDI0_OSC_CTL0_XOSC_LF_DIG_32KHZ           (0)                                         /* Use 32kHz XOSC as xosc_lf
                                                                                                  * clock source */
 #  define DDI0_OSC_CTL0_XOSC_LF_DIG_DIGINPUT        DDI0_OSC_CTL0_XOSC_LF_DIG_BYPASS            /* Use digital input (from AON)
                                                                                                  * as xosc_lf clock source */
+
 #define DDI0_OSC_CTL0_XOSC_HF_POWER_MODE            (1 << 11) /* Bit 11 */
 #define DDI0_OSC_CTL0_RCOSC_LF_TRIMMED              (1 << 12) /* Bit 12 */
 #define DDI0_OSC_CTL0_HPOSC_MODE_EN                 (1 << 14) /* Bit 14 */
@@ -264,6 +276,7 @@
 #  define DDI0_OSC_ATESTCTL_ATEST_RCOSCMF_BIAS      (3 << DDI0_OSC_ATESTCTL_ATEST_RCOSCMF_SHIFT) /* ATEST enabled, bias current connected,
                                                                                                   * ATEST internal to RCOSC_MF enabled
                                                                                                   * to send out 2MHz clock. */
+
 #define DDI0_OSC_ATESTCTL_TEST_RCOSCMF_SHIFT        (14)      /* Bits 14-15: Test mode control for RCOSC_MF */
 #define DDI0_OSC_ATESTCTL_TEST_RCOSCMF_MASK         (3 << DDI0_OSC_ATESTCTL_TEST_RCOSCMF_SHIFT)
 #  define DDI0_OSC_ATESTCTL_TEST_RCOSCMF_DISABLE    (0 << DDI0_OSC_ATESTCTL_TEST_RCOSCMF_SHIFT)   /* Test modes disabled */
@@ -273,6 +286,7 @@
 #  define DDI0_OSC_ATESTCTL_TEST_RCOSCMF_BOOSTDIS   (3 << DDI0_OSC_ATESTCTL_TEST_RCOSCMF_SHIFT)   /* Boosted bias current into self
                                                                                                    * biased inverter + clock qualification
                                                                                                    * disabled */
+
 #define DDI0_OSC_ATESTCTL_SCLK_LF_AUX_EN            (1 << 31) /* Bit 31: Enable 32 kHz clock to AUX_COMPB */
 
 /* DDI0_OSC_ADCDOUBLERNANOAMPCTL */
@@ -332,6 +346,7 @@
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_MIN       (8 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* minimum current */
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_DEFAULT   (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* default current */
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_MAX       (7 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_BIAS_ADJ_SHIFT)  /* maximum current */
+
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT       (4)       /* Bits 4-5: Select fine resistor for frequency adjustment */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_MASK        (3 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT)
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_11K       (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT)  /* 11kohms, minimum resistance,
@@ -340,6 +355,7 @@
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_16K       (2 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT)  /* 16kohms */
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_20K       (3 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_FINE_SHIFT)  /* 20kohms, max resistance,
                                                                                                                * min freq */
+
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_SHIFT     (6)      /* Bits 6-7: Select coarse resistor for frequency adjustment */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_MASK      (3 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_SHIFT)
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_DEFAULT (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_SHIFT) /* 400kohms, default */
@@ -349,6 +365,7 @@
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_400KOHM (0 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_SHIFT) /* 400kohms */
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_500KOHM (3 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_SHIFT) /* 500kohms */
 #  define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_600KOHM (2 << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_RES_COARSE_SHIFT) /* 600kohms */
+
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_REG_SEL              (1 << 8)  /* Bit 8:  Select alternate regulator type */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_CAP_ARRAY_SHIFT      (9)       /* Bits 9-15: Adjust RCOSC_MF capacitor array */
 #define DDI0_OSC_RCOSCMFCTL_RCOSC_MF_CAP_ARRAY_MASK       (0x7f << DDI0_OSC_RCOSCMFCTL_RCOSC_MF_CAP_ARRAY_SHIFT)
@@ -382,8 +399,11 @@
 #define DDI0_OSC_STAT0_RCOSC_LF_EN              (1 << 21) /* Bit 21: RCOSC_LF enable */
 #define DDI0_OSC_STAT0_RCOSC_HF_EN              (1 << 22) /* Bit 22: RSOSC_HF enable */
 #define DDI0_OSC_STAT0_SCLK_HF_SRC              (1 << 28) /* Bit 28: Indicates source for sclk_hf */
+
 #  define DDI0_OSC_STAT0_SCLK_HF_SRC_RCOSC      (0)  /* High frequency RCOSC clock */
+
 #  define DDI0_OSC_STAT0_SCLK_HF_SRC_XOSC       DDI0_OSC_STAT0_SCLK_HF_SRC /* High frequency XOSC */
+
 #define DDI0_OSC_STAT0_SCLK_LF_SRC_SHIFT        (29)      /* Bits 29-30: Indicates source for the sclk_lf */
 #define DDI0_OSC_STAT0_SCLK_LF_SRC_MASK         (3 << DDI0_OSC_STAT0_SCLK_LF_SRC_SHIFT)
 #  define DDI0_OSC_STAT0_SCLK_LF_SRC(n)         ((uint32_t)(n) << DDI0_OSC_STAT0_SCLK_LF_SRC_SHIFT)

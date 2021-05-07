@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/nr5m100/nr5_timerisr.c
+ * arch/misoc/src/common/misoc_timerisr.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -122,7 +122,7 @@ void up_timer_initialize(void)
 
   timer0_ev_pending_write(timer0_ev_pending_read());
 
-  /* Disable timer*/
+  /* Disable timer */
 
   timer0_en_write(0);
 

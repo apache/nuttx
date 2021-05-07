@@ -19,11 +19,9 @@
 ############################################################################
 
 ifeq ($(CONFIG_RISCV_MEMCPY),y)
-
 ASRCS += arch_memcpy.S
+endif
 
 DEPPATH += --dep-path machine/risc-v/rv32
 VPATH += :machine/risc-v/rv32
-
-endif
 

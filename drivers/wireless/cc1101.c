@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/wireless/cc1101.c
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -46,7 +31,8 @@
  *     ISM Region 2 (Complete America)
  *
  * Todo:
- *   - Extend max packet length up to 255 bytes or rather infinite < 4096 bytes
+ *   - Extend max packet length up to 255 bytes or rather
+ *     infinite < 4096 bytes
  *   - Power up/down modes
  *   - Sequencing between states or add protection for correct termination of
  *     various different state (so that CC1101 does not block in case of
@@ -83,7 +69,8 @@
  * how RSSI and LQI work:
  *
  *  1. A weak signal in the presence of noise may give low RSSI and low LQI.
- *  2. A weak signal in "total" absence of noise may give low RSSI and high LQI.
+ *  2. A weak signal in "total" absence of noise may give low RSSI and high
+ *     LQI.
  *  3. Strong noise (usually coming from an interferer) may give high RSSI
  *     and low LQI.
  *  4. A strong signal without much noise may give high RSSI and high LQI.
@@ -191,8 +178,8 @@
 #define CC1101_VCO_VC_DAC       (0x39 | 0xc0)   /* Current setting from PLL cal module */
 #define CC1101_TXBYTES          (0x3a | 0xc0)   /* Underflow and # of bytes in TXFIFO */
 #define CC1101_RXBYTES          (0x3b | 0xc0)   /* Overflow and # of bytes in RXFIFO */
-#define CC1101_RCCTRL1_STATUS   (0x3c | 0xc0)   /* Last RC oscilator calibration results */
-#define CC1101_RCCTRL0_STATUS   (0x3d | 0xc0)   /* Last RC oscilator calibration results */
+#define CC1101_RCCTRL1_STATUS   (0x3c | 0xc0)   /* Last RC oscillator calibration results */
+#define CC1101_RCCTRL0_STATUS   (0x3d | 0xc0)   /* Last RC oscillator calibration results */
 
 /* Multi byte memory locations */
 
@@ -299,7 +286,8 @@ static int cc1101_file_open(FAR struct file *filep);
 static int cc1101_file_close(FAR struct file *filep);
 static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
-static ssize_t cc1101_file_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t cc1101_file_write(FAR struct file *filep,
+                                 FAR const char *buffer,
                                  size_t buflen);
 static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
@@ -1130,7 +1118,8 @@ int cc1101_powerdown(FAR struct cc1101_dev_s *dev)
  *
  ****************************************************************************/
 
-int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
+int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin,
+                  uint8_t function)
 {
   DEBUGASSERT(dev);
   DEBUGASSERT(pin <= CC1101_IOCFG0);
@@ -1174,30 +1163,36 @@ int cc1101_setgdo(FAR struct cc1101_dev_s *dev, uint8_t pin, uint8_t function)
 int cc1101_setrf(FAR struct cc1101_dev_s *dev,
                  FAR const struct c1101_rfsettings_s *settings)
 {
+  int ret;
+
   DEBUGASSERT(dev);
   DEBUGASSERT(settings);
 
-  if (cc1101_access(
-          dev, CC1101_FSCTRL1, (FAR uint8_t *)&settings->FSCTRL1, -11) < 0)
+  ret = cc1101_access(dev, CC1101_FSCTRL1,
+                      (FAR uint8_t *)&settings->FSCTRL1, -11);
+  if (ret < 0)
     {
       return -EIO;
     }
 
-  if (cc1101_access(dev, CC1101_FOCCFG, (FAR uint8_t *)&settings->FOCCFG, -5) <
-      0)
+  ret = cc1101_access(dev, CC1101_FOCCFG,
+                      (FAR uint8_t *)&settings->FOCCFG, -5);
+  if (ret < 0)
     {
       return -EIO;
     }
 
-  if (cc1101_access(dev, CC1101_FREND1, (FAR uint8_t *)&settings->FREND1, -6) <
-      0)
+  ret = cc1101_access(dev, CC1101_FREND1,
+                      (FAR uint8_t *)&settings->FREND1, -6);
+  if (ret < 0)
     {
       return -EIO;
     }
 
   /* Load Power Table */
 
-  if (cc1101_access(dev, CC1101_PATABLE, (FAR uint8_t *)settings->PA, -8) < 0)
+  ret = cc1101_access(dev, CC1101_PATABLE, (FAR uint8_t *)settings->PA, -8);
+  if (ret < 0)
     {
       return -EIO;
     }
@@ -1287,13 +1282,13 @@ uint8_t cc1101_setpower(FAR struct cc1101_dev_s *dev, uint8_t power)
 }
 
 /****************************************************************************
- * Name: cc1101_calcRSSIdBm
+ * Name: cc1101_calc_rssi_dbm
  *
  * Description:
  *
  ****************************************************************************/
 
-int cc1101_calcRSSIdBm(int rssi)
+int cc1101_calc_rssi_dbm(int rssi)
 {
   if (rssi >= 128)
     {
@@ -1351,7 +1346,8 @@ int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
 
   nbytes += 2; /* RSSI and LQI */
   buf[0] = nbytes;
-  cc1101_access(dev, CC1101_RXFIFO, buf + 1, (nbytes > size) ? size : nbytes);
+  cc1101_access(dev, CC1101_RXFIFO, buf + 1,
+                (nbytes > size) ? size : nbytes);
 
   /* Flush remaining bytes, if there is no room to receive or if there is a
    * BAD CRC

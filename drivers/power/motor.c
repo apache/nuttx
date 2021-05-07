@@ -1,6 +1,5 @@
 /****************************************************************************
  * drivers/power/motor.c
- * Upper-half, character driver for motor control
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +17,8 @@
  * under the License.
  *
  ****************************************************************************/
+
+/* Upper-half, character driver for motor control */
 
 /****************************************************************************
  * Included Files

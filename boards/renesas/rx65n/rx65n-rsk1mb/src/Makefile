@@ -1,5 +1,5 @@
 ############################################################################
-# configs/rx65n/src/Makefile
+# boards/renesas/rx65n/rx65n-rsk1mb/src/Makefile
 #
 #   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
 #   Author: Anjana <anjana@tataelxsi.co.in>

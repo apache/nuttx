@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -140,12 +141,8 @@ int g_console_disable;
 #  define HS_DMAACT_ACT2      3
 #endif
 
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? a : b)
-#endif
-
 #ifndef MIN
-#define MIN(a, b) ((a) > (b) ? b : a)
+#  define MIN(a, b) ((a) > (b) ? (b) : (a))
 #endif
 
 /****************************************************************************
@@ -474,7 +471,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   if (udiv < 0)
     {
-      serr("ERROR: baud = %d\n", priv->baud);
+      serr("ERROR: baud = %" PRId32 "\n", priv->baud);
       return -EINVAL;
     }
 

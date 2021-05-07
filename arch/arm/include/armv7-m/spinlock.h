@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv7-a/spinlock.h
+ * arch/arm/include/armv7-m/spinlock.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

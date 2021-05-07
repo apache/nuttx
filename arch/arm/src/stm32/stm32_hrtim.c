@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <errno.h>
 #include <assert.h>
@@ -5325,8 +5326,9 @@ static int hrtim_tim_freq_set(FAR struct hrtim_dev_s *dev, uint8_t timer,
   per = fclk / freq;
   if (per > HRTIM_PER_MAX)
     {
-      tmrerr("ERROR: can not achieve timer pwm freq=%u if fclk=%llu\n",
-             (uint32_t)freq, (uint64_t)fclk);
+      tmrerr("ERROR: can not achieve timer pwm "
+             "freq=%" PRIu64 " if fclk=%" PRIu64 "\n",
+             freq, fclk);
       ret = -EINVAL;
       goto errout;
     }

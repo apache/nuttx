@@ -1,56 +1,40 @@
-/********************************************************************************************
+/****************************************************************************
  * arch/arm/src/samv7/hardware/sam_pmc.h
- * Power Management Controller (PMC) for the SAMV71
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PMC_H
 #define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PMC_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 #include "hardware/sam_memorymap.h"
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* PMC register offsets *********************************************************************/
+/* PMC register offsets *****************************************************/
 
 #define SAM_PMC_SCER_OFFSET            0x0000 /* System Clock Enable Register */
 #define SAM_PMC_SCDR_OFFSET            0x0004 /* System Clock Disable Register */
@@ -105,7 +89,7 @@
 #define SAM_PMC_SLPWK_ASR1_OFFSET      0x0140 /* SleepWalking Activity Status Register 1 */
 #define SAM_PMC_SLPWK_AIPR_OFFSET      0x0144 /* SleepWalking Activity In Progress Register */
 
-/* PMC register addresses *******************************************************************/
+/* PMC register addresses ***************************************************/
 
 #define SAM_PMC_SCER                   (SAM_PMC_BASE+SAM_PMC_SCER_OFFSET)
 #define SAM_PMC_SCDR                   (SAM_PMC_BASE+SAM_PMC_SCDR_OFFSET)
@@ -156,10 +140,10 @@
 #define SAM_PMC_SLPWK_ASR1             (SAM_PMC_BASE+SAM_PMC_SLPWK_ASR1_OFFSET)
 #define SAM_PMC_SLPWK_AIPR             (SAM_PMC_BASE+SAM_PMC_SLPWK_AIPR_OFFSET)
 
-/* PMC register bit definitions *************************************************************/
+/* PMC register bit definitions *********************************************/
 
-/* PMC System Clock Enable Register, PMC System Clock Disable Register, and PMC System
- * Clock Status Register common bit-field definitions
+/* PMC System Clock Enable Register, PMC System Clock Disable Register, and
+ * PMC System Clock Status Register common bit-field definitions
  */
 
 #define PMC_USBCLK                     (1 << 5)  /* Bit 5: Enable USB FS Clock */
@@ -172,8 +156,9 @@
 #  define PMC_PCK5                     (1 << 13) /* Bit 13: Programmable Clock 5 Output Enable */
 #  define PMC_PCK6                     (1 << 14) /* Bit 14: Programmable Clock 6 Output Enable */
 
-/* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable Register, and PMC
- * Peripheral Clock Status Register common bit-field definitions.
+/* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable
+ * Register, and PMC Peripheral Clock Status Register common bit-field
+ * definitions.
  */
 
 #define PMC_PIDL(n)                    (1 << (n))
@@ -222,6 +207,7 @@
 #  define PMC_CKGR_MOR_MOSCRCF_4MHz    (0 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 4MHz (default) */
 #  define PMC_CKGR_MOR_MOSCRCF_8MHz    (1 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 8MHz */
 #  define PMC_CKGR_MOR_MOSCRCF_12MHz   (2 << PMC_CKGR_MOR_MOSCRCF_SHIFT) /* Fast RC Osc is 12MHz */
+
 #define PMC_CKGR_MOR_MOSCXTST_SHIFT    (8)       /* Bits 8-15: Main Crystal Oscillator Start-up Time */
 #define PMC_CKGR_MOR_MOSCXTST_MASK     (0xff << PMC_CKGR_MOR_MOSCXTST_SHIFT)
 #  define PMC_CKGR_MOR_MOSCXTST(n)     ((uint32_t)(n) << PMC_CKGR_MOR_MOSCXTST_SHIFT)
@@ -250,6 +236,7 @@
 #  define PMC_CKGR_PLLAR_DIV_ZERO      (0 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider output is 0 */
 #  define PMC_CKGR_PLLAR_DIV_BYPASS    (1 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider is bypassed (DIV=1) */
 #  define PMC_CKGR_PLLAR_DIV(n)        ((n) << PMC_CKGR_PLLAR_DIV_SHIFT) /* Divider output is DIV=n, n=2..255 */
+
 #define PMC_CKGR_PLLAR_COUNT_SHIFT     (8)       /* Bits 8-13: PLLA Counter */
 #define PMC_CKGR_PLLAR_COUNT_MASK      (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
 #define PMC_CKGR_PLLAR_MUL_SHIFT       (16)      /* Bits 16-26: PLLA Multiplier */
@@ -265,6 +252,7 @@
 #  define PMC_MCKR_CSS_MAIN            (1 << PMC_MCKR_CSS_SHIFT) /* Main Clock */
 #  define PMC_MCKR_CSS_PLLA            (2 << PMC_MCKR_CSS_SHIFT) /* PLLA Clock */
 #  define PMC_MCKR_CSS_UPLL            (3 << PMC_MCKR_CSS_SHIFT) /* Divided UPLL Clock */
+
 #define PMC_MCKR_PRES_SHIFT            (4)       /* Bits 4-6: Processor Clock Prescaler */
 #define PMC_MCKR_PRES_MASK             (7 << PMC_MCKR_PRES_SHIFT)
 #  define PMC_MCKR_PRES_DIV1           (0 << PMC_MCKR_PRES_SHIFT) /* Selected clock */
@@ -275,12 +263,14 @@
 #  define PMC_MCKR_PRES_DIV32          (5 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 32 */
 #  define PMC_MCKR_PRES_DIV64          (6 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 64 */
 #  define PMC_MCKR_PRES_DIV3           (7 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 3 */
+
 #define PMC_MCKR_MDIV_SHIFT            (8)       /* Bits 8-9: Master Clock Division */
 #define PMC_MCKR_MDIV_MASK             (3 << PMC_MCKR_MDIV_SHIFT)
 #  define PMC_MCKR_MDIV_DIV1           (0 << PMC_MCKR_MDIV_SHIFT) /* Master Clock is Prescaler Output Clock / 1 */
 #  define PMC_MCKR_MDIV_DIV2           (1 << PMC_MCKR_MDIV_SHIFT) /* Master Clock = Prescaler Output Clock / 2 */
 #  define PMC_MCKR_MDIV_DIV4           (2 << PMC_MCKR_MDIV_SHIFT) /* Master Clock = Prescaler Output Clock / 4 */
 #  define PMC_MCKR_MDIV_DIV3           (3 << PMC_MCKR_MDIV_SHIFT) /* Master Clock = Prescaler Output Clock / 3 */
+
 #define PMC_MCKR_PLLADIV2              (1 << 12) /* Bit 12: PLLA Divider */
 
 /* USB Clock Register PMC_USB */
@@ -301,12 +291,13 @@
 #  define PMC_PCK_CSS_PLLA             (2 << PMC_PCK_CSS_SHIFT) /* PLLA Clock */
 #  define PMC_PCK_CSS_UPLL             (3 << PMC_PCK_CSS_SHIFT) /* Divided UPLL Clock */
 #  define PMC_PCK_CSS_MCK              (4 << PMC_PCK_CSS_SHIFT) /* Master Clock */
+
 #define PMC_PCK_PRES_SHIFT             (4)       /* Bits 4-11: Programmable Clock Prescaler */
 #define PMC_PCK_PRES_MASK              (0xff << PMC_PCK_PRES_SHIFT)
 #  define PMC_PCK_PRES(n)              ((uint32_t)(n) << PMC_PCK_PRES_SHIFT) /* n=0..255 */
 
-/* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status Register,
- * and PMC Interrupt Mask Register common bit-field definitions
+/* PMC Interrupt Enable Register, PMC Interrupt Disable Register, PMC Status
+ * Register, and PMC Interrupt Mask Register common bit-field definitions
  */
 
 #define PMC_INT_MOSCXTS                (1 << 0)  /* Bit 0:  Main Crystal Oscillator Status Interrupt */
@@ -328,8 +319,8 @@
 #define PMC_SR_FOS                     (1 << 20) /* Bit 20: Clock Failure Detector Fault Output Status (SR only) */
 #define PMC_INT_XT32KERR               (1 << 21) /* Bit 21: Slow Crystal Oscillator Error Interrupt */
 
-/* PMC Fast Startup Mode Register and PMC Fast Startup Polarity Register common bit-field
- * definitions
+/* PMC Fast Startup Mode Register and PMC Fast Startup Polarity Register
+ * common bit-field definitions
  */
 
 #define PMC_FSTI(n)                    (1 << (n))
@@ -358,6 +349,7 @@
 #  define PMC_FSMR_FLPM_STANDBY        (0 << PMC_FSMR_FLPM_SHIFT) /* Flash Standby Mode */
 #  define PMC_FSMR_FLPM_PWRDOWN        (1 << PMC_FSMR_FLPM_SHIFT) /* Flash deep power down mode */
 #  define PMC_FSMR_FLPM_IDLE           (2 << PMC_FSMR_FLPM_SHIFT) /* Idle mode */
+
 #define PMC_FSMR_FFLPM                 (1 << 23) /* Bit 20: Force Flash Low-power Mode (MR only) */
 
 /* PMC Fault Output Clear Register */
@@ -377,8 +369,8 @@
 #define PMC_WPSR_WPVSRC_SHIFT            (8)       /* Bits 8-23: Write Protect Violation Source */
 #define PMC_WPSR_WPVSRC_MASK             (0xffff << PMC_WPSR_WPVSRC_SHIFT)
 
-/* Peripheral Clock Enable Register 1, Peripheral Clock Disable Register 1, and Peripheral
- * Clock Status Register 1
+/* Peripheral Clock Enable Register 1, Peripheral Clock Disable Register 1,
+ * and Peripheral Clock Status Register 1
  */
 
 #define PMC_PIDH(n)                    (1 << ((n) - 32))
@@ -420,6 +412,7 @@
 #  define PMC_PCR_DIV2                 (1 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
 #  define PMC_PCR_DIV4                 (2 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
 #  define PMC_PCR_DIV8                 (3 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/8 */
+
 #define PMC_PCR_EN                     (1 << 28) /* Bit 28: Enable */
 
 /* Oscillator Calibration Register */
@@ -438,29 +431,35 @@
 #define PMC_OCR_SEL12                 (1 << 23) /* Bit 23:  Select 12MHz RC Oscillator Calibration */
 
 /* SleepWalking Enable Register 0:  Use PMC_PIDL definitions */
+
 /* SleepWalking Disable Register 0:  Use PMC_PIDL definitions */
+
 /* SleepWalking Status Register 0:  Use PMC_PIDL definitions */
+
 /* SleepWalking Activity Status Register 0:  Use PMC_PIDL definitions */
 
 /* SleepWalking Enable Register 1:  Use PMC_PIDH definitions */
+
 /* SleepWalking Disable Register 1:  Use PMC_PIDH definitions */
+
 /* SleepWalking Status Register 1:  Use PMC_PIDH definitions */
+
 /* SleepWalking Activity Status Register 1:  Use PMC_PIDH definitions */
 
 /* SleepWalking Activity In Progress Register */
 
 #define PMC_SLPWK_AIPR_AIP            (0)       /* Bit 0: Activity in progress */
 
-/********************************************************************************************
+/****************************************************************************
  * Public Types
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Public Data
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
- * Public Functions
- ********************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PMC_H */

@@ -28,6 +28,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -204,14 +205,14 @@ struct smps_lower_dev_s
 
 struct smps_priv_s
 {
-  uint8_t           conv_mode;   /* Converter mode */
-  uint16_t          v_in_raw;    /* Voltage input RAW value */
-  uint16_t          v_out_raw;   /* Voltage output RAW value */
-  float             v_in;        /* Voltage input real value in V */
-  float             v_out;       /* Voltage output real value in V  */
-  bool              running;     /* Running flag */
-  pid_controller_t  pid;         /* PID controller */
-  float            *c_limit_tab; /* Current limit tab */
+  uint8_t               conv_mode;   /* Converter mode */
+  uint16_t              v_in_raw;    /* Voltage input RAW value */
+  uint16_t              v_out_raw;   /* Voltage output RAW value */
+  float                 v_in;        /* Voltage input real value in V */
+  float                 v_out;       /* Voltage output real value in V  */
+  bool                  running;     /* Running flag */
+  pid_controller_f32_t  pid;         /* PID controller */
+  float                *c_limit_tab; /* Current limit tab */
 };
 
 /****************************************************************************
@@ -430,6 +431,10 @@ static int smps_start(FAR struct smps_dev_s *dev)
   /* Set PID controller saturation */
 
   pid_saturation_set(&priv->pid, 0.0, BOOST_VOLT_MAX);
+
+  /* Reset PI integral if saturated */
+
+  pi_ireset_enable(&priv->pid, true);
 #endif
 
   /* Get TIMA period value for given frequency */
@@ -438,7 +443,8 @@ static int smps_start(FAR struct smps_dev_s *dev)
   per = fclk / TIMA_PWM_FREQ;
   if (per > HRTIM_PER_MAX)
     {
-      pwrerr("ERROR:  Can not achieve tima pwm freq=%u if fclk=%llu\n",
+      pwrerr("ERROR:  Can not achieve tima pwm "
+             "freq=%" PRIu32 " if fclk=%" PRIu64 "\n",
              (uint32_t)TIMA_PWM_FREQ, (uint64_t)fclk);
       ret = -EINVAL;
       goto errout;
@@ -454,7 +460,8 @@ static int smps_start(FAR struct smps_dev_s *dev)
   per = fclk / TIMB_PWM_FREQ;
   if (per > HRTIM_PER_MAX)
     {
-      pwrerr("ERROR:  Can not achieve timb pwm freq=%u if fclk=%llu\n",
+      pwrerr("ERROR:  Can not achieve timb pwm "
+             "freq=%" PRIu32 " if fclk=%" PRIu64 "\n",
              (uint32_t)TIMB_PWM_FREQ, (uint64_t)fclk);
       ret = -EINVAL;
       goto errout;

@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_gpio.c
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Bob Feretich <bob.feretich@rafresearch.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -64,6 +48,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* Base addresses for each GPIO block */
 
 const uint32_t g_gpiobase[STM32F7_NGPIO] =
@@ -164,7 +149,10 @@ int stm32_configgpio(uint32_t cfgset)
         break;
 
       case GPIO_OUTPUT:     /* General purpose output mode */
-        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
+
+        /* Set the initial output value */
+
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -294,18 +282,22 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
-  /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
+  /* Otherwise, it is an input pin.  Should it configured as an EXTI
+   * interrupt?
+   */
 
   if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
-      /* "In STM32 F1 the selection of the EXTI line source is performed through
-       *  the EXTIx bits in the AFIO_EXTICRx registers, while in F2 series this
-       *  selection is done through the EXTIx bits in the SYSCFG_EXTICRx registers.
+      /* "In STM32 F1 the selection of the EXTI line source is performed
+       *  through the EXTIx bits in the AFIO_EXTICRx registers, while in F2
+       *  series this selection is done through the EXTIx bits in the
+       *  SYSCFG_EXTICRx registers.
        *
-       * "Only the mapping of the EXTICRx registers has been changed, without any
-       *  changes to the meaning of the EXTIx bits. However, the range of EXTI
-       *  bits values has been extended to 0b1000 to support the two ports added
-       *  in F2, port H and I (in F1 series the maximum value is 0b0110)."
+       * "Only the mapping of the EXTICRx registers has been changed,
+       *  without any changes to the meaning of the EXTIx bits. However, the
+       *  range of EXTI bits values has been extended to 0b1000 to support
+       *  the two ports added in F2, port H and I (in F1 series the maximum
+       *  value is 0b0110)."
        */
 
       uint32_t regaddr;
@@ -330,14 +322,15 @@ int stm32_configgpio(uint32_t cfgset)
  * Name: stm32_unconfiggpio
  *
  * Description:
- *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
- *   into default HiZ state (and possibly mark it's unused) and unlock it whether
- *   it was previously selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
+ *   it into default HiZ state (and possibly mark it's unused) and unlock it
+ *   whether it was previously selected as alternative function
+ *   (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
- *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
- *   operate in PWM mode could produce excessive on-board currents and trigger
- *   over-current/alarm function.
+ *   This is a safety function and prevents hardware from schocks, as
+ *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
+ *   while it should operate in PWM mode could produce excessive on-board
+ *   currents and trigger over-current/alarm function.
  *
  * Returned Value:
  *  OK on success
@@ -425,6 +418,7 @@ bool stm32_gpioread(uint32_t pinset)
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
       return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
+
   return 0;
 }
 
@@ -437,10 +431,11 @@ bool stm32_gpioread(uint32_t pinset)
  *   By default the I/O compensation cell is not used. However when the I/O
  *   output buffer speed is configured in 50 MHz or 100 MHz mode, it is
  *   recommended to use the compensation cell for slew rate control on I/O
- *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+ *   tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power
+ *   supply.
  *
- *   The I/O compensation cell can be used only when the supply voltage ranges
- *   from 2.4 to 3.6 V.
+ *   The I/O compensation cell can be used only when the supply voltage
+ *   ranges from 2.4 to 3.6 V.
  *
  * Input Parameters:
  *   None

@@ -153,14 +153,17 @@ void stm32_selectlcd(void)
 
   /* Bank3 NOR/SRAM timing register configuration */
 
-  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) | FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTURN(0) |
-           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) | FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
+  putreg32(FSMC_BTR_ADDSET(5) | FSMC_BTR_ADDHLD(0) |
+           FSMC_BTR_DATAST(9) | FSMC_BTR_BUSTURN(0) |
+           FSMC_BTR_CLKDIV(0) | FSMC_BTR_DATLAT(0) |
+           FSMC_BTR_ACCMODA, STM32_FSMC_BTR3);
 
   putreg32(0xffffffff, STM32_FSMC_BWTR3);
 
   /* Enable the bank by setting the MBKEN bit */
 
-  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR3);
+  putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM |
+           FSMC_BCR_MWID16 | FSMC_BCR_WREN, STM32_FSMC_BCR3);
 }
 
 #endif /* CONFIG_STM32_FSMC */

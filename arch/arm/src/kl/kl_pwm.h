@@ -1,58 +1,54 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/kl/kl_pwm.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis <acassis@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_KINETIS_PWM_H
 #define __ARCH_ARM_SRC_KL_KINETIS_PWM_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
 
-/************************************************************************************
+/* Check if PWM support for any channel is enabled. */
+
+#if defined(CONFIG_KL_TPM0_PWM)  || defined(CONFIG_KL_TPM1_PWM)  || \
+    defined(CONFIG_KL_TPM2_PWM)
+
+#include <arch/board/board.h>
+#include "hardware/kl_pinmux.h"
+#endif
+
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Timer devices may be used for different purposes.  One special purpose is
- * to generate modulated outputs for such things as motor control.  If CONFIG_KL_TPMn
- * is defined then the CONFIG_KL_TPMn_PWM must also be defined to indicate that
- * timer "n" is intended to be used for pulsed output signal generation.
+ * to generate modulated outputs for such things as motor control.
+ * If CONFIG_KL_TPMn is defined then the CONFIG_KL_TPMn_PWM must also be
+ * defined to indicate that timer "n" is intended to be used for pulsed
+ * output signal generation.
  */
 
 #ifndef CONFIG_KL_TPM0
@@ -70,16 +66,13 @@
 #if defined(CONFIG_KL_TPM0_PWM)  || defined(CONFIG_KL_TPM1_PWM)  || \
     defined(CONFIG_KL_TPM2_PWM)
 
-#include <arch/board/board.h>
-#include "hardware/kl_pinmux.h"
-
-/* For each timer that is enabled for PWM usage, we need the following additional
- * configuration settings:
+/* For each timer that is enabled for PWM usage, we need the following
+ * additional configuration settings:
  *
  * CONFIG_KL_TPMx_CHANNEL - Specifies the timer output channel {1,..,4}
- * PWM_TPMx_CHn - One of the values defined in chip/kl*_pinmap.h.  In the case
- *   where there are multiple pin selections, the correct setting must be provided
- *   in the arch/board/board.h file.
+ * PWM_TPMx_CHn - One of the values defined in chip/kl*_pinmap.h.  In the
+ *   case where there are multiple pin selections, the correct setting must
+ *   be provided in the arch/board/board.h file.
  */
 
 #ifdef CONFIG_KL_TPM0_PWM
@@ -142,13 +135,13 @@
 #  endif
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -161,11 +154,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: kl_pwminitialize
  *
  * Description:
@@ -178,7 +171,7 @@ extern "C"
  *   On success, a pointer to the KL lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
 

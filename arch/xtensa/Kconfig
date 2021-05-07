@@ -18,6 +18,7 @@ config ARCH_CHIP_ESP32
 	select ARCH_HAVE_SDRAM
 	select ARCH_HAVE_RESET
 	select ARCH_TOOLCHAIN_GNU
+	select ARCH_VECNOTIRQ
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -108,28 +109,34 @@ config XTENSA_BTDEPTH
 	---help---
 		This is the depth of the backtrace.
 
-config XTENSA_USE_SEPARATE_IMEM
+config XTENSA_INTBACKTRACE
+	bool "Full backtrace from interrupts"
+	default n
+	depends on XTENSA_DUMPBT_ON_ASSERT
+	---help---
+		Add necessary logic to be able to have a full backtrace from an interrupt context.
+
+config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"
 	default n
 	help
 		This is a separate internal heap that's used by drivers when certain operations
 		are not possible with the provided buffer(s).
-		Mainly, when the provided buffer comes from external RAM and a DMA or flash 
+		Mainly, when the provided buffer comes from external RAM and a DMA or flash
 		operation is going to be performed.
-
-		This separate heap will be part of the internal DRAM.  It starts right after .data
-		and ends at the configurable size given by the OPTION XTENSA_IMEM_REGION_SIZE.
+		This separate heap will be part of the internal DRAM.
 
 config XTENSA_IMEM_REGION_SIZE
 	hex "DRAM region size for internal use"
-	depends on XTENSA_USE_SEPARATE_IMEM
-	range 0x2000 0x28000
-	default 0x28000
+	depends on XTENSA_IMEM_USE_SEPARATE_HEAP
+	default 0x18000
 
-config XTENSA_IMEM_PROCFS
-	bool "Internal memory PROCFS support"
+config XTENSA_EXTMEM_BSS
+	bool "Allow BSS section in external memory"
 	default n
-	depends on XTENSA_USE_SEPARATE_IMEM && !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+	help
+		Adds a section and an attribute that allows to force variables into
+		the external memory.
 
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32

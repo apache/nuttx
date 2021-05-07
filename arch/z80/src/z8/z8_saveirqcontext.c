@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_saveirqcontext.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -93,10 +78,12 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
       /* Calculate the source address based on the saved RP value */
 
       uint16_t       rp  = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS] >> 8;
-      FAR chipreg_t *src = (FAR uint16_t*)(rp & 0xf0);
+      FAR chipreg_t *src = (FAR uint16_t *)(rp & 0xf0);
       FAR chipreg_t *dest = &regs[XCPT_RR0];
 
-      /* Copy the interrupted tasks register into the TCB register save area. */
+      /* Copy the interrupted tasks register into the TCB register save
+       * area.
+       */
 
       int i;
       for (i = 0; i < XCPTCONTEXT_REGS; i++)
@@ -104,7 +91,9 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
           *dest++ = *src++;
         }
 
-      /* Since the task was interrupted, we know that interrupts were enabled */
+      /* Since the task was interrupted, we know that interrupts were
+       * enabled
+       */
 
       regs[XCPT_IRQCTL] = 0x0080; /* IRQE bit will enable interrupts */
 
@@ -122,8 +111,8 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
       regs[XCPT_RPFLAGS] = g_z8irqstate.regs[Z8_IRQSAVE_RPFLAGS];
       regs[XCPT_PC]      = g_z8irqstate.regs[Z8_IRQSAVE_PC];
 
-      /* Now update the IRQ save area so that we will know that we have already
-       * done this.
+      /* Now update the IRQ save area so that we will know that we have
+       * already done this.
        */
 
       g_z8irqstate.state = Z8_IRQSTATE_SAVED;

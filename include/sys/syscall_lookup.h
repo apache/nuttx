@@ -27,6 +27,11 @@
 SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(exit,                       1)
 SYSCALL_LOOKUP(getpid,                     0)
+SYSCALL_LOOKUP(gettid,                     0)
+
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  SYSCALL_LOOKUP(getppid,                  0)
+#endif
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
   SYSCALL_LOOKUP(getppid,                  0)
@@ -369,8 +374,10 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(listen,                   2)
   SYSCALL_LOOKUP(recv,                     4)
   SYSCALL_LOOKUP(recvfrom,                 6)
+  SYSCALL_LOOKUP(recvmsg,                  3)
   SYSCALL_LOOKUP(send,                     4)
   SYSCALL_LOOKUP(sendto,                   6)
+  SYSCALL_LOOKUP(sendmsg,                  3)
   SYSCALL_LOOKUP(setsockopt,               5)
   SYSCALL_LOOKUP(socket,                   3)
 #endif

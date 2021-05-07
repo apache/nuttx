@@ -1,36 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32/olimexino-stm32/include/board.h
  *
- *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,7 +37,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Clocking *************************************************************************/
+
+/* Clocking *****************************************************************/
 
 /* HSI - 8 MHz RC factory-trimmed
  * LSI - 40 KHz RC (30-60KHz, uncalibrated)
@@ -68,7 +53,10 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1,
+ * PLL multipler is 9:
+ * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -85,7 +73,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK
 #define STM32_HCLK_FREQUENCY    STM32_PLL_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY    /* same as above, to satisfy compiler */
 
 /* APB2 clock (PCLK2) is HCLK (72MHz) */
 
@@ -117,7 +104,8 @@
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
  * otherwise frequency is 2xAPBx.
- * Note: TIM1,8 are on APB2, others on APB1 */
+ * Note: TIM1,8 are on APB2, others on APB1
+ */
 
 #define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
@@ -128,12 +116,12 @@
 #define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* Buttons *************************************************************************/
+/* Buttons ******************************************************************/
 
 #define BUTTON_BOOT0_BIT  (0)
 #define BUTTON_BOOT0_MASK (1<<BUTTON_BOOT0_BIT)
 
-/* Leds *************************************************************************/
+/* Leds *********************************************************************/
 
 /* LED index values for use with board_userled() */
 
@@ -153,7 +141,8 @@
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                         Green  Yellow
- *   ------------------------  --------------------------  ------ ------ */
+ *   ------------------------  --------------------------  ------ ------
+ */
 
 #define LED_STARTED          0 /* NuttX has been started   OFF    OFF    */
 #define LED_HEAPALLOCATE     1 /* Heap has been allocated  OFF    OFF    */
@@ -163,7 +152,7 @@
 #define LED_SIGNAL           5 /* In a signal handler      N/C    ON     */
 #define LED_ASSERTION        6 /* An assertion failed      N/C    ON     */
 #define LED_PANIC            7 /* The system has crashed   N/C  Blinking */
-#define LED_IDLE             8  /* MCU is is sleep mode    OFF    N/C    */
+#define LED_IDLE             8 /* MCU is is sleep mode    OFF    N/C    */
 
 /* Thus if the Green is statically on, NuttX has successfully booted and is,
  * apparently, running normally.  If the YellowLED is flashing at

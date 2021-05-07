@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/lpc17xx_40xxx/lpc178x_40xx_irq.h
+ * arch/arm/include/lpc17xx_40xx/lpc178x_40xx_irq.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Rommel Marcelo
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Prototypes
  ****************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
@@ -156,8 +156,9 @@
 #define LPC17_40_IRQ_NEXTINT       (41)
 #define LPC17_40_IRQ_NIRQS         (LPC17_40_IRQ_EXTINT+LPC17_40_IRQ_NEXTINT)
 
-/* GPIO interrupts.  The LPC177x_8x supports several interrupts on ports 0 and
- * 2 (only).  We go through some special efforts to keep the number of IRQs
+/* GPIO interrupts.
+ * The LPC177x_8x supports several interrupts on ports 0 and 2 (only).
+ * We go through some special efforts to keep the number of IRQs
  * to a minimum in this sparse interrupt case.
  *
  * 31 interrupts on Port 0:  p0.0 - p0.30
@@ -170,7 +171,7 @@
 #  define LPC17_40_VALID_GPIOINT0   (0xfffffffful) /* GPIO port 0 interrupt set */
 #  define LPC17_40_VALID_GPIOINT2   (0xfffffffful) /* GPIO port 2 interrupt set */
 
-   /* Set 1: 16 interrupts p0.0-p0.15 */
+/* Set 1: 16 interrupts p0.0-p0.15 */
 
 #  define LPC17_40_VALID_SHIFT0L    (0)
 #  define LPC17_40_VALID_FIRST0L    (LPC17_40_IRQ_EXTINT+LPC17_40_IRQ_NEXTINT)
@@ -193,7 +194,7 @@
 #  define LPC17_40_IRQ_P0p15        (LPC17_40_VALID_FIRST0L+15)
 #  define LPC17_40_VALID_NIRQS0L    (16)
 
-   /* Set 2: 16 interrupts p0.16-p0.31 */
+/* Set 2: 16 interrupts p0.16-p0.31 */
 
 #  define LPC17_40_VALID_SHIFT0H    (16)
 #  define LPC17_40_VALID_FIRST0H    (LPC17_40_VALID_FIRST0L+LPC17_40_VALID_NIRQS0L)
@@ -216,7 +217,7 @@
 #  define LPC17_40_IRQ_P0p31        (LPC17_40_VALID_FIRST0H+15)
 #  define LPC17_40_VALID_NIRQS0H    (16)
 
-   /* Set 3: 16 interrupts p2.0-p2.15 */
+/* Set 3: 16 interrupts p2.0-p2.15 */
 
 #  define LPC17_40_VALID_SHIFT2L    (0)
 #  define LPC17_40_VALID_FIRST2L    (LPC17_40_VALID_FIRST0H+LPC17_40_VALID_NIRQS0H)
@@ -239,7 +240,7 @@
 #  define LPC17_40_IRQ_P2p15        (LPC17_40_VALID_FIRST2L+15)
 #  define LPC17_40_VALID_NIRQS2L    (16)
 
-   /* Set 4: 16 interrupts p2.16 - p2.31 */
+/* Set 4: 16 interrupts p2.16 - p2.31 */
 
 #  define LPC17_40_VALID_SHIFT2H    (16)
 #  define LPC17_40_VALID_FIRST2H    (LPC17_40_VALID_FIRST2L+LPC17_40_VALID_NIRQS2L)

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/include/kinetis/kinetis_dmamux.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,31 +31,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_KINETIS_KINETIS_DMAMUX_H
 #define __ARCH_ARM_INCLUDE_KINETIS_KINETIS_DMAMUX_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
 
-/* Note: It is envisioned that in the long term as a chip is added. The author of
- * the new chip definitions will either find the exact configuration in an existing
- * chip define and add the new chip to it Or add the DMAMUX feature configuration
- * #defines to the chip ifdef list below. In either case the author should mark
- * it as "Verified to Document Number:" taken from the reference manual.
+/* Note:
+ * It is envisioned that in the long term as a chip is added. The author of
+ * the new chip definitions will either find the exact configuration in an
+ * existing chip define and add the new chip to it Or add the DMAMUX feature
+ * configuration #defines to the chip ifdef list below. In either case the
+ * author should mark it as "Verified to Document Number:" taken from the
+ * reference manual.
  */
 
 /* DMAMUX Register Configuration
  *
- * KINETIS_DMAMUX_HAS_MONOTONIC_CHCFG    0|1    - SoC has reg in 0,1,2..KINETIS_NDMACH
+ * KINETIS_DMAMUX_HAS_MONOTONIC_CHCFG    0|1
+ *   - SoC has reg in 0,1,2..KINETIS_NDMACH
  */
 
 /* Describe the version of the DMA
@@ -115,7 +118,9 @@
 #elif defined(CONFIG_ARCH_CHIP_MK66FN2M0VMD18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VMD18) || \
       defined(CONFIG_ARCH_CHIP_MK66FN2M0VLQ18) || defined(CONFIG_ARCH_CHIP_MK66FX1M0VLQ18)
 
-/* Verified to Document Number: Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015 */
+/* Verified to Document Number:
+ * Document Number: K66P144M180SF5RMV2 Rev. 2, May 2015
+ */
 
 #  define KINETIS_DMAMUX_VERSION KINETIS_DMAMUX_VERSION_02
 
@@ -123,8 +128,8 @@
 #  define KINETIS_DMAMUX_VERSION KINETIS_DMAMUX_VERSION_UKN
 #endif
 
-/* Use the catch all configuration for the DMAMUX based on the implementations in
- * nuttx prior 8/10/2018
+/* Use the catch all configuration for the DMAMUX based on the
+ * implementations in nuttx prior 8/10/2018
  */
 
 #if KINETIS_DMA_VERSION == KINETIS_DMAMUX_VERSION_01

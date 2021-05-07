@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f411e-disco/include/board.h
+ * boards/arm/stm32/nucleo-f412zg/include/board.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Konstantin Berezenko <kpberezenko@gmail.com>
@@ -90,7 +90,6 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY      /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/2 (48MHz) */
 

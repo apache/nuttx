@@ -1,51 +1,37 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc43_otp.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_OTP_H
 #define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_OTP_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Register Offsets *****************************************************************/
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
 
 #define LPC43_OTP_MEM00_OFFSET   0x0010  /* General purpose OTP memory 0, word 0 */
 #define LPC43_OTP_MEM01_OFFSET   0x0014  /* General purpose OTP memory 0, word 1 */
@@ -74,7 +60,7 @@
 #define LPC43_OTP_CCD_OFFSET     0x0030  /* Customer control data */
 #define LPC43_OTP_USBID_OFFSET   0x0034  /* USB ID */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define LPC43_OTP_MEM00          (LPC43_OTPC_BASE+LPC43_OTP_MEM00_OFFSET)
 #define LPC43_OTP_MEM01          (LPC43_OTPC_BASE+LPC43_OTP_MEM01_OFFSET)
@@ -103,9 +89,10 @@
 #define LPC43_OTP_CCD            (LPC43_OTPC_BASE+LPC43_OTP_CCD_OFFSET)
 #define LPC43_OTP_USBID          (LPC43_OTPC_BASE+LPC43_OTP_USBID_OFFSET)
 
-/* Register Bit Definitions *********************************************************/
+/* Register Bit Definitions *************************************************/
 
 /* Customer control data */
+
                                            /* Bits 0-22: Reserved */
 #define OTP_CCD_USBID            (1 << 23) /* Bit 23: USB ID enable */
                                            /* Bit 24: Reserved */
@@ -120,6 +107,7 @@
 #  define OPT_CCD_BOOTSRC_USB1   (7 << OPT_CCD_BOOTSRC_SHIFT) /* USB1 */
 #  define OPT_CCD_BOOTSRC_SPI    (8 << OPT_CCD_BOOTSRC_SHIFT) /* SPI (via SSP) */
 #  define OPT_CCD_BOOTSRC_USART3 (9 << OPT_CCD_BOOTSRC_SHIFT) /* USART3 */
+
                                            /* Bits 29-30: Reserved */
 #define OTP_CCD_JTAGDIS          (1 << 31) /* Bit 31: JTAG disable */
 
@@ -130,16 +118,17 @@
 #define OTP_USBID_PID_SHIFT      (0)       /* Bits 16-31: USB product ID */
 #define OTP_USBID_PID_MASK       (0xffff << OTP_USBID_PID_SHIFT)
 
-/* OTP API *************************************************************************/
-/* The AES is controlled through a set of simple API calls located in the LPC43xx
- * ROM.  This value holds the pointer to the OTP driver table.
+/* OTP API ******************************************************************/
+
+/* The AES is controlled through a set of simple API calls located in the
+ * LPC43xx ROM.  This value holds the pointer to the OTP driver table.
  */
 
 #define LPC43_ROM_OTP_DRIVER_TABLE LPC43_ROM_DRIVER_TABLE1
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct lpc43_otp_s
 {
@@ -151,7 +140,9 @@ struct lpc43_otp_s
 
   unsigned int (*otp_ProgBootSrc)(unsigned int src);
 
-  /* JTAG disable. This command disables JTAG only when the device is AES capable. */
+  /* JTAG disable.
+   * This command disables JTAG only when the device is AES capable.
+   */
 
   unsigned int (*otp_ProgJTAGDis)(void);
 
@@ -163,8 +154,8 @@ struct lpc43_otp_s
 
   void *reserved[3];
 
-  /* Program the general purpose OTP memories. Use only if the device is not AES
-   * capable.
+  /* Program the general purpose OTP memories.
+   * Use only if the device is not AES capable.
    */
 
   unsigned int (*otp_ProgGP0)(unsigned int data, unsigned int mask);
@@ -176,17 +167,19 @@ struct lpc43_otp_s
   unsigned int (*otp_ProgKey1)(unsigned char *key);
   unsigned int (*otp_ProgKey2)(unsigned char *key);
 
-  /* Generate new random number using the hardware Random Number Generator (RNG). */
+  /* Generate new random number using the hardware
+   * Random Number Generator (RNG).
+   */
 
   unsigned int (*otp_GenRand)(void);
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_OTP_H */
