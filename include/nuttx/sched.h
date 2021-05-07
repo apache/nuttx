@@ -708,6 +708,8 @@ struct tcb_s
   uint32_t premp_max;                    /* Max time preemption disabled        */
   uint32_t crit_start;                   /* Time critical section entered       */
   uint32_t crit_max;                     /* Max time in critical section        */
+  uint32_t run_start;                    /* Time when thread begin run          */
+  uint32_t run_max;                      /* Max time thread run                 */
 #endif
 
   /* State save areas ***********************************************************/

@@ -803,7 +803,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
                              (unsigned long)maxtime.tv_sec,
                              (unsigned long)maxtime.tv_nsec);
-  copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
   totalsize += copysize;
@@ -833,10 +833,43 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time in a critical section */
 
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+                             (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                           &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Convert and generate output for maximum time thread running */
+
+  if (tcb->run_max > 0)
+    {
+      up_critmon_convert(tcb->run_max, &maxtime);
+    }
+  else
+    {
+      maxtime.tv_sec = 0;
+      maxtime.tv_nsec = 0;
+    }
+
+  /* Reset the maximum */
+
+  tcb->run_max = 0;
+
+  /* Generate output for maximum time thread running */
+
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu\n",
                              (unsigned long)maxtime.tv_sec,
                              (unsigned long)maxtime.tv_nsec);
-  copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
   totalsize += copysize;
