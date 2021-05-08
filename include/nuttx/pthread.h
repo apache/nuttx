@@ -140,6 +140,7 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *                 for the new thread
  *    entry      - The new thread starts execution by invoking entry
  *    arg        - It is passed as the sole argument of entry
+ *    exit       - The user-space pthread exit function
  *
  * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno
@@ -149,7 +150,8 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
 
 int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
-                      pthread_startroutine_t entry, pthread_addr_t arg);
+                      pthread_startroutine_t entry, pthread_addr_t arg,
+                      pthread_exitroutine_t exit);
 
 /****************************************************************************
  * Name: nx_pthread_exit
@@ -162,8 +164,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
  *
  * Returned Value:
  *   None
- *
- * Assumptions:
  *
  ****************************************************************************/
 

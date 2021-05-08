@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/or1k/src/common/up_pthread_start.c
+ * arch/risc-v/src/common/riscv_pthread_exit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,7 +27,7 @@
 #include <nuttx/arch.h>
 
 #include "svcall.h"
-#include "up_internal.h"
+#include "riscv_internal.h"
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
     !defined(CONFIG_DISABLE_PTHREAD)
@@ -37,40 +37,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_pthread_start
+ * Name: up_pthread_exit
  *
  * Description:
  *   In this kernel mode build, this function will be called to execute a
- *   pthread in user-space.  When the pthread is first started, a kernel-mode
- *   stub will first run to perform some housekeeping functions.  This
- *   kernel-mode stub will then be called transfer control to the user-mode
- *   pthread.
- *
- *   Normally the a user-mode start-up stub will also execute before the
- *   pthread actually starts.  See libc/pthread/pthread_create.c
+ *   pthread in user-space. This kernel-mode stub will then be called
+ *   transfer control to the user-mode pthread_exit.
  *
  * Input Parameters:
- *   startup - The user-space pthread startup function
- *   entrypt - The user-space address of the pthread entry point
- *   arg     - Standard argument for the pthread entry point
+ *   exit       - The user-space pthread_exit function
+ *   exit_value - The pointer of the pthread exit parameter
  *
  * Returned Value:
- *   This function should not return.  It should call the user-mode start-up
- *   stub and that stub should call pthread_exit if/when the user pthread
- *   terminates.
- *
+ *   None
  ****************************************************************************/
 
-void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
+void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
 {
-  /* Let sys_call3() do all of the work */
-
-  sinfo("entry %p arg %p\n", entrypt, arg);
-
-  sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
-            (uintptr_t)arg);
-
-  PANIC();
+  sys_call2(SYS_pthread_exit, (uintptr_t)exit, (uintptr_t)exit_value);
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */
