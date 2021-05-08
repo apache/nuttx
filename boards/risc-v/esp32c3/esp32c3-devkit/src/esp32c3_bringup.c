@@ -46,9 +46,15 @@
 #  include "esp32c3_spi.h"
 #endif
 
+#ifdef CONFIG_ESP32C3_RT_TIMER
+#  include "esp32c3_rt_timer.h"
+#endif
+
 #ifdef CONFIG_TIMER
 #  include "esp32c3_tim_lowerhalf.h"
 #endif
+
+#include "esp32c3_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -249,6 +255,14 @@ int esp32c3_bringup(void)
     }
 
 #endif /* CONFIG_ONESHOT */
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+  ret = esp32c3_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_ESP32C3_WIRELESS
 

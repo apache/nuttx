@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdint.h>
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -29,6 +30,14 @@
 
 #include "esp32c3.h"
 #include "esp32c3_pm.h"
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+#include "esp32c3_rt_timer.h"
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+#include "esp32c3_tickless.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,6 +67,14 @@
 #endif
 
 #define PM_IDLE_DOMAIN 0 /* Revisit */
+
+#ifndef MIN
+#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#define EXPECTED_IDLE_TIME_US (800)
+#define EARLY_WAKEUP_US       (200)
+
 #endif
 
 /****************************************************************************
@@ -75,9 +92,57 @@
 #ifdef CONFIG_PM
 static void up_idlepm(void)
 {
+  irqstate_t flags;
+
+#ifdef CONFIG_ESP32C3_AUTO_SLEEP
+  flags = spin_lock_irqsave(NULL);
+  if (esp32c3_pm_lockstatus() == 0 &&
+     (esp32c3_should_skip_light_sleep() == false))
+    {
+      uint64_t os_start_us;
+      uint64_t os_end_us;
+      uint64_t os_step_us;
+      uint64_t hw_start_us;
+      uint64_t hw_end_us;
+      uint64_t hw_step_us;
+      uint64_t rtc_diff_us;
+      struct   timespec ts;
+      uint64_t os_idle_us = up_get_idletime();
+      uint64_t hw_idle_us = rt_timer_get_alarm();
+      uint64_t sleep_us   = MIN(os_idle_us, hw_idle_us);
+      if (sleep_us > EXPECTED_IDLE_TIME_US)
+        {
+          esp32c3_sleep_enable_rtc_timer_wakeup(sleep_us - EARLY_WAKEUP_US);
+          up_timer_gettime(&ts);
+          os_start_us = (ts.tv_sec * USEC_PER_SEC +
+                         ts.tv_nsec /  NSEC_PER_USEC);
+          hw_start_us = rt_timer_time_us();
+
+          esp32c3_light_sleep_start(&rtc_diff_us);
+
+          hw_end_us = rt_timer_time_us();
+          up_timer_gettime(&ts);
+          os_end_us = (ts.tv_sec * USEC_PER_SEC +
+                         ts.tv_nsec /  NSEC_PER_USEC);
+          hw_step_us = rtc_diff_us - (hw_end_us - hw_start_us);
+          os_step_us = rtc_diff_us - (os_end_us - os_start_us);
+          DEBUGASSERT(hw_step_us > 0);
+          DEBUGASSERT(os_step_us > 0);
+
+          /* Adjust current RT timer by a certain value. */
+
+          rt_timer_calibration(hw_step_us);
+
+          /* Adjust system time by a certain value. */
+
+          up_step_idletime((uint32_t)os_step_us);
+        }
+    }
+
+  spin_unlock_irqrestore(NULL, flags);
+#else /* CONFIG_ESP32C3_AUTO_SLEEP */
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
-  irqstate_t flags;
   int ret;
 
   /* Decide, which power saving level can be obtained */
@@ -159,6 +224,7 @@ static void up_idlepm(void)
       pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
 #endif
     }
+#endif
 }
 #else
 #  define up_idlepm()

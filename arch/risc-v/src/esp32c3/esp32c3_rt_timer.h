@@ -167,6 +167,38 @@ void rt_timer_delete(struct rt_timer_s *timer);
 uint64_t rt_timer_time_us(void);
 
 /****************************************************************************
+ * Name: rt_timer_get_alarm
+ *
+ * Description:
+ *   Get the timestamp when the next timeout is expected to occur.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Timestamp of the nearest timer event, in microseconds.
+ *
+ ****************************************************************************/
+
+uint64_t rt_timer_get_alarm(void);
+
+/****************************************************************************
+ * Name: rt_timer_calibration
+ *
+ * Description:
+ *   Adjust current RT timer by a certain value.
+ *
+ * Input Parameters:
+ *   time_us - adjustment to apply to RT timer, in microseconds
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void rt_timer_calibration(uint64_t time_us);
+
+/****************************************************************************
  * Name: esp32c3_rt_timer_init
  *
  * Description:
