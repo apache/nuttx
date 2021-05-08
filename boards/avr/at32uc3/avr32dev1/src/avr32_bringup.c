@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_ptsname.c
+ * boards/avr/at32uc3/avr32dev1/src/avr32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,35 +24,34 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <sys/types.h>
+#include <debug.h>
 
-#ifdef CONFIG_PSEUDOTERM
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ptsname
+ * Name: avr32_bringup
  *
  * Description:
- *   The ptsname() function returns the name of the slave pseudoterminal
- *   device corresponding to the master referred to by fd.
- *
- * Returned Value:
- *   On success, ptsname() returns a pointer to a string in static storage
- *   which will be overwritten by subsequent calls.  This pointer must not
- *   be freed.  On failure, NULL is returned.
- *
- *     ENOTTY fd does not refer to a pseudoterminal master device.
+ *   Bring up board features
  *
  ****************************************************************************/
 
-FAR char *ptsname(int fd)
+int avr32_bringup(void)
 {
-  static char devname[16];
-  int ret = ptsname_r(fd, devname, 16);
-  return ret < 0 ? NULL : devname;
-}
+  int ret = OK;
 
-#endif /* CONFIG_PSEUDOTERM */
+  #warning "Not Implemented"
+
+  return ret;
+}

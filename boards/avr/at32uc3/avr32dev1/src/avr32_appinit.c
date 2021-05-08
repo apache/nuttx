@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdlib/lib_ptsname.c
+ * boards/avr/at32uc3/avr32dev1/src/avr32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,35 +24,48 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
+#include <stdint.h>
 
-#ifdef CONFIG_PSEUDOTERM
+#include <arch/board/board.h>
+
+#include "avr32dev1.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ptsname
+ * Name: board_app_initialize
  *
  * Description:
- *   The ptsname() function returns the name of the slave pseudoterminal
- *   device corresponding to the master referred to by fd.
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value could be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   On success, ptsname() returns a pointer to a string in static storage
- *   which will be overwritten by subsequent calls.  This pointer must not
- *   be freed.  On failure, NULL is returned.
- *
- *     ENOTTY fd does not refer to a pseudoterminal master device.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-FAR char *ptsname(int fd)
+int board_app_initialize(uintptr_t arg)
 {
-  static char devname[16];
-  int ret = ptsname_r(fd, devname, 16);
-  return ret < 0 ? NULL : devname;
-}
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
+  /* Perform board initialization */
 
-#endif /* CONFIG_PSEUDOTERM */
+  return avr32_bringup();
+#else
+  return OK;
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */
+}

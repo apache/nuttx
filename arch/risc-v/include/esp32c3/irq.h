@@ -29,6 +29,8 @@
 #  include <arch/csr.h>
 #endif
 
+#include <sys/types.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -95,8 +97,8 @@
 #define ESP32C3_PERIPH_ICACHE_SYNC0        42
 #define ESP32C3_PERIPH_APB_ADC             43
 #define ESP32C3_PERIPH_DMA_CH0             44
-#define ESP32C3_PERIPH_DMA_CH0             45
-#define ESP32C3_PERIPH_DMA_CH0             46
+#define ESP32C3_PERIPH_DMA_CH1             45
+#define ESP32C3_PERIPH_DMA_CH2             46
 #define ESP32C3_PERIPH_RSA                 47
 #define ESP32C3_PERIPH_AES                 48
 #define ESP32C3_PERIPH_SHA                 49
@@ -186,8 +188,8 @@
 #define ESP32C3_IRQ_ICACHE_SYNC0        (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_ICACHE_SYNC0)
 #define ESP32C3_IRQ_APB_ADC             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_APB_ADC)
 #define ESP32C3_IRQ_DMA_CH0             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_DMA_CH0)
-#define ESP32C3_IRQ_DMA_CH0             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_DMA_CH0)
-#define ESP32C3_IRQ_DMA_CH0             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_DMA_CH0)
+#define ESP32C3_IRQ_DMA_CH1             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_DMA_CH1)
+#define ESP32C3_IRQ_DMA_CH2             (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_DMA_CH2)
 #define ESP32C3_IRQ_RSA                 (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_RSA)
 #define ESP32C3_IRQ_AES                 (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_AES)
 #define ESP32C3_IRQ_SHA                 (ESP32C3_IRQ_FIRSTPERIPH + ESP32C3_PERIPH_SHA)

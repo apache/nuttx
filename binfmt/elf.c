@@ -220,7 +220,7 @@ static int elf_loadbinary(FAR struct binary_s *binp)
   if (ret != 0)
     {
       berr("Failed to initialize for load of ELF program: %d\n", ret);
-      goto errout;
+      goto errout_with_init;
     }
 
   /* Load the program binary */
@@ -287,7 +287,6 @@ errout_with_load:
   elf_unload(&loadinfo);
 errout_with_init:
   elf_uninit(&loadinfo);
-errout:
   return ret;
 }
 

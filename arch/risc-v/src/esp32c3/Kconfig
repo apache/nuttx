@@ -237,6 +237,11 @@ config ESP32C3_SPI2
 	select ESP32C3_SPI
 	select SPI
 
+config ESP32C3_DMA
+	bool "General DMA (GDMA)"
+	default n
+	select ARCH_DMA
+
 config ESP32C3_MWDT0
 	bool "Main System Watchdog Timer (Group 0)"
 	default n
@@ -541,5 +546,24 @@ config ESP32C3_PARTITION_MOUNT
 	default "/dev/esp/partition/"
 
 endmenu # ESP32C3_PARTITION
+
+menu "GDMA Configuration"
+	depends on ESP32C3_DMA
+
+config ESP32C3_DMA_M2M_TEST
+	bool "Test GDMA M2M"
+	default n
+
+config ESP32C3_DMA_M2M_TEST_LOOPS
+	int "Test GDMA M2M loops"
+	default 256
+	depends on ESP32C3_DMA_M2M_TEST
+
+config ESP32C3_DMA_M2M_TEST_BUFSIZE
+	int "Test GDMA M2M buffer size"
+	default 16000
+	depends on ESP32C3_DMA_M2M_TEST
+
+endmenu # GDMA Configuration
 
 endif # ARCH_CHIP_ESP32C3
