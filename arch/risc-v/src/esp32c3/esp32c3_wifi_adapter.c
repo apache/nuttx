@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wireless/wireless.h>
 
+#include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_syscon.h"
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
@@ -57,6 +58,10 @@
 #include "esp32c3_wifi_adapter.h"
 #include "esp32c3_rt_timer.h"
 #include "esp32c3_wifi_utils.h"
+
+#ifdef CONFIG_PM
+#include "esp32c3_pm.h"
+#endif
 
 #include "espidf_wifi.h"
 
@@ -89,6 +94,27 @@
 #define ESP_WIFI_11N_MCS7_HT40_BITRATE (150)
 #define ESP_MAX_STA_CONN               (4)
 #define ESP_WIFI_CHANNEL               (6)
+
+#ifndef CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
+#define CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL 3
+#endif
+
+#define DEFAULT_LISTEN_INTERVAL CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
+
+/* CONFIG_POWER_SAVE_MODEM */
+
+#if defined(CONFIG_EXAMPLE_POWER_SAVE_MIN_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MIN_MODEM
+#elif defined(CONFIG_EXAMPLE_POWER_SAVE_MAX_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MAX_MODEM
+#elif defined(CONFIG_EXAMPLE_POWER_SAVE_NONE)
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#else
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#endif
+
+#define RTC_CLK_CAL_FRACT               (19)
+#define SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH  (12)
 
 /****************************************************************************
  * Private Types
@@ -2062,7 +2088,7 @@ static void esp_evt_work_cb(FAR void *arg)
           case WIFI_ADPT_EVT_STA_START:
             wlinfo("INFO: Wi-Fi sta start\n");
             g_sta_connected = false;
-            ret = esp_wifi_set_ps(WIFI_PS_NONE);
+            ret = esp_wifi_set_ps(DEFAULT_PS_MODE);
             if (ret)
               {
                 wlerr("ERROR: Failed to close PS\n");
@@ -2334,24 +2360,30 @@ static void esp_dport_access_stall_other_cpu_end(void)
  * Name: wifi_apb80m_request
  *
  * Description:
- *   Don't support
+ *   Take Wi-Fi lock in auto-sleep
  *
  ****************************************************************************/
 
 static void wifi_apb80m_request(void)
 {
+#ifdef CONFIG_ESP32C3_AUTO_SLEEP
+  esp32c3_pm_lockacquire();
+#endif
 }
 
 /****************************************************************************
  * Name: wifi_apb80m_release
  *
  * Description:
- *   Don't support
+ *   Release Wi-Fi lock in auto-sleep
  *
  ****************************************************************************/
 
 static void wifi_apb80m_release(void)
 {
+#ifdef CONFIG_ESP32C3_AUTO_SLEEP
+  esp32c3_pm_lockrelease();
+#endif
 }
 
 /****************************************************************************
@@ -3419,11 +3451,26 @@ static int esp_get_time(void *t)
 
 /****************************************************************************
  * Name: esp_clk_slowclk_cal_get_wrapper
+ *
+ * Description:
+ *   Get the calibration value of RTC slow clock
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The calibration value obtained using rtc_clk_cal
+ *
  ****************************************************************************/
 
 static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
 {
-    return 28639;
+  /* The bit width of Wi-Fi light sleep clock calibration is 12 while the one
+   * of system is 19. It should shift 19 - 12 = 7.
+   */
+
+  return (getreg32(RTC_SLOW_CLK_CAL_REG) >> (RTC_CLK_CAL_FRACT -
+          SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH));
 }
 
 /****************************************************************************
@@ -4616,6 +4663,26 @@ esp_err_t esp_wifi_init(const wifi_init_config_t *config)
       return ret;
     }
 
+#if SOC_WIFI_HW_TSF
+  ret = esp32c3_pm_register_skip_sleep_callback(
+                    esp_wifi_internal_is_tsf_active);
+  if (ret != OK)
+    {
+      wlerr("ERROR: Failed to register skip sleep callback (0x%x)", ret);
+      return ret;
+    }
+
+  ret = esp32c3_pm_register_inform_out_sleep_overhead_callback(
+             esp_wifi_internal_update_light_sleep_wake_ahead_time);
+  if (ret != OK)
+    {
+      wlerr("ERROR: Failed to register overhead callback (0x%x)", ret);
+      return ret;
+    }
+
+  esp32c3_sleep_enable_wifi_wakeup();
+#endif
+
   return 0;
 }
 
@@ -4651,6 +4718,12 @@ esp_err_t esp_wifi_deinit(void)
       return ret;
     }
 
+#if SOC_WIFI_HW_TSF
+    esp32c3_pm_unregister_skip_sleep_callback(
+                    esp_wifi_internal_is_tsf_active);
+    esp32c3_pm_unregister_inform_out_sleep_overhead_callback(
+                    esp_wifi_internal_update_light_sleep_wake_ahead_time);
+#endif
   return ret;
 }
 
@@ -4793,13 +4866,6 @@ int esp_wifi_adapter_init(void)
       return OK;
     }
 
-  ret = esp32c3_rt_timer_init();
-  if (ret < 0)
-    {
-      wlerr("ERROR: Failed to initialize RT timer error=%d\n", ret);
-      goto errout_init_timer;
-    }
-
   sq_init(&g_wifi_evt_queue);
 
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
@@ -4867,8 +4933,6 @@ int esp_wifi_adapter_init(void)
 errout_init_txdone:
   esp_wifi_deinit();
 errout_init_wifi:
-  esp32c3_rt_timer_deinit();
-errout_init_timer:
   esp_wifi_lock(false);
   return ret;
 }
@@ -5145,6 +5209,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
+      wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)

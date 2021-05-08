@@ -41,6 +41,7 @@
 #include "hardware/esp32c3_soc.h"
 #include "esp32c3_tim.h"
 #include "esp32c3_rt_timer.h"
+#include "esp32c3_attr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -568,7 +569,7 @@ void rt_timer_delete(FAR struct rt_timer_s *timer)
  *
  ****************************************************************************/
 
-uint64_t rt_timer_time_us(void)
+uint64_t IRAM_ATTR rt_timer_time_us(void)
 {
   uint64_t counter;
   struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
@@ -576,6 +577,74 @@ uint64_t rt_timer_time_us(void)
   ESP32C3_TIM_GETCTR(tim, &counter);
 
   return counter;
+}
+
+/****************************************************************************
+ * Name: rt_timer_get_alarm
+ *
+ * Description:
+ *   Get the timestamp when the next timeout is expected to occur.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Timestamp of the nearest timer event, in microseconds.
+ *
+ ****************************************************************************/
+
+uint64_t IRAM_ATTR rt_timer_get_alarm(void)
+{
+  irqstate_t flags;
+  uint64_t counter;
+  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  uint64_t alarm_value = 0;
+
+  flags = enter_critical_section();
+
+  ESP32C3_TIM_GETCTR(tim, &counter);
+  ESP32C3_TIM_GETALRVL(tim, &alarm_value);
+
+  if (alarm_value <= counter)
+    {
+      alarm_value = 0;
+    }
+  else
+    {
+      alarm_value -= counter;
+    }
+
+  leave_critical_section(flags);
+
+  return alarm_value;
+}
+
+/****************************************************************************
+ * Name: rt_timer_calibration
+ *
+ * Description:
+ *   Adjust current RT timer by a certain value.
+ *
+ * Input Parameters:
+ *   time_us - adjustment to apply to RT timer, in microseconds
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR rt_timer_calibration(uint64_t time_us)
+{
+  uint64_t counter;
+  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  ESP32C3_TIM_GETCTR(tim, &counter);
+  counter += time_us;
+  ESP32C3_TIM_SETCTR(tim, counter);
+  ESP32C3_TIM_RLD_NOW(tim);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

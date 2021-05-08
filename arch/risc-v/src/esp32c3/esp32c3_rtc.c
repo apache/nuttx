@@ -30,6 +30,7 @@
 #include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_soc.h"
 #include "hardware/esp32c3_system.h"
+#include "hardware/esp32c3_syscon.h"
 #include "hardware/esp32c3_tim.h"
 #include "hardware/apb_ctrl_reg.h"
 #include "hardware/bb_reg.h"
@@ -1575,6 +1576,43 @@ void IRAM_ATTR esp32c3_rtc_init()
       modifyreg32(RTC_CNTL_DIG_ISO_REG, RTC_CNTL_DG_PAD_FORCE_UNHOLD |
                   RTC_CNTL_DG_PAD_FORCE_NOISO, 0);
     }
+}
+
+/****************************************************************************
+ * Name: esp32c3_rtc_get_time_us
+ *
+ * Description:
+ *   Get current value of RTC counter in microseconds
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current value of RTC counter in microseconds
+ *
+ ****************************************************************************/
+
+uint64_t esp32c3_rtc_get_time_us(void)
+{
+  const uint32_t cal = getreg32(RTC_SLOW_CLK_CAL_REG);
+  const uint64_t rtc_this_ticks = esp32c3_rtc_time_get();
+
+  /* RTC counter result is up to 2^48, calibration factor is up to 2^24,
+   * for a 32kHz clock. We need to calculate (assuming no overflow):
+   * (ticks * cal) >> RTC_CLK_CAL_FRACT. An overflow in the (ticks * cal)
+   * multiplication would cause time to wrap around after approximately
+   * 13 days, which is probably not enough for some applications.
+   * Therefore multiplication is split into two terms, for the lower 32-bit
+   * and the upper 16-bit parts of "ticks", i.e.:
+   * ((ticks_low + 2^32 * ticks_high) * cal) >> RTC_CLK_CAL_FRACT
+   */
+
+  const uint64_t ticks_low = rtc_this_ticks & UINT32_MAX;
+  const uint64_t ticks_high = rtc_this_ticks >> 32;
+  const uint64_t delta_time_us = ((ticks_low * cal) >> RTC_CLK_CAL_FRACT) +
+          ((ticks_high * cal) << (32 - RTC_CLK_CAL_FRACT));
+
+  return delta_time_us;
 }
 
 /****************************************************************************

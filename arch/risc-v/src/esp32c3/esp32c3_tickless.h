@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_wifi_utils.h
+ * arch/risc-v/src/esp32c3/esp32c3_tickless.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,103 +18,50 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_TICKLESS_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_TICKLESS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_UTILS_H
-#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_UTILS_H
-
-#include <nuttx/config.h>
-#include <nuttx/net/netdev.h>
-
 #include <stdint.h>
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_wifi_start_scan
+ * Name: up_get_idletime
  *
  * Description:
- *   Scan all available APs.
- *
- * Input Parameters:
- *   iwr - The argument of the ioctl cmd
- *
- * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-int esp_wifi_start_scan(struct iwreq *iwr);
-
-/****************************************************************************
- * Name: esp_wifi_get_scan_results
- *
- * Description:
- *   Get scan result
- *
- * Input Parameters:
- *   req      The argument of the ioctl cmd
- *
- * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
- *
- ****************************************************************************/
-
-int esp_wifi_get_scan_results(struct iwreq *iwr);
-
-/****************************************************************************
- * Name: esp_wifi_scan_event_parse
- *
- * Description:
- *   Parse scan information
+ *   This function returns the idle time.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *     None
+ *   The time in system ticks remaining for idle.
+ *   Zero means system is busy.
  *
  ****************************************************************************/
 
-void esp_wifi_scan_event_parse(void);
+uint32_t up_get_idletime(void);
 
 /****************************************************************************
- * Name: esp_wifi_scan_init
+ * Name:  up_step_idletime
  *
  * Description:
- *   Initialize Wi-Fi scan parameter.
+ *   Add system time by idletime_us.
  *
  * Input Parameters:
- *   None
+ *   idletime_us - Idle time(us)
  *
  * Returned Value:
- *   OK is returned on success. Otherwise, a negated errno value is returned.
+ *   None
  *
  ****************************************************************************/
 
-int esp_wifi_scan_init(void);
+void up_step_idletime(uint32_t idletime_us);
 
-#ifdef __cplusplus
-}
-#endif
-#undef EXTERN
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_UTILS_H */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_TICKLESS_H */

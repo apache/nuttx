@@ -303,4 +303,7 @@
 
 #define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f##_V) << (_f##_S)))|(((_v) & (_f##_V))<<(_f##_S)))))
 
+#define SOC_SYSTIMER_BIT_WIDTH_LO (32) /* Bit width of systimer low part */
+#define SOC_SYSTIMER_BIT_WIDTH_HI (20) /* Bit width of systimer high part */
+
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_SOC_H */

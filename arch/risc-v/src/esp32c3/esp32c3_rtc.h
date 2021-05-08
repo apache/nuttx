@@ -428,6 +428,22 @@ void esp32c3_rtc_clk_cpu_freq_get_config(
 
 void esp32c3_rtc_sleep_set_wakeup_time(uint64_t t);
 
+/****************************************************************************
+ * Name: esp32c3_rtc_get_time_us
+ *
+ * Description:
+ *   Get current value of RTC counter in microseconds
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current value of RTC counter in microseconds
+ *
+ ****************************************************************************/
+
+uint64_t esp32c3_rtc_get_time_us(void);
+
 #ifdef __cplusplus
 }
 #endif
