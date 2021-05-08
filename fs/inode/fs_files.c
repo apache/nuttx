@@ -385,7 +385,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
  *   Clone a file descriptor to a specific descriptor number.
  *
  * Returned Value:
- *   fd2 is returned on success; a negated errno value is return on
+ *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
  ****************************************************************************/
@@ -432,7 +432,7 @@ int nx_dup2(int fd1, int fd2)
                                  [fd2 % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK]);
   _files_semgive(list);
 
-  return ret < 0 ? ret : fd2;
+  return ret;
 }
 
 /****************************************************************************
