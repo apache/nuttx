@@ -795,7 +795,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  *   applications.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
+ *   fd2 is returned on success; a negated errno value is return on
  *   any failure.
  *
  ****************************************************************************/
