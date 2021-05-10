@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/b-g431b-esc1/src/stm32_appinit.c
+ * boards/arm/stm32/b-g431b-esc1/src/stm32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,14 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <syslog.h>
+
 #include <nuttx/board.h>
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
 
 #include "b-g431b-esc1.h"
 
@@ -32,8 +39,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef OK
-#  define OK 0
+#undef HAVE_LEDS
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
 #endif
 
 /****************************************************************************
@@ -41,39 +50,34 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: stm32_bringup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
  *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int stm32_bringup(void)
 {
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-  /* Board initialization already performed by board_late_initialize() */
+  int ret;
 
-  return OK;
-#else
-  /* Perform board-specific initialization */
+#if defined(HAVE_LEDS)
+  /* Register the LED driver */
 
-  return stm32_bringup();
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
 #endif
+
+  UNUSED(ret);
+  return OK;
 }
