@@ -792,7 +792,7 @@ void nx_start(void)
 
       /* Check stack in idle thread */
 
-      for (i = 0; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
+      for (i = 1; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
         {
           flags = enter_critical_section();
 
