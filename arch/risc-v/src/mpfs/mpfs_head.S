@@ -130,6 +130,47 @@ __start_mpfs:
 
 .skip_e51:
 
+#ifdef CONFIG_MPFS_BOOTLOADER
+
+  /* Set all but the boot hart into wfi */
+
+  li a1, CONFIG_MPFS_BOOT_HART
+  beq a0, a1, .continue_boot
+
+  /* Enable IRQ_M_SOFT */
+
+  li a2, (1U << 3)
+  csrw mie, a2     /* Set MSIE bit to receive IPI */
+
+  /* flush the instruction cache */
+  fence.i
+
+.wait_boot:
+  wfi
+
+  /* Only start if MIP_MSIP is set. Breakpoints in the debugger (halt)
+   * will wakeup wfi, so we will check again that we actually got the soft
+   * interrupt
+   */
+
+  csrr a2, mip
+  andi a2, a2, (1U << 3) /* MIP_MSIP */
+  beqz a2, .wait_boot
+
+  /* Disable and clear all interrupts (the sw interrupt) */
+  li a2, 0x00000008      /* MSTATUS_MIE */
+  csrc mstatus, a2
+  csrw mie, zero
+  csrw mip, zero
+
+  /* Jump to app (TODO: remove fixed address) */
+  li a1, 0x80000000
+  jr a1
+
+.continue_boot:
+
+#endif
+
   /* Set stack pointer to the idle thread stack */
 
   la   sp, MPFS_IDLESTACK_TOP
