@@ -239,7 +239,6 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
    * process.
    */
 
-#ifndef CONFIG_DISABLE_SIGNAL
   if (priv->pid != INVALID_PROCESS_ID)
     {
       union sigval value;
@@ -247,7 +246,6 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
       value.sival_ptr = priv->sigdata;
       nxsig_queue(priv->pid, priv->signo, value);
     }
-#endif
 
   return OK;
 }
