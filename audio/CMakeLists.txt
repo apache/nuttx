@@ -34,7 +34,7 @@
 ############################################################################
 
 if (CONFIG_AUDIO)
-  nuttx_add_library(audio)
+  nuttx_add_kernel_library(audio)
 
   set(SRCS audio.c)
 

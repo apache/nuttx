@@ -1,31 +1,24 @@
 if (CONFIG_LIB_ZONEINFO_ROMFS)
-  message(FATAL_ERROR "zoneinfo romfs not supported yet")
+  FetchContent_Declare(tzcode URL http://ftp.iana.org/tz/tzcode-latest.tar.gz)
+  FetchContent_Declare(tzdata URL http://ftp.iana.org/tz/tzdata-latest.tar.gz)
+  FetchContent_Populate(tzcode)
+  FetchContent_Populate(tzdata)
 
-#  tzcode:
-#    mkdir tzcode
+  file(COPY ${tzcode_SOURCE_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/tz)
+  file(COPY ${tzdata_SOURCE_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/tz)
 
-#  tzbin:
-#    mkdir tzbin
+  execute_process(COMMAND make -C ${CMAKE_CURRENT_BINARY_DIR}/tz install TOPDIR=${CMAKE_CURRENT_BINARY_DIR}/tzbin)
 
-#  tzcode-latest.tar.gz:
-#    $(Q) curl -L -O ftp://ftp.iana.org/tz/tzcode-latest.tar.gz
+  nuttx_add_romfs(
+    NAME zoneinfo
+    PATH ${CMAKE_CURRENT_BINARY_DIR}/tzbin/usr/share/zoneinfo
+    HEADER
+    PREFIX zoneinfo
+    NONCONST)
 
-#  tzdata-latest.tar.gz:
-#    $(Q) curl -L -O ftp://ftp.iana.org/tz/tzdata-latest.tar.gz
+  set_property(SOURCE romfs_zoneinfo.h PROPERTY GENERATED)
 
-#  .tzunpack: tzcode tzcode-latest.tar.gz tzdata-latest.tar.gz
-#    $(Q) tar zx -C tzcode -f tzcode-latest.tar.gz
-#    $(Q) tar zx -C tzcode -f tzdata-latest.tar.gz
-#    $(Q) touch .tzunpack
-
-#  .tzbuilt: tzcode tzbin .tzunpack
-#    $(Q) $(MAKE) -C tzcode TOPDIR=$(TZBIN_PATH) install
-#    $(Q) touch .tzbuilt
-
-  add_custom_command(
-    OUTPUT romfs_zoneinfo.h
-    COMMAND ${GENROMFS} -f romfs_zoneinfo.img -d ${CMAKE_CURRENT_SOURCE_DIR}/tzbin/usr/share/zoneinfo -V "TZDatbase"
-    COMMAND ${XXD} -i romfs_zoneinfo.img > romfs_zoneinfo.h)
-
-  target_sources(c PRIVATE tzromfs.c)
+  nuttx_add_aux_library(zoneinfo tzromfs.c)
+  target_include_directories(zoneinfo PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+  target_link_libraries(c PRIVATE zoneinfo)
 endif()

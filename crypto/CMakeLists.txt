@@ -1,5 +1,5 @@
 if(CONFIG_CRYPTO)
-  nuttx_add_library(crypto)
+  nuttx_add_kernel_library(crypto)
 
   set(SRCS crypto.c testmngr.c)
 

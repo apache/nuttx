@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-nuttx_add_library(drivers)
+nuttx_add_kernel_library(drivers)
 
 add_subdirectory(1wire)
 add_subdirectory(analog)
@@ -53,6 +53,7 @@ add_subdirectory(leds)
 add_subdirectory(loop)
 add_subdirectory(mmcsd)
 add_subdirectory(modem)
+add_subdirectory(motor)
 add_subdirectory(mtd)
 add_subdirectory(net)
 add_subdirectory(pipes)

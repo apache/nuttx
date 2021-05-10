@@ -40,5 +40,5 @@ if(CONFIG_WIRELESS_PKTRADIO)
 		list(APPEND SRCS pktradio_loopback.c)
   endif()
 
-  target_sources(fs PRIVATE SRCS)
+  target_sources(wireless PRIVATE SRCS)
 endif()

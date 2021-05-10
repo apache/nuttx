@@ -21,17 +21,21 @@
 set(LIBCXX_VERSION 11.0.0)
 
 FetchContent_Declare(libcxx
-  URL https://github.com/llvm/llvm-project/releases/download/llvmorg-${VERSION}/libcxx-${VERSION}.src.tar.xz
-  PATCH_COMMAND -p0 < libcxx-fixes.patch
+  URL https://github.com/llvm/llvm-project/releases/download/llvmorg-${LIBCXX_VERSION}/libcxx-${LIBCXX_VERSION}.src.tar.xz
+  PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/0001-libc-Fix-a-few-warnings.patch &&
+    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/0001-libc-NFC-Fix-several-GCC-warnings-in-the-test-suite.patch &&
+    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/0001-libc-Fix-tests-failing-with-Clang-after-removing-GCC.patch &&
+    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-Check-_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE-fir.patch &&
+    patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
 )
 FetchContent_Populate(libcxx)
-
+FetchContent_GetProperties(libcxx SOURCE_DIR LIBCXX_SOURCE_DIR)
 
 file(GLOB SRCS LIST_DIRECTORIES false CONFIGURE_DEPENDS
-  libcxx/src/*.cpp libcxx/src/experimental/*.cpp libcxx/src/filesystem/*.cpp)
+  ${LIBCXX_SOURCE_DIR}/src/*.cpp ${LIBCXX_SOURCE_DIR}/src/experimental/*.cpp ${LIBCXX_SOURCE_DIR}/src/filesystem/*.cpp)
 target_sources(xx PRIVATE ${SRCS})
 
-set_property(GLOBAL APPEND PROPERTY NUTTX_DEFINITIONS
+set_property(TARGET nuttx APPEND PROPERTY NUTTX_DEFINITIONS
   $<$<COMPILE_LANGUAGE:CXX>:__GLIBCXX__>
   $<$<COMPILE_LANGUAGE:CXX>:_LIBCPP_BUILDING_LIBRARY>)
 
@@ -45,8 +49,9 @@ set_property(GLOBAL APPEND PROPERTY NUTTX_DEFINITIONS
 #    29 |     ptrdiff_t&         __expected;
 #       |                        ^~~~~~~~~~
 
-set_property(SOURCE libcxx/src/barrier.cpp APPEND PROPERTY COMPILE_OPTIONS -Wno-shadow)
-set_property(SOURCE libcxx/src/locale.cpp APPEND PROPERTY COMPILE_OPTIONS -Wno-shadow)
+set_property(SOURCE ${SRCS} APPEND PROPERTY COMPILE_OPTIONS -Wno-shadow)
 
-set_property(SOURCE libcxx/src/filesystem/directory_iterator.cpp APPEND PROPERTY COMPILE_OPTIONS -Wno-shadow)
-set_property(SOURCE libcxx/src/filesystem/operations.cpp APPEND PROPERTY COMPILE_OPTIONS -Wno-shadow)
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${LIBCXX_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include_cxx
+)
+

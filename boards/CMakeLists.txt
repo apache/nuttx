@@ -54,14 +54,13 @@
 #  BOARD_KCONFIG = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)dummy_kconfig
 #endif
 
-nuttx_add_library(board)
-
-set(SRCS)
+file(WRITE ${CMAKE_BINARY_DIR}/empty.c "")
+nuttx_add_kernel_library(board ${CMAKE_BINARY_DIR}/empty.c)
 
 # boardctl support
 
-if("${CONFIG_LIB_BOARDCTL}" STREQUAL "y")
-	list(APPEND SRCS boardctl.c)
+if(CONFIG_LIB_BOARDCTL)
+	target_sources(board PRIVATE boardctl.c)
 endif()
 
 target_include_directories(board PRIVATE
@@ -70,6 +69,4 @@ target_include_directories(board PRIVATE
 )
   
 add_subdirectory(${NUTTX_BOARD})
-
-target_sources(board PRIVATE ${SRCS})
 

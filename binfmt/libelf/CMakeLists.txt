@@ -38,7 +38,8 @@ if (CONFIG_ELF)
 
   # ELF application interfaces
 
-  list(APPEND SRCS elf.c)
+  # TODO: missing?
+  #list(APPEND SRCS elf.c)
 
   # ELF library
 

@@ -66,5 +66,5 @@ if (CONFIG_LIBC_NETDB)
     endif()
   endif()
 
-  target_sources(drivers PRIVATE ${SRCS})
+  target_sources(c PRIVATE ${SRCS})
 endif()

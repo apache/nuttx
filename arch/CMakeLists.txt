@@ -1,5 +1,5 @@
 # declare arch lib
-nuttx_add_library(arch)
+nuttx_add_kernel_library(arch)
 
 target_include_directories(arch PRIVATE ${CMAKE_SOURCE_DIR}/sched)
 

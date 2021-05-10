@@ -21,10 +21,11 @@
 set(UCLIBCXX_VERSION 0.2.5)
 
 FetchContent_Declare(uclibcxx
-  URL https://git.busybox.net/uClibc++/snapshot/uClibc++-${VERSION}.tar.gz
+  URL https://git.busybox.net/uClibc++/snapshot/uClibc++-${UCLIBCXX_VERSION}.tar.gz
 	#$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
 )
 FetchContent_Populate(uclibcxx)
+FetchContent_GetProperties(uclibcxx SOURCE_DIR UCLIBCXX_SOURCE_DIR)
 
 set(SRCS
   algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
@@ -37,5 +38,12 @@ set(SRCS
   streambuf.cpp string.cpp typeinfo.cpp utility.cpp valarray.cpp
   vector.cpp)
 
-list(TRANSFORM SRCS PREPEND uClibc++/src/)
+list(TRANSFORM SRCS PREPEND ${UCLIBCXX_SOURCE_DIR}/src/)
 target_sources(xx PRIVATE ${SRCS})
+
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${UCLIBCXX_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include_cxx
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/system_configuration.h ${CMAKE_BINARY_DIR}/include
+)
+
+target_include_directories(xx PRIVATE ${CMAKE_CURRENT_LIST_DIR})

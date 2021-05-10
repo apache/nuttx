@@ -34,7 +34,5 @@
 ############################################################################
 
 if(CONFIG_FS_CROMFS)
-
   target_sources(fs PRIVATE fs_cromfs.c)
-
 endif()

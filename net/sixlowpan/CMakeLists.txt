@@ -57,7 +57,7 @@ if (CONFIG_NET_6LOWPAN)
 
   if (CONFIG_NET_UDP)
     list(APPEND SRCS sixlowpan_send.c)
-  else if (CONFIG_NET_ICMPv6)
+  elseif (CONFIG_NET_ICMPv6)
     list(APPEND SRCS sixlowpan_send.c)
   endif()
 

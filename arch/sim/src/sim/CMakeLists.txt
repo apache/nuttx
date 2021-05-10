@@ -53,15 +53,15 @@ list(APPEND SRCS
       up_heap.c up_uart.c up_assert.c up_copyfullstate.c up_sigdeliver.c
 )
 
-if(CONFIG_HOST_X86_64)
+if(X86_64)
   if(CONFIG_SIM_M32)
     list(APPEND SRCS up_vfork32.S)
   else()
     list(APPEND SRCS up_vfork64.S)
   endif()
-elseif(CONFIG_HOST_X86)
+elseif(X86)
   list(APPEND SRCS up_vfork32.S)
-elseif(CONFIG_HOST_ARM)
+elseif(ARM)
   list(APPEND SRCS up_vfork_arm.S)
 endif()
 
@@ -108,7 +108,7 @@ if (CONFIG_FS_FAT)
   list(APPEND STDLIBS z)
 endif()
 
-if (CONFIG_HOST_MACOS)
+if (APPLE)
   if (NOT CONFIG_LIBCXX)
     list(APPEND STDLIBS c++abi)
   endif()
@@ -180,7 +180,7 @@ if (CONFIG_SIM_NETDEV_TAP)
   list(APPEND SRCS up_netdriver.c)
   list(APPEND HOST_DEFINITIONS NETDEV_BUFSIZE=${CONFIG_NET_ETH_PKTSIZE})
 
-  if (NOT CONFIG_WINDOWS_CYGWIN)
+  if (NOT CYGWIN)
     list(APPEND HOSTSRCS up_tapdev.c)
 
     if (CONFIG_SIM_NET_BRIDGE)
@@ -192,14 +192,14 @@ if (CONFIG_SIM_NETDEV_TAP)
     if (CONFIG_SIM_NET_HOST_ROUTE)
       list(APPEND HOST_DEFINITIONS CONFIG_SIM_NET_HOST_ROUTE)
     endif()
-  else() # CONFIG_WINDOWS_CYGWIN != y
+  else() # CYGWIN != y
     list(APPEND HOSTSRCS up_wpcap.c)
     list(APPEND STDLIBS /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a)
   endif() # CONFIG_WINDOWS_CYGWIN != y
 elseif (CONFIG_SIM_NETDEV_VPNKIT)
   list(APPEND SRCS up_netdriver.c)
   list(APPEND HOST_DEFINITIONS CONFIG_SIM_NETDEV_VPNKIT_PATH=\"${CONFIG_SIM_NETDEV_VPNKIT_PATH}\")
-  list(APPEND HOSTSRCS up_vpnkit.c protocol.c negotiate.c)
+  list(APPEND HOSTSRCS up_vpnkit.c vpnkit/protocol.c vpnkit/negotiate.c)
 endif()
 
 if (CONFIG_SIM_HCISOCKET)
@@ -223,11 +223,6 @@ endif()
 if (CONFIG_FS_HOSTFS AND NOT CONFIG_FS_HOSTFS_RPMSG)
   list(APPEND HOSTSRCS up_hostfs.c)
   list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
-
-  # TODO
-  #hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
-  #	@echo "CP:  $<"
-  #	$(Q) cp $< $@
 endif()
 
 target_sources(up_head PUBLIC up_head.c)
@@ -237,3 +232,5 @@ target_sources(nuttx PRIVATE ${HOSTSRCS})
 target_link_libraries(nuttx PUBLIC ${STDLIBS})
 target_compile_definitions(nuttx PRIVATE ${HOST_DEFINITIONS})
 
+configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h ${CMAKE_BINARY_DIR}/include/host/hostfs.h COPYONLY)
+target_include_directories(nuttx PRIVATE ${CMAKE_BINARY_DIR}/include/host)

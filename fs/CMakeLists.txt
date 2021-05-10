@@ -1,4 +1,4 @@
-nuttx_add_library(fs fs_initialize.c)
+nuttx_add_kernel_library(fs fs_initialize.c)
 
 add_subdirectory(aio)
 add_subdirectory(binfs)

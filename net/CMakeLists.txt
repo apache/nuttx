@@ -34,7 +34,7 @@
 ############################################################################
 
 if(CONFIG_NET)
-  nuttx_add_library(net)
+  nuttx_add_kernel_library(net)
 
 	add_subdirectory(arp)
 	add_subdirectory(bluetooth)
@@ -63,4 +63,5 @@ if(CONFIG_NET)
 	add_subdirectory(utils)
 		
   target_sources(net PRIVATE net_initialize.c)
+  target_include_directories(net PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 endif()

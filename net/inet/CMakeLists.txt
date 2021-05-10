@@ -37,7 +37,7 @@ set(SRCS inet_txdrain.c)
 
 if (CONFIG_NET_IPv4)
   list(APPEND SRCS inet_sockif.c inet_globals.c)
-else if (CONFIG_NET_IPv6)
+elseif (CONFIG_NET_IPv6)
   list(APPEND SRCS inet_sockif.c inet_globals.c)
 endif()
 

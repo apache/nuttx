@@ -7,8 +7,8 @@ target_include_directories(nuttx PRIVATE ${CONFIG_ARCH_CHIP})
 
 target_compile_definitions(nuttx PRIVATE CONFIG_USEC_PER_TICK=${CONFIG_USEC_PER_TICK})
 
-if (CONFIG_HOST_MACOS)
-  target_compile_options(nuttx -Wno-deprecated-declarations)
+if (APPLE)
+  target_compile_options(nuttx PRIVATE -Wno-deprecated-declarations)
 endif()
 
 # configure simulated nuttx ##################################################
@@ -16,22 +16,22 @@ endif()
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to shared libraries
 
-set_property(GLOBAL APPEND PROPERTY NUTTX_COMPILE_OPTIONS -fvisibility=hidden)
+set_property(TARGET nuttx APPEND PROPERTY NUTTX_COMPILE_OPTIONS -fvisibility=hidden)
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 
-set_property(GLOBAL APPEND PROPERTY NUTTX_COMPILE_OPTIONS -fno-common)
+set_property(TARGET nuttx APPEND PROPERTY NUTTX_COMPILE_OPTIONS -fno-common)
 
 if (CONFIG_SIM_SANITIZE)
-  set_property(GLOBAL APPEND PROPERTY NUTTX_COMPILE_OPTIONS
+  set_property(TARGET nuttx APPEND PROPERTY NUTTX_COMPILE_OPTIONS
                   -fsanitize=address
                   -fsanitize=undefined
                   -fno-omit-frame-pointer
   )
 endif()
 
-set_property(GLOBAL APPEND PROPERTY NUTTX_COMPILE_OPTIONS
+set_property(TARGET nuttx APPEND PROPERTY NUTTX_COMPILE_OPTIONS
   # NuttX is sometimes built as a native target.
   # In that case, the __NuttX__ macro is predefined by the compiler.
   # https://github.com/NuttX/buildroot
@@ -58,9 +58,10 @@ set_property(GLOBAL APPEND PROPERTY NUTTX_COMPILE_OPTIONS
 
 # common options #############################################################
 
-if (CONFIG_SIM_M32)
-  set_property(GLOBAL APPEND PROPERTY NUTTX_COMPILE_OPTIONS -m32)
+if (X86_64 AND CONFIG_SIM_M32)
+  set_property(TARGET nuttx APPEND PROPERTY NUTTX_COMPILE_OPTIONS -m32)
   target_compile_options(nuttx PRIVATE -m32)
+  target_link_options(nuttx PRIVATE -m32)
 endif()
 
 if(CONFIG_LIBCXX)
@@ -76,15 +77,15 @@ if(CONFIG_LIBCXX)
   set(CMAKE_CXX_STANDARD 14)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-  if (CONFIG_HOST_MACOS)
+  if (APPLE)
     # macOS uses libc++abi
 
-    set_property(GLOBAL APPEND PROPERTY NUTTX_DEFINITIONS LIBCXX_BUILDING_LIBCXXABI)
+    set_property(TARGET nuttx APPEND PROPERTY NUTTX_DEFINITIONS LIBCXX_BUILDING_LIBCXXABI)
   else()
     # Linux C++ ABI seems vary.
     # Probably __GLIBCXX__ is the best bet.
     # XXX what to do for windows?
-    set_property(GLOBAL APPEND PROPERTY NUTTX_DEFINITIONS __GLIBCXX__)
+    set_property(TARGET nuttx APPEND PROPERTY NUTTX_DEFINITIONS __GLIBCXX__)
   endif()
 endif()
 

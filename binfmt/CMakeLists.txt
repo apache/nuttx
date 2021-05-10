@@ -36,7 +36,7 @@
 
 set(SRCS)
 
-nuttx_add_library(binfmt)
+nuttx_add_kernel_library(binfmt)
 
 add_subdirectory(libelf)
 add_subdirectory(libnxflat)

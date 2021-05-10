@@ -51,8 +51,9 @@ elseif (CONFIG_NX_HWCURSOR)
   list(APPEND SRCS nxbe_cursor.c)
 endif()
 
+if (CONFIG_NX_UPDATE)
+  list(APPEND SRCS nxbe_notify_rectangle.c)
+endif()
+
 target_sources(graphics PRIVATE ${SRCS})
 
-ifeq ($(CONFIG_NX_UPDATE),y)
-CSRCS += nxbe_notify_rectangle.c
-endif

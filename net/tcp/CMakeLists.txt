@@ -35,7 +35,7 @@
 
 # TCP/IP source files
 
-if (CONFIG_NET_TCP NOT CONFIG_NET_TCP_NO_STACK)
+if (CONFIG_NET_TCP AND NOT CONFIG_NET_TCP_NO_STACK)
 
   # Socket layer
 

@@ -35,3 +35,5 @@ target_sources(xx PRIVATE
 
 set_property(SOURCE libxx_new.cxx APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-exception-spec)
 set_property(SOURCE libxx_newa.cxx APPEND PROPERTY COMPILE_OPTIONS -Wno-missing-exception-spec)
+
+target_include_directories(xx PUBLIC ${NUTTX_DIR}/include/cxx)

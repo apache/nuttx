@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-if (CONFIG_NET_ICMPv6 AND CONFIG_NET_ICMPv6_NO_STACK)
+if (CONFIG_NET_ICMPv6 AND NOT CONFIG_NET_ICMPv6_NO_STACK)
   # ICMPv6 source files
 
   set(SRCS

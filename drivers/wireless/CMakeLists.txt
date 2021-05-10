@@ -38,6 +38,7 @@ if (CONFIG_DRIVERS_WIRELESS)
 
   add_subdirectory(ieee802154)
   add_subdirectory(ieee80211)
+  add_subdirectory(bluetooth)
   add_subdirectory(lpwan)
 
   # Include wireless drivers

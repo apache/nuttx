@@ -44,4 +44,6 @@ if (CONFIG_NET_LOCAL)
   if (CONFIG_NET_LOCAL_STREAM)
     list(APPEND SRCS local_connect.c local_listen.c local_accept.c)
   endif()
+
+  target_sources(net PRIVATE ${SRCS})
 endif()

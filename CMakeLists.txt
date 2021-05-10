@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.16)
 
 # Basic CMake configuration ##################################################
 
-set(CMAKE_CXX_STANDARD 11)	# TODO: refine to 14?
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 #set(CMAKE_C_STANDARD 99)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -131,6 +132,9 @@ project(NuttX LANGUAGES ASM C CXX)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/cmake)
 include(Platform)
 
+# detect host platform
+include(detect_platform)
+
 # Setup main nuttx target ####################################################
 
 add_executable(nuttx)
@@ -143,10 +147,10 @@ if (CONFIG_ARCH_SIM)
 
   add_library(up_head OBJECT)
   nuttx_add_library_internal(up_head)
-  get_property(definitions GLOBAL PROPERTY NUTTX_KERNEL_DEFINITIONS)
+  get_property(definitions TARGET nuttx PROPERTY NUTTX_KERNEL_DEFINITIONS)
   target_compile_definitions(up_head PRIVATE ${definitions})
 
-  get_property(options GLOBAL PROPERTY NUTTX_KERNEL_COMPILE_OPTIONS)
+  get_property(options TARGET nuttx PROPERTY NUTTX_KERNEL_COMPILE_OPTIONS)
   target_compile_options(up_head PRIVATE ${options})
 
   # We need the relocatable object to be first in the list of libraries
@@ -178,7 +182,7 @@ add_compile_options(
 )
 
 if (CONFIG_CXX_EXCEPTION)
-  add_compile_options(-fno-exceptions -fcheck-new)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fcheck-new -fno-rtti>)
 endif()
 
 if (CONFIG_STACK_CANARIES)
@@ -189,7 +193,7 @@ add_definitions(
   -D__NuttX__
 )
 
-set_property(GLOBAL APPEND PROPERTY NUTTX_KERNEL_DEFINITIONS -D__KERNEL__)
+set_property(TARGET nuttx APPEND PROPERTY NUTTX_KERNEL_DEFINITIONS __KERNEL__)
 
 # Recurse subdirectories #####################################################
 
@@ -215,6 +219,7 @@ add_subdirectory(graphics)
 add_subdirectory(libs)
 add_subdirectory(mm)
 add_subdirectory(net)
+add_subdirectory(openamp)
 add_subdirectory(sched)
 add_subdirectory(wireless)
 
@@ -256,15 +261,20 @@ get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
 # Perform link
 
-if (NOT CONFIG_ARCH_SIM)
-  # Non-sim platform
+# Add empty source file to nuttx target since
+# cmake requires at least one file
 
-  # Add empty source file to nuttx target since we will only link libraries
-  # to create it and cmake requires at least one file
-
+if (CONFIG_HAVE_CXX)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/empty.cxx" "")
+  target_sources(nuttx PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/empty.cxx")
+else()
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/empty.c" "")
   target_sources(nuttx PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/empty.c")
+endif()
 
+
+if (NOT CONFIG_ARCH_SIM)
+  # Non-sim platform
   # pass the apropriate linker flags
 
   target_link_libraries(nuttx PRIVATE
@@ -321,7 +331,7 @@ else()
 
   set(NXSYMBOL_RENAMES)
   foreach(NXSYMBOL ${NXSYMBOLS})
-    if (CONFIG_HOST_MACOS OR (CONFIG_HOST_WINDOWS AND CONFIG_SIM_CYGWIN_DECORATED))
+    if (APPLE OR (CYGWIN AND CONFIG_SIM_CYGWIN_DECORATED))
       list(APPEND NXSYMBOL_RENAMES "_${NXSYMBOL} NX${NXSYMBOL}")
     else()
       list(APPEND NXSYMBOL_RENAMES "${NXSYMBOL} NX${NXSYMBOL}")
@@ -336,7 +346,7 @@ else()
     OUTPUT nuttx.rel
     COMMAND ${CMAKE_C_COMPILER} ARGS
       -r
-      #-Wl,--script=${ldscript}
+      $<$<BOOL:${CONFIG_SIM_M32}>:-m32>
       $<TARGET_OBJECTS:up_head>
       -Wl,--start-group ${nuttx_libs_paths} -Wl,--end-group
       -o nuttx.rel

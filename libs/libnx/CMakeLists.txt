@@ -1,5 +1,6 @@
 if (CONFIG_NX)
   nuttx_add_library(nx)
+  target_include_directories(nx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
   add_subdirectory(bin)
   add_subdirectory(kbin)

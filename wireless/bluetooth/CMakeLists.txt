@@ -45,5 +45,5 @@ if (CONFIG_WIRELESS_BLUETOOTH)
       bt_uuid.c)
   endif()
 
-  target_sources(fs PRIVATE ${SRCS})
+  target_sources(wireless PRIVATE ${SRCS})
 endif()

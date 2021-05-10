@@ -43,28 +43,21 @@ set(SRCS
   net_dup2.c net_sockif.c net_poll.c net_vfcntl.c
   net_fstat.c)
 
-# TCP/IP support
-
-if (CONFIG_NET_TCP)
+# TCP/IP support or Local Unix domain support
+if (CONFIG_NET_TCP OR CONFIG_NET_LOCAL_STREAM)
   list(APPEND SRCS listen.c accept.c)
+endif()
 
-  # Local Unix domain support
+# Socket options
 
-  else if (CONFIG_NET_LOCAL_STREAM)
-    list(APPEND SRCS listen.c accept.c)
-  endif()
+if (CONFIG_NET_SOCKOPTS)
+  list(APPEND SRCS setsockopt.c getsockopt.c net_timeo.c)
+endif()
 
-  # Socket options
+# Support for sendfile()
 
-  if (CONFIG_NET_SOCKOPTS)
-    list(APPEND SRCS setsockopt.c getsockopt.c net_timeo.c)
-  endif()
-
-  # Support for sendfile()
-
-  if (CONFIG_NET_SENDFILE)
-    list(APPEND SRCS net_sendfile.c)
-  endif()
+if (CONFIG_NET_SENDFILE)
+  list(APPEND SRCS net_sendfile.c)
 endif()
 
 target_sources(net PRIVATE ${SRCS})

@@ -33,6 +33,7 @@
 #
 ############################################################################
 
+nuttx_add_aux_library(nxglib)
 set(SRCS)
 
 set(OPERATIONS setpixel fillrectangle getrectangle
@@ -45,66 +46,37 @@ else()
   set(BLITDIR fb)
 endif()
 
-set(BLIT_SRCS)
-foreach(op OPERATIONS)
-  foreach(bpp BPPS)
-    add_custom_command(
-      OUTPUT nxglib_${op}_${bpp}bpp.c
-      COMMAND ${CMAKE_C_COMPILER}
-      ARGS -E ${CMAKE_C_FLAGS} -c ${BLITDIR}/nxglib_${op}.c -o nxglib_${op}_${bpp}bpp.c
-      DEPENDS ${BLITDIR}/nxglib_${op}.c
-    )
-
-    list(APPEND BLIT_SRCS nxglib_${op}_${bpp}bpp.c)
+foreach(op ${OPERATIONS})
+  foreach(bpp ${BPPS})
+    configure_file(${BLITDIR}/nxglib_${op}.c.in nxglib_${op}_${bpp}bpp.c)
+    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/nxglib_${op}_${bpp}bpp.c PROPERTIES COMPILE_FLAGS -DNXGLIB_BITSPERPIXEL=${bpp})
+    list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxglib_${op}_${bpp}bpp.c)
   endforeach()
 endforeach()
 
-set(SRCS ${SRCS} ${BLIT_SRCS})
-add_custom_target(nxglib_blit ${BLIT_SRCS})
-add_dependencies(graphics nxglib_blit)
-
 if (CONFIG_NX_RAMBACKED)
-  set(PWFB_SRCS)
-
-  foreach(op OPERATIONS)
-    foreach(bpp BPPS)
-      add_custom_command(
-        OUTPUT pwfb_${op}_${bpp}bpp.c
-        COMMAND ${CMAKE_C_COMPILER}
-        ARGS -E ${CMAKE_C_FLAGS} -c pwfb/pwfb_${op}.c -o pwfb_${op}_${bpp}bpp.c
-        DEPENDS pwfb/pwfb_${op}.c
-      )
-
-      list(APPEND PWFB_SRCS pwfb_${op}_${bpp}bpp.c)
+  foreach(op ${OPERATIONS})
+    foreach(bpp ${BPPS})
+      configure_file(pwfb/pwfb_${op}.c.in pwfb_${op}_${bpp}bpp.c)
+      set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/pwfb_${op}_${bpp}bpp.c PROPERTIES COMPILE_FLAGS -DNXGLIB_BITSPERPIXEL=${bpp})
+      list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/pwfb_${op}_${bpp}bpp.c)
     endforeach()
   endforeach()
-
-  add_custom_target(nxglib_pwfb DEPEND ${PWFB_SRCS})
-  add_dependencies(graphics nxglib_pwfb)
-  set(SRCS ${SRCS} ${PWFB_SRCS})
 endif()
 
 if (CONFIG_NX_SWCURSOR)
-  set(CURSOR_SRCS)
   set(CURSOR_OPS draw erase backup)
   set(CURSOR_BPPS 8 16 24 32)
 
-  foreach(op CURSOR_OPS)
-    foreach(bpp CURSOR_BPPS)
-      add_custom_command(
-        OUTPUT nxglib_cursor_${op}_${bpp}bpp.c
-        COMMAND ${CMAKE_C_COMPILER}
-        ARGS -E ${CMAKE_C_FLAGS} -c cursor/nxglib_cursor_${op}.c -o nxglib_cursor_${op}_${bpp}bpp.c
-        DEPENDS cursor/nxglib_cursor_${op}.c
-      )
-
-      list(APPEND CURSOR_SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}_${bpp}bpp.c)
+  foreach(op ${CURSOR_OPS})
+    foreach(bpp ${CURSOR_BPPS})
+      configure_file(cursor/nxglib_cursor_${op}.c.in nxglib_cursor_${op}_${bpp}bpp.c)
+      set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}_${bpp}bpp.c PROPERTIES COMPILE_FLAGS -DNXGLIB_BITSPERPIXEL=${bpp})
+      list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/nxglib_cursor_${op}_${bpp}bpp.c)
     endforeach()
   endforeach()
-
-  add_custom_target(nxglib_cursor DEPEND ${CURSOR_SRCS})
-  add_dependencies(graphics nxglib_cursor)
-  set(SRCS ${SRCS} ${CURSOR_SRCS})
 endif()
 
-target_sources(graphics PRIVATE ${SRCS})
+target_sources(nxglib PRIVATE ${SRCS})
+target_include_directories(nxglib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(graphics PRIVATE nxglib)

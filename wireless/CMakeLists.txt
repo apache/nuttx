@@ -34,7 +34,7 @@
 ############################################################################
 
 if(CONFIG_WIRELESS)
-  nuttx_add_library(wireless)
+  nuttx_add_kernel_library(wireless)
 
   add_subdirectory(bluetooth)
 	add_subdirectory(ieee802154)

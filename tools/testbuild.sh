@@ -180,6 +180,14 @@ function makefunc {
   return $fail
 }
 
+function ninjafunc {
+  if ! ninja ; then
+    fail=1
+  fi
+
+  return $fail
+}
+
 # Clean up after the last build
 
 function distclean {
@@ -246,7 +254,7 @@ function cmake_configure {
 
   nuttx_board=$(cd ../boards && find . -mindepth 3 -maxdepth 3 -type d -name ${boarddir} -print -quit | sed -r 's|^..||')
 
-  if ! cmake -DCMAKE_BUILD_TYPE=Debug -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
+  if ! cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
     fail=1
   fi
 
@@ -257,7 +265,8 @@ function cmake_configure {
 
 function build {
   echo "  Building NuttX..."
-  makefunc
+  #makefunc
+  ninjafunc
   if [ ${SAVEARTIFACTS} -eq 1 ]; then
     artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
     mkdir -p $artifactconfigdir
@@ -266,9 +275,9 @@ function build {
 
   # Ensure defconfig in the canonical form
 
-  if ! $nuttx/tools/refresh.sh --silent $config; then
-    fail=1
-  fi
+  #if ! $nuttx/tools/refresh.sh --silent $config; then
+  #  fail=1
+  #fi
 
   # Ensure nuttx and apps directory in clean state
 

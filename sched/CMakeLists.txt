@@ -1,7 +1,7 @@
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-nuttx_add_library(sched)
+nuttx_add_kernel_library(sched)
 
 add_subdirectory(clock)
 add_subdirectory(environ)

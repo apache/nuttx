@@ -45,7 +45,7 @@ if (CONFIG_NET_ROUTE)
     list(APPEND SRCS
       net_alloc_ramroute.c  net_add_ramroute.c net_del_ramroute.c
       net_queue_ramroute.c net_foreach_ramroute.c)
-  else if (CONFIG_ROUTE_IPv6_RAMROUTE)
+  elseif (CONFIG_ROUTE_IPv6_RAMROUTE)
     list(APPEND SRCS
       net_alloc_ramroute.c  net_add_ramroute.c net_del_ramroute.c
       net_queue_ramroute.c net_foreach_ramroute.c)
@@ -55,7 +55,7 @@ if (CONFIG_NET_ROUTE)
 
   if (CONFIG_ROUTE_IPv4_ROMROUTE)
     list(APPEND SRCS net_foreach_romroute.c)
-  else if (CONFIG_ROUTE_IPv6_ROMROUTE)
+  elseif (CONFIG_ROUTE_IPv6_ROMROUTE)
     list(APPEND SRCS net_foreach_romroute.c)
   endif()
 
@@ -65,7 +65,7 @@ if (CONFIG_NET_ROUTE)
     list(APPEND SRCS
       net_fileroute.c net_add_fileroute.c net_del_fileroute.c
       net_foreach_fileroute.c)
-  else if (CONFIG_ROUTE_IPv6_FILEROUTE)
+  elseif (CONFIG_ROUTE_IPv6_FILEROUTE)
     list(APPEND SRCS
       net_fileroute.c net_add_fileroute.c net_del_fileroute.c
       net_foreach_fileroute.c)
@@ -75,7 +75,7 @@ if (CONFIG_NET_ROUTE)
 
   if (CONFIG_ROUTE_IPv4_CACHEROUTE)
     list(APPEND SRCS net_cacheroute.c)
-  else if (CONFIG_ROUTE_IPv6_CACHEROUTE)
+  elseif (CONFIG_ROUTE_IPv6_CACHEROUTE)
     list(APPEND SRCS net_cacheroute.c)
   endif()
 
