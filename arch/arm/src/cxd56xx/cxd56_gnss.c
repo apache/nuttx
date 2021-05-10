@@ -132,14 +132,12 @@ extern int fw_pm_sleepcpu(int cpuid, int mode);
  * Private Types
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNAL
 struct cxd56_gnss_sig_s
 {
   uint8_t                             enable;
   int                                 pid;
   FAR struct cxd56_gnss_signal_info_s info;
 };
-#endif
 
 struct cxd56_gnss_shared_info_s
 {
@@ -163,8 +161,7 @@ struct cxd56_gnss_dev_s
   struct file                     cepfp;
   FAR void *                      cepbuf;
   FAR struct pollfd              *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   struct cxd56_gnss_sig_s         sigs[CONFIG_CXD56_GNSS_NSIGNALRECEIVERS];
 #endif
   struct cxd56_gnss_shared_info_s shared_info;
@@ -1459,8 +1456,7 @@ static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
 {
   int ret = 0;
 
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   FAR struct inode                       *inode;
   FAR struct cxd56_gnss_dev_s            *priv;
   FAR struct cxd56_gnss_signal_setting_s *setting;
@@ -1533,10 +1529,7 @@ static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
   _success:
   _err:
   nxsem_post(&priv->devsem);
-#endif
-/* if !defined(CONFIG_DISABLE_SIGNAL) &&
- *  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
- */
+#endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
   return ret;
 }
@@ -2257,9 +2250,6 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_BKUPFILE, 0);
 }
 
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
-
 /****************************************************************************
  * Name: cxd56_gnss_common_signalhandler
  *
@@ -2276,6 +2266,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
  *
  ****************************************************************************/
 
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
 static void cxd56_gnss_common_signalhandler(uint32_t data,
                                             FAR void *userdata)
 {
@@ -2312,11 +2303,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
 
   nxsem_post(&priv->devsem);
 }
-
-#endif
-/* if !defined(CONFIG_DISABLE_SIGNAL) &&
- *  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
- */
+#endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
 /****************************************************************************
  * Name: cxd56_gnss_default_sighandler
@@ -2418,8 +2405,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
 
   nxsem_post(&priv->devsem);
 
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   cxd56_gnss_common_signalhandler(data, userdata);
 #endif
 }

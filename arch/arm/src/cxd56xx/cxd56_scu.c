@@ -196,10 +196,9 @@ struct cxd56_scudev_s
   uint8_t oneshot;    /* Bitmap for Oneshots */
 
   sem_t oneshotwait[3]; /* Semaphore for wait oneshot sequence is done */
-#ifndef CONFIG_DISABLE_SIGNAL
+
   struct ev_notify_s event[3]; /* MATHFUNC event notify */
   struct wm_notify_s wm[14];   /* Watermark notify */
-#endif
   int currentreq;
 };
 
@@ -274,7 +273,6 @@ static void seq_setdecimation(int wid, uint8_t ratio, uint8_t leveladj,
                               uint8_t forcethrough);
 static int seq_setwatermark(FAR struct seq_s *seq, int fifoid,
                             FAR struct scufifo_wm_s *wm);
-#ifndef CONFIG_DISABLE_SIGNAL
 static void convert_firsttimestamp(struct scutimestamp_s *tm,
                                    uint16_t interval, uint16_t sample,
                                    uint16_t adjust);
@@ -282,7 +280,6 @@ static void latest_timestamp(struct scufifo_s *fifo, uint32_t interval,
                              struct scutimestamp_s *tm, uint16_t *samples);
 static void seq_gettimestamp(struct scufifo_s *fifo,
                              struct scutimestamp_s *tm);
-#endif
 
 static int seq_oneshot(int bustype, int slave, FAR uint16_t *inst,
                        uint32_t nr_insts, FAR uint8_t *buffer, int len);
@@ -1478,10 +1475,8 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
 {
   uint32_t bit;
   int i;
-#ifndef CONFIG_DISABLE_SIGNAL
   struct wm_notify_s *notify;
   union sigval value;
-#endif
 
   if ((intr & 0x007ffe00) == 0)
     {
@@ -1498,7 +1493,6 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
 
           putreg32(bit, SCU_INT_CLEAR_MAIN);
 
-#ifndef CONFIG_DISABLE_SIGNAL
           notify = &priv->wm[i];
 
           if (notify->ts)
@@ -1510,7 +1504,6 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
 
           value.sival_ptr = notify->ts;
           nxsig_queue(notify->pid, notify->signo, value);
-#endif
         }
     }
 }
@@ -1530,10 +1523,8 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
   uint32_t bit;
   uint32_t rise;
   uint32_t fall;
-#ifndef CONFIG_DISABLE_SIGNAL
   struct ev_notify_s *notify;
   int detected = 0;
-#endif
 
   rise = (intr >> 6) & 0x7;
   fall = (intr >> 28) & 0x7;
@@ -1545,16 +1536,14 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
 
   for (i = 0, bit = 1; i < 3; i++, bit <<= 1)
     {
-#ifndef CONFIG_DISABLE_SIGNAL
       notify = &priv->event[i];
-#endif
+
       /* Detect rise event */
 
       if (rise & bit)
         {
           putreg32(bit << 6, SCU_INT_CLEAR_MAIN);
 
-#ifndef CONFIG_DISABLE_SIGNAL
           /* Get rise event occurred timestamp */
 
           if (notify->arg)
@@ -1567,7 +1556,6 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
             }
 
           detected = 1;
-#endif
         }
 
       /* Detect fall event */
@@ -1576,7 +1564,6 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
         {
           putreg32(bit << 28, SCU_INT_CLEAR_MAIN);
 
-#ifndef CONFIG_DISABLE_SIGNAL
           /* Get fall event occurred timestamp */
 
           if (notify->arg)
@@ -1589,10 +1576,8 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
             }
 
           detected = 1;
-#endif
         }
 
-#ifndef CONFIG_DISABLE_SIGNAL
       if (detected)
         {
           union sigval value;
@@ -1603,7 +1588,6 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
           nxsig_queue(notify->pid, notify->signo, value);
           detected = 0;
         }
-#endif
     }
 }
 
@@ -2232,9 +2216,7 @@ static int seq_seteventnotifier(FAR struct scufifo_s *fifo,
   int riseint;
   int fallint;
   int mid;
-#ifndef CONFIG_DISABLE_SIGNAL
   irqstate_t flags;
-#endif
 
   DEBUGASSERT(fifo && ev);
 
@@ -2247,7 +2229,6 @@ static int seq_seteventnotifier(FAR struct scufifo_s *fifo,
 
   mid = fifo->mid;
 
-#ifndef CONFIG_DISABLE_SIGNAL
   /* Save signal number and target PID */
 
   flags = enter_critical_section();
@@ -2256,7 +2237,6 @@ static int seq_seteventnotifier(FAR struct scufifo_s *fifo,
   priv->event[mid].arg = ev->arg;
   priv->event[mid].fifo = fifo;
   leave_critical_section(flags);
-#endif
 
   thresh = count0 = count1 = delaysample = 0;
   riseint = fallint = 0;
@@ -2305,8 +2285,6 @@ static int seq_seteventnotifier(FAR struct scufifo_s *fifo,
 
   return OK;
 }
-
-#ifndef CONFIG_DISABLE_SIGNAL
 
 /****************************************************************************
  * Name: seq_setwatermark
@@ -2481,9 +2459,6 @@ static void seq_gettimestamp(struct scufifo_s *fifo,
 
   convert_firsttimestamp(tm, interval, sample, adjust);
 }
-#else
-#define seq_setwatermark(seq, fifoid, wm) (-ENOSYS)
-#endif
 
 /****************************************************************************
  * Name: seq_setfifomode
@@ -2498,22 +2473,16 @@ static void seq_setfifomode(FAR struct seq_s *seq, int fifoid, int enable)
   FAR struct scufifo_s *fifo = seq_getfifo(seq, fifoid);
   uint32_t val;
   irqstate_t flags;
-#ifndef CONFIG_DISABLE_SIGNAL
   FAR struct cxd56_scudev_s *priv = &g_scudev;
   FAR struct wm_notify_s *notify = &priv->wm[fifo->rid];
   bool iswtmk = false;
-#endif
-
-  DEBUGASSERT(fifo);
 
   scuinfo("FIFO mode %d wid %d\n", enable, fifo->wid);
 
-#ifndef CONFIG_DISABLE_SIGNAL
   if (notify->ts)
     {
       iswtmk = true;
     }
-#endif
 
   flags = enter_critical_section();
 
@@ -2535,15 +2504,12 @@ static void seq_setfifomode(FAR struct seq_s *seq, int fifoid, int enable)
       val = 0x1 << (fifo->rid + 9);
       putreg32(val, SCU_INT_DISABLE_ERR_0);
 
-#ifndef CONFIG_DISABLE_SIGNAL
-
       /* disable almostfull interrupt */
 
       if (iswtmk)
         {
           putreg32(val, SCU_INT_DISABLE_MAIN);
         }
-#endif
     }
   else
     {
@@ -2557,8 +2523,6 @@ static void seq_setfifomode(FAR struct seq_s *seq, int fifoid, int enable)
       val = 0x1 << (fifo->rid + 9);
       putreg32(val, SCU_INT_ENABLE_ERR_0);
 
-#ifndef CONFIG_DISABLE_SIGNAL
-
       /* enable almostfull interrupt */
 
       if (iswtmk)
@@ -2566,7 +2530,6 @@ static void seq_setfifomode(FAR struct seq_s *seq, int fifoid, int enable)
           val = 0x1 << (fifo->rid + 9);
           putreg32(val, SCU_INT_ENABLE_MAIN);
         }
-#endif
     }
 
   leave_critical_section(flags);

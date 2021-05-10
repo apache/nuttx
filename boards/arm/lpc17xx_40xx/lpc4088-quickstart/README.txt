@@ -413,9 +413,6 @@ Configuration Directories
             CONFIG_LPC17_40_GPIOIRQ=y            : GPIO interrupt support
             CONFIG_LPC17_40_SSP1=y               : Enable support for SSP1
 
-          RTOS Features:
-            CONFIG_DISABLE_SIGNALS=n          : Signals are required
-
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
 
