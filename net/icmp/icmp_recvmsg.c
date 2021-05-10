@@ -162,7 +162,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Return the size of the returned data */
 
-          DEBUGASSERT(recvsize > INT16_MAX);
+          DEBUGASSERT(recvsize <= INT16_MAX);
           pstate->recv_result = recvsize;
 
           /* Return the IPv4 address of the sender from the IPv4 header */
