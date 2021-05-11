@@ -180,12 +180,7 @@ config SYSLOG_COLOR_OUTPUT
 	---help---
 		Enables colored output in syslog, according to message priority.
 
-choice
-	prompt "System log device"
-	default SYSLOG_CONSOLE if !ARCH_LOWPUTC
-	default SYSLOG_DEFAULT if ARCH_LOWPUTC
-	depends on !ARCH_SYSLOG
-
+if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
 	---help---
@@ -195,7 +190,7 @@ config SYSLOG_CHAR
 
 config RAMLOG_SYSLOG
 	bool "Use RAMLOG for SYSLOG"
-	depends on RAMLOG && !ARCH_SYSLOG
+	depends on RAMLOG
 	---help---
 		Use the RAM logging device for the syslogging interface.  If this
 		feature is enabled (along with SYSLOG), then all debug output (only)
@@ -204,6 +199,7 @@ config RAMLOG_SYSLOG
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
+	default !ARCH_LOWPUTC
 	depends on DEV_CONSOLE
 	---help---
 		Use the system console as a SYSLOG output device.
@@ -224,11 +220,12 @@ config SYSLOG_RPMSG_SERVER_NAME
 
 config SYSLOG_DEFAULT
 	bool "Default SYSLOG device"
+	default ARCH_LOWPUTC
 	---help---
 		syslog() interfaces will be present, but all output will go to the
 		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
 
-endchoice
+endif
 
 config SYSLOG_RPMSG_WORK_DELAY
 	int "SYSLOG RPMSG work delay(ms)"
