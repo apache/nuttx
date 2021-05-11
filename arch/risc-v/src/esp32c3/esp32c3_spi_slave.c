@@ -46,6 +46,10 @@
 #include "esp32c3_irq.h"
 #include "esp32c3_gpio.h"
 
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+#include "esp32c3_dma.h"
+#endif
+
 #include "riscv_arch.h"
 #include "hardware/esp32c3_gpio_sigmap.h"
 #include "hardware/esp32c3_pinmap.h"
@@ -58,6 +62,17 @@
  ****************************************************************************/
 
 #define SPI_SLAVE_BUFSIZE (CONFIG_ESP32C3_SPI2_SLAVE_BUFSIZE)
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+/* SPI DMA RX/TX number of descriptors */
+
+#if (SPI_SLAVE_BUFSIZE % ESP32C3_DMA_BUFLEN_MAX) > 0
+#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESP32C3_DMA_BUFLEN_MAX + 1)
+#else
+#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESP32C3_DMA_BUFLEN_MAX)
+#endif
+
+#endif /* CONFIG_ESP32C3_SPI2_DMA */
 
 /* Verify whether SPI has been assigned IOMUX pins.
  * Otherwise, SPI signals will be routed via GPIO Matrix.
@@ -113,6 +128,10 @@ struct spislave_config_s
   uint8_t irq;                /* Interrupt ID */
   uint32_t clk_bit;           /* Clock enable bit */
   uint32_t rst_bit;           /* SPI reset bit */
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  uint32_t dma_clk_bit;       /* DMA clock enable bit */
+  uint32_t dma_rst_bit;       /* DMA reset bit */
+#endif
   uint32_t cs_insig;          /* SPI CS input signal index */
   uint32_t cs_outsig;         /* SPI CS output signal index */
   uint32_t mosi_insig;        /* SPI MOSI input signal index */
@@ -138,6 +157,9 @@ struct spislave_priv_s
   const struct spislave_config_s *config;
   int refs;              /* Reference count */
   int cpuint;            /* SPI interrupt ID */
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  int32_t dma_channel;   /* Channel assigned by the GDMA driver */
+#endif
   enum spi_smode_e mode; /* Current SPI Slave hardware mode */
   uint8_t nbits;         /* Current SPI send/receive bits once transmission */
   uint32_t tx_length;    /* Location of next TX value */
@@ -179,7 +201,13 @@ static void spislave_store_result(FAR struct spislave_priv_s *priv,
 static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv);
 static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
                                      uint32_t sent_bytes);
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+static void spislave_setup_rx_dma(FAR struct spislave_priv_s *priv);
+static void spislave_setup_tx_dma(FAR struct spislave_priv_s *priv);
+static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv);
+#else
 static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv);
+#endif
 static void spislave_initialize(FAR struct spi_sctrlr_s *sctrlr);
 static void spislave_deinitialize(FAR struct spi_sctrlr_s *sctrlr);
 
@@ -214,6 +242,10 @@ static const struct spislave_config_s esp32c3_spi2slave_config =
   .irq          = ESP32C3_IRQ_SPI2,
   .clk_bit      = SYSTEM_SPI2_CLK_EN,
   .rst_bit      = SYSTEM_SPI2_RST,
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  .dma_clk_bit  = SYSTEM_SPI2_DMA_CLK_EN,
+  .dma_rst_bit  = SYSTEM_SPI2_DMA_RST,
+#endif
   .cs_insig     = FSPICS0_IN_IDX,
   .cs_outsig    = FSPICS0_OUT_IDX,
   .mosi_insig   = FSPID_IN_IDX,
@@ -244,6 +276,9 @@ static struct spislave_priv_s esp32c3_spi2slave_priv =
   .config        = &esp32c3_spi2slave_config,
   .refs          = 0,
   .cpuint        = -ENOMEM,
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  .dma_channel   = -ENOMEM,
+#endif
   .mode          = SPISLAVE_MODE0,
   .nbits         = 0,
   .tx_length     = 0,
@@ -260,6 +295,15 @@ static struct spislave_priv_s esp32c3_spi2slave_priv =
   .is_tx_enabled = false
 };
 #endif /* CONFIG_ESP32C3_SPI2 */
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+
+/* SPI DMA RX/TX description */
+
+static struct esp32c3_dmadesc_s dma_rxdesc[SPI_DMA_DESC_NUM];
+static struct esp32c3_dmadesc_s dma_txdesc[SPI_DMA_DESC_NUM];
+
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -300,11 +344,59 @@ static inline void spislave_peripheral_reset(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ESP32C3_SPI2_DMA
 static inline void spislave_cpu_tx_fifo_reset(void)
 {
   setbits(SPI_BUF_AFIFO_RST_M, SPI_DMA_CONF_REG);
   resetbits(SPI_BUF_AFIFO_RST_M, SPI_DMA_CONF_REG);
 }
+#endif
+
+/****************************************************************************
+ * Name: spislave_dma_tx_fifo_reset
+ *
+ * Description:
+ *   Reset the DMA TX AFIFO, which is used to send data out in SPI Slave
+ *   DMA-controlled mode transfer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+static inline void spislave_dma_tx_fifo_reset(void)
+{
+  setbits(SPI_DMA_AFIFO_RST_M, SPI_DMA_CONF_REG);
+  resetbits(SPI_DMA_AFIFO_RST_M, SPI_DMA_CONF_REG);
+}
+#endif
+
+/****************************************************************************
+ * Name: spislave_dma_rx_fifo_reset
+ *
+ * Description:
+ *   Reset the RX AFIFO, which is used to receive data in SPI Slave mode
+ *   transfer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+static inline void spislave_dma_rx_fifo_reset(void)
+{
+  setbits(SPI_RX_AFIFO_RST_M, SPI_DMA_CONF_REG);
+  resetbits(SPI_RX_AFIFO_RST_M, SPI_DMA_CONF_REG);
+}
+#endif
 
 /****************************************************************************
  * Name: spislave_setmode
@@ -448,7 +540,7 @@ static int spislave_cs_interrupt(int irq, void *context, FAR void *arg)
  * Name: spislave_store_result
  *
  * Description:
- *   Fetch data from the data buffer registers and record the length.
+ *   Fetch data from the SPI hardware data buffer and record the length.
  *   This is a post transaction operation.
  *
  * Input Parameters:
@@ -474,6 +566,7 @@ static void spislave_store_result(FAR struct spislave_priv_s *priv,
       bytes_to_copy = remaining_space;
     }
 
+#ifndef CONFIG_ESP32C3_SPI2_DMA
   /* If DMA is not enabled, software should copy incoming data from data
    * buffer registers to receive buffer.
    */
@@ -485,7 +578,7 @@ static void spislave_store_result(FAR struct spislave_priv_s *priv,
 
       uintptr_t data_buf_reg = SPI_W0_REG;
 
-      /* Read received data words from SPI data buffer registers. */
+      /* Read received data words from SPI hardware data buffer. */
 
       for (int i = 0; i < bytes_to_copy; i += sizeof(uint32_t))
         {
@@ -499,7 +592,7 @@ static void spislave_store_result(FAR struct spislave_priv_s *priv,
           data_buf_reg += sizeof(uintptr_t);
         }
 
-      /* Clear data buffer registers to avoid echoing on the next transfer. */
+      /* Clear hardware data buffer to avoid echoing on the next transfer. */
 
       data_buf_reg = SPI_W0_REG;
 
@@ -510,6 +603,7 @@ static void spislave_store_result(FAR struct spislave_priv_s *priv,
           data_buf_reg += sizeof(uintptr_t);
         }
     }
+#endif /* CONFIG_ESP32C3_SPI2_DMA */
 
   priv->rx_length += bytes_to_copy;
 }
@@ -533,7 +627,9 @@ static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv)
 {
   if (priv->rx_length < SPI_SLAVE_BUFSIZE)
     {
-
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+      spislave_setup_rx_dma(priv);
+#endif
     }
 }
 
@@ -559,8 +655,11 @@ static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
   if (sent_bytes < priv->tx_length)
     {
       priv->tx_length -= sent_bytes;
+
       memmove(priv->tx_buffer, priv->tx_buffer + sent_bytes,
               priv->tx_length);
+
+      memset(priv->tx_buffer + priv->tx_length, 0, sent_bytes);
     }
   else
     {
@@ -572,7 +671,7 @@ static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
  * Name: spislave_write_tx_buffer
  *
  * Description:
- *   Write to SPI Slave peripheral data buffer registers.
+ *   Write to SPI Slave peripheral hardware data buffer.
  *
  * Input Parameters:
  *   priv   - Private SPI Slave controller structure
@@ -582,6 +681,7 @@ static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ESP32C3_SPI2_DMA
 static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv)
 {
   /* Initialize data_buf_reg with the address of the first data buffer
@@ -592,7 +692,7 @@ static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv)
 
   uint32_t transfer_size = MIN(SPI_SLAVE_HW_BUF_SIZE, priv->tx_length);
 
-  /* Write data words to data buffer registers.
+  /* Write data words to hardware data buffer.
    * SPI peripheral contains 16 registers (W0 - W15).
    */
 
@@ -609,6 +709,83 @@ static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv)
       data_buf_reg += sizeof(uintptr_t);
     }
 }
+#endif
+
+/****************************************************************************
+ * Name: spislave_setup_rx_dma
+ *
+ * Description:
+ *   Configure the SPI Slave peripheral to perform the next RX data transfer
+ *   via DMA.
+ *
+ * Input Parameters:
+ *   priv   - Private SPI Slave controller structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+static void spislave_setup_rx_dma(FAR struct spislave_priv_s *priv)
+{
+  uint32_t length = SPI_SLAVE_BUFSIZE - priv->rx_length;
+
+  esp32c3_dma_setup(priv->dma_channel, false, dma_rxdesc, SPI_DMA_DESC_NUM,
+                    priv->rx_buffer + priv->rx_length, length);
+
+  spislave_dma_rx_fifo_reset();
+
+  spislave_peripheral_reset();
+
+  /* Clear input FIFO full error */
+
+  setbits(SPI_DMA_INFIFO_FULL_ERR_INT_CLR_M, SPI_DMA_INT_CLR_REG);
+
+  /* Enable SPI DMA RX */
+
+  setbits(SPI_DMA_RX_ENA_M, SPI_DMA_CONF_REG);
+
+  esp32c3_dma_enable(priv->dma_channel, false);
+}
+#endif
+
+/****************************************************************************
+ * Name: spislave_setup_tx_dma
+ *
+ * Description:
+ *   Configure the SPI Slave peripheral to perform the next TX data transfer
+ *   via DMA.
+ *
+ * Input Parameters:
+ *   priv   - Private SPI Slave controller structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+static void spislave_setup_tx_dma(FAR struct spislave_priv_s *priv)
+{
+  esp32c3_dma_setup(priv->dma_channel, true, dma_txdesc, SPI_DMA_DESC_NUM,
+                    priv->tx_buffer, SPI_SLAVE_BUFSIZE);
+
+  spislave_dma_tx_fifo_reset();
+
+  spislave_peripheral_reset();
+
+  /* Clear output FIFO empty error */
+
+  setbits(SPI_DMA_OUTFIFO_EMPTY_ERR_INT_CLR_M, SPI_DMA_INT_CLR_REG);
+
+  /* Enable SPI DMA TX */
+
+  setbits(SPI_DMA_TX_ENA_M, SPI_DMA_CONF_REG);
+
+  esp32c3_dma_enable(priv->dma_channel, true);
+}
+#endif
 
 /****************************************************************************
  * Name: spislave_prepare_next_tx
@@ -629,11 +806,15 @@ static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv)
 {
   if (priv->tx_length != 0)
     {
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+      spislave_setup_tx_dma(priv);
+#else
       spislave_peripheral_reset();
 
       spislave_write_tx_buffer(priv);
 
       spislave_cpu_tx_fifo_reset();
+#endif
 
       priv->is_tx_enabled = true;
     }
@@ -641,7 +822,9 @@ static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv)
     {
       spiwarn("TX buffer empty! Disabling TX for next transaction\n");
 
+#ifndef CONFIG_ESP32C3_SPI2_DMA
       spislave_cpu_tx_fifo_reset();
+#endif
 
       priv->is_tx_enabled = false;
     }
@@ -679,13 +862,16 @@ static int spislave_periph_interrupt(int irq, void *context, FAR void *arg)
 
   /* RX process */
 
-  spislave_store_result(priv, transfer_size);
+  if (transfer_size > 0)
+    {
+      spislave_store_result(priv, transfer_size);
+    }
 
   spislave_prepare_next_rx(priv);
 
   /* TX process */
 
-  if (priv->is_tx_enabled)
+  if (transfer_size > 0 && priv->is_tx_enabled)
     {
       spislave_evict_sent_data(priv, transfer_size);
     }
@@ -708,6 +894,56 @@ static int spislave_periph_interrupt(int irq, void *context, FAR void *arg)
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: spislave_dma_init
+ *
+ * Description:
+ *   Initialize ESP32-C3 SPI Slave connection to GDMA engine.
+ *
+ * Input Parameters:
+ *   priv   - Private SPI Slave controller structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+void spislave_dma_init(FAR struct spislave_priv_s *priv)
+{
+  /* Enable GDMA clock for the SPI peripheral */
+
+  setbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
+
+  /* Reset GDMA for the SPI peripheral */
+
+  resetbits(priv->config->dma_rst_bit, SYSTEM_PERIP_RST_EN0_REG);
+
+  /* Initialize GDMA controller */
+
+  esp32c3_dma_init();
+
+  /* Request a GDMA channel for SPI peripheral */
+
+  priv->dma_channel = esp32c3_dma_request(ESP32C3_DMA_PERIPH_SPI, 1, 1,
+                                          true);
+  if (priv->dma_channel < 0)
+    {
+      spierr("Failed to allocate GDMA channel\n");
+
+      DEBUGASSERT(false);
+    }
+
+  /* Disable segment transaction mode for SPI Slave */
+
+  resetbits(SPI_DMA_SLV_SEG_TRANS_EN_M, SPI_DMA_CONF_REG);
+
+  /* Configure DMA In-Link EOF to be generated by trans_done */
+
+  resetbits(SPI_RX_EOF_EN_M, SPI_DMA_CONF_REG);
+}
+#endif
 
 /****************************************************************************
  * Name: spislave_initialize
@@ -776,13 +1012,17 @@ static void spislave_initialize(FAR struct spi_sctrlr_s *sctrlr)
 
   spislave_peripheral_reset();
 
-  /* Use all 64 bytes of the data buffer */
+  /* Use all 64 bytes of the SPI hardware data buffer */
 
   resetbits(SPI_USR_MISO_HIGHPART_M | SPI_USR_MOSI_HIGHPART_M, SPI_USER_REG);
 
   /* Disable interrupts */
 
   resetbits(SPI_INT_MASK, SPI_DMA_INT_ENA_REG);
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  spislave_dma_init(priv);
+#endif
 
   esp32c3_gpioirqenable(ESP32C3_PIN2IRQ(config->cs_pin), RISING);
 
@@ -820,6 +1060,10 @@ static void spislave_deinitialize(FAR struct spi_sctrlr_s *sctrlr)
   /* Disable the trans_done interrupt */
 
   resetbits(SPI_TRANS_DONE_INT_ENA_M, SPI_DMA_INT_ENA_REG);
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
+#endif
 
   setbits(priv->config->clk_bit, SYSTEM_PERIP_RST_EN0_REG);
   resetbits(priv->config->clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
@@ -943,6 +1187,10 @@ static void spislave_unbind(FAR struct spi_sctrlr_s *sctrlr)
   /* Disable the trans_done interrupt */
 
   resetbits(SPI_TRANS_DONE_INT_ENA_M, SPI_DMA_INT_ENA_REG);
+
+#ifdef CONFIG_ESP32C3_SPI2_DMA
+  resetbits(priv->config->dma_clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
+#endif
 
   resetbits(priv->config->clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
 
