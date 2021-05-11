@@ -118,7 +118,7 @@ config SYSLOG_TIMESTAMP_FORMATTED
 	depends on SYSLOG_TIMESTAMP_REALTIME
 	---help---
 		Syslog timestamp will be formatted according to the
-		SYSLOG_TIMESTAMP_FORMAT format string.		
+		SYSLOG_TIMESTAMP_FORMAT format string.
 
 config SYSLOG_TIMESTAMP_LOCALTIME
 	bool "Use local-time timestamp"
@@ -180,14 +180,10 @@ config SYSLOG_COLOR_OUTPUT
 	---help---
 		Enables colored output in syslog, according to message priority.
 
-choice
-	prompt "System log device"
-	default SYSLOG_CONSOLE if !ARCH_LOWPUTC
-	default SYSLOG_DEFAULT if ARCH_LOWPUTC
-	depends on !ARCH_SYSLOG
-
+if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
+	default n
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
@@ -195,7 +191,8 @@ config SYSLOG_CHAR
 
 config RAMLOG_SYSLOG
 	bool "Use RAMLOG for SYSLOG"
-	depends on RAMLOG && !ARCH_SYSLOG
+	depends on RAMLOG
+	default n
 	---help---
 		Use the RAM logging device for the syslogging interface.  If this
 		feature is enabled (along with SYSLOG), then all debug output (only)
@@ -204,6 +201,7 @@ config RAMLOG_SYSLOG
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
+	default !ARCH_LOWPUTC && !SYSLOG_RPMSG && !RAMLOG_SYSLOG && !SYSLOG_CHAR
 	depends on DEV_CONSOLE
 	---help---
 		Use the system console as a SYSLOG output device.
@@ -212,23 +210,26 @@ config SYSLOG_RPMSG
 	bool "Log to RPMSG"
 	depends on OPENAMP
 	depends on SCHED_WORKQUEUE
+	default n
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
-config SYSLOG_RPMSG_SERVER_NAME
-	string "The name of Syslog Rpmsg Server"
-	depends on SYSLOG_RPMSG
-	---help---
-		The proc name of rpmsg server. Client sends message to
-		specified name of remote proc.
-
 config SYSLOG_DEFAULT
 	bool "Default SYSLOG device"
+	default ARCH_LOWPUTC && !SYSLOG_RPMSG && !SYSLOG_CONSOLE && !RAMLOG_SYSLOG && !SYSLOG_CHAR
 	---help---
 		syslog() interfaces will be present, but all output will go to the
 		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
 
-endchoice
+endif
+
+config SYSLOG_RPMSG_SERVER_NAME
+	string "The name of Syslog Rpmsg Server"
+	depends on SYSLOG_RPMSG
+	default ""
+	---help---
+		The proc name of rpmsg server. Client sends message to
+		specified name of remote proc.
 
 config SYSLOG_RPMSG_WORK_DELAY
 	int "SYSLOG RPMSG work delay(ms)"
