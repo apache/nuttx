@@ -182,6 +182,24 @@ int esp32c3_spiflash_init(void);
 #endif
 
 /****************************************************************************
+ * Name: esp32c3_spiflash_encrypt_test
+ *
+ * Description:
+ *   Test ESP32-C3 SPI Flash driver read/write with encryption.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
+void esp32c3_spiflash_encrypt_test(void);
+#endif
+
+/****************************************************************************
  * Name: esp32c3_ledc_setup
  *
  * Description:
