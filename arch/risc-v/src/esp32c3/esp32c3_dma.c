@@ -81,9 +81,10 @@ static sem_t g_dma_exc_sem = SEM_INITIALIZER(1);
  *   Request DMA channel and config it with given parameters.
  *
  * Input Parameters:
- *   periph  - Peripheral for which the DMA channel request was made
- *   tx_prio - Interrupt priority
- *   rx_prio - Interrupt flags
+ *   periph   - Peripheral for which the DMA channel request was made
+ *   tx_prio  - Interrupt priority
+ *   rx_prio  - Interrupt flags
+ *   burst_en - Enable burst transmission
  *
  * Returned Value:
  *   DMA channel number (>=0) if success or -1 if fail.
@@ -92,7 +93,8 @@ static sem_t g_dma_exc_sem = SEM_INITIALIZER(1);
 
 int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
                             uint32_t tx_prio,
-                            uint32_t rx_prio)
+                            uint32_t rx_prio,
+                            bool burst_en)
 {
   int chan;
 
@@ -145,11 +147,26 @@ int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
 
       CLR_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_MEM_TRANS_EN_CH0_M);
 
-      /* Connect DMA TX/RX channel to a given peripheral */
+      /* Connect DMA TX/RX channels to a given peripheral */
 
       SET_REG(DMA_OUT_PERI_SEL_CH0_REG, chan, periph);
       SET_REG(DMA_IN_PERI_SEL_CH0_REG, chan, periph);
     }
+
+  if (burst_en)
+    {
+      /* Enable DMA TX/RX channels burst sending data */
+
+      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
+      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_DATA_BURST_EN_CH0_M);
+
+      /* Enable DMA TX/RX channels burst reading descriptor link */
+
+      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
+      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_INDSCR_BURST_EN_CH0_M);
+    }
+
+  /* Set priority for DMA TX/RX channels */
 
   SET_REG(DMA_OUT_PRI_CH0_REG, chan, tx_prio);
   SET_REG(DMA_IN_PRI_CH0_REG, chan, rx_prio);
@@ -435,7 +452,7 @@ void esp32c3_dma_main(int argc, char *argv[])
 
   esp32c3_dma_init();
 
-  chan = esp32c3_dma_request(ESP32C3_DMA_PERIPH_MEM, 1, 1);
+  chan = esp32c3_dma_request(ESP32C3_DMA_PERIPH_MEM, 1, 1, false);
   if (chan < 0)
     {
       syslog(LOG_ERR, "Request DMA channel error\n");

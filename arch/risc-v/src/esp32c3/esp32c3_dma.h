@@ -26,6 +26,7 @@
 #define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_DMA_H
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifndef __ASSEMBLY__
@@ -122,7 +123,8 @@ struct esp32c3_dmadesc_s
 
 int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
                             uint32_t tx_prio,
-                            uint32_t rx_prio);
+                            uint32_t rx_prio,
+                            bool burst_en);
 
 /****************************************************************************
  * Name: esp32c3_dma_setup
