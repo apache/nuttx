@@ -144,65 +144,51 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
         break;
 
       case TCP_KEEPIDLE:  /* Start keepalives after this IDLE period */
-        if (*value_len < sizeof(struct timeval))
-          {
-            /* REVISIT: POSIX says that we should truncate the value if it
-             * is larger than value_len.   That just doesn't make sense
-             * to me in this case.
-             */
-
-            ret = -EINVAL;
-          }
-        else
-          {
-            FAR struct timeval *tv = (FAR struct timeval *)value;
-
-            if (tv == NULL)
-              {
-                ret        = -EINVAL;
-              }
-            else
-              {
-                /* Convert the KeepIdle time from deciseconds to struct
-                 * timeval.
-                 */
-
-                net_dsec2timeval(conn->keepidle, tv);
-                *value_len = sizeof(struct timeval);
-                ret        = OK;
-              }
-          }
-        break;
-
       case TCP_KEEPINTVL: /* Interval between keepalives */
-        if (*value_len < sizeof(struct timeval))
-          {
-            /* REVISIT: POSIX says that we should truncate the value if it
-             * is larger than value_len.   That just doesn't make sense
-             * to me in this case.
-             */
+        {
+          int dsecs;
 
-            ret = -EINVAL;
-          }
-        else
-          {
-            FAR struct timeval *tv = (FAR struct timeval *)value;
+          if (option == TCP_KEEPIDLE)
+            {
+              dsecs = conn->keepidle;
+            }
+          else
+            {
+              dsecs = conn->keepintvl;
+            }
 
-            if (tv == NULL)
-              {
-                ret        = -EINVAL;
-              }
-            else
-              {
-                /* Convert the KeepIdle time from deciseconds to struct
-                 * timeval.
-                 */
+          if (value == NULL)
+            {
+              ret = -EINVAL;
+            }
+          else if (*value_len == sizeof(struct timeval))
+            {
+              FAR struct timeval *tv = (FAR struct timeval *)value;
 
-                net_dsec2timeval(conn->keepintvl, tv);
-                *value_len = sizeof(struct timeval);
-                ret        = OK;
-              }
-          }
+              /* Convert the KeepIdle time from deciseconds to struct
+               * timeval.
+               */
+
+              net_dsec2timeval(dsecs, tv);
+              *value_len      = sizeof(struct timeval);
+              ret             = OK;
+            }
+          else if (*value_len == sizeof(int))
+            {
+              FAR int *pdsecs = (FAR int *)value;
+              *pdsecs         = dsecs;
+              ret             = OK;
+            }
+          else
+            {
+              /* REVISIT: POSIX says that we should truncate the value if it
+               * is larger than value_len.   That just doesn't make sense
+               * to me in this case.
+               */
+
+              ret = -EINVAL;
+            }
+        }
         break;
 
       case TCP_KEEPCNT:   /* Number of keepalives before death */
