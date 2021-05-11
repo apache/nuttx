@@ -138,6 +138,11 @@ int esp32c3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
+
+#  ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
+  esp32c3_spiflash_encrypt_test();
+#  endif
+
   ret = esp32c3_spiflash_init();
   if (ret)
     {
