@@ -338,6 +338,14 @@ config ESP32C3_SPI_UDCS
 
 if ESP32C3_SPI2
 
+config ESP32C3_SPI2_SLAVE
+	bool "SPI2 Slave mode"
+	default n
+	depends on SPI_SLAVE
+	select ESP32C3_GPIO_IRQ
+	---help---
+		Configure SPI2 to operate in Slave mode.
+
 config ESP32C3_SPI2_DMA
 	bool "SPI2 use GDMA"
 	default n
@@ -354,12 +362,19 @@ config ESP32C3_SPI2_DMADESC_NUM
 		be chained for a GDMA transfer.
 
 config ESP32C3_SPI2_DMATHRESHOLD
-	int "SPI2 GDMA threshold"
+	int "SPI2 Master GDMA threshold"
 	default 64
 	depends on ESP32C3_SPI2_DMA
 	---help---
 		When SPI GDMA is enabled, GDMA transfers whose size are below the
 		defined threshold will be performed by polling logic.
+
+config ESP32C3_SPI2_SLAVE_BUFSIZE
+	int "SPI2 Slave buffer size"
+	default 2048
+	depends on ESP32C3_SPI2_SLAVE
+	---help---
+		Configure the size of SPI2 Slave controller's internal buffers.
 
 config ESP32C3_SPI2_CSPIN
 	int "SPI2 CS Pin"
