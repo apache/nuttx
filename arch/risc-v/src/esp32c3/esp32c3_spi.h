@@ -126,6 +126,39 @@ int esp32c3_spi2_cmddata(FAR struct spi_dev_s *dev,
 
 int esp32c3_spibus_uninitialize(FAR struct spi_dev_s *dev);
 
+/****************************************************************************
+ * Name: esp32c3_spislave_sctrlr_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI Slave bus.
+ *
+ * Input Parameters:
+ *   port - Port number (for hardware that has multiple SPI Slave interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI Slave controller structure reference on success;
+ *   NULL on failure.
+ *
+ ****************************************************************************/
+
+FAR struct spi_sctrlr_s *esp32c3_spislave_sctrlr_initialize(int port);
+
+/****************************************************************************
+ * Name: esp32c3_spislave_sctrlr_uninitialize
+ *
+ * Description:
+ *   Uninitialize an SPI Slave bus.
+ *
+ * Input Parameters:
+ *   sctrlr - SPI Slave controller interface instance
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32c3_spislave_sctrlr_uninitialize(FAR struct spi_sctrlr_s *sctrlr);
+
 #endif /* CONFIG_ESP32C3_SPI */
 
 #ifdef __cplusplus
