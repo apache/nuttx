@@ -359,6 +359,7 @@ static int rpcclnt_receive(FAR struct rpcclnt *rpc,
 {
   uint32_t mark;
   int error = 0;
+  int offset = 0;
 
   /* Receive the record marking(RM) for stream only */
 
@@ -388,12 +389,20 @@ static int rpcclnt_receive(FAR struct rpcclnt *rpc,
       resplen = mark;
     }
 
-  error = psock_recv(&rpc->rc_so, reply, resplen, 0);
-  if (error < 0)
+  do
     {
-      ferr("ERROR: psock_recv response failed: %d\n", error);
-      return error;
+      error = psock_recv(&rpc->rc_so, reply + offset, resplen, 0);
+
+      if (error < 0)
+        {
+          ferr("ERROR: psock_recv response failed: %d\n", error);
+          return error;
+        }
+
+      resplen -= error;
+      offset  += error;
     }
+  while (rpc->rc_sotype == SOCK_STREAM && resplen != 0);
 
   return OK;
 }
