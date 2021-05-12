@@ -79,8 +79,17 @@ void *mpfs_dispatch_irq(uint64_t vector, uint64_t *regs)
   /* Firstly, check if the irq is machine external interrupt */
 
   uint64_t hart_id = READ_CSR(mhartid);
-  uintptr_t claim_address = MPFS_PLIC_H1_MCLAIM +
-                            ((hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET);
+  uintptr_t claim_address;
+
+  if (hart_id == 0)
+    {
+      claim_address = MPFS_PLIC_H0_MCLAIM;
+    }
+  else
+    {
+      claim_address = MPFS_PLIC_H1_MCLAIM +
+        ((hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET);
+    }
 
   if (irq == MPFS_IRQ_MEXT)
     {
