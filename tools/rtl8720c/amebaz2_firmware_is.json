@@ -1,0 +1,187 @@
+{
+ "msg_level": 3,
+	"__comment":"example key",
+	"000priv":"A0D6DAE7E062CA94CBB294BF896B9F68CF8438774256AC7403CA4FD9A1C9564F",
+	"000pub":"68513EF83E396B12BA059A900F36B6D31D11FE1C5D25EB8AA7C550307F9C2405",
+	"001priv":"882AA16C8C44A7760AA8C9AB22E3568C6FA16C2AFA4F0CEA29A10ABCDF60E44F",
+	"001pub":"48AD23DDBDAC9E65719DB7D394D44D62820D19E50D68376774237E98D2305E6A",
+	"002priv":"58A3D915706835212260C22D628B336D13190B539714E3DB249D823CA5774453",
+	"002pub":"FD8D3F3E516D96186E10F07A64B24C7DE736826A24FAFE367E79F1FBB2F1C832",
+	"003priv":"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E5F",
+	"003pub":"8F40C5ADB68F25624AE5B214EA767A6EC94D829D3D7B5E1AD1BA6F3E2138285F",
+
+	"PROFILE":["FIRMWARE"],
+	"FIRMWARE":{
+        "rand_pad": false,
+        "__comment_xip_pg_size":"XIP remapping page size/alignment setting: 0/1/2: 16K/32K/64K",
+	    "xip_pg_size": 0,
+
+        "__comment_mode":"mode 0: bootloader and partition table, mode 1: firmware",
+		"mode": 1,
+		"file":"application_is/Debug/bin/firmware_is.bin",
+		"__comment_too_privkey":"if user want to fix key, can set priviate key here, if not, will use random key",
+		"privkey_enc":"A0D6DAE7E062CA94CBB294BF896B9F68CF8438774256AC7403CA4FD9A1C9564F",
+
+		"__comment_hash_key_src":"hash key from partition table FW1/FW2 (must match type in partition item)",
+		"hash_key_src" : "FW1",
+
+        "__comment_images":"offset = null => cascade ( align to 64 ), should be zero if valid",
+		"images":[
+			{"img": "FWHS", "offset":"0x00"},
+			{"img": "XIP_FLASH_C", "offset":"0x00"},
+			{"img": "XIP_FLASH_P", "offset":"0x00"}
+		]
+	},
+	"FWHS": {
+		"source":"application_is/Debug/bin/application_is.axf",
+		"header":{
+			"next":null,
+			"__comment_type":"Support Type:PARTAB,BOOT,FWHS_S,FWHS_NS,FWLS,ISP,VOE,WLN,DTCM,ITCM,SRAM,ERAM,XIP,M0,CPFW",
+			"type":"FWHS_S", 
+			"enc":false,
+            "user_key2":"BB0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F",
+			"__comment_pkey_idx":"assign by program, no need to configurate",
+			"serial": 100
+		},
+        "FST":{
+			"__comment_FST0": "enc_algorithm: cbc/ecb with cipher key",
+			"__comment_FST1": "validpat is used for section header validation",
+			"__comment_FST2": "hash_en/enc_en?",
+            "enc_algorithm":"cbc",
+			"hash_algorithm":"sha256",
+			"part_size":"4096",
+			
+			"__comment_validpat": "use auto or dedicated value",
+			"validpat":"0001020304050607",
+			"hash_en":true,
+			"enc_en":false,
+			"cipherkey":null,
+			"cipheriv":null
+        },
+		"list" : ["sram", "psram"],    
+		"sram": {
+			"secthdr":{
+				"type": "SRAM"
+			},
+			"__comment_option":"TODO: not ready",
+			"option": null,
+
+			"__comment_entry":"startup function table symbol",
+			"entry":"__ram_start_table_start__",
+			
+			"sections":	[".ram.img.signature",
+                   ".ram.func.table",
+                   ".data",
+                   ".ram.code_text",
+                   ".ram.code_rodata"
+			],
+			"__comment_file":"TODO: use binary file directly",
+			"file": null
+		},
+		
+		"psram": {
+			"secthdr":{
+				"type": "PSRAM"
+			},
+			"__comment_option":"TODO: not ready",
+			"option": null,
+
+			"sections":	[".psram.data",
+                   ".psram.code_text",
+                   ".psram.code_rodata"
+			],
+			"__comment_file":"TODO: use binary file directly",
+			"file": null
+		}
+	},
+	
+	"XIP_FLASH_C": {
+		"source":"application_is/Debug/bin/application_is.axf",
+		"header":{
+			"next":null,
+			"__comment_type":"Support Type:PARTAB,BOOT,FWHS_S,FWHS_NS,FWLS,ISP,VOE,WLN,DTCM,ITCM,SRAM,ERAM,XIP,M0,CPFW",
+			"type":"XIP", 
+			"enc":false,
+			"__comment_pkey_idx":"assign by program, no need to configurate",
+			"serial": 0
+		},
+        "FST":{
+			"__comment_FST0": "enc_algorithm: cbc/ecb with cipher key",
+			"__comment_FST1": "validpat is used for section header validation",
+			"__comment_FST2": "hash_en/enc_en?",
+            "enc_algorithm":"cbc",
+			"hash_algorithm":"sha256",
+			"part_size":"4096",
+			
+			"__comment_validpat": "use auto or dedicated value",
+			"validpat":"0001020304050607",
+			"hash_en":true,
+			"enc_en":false,
+			"cipherkey":null,
+			"cipheriv":null
+        },
+		"list" : ["xip"],
+		"xip": {
+			"secthdr":{
+				"type": "XIP",
+				"xip_key": "A0D6DAE7E062CA94CBB294BF896B9F68",
+				"xip_iv": "94879487948794879487948794879487"
+			},
+			"__comment_option":"TODO: not ready",
+			"option": null,
+
+			"__comment_entry":"XIP text, RO_data",
+			
+			"sections":	[
+				".xip.code_c"
+			],
+			"__comment_file":"TODO: use binary file directly",
+			"file": null
+		}
+	},
+
+	"XIP_FLASH_P": {
+		"source":"application_is/Debug/bin/application_is.axf",
+		"header":{
+			"next":null,
+			"__comment_type":"Support Type:PARTAB,BOOT,FWHS_S,FWHS_NS,FWLS,ISP,VOE,WLN,DTCM,ITCM,SRAM,ERAM,XIP,M0,CPFW",
+			"type":"XIP", 
+			"enc":false,
+			"__comment_pkey_idx":"assign by program, no need to configurate",
+			"serial": 0
+		},
+        "FST":{
+			"__comment_FST0": "enc_algorithm: cbc/ecb with cipher key",
+			"__comment_FST1": "validpat is used for section header validation",
+			"__comment_FST2": "hash_en/enc_en?",
+            "enc_algorithm":"cbc",
+			"hash_algorithm":"sha256",
+			"part_size":"4096",
+			
+			"__comment_validpat": "use auto or dedicated value",
+			"validpat":"0001020304050607",
+			"hash_en":true,
+			"enc_en":false,
+			"cipherkey":null,
+			"cipheriv":null
+        },
+		"list" : ["xip"],
+		"xip": {
+			"secthdr":{
+				"type": "XIP",
+				"xip_key": "A0D6DAE7E062CA94CBB294BF896B9F68",
+				"xip_iv": "94879487948794879487948794879487"
+			},
+			"__comment_option":"TODO: not ready",
+			"option": null,
+
+			"__comment_entry":"XIP text, RO_data",
+			
+			"sections":	[
+				".xip.code_p"
+			],
+			"__comment_file":"TODO: use binary file directly",
+			"file": null
+		}
+	}	
+}

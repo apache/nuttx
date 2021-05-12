@@ -1,0 +1,44 @@
+{
+    "__comment__":"global setting",
+    "partab":{
+        "ptable":{
+            "ota_trap":{
+                "valid": 0,
+                "level": 0,
+                "port": 0,
+                "pin": 0
+            },
+            "mp_trap":{
+                "valid": 0,
+                "level": 0,
+                "port": 0,
+                "pin": 0
+            },
+            "key_exp_op": 1,
+            "user_len": 256,
+            "user_bin":"user.bin",
+            "items":["boot","fw1","fw2"]
+        },
+        "boot":{
+            "start_addr" : "0x4000",
+            "length" : "0x8000",
+            "type": "BOOT",
+            "dbg_skip": false,
+            "hash_key":"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+        },
+        "fw1":{
+            "start_addr" : "0xc000",
+            "length" : "0x80000",
+            "type": "FW1",
+            "dbg_skip": false,
+            "hash_key":"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E5F"
+        },
+        "fw2":{
+            "start_addr" : "0xE4000",
+            "length" : "0x80000",
+            "type": "FW2",
+            "dbg_skip": false,
+            "hash_key":"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E5F"
+        }
+    }
+}

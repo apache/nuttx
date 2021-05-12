@@ -1,0 +1,395 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_CUSTOM
+
+comment "AMEBA Configuration Options"
+
+choice
+	prompt "AMEBA Chip Selection"
+	default ARCH_CHIP_AMEBAZ
+
+config ARCH_CHIP_AMEBAZ
+	bool "AmebaZ"
+	select ARCH_CORTEXM33
+
+endchoice
+
+choice
+	prompt "AMEBAZ Chip Type Selection"
+	default ARCH_CHIP_AMEBAZ_C_CUT
+	depends on ARCH_CHIP_AMEBAZ
+
+config ARCH_CHIP_AMEBAZ_C_CUT
+	bool "AmebaZ_C_CUT"
+
+config ARCH_CHIP_AMEBAZ_D_CUT
+	bool "AmebaZ_D_CUT"
+
+endchoice
+
+config AMEBA_NR_IRQS
+	int "Interrupt Number"
+
+menuconfig AMEBA_UART
+	bool "AMEBA UART Chip support"
+	select ARCH_HAVE_SERIAL_TERMIOS
+	default n
+
+if AMEBA_UART
+
+config AMEBA_UART0
+	bool "AMEBA UART0"
+	default n
+
+if AMEBA_UART0
+
+config AMEBA_UART0_TX_PIN
+	int "AMEBA UART0 tx pin"
+
+config AMEBA_UART0_RX_PIN
+	int "AMEBA UART0 rx pin"
+
+config AMEBA_UART0_BAUD
+	int "AMEBA UART0 BAUD"
+	default 115200
+
+config AMEBA_UART0_PARITY
+	int "AMEBA UART0 parity"
+	default 0
+	range 0 2
+	---help---
+		AMEBA UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config AMEBA_UART0_BITS
+	int "AMEBA UART0 number of bits"
+	default 8
+	---help---
+		AMEBA UART0 number of bits.  Default: 8
+
+config AMEBA_UART0_2STOP
+	int "AMEBA UART0 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config AMEBA_UART0_RXBUFSIZE
+	int "AMEBA UART0 Rx buffer size"
+	default 256
+	---help---
+		AMEBA UART0 Rx buffer size.  Default: 256
+
+config AMEBA_UART0_TXBUFSIZE
+	int "AMEBA UART0 Tx buffer size"
+	default 256
+	---help---
+		AMEBA UART0 Tx buffer size.  Default: 256
+
+config AMEBA_UART0_IFLOWCONTROL
+	bool "AMEBA UART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable AMEBA UART0 RTS flow control
+
+config AMEBA_UART0_OFLOWCONTROL
+	bool "AMEBA UART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable AMEBA UART0 CTS flow control
+
+endif # AMEBA_UART0
+
+config AMEBA_UART1
+	bool "AMEBA UART1"
+	default n
+
+if AMEBA_UART1
+
+config AMEBA_UART1_TX_PIN
+	int "AMEBA UART1 tx pin"
+
+config AMEBA_UART1_RX_PIN
+	int "AMEBA UART1 rx pin"
+
+config AMEBA_UART1_BAUD
+	int "AMEBA UART1 BAUD"
+	default 115200
+
+config AMEBA_UART1_PARITY
+	int "AMEBA UART1 parity"
+	default 0
+	range 0 2
+	---help---
+		AMEBA UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config AMEBA_UART1_BITS
+	int "AMEBA UART1 number of bits"
+	default 8
+	---help---
+		AMEBA UART1 number of bits.  Default: 8
+
+config AMEBA_UART1_2STOP
+	int "AMEBA UART1 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config AMEBA_UART1_RXBUFSIZE
+	int "AMEBA UART1 Rx buffer size"
+	default 256
+	---help---
+		AMEBA UART1 Rx buffer size.  Default: 256
+
+config AMEBA_UART1_TXBUFSIZE
+	int "AMEBA UART1 Tx buffer size"
+	default 256
+	---help---
+		AMEBA UART1 Tx buffer size.  Default: 256
+
+config AMEBA_UART1_IFLOWCONTROL
+	bool "AMEBA UART1 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable AMEBA UART1 RTS flow control
+
+config AMEBA_UART1_OFLOWCONTROL
+	bool "AMEBA UART1 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable AMEBA UART1 CTS flow control
+
+endif # AMEBA_UART1
+
+config AMEBA_UART2
+	bool "AMEBA UART2"
+	default n
+
+if AMEBA_UART2
+
+config AMEBA_UART2_TX_PIN
+	int "AMEBA UART2 tx pin"
+
+config AMEBA_UART2_RX_PIN
+	int "AMEBA UART2 rx pin"
+
+config AMEBA_UART2_BAUD
+	int "AMEBA UART2 BAUD"
+	default 115200
+
+config AMEBA_UART2_PARITY
+	int "AMEBA UART2 parity"
+	default 0
+	range 0 2
+	---help---
+		AMEBA UART2 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config AMEBA_UART2_BITS
+	int "AMEBA UART2 number of bits"
+	default 8
+	---help---
+		AMEBA UART2 number of bits.  Default: 8
+
+config AMEBA_UART2_2STOP
+	int "AMEBA UART2 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config AMEBA_UART2_RXBUFSIZE
+	int "AMEBA UART2 Rx buffer size"
+	default 256
+	---help---
+		AMEBA UART2 Rx buffer size.  Default: 256
+
+config AMEBA_UART2_TXBUFSIZE
+	int "AMEBA UART2 Tx buffer size"
+	default 256
+	---help---
+		AMEBA UART2 Tx buffer size.  Default: 256
+
+config AMEBA_UART2_IFLOWCONTROL
+	bool "AMEBA UART2 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable AMEBA UART2 RTS flow control
+
+config AMEBA_UART2_OFLOWCONTROL
+	bool "AMEBA UART2 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable AMEBA UART2 CTS flow control
+
+endif # AMEBA_UART2
+
+config AMEBA_UART3
+	bool "AMEBA UART3"
+	default n
+
+if AMEBA_UART3
+
+config AMEBA_UART3_TX_PIN
+	int "AMEBA UART3 tx pin"
+
+config AMEBA_UART3_RX_PIN
+	int "AMEBA UART3 rx pin"
+
+config AMEBA_UART3_BAUD
+	int "AMEBA UART3 BAUD"
+	default 115200
+
+config AMEBA_UART3_PARITY
+	int "AMEBA UART3 parity"
+	default 0
+	range 0 2
+	---help---
+		AMEBA UART3 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config AMEBA_UART3_BITS
+	int "AMEBA UART3 number of bits"
+	default 8
+	---help---
+		AMEBA UART3 number of bits.  Default: 8
+
+config AMEBA_UART3_2STOP
+	int "AMEBA UART3 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config AMEBA_UART3_RXBUFSIZE
+	int "AMEBA UART3 Rx buffer size"
+	default 256
+	---help---
+		AMEBA UART3 Rx buffer size.  Default: 256
+
+config AMEBA_UART3_TXBUFSIZE
+	int "AMEBA UART3 Tx buffer size"
+	default 256
+	---help---
+		AMEBA UART3 Tx buffer size.  Default: 256
+
+config AMEBA_UART3_IFLOWCONTROL
+	bool "AMEBA UART3 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable AMEBA UART3 RTS flow control
+
+config AMEBA_UART3_OFLOWCONTROL
+	bool "AMEBA UART3 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable AMEBA UART3 CTS flow control
+
+endif # AMEBA_UART3
+
+choice
+	prompt "AMEBA Serial Console"
+	default AMEBA_NO_SERIAL_CONSOLE
+	depends on DEV_CONSOLE
+
+config AMEBA_UART0_SERIAL_CONSOLE
+	bool "AMEBA UART0 serial console"
+	depends on AMEBA_UART0
+	select SERIAL_CONSOLE
+
+config AMEBA_UART1_SERIAL_CONSOLE
+	bool "AMEBA UART1 serial console"
+	depends on AMEBA_UART1
+	select SERIAL_CONSOLE
+
+config AMEBA_UART2_SERIAL_CONSOLE
+	bool "AMEBA UART2 serial console"
+	depends on AMEBA_UART2
+	select SERIAL_CONSOLE
+
+config AMEBA_UART3_SERIAL_CONSOLE
+	bool "AMEBA UART3 serial console"
+	depends on AMEBA_UART3
+	select SERIAL_CONSOLE
+
+config AMEBA_NO_SERIAL_CONSOLE
+	bool "No AMEBA serial console"
+
+endchoice # AMEBA Serial Console
+
+config AMEBA_SUPRESS_CONFIG
+	bool "Suppress AMEBA configuration"
+	default n
+
+config AMEBA_SUPRESS_INITIAL_CONFIG
+	bool "Suppress initial AMEBA configuration"
+	depends on !AMEBA_SUPRESS_CONFIG
+	default n
+	---help---
+		This option is useful, for example, if you are using a bootloader
+		that configures the AMEBA_UART.  In that case, you may want to
+		just leave the existing console configuration in place.  Default: n
+
+config SERIAL_UART_ARCH_MMIO
+	bool "Platform access register through the memory mapping"
+	default n
+
+config SERIAL_UART_ARCH_IOCTL
+	bool "Platform has own custom IOCTL"
+	default n
+
+config AMEBA_REGINCR
+	int "Address increment between AMEBA registers"
+	default 1
+	---help---
+		The address increment between AMEBA registers.  Options are 1, 2, or 4.
+		Default: 1
+
+config AMEBA_REGWIDTH
+	int "Bit width of AMEBA registers"
+	default 8
+	---help---
+		The bit width of registers.  Options are 8, 16, or 32. Default: 8
+
+config AMEBA_ADDRWIDTH
+	int "Address width of AMEBA registers"
+	default 8
+	---help---
+		The bit width of registers.  Options are 8, 16, or 32. Default: 8
+
+config AMEBA_HCI_DEV_NAME
+	string "Device Name of UART Device for Bluetooth"
+	default "/dev/ttyS2"
+	---help---
+		This option specifies the name of UART device to be used
+		for Bluetooth.
+
+config AMEBA_HCI_PROXY_DEV_NAME
+	string "Device Name of UART Device for Bluetooth"
+	default "/dev/ttyBT"
+	---help---
+		This option specifies the name of UART device to be used
+		for Bluetooth.
+
+endif # AMEBA_UART
+
+config IEEE80211_REALTEK_AMEBAZ
+	bool "Realtek amebaZ chip support"
+	default n
+
+if IEEE80211_REALTEK_AMEBAZ
+
+config IEEE80211_REALTEK_AMEBAZ_RECV_STACKSIZE
+  int "Realtek amebaZ recv stack size"
+  default 4096
+  ---help---
+    Default recv stack size
+
+endif
+
+endif # ARCH_CHIP_CUSTOM

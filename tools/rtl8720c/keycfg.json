@@ -1,0 +1,11 @@
+{
+
+    "__comment_0":"configuration for private key, use auto to generate random key",
+    "__comment_1":"private key maybe different from your desired input, program will modify first byte and last byte of key",
+    "__comment_2":"to get actual private key, please open key.json after key generated.",
+    "__comment_3":"hash private key in key.json will be encrypted",
+    "privkey_enc":"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E5F",
+    "privkey_enc1":"auto",
+    "privkey_hash":"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E5F",
+    "privkey_hash1":"auto"
+}
