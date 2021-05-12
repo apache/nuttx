@@ -67,6 +67,35 @@ Note that this step is required only one time.  Once the bootloader and partitio
 table are flashed, we don't need to flash them again.  So subsequent builds
 would just require: ``make download ESPTOOL_PORT=/dev/ttyUSBXX``
 
+Debugging with OpenOCD
+======================
+
+Download and build OpenOCD from Espressif, that can be found in 
+https://github.com/espressif/openocd-esp32  
+
+If you have an ESP32-C3 ECO3, no external JTAG is required to debug, the ESP32-C3
+integrates a USB-to-JTAG adapter.  
+
+OpenOCD can then be used::
+
+   openocd -c 'set ESP_RTOS none' -f board/esp32c3_builtin.cfg
+
+For versions prior to ESP32-C3 ECO3, an external JTAG adapter is needed.
+It can be connected as follows::
+
+  TMS -> GPIO4
+  TDI -> GPIO5
+  TCK -> GPIO6
+  TDO -> GPIO7
+
+Furthermore, an efuse needs to be burnt to be able to debug::
+  
+  espefuse.py -p <port> burn_efuse DIS_USB_JTAG
+
+OpenOCD can then be used::
+
+  openocd  -c 'set ESP_RTOS none' -f board/esp32c3-ftdi.cfg
+
 Peripheral Support
 ==================
 
