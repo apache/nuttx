@@ -241,27 +241,30 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
       goto bad;
     }
 
-  /* Some servers require that the client port be a reserved port
-   * number. We always allocate a reserved port, as this prevents
-   * filehandle disclosure through UDP port capture.
-   */
-
-  do
+  if (rpc->rc_sotype == SOCK_DGRAM)
     {
-      *lport = htons(--port);
-      error = psock_bind(&rpc->rc_so, (FAR struct sockaddr *)&laddr,
-                         addrlen);
-      if (error < 0)
+      /* Some servers require that the client port be a reserved port
+       * number. We always allocate a reserved port, as this prevents
+       * filehandle disclosure through UDP port capture.
+       */
+
+      do
+        {
+          *lport = htons(--port);
+          error = psock_bind(&rpc->rc_so, (FAR struct sockaddr *)&laddr,
+                             addrlen);
+          if (error < 0)
+            {
+              ferr("ERROR: psock_bind failed: %d\n", error);
+            }
+        }
+      while (error == -EADDRINUSE && port >= 512);
+
+      if (error)
         {
           ferr("ERROR: psock_bind failed: %d\n", error);
+          goto bad;
         }
-    }
-  while (error == -EADDRINUSE && port >= 512);
-
-  if (error)
-    {
-      ferr("ERROR: psock_bind failed: %d\n", error);
-      goto bad;
     }
 
   /* Protocols that do not require connections could be optionally left
