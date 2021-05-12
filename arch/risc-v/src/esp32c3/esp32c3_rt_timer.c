@@ -253,6 +253,7 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
 
 static void delete_rt_timer(FAR struct rt_timer_s *timer)
 {
+  int ret;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -272,6 +273,14 @@ static void delete_rt_timer(FAR struct rt_timer_s *timer)
 
   list_add_after(&s_toutlist, &timer->list);
   timer->state = RT_TIMER_DELETE;
+
+  /* Wake up thread to process deleted timers */
+
+  ret = nxsem_post(&s_toutsem);
+  if (ret < 0)
+    {
+      tmrerr("ERROR: Failed to post sem ret=%d\n", ret);
+    }
 
 exit:
   leave_critical_section(flags);
@@ -387,19 +396,17 @@ static int rt_timer_thread(int argc, FAR char *argv[])
 
 static int rt_timer_isr(int irq, void *context, void *arg)
 {
+  int ret;
   irqstate_t flags;
   struct rt_timer_s *timer;
   uint64_t alarm;
   uint64_t counter;
+  bool wake = false;
   struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
 
   /* Clear interrupt register status */
 
   ESP32C3_TIM_ACKINT(tim);
-
-  /* Wake up thread to process timeout timers */
-
-  nxsem_post(&s_toutsem);
 
   flags = enter_critical_section();
 
@@ -428,6 +435,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
           list_delete(&timer->list);
           timer->state = RT_TIMER_TIMEOUT;
           list_add_after(&s_toutlist, &timer->list);
+          wake = true;
 
           /* Check if thers is timer running */
 
@@ -439,8 +447,22 @@ static int rt_timer_isr(int irq, void *context, void *arg)
               alarm = timer->alarm;
 
               ESP32C3_TIM_SETALRVL(tim, alarm);
-              ESP32C3_TIM_SETALRM(tim, true);
             }
+        }
+
+      /* If there is timer in list, alarm should be enable */
+
+      ESP32C3_TIM_SETALRM(tim, true);
+    }
+
+  if (wake)
+    {
+      /* Wake up thread to process timeout timers */
+
+      ret = nxsem_post(&s_toutsem);
+      if (ret < 0)
+        {
+          tmrerr("ERROR: Failed to post sem ret=%d\n", ret);
         }
     }
 
