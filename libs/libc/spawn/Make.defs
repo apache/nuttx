@@ -34,9 +34,6 @@ CSRCS += lib_psa_setschedpolicy.c lib_psa_getsigmask.c lib_psa_setsigmask.c
 ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += lib_psa_getstackaddr.c lib_psa_setstackaddr.c
 CSRCS += lib_psa_getstacksize.c lib_psa_setstacksize.c
-ifeq ($(CONFIG_LIB_SYSCALL),y)
-CSRCS += lib_task_spawn.c
-endif
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
