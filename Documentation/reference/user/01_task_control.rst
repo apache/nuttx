@@ -789,18 +789,13 @@ Functions
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
 
-.. c:function:: int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry, \
+.. c:function:: int task_spawn(FAR const char *name, main_t entry, \
       FAR const posix_spawn_file_actions_t *file_actions, \
       FAR const posix_spawnattr_t *attr, \
       FAR char * const argv[], FAR char * const envp[])
 
   The ``task_spawn()`` function will create a new, child
   task, where the entry point to the task is an address in memory.
-
-  :param pid: Upon successful completion, ``task_spawn()`` will return the
-     task ID of the child task to the parent task, in the variable pointed
-     to by a non-NULL ``pid`` argument. If the ``pid`` argument is a null
-     pointer, the process ID of the child is not returned to the caller.
 
   :param name: The name to assign to the child task.
 
@@ -844,9 +839,9 @@ Functions
   :param envp: The ``envp[]`` argument is not used by NuttX and may be
      ``NULL``.
 
-  :return: ``task_spawn()`` will return zero on success.
-    Otherwise, an error number will be returned as the function return value
-    to indicate the error:
+  :return: ``task_spawn()`` will return process ID of new task on success.
+    Otherwise, a negative number will be returned as the function return
+    value to indicate the error:
 
   **POSIX Compatibility:** This is a non-standard interface inspired by
   ``posix_spawn()``.
