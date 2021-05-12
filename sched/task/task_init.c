@@ -64,7 +64,6 @@
  *   tcb        - Address of the new task's TCB
  *   name       - Name of the new task (not used)
  *   priority   - Priority of the new task
- *   stack      - Start of the pre-allocated stack
  *   stack_size - Size (in bytes) of the stack allocated
  *   entry      - Application start point of the new task
  *   argv       - A pointer to an array of input parameters.  The array
@@ -81,8 +80,7 @@
  ****************************************************************************/
 
 int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
-                FAR void *stack, uint32_t stack_size,
-                main_t entry, FAR char * const argv[])
+                uint32_t stack_size, main_t entry, FAR char * const argv[])
 {
   uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
   FAR struct task_info_s *info;
@@ -110,21 +108,11 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
       goto errout_with_group;
     }
 
-  if (stack)
-    {
-      /* Use pre-allocated stack */
+  /* Allocate the stack for the TCB */
 
-      ret = up_use_stack(&tcb->cmn, stack, stack_size);
-    }
-  else
-    {
-      /* Allocate the stack for the TCB */
-
-      ret = up_create_stack(&tcb->cmn,
-                            sizeof(struct task_info_s) + stack_size,
-                            ttype);
-    }
-
+  ret = up_create_stack(&tcb->cmn,
+                        sizeof(struct task_info_s) + stack_size,
+                        ttype);
   if (ret < OK)
     {
       goto errout_with_group;
@@ -169,29 +157,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
 
 errout_with_group:
-
-  if (!stack && tcb->cmn.stack_alloc_ptr)
-    {
-#ifdef CONFIG_BUILD_KERNEL
-      /* If the exiting thread is not a kernel thread, then it has an
-       * address environment.  Don't bother to release the stack memory
-       * in this case... There is no point since the memory lies in the
-       * user memory region that will be destroyed anyway (and the
-       * address environment has probably already been destroyed at
-       * this point.. so we would crash if we even tried it).  But if
-       * this is a privileged group, when we still have to release the
-       * memory using the kernel allocator.
-       */
-
-      if (ttype == TCB_FLAG_TTYPE_KERNEL)
-#endif
-        {
-          up_release_stack(&tcb->cmn, ttype);
-        }
-    }
-
   group_leave(&tcb->cmn);
-
   return ret;
 }
 
