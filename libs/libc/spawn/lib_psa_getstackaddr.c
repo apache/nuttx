@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/spawn/lib_psa_getstacksize.c
+ * libs/libc/spawn/lib_psa_getstackaddr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,16 +35,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_spawnattr_getstacksize
+ * Name: task_spawnattr_getstackaddr
  *
  * Description:
- *   The task_spawnattr_getstacksize() function will obtain the value of
- *   the spawn-stacksize attribute from the attributes object referenced
+ *   The task_spawnattr_getstackaddr() function will obtain the value of
+ *   the spawn-stackaddr attribute from the attributes object referenced
  *   by attr.
  *
  * Input Parameters:
  *   attr - The address spawn attributes to be queried.
- *   stacksize - The location to return the spawn-stacksize value.
+ *   stackaddr - The location to return the spawn-stackaddr value.
  *
  * Returned Value:
  *   On success, these functions return 0; on failure they return an error
@@ -52,11 +52,11 @@
  *
  ****************************************************************************/
 
-int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
-                                FAR size_t *stacksize)
+int task_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
+                                FAR void **stackaddr)
 {
-  DEBUGASSERT(attr && stacksize);
-  *stacksize = attr->stacksize;
+  DEBUGASSERT(attr && stackaddr);
+  *stackaddr = attr->stackaddr;
   return OK;
 }
 
