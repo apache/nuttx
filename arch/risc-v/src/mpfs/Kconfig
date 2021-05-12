@@ -93,6 +93,14 @@ config MPFS_UART4
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select MPFS_HAVE_UART4
 
+config MPFS_I2C0
+        bool "I2C 0"
+        default n
+
+config MPFS_I2C1
+        bool "I2C 1"
+        default n
+
 endmenu
 
 menu "MPFS Others"

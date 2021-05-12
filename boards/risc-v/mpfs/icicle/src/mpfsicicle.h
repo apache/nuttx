@@ -43,5 +43,6 @@
 
 int mpfs_bringup(void);
 int mpfs_board_spi_init(void);
+int mpfs_board_i2c_init(void);
 
 #endif /* __BOARDS_RISCV_ICICLE_MPFS_SRC_MPFSICICLE_H */
