@@ -78,7 +78,7 @@ integrates a USB-to-JTAG adapter.
 
 OpenOCD can then be used::
 
-   openocd -c 'set ESP_RTOS none' -f board/esp32c3_builtin.cfg
+   openocd -c 'set ESP_RTOS none' -f board/esp32c3-builtin.cfg
 
 For versions prior to ESP32-C3 ECO3, an external JTAG adapter is needed.
 It can be connected as follows::
