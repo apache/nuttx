@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_bringup.c
+ * boards/risc-v/mpfs/icicle/src/mpfs_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,60 +24,78 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#include <nuttx/board.h>
-#include <nuttx/drivers/ramdisk.h>
-
-#include "mpfsicicle.h"
-#include "mpfs.h"
+#include "mpfs_i2c.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpfs_bringup
+ * Name: board_i2c_init
+ *
+ * Description:
+ *   Configure the I2C driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-int mpfs_bringup(void)
+int mpfs_board_i2c_init(void)
 {
   int ret = OK;
 
-#if defined(CONFIG_I2C_DRIVER)
-  /* Configure I2C peripheral interfaces */
-
-  ret = mpfs_board_i2c_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
-    }
+#if defined(CONFIG_MPFS_I2C0) || defined(CONFIG_MPFS_I2C1)
+#ifdef CONFIG_I2C_DRIVER
+  int bus = 0;
+#endif
+  FAR struct i2c_master_s *i2c;
 #endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+#ifdef CONFIG_MPFS_I2C0
+  i2c = mpfs_i2cbus_initialize(0);
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Failed to init I2C0 interface\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, bus++);
   if (ret < 0)
     {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+      i2cerr("ERROR: Failed to register I2C0 driver: %d\n", ret);
+      mpfs_i2cbus_uninitialize(i2c);
+      return ret;
     }
 #endif
+#endif
 
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  /* Configure SPI peripheral interfaces */
+#ifdef CONFIG_MPFS_I2C1
+  i2c = mpfs_i2cbus_initialize(1);
 
-  ret = mpfs_board_spi_init();
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Failed to init I2C1 interface\n");
+      return -ENODEV;
+    }
 
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, bus);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
+      i2cerr("ERROR: Failed to register I2C1 driver: %d\n", ret);
+      mpfs_i2cbus_uninitialize(i2c);
+      return ret;
     }
+#endif
 #endif
 
   return ret;

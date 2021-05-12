@@ -58,7 +58,7 @@ Peripheral     Support  NOTES
 GPIO           Yes      
 MMUART         Yes      Uart mode only
 SPI            Yes      
-I2C            No       
+I2C            Yes      
 Timers         No       
 Watchdog       No       
 RTC            No       

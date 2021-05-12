@@ -26,6 +26,10 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += mpfs_appinit.c
 endif
 
+ifeq ($(CONFIG_I2C),y)
+CSRCS += mpfs_i2c.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += mpfs_autoleds.c
 endif
