@@ -18,7 +18,7 @@ mount ESP32-C3 DevKit on a breadboard.
 
           ESP32-C3-DevKitC-02
 
-     - .. figure:: ESP32-C3-DevKitM-v1.0.png
+     - .. figure:: ESP32-C3-DevKitM-1-v1.0.png
           :align: center
 
           ESP32-C3-DevKitM-1
