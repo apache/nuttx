@@ -183,10 +183,10 @@ config TTY_FORCE_PANIC
 
 config TTY_FORCE_PANIC_CHAR
 	hex "TTY force crash characters"
-	default 0x0
+	default 0x1F
 	depends on TTY_FORCE_PANIC
 	---help---
-		Use Ctrl-@  NULL(0x0) inputs to determine whether panic system
+		Use Ctrl-? 0x1F inputs to determine whether panic system
 
 config TTY_SIGINT
 	bool "Support SIGINT"
