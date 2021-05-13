@@ -199,8 +199,6 @@ config ARCH_BOARD_ESP32_DEVKITC
 	bool "Espressif ESP32 DevkitC board V4"
 	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
@@ -212,8 +210,6 @@ config ARCH_BOARD_ESP32_DEVKITC
 config ARCH_BOARD_ESP32_ETHERNETKIT
 	bool "Espressif ESP32 Ethernet Kit"
 	depends on ARCH_CHIP_ESP32WROVER
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
   		Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
@@ -224,8 +220,6 @@ config ARCH_BOARD_ESP32_WROVERKIT
 	bool "Espressif ESP-WROVER-KIT"
 	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		ESP-WROVER-KIT is an ESP32-based development board produced by Espressif.
 		ESP-WROVER-KIT features the following integrated components:
@@ -400,16 +394,6 @@ config ARCH_BOARD_IMXRT1060_EVK
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1060-EVK.  This board features the MIMXRT1062DVL6A MCU.
-
-config ARCH_BOARD_IMXRT1064_EVK
-	bool "NXP i.MX RT 1064 EVK"
-	depends on ARCH_CHIP_MIMXRT1064DVL6A
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		This is the board configuration for the port of NuttX to the NXP i.MXRT
-		evaluation kit, MIMXRT1064-EVK.  This board features the MIMXRT1064DVL6A MCU.
 
 config ARCH_BOARD_LC823450_XGEVK
 	bool "ON Semiconductor LC823450-XGEVK development board"
@@ -1255,14 +1239,6 @@ config ARCH_BOARD_NUCLEO_H743ZI
 	---help---
 		STMicro Nucleo H743ZI board based on the STMicro STM32H743ZI MCU.
 
-config ARCH_BOARD_NUCLEO_H743ZI2
-	bool "STM32H743 Nucleo H743ZI2"
-	depends on ARCH_CHIP_STM32H743ZI
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	---help---
-		STMicro Nucleo H743ZI2 board based on the STMicro STM32H743ZI MCU.
-
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
 	depends on ARCH_CHIP_STM32L152RE
@@ -1450,6 +1426,14 @@ config ARCH_BOARD_GIANT_BOARD
 	---help---
 	    This options selects support for NuttX on the Groboards Giant Board,
 	    featuring the SAMA5D27C-D1G SIP with 128MB DDR2 RAM.
+		
+config ARCH_BOARD_JTI_TOUCAN2
+	bool "JT Innovations Ltd. Toucan2 Board (SAMA5D27C-D5M)"
+	depends on ARCH_CHIP_ATSAMA5D27
+    select SAMA5D27_JTI_TOUCAN2_492MHZ
+	---help---
+	    This options selects support for NuttX on the JT Innovations Ltd. Toucan2 Board,
+	    using the SAMA5D27C-D5M SiP with 64MB DDR2 RAM
 
 config ARCH_BOARD_SAMA5D3X_EK
 	bool "Atmel SAMA5D3x-EK development board"
@@ -2291,7 +2275,6 @@ config ARCH_BOARD
 	default "imxrt1020-evk"            if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
 	default "imxrt1060-evk"            if ARCH_BOARD_IMXRT1060_EVK
-	default "imxrt1064-evk"            if ARCH_BOARD_IMXRT1064_EVK
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
 	default "launchxl-cc1310"          if ARCH_BOARD_LAUNCHXL_CC1310
 	default "launchxl-cc1312r1"        if ARCH_BOARD_LAUNCHXL_CC1312R1
@@ -2349,7 +2332,6 @@ config ARCH_BOARD
 	default "nucleo-g070rb"            if ARCH_BOARD_NUCLEO_G070RB
 	default "nucleo-g071rb"            if ARCH_BOARD_NUCLEO_G071RB
 	default "nucleo-h743zi"            if ARCH_BOARD_NUCLEO_H743ZI
-	default "nucleo-h743zi2"           if ARCH_BOARD_NUCLEO_H743ZI2
 	default "nucleo-l073rz"            if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"            if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"            if ARCH_BOARD_NUCLEO_L432KC
@@ -2395,6 +2377,7 @@ config ARCH_BOARD
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
+	default "jti-toucan2"              if ARCH_BOARD_JTI_TOUCAN2
 	default "sama5d3x-ek"              if ARCH_BOARD_SAMA5D3X_EK
 	default "sama5d3-xplained"         if ARCH_BOARD_SAMA5D3_XPLAINED
 	default "sama5d4-ek"               if ARCH_BOARD_SAMA5D4_EK
@@ -2569,9 +2552,6 @@ endif
 if ARCH_BOARD_IMXRT1060_EVK
 source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
 endif
-if ARCH_BOARD_IMXRT1064_EVK
-source "boards/arm/imxrt/imxrt1064-evk/Kconfig"
-endif
 if ARCH_BOARD_TEENSY_4X
 source "boards/arm/imxrt/teensy-4.x/Kconfig"
 endif
@@ -2740,6 +2720,9 @@ endif
 if ARCH_BOARD_GIANT_BOARD
 source "boards/arm/sama5/giant-board/Kconfig"
 endif
+if ARCH_JTI_TOUCAN2_BOARD
+source "boards/arm/sama5/jti-toucan2/Kconfig"
+endif
 if ARCH_BOARD_SAMA5D3X_EK
 source "boards/arm/sama5/sama5d3x-ek/Kconfig"
 endif
@@ -2821,9 +2804,6 @@ endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_H743ZI2
-source "boards/arm/stm32h7/nucleo-h743zi2/Kconfig"
-endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
 endif
@@ -2899,7 +2879,7 @@ endif
 if ARCH_BOARD_NUCLEO_F412ZG
 source "boards/arm/stm32/nucleo-f412zg/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_F446RE
+if ARCH_BOARD_NUCLEO_F44RE
 source "boards/arm/stm32/nucleo-f446re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
@@ -3130,9 +3110,6 @@ endif
 if ARCH_BOARD_RX65N_GRROSE
 source "boards/renesas/rx65n/rx65n-grrose/Kconfig"
 endif
-if ARCH_CHIP_ESP32 && !ARCH_BOARD_CUSTOM
-source "boards/xtensa/esp32/common/Kconfig"
-endif
 if ARCH_BOARD_ESP32_DEVKITC
 source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
 endif
@@ -3173,12 +3150,6 @@ if ARCH_BOARD_BL602EVB
 source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
 
-comment "Board-Common Options"
-
-if ARCH_CHIP_STM32
-source boards/arm/stm32/common/Kconfig
-endif
-
 config BOARD_CRASHDUMP
 	bool "Enable Board level logging of crash dumps"
 	default n
@@ -3215,6 +3186,7 @@ config BOARD_INITRNGSEED
 		board_init_rndseed() upon initialization. This function
 		can then provide early entropy seed to the pool through
 		entropy injection APIs provided at 'nuttx/random.h'.
+#endif
 
 config LIB_BOARDCTL
 	bool "Enable boardctl() interface"
