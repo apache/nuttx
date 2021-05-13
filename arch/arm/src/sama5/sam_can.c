@@ -235,7 +235,7 @@ static inline void can_rxinterrupt(FAR struct can_dev_s *dev, int mbndx,
                                    uint32_t msr);
 static inline void can_txinterrupt(FAR struct can_dev_s *dev, int mbndx);
 static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx);
-static void can_interrupt(int irq, void *context, FAR void *arg);
+static int can_interrupt(int irq, void *context, FAR void *arg);
 
 /* Hardware initialization */
 
@@ -802,7 +802,9 @@ static void can_reset(FAR struct can_dev_s *dev)
 {
   FAR struct sam_can_s *priv;
   FAR const struct sam_config_s *config;
+#if 0
   int ret;
+#endif  
   int i;
 
   DEBUGASSERT(dev);
@@ -816,7 +818,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake_noncancelable();
+  can_semtake_noncancelable(priv);
 
   /* Disable all interrupts */
 
@@ -1121,6 +1123,7 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   FAR uint8_t *ptr;
   uint32_t regval;
   int mbndx;
+  int ret;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -1251,6 +1254,7 @@ static bool can_txready(FAR struct can_dev_s *dev)
 {
   FAR struct sam_can_s *priv = dev->cd_priv;
   bool txready;
+  int ret;
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -1475,7 +1479,7 @@ static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx)
             canerr("ERROR: CAN%d MB%d: Unsupported or "
                     "invalid mailbox type\n",
                    priv->config->port, mbndx);
-            canerr("       MSR: %08x MMR: %08x\n", msr, mmr);
+            canerr("       MSR: %08lx MMR: %08lx\n", msr, mmr);
             break;
         }
     }
@@ -1495,15 +1499,18 @@ static inline void can_mbinterrupt(FAR struct can_dev_s *dev, int mbndx)
  *
  ****************************************************************************/
 
-static void can_interrupt(int irq, void *context, FAR void *arg)
+static int can_interrupt(int irq, void *context, FAR void *arg)
 {
   FAR struct can_dev_s *dev = (FAR struct can_dev_s *)arg;
+#if 0
   FAR struct sam_can_s *priv;
+#endif
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
 
   DEBUGASSERT(dev != NULL);
+
   FAR struct sam_can_s *priv = dev->cd_priv;
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
@@ -1570,9 +1577,10 @@ static void can_interrupt(int irq, void *context, FAR void *arg)
 
   if ((pending & ~CAN_INT_MBALL) != 0)
     {
-      canerr("ERROR: CAN%d system interrupt, SR=%08x IMR=%08x\n",
+      canerr("ERROR: CAN%d system interrupt, SR=%08lx IMR=%08lx\n",
              priv->config->port, sr, imr);
     }
+  return OK;
 }
 
 /****************************************************************************
@@ -1702,7 +1710,7 @@ static int can_bittiming(struct sam_can_s *priv)
     {
       /* The BRP field must be within the range 1 - 0x7f */
 
-      canerr("CAN%d ERROR: baud %d too high\n", config->port, config->baud);
+      canerr("CAN%d ERROR: baud %ld too high\n", config->port, config->baud);
       return -EINVAL;
     }
 
@@ -1750,7 +1758,7 @@ static int can_bittiming(struct sam_can_s *priv)
 
   if ((propag + phase1 + phase2) != (uint32_t)(tq - 4))
     {
-      canerr("CAN%d ERROR: Could not realize baud %d\n",
+      canerr("CAN%d ERROR: Could not realize baud %ld\n",
              config->port, config->baud);
       return -EINVAL;
     }
