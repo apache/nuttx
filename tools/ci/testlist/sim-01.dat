@@ -1,0 +1,23 @@
+/sim/*/*/*/[a-n]*
+
+# macOS doesn't have ALSA
+-Darwin,sim:alsa
+
+-Darwin,sim:cxxtest
+-Darwin,sim:libcxxtest
+
+# Do not build Linux configs
+-Darwin,sim:linuxi2c
+
+# macOS doesn't support 32bit(CONFIG_SIM_M32=y) anymore
+-Darwin,sim:elf
+-Darwin,sim:foc
+-Darwin,sim:loadable
+-Darwin,sim:module32
+
+# macOS doesn't have X11
+-Darwin,sim:lvgl
+-Darwin,sim:nsh2
+-Darwin,sim:nx11
+-Darwin,sim:nxlines
+-Darwin,sim:nxwm

@@ -1,0 +1,10 @@
+/sim/*/*/*/[o-z]*
+
+# macOS doesn't support 32bit anymore(CONFIG_SIM_M32=y)
+-Darwin,sim:posix_spawn
+-Darwin,sim:rpproxy
+-Darwin,sim:rpserver
+-Darwin,sim:sotest32
+
+# macOS doesn't have X11
+-Darwin,sim:touchscreen
