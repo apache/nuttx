@@ -1,0 +1,37 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_JTI_TOUCAN2
+
+choice
+	prompt "CPU Frequency"
+	default SAMA5D27_JTI_TOUCAN2_492MHZ
+
+config SAMA5D27_JTI_TOUCAN2_492MHZ
+	bool "492 MHz"
+  
+endchoice # CPU Frequency
+
+ 
+config SAMA5D27_JTI_TOUCAN2_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D27_JTI_TOUCAN2_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
+
+
+config SAMA5_SYSTEMRESET
+	bool "Enable system reset - this will enable the nsh reboot command"
+	select BOARDCTL_RESET
+	
+
+
+
+endif # ARCH_BOARD_JTI_TOUCAN2
