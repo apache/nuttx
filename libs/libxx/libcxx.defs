@@ -18,7 +18,7 @@
 #
 ###########################################################################
 
-VERSION=11.0.0
+VERSION=12.0.0
 
 libcxx-$(VERSION).src.tar.xz:
 	$(Q) curl -O -L https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
@@ -26,11 +26,6 @@ libcxx-$(VERSION).src.tar.xz:
 libcxx: libcxx-$(VERSION).src.tar.xz
 	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
 	$(Q) mv libcxx-$(VERSION).src libcxx
-	$(Q) patch -p0 < 0001-libc-Fix-a-few-warnings.patch
-	$(Q) patch -p0 < 0001-libc-NFC-Fix-several-GCC-warnings-in-the-test-suite.patch
-	$(Q) patch -p0 < 0001-libc-Fix-tests-failing-with-Clang-after-removing-GCC.patch
-	$(Q) patch -p0 < 0001-libcxx-Check-_LIBCPP_PROVIDES_DEFAULT_RUNE_TABLE-fir.patch
-	$(Q) patch -p0 < 0001-libcxx-Port-to-NuttX-https-nuttx.apache.org-RTOS.patch
 	$(Q) touch $@
 
 $(TOPDIR)/include/libcxx: libcxx
