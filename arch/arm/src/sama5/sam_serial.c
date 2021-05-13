@@ -223,6 +223,7 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port  /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
+#ifdef SAMA5_HAVE_USART
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS2_DEV           g_usart0port /* USART0 is ttyS2 */
 #  define USART0_ASSIGNED     1
@@ -239,6 +240,7 @@
 #  define TTYS2_DEV           g_usart4port /* USART4 is ttyS2 */
 #  define USART4_ASSIGNED     1
 #endif
+#endif
 
 /* Pick ttyS3.  This could be one of UART2-4 or USART0-4. It can't be
  * UART0-1; those have already been assigned to ttyS0, 1, or 2.  One of
@@ -254,6 +256,7 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart1port  /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
+#ifdef SAMA5_HAVE_USART
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS3_DEV           g_usart0port /* USART0 is ttyS3 */
 #  define USART0_ASSIGNED     1
@@ -270,6 +273,7 @@
 #  define TTYS3_DEV           g_usart4port /* USART4 is ttyS3 */
 #  define USART4_ASSIGNED     1
 #endif
+#endif
 
 /* Pick ttyS4.  This could be one of UART3-4 or USART0-4. It can't be
  * UART0-2; those have already been assigned to ttyS0-3.  One of
@@ -282,6 +286,7 @@
 #elif defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port  /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
+#ifdef SAMA5_HAVE_USART
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS4_DEV           g_usart0port /* USART0 is ttyS4 */
 #  define USART0_ASSIGNED     1
@@ -298,7 +303,7 @@
 #  define TTYS4_DEV           g_usart4port /* USART4 is ttyS4 */
 #  define USART4_ASSIGNED     1
 #endif
-
+#endif
 /* Pick ttyS5.  This could be one of UART4 or USART0-4. It can't be
  * UART0-3; those have already been assigned to ttyS0-4.  One of
  * UART4 or USART0-4 could also be the console.
@@ -307,6 +312,7 @@
 #if defined(CONFIG_SAMA5_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port  /* UART4 is ttyS5 */
 #  define UART1_ASSIGNED      1
+#ifdef SAMA5_HAVE_USART
 #elif defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS5_DEV           g_usart0port /* USART0 is ttyS5 */
 #  define USART0_ASSIGNED     1
@@ -323,6 +329,7 @@
 #  define TTYS5_DEV           g_usart4port /* USART4 is ttyS5 */
 #  define USART4_ASSIGNED     1
 #endif
+#endif
 
 /* Pick ttyS6.  This could be one of USART0-4. It can't be UART0-4;
  * those have already been assigned to ttyS0-5.  One of USART0-4
@@ -331,6 +338,7 @@
 
 #if defined(CONFIG_USART0_SERIALDRIVER) && !defined(USART0_ASSIGNED)
 #  define TTYS6_DEV           g_usart0port /* USART0 is ttyS6 */
+#ifdef SAMA5_HAVE_USART
 #  define USART0_ASSIGNED     1
 #elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS6_DEV           g_usart1port /* USART1 is ttyS6 */
@@ -345,12 +353,13 @@
 #  define TTYS6_DEV           g_usart4port /* USART4 is ttyS6 */
 #  define USART4_ASSIGNED     1
 #endif
+#endif
 
 /* Pick ttyS7.  This could be one of USART1-4. It can't be UART0-4
  * or USART0; those have already been assigned to ttyS0-5.  One of
  * USART1-4 could also be the console.
  */
-
+#ifdef SAMA5_HAVE_USART
 #if defined(CONFIG_USART1_SERIALDRIVER) && !defined(USART1_ASSIGNED)
 #  define TTYS7_DEV           g_usart1port /* USART1 is ttyS7 */
 #  define USART1_ASSIGNED      1
@@ -364,12 +373,13 @@
 #  define TTYS7_DEV           g_usart4port /* USART4 is ttyS7 */
 #  define USART4_ASSIGNED      1
 #endif
+#endif
 
 /* Pick ttyS8.  This could be one of USART2-4. It can't be UART0-4
  * or USART0-1; those have already been assigned to ttyS0-5.  One of
  * USART2-4 could also be the console.
  */
-
+#ifdef SAMA5_HAVE_USART
 #if defined(CONFIG_USART2_SERIALDRIVER) && !defined(USART2_ASSIGNED)
 #  define TTYS8_DEV           g_usart2port /* USART2 is ttyS8 */
 #  define USART2_ASSIGNED      1
@@ -380,18 +390,20 @@
 #  define TTYS8_DEV           g_usart4port /* USART4 is ttyS8 */
 #  define USART4_ASSIGNED      1
 #endif
+#endif
 
 /* Pick ttyS9.  This could be one of USART3-4. It can't be UART0-4
  * or USART0-2; those have already been assigned to ttyS0-8.  One of
  * USART3-4 could also be the console.
  */
-
+#ifdef SAMA5_HAVE_USART
 #if defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
 #  define TTYS9_DEV           g_usart3port /* USART3 is ttyS9 */
 #  define USART3_ASSIGNED      1
 #elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
 #  define TTYS9_DEV           g_usart4port /* USART4 is ttyS9 */
 #  define USART4_ASSIGNED      1
+#endif
 #endif
 
 /* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
@@ -459,7 +471,7 @@ static const struct uart_ops_s g_uart_ops =
 };
 
 /* I/O buffers */
-
+#ifdef SAMA5_HAVE_UART
 #ifdef CONFIG_SAMA5_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
@@ -480,6 +492,8 @@ static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
+#endif
+#ifdef SAMA5_HAVE_USART
 #ifdef CONFIG_USART0_SERIALDRIVER
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
@@ -499,6 +513,7 @@ static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #ifdef CONFIG_USART4_SERIALDRIVER
 static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
 static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
+#endif
 #endif
 
 /* This describes the state of the UART0 port. */
@@ -702,7 +717,7 @@ static uart_dev_t g_uart4port =
 #endif
 
 /* This describes the state of the USART0 port. */
-
+#ifdef SAMA5_HAVE_USART
 #ifdef CONFIG_USART0_SERIALDRIVER
 static struct up_dev_s g_usart0priv =
 {
@@ -846,6 +861,7 @@ static struct up_dev_s g_usart4priv =
   .stopbits2      = CONFIG_USART4_2STOP,
 #if defined(CONFIG_USART4_OFLOWCONTROL) || defined(CONFIG_USART4_IFLOWCONTROL)
   .flowc          = true,
+#endif
 #endif
 };
 
