@@ -10,9 +10,10 @@
 -Darwin,sim:linuxi2c
 
 # macOS doesn't support 32bit(CONFIG_SIM_M32=y) anymore
+-Darwin,sim:elf
+-Darwin,sim:foc
 -Darwin,sim:loadable
 -Darwin,sim:module32
--Darwin,sim:foc
 
 # macOS doesn't have X11
 -Darwin,sim:lvgl
