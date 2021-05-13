@@ -68,11 +68,11 @@
 #undef TTYFC3_DEV
 #undef TTYFC4_DEV
 
-#undef USART0_ASSIGNED
-#undef USART1_ASSIGNED
-#undef USART2_ASSIGNED
-#undef USART3_ASSIGNED
-#undef USART4_ASSIGNED
+#undef FLEXUS0_ASSIGNED
+#undef FLEXUS1_ASSIGNED
+#undef FLEXUS2_ASSIGNED
+#undef FLEXUS3_ASSIGNED
+#undef FLEXUS4_ASSIGNED
 
 #ifdef SAMA5_HAVE_FLEXCOM_USART
 
@@ -118,7 +118,7 @@
 #    define FLEXUS3_ASSIGNED    1
 #  elif defined(CONFIG_USART4_SERIALDRIVER)
 #    define TTYFC0_DEV          g_flexus4port /* FLEXUS4 is ttyFC0 */
-#    define FLEXUS4_ASSIGNED    4
+#    define FLEXUS4_ASSIGNED    1
 #  endif
 #endif
 
@@ -145,8 +145,10 @@
  * because that was either assigned as ttyFC0 or ttyFC1.  One of these
  * could also be the console.
  */
-
-#if defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
+#if defined(CONFIG_USART0_SERIALDRIVER) && !defined(FLEXUS0_ASSIGNED)
+#  define TTYFC2_DEV           g_flexus0port /* FLEXUS0 is ttyFC2 */
+#  define FLEXUS0_ASSIGNED     1
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
 #  define TTYFC2_DEV           g_flexus1port /* FLEXUS1 is ttyFC2 */
 #  define FLEXUS1_ASSIGNED     1
 #elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
@@ -164,8 +166,13 @@
  * UART0-1; those have already been assigned to ttyFC0, 1, or 2.  One of
  * FLEXUS2-4 could also be the console.
  */
-
-#if defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
+#if defined(CONFIG_USART0_SERIALDRIVER) && !defined(FLEXUS0_ASSIGNED)
+#  define TTYFC3_DEV           g_flexus0port /* FLEXUS0 is ttyFC3 */
+#  define FLEXUS0_ASSIGNED     1
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
+#  define TTYFC3_DEV           g_flexus1port /* FLEXUS1 is ttyFC3 */
+#  define FLEXUS1_ASSIGNED     1
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
 #  define TTYFC3_DEV           g_flexus2port /* FLEXUS2 is ttyFC3 */
 #  define FLEXUS2_ASSIGNED     1
 #elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
@@ -180,13 +187,21 @@
  * USART0-2; those have already been assigned to ttyFC0-3.  One of
  * USART3-4 could also be the console.
  */
-
-#if defined(CONFIG_USART3_SERIALDRIVER) && !defined(USART3_ASSIGNED)
-#  define TTYFC4_DEV           g_flexus3port /* USART3 is ttyFC4 */
-#  define USART3_ASSIGNED     1
-#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(USART4_ASSIGNED)
-#  define TTYFC4_DEV           g_flexus4port /* USART4 is ttyFC4 */
-#  define USART4_ASSIGNED     1
+#if defined(CONFIG_USART0_SERIALDRIVER) && !defined(FLEXUS0_ASSIGNED)
+#  define TTYFC4_DEV           g_flexus0port /* FLEXUS0 is ttyFC3 */
+#  define FLEXUS0_ASSIGNED     1
+#elif defined(CONFIG_USART1_SERIALDRIVER) && !defined(FLEXUS1_ASSIGNED)
+#  define TTYFC4_DEV           g_flexus1port /* FLEXUS1 is ttyFC3 */
+#  define FLEXUS1_ASSIGNED     1
+#elif defined(CONFIG_USART2_SERIALDRIVER) && !defined(FLEXUS2_ASSIGNED)
+#  define TTYFC4_DEV           g_flexus2port /* FLEXUS2 is ttyFC3 */
+#  define FLEXUS2_ASSIGNED     1
+#elif defined(CONFIG_USART3_SERIALDRIVER) && !defined(FLEXUS3_ASSIGNED)
+#  define TTYFC4_DEV           g_flexus3port /* FLEXUS3 is ttyFC4 */
+#  define FLEXUS3_ASSIGNED     1
+#elif defined(CONFIG_USART4_SERIALDRIVER) && !defined(FLEXUS4_ASSIGNED)
+#  define TTYFC4_DEV           g_flexus4port /* FLEXUS4 is ttyFC4 */
+#  define FLEXUS4_ASSIGNED     1
 #endif
 
 /* The Flexcom modules are driven by the peripheral clock (MCK or MCK2). */
