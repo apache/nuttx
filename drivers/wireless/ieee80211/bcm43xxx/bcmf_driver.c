@@ -848,7 +848,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
 
           switch (ie_buffer[ie_offset])
             {
-              case IEEE80211_ELEMID_RSN:
+              case WLAN_EID_RSN:
                 {
                   size_t ie_frame_size_aligned;
                   ie_frame_size_aligned = (ie_frame_size + 3) & -4;
