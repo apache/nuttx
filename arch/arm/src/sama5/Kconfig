@@ -793,15 +793,15 @@ choice
 
 config SAMA5_FLEXCOM0_USART
 	bool "USART"
-	select SAMA5_FLEXCOM_USART
 	select USART0_SERIALDRIVER
+  select SAMA5_FLEXCOM_USART
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_FLEXCOM0_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM0_SPI
+config SAMA5_FLEXCOM0_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -809,20 +809,20 @@ endchoice # FLEXCOM0 Configuration
 
 choice
 	prompt "FLEXCOM1 Configuration"
-	default SAMA5_FLEXCOM1_USART
+	default SAMA5_FLEXCOM1_IS_USART
 	depends on SAMA5_FLEXCOM1
 
 config SAMA5_FLEXCOM1_USART
 	bool "USART"
-	select SAMA5_FLEXCOM_USART
 	select USART1_SERIALDRIVER
+  select SAMA5_FLEXCOM_USART
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_FLEXCOM1_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM1_SPI
+config SAMA5_FLEXCOM1_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -830,20 +830,20 @@ endchoice # FLEXCOM1 Configuration
 
 choice
 	prompt "FLEXCOM2 Configuration"
-	default SAMA5_FLEXCOM2_USART
+	default SAMA5_FLEXCOM2_IS_USART
 	depends on SAMA5_FLEXCOM2
 
 config SAMA5_FLEXCOM2_USART
 	bool "USART"
-	select SAMA5_FLEXCOM_USART
 	select USART2_SERIALDRIVER
+  select SAMA5_FLEXCOM_USART
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_FLEXCOM2_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM2_SPI
+config SAMA5_FLEXCOM2_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -851,20 +851,21 @@ endchoice # FLEXCOM2 Configuration
 
 choice
 	prompt "FLEXCOM3 Configuration"
-	default SAMA5_FLEXCOM3_USART
+	default SAMA5_FLEXCOM3_IS_USART
+
 	depends on SAMA5_FLEXCOM3
 
 config SAMA5_FLEXCOM3_USART
 	bool "USART"
-	select SAMA5_FLEXCOM_USART
+  select USART3_SERIALDRIVER  
+  select SAMA5_FLEXCOM_USART
+  select ARCH_HAVE_SERIAL_TERMIOS
 
 config SAMA5_FLEXCOM3_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
-	select USART3_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
 
-config SAMA5_FLEXCOM3_SPI
+config SAMA5_FLEXCOM3_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
@@ -872,12 +873,12 @@ endchoice # FLEXCOM3 Configuration
 
 choice
 	prompt "FLEXCOM4 Configuration"
-	default SAMA5_FLEXCOM4_USART
+	default SAMA5_FLEXCOM4_IS_USART
 	depends on SAMA5_FLEXCOM4
 
 config SAMA5_FLEXCOM4_USART
 	bool "USART"
-	select SAMA5_FLEXCOM_USART
+  select SAMA5_FLEXCOM_USART
 	select USART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
@@ -885,7 +886,7 @@ config SAMA5_FLEXCOM4_SPI
 	bool "SPI"
 	select SAMA5_FLEXCOM_SPI
 
-config SAMA5_FLEXCOM4_SPI
+config SAMA5_FLEXCOM4_TWI
 	bool "TWI"
 	select SAMA5_FLEXCOM_TWI
 
