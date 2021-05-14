@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_arch.h"
 #include "lc823450_dma.h"

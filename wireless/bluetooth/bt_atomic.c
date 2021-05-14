@@ -24,7 +24,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "bt_atomic.h"
 

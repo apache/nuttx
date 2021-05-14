@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
 
 #include "sched/sched.h"

@@ -58,6 +58,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_core.h>

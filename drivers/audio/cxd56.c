@@ -32,6 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 

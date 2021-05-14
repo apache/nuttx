@@ -35,8 +35,7 @@
 
 #include <arpa/inet.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/wdog.h>

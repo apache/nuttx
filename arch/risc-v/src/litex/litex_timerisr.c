@@ -30,6 +30,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"

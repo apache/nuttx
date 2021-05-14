@@ -27,8 +27,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "riscv_arch.h"
 

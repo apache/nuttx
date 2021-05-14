@@ -29,6 +29,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_arch.h"
 #include "chip.h"

@@ -28,6 +28,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
 #include <arch/tls.h>
 

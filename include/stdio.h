@@ -29,10 +29,10 @@
 
 #include <sys/types.h>
 #include <stdarg.h>
-#include <sched.h>
 #include <time.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
