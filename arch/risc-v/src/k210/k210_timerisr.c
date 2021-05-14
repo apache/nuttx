@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"

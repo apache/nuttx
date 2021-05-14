@@ -36,12 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Values for protocol attribute */
-
-#define SEM_PRIO_NONE             0
-#define SEM_PRIO_INHERIT          1
-#define SEM_PRIO_PROTECT          2
-
 /* Most internal nxsem_* interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the application semaphore
  * interfaces must be used.  The differences between the two sets of
@@ -462,27 +456,6 @@ int nxsem_reset(FAR sem_t *sem, int16_t count);
 #define nxsem_get_protocol(s,p) sem_getprotocol(s,p)
 
 /****************************************************************************
- * Name: sem_getprotocol
- *
- * Description:
- *    Return the value of the semaphore protocol attribute.
- *
- * Input Parameters:
- *    sem      - A pointer to the semaphore whose attributes are to be
- *               queried.
- *    protocol - The user provided location in which to store the protocol
- *               value.
- *
- * Returned Value:
- *   This function is exposed as a non-standard application interface.  It
- *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
- *   the errno value is set appropriately.
- *
- ****************************************************************************/
-
-int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
-
-/****************************************************************************
  * Name: nxsem_set_protocol
  *
  * Description:
@@ -520,45 +493,6 @@ int sem_getprotocol(FAR sem_t *sem, FAR int *protocol);
  ****************************************************************************/
 
 int nxsem_set_protocol(FAR sem_t *sem, int protocol);
-
-/****************************************************************************
- * Name: sem_setprotocol
- *
- * Description:
- *    Set semaphore protocol attribute.
- *
- *    One particularly important use of this function is when a semaphore
- *    is used for inter-task communication like:
- *
- *      TASK A                 TASK B
- *      sem_init(sem, 0, 0);
- *      sem_wait(sem);
- *                             sem_post(sem);
- *      Awakens as holder
- *
- *    In this case priority inheritance can interfere with the operation of
- *    the semaphore.  The problem is that when TASK A is restarted it is a
- *    holder of the semaphore.  However, it never calls sem_post(sem) so it
- *    becomes *permanently* a holder of the semaphore and may have its
- *    priority boosted when any other task tries to acquire the semaphore.
- *
- *    The fix is to call sem_setprotocol(SEM_PRIO_NONE) immediately after
- *    the sem_init() call so that there will be no priority inheritance
- *    operations on this semaphore.
- *
- * Input Parameters:
- *    sem      - A pointer to the semaphore whose attributes are to be
- *               modified
- *    protocol - The new protocol to use
- *
- * Returned Value:
- *   This function is exposed as a non-standard application interface.  It
- *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
- *   the errno value is set appropriately.
- *
- ****************************************************************************/
-
-int sem_setprotocol(FAR sem_t *sem, int protocol);
 
 /****************************************************************************
  * Name: nxsem_wait_uninterruptible

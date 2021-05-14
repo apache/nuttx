@@ -29,8 +29,10 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
 
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 #if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)

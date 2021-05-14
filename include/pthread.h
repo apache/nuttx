@@ -36,8 +36,7 @@
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <time.h>            /* Needed for struct timespec */
-
-#include <nuttx/semaphore.h> /* For sem_t and SEM_PRIO_* defines */
+#include <semaphore.h>       /* For sem_t and SEM_PRIO_* defines */
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* The architecture specific spinlock.h header file must provide the

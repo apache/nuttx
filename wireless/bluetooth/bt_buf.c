@@ -51,7 +51,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/bluetooth.h>

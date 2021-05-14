@@ -37,10 +37,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <irq/irq.h>
-#include "nuttx/kmalloc.h"
+#include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
-#include "nuttx/spinlock.h"
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kthread.h>
 #include <nuttx/wdog.h>

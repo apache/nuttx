@@ -33,7 +33,7 @@
 #include <string.h>
 #include <sys/param.h>
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "esp32_spiram.h"
 #include "esp32_spicache.h"

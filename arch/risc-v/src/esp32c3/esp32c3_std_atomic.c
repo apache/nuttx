@@ -26,8 +26,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions

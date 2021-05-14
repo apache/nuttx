@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
