@@ -38,6 +38,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include "stm32_flash.h"

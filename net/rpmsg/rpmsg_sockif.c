@@ -27,6 +27,7 @@
 #include <poll.h>
 #include <stdio.h>
 #include <string.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/circbuf.h>

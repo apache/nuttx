@@ -27,6 +27,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 
+#include <debug.h>
 #include <queue.h>
 
 #include <alsa/asoundlib.h>

@@ -27,8 +27,6 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
 #include <nuttx/mm/gran.h>
 
 #ifdef CONFIG_MM_SHM

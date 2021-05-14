@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <syslog.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/board.h>

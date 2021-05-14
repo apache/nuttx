@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <debug.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>

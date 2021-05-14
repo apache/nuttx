@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>

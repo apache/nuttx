@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <debug.h>
 #include <errno.h>
 #include <time.h>
 #include <fcntl.h>

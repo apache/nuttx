@@ -30,8 +30,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sched.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/signal.h>
 #include <nuttx/kthread.h>
