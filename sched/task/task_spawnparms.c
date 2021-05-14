@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <spawn.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
