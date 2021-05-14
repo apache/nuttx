@@ -27,18 +27,11 @@
 #include <sys/types.h>
 #include <sys/boardctl.h>
 
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
 #include <pthread.h>
 #include <sched.h>
-
-/* The architecture specific spinlock.h header file must provide the
- * following:
- *
- *   SP_LOCKED    - A definition of the locked state value (usually 1)
- *   SP_UNLOCKED  - A definition of the unlocked state value (usually 0)
- *   spinlock_t   - The type of a spinlock memory object (usually uint8_t).
- */
-
-#include <arch/spinlock.h>
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 

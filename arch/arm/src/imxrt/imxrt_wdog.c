@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/watchdog.h>
 
 #include "arm_arch.h"

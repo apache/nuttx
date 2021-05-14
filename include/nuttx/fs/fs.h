@@ -32,11 +32,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
-#ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  include <nuttx/semaphore.h>
-#endif
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

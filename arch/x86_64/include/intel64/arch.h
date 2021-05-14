@@ -395,10 +395,6 @@ static inline void set_pcid(uint64_t pcid)
                      "%%rbx; mov %%rbx, %%cr3;"
                      ::"g"(pcid):"memory", "rbx", "rax");
       }
-    else
-      {
-        PANIC();
-      }
 }
 
 static inline unsigned long read_msr(unsigned int msr)
