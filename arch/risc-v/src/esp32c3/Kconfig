@@ -295,6 +295,10 @@ config ESP32C3_WIRELESS
 	---help---
 		Enable Wireless support
 
+config ESP32C3_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+
 endmenu # ESP32-C3 Peripheral Support
 
 menu "I2C Configuration"
@@ -759,5 +763,14 @@ config ESP32C3_TICKLESS
 	default n
 	select ARCH_HAVE_TICKLESS
 	select SCHED_TICKLESS
+
+menu "AES accelerator"
+	depends on ESP32C3_AES_ACCELERATOR
+
+config ESP32C3_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # AES accelerator
 
 endif # ARCH_CHIP_ESP32C3
