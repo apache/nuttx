@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>

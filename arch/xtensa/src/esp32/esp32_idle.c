@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <debug.h>
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>

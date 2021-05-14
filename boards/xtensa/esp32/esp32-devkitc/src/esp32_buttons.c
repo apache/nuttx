@@ -24,10 +24,10 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>

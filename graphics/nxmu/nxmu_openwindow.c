@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <debug.h>
 #include <errno.h>
 
 #ifdef CONFIG_NX_RAMBACKED

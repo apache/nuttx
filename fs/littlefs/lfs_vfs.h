@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/fe310/hifive1-revb/src/fe310_bringup.c
+ * fs/littlefs/lfs_vfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,49 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#undef LFS_CONFIG
+#undef LFS_UTIL_H
 
-#include <stdbool.h>
-#include <stdio.h>
 #include <debug.h>
-#include <errno.h>
-
-#include <nuttx/board.h>
-#include <nuttx/input/buttons.h>
-
-#include "fe310.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fe310_bringup
- ****************************************************************************/
-
-int fe310_bringup(void)
-{
-  int ret = OK;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
-#endif
-
-#ifdef CONFIG_INPUT_BUTTONS
-  /* Register the BUTTON driver */
-
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret < 0)
-    {
-      serr("ERROR: btn_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-  return ret;
-}
+#include "littlefs/lfs_util.h"

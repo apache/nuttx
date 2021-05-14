@@ -54,6 +54,7 @@
 #include <nuttx/usb/dfu.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <debug.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>

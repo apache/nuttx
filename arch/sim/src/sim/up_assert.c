@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <sched/sched.h>
 #include <stdlib.h>
+#include <syslog.h>
 #include <nuttx/board.h>
 #include "up_internal.h"
 

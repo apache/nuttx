@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/wireless/wireless.h>

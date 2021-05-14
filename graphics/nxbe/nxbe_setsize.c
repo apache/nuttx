@@ -25,9 +25,9 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <debug.h>
 
 #ifdef CONFIG_NX_RAMBACKED
-#  include <debug.h>
 #  include <string.h>
 #ifdef CONFIG_BUILD_KERNEL
 #  include <nuttx/pgalloc.h>

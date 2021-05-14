@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/mm/iob.h>

@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <debug.h>
 #include <errno.h>
 
 #include "arm_arch.h"
