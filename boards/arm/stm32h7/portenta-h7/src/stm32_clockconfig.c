@@ -41,7 +41,6 @@
  * Private Data
  ****************************************************************************/
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -50,8 +49,8 @@
  * Name: stm32_board_clockconfig
  *
  * Description:
- *   The Portena H7 board has an external oscillator, but it must be turned on
- *   by pulling the OSCEN pin high. The oscillator is 25MHz despite any
+ *   The Portena H7 board has an external oscillator, but it must be turned
+ *   on by pulling the OSCEN pin high. The oscillator is 25MHz despite any
  *   documentation stating otherwise - which at the time of writing, the
  *   documentation states it is 27MHz. This has been confirmed by the
  *   Arduino staff.
@@ -60,19 +59,19 @@
 
 void stm32_board_clockconfig(void)
 {
-    /* We are in the context of stm32_clockconfig(), after the RCC block has
-     * been reset. The peripheral clocks are all off, but we need to turn on
-     * the oscillator via pin PH1 before we can get the system running. We must
-     * enable the peripheral clock for port H now and set the pin.
-     */
+  /* We are in the context of stm32_clockconfig(), after the RCC block has
+   * been reset. The peripheral clocks are all off, but we need to turn on
+   * the oscillator via pin PH1 before we can get the system running.
+   * We must enable the peripheral clock for port H now and set the pin.
+   */
 
-    uint32_t regval;
-    regval = getreg32(STM32_RCC_AHB4ENR);
-    regval |= RCC_AHB4ENR_GPIOHEN;
-    putreg32(regval, STM32_RCC_AHB4ENR);
-    stm32_configgpio(GPIO_OSCEN);
+  uint32_t regval;
+  regval = getreg32(STM32_RCC_AHB4ENR);
+  regval |= RCC_AHB4ENR_GPIOHEN;
+  putreg32(regval, STM32_RCC_AHB4ENR);
+  stm32_configgpio(GPIO_OSCEN);
 
-    stm32_stdclockconfig();
+  stm32_stdclockconfig();
 }
 
 #endif /* CONFIG_STM32H7_CUSTOM_CLOCKCONFIG */

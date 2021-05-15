@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/portenta/src/stm32_boot.c
+ * boards/arm/stm32h7/portenta-h7/src/stm32_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -89,7 +89,7 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board bring-up here instead of from the board_app_initialize(). */
+  /* Perform board bring-up here instead of from the board_app_initialize() */
 
   (void)stm32_bringup();
 }

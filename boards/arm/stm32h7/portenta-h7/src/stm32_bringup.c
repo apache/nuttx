@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h7/portenta/src/stm32_boot.c
+ * boards/arm/stm32h7/portenta-h7/src/stm32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
