@@ -117,9 +117,6 @@ struct stm32_tickless_s
   uint8_t channel;                 /* The timer channel to use for intervals */
   FAR struct stm32_tim_dev_s *tch; /* Handle returned by stm32_tim_init() */
   uint32_t frequency;
-#ifdef CONFIG_CLOCK_TIMEKEEPING
-  uint64_t counter_mask;
-#endif
   uint32_t overflow;               /* Timer counter overflow */
   volatile bool pending;           /* True: pending task */
   uint32_t period;                 /* Interval period */
@@ -555,13 +552,6 @@ void up_timer_initialize(void)
 
   STM32_TIM_SETCLOCK(g_tickless.tch, g_tickless.frequency);
 
-#ifdef CONFIG_CLOCK_TIMEKEEPING
-
-  /* Should this be changed to 0xffff because we use 16 bit timers? */
-
-  g_tickless.counter_mask = 0xffffffffull;
-#endif
-
   /* Set up to receive the callback when the counter overflow occurs */
 
   STM32_TIM_SETISR(g_tickless.tch, stm32_tickless_handler, NULL, 0);
@@ -761,10 +751,11 @@ int up_timer_getcounter(FAR uint64_t *cycles)
 void up_timer_getmask(FAR uint64_t *mask)
 {
   DEBUGASSERT(mask != NULL);
-
-  /* Should this be changed to 0xffff because we use 16 bit timers? */
-
-  *mask = 0xffffffffull;
+#ifdef HAVE_32BIT_TICKLESS
+  *mask = UINT32_MAX;
+#else
+  *mask = UINT16_MAX;
+#endif
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
