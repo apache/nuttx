@@ -26,21 +26,81 @@ menuconfig SPI
 if SPI
 
 config SPI_SLAVE
-	bool "SPI slave"
+	bool "SPI Slave"
 	default n
 	---help---
-		Enable support for SPI slave features
+		Enable support for SPI Slave features
 
 if SPI_SLAVE
 
+config SPI_SLAVE_DRIVER
+	bool "SPI Slave character driver"
+	default n
+	---help---
+		Built-in support for a character driver at /dev/spislv[N] that may be
+		used to perform SPI bus transfers from applications.
+		The intent of this driver is to support SPI Slave testing.
+
+if SPI_SLAVE_DRIVER
+
+config SPI_SLAVE_DRIVER_MODE
+	int "SPI Slave character driver default mode"
+	default 0
+	---help---
+		Default SPI Slave character driver mode, where:
+		0 = CPOL=0, CPHA=0
+		1 = CPOL=0, CPHA=1
+		2 = CPOL=1, CPHA=0
+		3 = CPOL=1, CPHA=1
+
+config SPI_SLAVE_DRIVER_WIDTH
+	int "SPI Slave character driver default bit width"
+	default 8
+	---help---
+		Number of bits per SPI Slave transfer (default 8).
+
+config SPI_SLAVE_DRIVER_BUFFER_SIZE
+	int "SPI Slave character driver TX and RX buffer sizes"
+	default 128
+	---help---
+		Size of the internal TX and RX buffers of the SPI Slave
+		character driver.
+
+config SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
+	bool "SPI Slave character driver colorize TX buffer"
+	default n
+	---help---
+		Initialize entries of the TX buffer with a given pattern.
+		If the SPI Slave controller performs a call to "getdata" API during
+		the "bind" operation, the colorized buffer may be sent as part of the
+		first TX transfer of the SPI Slave controller.
+		This feature might be useful for a quick communication test between
+		Master and Slave.
+
+config SPI_SLAVE_DRIVER_COLORIZE_PATTERN
+	hex "SPI Slave character driver colorize pattern"
+	default 0xa5
+	depends on SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
+	---help---
+		Pattern to be used as the coloration of the TX buffer.
+
+config SPI_SLAVE_DRIVER_COLORIZE_NUM_BYTES
+	int "SPI Slave character driver colorize number of bytes"
+	default 4
+	depends on SPI_SLAVE_DRIVER_COLORIZE_TX_BUFFER
+	---help---
+		Number of bytes of the TX buffer to be colorized.
+
+endif # SPI_SLAVE_DRIVER
+
 config SPI_SLAVE_DMA
-	bool "SPI slave DMA"
+	bool "SPI Slave DMA"
 	default n
 	depends on ARCH_DMA && EXPERIMENTAL
 	---help---
 		Enable support for DMA data transfers (not yet implemented).
 
-endif
+endif # SPI_SLAVE
 
 config SPI_EXCHANGE
 	bool "SPI exchange"
