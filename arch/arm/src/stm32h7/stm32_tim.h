@@ -125,8 +125,13 @@ typedef enum
 
   /* Output Compare Modes */
 
-  STM32_TIM_CH_OUTPWM         = 0x04,    /* Enable standard PWM mode, active high when counter < compare */
-  STM32_TIM_CH_OUTTOGGLE      = 0x08,    /* Toggle TIM_CHx output on UEV */
+  /* Enable standard PWM mode, active high when counter < compare */
+
+  STM32_TIM_CH_OUTPWM         = 0x04,
+
+  /* Toggle TIM_CHx output on UEV */
+
+  STM32_TIM_CH_OUTTOGGLE      = 0x08,
 #if 0
   STM32_TIM_CH_OUTCOMPARE     = 0x06,
 
@@ -134,7 +139,7 @@ typedef enum
 
   STM32_TIM_CH_INCAPTURE      = 0x10,
   STM32_TIM_CH_INPWM          = 0x20
-  STM32_TIM_CH_DRIVE_OC   -- open collector mode
+  STM32_TIM_CH_DRIVE_OC - open collector mode
 #endif
 } stm32_tim_channel_t;
 
