@@ -274,8 +274,10 @@ static void     stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev,
                                     int source);
 static void     stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev,
                                      int source);
-static void     stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
-static int      stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev, int source);
+static void     stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev,
+                                 int source);
+static int      stm32_tim_checkint(FAR struct stm32_tim_dev_s *dev,
+                                   int source);
 
 /****************************************************************************
  * Private Data
@@ -496,9 +498,9 @@ static void stm32_tim_disable(FAR struct stm32_tim_dev_s *dev)
   stm32_putreg16(dev, STM32_GTIM_CR1_OFFSET, val);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_tim_getwidth
- *****************************************************************************/
+ ****************************************************************************/
 
 static int stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev)
 {
@@ -523,9 +525,9 @@ static int stm32_tim_getwidth(FAR struct stm32_tim_dev_s *dev)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_tim_getcounter
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
 {
@@ -535,9 +537,9 @@ static uint32_t stm32_tim_getcounter(FAR struct stm32_tim_dev_s *dev)
     (uint32_t)stm32_getreg16(dev, STM32_BTIM_CNT_OFFSET);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_tim_setcounter
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32_tim_setcounter(FAR struct stm32_tim_dev_s *dev,
                                  uint32_t count)
