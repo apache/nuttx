@@ -42,7 +42,7 @@
 #include "esp32c3_partition.h"
 #include "esp32c3-devkit.h"
 
-#ifdef CONFIG_SPI_DRIVER
+#ifdef CONFIG_SPI
 #  include "esp32c3_spi.h"
 #endif
 
@@ -181,6 +181,15 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
+             ESP32C3_SPI2, ret);
+    }
+#endif
+
+#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32C3_SPI2)
+  ret = board_spislavedev_initialize(ESP32C3_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
              ESP32C3_SPI2, ret);
     }
 #endif
