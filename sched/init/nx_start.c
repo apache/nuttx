@@ -790,7 +790,7 @@ void nx_start(void)
       kmm_checkcorruption();
 
 #if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_DEBUG_MM)
-      for (i = 0; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
+      for (i = 1; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
         {
           assert(up_check_tcbstack_remain(g_pidhash[i].tcb) > 0);
         }
