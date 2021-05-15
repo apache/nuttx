@@ -92,6 +92,11 @@
  #define HAVE_32BIT_TICKLESS 1
 #endif
 
+#if (CONFIG_STM32H7_TICKLESS_TIMER == 6) || \
+    (CONFIG_STM32H7_TICKLESS_TIMER == 7)
+# error Basic timers not supported by the tickless driver
+#endif
+
 #if CONFIG_STM32H7_TICKLESS_CHANNEL == 1
 #define DIER_CAPT_IE          GTIM_DIER_CC1IE
 #elif CONFIG_STM32H7_TICKLESS_CHANNEL == 2
@@ -450,24 +455,6 @@ void up_timer_initialize(void)
       case 5:
         g_tickless.base = STM32_TIM5_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM5STOP);
-        break;
-#endif
-
-#ifdef CONFIG_STM32H7_TIM6
-      case 6:
-
-        /* Basic timers not supported by this implementation */
-
-        DEBUGASSERT(0);
-        break;
-#endif
-
-#ifdef CONFIG_STM32H7_TIM7
-      case 7:
-
-        /* Basic timers not supported by this implementation */
-
-        DEBUGASSERT(0);
         break;
 #endif
 
