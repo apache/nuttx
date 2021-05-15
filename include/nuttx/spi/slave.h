@@ -534,6 +534,36 @@ struct spi_sdev_s
  * Public Data
  ****************************************************************************/
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: spislv_register
+ *
+ * Description:
+ *   Register the SPI Slave echo character device as 'devpath'.
+ *
+ * Input Parameters:
+ *   sctrlr  - An instance of the SPI Slave interface to use to communicate
+ *             with the SPI Slave echo device
+ *   bus     - The SPI Slave bus number. This will be used as the SPI device
+ *             minor number. The SPI Slave character device will be
+ *             registered as /dev/spislvN where N is the minor number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+int spislv_register(FAR struct spi_sctrlr_s *sctrlr, int bus);
+#endif /* CONFIG_SPI_SLAVE_DRIVER */
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -547,4 +577,5 @@ extern "C"
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __INCLUDE_NUTTX_SPI_SLAVE_H */
