@@ -2324,13 +2324,13 @@ static int pwm_mode_configure(FAR struct pwm_lowerhalf_s *dev,
 
       case STM32_CHANMODE_PWM1:
         {
-          chanmode = ATIM_CCMR_MODE_PWM1;
+          chanmode = GTIM_CCMR_MODE_PWM1;
           break;
         }
 
       case STM32_CHANMODE_PWM2:
         {
-          chanmode = ATIM_CCMR_MODE_PWM2;
+          chanmode = GTIM_CCMR_MODE_PWM2;
           break;
         }
 
@@ -2651,13 +2651,13 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
 
   /* Get outputs configuration */
 
-  regval |= ((outputs & STM32_PWM_OUT1)  ? ATIM_CCER_CC1E  : 0);
-  regval |= ((outputs & STM32_PWM_OUT1N) ? ATIM_CCER_CC1NE : 0);
-  regval |= ((outputs & STM32_PWM_OUT2)  ? ATIM_CCER_CC2E  : 0);
-  regval |= ((outputs & STM32_PWM_OUT2N) ? ATIM_CCER_CC2NE : 0);
-  regval |= ((outputs & STM32_PWM_OUT3)  ? ATIM_CCER_CC3E  : 0);
-  regval |= ((outputs & STM32_PWM_OUT3N) ? ATIM_CCER_CC3NE : 0);
-  regval |= ((outputs & STM32_PWM_OUT4)  ? ATIM_CCER_CC4E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT1)  ? GTIM_CCER_CC1E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT1N) ? GTIM_CCER_CC1NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT2)  ? GTIM_CCER_CC2E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT2N) ? GTIM_CCER_CC2NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT3)  ? GTIM_CCER_CC3E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT3N) ? GTIM_CCER_CC3NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT4)  ? GTIM_CCER_CC4E  : 0);
 
   /* NOTE: CC4N doesn't exist, but some docs show configuration bits for it */
 
@@ -2770,7 +2770,7 @@ static int pwm_soft_update(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
 
-  pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, ATIM_EGR_UG);
+  pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
 
   return OK;
 }
@@ -3113,7 +3113,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
        */
 
       priv->prev  = pwm_pulsecount(info->count);
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->prev - 1);
+      pwm_putreg(priv, STM32_GTIM_RCR_OFFSET, (uint16_t)priv->prev - 1);
 
       /* Generate an update event to reload the prescaler.  This should
        * preload the RCR into active repetition counter.
@@ -3127,7 +3127,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
 
       priv->count = info->count;
       priv->curr  = pwm_pulsecount(info->count - priv->prev);
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
+      pwm_putreg(priv, STM32_GTIM_RCR_OFFSET, (uint16_t)priv->curr - 1);
     }
 
   /* Otherwise, just clear the repetition counter */
@@ -3136,7 +3136,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
     {
       /* Set the repetition counter to zero */
 
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
+      pwm_putreg(priv, STM32_GTIM_RCR_OFFSET, 0);
 
       /* Generate an update event to reload the prescaler */
 
@@ -3165,7 +3165,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
       /* Clear all pending interrupts and enable the update interrupt. */
 
       pwm_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
-      pwm_putreg(priv, STM32_GTIM_DIER_OFFSET, ATIM_DIER_UIE);
+      pwm_putreg(priv, STM32_GTIM_DIER_OFFSET, GTIM_DIER_UIE);
 
       /* Enable the timer */
 
