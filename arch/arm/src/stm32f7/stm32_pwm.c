@@ -1345,7 +1345,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
           /* Generate an update event to reload the prescaler */
 
-          pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, ATIM_EGR_UG);
+          pwm_putreg(priv, STM32_ATIM_EGR_OFFSET, ATIM_EGR_UG);
         }
     }
   else
@@ -1353,7 +1353,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
     {
       /* Generate an update event to reload the prescaler (all timers) */
 
-      pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, ATIM_EGR_UG);
+      pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
     }
 
   /* Handle channel specific setup */
@@ -1419,11 +1419,11 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       switch (mode)
         {
           case STM32_CHANMODE_PWM1:
-            chanmode = ATIM_CCMR_MODE_PWM1;
+            chanmode = GTIM_CCMR_MODE_PWM1;
             break;
 
           case STM32_CHANMODE_PWM2:
-            chanmode = ATIM_CCMR_MODE_PWM2;
+            chanmode = GTIM_CCMR_MODE_PWM2;
             break;
 
           default:
@@ -1437,13 +1437,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             {
               /* Select the CCER enable bit for this channel */
 
-              ccenable |= ATIM_CCER_CC1E;
+              ccenable |= GTIM_CCER_CC1E;
 
               /* Set the CCMR1 mode values (leave CCMR2 zero) */
 
-              ocmode1  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC1S_SHIFT) |
-                          (chanmode << ATIM_CCMR1_OC1M_SHIFT) |
-                          ATIM_CCMR1_OC1PE;
+              ocmode1  |= (GTIM_CCMR_CCS_CCOUT << GTIM_CCMR1_CC1S_SHIFT) |
+                          (chanmode << GTIM_CCMR1_OC1M_SHIFT) |
+                          GTIM_CCMR1_OC1PE;
 
               /* Set the duty cycle by writing to the CCR register for this
                * channel
@@ -1457,13 +1457,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             {
               /* Select the CCER enable bit for this channel */
 
-              ccenable |= ATIM_CCER_CC2E;
+              ccenable |= GTIM_CCER_CC2E;
 
               /* Set the CCMR1 mode values (leave CCMR2 zero) */
 
-              ocmode1  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR1_CC2S_SHIFT) |
-                          (chanmode << ATIM_CCMR1_OC2M_SHIFT) |
-                          ATIM_CCMR1_OC2PE;
+              ocmode1  |= (GTIM_CCMR_CCS_CCOUT << GTIM_CCMR1_CC2S_SHIFT) |
+                          (chanmode << GTIM_CCMR1_OC2M_SHIFT) |
+                          GTIM_CCMR1_OC2PE;
 
               /* Set the duty cycle by writing to the CCR register for this
                * channel
@@ -1477,13 +1477,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             {
               /* Select the CCER enable bit for this channel */
 
-              ccenable |= ATIM_CCER_CC3E;
+              ccenable |= GTIM_CCER_CC3E;
 
               /* Set the CCMR2 mode values (leave CCMR1 zero) */
 
-              ocmode2  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC3S_SHIFT) |
-                          (chanmode << ATIM_CCMR2_OC3M_SHIFT) |
-                          ATIM_CCMR2_OC3PE;
+              ocmode2  |= (GTIM_CCMR_CCS_CCOUT << GTIM_CCMR2_CC3S_SHIFT) |
+                          (chanmode << GTIM_CCMR2_OC3M_SHIFT) |
+                          GTIM_CCMR2_OC3PE;
 
               /* Set the duty cycle by writing to the CCR register for this
                * channel
@@ -1497,13 +1497,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             {
               /* Select the CCER enable bit for this channel */
 
-              ccenable |= ATIM_CCER_CC4E;
+              ccenable |= GTIM_CCER_CC4E;
 
               /* Set the CCMR2 mode values (leave CCMR1 zero) */
 
-              ocmode2  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC4S_SHIFT) |
-                          (chanmode << ATIM_CCMR2_OC4M_SHIFT) |
-                          ATIM_CCMR2_OC4PE;
+              ocmode2  |= (GTIM_CCMR_CCS_CCOUT << GTIM_CCMR2_CC4S_SHIFT) |
+                          (chanmode << GTIM_CCMR2_OC4M_SHIFT) |
+                          GTIM_CCMR2_OC4PE;
 
               /* Set the duty cycle by writing to the CCR register for this
                * channel
@@ -1535,10 +1535,10 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
    * mode
    */
 
-  ccmr1 &= ~(ATIM_CCMR1_CC1S_MASK | ATIM_CCMR1_OC1M_MASK | ATIM_CCMR1_OC1PE |
-             ATIM_CCMR1_CC2S_MASK | ATIM_CCMR1_OC2M_MASK | ATIM_CCMR1_OC2PE);
-  ccmr2 &= ~(ATIM_CCMR2_CC3S_MASK | ATIM_CCMR2_OC3M_MASK | ATIM_CCMR2_OC3PE |
-             ATIM_CCMR2_CC4S_MASK | ATIM_CCMR2_OC4M_MASK | ATIM_CCMR2_OC4PE);
+  ccmr1 &= ~(GTIM_CCMR1_CC1S_MASK | GTIM_CCMR1_OC1M_MASK | GTIM_CCMR1_OC1PE |
+             GTIM_CCMR1_CC2S_MASK | GTIM_CCMR1_OC2M_MASK | GTIM_CCMR1_OC2PE);
+  ccmr2 &= ~(GTIM_CCMR2_CC3S_MASK | GTIM_CCMR2_OC3M_MASK | GTIM_CCMR2_OC3PE |
+             GTIM_CCMR2_CC4S_MASK | GTIM_CCMR2_OC4M_MASK | GTIM_CCMR2_OC4PE);
   ccmr1 |= ocmode1;
   ccmr2 |= ocmode2;
 
@@ -1546,13 +1546,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
    * polarity)
    */
 
-  ccer &= ~(ATIM_CCER_CC1P | ATIM_CCER_CC2P | ATIM_CCER_CC3P |
-            ATIM_CCER_CC4P);
+  ccer &= ~(GTIM_CCER_CC1P | GTIM_CCER_CC2P | GTIM_CCER_CC3P |
+            GTIM_CCER_CC4P);
 
   /* Enable the output state of the selected channels */
 
-  ccer &= ~(ATIM_CCER_CC1E | ATIM_CCER_CC2E | ATIM_CCER_CC3E |
-            ATIM_CCER_CC4E);
+  ccer &= ~(GTIM_CCER_CC1E | GTIM_CCER_CC2E | GTIM_CCER_CC3E |
+            GTIM_CCER_CC4E);
   ccer |= ccenable;
 
   /* Some special setup for advanced timers */
@@ -1621,7 +1621,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       /* Clear all pending interrupts and enable the update interrupt. */
 
       pwm_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
-      pwm_putreg(priv, STM32_GTIM_DIER_OFFSET, ATIM_DIER_UIE);
+      pwm_putreg(priv, STM32_GTIM_DIER_OFFSET, GTIM_DIER_UIE);
 
       /* Enable the timer */
 
