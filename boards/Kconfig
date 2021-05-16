@@ -92,6 +92,14 @@ config ARCH_BOARD_C5471EVM
 		NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
 		This port is complete and verified.
 
+config ARCH_BOARD_CIRCUIT_EXPRESS
+	bool "Adafruit Circuit Express"
+	depends on ARCH_CHIP_SAMD21G18A
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects the Adafruit Circuit Express board featuring the Atmel
+		ATSAMD21 MCU.
+
 config ARCH_BOARD_CLICKER2_STM32
 	bool "Mikroe Clicker2 STM32"
 	depends on ARCH_CHIP_STM32F407VG
@@ -2261,6 +2269,7 @@ config ARCH_BOARD
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
 	default "bl602evb"                 if ARCH_BOARD_BL602EVB
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
+	default "circuit-express"          if ARCH_BOARD_CIRCUIT_EXPRESS
 	default "clicker2-stm32"           if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                if ARCH_BOARD_CLOUDCTRL
 	default "demo9s12ne64"             if ARCH_BOARD_DEMOS92S12NEC64
@@ -2712,6 +2721,9 @@ source "boards/arm/sam34/arduino-due/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_M0
 source "boards/arm/samd2l2/arduino-m0/Kconfig"
+endif
+if ARCH_BOARD_CIRCUIT_EXPRESS
+source "boards/arm/samd2l2/circuit-express/Kconfig"
 endif
 if ARCH_BOARD_FLIPNCLICK_SAM3X
 source "boards/arm/sam34/flipnclick-sam3x/Kconfig"
