@@ -34,4 +34,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += sam_appinit.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += sam_usb.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
