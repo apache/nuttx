@@ -1296,27 +1296,27 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             {
               /* Set the CCMR2 mode values (leave CCMR1 zero) */
 
-              ocmode2  |= (GTIM_CCMR_CCS_CCOUT << GTIM_CCMR2_CC3S_SHIFT) |
-                          (chanmode << GTIM_CCMR2_OC3M_SHIFT) |
-                          GTIM_CCMR2_OC3PE;
+              ocmode2  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC3S_SHIFT) |
+                          (chanmode << ATIM_CCMR2_OC3M_SHIFT) |
+                          ATIM_CCMR2_OC3PE;
 
               if (ocmbit)
                 {
-                  ocmode2 |= GTIM_CCMR2_OC3M;
+                  ocmode2 |= ATIM_CCMR2_OC3M;
                 }
 
               /* Set the duty cycle by writing to the CCR register for this
                * channel.
                */
 
-              stm32pwm_putreg(priv, STM32_GTIM_CCR3_OFFSET, ccr);
+              stm32pwm_putreg(priv, STM32_ATIM_CCR3_OFFSET, ccr);
 
               /* Reset the Output Compare Mode Bits and set the select
                * output compare mode.
                */
 
-              ccmr2 &= ~(GTIM_CCMR2_CC3S_MASK | GTIM_CCMR2_OC3M_MASK |
-                         GTIM_CCMR2_OC3PE | GTIM_CCMR2_OC3M);
+              ccmr2 &= ~(ATIM_CCMR2_CC3S_MASK | ATIM_CCMR2_OC3M_MASK |
+                         ATIM_CCMR2_OC3PE | ATIM_CCMR2_OC3M);
               stm32pwm_output_configure(priv, channel);
             }
             break;
@@ -1325,27 +1325,27 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
             {
               /* Set the CCMR2 mode values (leave CCMR1 zero) */
 
-              ocmode2  |= (GTIM_CCMR_CCS_CCOUT << GTIM_CCMR2_CC4S_SHIFT) |
-                          (chanmode << GTIM_CCMR2_OC4M_SHIFT) |
-                          GTIM_CCMR2_OC4PE;
+              ocmode2  |= (ATIM_CCMR_CCS_CCOUT << ATIM_CCMR2_CC4S_SHIFT) |
+                          (chanmode << ATIM_CCMR2_OC4M_SHIFT) |
+                          ATIM_CCMR2_OC4PE;
 
               if (ocmbit)
                 {
-                  ocmode2 |= GTIM_CCMR2_OC4M;
+                  ocmode2 |= ATIM_CCMR2_OC4M;
                 }
 
               /* Set the duty cycle by writing to the CCR register for this
                * channel.
                */
 
-              stm32pwm_putreg(priv, STM32_GTIM_CCR4_OFFSET, ccr);
+              stm32pwm_putreg(priv, STM32_ATIM_CCR4_OFFSET, ccr);
 
               /* Reset the Output Compare Mode Bits and set the select
                * output compare mode.
                */
 
-              ccmr2 &= ~(GTIM_CCMR2_CC4S_MASK | GTIM_CCMR2_OC4M_MASK |
-                         GTIM_CCMR2_OC4PE | GTIM_CCMR2_OC4M);
+              ccmr2 &= ~(ATIM_CCMR2_CC4S_MASK | ATIM_CCMR2_OC4M_MASK |
+                         ATIM_CCMR2_OC4PE | ATIM_CCMR2_OC4M);
               stm32pwm_output_configure(priv, channel);
             }
             break;
@@ -1371,14 +1371,14 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
       /* Get current register state */
 
-      bdtr  = stm32pwm_getreg(priv, STM32_GTIM_BDTR_OFFSET);
+      bdtr  = stm32pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET);
 
       /* Update deadtime */
 
-      bdtr &= ~(GTIM_BDTR_OSSI | GTIM_BDTR_OSSR);
-      bdtr |= GTIM_BDTR_MOE;
+      bdtr &= ~(ATIM_BDTR_OSSI | ATIM_BDTR_OSSR);
+      bdtr |= ATIM_BDTR_MOE;
 
-      stm32pwm_putreg(priv, STM32_GTIM_BDTR_OFFSET, bdtr);
+      stm32pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
     }
 #endif
 
@@ -1386,7 +1386,7 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
 
   putreg32(ccmr1, priv->base + STM32_GTIM_CCMR1_OFFSET);
 #if defined(HAVE_CCMR2)
-  putreg32(ccmr2, priv->base + STM32_GTIM_CCMR2_OFFSET);
+  putreg32(ccmr2, priv->base + STM32_ATIM_CCMR2_OFFSET);
 #endif
 
   /* Set the ARR Preload Bit */
