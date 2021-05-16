@@ -56,6 +56,10 @@
 
 #include "esp32c3_rtc.h"
 
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp32c3_rtc_lowerhalf.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -327,6 +331,17 @@ int esp32c3_bringup(void)
       return ret;
     }
 #endif /* CONFIG_ESP32C3_ADC */
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the ESP32-C3 RTC driver */
+
+  ret = esp32c3_rtc_driverinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
