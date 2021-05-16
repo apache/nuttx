@@ -19,11 +19,10 @@ handlers may send messages via named message queues.
 
 .. c:function:: mqd_t mq_open(const char *mqName, int oflags, ...)
 
-  Establishes a connection between a named
-  message queue and the calling task. After a successful call of
-  mq_open(), the task can reference the message queue using the address
-  returned by the call. The message queue remains usable until it is
-  closed by a successful call to mq_close().
+  Establishes a connection between a named message queue and the calling
+  task. After a successful call of mq_open(), the task can reference the
+  message queue using the address returned by the call. The message queue
+  remains usable until it is closed by a successful call to mq_close().
 
   :param mqName: Name of the queue to open
   :param oflags: Open flags. These may be any combination of:
@@ -65,10 +64,10 @@ handlers may send messages via named message queues.
 
 .. c:function:: int mq_close(mqd_t mqdes)
 
-  Used to indicate that the calling task
-  is finished with the specified message queued mqdes. The mq_close()
-  deallocates any system resources allocated by the system for use by this
-  task for its message queue.
+  Used to indicate that the calling task is finished with the specified
+  message queued ``mqdes``. The ``mq_close()`` deallocates any system
+  resources allocated by the system for use by this task for its message
+  queue.
 
   If the calling task has attached a notification request to the message
   queue via this ``mqdes`` (see ``mq_notify()``), this attachment will be
@@ -104,10 +103,10 @@ handlers may send messages via named message queues.
 
 .. c:function:: int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 
-  Adds the specified message, ``msg``, to
-  the message queue, ``mqdes``. The ``msglen`` parameter specifies the
-  length of the message in bytes pointed to by ``msg``. This length must
-  not exceed the maximum message length from the ``mq_getattr()``.
+  Adds the specified message, ``msg``, to the message queue, ``mqdes``.
+  The ``msglen`` parameter specifies the length of the message in bytes
+  pointed to by ``msg``. This length must not exceed the maximum message
+  length from the ``mq_getattr()``.
 
   If the message queue is not full, ``mq_send()`` will place the ``msg``
   in the message queue at the position indicated by the ``prio`` argument.
@@ -125,14 +124,14 @@ handlers may send messages via named message queues.
   However, it behaves differently when called from the interrupt level:
 
   -  It does not check the size of the queue. It will always post the
-     message, even if there is already too many messages in queue. This is
+     message, even if there are already too many messages in queue. This is
      because the interrupt handler does not have the option of waiting for
      the message queue to become non-full.
   -  It doesn't allocate new memory (because you cannot allocate memory
-     from an interrupt handler). Instead, there are are pool of
-     pre-allocated message structures that may be used just for sending
-     messages from interrupt handlers. The number of such pre-allocated
-     messages is a configuration parameter.
+     from an interrupt handler). Instead, there is a pool of pre-allocated
+     message structures that may be used just for sending messages from
+     interrupt handlers. The number of such pre-allocated messages is set
+     by the ``PREALLOC_MQ_IRQ_MSGS`` configuration parameter.
 
   :param mqdes: Message queue descriptor.
   :param msg: Message to send.
@@ -157,10 +156,10 @@ handlers may send messages via named message queues.
 .. c:function:: int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio, \
                 const struct timespec *abstime);
 
-  Adds the specified message, ``msg``, to
-  the message queue, ``mqdes``. The ``msglen`` parameter specifies the
-  length of the message in bytes pointed to by ``msg``. This length must
-  not exceed the maximum message length from the ``mq_getattr()``.
+  Adds the specified message, ``msg``, to the message queue, ``mqdes``.
+  The ``msglen`` parameter specifies the length of the message in bytes
+  pointed to by ``msg``. This length must not exceed the maximum message
+  length from the ``mq_getattr()``.
 
   If the message queue is not full, ``mq_timedsend()`` will place the
   ``msg`` in the message queue at the position indicated by the ``prio``
@@ -203,12 +202,11 @@ handlers may send messages via named message queues.
 
 .. c:function:: ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 
-  Receives the oldest of the highest
-  priority messages from the message queue specified by ``mqdes``. If the
-  size of the buffer in bytes, ``msgLen``, is less than the ``mq_msgsize``
-  attribute of the message queue, ``mq_receive()`` will return an error.
-  Otherwise, the selected message is removed from the queue and copied to
-  ``msg``.
+  Receives the oldest of the highest priority messages from the message
+  queue specified by ``mqdes``. If the size of the buffer in bytes,
+  ``msgLen``, is less than the ``mq_msgsize`` attribute of the message
+  queue, ``mq_receive()`` will return an error. Otherwise, the selected
+  message is removed from the queue and copied to ``msg``.
 
   If the message queue is empty and ``O_NONBLOCK`` was not set,
   ``mq_receive()`` will block until a message is added to the message
@@ -223,8 +221,8 @@ handlers may send messages via named message queues.
   :param msg: Buffer to receive the message.
   :param msglen: Size of the buffer in bytes.
   :param prio: If not NULL, the location to store message priority.
-  :return: One success, the length of the selected message in
-    bytes is returned. On failure, -1 (``ERROR``) is returned and the
+  :return: On success, the length of the selected message in bytes is
+    returned. On failure, -1 (``ERROR``) is returned and the
     ```errno`` <#ErrnoAccess>`__ is set appropriately:
 
     -  ``EAGAIN`` The queue was empty and the ``O_NONBLOCK`` flag was set
@@ -241,12 +239,11 @@ handlers may send messages via named message queues.
 .. c:function:: ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen, \
                                int *prio, const struct timespec *abstime);
 
-  Receives the oldest of the highest
-  priority messages from the message queue specified by ``mqdes``. If the
-  size of the buffer in bytes, ``msgLen``, is less than the ``mq_msgsize``
-  attribute of the message queue, ``mq_timedreceive()`` will return an
-  error. Otherwise, the selected message is removed from the queue and
-  copied to ``msg``.
+  Receives the oldest of the highest priority messages from the message
+  queue specified by ``mqdes``. If the size of the buffer in bytes,
+  ``msgLen``, is less than the ``mq_msgsize`` attribute of the message
+  queue, ``mq_timedreceive()`` will return an error. Otherwise, the
+  selected message is removed from the queue and copied to ``msg``.
 
   If the message queue is empty and ``O_NONBLOCK`` was not set,
   ``mq_timedreceive()`` will block until a message is added to the message
@@ -270,8 +267,8 @@ handlers may send messages via named message queues.
   :param prio: If not NULL, the location to store message priority.
   :param abstime: The absolute time to wait until a timeout is declared.
 
-  :return: One success, the length of the selected message in
-    bytes is returned. On failure, -1 (``ERROR``) is returned and the
+  :return: On success, the length of the selected message in bytes is
+    returned. On failure, -1 (``ERROR``) is returned and the
     ```errno`` <#ErrnoAccess>`__ is set appropriately:
 
     -  ``EAGAIN``: The queue was empty and the ``O_NONBLOCK`` flag was set
@@ -289,11 +286,10 @@ handlers may send messages via named message queues.
 
 .. c:function:: int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 
-  If the ``notification`` input parameter is not
-  ``NULL``, this function connects the task with the message queue such
-  that the specified signal will be sent to the task whenever the message
-  changes from empty to non-empty. One notification can be attached to a
-  message queue.
+  If the ``notification`` input parameter is not ``NULL``, this function
+  connects the task with the message queue such that the specified signal
+  will be sent to the task whenever the message queue changes from empty
+  to non-empty. One notification can be attached to a message queue.
 
   If ``notification``; is ``NULL``, the attached notification is detached
   (if it was held by the calling task) and the queue is available to
@@ -337,9 +333,8 @@ handlers may send messages via named message queues.
 .. c:function:: int mq_setattr(mqd_t mqdes, const struct mq_attr *mqStat, \
                       struct mq_attr *oldMqStat);
 
-  Sets the attributes associated with the
-  specified message queue "mqdes." Only the "O_NONBLOCK" bit of the
-  "mq_flags" can be changed.
+  Sets the attributes associated with the specified message queue "mqdes."
+  Only the "O_NONBLOCK" bit of the "mq_flags" can be changed.
 
   If ``oldMqStat`` is non-null, mq_setattr() will store the previous message
   queue attributes at that location (just as would have been returned by
@@ -357,8 +352,8 @@ handlers may send messages via named message queues.
 
 .. c:function:: int mq_getattr(mqd_t mqdes, struct mq_attr *mqStat)
 
-  Gets status information and attributes
-  associated with the specified message queue.
+  Gets status information and attributes associated with the specified
+  message queue.
 
   :param mqdes: Message queue descriptor
   :param mqStat: Buffer in which to return attributes. The returned

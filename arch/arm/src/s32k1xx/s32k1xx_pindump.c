@@ -78,7 +78,7 @@ static const char g_portchar[S32K1XX_NPORTS] =
  *
  * Description:
  *   Dump all GPIO registers associated with the provided pin description
- *   along with a descriptive messasge.
+ *   along with a descriptive message.
  *
  ****************************************************************************/
 

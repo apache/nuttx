@@ -655,9 +655,9 @@ static int lpc17_40_transmit(struct lpc17_40_driver_s *priv)
   *txdesc  = TXDESC_CONTROL_INT | TXDESC_CONTROL_LAST | TXDESC_CONTROL_CRC |
              (priv->lp_dev.d_len - 1);
 
-  /* Copy the packet data into the Tx buffer assignd to this descriptor.  It
+  /* Copy the packet data into the Tx buffer assigned to this descriptor.  It
    * should fit because each packet buffer is the MTU size and breaking up
-   * largerTCP messasges is handled by higher level logic.  The hardware
+   * larger TCP message is handled by higher level logic.  The hardware
    * does, however, support breaking up larger messages into many fragments,
    * however, that capability is not exploited here.
    *

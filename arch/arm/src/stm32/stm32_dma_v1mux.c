@@ -1066,13 +1066,13 @@ void weak_function arm_dma_initialize(void)
  *     in hardware/stm32g4xxxx_dmamux.h
  *
  * Returned Value:
- *   One success, this function returns a non-NULL, void* DMA channel
- *   handle.  NULL is returned on any failure.  This function can fail only
- *   if no DMA channel is available.
+ *   On success, this function returns a non-NULL, void* DMA channel handle.
+ *   NULL is returned on any failure.  This function can fail only if no DMA
+ *   channel is available.
  *
  * Assumptions:
  *   - The caller does not hold he DMA channel.
- *   - The caller can wait for the DMA channel to be freed if it is no
+ *   - The caller can wait for the DMA channel to be freed if it is not
  *     available.
  *
  ****************************************************************************/

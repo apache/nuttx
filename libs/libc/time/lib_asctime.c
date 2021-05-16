@@ -42,7 +42,7 @@
  *   tp - Pointer to the time to be converted.
  *
  * Returned Value:
- *   One success a pointer to the string is returned; on failure, NULL is
+ *   On success, a pointer to the string is returned; on failure, NULL is
  *   returned.
  *
  ****************************************************************************/

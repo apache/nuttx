@@ -102,7 +102,7 @@ extern "C"
  *   None
  *
  * Returned Value:
- *   One success, a reference to the initialized MTD device instance is
+ *   On success, a reference to the initialized MTD device instance is
  *   returned;  NULL is returned on any failure.
  *
  ****************************************************************************/

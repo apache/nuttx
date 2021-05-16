@@ -91,11 +91,10 @@ config STANDARD_SERIAL
 
 config SERIAL_NPOLLWAITERS
 	int "Number of poll threads"
-	default 2
-	depends on STANDARD_SERIAL
+	default 4
 	---help---
 		Maximum number of threads than can be waiting for POLL events.
-		Default: 2
+		Default: 4
 
 config SERIAL_IFLOWCONTROL
 	bool

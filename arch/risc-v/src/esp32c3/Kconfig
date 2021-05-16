@@ -178,6 +178,11 @@ config ESP32C3_SPI
 	bool
 	default n
 
+config ESP32C3_LEDC
+	bool "LEDC (PWM)"
+	default n
+	select PWM
+
 config ESP32C3_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	default n
@@ -417,6 +422,71 @@ config ESP32C3_FREERUN
 
 endmenu # Timer/counter Configuration
 endif # ESP32C3_TIMER
+
+menu "LEDC configuration"
+	depends on ESP32C3_LEDC
+
+menuconfig ESP32C3_LEDC_TIM0
+	bool "Timer 0"
+	default n
+
+if ESP32C3_LEDC_TIM0
+
+config ESP32C3_LEDC_TIM0_CHANNELS
+	int "Number of Timer 0 channels"
+	default 2
+
+endif # ESP32C3_LEDC_TIM0
+
+menuconfig ESP32C3_LEDC_TIM1
+	bool "Timer 1"
+	default n
+
+if ESP32C3_LEDC_TIM1
+
+config ESP32C3_LEDC_TIM1_CHANNELS
+	int "Number of Timer 1 channels"
+	default 2
+
+endif # ESP32C3_LEDC_TIM1
+
+menuconfig ESP32C3_LEDC_TIM2
+	bool "Timer 2"
+	default n
+
+if ESP32C3_LEDC_TIM2
+
+config ESP32C3_LEDC_TIM2_CHANNELS
+	int "Number of Timer 2 channels"
+	default 2
+
+endif # ESP32C3_LEDC_TIM2
+
+config ESP32C3_LEDC_CHANNEL0_PIN
+	int "Channel 0 pin"
+	default 2
+
+config ESP32C3_LEDC_CHANNEL1_PIN
+	int "Channel 1 pin"
+	default 3
+
+config ESP32C3_LEDC_CHANNEL2_PIN
+	int "Channel 2 pin"
+	default 4
+
+config ESP32C3_LEDC_CHANNEL3_PIN
+	int "Channel 3 pin"
+	default 5
+
+config ESP32C3_LEDC_CHANNEL4_PIN
+	int "Channel 4 pin"
+	default 6
+
+config ESP32C3_LEDC_CHANNEL5_PIN
+	int "Channel 5 pin"
+	default 7
+
+endmenu # LEDC configuration
 
 menu "Wi-Fi configuration"
 	depends on ESP32C3_WIRELESS

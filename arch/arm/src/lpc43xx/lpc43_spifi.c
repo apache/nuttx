@@ -1146,7 +1146,7 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
  *   None
  *
  * Returned Value:
- *   One success, a reference to the initialized MTD device instance is
+ *   On success, a reference to the initialized MTD device instance is
  *   returned;  NULL is returned on any failure.
  *
  ****************************************************************************/

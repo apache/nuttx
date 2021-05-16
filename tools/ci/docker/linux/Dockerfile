@@ -203,6 +203,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libxext-dev libxext-dev:i386 \
   linux-libc-dev:i386 \
   linux-headers-generic \
+  ninja-build \
   python3 \
   python3-pip \
   python-is-python3 \

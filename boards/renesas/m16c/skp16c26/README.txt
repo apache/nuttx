@@ -27,7 +27,7 @@ boards/renesas/m16c/skp16c26/README.txt
 
    c:\Hew3\Tools\KPIT Cummins\GNUM16CM32C-ELF\v0901\m32c-elf\bin\m32c-elf-ld.exe: BFD (GNU Binutils) 2.19-GNUM16CM32C_v0901 assertion fail /home/kpit/fsfsrc/binutils-2.19/bfd/elf32-m32c.c:482
 
-It is possible that this error messasge my be telling me -- a very roundabout way --
+It is possible that this error message may be telling me -- a very roundabout way --
 that I have exceeded the FLASH region, but I think that unlikely (it is difficult
 to know if the link does not complete gracefully).
 
