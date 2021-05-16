@@ -151,6 +151,7 @@ config ESP32C3_CPU_FREQ_MHZ
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
+	select ESP32C3_TIMER0
 
 config ESP32C3_DISABLE_STDC_ATOMIC
 	bool "Disable standard C atomic"
