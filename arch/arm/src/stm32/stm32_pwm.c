@@ -2975,11 +2975,11 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
   /* Get outputs configuration */
 
   regval |= ((outputs & STM32_PWM_OUT1)  ? GTIM_CCER_CC1E  : 0);
-  regval |= ((outputs & STM32_PWM_OUT1N) ? GTIM_CCER_CC1NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT1N) ? ATIM_CCER_CC1NE : 0);
   regval |= ((outputs & STM32_PWM_OUT2)  ? GTIM_CCER_CC2E  : 0);
-  regval |= ((outputs & STM32_PWM_OUT2N) ? GTIM_CCER_CC2NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT2N) ? ATIM_CCER_CC2NE : 0);
   regval |= ((outputs & STM32_PWM_OUT3)  ? GTIM_CCER_CC3E  : 0);
-  regval |= ((outputs & STM32_PWM_OUT3N) ? GTIM_CCER_CC3NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT3N) ? ATIM_CCER_CC3NE : 0);
   regval |= ((outputs & STM32_PWM_OUT4)  ? GTIM_CCER_CC4E  : 0);
 
   /* NOTE: CC4N doesn't exist, but some docs show configuration bits for it */
