@@ -486,7 +486,7 @@ static inline void rcc_enableapb2(void)
 #endif
 
 #ifdef CONFIG_STM32H7_USART6
-  /* USART1 clock enable */
+  /* USART6 clock enable */
 
   regval |= RCC_APB2ENR_USART6EN;
 #endif
