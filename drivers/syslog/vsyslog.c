@@ -116,22 +116,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
   /* Wrap the low-level output in a stream object and let lib_vsprintf
-   * do the work.  NOTE that emergency priority output is handled
-   * differently.. it will use the SYSLOG emergency stream.
+   * do the work.
    */
 
-  if (priority == LOG_EMERG)
-    {
-      /* Use the SYSLOG emergency stream */
-
-      emergstream(&stream.public);
-    }
-  else
-    {
-      /* Use the normal SYSLOG stream */
-
-      syslogstream_create(&stream);
-    }
+  syslogstream_create(&stream);
 
 #if defined(CONFIG_SYSLOG_TIMESTAMP)
   /* Prepend the message with the current time, if available */
