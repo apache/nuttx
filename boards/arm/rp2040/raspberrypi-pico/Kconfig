@@ -63,6 +63,13 @@ config RP2040_SPI1_GPIO
 	range -1 29
 	depends on RP2040_SPI1
 
+config RP2040_LCD_SPI_CH
+	int "RP2040 LCD SPI channel number"
+	default 0
+	range 0 1
+	depends on LCD
+	---help---
+		Select SPI channel number to use LCD display.
 
 config RP2040_ENC28J60_SPI_CH
 	int "ENC28J60 SPI channel number"
