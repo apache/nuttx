@@ -26,6 +26,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <queue.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 

@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <arch/board/board.h>

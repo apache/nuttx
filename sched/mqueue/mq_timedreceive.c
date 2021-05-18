@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
 #include <mqueue.h>
 #include <debug.h>

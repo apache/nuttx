@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <pthread.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

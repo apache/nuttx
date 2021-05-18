@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <sched.h>
 #include <queue.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

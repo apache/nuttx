@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <netdb.h>
 
 #include "libc.h"

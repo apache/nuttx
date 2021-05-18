@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 

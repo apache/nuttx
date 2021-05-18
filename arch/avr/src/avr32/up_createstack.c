@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>

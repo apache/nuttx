@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 

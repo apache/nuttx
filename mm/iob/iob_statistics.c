@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>

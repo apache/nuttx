@@ -71,6 +71,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>

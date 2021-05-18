@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <string.h>

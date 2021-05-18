@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 

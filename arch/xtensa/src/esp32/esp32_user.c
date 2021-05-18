@@ -29,6 +29,7 @@
 #include <arch/xtensa/core.h>
 
 #include <sys/types.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "xtensa.h"
