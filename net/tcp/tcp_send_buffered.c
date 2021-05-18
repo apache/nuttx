@@ -487,6 +487,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
           else if (ackno == TCP_WBSEQNO(wrb))
             {
+              /* Reset the duplicate ack counter */
+
+              if ((flags & TCP_NEWDATA) != 0)
+                {
+                  TCP_WBNACK(wrb) = 0;
+                }
+
               /* Duplicate ACK? Retransmit data if need */
 
               if (++TCP_WBNACK(wrb) ==
