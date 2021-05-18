@@ -331,13 +331,6 @@ int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
 #endif
 
-/* up_btuart.c **************************************************************/
-
-#ifdef CONFIG_SIM_BTUART
-int  sim_btuart_register(const char *name, int id);
-void sim_btuart_loop(void);
-#endif
-
 /* up_audio.c ***************************************************************/
 
 #ifdef CONFIG_SIM_SOUND
