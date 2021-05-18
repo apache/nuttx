@@ -29,8 +29,6 @@
 #include <string.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 
-#ifdef CONFIG_NET_BLUETOOTH
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -60,6 +58,8 @@
 #define BLUETOOTH_ADDRSIZE      6
 #define BLUETOOTH_ADDRCOPY(d,s) memcpy((d),(s),BLUETOOTH_ADDRSIZE)
 #define BLUETOOTH_ADDRCMP(a,b)  (memcmp((a),(b),BLUETOOTH_ADDRSIZE) == 0)
+
+#ifdef CONFIG_NET_BLUETOOTH
 
 /****************************************************************************
  * Public Types

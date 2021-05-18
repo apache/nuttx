@@ -35,6 +35,7 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
+#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Private Function Prototypes
@@ -45,15 +46,16 @@ static void btnull_format_cmdcomplete(FAR struct bt_buf_s *buf,
 static void btnull_format_bdaddr_rsp(FAR struct bt_buf_s *buf,
                                      uint16_t opcode);
 
-static int  btnull_open(FAR const struct bt_driver_s *dev);
-static int  btnull_send(FAR const struct bt_driver_s *dev,
-                        FAR struct bt_buf_s *buf);
+static int  btnull_open(FAR struct bt_driver_s *dev);
+static int  btnull_send(FAR struct bt_driver_s *dev,
+                        enum bt_buf_type_e type,
+                        FAR void *data, size_t len);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct bt_driver_s g_bt_null =
+static struct bt_driver_s g_bt_null =
 {
   0,            /* head_reserve */
   btnull_open,  /* open */
@@ -180,16 +182,17 @@ static void btnull_format_buffersize_rsp(FAR struct bt_buf_s *buf,
   buf->len           = len;
 }
 
-static int btnull_send(FAR const struct bt_driver_s *dev,
-                       FAR struct bt_buf_s *buf)
+static int btnull_send(FAR struct bt_driver_s *dev,
+                       enum bt_buf_type_e type,
+                       FAR void *data, size_t len)
 {
-  wlinfo("Bit bucket: length %d\n", (int)buf->len);
+  wlinfo("Bit bucket: length %zu\n", len);
 
   /* Is the Bluetooth stack waiting for an event? */
 
-  if (buf->type == BT_CMD)
+  if (type == BT_CMD)
     {
-      FAR struct bt_hci_cmd_hdr_s *hdr = (FAR void *)buf->data;
+      FAR struct bt_hci_cmd_hdr_s *hdr = data;
       FAR struct bt_buf_s *outbuf;
       uint16_t opcode = hdr->opcode;
 
@@ -224,13 +227,15 @@ static int btnull_send(FAR const struct bt_driver_s *dev,
 
       wlinfo("Send CMD complete event\n");
 
-      bt_hci_receive(outbuf);
+      bt_netdev_receive(dev, outbuf->type,
+                        outbuf->data, outbuf->len);
+      bt_buf_release(outbuf);
     }
 
-  return buf->len;
+  return len;
 }
 
-static int btnull_open(FAR const struct bt_driver_s *dev)
+static int btnull_open(FAR struct bt_driver_s *dev)
 {
   return OK;
 }
