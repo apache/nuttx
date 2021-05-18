@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>

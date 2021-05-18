@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <poll.h>
 #include <stdio.h>
 #include <string.h>

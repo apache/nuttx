@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

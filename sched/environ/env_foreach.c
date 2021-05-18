@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sched.h>
+#include <assert.h>
 
 #include <nuttx/environ.h>
 

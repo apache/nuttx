@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <stdint.h>
 #include <debug.h>
 #include <nuttx/config.h>

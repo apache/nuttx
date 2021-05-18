@@ -50,6 +50,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>

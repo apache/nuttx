@@ -27,6 +27,7 @@
 #ifdef CONFIG_ESP32_SPIFLASH
 
 #include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 #include <stdio.h>
 #include <string.h>

@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <assert.h>
 #include <string.h>
 
 #include <nuttx/kmalloc.h>

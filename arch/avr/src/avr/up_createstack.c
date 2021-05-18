@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>

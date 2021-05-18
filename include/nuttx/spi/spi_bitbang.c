@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/spi/spi_bitbang.h>
 
 /****************************************************************************

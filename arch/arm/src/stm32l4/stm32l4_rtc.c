@@ -28,6 +28,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

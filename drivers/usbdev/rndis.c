@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <queue.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <inttypes.h>

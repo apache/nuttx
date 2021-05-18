@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 

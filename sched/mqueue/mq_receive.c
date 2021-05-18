@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <errno.h>
 #include <mqueue.h>
 #include <debug.h>

@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <fcntl.h>

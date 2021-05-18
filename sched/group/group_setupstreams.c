@@ -26,6 +26,7 @@
 
 #include <sched.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>

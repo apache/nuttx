@@ -27,6 +27,7 @@
 #include <sys/wait.h>
 #include <sched.h>
 #include <spawn.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 

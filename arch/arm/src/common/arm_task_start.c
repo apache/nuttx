@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
+#include <assert.h>
+
 #include "svcall.h"
 #include "arm_internal.h"
 
