@@ -2142,6 +2142,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
                       off_t position)
 {
   int sectoroffset;
+  off_t cluster_start_sector;
 
   if (position <= ff->ff_size)
     {
@@ -2149,12 +2150,18 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
       sectoroffset = SEC_NSECTORS(fs, position) & CLUS_NDXMASK(fs);
 
-      /* The current cluster is the first sector of the cluster plus
+      /* The current sector is the first sector of the cluster plus
        * the sector offset
        */
 
-      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
-                           + sectoroffset;
+      cluster_start_sector = fat_cluster2sector(fs, ff->ff_currentcluster);
+
+      if (cluster_start_sector < 0)
+        {
+          return cluster_start_sector;
+        }
+
+      ff->ff_currentsector = cluster_start_sector + sectoroffset;
 
       /* The remainder is the number of sectors left in the cluster to be
        * read/written
