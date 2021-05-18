@@ -58,8 +58,8 @@
  *   sdev   - SPI slave device interface instance
  *   mode   - The SPI mode requested
  *   nbits  - The number of bits requests.
- *            If value is greater > 0 then it implies MSB first
- *            If value is below < 0, then it implies LSB first with -nbits
+ *            If value is greater than 0, then it implies MSB first
+ *            If value is less than 0, then it implies LSB first with -nbits
  *
  * Returned Value:
  *   None.
@@ -98,9 +98,10 @@
  *   sctrlr - SPI slave controller interface instance
  *   data   - Pointer to the command/data mode data to be shifted out.
  *            The data width must be aligned to the nbits parameter which was
- *            previously provided to the bind() methods.
+ *            previously provided to the bind() method.
  *   len    - Number of units of "nbits" wide to enqueue,
- *            "nbits" being the data width given in "bind"
+ *            "nbits" being the data width previously provided to the bind()
+ *            method.
  *
  * Returned Value:
  *   Number of data items successfully queued, or a negated errno:
@@ -123,7 +124,7 @@
  *   sctrlr - SPI slave controller interface instance
  *
  * Returned Value:
- *   true if the output queue is full.
+ *   true if the output queue is full, false otherwise.
  *
  ****************************************************************************/
 
@@ -188,12 +189,12 @@
  * Name: SPI_SDEV_SELECT
  *
  * Description:
- *   This is a SPI device callback that used when the SPI device controller
+ *   This is a SPI device callback that is used when the SPI controller
  *   driver detects any change in the chip select pin.
  *
  * Input Parameters:
  *   sdev     - SPI device interface instance
- *   selected - True: chip select is low (selected);
+ *   selected - Indicates whether the chip select is in active state
  *
  * Returned Value:
  *   None.
@@ -210,13 +211,13 @@
  * Name: SPI_SDEV_CMDDATA
  *
  * Description:
- *   This is a SPI device callback that used when the SPI device controller
- *   driver detects any change command/data condition.
+ *   This is a SPI device callback that is used when the SPI controller
+ *   driver detects any change in the command/data condition.
  *
  *   Normally only LCD devices distinguish command and data. For devices
  *   that do not distinguish between command and data, this method may be
- *   a stub.; For devices that do make that distinction, they should treat
- *   all subsequent calls to enqueue() or rece() appropriately for the
+ *   a stub. For devices that do make that distinction, they should treat
+ *   all subsequent calls to getdata() or receive() appropriately for the
  *   current command/data selection.
  *
  * Input Parameters:
@@ -238,7 +239,7 @@
  * Name: SPI_SDEV_GETDATA
  *
  * Description:
- *   This is a SPI device callback that used when the SPI device controller
+ *   This is a SPI device callback that is used when the SPI controller
  *   requires data be shifted out at the next leading clock edge. This
  *   is necessary to "prime the pump" so that the SPI controller driver
  *   can keep pace with the shifted-in data.
@@ -253,7 +254,7 @@
  *          The device will set the data buffer pointer to the actual data
  *
  * Returned Value:
- *   The number of data bytes to be shifted out from the data buffer
+ *   The number of data units to be shifted out from the data buffer.
  *
  * Assumptions:
  *   May be called from an interrupt handler and the response is usually
@@ -267,16 +268,16 @@
  * Name: SPI_SDEV_RECEIVE
  *
  * Description:
- *   This is a SPI device callback that used when the SPI device controller
- *   receives a new value shifted in and requires the next value to be
- *   shifted out. Notice that these values my be out of synchronization by
- *   several words.
+ *   This is a SPI device callback that is used when the SPI controller
+ *   receives a new value shifted in. Notice that these values may be out of
+ *   synchronization by several words.
  *
  * Input Parameters:
  *   sdev - SPI device interface instance
  *   data - Pointer to the new data that has been shifted in
  *   len  - Length of the new data in units of nbits wide,
- *          nbits being the data width given in "bind"
+ *          nbits being the data width previously provided to the bind()
+ *          method.
  *
  * Returned Value:
  *   Number of units accepted by the device. In other words,
@@ -319,7 +320,7 @@
  *    slave device and the SPI slave controller hardware. This interface
  *    is implemented by the SPI slave device. The slave device passes this
  *    interface to the struct spi_sctrlr_s during initialization
- *    be calling the bind() method of the struct spi_sctrlr_s
+ *    by calling the bind() method of the struct spi_sctrlr_s
  *    interface.
  *
  * The basic initialization steps are:
