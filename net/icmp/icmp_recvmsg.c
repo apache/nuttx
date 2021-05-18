@@ -181,7 +181,8 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Indicate that the data has been consumed */
 
-          flags &= ~ICMP_NEWDATA;
+          flags     &= ~ICMP_NEWDATA;
+          dev->d_len = 0;
           goto end_wait;
         }
 
