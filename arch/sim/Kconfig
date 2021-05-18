@@ -549,21 +549,6 @@ config SIM_HCISOCKET
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
 
-config SIM_BTUART
-	bool "Attach Host Bluetooth As TTY Device"
-	default false
-	depends on (DRIVERS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
-	select BLUETOOTH_UART_SHIM if BLUETOOTH_UART
-	---help---
-		Attached the local bluetooth device to the simulation
-		target via HCI_CHANNEL_USER. This gives NuttX full
-		control of the device, but is abstracted from the
-		physical interface which is still handled by Linux.
-		Unlike SIM_HCISOCKET, BTUART will wrap the bluetooth
-		interface/controller as a TTY device, which provides
-		an option for developers to setup the bluetooth host in
-		userspace.
-
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"
 	default n
