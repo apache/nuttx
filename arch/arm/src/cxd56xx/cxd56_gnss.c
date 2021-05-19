@@ -519,7 +519,7 @@ static int cxd56_gnss_get_satellite_system(FAR struct file *filep,
                                            unsigned long    arg)
 {
   int ret;
-  uint32_t system;
+  uint32_t system = 0;
 
   if (!arg)
     {
@@ -701,7 +701,7 @@ static int cxd56_gnss_get_tcxo_offset(FAR struct file *filep,
                                       unsigned long    arg)
 {
   int     ret;
-  int32_t offset;
+  int32_t offset = 0;
 
   if (!arg)
     {
@@ -1741,7 +1741,7 @@ static int cxd56_gnss_get_rtk_interval(FAR struct file *filep,
                                        unsigned long    arg)
 {
   int ret;
-  int interval;
+  int interval = 0;
 
   if (!arg)
     {
@@ -1798,7 +1798,7 @@ static int cxd56_gnss_get_rtk_satellite(FAR struct file *filep,
                                         unsigned long    arg)
 {
   int       ret;
-  uint32_t  gnss;
+  uint32_t  gnss = 0;
 
   if (!arg)
     {
@@ -1855,7 +1855,7 @@ static int cxd56_gnss_get_rtk_ephemeris_enable(FAR struct file *filep,
                                                unsigned long    arg)
 {
   int ret;
-  int enable;
+  int enable = 0;
 
   if (!arg)
     {
