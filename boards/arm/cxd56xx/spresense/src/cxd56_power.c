@@ -127,7 +127,8 @@ int board_pmic_write(uint8_t addr, void *buf, uint32_t size)
 int board_power_setup(int status)
 {
 #ifdef CONFIG_BOARD_USB_DISABLE_IN_DEEP_SLEEPING
-  uint8_t val;
+  int      ret;
+  uint8_t  val = 0;
   uint32_t bootcause;
 
   /* Enable USB after wakeup from deep sleeping */
@@ -140,8 +141,8 @@ int board_power_setup(int status)
       case PM_BOOT_DEEP_WKUPS:
       case PM_BOOT_DEEP_RTC:
       case PM_BOOT_DEEP_OTHERS:
-        cxd56_pmic_read(PMIC_REG_CNT_USB2, &val, sizeof(val));
-        if (val & PMIC_SET_CHGOFF)
+        ret = cxd56_pmic_read(PMIC_REG_CNT_USB2, &val, sizeof(val));
+        if ((ret == 0) && (val & PMIC_SET_CHGOFF))
           {
             val &= ~PMIC_SET_CHGOFF;
             cxd56_pmic_write(PMIC_REG_CNT_USB2, &val, sizeof(val));
