@@ -190,6 +190,7 @@ config CXD56_WDT_INTERRUPT
 config CXD56_WDT_REGDEBUG
 	bool "Register level debug"
 	default n
+	depends on DEBUG_WATCHDOG_INFO
 	---help---
 		Enable low-level register debug output
 
