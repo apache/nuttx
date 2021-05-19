@@ -303,7 +303,9 @@ void __start(void)
 
   putreg32(0, CXD56_EXCCONF_BASE + 0);
 
+#ifndef CONFIG_CXD56_SUBCORE
   cxd56_lowsetup();
+#endif
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -327,7 +329,7 @@ void __start(void)
 
   /* Perform early serial initialization */
 
-#ifdef USE_EARLYSERIALINIT
+#if defined(USE_EARLYSERIALINIT) && !defined(CONFIG_CXD56_SUBCORE)
   arm_earlyserialinit();
 #endif
   showprogress('E');
