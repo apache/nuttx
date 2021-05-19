@@ -509,9 +509,12 @@ int board_reset(int status)
 {
   /* Restore the original state for bootup after power cycle  */
 
-  board_xtal_power_control(true);
-  board_flash_power_control(true);
-  up_pm_acquire_freqlock(&g_hv_lock);
+  if (!up_interrupt_context())
+    {
+      board_xtal_power_control(true);
+      board_flash_power_control(true);
+      up_pm_acquire_freqlock(&g_hv_lock);
+    }
 
   /* System reboot */
 
