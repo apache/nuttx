@@ -509,6 +509,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   FAR struct cxd56_spidev_s *priv = (FAR struct cxd56_spidev_s *)dev;
   uint32_t regval;
+  uint32_t cr1val;
 
   /* Has the mode changed? */
 
@@ -551,7 +552,18 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
             return;
         }
 
+      /* Disable SSE */
+
+      cr1val = spi_getreg(priv, CXD56_SPI_CR1_OFFSET);
+      spi_putreg(priv, CXD56_SPI_CR1_OFFSET, cr1val & ~SPI_CR1_SSE);
+
       spi_putreg(priv, CXD56_SPI_CR0_OFFSET, regval);
+
+      /* Enable SSE after a few microseconds delay */
+
+      up_udelay(3);
+
+      spi_putreg(priv, CXD56_SPI_CR1_OFFSET, cr1val);
 
       /* Enable clock gating (clock disable) */
 
