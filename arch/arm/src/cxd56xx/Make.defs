@@ -201,3 +201,7 @@ endif
 ifeq ($(CONFIG_CXD56_BACKUPLOG),y)
 CHIP_CSRCS += cxd56_backuplog.c
 endif
+
+ifeq ($(CONFIG_CXD56_HOSTIF),y)
+CHIP_CSRCS += cxd56_hostif.c
+endif
