@@ -159,7 +159,7 @@ jobs:
     needs: Fetch-Source
     strategy:
       matrix:
-        boards: [macos, sim01, sim02]
+        boards: [macos, sim-01, sim-02]
     steps:
       - name: Download Source Artifact
         uses: actions/download-artifact@v1

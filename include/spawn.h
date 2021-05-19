@@ -31,7 +31,6 @@
 
 #include <sched.h>
 #include <signal.h>
-#include <errno.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -5894,6 +5894,10 @@ static int smart_fsck_directory(FAR struct smart_struct_s *dev,
           ferr("Invalidate next log sector %d\n", nextsector);
 
           *(uint16_t *)chain->nextsector = 0xffff;
+
+          /* Set flag to relocate later */
+
+          relocate = 1;
         }
     }
 

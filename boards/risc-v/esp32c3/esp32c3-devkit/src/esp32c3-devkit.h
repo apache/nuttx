@@ -193,5 +193,21 @@ int esp32c3_spiflash_init(void);
 int esp32c3_pwm_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: board_adc_init
+ *
+ * Description:
+ *   Configure the ADC driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int board_adc_init(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */

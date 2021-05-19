@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/syslog/syslog_emergstream.c
+ * arch/risc-v/src/esp32c3/esp32c3_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,82 +18,62 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_ADC_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_ADC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <errno.h>
-
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/streams.h>
-
-#include "syslog.h"
+#include <nuttx/arch.h>
+#include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: emergstream_putc
+ * Public Types
  ****************************************************************************/
 
-static void emergstream_putc(FAR struct lib_outstream_s *this, int ch)
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret;
-
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_force returns a negated errno value.
-       */
-
-      ret = syslog_force(ch);
-      if (ret >= 0)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The special return value -EINTR means that syslog_force() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
-    }
-  while (ret == -EINTR);
-}
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: emergstream
+ * Name: esp32c3_adc_init
  *
  * Description:
- *   Initializes a stream for use with the configured emergency syslog
- *   interface.  Only accessible from with the OS SYSLOG logic.
+ *   Initialize the ADC.
  *
  * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_outstream_s to be initialized.
+ *   channel - ADC channel number
  *
  * Returned Value:
- *   None (User allocated instance initialized).
+ *   ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-void emergstream(FAR struct lib_outstream_s *stream)
-{
-  stream->put   = emergstream_putc;
-  stream->flush = lib_noflush;
-  stream->nput  = 0;
+struct adc_dev_s *esp32c3_adc_init(int channel);
+
+#ifdef __cplusplus
 }
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_ADC_H */
