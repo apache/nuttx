@@ -1028,7 +1028,9 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
   i2c_reg_write(priv, CXD56_IC_SDA_HOLD, 1);
 
   i2c_reg_write(priv, CXD56_IC_CON,
-                (IC_SLAVE_DISABLE | IC_MASTER_MODE | IC_TX_EMPTY_CTRL));
+                (IC_RX_FIFO_FULL_HLD_CTRL | IC_RESTART_EN |
+                 IC_SLAVE_DISABLE | IC_MASTER_MODE | IC_TX_EMPTY_CTRL));
+
   cxd56_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
   leave_critical_section(flags);
