@@ -211,7 +211,7 @@ static int hif_open(FAR struct file *filep)
     }
 
   if ((filep->f_oflags & O_WRONLY) &&
-      ((priv->flags & HOSTIF_BUFF_ATTR_WRITE) != 0))
+      ((priv->flags & HOSTIF_BUFF_ATTR_READ) != 0))
     {
       return -EINVAL;
     }
