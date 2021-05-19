@@ -205,6 +205,13 @@ int board_power_control(int target, bool en)
   if (pfunc)
     {
       ret = pfunc(PMIC_GET_CH(target), en);
+
+      /* If RTC clock is unstable, delay 1 tick for PMIC setting. */
+
+      if (!g_rtc_enabled)
+        {
+          usleep(1);
+        }
     }
 
   return ret;
@@ -236,6 +243,13 @@ int board_power_control_tristate(int target, int value)
       /* set HiZ to PMIC GPO channel */
 
       ret = cxd56_pmic_set_gpo_hiz(PMIC_GET_CH(target));
+
+      /* If RTC clock is unstable, delay 1 tick for PMIC setting. */
+
+      if (!g_rtc_enabled)
+        {
+          usleep(1);
+        }
     }
   else
     {
