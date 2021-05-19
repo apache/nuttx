@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <nuttx/arch.h>
 
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
@@ -73,6 +74,8 @@
 #else
 #  error "Select LTE SPI 4 or 5"
 #endif
+
+#define WAIT_READY_TO_GPIO_INTERRUPT 300 /* micro seconds */
 
 /****************************************************************************
  * Private Function Prototypes
@@ -313,6 +316,12 @@ static bool altmdm_sready(void)
 
 static void altmdm_master_request(bool request)
 {
+  /* If the GPIO falls within 300us after raising
+   * (or GPIO raises within 300us after falling), the modem may miss the GPIO
+   * interrupt. So delay by 300us before changing the GPIO.
+   */
+
+  up_udelay(WAIT_READY_TO_GPIO_INTERRUPT);
   cxd56_gpio_write(ALTMDM_MASTER_REQ, request);
 }
 
