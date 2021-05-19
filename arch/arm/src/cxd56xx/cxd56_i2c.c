@@ -846,9 +846,6 @@ static int cxd56_i2c_transfer_scu(FAR struct i2c_master_s *dev,
       cxd56_i2c_clock_gate_disable(priv->port);
       cxd56_i2c_disable(priv);
       cxd56_i2c_setfrequency(priv, msgs->frequency);
-      i2c_reg_rmw(priv, CXD56_IC_CON, IC_RESTART_EN, IC_RESTART_EN);
-      i2c_reg_write(priv, CXD56_IC_TAR, msgs->addr & 0x7f);
-      cxd56_i2c_enable(priv);
       cxd56_i2c_clock_gate_enable(priv->port);
 
       priv->frequency = msgs->frequency;
