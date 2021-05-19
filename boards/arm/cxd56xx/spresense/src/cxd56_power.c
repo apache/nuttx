@@ -206,9 +206,9 @@ int board_power_control(int target, bool en)
     {
       ret = pfunc(PMIC_GET_CH(target), en);
 
-      /* If RTC clock is unstable, delay 1 tick for PMIC setting. */
+      /* If RTC clock is unstable, delay 1 tick for PMIC GPO setting. */
 
-      if (!g_rtc_enabled)
+      if (!g_rtc_enabled && (PMIC_GET_TYPE(target) == PMIC_TYPE_GPO))
         {
           usleep(1);
         }
