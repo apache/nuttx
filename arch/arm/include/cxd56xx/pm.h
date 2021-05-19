@@ -62,8 +62,9 @@
 
 /* FrequencyLock request flag definitions */
 
-#define PM_CPUFREQLOCK_FLAG_HV (0x0001) /* request HV */
-#define PM_CPUFREQLOCK_FLAG_LV (0x4000) /* request LV */
+#define PM_CPUFREQLOCK_FLAG_HV (0x0001)   /* request HV */
+#define PM_CPUFREQLOCK_FLAG_LV (0x4000)   /* request LV */
+#define PM_CPUFREQLOCK_FLAG_HOLD (0x8000) /* hold the current frequency */
 
 /* FrequencyLock identifier tag helper macro function */
 
