@@ -399,6 +399,13 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                             (FAR struct sockaddr_in *)from, fromlen);
     }
 
+  /* Handle non-blocking ICMP sockets */
+
+  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+    {
+      return -EAGAIN;
+    }
+
   /* Initialize the state structure */
 
   memset(&state, 0, sizeof(struct icmp_recvfrom_s));

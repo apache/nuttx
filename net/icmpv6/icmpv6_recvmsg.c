@@ -406,6 +406,13 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                             (FAR struct sockaddr_in6 *)from, fromlen);
     }
 
+  /* Handle non-blocking ICMP sockets */
+
+  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+    {
+      return -EAGAIN;
+    }
+
   /* Initialize the state structure */
 
   memset(&state, 0, sizeof(struct icmpv6_recvfrom_s));
