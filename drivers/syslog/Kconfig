@@ -39,8 +39,8 @@ config RAMLOG_BUFFER_SECTION
 	default ".bss"
 	depends on RAMLOG_SYSLOG
 	---help---
-		The section where ramlog buffer is located, this section cannot
-		be initialized each time when the system boot.
+		The section where ramlog buffer is located.
+		The section shall not be initialized on system boot.
 
 config RAMLOG_BUFSIZE
 	int "RAMLOG buffer size"

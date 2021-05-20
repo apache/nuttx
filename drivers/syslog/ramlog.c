@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <ctype.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
@@ -133,8 +134,8 @@ static struct ramlog_dev_s g_sysdev =
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   0,                             /* rl_nwaiters */
 #endif
-  0,                             /* rl_head */
-  0,                             /* rl_tail */
+  CONFIG_RAMLOG_BUFSIZE,         /* rl_head */
+  CONFIG_RAMLOG_BUFSIZE,         /* rl_tail */
   SEM_INITIALIZER(1),            /* rl_exclsem */
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   SEM_INITIALIZER(0),            /* rl_waitsem */
@@ -232,6 +233,7 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 #ifdef CONFIG_RAMLOG_OVERWRITE
       /* Yes... Overwrite with the latest log in the circular buffer */
 
+      priv->rl_buffer[priv->rl_tail] = '\0';
       priv->rl_tail += 1;
       if (priv->rl_tail >= priv->rl_bufsize)
         {
@@ -382,6 +384,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer,
            */
 
           ch = priv->rl_buffer[priv->rl_tail];
+          priv->rl_buffer[priv->rl_tail] = '\0';
 
           /* Increment the tail index. */
 
@@ -641,6 +644,61 @@ errout:
 }
 
 /****************************************************************************
+ * Name: ramlog_initbuf
+ *
+ * Description:
+ *   Initialize g_sysdev based on the current system ramlog buffer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+static void ramlog_initbuf(void)
+{
+  FAR struct ramlog_dev_s *priv = &g_sysdev;
+  char prev, cur;
+  size_t i;
+
+  if (priv->rl_head != CONFIG_RAMLOG_BUFSIZE ||
+      priv->rl_tail != CONFIG_RAMLOG_BUFSIZE)
+    {
+      return;
+    }
+
+  prev = priv->rl_buffer[priv->rl_bufsize - 1];
+
+  for (i = 0; i < priv->rl_bufsize; i++)
+    {
+      cur = priv->rl_buffer[i];
+
+      if (!isascii(cur))
+        {
+          goto out;
+        }
+
+      if (prev && !cur)
+        {
+          priv->rl_head = i;
+        }
+
+      if (!prev && cur)
+        {
+          priv->rl_tail = i;
+        }
+
+      prev = cur;
+    }
+
+out:
+  if (i != priv->rl_bufsize)
+    {
+      priv->rl_head = 0;
+      priv->rl_tail = 0;
+      memset(priv->rl_buffer, 0, priv->rl_bufsize);
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -728,6 +786,8 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   int ret;
 
   UNUSED(channel);
+
+  ramlog_initbuf();
 
 #ifdef CONFIG_RAMLOG_CRLF
   /* Ignore carriage returns.  But return success. */
