@@ -33,9 +33,13 @@
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
-#elif defined(CONFIG_SYSLOG_RPMSG)
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG
 #  include <nuttx/syslog/syslog_rpmsg.h>
-#elif defined(CONFIG_ARCH_LOWPUTC)
+#endif
+
+#ifdef CONFIG_ARCH_LOWPUTC
 #  include <nuttx/arch.h>
 #endif
 
