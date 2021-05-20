@@ -34,6 +34,14 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
+config RAMLOG_BUFFER_SECTION
+	string "The section where ramlog buffer is located"
+	default ".bss"
+	depends on RAMLOG_SYSLOG
+	---help---
+		The section where ramlog buffer is located, this section cannot
+		be initialized each time when the system boot.
+
 config RAMLOG_BUFSIZE
 	int "RAMLOG buffer size"
 	default 1024
