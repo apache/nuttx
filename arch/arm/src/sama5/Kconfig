@@ -2176,7 +2176,7 @@ config SAMA5_CAN0_ADDR0
 
 config SAMA5_CAN0_MASK0
 	hex "Mailbox 0 address mask"
-	default 0x7fff if !CAN_EXTID
+	default 0x7ff if !CAN_EXTID
 	default 0x1fffffff if CAN_EXTID
 	---help---
 		This setting defines the address mask for receive mailbox 0.  And
@@ -2198,7 +2198,7 @@ config SAMA5_CAN0_ADDR1
 
 config SAMA5_CAN0_MASK1
 	hex "Mailbox 1 address mask"
-	default 0x7fff if !CAN_EXTID
+	default 0x7ff if !CAN_EXTID
 	default 0x1fffffff if CAN_EXTID
 	---help---
 		This setting defines the address mask for receive mailbox 1.  And
@@ -2222,7 +2222,7 @@ config SAMA5_CAN0_ADDR2
 
 config SAMA5_CAN0_MASK2
 	hex "Mailbox 1 address mask"
-	default 0x7fff if !CAN_EXTID
+	default 0x7ff if !CAN_EXTID
 	default 0x1fffffff if CAN_EXTID
 	---help---
 		This setting defines the address mask for receive mailbox 2.  And
