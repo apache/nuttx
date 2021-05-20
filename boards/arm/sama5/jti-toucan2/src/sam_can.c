@@ -63,11 +63,14 @@ int sam_can_setup(void)
 	
 	int ret = OK;
   printf("PRINTF: Setting up CAN\n");
-  #if defined CONFIG_DEBUG_CAN_INFO
+#if defined CONFIG_DEBUG_CAN_INFO
   
+  canerr("CANERROR: Setting up CAN\n");
+  canwarn("CANWARN: Setting up CAN\n");
   caninfo("CANINFO: Setting up CAN\n");
-
-  #endif
+#else
+    printf("no CAN debug enabled\n");
+#endif
 	#if defined(CONFIG_SAMA5_CAN0)
     struct can_dev_s *can0;
 	  /* Call sam_caninitialize() to get an instance of the CAN interface */
