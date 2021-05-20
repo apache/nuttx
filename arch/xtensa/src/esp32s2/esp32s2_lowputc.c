@@ -63,11 +63,11 @@ struct esp32s2_uart_s g_uart0_config =
   .periph = ESP32S2_PERI_UART,
   .id = 0,
   .cpuint = -ENOMEM,
-  .irq =  ESP32S2_IRQ_UART,
+  .irq = ESP32S2_IRQ_UART,
   .baud = CONFIG_UART0_BAUD,
   .bits = CONFIG_UART0_BITS,
   .parity = CONFIG_UART0_PARITY,
-  .stop_b2 =  CONFIG_UART0_2STOP,
+  .stop_b2 = CONFIG_UART0_2STOP,
   .int_pri = ESP32S2_INT_PRIO_DEF,
   .txpin = CONFIG_ESP32S2_UART0_TXPIN,
   .txsig = U0TXD_OUT_IDX,
@@ -88,7 +88,7 @@ struct esp32s2_uart_s g_uart1_config =
   .baud = CONFIG_UART1_BAUD,
   .bits = CONFIG_UART1_BITS,
   .parity = CONFIG_UART1_PARITY,
-  .stop_b2 =  CONFIG_UART1_2STOP,
+  .stop_b2 = CONFIG_UART1_2STOP,
   .int_pri = ESP32S2_INT_PRIO_DEF,
   .txpin = CONFIG_ESP32S2_UART1_TXPIN,
   .txsig = U1TXD_OUT_IDX,
@@ -221,7 +221,7 @@ uint32_t esp32s2_lowputc_get_sclk(const struct esp32s2_uart_s * priv)
   uint32_t clk_conf_reg;
   uint32_t ret = -ENODATA;
   uint32_t clk;
-  clk_conf_reg   = getreg32(UART_CONF0_REG(priv->id));
+  clk_conf_reg = getreg32(UART_CONF0_REG(priv->id));
   clk = REG_MASK(clk_conf_reg, UART_TICK_REF_ALWAYS_ON);
   if (clk == 1)
     {
@@ -232,6 +232,9 @@ uint32_t esp32s2_lowputc_get_sclk(const struct esp32s2_uart_s * priv)
       /* TODO in esp32s2_clockconfig.c
        * ret = esp32s2_clk_ref_freq();
        */
+
+      _warn("esp32s2_clockconfig.c still doesn't support "
+            "esp32s2_clk_ref_freq() ");
     }
 
   return ret;
@@ -583,11 +586,15 @@ void esp32s2_lowputc_config_pins(const struct esp32s2_uart_s *priv)
 
   esp32s2_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
 
-  /* Select the GPIO function to the TX pin and configure as output. */
+  /* Select the GPIO function to the TX pin and
+   * configure as output.
+   */
 
   esp32s2_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
 
-  /* Select the GPIO function to the RX pin and configure as input. */
+  /* Select the GPIO function to the RX pin and
+   * configure as input.
+   */
 
   esp32s2_configgpio(priv->rxpin, INPUT_FUNCTION_1);
 
@@ -611,11 +618,11 @@ void up_lowputc(char ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
 
-#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
   struct esp32s2_uart_s *priv = &g_uart0_config;
 #elif defined (CONFIG_UART1_SERIAL_CONSOLE)
   struct esp32s2_uart_s *priv = &g_uart1_config;
-#endif
+# endif
 
   /* Wait until the TX FIFO has space to insert new char */
 

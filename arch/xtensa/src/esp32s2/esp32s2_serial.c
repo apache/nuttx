@@ -53,10 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The console is enabled, and it's not the syslog device,
- * so, it should be a serial device.
- */
-
 #ifdef USE_SERIALDRIVER
 
 /* Which UART will be tty0/console and which tty1? */
@@ -658,7 +654,7 @@ static int esp32s2_receive(struct uart_dev_s *dev, unsigned int *status)
   struct esp32s2_uart_s *priv = dev->priv;
 
   rx_fifo = getreg32(UART_FIFO_REG(priv->id));
-  rx_fifo = rx_fifo & UART_RXFIFO_RD_BYTE_M;
+  rx_fifo = REG_MASK(rx_fifo, UART_RXFIFO_RD_BYTE);
 
   /* Since we don't have error bits associated with receipt, we set zero */
 
