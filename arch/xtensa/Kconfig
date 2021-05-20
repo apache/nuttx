@@ -37,6 +37,32 @@ config ARCH_CHIP_ESP32
 		"application"), however for most purposes the two CPUs are
 		interchangeable.
 
+config ARCH_CHIP_ESP32S2
+	bool "Espressif ESP32-S2"
+	select ARCH_FAMILY_LX7
+	select XTENSA_HAVE_INTERRUPTS
+	select ARCH_HAVE_MODULE_TEXT
+	select ARCH_HAVE_SDRAM
+	select ARCH_HAVE_RESET
+	select ARCH_TOOLCHAIN_GNU
+	select ARCH_VECNOTIRQ
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMCCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	---help---
+		The ESP32-S2 is a dual-core system from Espressif with a
+		Harvard architecture Xtensa LX7 CPU.
+
 config ARCH_CHIP_XTENSA_CUSTOM
 	bool "Custom XTENSA chip"
 	select ARCH_CHIP_CUSTOM
@@ -53,9 +79,17 @@ config ARCH_FAMILY_LX6
 		Cadence® Tensilica® Xtensa® LX6 data plane processing unit (DPU).
 		The LX6 is a configurable and extensible processor core.
 
+config ARCH_FAMILY_LX7
+	bool
+	default n
+	---help---
+		Cadence® Tensilica® Xtensa® LX7 data plane processing unit (DPU).
+		The LX7 is a configurable and extensible processor core.
+
 config ARCH_CHIP
 	string
 	default "esp32"		if ARCH_CHIP_ESP32
+	default "esp32s2"	if ARCH_CHIP_ESP32S2
 
 config XTENSA_CP_LAZY
 	bool "Lazy co-processor state restoration"
@@ -141,6 +175,11 @@ config XTENSA_EXTMEM_BSS
 source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32
 source arch/xtensa/src/esp32/Kconfig
+endif
+
+source arch/xtensa/src/lx7/Kconfig
+if ARCH_CHIP_ESP32S2
+source arch/xtensa/src/esp32s2/Kconfig
 endif
 
 endif # ARCH_XTENSA

@@ -25,6 +25,10 @@ ifeq ($(CONFIG_ARCH_FAMILY_LX6),y)
 ARCH_SUBDIR = lx6
 endif
 
+ifeq ($(CONFIG_ARCH_FAMILY_LX7),y)
+ARCH_SUBDIR = lx7
+endif
+
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
