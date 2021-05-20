@@ -927,8 +927,8 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: 0x%08x\n",
-          priv->intstate, (long)elapsed, (long)timeout, priv->status);
+  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: 0x%08" PRIx32
+          "\n", priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
 
