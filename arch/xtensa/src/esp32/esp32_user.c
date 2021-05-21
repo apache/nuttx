@@ -293,7 +293,7 @@ static void advance_pc(uint32_t *regs, int diff)
   /* Advance to the next instruction. */
 
   nextpc = regs[REG_PC] + diff;
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
   /* See Xtensa ISA 4.3.2.4 Loopback Semantics */
 
   if (regs[REG_LCOUNT] != 0 && nextpc == regs[REG_LEND])
