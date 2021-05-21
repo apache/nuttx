@@ -140,7 +140,7 @@ static inline void xtensa_registerdump(void)
   _alert("  SAR: %08lx CAUSE: %08lx VADDR: %08lx\n",
          (unsigned long)regs[REG_SAR], (unsigned long)regs[REG_EXCCAUSE],
          (unsigned long)regs[REG_EXCVADDR]);
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
   _alert(" LBEG: %08lx  LEND: %08lx  LCNT: %08lx\n",
          (unsigned long)regs[REG_LBEG], (unsigned long)regs[REG_LEND],
          (unsigned long)regs[REG_LCOUNT]);
