@@ -719,6 +719,7 @@ static void do_dependency(const char *file)
     {
       char tmp[NAME_MAX + 6];
       char *dupname;
+      char *objname;
       char *dotptr;
       const char *expanded;
 
@@ -729,14 +730,15 @@ static void do_dependency(const char *file)
           exit(EXIT_FAILURE);
         }
 
-      dotptr = strrchr(dupname, '.');
+      objname = basename(dupname);
+      dotptr  = strrchr(objname, '.');
       if (dotptr)
         {
           *dotptr = '\0';
         }
 
       snprintf(tmp, NAME_MAX + 6, " -MT %s%c%s%s ",
-               g_objpath, separator, dupname, g_suffix);
+               g_objpath, separator, objname, g_suffix);
       expanded = do_expand(tmp);
 
       cmdlen += strlen(expanded);
