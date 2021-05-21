@@ -262,39 +262,6 @@ void riscv_ack_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_irq_save
- *
- * Description:
- *   Return the current interrupt state and disable interrupts
- *
- ****************************************************************************/
-
-irqstate_t up_irq_save(void)
-{
-  uint64_t oldstat;
-
-  /* Read mstatus & clear machine interrupt enable (MIE) in mstatus */
-
-  asm volatile ("csrrc %0, mstatus, %1": "=r" (oldstat) : "r"(MSTATUS_MIE));
-  return oldstat;
-}
-
-/****************************************************************************
- * Name: up_irq_restore
- *
- * Description:
- *   Restore previous IRQ mask state
- *
- ****************************************************************************/
-
-void up_irq_restore(irqstate_t flags)
-{
-  /* Write flags to mstatus */
-
-  asm volatile("csrw mstatus, %0" : /* no output */ : "r" (flags));
-}
-
-/****************************************************************************
  * Name: up_irq_enable
  *
  * Description:

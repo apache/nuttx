@@ -416,3 +416,28 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
 
   return regs;
 }
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Return the current interrupt state and enable interrupts
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_enable(void)
+{
+  uint32_t flags;
+
+  /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
+
+  __asm__ __volatile__
+    (
+      "csrrs %0, mstatus, %1\n"
+      : "=r" (flags)
+      : "r"(MSTATUS_MIE)
+      : "memory"
+    );
+
+  return flags;
+}

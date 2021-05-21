@@ -27,6 +27,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <arch/csr.h>
+#  include <arch/irq.h>
 #endif
 
 #include <sys/types.h>
@@ -226,90 +227,5 @@
 /* Total number of IRQs: ecall + Number of peripheral IRQs + GPIOs IRQs. */
 
 #define NR_IRQS  (RISCV_NIRQ_INTERRUPTS + ESP32C3_NIRQ_PERIPH + ESP32C3_NIRQ_GPIO)
-
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Name: up_irq_restore
- *
- * Description:
- *   Restore the value of the mstatus register
- *
- ****************************************************************************/
-
-static inline void up_irq_restore(irqstate_t flags)
-{
-  __asm__ __volatile__
-  (
-    "csrw mstatus, %0" : /* no output */ : "r" (flags)
-  );
-}
-
-/****************************************************************************
- * Name: up_irq_save
- *
- * Description:
- *   Disable interrupts and return the previous value of the mstatus register
- *
- ****************************************************************************/
-
-static inline irqstate_t up_irq_save(void)
-{
-  irqstate_t flags;
-
-  /* Read mstatus & clear machine interrupt enable (MIE) in mstatus */
-
-  __asm__ __volatile__
-  (
-    "csrrc %0, mstatus, %1" : "=r" (flags) : "r"(MSTATUS_MIE)
-  );
-
-  /* Return the previous mstatus value so that it can be restored with
-   * up_irq_restore().
-   */
-
-  return flags;
-}
-
-/****************************************************************************
- * Name: up_irq_enable
- *
- * Description:
- *   Return the current interrupt state and enable interrupts
- *
- ****************************************************************************/
-
-static inline irqstate_t up_irq_enable(void)
-{
-  uint32_t flags;
-
-  /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
-
-  __asm__ __volatile__
-  (
-    "csrrs %0, mstatus, %1": "=r" (flags) : "r"(MSTATUS_MIE)
-  );
-
-  return flags;
-}
-
-/****************************************************************************
- * Name: up_irq_disable
- *
- * Description:
- *   Disable interrupts
- *
- ****************************************************************************/
-
-static inline void up_irq_disable(void)
-{
-  up_irq_save();
-}
-
-#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_RISCV_INCLUDE_ESP32C3_IRQ_H */
