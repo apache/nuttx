@@ -250,6 +250,12 @@ config ARCH_BOARD_ESP32C3_DEVKIT
 		The ESP32-C3-DevKitM-1 version contains the ESP32-C3-MINI-1 module and the
 		ESP32-C3-DevKitC-02 version the ESP32-C3-WROOM-02.
 
+config ARCH_BOARD_ET_STM32_STAMP
+	bool "Futurlec: ET-STM32 Stamp"
+	depends on ARCH_CHIP_STM32F103RE
+	---help---
+		The ET-STM32 Stamp features the STM32F103RET6 (Cortex M3) microcontroller.
+		For board details, see: https://www.futurlec.com/ET-STM32_Stamp.shtml
 
 config ARCH_BOARD_EZ80F910200KITG
 	bool "ZiLOG ez80f910200kitg development kit"
@@ -2285,6 +2291,7 @@ config ARCH_BOARD
 	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
 	default "esp32-wrover-kit"         if ARCH_BOARD_ESP32_WROVERKIT
 	default "esp32c3-devkit"           if ARCH_BOARD_ESP32C3_DEVKIT
+	default "et-stm32-stamp"           if ARCH_BOARD_ET_STM32_STAMP
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
@@ -2883,6 +2890,9 @@ source "boards/arm/stm32/hymini-stm32v/Kconfig"
 endif
 if ARCH_BOARD_MAPLE
 source "boards/arm/stm32/maple/Kconfig"
+endif
+if ARCH_BOARD_ET_STM32_STAMP
+source "boards/arm/stm32/et-stm32-stamp/Kconfig"
 endif
 if ARCH_BOARD_MIKROE_STM32F4
 source "boards/arm/stm32/mikroe-stm32f4/Kconfig"

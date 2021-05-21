@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ET_STM32_STAMP
+
+choice
+	prompt "Select board type"
+	default ET_STM32_STAMP if ARCH_CHIP_STM32F103RE
+	---help---
+		Select the board hosting the architecture.  You must first select the
+		exact MCU part number, then the boards supporting that part will
+		be available for selection.  Use ARCH_BOARD_CUSTOM to create a new
+		board configuration.
+
+config ET_STM32_STAMP
+	bool "ET-STM32 Stamp"
+	depends on ARCH_CHIP_STM32F103RE
+	---help---
+		This version is the standard ET-STM32 Stamp board from Futurlec, with
+		the STM32F103RET6 microcontroller.
+
+endchoice
+
+endif
