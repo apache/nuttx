@@ -78,7 +78,9 @@ static void up_stackdump(uint64_t sp, uintptr_t stack_top)
   for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      _alert("%08" PRIxPTR ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -130,44 +132,52 @@ static inline void up_registerdump(void)
 
   if (CURRENT_REGS)
     {
-      _alert("EPC:%016x \n",
+      _alert("EPC:%016" PRIx64 " \n",
              CURRENT_REGS[REG_EPC]);
 
-      _alert("A0:%016x A1:%016x A2:%016x A3:%016x \n",
+      _alert("A0:%016" PRIx64 " A1:%01" PRIx64 "6 A2:%016" PRIx64
+             " A3:%016" PRIx64 " \n",
              CURRENT_REGS[REG_A0], CURRENT_REGS[REG_A1],
              CURRENT_REGS[REG_A2], CURRENT_REGS[REG_A3]);
 
-      _alert("A4:%016x A5:%016x A6:%016x A7:%016x \n",
+      _alert("A4:%016" PRIx64 " A5:%016" PRIx64 "A6:%016" PRIx64
+             " A7:%016" PRIx64 " \n",
              CURRENT_REGS[REG_A4], CURRENT_REGS[REG_A5],
              CURRENT_REGS[REG_A6], CURRENT_REGS[REG_A7]);
 
-      _alert("T0:%016x T1:%016x T2:%016x T3:%016x \n",
+      _alert("T0:%016" PRIx64 " T1:%016" PRIx64 " T2:%016" PRIx64
+             " T3:%016" PRIx64 " \n",
              CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
              CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3]);
 
-      _alert("T4:%016x T5:%016x T6:%016x \n",
+      _alert("T4:%016" PRIx64 " T5:%016" PRIx64 " T6:%016" PRIx64 " \n",
              CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
              CURRENT_REGS[REG_T6]);
 
-      _alert("S0:%016x S1:%016x S2:%016x S3:%016x \n",
+      _alert("S0:%016" PRIx64 " S1:%016" PRIx64 " S2:%016" PRIx64
+             " S3:%016" PRIx64 " \n",
              CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
              CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3]);
 
-      _alert("S4:%016x S5:%016x S6:%016x S7:%016x \n",
+      _alert("S4:%016" PRIx64 " S5:%016" PRIx64 " S6:%016" PRIx64
+             " S7:%016" PRIx64 " \n",
              CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
              CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
 
-      _alert("S8:%016x S9:%016x S10:%016x S11:%016x \n",
+      _alert("S8:%016" PRIx64 " S9:%016" PRIx64 " S10:%016" PRIx64
+             " S11:%016" PRIx64 " \n",
              CURRENT_REGS[REG_S8], CURRENT_REGS[REG_S9],
              CURRENT_REGS[REG_S10], CURRENT_REGS[REG_S11]);
 
 #ifdef RISCV_SAVE_GP
-      _alert("GP:%016x SP:%016x FP:%016x TP:%016x RA:%016x \n",
+      _alert("GP:%016" PRIx64 " SP:%016" PRIx64 " FP:%016" PRIx64
+             " TP:%016" PRIx64 " RA:%016" PRIx64 " \n",
              CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
              CURRENT_REGS[REG_FP], CURRENT_REGS[REG_TP],
              CURRENT_REGS[REG_RA]);
 #else
-      _alert("SP:%016x FP:%016x TP:%016x RA:%016x \n",
+      _alert("SP:%016" PRIx64 " FP:%016" PRIx64 " TP:%016" PRIx64
+             " RA:%016" PRIx64 " \n",
              CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
              CURRENT_REGS[REG_TP], CURRENT_REGS[REG_RA]);
 #endif
@@ -206,10 +216,10 @@ static void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  _alert("sp:     %016x\n", sp);
+  _alert("sp:     %016" PRIx64 "\n", sp);
   _alert("IRQ stack:\n");
-  _alert("  base: %016x\n", istackbase);
-  _alert("  size: %016x\n", istacksize);
+  _alert("  base: %016" PRIxPTR "\n", istackbase);
+  _alert("  size: %016" PRIxPTR "\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -224,7 +234,7 @@ static void up_dumpstate(void)
       /* Extract the user stack pointer */
 
       sp = CURRENT_REGS[REG_SP];
-      _alert("sp:     %016x\n", sp);
+      _alert("sp:     %016" PRIx64 "\n", sp);
     }
   else if (CURRENT_REGS)
     {
@@ -235,12 +245,12 @@ static void up_dumpstate(void)
   /* Show user stack info */
 
   _alert("User stack:\n");
-  _alert("  base: %016x\n", ustackbase);
-  _alert("  size: %016x\n", ustacksize);
+  _alert("  base: %016" PRIxPTR "\n", ustackbase);
+  _alert("  size: %016" PRIxPTR "\n", ustacksize);
 #else
-  _alert("sp:         %016x\n", sp);
-  _alert("stack base: %016x\n", ustackbase);
-  _alert("stack size: %016x\n", ustacksize);
+  _alert("sp:         %016" PRIx64 "\n", sp);
+  _alert("stack base: %016" PRIxPTR "\n", ustackbase);
+  _alert("stack size: %016" PRIxPTR "\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -336,7 +346,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 
 void up_assert(const char *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
+#if CONFIG_TASK_NAME_SIZE > 0
   struct tcb_s *rtcb = running_task();
 #endif
 

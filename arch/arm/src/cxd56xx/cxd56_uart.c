@@ -206,11 +206,15 @@ static void cxd56_uart_pincontrol(int ch, bool on)
 
 static void cxd56_uart_start(int ch)
 {
+  irqstate_t flags = enter_critical_section();
+
   cxd56_setbaud(CONSOLE_BASE, CONSOLE_BASEFREQ, CONSOLE_BAUD);
 
   putreg32(g_lcr, g_uartdevs[ch].uartbase + CXD56_UART_LCR_H);
 
   putreg32(g_cr, g_uartdevs[ch].uartbase + CXD56_UART_CR);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -226,6 +230,8 @@ static void cxd56_uart_stop(int ch)
 {
   uint32_t cr;
 
+  irqstate_t flags = enter_critical_section();
+
   while (UART_FR_BUSY & getreg32(g_uartdevs[ch].uartbase + CXD56_UART_FR));
 
   cr   = getreg32(g_uartdevs[ch].uartbase + CXD56_UART_CR);
@@ -235,6 +241,8 @@ static void cxd56_uart_stop(int ch)
 
   g_lcr = getreg32(g_uartdevs[ch].uartbase + CXD56_UART_LCR_H);
   putreg32(0, g_uartdevs[ch].uartbase + CXD56_UART_LCR_H);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

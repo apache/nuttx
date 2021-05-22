@@ -1232,12 +1232,24 @@ static int do_trxreset(FAR struct altmdm_dev_s *priv)
   ret = wait_receiverready(priv, WAIT_RXREQ_TIMEOUT);
   if (ret >= 0)
     {
-      /* If a conflict occurs with the reset packet,
-       * the packet is transferred by the size specified
-       * by the receiving side. Discard the data on the sending side.
+      /* Even in the case of a conflict between a reset packet
+       * and a send packet, the send size is compared and the
+       * larger size is sent as the payload.
+       * If the send packet that conflicts with the reset packet
+       * is in ALTCOM command format, the modem may assert.
+       * If it is not in the ALTCOM command format, it will be
+       * discarded by the modem, so dummy data will be sent to
+       * avoid assertion.
        */
 
-      xfer_size = spidev->rx_param.total_size;
+      if (spidev->tx_param.total_size < spidev->rx_param.total_size)
+        {
+          xfer_size = spidev->rx_param.total_size;
+        }
+      else
+        {
+          xfer_size = spidev->tx_param.total_size;
+        }
 
       /* Get DMA transfer size */
 

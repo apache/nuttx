@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/power/pm.h>
 
 #ifdef CONFIG_PM
 
@@ -43,11 +44,20 @@
 #include "hardware/esp32c3_soc.h"
 #include "hardware/esp32c3_uart.h"
 #include "hardware/esp32c3_gpio.h"
+#include "hardware/apb_ctrl_reg.h"
 
 #include "esp32c3_attr.h"
 #include "esp32c3_rtc.h"
 #include "esp32c3_clockconfig.h"
 #include "esp32c3_pm.h"
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+#include "esp32c3_rt_timer.h"
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+#include "esp32c3_tickless.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -98,6 +108,9 @@
 #define RTC_XTAL32K_DEAD_TRIG_EN  BIT(12)
 #define RTC_USB_TRIG_EN           BIT(14)
 #define RTC_BROWNOUT_DET_TRIG_EN  BIT(16)
+
+#define PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO (1)
+#define PERIPH_SKIP_SLEEP_NO                (1)
 
 /****************************************************************************
  * Private Types
@@ -207,28 +220,31 @@ struct esp32c3_rtc_vddsdio_config_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline uint32_t esp32c3_periph_ll_get_rst_en_mask
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_mask
               (enum esp32c3_periph_module_e periph, bool enable);
 static uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_reg(
                             enum esp32c3_periph_module_e periph);
 static uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_reg(
                             enum esp32c3_periph_module_e periph);
-static inline uint32_t esp32c3_periph_ll_get_clk_en_mask(
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_mask(
                             enum esp32c3_periph_module_e periph);
 static inline bool IRAM_ATTR esp32c3_periph_ll_periph_enabled(
                                      enum esp32c3_periph_module_e periph);
-static inline void esp32c3_uart_tx_wait_idle(uint8_t uart_no);
+static inline void IRAM_ATTR esp32c3_uart_tx_wait_idle(uint8_t uart_no);
 static void IRAM_ATTR esp32c3_flush_uarts(void);
 static void IRAM_ATTR esp32c3_suspend_uarts(void);
 static void IRAM_ATTR esp32c3_resume_uarts(void);
-static void esp32c3_timer_wakeup_prepare(void);
-static uint32_t esp32c3_get_power_down_flags(void);
+static void IRAM_ATTR esp32c3_timer_wakeup_prepare(void);
+static uint32_t IRAM_ATTR esp32c3_get_power_down_flags(void);
 static void IRAM_ATTR esp32c3_set_vddsdio_config(
                       struct esp32c3_rtc_vddsdio_config_s config);
 static int IRAM_ATTR esp32c3_get_vddsdio_config(
                       struct esp32c3_rtc_vddsdio_config_s *config);
 static int IRAM_ATTR esp32c3_light_sleep_inner(uint32_t pd_flags,
             uint32_t time_us, struct esp32c3_rtc_vddsdio_config_s config);
+static void esp32c3_periph_module_enable(
+            enum esp32c3_periph_module_e periph);
+static void IRAM_ATTR esp32c3_perip_clk_init(void);
 static int IRAM_ATTR esp32c3_sleep_start(uint32_t pd_flags);
 
 /****************************************************************************
@@ -245,6 +261,22 @@ static struct esp32c3_sleep_config_s s_config =
   .ccount_ticks_record = 0,
   .sleep_time_overhead_out = DEFAULT_SLEEP_OUT_OVERHEAD_US,
   .wakeup_triggers = 0
+};
+
+static _Atomic uint32_t pm_wakelock = 0;
+
+/* Inform peripherals of light sleep wakeup overhead time */
+
+inform_out_sleep_overhead_cb_t
+  g_periph_inform_out_sleep_overhead_cb[PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO];
+
+/* Indicates if light sleep shoule be skipped by peripherals. */
+
+skip_light_sleep_cb_t g_periph_skip_sleep_cb[PERIPH_SKIP_SLEEP_NO];
+
+static uint8_t ref_counts[PERIPH_MODULE_MAX] =
+{
+  0
 };
 
 /****************************************************************************
@@ -276,7 +308,7 @@ extern void esp_rom_delay_us(uint32_t us);
  *
  ****************************************************************************/
 
-static inline uint32_t esp32c3_periph_ll_get_rst_en_mask
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_mask
               (enum esp32c3_periph_module_e periph, bool enable)
 {
   switch (periph)
@@ -480,7 +512,7 @@ static uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_reg(
  *
  ****************************************************************************/
 
-static inline uint32_t esp32c3_periph_ll_get_clk_en_mask(
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_mask(
                                enum esp32c3_periph_module_e periph)
 {
   switch (periph)
@@ -725,7 +757,7 @@ static void IRAM_ATTR esp32c3_resume_uarts(void)
  *
  ****************************************************************************/
 
-static uint32_t esp32c3_get_power_down_flags(void)
+static uint32_t IRAM_ATTR esp32c3_get_power_down_flags(void)
 {
   uint32_t pd_flags = 0;
 
@@ -1019,14 +1051,327 @@ static int IRAM_ATTR esp32c3_light_sleep_inner(uint32_t pd_flags,
 }
 
 /****************************************************************************
+ * Name: esp32c3_periph_module_enable
+ *
+ * Description:
+ *   Enable peripheral module
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32c3_periph_module_enable(enum esp32c3_periph_module_e periph)
+{
+  irqstate_t flags = enter_critical_section();
+
+  assert(periph < PERIPH_MODULE_MAX);
+  if (ref_counts[periph] == 0)
+    {
+      modifyreg32(esp32c3_periph_ll_get_clk_en_reg(periph), 0,
+                  esp32c3_periph_ll_get_clk_en_mask(periph));
+      modifyreg32(esp32c3_periph_ll_get_rst_en_reg(periph),
+                  esp32c3_periph_ll_get_rst_en_mask(periph, true), 0);
+    }
+
+  ref_counts[periph]++;
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name:  esp32c3_perip_clk_init
+ *
+ * Description:
+ *   This function disables clock of useless peripherals when cpu starts.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp32c3_perip_clk_init(void)
+{
+  uint32_t common_perip_clk1 = 0;
+
+  /* Reset the communication peripherals like I2C, SPI,
+   * UART, I2S and bring them to known state.
+   */
+
+  uint32_t common_perip_clk = SYSTEM_WDG_CLK_EN |
+                           SYSTEM_I2S0_CLK_EN |
+                           SYSTEM_UART1_CLK_EN |
+                           SYSTEM_UART2_CLK_EN |
+                           SYSTEM_SPI2_CLK_EN |
+                           SYSTEM_I2C_EXT0_CLK_EN |
+                           SYSTEM_UHCI0_CLK_EN |
+                           SYSTEM_RMT_CLK_EN |
+                           SYSTEM_LEDC_CLK_EN |
+                           SYSTEM_UHCI1_CLK_EN |
+                           SYSTEM_TIMERGROUP1_CLK_EN |
+                           SYSTEM_SPI3_CLK_EN |
+                           SYSTEM_SPI4_CLK_EN |
+                           SYSTEM_I2C_EXT1_CLK_EN |
+                           SYSTEM_TWAI_CLK_EN |
+                           SYSTEM_I2S1_CLK_EN |
+                           SYSTEM_SPI2_DMA_CLK_EN |
+                           SYSTEM_SPI3_DMA_CLK_EN;
+
+  uint32_t hwcrypto_perip_clk = SYSTEM_CRYPTO_AES_CLK_EN |
+                          SYSTEM_CRYPTO_SHA_CLK_EN |
+                          SYSTEM_CRYPTO_RSA_CLK_EN;
+  uint32_t wifi_bt_sdio_clk = SYSTEM_WIFI_CLK_WIFI_EN |
+                        SYSTEM_WIFI_CLK_BT_EN_M |
+                        SYSTEM_WIFI_CLK_UNUSED_BIT5 |
+                        SYSTEM_WIFI_CLK_UNUSED_BIT12;
+
+  /* Disable some peripheral clocks. */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, common_perip_clk, 0);
+  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, common_perip_clk);
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, common_perip_clk1, 0);
+  modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, common_perip_clk1);
+
+  /* Disable hardware crypto clocks. */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, hwcrypto_perip_clk, 0);
+  modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, hwcrypto_perip_clk);
+
+  /* Disable WiFi/BT/SDIO clocks. */
+
+  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, wifi_bt_sdio_clk, 0);
+  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, SYSTEM_WIFI_CLK_EN);
+
+  /* Set WiFi light sleep clock source to RTC slow clock */
+
+  REG_SET_FIELD(SYSTEM_BT_LPCK_DIV_INT_REG, SYSTEM_BT_LPCK_DIV_NUM, 0);
+  modifyreg32(SYSTEM_BT_LPCK_DIV_FRAC_REG, SYSTEM_LPCLK_SEL_8M,
+              SYSTEM_LPCLK_SEL_RTC_SLOW);
+
+  /* Enable RNG clock. */
+
+  esp32c3_periph_module_enable(PERIPH_RNG_MODULE);
+}
+
+/****************************************************************************
+ * Name:  esp32c3_periph_should_skip_sleep
+ *
+ * Description:
+ *   Indicates if light sleep shoule be skipped by peripherals
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True is returned on success.  Otherwise false.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32c3_periph_should_skip_sleep(void)
+{
+  for (int i = 0; i < PERIPH_SKIP_SLEEP_NO; i++)
+    {
+      if (g_periph_skip_sleep_cb[i])
+        {
+          if (g_periph_skip_sleep_cb[i]() == true)
+            {
+              return true;
+            }
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32c3_sleep_enable_timer_wakeup
+ * Name:  esp32c3_pm_register_skip_sleep_callback
  *
  * Description:
- *   Configure wake-up interval
+ *   Unregister callback function of skipping light sleep.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32c3_pm_register_skip_sleep_callback(skip_light_sleep_cb_t cb)
+{
+  for (int i = 0; i < PERIPH_SKIP_SLEEP_NO; i++)
+    {
+      if (g_periph_skip_sleep_cb[i] == cb)
+        {
+          return OK;
+        }
+      else if (g_periph_skip_sleep_cb[i] == NULL)
+        {
+          g_periph_skip_sleep_cb[i] = cb;
+          return OK;
+        }
+    }
+
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name:  esp32c3_pm_unregister_skip_sleep_callback
+ *
+ * Description:
+ *   Register callback function of skipping light sleep.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32c3_pm_unregister_skip_sleep_callback(skip_light_sleep_cb_t cb)
+{
+  for (int i = 0; i < PERIPH_SKIP_SLEEP_NO; i++)
+    {
+      if (g_periph_skip_sleep_cb[i] == cb)
+        {
+          g_periph_skip_sleep_cb[i] = NULL;
+          return OK;
+        }
+    }
+
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name:  esp32c3_should_skip_light_sleep
+ *
+ * Description:
+ *   Indicates if light sleep shoule be skipped.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   True is returned on success.  Otherwise false.
+ *
+ ****************************************************************************/
+
+bool IRAM_ATTR esp32c3_should_skip_light_sleep(void)
+{
+  if (esp32c3_periph_should_skip_sleep() == true)
+    {
+      return true;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name:  esp32c3_pm_register_inform_out_sleep_overhead_callback
+ *
+ * Description:
+ *   Register informing peripherals of light sleep wakeup overhead time
+ *   callback function.
+ *
+ * Input Parameters:
+ *   cb - callback function
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32c3_pm_register_inform_out_sleep_overhead_callback(
+                            inform_out_sleep_overhead_cb_t cb)
+{
+  for (int i = 0; i < PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO; i++)
+    {
+      if (g_periph_inform_out_sleep_overhead_cb[i] == cb)
+        {
+          return ERROR;
+        }
+      else if (g_periph_inform_out_sleep_overhead_cb[i] == NULL)
+        {
+          g_periph_inform_out_sleep_overhead_cb[i] = cb;
+          return OK;
+        }
+    }
+
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name:  esp32c3_pm_unregister_inform_out_sleep_overhead_callback
+ *
+ * Description:
+ *   Unregister informing peripherals of light sleep wakeup overhead time
+ *   callback function.
+ *
+ * Input Parameters:
+ *   cb - callback function
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+int esp32c3_pm_unregister_inform_out_sleep_overhead_callback(
+                              inform_out_sleep_overhead_cb_t cb)
+{
+  for (int i = 0; i < PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO; i++)
+    {
+      if (g_periph_inform_out_sleep_overhead_cb[i] == cb)
+        {
+          g_periph_inform_out_sleep_overhead_cb[i] = NULL;
+          return OK;
+        }
+    }
+
+  return ERROR;
+}
+
+/****************************************************************************
+ * Name:  esp32c3_periph_inform_out_sleep_overhead
+ *
+ * Description:
+ *   Inform peripherals of light sleep wakeup overhead time
+ *
+ * Input Parameters:
+ *   us - light sleep wakeup overhead time
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32c3_periph_inform_out_sleep_overhead(uint32_t us)
+{
+  for (int i = 0; i < PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO; i++)
+    {
+      if (g_periph_inform_out_sleep_overhead_cb[i])
+        {
+          g_periph_inform_out_sleep_overhead_cb[i](us);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name:  esp32c3_sleep_enable_rtc_timer_wakeup
+ *
+ * Description:
+ *   Configure RTC TIMER wake-up interval
  *
  * Input Parameters:
  *   time_in_us - Configure wake-up time interval
@@ -1036,10 +1381,29 @@ static int IRAM_ATTR esp32c3_light_sleep_inner(uint32_t pd_flags,
  *
  ****************************************************************************/
 
-void esp32c3_sleep_enable_timer_wakeup(uint64_t time_in_us)
+void IRAM_ATTR esp32c3_sleep_enable_rtc_timer_wakeup(uint64_t time_in_us)
 {
   s_config.wakeup_triggers |= RTC_TIMER_TRIG_EN;
   s_config.sleep_duration = time_in_us;
+}
+
+/****************************************************************************
+ * Name:  esp32c3_sleep_enable_wifi_wakeup
+ *
+ * Description:
+ *   Configure Wi-Fi wake-up source
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32c3_sleep_enable_wifi_wakeup(void)
+{
+  s_config.wakeup_triggers |= RTC_WIFI_TRIG_EN;
 }
 
 /****************************************************************************
@@ -1049,14 +1413,14 @@ void esp32c3_sleep_enable_timer_wakeup(uint64_t time_in_us)
  *   Enter light sleep mode
  *
  * Input Parameters:
- *   None
+ *   sleep_time - Actual sleep time
  *
  * Returned Value:
  *   0 is returned on success or a negated errno value is returned
  *
  ****************************************************************************/
 
-int esp32c3_light_sleep_start(void)
+int IRAM_ATTR esp32c3_light_sleep_start(uint64_t *sleep_time)
 {
   int ret = OK;
   irqstate_t flags;
@@ -1141,12 +1505,22 @@ int esp32c3_light_sleep_start(void)
         }
     }
 
+  esp32c3_periph_inform_out_sleep_overhead(
+    s_config.sleep_time_adjustment - sleep_time_overhead_in);
+
   esp32c3_get_vddsdio_config(&vddsdio_config);
 
   /* Enter sleep, then wait for flash to be ready on wakeup */
 
   ret = esp32c3_light_sleep_inner(pd_flags, flash_enable_time_us,
                                                vddsdio_config);
+
+  if (sleep_time != NULL)
+    {
+      *sleep_time = esp32c3_rtc_time_slowclk_to_us(esp32c3_rtc_time_get() -
+          s_config.rtc_ticks_at_sleep_start, s_config.rtc_clk_cal_period);
+    }
+
   s_config.sleep_time_overhead_out = (esp32c3_cpu_cycle_count() -
        s_config.ccount_ticks_record) / (esp32c3_clk_cpu_freq() / 1000000ULL);
 
@@ -1175,6 +1549,7 @@ void esp32c3_pminit(void)
 
   esp32c3_rtc_init();
   esp32c3_rtc_clk_set();
+  esp32c3_perip_clk_init();
 }
 
 /****************************************************************************
@@ -1193,11 +1568,41 @@ void esp32c3_pminit(void)
 
 void esp32c3_pmstandby(uint64_t time_in_us)
 {
+  uint64_t rtc_diff_us;
+#ifdef CONFIG_ESP32C3_RT_TIMER
+  uint64_t hw_start_us;
+  uint64_t hw_end_us;
+  uint64_t hw_diff_us;
+#endif
+
   /* don't power down XTAL — powering it up takes different time on. */
 
   fflush(stdout);
-  esp32c3_sleep_enable_timer_wakeup(time_in_us);
-  esp32c3_light_sleep_start();
+  esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
+#ifdef CONFIG_ESP32C3_RT_TIMER
+  /* Get rt-timer timestamp before entering sleep */
+
+  hw_start_us = rt_timer_time_us();
+#endif
+
+  esp32c3_light_sleep_start(&rtc_diff_us);
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+  /* Get rt-timer timestamp after waking up from sleep */
+
+  hw_end_us = rt_timer_time_us();
+  hw_diff_us = hw_end_us - hw_start_us;
+  DEBUGASSERT(rtc_diff_us > hw_diff_us);
+
+  rt_timer_calibration(rtc_diff_us - hw_diff_us);
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+  up_step_idletime((uint32_t)time_in_us);
+#endif
+
+  pwrinfo("Returned from auto-sleep, slept for %" PRIu32 " ms\n",
+            (uint32_t)(rtc_diff_us) / 1000);
 }
 
 /****************************************************************************
@@ -1259,8 +1664,47 @@ void IRAM_ATTR esp32c3_deep_sleep_start(void)
 void esp32c3_pmsleep(uint64_t time_in_us)
 {
   fflush(stdout);
-  esp32c3_sleep_enable_timer_wakeup(time_in_us);
+  esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
   esp32c3_deep_sleep_start();
+}
+
+/****************************************************************************
+ * Name: esp32c3_pm_lockacquire
+ *
+ * Description:
+ *   Take a power management lock
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32c3_pm_lockacquire(void)
+{
+  ++pm_wakelock;
+}
+
+/****************************************************************************
+ * Name: esp32c3_pm_lockrelease
+ *
+ * Description:
+ *   Release the lock taken using esp32c3_pm_lockacquire.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32c3_pm_lockrelease(void)
+{
+  --pm_wakelock;
+}
+
+/****************************************************************************
+ * Name: esp32c3_pm_lockstatus
+ *
+ * Description:
+ *   Return power management lock status.
+ *
+ ****************************************************************************/
+
+uint32_t IRAM_ATTR esp32c3_pm_lockstatus(void)
+{
+  return pm_wakelock;
 }
 
 #endif /* CONFIG_PM */

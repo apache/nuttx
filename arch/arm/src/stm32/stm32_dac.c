@@ -1056,7 +1056,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 #ifdef HAVE_TIMER
   if (chan->timer != TIM_INDEX_HRTIM)
     {
-      tim_modifyreg(chan, STM32_BTIM_EGR_OFFSET, 0, ATIM_EGR_UG);
+      tim_modifyreg(chan, STM32_GTIM_EGR_OFFSET, 0, GTIM_EGR_UG);
     }
 #endif
 
@@ -1336,26 +1336,26 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(chan, STM32_BTIM_ARR_OFFSET, (uint16_t)reload);
-  tim_putreg(chan, STM32_BTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
+  tim_putreg(chan, STM32_GTIM_ARR_OFFSET, (uint16_t)reload);
+  tim_putreg(chan, STM32_GTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
 
   /* Count mode up, auto reload */
 
-  tim_modifyreg(chan, STM32_BTIM_CR1_OFFSET, 0, ATIM_CR1_ARPE);
+  tim_modifyreg(chan, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_ARPE);
 
   /* Selection TRGO selection: update */
 
-  tim_modifyreg(chan, STM32_BTIM_CR2_OFFSET, ATIM_CR2_MMS_MASK,
-                ATIM_CR2_MMS_UPDATE);
+  tim_modifyreg(chan, STM32_GTIM_CR2_OFFSET, GTIM_CR2_MMS_MASK,
+                GTIM_CR2_MMS_UPDATE);
 
   /* Update DMA request enable ???? */
 #if 0
-  tim_modifyreg(chan, STM32_BTIM_DIER_OFFSET, 0, ATIM_DIER_UDE);
+  tim_modifyreg(chan, STM32_GTIM_DIER_OFFSET, 0, GTIM_DIER_UDE);
 #endif
 
   /* Enable the counter */
 
-  tim_modifyreg(chan, STM32_BTIM_CR1_OFFSET, 0, ATIM_CR1_CEN);
+  tim_modifyreg(chan, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
   return OK;
 }
 #endif

@@ -100,7 +100,7 @@
 #endif
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -111,6 +111,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
 /* Default pthread attributes.  This global can only be shared within the
  * kernel- or within the user- address space.
  */
@@ -120,6 +124,70 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name:  nx_pthread_create
+ *
+ * Description:
+ *   This function creates and activates a new thread with specified
+ *   attributes.
+ *
+ * Input Parameters:
+ *    trampoline - The user space startup function
+ *    thread     - The pthread handle to be used
+ *    attr       - It points to a pthread_attr_t structure whose contents are
+ *                 used at thread creation time to determine attributes
+ *                 for the new thread
+ *    entry      - The new thread starts execution by invoking entry
+ *    arg        - It is passed as the sole argument of entry
+ *    exit       - The user-space pthread exit function
+ *
+ * Returned Value:
+ *   OK (0) on success; a (non-negated) errno value on failure. The errno
+ *   variable is not set.
+ *
+ ****************************************************************************/
+
+int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
+                      FAR const pthread_attr_t *attr,
+                      pthread_startroutine_t entry, pthread_addr_t arg,
+                      pthread_exitroutine_t exit);
+
+/****************************************************************************
+ * Name: nx_pthread_exit
+ *
+ * Description:
+ *   Terminate execution of a thread started with pthread_create.
+ *
+ * Input Parameters:
+ *   exit_value
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nx_pthread_exit(FAR void *exit_value) noreturn_function;
+
+/****************************************************************************
+ * Name: pthread_cleanup_popall
+ *
+ * Description:
+ *   The pthread_cleanup_popall() is an internal function that will pop and
+ *   execute all clean-up functions.  This function is only called from
+ *   within the pthread_exit() and pthread_cancellation() logic
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+void pthread_cleanup_popall(void);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

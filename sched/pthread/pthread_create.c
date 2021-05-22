@@ -64,41 +64,47 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_argsetup
+ * Name: pthread_tcb_setup
  *
  * Description:
- *   This functions sets up parameters in the Task Control Block (TCB) in
+ *   This function sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
- *   pthread_argsetup() is called from nxtask_init() and nxtask_start() to
+ *   pthread_tcb_setup() is called from nxtask_init() and nxtask_start() to
  *   create a new task (with arguments cloned via strdup) or pthread_create()
  *   which has one argument passed by value (distinguished by the pthread
  *   boolean argument).
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
+ *   trampoline - User space pthread startup function
  *   arg        - The argument to provide to the pthread on startup.
+ *   exit       - The user-space pthread exit function
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
-                                    pthread_addr_t arg)
+static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
+                                     pthread_trampoline_t trampoline,
+                                     pthread_addr_t arg,
+                                     pthread_exitroutine_t exit)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
 
-  snprintf(tcb->cmn.name, CONFIG_TASK_NAME_SIZE,
-           "pt-%p", tcb->cmn.entry.pthread);
+  snprintf(ptcb->cmn.name, CONFIG_TASK_NAME_SIZE,
+           "pt-%p", ptcb->cmn.entry.pthread);
 #endif /* CONFIG_TASK_NAME_SIZE */
 
   /* For pthreads, args are strictly pass-by-value; that actual
    * type wrapped by pthread_addr_t is unknown.
    */
 
-  tcb->arg = arg;
+  ptcb->trampoline = trampoline;
+  ptcb->arg        = arg;
+  ptcb->exit       = exit;
 }
 
 /****************************************************************************
@@ -150,9 +156,8 @@ static void pthread_start(void)
   FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)this_task();
   FAR struct task_group_s *group = ptcb->cmn.group;
   FAR struct join_s *pjoin = (FAR struct join_s *)ptcb->joininfo;
-  pthread_addr_t exit_status;
 
-  DEBUGASSERT(group && pjoin);
+  DEBUGASSERT(group != NULL && pjoin != NULL);
 
   /* Successfully spawned, add the pjoin to our data set. */
 
@@ -180,16 +185,23 @@ static void pthread_start(void)
    * to switch to user-mode before calling into the pthread.
    */
 
+  DEBUGASSERT(ptcb->trampoline != NULL && ptcb->cmn.entry.pthread != NULL);
+
 #ifdef CONFIG_BUILD_FLAT
-  exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
+  ptcb->trampoline(ptcb->cmn.entry.pthread, ptcb->arg);
 #else
-  up_pthread_start(ptcb->cmn.entry.pthread, ptcb->arg);
-  exit_status = NULL;
+  up_pthread_start(ptcb->trampoline, ptcb->cmn.entry.pthread, ptcb->arg);
 #endif
 
-  /* The thread has returned (should never happen in the kernel mode case) */
+  /* The thread has returned (should never happen) */
 
-  pthread_exit(exit_status);
+  DEBUGPANIC();
+#ifndef CONFIG_BUILD_FLAT
+  ptcb->cmn.flags &= ~TCB_FLAG_CANCEL_PENDING;
+  ptcb->cmn.flags |= TCB_FLAG_CANCEL_DOING;
+
+  up_pthread_exit(ptcb->exit, NULL);
+#endif
 }
 
 /****************************************************************************
@@ -197,17 +209,21 @@ static void pthread_start(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  pthread_create
+ * Name:  nx_pthread_create
  *
  * Description:
- *   This function creates and activates a new thread with a specified
+ *   This function creates and activates a new thread with specified
  *   attributes.
  *
  * Input Parameters:
- *    thread
- *    attr
- *    start_routine
- *    arg
+ *    trampoline - The user space startup function
+ *    thread     - The pthread handle to be used
+ *    attr       - It points to a pthread_attr_t structure whose contents are
+ *                 used at thread creation time to determine attributes
+ *                 for the new thread
+ *    entry      - The new thread starts execution by invoking entry
+ *    arg        - It is passed as the sole argument of entry
+ *    exit       - The user-space pthread exit function
  *
  * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno
@@ -215,8 +231,10 @@ static void pthread_start(void)
  *
  ****************************************************************************/
 
-int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
-                   pthread_startroutine_t start_routine, pthread_addr_t arg)
+int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
+                      FAR const pthread_attr_t *attr,
+                      pthread_startroutine_t entry, pthread_addr_t arg,
+                      pthread_exitroutine_t exit)
 {
   FAR struct pthread_tcb_s *ptcb;
   FAR struct tls_info_s *info;
@@ -227,6 +245,9 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   pid_t pid;
   int ret;
   bool group_joined = false;
+
+  DEBUGASSERT(trampoline != NULL);
+  DEBUGASSERT(exit != NULL);
 
   /* If attributes were not supplied, use the default attributes */
 
@@ -415,7 +436,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   /* Initialize the task control block */
 
   ret = pthread_setup_scheduler(ptcb, param.sched_priority, pthread_start,
-                                start_routine);
+                                entry);
   if (ret != OK)
     {
       errcode = EBUSY;
@@ -440,7 +461,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
    * passed by value
    */
 
-  pthread_argsetup(ptcb, arg);
+  pthread_tcb_setup(ptcb, trampoline, arg, exit);
 
   /* Join the parent's task group */
 

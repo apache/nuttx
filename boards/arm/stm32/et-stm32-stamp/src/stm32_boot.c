@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_startup.c
+ * boards/arm/stm32/et-stm32-stamp/src/stm32_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,24 +23,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spi/spi.h>
+#include <debug.h>
 
-#include <pthread.h>
-#include <assert.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-#include <nuttx/userspace.h>
-
-#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
+#include "arm_arch.h"
+#include "et-stm32-stamp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -48,46 +41,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_startup
+ * Name: stm32_boardinitialize
  *
  * Description:
- *   This function is the user-space, pthread startup function.  It is called
- *   from up_pthread_start() in user-mode.
- *
- * Input Parameters:
- *   entrypt - The user-space address of the pthread entry point
- *   arg     - Standard argument for the pthread entry point
- *
- * Returned Value:
- *   None.  This function does not return.
+ *   All STM32 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
  *
  ****************************************************************************/
 
-void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg)
+void stm32_boardinitialize(void)
 {
-  pthread_addr_t exit_status;
-
-  DEBUGASSERT(entrypt);
-
-  /* Pass control to the thread entry point. */
-
-  exit_status = entrypt(arg);
-
-  /* The pthread has returned */
-
-  pthread_exit(exit_status);
+  /* Empty for now. */
 }
-
-#endif /* !CONFIG_BUILD_FLAT && !__KERNEL__ */

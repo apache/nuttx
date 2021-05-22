@@ -60,6 +60,10 @@
 #include "esp32_rt_timer.h"
 #include "esp32_wifi_utils.h"
 
+#ifdef CONFIG_PM
+#include "esp32_pm.h"
+#endif
+
 #include "espidf_wifi.h"
 
 /****************************************************************************
@@ -89,6 +93,24 @@
 
 #define SSID_MAX_LEN                   (32)
 #define PWD_MAX_LEN                    (64)
+
+#ifndef CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
+#define CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL 3
+#endif
+
+#define DEFAULT_LISTEN_INTERVAL CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
+
+/* CONFIG_POWER_SAVE_MODEM */
+
+#if defined(CONFIG_EXAMPLE_POWER_SAVE_MIN_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MIN_MODEM
+#elif defined(CONFIG_EXAMPLE_POWER_SAVE_MAX_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MAX_MODEM
+#elif defined(CONFIG_EXAMPLE_POWER_SAVE_NONE)
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#else
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#endif
 
 /****************************************************************************
  * Private Types
@@ -2100,7 +2122,7 @@ static void esp_evt_work_cb(FAR void *arg)
           case WIFI_ADPT_EVT_STA_START:
             wlinfo("WiFi sta start\n");
             g_sta_connected = false;
-            ret = esp_wifi_set_ps(WIFI_PS_NONE);
+            ret = esp_wifi_set_ps(DEFAULT_PS_MODE);
             if (ret)
               {
                 wlerr("Failed to close PS\n");
@@ -2334,24 +2356,30 @@ static void esp_dport_access_stall_other_cpu_end(void)
  * Name: wifi_apb80m_request
  *
  * Description:
- *   Don't support
+ *   Take Wi-Fi lock in auto-sleep
  *
  ****************************************************************************/
 
 static void wifi_apb80m_request(void)
 {
+#ifdef CONFIG_ESP32_AUTO_SLEEP
+  esp32_pm_lockacquire();
+#endif
 }
 
 /****************************************************************************
  * Name: wifi_apb80m_release
  *
  * Description:
- *   Don't support
+ *   Release Wi-Fi lock in auto-sleep
  *
  ****************************************************************************/
 
 static void wifi_apb80m_release(void)
 {
+#ifdef CONFIG_ESP32_AUTO_SLEEP
+  esp32_pm_lockrelease();
+#endif
 }
 
 /****************************************************************************
@@ -4870,13 +4898,6 @@ int esp_wifi_adapter_init(void)
       return OK;
     }
 
-  ret = esp32_rt_timer_init();
-  if (ret < 0)
-    {
-      wlerr("Failed to initialize RT timer error=%d\n", ret);
-      goto errout_init_timer;
-    }
-
   sq_init(&g_wifi_evt_queue);
 
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
@@ -4935,9 +4956,8 @@ int esp_wifi_adapter_init(void)
 errout_init_txdone:
   esp_wifi_deinit();
 errout_init_wifi:
-  esp32_rt_timer_deinit();
-errout_init_timer:
   esp_wifi_lock(false);
+
   return ret;
 }
 
@@ -5213,6 +5233,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
+      wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
@@ -5583,7 +5604,7 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
 
   if (set)
     {
-      return -ENOSYS;
+      return OK;
     }
   else
     {

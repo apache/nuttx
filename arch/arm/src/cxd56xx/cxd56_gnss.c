@@ -389,6 +389,11 @@ static struct pm_cpu_freqlock_s g_lv_lock =
   PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('G', 'T', 0),
                       PM_CPUFREQLOCK_FLAG_LV);
 
+/* Lock to prohibit clock change in gnss open */
+
+static struct pm_cpu_freqlock_s g_hold_lock =
+  PM_CPUFREQLOCK_INIT(0, PM_CPUFREQLOCK_FLAG_HOLD);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -514,7 +519,7 @@ static int cxd56_gnss_get_satellite_system(FAR struct file *filep,
                                            unsigned long    arg)
 {
   int ret;
-  uint32_t system;
+  uint32_t system = 0;
 
   if (!arg)
     {
@@ -696,7 +701,7 @@ static int cxd56_gnss_get_tcxo_offset(FAR struct file *filep,
                                       unsigned long    arg)
 {
   int     ret;
-  int32_t offset;
+  int32_t offset = 0;
 
   if (!arg)
     {
@@ -1736,7 +1741,7 @@ static int cxd56_gnss_get_rtk_interval(FAR struct file *filep,
                                        unsigned long    arg)
 {
   int ret;
-  int interval;
+  int interval = 0;
 
   if (!arg)
     {
@@ -1793,7 +1798,7 @@ static int cxd56_gnss_get_rtk_satellite(FAR struct file *filep,
                                         unsigned long    arg)
 {
   int       ret;
-  uint32_t  gnss;
+  uint32_t  gnss = 0;
 
   if (!arg)
     {
@@ -1850,7 +1855,7 @@ static int cxd56_gnss_get_rtk_ephemeris_enable(FAR struct file *filep,
                                                unsigned long    arg)
 {
   int ret;
-  int enable;
+  int enable = 0;
 
   if (!arg)
     {
@@ -2632,7 +2637,16 @@ static int cxd56_gnss_open(FAR struct file *filep)
 
       nxsem_set_protocol(&priv->syncsem, SEM_PRIO_NONE);
 
+      /* Prohibit the clock change during loading image */
+
+      up_pm_acquire_freqlock(&g_hold_lock);
+
       ret = fw_pm_loadimage(CXD56_GNSS_GPS_CPUID, CXD56_GNSS_FWNAME);
+
+      /* Allow the clock change after loading image */
+
+      up_pm_release_freqlock(&g_hold_lock);
+
       if (ret < 0)
         {
           goto _err1;

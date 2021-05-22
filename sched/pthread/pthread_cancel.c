@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -82,21 +84,15 @@ int pthread_cancel(pthread_t thread)
 
   if (tcb == this_task())
     {
+      tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
+      tcb->flags |= TCB_FLAG_CANCEL_DOING;
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+      up_pthread_exit(((FAR struct pthread_tcb_s *)tcb)->exit,
+                      PTHREAD_CANCELED);
+#else
       pthread_exit(PTHREAD_CANCELED);
-    }
-
-#ifdef CONFIG_PTHREAD_CLEANUP
-  /* Perform any stack pthread clean-up callbacks.
-   *
-   * REVISIT: In this case, the clean-up callback will execute on the
-   * thread of the caller of pthread cancel, not on the thread of
-   * the thread-to-be-canceled.  This is a problem when deferred
-   * cancellation is not supported because, for example, the clean-up
-   * function will be unable to unlock its own mutexes.
-   */
-
-  pthread_cleanup_popall(tcb);
 #endif
+    }
 
   /* Complete pending join operations */
 

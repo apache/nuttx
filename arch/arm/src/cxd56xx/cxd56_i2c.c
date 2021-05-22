@@ -846,9 +846,6 @@ static int cxd56_i2c_transfer_scu(FAR struct i2c_master_s *dev,
       cxd56_i2c_clock_gate_disable(priv->port);
       cxd56_i2c_disable(priv);
       cxd56_i2c_setfrequency(priv, msgs->frequency);
-      i2c_reg_rmw(priv, CXD56_IC_CON, IC_RESTART_EN, IC_RESTART_EN);
-      i2c_reg_write(priv, CXD56_IC_TAR, msgs->addr & 0x7f);
-      cxd56_i2c_enable(priv);
       cxd56_i2c_clock_gate_enable(priv->port);
 
       priv->frequency = msgs->frequency;
@@ -1028,7 +1025,9 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
   i2c_reg_write(priv, CXD56_IC_SDA_HOLD, 1);
 
   i2c_reg_write(priv, CXD56_IC_CON,
-                (IC_SLAVE_DISABLE | IC_MASTER_MODE | IC_TX_EMPTY_CTRL));
+                (IC_RX_FIFO_FULL_HLD_CTRL | IC_RESTART_EN |
+                 IC_SLAVE_DISABLE | IC_MASTER_MODE | IC_TX_EMPTY_CTRL));
+
   cxd56_i2c_setfrequency(priv, I2C_DEFAULT_FREQUENCY);
 
   leave_critical_section(flags);

@@ -895,7 +895,7 @@ void stm32_foc_sync_all(void)
     {
       /* Force update event to reset CNTR */
 
-      putreg32(ATIM_EGR_UG, egr_reg[i]);
+      putreg32(GTIM_EGR_UG, egr_reg[i]);
     }
 }
 #endif

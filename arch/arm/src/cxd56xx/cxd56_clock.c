@@ -2291,6 +2291,182 @@ uint32_t cxd56_get_img_vsync_baseclock(void)
     }
 }
 
+static int cxd56_hostif_clock_ctrl(uint32_t block, uint32_t intr, int on)
+{
+  uint32_t val;
+  uint32_t stat;
+  int      retry = 10000;
+
+  putreg32(0xffffffff, CXD56_TOPREG_CRG_INT_CLR0);
+
+  val = getreg32(CXD56_TOPREG_SYSIOP_CKEN);
+  if (on)
+    {
+      if ((val & block) == block)
+        {
+          /* Already clock on */
+
+          return OK;
+        }
+
+      putreg32(val | block, CXD56_TOPREG_SYSIOP_CKEN);
+    }
+  else
+    {
+      if ((val & block) == 0)
+        {
+          /* Already clock off */
+
+          return OK;
+        }
+
+      putreg32(val & ~block, CXD56_TOPREG_SYSIOP_CKEN);
+    }
+
+  do
+    {
+      stat = getreg32(CXD56_TOPREG_CRG_INT_STAT_RAW0);
+      busy_wait(1000);
+    }
+  while (retry-- && !(stat & intr));
+
+  putreg32(0xffffffff, CXD56_TOPREG_CRG_INT_CLR0);
+
+  return (retry) ? OK : -ETIMEDOUT;
+}
+
+int cxd56_hostif_clock_enable(void)
+{
+  int      ret = OK;
+  uint32_t mask;
+  uint32_t intr;
+
+  /* Enable HOSTIF IRAM/DRAM & general RAM memory power. */
+
+  putreg32((0x3 << 24) | 0xf, CXD56_TOPREG_HOSTIFC_RAMMODE_SEL);
+
+  do_power_control();
+
+  mask = CKEN_HOSSPI | CKEN_HOSI2C | CKEN_HOSTIFC_SEQ | CKEN_BRG_HOST |
+    CKEN_I2CS | CKEN_PCLK_HOSTIFC | CKEN_PCLK_UART0 | CKEN_UART0;
+
+  if (getreg32(CXD56_TOPREG_SYSIOP_CKEN) & mask)
+    {
+      /* Already enabled */
+
+      return ret;
+    }
+
+  putreg32(0, CXD56_TOPREG_CKDIV_HOSTIFC);
+  putreg32(0, CXD56_TOPREG_CKSEL_SYSIOP);
+
+  mask = CKEN_HOSSPI | CKEN_HOSI2C | CKEN_BRG_HOST |
+    CKEN_I2CS | CKEN_PCLK_HOSTIFC;
+
+  intr = CRG_CK_BRG_HOST | CRG_CK_I2CS | CRG_CK_PCLK_HOSTIFC;
+
+  ret = cxd56_hostif_clock_ctrl(mask, intr, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = cxd56_hostif_clock_ctrl(mask, intr, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  modifyreg32(CXD56_TOPREG_SWRESET_BUS, 0, XRST_HOSTIFC);
+  ret = cxd56_hostif_clock_ctrl(mask, intr, 1);
+
+  return ret;
+}
+
+int cxd56_hostif_clock_disable(void)
+{
+  int      ret = OK;
+  uint32_t mask;
+  uint32_t intr;
+
+  mask = CKEN_HOSSPI | CKEN_HOSI2C | CKEN_HOSTIFC_SEQ | CKEN_BRG_HOST |
+    CKEN_I2CS |  CKEN_PCLK_HOSTIFC |  CKEN_PCLK_UART0 |  CKEN_UART0;
+
+  if (0 == (getreg32(CXD56_TOPREG_SYSIOP_CKEN) & mask))
+    {
+      /* Already disabled */
+
+      return ret;
+    }
+
+  mask = CKEN_HOSSPI | CKEN_HOSI2C | CKEN_BRG_HOST |
+    CKEN_I2CS |  CKEN_PCLK_HOSTIFC;
+
+  intr = CRG_CK_BRG_HOST | CRG_CK_I2CS | CRG_CK_PCLK_HOSTIFC;
+
+  ret = cxd56_hostif_clock_ctrl(mask, intr, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  modifyreg32(CXD56_TOPREG_SWRESET_BUS, XRST_HOSTIFC, 0);
+
+  /* Disable HOSTIF IRAM/DRAM & general RAM memory power. */
+
+  putreg32(0x3, CXD56_TOPREG_HOSTIFC_RAMMODE_SEL);
+
+  do_power_control();
+
+  return ret;
+}
+
+int cxd56_hostseq_clock_enable(void)
+{
+  int ret = OK;
+
+  if (getreg32(CXD56_TOPREG_SYSIOP_CKEN) & CKEN_HOSTIFC_SEQ)
+    {
+      /* Already enabled */
+
+      return ret;
+    }
+
+  ret = cxd56_hostif_clock_ctrl(CKEN_HOSTIFC_SEQ, CRG_CK_HOSTIFC_SEQ, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = cxd56_hostif_clock_ctrl(CKEN_HOSTIFC_SEQ, CRG_CK_HOSTIFC_SEQ, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  modifyreg32(CXD56_TOPREG_SWRESET_BUS, 0, XRST_HOSTIFC_ISOP);
+  ret = cxd56_hostif_clock_ctrl(CKEN_HOSTIFC_SEQ, CRG_CK_HOSTIFC_SEQ, 1);
+
+  return ret;
+}
+
+int cxd56_hostseq_clock_disable(void)
+{
+  int ret = OK;
+
+  if (0 == (getreg32(CXD56_TOPREG_SYSIOP_CKEN) & CKEN_HOSTIFC_SEQ))
+    {
+      /* Already disabled */
+
+      return ret;
+    }
+
+  modifyreg32(CXD56_TOPREG_SWRESET_BUS, XRST_HOSTIFC_ISOP, 0);
+  ret = cxd56_hostif_clock_ctrl(CKEN_HOSTIFC_SEQ, CRG_CK_HOSTIFC_SEQ, 0);
+
+  return ret;
+}
+
 int up_pmramctrl(int cmd, uintptr_t addr, size_t size)
 {
   int startidx;

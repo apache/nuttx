@@ -45,9 +45,9 @@
 #ifdef CONFIG_LIB_SYSCALL
 #  ifdef CONFIG_BUILD_PROTECTED
 #    ifndef CONFIG_SYS_RESERVED
-#      error "CONFIG_SYS_RESERVED must be defined to have the value 8"
-#    elif CONFIG_SYS_RESERVED != 8
-#      error "CONFIG_SYS_RESERVED must have the value 8"
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 9"
+#    elif CONFIG_SYS_RESERVED != 9
+#      error "CONFIG_SYS_RESERVED must have the value 9"
 #    endif
 #  else
 #    ifndef CONFIG_SYS_RESERVED
@@ -81,6 +81,7 @@
 
 #define SYS_switch_context        (2)
 
+#ifndef CONFIG_BUILD_FLAT
 #ifdef CONFIG_LIB_SYSCALL
 /* SYS call 3:
  *
@@ -97,14 +98,6 @@
  */
 
 #define SYS_task_start            (4)
-
-/* SYS call 5:
- *
- * void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
- *        noreturn_function
- */
-
-#define SYS_pthread_start         (5)
 
 /* SYS call 6:
  *
@@ -123,6 +116,24 @@
 #define SYS_signal_handler_return (7)
 
 #endif /* CONFIG_BUILD_PROTECTED */
+
+/* SYS call 5:
+ *
+ * void up_pthread_start((pthread_startroutine_t startup,
+ *                        pthread_startroutine_t entrypt, pthread_addr_t arg)
+ *        noreturn_function
+ */
+
+#define SYS_pthread_start         (5)
+
+/* SYS call 8:
+ *
+ * void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
+ */
+
+#define SYS_pthread_exit         (8)
+
+#endif /* !CONFIG_BUILD_FLAT */
 #endif /* CONFIG_LIB_SYSCALL */
 
 /****************************************************************************

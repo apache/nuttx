@@ -460,6 +460,17 @@ static int up_setup(FAR struct uart_dev_s *dev)
   uint32_t lcr;
   uint32_t cr;
 
+#ifdef CONFIG_CXD56_SUBCORE
+  if (priv->id == 1)
+    {
+      /* In case of SUBCORE, UART1 has been already initialized,
+       * then we don't need to do anything.
+       */
+
+      return OK;
+    }
+#endif
+
   cxd56_uart_setup(priv->id);
 
   /* Init HW */
