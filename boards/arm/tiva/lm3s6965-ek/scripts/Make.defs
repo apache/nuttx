@@ -41,6 +41,17 @@ ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+ifeq ($(CONFIG_NXFLAT),y)
+  # mpic-data-is-text-relative flag first time appeared in GCC source code tree on 2016-Jul-12
+  # and it was included in GCC 4.9.4 release on 2016-Aug-03.
+  ARCHCC_HAS_PIC_DATA_IS_TEXT_RELATIVE_FLAG = ${shell $(CC) --target-help 2>&1 | grep -c "mpic-data-is-text-relative"}
+
+  # Turn off -mpic-data-is-text-relative flag to access bss via the GOT
+  # (https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139630111)
+  ifneq ($(ARCHCC_HAS_PIC_DATA_IS_TEXT_RELATIVE_FLAG),0)
+    ARCHPICFLAGS += -mno-pic-data-is-text-relative
+  endif
+endif
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
