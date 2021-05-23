@@ -127,7 +127,7 @@ static int load_absmodule(FAR struct binary_s *bin)
           /* Save the unload method for use by unload_module */
 
           bin->unload = binfmt->unload;
-          dump_module(bin);
+          binfmt_dumpmodule(bin);
           break;
         }
     }
