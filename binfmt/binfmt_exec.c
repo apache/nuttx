@@ -92,22 +92,13 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
   bin->exports  = exports;
   bin->nexports = nexports;
 
-  /* Copy the argv[] list */
-
-  ret = binfmt_copyargv(bin, argv);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to copy argv[]: %d\n", ret);
-      goto errout_with_bin;
-    }
-
   /* Load the module into memory */
 
   ret = load_module(bin);
   if (ret < 0)
     {
       berr("ERROR: Failed to load program '%s': %d\n", filename, ret);
-      goto errout_with_argv;
+      goto errout_with_bin;
     }
 
   /* Update the spawn attribute */
@@ -136,7 +127,7 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 
   /* Then start the module */
 
-  pid = exec_module(bin);
+  pid = exec_module(bin, argv);
   if (pid < 0)
     {
       ret = pid;
@@ -159,7 +150,6 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 #else
   /* Free the binary_s structure here */
 
-  binfmt_freeargv(bin);
   kmm_free(bin);
 
   /* TODO: How does the module get unloaded in this case? */
@@ -172,8 +162,6 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 errout_with_lock:
   sched_unlock();
   unload_module(bin);
-errout_with_argv:
-  binfmt_freeargv(bin);
 errout_with_bin:
   kmm_free(bin);
 errout:

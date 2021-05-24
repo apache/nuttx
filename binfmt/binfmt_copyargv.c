@@ -59,17 +59,17 @@
  *   do not have any real option other than to copy the callers argv[] list.
  *
  * Input Parameters:
- *   bin      - Load structure
  *   argv     - Argument list
  *
  * Returned Value:
- *   Zero (OK) on success; a negated error value on failure.
+ *   A non-zero copy is returned on success.
  *
  ****************************************************************************/
 
-int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
+FAR char * const *binfmt_copyargv(FAR char * const *argv)
 {
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  FAR char **argvbuf = NULL;
   FAR char *ptr;
   size_t argvsize;
   size_t argsize;
@@ -77,9 +77,6 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
   int i;
 
   /* Get the number of arguments and the size of the argument list */
-
-  bin->argv      = (FAR char **)NULL;
-  bin->argbuffer = (FAR char *)NULL;
 
   if (argv)
     {
@@ -105,7 +102,7 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
             {
               berr("ERROR: Too many arguments: %lu\n",
                    (unsigned long)argvsize);
-              return -E2BIG;
+              return NULL;
             }
         }
 
@@ -115,39 +112,38 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
 
       if (argsize > 0)
         {
-          argvsize  = (nargs + 1) * sizeof(FAR char *);
-          bin->argbuffer = (FAR char *)kmm_malloc(argvsize + argsize);
-          if (!bin->argbuffer)
+          argvsize = (nargs + 1) * sizeof(FAR char *);
+          ptr      = (FAR char *)kmm_malloc(argvsize + argsize);
+          if (!ptr)
             {
               berr("ERROR: Failed to allocate the argument buffer\n");
-              return -ENOMEM;
+              return NULL;
             }
 
           /* Copy the argv list */
 
-          bin->argv = (FAR char **)bin->argbuffer;
-          ptr       = bin->argbuffer + argvsize;
+          argvbuf = (FAR char **)ptr;
+          ptr    += argvsize;
           for (i = 0; argv[i]; i++)
             {
-              bin->argv[i] = ptr;
-              argsize      = strlen(argv[i]) + 1;
+              argvbuf[i] = ptr;
+              argsize    = strlen(argv[i]) + 1;
               memcpy(ptr, argv[i], argsize);
-              ptr         += argsize;
+              ptr       += argsize;
             }
 
           /* Terminate the argv[] list */
 
-          bin->argv[i] = (FAR char *)NULL;
+          argvbuf[i] = NULL;
         }
     }
 
-  return OK;
+  return (FAR char * const *)argvbuf;
 
 #else
-  /* Just save the caller's argv pointer */
+  /* Just return the caller's argv pointer */
 
-  bin->argv = argv;
-  return OK;
+  return argv;
 #endif
 }
 
@@ -158,7 +154,7 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
  *   Release the copied argv[] list.
  *
  * Input Parameters:
- *   binp - Load structure
+ *   argv     - Argument list
  *
  * Returned Value:
  *   None
@@ -166,21 +162,16 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-void binfmt_freeargv(FAR struct binary_s *binp)
+void binfmt_freeargv(FAR char * const *argv)
 {
   /* Is there an allocated argument buffer */
 
-  if (binp->argbuffer)
+  if (argv)
     {
       /* Free the argument buffer */
 
-      kmm_free(binp->argbuffer);
+      kmm_free((FAR char **)argv);
     }
-
-  /* Nullify the allocated argv[] array and the argument buffer pointers */
-
-  binp->argbuffer = (FAR char *)NULL;
-  binp->argv      = (FAR char **)NULL;
 }
 #endif
 

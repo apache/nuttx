@@ -88,15 +88,14 @@ int binfmt_dumpmodule(FAR const struct binary_s *bin);
  *   do not have any real option other than to copy the callers argv[] list.
  *
  * Input Parameters:
- *   bin      - Load structure
  *   argv     - Argument list
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   A non-zero copy is returned on success.
  *
  ****************************************************************************/
 
-int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv);
+FAR char * const *binfmt_copyargv(FAR char * const *argv);
 
 /****************************************************************************
  * Name: binfmt_freeargv
@@ -105,7 +104,7 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv);
  *   Release the copied argv[] list.
  *
  * Input Parameters:
- *   bin      - Load structure
+ *   argv     - Argument list
  *
  * Returned Value:
  *   None
@@ -113,9 +112,9 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-void binfmt_freeargv(FAR struct binary_s *bin);
+void binfmt_freeargv(FAR char * const *argv);
 #else
-#  define binfmt_freeargv(bin)
+#  define binfmt_freeargv(argv)
 #endif
 
 /****************************************************************************
