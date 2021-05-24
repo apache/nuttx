@@ -44,7 +44,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int builtin_loadbinary(FAR struct binary_s *binp);
+static int builtin_loadbinary(FAR struct binary_s *binp,
+                              FAR const char *filename,
+                              FAR const struct symtab_s *exports,
+                              int nexports);
 
 /****************************************************************************
  * Private Data
@@ -69,22 +72,24 @@ static struct binfmt_s g_builtin_binfmt =
  *
  ****************************************************************************/
 
-static int builtin_loadbinary(struct binary_s *binp)
+static int builtin_loadbinary(FAR struct binary_s *binp,
+                              FAR const char *filename,
+                              FAR const struct symtab_s *exports,
+                              int nexports)
 {
-  FAR const char *filename;
   FAR const struct builtin_s *builtin;
   int fd;
   int index;
   int ret;
 
-  binfo("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", filename);
 
   /* Open the binary file for reading (only) */
 
-  fd = nx_open(binp->filename, O_RDONLY);
+  fd = nx_open(filename, O_RDONLY);
   if (fd < 0)
     {
-      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, fd);
+      berr("ERROR: Failed to open binary %s: %d\n", filename, fd);
       return fd;
     }
 

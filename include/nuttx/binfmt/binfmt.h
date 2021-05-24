@@ -61,12 +61,6 @@ typedef FAR void (*binfmt_dtor_t)(void);
 struct symtab_s;
 struct binary_s
 {
-  /* Information provided to the loader to load and bind a module */
-
-  FAR const char *filename;            /* Full path to the binary to be loaded (See NOTE 1 above) */
-  FAR const struct symtab_s *exports;  /* Table of exported symbols */
-  int nexports;                        /* The number of symbols in exports[] */
-
   /* Information provided from the loader (if successful) describing the
    * resources used by the loaded module.
    */
@@ -118,7 +112,10 @@ struct binfmt_s
 
   /* Verify and load binary into memory */
 
-  CODE int (*load)(FAR struct binary_s *bin);
+  CODE int (*load)(FAR struct binary_s *bin,
+                   FAR const char *filename,
+                   FAR const struct symtab_s *exports,
+                   int nexports);
 
   /* Unload module callback */
 
@@ -192,7 +189,8 @@ int unregister_binfmt(FAR struct binfmt_s *binfmt);
  *
  ****************************************************************************/
 
-int load_module(FAR struct binary_s *bin);
+int load_module(FAR struct binary_s *bin, FAR const char *filename,
+                FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
  * Name: unload_module
@@ -228,7 +226,8 @@ int unload_module(FAR struct binary_s *bin);
  *
  ****************************************************************************/
 
-int exec_module(FAR const struct binary_s *binp, FAR char * const *argv);
+int exec_module(FAR const struct binary_s *binp,
+                FAR const char *filename, FAR char * const *argv);
 
 /****************************************************************************
  * Name: exec

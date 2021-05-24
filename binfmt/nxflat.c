@@ -65,7 +65,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nxflat_loadbinary(FAR struct binary_s *binp);
+static int nxflat_loadbinary(FAR struct binary_s *binp,
+                             FAR const char *filename,
+                             FAR const struct symtab_s *exports,
+                             int nexports);
 static int nxflat_unloadbinary(FAR struct binary_s *binp);
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
@@ -137,16 +140,19 @@ static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-static int nxflat_loadbinary(FAR struct binary_s *binp)
+static int nxflat_loadbinary(FAR struct binary_s *binp,
+                             FAR const char *filename,
+                             FAR const struct symtab_s *exports,
+                             int nexports)
 {
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
   int                      ret;
 
-  binfo("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", filename);
 
   /* Initialize the xflat library to load the program binary. */
 
-  ret = nxflat_init(binp->filename, &loadinfo);
+  ret = nxflat_init(filename, &loadinfo);
   nxflat_dumploadinfo(&loadinfo);
   if (ret != 0)
     {
@@ -166,7 +172,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp)
 
   /* Bind the program to the exported symbol table */
 
-  ret = nxflat_bind(&loadinfo, binp->exports, binp->nexports);
+  ret = nxflat_bind(&loadinfo, exports, nexports);
   if (ret != 0)
     {
       berr("Failed to bind symbols program binary: %d\n", ret);

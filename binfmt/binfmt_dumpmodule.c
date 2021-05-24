@@ -57,7 +57,6 @@ int binfmt_dumpmodule(FAR const struct binary_s *bin)
   if (bin)
     {
       binfo("Module:\n");
-      binfo("  filename:  %s\n", bin->filename);
       binfo("  entrypt:   %p\n", bin->entrypt);
       binfo("  mapped:    %p size=%zd\n", bin->mapped, bin->mapsize);
       binfo("  alloc:     %p %p %p\n", bin->alloc[0],
