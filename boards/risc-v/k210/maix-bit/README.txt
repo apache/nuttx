@@ -1,6 +1,7 @@
 1. Download and install toolchain and openocd-k210
 
   $ curl https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
+  $ export PATH=$PATH:/$TOOL_CHAIN_PATH/bin
 
 2. Build openocd-k210
 
@@ -11,8 +12,8 @@
 3. Configure and build NuttX
 
   $ mkdir ./nuttx; cd ./nuttx
-  $ git clone https://github.com/apache/incubator-nuttx.git
-  $ git clone https://github.com/apache/incubator-nuttx-apps.git
+  $ git clone https://github.com/apache/incubator-nuttx.git nuttx
+  $ git clone https://github.com/apache/incubator-nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
   $ ./tools/configure.sh maix-bit:nsh
