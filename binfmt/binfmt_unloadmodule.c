@@ -150,10 +150,6 @@ int unload_module(FAR struct binary_s *binp)
         }
 #endif
 
-      /* Free any allocated argv[] strings */
-
-      binfmt_freeargv(binp);
-
       /* Unmap mapped address spaces */
 
       if (binp->mapped)
