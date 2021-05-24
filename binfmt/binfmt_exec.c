@@ -86,15 +86,9 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
       goto errout;
     }
 
-  /* Initialize the binary structure */
-
-  bin->filename = filename;
-  bin->exports  = exports;
-  bin->nexports = nexports;
-
   /* Load the module into memory */
 
-  ret = load_module(bin);
+  ret = load_module(bin, filename, exports, nexports);
   if (ret < 0)
     {
       berr("ERROR: Failed to load program '%s': %d\n", filename, ret);
@@ -127,7 +121,7 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 
   /* Then start the module */
 
-  pid = exec_module(bin, argv);
+  pid = exec_module(bin, filename, argv);
   if (pid < 0)
     {
       ret = pid;
