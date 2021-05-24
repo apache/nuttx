@@ -82,13 +82,13 @@ function pack_sdk()
 {
   VENDOR=(\
       "realtek" \
-      "allwinner" )
+      "bes" )
   BOARDS=(\
       "
       amebaZ
       " \
       "
-      perf1-r328
+      best2001_ep
       " \
       )
 
@@ -110,8 +110,8 @@ function pack_sdk()
   fi
 
   local version=$CONFIG_VERSION_STRING.$CONFIG_VERSION_BUILD
-  local packname=`echo nuttx-sdk-$1-$version.zip | sed 's/\//-/g'`
-  local board=`echo $1 | awk -F '[:|\/]' '{print $1}'`
+  local board=`echo $1 | awk -F '/' '{print $4}'`
+  local packname=`echo nuttx-sdk-$board-$version.zip`
   local vendor=
 
   for (( i = 0; i < ${#BOARDS[*]}; i++)); do
