@@ -236,6 +236,7 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 #ifdef CONFIG_RAMLOG_OVERWRITE
       /* Yes... Overwrite with the latest log in the circular buffer */
 
+      priv->rl_buffer[priv->rl_tail] = '\0';
       priv->rl_tail += 1;
       if (priv->rl_tail >= priv->rl_bufsize)
         {
