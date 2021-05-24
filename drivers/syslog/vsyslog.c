@@ -28,6 +28,7 @@
 #include <syslog.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
@@ -133,6 +134,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   ret = lib_sprintf(&stream.public, "[%5jd.%06ld] ",
                     (uintmax_t)ts.tv_sec, ts.tv_nsec / 1000);
 #endif
+#endif
+
+#if defined(CONFIG_SMP)
+  ret += lib_sprintf(&stream.public, "[CPU%d] ", up_cpu_index());
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
