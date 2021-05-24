@@ -111,7 +111,8 @@ static void exec_ctors(FAR void *arg)
  *
  ****************************************************************************/
 
-int exec_module(FAR const struct binary_s *binp, FAR char * const *argv)
+int exec_module(FAR const struct binary_s *binp,
+                FAR const char *filename, FAR char * const *argv)
 {
   FAR struct task_tcb_s *tcb;
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -129,7 +130,7 @@ int exec_module(FAR const struct binary_s *binp, FAR char * const *argv)
     }
 #endif
 
-  binfo("Executing %s\n", binp->filename);
+  binfo("Executing %s\n", filename);
 
   /* Allocate a TCB for the new task. */
 
@@ -167,7 +168,7 @@ int exec_module(FAR const struct binary_s *binp, FAR char * const *argv)
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, binp->filename, binp->priority,
+  ret = nxtask_init(tcb, filename, binp->priority,
                     NULL, binp->stacksize, binp->entrypt, argv);
   binfmt_freeargv(argv);
   if (ret < 0)
