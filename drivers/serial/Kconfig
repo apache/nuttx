@@ -617,4 +617,37 @@ config PSEUDOTERM_TXBUFSIZE
 
 endif # PSEUDOTERM
 
+menuconfig UART_BTH4
+	bool "BT H4 uart pseudo device"
+	default n
+	select MM_CIRCBUF
+	---help---
+		Enable support for Bluetooth H4 UART Pseudo Device(eg. /dev/ttyHCI).
+		This instantiates a serial-like interface over an existing bluetooth
+		controller via HCI interface. Useful for external Bluetooth
+		stacks working this way instead of the socket based interface.
+
+if UART_BTH4
+
+config UART_BTH4_TXBUFSIZE
+	int "BT H4 uart TX buffer size"
+	default 1024
+	---help---
+		H4 UART TX buffer size.  Default: 1024
+
+config UART_BTH4_RXBUFSIZE
+	int "BT H4 uart RX buffer size"
+	default 1024
+	---help---
+		H4 UART RX buffer size.  Default: 1024
+
+config UART_BTH4_NPOLLWAITERS
+	int "Number of poll threads"
+	default 2
+	---help---
+		Maximum number of threads than can be waiting for POLL events.
+		Default: 2
+
+endif # UART_BTH4
+
 endif # SERIAL
