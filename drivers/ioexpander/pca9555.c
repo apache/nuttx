@@ -814,7 +814,7 @@ static int pca9555_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
   DEBUGASSERT(pca != NULL && cb != NULL);
   DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&pca->cb[0] &&
               (uintptr_t)cb <=
-              (uintptr_t)&pca->cb[CONFIG_TCA64XX_INT_NCALLBACKS - 1]);
+              (uintptr_t)&pca->cb[CONFIG_PCA9555_INT_NCALLBACKS - 1]);
   UNUSED(pca);
 
   cb->pinset = 0;
