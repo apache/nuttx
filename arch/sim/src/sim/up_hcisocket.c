@@ -39,6 +39,10 @@
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
 
+#if defined(CONFIG_UART_BTH4)
+  #include <nuttx/serial/uart_bth4.h>
+#endif
+
 #include "up_internal.h"
 #include "up_hcisocket_host.h"
 
@@ -219,6 +223,9 @@ static FAR struct bthcisock_s *bthcisock_alloc(int dev_id)
 int bthcisock_register(int dev_id)
 {
   FAR struct bthcisock_s *dev;
+#if defined(CONFIG_UART_BTH4)
+  char name[32];
+#endif
   int ret;
 
   dev = bthcisock_alloc(dev_id);
@@ -227,7 +234,12 @@ int bthcisock_register(int dev_id)
       return -ENOMEM;
     }
 
+#if defined(CONFIG_UART_BTH4)
+  snprintf(name, sizeof(name), "/dev/ttyHCI%d", dev_id);
+  ret = uart_bth4_register(name, &dev->drv);
+#else
   ret = bt_netdev_register(&dev->drv);
+#endif
   if (ret < 0)
     {
       kmm_free(dev);

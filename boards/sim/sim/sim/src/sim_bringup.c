@@ -372,7 +372,7 @@ int sim_bringup(void)
 #ifdef CONFIG_BLUETOOTH_UART_BRIDGE
   /* Register the Bluetooth BT/BLE dual mode bridge driver */
 
-  ret = bt_uart_bridge_register("/dev/ttyHCI",
+  ret = bt_uart_bridge_register("/dev/ttyHCI0",
                                 "/dev/ttyBT", "/dev/ttyBLE");
   if (ret < 0)
     {
