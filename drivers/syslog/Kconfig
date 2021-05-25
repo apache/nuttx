@@ -34,14 +34,6 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_BUFFER_SECTION
-	string "The section where ramlog buffer is located"
-	default ".bss"
-	depends on RAMLOG_SYSLOG
-	---help---
-		The section where ramlog buffer is located, this section cannot
-		be initialized each time when the system boot.
-
 config RAMLOG_BUFSIZE
 	int "RAMLOG buffer size"
 	default 1024
@@ -126,7 +118,7 @@ config SYSLOG_TIMESTAMP_FORMATTED
 	depends on SYSLOG_TIMESTAMP_REALTIME
 	---help---
 		Syslog timestamp will be formatted according to the
-		SYSLOG_TIMESTAMP_FORMAT format string.		
+		SYSLOG_TIMESTAMP_FORMAT format string.
 
 config SYSLOG_TIMESTAMP_LOCALTIME
 	bool "Use local-time timestamp"
@@ -207,7 +199,7 @@ config RAMLOG_SYSLOG
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
-	default !ARCH_LOWPUTC
+	default !ARCH_LOWPUTC && !SYSLOG_RPMSG && !RAMLOG_SYSLOG && !SYSLOG_CHAR
 	depends on DEV_CONSOLE
 	---help---
 		Use the system console as a SYSLOG output device.
@@ -219,21 +211,29 @@ config SYSLOG_RPMSG
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
+config SYSLOG_DEFAULT
+	bool "Default SYSLOG device"
+	default ARCH_LOWPUTC && !SYSLOG_RPMSG && !SYSLOG_CONSOLE && !RAMLOG_SYSLOG && !SYSLOG_CHAR
+	---help---
+		syslog() interfaces will be present, but all output will go to the
+		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
+
+endif
+
+config RAMLOG_BUFFER_SECTION
+	string "The section where ramlog buffer is located"
+	default ".bss"
+	depends on RAMLOG_SYSLOG
+	---help---
+		The section where ramlog buffer is located, this section cannot
+		be initialized each time when the system boot.
+
 config SYSLOG_RPMSG_SERVER_NAME
 	string "The name of Syslog Rpmsg Server"
 	depends on SYSLOG_RPMSG
 	---help---
 		The proc name of rpmsg server. Client sends message to
 		specified name of remote proc.
-
-config SYSLOG_DEFAULT
-	bool "Default SYSLOG device"
-	default ARCH_LOWPUTC
-	---help---
-		syslog() interfaces will be present, but all output will go to the
-		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
-
-endif
 
 config SYSLOG_RPMSG_WORK_DELAY
 	int "SYSLOG RPMSG work delay(ms)"
