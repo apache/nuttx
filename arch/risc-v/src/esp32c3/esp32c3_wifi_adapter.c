@@ -5202,6 +5202,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
           return -EINVAL;
         }
 
+      memset(wifi_cfg.sta.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
@@ -5328,6 +5329,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
@@ -6284,8 +6286,8 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
   if (set)
     {
       wifi_cfg.ap.max_connection = ESP_MAX_STA_CONN;
+      memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.ap.password, pdata, len);
-      wifi_cfg.ap.password[len] = '\0';
       if (len)
         {
           wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
@@ -6369,6 +6371,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.ap.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
