@@ -850,7 +850,8 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
 
   eedev->readonly = !!readonly;
 
-  finfo("EEPROM device %s, %d bytes, %d per page, addrlen %d, readonly %d\n",
+  finfo("EEPROM device %s, %"PRIu32" bytes, "
+        "%u per page, addrlen %u, readonly %d\n",
        devname, eedev->size, eedev->pgsize, eedev->addrlen, eedev->readonly);
 
   return register_driver(devname, &ee25xx_fops, 0666, eedev);
