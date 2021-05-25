@@ -751,6 +751,12 @@ choice EXAMPLE_POWER_SAVE_MODE
 		bool "maximum modem"
 endchoice
 
+config ESP32C3_WIFI_RECONNECT
+	bool "Enable Wi-Fi to reconnect"
+	default n
+	---help---
+		Select this option to enable Wi-Fi to reconnect for station when disconnected.
+
 endmenu # ESP32C3_WIRELESS
 
 menu "SPI Flash configuration"

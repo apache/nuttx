@@ -2056,6 +2056,7 @@ static void esp_evt_work_cb(FAR void *arg)
   irqstate_t flags;
   struct evt_adpt *evt_adpt;
   struct wifi_notify *notify;
+  wifi_event_sta_disconnected_t *disconnected;
 
   while (1)
     {
@@ -2092,8 +2093,11 @@ static void esp_evt_work_cb(FAR void *arg)
             break;
 
           case WIFI_ADPT_EVT_STA_DISCONNECT:
-            wlinfo("INFO: Wi-Fi sta disconnect\n");
+            disconnected = (wifi_event_sta_disconnected_t *)evt_adpt->buf;
+            wlinfo("INFO: Wi-Fi sta disconnect, reason code: %d\n",
+                                              disconnected->reason);
             g_sta_connected = false;
+#ifdef CONFIG_ESP32C3_WIFI_RECONNECT
             if (g_sta_reconnect)
               {
                 ret = esp_wifi_connect();
@@ -2102,6 +2106,7 @@ static void esp_evt_work_cb(FAR void *arg)
                     wlerr("ERROR: Failed to connect AP error=%d\n", ret);
                   }
               }
+#endif
             break;
 
           case WIFI_ADPT_EVT_STA_STOP:
