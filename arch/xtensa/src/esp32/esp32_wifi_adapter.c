@@ -2619,12 +2619,12 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
   regval[1] = getreg32(MAC_ADDR1_REG);
 
   crc = data[6];
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < MAC_LEN; i++)
     {
       mac[i] = data[5 - i];
     }
 
-  if (crc != esp_crc8(mac, 6))
+  if (crc != esp_crc8(mac, MAC_LEN))
     {
       wlerr("Failed to check MAC address CRC\n");
       return -1;
@@ -5431,7 +5431,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
   if (set)
     {
       wifi_cfg.sta.bssid_set = true;
-      memcpy(wifi_cfg.sta.bssid, pdata, 6);
+      memcpy(wifi_cfg.sta.bssid, pdata, MAC_LEN);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
@@ -5442,7 +5442,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
     }
   else
     {
-      memcpy(pdata, wifi_cfg.sta.bssid, 6);
+      memcpy(pdata, wifi_cfg.sta.bssid, MAC_LEN);
     }
 
   return OK;

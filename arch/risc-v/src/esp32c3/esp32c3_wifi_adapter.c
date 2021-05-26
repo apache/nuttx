@@ -2575,7 +2575,7 @@ esp_err_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
   regval[0] = getreg32(MAC_ADDR0_REG);
   regval[1] = getreg32(MAC_ADDR1_REG);
 
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < MAC_LEN; i++)
     {
       mac[i] = data[5 - i];
     }
@@ -5409,7 +5409,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
   if (set)
     {
       wifi_cfg.sta.bssid_set = true;
-      memcpy(wifi_cfg.sta.bssid, pdata, 6);
+      memcpy(wifi_cfg.sta.bssid, pdata, MAC_LEN);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
@@ -5420,7 +5420,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
     }
   else
     {
-      memcpy(pdata, wifi_cfg.sta.bssid, 6);
+      memcpy(pdata, wifi_cfg.sta.bssid, MAC_LEN);
     }
 
   return OK;
