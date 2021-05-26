@@ -44,7 +44,7 @@
  *
  * Input Parameters:
  *   attr
- *   policy
+ *   inheritsched
  *
  * Returned Value:
  *   0 if successful.  Otherwise, an error code.
