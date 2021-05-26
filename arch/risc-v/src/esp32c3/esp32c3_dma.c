@@ -157,12 +157,12 @@ int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
     {
       /* Enable DMA TX/RX channels burst sending data */
 
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
+      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
       SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_DATA_BURST_EN_CH0_M);
 
       /* Enable DMA TX/RX channels burst reading descriptor link */
 
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
+      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
       SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_INDSCR_BURST_EN_CH0_M);
     }
 
