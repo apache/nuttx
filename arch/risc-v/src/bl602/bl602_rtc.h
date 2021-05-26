@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_hbn.h
+ * arch/risc-v/src/bl602/bl602_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,152 +18,58 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_BL602_HBN_H
-#define __ARCH_RISCV_SRC_BL602_BL602_HBN_H
+#ifndef __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H
+#define __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdbool.h>
 
-#include <sys/types.h>
-#include <string.h>
-#include <errno.h>
-#include <stdint.h>
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BL602_HBN_OUT0_INT_GPIO7 (0)     /* HBN out 0 interrupt type: GPIO7 */
-#define BL602_HBN_OUT0_INT_GPIO8 (1)     /* HBN out 0 interrupt type: GPIO8 */
-#define BL602_HBN_OUT0_INT_RTC   (2)     /* HBN out 0 interrupt type: RTC */
+#define BL602_HBN_32K_RC               0         /* HBN use rc 32k */
+#define BL602_HBN_32K_XTAL             1         /* HBN use xtal 32k */
+#define BL602_HBN_32K_DIG              3         /* HBN use dig 32k */
 
-#define BL602_HBN_INT_GPIO7      (0)     /* HBN interrupt type: GPIO7 */
-#define BL602_HBN_INT_GPIO8      (1)     /* HBN interrupt type: GPIO8 */
-#define BL602_HBN_INT_RTC        (16)    /* HBN interrupt type: RTC */
-#define BL602_HBN_INT_PIR        (17)    /* HBN interrupt type: PIR */
-#define BL602_HBN_INT_BOR        (18)    /* HBN interrupt type: BOR */
-#define BL602_HBN_INT_ACOMP0     (20)    /* HBN interrupt type: ACOMP0 */
-#define BL602_HBN_INT_ACOMP1     (22)    /* HBN interrupt type: ACOMP1 */
+#define BL602_HBN_RTC_INT_DELAY_32T    0         /* HBN RTC int delay 32T */
+#define BL602_HBN_RTC_INT_DELAY_0T     1         /* HBN RTC int delay 0T */
 
-typedef CODE int (*bl602_hbn_cb_t)(FAR void *arg);
+#define BL602_HBN_RTC_COMP_BIT0_39     0x01      /* RTC COMP mode bit0-39 */
+#define BL602_HBN_RTC_COMP_BIT0_23     0x02      /* RTC COMP mode bit0-23 */
+#define BL602_HBN_RTC_COMP_BIT13_39    0x04      /* RTC COMP mode bit13-39 */
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bl602_hbn_set_uart_clk_sel
+ * Name: bl602_hbn_sel
  *
  * Description:
- *   Select uart clock source.
+ *   HBN select 32K
  *
  * Input Parameters:
- *   clk_sel: uart clock type selection, 0 for FCLK or 1 for 160MHz CLK
+ *   clk_type: HBN 32k clock type
  *
  * Returned Value:
- *   Description of the value returned by this function (if any),
- *   including an enumeration of all possible error values.
- *
- * Assumptions/Limitations:
- *   Anything else that one might need to know to use this function.
+ *   None.
  *
  ****************************************************************************/
 
-void bl602_set_uart_clk_sel(int clk_sel);
+FAR void bl602_hbn_sel(uint8_t clk_type);
 
 /****************************************************************************
- * Name: bl602_hbn_get_int_state
+ * Name: bl602_hbn_clear_rtc_int
  *
  * Description:
- *   HBN get interrupt status.
- *
- * Input Parameters:
- *   irq_type: HBN interrupt type
- *
- * Returned Value:
- *   true or false
- *
- ****************************************************************************/
-
-bool bl602_hbn_get_int_state(uint8_t irq_type);
-
-/****************************************************************************
- * Name: bl602_hbn_clear_irq
- *
- * Description:
- *   HBN clear interrupt status.
- *
- * Input Parameters:
- *   hbn_int_type: HBN interrupt type
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void bl602_hbn_clear_irq(uint8_t hbn_int_type);
-
-/****************************************************************************
- * Name: bl602_hbn_out0_int_register
- *
- * Description:
- *   HBN out0 interrupt cllback register.
- *
- * Input Parameters:
- *   irq_type: HBN interrupt type
- *   isr_cb: callback
- *   arg: callback arg
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on any failure.
- *
- ****************************************************************************/
-
-int bl602_hbn_out0_int_register(uint8_t irq_type, bl602_hbn_cb_t isr_cb,
-                                void *arg);
-
-/****************************************************************************
- * Name: bl602_hbn_out0_int_unregister
- *
- * Description:
- *   HBN out0 interrupt cllback unregister.
- *
- * Input Parameters:
- *   irq_type: HBN interrupt type
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on any failure.
- *
- ****************************************************************************/
-
-int bl602_hbn_out0_int_unregister(uint8_t irq_type);
-
-/****************************************************************************
- * Name: bl602_hbn_out0_int_enable
- *
- * Description:
- *   HBN out0 interrupt enable.
+ *   HBN clear RTC timer interrupt,this function must be called to clear
+ *   delayed rtc IRQ
  *
  * Input Parameters:
  *   None
@@ -173,13 +79,33 @@ int bl602_hbn_out0_int_unregister(uint8_t irq_type);
  *
  ****************************************************************************/
 
-void bl602_hbn_out0_int_enable(void);
+FAR void bl602_hbn_clear_rtc_int(void);
 
 /****************************************************************************
- * Name: bl602_hbn_out0_int_disable
+ * Name: bl602_hbn_set_rtc_timer
  *
  * Description:
- *   HBN out0 interrupt disable.
+ *   HBN set RTC timer configuration
+ *
+ * Input Parameters:
+ *   delay: RTC interrupt delay 32 clocks
+ *   compval_low: RTC interrupt commpare value low 32 bits
+ *   compval_high: RTC interrupt commpare value high 32 bits
+ *   comp_mode: RTC interrupt commpare
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+FAR void bl602_hbn_set_rtc_timer(uint8_t delay_type, uint32_t compval_low,
+                                 uint32_t compval_high,  uint8_t comp_mode);
+
+/****************************************************************************
+ * Name: bl602_hbn_clear_rtc_counter
+ *
+ * Description:
+ *   HBN set RTC timer configuration
  *
  * Input Parameters:
  *   None
@@ -189,12 +115,56 @@ void bl602_hbn_out0_int_enable(void);
  *
  ****************************************************************************/
 
-void bl602_hbn_out0_int_disable(void);
+FAR void bl602_hbn_clear_rtc_counter(void);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+/****************************************************************************
+ * Name: bl602_hbn_enable_rtc_counter
+ *
+ * Description:
+ *   HBN clear RTC timer counter
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_BL602_BL602_HBN_H */
+FAR void bl602_hbn_enable_rtc_counter(void);
+
+/****************************************************************************
+ * Name: bl602_hbn_get_rtc_timer_val
+ *
+ * Description:
+ *   HBN get RTC timer count value
+ *
+ * Input Parameters:
+ *   val_low: RTC count value pointer for low 32 bits
+ *   val_high: RTC count value pointer for high 8 bits
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+FAR void bl602_hbn_get_rtc_timer_val(uint32_t *val_low, uint32_t *val_high);
+
+/****************************************************************************
+ * Name: bl602_rtc_lowerhalf_initialize
+ *
+ * Description:
+ *   None.
+ *
+ * Input Parameters:
+ *   pwm - A number identifying the pwm instance.
+ *
+ * Returned Value:
+ *   On success, a pointer to the BL602 lower half PWM driver is returned.
+ *   NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void);
+
+#endif /* __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H */
