@@ -45,6 +45,14 @@ config BL602_I2C0
 config BL602_SPI0
 	bool "SPI0"
 
+config BL602_RTC
+	bool "RTC"
+
+config BL602_RTC_USE_XTAL32K
+	bool "Select enable RTC XTAL32K clock source, otherwise use internal RC32K"
+	default n
+	depends on BL602_RTC
+
 config BL602_SPIFLASH
 	bool "SPI Flash"
 	default n
