@@ -97,7 +97,7 @@ enum esp32c3_dma_periph_e
 struct esp32c3_dmadesc_s
 {
   uint32_t ctrl;                    /* DMA control block */
-  uint8_t *pbuf;                    /* DMA TX/RX buffer address */
+  const uint8_t *pbuf;              /* DMA TX/RX buffer address */
   struct esp32c3_dmadesc_s *next;   /* Next DMA descriptor address */
 };
 
