@@ -2074,7 +2074,7 @@ int fat_computefreeclusters(struct fat_mountpt_s *fs)
 
           if (offset >= fs->fs_hwsectorsize)
             {
-              ret = fat_fscacheread(fs, fatsector++);
+              ret = fat_fscacheread(fs, fatsector);
               if (ret < 0)
                 {
                   return ret;
@@ -2154,7 +2154,7 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
 }
 
 /****************************************************************************
- * Name: fat_nfreeclusters
+ * Name: fat_currentsector
  *
  * Description:
  *   Given the file position, set the correct current sector to access.
