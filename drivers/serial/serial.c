@@ -1403,7 +1403,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               /* Save the PID of the recipient of the SIGINT signal. */
 
               dev->pid = (pid_t)arg;
-              DEBUGASSERT((unsigned long)(dev->pid) == arg);
             }
             break;
 #endif
