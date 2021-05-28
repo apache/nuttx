@@ -58,6 +58,7 @@
 #include "esp32c3_wifi_adapter.h"
 #include "esp32c3_rt_timer.h"
 #include "esp32c3_wifi_utils.h"
+#include "esp32c3_wlan.h"
 
 #ifdef CONFIG_PM
 #include "esp32c3_pm.h"
@@ -2192,6 +2193,12 @@ static void esp_evt_work_cb(FAR void *arg)
           case WIFI_ADPT_EVT_STA_CONNECT:
             wlinfo("INFO: Wi-Fi sta connect\n");
             g_sta_connected = true;
+            ret = esp32c3_wlan_sta_set_linkstatus(true);
+            if (ret < 0)
+              {
+                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
+              }
+
             break;
 
           case WIFI_ADPT_EVT_STA_DISCONNECT:
@@ -2199,6 +2206,11 @@ static void esp_evt_work_cb(FAR void *arg)
             wlinfo("INFO: Wi-Fi sta disconnect, reason code: %d\n",
                                               disconnected->reason);
             g_sta_connected = false;
+            ret = esp32c3_wlan_sta_set_linkstatus(false);
+            if (ret < 0)
+              {
+                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
+              }
 #ifdef CONFIG_ESP32C3_WIFI_RECONNECT
             if (g_sta_reconnect)
               {
