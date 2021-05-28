@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+config ESP32S2_QEMU_IMAGE
+	bool "ESP32S2 binary image for QEMU"
+	default n
+	---help---
+		Create a binary flash image used for QEMU.
+
