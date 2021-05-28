@@ -69,7 +69,7 @@
 
 #define OPAMP_CSR_OPAMPEN           (1 << 0)                        /* Bit 0: OPAMP enable */
 #define OPAMP_CSR_FORCE_VP          (1 << 1)                        /* Bit 1: FORCE_VP */
-#define OPAMP_CSR_VPSEL_SHIFT       (3)                             /* Bits 2-3: OPAMP non inverting input selection */
+#define OPAMP_CSR_VPSEL_SHIFT       (2)                             /* Bits 2-3: OPAMP non inverting input selection */
 #define OPAMP_CSR_VPSEL_MASK        (3 << OPAMP_CSR_VPSEL_SHIFT)
 #  define OPAMP_CSR_VPSEL_VINP0     (0 << OPAMP_CSR_VPSEL_SHIFT)
 #  define OPAMP_CSR_VPSEL_VINP1     (1 << OPAMP_CSR_VPSEL_SHIFT)
