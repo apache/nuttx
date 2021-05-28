@@ -54,6 +54,10 @@ CHIP_CSRCS += mpfs_lowputc.c mpfs_serial.c
 CHIP_CSRCS += mpfs_start.c mpfs_timerisr.c
 CHIP_CSRCS += mpfs_gpio.c mpfs_systemreset.c
 
+ifeq ($(CONFIG_MPFS_DMA),y)
+CHIP_CSRCS  += mpfs_dma.c
+endif
+
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS  += riscv_task_start.c riscv_pthread_start.c
 CMN_CSRCS  += riscv_signal_dispatch.c riscv_pmp.c
