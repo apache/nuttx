@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/mpfs/mpfs_memorymap.h
+ * arch/risc-v/src/mpfs/mpfs_systemreset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,36 +18,39 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_MPFS_MPFS_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_MPFS_MPFS_MEMORYMAP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "hardware/mpfs_clint.h"
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
+#include <riscv_arch.h>
 #include "hardware/mpfs_memorymap.h"
-#include "hardware/mpfs_plic.h"
 #include "hardware/mpfs_sysreg.h"
-#include "hardware/mpfs_uart.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-/* Idle thread stack starts from _default_stack_limit */
+/****************************************************************************
+ * Name: up_systemreset
+ *
+ * Description:
+ *   Internal reset logic.
+ *
+ ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-extern uintptr_t *_default_stack_limit;
-#define MPFS_IDLESTACK_BASE  (uintptr_t)&_default_stack_limit
-#else
-#define MPFS_IDLESTACK_BASE  _default_stack_limit
-#endif
+void up_systemreset(void)
+{
+  putreg32(0xdead, MPFS_SYSREG_BASE + MPFS_SYSREG_MSS_RESET_CR_OFFSET);
 
-#define MPFS_IDLESTACK_SIZE (CONFIG_IDLETHREAD_STACKSIZE & ~15)
+  /* Wait for the reset */
 
-#define MPFS_IDLESTACK0_TOP  (MPFS_IDLESTACK_BASE + MPFS_IDLESTACK_SIZE)
+  for (; ; );
+}
 
-#define MPFS_IDLESTACK_TOP   (MPFS_IDLESTACK0_TOP)
-
-#endif /* _ARCH_RISCV_SRC_MPFS_MPFS_MEMORYMAP_H */
