@@ -1872,6 +1872,7 @@ config ARCH_BOARD_B_G431B_ESC1
 	depends on ARCH_CHIP_STM32G431C
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		ST Micro B-G431B-ESC1 Discovery Kit, based on the STM32G431CB
 		MCU, a Cortex-M4 with FPU, 170 MHz, 32 KB SRAM, 128 KB code.

@@ -57,6 +57,19 @@
 
 #define LED_DRIVER_PATH                "/dev/userleds"
 
+/* Button definitions *******************************************************/
+
+/* The B-G431B-ESC supports one buttons controllabe by software:
+ *
+ *   B1 USER:  user button connected to the I/O PC10.
+ */
+
+#define MIN_IRQBUTTON  BUTTON_USER
+#define MAX_IRQBUTTON  BUTTON_USER
+#define NUM_IRQBUTTONS 1
+
+#define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN10)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

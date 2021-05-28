@@ -33,6 +33,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
 #include "b-g431b-esc1.h"
 
 /****************************************************************************
@@ -66,6 +70,16 @@
 int stm32_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_INPUT_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 
 #if defined(HAVE_LEDS)
   /* Register the LED driver */
