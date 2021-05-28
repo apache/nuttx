@@ -136,6 +136,9 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
     {
       /* Advertise maximum segment size for window edge if here is no
        * available iobs on current "free" connection.
+       *
+       * Note: hopefully, a single mss-sized packet can be queued by
+       * the throttled=false case in tcp_datahandler().
        */
 
       recvwndo = mss;
