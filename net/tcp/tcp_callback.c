@@ -91,7 +91,7 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * read-ahead buffers to retain the data -- drop the packet.
            */
 
-         ninfo("Dropped %d bytes\n", dev->d_len);
+          ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.drop++;
