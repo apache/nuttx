@@ -413,17 +413,41 @@ config ESP32C3_UART0_RXPIN
 	int "UART0 RX Pin"
 	default 20
 
+config ESP32C3_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 16
+	range 0 21
+
+config ESP32C3_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 15
+	range 0 21
+
 endif # ESP32C3_UART0
 
 if ESP32C3_UART1
 
 config ESP32C3_UART1_TXPIN
 	int "UART1 TX Pin"
-	default 6
+	default 8
 
 config ESP32C3_UART1_RXPIN
 	int "UART1 RX Pin"
-	default 7
+	default 9
+
+config ESP32C3_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 1
+	range 0 21
+
+config ESP32C3_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 2
+	range 0 21
 
 endif # ESP32C3_UART1
 
