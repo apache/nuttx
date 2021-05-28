@@ -96,7 +96,11 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.drop++;
 #endif
-          /* Clear the TCP_SNDACK bit so that no ACK will be sent */
+          /* Clear the TCP_SNDACK bit so that no ACK will be sent.
+           *
+           * Revisit: It might make more sense to send a dup ack
+           * to give a hint to the peer.
+           */
 
           ret &= ~TCP_SNDACK;
         }
