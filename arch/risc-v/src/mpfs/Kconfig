@@ -103,7 +103,15 @@ config MPFS_I2C1
 
 endmenu
 
+config MPFS_DMA
+	bool "MPFS DMA (PDMA)"
+	default n
+	select ARCH_DMA
+	---help---
+		Enable DMA Support. MPFS DMA is Memory-to-Memory only.
+
 menu "MPFS Others"
 
-
 endmenu
+
+
