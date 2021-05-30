@@ -71,8 +71,7 @@ endif
 
 CHIP_CSRCS  = esp32s2_allocateheap.c esp32s2_clockconfig.c esp32s2_cpuint.c
 CHIP_CSRCS += esp32s2_gpio.c esp32s2_intdecode.c esp32s2_irq.c esp32s2_region.c
-CHIP_CSRCS += esp32s2_timerisr.c esp32s2_user.c esp32s2_rtc.c
-CHIP_CSRCS += esp32s2_lowputc.c
+CHIP_CSRCS += esp32s2_timerisr.c esp32s2_user.c esp32s2_lowputc.c
 
 # Configuration-dependent ESP32S2 files
 

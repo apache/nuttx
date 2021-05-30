@@ -378,35 +378,16 @@
 #define APB_CTRL_PRE_DIV_CNT_V      0x3ff
 #define APB_CTRL_PRE_DIV_CNT_S      0
 
-#define I2C_BBPLL_IR_CAL_DELAY      0
-#define I2C_BBPLL_IR_CAL_EXT_CAP    1
-#define I2C_BBPLL_OC_ENB_FCAL       4
-#define I2C_BBPLL_OC_ENB_VCON       10
-#define I2C_BBPLL_BBADC_CAL_7_0     12
+/* ROM functions which read/write internal control bus */
 
-#define I2C_BBPLL_OC_LREF           2
-#define I2C_BBPLL_OC_LREF_MSB       7
-#define I2C_BBPLL_OC_LREF_LSB       7
-
-#define I2C_BBPLL_OC_DIV_7_0        3
-#define I2C_BBPLL_OC_DIV_7_0_MSB    7
-#define I2C_BBPLL_OC_DIV_7_0_LSB    0
-
-#define I2C_BBPLL_BBADC_DSMP        9
-#define I2C_BBPLL_BBADC_DSMP_MSB    7
-#define I2C_BBPLL_BBADC_DSMP_LSB    4
-
-#define I2C_BBPLL_OC_DCUR           5
-#define I2C_BBPLL_OC_DCUR_MSB       2
-#define I2C_BBPLL_OC_DCUR_LSB       0
-
-#define I2C_BBPLL_ENDIV5            11
-
-#define I2C_BBPLL                   0x66
-#define I2C_BBPLL_HOSTID            4
-
-extern int rom_i2c_writereg(int block, int block_id, int reg_add,
-                            int indata);
+extern uint8_t rom_i2c_readreg(uint8_t block, uint8_t host_id,
+                               uint8_t reg_add);
+extern uint8_t rom_i2c_readreg_mask(uint8_t block, uint8_t host_id,
+                        uint8_t reg_add, uint8_t msb, uint8_t lsb);
+extern void rom_i2c_writereg(uint8_t block, uint8_t host_id,
+                             uint8_t reg_add, uint8_t data);
+extern void rom_i2c_writereg_mask(uint8_t block, uint8_t host_id,
+                   uint8_t reg_add, uint8_t msb, uint8_t lsb, uint8_t data);
 
 #define I2C_WRITEREG_RTC(block, reg_add, indata) \
       rom_i2c_writereg(block, block##_HOSTID,  reg_add, indata)
