@@ -14,7 +14,7 @@ SECTIONS
   {
     _iram_start = ABSOLUTE(.);
 
-    /* Vectors go to IRAM */
+    /* Vectors go to IRAM. */
 
     _init_start = ABSOLUTE(.);
 
@@ -47,24 +47,17 @@ SECTIONS
     *(.entry.text)
     *(.init.literal)
     *(.init)
-    _init_end = ABSOLUTE(.);
   } > iram0_0_seg
 
   .iram0.text :
   {
     /* Code marked as running out of IRAM */
 
-    _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
-    *librtc.a:(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s2_spiflash.*(.literal .text .literal.* .text.*)
-    *(.wifirxiram .wifirxiram.*)
-    *(.wifi0iram  .wifi0iram.*)
-    _iram_text_end = ABSOLUTE(.);
 
-    /* Module text area starts at the end of iram0_0_seg */
+    /* align + add 16B for CPU dummy speculative instr. fetch */
 
-    _smodtext = ABSOLUTE(.);
+    . = ALIGN(4) + 16;
     _iram_text = ABSOLUTE(.);
   } > iram0_0_seg
 
@@ -95,7 +88,6 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
-    *libarch.a:esp32s2_spiflash.*(.bss  .bss.*  COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
   } >dram0_0_seg
@@ -106,7 +98,9 @@ SECTIONS
      * or during the application's initialization sequence.
      */
 
+    . = ALIGN(4);
     *(.noinit)
+    . = ALIGN(4);
   } >dram0_0_seg
 
   .dram0.data :
@@ -126,8 +120,6 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
-    *libphy.a:(.rodata  .rodata.*)
-    *libarch.a:esp32s2_spiflash.*(.rodata  .rodata.*)
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
 
@@ -135,16 +127,6 @@ SECTIONS
 
     _sheap = ABSOLUTE(.);
   } >dram0_0_seg
-
-  /* External memory bss, from any global variable with EXT_RAM_ATTR attribute */
-
-  .extmem.bss (NOLOAD) :
-  {
-    _sbss_extmem = ABSOLUTE(.);
-    *(.extmem.bss .extmem.bss.*)
-    . = ALIGN(4);
-    _ebss_extmem = ABSOLUTE(.);
-  } > extmem_seg
 
   .flash.rodata :
   {
@@ -187,7 +169,9 @@ SECTIONS
     *(.dynamic)
     *(.gnu.version_d)
     _erodata = ABSOLUTE(.);
+
     /* Literals are also RO data. */
+
     _lit4_start = ABSOLUTE(.);
     *(*.lit4)
     *(.lit4.*)
@@ -199,13 +183,20 @@ SECTIONS
   .flash.text :
   {
     _stext = .;
-    _text_start = ABSOLUTE(.);
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
-    _text_end = ABSOLUTE(.);
+
+    /* CPU will try to prefetch up to 16 bytes of instructions.
+     * This means that any configuration (e.g. MMU, PMS) must allow
+     * safe access to up to 16 bytes after the last real instruction, add
+     * dummy bytes to ensure this
+     */
+
+    . += 16;
+
     _etext = .;
   } >iram0_2_seg
 
