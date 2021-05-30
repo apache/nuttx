@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/hardware/interrupt_reg.h
+ * arch/xtensa/src/esp32s2/hardware/esp32s2_interrupt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

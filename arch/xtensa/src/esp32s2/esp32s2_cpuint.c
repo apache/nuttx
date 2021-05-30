@@ -49,11 +49,11 @@
  * PERIPHERAL ID                                  INTERRUPT_PRO_X_MAP
  * MNEMONIC                                       REGISTER OFFSET
  * ESP32S2_PERIPH_MAC_INTR                        0x0000
- * ESP32S2_PERIPH_MAC_NMI                         0x0004 
- * ESP32S2_PERIPH_PWR_INTR                        0x0008 
- * ESP32S2_PERIPH_BB_INT                          0x000C 
- * ESP32S2_PERIPH_BT_MAC_INT                      0x0010 
- * ESP32S2_PERIPH_BT_BB_INT                       0x0014 
+ * ESP32S2_PERIPH_MAC_NMI                         0x0004
+ * ESP32S2_PERIPH_PWR_INTR                        0x0008
+ * ESP32S2_PERIPH_BB_INT                          0x000C
+ * ESP32S2_PERIPH_BT_MAC_INT                      0x0010
+ * ESP32S2_PERIPH_BT_BB_INT                       0x0014
  * ESP32S2_PERIPH_BT_BB_NMI                       0x0018
  * ESP32S2_PERIPH_RWBT_IRQ                        0x001C
  * ESP32S2_PERIPH_RWBLE_IRQ                       0x0020
@@ -76,19 +76,19 @@
  * ESP32S2_PERIPH_GPIO_INTERRUPT_APP              0x0064
  * ESP32S2_PERIPH_GPIO_INTERRUPT_APP_NMI          0x0068
  * ESP32S2_PERIPH_DEDICATED_GPIO_IN_INTR          0x006C
- * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_0             0x0070 
- * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_1             0x0074 
- * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_2             0x0078 
- * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_3             0x007C 
- * ESP32S2_PERIPH_SPI_INTR_1                      0x0080 
- * ESP32S2_PERIPH_SPI_INTR_2                      0x0084 
- * ESP32S2_PERIPH_SPI_INTR_3                      0x0088 
+ * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_0             0x0070
+ * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_1             0x0074
+ * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_2             0x0078
+ * ESP32S2_PERIPH_CPU_INTR_FROM_CPU_3             0x007C
+ * ESP32S2_PERIPH_SPI_INTR_1                      0x0080
+ * ESP32S2_PERIPH_SPI_INTR_2                      0x0084
+ * ESP32S2_PERIPH_SPI_INTR_3                      0x0088
  * ESP32S2_PERIPH_I2S0_INT                        0x008C
  * ESP32S2_PERIPH_I2S1_INT                        0x0090
  * ESP32S2_PERIPH_UART_INT                        0x0094
  * ESP32S2_PERIPH_UART1_INT                       0x0098
  * ESP32S2_PERIPH_UART2_INT                       0x009C
- * ESP32S2_PERIPH_SDIO_HOST_INTERRUPT             0x00A0           
+ * ESP32S2_PERIPH_SDIO_HOST_INTERRUPT             0x00A0
  * ESP32S2_PERIPH_PWM0_INTR                       0x00A4
  * ESP32S2_PERIPH_PWM1_INTR                       0x00A8
  * ESP32S2_PERIPH_PWM2_INTR                       0x00AC
@@ -105,13 +105,13 @@
  * ESP32S2_PERIPH_RSA_INTR                        0x00D8
  * ESP32S2_PERIPH_SHA_INTR                        0x00DC
  * ESP32S2_PERIPH_AES_INTR                        0x00E0
- * ESP32S2_PERIPH_SPI2_DMA_INT                    0x00E4 
- * ESP32S2_PERIPH_SPI3_DMA_INT                    0x00E8 
- * ESP32S2_PERIPH_WDG_INT                         0x00EC 
- * ESP32S2_PERIPH_TIMER_INT1                      0x00F0 
- * ESP32S2_PERIPH_TIMER_INT2                      0x00F4 
- * ESP32S2_PERIPH_TG_T0_EDGE_INT                  0x00F8 
- * ESP32S2_PERIPH_TG_T1_EDGE_INT                  0x00FC 
+ * ESP32S2_PERIPH_SPI2_DMA_INT                    0x00E4
+ * ESP32S2_PERIPH_SPI3_DMA_INT                    0x00E8
+ * ESP32S2_PERIPH_WDG_INT                         0x00EC
+ * ESP32S2_PERIPH_TIMER_INT1                      0x00F0
+ * ESP32S2_PERIPH_TIMER_INT2                      0x00F4
+ * ESP32S2_PERIPH_TG_T0_EDGE_INT                  0x00F8
+ * ESP32S2_PERIPH_TG_T1_EDGE_INT                  0x00FC
  * ESP32S2_PERIPH_TG_WDT_EDGE_INT                 0x0100
  * ESP32S2_PERIPH_TG_LACT_EDGE_INT                0x0104
  * ESP32S2_PERIPH_TG1_T0_EDGE_INT                 0x0108
@@ -134,13 +134,13 @@
  * ESP32S2_PERIPH_SPI_MEM_REJECT_INTR             0x014C
  * ESP32S2_PERIPH_DMA_COPY_INTR                   0x0150
  * ESP32S2_PERIPH_SPI4_DMA_INT                    0x0154
- * ESP32S2_PERIPH_SPI_INTR_4                      0x0158 
- * ESP32S2_PERIPH_DCACHE_PRELOAD_INT              0x015C 
- * ESP32S2_PERIPH_ICACHE_PRELOAD_INT              0x0160 
- * ESP32S2_PERIPH_APB_ADC_INT                     0x0164 
- * ESP32S2_PERIPH_CRYPTO_DMA_INT                  0x0168 
- * ESP32S2_PERIPH_CPU_PERI_ERROR_INT              0x016C 
- * ESP32S2_PERIPH_APB_PERI_ERROR_INT              0x0170 
+ * ESP32S2_PERIPH_SPI_INTR_4                      0x0158
+ * ESP32S2_PERIPH_DCACHE_PRELOAD_INT              0x015C
+ * ESP32S2_PERIPH_ICACHE_PRELOAD_INT              0x0160
+ * ESP32S2_PERIPH_APB_ADC_INT                     0x0164
+ * ESP32S2_PERIPH_CRYPTO_DMA_INT                  0x0168
+ * ESP32S2_PERIPH_CPU_PERI_ERROR_INT              0x016C
+ * ESP32S2_PERIPH_APB_PERI_ERROR_INT              0x0170
  * ESP32S2_PERIPH_DCACHE_SYNC_INT                 0x0174
  * ESP32S2_PERIPH_ICACHE_SYNC_INT                 0x0178
  * ESP32S2_PERIPH_NMI                             0x0188
@@ -264,7 +264,7 @@ static int esp32s2_alloc_cpuint(uint32_t intmask)
     {
       /* Skip over initial unavailable CPU interrupts quickly in groups
        * of 8 interrupt until find the first slot with the required
-       * CPU interrupt set. 
+       * CPU interrupt set.
        */
 
       for (cpuint = 0, bitmask = 0xff;
@@ -512,7 +512,7 @@ void esp32s2_free_cpuint(int cpuint)
  *
  * Description:
  *   Attach a peripheral interrupt to a CPU interrupt.
- *   This function may be called after esp32s2_alloc_edgeint or 
+ *   This function may be called after esp32s2_alloc_edgeint or
  *   esp32s2_alloc_levelint
  *
  * Input Parameters:
@@ -533,7 +533,7 @@ void esp32s2_attach_peripheral(int periphid, int cpuint)
 
   /* Get the map for CPU interrupts and IRQs */
 
-  uint8_t *intmap = g_cpu0_intmap;  
+  uint8_t *intmap = g_cpu0_intmap;
 
   DEBUGASSERT(periphid >= 0 && periphid < ESP32S2_NPERIPHERALS);
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32S2_CPUINT_MAX);
