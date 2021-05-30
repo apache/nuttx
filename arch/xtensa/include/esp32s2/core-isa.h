@@ -396,7 +396,7 @@
 #define XCHAL_NUM_INTERRUPTS            32 /* number of interrupts */
 #define XCHAL_NUM_INTERRUPTS_LOG2       5  /* ceil(log2(NUM_INTERRUPTS)) */
 #define XCHAL_NUM_EXTINTERRUPTS         26 /* num of external interrupts */
-#define XCHAL_NUM_INTLEVELS             6  /* number of interrupt levels
+#define XCHAL_INT_NLEVELS               6  /* number of interrupt levels
                                             * (not including level zero)
                                             */
 #define XCHAL_EXCM_LEVEL                3  /* level masked by PS.EXCM */

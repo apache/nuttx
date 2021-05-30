@@ -31,7 +31,6 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
-#include <arch/esp32s2/memory_layout.h>
 
 #include "xtensa.h"
 

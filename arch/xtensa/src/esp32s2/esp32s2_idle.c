@@ -27,7 +27,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
 
-#include "esp32s2_pm.h"
 #include "xtensa.h"
 
 /****************************************************************************

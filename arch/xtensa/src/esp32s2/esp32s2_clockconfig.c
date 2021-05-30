@@ -31,7 +31,6 @@
 #include "hardware/esp32s2_uart.h"
 #include "hardware/esp32s2_rtccntl.h"
 #include "hardware/esp32s2_system.h"
-#include "esp32s2_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
