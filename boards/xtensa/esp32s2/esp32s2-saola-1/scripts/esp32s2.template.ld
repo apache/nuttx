@@ -31,12 +31,12 @@
 #endif
 
 #define RAM_IRAM_START    0x40020000
-#define RAM_DRAM_START    0x3FFB0000
+#define RAM_DRAM_START    0x3ffb0000
 
-#define DATA_RAM_END      0x3FFE0000  /* 2nd stage bootloader iram_loader_seg
+#define DATA_RAM_END      0x3ffe0000  /* 2nd stage bootloader iram_loader_seg
                                        * starts at SRAM block 14 (reclaimed
-				       * after app boots)
-				       */
+                                       * after app boots)
+                                       */
 
 #define IRAM_ORG    (RAM_IRAM_START + CONFIG_ESP32S2_INSTRUCTION_CACHE_SIZE \
                                     + CONFIG_ESP32S2_DATA_CACHE_SIZE)
@@ -45,8 +45,6 @@
                                     + CONFIG_ESP32S2_DATA_CACHE_SIZE)
 
 #define I_D_RAM_SIZE   DATA_RAM_END - DRAM_ORG
-
-#define STATIC_RAM_SIZE  0 /* FIXME: Should it be configurable? */
 
 MEMORY
 {
@@ -75,8 +73,7 @@ MEMORY
    * bss/data/stack.
    */
 
-  dram0_0_seg (RW) :                 org = DRAM_ORG, len = I_D_RAM_SIZE - \
-                                                           STATIC_RAM_SIZE
+  dram0_0_seg (RW) :                 org = DRAM_ORG, len = I_D_RAM_SIZE
 
   /* Flash mapped constant data */
 
@@ -93,16 +90,5 @@ MEMORY
 
   rtc_slow_seg(RW)  :    org = 0x50000000 + CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM,
                          len = 0x2000 - CONFIG_ESP32S2_ULP_COPROC_RESERVE_MEM
-
-  /* External memory, including data and text */
-
-  extmem_seg(RWX)  :  org = 0x3f800000, len = 0x400000
 }
 
-/* Heap ends at top of dram0_0_seg */
-
-_eheap = 0x40000000 - CONFIG_ESP32S2_TRACEMEM_RESERVE_DRAM;
-
-/* Module text area ends at top of dram0_0_seg */
-
-_emodtext = 0x400a0000;

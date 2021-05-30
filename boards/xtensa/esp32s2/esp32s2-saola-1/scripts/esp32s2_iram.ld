@@ -52,27 +52,19 @@ SECTIONS
   {
     /* Code marked as running out of IRAM */
 
-    _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
-    *libphy.a:(.literal .text .literal.* .text.*)
-    *librtc.a:(.literal .text .literal.* .text.*)
-    *libpp.a:(.literal .text .literal.* .text.*)
-    *libhal.a:(.literal .text .literal.* .text.*)
-    _iram_text_end = ABSOLUTE(.);
 
     _stext = .;
-    _text_start = ABSOLUTE(.);
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
-    _text_end = ABSOLUTE(.);
+
+    /* align + add 16B for CPU dummy speculative instr. fetch */
+
+    . = ALIGN(4) + 16;
     _etext = .;
-
-    /* Module text area starts at the end of iram0_0_seg */
-
-    _smodtext = ABSOLUTE(.);
   } > iram0_0_seg
 
   /* Shared RAM */
@@ -102,7 +94,9 @@ SECTIONS
 
     /* Uninitialized .bss */
 
+    . = ALIGN(4);
     *(.noinit)
+    . = ALIGN(4);
   } >dram0_0_seg
 
   .dram0.data :

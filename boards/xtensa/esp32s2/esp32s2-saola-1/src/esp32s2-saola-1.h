@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S2_ESP32S2_CORE_SRC_ESP32S2_CORE_H
-#define __BOARDS_XTENSA_ESP32S2_ESP32S2_CORE_SRC_ESP32S2_CORE_H
+#ifndef __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_SRC_ESP32S2_SAOLA_1_H
+#define __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_SRC_ESP32S2_SAOLA_1_H
 
 /****************************************************************************
  * Included Files
@@ -38,29 +38,6 @@
 /* BOOT Button */
 
 #define BUTTON_BOOT  0
-
-/* LED
- *
- * This is an externally connected LED used for testing.
- */
-
-#define GPIO_LED1             2
-
-/* MCP2515 Interrupt pin */
-
-#define GPIO_MCP2515_IRQ      22
-
-/* TIMERS */
-
-#define TIMER0 0
-#define TIMER1 1
-#define TIMER2 2
-#define TIMER3 3
-
-/* ONESHOT */
-
-#define ONESHOT_TIMER         1
-#define ONESHOT_RESOLUTION_US 1
 
 /****************************************************************************
  * Public Types
@@ -92,49 +69,5 @@
 
 int esp32s2_bringup(void);
 
-/****************************************************************************
- * Name: esp32s2_mmcsd_initialize
- *
- * Description:
- *   Initialize SPI-based SD card and card detect thread.
- ****************************************************************************/
-
-int esp32s2_mmcsd_initialize(int minor);
-
-/****************************************************************************
- * Name: esp32s2_spiflash_init
- *
- * Description:
- *   Initialize the SPIFLASH and register the MTD device.
- ****************************************************************************/
-
-int esp32s2_spiflash_init(void);
-
-/****************************************************************************
- * Name: esp32s2_spiflash_encrypt_test
- *
- * Description:
- *   Test ESP32S2 SPI Flash driver read/write with encryption.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S2_SPIFLASH_ENCRYPTION_TEST
-void esp32s2_spiflash_encrypt_test(void);
-#endif
-
-/****************************************************************************
- * Name: esp32s2_gpio_init
- ****************************************************************************/
-
-#ifdef CONFIG_DEV_GPIO
-int esp32s2_gpio_init(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S2_ESP32S2_CORE_SRC_ESP32S2_CORE_H */
+#endif /* __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_SRC_ESP32S2_SAOLA_1_H */
