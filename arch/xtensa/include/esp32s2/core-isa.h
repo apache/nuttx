@@ -514,7 +514,7 @@
 
 /*  Interrupt numbers assigned to specific interrupt sources:  */
 
-#define XTHAL_TIMER_UNCONFIGURED        -1    /* REVISIT: should be in hal.h */
+#define XTHAL_TIMER_UNCONFIGURED        -1
 #define XCHAL_TIMER0_INTERRUPT          6       /* CCOMPARE0 */
 #define XCHAL_TIMER1_INTERRUPT          15      /* CCOMPARE1 */
 #define XCHAL_TIMER2_INTERRUPT          16      /* CCOMPARE2 */
