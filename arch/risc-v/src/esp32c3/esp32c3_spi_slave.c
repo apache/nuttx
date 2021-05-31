@@ -533,15 +533,7 @@ static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv)
 {
   if (priv->rx_length < SPI_SLAVE_BUFSIZE)
     {
-      setbits(SPI_USR_MOSI_M, SPI_USER_REG);
-    }
-  else
-    {
-      spiwarn("RX buffer full! Disabling RX for next transaction\n");
 
-      /* Disable SPI Slave input data phase. */
-
-      resetbits(SPI_USR_MOSI_M, SPI_USER_REG);
     }
 }
 
@@ -644,10 +636,6 @@ static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv)
       spislave_cpu_tx_fifo_reset();
 
       priv->is_tx_enabled = true;
-
-      /* Enable SPI Slave output data phase. */
-
-      setbits(SPI_USR_MISO_M, SPI_USER_REG);
     }
   else
     {
@@ -656,10 +644,6 @@ static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv)
       spislave_cpu_tx_fifo_reset();
 
       priv->is_tx_enabled = false;
-
-      /* Disable SPI Slave output data phase. */
-
-      resetbits(SPI_USR_MISO_M, SPI_USER_REG);
     }
 }
 
@@ -799,10 +783,6 @@ static void spislave_initialize(FAR struct spi_sctrlr_s *sctrlr)
   /* Disable interrupts */
 
   resetbits(SPI_INT_MASK, SPI_DMA_INT_ENA_REG);
-
-  /* Set the maximum data length to the size of the HW buffer in bits */
-
-  putreg32((SPI_SLAVE_HW_BUF_SIZE * 8) - 1, SPI_MS_DLEN_REG);
 
   esp32c3_gpioirqenable(ESP32C3_PIN2IRQ(config->cs_pin), RISING);
 
