@@ -1,0 +1,1 @@
+nuttx_add_aux_library(userspace stm32_userspace.c)

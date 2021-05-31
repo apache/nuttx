@@ -213,8 +213,6 @@ config ARCH_CHIP_CUSTOM_DIR_RELPATH
 endmenu # Custom Chip Configuration
 endif #ARCH_CHIP_CUSTOM
 
-source "arch/dummy/Kconfig"
-
 config ARCH_TOOLCHAIN_IAR
 	bool
 	default n

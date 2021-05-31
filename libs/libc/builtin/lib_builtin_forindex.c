@@ -51,10 +51,12 @@
 
 FAR const struct builtin_s *builtin_for_index(int index)
 {
+#ifdef CONFIG_BUILD_PROTECTED
   if (index < g_builtin_count)
     {
       return &g_builtins[index];
     }
+#endif
 
   return NULL;
 }

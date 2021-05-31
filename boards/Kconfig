@@ -3349,7 +3349,7 @@ if ARCH_BOARD_MOTEINO_MEGA
 source "boards/avr/atmega/moteino-mega/Kconfig"
 endif
 if ARCH_BOARD_CUSTOM
-source "boards/dummy/Kconfig"
+#source "boards/dummy/Kconfig"
 endif
 if ARCH_BOARD_DEMOS92S12NEC64
 source "boards/hc/m9s12/demo9s12ne64/Kconfig"

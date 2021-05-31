@@ -1,3 +1,5 @@
+/build*
+/CMakeLists.txt.user
 *.a
 *.adb
 *.asm
@@ -27,6 +29,8 @@
 *.wsp
 *.ddc
 *.dds
+*.patch
+*.pyc
 *~
 .depend
 /.config
@@ -48,7 +52,6 @@
 /tags
 /TAGS
 core
-Make*.dep
 uImage
 /external
 # $(TOPDIR)/Makefile.[unix|win]::$(CONTEXTDIRS_DEPS)

@@ -71,23 +71,22 @@ config DEFAULT_SMALL
 		have already been selected in your configuration file.  This applies
 		only to new settings that require a default value.
 
-choice
-	prompt "Build Host Platform"
-	default HOST_LINUX
-
 config HOST_LINUX
-	bool "Linux"
+	bool
+	option env="HOST_LINUX"
 
 config HOST_MACOS
-	bool "macOS"
+	bool
+	option env="HOST_MACOS"
 
 config HOST_WINDOWS
-	bool "Windows"
+	bool
+	option env="HOST_WINDOWS"
 
 config HOST_OTHER
-	bool "Other"
+	bool
+	option env="HOST_OTHER"
 
-endchoice
 
 config TOOLCHAIN_WINDOWS
 	bool
@@ -2058,4 +2057,4 @@ config EXTERNALDIR
 	string
 	option env="EXTERNALDIR"
 
-source "$EXTERNALDIR/Kconfig"
+#source "$EXTERNALDIR/Kconfig"

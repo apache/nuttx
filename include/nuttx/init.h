@@ -96,7 +96,8 @@ EXTERN uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
 
 /* This entry point must be supplied by the application */
 
-int CONFIG_INIT_ENTRYPOINT(int argc, char *argv[]);
+//int CONFIG_INIT_ENTRYPOINT(int argc, char *argv[]);
+int nsh_main(int argc, char *argv[]);
 
 /* Functions contained in nx_task.c *****************************************/
 

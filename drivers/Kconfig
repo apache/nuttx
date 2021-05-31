@@ -44,9 +44,14 @@ source "drivers/wireless/Kconfig"
 source "drivers/contactless/Kconfig"
 source "drivers/1wire/Kconfig"
 source "drivers/syslog/Kconfig"
-source "drivers/platform/Kconfig"
 source "drivers/rf/Kconfig"
 source "drivers/rc/Kconfig"
 source "drivers/motor/Kconfig"
 source "drivers/math/Kconfig"
 source "drivers/segger/Kconfig"
+
+config DRIVERS_PLATFORM_DIR
+        string
+        option env="DRIVERS_PLATFORM_DIR"
+
+#source "$DRIVERS_PLATFORM_DIR/Kconfig"
