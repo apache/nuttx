@@ -180,6 +180,14 @@ function makefunc {
   return $fail
 }
 
+function ninjafunc {
+  if ! ninja ; then
+    fail=1
+  fi
+
+  return $fail
+}
+
 # Clean up after the last build
 
 function distclean {
@@ -220,7 +228,7 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION} 1>/dev/null; then
+  if ! ./tools/configure.sh $config ${JOPTION} 1>/dev/null; then
     fail=1
   fi
 
@@ -241,22 +249,35 @@ function configure {
   return $fail
 }
 
+function cmake_configure {
+  echo "  Configuring..."
+
+  nuttx_board=$(cd ../boards && find . -mindepth 3 -maxdepth 3 -type d -name ${boarddir} -print -quit | sed -E 's|^..||')
+
+  if ! cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DNUTTX_BOARD=${nuttx_board} -DNUTTX_CONFIG=${configdir} ..; then
+    fail=1
+  fi
+
+  return $fail
+}
+
 # Perform the next build
 
 function build {
   echo "  Building NuttX..."
-  makefunc
+  #makefunc
+  ninjafunc
   if [ ${SAVEARTIFACTS} -eq 1 ]; then
     artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
     mkdir -p $artifactconfigdir
-    xargs -I "{}" cp "{}" $artifactconfigdir < $nuttx/nuttx.manifest
+    xargs -I "{}" cp "{}" $artifactconfigdir < nuttx.manifest
   fi
 
   # Ensure defconfig in the canonical form
 
-  if ! ./tools/refresh.sh --silent $config; then
-    fail=1
-  fi
+  #if ! $nuttx/tools/refresh.sh --silent $config; then
+  #  fail=1
+  #fi
 
   # Ensure nuttx and apps directory in clean state
 
@@ -327,9 +348,17 @@ function dotest {
   # Perform the build test
 
   echo "------------------------------------------------------------------------------------"
-  distclean
-  configure
+  #distclean
+  #configure
+
+  rm -rf build
+  mkdir build
+  cd build
+  cmake_configure
+
   build
+
+  cd ..
 }
 
 # Perform the build test for each entry in the test list file

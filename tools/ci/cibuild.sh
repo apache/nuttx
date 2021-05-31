@@ -37,7 +37,7 @@ EXTRA_PATH=
 
 case $os in
   Darwin)
-    install="python-tools u-boot-tools elf-toolchain gen-romfs kconfig-frontends arm-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain avr-gcc-toolchain c-cache binutils"
+    install="python-tools u-boot-tools elf-toolchain gen-romfs kconfig-frontends arm-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain avr-gcc-toolchain c-cache binutils ninja-tool"
     mkdir -p ${prebuilt}/homebrew
     export HOMEBREW_CACHE=${prebuilt}/homebrew
     # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
@@ -70,6 +70,17 @@ function u-boot-tools {
     case $os in
       Darwin)
         brew install u-boot-tools
+        ;;
+    esac
+  fi
+}
+
+function ninja-tool
+{
+  if ! type ninja > /dev/null; then
+    case $os in
+      Darwin)
+        brew install ninja
         ;;
     esac
   fi

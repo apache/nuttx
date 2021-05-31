@@ -14,6 +14,8 @@ name: "Build Documentation"
 on:
   pull_request:
   push:
+    branches:
+      - master
 
 jobs:
   build-html:
