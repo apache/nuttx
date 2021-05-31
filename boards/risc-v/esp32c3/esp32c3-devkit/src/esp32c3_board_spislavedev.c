@@ -68,7 +68,7 @@ int board_spislavedev_initialize(int bus)
       return -ENODEV;
     }
 
-  ret = spislv_register(sctrlr, bus);
+  ret = spislave_register(sctrlr, bus);
   if (ret < 0)
     {
       spierr("Failed to register /dev/spislv%d: %d\n", bus, ret);

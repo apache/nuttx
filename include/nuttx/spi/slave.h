@@ -543,7 +543,7 @@ struct spi_sdev_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spislv_register
+ * Name: spislave_register
  *
  * Description:
  *   Register the SPI Slave echo character device as 'devpath'.
@@ -561,7 +561,7 @@ struct spi_sdev_s
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_SLAVE_DRIVER
-int spislv_register(FAR struct spi_sctrlr_s *sctrlr, int bus);
+int spislave_register(FAR struct spi_sctrlr_s *sctrlr, int bus);
 #endif /* CONFIG_SPI_SLAVE_DRIVER */
 
 #undef EXTERN
