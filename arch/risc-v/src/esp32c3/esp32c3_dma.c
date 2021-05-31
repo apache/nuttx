@@ -50,7 +50,7 @@
 #define REG_OFF  (DMA_OUT_CONF0_CH1_REG - DMA_OUT_CONF0_CH0_REG)
 
 #define SET_REG(_r, _ch, _v)    putreg32((_v), (_r) + (_ch) * REG_OFF)
-#define GET_REG(_r, _ch, _v)    getreg32((_r) + (_ch) * REG_OFF)
+#define GET_REG(_r, _ch)        getreg32((_r) + (_ch) * REG_OFF)
 
 #define SET_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, 0, (_b))
 #define CLR_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, (_b), 0)
