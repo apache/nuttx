@@ -1,0 +1,4 @@
+# Create a RAMDISK and mount it at /tmp
+mkrd -m ${CONFIG_NSH_FATDEVNO} -s ${CONFIG_NSH_FATSECTSIZE} ${CONFIG_NSH_FATNSECTORS}
+mkfatfs /dev/ram${CONFIG_NSH_FATDEVNO}
+mount -t vfat /dev/ram${CONFIG_NSH_FATDEVNO} ${CONFIG_NSH_FATMOUNTPT}

@@ -35,9 +35,7 @@
 
 open(OUTPUT, "> httpd_fsdata.c");
 
-chdir("httpd-fs");
-
-opendir(DIR, ".");
+opendir(DIR, "$ARGV[1]");
 @files =  grep { !/^\./ && !/(CVS|~)/ } readdir(DIR);
 closedir(DIR);
 

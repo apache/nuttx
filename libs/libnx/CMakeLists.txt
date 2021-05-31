@@ -1,0 +1,12 @@
+if (CONFIG_NX)
+  nuttx_add_kernel_library(nx SPLIT)
+  target_include_directories(nx PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+  add_subdirectory(bin)
+  add_subdirectory(kbin)
+  add_subdirectory(nx)
+  add_subdirectory(nxfonts)
+  add_subdirectory(nxglib)
+  add_subdirectory(nxmu)
+  add_subdirectory(nxtk)
+endif()

@@ -1,0 +1,87 @@
+############################################################################
+# drivers/net/CMakeLists.txt
+#
+#   Copyright (C) 2007, 2010-2012, 2015 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+if (CONFIG_NET)
+  set(SRCS)
+
+  # Include network interface drivers
+
+  if (CONFIG_NET_LOOPBACK)
+    list(APPEND SRCS loopback.c)
+  endif()
+
+  if (CONFIG_NET_RPMSG_DRV)
+    list(APPEND SRCS rpmsgdrv.c)
+  endif()
+
+  if (CONFIG_NETDEV_TELNET)
+    list(APPEND SRCS telnet.c)
+  endif()
+
+  if (CONFIG_NET_DM90x0)
+    list(APPEND SRCS dm90x0.c)
+  endif()
+
+  if (CONFIG_ENC28J60)
+    list(APPEND SRCS enc28j60.c)
+  endif()
+
+  if (CONFIG_ENCX24J600)
+    list(APPEND SRCS encx24j600.c)
+  endif()
+
+  if (CONFIG_NET_SLIP)
+    list(APPEND SRCS slip.c)
+  endif()
+
+  if (CONFIG_NET_TUN)
+    list(APPEND SRCS tun.c)
+  endif()
+
+  if (CONFIG_NET_FTMAC100)
+    list(APPEND SRCS ftmac100.c)
+  endif()
+
+  if (CONFIG_NET_LAN91C111)
+    list(APPEND SRCS lan91c111.c)
+  endif()
+
+  if (CONFIG_ARCH_PHY_INTERRUPT)
+    list(APPEND SRCS phy_notify.c)
+  endif()
+
+  target_sources(drivers PRIVATE ${SRCS})
+endif()
+

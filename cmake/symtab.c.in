@@ -1,0 +1,34 @@
+#include <nuttx/compiler.h>
+#include <nuttx/symtab.h>
+
+#define _CONCAT(x,y) x ## y
+#define CONCAT(x,y) _CONCAT(x,y)
+
+#include "symtab_@NAME@_declarations.h"
+
+#ifndef SYMTAB_PREFIX
+#  if defined(CONFIG_EXECFUNCS_HAVE_SYMTAB)
+const struct symtab_s CONFIG_EXECFUNCS_SYMTAB_ARRAY[] =
+#  elif defined(CONFIG_SYSTEM_NSH_SYMTAB)
+const struct symtab_s CONFIG_SYSTEM_NSH_SYMTAB_ARRAYNAME[] =
+#  else
+const struct symtab_s dummy_symtab[] =
+#  endif
+#else
+const struct symtab_s CONCAT(SYMTAB_PREFIX,_exports)[] =
+#endif
+{
+#include "symtab_@NAME@_entries.h"
+};
+
+#ifndef SYMTAB_PREFIX
+#  if defined(CONFIG_EXECFUNCS_HAVE_SYMTAB)
+const int CONFIG_EXECFUNCS_NSYMBOLS_VAR = sizeof(CONFIG_EXECFUNCS_SYMTAB_ARRAY) / sizeof(struct symtab_s);
+#  elif defined(CONFIG_SYSTEM_NSH_SYMTAB)
+const int CONFIG_SYSTEM_NSH_SYMTAB_COUNTNAME = sizeof(CONFIG_SYSTEM_NSH_SYMTAB_ARRAYNAME) / sizeof(struct symtab_s);
+#  else
+const int dummy_nsymtabs = sizeof(dummy_symtab) / sizeof(struct symtab_s);
+#  endif
+#else
+const int CONCAT(SYMTAB_PREFIX,_nexports) = sizeof(CONCAT(SYMTAB_PREFIX,_exports)) / sizeof(struct symtab_s);
+#endif
