@@ -57,7 +57,7 @@
  * Private Types
  ****************************************************************************/
 
-struct spislv_driver_s
+struct spislave_driver_s
 {
   /* Externally visible part of the SPI Slave device interface */
 
@@ -89,52 +89,52 @@ struct spislv_driver_s
 
 /* Character driver methods */
 
-static int     spislv_open(FAR struct file *filep);
-static int     spislv_close(FAR struct file *filep);
-static ssize_t spislv_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen);
-static ssize_t spislv_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen);
-static int     spislv_unlink(FAR struct inode *inode);
+static int     spislave_open(FAR struct file *filep);
+static int     spislave_close(FAR struct file *filep);
+static ssize_t spislave_read(FAR struct file *filep, FAR char *buffer,
+                             size_t buflen);
+static ssize_t spislave_write(FAR struct file *filep, FAR const char *buffer,
+                              size_t buflen);
+static int     spislave_unlink(FAR struct inode *inode);
 
 /* SPI Slave driver methods */
 
-static void    spislv_select(FAR struct spi_sdev_s *sdev, bool selected);
-static void    spislv_cmddata(FAR struct spi_sdev_s *sdev, bool data);
-static size_t  spislv_getdata(FAR struct spi_sdev_s *sdev,
-                              FAR const void **data);
-static size_t  spislv_receive(FAR struct spi_sdev_s *sdev,
-                              FAR const void *data, size_t nwords);
+static void    spislave_select(FAR struct spi_sdev_s *sdev, bool selected);
+static void    spislave_cmddata(FAR struct spi_sdev_s *sdev, bool data);
+static size_t  spislave_getdata(FAR struct spi_sdev_s *sdev,
+                                FAR const void **data);
+static size_t  spislave_receive(FAR struct spi_sdev_s *sdev,
+                                FAR const void *data, size_t nwords);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_spislvfops =
+static const struct file_operations g_spislavefops =
 {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  spislv_open,                  /* open */
-  spislv_close,                 /* close */
+  spislave_open,                /* open */
+  spislave_close,               /* close */
 #else
   NULL,                         /* open */
   NULL,                         /* close */
 #endif
-  spislv_read,                  /* read */
-  spislv_write,                 /* write */
+  spislave_read,                /* read */
+  spislave_write,               /* write */
   NULL,                         /* seek */
   NULL,                         /* ioctl */
   NULL                          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , spislv_unlink               /* unlink */
+  , spislave_unlink             /* unlink */
 #endif
 };
 
 static const struct spi_sdevops_s g_spisdev_ops =
 {
-  spislv_select,                /* select */
-  spislv_cmddata,               /* cmddata */
-  spislv_getdata,               /* getdata */
-  spislv_receive,               /* receive */
+  spislave_select,              /* select */
+  spislave_cmddata,             /* cmddata */
+  spislave_getdata,             /* getdata */
+  spislave_receive,             /* receive */
 };
 
 /****************************************************************************
@@ -142,7 +142,7 @@ static const struct spi_sdevops_s g_spisdev_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spislv_open
+ * Name: spislave_open
  *
  * Description:
  *   This function is called whenever the SPI Slave device is opened.
@@ -157,10 +157,10 @@ static const struct spi_sdevops_s g_spisdev_ops =
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int spislv_open(FAR struct file *filep)
+static int spislave_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct spislv_driver_s *priv;
+  FAR struct spislave_driver_s *priv;
   int ret;
 
   DEBUGASSERT(filep != NULL);
@@ -172,7 +172,7 @@ static int spislv_open(FAR struct file *filep)
   /* Get our private data structure */
 
   inode = filep->f_inode;
-  priv = (FAR struct spislv_driver_s *)inode->i_private;
+  priv = (FAR struct spislave_driver_s *)inode->i_private;
 
   /* Get exclusive access to the SPI Slave driver state structure */
 
@@ -194,7 +194,7 @@ static int spislv_open(FAR struct file *filep)
 #endif
 
 /****************************************************************************
- * Name: spislv_close
+ * Name: spislave_close
  *
  * Description:
  *   This routine is called when the SPI Slave device is closed.
@@ -209,10 +209,10 @@ static int spislv_open(FAR struct file *filep)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int spislv_close(FAR struct file *filep)
+static int spislave_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
-  FAR struct spislv_driver_s *priv;
+  FAR struct spislave_driver_s *priv;
   int ret;
 
   DEBUGASSERT(filep != NULL);
@@ -224,7 +224,7 @@ static int spislv_close(FAR struct file *filep)
   /* Get our private data structure */
 
   inode = filep->f_inode;
-  priv = (FAR struct spislv_driver_s *)inode->i_private;
+  priv = (FAR struct spislave_driver_s *)inode->i_private;
 
   /* Get exclusive access to the SPI Slave driver state structure */
 
@@ -258,7 +258,7 @@ static int spislv_close(FAR struct file *filep)
 #endif
 
 /****************************************************************************
- * Name: spislv_read
+ * Name: spislave_read
  *
  * Description:
  *   This routine is called when the application requires to read the data
@@ -275,11 +275,11 @@ static int spislv_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t spislv_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t spislave_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct inode *inode;
-  FAR struct spislv_driver_s *priv;
+  FAR struct spislave_driver_s *priv;
   size_t read_bytes;
   size_t remaining_words;
 
@@ -288,7 +288,7 @@ static ssize_t spislv_read(FAR struct file *filep, FAR char *buffer,
   /* Get our private data structure */
 
   inode = filep->f_inode;
-  priv  = (FAR struct spislv_driver_s *)inode->i_private;
+  priv  = (FAR struct spislave_driver_s *)inode->i_private;
 
   if (buffer == NULL)
     {
@@ -314,7 +314,7 @@ static ssize_t spislv_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
- * Name: spislv_write
+ * Name: spislave_write
  *
  * Description:
  *   This routine is called when the application needs to enqueue data to be
@@ -331,11 +331,11 @@ static ssize_t spislv_read(FAR struct file *filep, FAR char *buffer,
  *
  ****************************************************************************/
 
-static ssize_t spislv_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t spislave_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
   FAR struct inode *inode;
-  FAR struct spislv_driver_s *priv;
+  FAR struct spislave_driver_s *priv;
   size_t num_words;
   size_t enqueued_bytes;
 
@@ -344,7 +344,7 @@ static ssize_t spislv_write(FAR struct file *filep, FAR const char *buffer,
   /* Get our private data structure */
 
   inode = filep->f_inode;
-  priv = (FAR struct spislv_driver_s *)inode->i_private;
+  priv = (FAR struct spislave_driver_s *)inode->i_private;
 
   memcpy(priv->tx_buffer, buffer, buflen);
   priv->tx_length = buflen;
@@ -360,7 +360,7 @@ static ssize_t spislv_write(FAR struct file *filep, FAR const char *buffer,
 }
 
 /****************************************************************************
- * Name: spislv_unlink
+ * Name: spislave_unlink
  *
  * Description:
  *   This routine is called when the SPI Slave device is unlinked.
@@ -374,9 +374,9 @@ static ssize_t spislv_write(FAR struct file *filep, FAR const char *buffer,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int spislv_unlink(FAR struct inode *inode)
+static int spislave_unlink(FAR struct inode *inode)
 {
-  FAR struct spislv_driver_s *priv;
+  FAR struct spislave_driver_s *priv;
   int ret;
 
   DEBUGASSERT(inode != NULL);
@@ -384,7 +384,7 @@ static int spislv_unlink(FAR struct inode *inode)
 
   /* Get our private data structure */
 
-  priv = (FAR struct spislv_driver_s *)inode->i_private;
+  priv = (FAR struct spislave_driver_s *)inode->i_private;
 
   /* Get exclusive access to the SPI Slave driver state structure */
 
@@ -416,7 +416,7 @@ static int spislv_unlink(FAR struct inode *inode)
 #endif
 
 /****************************************************************************
- * Name: spislv_select
+ * Name: spislave_select
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -435,13 +435,13 @@ static int spislv_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-static void spislv_select(FAR struct spi_sdev_s *sdev, bool selected)
+static void spislave_select(FAR struct spi_sdev_s *sdev, bool selected)
 {
   spiinfo("sdev: %p CS: %s\n", sdev, selected ? "select" : "free");
 }
 
 /****************************************************************************
- * Name: spislv_cmddata
+ * Name: spislave_cmddata
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -466,13 +466,13 @@ static void spislv_select(FAR struct spi_sdev_s *sdev, bool selected)
  *
  ****************************************************************************/
 
-static void spislv_cmddata(FAR struct spi_sdev_s *sdev, bool data)
+static void spislave_cmddata(FAR struct spi_sdev_s *sdev, bool data)
 {
   spiinfo("sdev: %p CMD: %s\n", sdev, data ? "data" : "command");
 }
 
 /****************************************************************************
- * Name: spislv_getdata
+ * Name: spislave_getdata
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -498,10 +498,10 @@ static void spislv_cmddata(FAR struct spi_sdev_s *sdev, bool data)
  *
  ****************************************************************************/
 
-static size_t spislv_getdata(FAR struct spi_sdev_s *sdev,
+static size_t spislave_getdata(FAR struct spi_sdev_s *sdev,
                              FAR const void **data)
 {
-  FAR struct spislv_driver_s *priv = (FAR struct spislv_driver_s *)sdev;
+  FAR struct spislave_driver_s *priv = (FAR struct spislave_driver_s *)sdev;
 
   *data = priv->tx_buffer;
 
@@ -509,7 +509,7 @@ static size_t spislv_getdata(FAR struct spi_sdev_s *sdev,
 }
 
 /****************************************************************************
- * Name: spislv_receive
+ * Name: spislave_receive
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -535,10 +535,10 @@ static size_t spislv_getdata(FAR struct spi_sdev_s *sdev,
  *
  ****************************************************************************/
 
-static size_t spislv_receive(FAR struct spi_sdev_s *sdev,
+static size_t spislave_receive(FAR struct spi_sdev_s *sdev,
                              FAR const void *data, size_t len)
 {
-  FAR struct spislv_driver_s *priv = (FAR struct spislv_driver_s *)sdev;
+  FAR struct spislave_driver_s *priv = (FAR struct spislave_driver_s *)sdev;
   size_t recv_bytes = MIN(len, sizeof(priv->rx_buffer));
 
   memcpy(priv->rx_buffer, data, recv_bytes);
@@ -553,7 +553,7 @@ static size_t spislv_receive(FAR struct spi_sdev_s *sdev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spislv_register
+ * Name: spislave_register
  *
  * Description:
  *   Register the SPI Slave character device as 'devpath'.
@@ -570,9 +570,9 @@ static size_t spislv_receive(FAR struct spi_sdev_s *sdev,
  *
  ****************************************************************************/
 
-int spislv_register(FAR struct spi_sctrlr_s *sctrlr, int bus)
+int spislave_register(FAR struct spi_sctrlr_s *sctrlr, int bus)
 {
-  FAR struct spislv_driver_s *priv;
+  FAR struct spislave_driver_s *priv;
   char devname[DEVNAME_FMTLEN];
   int ret;
 
@@ -582,8 +582,8 @@ int spislv_register(FAR struct spi_sctrlr_s *sctrlr, int bus)
 
   /* Initialize the SPI Slave device structure */
 
-  priv = (FAR struct spislv_driver_s *)
-    kmm_zalloc(sizeof(struct spislv_driver_s));
+  priv = (FAR struct spislave_driver_s *)
+    kmm_zalloc(sizeof(struct spislave_driver_s));
   if (!priv)
     {
       spierr("ERROR: Failed to allocate instance\n");
@@ -610,7 +610,7 @@ int spislv_register(FAR struct spi_sctrlr_s *sctrlr, int bus)
 
   /* Register the character driver */
 
-  ret = register_driver(devname, &g_spislvfops, 0666, priv);
+  ret = register_driver(devname, &g_spislavefops, 0666, priv);
   if (ret < 0)
     {
       spierr("ERROR: Failed to register driver: %d\n", ret);
