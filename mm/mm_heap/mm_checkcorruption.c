@@ -74,14 +74,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       if (up_interrupt_context())
         {
-          if (heap_impl->mm_counts_held)
-            {
-#if CONFIG_MM_REGIONS > 1
-              continue;
-#else
-              return;
-#endif
-            }
+          return;
         }
       else if (sched_idletask())
         {
@@ -125,9 +118,6 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       assert(node == heap_impl->mm_heapend[region]);
 
-      if (!up_interrupt_context())
-        {
-          mm_givesemaphore(heap);
-        }
+      mm_givesemaphore(heap);
     }
 }
