@@ -42,7 +42,6 @@ context:: $(SCRIPTOUT)
 
 distclean::
 	$(call DELFILE, $(SCRIPTOUT))
-	$(call DELFILE, $(TOPDIR)/esp32s2_qemu_img.bin)
 
 DEPPATH += --dep-path board
 VPATH += :board
