@@ -69,12 +69,6 @@ ifdef ESPTOOL_BINDIR
 	FLASH_PT=$(PT_OFFSET) $(PARTITION_TABLE)
 endif
 
-ifeq ($(CONFIG_ESP32S2_QEMU_IMAGE),y)
-	MK_QEMU_IMG=$(TOPDIR)/tools/esp32s2/mk_qemu_img.sh -b $(BOOTLOADER) -p $(PARTITION_TABLE)
-else
-	MK_QEMU_IMG=
-endif
-
 # POSTBUILD -- Perform post build operations
 
 define POSTBUILD
@@ -92,7 +86,6 @@ define POSTBUILD
 	fi
 	esptool.py -c esp32-s2 elf2image $(ESPTOOL_ELF2IMG_OPTS) -o nuttx.bin nuttx
 	$(Q) echo "Generated: nuttx.bin (ESP32S2 compatible)"
-	$(Q) $(MK_QEMU_IMG)
 endef
 
 # ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
