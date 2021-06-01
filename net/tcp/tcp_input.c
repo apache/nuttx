@@ -704,6 +704,7 @@ found:
 
             conn->tcpstateflags = TCP_ESTABLISHED;
             memcpy(conn->rcvseq, tcp->seqno, 4);
+            conn->rcv_adv = tcp_getsequence(conn->rcvseq);
 
             net_incr32(conn->rcvseq, 1);
             conn->tx_unacked    = 0;

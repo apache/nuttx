@@ -188,7 +188,7 @@ struct tcp_conn_s
                            * connection */
   uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
                            * window update */
-  uint16_t rcv_wnd;       /* Receiver window available */
+  uint32_t rcv_adv;       /* The right edge of the recv window advertized */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
@@ -266,12 +266,6 @@ struct tcp_conn_s
    */
 
   FAR struct devif_callback_s *connevents;
-
-  /* Receiver callback to indicate that the data has been consumed and that
-   * an ACK should be send.
-   */
-
-  FAR struct devif_callback_s *rcv_ackcb;
 
   /* accept() is called when the TCP logic has created a connection
    *
@@ -1467,6 +1461,22 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
 
 uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
                             FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_should_send_recvwindow
+ *
+ * Description:
+ *   Determine if we should advertize the new recv window to the peer.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection structure holding connection information.
+ *
+ * Returned Value:
+ *   If we should send an update.
+ *
+ ****************************************************************************/
+
+bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: psock_tcp_cansend
