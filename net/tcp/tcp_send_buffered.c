@@ -862,53 +862,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: send_txnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
- *
- * Input Parameters:
- *   psock - Socket state structure
- *   conn  - The TCP connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void send_txnotify(FAR struct socket *psock,
-                                 FAR struct tcp_conn_s *conn)
-{
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver that send data is available */
-
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver that send data is available */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
-}
-
-/****************************************************************************
  * Name: tcp_max_wrb_size
  *
  * Description:
@@ -1244,7 +1197,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Notify the device driver of the availability of TX data */
 
-      send_txnotify(psock, conn);
+      tcp_send_txnotify(psock, conn);
       net_unlock();
 
       if (chunk_result == 0)

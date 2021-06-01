@@ -1022,6 +1022,25 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result);
 
 /****************************************************************************
+ * Name: tcp_send_txnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are have data ready to
+ *   be send (TCP)
+ *
+ * Input Parameters:
+ *   psock - Socket state structure
+ *   conn  - The TCP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void tcp_send_txnotify(FAR struct socket *psock,
+                       FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
  * Name: tcp_ipv4_input
  *
  * Description:
