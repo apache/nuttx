@@ -38,6 +38,45 @@
 #include "tcp/tcp.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_maxrcvwin
+ *
+ * Description:
+ *   Calculate the possible max TCP receive window for the connection.
+ *
+ * Input Parameters:
+ *   conn - The TCP connection.
+ *
+ * Returned Value:
+ *   The value of the TCP receive window.
+ ****************************************************************************/
+
+static uint16_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
+{
+  size_t maxiob;
+  uint16_t maxwin;
+
+  /* Calculate the max possible window size for the connection.
+   * This needs to be in sync with tcp_get_recvwindow().
+   */
+
+  maxiob = (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE) * CONFIG_IOB_BUFSIZE;
+  if (maxiob >= UINT16_MAX)
+    {
+      maxwin = UINT16_MAX;
+    }
+  else
+    {
+      maxwin = maxiob;
+    }
+
+  return maxwin;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -162,4 +201,69 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
     }
 
   return recvwndo;
+}
+
+bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
+{
+  FAR struct net_driver_s *dev = conn->dev;
+  uint16_t win;
+  uint16_t maxwin;
+  uint16_t oldwin;
+  uint32_t rcvseq;
+  uint16_t adv;
+  uint16_t mss;
+
+  /* Note: rcv_adv can be smaller than rcvseq.
+   * For examples, when:
+   *
+   * - we shrunk the window
+   * - zero window probes advanced rcvseq
+   */
+
+  rcvseq = tcp_getsequence(conn->rcvseq);
+  if (TCP_SEQ_GT(conn->rcv_adv, rcvseq))
+    {
+      oldwin = TCP_SEQ_SUB(conn->rcv_adv, rcvseq);
+    }
+  else
+    {
+      oldwin = 0;
+    }
+
+  win = tcp_get_recvwindow(dev, conn);
+
+  /* If the window doesn't extend, don't send. */
+
+  if (win <= oldwin)
+    {
+      return false;
+    }
+
+  adv = win - oldwin;
+
+  /* The following conditions are inspired from NetBSD TCP stack.
+   *
+   * - If we can extend the window by the half of the max possible size,
+   *   send it.
+   *
+   * - If we can extend the window by 2 * mss, send it.
+   */
+
+  maxwin = tcp_maxrcvwin(conn);
+  if (2 * adv >= maxwin)
+    {
+      return true;
+    }
+
+  /* Revisit: the real expected size should be used instead.
+   * E.g. consider the path MTU
+   */
+
+  mss = tcp_rx_mss(dev);
+  if (adv >= 2 * mss)
+    {
+      return true;
+    }
+
+  return false;
 }
