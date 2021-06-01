@@ -97,6 +97,16 @@ struct esp32s2_uart_s
   uint8_t   txsig;          /* TX signal */
   uint8_t   rxpin;          /* RX pin */
   uint8_t   rxsig;          /* RX signal */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  uint8_t  rtspin;          /* RTS pin number */
+  uint8_t  rtssig;          /* RTS signal */
+  bool     iflow;           /* Input flow control (RTS) enabled */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  uint8_t  ctspin;          /* CTS pin number */
+  uint8_t  ctssig;          /* CTS signal */
+  bool     oflow;           /* Output flow control (CTS) enabled */
+#endif
 };
 
 extern struct esp32s2_uart_s g_uart0_config;
@@ -105,6 +115,38 @@ extern struct esp32s2_uart_s g_uart1_config;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s2_lowputc_set_iflow
+ *
+ * Description:
+ *   Configure the input hardware flow control.
+ *
+ * Parameters:
+ *   priv           - Pointer to the private driver struct.
+ *   threshold      - RX FIFO value from which RST will automatically be
+ *                    asserted.
+ *   enable         - true = enable, false = disable
+ *
+ ****************************************************************************/
+
+void esp32s2_lowputc_set_iflow(const struct esp32s2_uart_s *priv,
+                               uint8_t threshold, bool enable);
+
+/****************************************************************************
+ * Name: esp32s2_lowputc_set_oflow
+ *
+ * Description:
+ *   Configure the output hardware flow control.
+ *
+ * Parameters:
+ *   priv           - Pointer to the private driver struct.
+ *   enable         - true = enable, false = disable
+ *
+ ****************************************************************************/
+
+void esp32s2_lowputc_set_oflow(const struct esp32s2_uart_s *priv,
+                               bool enable);
 
 /****************************************************************************
  * Name: esp32s2_lowputc_enable_sysclk

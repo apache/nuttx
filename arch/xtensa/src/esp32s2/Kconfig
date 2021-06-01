@@ -448,18 +448,42 @@ config ESP32S2_UART0_RXPIN
 	default 44
 	range 0 46
 
+config ESP32S2_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 16
+	range 0 46
+
+config ESP32S2_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 15
+	range 0 46
+
 endif # ESP32S2_UART0
 
 if ESP32S2_UART1
 
 config ESP32S2_UART1_TXPIN
 	int "UART1 Tx Pin"
-	default 17
+	default 37
 	range 0 46
 
 config ESP32S2_UART1_RXPIN
 	int "UART1 Rx Pin"
-	default 18
+	default 38
+	range 0 46
+
+config ESP32S2_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 35
+	range 0 46
+
+config ESP32S2_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 36
 	range 0 46
 
 endif # ESP32S2_UART1
