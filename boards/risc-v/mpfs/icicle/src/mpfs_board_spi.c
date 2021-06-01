@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_bringup.c
+ * boards/risc-v/mpfs/icicle/src/mpfs_board_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,50 +24,76 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/board.h>
-#include <nuttx/drivers/ramdisk.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/spi/spi_transfer.h>
 
-#include "mpfsicicle.h"
-#include "mpfs.h"
+#include "mpfs_spi.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpfs_bringup
+ * Name: board_spi_initialize
+ *
+ * Description:
+ *   Initialize and register SPI driver for the defined SPI ports.
+ *
  ****************************************************************************/
 
-int mpfs_bringup(void)
+int mpfs_board_spi_init(void)
 {
   int ret = OK;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
-#endif
-
 #if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  /* Configure SPI peripheral interfaces */
-
-  ret = mpfs_board_spi_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
+  struct spi_dev_s *spi;
+#ifdef CONFIG_SPI_DRIVER
+  int port = 0;
+#endif /* CONFIG_SPI_DRIVER */
 #endif
 
+  /* Initialize SPI device */
+
+#ifdef CONFIG_MPFS_SPI0
+  spi = mpfs_spibus_initialize(0);
+  if (spi == NULL)
+    {
+      spierr("Failed to initialize SPI0\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_SPI_DRIVER
+  ret = spi_register(spi, port++);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register /dev/spi0: %d\n", ret);
+
+      mpfs_spibus_uninitialize(spi);
+    }
+#endif /* CONFIG_SPI_DRIVER */
+#endif /* CONFIG_MPFS_SPI0 */
+
+#ifdef CONFIG_MPFS_SPI1
+  spi = mpfs_spibus_initialize(1);
+  if (spi == NULL)
+    {
+      spierr("Failed to initialize SPI1\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_SPI_DRIVER
+  ret = spi_register(spi, port);
+  if (ret < 0)
+    {
+      spierr("Failed to register /dev/spi%d: %d\n", port, ret);
+
+      mpfs_spibus_uninitialize(spi);
+    }
+
+#endif /* CONFIG_SPI_DRIVER */
+#endif /* CONFIG_MPFS_SPI1 */
   return ret;
 }

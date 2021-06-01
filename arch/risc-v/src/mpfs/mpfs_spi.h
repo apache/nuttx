@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_bringup.c
+ * arch/risc-v/src/mpfs/mpfs_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,52 +22,63 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_MPFS_MPFS_SPI_H
+#define __ARCH_RISCV_SRC_MPFS_MPFS_SPI_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <debug.h>
-#include <errno.h>
+#ifndef __ASSEMBLY__
 
-#include <nuttx/board.h>
-#include <nuttx/drivers/ramdisk.h>
-
-#include "mpfsicicle.h"
-#include "mpfs.h"
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mpfs_bringup
- ****************************************************************************/
-
-int mpfs_bringup(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret = OK;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
+#else
+#define EXTERN extern
 #endif
 
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  /* Configure SPI peripheral interfaces */
+#include <nuttx/spi/spi.h>
+#include <nuttx/spi/spi_transfer.h>
 
-  ret = mpfs_board_spi_init();
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
-#endif
+/****************************************************************************
+ * Name: mpfs_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI bus
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
 
-  return ret;
+struct spi_dev_s *mpfs_spibus_initialize(int port);
+
+/****************************************************************************
+ * Name: mpfs_spibus_uninitialize
+ *
+ * Description:
+ *   Uninitialize an SPI bus
+ *
+ ****************************************************************************/
+
+int mpfs_spibus_uninitialize(FAR struct spi_dev_s *dev);
+
+#ifdef __cplusplus
 }
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_MPFS_MPFS_SPI_H */

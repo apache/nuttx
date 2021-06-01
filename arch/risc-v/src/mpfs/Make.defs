@@ -61,3 +61,7 @@ CMN_UASRCS += riscv_signal_handler.S
 
 CHIP_CSRCS += mpfs_userspace.c
 endif
+
+ifeq ($(CONFIG_SPI),y)
+CHIP_CSRCS += mpfs_spi.c
+endif

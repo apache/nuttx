@@ -50,6 +50,14 @@ config MPFS_HAVE_UART4
 
 # These are the peripheral selections proper
 
+config MPFS_SPI0
+        bool "SPI 0"
+        default n
+
+config MPFS_SPI1
+        bool "SPI 1"
+        default n
+
 config MPFS_UART0
 	bool "UART 0"
 	default n
