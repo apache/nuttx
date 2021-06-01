@@ -86,6 +86,15 @@
 #  endif
 #endif
 
+/* 32-bit modular arithmetics for tcp sequence numbers */
+
+#define TCP_SEQ_LT(a, b)	((int32_t)((a) - (b)) < 0)
+#define TCP_SEQ_GT(a, b)	TCP_SEQ_LT(b, a)
+#define TCP_SEQ_LTE(a, b)	(!TCP_SEQ_GT(a, b))
+#define TCP_SEQ_GTE(a, b)	(!TCP_SEQ_LT(a, b))
+
+#define TCP_SEQ_SUB(a, b)	((uint32_t)((a) - (b)))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
