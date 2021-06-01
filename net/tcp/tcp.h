@@ -963,6 +963,22 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 void tcp_reset(FAR struct net_driver_s *dev);
 
 /****************************************************************************
+ * Name: tcp_rx_mss
+ *
+ * Description:
+ *   Return the MSS to advertize to the peer.
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure
+ *
+ * Returned Value:
+ *   The MSS value.
+ *
+ ****************************************************************************/
+
+uint16_t tcp_rx_mss(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: tcp_synack
  *
  * Description:
