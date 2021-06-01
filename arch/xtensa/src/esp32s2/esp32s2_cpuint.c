@@ -519,7 +519,7 @@ void esp32s2_free_cpuint(int cpuint)
  *   periphid       - The peripheral number from irq.h to be assigned to
  *                    a CPU interrupt.
  *   cpuint         - The CPU interrupt to receive the peripheral interrupt
- *                    assignment. This value is returned by 
+ *                    assignment. This value is returned by
  *                    esp32s2_alloc_edgeint or esp32s2_alloc_levelint.
  *
  * Returned Value:

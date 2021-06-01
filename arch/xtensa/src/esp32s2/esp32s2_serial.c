@@ -116,6 +116,10 @@ static bool esp32s2_txempty(struct uart_dev_s *dev);
 static void esp32s2_send(struct uart_dev_s *dev, int ch);
 static int  esp32s2_receive(struct uart_dev_s *dev, unsigned int *status);
 static int  esp32s2_ioctl(struct file *filep, int cmd, unsigned long arg);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool esp32s2_rxflowcontrol(struct uart_dev_s *dev,
+                                  unsigned int nbuffered, bool upper);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -138,7 +142,7 @@ static struct uart_ops_s g_uart_ops =
     .receive     = esp32s2_receive,
     .ioctl       = esp32s2_ioctl,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-    .rxflowcontrol = NULL,
+    .rxflowcontrol  = esp32s2_rxflowcontrol,
 #endif
 };
 
@@ -328,6 +332,44 @@ static int esp32s2_setup(struct uart_dev_s *dev)
   /* Stop bit */
 
   esp32s2_lowputc_stop_length(priv);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  /* Configure the input flow control */
+
+  if (priv->iflow)
+    {
+      /* Enable input flow control and set the RX FIFO threshold
+       * to assert the RTS line to half the RX FIFO buffer.
+       * It will then save some space on the hardware fifo to
+       * remaining bytes that may arrive after RTS be asserted
+       * and before the transmitter stops sending data.
+       */
+
+      esp32s2_lowputc_set_iflow(priv, (uint8_t)(UART_RX_FIFO_SIZE / 2),
+                                true);
+    }
+  else
+    {
+      /* Just disable input flow control, threshold parameter
+       * will be discarded.
+       */
+
+      esp32s2_lowputc_set_iflow(priv, 0 , false);
+    }
+
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  /* Configure the ouput flow control */
+
+  if (priv->oflow)
+    {
+      esp32s2_lowputc_set_oflow(priv, true);
+    }
+  else
+    {
+      esp32s2_lowputc_set_oflow(priv, false);
+    }
+#endif
 
   /* Reset FIFOs */
 
@@ -740,6 +782,13 @@ static int esp32s2_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         termiosp->c_cflag |= (priv->stop_b2) ? CSTOPB : 0;
 
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        termiosp->c_cflag |=  (priv->oflow) ? CCTS_OFLOW : 0;
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        termiosp->c_cflag |=  (priv->iflow) ? CRTS_IFLOW : 0;
+#endif
+
         /* Set the baud rate in the termiosp using the
          * cfsetispeed interface.
          */
@@ -779,6 +828,12 @@ static int esp32s2_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint8_t  parity;
         uint8_t  bits;
         uint8_t  stop2;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        bool iflow;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        bool oflow;
+#endif
 
         if (!termiosp)
           {
@@ -830,6 +885,13 @@ static int esp32s2_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         stop2 = (termiosp->c_cflag & CSTOPB) ? 1 : 0;
 
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
+#endif
+
         /* Verify that all settings are valid before
          * performing the changes.
          */
@@ -842,6 +904,13 @@ static int esp32s2_ioctl(struct file *filep, int cmd, unsigned long arg)
             priv->parity    = parity;
             priv->bits      = bits;
             priv->stop_b2   = stop2;
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+            priv->iflow     = iflow;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+            priv->oflow     = oflow;
+#endif
 
             /* Effect the changes immediately - note that we do not
              * implement TCSADRAIN or TCSAFLUSH, only TCSANOW option.
@@ -866,6 +935,78 @@ static int esp32s2_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: esp32s2_rxflowcontrol
+ *
+ * Description:
+ *   Called when upper half RX buffer is full (or exceeds configured
+ *   watermark levels if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data.
+ *   NOTE: ESP32-S2 has a hardware RX FIFO threshold mechanism to control
+ *   RTS line and to stop receiving data. This is very similar to the concept
+ *   behind upper watermark level. The hardware threshold is used here
+ *   to control the RTS line. When setting the threshold to zero, RTS will
+ *   immediately be asserted. If nbuffered = 0 or the lower watermark is
+ *   crossed and the serial driver decides to disable RX flow control, the
+ *   threshold will be changed to UART_RX_FLOW_THRHD_VALUE, which is almost
+ *   half the HW RX FIFO capacity. It keeps some space to keep the data
+ *   received between the RTS assertion and the stop by the sender.
+ *
+ * Input Parameters:
+ *   dev       - UART device instance
+ *   nbuffered - the number of characters currently buffered
+ *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
+ *               not defined the value will be 0 for an empty buffer or the
+ *               defined buffer size for a full buffer)
+ *   upper     - true indicates the upper watermark was crossed where
+ *               false indicates the lower watermark has been crossed
+ *
+ * Returned Value:
+ *   true if RX flow control activated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool esp32s2_rxflowcontrol(struct uart_dev_s *dev,
+                                  unsigned int nbuffered, bool upper)
+{
+  bool ret = false;
+  struct esp32s2_uart_s *priv = dev->priv;
+  if (priv->iflow)
+    {
+      if (nbuffered == 0 || upper == false)
+        {
+          /* Empty buffer, RTS should be de-asserted and logic in above
+           * layers should re-enable RX interrupt.
+           */
+
+          esp32s2_lowputc_set_iflow(priv, (uint8_t)(UART_RX_FIFO_SIZE / 2),
+                                    true);
+          esp32s2_rxint(dev, true);
+          ret = false;
+        }
+      else
+        {
+          /* If the RX buffer is not zero and watermarks are not enabled,
+           * then this function is called to announce RX buffer is full.
+           * The first thing it should do is to immediately assert RTS.
+           * Software RX FIFO is full, so besides asserting RTS, it's
+           * necessary to disable RX interrupts to prevent remaining bytes
+           * (that arrive after asserting RTS) to be pushed to the
+           * SW RX FIFO.
+           */
+
+          esp32s2_lowputc_set_iflow(priv, 0 , true);
+          esp32s2_rxint(dev, false);
+          ret = true;
+        }
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
