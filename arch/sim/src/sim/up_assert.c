@@ -26,6 +26,7 @@
 #include <sched/sched.h>
 #include <stdlib.h>
 #include <syslog.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/board.h>
 #include "up_internal.h"
 
@@ -68,6 +69,10 @@
 
 void up_assert(const char *filename, int line)
 {
+  /* Flush any buffered SYSLOG data (from prior to the assertion) */
+
+  syslog_flush();
+
   /* Show the location of the failed assertion */
 
 #ifdef CONFIG_SMP
@@ -78,11 +83,19 @@ void up_assert(const char *filename, int line)
           filename, line);
 #endif
 
+  /* Flush any buffered SYSLOG data (from the above) */
+
+  syslog_flush();
+
   /* Allow for any board/configuration specific crash information */
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(sim_getsp(), this_task(), filename, line);
 #endif
+
+  /* Flush any buffered SYSLOG data */
+
+  syslog_flush();
 
   if (CURRENT_REGS || (running_task())->flink == NULL)
     {
