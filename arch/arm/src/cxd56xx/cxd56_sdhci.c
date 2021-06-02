@@ -667,7 +667,7 @@ static void cxd56_dumpsample(struct cxd56_sdiodev_s *priv,
   mcinfo(" HTCAPBLT[%08x]: %08x\n", CXD56_SDHCI_HTCAPBLT,  regs->htcapblt);
   mcinfo("   ADMAES[%08x]: %08x\n", CXD56_SDHCI_ADMAES,    regs->admaes);
   mcinfo("  ADSADDR[%08x]: %08x\n", CXD56_SDHCI_ADSADDR,   regs->adsaddr);
-  mcinfo(" VENDSPEC[%08x]: %08x\n", CXD56_SDHCI_VENDSPEC,  regs->hostver);
+  mcinfo(" VENDSPEC[%08x]: %08x\n", CXD56_SDHCI_VENDSPEC,  regs->vendspec);
 }
 #endif
 
