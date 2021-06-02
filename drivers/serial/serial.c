@@ -166,24 +166,15 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
 #endif
           if (fds->revents != 0)
             {
-              irqstate_t flags;
               int semcount;
 
               finfo("Report events: %02x\n", fds->revents);
 
-              /* Limit the number of times that the semaphore is posted.
-               * The critical section is needed to make the following
-               * operation atomic.
-               */
-
-              flags = enter_critical_section();
               nxsem_get_value(fds->sem, &semcount);
               if (semcount < 1)
                 {
                   nxsem_post(fds->sem);
                 }
-
-              leave_critical_section(flags);
             }
         }
     }
@@ -1515,8 +1506,8 @@ static int uart_poll(FAR struct file *filep,
 
       if (i >= CONFIG_SERIAL_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -1582,15 +1573,15 @@ static int uart_poll(FAR struct file *filep,
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ret              = -EIO;
+          ret = -EIO;
           goto errout;
         }
 #endif
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:
