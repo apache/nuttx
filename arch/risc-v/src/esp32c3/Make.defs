@@ -212,7 +212,7 @@ endif
 
 ifeq ($(CONFIG_ESP32C3_WIFI),y)
 CHIP_CSRCS += esp32c3_wlan.c esp32c3_wifi_utils.c esp32c3_wifi_adapter.c
-EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lcoexist -lespnow -lwpa_supplicant -lwapi
+EXTRA_LIBS += -lcore -lnet80211 -lpp -lsmartconfig -lcoexist -lespnow -lwpa_supplicant -lwapi -lmesh
 endif
 
 ifeq ($(CONFIG_ESP32C3_BLE),y)

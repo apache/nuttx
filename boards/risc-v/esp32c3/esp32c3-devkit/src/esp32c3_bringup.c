@@ -311,6 +311,17 @@ int esp32c3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32C3_WIRELESS
+
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  ret = esp32c3_wifi_bt_coexist_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT coexist\n");
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_ESP32C3_BLE
   ret = esp32c3_ble_initialize();
   if (ret)
@@ -352,6 +363,8 @@ int esp32c3_bringup(void)
 #endif
 
 #endif
+
+#endif /* CONFIG_ESP32C3_WIRELESS */
 
 #ifdef CONFIG_ESP32C3_LEDC
   ret = esp32c3_pwm_setup();

@@ -352,6 +352,11 @@ config ESP32C3_BLE
 
 endmenu # ESP32-C3 Peripheral Support
 
+menuconfig ESP32C3_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default n
+	depends on ESP32C3_WIFI && ESP32C3_BLE
+
 menu "I2C Configuration"
 	depends on ESP32C3_I2C
 
