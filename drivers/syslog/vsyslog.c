@@ -223,10 +223,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #ifdef CONFIG_SYSLOG_BUFFER
   /* Flush and destroy the syslog stream buffer */
 
-  if (priority != LOG_EMERG)
-    {
-      syslogstream_destroy(&stream);
-    }
+  syslogstream_destroy(&stream);
 #endif
 
   return ret;
