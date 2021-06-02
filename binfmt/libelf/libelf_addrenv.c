@@ -117,13 +117,30 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
 #else
   /* Allocate memory to hold the ELF image */
 
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  loadinfo->textalloc = (uintptr_t)
+                         up_module_text_memalign(loadinfo->textalign,
+                                                 textsize);
+#else
   loadinfo->textalloc = (uintptr_t)kumm_malloc(textsize + datasize);
+#endif
+
   if (!loadinfo->textalloc)
     {
       return -ENOMEM;
     }
 
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  loadinfo->dataalloc = (uintptr_t)kumm_malloc(datasize);
+
+  if (0 != datasize && !loadinfo->dataalloc)
+    {
+      return -ENOMEM;
+    }
+#else
   loadinfo->dataalloc = loadinfo->textalloc + textsize;
+#endif
+
   return OK;
 #endif
 }
@@ -159,12 +176,26 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
       berr("ERROR: up_addrenv_destroy failed: %d\n", ret);
     }
 #else
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  if (loadinfo->textalloc != 0)
+    {
+      up_module_text_free((FAR void *)loadinfo->textalloc);
+    }
+
+  if (loadinfo->dataalloc != 0)
+    {
+      kumm_free((FAR void *)loadinfo->dataalloc);
+    }
+#else
   /* If there is an allocation for the ELF image, free it */
 
   if (loadinfo->textalloc != 0)
     {
       kumm_free((FAR void *)loadinfo->textalloc);
     }
+#endif
+
 #endif
 
   /* Clear out all indications of the allocated address environment */
