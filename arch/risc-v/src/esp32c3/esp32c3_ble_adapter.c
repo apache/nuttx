@@ -56,6 +56,11 @@
 #include "esp32c3_rt_timer.h"
 #include "esp32c3_ble_adapter.h"
 
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+#  include "esp_coexist_internal.h"
+#  include "esp_coexist_adapter.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1356,7 +1361,9 @@ static uint32_t IRAM_ATTR btdm_hus_2_lpcycles(uint32_t us)
 
 static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 {
-  /* empty function */
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  coex_schm_status_bit_set(type, status);
+#endif
 }
 
 /****************************************************************************
@@ -1376,7 +1383,9 @@ static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 static void coex_schm_status_bit_clear_wrapper(uint32_t type,
                           uint32_t status)
 {
-  /* empty function */
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  coex_schm_status_bit_clear(type, status);
+#endif
 }
 
 /****************************************************************************
@@ -1786,6 +1795,10 @@ int esp32c3_bt_controller_init(void)
   wlinfo("BT controller compile version [%s]\n",
                               btdm_controller_get_compile_version());
 
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  coex_init();
+#endif
+
   modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, UINT32_MAX);
 
   bt_phy_enable();
@@ -1867,6 +1880,10 @@ int esp32c3_bt_controller_disable(void)
 
   btdm_controller_disable();
 
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  coex_disable();
+#endif
+
   btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
 
   return 0;
@@ -1900,6 +1917,10 @@ int esp32c3_bt_controller_enable(esp_bt_mode_t mode)
                                   mode, btdm_controller_get_mode());
       return -1;
     }
+
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  coex_enable();
+#endif
 
   /* enable low power mode */
 
