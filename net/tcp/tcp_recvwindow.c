@@ -139,6 +139,12 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        *
        * Note: hopefully, a single mss-sized packet can be queued by
        * the throttled=false case in tcp_datahandler().
+       *
+       * Revisit: I (yamamoto) am a bit skeptical on this logic.
+       * - Probably this should depend on IOB throttling.
+       * - IOB_BUFSIZE can be smaller than MSS. It seems wrong to
+       *   advertize a larger window when no IOBs are available
+       *   than when eg. a single IOB is available.
        */
 
       recvwndo = mss;
