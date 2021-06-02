@@ -97,6 +97,10 @@ CHIP_CSRCS += cxd56_testset.c
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT), y)
+CHIP_CSRCS += cxd56_modtext.c
+endif
+
 ifeq ($(CONFIG_CXD56_UART0),y)
 CHIP_CSRCS += cxd56_uart0.c
 endif
