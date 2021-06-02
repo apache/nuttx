@@ -4624,19 +4624,6 @@ int esp_mesh_send_event_internal(int32_t event_id,
 }
 
 /****************************************************************************
- * Name: esp_mesh_get_topology
- *
- * Description:
- *   Don't support
- *
- ****************************************************************************/
-
-void *esp_mesh_get_topology(void)
-{
-  return NULL;
-}
-
-/****************************************************************************
  * Functions needed by libwpa_supplicant.a
  ****************************************************************************/
 
@@ -4880,7 +4867,7 @@ esp_err_t esp_wifi_init(const wifi_init_config_t *config)
       return ret;
     }
 
-#if SOC_WIFI_HW_TSF
+#ifdef CONFIG_PM
   ret = esp32c3_pm_register_skip_sleep_callback(
                     esp_wifi_internal_is_tsf_active);
   if (ret != OK)
@@ -4935,7 +4922,7 @@ esp_err_t esp_wifi_deinit(void)
       return ret;
     }
 
-#if SOC_WIFI_HW_TSF
+#ifdef CONFIG_PM
     esp32c3_pm_unregister_skip_sleep_callback(
                     esp_wifi_internal_is_tsf_active);
     esp32c3_pm_unregister_inform_out_sleep_overhead_callback(
