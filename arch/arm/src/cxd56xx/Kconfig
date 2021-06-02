@@ -1331,4 +1331,10 @@ config CXD56_TESTSET
 	---help---
 		Use custom testset based on hardware semaphore
 
+config CXD56_USE_SYSBUS
+	bool "Use the system bus for the data section"
+	default y
+	select ARCH_USE_MODULE_TEXT if ELF
+	---help---
+		To make ldrex/strex work correctly, this option must be enabled
 endmenu
