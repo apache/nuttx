@@ -40,26 +40,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Extend the size of the interrupt buffer so that a "[truncated]\n"
- * indication can be append to the end.
- *
- * The usable capacity of the interrupt buffer is
- * (CONFIG_SYSLOG_INTBUFSIZE - 1).
- */
-
-#define SYSLOG_BUFOVERRUN_MESSAGE  "[truncated]\n"
-#define SYSLOG_BUFOVERRUN_SIZE     13
-
-#if CONFIG_SYSLOG_INTBUFSIZE > (65535 - SYSLOG_BUFOVERRUN_SIZE)
+#if CONFIG_SYSLOG_INTBUFSIZE > 65535
 #  undef  CONFIG_SYSLOG_INTBUFSIZE
-#  define CONFIG_SYSLOG_INTBUFSIZE (65535 - SYSLOG_BUFOVERRUN_SIZE)
-#  define SYSLOG_INTBUFSIZE        65535
-#else
-#  define SYSLOG_INTBUFSIZE \
-     (CONFIG_SYSLOG_INTBUFSIZE + SYSLOG_BUFOVERRUN_SIZE)
+#  define CONFIG_SYSLOG_INTBUFSIZE 65535
 #endif
-
-#define USABLE_INTBUFSIZE          (CONFIG_SYSLOG_INTBUFSIZE - 1)
 
 /****************************************************************************
  * Private Types
@@ -71,7 +55,7 @@ struct g_syslog_intbuffer_s
 {
   volatile uint16_t si_inndx;
   volatile uint16_t si_outndx;
-  uint8_t si_buffer[SYSLOG_INTBUFSIZE];
+  uint8_t si_buffer[CONFIG_SYSLOG_INTBUFSIZE];
 };
 
 /****************************************************************************
@@ -79,8 +63,6 @@ struct g_syslog_intbuffer_s
  ****************************************************************************/
 
 static struct g_syslog_intbuffer_s g_syslog_intbuffer;
-static const char g_overrun_msg[SYSLOG_BUFOVERRUN_SIZE] =
-                                            SYSLOG_BUFOVERRUN_MESSAGE;
 
 /****************************************************************************
  * Private Data
@@ -129,9 +111,9 @@ int syslog_remove_intbuffer(void)
 
       /* Increment the OUT index, handling wrap-around */
 
-      if (++outndx >= SYSLOG_INTBUFSIZE)
+      if (++outndx >= CONFIG_SYSLOG_INTBUFSIZE)
         {
-          outndx -= SYSLOG_INTBUFSIZE;
+          outndx -= CONFIG_SYSLOG_INTBUFSIZE;
         }
 
       g_syslog_intbuffer.si_outndx = (uint16_t)outndx;
@@ -178,7 +160,7 @@ int syslog_add_intbuffer(int ch)
   uint32_t outndx;
   uint32_t endndx;
   unsigned int inuse;
-  int ret;
+  int ret = OK;
   int i;
 
   /* Disable concurrent modification from interrupt handling logic */
@@ -193,65 +175,47 @@ int syslog_add_intbuffer(int ch)
   endndx = inndx;
   if (endndx < outndx)
     {
-      endndx += SYSLOG_INTBUFSIZE;
+      endndx += CONFIG_SYSLOG_INTBUFSIZE;
     }
 
   inuse = (unsigned int)(endndx - outndx);
 
-  /* Is there space for another character (reserving space for the overrun
-   * message)?
-   */
+  /* Is there space for another character */
 
-  if (inuse == USABLE_INTBUFSIZE)
+  if (inuse == CONFIG_SYSLOG_INTBUFSIZE - 1)
     {
-      /* Copy the truncated message one character at a time, handing index
-       * wrap-around on each character.
-       */
-
-      for (i = 0; i < SYSLOG_BUFOVERRUN_SIZE; i++)
+      int oldch = syslog_remove_intbuffer();
+      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
         {
-          /* Copy one character */
-
-          g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)g_overrun_msg[i];
-
-          /* Increment the IN index, handling wrap-around */
-
-          if (++inndx >= SYSLOG_INTBUFSIZE)
+          if (g_syslog_channel[i] == NULL)
             {
-              inndx -= SYSLOG_INTBUFSIZE;
+              break;
             }
 
-          DEBUGASSERT(inndx != outndx);
+          /* Select which putc function to use for this flush */
+
+          if (g_syslog_channel[i]->sc_ops->sc_force)
+            {
+              g_syslog_channel[i]->sc_ops->sc_force(
+                                           g_syslog_channel[i], oldch);
+            }
         }
 
-      g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
-      ret = -ENOSPC;
+        ret = -ENOSPC;
     }
-  else if (inuse < USABLE_INTBUFSIZE)
+
+  /* Copy one character */
+
+  g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
+
+  /* Increment the IN index, handling wrap-around */
+
+  if (++inndx >= CONFIG_SYSLOG_INTBUFSIZE)
     {
-      /* Copy one character */
-
-      g_syslog_intbuffer.si_buffer[inndx] = (uint8_t)ch;
-
-      /* Increment the IN index, handling wrap-around */
-
-      if (++inndx >= SYSLOG_INTBUFSIZE)
-        {
-          inndx -= SYSLOG_INTBUFSIZE;
-        }
-
-      g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
-      ret = OK;
-    }
-  else
-    {
-      /* This character goes to the bit bucket.  We have already copied
-       * the overrun message so there is nothing else to do.
-       */
-
-      ret = -ENOSPC;
+      inndx -= CONFIG_SYSLOG_INTBUFSIZE;
     }
 
+  g_syslog_intbuffer.si_inndx = (uint16_t)inndx;
   leave_critical_section(flags);
   return ret;
 }
