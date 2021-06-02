@@ -299,7 +299,7 @@ static struct emmc_dma_desc_s *emmc_setupdma(void *buf, unsigned int nbytes)
     }
 
   remain = nbytes;
-  addr = (uint32_t)(uintptr_t)buf;
+  addr = CXD56_PHYSADDR(buf);
 
   for (i = 0, d = descs; i < ndescs; i++, d++)
     {
@@ -309,7 +309,7 @@ static struct emmc_dma_desc_s *emmc_setupdma(void *buf, unsigned int nbytes)
       size = MIN(remain, 4096);
       d->size = size;
       d->addr = addr;
-      d->next = (uint32_t)(uintptr_t)(d + 1);
+      d->next = CXD56_PHYSADDR(d + 1);
 
       remain -= size;
       addr += size;
@@ -331,7 +331,7 @@ static struct emmc_dma_desc_s *emmc_setupdma(void *buf, unsigned int nbytes)
     }
 #endif
 
-  putreg32((uint32_t)(uintptr_t)descs, EMMC_DBADDR);
+  putreg32(CXD56_PHYSADDR(descs), EMMC_DBADDR);
 
   return descs;
 }

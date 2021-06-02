@@ -1059,7 +1059,7 @@ static void cxd56_endtransfer(struct cxd56_sdiodev_s *priv,
   putreg32(regval, CXD56_SDHCI_SYSCTL);
   cxd56_sdhci_adma_dscr[0] = 0;
   cxd56_sdhci_adma_dscr[1] = 0;
-  putreg32((uint32_t)cxd56_sdhci_adma_dscr, CXD56_SDHCI_ADSADDR);
+  putreg32(CXD56_PHYSADDR(cxd56_sdhci_adma_dscr), CXD56_SDHCI_ADSADDR);
   putreg32(0, CXD56_SDHCI_ADSADDR_H);
   priv->usedma = false;
   priv->dmasend_prepare = false;
@@ -2082,7 +2082,7 @@ static int cxd56_sdio_cancel(FAR struct sdio_dev_s *dev)
   priv->dmasend_regcmd = 0;
   cxd56_sdhci_adma_dscr[0] = 0;
   cxd56_sdhci_adma_dscr[1] = 0;
-  putreg32((uint32_t)cxd56_sdhci_adma_dscr, CXD56_SDHCI_ADSADDR);
+  putreg32(CXD56_PHYSADDR(cxd56_sdhci_adma_dscr), CXD56_SDHCI_ADSADDR);
   putreg32(0, CXD56_SDHCI_ADSADDR_H);
 #endif
   regval  = getreg32(CXD56_SDHCI_SYSCTL);
@@ -2756,12 +2756,12 @@ static int cxd56_sdio_registercallback(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_SDIO_DMA
 static int cxd56_sdio_admasetup(FAR const uint8_t *buffer, size_t buflen)
 {
-  uint32_t dscr_top = (uint32_t)cxd56_sdhci_adma_dscr;
+  uint32_t dscr_top = CXD56_PHYSADDR(cxd56_sdhci_adma_dscr);
   uint32_t dscr_l;
   uint32_t i;
   uint32_t remaining;
   uint32_t len;
-  uint32_t data_addr = (uint32_t)buffer;
+  uint32_t data_addr = CXD56_PHYSADDR(buffer);
   remaining = buflen;
 
   putreg32(0x0, CXD56_SDHCI_ADSADDR_H);
@@ -2903,7 +2903,7 @@ static int cxd56_sdio_dmarecvsetup(FAR struct sdio_dev_s *dev,
   priv->usedma = true;
 
   cxd56_configxfrints(priv, SDHCI_DMADONE_INTS);
-  putreg32((uint32_t)buffer, CXD56_SDHCI_DSADDR);
+  putreg32(CXD56_PHYSADDR(buffer), CXD56_SDHCI_DSADDR);
 
   /* Sample the register state */
 
@@ -3250,7 +3250,7 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
       cxd56_sdhci_adma_dscr[i] = 0;
     }
 
-  putreg32((uint32_t)cxd56_sdhci_adma_dscr, CXD56_SDHCI_ADSADDR);
+  putreg32(CXD56_PHYSADDR(cxd56_sdhci_adma_dscr), CXD56_SDHCI_ADSADDR);
   putreg32(0, CXD56_SDHCI_ADSADDR_H);
   putreg32(SDHCI_PROCTL_DMAS_ADMA2 |
           (getreg32(CXD56_SDHCI_PROCTL) & ~SDHCI_PROCTL_DMAS_MASK),
