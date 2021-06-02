@@ -52,11 +52,11 @@
 # define CONFIG_LIB_HOMEDIR "/"
 #endif
 
-/* The NuttX C library an be build in two modes: (1) as a standard, C-library
- * that can be used by normal, user-space applications, or (2) as a special,
- * kernel-mode C-library only used within the OS.  If NuttX is not being
- * built as separated kernel- and user-space modules, then only the first
- * mode is supported.
+/* The NuttX C library can be built in two modes: (1) as a standard,
+ * C-library that can be used by normal, user-space applications, or
+ * (2) as a special, kernel-mode C-library only used within the OS.
+ * If NuttX is not being built as separated kernel- and user-space modules,
+ * then only the first mode is supported.
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)

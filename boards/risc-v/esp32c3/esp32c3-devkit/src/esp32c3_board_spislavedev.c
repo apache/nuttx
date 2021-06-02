@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/spawn/lib_task_spawn.c
+ * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_board_spislavedev.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,56 +24,57 @@
 
 #include <nuttx/config.h>
 
-#include <spawn.h>
-#include <nuttx/spawn.h>
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
 
-#if defined(CONFIG_LIB_SYSCALL) && !defined(CONFIG_BUILD_KERNEL)
+#include <nuttx/spi/slave.h>
+
+#include "esp32c3_spi.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_spawn
+ * Name: board_spislavedev_initialize
  *
  * Description:
- *   This function marshals task_spwan() parameters and invokes the
- *   nx_task_spawn() system call.
- *
- *   task_spawn() and posix_spawn() are NuttX OS interfaces.  In PROTECTED
- *   and KERNEL build modes, then can be reached from applications only via
- *   a system call.  Currently, the number of parameters in a system call
- *   is limited to six; these spawn function have seven parameters.  Rather
- *   than extend the maximum number of parameters across all architectures,
- *   I opted instead to marshal the seven parameters into a structure.
- *
+ *   Initialize SPI Slave driver and register the /dev/spislv device.
  *
  * Input Parameters:
- *   file_actions - The address of the posix_spawn_file_actions_t to be
- *   initialized.
+ *   bus - The SPI bus number, used to build the device path as /dev/spislvN
  *
  * Returned Value:
- *   On success, these functions return 0; on failure they return an error
- *   number from <errno.h>.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
-               FAR const posix_spawn_file_actions_t *file_actions,
-               FAR const posix_spawnattr_t *attr,
-               FAR char * const argv[], FAR char * const envp[])
+int board_spislavedev_initialize(int bus)
 {
-  struct spawn_syscall_parms_s parms;
+  int ret;
 
-  parms.pid          = pid;
-  parms.name         = name;
-  parms.entry        = entry;
-  parms.file_actions = file_actions;
-  parms.attr         = attr;
-  parms.argv         = (FAR char * const *)argv;
-  parms.envp         = (FAR char * const *)envp;
+  FAR struct spi_sctrlr_s *sctrlr;
 
-  return nx_task_spawn(&parms);
+  spiinfo("Initializing /dev/spislv%d...\n", bus);
+
+  /* Initialize SPI Slave controller device */
+
+  sctrlr = esp32c3_spislave_sctrlr_initialize(bus);
+  if (sctrlr == NULL)
+    {
+      spierr("Failed to initialize SPI%d as slave.\n", bus);
+      return -ENODEV;
+    }
+
+  ret = spislave_register(sctrlr, bus);
+  if (ret < 0)
+    {
+      spierr("Failed to register /dev/spislv%d: %d\n", bus, ret);
+
+      esp32c3_spislave_sctrlr_uninitialize(sctrlr);
+    }
+
+  return ret;
 }
-
-#endif /* CONFIG_LIB_SYSCALL && !CONFIG_BUILD_KERNEL */

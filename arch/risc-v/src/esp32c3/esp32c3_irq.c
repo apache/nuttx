@@ -163,6 +163,8 @@ void up_enable_irq(int cpuint)
 {
   irqstate_t irqstate;
 
+  irqinfo("cpuint=%d\n", cpuint);
+
   DEBUGASSERT(cpuint >= ESP32C3_CPUINT_MIN && cpuint <= ESP32C3_CPUINT_MAX);
 
   irqstate = enter_critical_section();
@@ -181,6 +183,8 @@ void up_enable_irq(int cpuint)
 void up_disable_irq(int cpuint)
 {
   irqstate_t irqstate;
+
+  irqinfo("cpuint=%d\n", cpuint);
 
   DEBUGASSERT(cpuint >= ESP32C3_CPUINT_MIN && cpuint <= ESP32C3_CPUINT_MAX);
 
@@ -252,7 +256,6 @@ void esp32c3_bind_irq(uint8_t cpuint, uint8_t periphid, uint8_t prio,
 int esp32c3_request_irq(uint8_t periphid, uint8_t prio, uint32_t flags)
 {
   int ret;
-  uint32_t regval;
   int cpuint;
   irqstate_t irqstate;
 
@@ -262,33 +265,27 @@ int esp32c3_request_irq(uint8_t periphid, uint8_t prio, uint32_t flags)
 
   irqstate = enter_critical_section();
 
-  /* Skip over enabled interrupts.  NOTE: bit 0 is reserved. */
-
-  regval = getreg32(INTERRUPT_CPU_INT_ENABLE_REG);
-
-  /* Skip over reserved CPU interrupts */
-
-  regval |= CPUINT_RESERVED_MAPS;
+  /* Skip over already registered interrupts.
+   * NOTE: bit 0 is reserved.
+   */
 
   for (cpuint = 1; cpuint <= ESP32C3_CPUINT_MAX; cpuint++)
     {
-      if (!(regval & (1 << cpuint)))
+      if (g_cpuint_map[cpuint] == CPUINT_UNASSIGNED)
         {
           break;
         }
     }
 
-  irqinfo("INFO: cpuint=%d\n", cpuint);
+  irqinfo("periphid:%" PRIu8 " cpuint=%d\n", periphid, cpuint);
 
   if (cpuint <= ESP32C3_CPUINT_MAX)
     {
-      DEBUGASSERT(g_cpuint_map[cpuint] == CPUINT_UNASSIGNED);
-
-      /* We have a free CPU interrupt.  We can continue with mapping the
+      /* We have a free CPU interrupt. We can continue with mapping the
        * peripheral.
        */
 
-      /* Save the CPU interrupt ID.  We will return this value. */
+      /* Save the CPU interrupt ID. We will return this value. */
 
       ret = cpuint;
 

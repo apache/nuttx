@@ -312,7 +312,7 @@ void netdriver_loop(void);
 /* up_rptun.c ***************************************************************/
 
 #ifdef CONFIG_RPTUN
-int up_rptun_init(void);
+int up_rptun_init(const char *shmemname, const char *cpuname, bool master);
 void up_rptun_loop(void);
 #endif
 
@@ -329,13 +329,6 @@ struct qspi_dev_s *up_qspiflashinitialize(void);
 #ifdef CONFIG_SIM_HCISOCKET
 int bthcisock_register(int dev_id);
 int bthcisock_loop(void);
-#endif
-
-/* up_btuart.c **************************************************************/
-
-#ifdef CONFIG_SIM_BTUART
-int  sim_btuart_register(const char *name, int id);
-void sim_btuart_loop(void);
 #endif
 
 /* up_audio.c ***************************************************************/

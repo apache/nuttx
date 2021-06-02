@@ -27,6 +27,8 @@
 #include <stdbool.h>
 #include <fixedmath.h>
 
+#include <nuttx/spinlock.h>
+
 #include "arm_arch.h"
 #include "arm_internal.h"
 

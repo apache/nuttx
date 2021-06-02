@@ -809,7 +809,12 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
         }
     }
 
-  /* Receive additional data from read-ahead buffer, send the ACK timely. */
+  /* Receive additional data from read-ahead buffer, send the ACK timely.
+   *
+   * Revisit: Because IOBs are system-wide resources, consuming the read
+   * ahead buffer would update recv window of all connections in the system,
+   * not only this particular connection.
+   */
 
   if (conn->rcv_wnd == 0 && conn->rcv_ackcb == NULL)
     {

@@ -91,12 +91,16 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * read-ahead buffers to retain the data -- drop the packet.
            */
 
-         ninfo("Dropped %d bytes\n", dev->d_len);
+          ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.drop++;
 #endif
-          /* Clear the TCP_SNDACK bit so that no ACK will be sent */
+          /* Clear the TCP_SNDACK bit so that no ACK will be sent.
+           *
+           * Revisit: It might make more sense to send a dup ack
+           * to give a hint to the peer.
+           */
 
           ret &= ~TCP_SNDACK;
         }

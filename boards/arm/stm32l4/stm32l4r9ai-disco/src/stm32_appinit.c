@@ -26,7 +26,6 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#include <syslog.h>
 #include <errno.h>
 #include <debug.h>
 #include <string.h>

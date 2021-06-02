@@ -10,6 +10,11 @@ config EXAMPLES_TOUCHSCREEN_BGCOLOR
 	default 0x007b68ee
 	depends on EXAMPLES_TOUCHSCREEN
 
+config SIM_RPTUN_MASTER
+	bool "Remote Processor Tunneling Role"
+	default n
+	depends on RPTUN
+
 if SIM_TOUCHSCREEN
 
 comment "NX Server Options"

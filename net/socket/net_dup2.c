@@ -27,6 +27,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

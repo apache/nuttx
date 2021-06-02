@@ -138,79 +138,52 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
         break;
 
       case TCP_KEEPIDLE:  /* Start keepalives after this IDLE period */
-        if (value_len != sizeof(struct timeval))
-          {
-            ret = -EDOM;
-          }
-        else
-          {
-            FAR struct timeval *tv = (FAR struct timeval *)value;
-
-            if (tv == NULL)
-              {
-                ret = -EINVAL;
-              }
-            else
-              {
-                unsigned int dsecs;
-
-               /* Get the IDLE time value.  Any microsecond remainder will
-                * be forced to the next larger, whole decisecond value.
-                */
-
-               dsecs = (socktimeo_t)net_timeval2dsec(tv, TV2DS_CEIL);
-               if (dsecs > UINT16_MAX)
-                  {
-                    nwarn("WARNING: TCP_KEEPIDLE value out of range: %u\n",
-                          dsecs);
-                    ret = -EDOM;
-                  }
-                else
-                  {
-                    conn->keepidle = (uint16_t)dsecs;
-                    conn->keeptime = clock_systime_ticks();   /* Reset start time */
-                    ret = OK;
-                  }
-              }
-          }
-        break;
-
       case TCP_KEEPINTVL: /* Interval between keepalives */
-        if (value_len != sizeof(struct timeval))
-          {
-            ret = -EDOM;
-          }
-        else
-          {
-            FAR struct timeval *tv = (FAR struct timeval *)value;
+        {
+          unsigned int dsecs;
 
-            if (tv == NULL)
-              {
-                ret = -EINVAL;
-              }
-            else
-              {
-                unsigned int dsecs;
+          if (value == NULL)
+            {
+              return -EINVAL;
+            }
+          else if (value_len == sizeof(struct timeval))
+            {
+              FAR struct timeval *tv = (FAR struct timeval *)value;
 
-               /* Get the IDLE time value.  Any microsecond remainder will
-                * be forced to the next larger, whole decisecond value.
-                */
+              /* Get the IDLE time value.  Any microsecond remainder will
+               * be forced to the next larger, whole decisecond value.
+               */
 
-               dsecs = (socktimeo_t)net_timeval2dsec(tv, TV2DS_CEIL);
-               if (dsecs > UINT16_MAX)
-                  {
-                    nwarn("WARNING: TCP_KEEPINTVL value out of range: %u\n",
-                          dsecs);
-                    ret = -EDOM;
-                  }
-                else
-                  {
-                    conn->keepintvl = (uint16_t)dsecs;
-                    conn->keeptime  = clock_systime_ticks();   /* Reset start time */
-                    ret = OK;
-                  }
-              }
-          }
+              dsecs = (socktimeo_t)net_timeval2dsec(tv, TV2DS_CEIL);
+            }
+          else if (value_len == sizeof(int))
+            {
+              dsecs = *(FAR int *)value;
+            }
+          else
+            {
+              return -EDOM;
+            }
+
+          if (dsecs > UINT16_MAX)
+             {
+               nwarn("WARNING: value out of range: %u\n", dsecs);
+               return -EDOM;
+             }
+
+          if (option == TCP_KEEPIDLE)
+            {
+              conn->keepidle = (uint16_t)dsecs;
+            }
+          else
+            {
+              conn->keepintvl = (uint16_t)dsecs;
+            }
+
+          conn->keeptime  = clock_systime_ticks();   /* Reset start time */
+
+          ret = OK;
+        }
         break;
 
       case TCP_KEEPCNT:   /* Number of keepalives before death */

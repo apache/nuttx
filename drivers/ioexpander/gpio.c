@@ -29,10 +29,12 @@
 #include <string.h>
 #include <signal.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 #include <unistd.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/ioexpander/gpio.h>
 
 #ifdef CONFIG_DEV_GPIO

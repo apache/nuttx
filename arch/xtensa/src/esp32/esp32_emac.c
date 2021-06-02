@@ -2113,7 +2113,7 @@ static int emac_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
             {
               /* Enable PHY link up/down interrupts */
 
-              ret = phy_enable_interrupt(priv);
+              ret = phy_enable_interrupt();
             }
         }
         break;

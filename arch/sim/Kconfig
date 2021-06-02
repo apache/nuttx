@@ -228,17 +228,12 @@ endchoice
 
 endif
 
-config SIM_RPTUN_MASTER
-	bool "Remote Processor Tunneling Role"
-	depends on RPTUN
-
 menu "Simulated Graphics/Input"
 
 config SIM_X11FB
-  bool "X11 graphics/input"
-  default n
-  select SCHED_LPWORK
-	depends on SIM_WALLTIME
+	bool "X11 graphics/input"
+	default n
+	select SCHED_LPWORK
 	---help---
 		Use X11 to provide graphics and input emulation to interact with host.
 
@@ -548,21 +543,6 @@ config SIM_HCISOCKET
 		target via HCI_CHANNEL_USER. This gives NuttX full
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
-
-config SIM_BTUART
-	bool "Attach Host Bluetooth As TTY Device"
-	default false
-	depends on (DRIVERS_BLUETOOTH && HOST_LINUX && SIM_WALLTIME)
-	select BLUETOOTH_UART_SHIM if BLUETOOTH_UART
-	---help---
-		Attached the local bluetooth device to the simulation
-		target via HCI_CHANNEL_USER. This gives NuttX full
-		control of the device, but is abstracted from the
-		physical interface which is still handled by Linux.
-		Unlike SIM_HCISOCKET, BTUART will wrap the bluetooth
-		interface/controller as a TTY device, which provides
-		an option for developers to setup the bluetooth host in
-		userspace.
 
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"

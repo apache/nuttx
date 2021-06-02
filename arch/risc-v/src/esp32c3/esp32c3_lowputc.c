@@ -74,6 +74,24 @@ struct esp32c3_uart_s g_uart0_config =
   .txsig = U0TXD_OUT_IDX,
   .rxpin = CONFIG_ESP32C3_UART0_RXPIN,
   .rxsig = U0RXD_IN_IDX,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rtspin = CONFIG_ESP32C3_UART0_RTSPIN,
+  .rtssig = U0RTS_OUT_IDX,
+#ifdef CONFIG_UART0_IFLOWCONTROL
+  .iflow          = true,    /* input flow control (RTS) enabled */
+#else
+  .iflow          = false,   /* input flow control (RTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .ctspin = CONFIG_ESP32C3_UART0_CTSPIN,
+  .ctssig = U0CTS_IN_IDX,
+#ifdef CONFIG_UART0_OFLOWCONTROL
+  .oflow          = true,    /* output flow control (CTS) enabled */
+#else
+  .oflow          = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
 };
 
 #endif /* CONFIG_ESP32C3_UART0 */
@@ -95,6 +113,24 @@ struct esp32c3_uart_s g_uart1_config =
   .txsig = U1TXD_OUT_IDX,
   .rxpin = CONFIG_ESP32C3_UART1_RXPIN,
   .rxsig = U1RXD_IN_IDX,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rtspin = CONFIG_ESP32C3_UART1_RTSPIN,
+  .rtssig = U1RTS_OUT_IDX,
+#ifdef CONFIG_UART1_IFLOWCONTROL
+  .iflow          = true,    /* input flow control (RTS) enabled */
+#else
+  .iflow          = false,   /* input flow control (RTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .ctspin = CONFIG_ESP32C3_UART1_CTSPIN,
+  .ctssig = U1CTS_IN_IDX,
+#ifdef CONFIG_UART1_OFLOWCONTROL
+  .oflow          = true,    /* output flow control (CTS) enabled */
+#else
+  .oflow          = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
 };
 
 #endif /* CONFIG_ESP32C3_UART1 */
@@ -103,6 +139,72 @@ struct esp32c3_uart_s g_uart1_config =
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_lowputc_set_iflow
+ *
+ * Description:
+ *   Configure the input hardware flow control.
+ *
+ * Parameters:
+ *   priv           - Pointer to the private driver struct.
+ *   threshold      - RX FIFO value from which RST will automatically be
+ *                    asserted.
+ *   enable         - true = enable, false = disable
+ *
+ ****************************************************************************/
+
+void esp32c3_lowputc_set_iflow(const struct esp32c3_uart_s *priv,
+                               uint8_t threshold, bool enable)
+{
+  uint32_t mask;
+  if (enable)
+    {
+      /* Enable RX flow control */
+
+      modifyreg32(UART_CONF1_REG(priv->id), 0, UART_RX_FLOW_EN);
+
+      /* Configure the threshold */
+
+      mask = VALUE_TO_FIELD(threshold, UART_RX_FLOW_THRHD);
+      modifyreg32(UART_MEM_CONF_REG(priv->id), UART_RX_FLOW_THRHD_M, mask);
+    }
+  else
+    {
+      /* Disable RX flow control */
+
+      modifyreg32(UART_CONF1_REG(priv->id), UART_RX_FLOW_EN, 0);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32c3_lowputc_set_oflow
+ *
+ * Description:
+ *   Configure the output hardware flow control.
+ *
+ * Parameters:
+ *   priv           - Pointer to the private driver struct.
+ *   enable         - true = enable, false = disable
+ *
+ ****************************************************************************/
+
+void esp32c3_lowputc_set_oflow(const struct esp32c3_uart_s *priv,
+                               bool enable)
+{
+  if (enable)
+    {
+      /* Enable TX flow control */
+
+      modifyreg32(UART_CONF0_REG(priv->id), 0, UART_TX_FLOW_EN);
+    }
+  else
+    {
+      /* Disable TX flow control */
+
+      modifyreg32(UART_CONF0_REG(priv->id), UART_TX_FLOW_EN, 0);
+    }
+}
 
 /****************************************************************************
  * Name: esp32c3_lowputc_reset_core
@@ -642,6 +744,23 @@ void esp32c3_lowputc_config_pins(const struct esp32c3_uart_s *priv)
 
   esp32c3_configgpio(priv->rxpin, INPUT_FUNCTION_1);
   esp32c3_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      esp32c3_configgpio(priv->rtspin, OUTPUT_FUNCTION_1);
+      esp32c3_gpio_matrix_out(priv->rtspin, priv->rtssig,
+                              0, 0);
+    }
+
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (priv->oflow)
+    {
+      esp32c3_configgpio(priv->ctspin, INPUT_FUNCTION_1);
+      esp32c3_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
+    }
+#endif
 }
 
 /****************************************************************************

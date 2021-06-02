@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <queue.h>
+#include <sched.h>
 #include <signal.h>
 #include <semaphore.h>
 #include <pthread.h>

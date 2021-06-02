@@ -23,22 +23,10 @@
  ****************************************************************************/
 
 #include <nuttx/drivers/addrenv.h>
-#include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/rptun/rptun.h>
-#include <nuttx/serial/uart_rpmsg.h>
-#include <nuttx/syslog/syslog_rpmsg.h>
-#include <nuttx/timers/arch_rtc.h>
-#include <nuttx/timers/rpmsg_rtc.h>
+#include <nuttx/list.h>
 
 #include "up_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_SIM_RPTUN_MASTER
-#define CONFIG_SIM_RPTUN_MASTER 0
-#endif
 
 /****************************************************************************
  * Private Types
@@ -47,24 +35,23 @@
 struct sim_rptun_shmem_s
 {
   volatile uintptr_t        base;
-#if CONFIG_SIM_RPTUN_MASTER
-  volatile unsigned int     seqrx;
-  volatile unsigned int     seqtx;
-#else
-  volatile unsigned int     seqtx;
-  volatile unsigned int     seqrx;
-#endif
+  volatile unsigned int     seqs;
+  volatile unsigned int     seqm;
   struct rptun_rsc_s        rsc;
   char                      buf[0x10000];
 };
 
 struct sim_rptun_dev_s
 {
+  struct list_node          node;
   struct rptun_dev_s        rptun;
   rptun_callback_t          callback;
   void                     *arg;
-  unsigned int              seqrx;
+  bool                      master;
+  unsigned int              seq;
   struct sim_rptun_shmem_s *shmem;
+  struct simple_addrenv_s   addrenv[2];
+  char                      cpuname[RPMSG_NAME_SIZE + 1];
 };
 
 /****************************************************************************
@@ -73,7 +60,10 @@ struct sim_rptun_dev_s
 
 static const char *sim_rptun_get_cpuname(struct rptun_dev_s *dev)
 {
-  return CONFIG_SIM_RPTUN_MASTER ? "proxy" : "server";
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
+
+  return priv->cpuname;
 }
 
 static const char *sim_rptun_get_firmware(struct rptun_dev_s *dev)
@@ -82,14 +72,16 @@ static const char *sim_rptun_get_firmware(struct rptun_dev_s *dev)
 }
 
 static const struct rptun_addrenv_s *
-  sim_rptun_get_addrenv(struct rptun_dev_s *dev)
+sim_rptun_get_addrenv(struct rptun_dev_s *dev)
 {
   return NULL;
 }
 
-static struct rptun_rsc_s *sim_rptun_get_resource(struct rptun_dev_s *dev)
+static struct rptun_rsc_s *
+sim_rptun_get_resource(struct rptun_dev_s *dev)
 {
-  struct sim_rptun_dev_s *priv = (struct sim_rptun_dev_s *)dev;
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
   struct sim_rptun_shmem_s *shmem = priv->shmem;
 
   return &shmem->rsc;
@@ -102,7 +94,9 @@ static bool sim_rptun_is_autostart(struct rptun_dev_s *dev)
 
 static bool sim_rptun_is_master(struct rptun_dev_s *dev)
 {
-  return CONFIG_SIM_RPTUN_MASTER;
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
+  return priv->master;
 }
 
 static int sim_rptun_start(struct rptun_dev_s *dev)
@@ -117,17 +111,27 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
 
 static int sim_rptun_notify(struct rptun_dev_s *dev, uint32_t vqid)
 {
-  struct sim_rptun_dev_s *priv = (struct sim_rptun_dev_s *)dev;
-  struct sim_rptun_shmem_s *shmem = priv->shmem;
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
 
-  shmem->seqtx++;
+  if (priv->master)
+    {
+      priv->shmem->seqm++;
+    }
+  else
+    {
+      priv->shmem->seqs++;
+    }
+
   return 0;
 }
 
 static int sim_rptun_register_callback(struct rptun_dev_s *dev,
-                                       rptun_callback_t callback, void *arg)
+                                       rptun_callback_t callback,
+                                       void *arg)
 {
-  struct sim_rptun_dev_s *priv = (struct sim_rptun_dev_s *)dev;
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
 
   priv->callback = callback;
   priv->arg      = arg;
@@ -152,10 +156,7 @@ static const struct rptun_ops_s g_sim_rptun_ops =
   .register_callback = sim_rptun_register_callback,
 };
 
-static struct sim_rptun_dev_s g_dev =
-{
-  .rptun.ops         = &g_sim_rptun_ops
-};
+static struct list_node g_dev_list = LIST_INITIAL_VALUE(g_dev_list);
 
 /****************************************************************************
  * Public Functions
@@ -163,33 +164,57 @@ static struct sim_rptun_dev_s g_dev =
 
 void up_rptun_loop(void)
 {
-  struct sim_rptun_shmem_s *shmem = g_dev.shmem;
+  struct sim_rptun_dev_s *dev;
 
-  if (shmem != NULL && g_dev.seqrx != shmem->seqrx)
+  list_for_every_entry(&g_dev_list, dev,
+                       struct sim_rptun_dev_s, node)
     {
-      g_dev.seqrx = shmem->seqrx;
-      if (g_dev.callback != NULL)
+      if (dev->shmem != NULL)
         {
-          g_dev.callback(g_dev.arg, RPTUN_NOTIFY_ALL);
+          if (dev->master && dev->seq != dev->shmem->seqs)
+            {
+              dev->seq = dev->shmem->seqs;
+            }
+          else if (!dev->master && dev->seq != dev->shmem->seqm)
+            {
+              dev->seq = dev->shmem->seqm;
+            }
+
+          if (dev->callback != NULL)
+            {
+              dev->callback(dev->arg, RPTUN_NOTIFY_ALL);
+            }
         }
     }
 }
 
-int up_rptun_init(void)
+int up_rptun_init(const char *shmemname, const char *cpuname, bool master)
 {
+  struct sim_rptun_dev_s *dev;
   int ret;
 
-  g_dev.shmem = host_alloc_shmem("rptun-shmem",
-                                 sizeof(*g_dev.shmem),
-                                 CONFIG_SIM_RPTUN_MASTER);
-  if (g_dev.shmem == NULL)
+  dev = kmm_zalloc(sizeof(*dev));
+  if (dev == NULL)
     {
       return -ENOMEM;
     }
 
-  if (CONFIG_SIM_RPTUN_MASTER)
+  dev->shmem = host_alloc_shmem(shmemname, sizeof(*dev->shmem),
+                                master);
+  if (dev->shmem == NULL)
     {
-      struct rptun_rsc_s *rsc = &g_dev.shmem->rsc;
+      kmm_free(dev);
+      return -ENOMEM;
+    }
+
+  dev->master = master;
+  dev->rptun.ops = &g_sim_rptun_ops;
+  strncpy(dev->cpuname, cpuname, RPMSG_NAME_SIZE);
+  list_add_tail(&g_dev_list, &dev->node);
+
+  if (master)
+    {
+      struct rptun_rsc_s *rsc = &dev->shmem->rsc;
 
       rsc->rsc_tbl_hdr.ver          = 1;
       rsc->rsc_tbl_hdr.num          = 1;
@@ -208,59 +233,31 @@ int up_rptun_init(void)
       rsc->config.rxbuf_size        = 0x800;
       rsc->config.txbuf_size        = 0x800;
 
-      g_dev.shmem->base             = (uintptr_t)g_dev.shmem;
+      dev->shmem->base              = (uintptr_t)dev->shmem;
     }
   else
     {
-      static struct simple_addrenv_s s_addrenv[2];
-
       /* Wait untils master is ready */
 
-      while (g_dev.shmem->base == 0)
+      while (dev->shmem->base == 0)
         {
           host_sleep(1000);
         }
 
-      s_addrenv[0].va               = (uintptr_t)g_dev.shmem;
-      s_addrenv[0].pa               = g_dev.shmem->base;
-      s_addrenv[0].size             = sizeof(*g_dev.shmem);
+      dev->addrenv[0].va          = (uintptr_t)dev->shmem;
+      dev->addrenv[0].pa          = dev->shmem->base;
+      dev->addrenv[0].size        = sizeof(*dev->shmem);
 
-      simple_addrenv_initialize(s_addrenv);
+      simple_addrenv_initialize(dev->addrenv);
     }
 
-  ret = rptun_initialize(&g_dev.rptun);
+  ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
     {
-      host_free_shmem(g_dev.shmem);
-      return ret;
+      list_delete(&dev->node);
+      host_free_shmem(dev->shmem);
+      kmm_free(dev);
     }
 
-#ifdef CONFIG_SYSLOG_RPMSG_SERVER
-  syslog_rpmsg_server_init();
-#endif
-
-#ifndef CONFIG_RTC_RPMSG_SERVER
-  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
-#endif
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG
-  hostfs_rpmsg_init("server");
-#endif
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG_SERVER
-  hostfs_rpmsg_server_init();
-#endif
-
-  return 0;
+  return ret;
 }
-
-#if CONFIG_RPMSG_UART
-void rpmsg_serialinit(void)
-{
-#if CONFIG_SIM_RPTUN_MASTER
-  uart_rpmsg_init("proxy", "proxy", 4096, false);
-#else
-  uart_rpmsg_init("server", "proxy", 4096, true);
-#endif
-}
-#endif

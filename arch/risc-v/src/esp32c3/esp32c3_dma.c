@@ -50,7 +50,7 @@
 #define REG_OFF  (DMA_OUT_CONF0_CH1_REG - DMA_OUT_CONF0_CH0_REG)
 
 #define SET_REG(_r, _ch, _v)    putreg32((_v), (_r) + (_ch) * REG_OFF)
-#define GET_REG(_r, _ch, _v)    getreg32((_r) + (_ch) * REG_OFF)
+#define GET_REG(_r, _ch)        getreg32((_r) + (_ch) * REG_OFF)
 
 #define SET_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, 0, (_b))
 #define CLR_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, (_b), 0)
@@ -157,12 +157,12 @@ int32_t esp32c3_dma_request(enum esp32c3_dma_periph_e periph,
     {
       /* Enable DMA TX/RX channels burst sending data */
 
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
+      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUT_DATA_BURST_EN_CH0_M);
       SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_IN_DATA_BURST_EN_CH0_M);
 
       /* Enable DMA TX/RX channels burst reading descriptor link */
 
-      SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
+      SET_BITS(DMA_OUT_CONF0_CH0_REG, chan, DMA_OUTDSCR_BURST_EN_CH0_M);
       SET_BITS(DMA_IN_CONF0_CH0_REG, chan, DMA_INDSCR_BURST_EN_CH0_M);
     }
 

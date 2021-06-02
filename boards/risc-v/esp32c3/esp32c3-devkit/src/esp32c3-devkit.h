@@ -115,6 +115,25 @@ int board_spidev_initialize(int bus);
 #endif
 
 /****************************************************************************
+ * Name: board_spislavedev_initialize
+ *
+ * Description:
+ *   Initialize SPI Slave driver and register the /dev/spislv device.
+ *
+ * Input Parameters:
+ *   bus - The SPI bus number, used to build the device path as /dev/spislvN
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_SLAVE
+int board_spislavedev_initialize(int bus);
+#endif
+
+/****************************************************************************
  * Name: board_i2c_init
  *
  * Description:
@@ -179,6 +198,24 @@ int board_bmp180_initialize(int devno, int busno);
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
 int esp32c3_spiflash_init(void);
+#endif
+
+/****************************************************************************
+ * Name: esp32c3_spiflash_encrypt_test
+ *
+ * Description:
+ *   Test ESP32-C3 SPI Flash driver read/write with encryption.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
+void esp32c3_spiflash_encrypt_test(void);
 #endif
 
 /****************************************************************************

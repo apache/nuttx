@@ -84,13 +84,10 @@
 
 /* USB OTG FS
  *
- * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
  * PC0  OTG_FS_PowerSwitchOn
  * PD5  OTG_FS_Overcurrent
  */
 
-#define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
-                           GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 #define GPIO_OTGFS_PWRON  (GPIO_OUTPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|\
                            GPIO_PUSHPULL|GPIO_PORTC|GPIO_PIN0)
 

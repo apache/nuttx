@@ -29,6 +29,10 @@ ifeq ($(CONFIG_SPI_EXCHANGE),y)
   endif
 endif
 
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+  CSRCS += spi_slave_driver.c
+endif
+
 # Include the selected SPI drivers
 
 ifeq ($(CONFIG_SPI_BITBANG),y)

@@ -34,14 +34,24 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/fs/hostfs_rpmsg.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/rc/lirc_dev.h>
+#include <nuttx/rc/dummy.h>
+#include <nuttx/sensors/fakesensor.h>
+#include <nuttx/sensors/mpu60x0.h>
+#include <nuttx/sensors/wtgahrs2.h>
+#include <nuttx/serial/uart_rpmsg.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
+#include <nuttx/timers/arch_rtc.h>
+#include <nuttx/timers/oneshot.h>
+#include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
-#include <nuttx/i2c/i2c_master.h>
-#include <nuttx/sensors/mpu60x0.h>
 
 #ifdef CONFIG_LCD_DEV
 #include <nuttx/lcd/lcd_dev.h>
@@ -58,8 +68,19 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void)
+{
+#ifdef CONFIG_SIM_RPTUN_MASTER
+  uart_rpmsg_init("proxy", "proxy", 4096, false);
+#else
+  uart_rpmsg_init("server", "proxy", 4096, true);
+#endif
+}
+#endif
+
 /****************************************************************************
- * Name: sam_bringup
+ * Name: sim_bringup
  *
  * Description:
  *   Bring up simulated board features
@@ -348,24 +369,6 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SIM_BTUART
-  /* Register the HCI TTY device via HCI socket */
-
-  ret = sim_btuart_register("/dev/ttyHCI", 0);  /* Use HCI0 */
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: sim_btuart_register() failed: %d\n", ret);
-    }
-
-#  ifdef CONFIG_BLUETOOTH_UART_SHIM
-  ret = btuart_register(btuart_shim_getdevice("/dev/ttyHCI"));
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: btuart_register() failed: %d\n", ret);
-    }
-#  endif
-#endif
-
 #ifdef CONFIG_SIM_I2CBUS
   /* Initialize the i2c master bus device */
 
@@ -418,6 +421,57 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: sim_foc_setup() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_RPTUN
+#ifdef CONFIG_SIM_RPTUN_MASTER
+  up_rptun_init("server-proxy", "proxy", true);
+#else
+  up_rptun_init("server-proxy", "server", false);
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER
+  syslog_rpmsg_server_init();
+#endif
+
+#ifndef CONFIG_RTC_RPMSG_SERVER
+  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
+#endif
+
+#ifdef CONFIG_FS_HOSTFS_RPMSG
+  hostfs_rpmsg_init("server");
+#endif
+
+#ifdef CONFIG_FS_HOSTFS_RPMSG_SERVER
+  hostfs_rpmsg_server_init();
+#endif
+#endif
+
+#ifdef CONFIG_SIM_WTGAHRS2_UARTN
+#if CONFIG_SIM_WTGAHRS2_UARTN == 0
+  wtgahrs2_initialize(CONFIG_SIM_UART0_NAME, 0);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 1
+  wtgahrs2_initialize(CONFIG_SIM_UART1_NAME, 1);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 2
+  wtgahrs2_initialize(CONFIG_SIM_UART2_NAME, 2);
+#elif CONFIG_SIM_WTGAHRS2_UARTN == 3
+  wtgahrs2_initialize(CONFIG_SIM_UART3_NAME, 3);
+#endif
+#endif
+
+#ifdef CONFIG_SENSORS_FAKESENSOR
+  fakesensor_init(SENSOR_TYPE_ACCELEROMETER,
+                  "/data/boards/sim/sim/sim/src/csv/accel.csv", 0, 50);
+
+  fakesensor_init(SENSOR_TYPE_MAGNETIC_FIELD,
+                  "/data/boards/sim/sim/sim/src/csv/mag.csv", 0, 50);
+
+  fakesensor_init(SENSOR_TYPE_GYROSCOPE,
+                  "/data/boards/sim/sim/sim/src/csv/gyro.csv", 0, 50);
+#endif
+
+#ifdef CONFIG_RC_DUMMY
+  rc_dummy_initialize(0);
 #endif
 
   return ret;

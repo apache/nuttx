@@ -23,9 +23,10 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <debug.h>
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/power/pm.h>
 
 #include "esp32_pm.h"

@@ -147,7 +147,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
  * 'name'.
  */
 
-int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
+int task_spawn(FAR const char *name, main_t entry,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
       FAR char * const argv[], FAR char * const envp[]);

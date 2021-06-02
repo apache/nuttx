@@ -295,6 +295,10 @@ config ESP32C3_WIRELESS
 	---help---
 		Enable Wireless support
 
+config ESP32C3_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+
 endmenu # ESP32-C3 Peripheral Support
 
 menu "I2C Configuration"
@@ -334,6 +338,14 @@ config ESP32C3_SPI_UDCS
 
 if ESP32C3_SPI2
 
+config ESP32C3_SPI2_SLAVE
+	bool "SPI2 Slave mode"
+	default n
+	depends on SPI_SLAVE
+	select ESP32C3_GPIO_IRQ
+	---help---
+		Configure SPI2 to operate in Slave mode.
+
 config ESP32C3_SPI2_DMA
 	bool "SPI2 use GDMA"
 	default n
@@ -350,12 +362,19 @@ config ESP32C3_SPI2_DMADESC_NUM
 		be chained for a GDMA transfer.
 
 config ESP32C3_SPI2_DMATHRESHOLD
-	int "SPI2 GDMA threshold"
+	int "SPI2 Master GDMA threshold"
 	default 64
 	depends on ESP32C3_SPI2_DMA
 	---help---
 		When SPI GDMA is enabled, GDMA transfers whose size are below the
 		defined threshold will be performed by polling logic.
+
+config ESP32C3_SPI2_SLAVE_BUFSIZE
+	int "SPI2 Slave buffer size"
+	default 2048
+	depends on ESP32C3_SPI2_SLAVE
+	---help---
+		Configure the size of SPI2 Slave controller's internal buffers.
 
 config ESP32C3_SPI2_CSPIN
 	int "SPI2 CS Pin"
@@ -394,17 +413,41 @@ config ESP32C3_UART0_RXPIN
 	int "UART0 RX Pin"
 	default 20
 
+config ESP32C3_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 16
+	range 0 21
+
+config ESP32C3_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 15
+	range 0 21
+
 endif # ESP32C3_UART0
 
 if ESP32C3_UART1
 
 config ESP32C3_UART1_TXPIN
 	int "UART1 TX Pin"
-	default 6
+	default 8
 
 config ESP32C3_UART1_RXPIN
 	int "UART1 RX Pin"
-	default 7
+	default 9
+
+config ESP32C3_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 1
+	range 0 21
+
+config ESP32C3_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 2
+	range 0 21
 
 endif # ESP32C3_UART1
 
@@ -759,5 +802,14 @@ config ESP32C3_TICKLESS
 	default n
 	select ARCH_HAVE_TICKLESS
 	select SCHED_TICKLESS
+
+menu "AES accelerator"
+	depends on ESP32C3_AES_ACCELERATOR
+
+config ESP32C3_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # AES accelerator
 
 endif # ARCH_CHIP_ESP32C3

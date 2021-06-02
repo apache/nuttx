@@ -126,7 +126,7 @@ struct bt_dev_s
 
   /* Registered HCI driver */
 
-  FAR const struct bt_driver_s *btdev;
+  FAR struct bt_driver_s *btdev;
 };
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
@@ -281,7 +281,7 @@ int bt_initialize(void);
  *
  ****************************************************************************/
 
-int bt_driver_register(FAR const struct bt_driver_s *btdev);
+int bt_driver_register(FAR struct bt_driver_s *btdev);
 
 /****************************************************************************
  * Name: bt_driver_unregister
@@ -300,7 +300,7 @@ int bt_driver_register(FAR const struct bt_driver_s *btdev);
  *
  ****************************************************************************/
 
-void bt_driver_unregister(FAR const struct bt_driver_s *btdev);
+void bt_driver_unregister(FAR struct bt_driver_s *btdev);
 
 /****************************************************************************
  * Name: bt_send
@@ -318,7 +318,7 @@ void bt_driver_unregister(FAR const struct bt_driver_s *btdev);
  *
  ****************************************************************************/
 
-int bt_send(FAR const struct bt_driver_s *btdev,
+int bt_send(FAR struct bt_driver_s *btdev,
             FAR struct bt_buf_s *buf);
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
@@ -464,5 +464,18 @@ void bt_conn_cb_register(FAR struct bt_conn_cb_s *cb);
 void bt_hci_cb_register(FAR struct bt_hci_cb_s *cb);
 
 #endif
+
+/****************************************************************************
+ * Name: bt_receive
+ *
+ * Description:
+ *   Called by the Bluetooth low-level driver when new data is received from
+ *   the radio.  This may be called from the low-level driver and is part of
+ *   the driver interface
+ *
+ ****************************************************************************/
+
+int bt_receive(FAR struct bt_driver_s *btdev, enum bt_buf_type_e type,
+               FAR void *data, size_t len);
 
 #endif /* __WIRELESS_BLUETOOTH_BT_HDICORE_H */

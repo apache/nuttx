@@ -50,6 +50,10 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
 CSRCS += esp32c3_board_spidev.c
 endif
 
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+CSRCS += esp32c3_board_spislavedev.c
+endif
+
 ifeq ($(CONFIG_I2C_DRIVER),y)
 CSRCS += esp32c3_i2c.c
 endif

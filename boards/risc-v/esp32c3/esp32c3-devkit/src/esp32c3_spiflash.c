@@ -26,6 +26,7 @@
 
 #include <sys/mount.h>
 
+#include "inttypes.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -126,8 +127,8 @@ void esp32c3_spiflash_encrypt_test(void)
   uint32_t erase_nblocks;
   uint32_t rw_block;
   uint32_t rw_nblocks;
-  struct mtd_dev_s *mtd = esp32c3_spiflash_get_mtd();
-  struct mtd_dev_s *enc_mtd = esp32c3_spiflash_encrypt_get_mtd();
+  struct mtd_dev_s *mtd = esp32c3_spiflash_mtd();
+  struct mtd_dev_s *enc_mtd = esp32c3_spiflash_encrypt_mtd();
   const uint32_t address = CONFIG_ESP32C3_SPIFLASH_TEST_ADDRESS;
   const uint32_t size = 4096;
 
@@ -142,14 +143,14 @@ void esp32c3_spiflash_encrypt_test(void)
   wbuf = kmm_malloc(size);
   if (!wbuf)
     {
-      ferr("ERROR: Failed to alloc %d heap\n", size);
+      ferr("ERROR: Failed to alloc %" PRIu32 " heap\n", size);
       DEBUGASSERT(0);
     }
 
   rbuf = kmm_malloc(size);
   if (!rbuf)
     {
-      ferr("ERROR: Failed to alloc %d heap\n", size);
+      ferr("ERROR: Failed to alloc %" PRIu32 " heap\n", size);
       DEBUGASSERT(0);
     }
 

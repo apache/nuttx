@@ -38,6 +38,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/input/buttons.h>
+#include <nuttx/timers/rtc.h>
 #include <bl602_tim_lowerhalf.h>
 #include <bl602_oneshot_lowerhalf.h>
 #include <bl602_pwm_lowerhalf.h>
@@ -46,6 +47,7 @@
 #include <bl602_gpio.h>
 #include <bl602_i2c.h>
 #include <bl602_spi.h>
+#include <bl602_rtc.h>
 
 #if defined(CONFIG_BL602_SPIFLASH)
 #include <bl602_spiflash.h>
@@ -273,6 +275,33 @@ int bl602_bringup(void)
   bl602_set_em_sel(BL602_GLB_EM_8KB);
 
   bl602_net_initialize(0);
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the BL602 lower-half RTC driver */
+
+  FAR struct rtc_lowerhalf_s *lower;
+
+  lower = bl602_rtc_lowerhalf_initialize();
+  if (!lower)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, lower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
+        }
+    }
 #endif
 
 #if defined(CONFIG_BL602_BLE_CONTROLLER)

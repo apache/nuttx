@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>

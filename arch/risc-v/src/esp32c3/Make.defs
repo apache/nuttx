@@ -71,6 +71,9 @@ endif
 
 ifeq ($(CONFIG_ESP32C3_SPI),y)
 CHIP_CSRCS += esp32c3_spi.c
+  ifeq ($(CONFIG_SPI_SLAVE),y)
+    CHIP_CSRCS += esp32c3_spi_slave.c
+  endif
 endif
 
 ifeq ($(CONFIG_ESP32C3_SPIFLASH),y)
@@ -133,6 +136,10 @@ endif
 
 ifeq ($(CONFIG_ESP32C3_ADC),y)
 CHIP_CSRCS += esp32c3_adc.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_AES_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_aes.c
 endif
 
 ifeq ($(CONFIG_ESP32C3_WIRELESS),y)

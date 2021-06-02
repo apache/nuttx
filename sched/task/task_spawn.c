@@ -116,7 +116,6 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
       ret = nxsched_get_param(0, &param);
       if (ret < 0)
         {
-          ret = -ret;
           goto errout;
         }
 
@@ -129,7 +128,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
   pid = nxtask_create(name, priority, stacksize, entry, argv);
   if (pid < 0)
     {
-      ret = -pid;
+      ret = pid;
       serr("ERROR: nxtask_create failed: %d\n", ret);
       goto errout;
     }
@@ -245,18 +244,13 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_spawn/_task_spawn
+ * Name: task_spawn
  *
  * Description:
  *   The task_spawn() function will create a new, child task, where the
  *   entry point to the task is an address in memory.
  *
  * Input Parameters:
- *
- *   pid - Upon successful completion, task_spawn() will return the task ID
- *     of the child task to the parent task, in the variable pointed to by
- *     a non-NULL 'pid' argument.  If the 'pid' argument is a null pointer,
- *     the process ID of the child is not returned to the caller.
  *
  *   name - The name to assign to the child task.
  *
@@ -300,8 +294,9 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
  *   envp - The envp[] argument is not used by NuttX and may be NULL.
  *
  * Returned Value:
- *   task_spawn() will return zero on success. Otherwise, an error number
- *   will be returned as the function return value to indicate the error:
+ *   task_spawn() will return process ID of new task on success.
+ *   Otherwise, a negative number will be returned as the function return
+ *   value to indicate the error:
  *
  *   - EINVAL: The value specified by 'file_actions' or 'attr' is invalid.
  *   - Any errors that might have been return if vfork() and excec[l|v]()
@@ -309,27 +304,21 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_SYSCALL
-static int _task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
-                       FAR const posix_spawn_file_actions_t *file_actions,
-                       FAR const posix_spawnattr_t *attr,
-                       FAR char * const argv[], FAR char * const envp[])
-#else
-int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
+int task_spawn(FAR const char *name, main_t entry,
                FAR const posix_spawn_file_actions_t *file_actions,
                FAR const posix_spawnattr_t *attr,
                FAR char * const argv[], FAR char * const envp[])
-#endif
 {
   struct sched_param param;
   pid_t proxy;
+  pid_t pid;
 #ifdef CONFIG_SCHED_WAITPID
   int status;
 #endif
   int ret;
 
-  sinfo("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
-        pid, name, entry, file_actions, attr, argv);
+  sinfo("name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
+        name, entry, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to
    * the signal mask, then start the new child task directly from the parent
@@ -339,7 +328,13 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   if ((file_actions == NULL || *file_actions == NULL) &&
       (attr == NULL || (attr->flags & POSIX_SPAWN_SETSIGMASK) == 0))
     {
-      return nxtask_spawn_exec(pid, name, entry, attr, argv);
+      ret = nxtask_spawn_exec(&pid, name, entry, attr, argv);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      return pid;
     }
 
   /* Otherwise, we will have to go through an intermediary/proxy task in
@@ -359,13 +354,13 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   if (ret < 0)
     {
       serr("ERROR: spawn_semtake failed: %d\n", ret);
-      return -ret;
+      return ret;
     }
 
   /* Populate the parameter structure */
 
   g_spawn_parms.result       = ENOSYS;
-  g_spawn_parms.pid          = pid;
+  g_spawn_parms.pid          = &pid;
   g_spawn_parms.file_actions = file_actions ? *file_actions : NULL;
   g_spawn_parms.attr         = attr;
   g_spawn_parms.argv         = argv;
@@ -379,7 +374,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
     {
       serr("ERROR: nxsched_get_param failed: %d\n", ret);
       spawn_semgive(&g_spawn_parmsem);
-      return -ret;
+      return ret;
     }
 
 #ifdef CONFIG_SCHED_WAITPID
@@ -404,7 +399,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
                         (FAR char * const *)NULL);
   if (proxy < 0)
     {
-      ret = -proxy;
+      ret = proxy;
       serr("ERROR: Failed to start nxtask_spawn_proxy: %d\n", ret);
       goto errout_with_lock;
     }
@@ -434,7 +429,13 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
 
   /* Get the result and relinquish our access to the parameter structure */
 
-  ret = g_spawn_parms.result;
+  ret = -g_spawn_parms.result;
+  if (ret < 0)
+    {
+      goto errout_with_lock;
+    }
+
+  return (int)pid;
 
 errout_with_lock:
 #ifdef CONFIG_SCHED_WAITPID
@@ -443,37 +444,5 @@ errout_with_lock:
   spawn_semgive(&g_spawn_parmsem);
   return ret;
 }
-
-/****************************************************************************
- * Name: nx_task_spawn
- *
- * Description:
- *   This function de-marshals parameters and invokes _task_spawn().
- *
- *   task_spawn() and posix_spawn() are NuttX OS interfaces.  In PROTECTED
- *   and KERNEL build modes, then can be reached from applications only via
- *   a system call.  Currently, the number of parameters in a system call
- *   is limited to six; these spawn function have seven parameters.  Rather
- *   than extend the maximum number of parameters across all architectures,
- *   I opted instead to marshal the seven parameters into a structure.
- *
- * Input Parameters:
- *   parms - The marshaled task_spawn() parameters.
- *
- * Returned Value:
- *   On success, these functions return 0; on failure they return an error
- *   number from <errno.h> (see the comments associated with task_spawn()).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_SYSCALL
-int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms)
-{
-  DEBUGASSERT(parms != NULL);
-  return _task_spawn(parms->pid, parms->name, parms->entry,
-                     parms->file_actions, parms->attr,
-                     parms->argv, parms->envp);
-}
-#endif
 
 #endif /* CONFIG_BUILD_KERNEL */

@@ -33,7 +33,7 @@
 #include <assert.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/signal.h>
 
 #include "group/group.h"

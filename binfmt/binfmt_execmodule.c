@@ -111,7 +111,8 @@ static void exec_ctors(FAR void *arg)
  *
  ****************************************************************************/
 
-int exec_module(FAR const struct binary_s *binp)
+int exec_module(FAR const struct binary_s *binp,
+                FAR const char *filename, FAR char * const *argv)
 {
   FAR struct task_tcb_s *tcb;
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -129,7 +130,7 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
-  binfo("Executing %s\n", binp->filename);
+  binfo("Executing %s\n", filename);
 
   /* Allocate a TCB for the new task. */
 
@@ -139,6 +140,16 @@ int exec_module(FAR const struct binary_s *binp)
       return -ENOMEM;
     }
 
+  if (argv)
+    {
+      argv = binfmt_copyargv(argv);
+      if (!argv)
+        {
+          ret = -ENOMEM;
+          goto errout_with_tcb;
+        }
+    }
+
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Instantiate the address environment containing the user heap */
 
@@ -146,6 +157,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_select() failed: %d\n", ret);
+      binfmt_freeargv(argv);
       goto errout_with_tcb;
     }
 #endif
@@ -156,21 +168,14 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, binp->filename, binp->priority,
-                    NULL, binp->stacksize, binp->entrypt, binp->argv);
+  ret = nxtask_init(tcb, filename, binp->priority,
+                    NULL, binp->stacksize, binp->entrypt, argv);
+  binfmt_freeargv(argv);
   if (ret < 0)
     {
       berr("nxtask_init() failed: %d\n", ret);
       goto errout_with_addrenv;
     }
-
-  /* We can free the argument buffer now.
-   * REVISIT:  It is good to free up memory as soon as possible, but
-   * unfortunately here 'binp' is 'const'.  So to do this properly, we will
-   * have to make some more extensive changes.
-   */
-
-  binfmt_freeargv((FAR struct binary_s *)binp);
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Allocate the kernel stack */
@@ -264,9 +269,8 @@ errout_with_tcbinit:
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   up_addrenv_restore(&oldenv);
-
-errout_with_tcb:
 #endif
+errout_with_tcb:
   kmm_free(tcb);
   return ret;
 }

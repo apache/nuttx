@@ -62,6 +62,7 @@ extern "C"
 
 #define SSID_MAX_LEN                (32)
 #define PWD_MAX_LEN                 (64)
+#define MAC_LEN                     (6)
 
 /* Wi-Fi event ID */
 

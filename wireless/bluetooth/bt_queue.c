@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Common essage queue attributes */
+/* Common message queue attributes */
 
 #define BT_MSGSIZE   sizeof(struct bt_bufmsg_s)
 #define BT_MSGFLAGS  0

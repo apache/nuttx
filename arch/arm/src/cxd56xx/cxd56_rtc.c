@@ -28,10 +28,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 

@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dump_module
+ * Name: binfmt_dumpmodule
  *
  * Description:
  *   Dump the contents of struct binary_s.
@@ -52,13 +52,11 @@
  *
  ****************************************************************************/
 
-int dump_module(FAR const struct binary_s *bin)
+int binfmt_dumpmodule(FAR const struct binary_s *bin)
 {
   if (bin)
     {
       binfo("Module:\n");
-      binfo("  filename:  %s\n", bin->filename);
-      binfo("  argv:      %p\n", bin->argv);
       binfo("  entrypt:   %p\n", bin->entrypt);
       binfo("  mapped:    %p size=%zd\n", bin->mapped, bin->mapsize);
       binfo("  alloc:     %p %p %p\n", bin->alloc[0],
