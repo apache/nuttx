@@ -87,11 +87,11 @@ arm_fullcontextrestore:
 	 */
 
 	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
-	msr	cpsr, r1		/* Set the CPSR */
+	msr	spsr, r1		/* Set the SPSR */
 
-	/* Now recover r0-r1 and pc, destroying the stack frame */
+	/* Now recover r0-r1, pc and cpsr, destroying the stack frame */
 
-	ldmia	sp!, {r0-r1, r15}
+	ldmia	sp!, {r0-r1, r15}^
 
 	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
 	.end
