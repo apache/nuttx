@@ -72,11 +72,11 @@ int syslog_initialize(void)
 #if defined(CONFIG_SYSLOG_CHAR)
   /* Enable use of a character device as the SYSLOG device */
 
-  ret = syslog_dev_channel();
+  syslog_dev_channel();
 #elif defined(CONFIG_SYSLOG_CONSOLE)
   /* Use the console device as the SYSLOG device */
 
-  ret = syslog_console_channel();
+  syslog_console_channel();
 #endif
 
 #ifdef CONFIG_RAMLOG_SYSLOG
