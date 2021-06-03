@@ -369,24 +369,6 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SIM_BTUART
-  /* Register the HCI TTY device via HCI socket */
-
-  ret = sim_btuart_register("/dev/ttyHCI", 0);  /* Use HCI0 */
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: sim_btuart_register() failed: %d\n", ret);
-    }
-
-#  ifdef CONFIG_BLUETOOTH_UART_SHIM
-  ret = btuart_register(btuart_shim_getdevice("/dev/ttyHCI"));
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: btuart_register() failed: %d\n", ret);
-    }
-#  endif
-#endif
-
 #ifdef CONFIG_BLUETOOTH_UART_BRIDGE
   /* Register the Bluetooth BT/BLE dual mode bridge driver */
 
