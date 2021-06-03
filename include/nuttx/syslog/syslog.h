@@ -233,13 +233,12 @@ int syslog_initialize(void);
  *     file.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   A pointer to the new SYSLOG channel; NULL is returned on any failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_FILE
-int syslog_file_channel(FAR const char *devpath);
+FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath);
 #endif
 
 /****************************************************************************

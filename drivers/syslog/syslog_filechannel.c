@@ -85,15 +85,12 @@ FAR static struct syslog_channel_s *g_syslog_file_channel;
  *     file.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   A pointer to the new SYSLOG channel; NULL is returned on any failure.
  *
  ****************************************************************************/
 
-int syslog_file_channel(FAR const char *devpath)
+FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath)
 {
-  int ret;
-
   /* Reset the default SYSLOG channel so that we can safely modify the
    * SYSLOG device.  This is an atomic operation and we should be safe
    * after the default channel has been selected.
@@ -117,7 +114,6 @@ int syslog_file_channel(FAR const char *devpath)
                                                 OPEN_MODE);
   if (g_syslog_file_channel == NULL)
     {
-      ret = -ENOMEM;
       goto errout_with_lock;
     }
 
@@ -125,11 +121,15 @@ int syslog_file_channel(FAR const char *devpath)
    * screwed.
    */
 
-  ret = syslog_channel(g_syslog_file_channel);
+  if (syslog_channel(g_syslog_file_channel) != OK)
+    {
+      syslog_dev_uninitialize(g_syslog_file_channel);
+      g_syslog_file_channel = NULL;
+    }
 
 errout_with_lock:
   sched_unlock();
-  return ret;
+  return g_syslog_file_channel;
 }
 
 #endif /* CONFIG_SYSLOG_FILE */
