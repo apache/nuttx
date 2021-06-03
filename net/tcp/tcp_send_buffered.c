@@ -407,7 +407,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * the write buffer has been ACKed.
            */
 
-          if (ackno > TCP_WBSEQNO(wrb))
+          if (TCP_SEQ_GT(ackno, TCP_WBSEQNO(wrb)))
             {
               /* Get the sequence number at the end of the data */
 
@@ -419,7 +419,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
               /* Has the entire buffer been ACKed? */
 
-              if (ackno >= lastseq)
+              if (TCP_SEQ_GTE(ackno, lastseq))
                 {
                   ninfo("ACK: wrb=%p Freeing write buffer\n", wrb);
 
@@ -449,7 +449,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                    * buffers in the chain.
                    */
 
-                  trimlen = ackno - TCP_WBSEQNO(wrb);
+                  trimlen = TCP_SEQ_SUB(ackno, TCP_WBSEQNO(wrb));
                   if (trimlen > TCP_WBSENT(wrb))
                     {
                       /* More data has been ACKed then we have sent? */
@@ -504,13 +504,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
-      if (wrb && TCP_WBSENT(wrb) > 0 && ackno > TCP_WBSEQNO(wrb))
+      if (wrb && TCP_WBSENT(wrb) > 0 && TCP_SEQ_GT(ackno, TCP_WBSEQNO(wrb)))
         {
           uint32_t nacked;
 
           /* Number of bytes that were ACKed */
 
-          nacked = ackno - TCP_WBSEQNO(wrb);
+          nacked = TCP_SEQ_SUB(ackno, TCP_WBSEQNO(wrb));
           if (nacked > TCP_WBSENT(wrb))
             {
               /* More data has been ACKed then we have sent? ASSERT? */
@@ -811,8 +811,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
 
-      if ((predicted_seqno > conn->sndseq_max) ||
-          (tcp_getsequence(conn->sndseq) > predicted_seqno)) /* overflow */
+      if (TCP_SEQ_GT(predicted_seqno, conn->sndseq_max))
         {
            conn->sndseq_max = predicted_seqno;
         }

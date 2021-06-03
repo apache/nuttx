@@ -429,7 +429,7 @@ found:
       ackseq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
-      if (ackseq < rcvseq)
+      if (TCP_SEQ_LT(ackseq, rcvseq))
         {
           /* Send a "normal" acknowledgment of the KeepAlive probe */
 
@@ -492,7 +492,7 @@ found:
        * new sequence number.
        */
 
-      if (ackseq <= unackseq)
+      if (TCP_SEQ_LTE(ackseq, unackseq))
         {
           /* Calculate the new number of outstanding, unacknowledged bytes */
 
