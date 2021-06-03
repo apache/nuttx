@@ -144,11 +144,11 @@ arm_fullcontextrestore:
 	 * disabled.
 	 */
 
-	msr		cpsr, r2			/* Set the CPSR */
+	msr		spsr, r2			/* Set the SPSR */
 
-	/* Now recover r0 r1 r2 and R15 */
+	/* Now recover r0-r2, pc and cpsr, destroying the stack frame */
 
-	pop		{r0-r2, pc}
+	ldmia		sp!, {r0-r2, pc}^
 #endif
 
 	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
