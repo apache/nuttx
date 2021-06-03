@@ -60,6 +60,10 @@ extern "C"
  * Description:
  *   Return the total number of erasable units of memory.
  *
+ * Returned Value:
+ *   Returns number of erasable units of memory, or 0 if there are no units
+ *   available that can be programmed.
+ *
  ****************************************************************************/
 
 size_t up_progmem_maxeraseindex(void);
@@ -99,18 +103,22 @@ size_t up_progmem_writegranularity(void);
  * Name: up_progmem_erasesize
  *
  * Description:
- *   Return the erase size for a specified index. Will always be a multiple of
- *   the write granularity.
+ *   Return the erase size for a specified index. Will always be a multiple
+ *   of the write granularity.
  *
  * Input Parameters:
  *   index - ordinal number of the set of erasable units of memory
  *
  * Returned Value:
- *   Erase size for erasable unit of memory, SIZE_MAX if index is invalid.
+ *   Erase size for erasable unit of memory, or negative value on error.
+ *
+ *   The following errors are reported (errno is not set!):
+ *
+ *     -EFAULT: On invalid unit of memory
  *
  ****************************************************************************/
 
-size_t up_progmem_erasesize(size_t index);
+ssize_t up_progmem_erasesize(size_t index);
 
 /****************************************************************************
  * Name: up_progmem_getindex
@@ -120,7 +128,7 @@ size_t up_progmem_erasesize(size_t index);
  *
  * Input Parameters:
  *  addr - Address with or without flash offset
- *         (absolute or aligned to sector0)
+ *         (absolute or aligned to the zeroeth unit of memory)
  *
  * Returned Value:
  *   Index or negative value on error.
@@ -142,7 +150,7 @@ ssize_t up_progmem_getindex(size_t addr);
  *   index - ordinal number of the set of erasable units of memory
  *
  * Returned Value:
- *   Base address of given section, SIZE_MAX if index is not valid.
+ *   Base address of given unit of memory, SIZE_MAX if index is not valid.
  *
  ****************************************************************************/
 
@@ -158,10 +166,10 @@ size_t up_progmem_getaddress(size_t index);
  *   index - ordinal number of the set of erasable units of memory
  *
  * Returned Value:
- *   section size or negative value on error.
+ *   The unit of memory's size or negative value on error.
  *   The following errors are reported (errno is not set!):
  *
- *     -EFAULT: On invalid section
+ *     -EFAULT: On invalid index
  *     -EIO:    On unsuccessful erase
  *     -EROFS:  On access to write protected area
  *     -EACCES: Insufficient permissions (read/write protected)
@@ -173,7 +181,7 @@ size_t up_progmem_getaddress(size_t index);
 ssize_t up_progmem_erase(size_t index);
 
 /****************************************************************************
- * Name: up_progmem_issectionerased
+ * Name: up_progmem_iserased
  *
  * Description:
  *   Checks whether a specified unit of memory is erased
@@ -183,7 +191,7 @@ ssize_t up_progmem_erase(size_t index);
  *
  * Returned Value:
  *   Returns number of bytes NOT erased or negative value on error. If it
- *   returns zero then complete section is erased.
+ *   returns zero then complete unit of memory is erased.
  *
  *   The following errors are reported:
  *     -EFAULT: On invalid index
@@ -200,12 +208,12 @@ ssize_t up_progmem_iserased(size_t index);
  *
  *   Note: This function may cross memory boundaries so long as the caller
  *         has ensured all units of memory that will be programmed have been
- *         erased. It also does not require that the write be aligned with the
- *         beginning of a unit of memory.
+ *         erased. It also does not require that the write be aligned with
+ *         the beginning of a unit of memory.
  *
  * Input Parameters:
  *   addr  - Address with or without flash offset
- *           (absolute or aligned to sector0)
+ *           (absolute or aligned to the zeroeth unit of memory)
  *   buf   - Pointer to buffer
  *   count - Number of bytes to write
  *
@@ -239,7 +247,7 @@ ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count);
  *
  * Input Parameters:
  *   addr  - Address with or without flash offset
- *           (absolute or aligned to sector0)
+ *           (absolute or aligned to the zeroeth unit of memory)
  *   buf   - Pointer to buffer
  *   count - Number of bytes to read
  *
@@ -265,7 +273,8 @@ ssize_t up_progmem_read(size_t addr, FAR void *buf, size_t count);
  * Name: up_progmem_enableprogramming
  *
  * Description:
- *   Enable the ability to erase/write the FLASH memory.
+ *   Enable the ability to erase/write the FLASH memory. Typically done by
+ *   "Unlocking" the FLASH programming IP Block.
  *
  *   NOTE: Write-protection may still be required for an individual
  *         unit of memory.
@@ -281,7 +290,8 @@ int up_progmem_enableprogramming(void);
  * Name: up_progmem_disableprogramming
  *
  * Description:
- *   Disable the ability to erase/write the FLASH memory.
+ *   Disable the ability to erase/write the FLASH memory. Typically done by
+ *   "Locking" the FLASH programming IP Block.
  *
  * Returned Value:
  *   0 on success, or negative value on error.
