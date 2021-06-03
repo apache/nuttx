@@ -13,6 +13,8 @@ config ARCH_SYSLOG
 
 # Selected if the SYSLOG device supports multi-byte write operations
 
+comment "SYSLOG options"
+
 config SYSLOG_MAX_CHANNELS
 	int "Maximum SYSLOG channels"
 	default 1
@@ -105,6 +107,8 @@ config SYSLOG_INTBUFSIZE
 	---help---
 		The size of the interrupt buffer in bytes.
 
+comment "Formatting options"
+
 config SYSLOG_TIMESTAMP
 	bool "Prepend timestamp to syslog message"
 	default n
@@ -188,6 +192,8 @@ config SYSLOG_COLOR_OUTPUT
 	---help---
 		Enables colored output in syslog, according to message priority.
 
+comment "SYSLOG channels"
+
 if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
@@ -251,7 +257,7 @@ config SYSLOG_RPMSG_SERVER
 	---help---
 		Use rpmsg to receive message from remote proc.
 
-config SYSLOG_FILE
+menuconfig SYSLOG_FILE
 	bool "Syslog file output"
 	default n
 	---help---
@@ -264,6 +270,32 @@ config SYSLOG_FILE
 
 		NOTE interrupt level SYSLOG output will be lost in this case unless
 		the interrupt buffer is used.
+
+if SYSLOG_FILE
+
+config SYSLOG_FILE_ROTATE
+	bool "Log file rotate"
+	default n
+	depends on SYSLOG_FILE
+	---help---
+		If enabled, the log file size will be checked before opening.
+		If it is larger than the specified limit it will be "rotated",
+		i.e. the old file will be kept as a backup, and a new empty
+		file will be created.
+		
+		This option is useful to ensure that log files do not get
+		huge after prolonged periods of system operation.
+
+config SYSLOG_FILE_SIZE_LIMIT
+	int "Log file size limit"
+	default 524288
+	depends on SYSLOG_FILE_ROTATE
+	---help---
+		File size limit when the log is rotated automatically.
+		If a log file is found larger than this limit, it will
+		be rotated.
+
+endif # SYSLOG_FILE
 
 config CONSOLE_SYSLOG
 	bool "Use SYSLOG for /dev/console"
