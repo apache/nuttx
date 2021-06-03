@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 #include <arch/irq.h>
 #include <arch/xtensa/core.h>
 #include <arch/chip/core-isa.h>
@@ -63,8 +64,9 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == 0)
     {
       tcb->stack_alloc_ptr = g_idlestack;
-      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE -
+                             sizeof(struct task_info_s);
     }
 
   /* Initialize the initial exception register context structure */

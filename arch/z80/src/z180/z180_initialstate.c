@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 
 #include "chip.h"
 #include "z80_internal.h"
@@ -58,8 +59,9 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == 0)
     {
       tcb->stack_alloc_ptr = (void *)CONFIG_STACK_BASE;
-      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE -
+                             sizeof(struct task_info_s);
     }
 
   /* Initialize the initial exception register context structure */
