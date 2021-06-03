@@ -758,6 +758,13 @@ void nx_start(void)
 
   syslog_initialize();
 
+  /* Disables context switching beacuse we need take the memory manager
+   * semaphore on this CPU so that it will not be available on the other
+   * CPUs until we have finished initialization.
+   */
+
+  sched_lock();
+
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
 
@@ -780,6 +787,10 @@ void nx_start(void)
   /* Create initial tasks and bring-up the system */
 
   DEBUGVERIFY(nx_bringup());
+
+  /* Let other threads have access to the memory manager */
+
+  sched_unlock();
 
   /* The IDLE Loop **********************************************************/
 
