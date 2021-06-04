@@ -55,25 +55,25 @@ int board_spislavedev_initialize(int bus)
 {
   int ret;
 
-  FAR struct spi_sctrlr_s *sctrlr;
+  FAR struct spi_slave_ctrlr_s *ctrlr;
 
   spiinfo("Initializing /dev/spislv%d...\n", bus);
 
   /* Initialize SPI Slave controller device */
 
-  sctrlr = esp32c3_spislave_sctrlr_initialize(bus);
-  if (sctrlr == NULL)
+  ctrlr = esp32c3_spislave_ctrlr_initialize(bus);
+  if (ctrlr == NULL)
     {
       spierr("Failed to initialize SPI%d as slave.\n", bus);
       return -ENODEV;
     }
 
-  ret = spislave_register(sctrlr, bus);
+  ret = spi_slave_register(ctrlr, bus);
   if (ret < 0)
     {
       spierr("Failed to register /dev/spislv%d: %d\n", bus, ret);
 
-      esp32c3_spislave_sctrlr_uninitialize(sctrlr);
+      esp32c3_spislave_ctrlr_uninitialize(ctrlr);
     }
 
   return ret;
