@@ -273,15 +273,18 @@ menuconfig SYSLOG_FILE
 
 if SYSLOG_FILE
 
-config SYSLOG_FILE_ROTATE
-	bool "Log file rotate"
-	default n
+config SYSLOG_FILE_ROTATIONS
+	int "Log file rotations"
+	default 0
 	depends on SYSLOG_FILE
 	---help---
-		If enabled, the log file size will be checked before opening.
-		If it is larger than the specified limit it will be "rotated",
-		i.e. the old file will be kept as a backup, and a new empty
-		file will be created.
+		If enabled (set to a non-zero number), the log file size will be
+		checked before opening. If it is larger than the specified limit
+		it will be "rotated", i.e. the old file will be kept as a backup,
+		and a new empty	file will be created.
+		
+		The number of rotations specifies the number of old log files to
+		keep.
 		
 		This option is useful to ensure that log files do not get
 		huge after prolonged periods of system operation.
@@ -289,7 +292,7 @@ config SYSLOG_FILE_ROTATE
 config SYSLOG_FILE_SIZE_LIMIT
 	int "Log file size limit"
 	default 524288
-	depends on SYSLOG_FILE_ROTATE
+	depends on SYSLOG_FILE_ROTATIONS > 0
 	---help---
 		File size limit when the log is rotated automatically.
 		If a log file is found larger than this limit, it will
