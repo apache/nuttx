@@ -34,6 +34,12 @@
 #include <nuttx/kmalloc.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SYSBUS_ADDRESS_OFFSET 0x20000000
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -55,7 +61,19 @@ FAR void *up_module_text_memalign(size_t align, size_t size)
   ret = (FAR void *)kmm_malloc(size);
 
 #ifdef CONFIG_CXD56_USE_SYSBUS
-  ret -= 0x20000000;
+  if (ret)
+    {
+      binfo("** ret=%p \n", ret);
+
+      /* NOTE:
+       * kmm_malloc() will return the address in SYSBUS.
+       * So convert the address to I/D BUS.
+       */
+
+      ret -= SYSBUS_ADDRESS_OFFSET;
+
+      binfo("** mapped to %p \n", ret);
+    }
 #endif
 
   return ret;
@@ -67,5 +85,21 @@ FAR void *up_module_text_memalign(size_t align, size_t size)
 
 void up_module_text_free(FAR void *p)
 {
+#ifdef CONFIG_CXD56_USE_SYSBUS
+  if (p)
+    {
+      binfo("** p=%p \n", p);
+
+      /* NOTE:
+       * The address p will be in I/D BUS.
+       * So convert the address to SYSBUS.
+       */
+
+      p += SYSBUS_ADDRESS_OFFSET;
+
+      binfo("** mapped to %p \n", p);
+    }
+#endif
+
   kmm_free(p);
 }
