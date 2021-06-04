@@ -55,18 +55,6 @@
 
 #define CPUINT_UNASSIGNED 0xff
 
-/* Wi-Fi reserved CPU interrupt bit */
-
-#ifdef CONFIG_ESP32C3_WIRELESS
-#  define CPUINT_WMAC_MAP (1 << ESP32C3_CPUINT_WMAC)
-#else
-#  define CPUINT_WMAC_MAP 0
-#endif
-
-/* Reserved CPU interrupt bits */
-
-#define CPUINT_RESERVED_MAPS (CPUINT_WMAC_MAP)
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
