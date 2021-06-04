@@ -45,7 +45,7 @@
 /* Access macros ************************************************************/
 
 /****************************************************************************
- * Name: SPI_SCTRLR_BIND
+ * Name: SPIS_CTRLR_BIND
  *
  * Description:
  *   Bind the SPI slave device interface to the SPI slave controller
@@ -54,22 +54,22 @@
  *   transfers.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
- *   sdev   - SPI slave device interface instance
- *   mode   - The SPI mode requested
- *   nbits  - The number of bits requests.
- *            If value is greater than 0, then it implies MSB first
- *            If value is less than 0, then it implies LSB first with -nbits
+ *   ctrlr - SPI Slave controller interface instance
+ *   dev   - SPI Slave device interface instance
+ *   mode  - The SPI Slave mode requested
+ *   nbits - The number of bits requested.
+ *           If value is greater than 0, then it implies MSB first
+ *           If value is less than 0, then it implies LSB first with -nbits
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_BIND(c,d,m,n) ((c)->ops->bind(c,d,m,n))
+#define SPIS_CTRLR_BIND(c,d,m,n) ((c)->ops->bind(c,d,m,n))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_UNBIND
+ * Name: SPIS_CTRLR_UNBIND
  *
  * Description:
  *   Un-bind the SPI slave device interface from the SPI slave controller
@@ -77,17 +77,17 @@
  *   controller driver to its initial state.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_UNBIND(c) ((c)->ops->unbind(c))
+#define SPIS_CTRLR_UNBIND(c) ((c)->ops->unbind(c))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_ENQUEUE
+ * Name: SPIS_CTRLR_ENQUEUE
  *
  * Description:
  *   Enqueue the next value to be shifted out from the interface. This adds
@@ -95,43 +95,43 @@
  *   effect on any in-process or currently "committed" transfers.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
- *   data   - Pointer to the command/data mode data to be shifted out.
- *            The data width must be aligned to the nbits parameter which was
- *            previously provided to the bind() method.
- *   len    - Number of units of "nbits" wide to enqueue,
- *            "nbits" being the data width previously provided to the bind()
- *            method.
+ *   ctrlr - SPI Slave controller interface instance
+ *   data  - Pointer to the command/data mode data to be shifted out.
+ *           The data width must be aligned to the nbits parameter which was
+ *           previously provided to the bind() method.
+ *   len   - Number of units of "nbits" wide to enqueue,
+ *           "nbits" being the data width previously provided to the bind()
+ *           method.
  *
  * Returned Value:
  *   Number of data items successfully queued, or a negated errno:
- *          - "len" if all the data was successfully queued
- *          - "0..len-1" if queue is full
- *          - "-errno" in any other error
+ *         - "len" if all the data was successfully queued
+ *         - "0..len-1" if queue is full
+ *         - "-errno" in any other error
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_ENQUEUE(c,v,l)  ((c)->ops->enqueue(c,v,l))
+#define SPIS_CTRLR_ENQUEUE(c,v,l)  ((c)->ops->enqueue(c,v,l))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_QFULL
+ * Name: SPIS_CTRLR_QFULL
  *
  * Description:
  *   Return true if the queue is full or false if there is space to add an
  *   additional word to the queue.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   true if the output queue is full, false otherwise.
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_QFULL(c)  ((c)->ops->qfull(c))
+#define SPIS_CTRLR_QFULL(c)  ((c)->ops->qfull(c))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_QFLUSH
+ * Name: SPIS_CTRLR_QFLUSH
  *
  * Description:
  *   Discard all saved values in the output queue. On return from this
@@ -139,22 +139,22 @@
  *   "committed" output values may not be flushed.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_QFLUSH(c)  ((c)->ops->qflush(c))
+#define SPIS_CTRLR_QFLUSH(c)  ((c)->ops->qflush(c))
 
 /****************************************************************************
- * Name: SPI_SCTRLR_QPOLL
+ * Name: SPIS_CTRLR_QPOLL
  *
  * Description:
  *   Tell the controller to output all the receive queue data.
  *
- *   This will cause 1..n SPI_SDEV_RECEIVE calls back to the slave device,
+ *   This will cause 1..n SPIS_DEV_RECEIVE calls back to the slave device,
  *   offering blocks of data to the device. From each call, the slave device
  *   driver will return the number of data units it accepted/read out.
  *
@@ -175,7 +175,7 @@
  *   of bytes that was offered to each receive call.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   Number of units of width "nbits" left in the RX queue. If the device
@@ -183,17 +183,17 @@
  *
  ****************************************************************************/
 
-#define SPI_SCTRLR_QPOLL(c)  ((c)->ops->qpoll(c))
+#define SPIS_CTRLR_QPOLL(c)  ((c)->ops->qpoll(c))
 
 /****************************************************************************
- * Name: SPI_SDEV_SELECT
+ * Name: SPIS_DEV_SELECT
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
  *   driver detects any change in the chip select pin.
  *
  * Input Parameters:
- *   sdev     - SPI device interface instance
+ *   dev      - SPI Slave device interface instance
  *   selected - Indicates whether the chip select is in active state
  *
  * Returned Value:
@@ -205,10 +205,10 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_SELECT(d,s) ((d)->ops->select(d,s))
+#define SPIS_DEV_SELECT(d,s) ((d)->ops->select(d,s))
 
 /****************************************************************************
- * Name: SPI_SDEV_CMDDATA
+ * Name: SPIS_DEV_CMDDATA
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -221,7 +221,7 @@
  *   current command/data selection.
  *
  * Input Parameters:
- *   sdev - SPI device interface instance
+ *   dev  - SPI Slave device interface instance
  *   data - True: Data is selected
  *
  * Returned Value:
@@ -233,10 +233,10 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_CMDDATA(d,i) ((d)->ops->cmddata(d,i))
+#define SPIS_DEV_CMDDATA(d,i) ((d)->ops->cmddata(d,i))
 
 /****************************************************************************
- * Name: SPI_SDEV_GETDATA
+ * Name: SPIS_DEV_GETDATA
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -249,7 +249,7 @@
  *   method. Normally only LCD devices distinguish command and data.
  *
  * Input Parameters:
- *   sdev - SPI device interface instance
+ *   dev  - SPI Slave device interface instance
  *   data - Pointer to the data buffer pointer to be shifed out.
  *          The device will set the data buffer pointer to the actual data
  *
@@ -262,10 +262,10 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_GETDATA(d,v)  ((d)->ops->getdata(d,v))
+#define SPIS_DEV_GETDATA(d,v)  ((d)->ops->getdata(d,v))
 
 /****************************************************************************
- * Name: SPI_SDEV_RECEIVE
+ * Name: SPIS_DEV_RECEIVE
  *
  * Description:
  *   This is a SPI device callback that is used when the SPI controller
@@ -273,7 +273,7 @@
  *   synchronization by several words.
  *
  * Input Parameters:
- *   sdev - SPI device interface instance
+ *   dev  - SPI Slave device interface instance
  *   data - Pointer to the new data that has been shifted in
  *   len  - Length of the new data in units of nbits wide,
  *          nbits being the data width previously provided to the bind()
@@ -291,7 +291,7 @@
  *
  ****************************************************************************/
 
-#define SPI_SDEV_RECEIVE(d,v,l)  ((d)->ops->receive(d,v,l))
+#define SPIS_DEV_RECEIVE(d,v,l)  ((d)->ops->receive(d,v,l))
 
 /****************************************************************************
  * Public Types
@@ -299,7 +299,7 @@
 
 /* There are two interfaces defined for the implementation of SPI slave:
  *
- * 1) struct spi_sctrlr_s: Defines one interface between the SPI
+ * 1) struct spi_slave_ctrlr_s: Defines one interface between the SPI
  *    slave device and the SPI slave controller hardware. This interface
  *    is implemented by the SPI slave device controller lower-half driver
  *    and is provided to the SPI slave device driver when that driver
@@ -307,7 +307,7 @@
  *    unique to the SPI slave implementation. The prototype is probably
  *    something like:
  *
- *      FAR struct spi_sctrlr_s *xyz_spi_slave_initialize(int port);
+ *      FAR struct spi_slave_ctrlr_s *xyz_spi_slave_initialize(int port);
  *
  *    Given an SPI port number, this function returns an instance of the
  *    SPI slave controller interface.
@@ -316,24 +316,25 @@
  *    appear in a header file associated with the specific SPI slave
  *    implementation.
  *
- * 2) struct spi_sdev_s: Defines the second interface between the SPI
+ * 2) struct spi_slave_dev_s: Defines the second interface between the SPI
  *    slave device and the SPI slave controller hardware. This interface
  *    is implemented by the SPI slave device. The slave device passes this
- *    interface to the struct spi_sctrlr_s during initialization
- *    by calling the bind() method of the struct spi_sctrlr_s
+ *    interface to the struct spi_slave_ctrlr_s during initialization
+ *    by calling the bind() method of the struct spi_slave_ctrlr_s
  *    interface.
  *
  * The basic initialization steps are:
  *
  * 1) Board-specific logic calls board- or chip-specific logic to create an
- *    instance of the SPI slave controller interface, struct spi_sctrlr_s.
+ *    instance of the SPI slave controller interface,
+ *    struct spi_slave_ctrlr_s.
  *
  * 2) Board-specific logic then calls up_dev_initialize() to initialize
  *    the SPI slave device. The board-specific logic passes the instance
- *    of struct spi_sctrlr_s to support the initialization.
+ *    of struct spi_slave_ctrlr_s to support the initialization.
  *
  * 3) The SPI slave device driver creates and initializes an instance of
- *    struct spi_sdev_s; it passes this instance to the bind() method of
+ *    struct spi_slave_dev_s; it passes this instance to the bind() method of
  *    of the SPI slave controller interface.
  *
  * 4) The SPI slave controller will (1) call the slave device's select()
@@ -466,7 +467,7 @@
  *    solution might not be possible.
  */
 
-enum spi_smode_e
+enum spi_slave_mode_e
 {
   SPISLAVE_MODE0 = 0,     /* CPOL=0 CPHA=0 */
   SPISLAVE_MODE1,         /* CPOL=0 CPHA=1 */
@@ -476,20 +477,20 @@ enum spi_smode_e
 
 /* The SPI slave controller driver vtable */
 
-struct spi_sctrlr_s; /* Forward reference */
-struct spi_sdev_s;   /* Forward reference */
+struct spi_slave_ctrlr_s; /* Forward reference */
+struct spi_slave_dev_s;   /* Forward reference */
 
-struct spi_sctrlrops_s
+struct spi_slave_ctrlrops_s
 {
-  CODE void     (*bind)(FAR struct spi_sctrlr_s *sctrlr,
-                   FAR struct spi_sdev_s *sdev, enum spi_smode_e mode,
-                   int nbits);
-  CODE void     (*unbind)(FAR struct spi_sctrlr_s *sctrlr);
-  CODE int      (*enqueue)(FAR struct spi_sctrlr_s *sctrlr,
-                   FAR const void *data, size_t nwords);
-  CODE bool     (*qfull)(FAR struct spi_sctrlr_s *sctrlr);
-  CODE void     (*qflush)(FAR struct spi_sctrlr_s *sctrlr);
-  CODE size_t   (*qpoll)(FAR struct spi_sctrlr_s *sctrlr);
+  CODE void     (*bind)(FAR struct spi_slave_ctrlr_s *ctrlr,
+                        FAR struct spi_slave_dev_s *sdev,
+                        enum spi_slave_mode_e mode, int nbits);
+  CODE void     (*unbind)(FAR struct spi_slave_ctrlr_s *ctrlr);
+  CODE int      (*enqueue)(FAR struct spi_slave_ctrlr_s *ctrlr,
+                           FAR const void *data, size_t nwords);
+  CODE bool     (*qfull)(FAR struct spi_slave_ctrlr_s *ctrlr);
+  CODE void     (*qflush)(FAR struct spi_slave_ctrlr_s *ctrlr);
+  CODE size_t   (*qpoll)(FAR struct spi_slave_ctrlr_s *ctrlr);
 };
 
 /* SPI slave controller private data. This structure only defines the
@@ -498,22 +499,22 @@ struct spi_sctrlrops_s
  * the vtable structure pointer.
  */
 
-struct spi_sctrlr_s
+struct spi_slave_ctrlr_s
 {
-  FAR const struct spi_sctrlrops_s *ops;
+  FAR const struct spi_slave_ctrlrops_s *ops;
 
   /* Private SPI slave controller driver data may follow */
 };
 
 /* The SPI slave device driver vtable */
 
-struct spi_sdevops_s
+struct spi_slave_devops_s
 {
-  CODE void     (*select)(FAR struct spi_sdev_s *sdev, bool selected);
-  CODE void     (*cmddata)(FAR struct spi_sdev_s *sdev, bool data);
-  CODE size_t   (*getdata)(FAR struct spi_sdev_s *sdev,
+  CODE void     (*select)(FAR struct spi_slave_dev_s *sdev, bool selected);
+  CODE void     (*cmddata)(FAR struct spi_slave_dev_s *sdev, bool data);
+  CODE size_t   (*getdata)(FAR struct spi_slave_dev_s *sdev,
                            FAR const void **data);
-  CODE size_t   (*receive)(FAR struct spi_sdev_s *sdev,
+  CODE size_t   (*receive)(FAR struct spi_slave_dev_s *sdev,
                            FAR const void *data, size_t nwords);
 };
 
@@ -523,9 +524,9 @@ struct spi_sdevops_s
  * the vtable structure pointer.
  */
 
-struct spi_sdev_s
+struct spi_slave_dev_s
 {
-  FAR const struct spi_sdevops_s *ops;
+  FAR const struct spi_slave_devops_s *ops;
 
   /* Private SPI slave device driver data may follow */
 };
@@ -543,17 +544,17 @@ struct spi_sdev_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spislave_register
+ * Name: spi_slave_register
  *
  * Description:
- *   Register the SPI Slave echo character device as 'devpath'.
+ *   Register the SPI Slave character device driver as 'devpath'.
  *
  * Input Parameters:
- *   sctrlr  - An instance of the SPI Slave interface to use to communicate
- *             with the SPI Slave echo device
- *   bus     - The SPI Slave bus number. This will be used as the SPI device
- *             minor number. The SPI Slave character device will be
- *             registered as /dev/spislvN where N is the minor number
+ *   ctrlr - An instance of the SPI Slave interface to use to communicate
+ *           with the SPI Slave device
+ *   bus   - The SPI Slave bus number. This will be used as the SPI device
+ *           minor number. The SPI Slave character device will be
+ *           registered as /dev/spislvN where N is the minor number
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -561,7 +562,7 @@ struct spi_sdev_s
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_SLAVE_DRIVER
-int spislave_register(FAR struct spi_sctrlr_s *sctrlr, int bus);
+int spi_slave_register(FAR struct spi_slave_ctrlr_s *ctrlr, int bus);
 #endif /* CONFIG_SPI_SLAVE_DRIVER */
 
 #undef EXTERN
