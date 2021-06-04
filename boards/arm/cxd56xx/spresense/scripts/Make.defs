@@ -61,8 +61,8 @@ CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+NXFLATLDFLAGS1 = -r -Wl,-d -Wl,-warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -Wl,-no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
 # Loadable module definitions
@@ -88,7 +88,7 @@ else
   LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
-LDFLAGS += --gc-sections
+LDFLAGS += -Wl,--gc-sections
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -102,11 +102,11 @@ endif
 # Output map file with cross reference table
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}" --cref
+  LDFLAGS += -Wl,-Map="${shell cygpath -w $(TOPDIR)/nuttx.map}" -Wl,--cref
 else
-  LDFLAGS += -Map=$(TOPDIR)/nuttx.map --cref
+  LDFLAGS += -Wl,-Map=$(TOPDIR)/nuttx.map -Wl,--cref
 endif
 
 ifneq ($(CONFIG_ASMP_MEMSIZE),)
-  LDFLAGS += --defsym=__reserved_ramsize=$(CONFIG_ASMP_MEMSIZE)
+  LDFLAGS += -Wl,--defsym=__reserved_ramsize=$(CONFIG_ASMP_MEMSIZE)
 endif
