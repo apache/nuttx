@@ -79,8 +79,8 @@ LDFLAGS += $(ARCHSCRIPT)
 
 # Override in Make.defs if linker is not 'ld'
 
-LDSTARTGROUP ?= --start-group
-LDENDGROUP ?= --end-group
+LDSTARTGROUP ?= -Wl,--start-group
+LDENDGROUP ?= -Wl,--end-group
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
@@ -141,7 +141,7 @@ board$(DELIM)libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
-	$(Q) $(LD) --entry=0x100 $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) -Wl,--entry=0x100 $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)

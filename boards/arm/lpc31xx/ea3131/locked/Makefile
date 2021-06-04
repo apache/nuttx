@@ -76,7 +76,7 @@ $(PASS1_LIBBOARD):
 
 locked.r: ld-locked.inc $(PASS1_LIBBOARD)
 	@echo "LD:  locked.r"
-	$(Q) $(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC)
+	$(Q) $(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) -Wl,--start-group $(PASS1_LDLIBS) -Wl,--end-group $(PASS1_LIBGCC)
 	$(Q) $(NM) $@ > locked.map
 	$(Q) fgrep " U " locked.map | grep -v nx_start
 	$(Q) $(CROSSDEV)size $@
