@@ -419,17 +419,13 @@ found:
       (dev->d_len == 0 || dev->d_len == 1) &&
       conn->tx_unacked <= 0)
     {
-      uint32_t ackseq;
+      uint32_t seq;
       uint32_t rcvseq;
 
-      /* Get the sequence number of that has just been acknowledged by this
-       * incoming packet.
-       */
-
-      ackseq = tcp_getsequence(tcp->seqno);
+      seq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
-      if (TCP_SEQ_LT(ackseq, rcvseq))
+      if (TCP_SEQ_LT(seq, rcvseq))
         {
           /* Send a "normal" acknowledgment of the KeepAlive probe */
 
