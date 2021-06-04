@@ -67,6 +67,12 @@ config ARCH_CHIP_MPFS
         ---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
 
+config ARCH_CHIP_RV32M1
+	bool "NXP RV32M1"
+	select ARCH_RV32IM
+	---help---
+		NXP RV32M1 processor (RISC-V Core with PULP extensions).
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -105,6 +111,22 @@ config ARCH_CHIP
 	default "esp32c3"	if ARCH_CHIP_ESP32C3
 	default "c906"		if ARCH_CHIP_C906
 	default "mpfs"		if ARCH_CHIP_MPFS
+	default "rv32m1"	if ARCH_CHIP_RV32M1
+
+config ARCH_RISCV_INTXCPT_EXTENSIONS
+	bool "RISC-V Integer Context Extensions"
+	default n
+	---help---
+		RISC-V could be customized with extensions. Some Integer Context
+		Registers have to be saved and restored when Contexts switch.
+
+if ARCH_RISCV_INTXCPT_EXTENSIONS
+
+config ARCH_RISCV_INTXCPT_EXTREGS
+	int "Number of Extral RISC-V Integer Context Registers"
+	default 0
+
+endif
 
 if ARCH_RV32IM
 source arch/risc-v/src/rv32im/Kconfig
@@ -132,5 +154,8 @@ source arch/risc-v/src/c906/Kconfig
 endif
 if ARCH_CHIP_MPFS
 source arch/risc-v/src/mpfs/Kconfig
+endif
+if ARCH_CHIP_RV32M1
+source arch/risc-v/src/rv32m1/Kconfig
 endif
 endif

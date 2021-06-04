@@ -1394,6 +1394,16 @@ config ARCH_BOARD_RX65N_GRROSE
 		This is a port of the renesas RX65N on the Renesas RX65N board.
 		STATUS:  Work has just began on this port.
 
+config ARCH_BOARD_RV32M1_VEGA
+	bool "RV32M1 VEGA board"
+	depends on ARCH_CHIP_RV32M1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the
+		RV32M1 VEGA board. This board features the RV32M1 RISC-V Core(s).
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118
@@ -2425,6 +2435,7 @@ config ARCH_BOARD
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
 	default "rddrone-uavcan144"        if ARCH_BOARD_RDDRONE_UAVCAN144
 	default "rddrone-uavcan146"        if ARCH_BOARD_RDDRONE_UAVCAN146
+	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -3149,6 +3160,9 @@ source "boards/risc-v/c906/smartl-c906/Kconfig"
 endif
 if ARCH_BOARD_ICICLE_MPFS
 source "boards/risc-v/mpfs/icicle/Kconfig"
+endif
+if ARCH_BOARD_RV32M1_VEGA
+source "boards/risc-v/rv32m1/rv32m1-vega/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
