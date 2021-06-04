@@ -166,7 +166,11 @@ int unload_module(FAR struct binary_s *binp)
           if (binp->alloc[i])
             {
               binfo("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+              up_module_text_free((FAR void *)binp->alloc[i]);
+#else
               kumm_free((FAR void *)binp->alloc[i]);
+#endif
             }
         }
 
