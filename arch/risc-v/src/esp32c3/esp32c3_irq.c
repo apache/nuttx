@@ -65,7 +65,7 @@ volatile uint32_t *g_current_regs;
  * Private Data
  ****************************************************************************/
 
-uint8_t g_cpuint_map[ESP32C3_CPUINT_MAX];
+static uint8_t g_cpuint_map[ESP32C3_CPUINT_MAX];
 
 /****************************************************************************
  * Public Functions
