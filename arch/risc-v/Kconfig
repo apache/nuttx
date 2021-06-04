@@ -50,6 +50,7 @@ config ARCH_CHIP_ESP32C3
 	select LIBC_ARCH_MEMCCMP
 	select LIBC_ARCH_MEMMOVE
 	select LIBC_ARCH_MEMSET
+	select ARCH_HAVE_MODULE_TEXT
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
