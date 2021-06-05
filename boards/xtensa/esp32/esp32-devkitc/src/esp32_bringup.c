@@ -74,6 +74,10 @@
 #  include "esp32_bmp180.h"
 #endif
 
+#ifdef CONFIG_LCD_HT16K33
+#  include "esp32_ht16k33.h"
+#endif
+
 #ifdef CONFIG_ESP32_AES_ACCELERATOR
 #  include "esp32_aes.h"
 #endif
@@ -345,6 +349,18 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_LCD_HT16K33
+  /* Try to register HT16K33 in the I2C0 */
+
+  ret = board_ht16k33_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize HT16K33 driver: %d\n", ret);
       return ret;
     }
 #endif
