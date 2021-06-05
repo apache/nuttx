@@ -227,7 +227,12 @@ function avr-gcc-toolchain {
     case $os in
       Darwin)
         brew tap osx-cross/avr
-        brew install avr-gcc
+        # Rolling back avr-gcc version as a temporary workaround to conflict between
+        # x86_64-elf-binutils-2.36.1 and avr-binutils-2.36.1
+        pushd "$(brew --repository)"/Library/Taps/osx-cross/homebrew-avr &>/dev/null
+        git checkout c1a94c9
+        popd &>/dev/null
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install avr-gcc
         ;;
     esac
   fi
