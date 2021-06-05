@@ -142,6 +142,14 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 
   DEBUGASSERT(info == tcb->cmn.stack_alloc_ptr);
 
+  ret = task_setup_info(info);
+
+  if (ret < OK)
+    {
+      ret = -EINVAL;
+      goto errout_with_group;
+    }
+
   /* Initialize the task control block */
 
   ret = nxtask_setup_scheduler(tcb, priority, nxtask_start,

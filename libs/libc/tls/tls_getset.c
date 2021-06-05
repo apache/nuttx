@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlsgetdtor.c
+ * libs/libc/tls/tls_getset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,9 +32,6 @@
 #include <nuttx/tls.h>
 #include <arch/tls.h>
 
-#include "sched/sched.h"
-#include "group/group.h"
-
 #if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
@@ -42,34 +39,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_dtor
+ * Name: tls_get_set
  *
  * Description:
- *   Get the TLS element destructor associated with the 'tlsindex' to 'destr'
+ *   Get the set map of TLE element index.
  *
  * Input Parameters:
- *   tlsindex - Index of TLS data destructor to get
  *
  * Returned Value:
- *   A non-null destruct function pointer.
+ *   TLS element index set map.
  *
  ****************************************************************************/
 
-tls_dtor_t tls_get_dtor(int tlsindex)
+tls_ndxset_t tls_get_set(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
-  tls_dtor_t destr;
+  FAR struct task_info_s *tinfo = task_get_info();
+  tls_ndxset_t tlsset;
 
-  DEBUGASSERT(group != NULL);
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
+  DEBUGASSERT(tinfo != NULL);
 
-  flags = spin_lock_irqsave(NULL);
-  destr = group->tg_tlsdestr[tlsindex];
-  spin_unlock_irqrestore(NULL, flags);
+  tlsset = tinfo->ta_tlsset;
 
-  return destr;
+  return tlsset;
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */
