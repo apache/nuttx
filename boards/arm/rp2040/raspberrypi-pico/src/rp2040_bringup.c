@@ -142,5 +142,14 @@ int rp2040_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DEV_GPIO
+  ret = rp2040_dev_gpio_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
   return ret;
 }
