@@ -29,4 +29,8 @@
 
 int rp2040_bringup(void);
 
+#ifdef CONFIG_DEV_GPIO
+int rp2040_dev_gpio_init(void);
+#endif
+
 #endif /* __BOARDS_ARM_RP2040_RASPBERRYPI_PICO_SRC_RP2040_PICO_H */
