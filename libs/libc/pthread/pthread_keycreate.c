@@ -89,7 +89,7 @@ int pthread_key_create(FAR pthread_key_t *key,
       return OK;
     }
 
-  return -tlsindex;
+  return ERROR;
 }
 
 #endif /* CONFIG_TLS_NELEM */
