@@ -84,12 +84,12 @@
 #  define CONFIG_HT16K33_I2C_FREQ 400000
 #endif
 
-#ifndef LCD_HT16K33_NUMBER_MODULES
-#  define LCD_HT16K33_NUMBER_MODULES 1
+#ifndef CONFIG_LCD_HT16K33_NUMBER_MODULES
+#  define CONFIG_LCD_HT16K33_NUMBER_MODULES 1
 #endif
 
 #define HT16K33_MAX_ROW    1
-#define HT16K33_MAX_COL    4 * LCD_HT16K33_NUMBER_MODULES
+#define HT16K33_MAX_COL    4 * CONFIG_LCD_HT16K33_NUMBER_MODULES
 
 /* Device naming ************************************************************/
 
@@ -122,14 +122,14 @@ struct lcd_instream_s
  ****************************************************************************/
 
 static inline void ht16k33_write_cmd(FAR struct ht16k33_dev_s *priv,
-                                     uint8_t cmd);
+                                     int dev_id, uint8_t cmd);
 
 static inline void ht16k33_write_data(FAR struct ht16k33_dev_s *priv,
-                                      uint8_t cmd, uint8_t *values,
-                                      int nbytes);
+                                      int dev_id, uint8_t cmd,
+                                      uint8_t *values, int nbytes);
 
 static inline void ht16k33_setcontrast(FAR struct ht16k33_dev_s *priv,
-                                      int8_t contrast);
+                                       int dev_id, int8_t contrast);
 
 static void lcd_scroll_up(FAR struct ht16k33_dev_s *priv);
 
@@ -179,7 +179,7 @@ static const struct file_operations g_ht16k33fops =
  ****************************************************************************/
 
 static inline void ht16k33_write_cmd(FAR struct ht16k33_dev_s *priv,
-                                     uint8_t cmd)
+                                     int dev_id, uint8_t cmd)
 {
   struct i2c_msg_s msg;
   uint8_t data[1];
@@ -191,11 +191,11 @@ static inline void ht16k33_write_cmd(FAR struct ht16k33_dev_s *priv,
 
   /* Setup the HT16K33 Command */
 
-  msg.frequency = CONFIG_HT16K33_I2C_FREQ;  /* I2C frequency */
-  msg.addr      = HT16K33_I2C_ADDR;         /* 7-bit address */
-  msg.flags     = 0;                        /* Write transaction */
-  msg.buffer    = (FAR uint8_t *) data;     /* Transfer from this address */
-  msg.length    = 1;                        /* Send one byte */
+  msg.frequency = CONFIG_HT16K33_I2C_FREQ;   /* I2C frequency */
+  msg.addr      = HT16K33_I2C_ADDR + dev_id; /* 7-bit address */
+  msg.flags     = 0;                         /* Write transaction */
+  msg.buffer    = (FAR uint8_t *) data;      /* Transfer from this address */
+  msg.length    = 1;                         /* Send one byte */
 
   /* Perform the transfer */
 
@@ -215,8 +215,8 @@ static inline void ht16k33_write_cmd(FAR struct ht16k33_dev_s *priv,
  ****************************************************************************/
 
 static inline void ht16k33_write_data(FAR struct ht16k33_dev_s *priv,
-                                      uint8_t cmd, uint8_t *values,
-                                      int nbytes)
+                                      int dev_id, uint8_t cmd,
+                                      uint8_t *values, int nbytes)
 {
   struct i2c_msg_s msg;
   uint8_t data[16];
@@ -234,11 +234,11 @@ static inline void ht16k33_write_data(FAR struct ht16k33_dev_s *priv,
 
   /* Setup the message to write data to HT16K33 */
 
-  msg.frequency = CONFIG_HT16K33_I2C_FREQ;          /* I2C frequency */
-  msg.addr      = HT16K33_I2C_ADDR + priv->col / 4; /* 7-bit address */
-  msg.flags     = 0;                                /* Write transaction */
-  msg.buffer    = (FAR uint8_t *) data;             /* Transfer from here */
-  msg.length    = nbytes + 1;                       /* Send cmd + nbytes */
+  msg.frequency = CONFIG_HT16K33_I2C_FREQ;    /* I2C frequency */
+  msg.addr      = HT16K33_I2C_ADDR + dev_id;  /* 7-bit address */
+  msg.flags     = 0;                          /* Write transaction */
+  msg.buffer    = (FAR uint8_t *) data;       /* Transfer from here */
+  msg.length    = nbytes + 1;                 /* Send cmd + nbytes */
 
   /* Perform the transfer */
 
@@ -250,8 +250,10 @@ static inline void ht16k33_write_data(FAR struct ht16k33_dev_s *priv,
 }
 
 static inline void ht16k33_setcontrast(FAR struct ht16k33_dev_s *priv,
-                                      int8_t contrast)
+                                       int dev_id, int8_t contrast)
 {
+  int i;
+
   if (contrast < HT16K33_CONTRAST_MIN)
     {
       contrast = HT16K33_CONTRAST_MIN;
@@ -261,7 +263,10 @@ static inline void ht16k33_setcontrast(FAR struct ht16k33_dev_s *priv,
       contrast = HT16K33_CONTRAST_MAX;
     }
 
-  ht16k33_write_cmd(priv, HT16K33_DIMMING_SET | (contrast & 0x0f));
+  for (i = 0; i < CONFIG_LCD_HT16K33_NUMBER_MODULES; i++)
+    {
+      ht16k33_write_cmd(priv, i, HT16K33_DIMMING_SET | (contrast & 0x0f));
+    }
 }
 
 /****************************************************************************
@@ -327,8 +332,14 @@ static inline void addr2rc(FAR struct ht16k33_dev_s *priv, uint8_t addr,
 static void lcd_set_curpos(FAR struct ht16k33_dev_s *priv)
 {
   uint8_t addr;
+  int dev_id;
+
   addr = rc2addr(priv);
-  ht16k33_write_cmd(priv, HT16K33_DISP_DATA_ADDR | addr); /* set mem addr */
+  dev_id = priv->col / 4;
+
+  /* Define the memory address position */
+
+  ht16k33_write_cmd(priv, dev_id, HT16K33_DISP_DATA_ADDR | addr);
 }
 
 /****************************************************************************
@@ -344,6 +355,7 @@ static inline void lcd_putdata(FAR struct ht16k33_dev_s *priv, uint8_t data)
   uint8_t segment[2];
   uint8_t addr;
   uint8_t cmd;
+  int dev_id;
 
   /* Get current display memory position */
 
@@ -358,9 +370,11 @@ static inline void lcd_putdata(FAR struct ht16k33_dev_s *priv, uint8_t data)
   segment[0] = asciito14seg[data - 32] & 0xff;
   segment[1] = (asciito14seg[data - 32] & 0xff00) >> 8;
 
+  dev_id = priv->col / 4;
+
   /* Send data to display */
 
-  ht16k33_write_data(priv, cmd, segment, 2);
+  ht16k33_write_data(priv, dev_id, cmd, segment, 2);
 
   /* Save it in the buffer because we cannot read from display */
 
@@ -674,16 +688,16 @@ static void lcd_codec_action(FAR struct ht16k33_dev_s *priv,
       case SLCDCODE_BLINKSTART:      /* Start blinking with current cursor
                                       * position
                                       */
-        ht16k33_write_cmd(priv, HT16K33_DISPLAY_SETUP |
-                                DISPLAY_SETUP_BLINK_2HZ);
+        ht16k33_write_cmd(priv, 0, HT16K33_DISPLAY_SETUP |
+                                   DISPLAY_SETUP_BLINK_2HZ);
         break;
 
       case SLCDCODE_BLINKEND:        /* End blinking after the current cursor
                                       * position
                                       */
       case SLCDCODE_BLINKOFF:        /* Turn blinking off */
-        ht16k33_write_cmd(priv, HT16K33_DISPLAY_SETUP |
-                                DISPLAY_SETUP_BLINK_OFF);
+        ht16k33_write_cmd(priv, 0, HT16K33_DISPLAY_SETUP |
+                                   DISPLAY_SETUP_BLINK_OFF);
         break;                       /* Not implemented */
 
       /* These are actually unreportable errors */
@@ -728,22 +742,26 @@ static int lcd_getstream(FAR struct lib_instream_s *instream)
 static void lcd_init(FAR struct ht16k33_dev_s *priv)
 {
   uint8_t data;
+  int i;
 
-  /* Initialize the Display: Turn ON Oscillator */
+  for (i = 0; i < CONFIG_LCD_HT16K33_NUMBER_MODULES; i++)
+    {
+      /* Initialize the Display: Turn ON Oscillator */
 
-  data = HT16K33_SYSTEM_SETUP | SYSTEM_SETUP_OSC_ON;
+      data = HT16K33_SYSTEM_SETUP | SYSTEM_SETUP_OSC_ON;
 
-  ht16k33_write_cmd(priv, data);
+      ht16k33_write_cmd(priv, i, data);
 
-  /* Clear display */
+      /* Clear display */
 
-  ht16k33_clear_display(priv);
+      ht16k33_clear_display(priv);
 
-  /* Display ON */
+      /* Display ON */
 
-  data = HT16K33_DISPLAY_SETUP | DISPLAY_SETUP_DISP_ON;
+      data = HT16K33_DISPLAY_SETUP | DISPLAY_SETUP_DISP_ON;
 
-  ht16k33_write_cmd(priv, data);
+      ht16k33_write_cmd(priv, i, data);
+    }
 }
 
 /****************************************************************************
@@ -1033,7 +1051,7 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
           attr->ncolumns      = HT16K33_MAX_COL;
           attr->nbars         = 0;
           attr->maxcontrast   = 0;
-          attr->maxbrightness = 1;  /* 'brightness' for us is the backlight */
+          attr->maxbrightness = 16;  /* 'brightness' for us is the backlight */
         }
         break;
 
@@ -1070,7 +1088,7 @@ static int ht16k33_ioctl(FAR struct file *filep, int cmd,
 
           nxsem_wait(&priv->sem_excl);
 
-          /* TODO: set display contrast */
+          ht16k33_setcontrast(priv, 0, (uint8_t)arg);
 
           nxsem_post(&priv->sem_excl);
         }
