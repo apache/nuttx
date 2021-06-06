@@ -159,7 +159,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
-  ret = board_qencoder_initialize(0, CONFIG_NUCLEO_F401RE_QETIMER);
+  ret = board_qencoder_initialize(0, CONFIG_NUCLEO_F446RE_QETIMER);
   if (ret != OK)
     {
       syslog(LOG_ERR,
