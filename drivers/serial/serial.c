@@ -214,8 +214,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           dev->xmit.buffer[dev->xmit.head] = ch;
           dev->xmit.head = nexthead;
-          ret = OK;
-          goto err_out;
+          return OK;
         }
 
       /* The TX buffer is full.  Should be block, waiting for the hardware
@@ -289,8 +288,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           if (dev->disconnected)
             {
-              ret = -ENOTCONN;
-              goto err_out;
+              return -ENOTCONN;
             }
 #endif
 
@@ -302,8 +300,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
                * become non-full will abort the transfer.
                */
 
-              ret = -EINTR;
-              goto err_out;
+              return -EINTR;
             }
         }
 
@@ -313,8 +310,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
       else
         {
-          ret = -EAGAIN;
-          goto err_out;
+          return -EAGAIN;
         }
     }
 
@@ -322,11 +318,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
    * unreachable.
    */
 
-  ret = OK;
-
-err_out:
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
