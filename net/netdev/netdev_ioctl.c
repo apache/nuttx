@@ -1454,7 +1454,7 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 /****************************************************************************
- * Name: netdev_usrsock_ioctl
+ * Name: netdev_ioctl
  *
  * Description:
  *   Perform user private ioctl operations.
@@ -1470,9 +1470,8 @@ static int netdev_rt_ioctl(FAR struct socket *psock, int cmd,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_USRSOCK
-static int netdev_usrsock_ioctl(FAR struct socket *psock, int cmd,
-                                unsigned long arg)
+static int netdev_ioctl(FAR struct socket *psock, int cmd,
+                        unsigned long arg)
 {
   if (psock->s_sockif && psock->s_sockif->si_ioctl)
     {
@@ -1491,7 +1490,6 @@ static int netdev_usrsock_ioctl(FAR struct socket *psock, int cmd,
       return -ENOTTY;
     }
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -1512,11 +1510,13 @@ static int netdev_usrsock_ioctl(FAR struct socket *psock, int cmd,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_USRSOCK
 ssize_t net_ioctl_arglen(int cmd)
 {
   switch (cmd)
     {
+      case FIONREAD:
+        return sizeof(int);
+
       case SIOCGIFADDR:
       case SIOCSIFADDR:
       case SIOCGIFDSTADDR:
@@ -1607,7 +1607,6 @@ ssize_t net_ioctl_arglen(int cmd)
         return -ENOTTY;
     }
 }
-#endif
 
 /****************************************************************************
  * Name: psock_ioctl and psock_vioctl
@@ -1654,12 +1653,10 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
 
   arg = va_arg(ap, unsigned long);
 
-#ifdef CONFIG_NET_USRSOCK
   /* Check for a USRSOCK ioctl command */
 
-  ret = netdev_usrsock_ioctl(psock, cmd, arg);
+  ret = netdev_ioctl(psock, cmd, arg);
   if (ret == -ENOTTY)
-#endif
     {
       /* Check for a standard network IOCTL command. */
 
