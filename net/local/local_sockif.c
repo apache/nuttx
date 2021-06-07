@@ -34,6 +34,7 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
 #include <socket/socket.h>
 
@@ -67,6 +68,8 @@ static int        local_accept(FAR struct socket *psock,
 static int        local_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static int        local_close(FAR struct socket *psock);
+static int        local_ioctl(FAR struct socket *psock, int cmd,
+                    FAR void *arg, size_t arglen);
 
 /****************************************************************************
  * Public Data
@@ -86,7 +89,8 @@ const struct sock_intf_s g_local_sockif =
   local_poll,        /* si_poll */
   local_sendmsg,     /* si_sendmsg */
   local_recvmsg,     /* si_recvmsg */
-  local_close        /* si_close */
+  local_close,       /* si_close */
+  local_ioctl        /* si_ioctl */
 };
 
 /****************************************************************************
@@ -684,6 +688,44 @@ static int local_close(FAR struct socket *psock)
       default:
         return -EBADF;
     }
+}
+
+/****************************************************************************
+ * Name: local_ioctl
+ *
+ * Description:
+ *   This function performs local device specific operations.
+ *
+ * Parameters:
+ *   psock    A reference to the socket structure of the socket
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+static int local_ioctl(FAR struct socket *psock, int cmd,
+                       FAR void *arg, size_t arglen)
+{
+  FAR struct local_conn_s *conn;
+  int ret = OK;
+
+  conn = (FAR struct local_conn_s *)psock->s_conn;
+
+  switch (cmd)
+    {
+      case FIONREAD:
+        if (conn->lc_infile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_infile, cmd, arg);
+          }
+        break;
+      default:
+        ret = -EINVAL;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************

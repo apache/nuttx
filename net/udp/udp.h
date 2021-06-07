@@ -869,6 +869,23 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout);
 #  define udp_txdrain(conn, timeout) (0)
 #endif
 
+/****************************************************************************
+ * Name: udp_ioctl
+ *
+ * Description:
+ *   This function performs udp specific ioctl() operations.
+ *
+ * Parameters:
+ *   conn     The TCP connection of interest
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+int udp_ioctl(FAR struct udp_conn_s *conn,
+              int cmd, FAR void *arg, size_t arglen);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
