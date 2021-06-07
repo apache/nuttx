@@ -79,7 +79,7 @@ int tls_free(int tlsindex)
         }
       else
         {
-          ret = -get_errno();
+          ret = _SEM_ERRVAL(ret);
         }
     }
 
