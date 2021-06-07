@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <pthread.h>
 #include <nuttx/arch.h>
+#include <assert.h>
 
 #include "svcall.h"
 #include "riscv_internal.h"

@@ -27,6 +27,7 @@
 #ifdef CONFIG_ESP32C3_WIRELESS
 
 #include <queue.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <crc64.h>

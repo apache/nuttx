@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlsgetset.c
+ * arch/risc-v/src/rv32m1/hardware/rv32m1_scg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,56 +18,21 @@
  *
  ****************************************************************************/
 
+#ifndef ARCH_RISCV_SRC_RV32M1_CHIP_RV32M1_SCG_H
+#define ARCH_RISCV_SRC_RV32M1_CHIP_RV32M1_SCG_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#if defined(CONFIG_ARCH_CHIP_RV32M1_RI5CY)
+#  include "rv32m1ri5cy_scg.h"
+#elif defined(CONFIG_ARCH_CHIP_RV32M1_ZERORISCY)
+#  error "rv32m1 zero-riscy is to be continued..."
+#else
+#  error "Unspported rv32m1 cortex-m cores"
+#endif
 
-#include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
-#include <arch/tls.h>
-
-#include "sched/sched.h"
-#include "group/group.h"
-
-#if CONFIG_TLS_NELEM > 0
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: tls_get_set
- *
- * Description:
- *   Get the set map of TLE element index.
- *
- * Input Parameters:
- *
- * Returned Value:
- *   TLS element index set map.
- *
- ****************************************************************************/
-
-tls_ndxset_t tls_get_set(void)
-{
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
-  tls_ndxset_t tlsset;
-
-  DEBUGASSERT(group != NULL);
-
-  flags = spin_lock_irqsave(NULL);
-  tlsset = group->tg_tlsset;
-  spin_unlock_irqrestore(NULL, flags);
-
-  return tlsset;
-}
-
-#endif /* CONFIG_TLS_NELEM > 0 */
+#endif /* _ARCH_RISCV_SRC_RV32M1_CHIP_RV32M1_SCG_H */

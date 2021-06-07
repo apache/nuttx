@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -137,10 +138,12 @@ struct esp32_config_s
   uint8_t  rxpin;               /* Rx pin number (0-39) */
   uint8_t  txsig;               /* Tx signal */
   uint8_t  rxsig;               /* Rx signal */
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   uint8_t  rtspin;              /* RTS pin number (0-39) */
-  uint8_t  ctspin;              /* CTS pin number (0-39) */
   uint8_t  rtssig;              /* RTS signal */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  uint8_t  ctspin;              /* CTS pin number (0-39) */
   uint8_t  ctssig;              /* CTS signal */
 #endif
 };
@@ -156,8 +159,11 @@ struct esp32_dev_s
   uint8_t  parity;                     /* 0=none, 1=odd, 2=even */
   uint8_t  bits;                       /* Number of bits (5-9) */
   bool     stopbits2;                  /* true: Configure with 2 stop bits instead of 1 */
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  bool     flowc;                      /* Input flow control (RTS) enabled */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  bool iflow;                          /* Input flow control (RTS) enabled */
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  bool oflow;                          /* Output flow control (CTS) enabled */
 #endif
 };
 
@@ -178,6 +184,10 @@ static void esp32_send(struct uart_dev_s *dev, int ch);
 static void esp32_txint(struct uart_dev_s *dev, bool enable);
 static bool esp32_txready(struct uart_dev_s *dev);
 static bool esp32_txempty(struct uart_dev_s *dev);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool esp32_rxflowcontrol(struct uart_dev_s *dev,
+                                unsigned int nbuffered, bool upper);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -186,6 +196,7 @@ static bool esp32_txempty(struct uart_dev_s *dev);
 #define UART_TX_FIFO_SIZE        128
 #define UART_RX_FIFO_FULL_THRHD  112
 #define UART_RX_TOUT_THRHD_VALUE 0x02
+#define UART_RX_FLOW_THRHD_VALUE 64   /* Almost half RX FIFO size */
 
 static const struct uart_ops_s g_uart_ops =
 {
@@ -197,13 +208,13 @@ static const struct uart_ops_s g_uart_ops =
   .receive        = esp32_receive,
   .rxint          = esp32_rxint,
   .rxavailable    = esp32_rxavailable,
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = NULL,
-#endif
   .send           = esp32_send,
   .txint          = esp32_txint,
   .txready        = esp32_txready,
   .txempty        = esp32_txempty,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = esp32_rxflowcontrol,
+#endif
 };
 
 /* I/O buffers */
@@ -233,10 +244,12 @@ static const struct esp32_config_s g_uart0config =
   .rxpin          = CONFIG_ESP32_UART0_RXPIN,
   .txsig          = U0TXD_OUT_IDX,
   .rxsig          = U0RXD_IN_IDX,
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rtspin         = CONFIG_ESP32_UART0_RTSPIN,
-  .ctspin         = CONFIG_ESP32_UART0_CTSPIN,
   .rtssig         = U0RTS_OUT_IDX,
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .ctspin         = CONFIG_ESP32_UART0_CTSPIN,
   .ctssig         = U0CTS_IN_IDX,
 #endif
 };
@@ -248,6 +261,20 @@ static struct esp32_dev_s g_uart0priv =
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_UART0_IFLOWCONTROL
+  .iflow          = true,    /* Input flow control (RTS) enabled */
+#else
+  .iflow          = false,   /* Input flow control (RTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#ifdef CONFIG_UART0_OFLOWCONTROL
+  .oflow          = true,    /* Output flow control (CTS) enabled */
+#else
+  .oflow          = false,   /* Output flow control (CTS) disabled */
+#endif
+#endif
 };
 
 static uart_dev_t g_uart0port =
@@ -279,10 +306,12 @@ static const struct esp32_config_s g_uart1config =
   .rxpin          = CONFIG_ESP32_UART1_RXPIN,
   .txsig          = U1TXD_OUT_IDX,
   .rxsig          = U1RXD_IN_IDX,
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rtspin         = CONFIG_ESP32_UART1_RTSPIN,
-  .ctspin         = CONFIG_ESP32_UART1_CTSPIN,
   .rtssig         = U1RTS_OUT_IDX,
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .ctspin         = CONFIG_ESP32_UART1_CTSPIN,
   .ctssig         = U1CTS_IN_IDX,
 #endif
 };
@@ -294,6 +323,20 @@ static struct esp32_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_UART1_IFLOWCONTROL
+  .iflow          = true,    /* input flow control (RTS) enabled */
+#else
+  .iflow          = false,   /* input flow control (RTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#ifdef CONFIG_UART1_OFLOWCONTROL
+  .oflow          = true,    /* output flow control (CTS) enabled */
+#else
+  .oflow          = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
 };
 
 static uart_dev_t g_uart1port =
@@ -325,10 +368,12 @@ static const struct esp32_config_s g_uart2config =
   .rxpin          = CONFIG_ESP32_UART2_RXPIN,
   .txsig          = U2TXD_OUT_IDX,
   .rxsig          = U2RXD_IN_IDX,
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rtspin         = CONFIG_ESP32_UART2_RTSPIN,
-  .ctspin         = CONFIG_ESP32_UART2_CTSPIN,
   .rtssig         = U2RTS_OUT_IDX,
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  .ctspin         = CONFIG_ESP32_UART2_CTSPIN,
   .ctssig         = U2CTS_IN_IDX,
 #endif
 };
@@ -340,6 +385,20 @@ static struct esp32_dev_s g_uart2priv =
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_UART2_IFLOWCONTROL
+  .iflow          = true,    /* input flow control (RTS) enabled */
+#else
+  .iflow          = false,   /* input flow control (RTS) disabled */
+#endif
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#ifdef CONFIG_UART2_OFLOWCONTROL
+  .oflow          = true,    /* output flow control (CTS) enabled */
+#else
+  .oflow          = false,   /* output flow control (CTS) disabled */
+#endif
+#endif
 };
 
 static uart_dev_t g_uart2port =
@@ -532,15 +591,16 @@ static int esp32_setup(struct uart_dev_s *dev)
 
   conf0 = UART_TICK_REF_ALWAYS_ON;
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  /* Check if flow control is enabled */
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  /* Check if output flow control is enabled for this UART controller. */
 
-  if (priv->flowc)
+  if (priv->oflow)
     {
-      /* Enable hardware flow control */
+      /* Enable output hardware flow control */
 
       conf0 |= UART_TX_FLOW_EN;
     }
+
 #endif
 
   /* OR in settings for the selected number of bits */
@@ -612,8 +672,21 @@ static int esp32_setup(struct uart_dev_s *dev)
            VALUE_TO_FIELD(UART_RX_TOUT_THRHD_VALUE, UART_RX_TOUT_THRHD) |
            UART_RX_TOUT_EN;
   putreg32(regval, UART_CONF1_REG(priv->config->id));
-#endif
 
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  /* Check if input flow control is enabled for this UART controller */
+
+  if (priv->iflow)
+    {
+      /* Enable input hardware flow control */
+
+      regval |= VALUE_TO_FIELD(UART_RX_FLOW_THRHD_VALUE, UART_RX_FLOW_THRHD)
+                | UART_RX_FLOW_EN;
+      modifyreg32(UART_CONF1_REG(priv->config->id), 0, regval);
+    }
+
+#endif 
+#endif
   return OK;
 }
 
@@ -895,8 +968,11 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Return flow control */
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        termiosp->c_cflag |= (priv->flowc) ? (CCTS_OFLOW | CRTS_IFLOW): 0;
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        termiosp->c_cflag |= (priv->oflow) ? CCTS_OFLOW : 0;
+#endif
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
 #endif
         /* Return baud */
 
@@ -939,8 +1015,11 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint8_t parity;
         uint8_t nbits;
         bool stop2;
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        bool flowc;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        bool iflow;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        bool oflow;
 #endif
 
         if (!termiosp)
@@ -1000,8 +1079,11 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Decode flow control */
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-        flowc = (termiosp->c_cflag & (CCTS_OFLOW | CRTS_IFLOW)) != 0;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+        iflow = (termiosp->c_cflag &  CRTS_IFLOW) != 0;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+        oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
 #endif
         /* Verify that all settings are valid before committing */
 
@@ -1013,8 +1095,11 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
             priv->parity    = parity;
             priv->bits      = nbits;
             priv->stopbits2 = stop2;
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-            priv->flowc     = flowc;
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+            priv->iflow = iflow;
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+            priv->oflow = oflow;
 #endif
             /* effect the changes immediately - note that we do not
              * implement TCSADRAIN / TCSAFLUSH
@@ -1240,14 +1325,103 @@ static void esp32_config_pins(struct esp32_dev_s *priv)
   esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
   esp32_gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
-  esp32_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig, 0, 0);
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
+      esp32_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig,
+                            0, 0);
+    }
 
-  esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
-  esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
+#endif
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (priv->oflow)
+    {
+      esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
+      esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
+    }
 #endif
 }
+
+/****************************************************************************
+ * Name: esp32_rxflowcontrol
+ *
+ * Description:
+ *   Called when upper half RX buffer is full (or exceeds configured
+ *   watermark levels if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is defined).
+ *   Return true if UART activated RX flow control to block more incoming
+ *   data.
+ *   NOTE: ESP32 has a hardware RX FIFO threshold mechanism to control RTS
+ *   line and to stop receiving data. This is very similar to the concept
+ *   behind upper watermark level. The hardware threshold is used here
+ *   to control the RTS line. When setting the threshold to zero, RTS will
+ *   imediately be asserted. If nbuffered = 0 or the lower watermark is
+ *   crossed and the serial driver decides to disable RX flow control, the
+ *   threshold will be changed to UART_RX_FLOW_THRHD_VALUE, which is almost
+ *   half the HW RX FIFO capacity. It keeps some space to keep the data
+ *   received after the RTS is asserted, but before the sender stops.
+ *
+ * Input Parameters:
+ *   dev       - UART device instance
+ *   nbuffered - the number of characters currently buffered
+ *               (if CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS is
+ *               not defined the value will be 0 for an empty buffer or the
+ *               defined buffer size for a full buffer)
+ *   upper     - true indicates the upper watermark was crossed where
+ *               false indicates the lower watermark has been crossed
+ *
+ * Returned Value:
+ *   true if RX flow control activated.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+static bool esp32_rxflowcontrol(struct uart_dev_s *dev,
+                                unsigned int nbuffered, bool upper)
+{
+  bool ret = false;
+  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+
+  if (priv->iflow)
+    {
+      if (nbuffered == 0 || upper == false)
+        {
+          uint32_t regval;
+
+          /* Empty buffer, RTS should be de-asserted and logic in above
+           * layers should re-enable RX interrupt.
+           */
+
+          regval = VALUE_TO_FIELD(UART_RX_FLOW_THRHD_VALUE,
+                                  UART_RX_FLOW_THRHD);
+          modifyreg32(UART_CONF1_REG(priv->config->id), 0, regval);
+          esp32_rxint(dev, true);
+          ret = false;
+        }
+      else
+        {
+          /* If the RX buffer is not zero and watermarks are not enabled,
+           * then this function is called to announce RX buffer is full.
+           * The first thing it should do is to imediately assert RTS.
+           */
+
+          modifyreg32(UART_CONF1_REG(priv->config->id), UART_RX_FLOW_THRHD_M,
+                      0);
+
+          /* Software RX FIFO is full, so besides asserting RTS, it's
+           * necessary to disable RX interrupts to prevent remaining bytes
+           * (that arrive after asserting RTS) to be pushed to the
+           * SW RX FIFO.
+           */
+
+           esp32_rxint(dev, false);
+           ret = true;
+        }
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

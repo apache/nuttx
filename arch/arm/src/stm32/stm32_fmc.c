@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include "stm32.h"
 
 #if defined(CONFIG_STM32_FMC)

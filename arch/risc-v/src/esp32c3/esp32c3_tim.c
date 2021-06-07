@@ -27,6 +27,7 @@
 #include <nuttx/irq.h>
 
 #include <stdbool.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "riscv_arch.h"

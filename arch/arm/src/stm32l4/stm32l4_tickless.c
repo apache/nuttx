@@ -73,6 +73,7 @@
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "stm32l4_oneshot.h"

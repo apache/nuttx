@@ -26,6 +26,7 @@
 
 #include <pthread.h>
 #include <sched.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>

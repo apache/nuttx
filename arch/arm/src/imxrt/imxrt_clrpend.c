@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <arch/irq.h>
+#include <assert.h>
 
 #include "nvic.h"
 #include "arm_arch.h"

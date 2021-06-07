@@ -142,8 +142,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-struct spi_dev_s;    /* Forward reference */
-struct spi_sctrlr_s; /* Forward reference */
+struct spi_dev_s;         /* Forward reference */
+struct spi_slave_ctrlr_s; /* Forward reference */
 
 /****************************************************************************
  * Name: sam_spibus_initialize
@@ -176,7 +176,7 @@ FAR struct spi_dev_s *sam_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-FAR struct spi_sctrlr_s *sam_spi_slave_initialize(int port);
+FAR struct spi_slave_ctrlr_s *sam_spi_slave_initialize(int port);
 
 /****************************************************************************
  * Name:  sam_spi[0|1]select, sam_spi[0|1]status, and sam_spi[0|1]cmddata

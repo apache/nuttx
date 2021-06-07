@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <sched.h>
 #include <queue.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -140,6 +141,14 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
     }
 
   DEBUGASSERT(info == tcb->cmn.stack_alloc_ptr);
+
+  ret = task_setup_info(info);
+
+  if (ret < OK)
+    {
+      ret = -EINVAL;
+      goto errout_with_group;
+    }
 
   /* Initialize the task control block */
 

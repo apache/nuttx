@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>

@@ -52,6 +52,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

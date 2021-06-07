@@ -1421,20 +1421,31 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
-  uint8_t txbyte;
-  uint8_t rxbyte;
+  struct sam_spics_s *spics = (struct sam_spics_s *)dev;
+  if (spics->nbits <= 8)
+    {
+      uint8_t txbyte;
+      uint8_t rxbyte;
 
-  /* spi_exchange can do this. Note: right now, this only deals with 8-bit
-   * words.  If the SPI interface were configured for words of other sizes,
-   * this would fail.
-   */
+      txbyte = (uint8_t)wd;
+      rxbyte = (uint8_t)0;
+      spi_exchange(dev, &txbyte, &rxbyte, 1);
 
-  txbyte = (uint8_t)wd;
-  rxbyte = (uint8_t)0;
-  spi_exchange(dev, &txbyte, &rxbyte, 1);
+      spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
+      return (uint32_t)rxbyte;
+    }
+  else
+    {
+      uint16_t txword;
+      uint16_t rxword;
 
-  spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
-  return (uint32_t)rxbyte;
+      txword = (uint16_t)wd;
+      rxword = (uint16_t)0;
+      spi_exchange(dev, &txword, &rxword, 1);
+
+      spiinfo("Sent %02x received %02x\n", txword, rxword);
+      return (uint32_t)rxword;
+    }
 }
 
 /****************************************************************************

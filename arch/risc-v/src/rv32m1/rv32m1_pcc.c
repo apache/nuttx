@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlsgetdtor.c
+ * arch/risc-v/src/rv32m1/rv32m1_pcc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,50 +26,44 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
-#include <arch/tls.h>
+#include <arch/board/board.h>
 
-#include "sched/sched.h"
-#include "group/group.h"
+#include "riscv_arch.h"
+#include "rv32m1_pcc.h"
 
-#if CONFIG_TLS_NELEM > 0
+/****************************************************************************
+ * Pre-Processor Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_dtor
- *
- * Description:
- *   Get the TLS element destructor associated with the 'tlsindex' to 'destr'
- *
- * Input Parameters:
- *   tlsindex - Index of TLS data destructor to get
- *
- * Returned Value:
- *   A non-null destruct function pointer.
- *
+ * Name: rv32m1_pcc_clock_enable
  ****************************************************************************/
 
-tls_dtor_t tls_get_dtor(int tlsindex)
+void rv32m1_pcc_clock_enable(uint32_t regaddr)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
-  tls_dtor_t destr;
-
-  DEBUGASSERT(group != NULL);
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
-
-  flags = spin_lock_irqsave(NULL);
-  destr = group->tg_tlsdestr[tlsindex];
-  spin_unlock_irqrestore(NULL, flags);
-
-  return destr;
+  uint32_t regval = getreg32(regaddr);
+  regval |= PCC_CLKCFG_CGC;
+  putreg32(regval, regaddr);
 }
 
-#endif /* CONFIG_TLS_NELEM > 0 */
+/****************************************************************************
+ * Name: rv32m1_pcc_clock_disable
+ ****************************************************************************/
+
+void rv32m1_pcc_clock_disable(uint32_t regaddr)
+{
+  uint32_t regval = getreg32(regaddr);
+  regval &= ~PCC_CLKCFG_CGC;
+  putreg32(regval, regaddr);
+}

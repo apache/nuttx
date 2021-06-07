@@ -33,9 +33,13 @@
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
-#elif defined(CONFIG_SYSLOG_RPMSG)
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG
 #  include <nuttx/syslog/syslog_rpmsg.h>
-#elif defined(CONFIG_ARCH_LOWPUTC)
+#endif
+
+#ifdef CONFIG_ARCH_LOWPUTC
 #  include <nuttx/arch.h>
 #endif
 
@@ -45,15 +49,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#if !defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_RPMSG)
-#  define NEED_LOWPUTC
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef NEED_LOWPUTC
+#if defined(CONFIG_SYSLOG_DEFAULT)
 static int syslog_default_putc(FAR struct syslog_channel_s *channel,
                                int ch);
 #endif
@@ -63,38 +63,62 @@ static int syslog_default_putc(FAR struct syslog_channel_s *channel,
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
-static const struct syslog_channel_ops_s g_default_channel_ops =
+static const struct syslog_channel_ops_s g_ramlog_channel_ops =
 {
   ramlog_putc,
   ramlog_putc
 };
-#elif defined(CONFIG_SYSLOG_RPMSG)
-static const struct syslog_channel_ops_s g_default_channel_ops =
+
+static struct syslog_channel_s g_ramlog_channel =
+{
+  &g_ramlog_channel_ops
+};
+#endif
+
+#if defined(CONFIG_SYSLOG_RPMSG)
+static const struct syslog_channel_ops_s g_rpmsg_channel_ops =
 {
   syslog_rpmsg_putc,
   syslog_rpmsg_putc,
   syslog_rpmsg_flush,
   syslog_rpmsg_write
 };
-#else
+
+static struct syslog_channel_s g_rpmsg_channel =
+{
+  &g_rpmsg_channel_ops
+};
+#endif
+
+#if defined(CONFIG_SYSLOG_DEFAULT)
 static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_default_putc,
   syslog_default_putc
 };
-#endif
 
 static struct syslog_channel_s g_default_channel =
 {
   &g_default_channel_ops
 };
+#endif
 
 /* This is the current syslog channel in use */
 
 FAR struct syslog_channel_s
 *g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 {
-  &g_default_channel
+#if defined(CONFIG_SYSLOG_DEFAULT)
+  &g_default_channel,
+#endif
+
+#if defined(CONFIG_RAMLOG_SYSLOG)
+  &g_ramlog_channel,
+#endif
+
+#if defined(CONFIG_SYSLOG_RPMSG)
+  &g_rpmsg_channel
+#endif
 };
 
 /****************************************************************************
@@ -110,7 +134,7 @@ FAR struct syslog_channel_s
  *
  ****************************************************************************/
 
-#ifdef NEED_LOWPUTC
+#if defined(CONFIG_SYSLOG_DEFAULT)
 static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 {
   UNUSED(channel);

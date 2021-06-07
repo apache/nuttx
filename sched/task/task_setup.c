@@ -28,12 +28,14 @@
 #include <stdint.h>
 #include <sched.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "pthread/pthread.h"
@@ -719,4 +721,29 @@ int nxtask_setup_arguments(FAR struct task_tcb_s *tcb, FAR const char *name,
    */
 
   return nxtask_setup_stackargs(tcb, argv);
+}
+
+/****************************************************************************
+ * Name: task_setup_info
+ *
+ * Description:
+ *   Setup task_info_s for task
+ *
+ * Input Parameters:
+ *   info - New created task_info_s
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure
+ *
+ ****************************************************************************/
+
+int task_setup_info(FAR struct task_info_s *info)
+{
+  int ret = OK;
+
+#if CONFIG_TLS_NELEM > 0
+  ret = _SEM_INIT(&info->ta_tlssem, 0, 1);
+#endif
+
+  return ret;
 }

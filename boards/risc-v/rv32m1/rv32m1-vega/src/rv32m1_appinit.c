@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlsalloc.c
+ * boards/risc-v/rv32m1/rv32m1-vega/src/rv32m1_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,78 +24,52 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
 #include <errno.h>
-#include <assert.h>
-#include <debug.h>
 
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
+#include <nuttx/board.h>
 
-#include "sched/sched.h"
-#include "group/group.h"
-
-#if CONFIG_TLS_NELEM > 0
+#include "rv32m1.h"
+#include "rv32m1-vega.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_alloc
+ * Name: board_app_initialize
  *
  * Description:
- *   Allocate a group-unique TLS data index
+ *   Perform architecture specific initialization
  *
  * Input Parameters:
- *   None
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value could be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   A TLS index that is unique for use within this task group.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int tls_alloc(void)
+int board_app_initialize(uintptr_t arg)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
-  int candidate;
-  int ret = -EAGAIN;
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-  DEBUGASSERT(group != NULL);
+  return OK;
+#else
+  /* Perform board-specific initialization */
 
-  /* Search for an unused index.  This is done in a critical section here to
-   * avoid concurrent modification of the group TLS index set.
-   */
-
-  flags = spin_lock_irqsave(NULL);
-  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
-    {
-      /* Is this candidate index available? */
-
-      tls_ndxset_t mask = (1 << candidate);
-      if ((group->tg_tlsset & mask) == 0)
-        {
-          /* Yes.. allocate the index and break out of the loop */
-
-          group->tg_tlsset |= mask;
-          break;
-        }
-    }
-
-  spin_unlock_irqrestore(NULL, flags);
-
-  /* Check if found a valid TLS data index. */
-
-  if (candidate < CONFIG_TLS_NELEM)
-    {
-      /* Yes.. Return the TLS index and success */
-
-      ret = candidate;
-    }
-
-  return ret;
+  return rv32m1_bringup();
+#endif
 }
-
-#endif /* CONFIG_TLS_NELEM > 0 */

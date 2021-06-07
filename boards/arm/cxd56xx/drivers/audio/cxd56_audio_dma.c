@@ -519,7 +519,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_start(cxd56_audio_dma_t handle,
       return CXD56_AUDIO_ECODE_DMA_BUSY;
     }
 
-  cxd56_audio_bca_reg_set_start_addr(handle, addr);
+  cxd56_audio_bca_reg_set_start_addr(handle, CXD56_PHYSADDR(addr));
   cxd56_audio_bca_reg_set_sample_no(handle, sample);
 
   if (s_work_arroud_dmac[handle])

@@ -32,6 +32,8 @@
 
 #include "arm_internal.h"
 #include "arm_arch.h"
+
+#include <assert.h>
 #include <debug.h>
 
 #include "xmc4_config.h"

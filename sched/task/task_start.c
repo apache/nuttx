@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
 #include <string.h>
 

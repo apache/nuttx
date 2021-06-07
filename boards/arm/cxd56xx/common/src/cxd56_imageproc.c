@@ -37,6 +37,7 @@
 #include <debug.h>
 
 #include <arch/chip/ge2d.h>
+#include <arch/chip/chip.h>
 #include <arch/board/cxd56_imageproc.h>
 
 #include "chip.h"
@@ -346,8 +347,8 @@ static void *set_rop_cmd(void *cmdbuf,
   rc->fixedcolor = patcolor;
   rc->srch = srcwidth - 1;
   rc->srcv = srcheight - 1;
-  rc->saddr = (uint32_t) (uintptr_t) srcaddr | MSEL;
-  rc->daddr = (uint32_t) (uintptr_t) destaddr | MSEL;
+  rc->saddr = CXD56_PHYSADDR(srcaddr) | MSEL;
+  rc->daddr = CXD56_PHYSADDR(destaddr) | MSEL;
   rc->spitch = srcpitch - 1;
   rc->dpitch = destpitch - 1;
   rc->desth = destwidth - 1;
@@ -377,19 +378,19 @@ static void *set_ab_cmd(void *cmdbuf, void *srcaddr, void *destaddr,
   ac->mode = fixedalpha;
   ac->srch = srcwidth - 1;
   ac->srcv = srcheight - 1;
-  ac->saddr = (uint32_t)(uintptr_t)srcaddr | MSEL;
-  ac->daddr = (uint32_t)(uintptr_t)destaddr | MSEL;
+  ac->saddr = CXD56_PHYSADDR(srcaddr) | MSEL;
+  ac->daddr = CXD56_PHYSADDR(destaddr) | MSEL;
   ac->spitch = srcpitch - 1;
   ac->dpitch = destpitch - 1;
   ac->fixedsrc = (uint32_t)fixedsrc;
   if (aaddr)
     {
-      ac->aaddr = (uint32_t)(uintptr_t)aaddr | MSEL;
+      ac->aaddr = CXD56_PHYSADDR(aaddr) | MSEL;
       ac->apitch = apitch - 1;
     }
   else
     {
-      ac->aaddr = (uint32_t)(uintptr_t)destaddr | MSEL;
+      ac->aaddr = CXD56_PHYSADDR(destaddr) | MSEL;
       ac->apitch = destpitch - 1;
     }
 
@@ -433,10 +434,10 @@ static void imageproc_convert_(int      is_yuv2rgb,
 
   putreg32(hsize, ROT_SET_SRC_HSIZE);
   putreg32(vsize, ROT_SET_SRC_VSIZE);
-  putreg32((uint32_t) (uintptr_t) ibuf, ROT_SET_SRC_ADDRESS);
+  putreg32(CXD56_PHYSADDR(ibuf), ROT_SET_SRC_ADDRESS);
 
   putreg32(hsize, ROT_SET_SRC_PITCH);
-  putreg32((uint32_t) (uintptr_t) ibuf, ROT_SET_DST_ADDRESS);
+  putreg32(CXD56_PHYSADDR(ibuf), ROT_SET_DST_ADDRESS);
 
   putreg32(hsize, ROT_SET_DST_PITCH);
 

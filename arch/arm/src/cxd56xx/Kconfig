@@ -1326,9 +1326,25 @@ endif
 
 config CXD56_TESTSET
 	bool "Use custom testset for spinlock"
-	default n
-	depends on SPINLOCK
+	default y
+	depends on SMP
 	---help---
-		Use custom testset based on hardware semaphore
+		Use custom testset
 
+if CXD56_TESTSET
+
+config CXD56_TESTSET_WITH_HWSEM
+	bool "Use custom testset based on hardware semaphore"
+	default n if CXD56_USE_SYSBUS
+	default y if !CXD56_USE_SYSBUS
+	---help---
+
+endif
+
+config CXD56_USE_SYSBUS
+	bool "Use the system bus for the data section"
+	default y
+	select ARCH_USE_MODULE_TEXT if ELF
+	---help---
+		To make ldrex/strex work correctly, this option must be enabled
 endmenu

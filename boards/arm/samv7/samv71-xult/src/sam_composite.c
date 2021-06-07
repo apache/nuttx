@@ -29,6 +29,7 @@
 #include <nuttx/usb/cdcacm.h>
 #include <nuttx/usb/usbmsc.h>
 #include <nuttx/usb/composite.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "samv71-xult.h"

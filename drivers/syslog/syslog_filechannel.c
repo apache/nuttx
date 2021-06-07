@@ -25,9 +25,13 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
+#include <unistd.h>
 #include <sched.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <nuttx/syslog/syslog.h>
 
@@ -49,6 +53,62 @@
 /* Handle to the SYSLOG channel */
 
 FAR static struct syslog_channel_s *g_syslog_file_channel;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_FILE_ROTATE
+static void log_rotate(FAR const char *log_file)
+{
+  int fd;
+  off_t size;
+  struct stat f_stat;
+  char *backup_file;
+
+  /* Get the size of the current log file. */
+
+  fd = open(log_file, O_RDONLY);
+  if (fd < 0)
+    {
+      return;
+    }
+
+  fstat(fd, &f_stat);
+  size = f_stat.st_size;
+  close(fd);
+
+  /* If it does not exceed the limit we are OK. */
+
+  if (size < CONFIG_SYSLOG_FILE_SIZE_LIMIT)
+    {
+      return;
+    }
+
+  /* Construct the backup file name. */
+
+  backup_file = malloc(strlen(log_file) + 3);
+  if (backup_file == NULL)
+    {
+      return;
+    }
+
+  sprintf(backup_file, "%s.0", log_file);
+
+  /* Delete any old backup files. */
+
+  if (access(backup_file, F_OK) == 0)
+    {
+      remove(backup_file);
+    }
+
+  /* Rotate the log. */
+
+  rename(log_file, backup_file);
+
+  free(backup_file);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -85,15 +145,12 @@ FAR static struct syslog_channel_s *g_syslog_file_channel;
  *     file.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   A pointer to the new SYSLOG channel; NULL is returned on any failure.
  *
  ****************************************************************************/
 
-int syslog_file_channel(FAR const char *devpath)
+FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath)
 {
-  int ret;
-
   /* Reset the default SYSLOG channel so that we can safely modify the
    * SYSLOG device.  This is an atomic operation and we should be safe
    * after the default channel has been selected.
@@ -111,13 +168,18 @@ int syslog_file_channel(FAR const char *devpath)
       syslog_dev_uninitialize(g_syslog_file_channel);
     }
 
+  /* Rotate the log file, if needed. */
+
+#ifdef CONFIG_SYSLOG_FILE_ROTATE
+  log_rotate(devpath);
+#endif
+
   /* Then initialize the file interface */
 
   g_syslog_file_channel = syslog_dev_initialize(devpath, OPEN_FLAGS,
                                                 OPEN_MODE);
   if (g_syslog_file_channel == NULL)
     {
-      ret = -ENOMEM;
       goto errout_with_lock;
     }
 
@@ -125,11 +187,15 @@ int syslog_file_channel(FAR const char *devpath)
    * screwed.
    */
 
-  ret = syslog_channel(g_syslog_file_channel);
+  if (syslog_channel(g_syslog_file_channel) != OK)
+    {
+      syslog_dev_uninitialize(g_syslog_file_channel);
+      g_syslog_file_channel = NULL;
+    }
 
 errout_with_lock:
   sched_unlock();
-  return ret;
+  return g_syslog_file_channel;
 }
 
 #endif /* CONFIG_SYSLOG_FILE */

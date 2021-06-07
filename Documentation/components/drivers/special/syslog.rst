@@ -392,7 +392,8 @@ mounting of the file systems.
 The interface ``syslog_file_channel()`` is used to configure the
 SYSLOG file channel:
 
-.. c:function:: int syslog_file_channel(FAR const char *devpath);
+.. c:function:: FAR struct syslog_channel_s *
+                    syslog_file_channel(FAR const char *devpath);
 
   Configure to use a file in a mounted file system
   at ``devpath`` as the SYSLOG channel.
@@ -423,8 +424,8 @@ SYSLOG file channel:
     ``syslog_file_channel()`` will create the file.
 
   :return:
-    Zero (``OK``) is returned on success; a
-    negated ``errno`` value is returned on any failure.
+    A pointer to the new syslog channel; ``NULL`` is returned
+    on any failure.
 
   References: ``drivers/syslog/syslog_filechannel.c``,
   ``drivers/syslog/syslog_device.c``, and

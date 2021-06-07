@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>

@@ -27,6 +27,7 @@
 #if defined(CONFIG_ESP32C3_SPI) && defined(CONFIG_SPI_SLAVE)
 
 #include <assert.h>
+#include <debug.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -118,7 +119,7 @@
 struct spislave_config_s
 {
   int32_t width;              /* SPI Slave default width */
-  enum spi_smode_e mode;      /* SPI Slave default mode */
+  enum spi_slave_mode_e mode; /* SPI Slave default mode */
 
   uint8_t cs_pin;             /* GPIO configuration for CS */
   uint8_t mosi_pin;           /* GPIO configuration for MOSI */
@@ -146,28 +147,28 @@ struct spislave_priv_s
 {
   /* Externally visible part of the SPI Slave controller interface */
 
-  struct spi_sctrlr_s sctrlr;
+  struct spi_slave_ctrlr_s ctrlr;
 
   /* Reference to SPI Slave device interface */
 
-  struct spi_sdev_s *sdev;
+  struct spi_slave_dev_s *dev;
 
   /* Port configuration */
 
   const struct spislave_config_s *config;
-  int refs;              /* Reference count */
-  int cpuint;            /* SPI interrupt ID */
+  int refs;                   /* Reference count */
+  int cpuint;                 /* SPI interrupt ID */
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-  int32_t dma_channel;   /* Channel assigned by the GDMA driver */
+  int32_t dma_channel;        /* Channel assigned by the GDMA driver */
 #endif
-  enum spi_smode_e mode; /* Current SPI Slave hardware mode */
-  uint8_t nbits;         /* Current SPI send/receive bits once transmission */
-  uint32_t tx_length;    /* Location of next TX value */
+  enum spi_slave_mode_e mode; /* Current SPI Slave hardware mode */
+  uint8_t nbits;              /* Current configured bit width */
+  uint32_t tx_length;         /* Location of next TX value */
 
   /* SPI Slave TX queue buffer */
 
   uint8_t tx_buffer[SPI_SLAVE_BUFSIZE];
-  uint32_t rx_length;    /* Location of next RX value */
+  uint32_t rx_length;         /* Location of next RX value */
 
   /* SPI Slave RX queue buffer */
 
@@ -193,9 +194,9 @@ static int spislave_periph_interrupt(int irq, void *context, FAR void *arg);
 
 /* SPI Slave controller internal functions */
 
-static void spislave_setmode(FAR struct spi_sctrlr_s *dev,
-                             enum spi_smode_e mode);
-static void spislave_setbits(FAR struct spi_sctrlr_s *dev, int nbits);
+static void spislave_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
+                             enum spi_slave_mode_e mode);
+static void spislave_setbits(FAR struct spi_slave_ctrlr_s *ctrlr, int nbits);
 static void spislave_store_result(FAR struct spislave_priv_s *priv,
                                   uint32_t recv_bytes);
 static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv);
@@ -208,22 +209,22 @@ static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv);
 #else
 static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv);
 #endif
-static void spislave_initialize(FAR struct spi_sctrlr_s *sctrlr);
-static void spislave_deinitialize(FAR struct spi_sctrlr_s *sctrlr);
+static void spislave_initialize(FAR struct spi_slave_ctrlr_s *ctrlr);
+static void spislave_deinitialize(FAR struct spi_slave_ctrlr_s *ctrlr);
 
 /* SPI Slave controller operations */
 
-static void spislave_bind(FAR struct spi_sctrlr_s *sctrlr,
-                          FAR struct spi_sdev_s *sdev,
-                          enum spi_smode_e mode,
+static void spislave_bind(FAR struct spi_slave_ctrlr_s *ctrlr,
+                          FAR struct spi_slave_dev_s *dev,
+                          enum spi_slave_mode_e mode,
                           int nbits);
-static void spislave_unbind(FAR struct spi_sctrlr_s *sctrlr);
-static int spislave_enqueue(FAR struct spi_sctrlr_s *sctrlr,
+static void spislave_unbind(FAR struct spi_slave_ctrlr_s *ctrlr);
+static int spislave_enqueue(FAR struct spi_slave_ctrlr_s *ctrlr,
                             FAR const void *data,
                             size_t nwords);
-static bool spislave_qfull(FAR struct spi_sctrlr_s *sctrlr);
-static void spislave_qflush(FAR struct spi_sctrlr_s *sctrlr);
-static size_t spislave_qpoll(FAR struct spi_sctrlr_s *sctrlr);
+static bool spislave_qfull(FAR struct spi_slave_ctrlr_s *ctrlr);
+static void spislave_qflush(FAR struct spi_slave_ctrlr_s *ctrlr);
+static size_t spislave_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr);
 
 /****************************************************************************
  * Private Data
@@ -256,7 +257,7 @@ static const struct spislave_config_s esp32c3_spi2slave_config =
   .clk_outsig   = FSPICLK_OUT_IDX
 };
 
-static const struct spi_sctrlrops_s esp32c3_spi2slave_ops =
+static const struct spi_slave_ctrlrops_s esp32c3_spi2slave_ops =
 {
   .bind     = spislave_bind,
   .unbind   = spislave_unbind,
@@ -268,11 +269,11 @@ static const struct spi_sctrlrops_s esp32c3_spi2slave_ops =
 
 static struct spislave_priv_s esp32c3_spi2slave_priv =
 {
-  .sctrlr        =
+  .ctrlr         =
                   {
                     .ops = &esp32c3_spi2slave_ops
                   },
-  .sdev          = NULL,
+  .dev           = NULL,
   .config        = &esp32c3_spi2slave_config,
   .refs          = 0,
   .cpuint        = -ENOMEM,
@@ -402,21 +403,21 @@ static inline void spislave_dma_rx_fifo_reset(void)
  * Name: spislave_setmode
  *
  * Description:
- *   Set the SPI mode.
+ *   Set the SPI Slave mode.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
- *   mode   - Requested SPI Slave mode
+ *   ctrlr - SPI Slave controller interface instance
+ *   mode  - Requested SPI Slave mode
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spislave_setmode(FAR struct spi_sctrlr_s *sctrlr,
-                             enum spi_smode_e mode)
+static void spislave_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
+                             enum spi_slave_mode_e mode)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
 
   spiinfo("mode=%d\n", mode);
 
@@ -489,17 +490,17 @@ static void spislave_setmode(FAR struct spi_sctrlr_s *sctrlr,
  *   Set the number of bits per word.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
- *   nbits  - The number of bits in an SPI word
+ *   ctrlr - SPI Slave controller interface instance
+ *   nbits - The number of bits in an SPI word
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spislave_setbits(FAR struct spi_sctrlr_s *sctrlr, int nbits)
+static void spislave_setbits(FAR struct spi_slave_ctrlr_s *ctrlr, int nbits)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -530,7 +531,7 @@ static int spislave_cs_interrupt(int irq, void *context, FAR void *arg)
   if (priv->is_processing)
     {
       priv->is_processing = false;
-      SPI_SDEV_SELECT(priv->sdev, false);
+      SPIS_DEV_SELECT(priv->dev, false);
     }
 
   return 0;
@@ -856,7 +857,7 @@ static int spislave_periph_interrupt(int irq, void *context, FAR void *arg)
 
   if (!priv->is_processing)
     {
-      SPI_SDEV_SELECT(priv->sdev, true);
+      SPIS_DEV_SELECT(priv->dev, true);
       priv->is_processing = true;
     }
 
@@ -881,7 +882,7 @@ static int spislave_periph_interrupt(int irq, void *context, FAR void *arg)
   if (priv->is_processing && esp32c3_gpioread(priv->config->cs_pin))
     {
       priv->is_processing = false;
-      SPI_SDEV_SELECT(priv->sdev, false);
+      SPIS_DEV_SELECT(priv->dev, false);
     }
 
   /* Clear the trans_done interrupt flag */
@@ -952,19 +953,19 @@ void spislave_dma_init(FAR struct spislave_priv_s *priv)
  *   Initialize ESP32-C3 SPI Slave hardware interface.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spislave_initialize(FAR struct spi_sctrlr_s *sctrlr)
+static void spislave_initialize(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   const struct spislave_config_s *config = priv->config;
 
-  spiinfo("sctrlr=%p\n", sctrlr);
+  spiinfo("ctrlr=%p\n", ctrlr);
 
   esp32c3_gpiowrite(config->cs_pin, 1);
   esp32c3_gpiowrite(config->mosi_pin, 1);
@@ -1044,16 +1045,16 @@ static void spislave_initialize(FAR struct spi_sctrlr_s *sctrlr)
  *   Deinitialize ESP32-C3 SPI Slave hardware interface.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spislave_deinitialize(FAR struct spi_sctrlr_s *sctrlr)
+static void spislave_deinitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
 
   esp32c3_gpioirqdisable(ESP32C3_PIN2IRQ(priv->config->cs_pin));
 
@@ -1086,10 +1087,10 @@ static void spislave_deinitialize(FAR struct spi_sctrlr_s *sctrlr)
  *   transfers.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
- *   sdev   - SPI Slave device interface instance
- *   mode   - The SPI mode requested
- *   nbits  - The number of bits requests.
+ *   ctrlr - SPI Slave controller interface instance
+ *   dev   - SPI Slave device interface instance
+ *   mode  - The SPI mode requested
+ *   nbits - The number of bits requests.
  *            If value is greater than 0, then it implies MSB first
  *            If value is less than 0, then it implies LSB first with -nbits
  *
@@ -1102,41 +1103,41 @@ static void spislave_deinitialize(FAR struct spi_sctrlr_s *sctrlr)
  *
  ****************************************************************************/
 
-static void spislave_bind(FAR struct spi_sctrlr_s *sctrlr,
-                          FAR struct spi_sdev_s *sdev,
-                          enum spi_smode_e mode,
+static void spislave_bind(FAR struct spi_slave_ctrlr_s *ctrlr,
+                          FAR struct spi_slave_dev_s *dev,
+                          enum spi_slave_mode_e mode,
                           int nbits)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   FAR const void *data = NULL;
   irqstate_t flags;
   size_t num_words;
 
-  spiinfo("sctrlr=%p sdev=%p mode=%d nbits=%d\n", sctrlr, sdev, mode, nbits);
+  spiinfo("ctrlr=%p dev=%p mode=%d nbits=%d\n", ctrlr, dev, mode, nbits);
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(priv->sdev == NULL);
-  DEBUGASSERT(sdev != NULL);
+  DEBUGASSERT(priv->dev == NULL);
+  DEBUGASSERT(dev != NULL);
   DEBUGASSERT(nbits > 0);
 
   flags = enter_critical_section();
 
-  priv->sdev = sdev;
+  priv->dev = dev;
 
-  SPI_SDEV_SELECT(sdev, false);
+  SPIS_DEV_SELECT(dev, false);
 
-  SPI_SDEV_CMDDATA(sdev, false);
+  SPIS_DEV_CMDDATA(dev, false);
 
   priv->rx_length = 0;
   priv->tx_length = 0;
   priv->is_tx_enabled = false;
 
-  spislave_initialize(sctrlr);
+  spislave_initialize(ctrlr);
 
-  spislave_setmode(sctrlr, mode);
-  spislave_setbits(sctrlr, nbits);
+  spislave_setmode(ctrlr, mode);
+  spislave_setbits(ctrlr, nbits);
 
-  num_words = SPI_SDEV_GETDATA(sdev, &data);
+  num_words = SPIS_DEV_GETDATA(dev, &data);
 
   if (data != NULL && num_words > 0)
     {
@@ -1161,22 +1162,22 @@ static void spislave_bind(FAR struct spi_sctrlr_s *sctrlr,
  *   controller driver to its initial state.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spislave_unbind(FAR struct spi_sctrlr_s *sctrlr)
+static void spislave_unbind(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(priv->sdev != NULL);
+  DEBUGASSERT(priv->dev != NULL);
 
-  spiinfo("Unbinding %p\n", priv->sdev);
+  spiinfo("Unbinding %p\n", priv->dev);
 
   flags = enter_critical_section();
 
@@ -1194,7 +1195,7 @@ static void spislave_unbind(FAR struct spi_sctrlr_s *sctrlr)
 
   resetbits(priv->config->clk_bit, SYSTEM_PERIP_CLK_EN0_REG);
 
-  priv->sdev = NULL;
+  priv->dev = NULL;
 
   leave_critical_section(flags);
 }
@@ -1208,36 +1209,36 @@ static void spislave_unbind(FAR struct spi_sctrlr_s *sctrlr)
  *   effect on any in-process or currently "committed" transfers.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
- *   data   - Pointer to the command/data mode data to be shifted out.
- *            The data width must be aligned to the nbits parameter which was
- *            previously provided to the bind() method.
- *   len    - Number of units of "nbits" wide to enqueue,
- *            "nbits" being the data width previously provided to the bind()
- *            method.
+ *   ctrlr - SPI Slave controller interface instance
+ *   data  - Pointer to the command/data mode data to be shifted out.
+ *           The data width must be aligned to the nbits parameter which was
+ *           previously provided to the bind() method.
+ *   len   - Number of units of "nbits" wide to enqueue,
+ *           "nbits" being the data width previously provided to the bind()
+ *           method.
  *
  * Returned Value:
  *   Number of data items successfully queued, or a negated errno:
- *          - "len" if all the data was successfully queued
- *          - "0..len-1" if queue is full
- *          - "-errno" in any other error
+ *         - "len" if all the data was successfully queued
+ *         - "0..len-1" if queue is full
+ *         - "-errno" in any other error
  *
  ****************************************************************************/
 
-static int spislave_enqueue(FAR struct spi_sctrlr_s *sctrlr,
+static int spislave_enqueue(FAR struct spi_slave_ctrlr_s *ctrlr,
                             FAR const void *data,
                             size_t len)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   size_t num_bytes = WORDS2BYTES(priv, len);
   size_t bufsize;
   irqstate_t flags;
   int enqueued_words;
 
-  spiinfo("sctrlr=%p, data=%p, num_bytes=%zu\n", sctrlr, data, num_bytes);
+  spiinfo("ctrlr=%p, data=%p, num_bytes=%zu\n", ctrlr, data, num_bytes);
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(priv->sdev != NULL);
+  DEBUGASSERT(priv->dev != NULL);
 
   flags = enter_critical_section();
 
@@ -1272,23 +1273,23 @@ static int spislave_enqueue(FAR struct spi_sctrlr_s *sctrlr,
  *   additional word to the queue.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   true if the output queue is full, false otherwise.
  *
  ****************************************************************************/
 
-static bool spislave_qfull(FAR struct spi_sctrlr_s *sctrlr)
+static bool spislave_qfull(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
   bool is_full = false;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(priv->sdev != NULL);
+  DEBUGASSERT(priv->dev != NULL);
 
-  spiinfo("sctrlr=%p\n", sctrlr);
+  spiinfo("ctrlr=%p\n", ctrlr);
 
   flags = enter_critical_section();
   is_full = priv->tx_length == SPI_SLAVE_BUFSIZE;
@@ -1306,22 +1307,22 @@ static bool spislave_qfull(FAR struct spi_sctrlr_s *sctrlr)
  *   "committed" output values may not be flushed.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spislave_qflush(FAR struct spi_sctrlr_s *sctrlr)
+static void spislave_qflush(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(priv->sdev != NULL);
+  DEBUGASSERT(priv->dev != NULL);
 
-  spiinfo("sctrlr=%p\n", sctrlr);
+  spiinfo("ctrlr=%p\n", ctrlr);
 
   flags = enter_critical_section();
   priv->tx_length = 0;
@@ -1336,7 +1337,7 @@ static void spislave_qflush(FAR struct spi_sctrlr_s *sctrlr)
  *   Tell the controller to output all the receive queue data.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   Number of units of width "nbits" left in the RX queue. If the device
@@ -1344,22 +1345,22 @@ static void spislave_qflush(FAR struct spi_sctrlr_s *sctrlr)
  *
  ****************************************************************************/
 
-static size_t spislave_qpoll(FAR struct spi_sctrlr_s *sctrlr)
+static size_t spislave_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
   uint32_t tmp;
   uint32_t recv_n;
   size_t remaining_words;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(priv->sdev != NULL);
+  DEBUGASSERT(priv->dev != NULL);
 
-  spiinfo("sctrlr=%p\n", sctrlr);
+  spiinfo("ctrlr=%p\n", ctrlr);
 
   flags = enter_critical_section();
 
-  tmp = SPI_SDEV_RECEIVE(priv->sdev, priv->rx_buffer,
+  tmp = SPIS_DEV_RECEIVE(priv->dev, priv->rx_buffer,
                          BYTES2WORDS(priv, priv->rx_length));
   recv_n = WORDS2BYTES(priv, tmp);
   if (recv_n < priv->rx_length)
@@ -1384,7 +1385,7 @@ static size_t spislave_qpoll(FAR struct spi_sctrlr_s *sctrlr)
 }
 
 /****************************************************************************
- * Name: esp32c3_spislave_sctrlr_initialize
+ * Name: esp32c3_spislave_ctrlr_initialize
  *
  * Description:
  *   Initialize the selected SPI Slave bus.
@@ -1398,9 +1399,9 @@ static size_t spislave_qpoll(FAR struct spi_sctrlr_s *sctrlr)
  *
  ****************************************************************************/
 
-FAR struct spi_sctrlr_s *esp32c3_spislave_sctrlr_initialize(int port)
+FAR struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port)
 {
-  FAR struct spi_sctrlr_s *spislave_dev;
+  FAR struct spi_slave_ctrlr_s *spislave_dev;
   FAR struct spislave_priv_s *priv;
   irqstate_t flags;
 
@@ -1415,7 +1416,7 @@ FAR struct spi_sctrlr_s *esp32c3_spislave_sctrlr_initialize(int port)
         return NULL;
     }
 
-  spislave_dev = (FAR struct spi_sctrlr_s *)priv;
+  spislave_dev = (FAR struct spi_slave_ctrlr_s *)priv;
 
   flags = enter_critical_section();
 
@@ -1470,25 +1471,25 @@ FAR struct spi_sctrlr_s *esp32c3_spislave_sctrlr_initialize(int port)
 }
 
 /****************************************************************************
- * Name: esp32c3_spislave_sctrlr_uninitialize
+ * Name: esp32c3_spislave_ctrlr_uninitialize
  *
  * Description:
  *   Uninitialize an SPI Slave bus.
  *
  * Input Parameters:
- *   sctrlr - SPI Slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   Zero (OK) is returned on success. Otherwise -1 (ERROR).
  *
  ****************************************************************************/
 
-int esp32c3_spislave_sctrlr_uninitialize(FAR struct spi_sctrlr_s *sctrlr)
+int esp32c3_spislave_ctrlr_uninitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)sctrlr;
+  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
 
-  DEBUGASSERT(sctrlr != NULL);
+  DEBUGASSERT(ctrlr != NULL);
 
   if (priv->refs == 0)
     {
@@ -1507,7 +1508,7 @@ int esp32c3_spislave_sctrlr_uninitialize(FAR struct spi_sctrlr_s *sctrlr)
   esp32c3_free_cpuint(priv->config->periph);
   priv->cpuint = -ENOMEM;
 
-  spislave_deinitialize(sctrlr);
+  spislave_deinitialize(ctrlr);
 
   leave_critical_section(flags);
 

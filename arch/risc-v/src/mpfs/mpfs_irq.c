@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
@@ -156,16 +157,9 @@ void up_disable_irq(int irq)
 
       asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
     }
-  else if (irq >= MPFS_IRQ_GLOBAL_START)
+  else if (irq >= MPFS_IRQ_EXT_START)
     {
-      /* REVISIT:
-       * Comment from baremetal lib:
-       * OFFSET_TO_MSS_GLOBAL_INTS:
-       * "Think this was required in early bitfile"
-       * Seems to be still true with 2021.04 release
-       */
-
-      extirq = (irq - MPFS_IRQ_GLOBAL_START) + OFFSET_TO_MSS_GLOBAL_INTS;
+      extirq = irq - MPFS_IRQ_EXT_START;
 
       /* Clear enable bit for the irq */
 
@@ -173,7 +167,7 @@ void up_disable_irq(int irq)
       uintptr_t miebase = MPFS_PLIC_H1_MIE0 +
                           ((hart_id - 1) * MPFS_HART_MIE_OFFSET);
 
-      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_GLOBAL_START)
+      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
         {
           modifyreg32(miebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
         }
@@ -209,16 +203,9 @@ void up_enable_irq(int irq)
 
       asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
     }
-  else if (irq >= MPFS_IRQ_GLOBAL_START)
+  else if (irq >= MPFS_IRQ_EXT_START)
     {
-      /* REVISIT:
-       * Comment from baremetal lib:
-       * OFFSET_TO_MSS_GLOBAL_INTS:
-       * "Think this was required in early bitfile"
-       * Seems to be still true with 2021.04 release
-       */
-
-      extirq = (irq - MPFS_IRQ_GLOBAL_START) + OFFSET_TO_MSS_GLOBAL_INTS;
+      extirq = irq - MPFS_IRQ_EXT_START;
 
       /* Set enable bit for the irq */
 
@@ -226,7 +213,7 @@ void up_enable_irq(int irq)
       uintptr_t miebase = MPFS_PLIC_H1_MIE0 +
                           ((hart_id - 1) * MPFS_HART_MIE_OFFSET);
 
-      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_GLOBAL_START)
+      if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
         {
           modifyreg32(miebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
         }

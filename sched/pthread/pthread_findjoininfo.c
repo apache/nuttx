@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 
 #include "group/group.h"
 #include "pthread/pthread.h"

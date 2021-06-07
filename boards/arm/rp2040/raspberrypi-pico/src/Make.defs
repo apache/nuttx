@@ -32,6 +32,10 @@ ifeq ($(CONFIG_SPI),y)
 CSRCS += rp2040_spi.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += rp2040_gpio.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
