@@ -312,7 +312,7 @@ int task_spawn(FAR const char *name, main_t entry,
 {
   struct sched_param param;
   pid_t proxy;
-  pid_t pid;
+  pid_t pid = INVALID_PROCESS_ID;
 #ifdef CONFIG_SCHED_WAITPID
   int status;
 #endif
@@ -374,6 +374,7 @@ int task_spawn(FAR const char *name, main_t entry,
   if (ret < 0)
     {
       serr("ERROR: nxsched_get_param failed: %d\n", ret);
+      g_spawn_parms.pid = NULL;
       spawn_semgive(&g_spawn_parmsem);
       return ret;
     }
@@ -442,6 +443,7 @@ errout_with_lock:
 #ifdef CONFIG_SCHED_WAITPID
   sched_unlock();
 #endif
+  g_spawn_parms.pid = NULL;
   spawn_semgive(&g_spawn_parmsem);
   return ret;
 }
