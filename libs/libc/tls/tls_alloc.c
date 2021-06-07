@@ -66,10 +66,9 @@ int tls_alloc(void)
    */
 
   ret = _SEM_WAIT(&tinfo->ta_tlssem);
-
-  if (ERROR == ret)
+  if (ret < 0)
     {
-      ret = -get_errno();
+      ret = _SEM_ERRVAL(ret);
       goto errout_with_errno;
     }
 
