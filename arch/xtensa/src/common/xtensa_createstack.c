@@ -280,7 +280,8 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
   /* Take extra care that we do not write outside the stack boundaries */
 
   start = STACK_ALIGN_UP((uintptr_t)stackbase);
-  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+  end   = nbytes ? STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
+          up_getsp(); /* 0: colorize the running stack */
 
   /* Get the adjusted size based on the top and bottom of the stack */
 

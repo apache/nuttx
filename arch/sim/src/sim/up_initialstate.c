@@ -55,8 +55,17 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(up_getsp() -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      up_stack_color(tcb->stack_alloc_ptr, 0);
+#endif /* CONFIG_STACK_COLORATION */
     }
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));
