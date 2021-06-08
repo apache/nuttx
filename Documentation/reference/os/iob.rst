@@ -191,13 +191,15 @@ Public Function Prototypes
   buffer at the head of the free list without waiting for a buffer
   to become free.
 
-.. c:function:: FAR struct iob_s *iob_free(FAR struct iob_s *iob);
+.. c:function:: FAR struct iob_s *iob_free(FAR struct iob_s *iob, \
+                                           enum iob_user_e producerid);
 
   Free the I/O buffer at the head of a buffer chain
   returning it to the free list. The link to the next I/O buffer in
   the chain is return.
 
-.. c:function:: void iob_free_chain(FAR struct iob_s *iob);
+.. c:function:: void iob_free_chain(FAR struct iob_s *iob, \
+                                    enum iob_user_e producerid);
 
   Free an entire buffer chain, starting at the
   beginning of the I/O buffer chain
@@ -231,7 +233,8 @@ Public Function Prototypes
   :return: Returns a reference to the I/O buffer chain at
     the head of the queue.
 
-.. c:function:: void iob_free_queue(FAR struct iob_queue_s *qhead);
+.. c:function:: void iob_free_queue(FAR struct iob_queue_s *qhead, \
+                                    enum iob_user_e producerid);
 
   Free an entire queue of I/O buffer chains.
 
@@ -265,14 +268,15 @@ Public Function Prototypes
 
   Concatenate iob_s chain iob2 to iob1.
 
-.. c:function:: FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
+.. c:function:: FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, \
+                   unsigned int trimlen, enum iob_user_e producerid)
 
   Remove bytes from the beginning of an I/O chain.
   Emptied I/O buffers are freed and, hence, the beginning of the
   chain may change.
 
 .. c:function:: FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead, \
-                                        unsigned int trimlen);
+                                        unsigned int trimlen, enum iob_user_e producerid);
 
   Remove bytes from the beginning of an I/O chain
   at the head of the queue. Emptied I/O buffers are freed and,
@@ -285,19 +289,22 @@ Public Function Prototypes
   :return: The new iob at the head of the queue is
     returned.
 
-.. c:function:: FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
+.. c:function:: FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, \
+                                        unsigned int trimlen, enum iob_user_e producerid);
 
   Remove bytes from the end of an I/O chain.
   Emptied I/O buffers are freed NULL will be returned in the special
   case where the entry I/O buffer chain is freed.
 
-.. c:function:: FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
+.. c:function:: FAR struct iob_s *iob_pack(FAR struct iob_s *iob, \
+                                        enum iob_user_e producerid);
 
   Pack all data in the I/O buffer chain so that the
   data offset is zero and all but the final buffer in the chain are
   filled. Any emptied buffers at the end of the chain are freed.
 
-.. c:function:: int iob_contig(FAR struct iob_s *iob, unsigned int len);
+.. c:function:: int iob_contig(FAR struct iob_s *iob, unsigned int len, \
+                                        enum iob_user_e producerid);
 
   Ensure that there is ``len`` bytes of contiguous
   space at the beginning of the I/O buffer chain starting at
