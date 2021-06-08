@@ -352,6 +352,8 @@ struct inode
   int16_t           i_crefs;    /* References to inode */
   uint16_t          i_flags;    /* Flags for inode */
   union inode_ops_u u;          /* Inode operations */
+  uid_t             i_uid;      /* The ID of the inode owner */
+  gid_t             i_gid;      /* The ID of the inode owner group */
 #ifdef CONFIG_FILE_MODE
   mode_t            i_mode;     /* Access mode flags */
 #endif

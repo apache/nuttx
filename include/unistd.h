@@ -315,6 +315,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
 ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 int     ftruncate(int fd, off_t length);
+int     fchown(int fd, uid_t owner, gid_t group);
 
 #ifdef CONFIG_SERIAL_TERMIOS
 /* Check if a file descriptor corresponds to a terminal I/O file */
@@ -351,6 +352,8 @@ int     unlink(FAR const char *pathname);
 int     truncate(FAR const char *path, off_t length);
 int     symlink(FAR const char *path1, FAR const char *path2);
 ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize);
+int     chown(FAR const char *pathname, uid_t owner, gid_t group);
+int     lchown(FAR const char *pathname, uid_t owner, gid_t group);
 
 /* Execution of programs from files */
 
