@@ -97,37 +97,9 @@ static uint16_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
 uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
                             FAR struct tcp_conn_s *conn)
 {
-  uint16_t iplen;
-  uint16_t mss;
   uint16_t recvwndo;
   int niob_avail;
   int nqentry_avail;
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  if (IFF_IS_IPv6(dev->d_flags))
-#endif
-    {
-      iplen = IPv6_HDRLEN;
-    }
-#endif /* CONFIG_NET_IPv6 */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  else
-#endif
-    {
-      iplen = IPv4_HDRLEN;
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-  /* Calculate the packet MSS.
-   *
-   * REVISIT:  The actual TCP header length is variable.  TCP_HDRLEN
-   * is the minimum size.
-   */
-
-  mss = dev->d_pktsize - (NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN);
 
   /* Update the TCP received window based on read-ahead I/O buffer
    * and IOB chain availability.  At least one queue entry is required.
@@ -186,7 +158,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        *   than when eg. a single IOB is available.
        */
 
-      recvwndo = mss;
+      recvwndo = tcp_rx_mss(dev);
     }
   else /* nqentry_avail == 0 || niob_avail == 0 */
     {
