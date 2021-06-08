@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>

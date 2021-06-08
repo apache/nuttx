@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 /* Output debug info even if debug output is not selected. */
 
 #undef  CONFIG_DEBUG_INFO
