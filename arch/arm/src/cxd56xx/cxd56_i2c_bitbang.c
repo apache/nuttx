@@ -23,6 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <assert.h>
+
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/i2c/i2c_bitbang.h>
 #include <nuttx/kmalloc.h>
