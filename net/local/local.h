@@ -664,6 +664,16 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 
 int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 
+/****************************************************************************
+ * Name: local_generate_instance_id
+ *
+ * Description:
+ *   Generate instance ID for stream
+ *
+ ****************************************************************************/
+
+int32_t local_generate_instance_id(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
