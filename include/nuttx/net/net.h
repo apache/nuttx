@@ -197,6 +197,7 @@ struct sock_intf_s
   CODE int        (*si_close)(FAR struct socket *psock);
   CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
                     FAR void *arg, size_t arglen);
+  CODE int        (*si_socketpair)(FAR struct socket *psocks[2]);
 #ifdef CONFIG_NET_SENDFILE
   CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
@@ -1422,6 +1423,27 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap);
  ****************************************************************************/
 
 int psock_fcntl(FAR struct socket *psock, int cmd, ...);
+
+/****************************************************************************
+ * Name: psock_socketpair
+ *
+ * Description:
+ * Create an unbound pair of connected sockets in a specified domain, of a
+ * specified type, under the protocol optionally specified by the protocol
+ * argument. The two sockets shall be identical. The file descriptors used
+ * in referencing the created sockets shall be returned in
+ * sv[0] and sv[1].
+ *
+ * Input Parameters:
+ *   domain   (see sys/socket.h)
+ *   type     (see sys/socket.h)
+ *   protocol (see sys/socket.h)
+ *   psocks   A pointer to a user allocated socket structure to be paired.
+ *
+ ****************************************************************************/
+
+int psock_socketpair(int domain, int type, int protocol,
+                     FAR struct socket *psocks[2]);
 
 /****************************************************************************
  * Name: netdev_register

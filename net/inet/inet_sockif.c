@@ -32,6 +32,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/tcp.h>
 #include <nuttx/kmalloc.h>
 
 #include "tcp/tcp.h"
@@ -43,6 +44,17 @@
 #include "inet/inet.h"
 
 #ifdef HAVE_INET_SOCKETS
+
+/****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+union sockaddr_u
+{
+  struct sockaddr     addr;
+  struct sockaddr_in  inaddr;
+  struct sockaddr_in6 in6addr;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -78,6 +90,7 @@ static ssize_t    inet_recvmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
 static int        inet_ioctl(FAR struct socket *psock, int cmd,
                     FAR void *arg, size_t arglen);
+static int        inet_socketpair(FAR struct socket *psocks[2]);
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
@@ -103,7 +116,8 @@ static const struct sock_intf_s g_inet_sockif =
   inet_sendmsg,     /* si_sendmsg */
   inet_recvmsg,     /* si_recvmsg */
   inet_close,       /* si_close */
-  inet_ioctl        /* si_ioctl */
+  inet_ioctl,       /* si_ioctl */
+  inet_socketpair   /* si_socketpair */
 #ifdef CONFIG_NET_SENDFILE
   ,
   inet_sendfile     /* si_sendfile */
@@ -1326,6 +1340,130 @@ static int inet_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
   return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: inet_socketpair
+ *
+ * Description:
+ *   Create a pair of connected sockets between psocks[2]
+ *
+ * Parameters:
+ *   psocks   A reference to the socket structure of the socket pair
+ *
+ ****************************************************************************/
+
+static int inet_socketpair(FAR struct socket *psocks[2])
+{
+  FAR struct socket *pserver;
+  FAR struct socket server;
+  union sockaddr_u addr[2];
+  socklen_t len;
+  int ret;
+
+  /* Set the sock address to localhost */
+
+#ifdef CONFIG_NET_IPv6
+  if (psocks[0]->s_domain == AF_INET6)
+    {
+      struct in6_addr init_sin6_addr = IN6ADDR_LOOPBACK_INIT;
+
+      len = sizeof(addr[0].in6addr);
+      memset(&addr[0], 0, len);
+      addr[0].in6addr.sin6_family = psocks[0]->s_domain;
+      addr[0].in6addr.sin6_addr = init_sin6_addr;
+    }
+  else
+#endif
+    {
+      len = sizeof(addr[0].inaddr);
+      memset(&addr[0], 0, len);
+      addr[0].inaddr.sin_family = psocks[0]->s_domain;
+      addr[0].inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    }
+
+  memcpy(&addr[1], &addr[0], len);
+
+  ret = psock_bind(psocks[0], &addr[0].addr, len);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  psock_getsockname(psocks[0], &addr[0].addr, &len);
+
+  /* For SOCK_STREAM, Use proxy service handle to make temporary
+   * pserver process, psocks[1] will be replaced with a new accept handle
+   */
+
+  if (psocks[0]->s_type == SOCK_STREAM)
+    {
+      ret = psock_socket(psocks[1]->s_domain, psocks[1]->s_type,
+                         psocks[1]->s_proto, &server);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      pserver = &server;
+    }
+  else
+    {
+      pserver = psocks[1];
+    }
+
+  ret = psock_bind(pserver, &addr[1].addr, len);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  psock_getsockname(pserver, &addr[1].addr, &len);
+
+  if (psocks[0]->s_type == SOCK_DGRAM)
+    {
+      ret = psock_connect(psocks[0], &addr[1].addr, len);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      ret = psock_connect(pserver, &addr[0].addr, len);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
+  else
+    {
+      ret = psock_listen(pserver, 2);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      ret = psock_connect(psocks[0], &addr[1].addr, len);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      /* Release the resource of psocks[1], accept will replace
+       * this handle
+       */
+
+      psock_close(psocks[1]);
+
+      ret = psock_accept(pserver, &addr[1].addr, &len, psocks[1]);
+    }
+
+errout:
+  if (pserver->s_type == SOCK_STREAM)
+    {
+      psock_close(pserver);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
