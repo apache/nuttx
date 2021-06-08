@@ -161,7 +161,7 @@ static int icmpv6_setup(FAR struct socket *psock, int protocol)
 
 static sockcaps_t icmpv6_sockcaps(FAR struct socket *psock)
 {
-  return 0;
+  return SOCKCAP_NONBLOCKING;
 }
 
 /****************************************************************************
