@@ -164,6 +164,7 @@ Public Function Prototypes
   - :c:func:`iob_remove_queue()`
   - :c:func:`iob_peek_queue()`
   - :c:func:`iob_free_queue()`
+  - :c:func:`iob_free_queue_qentry()`
   - :c:func:`iob_copyin()`
   - :c:func:`iob_trycopyin()`
   - :c:func:`iob_copyout()`
@@ -237,6 +238,11 @@ Public Function Prototypes
                                     enum iob_user_e producerid);
 
   Free an entire queue of I/O buffer chains.
+
+.. c:function:: void iob_free_queue_qentry(FAR struct iob_s *iob, \
+                  FAR struct iob_queue_s *iobq);
+
+  Free an iob entire queue of I/O buffer chains.
 
 .. c:function:: int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src, \
                   unsigned int len, unsigned int offset, bool throttled);
