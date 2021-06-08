@@ -273,6 +273,19 @@ menuconfig SYSLOG_FILE
 
 if SYSLOG_FILE
 
+config SYSLOG_FILE_SEPARATE
+	bool "Log file separation"
+	default n
+	depends on SYSLOG_FILE
+	---help---
+		If enabled, every time the file logger is re-attached, a separator
+		will be printed in the file.
+		
+		This can be useful to easily distinguish between log entries that
+		belong to different log sessions (e.g. system reboot), and to 
+		indicate that between the separated lines there may be more logs
+		that were lost.
+
 config SYSLOG_FILE_ROTATIONS
 	int "Log file rotations"
 	default 0
