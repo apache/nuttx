@@ -143,6 +143,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
       recvwndo = (uint16_t)rwnd;
     }
+#if CONFIG_IOB_THROTTLE > 0
   else if (IOB_QEMPTY(&conn->readahead))
     {
       /* Advertise maximum segment size for window edge if here is no
@@ -150,16 +151,17 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        *
        * Note: hopefully, a single mss-sized packet can be queued by
        * the throttled=false case in tcp_datahandler().
-       *
-       * Revisit: I (yamamoto) am a bit skeptical on this logic.
-       * - Probably this should depend on IOB throttling.
-       * - IOB_BUFSIZE can be smaller than MSS. It seems wrong to
-       *   advertize a larger window when no IOBs are available
-       *   than when eg. a single IOB is available.
        */
 
+      int niob_avail_no_throttle = iob_navail(false);
+
       recvwndo = tcp_rx_mss(dev);
+      if (recvwndo > niob_avail_no_throttle * CONFIG_IOB_BUFSIZE)
+        {
+          recvwndo = niob_avail_no_throttle * CONFIG_IOB_BUFSIZE;
+        }
     }
+#endif
   else /* nqentry_avail == 0 || niob_avail == 0 */
     {
       /* No IOB chains or noIOBs are available.
