@@ -109,12 +109,12 @@ do { \
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_getsp
+ * Name: up_getsp
  ****************************************************************************/
 
 /* I don't know if the builtin to get SP is enabled */
 
-static inline uint32_t arm_getsp(void)
+static inline uint32_t up_getsp(void)
 {
   uint32_t sp;
   __asm__

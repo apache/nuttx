@@ -49,7 +49,7 @@
 
 static void up_stackdump(uint16_t sp, uint16_t stack_top)
 {
-  uint16_t stack ;
+  uint16_t stack;
 
   for (stack = sp & ~3; stack < stack_top; stack += 12)
     {
@@ -125,7 +125,7 @@ static inline void up_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint16_t sp = avr_getsp();
+  uint16_t sp = up_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 0

@@ -52,7 +52,7 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
 
 static void sh1_stackdump(uint32_t sp, uint32_t stack_top)
 {
-  uint32_t stack ;
+  uint32_t stack;
 
   for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
@@ -109,7 +109,7 @@ static inline void sh1_registerdump(void)
 void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = renesas_getsp();
+  uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
