@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2790,7 +2790,7 @@ static inline void stm32l4_epout_interrupt(FAR struct stm32l4_usbdev_s *priv)
           if ((daint & 1) != 0)
             {
               regval = stm32l4_getreg(STM32L4_OTGFS_DOEPINT(epno));
-              uinfo("DOEPINT(%d) = %08x\n", epno, regval);
+              uinfo("DOEPINT(%d) = %08" PRIx32 "\n", epno, regval);
               stm32l4_putreg(0xff, STM32L4_OTGFS_DOEPINT(epno));
             }
 
@@ -3034,7 +3034,7 @@ static inline void stm32l4_epin_interrupt(FAR struct stm32l4_usbdev_s *priv)
         {
           if ((daint & 1) != 0)
             {
-              uerr("DIEPINT(%d) = %08x\n",
+              uerr("DIEPINT(%d) = %08" PRIx32 "\n",
                      epno, stm32l4_getreg(STM32L4_OTGFS_DIEPINT(epno)));
               stm32l4_putreg(0xff, STM32L4_OTGFS_DIEPINT(epno));
             }
