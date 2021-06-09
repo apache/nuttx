@@ -117,6 +117,10 @@ ifeq ($(CONFIG_ESP32C3_RSA_ACCELERATOR),y)
 CHIP_CSRCS += esp32c3_rsa.c
 endif
 
+ifeq ($(CONFIG_ESP32C3_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_sha.c
+endif
+
 ifeq ($(CONFIG_ESP32C3_FREERUN),y)
 CHIP_CSRCS += esp32c3_freerun.c
 endif

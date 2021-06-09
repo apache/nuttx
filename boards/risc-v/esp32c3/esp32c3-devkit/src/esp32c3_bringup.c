@@ -59,6 +59,10 @@
 #  include "esp32c3_efuse.h"
 #endif
 
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+#  include "esp32c3_sha.h"
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
 #  include "esp32c3_rtc_lowerhalf.h"
 #endif
@@ -134,6 +138,15 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+  ret = esp32c3_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
     }
 #endif
 

@@ -309,6 +309,11 @@ config ESP32C3_WIRELESS
 config ESP32C3_AES_ACCELERATOR
 	bool "AES Accelerator"
 	default n
+config ESP32C3_SHA_ACCELERATOR
+	bool "SHA Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 SHA accelerator support.
 
 config ESP32C3_BIGNUM_ACCELERATOR
 	bool "BIGNUM Accelerator"
@@ -840,6 +845,14 @@ config ESP32C3_AES_ACCELERATOR_TEST
 	default n
 
 endmenu # AES accelerator
+menu "SHA accelerator"
+	depends on ESP32C3_SHA_ACCELERATOR
+
+config ESP32C3_SHA_ACCELERATOR_TEST
+	bool "SHA accelerator test"
+	default n
+
+endmenu # ESP32C3_SHA_ACCELERATOR
 
 menu "RSA Accelerate Configuration"
 	depends on ESP32C3_RSA_ACCELERATOR
