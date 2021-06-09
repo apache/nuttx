@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_setdtor.c
+ * sched/group/group_tlsgetset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -32,6 +32,9 @@
 #include <nuttx/tls.h>
 #include <arch/tls.h>
 
+#include "sched/sched.h"
+#include "group/group.h"
+
 #if CONFIG_TLS_NELEM > 0
 
 /****************************************************************************
@@ -39,33 +42,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_dtor
+ * Name: tls_get_set
  *
  * Description:
- *   Set the TLS element destructor associated with the 'tlsindex' to 'dtor'
+ *   Get the set map of TLE element index.
  *
  * Input Parameters:
- *   tlsindex - Index of TLS data destructor to set
- *   dtor    - The dtor of TLS data element
  *
  * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
+ *   TLS element index set map.
  *
  ****************************************************************************/
 
-int tls_set_dtor(int tlsindex, tls_dtor_t dtor)
+tls_ndxset_t tls_get_set(void)
 {
-  FAR struct task_info_s *tinfo = task_get_info();
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct task_group_s *group = rtcb->group;
+  irqstate_t flags;
+  tls_ndxset_t tlsset;
 
-  DEBUGASSERT(tinfo != NULL);
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
+  DEBUGASSERT(group != NULL);
 
-  tinfo->ta_tlsdtor[tlsindex] = dtor;
+  flags = spin_lock_irqsave(NULL);
+  tlsset = group->tg_tlsset;
+  spin_unlock_irqrestore(NULL, flags);
 
-  return OK;
+  return tlsset;
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */

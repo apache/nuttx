@@ -119,13 +119,6 @@ struct task_info_s
 #ifndef CONFIG_BUILD_KERNEL
   struct getopt_s   ta_getopt; /* Globals used by getopt() */
 #endif
-  /* Thread local storage ***************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-  sem_t        ta_tlssem;
-  tls_ndxset_t ta_tlsset;                    /* Set of TLS index allocated  */
-  tls_dtor_t   ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors     */
-#endif
 };
 
 /****************************************************************************
@@ -326,21 +319,5 @@ void tls_destruct(void);
  ****************************************************************************/
 
 FAR struct task_info_s *task_get_info(void);
-
-/****************************************************************************
- * Name: task_setup_info
- *
- * Description:
- *   Setup task_info_s for task
- *
- * Input Parameters:
- *   info - New created task_info_s
- *
- * Returned Value:
- *   OK on success; ERROR on failure
- *
- ****************************************************************************/
-
-int task_setup_info(FAR struct task_info_s *info);
 
 #endif /* __INCLUDE_NUTTX_TLS_H */
