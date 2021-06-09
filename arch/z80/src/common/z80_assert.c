@@ -162,7 +162,7 @@ void up_assert(const char *filename, int lineno)
 #ifdef CONFIG_BOARD_CRASHDUMP
   /* Execute board-specific crash dump logic */
 
-  board_crashdump(z80_getsp(), running_task(), filename, lineno);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   _up_assert();

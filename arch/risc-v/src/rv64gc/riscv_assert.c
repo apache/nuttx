@@ -181,7 +181,7 @@ static inline void up_registerdump(void)
 static void up_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint64_t sp = riscv_getsp();
+  uint64_t sp = up_getsp();
   uintptr_t ustackbase;
   uintptr_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
@@ -387,7 +387,7 @@ void up_assert(const char *filename, int lineno)
   syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(riscv_getsp(), running_task(), filename, lineno);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   _up_assert();
