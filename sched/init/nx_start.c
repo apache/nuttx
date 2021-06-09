@@ -44,6 +44,7 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/init.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -518,6 +519,7 @@ void nx_start(void)
       if (cpu == 0)
         {
           up_initial_state(&g_idletcb[cpu].cmn);
+          up_stack_frame(&g_idletcb[cpu].cmn, sizeof(struct task_info_s));
         }
     }
 
