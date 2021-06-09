@@ -466,7 +466,7 @@ int iob_get_queue_count(FAR struct iob_queue_s *queue);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-size_t iob_get_queue_size(FAR struct iob_queue_s *queue);
+unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************

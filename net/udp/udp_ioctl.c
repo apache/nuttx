@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <net/if.h>
 
@@ -65,7 +66,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn,
           iob_get_queue_size(&conn->readahead);
         break;
       default:
-        ret = -EINVAL;
+        ret = -ENOTTY;
         break;
     }
 

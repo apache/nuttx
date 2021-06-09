@@ -40,11 +40,11 @@
  *
  ****************************************************************************/
 
-size_t iob_get_queue_size(FAR struct iob_queue_s *queue)
+unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue)
 {
   FAR struct iob_qentry_s *iobq;
+  unsigned int total = 0;
   FAR struct iob_s *iob;
-  size_t total = 0;
 
   for (iobq = queue->qh_head; iobq != NULL; iobq = iobq->qe_flink)
     {
