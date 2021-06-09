@@ -147,27 +147,6 @@ __start_mpfs:
 .option pop
 
 
-#ifdef CONFIG_STACK_COLORATION
-
-  /* Write a known value to the IDLE thread stack to support stack
-   * monitoring logic
-   */
-
-  la  t0, MPFS_IDLESTACK_BASE
-  la  t1, MPFS_IDLESTACK_TOP
-  li  t2, STACK_COLOR
-  bgeu t0, t1, 2f
-
-  /* t0 = start of IDLE stack; t1 = top of stack; t2 = coloration */
-
-1:
-  sw   t2, 0(t0)
-  addi t0, t0, 4
-  bne  t0, t1, 1b
-2:
-
-#endif
-
   /* Jump to __mpfs_start with mhartid in a0 */
 
   j    __mpfs_start
