@@ -70,7 +70,7 @@
 #ifdef CONFIG_ARCH_STACKDUMP
 static void riscv_stackdump(uint32_t sp, uint32_t stack_top)
 {
-  uint32_t stack ;
+  uint32_t stack;
 
   for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
@@ -177,7 +177,7 @@ static inline void riscv_registerdump(void)
 static void riscv_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = riscv_getsp();
+  uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -364,7 +364,7 @@ void up_assert(const char *filename, int lineno)
   syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(riscv_getsp(), running_task(), filename, lineno);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   riscv_assert();

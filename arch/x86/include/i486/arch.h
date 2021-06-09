@@ -357,7 +357,7 @@ begin_packed_struct struct idt_ptr_s
 
 /* Return stack pointer */
 
-static inline uint32_t x86_getsp()
+static inline uint32_t up_getsp()
 {
   uint32_t regval;
 
