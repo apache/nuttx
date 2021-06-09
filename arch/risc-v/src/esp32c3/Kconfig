@@ -181,6 +181,12 @@ config ESP32C3_WDT
 	bool
 	default n
 
+config ESP32C3_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32-C3 efuse support.
+
 config ESP32C3_SPI
 	bool
 	default n
