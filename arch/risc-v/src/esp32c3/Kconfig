@@ -300,6 +300,18 @@ config ESP32C3_AES_ACCELERATOR
 	bool "AES Accelerator"
 	default n
 
+config ESP32C3_BIGNUM_ACCELERATOR
+	bool "BIGNUM Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 BIGNUM accelerator support.
+
+config ESP32C3_RSA_ACCELERATOR
+	bool "RSA Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 RSA accelerator support.
+
 endmenu # ESP32-C3 Peripheral Support
 
 menu "I2C Configuration"
@@ -812,5 +824,23 @@ config ESP32C3_AES_ACCELERATOR_TEST
 	default n
 
 endmenu # AES accelerator
+
+menu "RSA Accelerate Configuration"
+	depends on ESP32C3_RSA_ACCELERATOR
+
+config ESP32C3_RSA_ACCELERATOR_TEST
+	bool "RSA driver test"
+	default n
+
+menu "BIGNUM"
+	depends on ESP32C3_BIGNUM_ACCELERATOR
+
+config ESP32C3_BIGNUM_ACCELERATOR_TEST
+	bool "BIGNUM driver test"
+	default n
+
+endmenu # ESP32C3_BIGNUM_ACCELERATOR
+
+endmenu # ESP32C3_RSA_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32C3
