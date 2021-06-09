@@ -55,6 +55,9 @@
 #endif
 
 #include "esp32c3_rtc.h"
+#ifdef CONFIG_ESP32C3_EFUSE
+#  include "esp32c3_efuse.h"
+#endif
 
 #ifdef CONFIG_RTC_DRIVER
 #  include "esp32c3_rtc_lowerhalf.h"
@@ -125,6 +128,14 @@ static int esp32c3_init_wifi_storage(void)
 int esp32c3_bringup(void)
 {
   int ret;
+
+#if defined(CONFIG_ESP32C3_EFUSE)
+  ret = esp32c3_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

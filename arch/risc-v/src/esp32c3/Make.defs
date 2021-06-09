@@ -150,6 +150,12 @@ ifeq ($(CONFIG_ESP32C3_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32c3_aes.c
 endif
 
+ifeq ($(CONFIG_ESP32C3_EFUSE),y)
+CHIP_CSRCS += esp32c3_efuse.c
+CHIP_CSRCS += esp32c3_efuse_table.c
+CHIP_CSRCS += esp32c3_efuse_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
 CHIP_CSRCS += esp32c3_modtext.c
 endif
