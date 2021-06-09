@@ -31,7 +31,6 @@
 #endif
 
 #include <nuttx/arch.h>
-#include <nuttx/tls.h>
 
 #include "up_internal.h"
 
@@ -59,9 +58,8 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(sim_getsp() -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE -
-                             sizeof(struct task_info_s);
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
   memset(&tcb->xcp, 0, sizeof(struct xcptcontext));

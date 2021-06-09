@@ -29,7 +29,6 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/tls.h>
 #include <arch/irq.h>
 #include <arch/mips32/cp0.h>
 
@@ -65,9 +64,8 @@ void up_initial_state(struct tcb_s *tcb)
     {
       tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
                                       CONFIG_IDLETHREAD_STACKSIZE);
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE -
-                             sizeof(struct task_info_s);
+      tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
     }
 
   /* Initialize the initial exception register context structure */

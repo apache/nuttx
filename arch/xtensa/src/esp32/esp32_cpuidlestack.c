@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <nuttx/tls.h>
 
 #include "xtensa.h"
 #include "esp32_smp.h"
@@ -98,9 +97,8 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
   /* Save information about pre-allocated IDLE thread stack */
 
   tcb->stack_alloc_ptr = g_cpu1_idlestack;
-  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-  tcb->adj_stack_size  = CPU1_IDLETHREAD_STACKSIZE -
-                         sizeof(struct task_info_s);
+  tcb->adj_stack_size  = CPU1_IDLETHREAD_STACKSIZE;
+  tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
 
 #if XCHAL_CP_NUM > 0
   /* REVISIT: Does it make since to have co-processors enabled on the IDLE
