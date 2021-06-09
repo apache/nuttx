@@ -22,9 +22,6 @@ CSRCS += task_getinfo.c
 
 ifneq ($(CONFIG_TLS_NELEM),0)
 CSRCS += tls_setvalue.c tls_getvalue.c tls_destruct.c
-CSRCS += tls_getdtor.c tls_setdtor.c
-CSRCS += tls_alloc.c tls_free.c
-CSRCS += tls_getset.c
 endif
 
 ifneq ($(CONFIG_TLS_ALIGNED),y)
