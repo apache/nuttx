@@ -2147,7 +2147,7 @@ static int qspi_command(struct qspi_dev_s *dev,
        * info
        */
 
-      qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDRD);
+      qspi_ccrconfig(priv, &xctn, CCR_FMODE_INDWR);
     }
 
   /* Wait for the interrupt routine to finish it's magic */
