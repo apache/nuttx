@@ -142,7 +142,7 @@ else
   CPP = $(CROSSDEV)gcc -E -P -x c
 endif
 
-LD = $(CROSSDEV)gcc
+LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm

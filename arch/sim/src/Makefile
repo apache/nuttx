@@ -212,8 +212,8 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 ifneq ($(CONFIG_HOST_MACOS),y)
   ARCHSCRIPT += -T nuttx.ld
-  LDSTARTGROUP ?= -Wl,--start-group
-  LDENDGROUP ?= -Wl,--end-group
+  LDSTARTGROUP ?= --start-group
+  LDENDGROUP ?= --end-group
 endif
 
 # Determine which NuttX libraries will need to be linked in
