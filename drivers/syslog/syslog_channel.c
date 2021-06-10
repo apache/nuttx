@@ -56,10 +56,12 @@
 #if defined(CONFIG_SYSLOG_DEFAULT)
 static int syslog_default_putc(FAR struct syslog_channel_s *channel,
                                int ch);
+static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
+                                    FAR const char *buffer, size_t buflen);
 #endif
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
@@ -91,10 +93,14 @@ static struct syslog_channel_s g_rpmsg_channel =
 #endif
 
 #if defined(CONFIG_SYSLOG_DEFAULT)
+static sem_t g_syslog_default_sem = SEM_INITIALIZER(1);
+
 static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_default_putc,
-  syslog_default_putc
+  syslog_default_putc,
+  NULL,
+  syslog_default_write
 };
 
 static struct syslog_channel_s g_default_channel =
@@ -126,7 +132,7 @@ FAR struct syslog_channel_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_default_putc and syslog_default_flush
+ * Name: syslog_default_putc
  *
  * Description:
  *   If the arch supports a low-level putc function, output will be
@@ -144,6 +150,24 @@ static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 #endif
 
   return ch;
+}
+
+static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
+                                    FAR const char *buffer, size_t buflen)
+{
+#if defined(CONFIG_ARCH_LOWPUTC)
+  size_t nwritten;
+
+  nxsem_wait(&g_syslog_default_sem);
+  for (nwritten = 0; nwritten < buflen; nwritten++)
+    {
+      up_putc(buffer[nwritten]);
+    }
+
+  nxsem_post(&g_syslog_default_sem);
+#endif
+
+  return OK;
 }
 #endif
 
