@@ -336,6 +336,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
   FAR struct dns_question_s *que;
   uint16_t nquestions;
   uint16_t nanswers;
+  uint16_t temp;
   int naddr_read;
   int ret;
 
@@ -436,11 +437,12 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
   /* Validate query type and class */
 
   que = (FAR struct dns_question_s *)nameptr;
-  ninfo("Question: type=%04x, class=%04x\n",
-        ntohs(que->type), ntohs(que->class));
 
-  if (que->type  != qinfo->rectype ||
-      que->class != HTONS(DNS_CLASS_IN))
+  /* N.B. Unaligned access may occur here */
+
+  temp = HTONS(DNS_CLASS_IN);
+  if (memcmp(&que->type, &qinfo->rectype, sizeof(uint16_t)) != 0 ||
+      memcmp(&que->class, &temp, sizeof(uint16_t)) != 0)
     {
       nerr("ERROR: DNS response with wrong question\n");
       return -EBADMSG;
