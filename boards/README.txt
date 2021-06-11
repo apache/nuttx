@@ -186,6 +186,9 @@ boards/arm/stm32/b-g474e-dpow1
   Initial support for booting NuttX to a functional NSH prompt on the
   STMicro B-G474E-DPOW1 Discovery kit with STM32G474RE MCU.
 
+boards/arm/stm32/nucleo-g431kb
+    STMicro Nucleo G431KB board based on the STMicro STM32G431KB MCU.
+
 boards/arm/stm32/nucleo-g431rb
     STMicro Nucleo G431RB board based on the STMicro STM32G431RB MCU.
 
