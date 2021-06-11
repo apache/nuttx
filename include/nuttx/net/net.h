@@ -494,7 +494,7 @@ FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
  *   Allocate a socket descriptor
  *
  * Input Parameters:
- *   psock    A double pointer to socket structure to be allocated.
+ *   psock    A pointer to socket structure.
  *   oflags   Open mode flags.
  *
  * Returned Value:
@@ -503,7 +503,7 @@ FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
  *
  ****************************************************************************/
 
-int sockfd_allocate(FAR struct socket **psock, int oflags);
+int sockfd_allocate(FAR struct socket *psock, int oflags);
 
 /****************************************************************************
  * Name: sockfd_socket
