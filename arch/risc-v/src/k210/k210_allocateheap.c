@@ -30,6 +30,7 @@
 #include <nuttx/userspace.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "k210.h"
@@ -43,6 +44,28 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_allocate_heap
+ *
+ * Description:
+ *   This function will be called to dynamically set aside the heap region.
+ *
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
+ *   size of the unprotected, user-space heap.
+ *
+ *   If a protected kernel-space heap is provided, the kernel heap must be
+ *   allocated (and protected) by an analogous up_allocate_kheap().
+ *
+ ****************************************************************************/
+
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+{
+  board_autoled_on(LED_HEAPALLOCATE);
+  *heap_start = (FAR void *)K210_HEAP_START;
+  *heap_size = CONFIG_RAM_END - K210_HEAP_START;
+}
 
 /****************************************************************************
  * Name: up_allocate_kheap
