@@ -396,6 +396,22 @@ __cpu3_start:
 
 .Lcpu_vstart:
 
+#ifdef CONFIG_STACK_COLORATION
+	/* Write a known value to the IDLE thread stack to support stack
+	 * monitoring logic
+	 */
+
+	adr		r3, .Lstkinit
+	mov		r0, sp		/* R0 = end of IDLE stack */
+	ldmia		r3, {r1, r2}	/* R1 = Size of stack; R2 = coloration */
+
+1:							/* Top of the loop */
+	sub		r1, r1, #1			/* R1 = Number of words remaining */
+	cmp		r1, #0				/* Check (nwords == 0) */
+	str		r2, [r0, #-4]!			/* Save stack color word, increment stack address */
+	bne		1b				/* Bottom of the loop */
+#endif
+
 	/* Branch to continue C level CPU initialization */
 
 	mov		fp, #0				/* Clear framepointer */
@@ -409,6 +425,14 @@ __cpu3_start:
  ***************************************************************************/
 
 	/* Text-section constants: */
+
+#ifdef CONFIG_STACK_COLORATION
+	.type	.Lstkinit, %object
+.Lstkinit:
+	.long	SMP_STACK_WORDS
+	.long	STACK_COLOR				/* Stack coloration word */
+	.size	.Lstkinit, . -.Lstkinit
+#endif
 
 /***************************************************************************
  * .noinit section data
