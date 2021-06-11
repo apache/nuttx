@@ -944,8 +944,6 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
       return ret;
     }
 
-  ret = -ENOSYS;
-
   if (setup)
     {
       for (i = 0; i < CONFIG_DEV_PTY_NPOLLWAITERS; i++)
