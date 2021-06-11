@@ -96,6 +96,21 @@ config SENSORS_BMG160
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
 
+config SENSORS_OPT3006
+	bool "TI OPT3006 Ambient Light Sensor support"
+	default n
+	select I2C
+	select IOEXPANDER
+	---help---
+		Enable driver support for the TI OPT3006 Ambient light sensor.
+
+config SENSORS_OPT3006_BUFFER_NUMBER
+	int "The number of circular buffer for sensor OPT3006"
+	default 1
+	depends on SENSORS_OPT3006
+	---help---
+		The number of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
 
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
