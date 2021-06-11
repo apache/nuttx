@@ -267,6 +267,13 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       goto errout;
     }
 
+  ret = psock_accept(psock, addr, addrlen, newsock);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_alloc;
+    }
+
   /* Allocate a socket descriptor for the new connection now (so that it
    * cannot fail later)
    */
@@ -275,21 +282,14 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
   if (newfd < 0)
     {
       errcode = ENFILE;
-      goto errout_with_alloc;
-    }
-
-  ret = psock_accept(psock, addr, addrlen, newsock);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout_with_socket;
+      goto errout_with_psock;
     }
 
   leave_cancellation_point();
   return newfd;
 
-errout_with_socket:
-  nx_close(newfd);
+errout_with_psock:
+  psock_close(newsock);
 
 errout_with_alloc:
   kmm_free(newsock);
