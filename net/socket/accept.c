@@ -32,7 +32,6 @@
 #include <assert.h>
 #include <debug.h>
 #include <fcntl.h>
-#include <string.h>
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
@@ -137,8 +136,6 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_accept != NULL);
 
-  memset(newsock, 0, sizeof(*newsock));
-
   net_lock();
   ret = psock->s_sockif->si_accept(psock, addr, addrlen, newsock);
   if (ret < 0)
@@ -231,8 +228,7 @@ errout_with_lock:
 int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  FAR struct socket *pnewsock;
-  FAR struct socket newsock;
+  FAR struct socket *newsock;
   FAR struct file *filep;
   int newfd;
   int errcode;
@@ -263,31 +259,29 @@ int accept(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
       goto errout;
     }
 
-  ret = psock_accept(psock, addr, addrlen, &newsock);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout;
-    }
-
   /* Allocate a socket descriptor for the new connection now (so that it
    * cannot fail later)
    */
 
-  newfd = sockfd_allocate(&pnewsock, O_RDWR);
+  newfd = sockfd_allocate(&newsock, O_RDWR);
   if (newfd < 0)
     {
       errcode = ENFILE;
-      goto errout_with_socket;
+      goto errout;
     }
 
-  memcpy(pnewsock, &newsock, sizeof(newsock));
+  ret = psock_accept(psock, addr, addrlen, newsock);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_socket;
+    }
 
   leave_cancellation_point();
   return newfd;
 
 errout_with_socket:
-  psock_close(&newsock);
+  nx_close(newfd);
 
 errout:
   leave_cancellation_point();
