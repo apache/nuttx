@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_EMW3162
+
+config EMW3162_WLAN
+	bool "Enable WLAN chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC_SDIO
+
+endif
