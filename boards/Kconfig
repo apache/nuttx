@@ -193,6 +193,14 @@ config ARCH_BOARD_EKKLM3S9B96
 		TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
 		an EKK-LM3S9B96 which is a Cortex-M3.
 
+config ARCH_BOARD_EMW3162
+	bool "EMW3162 Wi-Fi board"
+	depends on ARCH_CHIP_STM32F205RG
+	select ARCH_HAVE_LEDS
+	---help---
+		EMW3162 board (https://www.waveshare.com/wiki/EMW3162). This board
+		features the STM32F205RGY6 MCU and BCM43362KUBG Wi-Fi chip.
+
 config ARCH_BOARD_QUICKFEATHER
 	bool "EOS S3 QuickFeather"
 	depends on ARCH_CHIP_EOSS3
@@ -2321,6 +2329,7 @@ config ARCH_BOARD
 	default "efm32-g8xx-stk"           if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"          if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
+	default "emw3162"                  if ARCH_BOARD_EMW3162
 	default "quickfeather"             if ARCH_BOARD_QUICKFEATHER
 	default "esp32-devkitc"            if ARCH_BOARD_ESP32_DEVKITC
 	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
@@ -2923,6 +2932,9 @@ source "boards/arm/stm32/clicker2-stm32/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
 source "boards/arm/stm32/cloudctrl/Kconfig"
+endif
+if ARCH_BOARD_EMW3162
+source "boards/arm/stm32/emw3162/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
 source "boards/arm/stm32/fire-stm32v2/Kconfig"

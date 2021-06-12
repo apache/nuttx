@@ -258,6 +258,11 @@ boards/arm/tiva/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
   an EKK-LM3S9B96 which is a Cortex-M3.
 
+boards/arm/stm32/emw3162
+  A configuration for the EMW3162 Wi-Fi board
+  (https://www.waveshare.com/wiki/EMW3162). This board features
+  the STM32F205RGY6 MCU from STMicro.
+
 boards/xtensa/esp32/esp-core
   The ESP32 is a dual-core system from Espressif with two Harvard architecture
   Xtensa LX6 CPUs.  All embedded memory, external memory and peripherals are
