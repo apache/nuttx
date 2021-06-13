@@ -910,15 +910,16 @@ FAR struct streamlist *nxsched_get_streams(void);
  *     - Task type may be set in the TCB flags to create kernel thread
  *
  * Input Parameters:
- *   tcb        - Address of the new task's TCB
- *   name       - Name of the new task (not used)
- *   priority   - Priority of the new task
- *   stack      - Start of the pre-allocated stack
- *   stack_size - Size (in bytes) of the stack allocated
- *   entry      - Application start point of the new task
- *   argv       - A pointer to an array of input parameters.  The array
- *                should be terminated with a NULL argv[] value. If no
- *                parameters are required, argv may be NULL.
+ *   tcb         - Address of the new task's TCB
+ *   insert_name - Insert name to the first argv
+ *   name        - Name of the new task
+ *   priority    - Priority of the new task
+ *   stack       - Start of the pre-allocated stack
+ *   stack_size  - Size (in bytes) of the stack allocated
+ *   entry       - Application start point of the new task
+ *   argv        - A pointer to an array of input parameters.  The array
+ *                 should be terminated with a NULL argv[] value. If no
+ *                 parameters are required, argv may be NULL.
  *
  * Returned Value:
  *   OK on success; negative error value on failure appropriately.  (See
@@ -929,7 +930,8 @@ FAR struct streamlist *nxsched_get_streams(void);
  *
  ********************************************************************************/
 
-int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct task_tcb_s *tcb, bool insert_name,
+                const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
                 FAR char * const argv[]);
 

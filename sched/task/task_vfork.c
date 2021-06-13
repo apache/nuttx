@@ -208,7 +208,7 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
   name = parent->cmn.name;
 #endif
 
-  nxtask_setup_arguments(child, name, parent->argv);
+  nxtask_setup_arguments(child, false, name, parent->argv);
 
   /* Now we have enough in place that we can join the group */
 
