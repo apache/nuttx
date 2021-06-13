@@ -38,6 +38,14 @@ ifeq ($(CONFIG_LCD_ST7789),y)
 CSRCS += rp2040_st7789.c
 endif
 
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += rp2040_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += rp2040_composite.c
+endif
+
 ifeq ($(CONFIG_RP2040_SPISD),y)
   CSRCS += rp2040_spisd.c
 endif
