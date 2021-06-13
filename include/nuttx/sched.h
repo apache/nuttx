@@ -106,7 +106,8 @@
 #define TCB_FLAG_SIGNAL_ACTION     (1 << 8)                      /* Bit 8: In a signal handler */
 #define TCB_FLAG_SYSCALL           (1 << 9)                      /* Bit 9: In a system call */
 #define TCB_FLAG_EXIT_PROCESSING   (1 << 10)                     /* Bit 10: Exitting */
-                                                                 /* Bits 11-15: Available */
+#define TCB_FLAG_FREE_STACK        (1 << 11)                     /* Bit 11: Free stack after exit */
+                                                                 /* Bits 12-15: Available */
 
 /* Values for struct task_group tg_flags */
 
