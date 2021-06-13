@@ -663,12 +663,14 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
           response->qualtype = SCSIRESP_INQUIRYPQ_NOTCAPABLE |
                                SCSIRESP_INQUIRYPD_UNKNOWN;
         }
+#ifndef CONFIG_USBMSC_NOT_STALL_BULKEP
       else if ((inquiry->flags != 0) || (inquiry->pagecode != 0))
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_INQUIRYFLAGS), 0);
           priv->lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
           ret = -EINVAL;
         }
+#endif
       else
         {
           memset(response, 0, SCSIRESP_INQUIRY_SIZEOF);
@@ -822,7 +824,9 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
              (FAR struct scsicmd_modesense6_s *)priv->cdb;
   FAR struct scsiresp_modeparameterhdr6_s *mph =
              (FAR struct scsiresp_modeparameterhdr6_s *)buf;
+#ifndef CONFIG_USBMSC_NOT_STALL_BULKEP
   int mdlen;
+#endif
   int ret;
 
   priv->u.alloclen = modesense->alloclen;
@@ -830,6 +834,11 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
                         USBMSC_FLAGS_DIRDEVICE2HOST);
   if (ret == OK)
     {
+#ifdef CONFIG_USBMSC_NOT_STALL_BULKEP
+      priv->residue = priv->cbwlen = priv->nreqbytes =
+        SCSIRESP_MODEPARAMETERHDR6_SIZEOF;
+#endif
+
       if ((modesense->flags & ~SCSICMD_MODESENSE6_DBD) != 0 ||
            modesense->subpgcode != 0)
         {
@@ -851,6 +860,7 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
             (priv->lun->readonly ? SCSIRESP_MODEPARMHDR_DAPARM_WP : 0x00);
           mph->bdlen = 0; /* Block descriptor length */
 
+#ifndef CONFIG_USBMSC_NOT_STALL_BULKEP
           /* There are no block descriptors, only the following mode page: */
 
           ret = usbmsc_modepage(priv,
@@ -867,6 +877,7 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
               priv->nreqbytes =
                 mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF;
             }
+#endif
         }
     }
 
@@ -2584,6 +2595,7 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
 
           if (priv->residue > 0)
             {
+#ifndef CONFIG_USBMSC_NOT_STALL_BULKEP
               usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE),
                        (uint16_t)priv->residue);
 
@@ -2601,6 +2613,9 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
               nxsig_usleep (100000);
 #else
               EP_STALL(priv->epbulkin);
+#endif
+#else
+              priv->residue = 0;
 #endif
             }
         }
