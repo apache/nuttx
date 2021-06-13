@@ -852,6 +852,14 @@ config USBMSC_SCSI_STACKSIZE
 		Stack size used with the SCSI kernel thread.  The default value
 		is not tuned.
 
+config USBMSC_NOT_STALL_BULKEP
+	bool "Not stall USBMSC bulk endpoints for workaround"
+	default n
+	---help---
+		Not stall USBMSC bulk endpoints in some conditions.
+		Because RP2040 usbdev driver cannot handle stalling/resuming bulk
+		endpoints well, this workaround is required.
+
 endif
 
 menuconfig RNDIS
