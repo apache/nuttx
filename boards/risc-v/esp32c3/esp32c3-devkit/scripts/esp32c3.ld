@@ -234,6 +234,13 @@ SECTIONS
     . = SIZEOF(.rtc.text);
   } >rtc_seg
 
+  /* RTC BSS section. */
+
+  .rtc.bss (NOLOAD) :
+  {
+    *(.rtc.bss)
+  } >rtc_seg
+
   /* RTC data section holds RTC wake stub data/rodata. */
 
   .rtc.data :
