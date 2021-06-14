@@ -57,6 +57,11 @@
 
 #define LED_DRIVER_PATH                "/dev/userleds"
 
+/* PWM */
+
+#define NUCLEOG431KB_PWM_TIMER   1
+#define NUCLEOG431KB_PWM_PATH    "/dev/pwm0"
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -84,5 +89,17 @@
  ****************************************************************************/
 
 int stm32_bringup(void);
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
+#endif
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431KB_SRC_NUCLEO_G431KB_H */
