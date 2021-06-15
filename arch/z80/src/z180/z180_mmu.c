@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 static GRAN_HANDLE g_physhandle;
-static struct z180_cbr_s g_cbrs[CONFIG_MAX_TASKS];
+static struct z180_cbr_s g_cbrs[CONFIG_Z180_MAX_TASKS];
 
 /****************************************************************************
  * Private Functions
@@ -79,7 +79,7 @@ static inline FAR struct z180_cbr_s *z180_mmu_alloccbr(void)
 {
   int i;
 
-  for (i = 0; i < CONFIG_MAX_TASKS; i++)
+  for (i = 0; i < CONFIG_Z180_MAX_TASKS; i++)
     {
       FAR struct z180_cbr_s *cbr = &g_cbrs[i];
       if (cbr->crefs == 0)

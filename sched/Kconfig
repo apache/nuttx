@@ -483,13 +483,6 @@ config TASK_NAME_SIZE
 		will be TASK_NAME_SIZE + 1.  The default of 31 then results in
 		a align-able 32-byte allocation.
 
-config MAX_TASKS
-	int "Max number of tasks"
-	default 32
-	---help---
-		The maximum number of simultaneously active tasks. This value must be
-		a power of two.
-
 config SCHED_HAVE_PARENT
 	bool "Support parent/child task relationships"
 	default n
@@ -551,11 +544,8 @@ config PREALLOC_CHILDSTATUS
 		To prevent runaway child status allocations and to improve
 		allocation performance, child task exit status structures are pre-
 		allocated when the system boots.  This setting determines the number
-		of child status structures that will be pre-allocated.  If this
-		setting is not defined or if it is defined to be zero then a value
-		of 2*MAX_TASKS is used.
+		of child status structures that will be pre-allocated.
 
-		Note that there cannot be more than MAX_TASKS tasks in total.
 		However, the number of child status structures may need to be
 		significantly larger because this number includes the maximum number
 		of tasks that are running PLUS the number of tasks that have exit'ed
