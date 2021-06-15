@@ -98,6 +98,16 @@ selecting ``CONFIG_TEENSY_40=y``.
 This configuration runs over LPUART1 (pins 24 and 25 on Teensy). Communication
 over USB console can be turn on, but it causes problems with FlexCAN.
 
+enc-4.1
+-------
+
+This is an nsh configuration (see above) with added support of incremental
+encoder. Phase A is connected to GPIO_EMC_07 (pin 33), phase B to GPIO_EMC_06
+(pin 4) and INDEX to GPIO_B0_12 (pin 32). Only encoder 1 is connected to those
+pins.
+
+Function of the encoder can be tested by application "qe".
+
 netnsh-4.1
 ----------
 

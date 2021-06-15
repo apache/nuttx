@@ -183,6 +183,16 @@ int imxrt_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_IMXRT_ENC
+  /* Initialize ENC and register the ENC driver. */
+
+  ret = imxrt_enc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_enc_initialize() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
