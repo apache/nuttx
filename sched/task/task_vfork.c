@@ -97,7 +97,6 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
   FAR struct task_tcb_s *parent;
   FAR struct task_tcb_s *child;
   FAR struct task_info_s *info;
-  FAR const char *name = NULL;
   size_t stack_size;
   uint8_t ttype;
   int priority;
@@ -204,11 +203,7 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Setup to pass parameters to the new task */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  name = parent->cmn.name;
-#endif
-
-  nxtask_setup_arguments(child, name, parent->argv);
+  nxtask_setup_arguments(child, parent->argv[0], &parent->argv[1]);
 
   /* Now we have enough in place that we can join the group */
 
