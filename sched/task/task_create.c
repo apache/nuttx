@@ -91,8 +91,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, true, name, priority,
-                    NULL, stack_size, entry, argv);
+  ret = nxtask_init(tcb, name, priority, NULL, stack_size, entry, argv);
   if (ret < OK)
     {
       kmm_free(tcb);
