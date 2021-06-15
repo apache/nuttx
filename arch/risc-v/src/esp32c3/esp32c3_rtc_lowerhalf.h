@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_alloc.c
+ * arch/risc-v/src/esp32c3/esp32c3_rtc_lowerhalf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,88 +18,39 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_RTC_LOWERHALF_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_RTC_LOWERHALF_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <errno.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
-
-#if CONFIG_TLS_NELEM > 0
+#ifdef CONFIG_RTC_DRIVER
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_alloc
+ * Name: esp32c3_rtc_driverinit
  *
  * Description:
- *   Allocate a group-unique TLS data index
+ *   Bind the configuration timer to a timer lower half instance and
+ *   register the timer drivers at 'devpath'
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   A TLS index that is unique for use within this task group.
- *   If unsuccessful, an errno value will be returned and set to errno.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int tls_alloc(void)
-{
-  FAR struct task_info_s *tinfo = task_get_info();
-  int candidate;
-  int ret = -EAGAIN;
+int esp32c3_rtc_driverinit(void);
 
-  DEBUGASSERT(tinfo != NULL);
+#endif /* CONFIG_RTC_DRIVER */
 
-  /* Search for an unused index.  This is done in a critical section here to
-   * avoid concurrent modification of the group TLS index set.
-   */
-
-  ret = _SEM_WAIT(&tinfo->ta_tlssem);
-  if (ret < 0)
-    {
-      ret = _SEM_ERRVAL(ret);
-      goto errout_with_errno;
-    }
-
-  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
-    {
-      /* Is this candidate index available? */
-
-      tls_ndxset_t mask = (1 << candidate);
-      if ((tinfo->ta_tlsset & mask) == 0)
-        {
-          /* Yes.. allocate the index and break out of the loop */
-
-          tinfo->ta_tlsset |= mask;
-          break;
-        }
-    }
-
-  _SEM_POST(&tinfo->ta_tlssem);
-
-  /* Check if found a valid TLS data index. */
-
-  if (candidate < CONFIG_TLS_NELEM)
-    {
-      /* Yes.. Return the TLS index and success */
-
-      ret = candidate;
-    }
-
-errout_with_errno:
-
-  return ret;
-}
-
-#endif /* CONFIG_TLS_NELEM > 0 */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_RTC_LOWERHALF_H */

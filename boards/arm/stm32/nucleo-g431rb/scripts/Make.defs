@@ -57,8 +57,8 @@ CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+NXFLATLDFLAGS1 = -r -Wl,-d -Wl,-warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -Wl,-no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
@@ -69,7 +69,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 # Provide map file needed by the "Memory Allocation" view in Eclipse:
-LDFLAGS += -Map=$(TOPDIR)/NuttX.map --gc-sections
+LDFLAGS += -Wl,-Map=$(TOPDIR)/NuttX.map -Wl,--gc-sections
 
 # Embed absolute path to source file in debug information so that Eclipse
 # source level debugging won't get confused. See:

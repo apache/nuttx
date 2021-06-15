@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getset.c
+ * boards/arm/rp2040/common/src/rp2040_usbmsc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,43 +24,38 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
-#include <arch/tls.h>
+#include <nuttx/board.h>
 
-#if CONFIG_TLS_NELEM > 0
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_get_set
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Get the set map of TLE element index.
- *
- * Input Parameters:
- *
- * Returned Value:
- *   TLS element index set map.
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
  *
  ****************************************************************************/
 
-tls_ndxset_t tls_get_set(void)
+int board_usbmsc_initialize(int port)
 {
-  FAR struct task_info_s *tinfo = task_get_info();
-  tls_ndxset_t tlsset;
+  /* If system/usbmsc is built as an NSH command, then SD slot should
+   * already have been initialized in board_app_initialize()
+   * (see stm32_appinit.c).
+   * In this case, there is nothing further to be done here.
+   */
 
-  DEBUGASSERT(tinfo != NULL);
-
-  tlsset = tinfo->ta_tlsset;
-
-  return tlsset;
+  return OK;
 }
-
-#endif /* CONFIG_TLS_NELEM > 0 */

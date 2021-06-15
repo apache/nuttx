@@ -1688,6 +1688,23 @@ int up_timer_start(FAR const struct timespec *ts);
 #endif
 
 /****************************************************************************
+ * Name: up_getsp
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current stack pointer.
+ *
+ ****************************************************************************/
+
+/* uintptr_t up_getsp(void);
+ *
+ * The actual declaration or definition is provided in arch/arch.h.
+ * The actual implementation may be a MACRO or an inline function.
+ */
+
+/****************************************************************************
  * TLS support
  ****************************************************************************/
 

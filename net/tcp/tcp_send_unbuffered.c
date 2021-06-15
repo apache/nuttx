@@ -220,7 +220,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
+      pstate->snd_acked = TCP_SEQ_SUB(tcp_getsequence(tcp->ackno),
+                                      pstate->snd_isn);
       ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zd\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 

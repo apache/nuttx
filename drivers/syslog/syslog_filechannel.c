@@ -36,6 +36,7 @@
 
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 
 #include "syslog.h"
 
@@ -59,6 +60,22 @@ FAR static struct syslog_channel_s *g_syslog_file_channel;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_FILE_SEPARATE
+static void log_separate(FAR const char *log_file)
+{
+  struct file fp;
+
+  if (file_open(&fp, log_file, O_WRONLY) < 0)
+    {
+      return;
+    }
+
+  file_write(&fp, "\n\n", 2);
+
+  file_close(&fp);
+}
+#endif
 
 #if CONFIG_SYSLOG_FILE_ROTATIONS > 0
 static void log_rotate(FAR const char *log_file)
@@ -179,6 +196,12 @@ FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath)
 
 #if CONFIG_SYSLOG_FILE_ROTATIONS > 0
   log_rotate(devpath);
+#endif
+
+  /* Separate the old log entries. */
+
+#ifdef CONFIG_SYSLOG_FILE_SEPARATE
+  log_separate(devpath);
 #endif
 
   /* Then initialize the file interface */

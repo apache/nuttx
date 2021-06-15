@@ -225,6 +225,21 @@ void dns_save_answer(FAR const char *hostname,
 #endif
 
 /****************************************************************************
+ * Name: dns_clear_answer
+ *
+ * Description:
+ *   Clear the resolved hostname in the DNS cache
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
+void dns_clear_answer(void);
+#endif
+
+/****************************************************************************
  * Name: dns_find_answer
  *
  * Description:

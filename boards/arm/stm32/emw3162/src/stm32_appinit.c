@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_free.c
+ * boards/arm/stm32/emw3162/src/stm32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,66 +24,52 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <errno.h>
-#include <assert.h>
+#include <sys/types.h>
 
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
+#include <nuttx/board.h>
 
-#if CONFIG_TLS_NELEM > 0
+#include "emw3162.h"
+
+#ifdef CONFIG_LIB_BOARDCTL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_free
+ * Name: board_app_initialize
  *
  * Description:
- *   Release a group-unique TLS data index previous obtained by tls_alloc()
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
  * Input Parameters:
- *   tlsindex - The previously allocated TLS index to be freed
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value could be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   OK is returned on success; a negated errno value will be returned and
- *   set to errno on failure:
- *
- *     -EINVAL    - the index to be freed is out of range.
- *     -EINTR     - the wait operation interrupted by signal
- *     -ECANCELED - the thread was canceled during waiting
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int tls_free(int tlsindex)
+int board_app_initialize(uintptr_t arg)
 {
-  FAR struct task_info_s *tinfo = task_get_info();
-  tls_ndxset_t mask;
-  int ret = -EINVAL;
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
+  /* Perform board initialization */
 
-  DEBUGASSERT((unsigned)tlsindex < CONFIG_TLS_NELEM && tinfo != NULL);
-  if ((unsigned)tlsindex < CONFIG_TLS_NELEM)
-    {
-      /* This is done while holding a semaphore here to avoid concurrent
-       * modification of the group TLS index set.
-       */
-
-      mask  = (1 << tlsindex);
-      ret = _SEM_WAIT(&tinfo->ta_tlssem);
-      if (OK == ret)
-        {
-          DEBUGASSERT((tinfo->ta_tlsset & mask) != 0);
-          tinfo->ta_tlsset &= ~mask;
-          _SEM_POST(&tinfo->ta_tlssem);
-        }
-      else
-        {
-          ret = _SEM_ERRVAL(ret);
-        }
-    }
-
-  return ret;
+  return stm32_bringup();
+#else
+  return OK;
+#endif
 }
 
-#endif /* CONFIG_TLS_NELEM > 0 */
+#endif /* CONFIG_LIB_BOARDCTL */

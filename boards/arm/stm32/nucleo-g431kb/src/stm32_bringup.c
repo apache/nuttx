@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_setdtor.c
+ * boards/arm/stm32/nucleo-g431kb/src/stm32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,48 +24,70 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
+#include <sys/types.h>
+#include <syslog.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
-#include <nuttx/tls.h>
-#include <arch/tls.h>
+#include <nuttx/board.h>
 
-#if CONFIG_TLS_NELEM > 0
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#include "nucleo-g431kb.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#undef HAVE_LEDS
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_dtor
+ * Name: stm32_bringup
  *
  * Description:
- *   Set the TLS element destructor associated with the 'tlsindex' to 'dtor'
+ *   Perform architecture-specific initialization
  *
- * Input Parameters:
- *   tlsindex - Index of TLS data destructor to set
- *   dtor    - The dtor of TLS data element
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
  *
- * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int tls_set_dtor(int tlsindex, tls_dtor_t dtor)
+int stm32_bringup(void)
 {
-  FAR struct task_info_s *tinfo = task_get_info();
+  int ret;
 
-  DEBUGASSERT(tinfo != NULL);
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
+#ifdef HAVE_LEDS
+  /* Register the LED driver */
 
-  tinfo->ta_tlsdtor[tlsindex] = dtor;
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM driver. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
   return OK;
 }
-
-#endif /* CONFIG_TLS_NELEM > 0 */

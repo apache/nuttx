@@ -1005,10 +1005,13 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
           NETDEV_TXDONE(&priv->dev);
 #ifdef TX_TIMEOUT_WQ
           /* We are here because a transmission completed, so the
-           * corresponding watchdog can be canceled.
+           * corresponding watchdog can be canceled
+           * mailbox be set to inactive
            */
 
           wd_cancel(&priv->txtimeout[mbi]);
+          struct mb_s *mb = &priv->tx[mbi];
+          mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
 
@@ -1128,7 +1131,9 @@ static int kinetis_flexcan_interrupt(int irq, FAR void *context,
 static void kinetis_txtimeout_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
+  uint32_t flags;
   uint32_t mbi;
+  uint32_t mb_bit;
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
@@ -1139,6 +1144,8 @@ static void kinetis_txtimeout_work(FAR void *arg)
    * transmit function transmitted a new frame
    */
 
+  flags  = getreg32(priv->base + KINETIS_CAN_IFLAG1_OFFSET);
+
   for (mbi = 0; mbi < TXMBCOUNT; mbi++)
     {
       if (priv->txmb[mbi].deadline.tv_sec != 0
@@ -1146,6 +1153,14 @@ static void kinetis_txtimeout_work(FAR void *arg)
           || now->tv_usec > priv->txmb[mbi].deadline.tv_usec))
         {
           NETDEV_TXTIMEOUTS(&priv->dev);
+
+          mb_bit = 1 << (RXMBCOUNT +  mbi);
+
+          if (flags & mb_bit)
+            {
+              putreg32(mb_bit, priv->base + KINETIS_CAN_IFLAG1_OFFSET);
+            }
+
           struct mb_s *mb = &priv->tx[mbi];
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;

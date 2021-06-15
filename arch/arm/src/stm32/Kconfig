@@ -10902,4 +10902,19 @@ config STM32_FOC_USE_ADC4
        select STM32_ADC4
        select STM32_ADC3_JEXTSEL
 
+config STM32_FOC_G4_ADCCHAN0_WORKAROUND
+       bool "FOC G4 ADC channel 0 unwanted conversion workaround"
+       default n
+       ---help---
+         Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
+         conversion when a regular conversion is interrupted by an injected conversion.
+         This FOC implementation uses injected conversion to sample phase currents
+         and allows user to use regular conversion as an auxiliary analog conversion.
+         In this case, there is a certain probability that regular conversion will be
+         interrupted by an injected conversion that will lead to an incorrect reading
+         of phase currents.
+
+         This workaround inserts a dummy conversion at the beginning of the injected
+         sequence. For more details look at the chip errata documents.
+
 endif #STM32_FOC

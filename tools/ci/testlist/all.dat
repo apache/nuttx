@@ -5,6 +5,7 @@
 -imxrt1060-evk:libcxxtest
 -launchxl-cc1310:nsh
 -launchxl-tms57004:nsh
+-lm3s6965-ek:qemu-nxflat
 -lpcxpresso-lpc1768:thttpd
 -moxa:nsh
 -olimex-lpc1766stk:slip-httpd

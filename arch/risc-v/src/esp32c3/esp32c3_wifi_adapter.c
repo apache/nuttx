@@ -1962,16 +1962,7 @@ static void *esp_malloc(unsigned int size)
 
 static void esp_free(void *ptr)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  if (xtensa_imm_heapmember(ptr))
-    {
-      xtensa_imm_free(ptr);
-    }
-  else
-#endif
-    {
-      kmm_free(ptr);
-    }
+  kmm_free(ptr);
 }
 
 /****************************************************************************

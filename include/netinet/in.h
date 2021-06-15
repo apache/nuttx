@@ -189,6 +189,34 @@
    (a)->s6_addr32[1] == 0 && \
    (a)->s6_addr32[2] == HTONL(0xffff))
 
+/* This macro to convert a 16/32-bit constant values quantity from host byte
+ * order to network byte order.  The 16-bit version of this macro is required
+ * for uIP:
+ *
+ *   Author Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   All rights reserved.
+ */
+
+#ifdef CONFIG_ENDIAN_BIG
+# define HTONS(ns) (ns)
+# define HTONL(nl) (nl)
+#else
+# define HTONS(ns) \
+  (unsigned short) \
+    (((((unsigned short)(ns)) & 0x00ff) << 8) | \
+     ((((unsigned short)(ns)) >> 8) & 0x00ff))
+# define HTONL(nl) \
+  (unsigned long) \
+    (((((unsigned long)(nl)) & 0x000000ffUL) << 24) | \
+     ((((unsigned long)(nl)) & 0x0000ff00UL) <<  8) | \
+     ((((unsigned long)(nl)) & 0x00ff0000UL) >>  8) | \
+     ((((unsigned long)(nl)) & 0xff000000UL) >> 24))
+#endif
+
+#define NTOHS(hs) HTONS(hs)
+#define NTOHL(hl) HTONL(hl)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -307,6 +335,22 @@ EXTERN const struct in6_addr in6addr_any;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* Functions to convert between host and network byte ordering.
+ *
+ * REVISIT:  Since network order is defined as big-endian, the following
+ * functions are equivalent to functions declared in endian.h:
+ *
+ *   htonl   htobe32
+ *   htons   htobe16
+ *   ntohl   be32toh
+ *   ntohs   be16toh
+ */
+
+uint32_t    ntohl(uint32_t nl);
+uint16_t    ntohs(uint16_t ns);
+uint32_t    htonl(uint32_t hl);
+uint16_t    htons(uint16_t hs);
 
 #undef EXTERN
 #if defined(__cplusplus)

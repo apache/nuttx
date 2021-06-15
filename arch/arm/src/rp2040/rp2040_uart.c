@@ -64,30 +64,36 @@
 
 /* Get word length setting for the console */
 
-#if CONSOLE_BITS >= 5 && CONSOLE_BITS <= 8
- #define CONSOLE_LCR_WLS RP2040_UART_LCR_H_WLEN(CONSOLE_BITS)
-#elif defined(HAVE_CONSOLE)
- #error "Invalid CONFIG_UARTn_BITS setting for console "
+#if defined(HAVE_CONSOLE)
+ #if CONSOLE_BITS >= 5 && CONSOLE_BITS <= 8
+  #define CONSOLE_LCR_WLS RP2040_UART_LCR_H_WLEN(CONSOLE_BITS)
+ #else
+  #error "Invalid CONFIG_UARTn_BITS setting for console "
+ #endif
 #endif
 
 /* Get parity setting for the console */
 
-#if CONSOLE_PARITY == 0
- #define CONSOLE_LCR_PAR 0
-#elif CONSOLE_PARITY == 1
- #define CONSOLE_LCR_PAR (RP2040_UART_UARTLCR_H_PEN)
-#elif CONSOLE_PARITY == 2
- #define CONSOLE_LCR_PAR (RP2040_UART_UARTLCR_H_PEN | RP2040_UART_UARTLCR_H_EPS)
-#elif defined(HAVE_CONSOLE)
- #error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
+#if defined(HAVE_CONSOLE)
+ #if CONSOLE_PARITY == 0
+  #define CONSOLE_LCR_PAR 0
+ #elif CONSOLE_PARITY == 1
+  #define CONSOLE_LCR_PAR (RP2040_UART_UARTLCR_H_PEN)
+ #elif CONSOLE_PARITY == 2
+  #define CONSOLE_LCR_PAR (RP2040_UART_UARTLCR_H_PEN | RP2040_UART_UARTLCR_H_EPS)
+ #else
+  #error "Invalid CONFIG_UARTn_PARITY setting for CONSOLE"
+ #endif
 #endif
 
-/* Get stop-bit setting for the console and UART0/1/2 */
+/* Get stop-bit setting for the console and UART0/1 */
 
-#if CONSOLE_2STOP != 0
- #define CONSOLE_LCR_STOP RP2040_UART_UARTLCR_H_STP2
-#else
- #define CONSOLE_LCR_STOP 0
+#if defined(HAVE_CONSOLE)
+ #if CONSOLE_2STOP != 0
+  #define CONSOLE_LCR_STOP RP2040_UART_UARTLCR_H_STP2
+ #else
+  #define CONSOLE_LCR_STOP 0
+ #endif
 #endif
 
 /* LCR and FCR values for the console */

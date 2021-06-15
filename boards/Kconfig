@@ -193,6 +193,14 @@ config ARCH_BOARD_EKKLM3S9B96
 		TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
 		an EKK-LM3S9B96 which is a Cortex-M3.
 
+config ARCH_BOARD_EMW3162
+	bool "EMW3162 Wi-Fi board"
+	depends on ARCH_CHIP_STM32F205RG
+	select ARCH_HAVE_LEDS
+	---help---
+		EMW3162 board (https://www.waveshare.com/wiki/EMW3162). This board
+		features the STM32F205RGY6 MCU and BCM43362KUBG Wi-Fi chip.
+
 config ARCH_BOARD_QUICKFEATHER
 	bool "EOS S3 QuickFeather"
 	depends on ARCH_CHIP_EOSS3
@@ -1872,9 +1880,17 @@ config ARCH_BOARD_B_G431B_ESC1
 	depends on ARCH_CHIP_STM32G431C
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		ST Micro B-G431B-ESC1 Discovery Kit, based on the STM32G431CB
 		MCU, a Cortex-M4 with FPU, 170 MHz, 32 KB SRAM, 128 KB code.
+
+config ARCH_BOARD_NUCLEO_G431KB
+	bool "STM32G431KB Nucleo G431KB"
+	depends on ARCH_CHIP_STM32G431K
+	select ARCH_HAVE_LEDS
+	---help---
+		STMicro Nucleo-G431KB board based on the STMicro STM32G431KB MCU.
 
 config ARCH_BOARD_NUCLEO_G431RB
 	bool "STM32G431RB Nucleo G431RB"
@@ -2313,6 +2329,7 @@ config ARCH_BOARD
 	default "efm32-g8xx-stk"           if ARCH_BOARD_EFM32G8XXSTK
 	default "efm32gg-stk3700"          if ARCH_BOARD_EFM32GG_STK3700
 	default "ekk-lm3s9b96"             if ARCH_BOARD_EKKLM3S9B96
+	default "emw3162"                  if ARCH_BOARD_EMW3162
 	default "quickfeather"             if ARCH_BOARD_QUICKFEATHER
 	default "esp32-devkitc"            if ARCH_BOARD_ESP32_DEVKITC
 	default "esp32-ethernet-kit"       if ARCH_BOARD_ESP32_ETHERNETKIT
@@ -2480,6 +2497,7 @@ config ARCH_BOARD
 	default "stm32f746-ws"             if ARCH_BOARD_STM32F746_WS
 	default "b-g474e-dpow1"            if ARCH_BOARD_B_G474E_DPOW1
 	default "b-g431b-esc1"             if ARCH_BOARD_B_G431B_ESC1
+	default "nucleo-g431kb"            if ARCH_BOARD_NUCLEO_G431KB
 	default "nucleo-g431rb"            if ARCH_BOARD_NUCLEO_G431RB
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
@@ -2825,6 +2843,9 @@ endif
 if ARCH_BOARD_B_G431B_ESC1
 source "boards/arm/stm32/b-g431b-esc1/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_G431KB
+source "boards/arm/stm32/nucleo-g431kb/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_G431RB
 source "boards/arm/stm32/nucleo-g431rb/Kconfig"
 endif
@@ -2911,6 +2932,9 @@ source "boards/arm/stm32/clicker2-stm32/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
 source "boards/arm/stm32/cloudctrl/Kconfig"
+endif
+if ARCH_BOARD_EMW3162
+source "boards/arm/stm32/emw3162/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
 source "boards/arm/stm32/fire-stm32v2/Kconfig"

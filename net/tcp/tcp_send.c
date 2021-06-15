@@ -362,6 +362,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     {
       /* Update the TCP received window based on I/O buffer availability */
 
+      uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
       uint16_t recvwndo = tcp_get_recvwindow(dev, conn);
 
       /* Set the TCP Window */
@@ -371,7 +372,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       /* Update the Receiver Window */
 
-      conn->rcv_wnd = recvwndo;
+      conn->rcv_adv = rcvseq + recvwndo;
     }
 
   /* Finish the IP portion of the message and calculate checksums */
@@ -553,6 +554,45 @@ void tcp_reset(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: tcp_rx_mss
+ *
+ * Description:
+ *   Return the MSS to advertize to the peer.
+ *
+ * Input Parameters:
+ *   dev  - The device driver structure
+ *
+ * Returned Value:
+ *   The MSS value.
+ *
+ ****************************************************************************/
+
+uint16_t tcp_rx_mss(FAR struct net_driver_s *dev)
+{
+  uint16_t tcp_mss;
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  if (IFF_IS_IPv6(dev->d_flags))
+#endif
+    {
+      tcp_mss = TCP_IPv6_MSS(dev);
+    }
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  else
+#endif
+    {
+      tcp_mss = TCP_IPv4_MSS(dev);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+  return tcp_mss;
+}
+
+/****************************************************************************
  * Name: tcp_synack
  *
  * Description:
@@ -588,10 +628,9 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      /* Get the MSS value and offset TCP header address for this packet */
+      /* Get the offset TCP header address for this packet */
 
       tcp     = TCPIPv6BUF;
-      tcp_mss = TCP_IPv6_MSS(dev);
 
       /* Set the packet length for the TCP Maximum Segment Size */
 
@@ -604,16 +643,17 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   else
 #endif
     {
-      /* Get the MSS value and offset TCP header address for this packet */
+      /* Get the offset TCP header address for this packet */
 
       tcp     = TCPIPv4BUF;
-      tcp_mss = TCP_IPv4_MSS(dev);
 
       /* Set the packet length for the TCP Maximum Segment Size */
 
       dev->d_len  = IPv4TCP_HDRLEN + TCP_OPT_MSS_LEN;
     }
 #endif /* CONFIG_NET_IPv4 */
+
+  tcp_mss = tcp_rx_mss(dev);
 
   /* Save the ACK bits */
 

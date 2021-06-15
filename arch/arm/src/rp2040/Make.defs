@@ -86,6 +86,10 @@ CHIP_CSRCS += rp2040_i2s.c
 CHIP_CSRCS += rp2040_i2s_pio.c
 endif
 
+ifeq ($(CONFIG_USBDEV),y)
+CHIP_CSRCS += rp2040_usbdev.c
+endif
+
 ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
 ifneq ($(PICO_SDK_PATH),)
 include chip/boot2/Make.defs

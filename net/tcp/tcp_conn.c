@@ -966,6 +966,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       /* rcvseq should be the seqno from the incoming packet + 1. */
 
       memcpy(conn->rcvseq, tcp->seqno, 4);
+      conn->rcv_adv = tcp_getsequence(conn->rcvseq);
 
       /* Initialize the list of TCP read-ahead buffers */
 
