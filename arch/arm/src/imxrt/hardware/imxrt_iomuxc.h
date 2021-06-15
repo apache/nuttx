@@ -149,6 +149,8 @@
 #define IOMUX_ENET_TX_CLK_DEFAULT             (IOMUX_SLEW_FAST | IOMUX_DRIVE_40OHM | IOMUX_SPEED_LOW | \
                                                IOMUX_PULL_DOWN_100K | IOMUX_PULL_KEEP | GPIO_SION_ENABLE )
 
+#define IOMUX_ENC_DEFAULT                     (0)
+
 #define IOMUX_CAN_DEFAULT                     (IOMUX_SLEW_SLOW | \
                                                IOMUX_DRIVE_50OHM | IOMUX_SPEED_LOW )
 
