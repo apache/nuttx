@@ -91,8 +91,10 @@ int imxrt_xbar_connect(uint16_t mux_index_out, uint16_t mux_index_input)
         imxrt_clockall_xbar2();
         break;
       case 2:
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
         imxrt_clockall_xbar3();
         break;
+#endif
       default:
         break;
     }
