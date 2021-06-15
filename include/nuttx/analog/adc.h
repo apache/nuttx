@@ -110,6 +110,19 @@ struct adc_callback_s
 
   CODE int (*au_receive)(FAR struct adc_dev_s *dev, uint8_t ch,
                          int32_t data);
+
+  /* This method is called from the lower half, platform-specific ADC logic
+   * when an overrun appeared to free / reset upper half.
+   *
+   * Input Parameters:
+   *   dev  - The ADC device structure that was previously registered by
+   *          adc_register()
+   *
+   * Returned Value:
+   *   Zero on success; a negated errno value on failure.
+   */
+
+  CODE int (*au_reset)(FAR struct adc_dev_s *dev);
 };
 
 /* This describes on ADC message */
@@ -195,6 +208,7 @@ struct adc_dev_s
   sem_t                       ad_closesem;   /* Locks out new opens while close is in progress */
   sem_t                       ad_recvsem;    /* Used to wakeup user waiting for space in ad_recv.buffer */
   struct adc_fifo_s           ad_recv;       /* Describes receive FIFO */
+  bool                        ad_isovr;      /* Flag to indicate an ADC overrun */
 
   /* The following is a list of poll structures of threads waiting for
    * driver events.  The 'struct pollfd' reference for each open is also
