@@ -168,8 +168,8 @@ int exec_module(FAR const struct binary_s *binp,
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, filename, binp->priority,
-                    NULL, binp->stacksize, binp->entrypt, argv);
+  ret = nxtask_init(tcb, argv[0], binp->priority, NULL,
+                    binp->stacksize, binp->entrypt, &argv[1]);
   binfmt_freeargv(argv);
   if (ret < 0)
     {
