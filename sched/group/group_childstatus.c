@@ -38,19 +38,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Note that there cannot be more that CONFIG_MAX_TASKS tasks in total.
- * However, the number of child status structures may need to be
- * significantly larger because this number includes the maximum number of
- * tasks that are running PLUS the number of tasks that have exit'ed without
- * having their exit status reaped (via wait(), waitid(), or waitpid()).
- *
- * Obviously, if tasks spawn children indefinitely and never have the exit
- * status reaped, then you have a memory leak!
- */
-
 #if !defined(CONFIG_PREALLOC_CHILDSTATUS) || CONFIG_PREALLOC_CHILDSTATUS == 0
 #  undef  CONFIG_PREALLOC_CHILDSTATUS
-#  define CONFIG_PREALLOC_CHILDSTATUS (2*CONFIG_MAX_TASKS)
+#  define CONFIG_PREALLOC_CHILDSTATUS 16
 #endif
 
 #ifndef CONFIG_DEBUG_INFO

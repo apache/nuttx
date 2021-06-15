@@ -197,12 +197,11 @@ volatile pid_t g_lastpid;
  * 1. This hash table greatly speeds the determination of a new unique
  *    process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
- *
- * It has the side effects of using more memory and limiting
- * the number of tasks to CONFIG_MAX_TASKS.
  */
 
-struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
+FAR struct pidhash_s *g_pidhash;
+
+volatile int g_npidhash;
 
 /* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -378,27 +377,11 @@ void nx_start(void)
     }
 #endif
 
-  /* Initialize the logic that determine unique process IDs. */
-
-  g_lastpid = 0;
-  for (i = 0; i < CONFIG_MAX_TASKS; i++)
-    {
-      g_pidhash[i].tcb = NULL;
-      g_pidhash[i].pid = INVALID_PROCESS_ID;
-    }
-
   /* Initialize the IDLE task TCB *******************************************/
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       FAR dq_queue_t *tasklist;
-      int hashndx;
-
-      /* Assign the process ID(s) of ZERO to the idle task(s) */
-
-      hashndx                = PIDHASH(i);
-      g_pidhash[hashndx].tcb = &g_idletcb[i].cmn;
-      g_pidhash[hashndx].pid = i;
 
       /* Initialize a TCB for this thread of execution.  NOTE:  The default
        * value for most components of the g_idletcb are zero.  The entire
@@ -510,8 +493,6 @@ void nx_start(void)
         }
     }
 
-  g_lastpid = CONFIG_SMP_NCPUS - 1;
-
   /* Task lists are initialized */
 
   g_nx_initstate = OSINIT_TASKLISTS;
@@ -573,6 +554,36 @@ void nx_start(void)
 
   iob_initialize();
 #endif
+
+  /* Initialize the logic that determine unique process IDs. */
+
+  g_npidhash = 4;
+  while (g_npidhash <= CONFIG_SMP_NCPUS)
+    {
+      g_npidhash <<= 1;
+    }
+
+  g_pidhash = kmm_malloc(sizeof(struct pidhash_s) * g_npidhash);
+  DEBUGASSERT(g_pidhash);
+
+  for (i = 0; i < g_npidhash; i++)
+    {
+      g_pidhash[i].tcb = NULL;
+      g_pidhash[i].pid = INVALID_PROCESS_ID;
+    }
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      int hashndx;
+
+      /* Assign the process ID(s) of ZERO to the idle task(s) */
+
+      hashndx                = PIDHASH(i);
+      g_pidhash[hashndx].tcb = &g_idletcb[i].cmn;
+      g_pidhash[hashndx].pid = i;
+    }
+
+  g_lastpid = CONFIG_SMP_NCPUS - 1;
 
   /* The memory manager is available */
 
@@ -757,7 +768,7 @@ void nx_start(void)
 
   /* A few basic sanity checks */
 
-  DEBUGASSERT(this_cpu() == 0 && CONFIG_MAX_TASKS > CONFIG_SMP_NCPUS);
+  DEBUGASSERT(this_cpu() == 0);
 
   /* Then start the other CPUs */
 
@@ -790,7 +801,7 @@ void nx_start(void)
 
       /* Check stack in idle thread */
 
-      for (i = 0; i < CONFIG_MAX_TASKS; i++)
+      for (i = 0; i < g_npidhash; i++)
         {
           FAR struct tcb_s *tcb;
           irqstate_t flags;
