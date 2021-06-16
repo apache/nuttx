@@ -95,10 +95,12 @@ config MPFS_UART4
 
 config MPFS_I2C0
         bool "I2C 0"
+        select ARCH_HAVE_I2CRESET
         default n
 
 config MPFS_I2C1
         bool "I2C 1"
+        select ARCH_HAVE_I2CRESET
         default n
 
 endmenu
