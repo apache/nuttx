@@ -446,7 +446,7 @@ static int adc_reset(FAR struct adc_dev_s *dev)
   dev->ad_isovr = true;
 
   /* No need to notify here. The adc_receive callback will be called next.
-   * If an adc overrun occurs then there must be at least one conversion.
+   * If an ADC overrun occurs then there must be at least one conversion.
    */
 
   return OK;
