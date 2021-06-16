@@ -609,9 +609,6 @@ static int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                       bool setup)
 {
-#ifndef HAVE_LOCAL_POLL
-  return -ENOSYS;
-#else
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
@@ -626,7 +623,6 @@ static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 
       return local_pollteardown(psock, fds);
     }
-#endif /* HAVE_LOCAL_POLL */
 }
 
 /****************************************************************************
