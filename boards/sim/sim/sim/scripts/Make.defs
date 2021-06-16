@@ -199,5 +199,3 @@ endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe
-
-LDLINKFLAGS += -nostartfiles -nodefaultlibs
