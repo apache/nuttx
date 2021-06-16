@@ -62,6 +62,21 @@ config SENSORS_AK09912
 	---help---
 		Enable driver for AK09911/AK09912 Compass sensor.
 
+config SENSORS_AK09919C
+	bool "Asahi AK09919C Compass Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for AK09919C Compass sensor.
+
+config SENSORS_AK09919C_BUFFER_NUMBER
+	int "The nunmber of circular buffer for sensor AK09919C"
+	default 1
+	depends on SENSORS_AK09919C
+	---help---
+		The number of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
+
 config SENSORS_AS5048B
 	bool "AMS AS5048B Magnetic Rotary Encoder support"
 	default n
