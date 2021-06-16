@@ -1837,7 +1837,7 @@ static int adc_interrupt(FAR struct adc_dev_s *dev, uint32_t adcisr)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   int32_t value;
 
-  /* Identifies the interruption AWD */
+  /* Identifies the AWD interrupt */
 
   if ((adcisr & ADC_INT_AWD1) != 0)
     {
