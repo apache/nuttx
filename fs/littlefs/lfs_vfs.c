@@ -335,7 +335,7 @@ static int littlefs_close(FAR struct file *filep)
 
   if (--priv->refs <= 0)
     {
-      lfs_file_close(&fs->lfs, &priv->file);
+      ret = lfs_file_close(&fs->lfs, &priv->file);
     }
 
   littlefs_semgive(fs);
@@ -344,7 +344,7 @@ static int littlefs_close(FAR struct file *filep)
       kmm_free(priv);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
