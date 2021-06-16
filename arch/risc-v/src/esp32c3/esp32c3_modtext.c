@@ -33,6 +33,12 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
+#include "hardware/esp32c3_soc.h"
+
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+#include "esp32c3_rtc_heap.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -49,20 +55,44 @@
 
 void up_module_text_init()
 {
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+  /* Initialize the RTC heap */
+
+  esp32c3_rtc_heap_initialize();
+#endif
 }
 
 /****************************************************************************
  * Name: up_module_text_memalign()
+ *
+ * Description:
+ *   Allocate memory for module text with the specified alignment.
+ *
  ****************************************************************************/
 
 FAR void *up_module_text_memalign(size_t align, size_t size)
 {
-  FAR void *ret;
+  FAR void *ret = NULL;
 
-  ret = kmm_memalign(align, size);
-  if (ret)
+  /* Prioritise allocating from RTC. If that fails, allocate from the
+   * main heap.
+   */
+
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+  ret = esp32c3_rtc_heap_memalign(align, size);
+#endif
+
+  if (ret == NULL)
     {
-      ret += D_I_BUS_OFFSET;
+      ret = kmm_memalign(align, size);
+      if (ret)
+        {
+          /* kmm_memalign buffer is at the Data bus offset.  Adjust it so we
+           * can access it from the Instruction bus.
+           */
+
+          ret += D_I_BUS_OFFSET;
+        }
     }
 
   return ret;
@@ -70,14 +100,26 @@ FAR void *up_module_text_memalign(size_t align, size_t size)
 
 /****************************************************************************
  * Name: up_module_text_free()
+ *
+ * Description:
+ *   Free memory for module text.
+ *
  ****************************************************************************/
 
 void up_module_text_free(FAR void *p)
 {
   if (p)
     {
-      p -= D_I_BUS_OFFSET;
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+      if (esp32c3_ptr_rtc(p))
+        {
+          esp32c3_rtc_heap_free(p);
+        }
+      else
+#endif
+        {
+          p -= D_I_BUS_OFFSET;
+          kmm_free(p);
+        }
     }
-
-  kmm_free(p);
 }
