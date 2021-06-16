@@ -89,3 +89,6 @@ MEMORY
   REGION_ALIAS("default_code_seg", iram0_2_seg);
 #endif /* CONFIG_ESP32C3_DEVKIT_RUN_IRAM */
 
+/* Mark the end of the RTC heap (top of the RTC region) */
+
+_ertc_heap = 0x50001fff;
