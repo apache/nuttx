@@ -88,7 +88,7 @@ static int     ramlog_readnotify(FAR struct ramlog_dev_s *priv);
 #endif
 static void    ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
                                  pollevent_t eventset);
-static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
+static int     ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
@@ -212,7 +212,7 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
  * Name: ramlog_addchar
  ****************************************************************************/
 
-static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
+static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
   irqstate_t flags;
   size_t nexthead;
@@ -220,6 +220,25 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
   flags = enter_critical_section();
+
+#ifdef CONFIG_RAMLOG_CRLF
+  /* Ignore carriage returns */
+
+  if (ch == '\r')
+    {
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  /* Pre-pend a carriage before a linefeed */
+
+  if (ch == '\n')
+    {
+      ch = '\r';
+    }
+
+again:
+#endif
 
   /* Calculate the write index AFTER the next byte is written */
 
@@ -254,6 +273,15 @@ static ssize_t ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 
   priv->rl_buffer[priv->rl_head] = ch;
   priv->rl_head = nexthead;
+
+#ifdef CONFIG_RAMLOG_CRLF
+  if (ch == '\r')
+    {
+      ch = '\n';
+      goto again;
+    }
+#endif
+
   leave_critical_section(flags);
   return OK;
 }
@@ -456,30 +484,6 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
       /* Get the next character to output */
 
       ch = buffer[nwritten];
-
-      /* Ignore carriage returns */
-
-#ifdef CONFIG_RAMLOG_CRLF
-      if (ch == '\r')
-        {
-          continue;
-        }
-
-      /* Pre-pend a carriage before a linefeed */
-
-      if (ch == '\n')
-        {
-          ret = ramlog_addchar(priv, '\r');
-          if (ret < 0)
-            {
-              /* The buffer is full and nothing was saved.  The remaining
-               * data to be written is dropped on the floor.
-               */
-
-              break;
-            }
-        }
-#endif
 
       /* Then output the character */
 
@@ -826,28 +830,6 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   UNUSED(channel);
 
   ramlog_initbuf();
-
-#ifdef CONFIG_RAMLOG_CRLF
-  /* Ignore carriage returns.  But return success. */
-
-  if (ch == '\r')
-    {
-      return ch;
-    }
-
-  /* Pre-pend a newline with a carriage return */
-
-  if (ch == '\n')
-    {
-      ret = ramlog_addchar(priv, '\r');
-      if (ret < 0)
-        {
-          /* The buffer is full and nothing was saved. */
-
-          return ret;
-        }
-    }
-#endif
 
   /* Add the character to the RAMLOG */
 
