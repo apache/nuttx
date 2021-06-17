@@ -166,9 +166,13 @@ static size_t tcp_recvfrom_newdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static inline void tcp_newdata(FAR struct net_driver_s *dev,
-                               FAR struct tcp_recvfrom_s *pstate)
+static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
+                                   FAR struct tcp_recvfrom_s *pstate,
+                                   uint16_t flags)
 {
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)
+                                pstate->ir_sock->s_conn;
+
   /* Take as much data from the packet as we can */
 
   size_t recvlen = tcp_recvfrom_newdata(dev, pstate);
@@ -179,40 +183,39 @@ static inline void tcp_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      FAR struct tcp_conn_s *conn =
-        (FAR struct tcp_conn_s *)pstate->ir_sock->s_conn;
       FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
       uint16_t buflen = dev->d_len - recvlen;
-#ifdef CONFIG_DEBUG_NET
       uint16_t nsaved;
 
       nsaved = tcp_datahandler(conn, buffer, buflen);
-#else
-      tcp_datahandler(conn, buffer, buflen);
-#endif
-
-      /* There are complicated buffering issues that are not addressed fully
-       * here.  For example, what if up_datahandler() cannot buffer the
-       * remainder of the packet?  In that case, the data will be dropped but
-       * still ACKed.  Therefore it would not be resent.
-       *
-       * This is probably not an issue here because we only get here if the
-       * read-ahead buffers are empty and there would have to be something
-       * serioulsy wrong with the configuration not to be able to buffer a
-       * partial packet in this context.
-       */
-
-#ifdef CONFIG_DEBUG_NET
       if (nsaved < buflen)
         {
-          nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
+          nwarn("WARNING: packet data not fully saved "
+                "(%d/%u/%zu/%u bytes)\n",
+                buflen - nsaved,
+                (unsigned int)nsaved,
+                recvlen,
+                (unsigned int)dev->d_len);
         }
-#endif
+
+      recvlen += nsaved;
     }
+
+  if (recvlen < dev->d_len)
+    {
+      /* Clear the TCP_CLOSE because we effectively dropped the FIN as well.
+       */
+
+      flags &= ~TCP_CLOSE;
+    }
+
+  net_incr32(conn->rcvseq, recvlen);
 
   /* Indicate no data in the buffer */
 
   dev->d_len = 0;
+
+  return flags;
 }
 
 /****************************************************************************
@@ -418,7 +421,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
            * packet in the read-ahead buffer).
            */
 
-          tcp_newdata(dev, pstate);
+          flags = tcp_newdata(dev, pstate, flags);
 
           /* Save the sender's address in the caller's 'from' location */
 

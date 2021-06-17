@@ -238,7 +238,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
               goto drop;
             }
 
-          net_incr32(conn->rcvseq, 1);
+          net_incr32(conn->rcvseq, 1); /* ack SYN */
 
           /* Parse the TCP MSS option, if present. */
 
@@ -618,7 +618,6 @@ found:
             if (dev->d_len > 0)
               {
                 flags          |= TCP_NEWDATA;
-                net_incr32(conn->rcvseq, dev->d_len);
               }
 
             dev->d_sndlen       = 0;
@@ -706,7 +705,7 @@ found:
             memcpy(conn->rcvseq, tcp->seqno, 4);
             conn->rcv_adv = tcp_getsequence(conn->rcvseq);
 
-            net_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1); /* ack SYN */
             conn->tx_unacked    = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -774,7 +773,6 @@ found:
              * has been closed.
              */
 
-            net_incr32(conn->rcvseq, dev->d_len + 1);
             flags |= TCP_CLOSE;
 
             if (dev->d_len > 0)
@@ -782,17 +780,26 @@ found:
                 flags |= TCP_NEWDATA;
               }
 
-            tcp_callback(dev, conn, flags);
+            result = tcp_callback(dev, conn, flags);
 
-            conn->tcpstateflags = TCP_LAST_ACK;
-            conn->tx_unacked    = 1;
-            conn->nrtx          = 0;
+            if ((result & TCP_CLOSE) != 0)
+              {
+                conn->tcpstateflags = TCP_LAST_ACK;
+                conn->tx_unacked    = 1;
+                conn->nrtx          = 0;
+                net_incr32(conn->rcvseq, 1); /* ack FIN */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-            conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
+                conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
 #endif
-            ninfo("TCP state: TCP_LAST_ACK\n");
+                ninfo("TCP state: TCP_LAST_ACK\n");
+                tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
+              }
+            else
+              {
+                ninfo("TCP: Dropped a FIN\n");
+                tcp_appsend(dev, conn, result);
+              }
 
-            tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
             return;
           }
 
@@ -914,30 +921,11 @@ found:
 
         if ((flags & (TCP_NEWDATA | TCP_ACKDATA)) != 0)
           {
-            /* Clear sndlen and remember the size in d_len.  The application
-             * may modify d_len and we will need this value later when we
-             * update the sequence number.
-             */
-
             dev->d_sndlen = 0;
-            len           = dev->d_len;
 
             /* Provide the packet to the application */
 
             result = tcp_callback(dev, conn, flags);
-
-            /* If the application successfully handled the incoming data,
-             * then TCP_SNDACK will be set in the result.  In this case,
-             * we need to update the sequence number.  The ACK will be
-             * send by tcp_appsend().
-             */
-
-            if ((result & TCP_SNDACK) != 0)
-              {
-                /* Update the sequence number using the saved length */
-
-                net_incr32(conn->rcvseq, len);
-              }
 
             /* Send the response, ACKing the data or not, as appropriate */
 
@@ -986,7 +974,7 @@ found:
                 ninfo("TCP state: TCP_CLOSING\n");
               }
 
-            net_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1); /* ack FIN */
             tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
@@ -1018,7 +1006,7 @@ found:
             conn->timer         = 0;
             ninfo("TCP state: TCP_TIME_WAIT\n");
 
-            net_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1); /* ack FIN */
             tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
