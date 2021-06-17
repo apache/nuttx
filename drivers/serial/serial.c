@@ -1378,7 +1378,22 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               /* Save the PID of the recipient of the SIGINT signal. */
 
-              dev->pid = (pid_t)arg;
+              if ((int)arg < 0 || dev->pid >= 0)
+                {
+                  ret = -EINVAL;
+                }
+              else
+                {
+                  dev->pid = (pid_t)arg;
+                  ret = 0;
+                }
+            }
+            break;
+
+          case TIOCNOTTY:
+            {
+              dev->pid = (pid_t)-1;
+              ret = 0;
             }
             break;
 #endif
