@@ -214,6 +214,7 @@ endchoice # On-board Crystal Frequency
 config ESP32_RT_TIMER
 	bool "Real-time Timer"
 	default n
+	select ESP32_TIMER0
 
 config ESP32_PARTITION
 	bool "ESP32 Partition"
