@@ -140,6 +140,19 @@ void ramlog_syslog_register(void);
 int ramlog_putc(FAR struct syslog_channel_s *channel, int ch);
 #endif
 
+/****************************************************************************
+ * Name: ramlog_write
+ *
+ * Description:
+ *   This is the low-level system logging interface.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+ssize_t ramlog_write(FAR struct syslog_channel_s *channel,
+                     FAR const char *buffer, size_t buflen);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
