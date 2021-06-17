@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_comp.c
+ * arch/arm/src/stm32/hardware/stm32_comp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,9 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -26,18 +29,24 @@
 
 #include "chip.h"
 
-/* This file is only a thin shell that includes the correct COMP
- * implementation. At this moment only STM32 COMP IP version 1 device is
- * suportted.
- *   - STM32 COMP IP version 1: SMT32F33XX
+#ifdef CONFIG_STM32_COMP
+
+/* Include the correct COMP register definitions for
+ * selected STM32 COMP IP core:
  */
 
+/* If more than one COMP IP ensure that only one is selected */
+
 #if defined(CONFIG_STM32_HAVE_IP_COMP_V1)
-#  include "stm32_comp_v1.c"
+#  if defined(CONFIG_STM32_STM32F33XX)
+#    include "stm32f33xxx_comp.h"
+#  else
+#    error "Device not supported."
+#  endif
 #else
-#  error "STM32 COMP IP version not supported."
+#  error "STM32 COMP IP not supported."
 #endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#endif /* CONFIG_STM32_COMP */
+
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H */

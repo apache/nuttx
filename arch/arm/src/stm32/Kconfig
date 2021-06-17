@@ -1553,6 +1553,7 @@ config STM32_STM32F33XX
 	select STM32_HAVE_IP_DBGMCU_V2
 	select STM32_HAVE_IP_TIMERS_V2
 	select STM32_HAVE_IP_ADC_V2
+	select STM32_HAVE_IP_COMP_V1
 	select STM32_HAVE_IP_DMA_V1
 	select STM32_HAVE_IP_I2C_V2
 
@@ -2615,6 +2616,10 @@ config STM32_HAVE_IP_ADC_V2_BASIC
 	bool
 	default n
 	select STM32_HAVE_IP_ADC_V2
+
+config STM32_HAVE_IP_COMP_V1
+	bool
+	default n
 
 # These are the peripheral selections proper
 
