@@ -92,14 +92,14 @@ static int     ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch);
 
 /* Character driver methods */
 
-static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen);
-static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen);
-static int     ramlog_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
-static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                           bool setup);
+static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen);
+static ssize_t ramlog_file_write(FAR struct file *filep, FAR const char *buffer,
+                                 size_t buflen);
+static int     ramlog_file_ioctl(FAR struct file *filep, int cmd,
+                                 unsigned long arg);
+static int     ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                                bool setup);
 
 /****************************************************************************
  * Private Data
@@ -107,15 +107,15 @@ static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_ramlogfops =
 {
-  NULL,         /* open */
-  NULL,         /* close */
-  ramlog_read,  /* read */
-  ramlog_write, /* write */
-  NULL,         /* seek */
-  ramlog_ioctl, /* ioctl */
-  ramlog_poll   /* poll */
+  NULL,              /* open */
+  NULL,              /* close */
+  ramlog_file_read,  /* read */
+  ramlog_file_write, /* write */
+  NULL,              /* seek */
+  ramlog_file_ioctl, /* ioctl */
+  ramlog_file_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL        /* unlink */
+  , NULL             /* unlink */
 #endif
 };
 
@@ -287,11 +287,88 @@ again:
 }
 
 /****************************************************************************
+ * Name: ramlog_addbuf
+ ****************************************************************************/
+
+static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
+                             FAR const char *buffer, size_t len)
+{
+  int readers_waken;
+  ssize_t nwritten;
+  char ch;
+  int ret;
+
+  ret = nxsem_wait(&priv->rl_exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  for (nwritten = 0; (size_t)nwritten < len; nwritten++)
+    {
+      /* Get the next character to output */
+
+      ch = buffer[nwritten];
+
+      /* Then output the character */
+
+      ret = ramlog_addchar(priv, ch);
+      if (ret < 0)
+        {
+          /* The buffer is full and nothing was saved.  The remaining
+           * data to be written is dropped on the floor.
+           */
+
+          break;
+        }
+    }
+
+  /* Was anything written? */
+
+  if (nwritten > 0)
+    {
+      readers_waken = 0;
+
+#ifndef CONFIG_RAMLOG_NONBLOCKING
+      /* Are there threads waiting for read data? */
+
+      readers_waken = ramlog_readnotify(priv);
+#endif
+
+      /* If there are multiple readers, some of them might block despite
+       * POLLIN because first reader might read all data. Favor readers
+       * and notify poll waiters only if no reader was awaken, even if the
+       * latter may starve.
+       *
+       * This also implies we do not have to make these two notify
+       * operations a critical section.
+       */
+
+      if (readers_waken == 0)
+        {
+          /* Notify all poll/select waiters that they can read from the
+           * FIFO.
+           */
+
+          ramlog_pollnotify(priv, POLLIN);
+        }
+    }
+
+  /* We always have to return the number of bytes requested and NOT the
+   * number of bytes that were actually written.  Otherwise, callers
+   * probably retry, causing same error condition again.
+   */
+
+  nxsem_post(&priv->rl_exclsem);
+  return len;
+}
+
+/****************************************************************************
  * Name: ramlog_read
  ****************************************************************************/
 
-static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer,
-                           size_t len)
+static ssize_t ramlog_file_read(FAR struct file *filep, FAR char *buffer,
+                                size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv;
@@ -354,7 +431,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer,
 
           /* Otherwise, wait for something to be written to the circular
            * buffer. Increment the number of waiters so that the
-           * ramlog_write() will note that it needs to post the semaphore
+           * ramlog_file_write() will note that it needs to post the semaphore
            * to wake us up.
            */
 
@@ -452,24 +529,21 @@ errout_without_sem:
 }
 
 /****************************************************************************
- * Name: ramlog_write
+ * Name: ramlog_file_write
  ****************************************************************************/
 
-static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t len)
+static ssize_t ramlog_file_write(FAR struct file *filep, FAR const char *buffer,
+                                 size_t len)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv;
-  int readers_waken;
-  ssize_t nwritten;
-  char ch;
-  int ret;
 
   /* Some sanity checking */
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct ramlog_dev_s *)inode->i_private;
 
+<<<<<<< HEAD   (d24b87 Revert "net/socketpair: move socketpair implement into socke)
   /* Loop until all of the bytes have been written.  This function may be
    * called from an interrupt handler!  Semaphores cannot be used!
    *
@@ -535,13 +609,16 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
    */
 
   return len;
+=======
+  return ramlog_addbuf(priv, buffer, len);
+>>>>>>> CHANGE (a96a9e syslog/ramlog_channel: fix log confusion when multi task wri)
 }
 
 /****************************************************************************
- * Name: ramlog_ioctl
+ * Name: ramlog_file_ioctl
  ****************************************************************************/
 
-static int ramlog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int ramlog_file_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv;
@@ -573,11 +650,11 @@ static int ramlog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: ramlog_poll
+ * Name: ramlog_file_poll
  ****************************************************************************/
 
-static int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                       bool setup)
+static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                            bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct ramlog_dev_s *priv;
@@ -866,6 +943,15 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   /* Return the character added on success */
 
   return ch;
+}
+
+
+ssize_t ramlog_write(FAR struct syslog_channel_s *channel,
+                     FAR const char *buffer, size_t buflen)
+{
+  FAR struct ramlog_dev_s *priv = &g_sysdev;
+
+  return ramlog_addbuf(priv, buffer, buflen);
 }
 #endif
 

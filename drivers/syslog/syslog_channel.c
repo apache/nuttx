@@ -68,7 +68,9 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
 static const struct syslog_channel_ops_s g_ramlog_channel_ops =
 {
   ramlog_putc,
-  ramlog_putc
+  ramlog_putc,
+  NULL,
+  ramlog_write
 };
 
 static struct syslog_channel_s g_ramlog_channel =
