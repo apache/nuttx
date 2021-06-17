@@ -31,9 +31,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
-#include <nuttx/signal.h>
 #include <metal/utilities.h>
 
 /****************************************************************************
@@ -60,7 +60,7 @@ struct rptun_priv_s
   struct rpmsg_virtio_shm_pool shm_pool;
   struct metal_list            bind;
   struct metal_list            node;
-  int                          pid;
+  sem_t                        sem;
 };
 
 struct rptun_bind_s
@@ -167,22 +167,13 @@ static METAL_DECLARE_LIST(g_rptun_priv);
 static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
-  sigset_t set;
-  int ret;
 
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
 
-  sigemptyset(&set);
-  nxsig_addset(&set, SIGUSR1);
-  nxsig_procmask(SIG_BLOCK, &set, NULL);
-
   while (1)
     {
-      ret = nxsig_timedwait(&set, NULL, NULL);
-      if (ret == SIGUSR1)
-        {
-          remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
-        }
+      nxsem_wait_uninterruptible(&priv->sem);
+      remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
     }
 
   return 0;
@@ -191,8 +182,15 @@ static int rptun_thread(int argc, FAR char *argv[])
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
   FAR struct rptun_priv_s *priv = arg;
+  int semcount;
 
-  return nxsig_kill(priv->pid, SIGUSR1);
+  nxsem_get_value(&priv->sem, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(&priv->sem);
+    }
+
+  return OK;
 }
 
 static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
@@ -821,6 +819,9 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   argv[1] = arg1;
   argv[2] = NULL;
 
+  nxsem_init(&priv->sem, 0, 0);
+  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
+
   ret = kthread_create("rptun",
                        CONFIG_RPTUN_PRIORITY,
                        CONFIG_RPTUN_STACKSIZE,
@@ -832,7 +833,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       return ret;
     }
 
-  priv->pid = ret;
   priv->dev = dev;
 
   metal_list_init(&priv->bind);
