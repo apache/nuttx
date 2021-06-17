@@ -71,10 +71,6 @@ to match the highest priority client.
 **Common Configuration Options**. These options apply to all work
 queues:
 
--  ``CONFIG_SIG_SIGWORK`` The signal number that will be used to
-   wake-up the worker thread. This same signal is used with the
-   Default: 17
-
 Low Priority Kernel Work Queue
 ------------------------------
 

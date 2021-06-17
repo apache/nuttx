@@ -31,6 +31,7 @@
 #include <queue.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -51,7 +52,10 @@
 
 struct kworker_s
 {
+#ifdef CONFIG_PRIORITY_INHERITANCE
   pid_t             pid;    /* The task ID of the worker thread */
+#endif
+  sem_t             sem;    /* The counting semaphore of the worker thread */
   volatile bool     busy;   /* True: Worker is not available */
 };
 
@@ -161,15 +165,16 @@ int work_start_lowpri(void);
  *   be called from application level logic.
  *
  * Input Parameters:
- *   wqueue - Describes the work queue to be processed
- *   wndx   - The worker thread index
+ *   wqueue  - Describes the work queue to be processed
+ *   kworker - Describes a worker thread
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
+void work_process(FAR struct kwork_wqueue_s *wqueue,
+                  FAR struct kworker_s *kworker);
 
 /****************************************************************************
  * Name: work_initialize_notifier

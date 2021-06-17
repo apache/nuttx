@@ -98,14 +98,16 @@
  *   be called from application level logic.
  *
  * Input Parameters:
- *   wqueue - Describes the work queue to be processed
+ *   wqueue  - Describes the work queue to be processed
+ *   kworker - Describes a worker thread
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
+void work_process(FAR struct kwork_wqueue_s *wqueue,
+                  FAR struct kworker_s *kworker)
 {
   volatile FAR struct work_s *work;
   worker_t  worker;
@@ -229,16 +231,9 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
 
   if (next == WORK_DELAY_MAX)
     {
-      sigset_t set;
-
-      /* Wait indefinitely until signalled with SIGWORK */
-
-      sigemptyset(&set);
-      nxsig_addset(&set, SIGWORK);
-
-      wqueue->worker[wndx].busy = false;
-      DEBUGVERIFY(nxsig_waitinfo(&set, NULL));
-      wqueue->worker[wndx].busy = true;
+      kworker->busy = false;
+      nxsem_wait_uninterruptible(&kworker->sem);
+      kworker->busy = true;
     }
   else
     {
@@ -247,9 +242,11 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
        * Interrupts will be re-enabled while we wait.
        */
 
-      wqueue->worker[wndx].busy = false;
-      nxsig_usleep(next * USEC_PER_TICK);
-      wqueue->worker[wndx].busy = true;
+      kworker->busy = false;
+      nxsem_tickwait_uninterruptible(&kworker->sem,
+                                     clock_systime_ticks(),
+                                     next * USEC_PER_TICK);
+      kworker->busy = true;
     }
 
   leave_critical_section(flags);
