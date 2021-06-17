@@ -117,10 +117,10 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
 #else
   /* Allocate memory to hold the ELF image */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
   loadinfo->textalloc = (uintptr_t)
-                         up_module_text_memalign(loadinfo->textalign,
-                                                 textsize);
+                         up_textheap_memalign(loadinfo->textalign,
+                                              textsize);
 #else
   loadinfo->textalloc = (uintptr_t)kumm_malloc(textsize + datasize);
 #endif
@@ -130,7 +130,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
       return -ENOMEM;
     }
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
   loadinfo->dataalloc = (uintptr_t)kumm_malloc(datasize);
 
   if (0 != datasize && !loadinfo->dataalloc)
@@ -177,10 +177,10 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
     }
 #else
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
   if (loadinfo->textalloc != 0)
     {
-      up_module_text_free((FAR void *)loadinfo->textalloc);
+      up_textheap_free((FAR void *)loadinfo->textalloc);
     }
 
   if (loadinfo->dataalloc != 0)

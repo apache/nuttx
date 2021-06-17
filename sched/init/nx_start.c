@@ -572,8 +572,8 @@ void nx_start(void)
     }
 #endif
 
-#ifdef CONFIG_ARCH_USE_MODULE_TEXT
-  up_module_text_init();
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
+  up_textheap_init();
 #endif
 
 #ifdef CONFIG_MM_IOB

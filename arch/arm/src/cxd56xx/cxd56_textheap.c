@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_modtext.c
+ * arch/arm/src/cxd56xx/cxd56_textheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -44,18 +44,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_module_text_init()
+ * Name: up_textheap_init()
  ****************************************************************************/
 
-void up_module_text_init()
+void up_textheap_init()
 {
 }
 
 /****************************************************************************
- * Name: up_module_text_memalign()
+ * Name: up_textheap_memalign()
  ****************************************************************************/
 
-FAR void *up_module_text_memalign(size_t align, size_t size)
+FAR void *up_textheap_memalign(size_t align, size_t size)
 {
   FAR void *ret;
   ret = (FAR void *)kmm_malloc(size);
@@ -80,10 +80,10 @@ FAR void *up_module_text_memalign(size_t align, size_t size)
 }
 
 /****************************************************************************
- * Name: up_module_text_free()
+ * Name: up_textheap_free()
  ****************************************************************************/
 
-void up_module_text_free(FAR void *p)
+void up_textheap_free(FAR void *p)
 {
 #ifdef CONFIG_CXD56_USE_SYSBUS
   if (p)

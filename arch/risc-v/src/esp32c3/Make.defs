@@ -156,8 +156,8 @@ CHIP_CSRCS += esp32c3_efuse_table.c
 CHIP_CSRCS += esp32c3_efuse_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
-CHIP_CSRCS += esp32c3_modtext.c
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32c3_textheap.c
 endif
 
 ifeq ($(CONFIG_RTC_DRIVER),y)
