@@ -24,13 +24,19 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "esp32_rtc.h"
 #include "esp32_clockconfig.h"
+#include "esp32_rt_timer.h"
+
 #include "hardware/esp32_rtccntl.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_i2s.h"
-#include "esp32_rtc.h"
+
 #include "xtensa.h"
 #include "xtensa_attr.h"
 
@@ -124,6 +130,25 @@
   .fe_pd = (val), \
 }
 
+#ifdef CONFIG_RTC_DRIVER
+/* The magic data for the struct esp32_rtc_backup_s that is in RTC slow
+ * memory.
+ */
+
+#  define MAGIC_RTC_SAVE (UINT64_C(0x11223344556677))
+#endif
+
+/* RTC Memory & Store Register usage */
+
+#define RTC_SLOW_CLK_CAL_REG    RTC_CNTL_STORE1_REG /* RTC_SLOW_CLK calibration value */
+#define RTC_BOOT_TIME_LOW_REG   RTC_CNTL_STORE2_REG /* Boot time, low word */
+#define RTC_BOOT_TIME_HIGH_REG  RTC_CNTL_STORE3_REG /* Boot time, high word */
+#define RTC_XTAL_FREQ_REG       RTC_CNTL_STORE4_REG /* External XTAL frequency */
+#define RTC_APB_FREQ_REG        RTC_CNTL_STORE5_REG /* APB bus frequency */
+#define RTC_ENTRY_ADDR_REG      RTC_CNTL_STORE6_REG /* FAST_RTC_MEMORY_ENTRY */
+#define RTC_RESET_CAUSE_REG     RTC_CNTL_STORE6_REG
+#define RTC_MEMORY_CRC_REG      RTC_CNTL_STORE7_REG /* FAST_RTC_MEMORY_CRC */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -176,6 +201,28 @@ struct esp32_rtc_sleep_pd_config_s
   uint32_t fe_pd : 1;     /* Set to 1 to power down WiFi in sleep */
 };
 
+#ifdef CONFIG_RTC_DRIVER
+
+#ifdef CONFIG_RTC_ALARM
+struct alm_cbinfo_s
+{
+  struct rt_timer_s *alarm_hdl;  /* Timer id point to here */
+  volatile alm_callback_t ac_cb; /* Client callback function */
+  volatile FAR void *ac_arg;     /* Argument to pass with the callback function */
+  uint64_t deadline_us;
+  uint8_t index;
+};
+#endif
+
+struct esp32_rtc_backup_s
+{
+  uint64_t magic;
+  int64_t  offset;              /* Offset time from RTC HW value */
+  int64_t  reserved0;
+};
+
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -191,6 +238,10 @@ static void IRAM_ATTR esp32_rtc_clk_slow_freq_set(
                       enum esp32_rtc_slow_freq_e slow_freq);
 static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk);
 
+#ifdef CONFIG_RTC_DRIVER
+static void IRAM_ATTR esp32_rt_cb_handler(FAR void *arg);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -204,6 +255,31 @@ static struct esp32_rtc_priv_s esp32_rtc_priv =
   .pwrctl_init    = 1,
   .rtc_dboost_fpd = 1
 };
+
+#ifdef CONFIG_RTC_DRIVER
+
+/* Callback to use when the alarm expires */
+
+#ifdef CONFIG_RTC_ALARM
+static struct alm_cbinfo_s g_alarmcb[RTC_ALARM_LAST];
+#endif
+
+static RTC_DATA_ATTR struct esp32_rtc_backup_s rtc_saved_data;
+
+/* Saved data for persistent RTC time */
+
+static struct esp32_rtc_backup_s *g_rtc_save;
+static bool g_rt_timer_enabled = false;
+
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DRIVER
+volatile bool g_rtc_enabled = false;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -474,6 +550,49 @@ static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk)
 
   putreg32((uint32_t)cal_val, RTC_SLOW_CLK_CAL_REG);
 }
+
+#ifdef CONFIG_RTC_DRIVER
+
+/****************************************************************************
+ * Name: esp32_rt_cb_handler
+ *
+ * Description:
+ *   RT-Timer service routine
+ *
+ * Input Parameters:
+ *   arg - Information about the RT-Timer configuration.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp32_rt_cb_handler(FAR void *arg)
+{
+  FAR struct alm_cbinfo_s *cbinfo = (struct alm_cbinfo_s *)arg;
+  alm_callback_t cb;
+  FAR void *cb_arg;
+  int alminfo_id;
+
+  DEBUGASSERT(cbinfo != NULL);
+  alminfo_id = cbinfo->index;
+  DEBUGASSERT((RTC_ALARM0 <= alminfo_id) &&
+              (alminfo_id < RTC_ALARM_LAST));
+
+  if (cbinfo->ac_cb != NULL)
+    {
+      /* Alarm callback */
+
+      cb = cbinfo->ac_cb;
+      cb_arg = (FAR void *)cbinfo->ac_arg;
+      cbinfo->ac_cb  = NULL;
+      cbinfo->ac_arg = NULL;
+      cbinfo->deadline_us = 0;
+      cb(cb_arg, alminfo_id);
+    }
+}
+
+#endif /* CONFIG_RTC_DRIVER */
 
 /****************************************************************************
  * Public Functions
@@ -826,7 +945,7 @@ void IRAM_ATTR esp32_rtc_bbpll_configure(
  *
  ****************************************************************************/
 
-void esp32_rtc_clk_set()
+void esp32_rtc_clk_set(void)
 {
   enum esp32_rtc_fast_freq_e fast_freq = RTC_FAST_FREQ_8M;
   enum esp32_slow_clk_sel_e slow_clk = RTC_SLOW_FREQ_RTC;
@@ -848,7 +967,7 @@ void esp32_rtc_clk_set()
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp32_rtc_init()
+void IRAM_ATTR esp32_rtc_init(void)
 {
   struct esp32_rtc_priv_s *priv = &esp32_rtc_priv;
 
@@ -1473,3 +1592,471 @@ int IRAM_ATTR esp32_rtc_sleep_start(uint32_t wakeup_opt,
                 RTC_CNTL_DBG_ATTEN_DEFAULT);
   return reject;
 }
+
+/****************************************************************************
+ * Name: esp32_rtc_get_time_us
+ *
+ * Description:
+ *   Get current value of RTC counter in microseconds
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current value of RTC counter in microseconds
+ *
+ ****************************************************************************/
+
+uint64_t esp32_rtc_get_time_us(void)
+{
+  const uint32_t cal = getreg32(RTC_SLOW_CLK_CAL_REG);
+  const uint64_t rtc_this_ticks = esp32_rtc_time_get();
+
+  /* RTC counter result is up to 2^48, calibration factor is up to 2^24,
+   * for a 32kHz clock. We need to calculate (assuming no overflow):
+   * (ticks * cal) >> RTC_CLK_CAL_FRACT. An overflow in the (ticks * cal)
+   * multiplication would cause time to wrap around after approximately
+   * 13 days, which is probably not enough for some applications.
+   * Therefore multiplication is split into two terms, for the lower 32-bit
+   * and the upper 16-bit parts of "ticks", i.e.:
+   * ((ticks_low + 2^32 * ticks_high) * cal) >> RTC_CLK_CAL_FRACT
+   */
+
+  const uint64_t ticks_low = rtc_this_ticks & UINT32_MAX;
+  const uint64_t ticks_high = rtc_this_ticks >> 32;
+  const uint64_t delta_time_us = ((ticks_low * cal) >> RTC_CLK_CAL_FRACT) +
+          ((ticks_high * cal) << (32 - RTC_CLK_CAL_FRACT));
+
+  return delta_time_us;
+}
+
+/****************************************************************************
+ * Name: esp32_rtc_set_boot_time
+ *
+ * Description:
+ *   Set time to RTC register to replace the original boot time.
+ *
+ * Input Parameters:
+ *   time_us - set time in microseconds.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32_rtc_set_boot_time(uint64_t time_us)
+{
+  putreg32((uint32_t)(time_us & UINT32_MAX), RTC_BOOT_TIME_LOW_REG);
+  putreg32((uint32_t)(time_us >> 32), RTC_BOOT_TIME_HIGH_REG);
+}
+
+/****************************************************************************
+ * Name: esp32_rtc_get_boot_time
+ *
+ * Description:
+ *   Get time of RTC register to indicate the original boot time.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   time_us - get time in microseconds.
+ *
+ ****************************************************************************/
+
+uint64_t IRAM_ATTR esp32_rtc_get_boot_time(void)
+{
+  return ((uint64_t)getreg32(RTC_BOOT_TIME_LOW_REG))
+        + (((uint64_t)getreg32(RTC_BOOT_TIME_HIGH_REG)) << 32);
+}
+
+#ifdef CONFIG_RTC_DRIVER
+
+/****************************************************************************
+ * Name: up_rtc_time
+ *
+ * Description:
+ *   Get the current time in seconds.  This is similar to the standard time()
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation is selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but CONFIG_RTC_HIRES is not set.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current time in seconds
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_RTC_HIRES
+time_t up_rtc_time(void)
+{
+  uint64_t time_us;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(NULL);
+
+  /* NOTE: RT-Timer starts to work after the board is initialized, and the
+   * RTC controller starts works after up_rtc_initialize is initialized.
+   * Since the system clock starts to work before the board is initialized,
+   * if CONFIG_RTC is enabled, the system time must be matched by the time
+   * of the RTC controller (up_rtc_initialize has already been initialized,
+   * and RT-Timer cannot work).
+   */
+
+  /* Determine if RT-Timer is started */
+
+  if (g_rt_timer_enabled == true)
+    {
+      /* Get the time from RT-Timer, the time interval between RTC
+       * controller and RT-Timer is stored in g_rtc_save->offset.
+       */
+
+      time_us = rt_timer_time_us() + g_rtc_save->offset +
+                              esp32_rtc_get_boot_time();
+    }
+  else
+    {
+      /* Get the time from RTC controller. */
+
+      time_us = esp32_rtc_get_time_us() +
+                  esp32_rtc_get_boot_time();
+    }
+
+  spin_unlock_irqrestore(NULL, flags);
+
+  return (time_t)(time_us / USEC_PER_SEC);
+}
+#endif /* !CONFIG_RTC_HIRES */
+
+/****************************************************************************
+ * Name: up_rtc_settime
+ *
+ * Description:
+ *   Set the RTC to the provided time. All RTC implementations must be
+ *   able to set their time based on a standard timespec.
+ *
+ * Input Parameters:
+ *   ts - the time to use
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_settime(FAR const struct timespec *ts)
+{
+  irqstate_t flags;
+  uint64_t now_us;
+  uint64_t rtc_offset_us;
+
+  DEBUGASSERT(ts != NULL && ts->tv_nsec < NSEC_PER_SEC);
+  flags = spin_lock_irqsave(NULL);
+
+  now_us = ((uint64_t) ts->tv_sec) * USEC_PER_SEC +
+          ts->tv_nsec / NSEC_PER_USEC;
+  if (g_rt_timer_enabled == true)
+    {
+      /* Set based on RT-Timer offset value. */
+
+      rtc_offset_us = now_us - rt_timer_time_us();
+    }
+  else
+    {
+      /* Set based on the offset value of the RT controller. */
+
+      rtc_offset_us = now_us - esp32_rtc_get_time_us();
+    }
+
+  g_rtc_save->offset = 0;
+  esp32_rtc_set_boot_time(rtc_offset_us);
+
+  spin_unlock_irqrestore(NULL, flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_rtc_initialize
+ *
+ * Description:
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_initialize(void)
+{
+#ifndef CONFIG_PM
+  /* Initialize RTC controller parameters */
+
+  esp32_rtc_init();
+  esp32_rtc_clk_set();
+#endif
+
+  g_rtc_save = &rtc_saved_data;
+
+  /* If saved data is invalid, clear offset information */
+
+  if (g_rtc_save->magic != MAGIC_RTC_SAVE)
+    {
+      g_rtc_save->magic = MAGIC_RTC_SAVE;
+      g_rtc_save->offset = 0;
+      esp32_rtc_set_boot_time(0);
+    }
+
+#ifdef CONFIG_RTC_HIRES
+  /* Synchronize the base time to the RTC time */
+
+  up_rtc_gettime(&g_basetime);
+#endif
+
+  g_rtc_enabled = true;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC time or RT-Timer. This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation. It is used to replace the system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the RTC time or RT-Timer value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_HIRES
+int up_rtc_gettime(FAR struct timespec *tp)
+{
+  irqstate_t flags;
+  uint64_t time_us;
+
+  flags = spin_lock_irqsave(NULL);
+
+  if (g_rt_timer_enabled == true)
+    {
+      time_us = rt_timer_time_us() + g_rtc_save->offset +
+                              esp32_rtc_get_boot_time();
+    }
+  else
+    {
+      time_us = = esp32_rtc_get_time_us() +
+                    esp32_rtc_get_boot_time();
+    }
+
+  tp->tv_sec  = time_us / USEC_PER_SEC;
+  tp->tv_nsec = (time_us % USEC_PER_SEC) * NSEC_PER_USEC;
+
+  spin_unlock_irqrestore(NULL, flags);
+
+  return OK;
+}
+#endif /* CONFIG_RTC_HIRES */
+
+#ifdef CONFIG_RTC_ALARM
+
+/****************************************************************************
+ * Name: up_rtc_setalarm
+ *
+ * Description:
+ *   Set up an alarm.
+ *
+ * Input Parameters:
+ *   alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
+{
+  struct rt_timer_args_s rt_timer_args;
+  FAR struct alm_cbinfo_s *cbinfo;
+  irqstate_t flags;
+  int ret = -EBUSY;
+  int id;
+
+  DEBUGASSERT(alminfo != NULL);
+  DEBUGASSERT((RTC_ALARM0 <= alminfo->as_id) &&
+              (alminfo->as_id < RTC_ALARM_LAST));
+
+  /* Set the alarm in RT-Timer */
+
+  id = alminfo->as_id;
+  cbinfo = &g_alarmcb[id];
+
+  if (cbinfo->ac_cb == NULL)
+    {
+      /* Create the RT-Timer alarm */
+
+      flags = spin_lock_irqsave(NULL);
+
+      if (cbinfo->alarm_hdl == NULL)
+        {
+          cbinfo->index = id;
+          rt_timer_args.arg = cbinfo;
+          rt_timer_args.callback = esp32_rt_cb_handler;
+          ret = rt_timer_create(&rt_timer_args, &cbinfo->alarm_hdl);
+          if (ret < 0)
+            {
+              rtcerr("ERROR: Failed to create rt_timer error=%d\n", ret);
+              spin_unlock_irqrestore(NULL, flags);
+              return ret;
+            }
+        }
+
+      cbinfo->ac_cb  = alminfo->as_cb;
+      cbinfo->ac_arg = alminfo->as_arg;
+      cbinfo->deadline_us = alminfo->as_time.tv_sec * USEC_PER_SEC +
+                            alminfo->as_time.tv_nsec / NSEC_PER_USEC;
+
+      if (cbinfo->alarm_hdl == NULL)
+        {
+          rtcerr("ERROR: failed to create alarm timer\n");
+        }
+      else
+        {
+          rtcinfo("Start RTC alarm.\n");
+          rt_timer_start(cbinfo->alarm_hdl, cbinfo->deadline_us, false);
+          ret = OK;
+        }
+
+      spin_unlock_irqrestore(NULL, flags);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: up_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel an alarm.
+ *
+ * Input Parameters:
+ *   alarmid - Identifies the alarm to be cancelled
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_cancelalarm(enum alm_id_e alarmid)
+{
+  FAR struct alm_cbinfo_s *cbinfo;
+  irqstate_t flags;
+  int ret = -ENODATA;
+
+  DEBUGASSERT((RTC_ALARM0 <= alarmid) &&
+              (alarmid < RTC_ALARM_LAST));
+
+  /* Set the alarm in hardware and enable interrupts */
+
+  cbinfo = &g_alarmcb[alarmid];
+
+  if (cbinfo->ac_cb != NULL)
+    {
+      flags = spin_lock_irqsave(NULL);
+
+      /* Stop and delete the alarm */
+
+      rtcinfo("Cancel RTC alarm.\n");
+      rt_timer_stop(cbinfo->alarm_hdl);
+      rt_timer_delete(cbinfo->alarm_hdl);
+      cbinfo->ac_cb = NULL;
+      cbinfo->deadline_us = 0;
+      cbinfo->alarm_hdl = NULL;
+
+      spin_unlock_irqrestore(NULL, flags);
+
+      ret = OK;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: up_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *   tp      - Location to return the timer match register.
+ *   alarmid - Identifies the alarm to get.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_rdalarm(FAR struct timespec *tp, uint32_t alarmid)
+{
+  irqstate_t flags;
+  FAR struct alm_cbinfo_s *cbinfo;
+  DEBUGASSERT(tp != NULL);
+  DEBUGASSERT((RTC_ALARM0 <= alarmid) &&
+              (alarmid < RTC_ALARM_LAST));
+
+  flags = spin_lock_irqsave(NULL);
+
+  /* Get the alarm according to the alarmid */
+
+  cbinfo = &g_alarmcb[alarmid];
+
+  tp->tv_sec = (rt_timer_time_us() + g_rtc_save->offset +
+              cbinfo->deadline_us) / USEC_PER_SEC;
+  tp->tv_nsec = ((rt_timer_time_us() + g_rtc_save->offset +
+              cbinfo->deadline_us) % USEC_PER_SEC) * NSEC_PER_USEC;
+
+  spin_unlock_irqrestore(NULL, flags);
+
+  return OK;
+}
+
+#endif /* CONFIG_RTC_ALARM */
+
+/****************************************************************************
+ * Name: up_rtc_timer_init
+ *
+ * Description:
+ *   Init RTC timer.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_timer_init(void)
+{
+  /* RT-Timer enabled */
+
+  g_rt_timer_enabled = true;
+
+  /* Get the time difference between rt_timer and RTC timer */
+
+  g_rtc_save->offset = esp32_rtc_get_time_us() - rt_timer_time_us();
+
+  return OK;
+}
+
+#endif /* CONFIG_RTC_DRIVER */
