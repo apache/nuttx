@@ -108,7 +108,6 @@ struct foc_info_s
 /* FOC device upper-half */
 
 struct foc_lower_s;
-struct foc_typespec_s;
 struct foc_dev_s
 {
   /* Fields managed by common upper-half FOC logic **************************/
