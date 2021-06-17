@@ -440,7 +440,7 @@ static int hif_initialize(struct hostif_buff_s *buffer)
   cxd56_iccinit(CXD56_PROTO_HOSTIF);
 
   nxsem_init(&drv->sync, 0, 0);
-  nxsem_setprotocol(&drv->sync, SEM_PRIO_NONE);
+  nxsem_set_protocol(&drv->sync, SEM_PRIO_NONE);
 
   ret = cxd56_iccregisterhandler(CXD56_PROTO_HOSTIF, hif_rxhandler, NULL);
 
