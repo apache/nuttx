@@ -94,26 +94,22 @@ endif
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),BUILDROOT)
   CROSSDEV ?= avr-nuttx-elf-
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 # AVR CrossPack under macOS
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),CROSSPACK)
   CROSSDEV ?= avr-
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 # GCC toolchain under Linux
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),LINUXGCC)
   CROSSDEV ?= avr-
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),WINAVR)
   CROSSDEV ?= avr-
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 # Default toolchain
