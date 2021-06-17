@@ -1344,7 +1344,7 @@ endif
 config CXD56_USE_SYSBUS
 	bool "Use the system bus for the data section"
 	default y
-	select ARCH_USE_MODULE_TEXT if ELF
+	select ARCH_USE_TEXT_HEAP if ELF
 	---help---
 		To make ldrex/strex work correctly, this option must be enabled
 endmenu

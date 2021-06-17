@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_modtext.c
+ * arch/xtensa/src/esp32/esp32_textheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,63 +34,63 @@
  * Public Data
  ****************************************************************************/
 
-extern uint32_t _smodtext;
-extern uint32_t _emodtext;
+extern uint32_t _stextheap;
+extern uint32_t _etextheap;
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct mm_heap_s g_module_text;
+struct mm_heap_s g_textheap;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_module_text_init
+ * Name: up_textheap_init
  *
  * Description:
- *   Initialize the module text allocator
+ *   Initialize the text heap.
  *
  ****************************************************************************/
 
-void up_module_text_init()
+void up_textheap_init()
 {
-  mm_initialize(&g_module_text, &_smodtext, &_emodtext - &_smodtext);
+  mm_initialize(&g_textheap, &_stextheap, &_etextheap - &_stextheap);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_modtext_procfs;
+  static struct procfs_meminfo_entry_s g_textheap_procfs;
 
-  g_modtext_procfs.name = "modtext";
-  g_modtext_procfs.mallinfo = (void *)mm_mallinfo;
-  g_modtext_procfs.user_data = &g_module_text;
-  procfs_register_meminfo(&g_modtext_procfs);
+  g_textheap_procfs.name = "textheap";
+  g_textheap_procfs.mallinfo = (void *)mm_mallinfo;
+  g_textheap_procfs.user_data = &g_textheap;
+  procfs_register_meminfo(&g_textheap_procfs);
 #endif
 }
 
 /****************************************************************************
- * Name: up_module_text_memalign
+ * Name: up_textheap_memalign
  *
  * Description:
- *   Allocate memory for module text with the specified alignment.
+ *   Allocate memory from the text heap with the specified alignment.
  *
  ****************************************************************************/
 
-FAR void *up_module_text_memalign(size_t align, size_t size)
+FAR void *up_textheap_memalign(size_t align, size_t size)
 {
-  return mm_memalign(&g_module_text, align, size);
+  return mm_memalign(&g_textheap, align, size);
 }
 
 /****************************************************************************
- * Name: up_module_text_free
+ * Name: up_textheap_free
  *
  * Description:
- *   Free memory for module text.
+ *   Free memory from the text heap.
  *
  ****************************************************************************/
 
-void up_module_text_free(FAR void *p)
+void up_textheap_free(FAR void *p)
 {
-  return mm_free(&g_module_text, p);
+  return mm_free(&g_textheap, p);
 }

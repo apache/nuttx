@@ -180,8 +180,8 @@ CHIP_CSRCS += esp32_wdt_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
-CHIP_CSRCS += esp32_modtext.c
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32_textheap.c
 CMN_ASRCS += xtensa_loadstore.S
 endif
 

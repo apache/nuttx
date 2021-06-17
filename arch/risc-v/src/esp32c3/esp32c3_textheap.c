@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_modtext.c
+ * arch/risc-v/src/esp32c3/esp32c3_textheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -50,10 +50,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_module_text_init()
+ * Name: up_textheap_init()
  ****************************************************************************/
 
-void up_module_text_init()
+void up_textheap_init()
 {
 #ifdef CONFIG_ESP32C3_RTC_HEAP
   /* Initialize the RTC heap */
@@ -63,14 +63,14 @@ void up_module_text_init()
 }
 
 /****************************************************************************
- * Name: up_module_text_memalign()
+ * Name: up_textheap_memalign()
  *
  * Description:
  *   Allocate memory for module text with the specified alignment.
  *
  ****************************************************************************/
 
-FAR void *up_module_text_memalign(size_t align, size_t size)
+FAR void *up_textheap_memalign(size_t align, size_t size)
 {
   FAR void *ret = NULL;
 
@@ -99,14 +99,14 @@ FAR void *up_module_text_memalign(size_t align, size_t size)
 }
 
 /****************************************************************************
- * Name: up_module_text_free()
+ * Name: up_textheap_free()
  *
  * Description:
  *   Free memory for module text.
  *
  ****************************************************************************/
 
-void up_module_text_free(FAR void *p)
+void up_textheap_free(FAR void *p)
 {
   if (p)
     {
