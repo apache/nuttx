@@ -106,7 +106,7 @@ struct iob_s
   uint16_t io_len;      /* Length of the data in the entry */
   uint16_t io_offset;   /* Data begins at this offset */
 #endif
-  uint16_t io_pktlen;   /* Total length of the packet */
+  unsigned int io_pktlen; /* Total length of the packet */
 
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
 };
