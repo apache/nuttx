@@ -800,7 +800,7 @@ void nx_start(void)
   syslog(LOG_INFO, "CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
-#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_DEBUG_MM)
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_STACK_USAGE_SAFE_PERCENT > 0
 
       /* Check stack in idle thread */
 
@@ -812,7 +812,8 @@ void nx_start(void)
           flags = enter_critical_section();
 
           tcb = g_pidhash[i].tcb;
-          if (tcb && up_check_tcbstack_remain(tcb) <= 0)
+          if (tcb && (up_check_tcbstack(tcb) * 100 / tcb->adj_stack_size
+                      > CONFIG_STACK_USAGE_SAFE_PERCENT))
             {
               _alert("Stack check failed, pid %d, name %s\n",
                       tcb->pid, tcb->name);
