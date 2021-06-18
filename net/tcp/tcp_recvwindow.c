@@ -97,23 +97,41 @@ static uint16_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
 uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
                             FAR struct tcp_conn_s *conn)
 {
+  uint16_t tailroom;
   uint16_t recvwndo;
   int niob_avail;
-  int nqentry_avail;
 
   /* Update the TCP received window based on read-ahead I/O buffer
-   * and IOB chain availability.  At least one queue entry is required.
-   * If one queue entry is available, then the amount of read-ahead
+   * and IOB chain availability.
+   * The amount of read-ahead
    * data that can be buffered is given by the number of IOBs available
    * (ignoring competition with other IOB consumers).
    */
 
-  niob_avail    = iob_navail(true);
-  nqentry_avail = iob_qentry_navail();
+  if (conn->readahead != NULL)
+    {
+      /* XXX move this to mm/iob */
+
+      const struct iob_s *iob;
+
+      iob = conn->readahead;
+      while (iob->io_flink != NULL)
+        {
+          iob = iob->io_flink;
+        }
+
+      tailroom = CONFIG_IOB_BUFSIZE - (iob->io_offset + iob->io_len);
+    }
+  else
+    {
+      tailroom = 0;
+    }
+
+  niob_avail = iob_navail(true);
 
   /* Is there a a queue entry and IOBs available for read-ahead buffering? */
 
-  if (nqentry_avail > 0 && niob_avail > 0)
+  if (niob_avail > 0)
     {
       uint32_t rwnd;
 
@@ -123,8 +141,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        * TCP buffering.
        *
        * Assume that all of the available IOBs are can be used for buffering
-       * on this connection.  Also assume that at least one chain is
-       * available concatenate the IOBs.
+       * on this connection.
        *
        * REVISIT:  In an environment with multiple, active read-ahead TCP
        * sockets (and perhaps multiple network devices) or if there are
@@ -133,7 +150,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        * buffering for this connection.
        */
 
-      rwnd = (niob_avail * CONFIG_IOB_BUFSIZE);
+      rwnd = tailroom + (niob_avail * CONFIG_IOB_BUFSIZE);
       if (rwnd > UINT16_MAX)
         {
           rwnd = UINT16_MAX;
@@ -144,7 +161,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
       recvwndo = (uint16_t)rwnd;
     }
 #if CONFIG_IOB_THROTTLE > 0
-  else if (IOB_QEMPTY(&conn->readahead))
+  else if (conn->readahead == NULL)
     {
       /* Advertise maximum segment size for window edge if here is no
        * available iobs on current "free" connection.
@@ -162,16 +179,16 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
         }
     }
 #endif
-  else /* nqentry_avail == 0 || niob_avail == 0 */
+  else /* niob_avail == 0 */
     {
-      /* No IOB chains or noIOBs are available.
+      /* No IOBs are available.
        * Advertise the edge of window to zero.
        *
        * NOTE:  If no IOBs are available, then the next packet will be
        * lost if there is no listener on the connection.
        */
 
-      recvwndo = 0;
+      recvwndo = tailroom;
     }
 
   return recvwndo;

@@ -209,7 +209,7 @@ struct tcp_conn_s
    *               where the TCP/IP read-ahead data is retained.
    */
 
-  struct iob_queue_s readahead;   /* Read-ahead buffering */
+  struct iob_s *readahead;   /* Read-ahead buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Write buffering
