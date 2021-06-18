@@ -78,9 +78,9 @@ MEMORY
 
 _eheap = 0x40000000 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM;
 
-/* Text heap ends at top of dram0_0_seg */
+/* IRAM heap ends at top of dram0_0_seg */
 
-_etextheap = 0x400a0000;
+_eiramheap = 0x400a0000;
 
 /* Mark the end of the RTC heap (top of the RTC region) */
 
