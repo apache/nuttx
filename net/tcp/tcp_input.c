@@ -74,6 +74,123 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tcp_trim_head
+ *
+ * Description:
+ *   Trim the head of the TCP segment.
+ *
+ * Input Parameters:
+ *   dev     - The device driver structure containing the received TCP
+ *             packet.
+ *   tcp     - The TCP header.
+ *   trimlen - The length to trim in bytes.
+ *
+ * Returned Value:
+ *   True if nothing was left.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static bool tcp_trim_head(FAR struct net_driver_s *dev,
+                          FAR struct tcp_hdr_s *tcp,
+                          uint32_t trimlen)
+{
+  uint32_t seq = tcp_getsequence(tcp->seqno);
+  uint16_t urg_ptr = (tcp->urgp[0] << 8) | tcp->urgp[1];
+  uint32_t urg_trimlen = 0;
+  uint8_t th_flags = tcp->flags;
+
+  DEBUGASSERT(trimlen > 0);
+  ninfo("Dropping %" PRIu32 " bytes: "
+        "seq=%" PRIu32 ", "
+        "tcp flags=%" PRIx8 ", "
+        "d_len=%" PRIu16 ", "
+        "urg_ptr=%" PRIu16 "\n",
+        trimlen,
+        seq,
+        th_flags,
+        dev->d_len,
+        urg_ptr);
+
+  if ((th_flags & TCP_SYN) != 0)
+    {
+      ninfo("Dropping SYN\n");
+      seq = TCP_SEQ_ADD(seq, 1);
+      urg_trimlen++;
+      trimlen--;
+      th_flags &= ~TCP_SYN;
+    }
+
+  if (trimlen > 0)
+    {
+      uint32_t len = trimlen;
+
+      if (len > dev->d_len)
+        {
+          len = dev->d_len;
+        }
+
+      ninfo("Dropping %" PRIu32 " bytes app data\n", len);
+      seq = TCP_SEQ_ADD(seq, len);
+      urg_trimlen += len;
+      dev->d_appdata += len;
+      dev->d_len -= len;
+      trimlen -= len;
+    }
+
+  if (trimlen > 0)
+    {
+      if ((th_flags & TCP_FIN) != 0)
+        {
+          ninfo("Dropping FIN\n");
+          seq = TCP_SEQ_ADD(seq, 1);
+          urg_trimlen++;
+          trimlen--;
+          th_flags &= ~TCP_FIN;
+        }
+    }
+
+  /* Update the header */
+
+  if ((th_flags & TCP_URG) != 0)
+    {
+      /* Adjust URG pointer */
+
+      if (urg_trimlen >= urg_ptr)
+        {
+          th_flags &= ~TCP_URG;
+          urg_ptr = 0;
+        }
+      else
+        {
+          urg_ptr -= urg_trimlen;
+        }
+
+      ninfo("Adjusting URG pointer by %" PRIu32 ", "
+            "new urg_ptr=%" PRIu16 "\n",
+            urg_trimlen, urg_ptr);
+
+      tcp->urgp[0] = (uint8_t)(urg_ptr >> 8);
+      tcp->urgp[1] = (uint8_t)urg_ptr;
+    }
+
+  tcp->flags = th_flags;
+  tcp_setsequence(tcp->seqno, seq);
+
+  if ((th_flags & (TCP_SYN | TCP_FIN)) == 0 && dev->d_len == 0)
+    {
+      ninfo("Dropped the entire segment\n");
+      return true;
+    }
+
+  DEBUGASSERT(trimlen == 0);
+  ninfo("Dropped the segment partially\n");
+  return false;
+}
+
+/****************************************************************************
  * Name: tcp_input
  *
  * Description:
@@ -446,11 +563,38 @@ found:
         (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
         ((tcp->flags & TCP_CTL) == TCP_SYN))))
     {
+      uint32_t seq;
+      uint32_t rcvseq;
+
+      seq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
       if ((dev->d_len > 0 || ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          memcmp(tcp->seqno, conn->rcvseq, 4) != 0)
+          seq != rcvseq)
         {
-          tcp_send(dev, conn, TCP_ACK, tcpiplen);
-          return;
+          /* Trim the head of the segment */
+
+          if (TCP_SEQ_LT(seq, rcvseq))
+            {
+              uint32_t trimlen = TCP_SEQ_SUB(rcvseq, seq);
+
+              if (tcp_trim_head(dev, tcp, trimlen))
+                {
+                  /* The segment was completely out of the window.
+                   * E.g. a retransmit which was not necessary.
+                   */
+
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  return;
+                }
+            }
+          else
+            {
+              /* We never queue out-of-order segments. */
+
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
+            }
         }
     }
 
