@@ -210,7 +210,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
 
   if (win <= oldwin)
     {
-      ninfo("tcp_should_send_recvwindow: false: "
+      ninfo("Returning false: "
             "rcvseq=%" PRIu32 ", rcv_adv=%" PRIu32 ", "
             "old win=%" PRIu16 ", new win=%" PRIu16 "\n",
             rcvseq, conn->rcv_adv, oldwin, win);
@@ -230,7 +230,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
   maxwin = tcp_maxrcvwin(conn);
   if (2 * adv >= maxwin)
     {
-      ninfo("tcp_should_send_recvwindow: true: "
+      ninfo("Returning true: "
             "adv=%" PRIu16 ", maxwin=%" PRIu16 "\n",
             adv, maxwin);
       return true;
@@ -243,13 +243,13 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
   mss = tcp_rx_mss(dev);
   if (adv >= 2 * mss)
     {
-      ninfo("tcp_should_send_recvwindow: true: "
+      ninfo("Returning true: "
             "adv=%" PRIu16 ", mss=%" PRIu16 ", maxwin=%" PRIu16 "\n",
             adv, mss, maxwin);
       return true;
     }
 
-  ninfo("tcp_should_send_recvwindow: false: "
+  ninfo("Returning false: "
         "adv=%" PRIu16 ", mss=%" PRIu16 ", maxwin=%" PRIu16 "\n",
         adv, mss, maxwin);
   return false;
