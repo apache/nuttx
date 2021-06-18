@@ -281,8 +281,8 @@
 #define SOC_RTC_IRAM_HIGH       0x400c2000
 #define SOC_RTC_DRAM_LOW        0x3ff80000
 #define SOC_RTC_DRAM_HIGH       0x3ff82000
-#define SOC_RTC_DATA_LOW        0x50000000
-#define SOC_RTC_DATA_HIGH       0x50002000
+#define SOC_RTC_SLOW_LOW        0x50000000
+#define SOC_RTC_SLOW_HIGH       0x50002000
 #define SOC_EXTRAM_DATA_LOW     0x3f800000
 #define SOC_EXTRAM_DATA_HIGH    0x3fc00000
 
@@ -853,6 +853,23 @@ static inline bool IRAM_ATTR esp32_ptr_exec(const void *p)
       || (ip >= SOC_CACHE_APP_LOW && ip < SOC_CACHE_APP_HIGH)
 #endif
       || (ip >= SOC_RTC_IRAM_LOW && ip < SOC_RTC_IRAM_HIGH);
+}
+
+/****************************************************************************
+ * Name: esp32_ptr_rtcslow
+ *
+ * Description:
+ *   Check if the buffer comes from the RTC Slow RAM.
+ *
+ * Parameters:
+ *   p          - Pointer to the buffer.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32_ptr_rtcslow(const void *p)
+{
+  return ((intptr_t)p >= SOC_RTC_SLOW_LOW &&
+          (intptr_t)p < SOC_RTC_SLOW_HIGH);
 }
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_SOC_H */
