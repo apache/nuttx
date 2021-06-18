@@ -70,10 +70,10 @@ SECTIONS
     _text_end = ABSOLUTE(.);
     _etext = .;
 
-    /* Text heap starts at the end of iram0_0_seg */
+    /* IRAM heap starts at the end of iram0_0_seg */
 
     . = ALIGN (4);
-    _stextheap = ABSOLUTE(.);
+    _siramheap = ABSOLUTE(.);
   } > iram0_0_seg
 
   /* Shared RAM */
