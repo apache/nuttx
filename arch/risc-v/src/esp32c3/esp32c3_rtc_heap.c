@@ -66,12 +66,12 @@ void esp32c3_rtc_heap_initialize(void)
   mm_initialize(&g_rtc_heap, start, size);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_imm_procfs;
+  static struct procfs_meminfo_entry_s g_rtc_procfs;
 
-  g_imm_procfs.name = "rtc_heap";
-  g_imm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_imm_procfs.user_data = &g_rtc_heap;
-  procfs_register_meminfo(&g_imm_procfs);
+  g_rtc_procfs.name = "rtc_heap";
+  g_rtc_procfs.mallinfo = (void *)mm_mallinfo;
+  g_rtc_procfs.user_data = &g_rtc_heap;
+  procfs_register_meminfo(&g_rtc_procfs);
 #endif
 }
 
