@@ -246,7 +246,7 @@ static inline void tcp_readahead(struct tcp_recvfrom_s *pstate)
    * buffer.
    */
 
-  while ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
+  while ((iob = conn->readahead) != NULL &&
           pstate->ir_buflen > 0)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
@@ -270,29 +270,19 @@ static inline void tcp_readahead(struct tcp_recvfrom_s *pstate)
 
       if (recvlen >= iob->io_pktlen)
         {
-          FAR struct iob_s *tmp;
-
-          /* Remove the I/O buffer chain from the head of the read-ahead
-           * buffer queue.
-           */
-
-          tmp = iob_remove_queue(&conn->readahead);
-          DEBUGASSERT(tmp == iob);
-          UNUSED(tmp);
-
-          /* And free the I/O buffer chain */
+          /* Free free the I/O buffer chain */
 
           iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+          conn->readahead = NULL;
         }
       else
         {
           /* The bytes that we have received from the head of the I/O
-           * buffer chain (probably changing the head of the I/O
-           * buffer queue).
+           * buffer chain.
            */
 
-          iob_trimhead_queue(&conn->readahead, recvlen,
-                             IOBUSER_NET_TCP_READAHEAD);
+          conn->readahead = iob_trimhead(iob, recvlen,
+                                         IOBUSER_NET_TCP_READAHEAD);
         }
     }
 }

@@ -726,7 +726,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Release any read-ahead buffers attached to the connection */
 
-  iob_free_queue(&conn->readahead, IOBUSER_NET_TCP_READAHEAD);
+  iob_free_chain(conn->readahead, IOBUSER_NET_TCP_READAHEAD);
+  conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
@@ -970,7 +971,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
       /* Initialize the list of TCP read-ahead buffers */
 
-      IOB_QINIT(&conn->readahead);
+      conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
@@ -1244,7 +1245,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* Initialize the list of TCP read-ahead buffers */
 
-  IOB_QINIT(&conn->readahead);
+  conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Initialize the TCP write buffer lists */
