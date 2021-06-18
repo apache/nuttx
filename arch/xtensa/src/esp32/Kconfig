@@ -231,6 +231,10 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
+config ESP32_RTC_HEAP
+	bool "Use the RTC memory as a separate heap"
+	default n
+
 menu "ESP32 Peripheral Selection"
 
 config ESP32_UART
