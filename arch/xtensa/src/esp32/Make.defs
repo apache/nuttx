@@ -185,6 +185,7 @@ endif
 endif
 
 ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32_iramheap.c
 CHIP_CSRCS += esp32_textheap.c
 CMN_ASRCS += xtensa_loadstore.S
 endif

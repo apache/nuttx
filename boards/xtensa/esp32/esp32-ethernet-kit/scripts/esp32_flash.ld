@@ -66,10 +66,10 @@ SECTIONS
     *(.phyiram .phyiram.*)
     _iram_text_end = ABSOLUTE(.);
 
-    /* Text heap starts at the end of iram0_0_seg */
+    /* IRAM heap starts at the end of iram0_0_seg */
 
     . = ALIGN (4);
-    _stextheap = ABSOLUTE(.);
+    _siramheap = ABSOLUTE(.);
   } > iram0_0_seg
 
   /* Shared RAM */
