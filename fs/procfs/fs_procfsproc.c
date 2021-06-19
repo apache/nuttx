@@ -854,9 +854,25 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   remaining = buflen;
   totalsize = 0;
 
+  /* Show the stack alloc address */
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%p\n",
+                               "StackAlloc:", tcb->stack_alloc_ptr);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
   /* Show the stack base address */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s0x%p\n",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%p\n",
                         "StackBase:", tcb->stack_base_ptr);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
