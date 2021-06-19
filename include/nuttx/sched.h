@@ -490,12 +490,6 @@ struct task_group_s
   FAR pid_t *tg_members;            /* Members of the group                     */
 #endif
 
-  /* [at|on]exit support ****************************************************/
-
-#ifdef CONFIG_SCHED_EXIT_MAX
-  struct exitinfo_s tg_exit[CONFIG_SCHED_EXIT_MAX];
-#endif
-
 #ifdef CONFIG_BINFMT_LOADABLE
   /* Loadable module support ************************************************/
 

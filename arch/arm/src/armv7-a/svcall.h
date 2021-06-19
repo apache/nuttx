@@ -44,9 +44,9 @@
 
 #ifdef CONFIG_BUILD_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to have the value 7"
-#  elif CONFIG_SYS_RESERVED != 7
-#    error "CONFIG_SYS_RESERVED must have the value 6"
+#    error "CONFIG_SYS_RESERVED must be defined to have the value 8"
+#  elif CONFIG_SYS_RESERVED != 8
+#    error "CONFIG_SYS_RESERVED must have the value 8"
 #  endif
 #else
 #  ifndef CONFIG_SYS_RESERVED
@@ -81,6 +81,13 @@
  */
 
 #define SYS_task_start            (2)
+
+/* SYS call 7:
+ *
+ * void up_nxtask_onexit(onexitfunc_t func, int exitcode, FAR void *arg)
+ */
+
+#define SYS_nxtask_onexit          (7)
 
 /* SYS call 4:
  *

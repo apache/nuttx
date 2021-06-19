@@ -232,6 +232,28 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
         }
         break;
 
+      /* R0=SYS_nxtask_onexit:
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_nxtask_onexit
+       *   R1 = func
+       *   R2 = exitcode
+       *   R4 = arg
+       */
+
+#if defined(CONFIG_SCHED_ATEXIT) && defined(CONFIG_SCHED_ONEXIT)
+      case SYS_nxtask_onexit:
+        {
+          regs[REG_PC]      = (uintptr_t)regs[REG_R1] & ~1;
+          regs[REG_EXC_RETURN] = EXC_RETURN_UNPRIVTHR;
+
+          regs[REG_R0]       = regs[REG_R2]; /* exitcode */
+          regs[REG_R1]       = regs[REG_R3]; /* arg */
+        }
+        break;
+#endif
+
       /* R0=SYS_syscall_return:  This a syscall return command:
        *
        *   void arm_syscall_return(void);

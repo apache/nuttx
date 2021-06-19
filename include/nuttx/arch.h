@@ -609,6 +609,11 @@ void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value);
         noreturn_function;
 #endif
 
+#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT) && \
+    !defined(CONFIG_BUILD_FLAT)
+void up_nxtask_onexit(onexitfunc_t func, int exitcode, FAR void *arg);
+#endif
+
 /****************************************************************************
  * Name: up_signal_dispatch
  *

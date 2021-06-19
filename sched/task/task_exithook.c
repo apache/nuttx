@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 #include <nuttx/fs/fs.h>
 
 #include "sched/sched.h"
@@ -51,55 +52,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
-static inline void nxtask_atexit(FAR struct tcb_s *tcb)
-{
-  FAR struct task_group_s *group = tcb->group;
-
-  /* Make sure that we have not already left the group.  Only the final
-   * exiting thread in the task group should trigger the atexit()
-   * callbacks.
-   *
-   * REVISIT: This is a security problem In the PROTECTED and KERNEL builds:
-   * We must not call the registered function in supervisor mode!  See also
-   * on_exit() and pthread_cleanup_pop() callbacks.
-   *
-   * REVISIT:  In the case of task_delete(), the callback would execute in
-   * the context the caller of task_delete() cancel, not in the context of
-   * the exiting task (or process).
-   */
-
-  if (group && group->tg_nmembers == 1)
-    {
-      int index;
-
-      /* Call each atexit function in reverse order of registration atexit()
-       * functions are registered from lower to higher array indices; they
-       * must be called in the reverse order of registration when the task
-       * group exits, i.e., from higher to lower indices.
-       */
-
-      for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
-        {
-          if (group->tg_exit[index].func.at)
-            {
-              atexitfunc_t func;
-
-              /* Nullify the atexit function to prevent its reuse. */
-
-              func = group->tg_exit[index].func.at;
-              group->tg_exit[index].func.at = NULL;
-
-              /* Call the atexit function */
-
-              (*func)();
-            }
-        }
-    }
-}
-#else
-#  define nxtask_atexit(tcb)
-#endif
+#define nxtask_atexit(tcb)
 
 /****************************************************************************
  * Name: nxtask_onexit
@@ -139,22 +92,27 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
 
       for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
         {
-          if (group->tg_exit[index].func.on)
+          FAR struct task_info_s *info = group->tg_info;
+          if (info->ta_exit[index].func.on)
             {
               onexitfunc_t func;
               FAR void    *arg;
 
               /* Nullify the on_exit function to prevent its reuse. */
 
-              func = group->tg_exit[index].func.on;
-              arg  = group->tg_exit[index].arg;
+              func = info->ta_exit[index].func.on;
+              arg  = info->ta_exit[index].arg;
 
-              group->tg_exit[index].func.on = NULL;
-              group->tg_exit[index].arg     = NULL;
+              info->ta_exit[index].func.on = NULL;
+              info->ta_exit[index].arg     = NULL;
 
               /* Call the on_exit function */
 
+#ifdef CONFIG_BUILD_FLAT
               (*func)(status, arg);
+#else
+              up_nxtask_onexit(func, status, arg);
+#endif
             }
         }
     }

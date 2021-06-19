@@ -28,7 +28,7 @@ CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
 CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_systemreset.c
 CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_svcall.c arm_vfork.c arm_trigger_irq.c
+CMN_CSRCS += arm_svcall.c arm_vfork.c arm_trigger_irq.c arm_onexit.c
 
 # CMN_CSRCS += up_dwt.c
 

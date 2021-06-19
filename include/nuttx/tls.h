@@ -70,6 +70,12 @@ struct task_info_s
   tls_dtor_t  ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
 #endif
 
+  /* [at|on]exit support ****************************************************/
+
+#ifdef CONFIG_SCHED_EXIT_MAX
+  struct exitinfo_s ta_exit[CONFIG_SCHED_EXIT_MAX];
+#endif
+
 #ifndef CONFIG_BUILD_KERNEL
   struct getopt_s   ta_getopt; /* Globals used by getopt() */
 #endif

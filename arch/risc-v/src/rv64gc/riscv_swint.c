@@ -345,6 +345,28 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
         break;
 #endif
 
+      /* R0=SYS_nxtask_onexit:
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_nxtask_onexit
+       *   R1 = func
+       *   R2 = exitcode
+       *   R4 = arg
+       */
+
+#if defined(CONFIG_SCHED_ATEXIT) && defined(CONFIG_SCHED_ONEXIT)
+      case SYS_nxtask_onexit:
+        {
+          regs[REG_EPC]      = (uintptr_t)regs[REG_A1];
+          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
+
+          regs[REG_A0]       = regs[REG_A2]; /* exitcode */
+          regs[REG_A1]       = regs[REG_A3]; /* arg */
+        }
+        break;
+#endif
+
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
