@@ -51,15 +51,17 @@
 
 struct kworker_s
 {
-  pid_t             pid;    /* The task ID of the worker thread */
-  volatile bool     busy;   /* True: Worker is not available */
+#ifdef CONFIG_PRIORITY_INHERITANCE
+  pid_t             pid;       /* The task ID of the worker thread */
+#endif
 };
 
 /* This structure defines the state of one kernel-mode work queue */
 
 struct kwork_wqueue_s
 {
-  struct dq_queue_s q;         /* The queue of pending work */
+  struct sq_queue_s q;         /* The queue of pending work */
+  sem_t             sem;       /* The counting semaphore of the wqueue */
   struct kworker_s  worker[1]; /* Describes a worker thread */
 };
 
@@ -70,7 +72,8 @@ struct kwork_wqueue_s
 #ifdef CONFIG_SCHED_HPWORK
 struct hp_wqueue_s
 {
-  struct dq_queue_s q;         /* The queue of pending work */
+  struct sq_queue_s q;         /* The queue of pending work */
+  sem_t             sem;       /* The counting semaphore of the wqueue */
 
   /* Describes each thread in the high priority queue's thread pool */
 
@@ -85,7 +88,8 @@ struct hp_wqueue_s
 #ifdef CONFIG_SCHED_LPWORK
 struct lp_wqueue_s
 {
-  struct dq_queue_s q;      /* The queue of pending work */
+  struct sq_queue_s q;         /* The queue of pending work */
+  sem_t             sem;       /* The counting semaphore of the wqueue */
 
   /* Describes each thread in the low priority queue's thread pool */
 
@@ -150,26 +154,6 @@ int work_start_highpri(void);
 #ifdef CONFIG_SCHED_LPWORK
 int work_start_lowpri(void);
 #endif
-
-/****************************************************************************
- * Name: work_process
- *
- * Description:
- *   This is the logic that performs actions placed on any work list.  This
- *   logic is the common underlying logic to all work queues.  This logic is
- *   part of the internal implementation of each work queue; it should not
- *   be called from application level logic.
- *
- * Input Parameters:
- *   wqueue - Describes the work queue to be processed
- *   wndx   - The worker thread index
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx);
 
 /****************************************************************************
  * Name: work_initialize_notifier
