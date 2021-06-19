@@ -35,10 +35,35 @@
 
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
+#include <nuttx/semaphore.h>
 
 #include "wqueue/wqueue.h"
 
 #if defined(CONFIG_SCHED_WORKQUEUE)
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) && CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE > 0
+#  define CALL_WORKER(worker, arg) \
+     do \
+       { \
+         uint32_t start; \
+         uint32_t elapsed; \
+         start = up_critmon_gettime(); \
+         worker(arg); \
+         elapsed = up_critmon_gettime() - start; \
+         if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) \
+           { \
+             serr("WORKER %p execute too long %"PRIu32"\n", \
+                   worker, elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CALL_WORKER(worker, arg) worker(arg)
+#endif
 
 /****************************************************************************
  * Public Data
@@ -82,25 +107,71 @@ struct lp_wqueue_s g_lpwork;
  *
  ****************************************************************************/
 
-static int work_thread(int argc, char *argv[])
+static int work_thread(int argc, FAR char *argv[])
 {
-  FAR struct kwork_wqueue_s *queue;
-  int wndx;
+  FAR struct kwork_wqueue_s *wqueue;
+  FAR struct work_s *work;
+  worker_t  worker;
+  irqstate_t flags;
+  FAR void *arg;
 
-  queue  = (FAR struct kwork_wqueue_s *)
+  wqueue = (FAR struct kwork_wqueue_s *)
            ((uintptr_t)strtoul(argv[1], NULL, 0));
-  wndx   = atoi(argv[2]);
 
   /* Loop forever */
 
   for (; ; )
     {
       /* Then process queued work.  work_process will not return until: (1)
-       * there is no further work in the work queue, and (2) signal is
-       * triggered, or delayed work expires.
+       * there is no further work in the work queue, and (2) semaphore is
+       * posted.
        */
 
-      work_process(queue, wndx);
+      nxsem_wait_uninterruptible(&wqueue->sem);
+
+      flags = enter_critical_section();
+
+      /* And check each entry in the work queue.  Since we have disabled
+       * interrupts we know:  (1) we will not be suspended unless we do
+       * so ourselves, and (2) there will be no changes to the work queue
+       */
+
+      /* Remove the ready-to-execute work from the list */
+
+      work = (FAR struct work_s *)sq_remfirst(&wqueue->q);
+      DEBUGASSERT(work);
+
+      /* Extract the work description from the entry (in case the work
+       * instance by the re-used after it has been de-queued).
+       */
+
+      worker = work->worker;
+
+      /* Check for a race condition where the work may be nullified
+       * before it is removed from the queue.
+       */
+
+      if (worker != NULL)
+        {
+          /* Extract the work argument (before re-enabling interrupts) */
+
+          arg = work->arg;
+
+          /* Mark the work as no longer being queued */
+
+          work->worker = NULL;
+
+          /* Do the work.  Re-enable interrupts while the work is being
+           * performed... we don't have any idea how long this will take!
+           */
+
+          leave_critical_section(flags);
+          CALL_WORKER(worker, arg);
+        }
+      else
+        {
+          leave_critical_section(flags);
+        }
     }
 
   return OK; /* To keep some compilers happy */
@@ -129,14 +200,17 @@ static int work_thread_create(FAR const char *name, int priority,
                               int stack_size, int nthread,
                               FAR struct kwork_wqueue_s *wqueue)
 {
-  FAR char *argv[3];
-  char args[2][16];
+  FAR char *argv[2];
+  char args[16];
   int wndx;
   int pid;
 
-  snprintf(args[0], 16, "0x%" PRIxPTR, (uintptr_t)wqueue);
-  argv[0] = args[0];
-  argv[2] = NULL;
+  snprintf(args, 16, "0x%" PRIxPTR, (uintptr_t)wqueue);
+  argv[0] = args;
+  argv[1] = NULL;
+
+  nxsem_init(&wqueue->sem, 0, 0);
+  nxsem_set_protocol(&wqueue->sem, SEM_PRIO_NONE);
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_hpwork and g_lpwork.
@@ -146,9 +220,6 @@ static int work_thread_create(FAR const char *name, int priority,
 
   for (wndx = 0; wndx < nthread; wndx++)
     {
-      snprintf(args[1], 16, "%d", wndx);
-      argv[1] = args[1];
-
       pid = kthread_create(name, priority, stack_size,
                            (main_t)work_thread, argv);
 
@@ -163,7 +234,6 @@ static int work_thread_create(FAR const char *name, int priority,
 #ifdef CONFIG_PRIORITY_INHERITANCE
       wqueue->worker[wndx].pid  = pid;
 #endif
-      wqueue->worker[wndx].busy = true;
     }
 
   sched_unlock();
