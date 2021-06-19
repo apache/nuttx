@@ -1253,6 +1253,7 @@ config SCHED_STARTHOOK
 config SCHED_ATEXIT
 	bool "Enable atexit() API"
 	default n
+	select SCHED_ONEXIT
 	---help---
 		Enables the atexit() API
 

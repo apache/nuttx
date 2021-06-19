@@ -105,10 +105,6 @@ SYSCALL_LOOKUP(up_assert,                  2)
   SYSCALL_LOOKUP(vfork,                    0)
 #endif
 
-#ifdef CONFIG_SCHED_ATEXIT
-  SYSCALL_LOOKUP(atexit,                   1)
-#endif
-
 #ifdef CONFIG_SCHED_ONEXIT
   SYSCALL_LOOKUP(on_exit,                  2)
 #endif

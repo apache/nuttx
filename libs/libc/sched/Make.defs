@@ -34,6 +34,8 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_startup.c
 endif
 
+CSRCS += task_atexit.c
+
 # Add the sched directory to the build
 
 DEPPATH += --dep-path sched

@@ -33,7 +33,7 @@ CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
 CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
 CMN_CSRCS += arm_svcall.c arm_trigger_irq.c arm_unblocktask.c arm_udelay.c
-CMN_CSRCS += arm_usestack.c arm_vfork.c
+CMN_CSRCS += arm_usestack.c arm_vfork.c arm_onexit.c
 
 # Configuration-dependent common files
 

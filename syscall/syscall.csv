@@ -6,7 +6,6 @@
 "aio_read","aio.h","defined(CONFIG_FS_AIO)","int","FAR struct aiocb *"
 "aio_write","aio.h","defined(CONFIG_FS_AIO)","int","FAR struct aiocb *"
 "arc4random_buf","stdlib.h","defined(CONFIG_CRYPTO_RANDOM_POOL)","void","FAR void *","size_t"
-"atexit","stdlib.h","defined(CONFIG_SCHED_ATEXIT)","int","void (*)(void)"
 "bind","sys/socket.h","defined(CONFIG_NET)","int","int","FAR const struct sockaddr *","socklen_t"
 "boardctl","sys/boardctl.h","defined(CONFIG_LIB_BOARDCTL)","int","unsigned int","uintptr_t"
 "clearenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int"

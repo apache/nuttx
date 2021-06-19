@@ -28,7 +28,7 @@ CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_releasepending.c
 CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_schedulesigaction.c
 CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_svcall.c arm_systemreset.c
 CMN_CSRCS += arm_trigger_irq.c arm_unblocktask.c arm_udelay.c arm_usestack.c
-CMN_CSRCS += arm_doirq.c arm_vfork.c
+CMN_CSRCS += arm_doirq.c arm_vfork.c arm_onexit.c
 
 ifeq ($(CONFIG_STM32_TICKLESS_SYSTICK),y)
 CMN_CSRCS += arm_systick.c

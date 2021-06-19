@@ -44,9 +44,9 @@
 #ifdef CONFIG_LIB_SYSCALL
 #  ifdef CONFIG_BUILD_PROTECTED
 #    ifndef CONFIG_SYS_RESERVED
-#      error "CONFIG_SYS_RESERVED must be defined to have the value 8"
-#    elif CONFIG_SYS_RESERVED != 8
-#      error "CONFIG_SYS_RESERVED must have the value 8"
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 9"
+#    elif CONFIG_SYS_RESERVED != 9
+#      error "CONFIG_SYS_RESERVED must have the value 9"
 #    endif
 #  else
 #    ifndef CONFIG_SYS_RESERVED
@@ -79,6 +79,13 @@
  */
 
 #define SYS_switch_context        (2)
+
+/* SYS call 8:
+ *
+ * void up_nxtask_onexit(onexitfunc_t func, int exitcode, FAR void *arg)
+ */
+
+#define SYS_nxtask_onexit          (8)
 
 #ifdef CONFIG_LIB_SYSCALL
 /* SYS call 3:
