@@ -32,6 +32,7 @@
 #include <queue.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -244,11 +245,17 @@ typedef CODE void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
-  struct dq_entry_s dq;  /* Implements a doubly linked list */
-  worker_t  worker;      /* Work callback */
-  FAR void *arg;         /* Callback argument */
-  clock_t qtime;         /* Time work queued */
-  clock_t delay;         /* Delay until work performed */
+  union
+  {
+    struct
+    {
+      struct sq_entry_s sq; /* Implements a single linked list */
+      clock_t qtime;        /* Time work queued */
+    } s;
+    struct wdog_s timer;    /* Delay expiry timer */
+  } u;
+  worker_t  worker;         /* Work callback */
+  FAR void *arg;            /* Callback argument */
 };
 
 /* This is an enumeration of the various events that may be
@@ -373,24 +380,6 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  ****************************************************************************/
 
 int work_cancel(int qid, FAR struct work_s *work);
-
-/****************************************************************************
- * Name: work_signal
- *
- * Description:
- *   Signal the worker thread to process the work queue now.  This function
- *   is used internally by the work logic but could also be used by the
- *   user to force an immediate re-assessment of pending work.
- *
- * Input Parameters:
- *   qid    - The work queue ID
- *
- * Returned Value:
- *   Zero on success, a negated errno on failure
- *
- ****************************************************************************/
-
-int work_signal(int qid);
 
 /****************************************************************************
  * Name: work_available

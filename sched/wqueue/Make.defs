@@ -22,8 +22,7 @@
 
 ifeq ($(CONFIG_SCHED_WORKQUEUE),y)
 
-CSRCS += kwork_queue.c kwork_process.c kwork_cancel.c kwork_signal.c
-CSRCS += kwork_thread.c
+CSRCS += kwork_queue.c kwork_thread.c kwork_cancel.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += kwork_inherit.c
