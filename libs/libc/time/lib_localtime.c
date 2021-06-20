@@ -2584,6 +2584,7 @@ FAR struct tm *localtime(FAR const time_t * const timep)
 
 FAR struct tm *localtime_r(FAR const time_t * const timep, struct tm *tmp)
 {
+  tzset();
   return localsub(timep, 0L, tmp);
 }
 
