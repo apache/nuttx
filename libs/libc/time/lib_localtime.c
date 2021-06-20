@@ -321,6 +321,8 @@ static const char g_wildabbr[] = WILDABBR;
 static char g_lcl_tzname[MY_TZNAME_MAX + 1];
 static int g_lcl_isset;
 static int g_gmt_isset;
+static FAR struct state_s *g_lcl_ptr;
+static FAR struct state_s *g_gmt_ptr;
 static sem_t g_lcl_sem = SEM_INITIALIZER(1);
 static sem_t g_gmt_sem = SEM_INITIALIZER(1);
 
@@ -409,8 +411,6 @@ static int  tzload(FAR const char *name, FAR struct state_s *sp,
               int doextend);
 static int  tzparse(FAR const char *name, FAR struct state_s *sp,
               int lastditch);
-static FAR struct state_s *lclptr;
-static FAR struct state_s *gmtptr;
 
 /****************************************************************************
  * Private Functions
@@ -468,7 +468,7 @@ static int_fast64_t detzcode64(FAR const char *const codep)
 
 static void settzname(void)
 {
-  FAR struct state_s *const sp = lclptr;
+  FAR struct state_s *const sp = g_lcl_ptr;
   int i;
 
   tzname[0] = tzname[1] = (FAR char *)g_wildabbr;
@@ -1668,14 +1668,14 @@ static void tzsetwall(void)
       return;
     }
 
-  if (lclptr == NULL)
+  if (g_lcl_ptr == NULL)
     {
-      lclptr = lib_malloc(sizeof *lclptr);
+      g_lcl_ptr = lib_malloc(sizeof *g_lcl_ptr);
     }
 
-  if (lclptr != NULL && tzload(NULL, lclptr, TRUE) != 0)
+  if (g_lcl_ptr != NULL && tzload(NULL, g_lcl_ptr, TRUE) != 0)
     {
-      gmtload(lclptr);
+      gmtload(g_lcl_ptr);
     }
 
   settzname();
@@ -1700,7 +1700,7 @@ static struct tm *localsub(FAR const time_t * const timep,
   struct tm *result;
   const time_t t = *timep;
 
-  sp = lclptr;
+  sp = g_lcl_ptr;
   if (sp == NULL)
     {
       return gmtsub(timep, offset, tmp);
@@ -1814,17 +1814,17 @@ static struct tm *gmtsub(FAR const time_t * const timep,
 
   if (!g_gmt_isset)
     {
-      gmtptr = lib_malloc(sizeof *gmtptr);
-      if (gmtptr != NULL)
+      g_gmt_ptr = lib_malloc(sizeof *g_gmt_ptr);
+      if (g_gmt_ptr != NULL)
         {
-          gmtload(gmtptr);
+          gmtload(g_gmt_ptr);
           g_gmt_isset = 1;
         }
     }
 
   tz_semgive(&g_gmt_sem);
 
-  return timesub(timep, offset, gmtptr, tmp);
+  return timesub(timep, offset, g_gmt_ptr, tmp);
 }
 
 /* Return the number of leap years through the end of the given year
@@ -2333,7 +2333,7 @@ static time_t time2sub(struct tm *const tmp,
        */
 
       sp = (FAR const struct state_s *)
-        ((funcp == localsub) ? lclptr : gmtptr);
+        ((funcp == localsub) ? g_lcl_ptr : g_gmt_ptr);
       if (sp == NULL)
         {
           return -1;
@@ -2454,7 +2454,7 @@ static time_t time1(FAR struct tm *const tmp,
    * type they need.
    */
 
-  sp = (FAR const struct state_s *)((funcp == localsub) ? lclptr : gmtptr);
+  sp = ((funcp == localsub) ? g_lcl_ptr : g_gmt_ptr);
   if (sp == NULL)
     {
       return -1;
@@ -2531,10 +2531,10 @@ void tzset(void)
       goto out;
     }
 
-  if (lclptr == NULL)
+  if (g_lcl_ptr == NULL)
     {
-      lclptr = lib_malloc(sizeof *lclptr);
-      if (lclptr == NULL)
+      g_lcl_ptr = lib_malloc(sizeof *g_lcl_ptr);
+      if (g_lcl_ptr == NULL)
         {
           goto tzname;
         }
@@ -2544,19 +2544,19 @@ void tzset(void)
     {
       /* User wants it fast rather than right */
 
-      lclptr->leapcnt = 0; /* so, we're off a little */
-      lclptr->timecnt = 0;
-      lclptr->typecnt = 0;
-      lclptr->ttis[0].tt_isdst = 0;
-      lclptr->ttis[0].tt_gmtoff = 0;
-      lclptr->ttis[0].tt_abbrind = 0;
-      strcpy(lclptr->chars, GMT);
+      g_lcl_ptr->leapcnt = 0; /* so, we're off a little */
+      g_lcl_ptr->timecnt = 0;
+      g_lcl_ptr->typecnt = 0;
+      g_lcl_ptr->ttis[0].tt_isdst = 0;
+      g_lcl_ptr->ttis[0].tt_gmtoff = 0;
+      g_lcl_ptr->ttis[0].tt_abbrind = 0;
+      strcpy(g_lcl_ptr->chars, GMT);
     }
-  else if (tzload(name, lclptr, TRUE) != 0)
+  else if (tzload(name, g_lcl_ptr, TRUE) != 0)
     {
-      if (name[0] == ':' || tzparse(name, lclptr, FALSE) != 0)
+      if (name[0] == ':' || tzparse(name, g_lcl_ptr, FALSE) != 0)
         {
-          gmtload(lclptr);
+          gmtload(g_lcl_ptr);
           goto tzname;
         }
     }
