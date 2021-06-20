@@ -1663,11 +1663,8 @@ static void gmtload(FAR struct state_s *const sp)
 
 static void tzsetwall(void)
 {
-  tz_semtake(&g_lcl_sem);
-
   if (g_lcl_isset < 0)
     {
-      tz_semgive(&g_lcl_sem);
       return;
     }
 
@@ -1684,8 +1681,6 @@ static void tzsetwall(void)
   settzname();
 
   g_lcl_isset = -1;
-
-  tz_semgive(&g_lcl_sem);
 }
 
 /* The easy way to behave "as if no library function calls" localtime
@@ -2522,16 +2517,18 @@ void tzset(void)
 {
   FAR const char *name;
 
+  tz_semtake(&g_lcl_sem);
+
   name = getenv("TZ");
   if (name == NULL)
     {
       tzsetwall();
-      return;
+      goto out;
     }
 
   if (g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
     {
-      return;
+      goto out;
     }
 
   g_lcl_isset = strlen(name) < sizeof g_lcl_tzname;
@@ -2546,7 +2543,7 @@ void tzset(void)
       if (lclptr == NULL)
         {
           settzname(); /* all we can do */
-          return;
+          goto out;
         }
     }
 
@@ -2571,6 +2568,9 @@ void tzset(void)
     }
 
   settzname();
+
+out:
+  tz_semgive(&g_lcl_sem);
 }
 
 FAR struct tm *localtime(FAR const time_t * const timep)
