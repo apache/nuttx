@@ -1,4 +1,4 @@
-apps/system/zoneinfo/README.txt
+libs/libc/zoneinfo/README.txt
 Author: Gregory Nutt <gnutt@nuttx.org>
 
 Directory Contents
@@ -68,7 +68,7 @@ Select the above localtime() and nuttx/zoneinfo configuration settings.
 Then:
 
   make context
-  cd ../nuttx/zoneinfo/tzbin/etc/zoneinfo
+  cd ../nuttx/libs/libc/zoneinfo/tzbin/usr/share/zoneinfo
 
 Remove as many timezone files as you can.  Do not remove the GMT, localtime,
 or posixrules files.  Those might be needed in any event.  Then you can
