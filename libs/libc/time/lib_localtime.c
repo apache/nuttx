@@ -201,7 +201,7 @@
  * common default.
  */
 
-#define TZDEFRULESTRING     ",M4.1.0,M10.5.0"
+#define TZDEFRULESTRING     ",M3.2.0,M11.1.0"
 
 /****************************************************************************
  * Private Types
