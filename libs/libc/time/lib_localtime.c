@@ -272,7 +272,7 @@ struct ttinfo_s
 struct lsinfo_s
 {                             /* Leap second information */
   time_t ls_trans;            /* Transition time */
-  int_fast64_t ls_corr;       /* Correction to apply */
+  int_fast32_t ls_corr;       /* Correction to apply */
 };
 
 struct state_s
@@ -1851,10 +1851,10 @@ static struct tm *timesub(FAR const time_t * const timep,
   const struct lsinfo_s *lp;
   time_t tdays;
   int idays;           /* unsigned would be so 2003 */
-  int_fast64_t rem;
+  int_fast32_t rem;
   int y;
   FAR const int *ip;
-  int_fast64_t corr;
+  int_fast32_t corr;
   int hit;
   int i;
 
