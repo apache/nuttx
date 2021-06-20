@@ -199,7 +199,7 @@
 #  define SD_ACMDIDX52    52  /* IO_RW_DIRECT: (SDIO only)
                                * -R5 response, 23:16=status 15:8=data */
 #  define SD_ACMDIDX53    53  /* IO_RW_EXTENDED: (SDIO only)
-                               * -R5 response, 23:16=status */
+                               * -Addressed data transfer command, R5 response, 23:16=status */
 
 /* Response Encodings:
  *
@@ -316,8 +316,9 @@
 #define SD_ACMD49       (SD_ACMDIDX49  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define SD_ACMD51       (SD_ACMDIDX51  |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
 #define SD_ACMD52       (SD_ACMDIDX52  |MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
-#define SD_ACMD52ABRT   (SD_ACMDIDX52  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR|MMCSD_STOPXFR)
-#define SD_ACMD53       (SD_ACMDIDX53  |MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
+#define SD_ACMD52ABRT   (SD_ACMDIDX52  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR |MMCSD_STOPXFR)
+#define SD_ACMD53RD     (SD_ACMDIDX53  |MMCSD_R5_RESPONSE |MMCSD_RDDATAXFR)
+#define SD_ACMD53WR     (SD_ACMDIDX53  |MMCSD_R5_RESPONSE |MMCSD_WRDATAXFR)
 
 /* SDIO Card Common Control Registers definitions
  * see https://www.sdcard.org/developers/overview/sdio/
