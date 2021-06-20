@@ -2531,19 +2531,12 @@ void tzset(void)
       goto out;
     }
 
-  g_lcl_isset = strlen(name) < sizeof g_lcl_tzname;
-  if (g_lcl_isset)
-    {
-      strcpy(g_lcl_tzname, name);
-    }
-
   if (lclptr == NULL)
     {
       lclptr = lib_malloc(sizeof *lclptr);
       if (lclptr == NULL)
         {
-          settzname(); /* all we can do */
-          goto out;
+          goto tzname;
         }
     }
 
@@ -2564,11 +2557,18 @@ void tzset(void)
       if (name[0] == ':' || tzparse(name, lclptr, FALSE) != 0)
         {
           gmtload(lclptr);
+          goto tzname;
         }
     }
 
-  settzname();
+  g_lcl_isset = strlen(name) < sizeof g_lcl_tzname;
+  if (g_lcl_isset)
+    {
+      strcpy(g_lcl_tzname, name);
+    }
 
+tzname:
+  settzname();
 out:
   tz_semgive(&g_lcl_sem);
 }
