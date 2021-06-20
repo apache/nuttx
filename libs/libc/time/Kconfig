@@ -18,7 +18,7 @@ config LIBC_LOCALTIME
 		environment variable TZ must be set to the name of that timezone file
 		when tzset() is called.
 
-		See https://www.iana.org/time-zones .  See also nuttx/zoneinfo
+		See https://www.iana.org/time-zones .  See also libs/libc/zoneinfo
 		which provides a framework for incorporating the TZ database into a
 		NuttX build.
 
