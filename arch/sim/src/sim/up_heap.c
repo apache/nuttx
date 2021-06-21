@@ -48,7 +48,11 @@ struct mm_delaynode_s
 
 struct mm_heap_impl_s
 {
-  struct mm_delaynode_s *mm_delaylist;
+#ifdef CONFIG_SMP
+  struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+#else
+  struct mm_delaynode_s *mm_delaylist[1];
+#endif
 };
 
 /****************************************************************************
@@ -65,8 +69,8 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = enter_critical_section();
 
-  tmp->flink = heap->mm_impl->mm_delaylist;
-  heap->mm_impl->mm_delaylist = tmp;
+  tmp->flink = heap->mm_impl->mm_delaylist[up_cpu_index()];
+  heap->mm_impl->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
 }
@@ -83,8 +87,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
   flags = enter_critical_section();
 
-  tmp = heap->mm_impl->mm_delaylist;
-  heap->mm_impl->mm_delaylist = NULL;
+  tmp = heap->mm_impl->mm_delaylist[up_cpu_index()];
+  heap->mm_impl->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
@@ -135,8 +139,11 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
                    size_t heap_size)
 {
   FAR struct mm_heap_impl_s *impl;
+
   impl = host_malloc(sizeof(struct mm_heap_impl_s));
-  impl->mm_delaylist = NULL;
+  DEBUGASSERT(impl);
+
+  memset(impl, 0, sizeof(struct mm_heap_impl_s));
   heap->mm_impl = impl;
 }
 

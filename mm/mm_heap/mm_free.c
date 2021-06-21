@@ -50,8 +50,8 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = enter_critical_section();
 
-  tmp->flink = heap_impl->mm_delaylist;
-  heap_impl->mm_delaylist = tmp;
+  tmp->flink = heap_impl->mm_delaylist[up_cpu_index()];
+  heap_impl->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
 }
