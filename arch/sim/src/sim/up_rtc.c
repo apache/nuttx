@@ -83,7 +83,7 @@ static int sim_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int sim_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
                            FAR const struct rtc_time *rtctime)
 {
-  g_sim_delta = mktime((FAR struct tm *)rtctime);
+  g_sim_delta = timegm((FAR struct tm *)rtctime);
   g_sim_delta *= NSEC_PER_SEC;
   g_sim_delta += rtctime->tm_nsec;
   g_sim_delta -= host_gettime(true);
