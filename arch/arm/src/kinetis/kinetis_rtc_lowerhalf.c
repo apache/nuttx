@@ -274,7 +274,7 @@ static int kinetis_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = mktime((FAR struct tm *)rtctime);
+  ts.tv_sec  = timegm((FAR struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Set the time (to one second accuracy) */
@@ -325,7 +325,7 @@ static int kinetis_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       /* Convert from Julian calendar time to epoch time */
 
-      tp.tv_sec = mktime((FAR struct tm *)&alarminfo->time) ;
+      tp.tv_sec = timegm((FAR struct tm *)&alarminfo->time) ;
 
       /* And set the alarm */
 
@@ -393,7 +393,7 @@ kinetis_setrelative(FAR struct rtc_lowerhalf_s *lower,
           return ret;
         }
 
-      ts.tv_sec  = mktime(&time);
+      ts.tv_sec  = timegm(&time);
       ts.tv_nsec = 0;
 #else
       /* Get the current time in broken out format */

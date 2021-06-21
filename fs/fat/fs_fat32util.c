@@ -465,7 +465,7 @@ time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 
   /* Then convert the broken out time into seconds since the epoch */
 
-  return mktime(&tm);
+  return timegm(&tm);
 #else
   return 0;
 #endif

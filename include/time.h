@@ -91,7 +91,6 @@
 
 #define TIME_UTC           1
 
-
 /* Redirect the timelocal */
 
 #define timelocal         mktime

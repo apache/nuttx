@@ -367,7 +367,7 @@ static int rpmsg_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
 {
   struct rpmsg_rtc_set_s msg =
   {
-    .sec  = mktime((FAR struct tm *)rtctime),
+    .sec  = timegm((FAR struct tm *)rtctime),
     .nsec = rtctime->tm_nsec,
   };
 
@@ -388,7 +388,7 @@ static int rpmsg_rtc_setalarm(FAR struct rtc_lowerhalf_s *lower_,
     (FAR struct rpmsg_rtc_lowerhalf_s *)lower_;
   struct rpmsg_rtc_alarm_set_s msg =
   {
-    .sec  = mktime((FAR struct tm *)&alarminfo->time),
+    .sec  = timegm((FAR struct tm *)&alarminfo->time),
     .nsec = alarminfo->time.tm_nsec,
     .id   = alarminfo->id,
   };
@@ -419,7 +419,7 @@ rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
   time_t time;
 
   rpmsg_rtc_rdtime(lower, &alarminfo.time);
-  time = mktime((FAR struct tm *)&alarminfo.time);
+  time = timegm((FAR struct tm *)&alarminfo.time);
   time = time + relinfo->reltime;
   gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
 
