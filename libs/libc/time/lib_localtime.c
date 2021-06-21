@@ -1807,6 +1807,7 @@ static FAR struct tm *localsub(FAR const time_t *timep,
   result = timesub(&t, ttisp->tt_gmtoff, sp, tmp);
   tmp->tm_isdst = ttisp->tt_isdst;
   tzname[tmp->tm_isdst] = &sp->chars[ttisp->tt_abbrind];
+  tmp->tm_zone = tzname[tmp->tm_isdst];
 
   return result;
 }
@@ -1830,6 +1831,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
 
   tz_semgive(&g_gmt_sem);
 
+  tmp->tm_zone = GMT;
   return timesub(timep, offset, g_gmt_ptr, tmp);
 }
 
@@ -2004,7 +2006,6 @@ static FAR struct tm *timesub(FAR const time_t *timep,
   tmp->tm_mday = (int)(idays + 1);
   tmp->tm_isdst = 0;
   tmp->tm_gmtoff = offset;
-  tmp->tm_zone = tzname[0];
 
   return tmp;
 }
