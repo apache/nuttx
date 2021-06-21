@@ -87,7 +87,11 @@ struct mm_heap_impl_s
 
   /* Free delay list, for some situation can't do free immdiately */
 
-  FAR struct mm_delaynode_s *mm_delaylist;
+#ifdef CONFIG_SMP
+  struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+#else
+  struct mm_delaynode_s *mm_delaylist[1];
+#endif
 };
 
 /****************************************************************************
@@ -306,8 +310,8 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = enter_critical_section();
 
-  tmp->flink = impl->mm_delaylist;
-  impl->mm_delaylist = tmp;
+  tmp->flink = impl->mm_delaylist[up_cpu_index()];
+  impl->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
 }
@@ -331,8 +335,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
   flags = enter_critical_section();
 
-  tmp = impl->mm_delaylist;
-  impl->mm_delaylist = NULL;
+  tmp = impl->mm_delaylist[up_cpu_index()];
+  impl->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
