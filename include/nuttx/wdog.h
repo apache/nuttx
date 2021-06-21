@@ -34,15 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Watchdog Definitions *****************************************************/
-
-/* Flag bits for the flags field of struct wdog_s */
-
-#define WDOGF_ACTIVE       (1 << 0) /* Bit 0: 1=Watchdog is actively timing */
-
-#define WDOG_SETACTIVE(w)  do { (w)->flags |= WDOGF_ACTIVE; } while (0)
-#define WDOG_CLRACTIVE(w)  do { (w)->flags &= ~WDOGF_ACTIVE; } while (0)
-#define WDOG_ISACTIVE(w)   (((w)->flags & WDOGF_ACTIVE) != 0)
+#define WDOG_ISACTIVE(w)   ((w)->func != NULL)
 
 /****************************************************************************
  * Public Type Declarations
@@ -78,7 +70,6 @@ struct wdog_s
   FAR void          *picbase;    /* PIC base address */
 #endif
   int                lag;        /* Timer associated with the delay */
-  uint8_t            flags;      /* See WDOGF_* definitions above */
   wdparm_t           arg;        /* Callback argument */
 };
 

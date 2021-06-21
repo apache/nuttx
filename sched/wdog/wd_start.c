@@ -92,6 +92,7 @@
 static inline void wd_expiration(void)
 {
   FAR struct wdog_s *wdog;
+  wdentry_t func;
 
   /* Check if the watchdog at the head of the list is ready to run */
 
@@ -119,12 +120,13 @@ static inline void wd_expiration(void)
 
           /* Indicate that the watchdog is no longer active. */
 
-          WDOG_CLRACTIVE(wdog);
+          func = wdog->func;
+          wdog->func = NULL;
 
           /* Execute the watchdog function */
 
           up_setpicbase(wdog->picbase);
-          CALL_FUNC(wdog->func, wdog->arg);
+          CALL_FUNC(func, wdog->arg);
         }
     }
 }
@@ -180,7 +182,7 @@ int wd_start(FAR struct wdog_s *wdog, int32_t delay,
 
   /* Verify the wdog and setup parameters */
 
-  if (wdog == NULL || delay < 0)
+  if (wdog == NULL || wdentry == NULL || delay < 0)
     {
       return -EINVAL;
     }
@@ -317,7 +319,6 @@ int wd_start(FAR struct wdog_s *wdog, int32_t delay,
   /* Put the lag into the watchdog structure and mark it as active. */
 
   wdog->lag = delay;
-  WDOG_SETACTIVE(wdog);
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Resume the interval timer that will generate the next interval event.
