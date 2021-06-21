@@ -126,8 +126,7 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
       /* Mark the watchdog inactive */
 
-      wdog->next = NULL;
-      WDOG_CLRACTIVE(wdog);
+      wdog->func = NULL;
 
       /* Return success */
 
