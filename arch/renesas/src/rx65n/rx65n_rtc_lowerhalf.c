@@ -302,7 +302,7 @@ static int rx65n_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = mktime((FAR struct tm *)rtctime);
+  ts.tv_sec  = timegm((FAR struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Now set the time (to one second accuracy) */
@@ -445,7 +445,7 @@ static int rx65n_setrelative(FAR struct rtc_lowerhalf_s *lower,
           return ret;
         }
 
-      ts.tv_sec  = mktime(&time);
+      ts.tv_sec  = timegm(&time);
       ts.tv_nsec = 0;
 
 #elif defined(CONFIG_RTC_HIRES)
@@ -456,7 +456,7 @@ static int rx65n_setrelative(FAR struct rtc_lowerhalf_s *lower,
         {
           /* Convert to seconds since the epoch */
 
-          seconds = mktime(&time);
+          seconds = timegm(&time);
 
           /* Add the seconds offset.  Add one to the number of seconds
            * because we are unsure of the phase of the timer.

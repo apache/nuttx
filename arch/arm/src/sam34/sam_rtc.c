@@ -803,7 +803,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
                             RTC_CALR_YEAR_SHIFT)
              - 1900;
 
-  tp->tv_sec = mktime(&t);
+  tp->tv_sec = timegm(&t);
   tp->tv_nsec = (((rtt_val - g_rtt_offset) & (CONFIG_RTC_FREQUENCY - 1)) *
                    1000000000ull) / CONFIG_RTC_FREQUENCY;
 

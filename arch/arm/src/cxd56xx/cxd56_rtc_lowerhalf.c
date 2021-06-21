@@ -269,7 +269,7 @@ static int cxd56_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = mktime((FAR struct tm *)rtctime);
+  ts.tv_sec  = timegm((FAR struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Now set the time (to one second accuracy) */
@@ -324,7 +324,7 @@ static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       /* Convert the RTC time to a timespec (1 second accuracy) */
 
-      lowerinfo.as_time.tv_sec  = mktime((FAR struct tm *)&alarminfo->time);
+      lowerinfo.as_time.tv_sec  = timegm((FAR struct tm *)&alarminfo->time);
       lowerinfo.as_time.tv_nsec = 0;
 
       /* And set the alarm */
