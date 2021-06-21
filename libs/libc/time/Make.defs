@@ -29,7 +29,7 @@ CSRCS += lib_gethrtime.c
 ifdef CONFIG_LIBC_LOCALTIME
 CSRCS += lib_localtime.c
 else
-CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
+CSRCS += lib_timegm.c lib_gmtime.c lib_gmtimer.c
 endif
 
 # Add the time directory to the build
