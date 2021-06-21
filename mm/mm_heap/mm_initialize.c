@@ -197,20 +197,10 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   /* Set up global variables */
 
-  heap_impl->mm_heapsize = 0;
-
-#if CONFIG_MM_REGIONS > 1
-  heap_impl->mm_nregions = 0;
-#endif
-
-  /* Initialize mm_delaylist */
-
-  heap_impl->mm_delaylist = NULL;
+  memset(heap_impl, 0, sizeof(struct mm_heap_impl_s));
 
   /* Initialize the node array */
 
-  memset(heap_impl->mm_nodelist, 0,
-         sizeof(struct mm_freenode_s) * MM_NNODES);
   for (i = 1; i < MM_NNODES; i++)
     {
       heap_impl->mm_nodelist[i - 1].flink = &heap_impl->mm_nodelist[i];

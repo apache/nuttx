@@ -59,8 +59,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
   flags = enter_critical_section();
 
-  tmp = heap_impl->mm_delaylist;
-  heap_impl->mm_delaylist = NULL;
+  tmp = heap_impl->mm_delaylist[up_cpu_index()];
+  heap_impl->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
