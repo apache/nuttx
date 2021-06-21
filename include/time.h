@@ -91,9 +91,10 @@
 
 #define TIME_UTC           1
 
-/* Redirect the timegm */
 
-#define timegm mktime
+/* Redirect the timelocal */
+
+#define timelocal         mktime
 
 /********************************************************************************
  * Public Types
@@ -192,7 +193,9 @@ int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
 int timespec_get(FAR struct timespec *t, int b);
 
+time_t timegm(FAR struct tm *tp);
 time_t mktime(FAR struct tm *tp);
+
 FAR struct tm *gmtime(FAR const time_t *timep);
 FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result);
 

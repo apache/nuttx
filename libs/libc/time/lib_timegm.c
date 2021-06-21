@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/time/lib_mktime.c
+ * libs/libc/time/lib_timegm.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -62,14 +62,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  mktime
+ * Name:  timegm
  *
  * Description:
  *   Time conversion (based on the POSIX API)
  *
  ****************************************************************************/
 
-time_t mktime(FAR struct tm *tp)
+time_t timegm(FAR struct tm *tp)
 {
   time_t ret;
   time_t jdn;
@@ -89,4 +89,9 @@ time_t mktime(FAR struct tm *tp)
         (int)ret, tp->tm_hour, tp->tm_min, tp->tm_sec);
 
   return ret;
+}
+
+time_t mktime(FAR struct tm *tp)
+{
+  return timegm(tp);
 }

@@ -2604,3 +2604,8 @@ time_t mktime(struct tm * const tmp)
   tzset();
   return time1(tmp, localsub, 0L);
 }
+
+time_t timegm(FAR struct tm *tmp)
+{
+  return time1(tmp, gmtsub, 0L);
+}
