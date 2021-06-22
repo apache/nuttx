@@ -169,7 +169,7 @@ CHIP_CSRCS += esp32c3_rtc_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32C3_RTC_HEAP),y)
-CHIP_CSRCS += esp32c3_rtc_heap.c
+CHIP_CSRCS += esp32c3_rtcheap.c
 endif
 
 ifeq ($(CONFIG_ESP32C3_WIRELESS),y)

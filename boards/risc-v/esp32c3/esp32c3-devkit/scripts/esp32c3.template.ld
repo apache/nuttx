@@ -91,4 +91,4 @@ MEMORY
 
 /* Mark the end of the RTC heap (top of the RTC region) */
 
-_ertc_heap = 0x50001fff;
+_ertcheap = 0x50001fff;

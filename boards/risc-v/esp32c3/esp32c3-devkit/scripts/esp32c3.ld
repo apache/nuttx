@@ -250,7 +250,7 @@ SECTIONS
 
    /* Whatever is left from the RTC memory is used as a special heap. */
 
-    _srtc_heap = ABSOLUTE(.);
+    _srtcheap = ABSOLUTE(.);
 
   } >rtc_seg
 }
