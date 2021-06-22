@@ -58,8 +58,10 @@ void up_irqinitialize(void)
   up_irq_save();
 
   /* Note: C906 does this, but BeagleV crashes. Just don't do that. */
+
   /* enable access from supervisor mode */
-  // putreg32(0x1, JH7100_PLIC_CTRL);
+
+  /* putreg32(0x1, JH7100_PLIC_CTRL); */
 
   /* Disable all global interrupts */
 
@@ -141,6 +143,7 @@ void up_disable_irq(int irq)
       extirq = irq - JH7100_IRQ_PERI_START;
 
       /* Clear enable bit for the irq */
+
       if (0 <= extirq && extirq <= 63)
         {
           modifyreg32(JH7100_PLIC_MIE0 + (4 * (extirq / 32)),
@@ -160,7 +163,9 @@ void up_disable_irq(int irq)
  *   Enable the IRQ specified by 'irq'
  *
  ****************************************************************************/
-// uart3 == 73 (0x49)
+
+/* Note: uart3 == 73 (0x49) */
+
 void up_enable_irq(int irq)
 {
   int extirq;
@@ -194,8 +199,6 @@ void up_enable_irq(int irq)
           ASSERT(false);
         }
     }
-
-
 }
 
 /****************************************************************************
