@@ -1,4 +1,0 @@
-make distclean
-PATH=$PATH:/Users/robertlipe/tmp/tools/kconfig-frontends/utils
-PATH=$PATH:/Users/robertlipe/tmp/buildtools/bin/
-tools/configure.sh    smartl-c906:nsh
