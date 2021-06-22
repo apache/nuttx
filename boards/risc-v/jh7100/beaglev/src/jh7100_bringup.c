@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/jh7100/smartl-jh7100/src/jh7100_bringup.c
+ * boards/risc-v/jh7100/beaglev/src/jh7100_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -53,7 +53,7 @@ int jh7100_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-//      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+      /* serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret); */
     }
 #endif
 

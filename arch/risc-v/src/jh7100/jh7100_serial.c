@@ -504,10 +504,12 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 #else
   dr = up_serialin(priv, UART_LSR_OFFSET) & LSR_DATA_READY;
 #endif
-  // TODO: Reconcile why dr is always set in renode emulator. Fortunately,
-  // this was already tested when we set g_rxdata, so use that here.
- return g_rxdata;
-  // return !!dr;
+  /* TODO: Reconcile why dr is always set in renode emulator. Fortunately,
+   * this was already tested when we set g_rxdata, so use that here.
+   * return !!dr;
+   */
+
+  return g_rxdata;
 }
 
 /****************************************************************************

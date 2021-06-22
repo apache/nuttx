@@ -80,10 +80,10 @@ void __jh7100_start(uint32_t mhartid)
 
   if (0 != mhartid)
     {
-//asm("wfi");
-      while (true) {
-// riscv_lowputc(mhartid + 'a');
-	}
+      while (true)
+        {
+          asm("wfi");
+        }
     }
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
