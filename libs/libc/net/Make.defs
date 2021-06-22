@@ -33,6 +33,10 @@ ifeq ($(CONFIG_NET_LOOPBACK),y)
 CSRCS += lib_loopback.c
 endif
 
+ifeq ($(CONFIG_NETDEV_IFINDEX),y)
+CSRCS += lib_nameindex.c lib_freenameindex.c
+endif
+
 # Routing table support
 
 ifeq ($(CONFIG_NET_ROUTE),y)

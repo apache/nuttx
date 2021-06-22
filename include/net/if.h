@@ -32,6 +32,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* If CONFIG_NETDEV_IFINDEX is enabled then there is limit to the number of
+ * devices that can be registered due to the nature of some static data.
+ */
+
+#define MAX_IFINDEX        32
+
 /* Sizing parameters */
 
 #define IFNAMSIZ           16  /* Older naming standard */
@@ -102,6 +108,12 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+struct if_nameindex
+{
+  unsigned int if_index; /* 1, 2, ... */
+  FAR char *if_name;     /* null terminated name: "eth0", ... */
+};
 
 /* Structure passed with the SIOCMIINOTIFY ioctl command to enable
  * notification of of PHY state changes.
@@ -297,6 +309,48 @@ unsigned int if_nametoindex(FAR const char *ifname);
  ****************************************************************************/
 
 FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname);
+
+/****************************************************************************
+ * Name: if_nameindex
+ *
+ * Description:
+ *   The if_nameindex() function returns an array of if_nameindex structures,
+ *   each containing information about one of the network interfaces on the
+ *   local system. The if_nameindex structure contains at least the following
+ *   entries:
+ *         unsigned int if_index;
+ *         FAR char     *if_name;
+ *   The if_index field contains the interface index. The if_name field
+ *   points to the null-terminated interface name.  The end of the array
+ *   is indicated by entry with if_index set to zero and if_name set to NULL.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, if_nameindex() returns pointer to the array; on error, NULL
+ *   is returned, and errno is set to indicate the error.
+ *
+ ****************************************************************************/
+
+FAR struct if_nameindex *if_nameindex(void);
+
+/****************************************************************************
+ * Name: if_freenameindex
+ *
+ * Description:
+ *   The if_freenameindex() function free the data structure returned by
+ *   if_nameindex().
+ *
+ * Input Parameters:
+ *   ifn - The data structure to free
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void if_freenameindex(FAR struct if_nameindex *ifn);
 
 #undef EXTERN
 #ifdef __cplusplus
