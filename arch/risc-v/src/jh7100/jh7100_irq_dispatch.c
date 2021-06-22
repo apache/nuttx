@@ -70,7 +70,10 @@ void *jh7100_dispatch_irq(uint64_t vector, uint64_t *regs)
       uint32_t val = getreg32(JH7100_PLIC_MCLAIM);
 
       /* Add the value to nuttx irq which is offset to the mext */
+<<<<<<< HEAD
 
+=======
+>>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
       irq = val + JH7100_IRQ_PERI_START;
     }
 
