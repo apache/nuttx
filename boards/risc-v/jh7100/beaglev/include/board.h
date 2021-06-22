@@ -37,7 +37,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-// These aren't used in this port, but the common code refers to them.
+/* These aren't used in this port, but the common code refers to them. */
+
 #define LED_STARTED       0  /* N/C */
 #define LED_HEAPALLOCATE  1  /* N/C */
 #define LED_IRQSENABLED   2  /* N/C */
@@ -46,7 +47,6 @@
 #define LED_SIGNAL        5  /* N/C */
 #define LED_ASSERTION     6  /* N/C */
 #define LED_PANIC         7  /* blink */
-
 
 /****************************************************************************
  * Public Types

@@ -50,13 +50,9 @@
 /* IRQ 16- : (async event:interrupt=1) */
 
 #define JH7100_IRQ_ASYNC        (16)
-//#define JH7100_IRQ_SSOFT    (JH7100_IRQ_ASYNC + 1)  /* Supervisor Software Int */
 #define JH7100_IRQ_MSOFT    (JH7100_IRQ_ASYNC + 3)  /* Machine Software Int */
-//#define JH7100_IRQ_STIMER   (JH7100_IRQ_ASYNC + 5)  /* Supervisor Timer Int */
 #define JH7100_IRQ_MTIMER   (JH7100_IRQ_ASYNC + 7)  /* Machine Timer Int */
-//#define JH7100_IRQ_SEXT     (JH7100_IRQ_ASYNC + 9)  /* Supervisor External Int */
 #define JH7100_IRQ_MEXT     (JH7100_IRQ_ASYNC + 11) /* Machine External Int */
-//#define JH7100_IRQ_HPMOV    (JH7100_IRQ_ASYNC + 17) /* HPM Overflow Int */
 
 /* Machine Global External Interrupt */
 
@@ -65,7 +61,6 @@
 #ifdef CONFIG_JH7100_WITH_QEMU
 #define JH7100_IRQ_UART0        (JH7100_IRQ_PERI_START + 32)
 #else
-//#define JH7100_IRQ_UART0        (JH7100_IRQ_PERI_START + 32)
 #define JH7100_IRQ_UART0        (JH7100_IRQ_PERI_START + 73) // Manually extracted from Device Tree.
 #endif
 
