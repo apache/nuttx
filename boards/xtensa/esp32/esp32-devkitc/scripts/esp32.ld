@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-devkitc/scripts/esp32_iram.ld
+ * boards/xtensa/esp32/esp32-devkitc/scripts/esp32.ld
  ****************************************************************************/
 
 /* Default entry point: */
@@ -54,21 +54,14 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
-    *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
-    *libpp.a:(.literal .text .literal.* .text.*)
-    *libhal.a:(.literal .text .literal.* .text.*)
+    *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifi0iram  .wifi0iram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
+    *(.phyiram .phyiram.*)
     _iram_text_end = ABSOLUTE(.);
-
-    _stext = .;
-    _text_start = ABSOLUTE(.);
-    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
-    *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
-    *(.fini.literal)
-    *(.fini)
-    *(.gnu.version)
-    _text_end = ABSOLUTE(.);
-    _etext = .;
 
     /* IRAM heap starts at the end of iram0_0_seg */
 
@@ -98,6 +91,7 @@ SECTIONS
     *(.share.mem)
     *(.gnu.linkonce.b.*)
     *(COMMON)
+    *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
     . = ALIGN(8);
     _ebss = ABSOLUTE(.);
   } >dram0_0_seg
@@ -128,9 +122,28 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
+    *libphy.a:(.rodata  .rodata.*)
+    *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
 
+    /* Heap starts at the end of .data */
+
+    _sheap = ABSOLUTE(.);
+  } >dram0_0_seg
+
+  /* External memory bss, from any global variable with EXT_RAM_ATTR attribute */
+
+  .extmem.bss (NOLOAD) :
+  {
+    _sbss_extmem = ABSOLUTE(.);
+    *(.extmem.bss .extmem.bss.*)
+    . = ALIGN(4);
+    _ebss_extmem = ABSOLUTE(.);
+  } > extmem_seg
+
+  .flash.rodata :
+  {
     _srodata = ABSOLUTE(.);
     *(.rodata)
     *(.rodata.*)
@@ -140,6 +153,7 @@ SECTIONS
     __XT_EXCEPTION_TABLE_ = ABSOLUTE(.);
     *(.xt_except_table)
     *(.gcc_except_table)
+    *(.gcc_except_table.*)
     *(.gnu.linkonce.e.*)
     *(.gnu.version_r)
     *(.eh_frame)
@@ -176,11 +190,20 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
+  } >default_rodata_seg
 
-    /* Heap starts at the end of .data */
-
-    _sheap = ABSOLUTE(.);
-  } >dram0_0_seg
+  .flash.text :
+  {
+    _stext = .;
+    _text_start = ABSOLUTE(.);
+    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+    *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
+    *(.fini.literal)
+    *(.fini)
+    *(.gnu.version)
+    _text_end = ABSOLUTE(.);
+    _etext = .;
+  } >default_code_seg
 
   .rtc.text :
   {

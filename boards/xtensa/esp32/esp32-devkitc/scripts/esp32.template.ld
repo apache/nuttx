@@ -74,6 +74,14 @@ MEMORY
   extmem_seg(RWX)  :  org = 0x3f800000, len = 0x400000
 }
 
+#if CONFIG_ESP32_DEVKIT_RUN_IRAM
+  REGION_ALIAS("default_rodata_seg", dram0_0_seg);
+  REGION_ALIAS("default_code_seg", iram0_0_seg);
+#else
+  REGION_ALIAS("default_rodata_seg", drom0_0_seg);
+  REGION_ALIAS("default_code_seg", iram0_2_seg);
+#endif /* CONFIG_ESP32_DEVKIT_RUN_IRAM */
+
 /* Heap ends at top of dram0_0_seg */
 
 _eheap = 0x40000000 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM;
