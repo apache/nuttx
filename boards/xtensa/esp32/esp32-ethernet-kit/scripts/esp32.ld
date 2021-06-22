@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-ethernet-kit/scripts/esp32_flash.ld
+ * boards/xtensa/esp32/esp32-ethernet-kit/scripts/esp32.ld
  ****************************************************************************/
 
 /* Default entry point: */
@@ -192,7 +192,7 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >drom0_0_seg
+  } >default_rodata_seg
 
   .flash.text :
   {
@@ -205,7 +205,7 @@ SECTIONS
     *(.gnu.version)
     _text_end = ABSOLUTE(.);
     _etext = .;
-  } >iram0_2_seg
+  } >default_code_seg
 
   .rtc.text :
   {
