@@ -118,10 +118,7 @@ static int jh7100_timerisr(int irq, void *context, FAR void *arg)
 void up_timer_initialize(void)
 {
   /* Attach timer interrupt handler */
-<<<<<<< HEAD
 
-=======
->>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
   irq_attach(JH7100_IRQ_MTIMER, jh7100_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */

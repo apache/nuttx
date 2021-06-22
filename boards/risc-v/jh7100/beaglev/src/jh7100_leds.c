@@ -1,9 +1,5 @@
 /****************************************************************************
-<<<<<<< HEAD
  * boards/risc-v/jh7100/beaglev/src/jh7100_leds.c
-=======
- * boards/risc-v/jh7100/smartl-jh7100/src/jh7100_leds.c
->>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

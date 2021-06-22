@@ -1,9 +1,5 @@
 /****************************************************************************
-<<<<<<< HEAD
  * boards/risc-v/jh7100/beaglev/src/jh7100_appinit.c
-=======
- * boards/risc-v/jh7100/smartl-jh7100/src/jh7100_appinit.c
->>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,11 +32,7 @@
 #include <nuttx/board.h>
 
 #include "jh7100.h"
-<<<<<<< HEAD
 #include "beaglev-jh7100.h"
-=======
-#include "smartl-jh7100.h"
->>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
 
 /****************************************************************************
  * Public Functions

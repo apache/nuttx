@@ -80,17 +80,10 @@ void __jh7100_start(uint32_t mhartid)
 
   if (0 != mhartid)
     {
-<<<<<<< HEAD
       while (true)
         {
           asm("wfi");
         }
-=======
-//asm("wfi");
-      while (true) {
-// riscv_lowputc(mhartid + 'a');
-	}
->>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
     }
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
