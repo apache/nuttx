@@ -1,0 +1,13 @@
+rm -f /Users/robertlipe/tmp/nuttx/nuttx/arch/risc-v/include/chip
+rm -f /Users/robertlipe/tmp/nuttx/nuttx/arch/risc-v/src/chip
+
+make distclean
+PATH=$PATH:/Users/robertlipe/tmp/tools/kconfig-frontends/utils
+PATH=$PATH:/Users/robertlipe/tmp/buildtools/bin/
+# tools/configure.sh    beaglev-starlight-jh7100:nsh
+tools/configure.sh    beaglev:nsh
+
+# echo "IMPORTANT"
+# echo "In tools/Config.mk:143, add"
+# echo 'BOARD_DIR=$(TOPDIR)/boards/risc-v/jh7100/beaglev'
+

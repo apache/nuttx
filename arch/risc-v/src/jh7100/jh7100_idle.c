@@ -58,6 +58,7 @@ void up_idle(void)
   /* This would be an appropriate place to put some MCU-specific logic to
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
+
   asm("wfi");
 
 #endif
