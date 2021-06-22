@@ -94,18 +94,23 @@ FAR char *dirname(FAR char *path)
   p = strrchr(path, '/');
   if (p)
     {
-      /* Handle the case where the only '/' in the string is the at the
-       * beginning of the path.
-       */
-
-      if (p == path)
+      do
         {
-          return "/";
+          /* Handle the case where the only '/' in the string is the at the
+           * beginning of the path.
+           */
+
+          if (p == path)
+            {
+              return "/";
+            }
+
+          /* No, the directory component is the substring before the '/'. */
+
+          *p-- = '\0';
         }
+      while (*p == '/');
 
-      /* No, the directory component is the substring before the '/'. */
-
-      *p = '\0';
       return path;
     }
 
