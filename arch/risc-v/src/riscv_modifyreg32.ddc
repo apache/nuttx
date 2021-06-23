@@ -1,0 +1,20 @@
+riscv_modifyreg32.o: common/riscv_modifyreg32.c \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/nuttx/config.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/stdint.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/nuttx/compiler.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/arch/types.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/arch/inttypes.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/limits.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/arch/limits.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/debug.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/syslog.h \
+ /Users/robertlipe/src/bl_iot_sdk/toolchain/riscv/Darwin/lib/gcc/riscv64-unknown-elf/8.3.0/include/stdarg.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/stdbool.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/sys/uio.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/sys/types.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/nuttx/spinlock.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/nuttx/irq.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/arch/irq.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/arch/chip/irq.h \
+ /Users/robertlipe/tmp/nuttx/nuttx/include/arch/rv64gc/irq.h \
+ common/riscv_arch.h
