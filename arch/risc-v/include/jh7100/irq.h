@@ -91,7 +91,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN irqstate_t  up_irq_save(void);
+EXTERN irqstate_t up_irq_save(void);
 EXTERN void up_irq_restore(irqstate_t);
 EXTERN irqstate_t up_irq_enable(void);
 

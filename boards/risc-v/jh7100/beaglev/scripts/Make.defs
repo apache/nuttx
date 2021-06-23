@@ -61,7 +61,9 @@ endif
 
 ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-omit-frame-pointer
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+# -Werror-implicit-function-declaration is used by presubmit tester, but
+# isn't set in all versions of GCC. This is why -Wall is so awkward.
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -Werror-implicit-function-declaration
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
