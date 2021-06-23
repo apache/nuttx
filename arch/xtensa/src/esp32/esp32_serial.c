@@ -49,9 +49,13 @@
 #include "hardware/esp32_iomux.h"
 #include "hardware/esp32_gpio_sigmap.h"
 #include "hardware/esp32_uart.h"
+#include "hardware/esp32_uhci.h"
+#include "hardware/esp32_dma.h"
 #include "esp32_config.h"
 #include "esp32_gpio.h"
 #include "esp32_cpuint.h"
+#include "esp32_dma.h"
+#include "hardware/esp32_dport.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -121,6 +125,97 @@
 
 #define UART_CLK_FREQ         APB_CLK_FREQ
 
+/* DMA related */
+
+#ifdef CONFIG_SERIAL_RXDMA
+#  error "SERIAL_RXDMA is not supported in ESP32 due to a hardware issue"
+#endif
+
+#ifdef CONFIG_SERIAL_TXDMA
+
+#define UART_SELECT_SHIFT     UHCI_UART0_CE_S
+
+/* UART DMA RX/TX number of descriptors */
+
+#define UART_DMADESC_NUM     (CONFIG_UART_DMADESC_NUM)
+
+/* In case the three UARTs select TX DMA support,
+ * let DMA 0 exclusive to one and DMA 1
+ * shared with others.
+ */
+
+#if defined(CONFIG_ESP32_UART0_TXDMA) && defined(CONFIG_ESP32_UART1_TXDMA) && defined(CONFIG_ESP32_UART2_TXDMA)
+  #ifdef CONFIG_ESP32_UART0_EXC
+    #define UART0_DMA 0
+    #define UART1_DMA 1
+    #define UART2_DMA 1
+  #elif defined(CONFIG_ESP32_UART1_EXC)
+    #define UART0_DMA 1
+    #define UART1_DMA 0
+    #define UART2_DMA 1
+  #elif defined(CONFIG_ESP32_UART2_EXC)
+    #define UART0_DMA 1
+    #define UART1_DMA 1
+    #define UART2_DMA 0
+  #endif
+  #define USE_DMA0  1
+  #define USE_DMA1  1
+#else
+  #ifdef CONFIG_ESP32_UART0_TXDMA
+    #define UART0_DMA 0
+    #define USE_DMA0  1
+  #endif
+  #ifdef CONFIG_ESP32_UART1_TXDMA
+    #ifndef USE_DMA0
+      #define UART1_DMA 0
+      #define USE_DMA0  1
+    #else
+      #define UART1_DMA 1
+      #define USE_DMA1  1
+    #endif
+  #endif
+  #ifdef CONFIG_ESP32_UART2_TXDMA
+    #ifndef USE_DMA0
+      #define UART2_DMA 0
+      #define USE_DMA0  1
+    #else
+      #define UART2_DMA 1
+      #define USE_DMA1  1
+    #endif
+  #endif
+#endif
+
+/* UART DMA controllers */
+
+#if defined(USE_DMA0) && defined(USE_DMA1)
+#define UART_DMA_CONTROLLERS_NUM 2
+#else
+#define UART_DMA_CONTROLLERS_NUM 1
+#endif
+
+/* Semaphores to control access to each DMA.
+ * Theses semaphores ensure a new transfer is
+ * triggered only after the previous one is completed,
+ * and it also avoids competing issues with multiple UART
+ * instances requesting to the same DMA.
+ */
+
+#ifdef USE_DMA0
+static sem_t g_dma0_sem;
+#endif
+#ifdef USE_DMA1
+static sem_t g_dma1_sem;
+#endif
+
+/* UART DMA RX/TX descriptors */
+
+struct esp32_dmadesc_s s_dma_rxdesc[UART_DMA_CONTROLLERS_NUM]
+                                   [UART_DMADESC_NUM];
+struct esp32_dmadesc_s s_dma_txdesc[UART_DMA_CONTROLLERS_NUM]
+                                   [UART_DMADESC_NUM];
+
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -146,6 +241,10 @@ struct esp32_config_s
   uint8_t  ctspin;              /* CTS pin number (0-39) */
   uint8_t  ctssig;              /* CTS signal */
 #endif
+#ifdef CONFIG_SERIAL_TXDMA
+  uint8_t  dma_chan;            /* DMA instance 0-1 */
+  sem_t *  dma_sem;             /* DMA semaphore */
+#endif
 };
 
 /* Current state of the UART */
@@ -159,6 +258,9 @@ struct esp32_dev_s
   uint8_t  parity;                     /* 0=none, 1=odd, 2=even */
   uint8_t  bits;                       /* Number of bits (5-9) */
   bool     stopbits2;                  /* true: Configure with 2 stop bits instead of 1 */
+#ifdef CONFIG_SERIAL_TXDMA
+  bool txdma;                          /* TX DMA enabled for this UART */
+#endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   bool iflow;                          /* Input flow control (RTS) enabled */
 #endif
@@ -188,6 +290,15 @@ static bool esp32_txempty(struct uart_dev_s *dev);
 static bool esp32_rxflowcontrol(struct uart_dev_s *dev,
                                 unsigned int nbuffered, bool upper);
 #endif
+#ifdef CONFIG_SERIAL_TXDMA
+static void esp32_dmasend(struct uart_dev_s *dev);
+static void esp32_dmatxavail(struct uart_dev_s *dev);
+static void dma_config(uint8_t dma_chan);
+static void dma_attach(uint8_t dma_chan);
+static inline void dma_enable_int(uint8_t dma_chan);
+static inline void dma_disable_int(uint8_t dma_chan);
+static int esp32_interrupt_dma(int cpuint, void *context, FAR void *arg);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -214,6 +325,10 @@ static const struct uart_ops_s g_uart_ops =
   .txempty        = esp32_txempty,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rxflowcontrol  = esp32_rxflowcontrol,
+#endif
+#ifdef CONFIG_SERIAL_TXDMA
+  .dmasend        = esp32_dmasend,
+  .dmatxavail     = esp32_dmatxavail,
 #endif
 };
 
@@ -252,6 +367,16 @@ static const struct esp32_config_s g_uart0config =
   .ctspin         = CONFIG_ESP32_UART0_CTSPIN,
   .ctssig         = U0CTS_IN_IDX,
 #endif
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef CONFIG_ESP32_UART0_TXDMA
+  .dma_chan       = UART0_DMA,
+#if UART0_DMA == 0
+  .dma_sem        = &g_dma0_sem,
+#else
+  .dma_sem        = &g_dma1_sem,
+#endif
+#endif
+#endif
 };
 
 static struct esp32_dev_s g_uart0priv =
@@ -261,6 +386,13 @@ static struct esp32_dev_s g_uart0priv =
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef CONFIG_ESP32_UART0_TXDMA
+  .txdma          = true,    /* TX DMA enabled for this UART */
+#else
+  .txdma          = false,   /* TX DMA disabled for this UART */
+#endif
+#endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_UART0_IFLOWCONTROL
   .iflow          = true,    /* Input flow control (RTS) enabled */
@@ -314,6 +446,16 @@ static const struct esp32_config_s g_uart1config =
   .ctspin         = CONFIG_ESP32_UART1_CTSPIN,
   .ctssig         = U1CTS_IN_IDX,
 #endif
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef CONFIG_ESP32_UART1_TXDMA
+  .dma_chan       = UART1_DMA,
+#if UART1_DMA == 0
+  .dma_sem        = &g_dma0_sem,
+#else
+  .dma_sem        = &g_dma1_sem,
+#endif
+#endif
+#endif
 };
 
 static struct esp32_dev_s g_uart1priv =
@@ -323,6 +465,13 @@ static struct esp32_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef CONFIG_ESP32_UART1_TXDMA
+  .txdma          = true,    /* TX DMA enabled for this UART */
+#else
+  .txdma          = false,   /* TX DMA disabled for this UART */
+#endif
+#endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_UART1_IFLOWCONTROL
   .iflow          = true,    /* input flow control (RTS) enabled */
@@ -376,6 +525,16 @@ static const struct esp32_config_s g_uart2config =
   .ctspin         = CONFIG_ESP32_UART2_CTSPIN,
   .ctssig         = U2CTS_IN_IDX,
 #endif
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef CONFIG_ESP32_UART2_TXDMA
+  .dma_chan       = UART2_DMA,
+#if UART2_DMA == 0
+  .dma_sem        = &g_dma0_sem,
+#else
+  .dma_sem        = &g_dma1_sem,
+#endif
+#endif
+#endif
 };
 
 static struct esp32_dev_s g_uart2priv =
@@ -385,6 +544,13 @@ static struct esp32_dev_s g_uart2priv =
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef CONFIG_ESP32_UART2_TXDMA
+  .txdma          = true,    /* TX DMA enabled for this UART */
+#else
+  .txdma          = false,   /* TX DMA disabled for this UART */
+#endif
+#endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_UART2_IFLOWCONTROL
   .iflow          = true,    /* input flow control (RTS) enabled */
@@ -421,6 +587,124 @@ static uart_dev_t g_uart2port =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_TXDMA
+/****************************************************************************
+ * Name: esp32_dmasend
+ *
+ * Description:
+ *   Prepare the descriptor linked-list and initialize a transfer.
+ *
+ * Parameters:
+ *   priv        -  Pointer to the serial driver struct.
+ *
+ ****************************************************************************/
+
+static void esp32_dmasend(struct uart_dev_s *dev)
+{
+  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+
+  if (priv->txdma)
+    {
+      struct esp32_dmadesc_s *dmadesc;
+      uint8_t *tp;
+    #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+      uint8_t *alloctp = NULL;
+    #endif
+
+      /* If the buffer comes from PSRAM, allocate a new one from DRAM */
+
+    #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+      if (esp32_ptr_extram(dev->dmatx.buffer))
+        {
+          alloctp = xtensa_imm_malloc(dev->dmatx.length);
+          DEBUGASSERT(alloctp != NULL);
+          memcpy(alloctp, dev->dmatx.buffer, dev->dmatx.length);
+          tp = alloctp;
+        }
+      else
+    #endif
+        {
+          tp = (uint8_t *)dev->dmatx.buffer;
+        }
+
+      /* Initialize descriptor linked-list.
+       * esp32_dma_init divides the buffer into the list, perform
+       * the required alignment and fill all descriptor words.
+       */
+
+      dmadesc = s_dma_txdesc[priv->config->dma_chan];
+
+      esp32_dma_init(dmadesc, UART_DMADESC_NUM, tp,
+                    (uint32_t) dev->dmatx.length);
+
+      /* Set the 1st descriptor address */
+
+      modifyreg32(UHCI_DMA_OUT_LINK_REG(priv->config->dma_chan),
+                  UHCI_OUTLINK_ADDR_M,
+                  (((uintptr_t) dmadesc) & UHCI_OUTLINK_ADDR_M));
+
+      /* Trigger DMA transfer */
+
+      modifyreg32(UHCI_DMA_OUT_LINK_REG(priv->config->dma_chan),
+                  UHCI_OUTLINK_STOP_M, UHCI_OUTLINK_START_M);
+
+    #ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
+      if (alloctp != NULL)
+        {
+          xtensa_imm_free(alloctp);
+        }
+    #endif
+    }
+}
+
+/****************************************************************************
+ * Name: esp32_dmatxavail
+ *
+ * Description:
+ *   Verifies if the DMA is available for a transfer. If so, trigger a
+ *   transfer.
+ *
+ * Parameters:
+ *   priv        -  Pointer to the serial driver struct.
+ *
+ ****************************************************************************/
+
+static void esp32_dmatxavail(struct uart_dev_s *dev)
+{
+  struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
+
+  /* Check if this UART instance has DMA TX enabled */
+
+  if (priv->txdma)
+    {
+      /* Try to acquire the semaphore.
+       * This semaphore is always unlocked at 1st time.
+       * Then, the next times, it is released when a DMA transfer
+       * is completed.
+       */
+
+      if (nxsem_trywait(priv->config->dma_sem) == OK)
+        {
+          if (priv->config->dma_chan == 0)
+            {
+              modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, DPORT_UHCI0_CLK_EN);
+            }
+          else
+            {
+              modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, DPORT_UHCI1_CLK_EN);
+            }
+
+          modifyreg32(UHCI_CONF0_REG(priv->config->dma_chan),
+                      UHCI_UART0_CE | UHCI_UART1_CE | UHCI_UART2_CE,
+                      1 << (UART_SELECT_SHIFT + priv->config->id));
+          dma_enable_int(priv->config->dma_chan);
+          uart_xmitchars_dma(dev);
+        }
+    }
+}
+#endif
+
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 /****************************************************************************
  * Name: esp32_reset_rx_fifo
@@ -686,6 +970,7 @@ static int esp32_setup(struct uart_dev_s *dev)
     }
 
 #endif 
+
 #endif
   return OK;
 }
@@ -825,6 +1110,249 @@ static void esp32_detach(struct uart_dev_s *dev)
   esp32_free_cpuint(priv->cpuint);
   priv->cpuint = -1;
 }
+
+#ifdef CONFIG_SERIAL_TXDMA
+
+/****************************************************************************
+ * Name: dma_enable_int
+ *
+ * Description:
+ *   Enable UHCI interrupt.
+ *
+ * Parameters:
+ *   dma_chan - DMA instance.
+ *
+ ****************************************************************************/
+
+static inline void dma_enable_int(uint8_t dma_chan)
+{
+  /* Interrupt will be triggered when all descriptors were transferred or
+   * in case of error with output descriptor.
+   */
+
+  uint32_t int_mask = UHCI_OUT_TOTAL_EOF_INT_ENA_M |
+                      UHCI_OUT_DSCR_ERR_INT_ENA_M;
+  putreg32(int_mask, UHCI_INT_ENA_REG(dma_chan));
+}
+
+/****************************************************************************
+ * Name: dma_disable_int.
+ *
+ * Description:
+ *   Disable UHCI interrupt.
+ *
+ * Parameters:
+ *   dma_chan - DMA instance.
+ *
+ ****************************************************************************/
+
+static inline void dma_disable_int(uint8_t dma_chan)
+{
+  putreg32(0, UHCI_INT_ENA_REG(dma_chan));
+}
+
+/****************************************************************************
+ * Name: dma_attach
+ *
+ * Description:
+ *   Configure an DMA interrupt, attach to a CPU interrupt and enable it.
+ *
+ * Parameters:
+ *   dma_chan - DMA instance.
+ *
+ ****************************************************************************/
+
+static void dma_attach(uint8_t dma_chan)
+{
+  int dma_cpuint;
+  int cpu;
+  int ret;
+
+  /* Clear the interrupts */
+
+  putreg32(UINT32_MAX, UHCI_INT_CLR_REG(dma_chan));
+
+  /* Allocate a level-sensitive, priority 1 CPU interrupt for the DMA */
+
+  dma_cpuint = esp32_alloc_levelint(1);
+  if (dma_cpuint < 0)
+    {
+      /* Failed to allocate a CPU interrupt of this type */
+
+      dmaerr("Failed to allocate a CPU interrupt.\n");
+      return;
+    }
+
+  /* Set up to receive peripheral interrupts on the current CPU */
+
+#ifdef CONFIG_SMP
+  cpu = up_cpu_index();
+#else
+  cpu = 0;
+#endif
+
+  /* Attach the UHCI interrupt to the allocated CPU interrupt
+   * and attach and enable the IRQ.
+   */
+
+  up_disable_irq(dma_cpuint);
+
+  if (dma_chan == 0)
+    {
+      esp32_attach_peripheral(cpu, ESP32_PERIPH_UHCI0, dma_cpuint);
+      ret = irq_attach(ESP32_IRQ_UHCI0, esp32_interrupt_dma, NULL);
+    }
+  else
+    {
+      esp32_attach_peripheral(cpu, ESP32_PERIPH_UHCI1, dma_cpuint);
+      ret = irq_attach(ESP32_IRQ_UHCI1, esp32_interrupt_dma, NULL);
+    }
+
+  if (ret == OK)
+    {
+      /* Enable the CPU interrupt */
+
+      up_enable_irq(dma_cpuint);
+    }
+  else
+    {
+      dmaerr("Couldn't attach IRQ to handler.\n");
+    }
+}
+
+/****************************************************************************
+ * Name: esp32_interrupt
+ *
+ * Description:
+ *   DMA interrupt.
+ *
+ ****************************************************************************/
+
+static int esp32_interrupt_dma(int irq, void *context, FAR void *arg)
+{
+  uint32_t value;
+  uint32_t status;
+  uint8_t uhci = irq - ESP32_IRQ_UHCI0;
+  struct uart_dev_s *dev = NULL;
+
+  /* Disable interrupt, stop UHCI, save interrupt status
+   * clear interrupts.
+   */
+
+  status = getreg32(UHCI_INT_ST_REG(uhci));
+  dma_disable_int(uhci);
+  modifyreg32(UHCI_DMA_OUT_LINK_REG(uhci),
+              UHCI_OUTLINK_START_M, UHCI_OUTLINK_STOP_M);
+  putreg32(UINT32_MAX, UHCI_INT_CLR_REG(uhci));
+
+  /* Check which UART is using DMA now and calls
+   * uart_xmitchars_done to adjust TX software buffer.
+   */
+
+  value = getreg32(UHCI_CONF0_REG(uhci));
+  value = value & (UHCI_UART2_CE_M | UHCI_UART1_CE_M | UHCI_UART0_CE_M);
+
+  switch (value)
+    {
+#ifdef CONFIG_ESP32_UART0_TXDMA
+      case UHCI_UART0_CE_M:
+        dev = &g_uart0port;
+      break;
+#endif
+
+#ifdef CONFIG_ESP32_UART1_TXDMA
+      case UHCI_UART1_CE_M:
+        dev = &g_uart1port;
+      break;
+#endif
+
+#ifdef CONFIG_ESP32_UART2_TXDMA
+      case UHCI_UART2_CE_M:
+        dev = &g_uart2port;
+      break;
+#endif
+
+      default:
+        dmaerr("No UART selected\n");
+    }
+
+  if (dev != NULL)
+    {
+      dev->dmatx.nbytes = dev->dmatx.length;
+      uart_xmitchars_done(dev);
+    }
+
+  /* Post on semaphore to allow new transfers and share the resource.
+   * Disable clk gate for UHCI, so RX can work properly.
+   */
+
+  if (status & UHCI_OUT_TOTAL_EOF_INT_ENA_M)
+    {
+      if (uhci == 0)
+        {
+          nxsem_post(&g_dma0_sem);
+          modifyreg32(DPORT_PERIP_CLK_EN_REG, DPORT_UHCI0_CLK_EN, 0);
+        }
+    #ifdef USE_DMA1
+      else
+        {
+          nxsem_post(&g_dma1_sem);
+          modifyreg32(DPORT_PERIP_CLK_EN_REG, DPORT_UHCI1_CLK_EN, 0);
+        }
+    #endif
+    }
+  else
+    {
+      dmaerr("Error with the output descriptor in DMA 0\n");
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: dma_config
+ *
+ * Description:
+ *   Configure the UHCI peripheral.
+ *
+ * Parameters:
+ *   dma_chan - DMA instance.
+ *
+ ****************************************************************************/
+
+static void dma_config(uint8_t dma_chan)
+{
+  /* Enable peripheral CLK and RST module */
+
+  if (dma_chan == 0)
+    {
+      modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, DPORT_UHCI0_CLK_EN);
+      modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_UHCI0_RST, DPORT_UHCI0_RST);
+      modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_UHCI0_RST, 0);
+    }
+  else
+    {
+      modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, DPORT_UHCI1_CLK_EN);
+      modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_UHCI1_RST, DPORT_UHCI1_RST);
+      modifyreg32(DPORT_PERIP_RST_EN_REG, DPORT_UHCI1_RST, 0);
+    }
+
+  /* Configure registers */
+
+  putreg32(UHCI_CLK_EN_M, UHCI_CONF0_REG(dma_chan));
+
+  putreg32(0, UHCI_CONF1_REG(dma_chan));
+  putreg32(UHCI_CHECK_OWNER | (100 << UHCI_DMA_INFIFO_FULL_THRS_S),
+           UHCI_CONF1_REG(dma_chan));
+
+  putreg32(0, UHCI_HUNG_CONF_REG(dma_chan));
+
+  modifyreg32(UHCI_CONF0_REG(dma_chan), UHCI_IN_RST, UHCI_IN_RST);
+  modifyreg32(UHCI_CONF0_REG(dma_chan), UHCI_IN_RST, 0);
+  modifyreg32(UHCI_CONF0_REG(dma_chan), UHCI_OUT_RST, UHCI_OUT_RST);
+  modifyreg32(UHCI_CONF0_REG(dma_chan), UHCI_OUT_RST, 0);
+}
+#endif
 
 /****************************************************************************
  * Name: esp32_interrupt
@@ -1234,33 +1762,41 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
   irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (enable)
+#ifdef CONFIG_SERIAL_TXDMA
+  if (priv->txdma == false)
     {
-      /* Set to receive an interrupt when the TX holding register is empty */
-
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      modifyreg32(UART_INT_ENA_REG(priv->config->id),
-                  0, (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA));
-
-      /* Fake a TX interrupt here by just calling uart_xmitchars() with
-       * interrupts disabled (note this may recurse).
-       */
-
-      uart_xmitchars(dev);
 #endif
-    }
-  else
-    {
-      /* Disable the TX interrupt */
+      flags = enter_critical_section();
 
-      modifyreg32(UART_INT_ENA_REG(priv->config->id),
-                  (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA), 0);
-    }
+      if (enable)
+        {
+          /* Set to receive an interrupt when the TX holding register
+           * is empty.
+           */
 
-  leave_critical_section(flags);
+    #ifndef CONFIG_SUPPRESS_SERIAL_INTS
+          modifyreg32(UART_INT_ENA_REG(priv->config->id),
+                      0, (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA));
+
+          /* Fake a TX interrupt here by just calling uart_xmitchars() with
+           * interrupts disabled (note this may recurse).
+           */
+
+          uart_xmitchars(dev);
+    #endif
+        }
+      else
+        {
+          /* Disable the TX interrupt */
+
+          modifyreg32(UART_INT_ENA_REG(priv->config->id),
+                      (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA), 0);
+        }
+
+      leave_critical_section(flags);
+#ifdef CONFIG_SERIAL_TXDMA
+    }
+#endif
 }
 
 /****************************************************************************
@@ -1509,6 +2045,21 @@ void xtensa_serialinit(void)
 #endif
 #ifdef TTYS2_DEV
   uart_register("/dev/ttyS2", &TTYS2_DEV);
+#endif
+
+  /* DMA related */
+
+#ifdef CONFIG_SERIAL_TXDMA
+#ifdef USE_DMA0
+  nxsem_init(&g_dma0_sem, 0, 1);
+  dma_config(0);
+  dma_attach(0);
+#endif
+#ifdef USE_DMA1
+  nxsem_init(&g_dma1_sem, 0, 1);
+  dma_config(1);
+  dma_attach(1);
+#endif
 #endif
 }
 
