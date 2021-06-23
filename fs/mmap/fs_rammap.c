@@ -46,34 +46,14 @@
 
 /* This is the list of all mapped files */
 
-struct fs_allmaps_s g_rammaps;
+struct fs_allmaps_s g_rammaps =
+{
+  SEM_INITIALIZER(1)
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: rammap_initialize
- *
- * Description:
- *   Verified that this capability has been initialized.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void rammap_initialize(void)
-{
-  if (!g_rammaps.initialized)
-    {
-      nxsem_init(&g_rammaps.exclsem, 0, 1);
-      g_rammaps.initialized = true;
-    }
-}
 
 /****************************************************************************
  * Name: rammmap
@@ -197,7 +177,6 @@ FAR void *rammap(int fd, size_t length, off_t offset)
 
   /* Add the buffer to the list of regions */
 
-  rammap_initialize();
   ret = nxsem_wait(&g_rammaps.exclsem);
   if (ret < 0)
     {
