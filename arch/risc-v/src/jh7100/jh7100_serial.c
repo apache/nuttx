@@ -509,6 +509,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
    * return !!dr;
    */
 
+  (void) dr;
   return g_rxdata;
 }
 

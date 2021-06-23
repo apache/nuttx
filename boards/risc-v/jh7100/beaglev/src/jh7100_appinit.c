@@ -32,6 +32,7 @@
 #include <nuttx/board.h>
 
 #include "jh7100.h"
+#include "beaglev-jh7100.h"
 
 /****************************************************************************
  * Public Functions
