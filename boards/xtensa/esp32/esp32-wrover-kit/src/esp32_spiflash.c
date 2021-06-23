@@ -35,6 +35,9 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#ifdef CONFIG_BCH
+#include <nuttx/drivers/drivers.h>
+#endif
 
 #include "esp32_spiflash.h"
 #include "esp32-wrover-kit.h"
@@ -43,8 +46,99 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
+
 #define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
 #define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
+
+struct ota_partition_s
+{
+  uint32_t    offset;          /* Partition offset from the beginning of MTD */
+  uint32_t    size;            /* Partition size in bytes */
+  const char *devpath;         /* Partition device path */
+};
+
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
+static const struct ota_partition_s g_ota_partition_table[] =
+{
+  {
+    .offset  = CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET,
+    .size    = CONFIG_ESP32_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESP32_OTA_PRIMARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESP32_OTA_SECONDARY_SLOT_OFFSET,
+    .size    = CONFIG_ESP32_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESP32_OTA_SECONDARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESP32_OTA_SCRATCH_OFFSET,
+    .size    = CONFIG_ESP32_OTA_SCRATCH_SIZE,
+    .devpath = CONFIG_ESP32_OTA_SCRATCH_DEVPATH
+  }
+};
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_BCH
+  char blockdev[18];
+#endif
+  int ret = OK;
+
+  for (int i = 0; i < ARRAYSIZE(g_ota_partition_table); ++i)
+    {
+      const struct ota_partition_s *part = &g_ota_partition_table[i];
+      mtd = esp32_spiflash_alloc_mtdpart(part->offset, part->size);
+
+      ret = ftl_initialize(i, mtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#ifdef CONFIG_BCH
+      snprintf(blockdev, 18, "/dev/mtdblock%d", i);
+
+      ret = bchdev_register(blockdev, part->devpath, false);
+      if (ret < 0)
+        {
+          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
+          return ret;
+        }
+#endif
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -61,6 +155,14 @@ int esp32_spiflash_init(void)
 {
   FAR struct mtd_dev_s *mtd;
   int ret = ERROR;
+
+#ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   mtd = esp32_spiflash_alloc_mtdpart(ESP32_MTD_OFFSET, ESP32_MTD_SIZE);
 
