@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_bringup.c
+ * boards/risc-v/mpfs/icicle/src/mpfs_pwm.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,73 +24,67 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <debug.h>
 #include <errno.h>
+#include <stddef.h>
+#include <debug.h>
+#include <string.h>
+#include <limits.h>
 
-#include <nuttx/board.h>
-#include <nuttx/drivers/ramdisk.h>
-
-#include "mpfsicicle.h"
+#include <nuttx/timers/pwm.h>
+#include <arch/board/board.h>
 #include "mpfs_corepwm.h"
-#include "mpfs.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpfs_bringup
+ * Name: mpfs_pwm_setup
+ *
+ * Description:
+ *
+ *   Initialize PWM and register PWM devices
+ *
  ****************************************************************************/
 
-int mpfs_bringup(void)
+int mpfs_pwm_setup(void)
 {
-  int ret = OK;
+  struct pwm_lowerhalf_s *lower_half = NULL; /* lower-half handle */
 
-#if defined(CONFIG_I2C_DRIVER)
-  /* Configure I2C peripheral interfaces */
+  /* The underlying CorePWM driver "knows" there are up to 16 channels
+   * available for each timer device, so we don't have to do anything
+   * special here.
+   */
 
-  ret = mpfs_board_i2c_init();
+#ifdef CONFIG_MPFS_COREPWM0
+  lower_half = mpfs_corepwm_init(0);
 
-  if (ret < 0)
+  /* If we can't get the lower-half handle, skip and keep going. */
+
+  if (lower_half)
     {
-      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+      /* Translate the peripheral number to a device name. */
+
+      pwm_register("/dev/corepwm0", lower_half);
+    }
+
+#endif
+#ifdef CONFIG_MPFS_COREPWM1
+  lower_half = mpfs_corepwm_init(1);
+
+  /* If we can't get the lower-half handle, skip and keep going. */
+
+  if (lower_half)
+    {
+      /* Translate the peripheral number to a device name. */
+
+      pwm_register("/dev/corepwm1", lower_half);
     }
 #endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
-#endif
-
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  /* Configure SPI peripheral interfaces */
-
-  ret = mpfs_board_spi_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MPFS_HAVE_COREPWM
-  /* Configure PWM peripheral interfaces */
-
-  ret = mpfs_pwm_setup();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize CorePWM driver: %d\n", ret);
-    }
-#endif
-
-  return ret;
+  return 0;
 }
