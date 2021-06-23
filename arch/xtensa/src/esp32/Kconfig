@@ -582,6 +582,11 @@ config ESP32_UART0_CTSPIN
 	default 19
 	range 0 39
 
+config ESP32_UART0_TXDMA
+	bool "Enable UART0 TX DMA"
+	select ARCH_DMA
+	select UART0_TXDMA
+
 endif # ESP32_UART0
 
 if ESP32_UART1
@@ -607,6 +612,11 @@ config ESP32_UART1_CTSPIN
 	depends on SERIAL_OFLOWCONTROL
 	default 6
 	range 0 39
+
+config ESP32_UART1_TXDMA
+	bool "Enable UART1 TX DMA"
+	select ARCH_DMA
+	select UART1_TXDMA
 
 endif # ESP32_UART1
 
@@ -634,7 +644,37 @@ config ESP32_UART2_CTSPIN
 	default 8
 	range 0 39
 
+config ESP32_UART2_TXDMA
+	bool "Enable UART2 TX DMA"
+	select ARCH_DMA
+	select UART2_TXDMA
+
 endif # ESP32_UART2
+
+choice
+	prompt "UART with exclusive DMA"
+	default ESP32_UART0_EXC
+	depends on ESP32_UART0_TXDMA && ESP32_UART1_TXDMA && ESP32_UART2_TXDMA
+	---help---
+		The three UARTs from ESP32 share 2 DMA channels.
+		Select which UART should have exclusive access to
+		a DMA channel.
+
+config ESP32_UART0_EXC
+	bool "UART 0"
+
+config ESP32_UART1_EXC
+	bool "UART 1"
+
+config ESP32_UART2_EXC
+	bool "UART 2"
+
+endchoice
+
+config UART_DMADESC_NUM
+	int "UART DMA descriptor list size"
+	depends on SERIAL_TXDMA
+	default 2
 
 endmenu # UART configuration
 
