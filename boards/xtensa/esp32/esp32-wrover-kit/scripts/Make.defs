@@ -35,7 +35,11 @@ endif
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld),)
 	LDSCRIPT_SECT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
 else
-	LDSCRIPT_SECT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+	ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+		LDSCRIPT_SECT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
+	else
+		LDSCRIPT_SECT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+	endif
 endif
 
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
