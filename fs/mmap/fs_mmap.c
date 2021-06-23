@@ -132,8 +132,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
    * logic is not in place.
    */
 
-  if (prot == PROT_NONE ||
-      (flags & (MAP_FIXED | MAP_DENYWRITE)) != 0)
+  if ((flags & (MAP_FIXED | MAP_DENYWRITE)) != 0)
     {
       ferr("ERROR: Unsupported options, prot=%x flags=%04x\n", prot, flags);
       ret = -ENOSYS;
