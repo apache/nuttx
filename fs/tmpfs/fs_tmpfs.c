@@ -76,9 +76,9 @@ static void tmpfs_unlock_reentrant(FAR struct tmpfs_sem_s *sem);
 static void tmpfs_unlock(FAR struct tmpfs_s *fs);
 static int  tmpfs_lock_object(FAR struct tmpfs_object_s *to);
 static void tmpfs_unlock_object(FAR struct tmpfs_object_s *to);
-static int  tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
+static int  tmpfs_realloc_directory(FAR struct tmpfs_directory_s *tdo,
               unsigned int nentries);
-static int  tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
+static int  tmpfs_realloc_file(FAR struct tmpfs_file_s *tfo,
               size_t newsize);
 static void tmpfs_release_lockedobject(FAR struct tmpfs_object_s *to);
 static void tmpfs_release_lockedfile(FAR struct tmpfs_file_s *tfo);
@@ -86,7 +86,7 @@ static int  tmpfs_find_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR const char *name);
 static int  tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR const char *name);
-static int  tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
+static int  tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
               FAR struct tmpfs_object_s *to, FAR const char *name);
 static FAR struct tmpfs_file_s *tmpfs_alloc_file(void);
 static int  tmpfs_create_file(FAR struct tmpfs_s *fs,
@@ -293,24 +293,23 @@ static void tmpfs_unlock_object(FAR struct tmpfs_object_s *to)
  * Name: tmpfs_realloc_directory
  ****************************************************************************/
 
-static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
+static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s *tdo,
                                    unsigned int nentries)
 {
-  FAR struct tmpfs_directory_s *oldtdo = *tdo;
-  FAR struct tmpfs_directory_s *newtdo;
+  FAR struct tmpfs_dirent_s *newentry;
   size_t objsize;
-  int ret = oldtdo->tdo_nentries;
+  int ret = tdo->tdo_nentries;
 
   /* Get the new object size */
 
   objsize = SIZEOF_TMPFS_DIRECTORY(nentries);
-  if (objsize <= oldtdo->tdo_alloc)
+  if (objsize <= tdo->tdo_alloc)
     {
       /* Already big enough.
        * REVISIT: Missing logic to shrink directory objects.
        */
 
-      oldtdo->tdo_nentries = nentries;
+      tdo->tdo_nentries = nentries;
       return ret;
     }
 
@@ -322,22 +321,17 @@ static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
 
   /* Realloc the directory object */
 
-  newtdo = (FAR struct tmpfs_directory_s *)kmm_realloc(oldtdo, objsize);
-  if (newtdo == NULL)
+  newentry = kmm_realloc(tdo->tdo_entry, objsize);
+  if (newentry == NULL)
     {
       return -ENOMEM;
     }
 
-  /* Adjust the reference in the parent directory entry */
-
-  DEBUGASSERT(newtdo->tdo_dirent);
-  newtdo->tdo_dirent->tde_object = (FAR struct tmpfs_object_s *)newtdo;
-
   /* Return the new address of the reallocated directory object */
 
-  newtdo->tdo_alloc    = objsize;
-  newtdo->tdo_nentries = nentries;
-  *tdo                 = newtdo;
+  tdo->tdo_alloc    = objsize;
+  tdo->tdo_nentries = nentries;
+  tdo->tdo_entry    = newentry;
 
   /* Return the index to the first, newly allocated directory entry */
 
@@ -348,22 +342,16 @@ static int tmpfs_realloc_directory(FAR struct tmpfs_directory_s **tdo,
  * Name: tmpfs_realloc_file
  ****************************************************************************/
 
-static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
+static int tmpfs_realloc_file(FAR struct tmpfs_file_s *tfo,
                               size_t newsize)
 {
-  FAR struct tmpfs_file_s *oldtfo = *tfo;
-  FAR struct tmpfs_file_s *newtfo;
-  size_t objsize;
+  FAR uint8_t *newdata;
   size_t allocsize;
   size_t delta;
 
-  /* Check if the current allocation is sufficient */
-
-  objsize = SIZEOF_TMPFS_FILE(newsize);
-
   /* Are we growing or shrinking the object? */
 
-  if (objsize <= oldtfo->tfo_alloc)
+  if (newsize <= tfo->tfo_alloc)
     {
       /* Shrinking ... Shrink unconditionally if the size is shrinking to
        * zero.
@@ -375,12 +363,12 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
            * lot.
            */
 
-          delta = oldtfo->tfo_alloc - objsize;
+          delta = tfo->tfo_alloc - newsize;
           if (delta <= CONFIG_FS_TMPFS_FILE_FREEGUARD)
             {
               /* Hasn't shrunk enough.. Return doing nothing for now */
 
-              oldtfo->tfo_size = newsize;
+              tfo->tfo_size = newsize;
               return OK;
             }
         }
@@ -390,26 +378,21 @@ static int tmpfs_realloc_file(FAR struct tmpfs_file_s **tfo,
    * reallocations.
    */
 
-  allocsize = objsize + CONFIG_FS_TMPFS_FILE_ALLOCGUARD;
+  allocsize = newsize + CONFIG_FS_TMPFS_FILE_ALLOCGUARD;
 
   /* Realloc the file object */
 
-  newtfo = (FAR struct tmpfs_file_s *)kmm_realloc(oldtfo, allocsize);
-  if (newtfo == NULL)
+  newdata = kmm_realloc(tfo->tfo_data, allocsize);
+  if (newdata == NULL)
     {
       return -ENOMEM;
     }
 
-  /* Adjust the reference in the parent directory entry */
-
-  DEBUGASSERT(newtfo->tfo_dirent);
-  newtfo->tfo_dirent->tde_object = (FAR struct tmpfs_object_s *)newtfo;
-
   /* Return the new address of the reallocated file object */
 
-  newtfo->tfo_alloc = allocsize;
-  newtfo->tfo_size  = newsize;
-  *tfo              = newtfo;
+  tfo->tfo_alloc = allocsize;
+  tfo->tfo_size  = newsize;
+  tfo->tfo_data  = newdata;
   return OK;
 }
 
@@ -449,6 +432,7 @@ static void tmpfs_release_lockedfile(FAR struct tmpfs_file_s *tfo)
   if (tfo->tfo_refs == 1 && (tfo->tfo_flags & TFO_FLAG_UNLINKED) != 0)
     {
       nxsem_destroy(&tfo->tfo_exclsem.ts_sem);
+      kmm_free(tfo->tfo_data);
       kmm_free(tfo);
     }
 
@@ -512,22 +496,7 @@ static int tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
   last = tdo->tdo_nentries - 1;
   if (index != last)
     {
-      FAR struct tmpfs_dirent_s *newtde;
-      FAR struct tmpfs_dirent_s *oldtde;
-      FAR struct tmpfs_object_s *to;
-
-      /* Move the directory entry */
-
-      newtde             = &tdo->tdo_entry[index];
-      oldtde             = &tdo->tdo_entry[last];
-      to                 = oldtde->tde_object;
-
-      newtde->tde_object = to;
-      newtde->tde_name   = oldtde->tde_name;
-
-      /* Reset the backward link to the directory entry */
-
-      to->to_dirent      = newtde;
+      tdo->tdo_entry[index] = tdo->tdo_entry[last];
     }
 
   /* And decrement the count of directory entries */
@@ -540,12 +509,10 @@ static int tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
  * Name: tmpfs_add_dirent
  ****************************************************************************/
 
-static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
+static int tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
                             FAR struct tmpfs_object_s *to,
                             FAR const char *name)
 {
-  FAR struct tmpfs_directory_s *oldtdo;
-  FAR struct tmpfs_directory_s *newtdo;
   FAR struct tmpfs_dirent_s *tde;
   FAR char *newname;
   unsigned int nentries;
@@ -563,8 +530,7 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
 
   /* Get the new number of entries */
 
-  oldtdo = *tdo;
-  nentries = oldtdo->tdo_nentries + 1;
+  nentries = tdo->tdo_nentries + 1;
 
   /* Reallocate the directory object (if necessary) */
 
@@ -577,14 +543,10 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
 
   /* Save the new object info in the new directory entry */
 
-  newtdo          = *tdo;
-  tde             = &newtdo->tdo_entry[index];
+  tde             = &tdo->tdo_entry[index];
   tde->tde_object = to;
   tde->tde_name   = newname;
 
-  /* Add backward link to the directory entry to the object */
-
-  to->to_dirent  = tde;
   return OK;
 }
 
@@ -595,12 +557,10 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s **tdo,
 static FAR struct tmpfs_file_s *tmpfs_alloc_file(void)
 {
   FAR struct tmpfs_file_s *tfo;
-  size_t allocsize;
 
   /* Create a new zero length file object */
 
-  allocsize = SIZEOF_TMPFS_FILE(CONFIG_FS_TMPFS_FILE_ALLOCGUARD);
-  tfo = (FAR struct tmpfs_file_s *)kmm_malloc(allocsize);
+  tfo = (FAR struct tmpfs_file_s *)kmm_malloc(sizeof(*tfo));
   if (tfo == NULL)
     {
       return NULL;
@@ -610,11 +570,12 @@ static FAR struct tmpfs_file_s *tmpfs_alloc_file(void)
    * locked with one reference count.
    */
 
-  tfo->tfo_alloc = allocsize;
+  tfo->tfo_alloc = 0;
   tfo->tfo_type  = TMPFS_REGULAR;
   tfo->tfo_refs  = 1;
   tfo->tfo_flags = 0;
   tfo->tfo_size  = 0;
+  tfo->tfo_data  = NULL;
 
   tfo->tfo_exclsem.ts_holder = getpid();
   tfo->tfo_exclsem.ts_count  = 1;
@@ -718,7 +679,7 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
 
   /* Then add the new, empty file to the directory */
 
-  ret = tmpfs_add_dirent(&parent, (FAR struct tmpfs_object_s *)newtfo, name);
+  ret = tmpfs_add_dirent(parent, (FAR struct tmpfs_object_s *)newtfo, name);
   if (ret < 0)
     {
       goto errout_with_file;
@@ -757,19 +718,10 @@ errout_with_copy:
 static FAR struct tmpfs_directory_s *tmpfs_alloc_directory(void)
 {
   FAR struct tmpfs_directory_s *tdo;
-  size_t allocsize;
-  unsigned int nentries;
-
-  /* Convert the pre-allocated memory to a number of directory entries */
-
-  nentries = (CONFIG_FS_TMPFS_DIRECTORY_ALLOCGUARD +
-              sizeof(struct tmpfs_dirent_s) - 1) /
-             sizeof(struct tmpfs_dirent_s);
 
   /* Create a new zero length directory object */
 
-  allocsize = SIZEOF_TMPFS_DIRECTORY(nentries);
-  tdo = (FAR struct tmpfs_directory_s *)kmm_malloc(allocsize);
+  tdo = (FAR struct tmpfs_directory_s *)kmm_malloc(sizeof(*tdo));
   if (tdo == NULL)
     {
       return NULL;
@@ -777,10 +729,11 @@ static FAR struct tmpfs_directory_s *tmpfs_alloc_directory(void)
 
   /* Initialize the new directory object */
 
-  tdo->tdo_alloc    = allocsize;
+  tdo->tdo_alloc    = 0;
   tdo->tdo_type     = TMPFS_DIRECTORY;
   tdo->tdo_refs     = 0;
   tdo->tdo_nentries = 0;
+  tdo->tdo_entry    = NULL;
 
   tdo->tdo_exclsem.ts_holder = TMPFS_NO_HOLDER;
   tdo->tdo_exclsem.ts_count  = 0;
@@ -880,7 +833,7 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
 
   /* Then add the new, empty file to the directory */
 
-  ret = tmpfs_add_dirent(&parent, (FAR struct tmpfs_object_s *)newtdo, name);
+  ret = tmpfs_add_dirent(parent, (FAR struct tmpfs_object_s *)newtdo, name);
   if (ret < 0)
     {
       goto errout_with_directory;
@@ -1189,6 +1142,7 @@ static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
        */
 
       tmptfo             = (FAR struct tmpfs_file_s *)to;
+      tmpbuf->tsf_alloc += sizeof(struct tmpfs_file_s);
       tmpbuf->tsf_inuse += tmptfo->tfo_size;
       tmpbuf->tsf_files++;
     }
@@ -1206,6 +1160,7 @@ static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
       inuse  = SIZEOF_TMPFS_DIRECTORY(tmptdo->tdo_nentries);
       avail  = tmptdo->tdo_alloc - inuse;
 
+      tmpbuf->tsf_alloc += sizeof(struct tmpfs_directory_s);
       tmpbuf->tsf_inuse += inuse;
       tmpbuf->tsf_ffree += avail / sizeof(struct tmpfs_dirent_s);
     }
@@ -1240,20 +1195,9 @@ static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
 
   if (index != last)
     {
-      FAR struct tmpfs_dirent_s *oldtde;
-      FAR struct tmpfs_object_s *oldto;
-
       /* Move the directory entry */
 
-      oldtde           = &tdo->tdo_entry[last];
-      oldto            = oldtde->tde_object;
-
-      tde->tde_object  = oldto;
-      tde->tde_name    = oldtde->tde_name;
-
-      /* Reset the backward link to the directory entry */
-
-      oldto->to_dirent = tde;
+      *tde = tdo->tdo_entry[last];
     }
 
   /* And decrement the count of directory entries */
@@ -1275,6 +1219,14 @@ static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
           tfo->tfo_flags |= TFO_FLAG_UNLINKED;
           return TMPFS_UNLINKED;
         }
+
+      kmm_free(tfo->tfo_data);
+    }
+  else /* if (to->to_type == TMPFS_DIRECTORY) */
+    {
+      tdo = (FAR struct tmpfs_directory_s *)to;
+
+      kmm_free(tdo->tdo_entry);
     }
 
   /* Free the object now */
@@ -1441,7 +1393,7 @@ static int tmpfs_open(FAR struct file *filep, FAR const char *relpath,
 
           if (tfo->tfo_size > 0)
             {
-              ret = tmpfs_realloc_file(&tfo, 0);
+              ret = tmpfs_realloc_file(tfo, 0);
               if (ret < 0)
                 {
                   goto errout_with_filelock;
@@ -1561,6 +1513,7 @@ static int tmpfs_close(FAR struct file *filep)
        * have any other references.
        */
 
+      kmm_free(tfo->tfo_data);
       kmm_free(tfo);
       return OK;
     }
@@ -1662,13 +1615,11 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
     {
       /* Reallocate the file to handle the write past the end of the file. */
 
-      ret = tmpfs_realloc_file(&tfo, (size_t)endpos);
+      ret = tmpfs_realloc_file(tfo, (size_t)endpos);
       if (ret < 0)
         {
           goto errout_with_lock;
         }
-
-      filep->f_priv = tfo;
     }
 
   /* Copy data from the memory object to the user buffer */
@@ -1892,13 +1843,11 @@ static int tmpfs_truncate(FAR struct file *filep, off_t length)
     {
       /* The size is changing.. up or down.  Reallocate the file memory. */
 
-      ret = tmpfs_realloc_file(&tfo, (size_t)length);
+      ret = tmpfs_realloc_file(tfo, (size_t)length);
       if (ret < 0)
         {
           goto errout_with_lock;
         }
-
-      filep->f_priv = tfo;
 
       /* If the size has increased, then we need to zero the newly added
        * memory.
@@ -2127,10 +2076,6 @@ static int tmpfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   fs->tfs_root.tde_object = (FAR struct tmpfs_object_s *)tdo;
   fs->tfs_root.tde_name   = "";
 
-  /* Set up the backward link (to support reallocation) */
-
-  tdo->tdo_dirent         = &fs->tfs_root;
-
   /* Initialize the file system state */
 
   fs->tfs_exclsem.ts_holder = TMPFS_NO_HOLDER;
@@ -2174,6 +2119,7 @@ static int tmpfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   /* Now we can destroy the root file system and the file system itself. */
 
   nxsem_destroy(&tdo->tdo_exclsem.ts_sem);
+  kmm_free(tdo->tdo_entry);
   kmm_free(tdo);
 
   nxsem_destroy(&fs->tfs_exclsem.ts_sem);
@@ -2341,6 +2287,7 @@ static int tmpfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   else
     {
       nxsem_destroy(&tfo->tfo_exclsem.ts_sem);
+      kmm_free(tfo->tfo_data);
       kmm_free(tfo);
     }
 
@@ -2475,6 +2422,7 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   /* Free the directory object */
 
   nxsem_destroy(&tdo->tdo_exclsem.ts_sem);
+  kmm_free(tdo->tdo_entry);
   kmm_free(tdo);
 
   /* Release the reference and lock on the parent directory */
@@ -2629,7 +2577,7 @@ static int tmpfs_rename(FAR struct inode *mountpt,
 
   /* Add an entry to the new parent directory. */
 
-  ret = tmpfs_add_dirent(&newparent, to, newname);
+  ret = tmpfs_add_dirent(newparent, to, newname);
 
 errout_with_oldparent:
   oldparent->tdo_refs--;
