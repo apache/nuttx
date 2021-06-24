@@ -84,9 +84,9 @@ CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
 
 LDELFFLAGS = -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
+  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld}"
 else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
+  LDELFFLAGS += -T $(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld
 endif
 
 LDFLAGS += -nostartfiles -nodefaultlibs
