@@ -137,108 +137,346 @@
 
 /* Register bit field definitions *******************************************/
 
-/* Master clock configuration */
-
-#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT     (0) /* Bits: 0-5: master synchronous clock divider */
-#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_MASK      (0x3f << SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT)
-#define SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_SHIFT (8) /* Bit: 8: enable the 1mHz (2MHz) on-chip oscillator */
-#define SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_MASK  (1 << SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_SHIFT)
-#define SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ       (1 << SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_SHIFT)
-
-/* RTC clock divider */
-
-#define SYSREG_RTC_CLOCK_CR_PERIOD_SHIFT         (0) /* Bits: 0-11: period */
-#define SYSREG_RTC_CLOCK_CR_PERIOD_MASK          (0xfff << SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT)
-#define SYSREG_RTC_CLOCK_CR_ENABLE_SHIFT         (16) /* Bit: 16: RTC Clock enable */
-#define SYSREG_RTC_CLOCK_CR_ENABLE_MASK          (1 << SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT)
-#define SYSREG_RTC_CLOCK_CR_ENABLE               (1 << SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT)
-
-/* TODO:
- * FABRIC_RESET_CR
- * BOOT_FAIL_CR
- * MSS_RESET_CR
- * CONFIG_LOCK_CR
- * RESET_SR
- * DEVICE_STATUS
- * MSS_BUILD
- * FAB_INTEN_U54_1
- * FAB_INTEN_U54_2
- * FAB_INTEN_U54_3
- * FAB_INTEN_U54_4
- * FAB_INTEN_MISC
- * GPIO_INTERRUPT_FAB_CR
- * APBBUS_CR
+/* CLOCK_CONFIG_CR:
+ * Master clock configuration.
  */
 
-/* Enables the clock to the MSS peripheral */
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT      (0) /* Bits: 0-5: master synchronous clock divider */
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_MASK       (0x3f << SYSREG_CLOCK_CONFIG_CR_DIVIDER_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_CPU_SHIFT  (0) /* Bits 0-1: CPU clock divider (Reset=/1 =0) */
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_CPU_MASK   (3)
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_CPU(x)     ((x & SYSREG_CLOCK_CONFIG_CR_DIVIDER_CPU_MASK) << SYSREG_CLOCK_CONFIG_CR_DIVIDER_CPU_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_AXI_SHIFT  (2) /* Bits 2-3: AXI clock divider (Reset=/1 =0) */
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_AXI_MASK   (3 << SYSREG_CLOCK_CONFIG_CR_DIVIDER_AXI_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_AXI(x)     ((x & SYSREG_CLOCK_CONFIG_CR_DIVIDER_AXI_MASK) << SYSREG_CLOCK_CONFIG_CR_DIVIDER_AXI_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_AHB_SHIFT  (2) /* Bits 4-5: AHB/APB clock divider (Reset=/2 =1) */
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_AHB_MASK   (3 << SYSREG_CLOCK_CONFIG_CR_DIVIDER_AHB_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_DIVIDER_AHB(x)     ((x & SYSREG_CLOCK_CONFIG_CR_DIVIDER_AHB_MASK) << SYSREG_CLOCK_CONFIG_CR_DIVIDER_AHB_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_SHIFT  (8) /* Bit: 8: enable the 1mHz (2MHz) on-chip oscillator */
+#define SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_MASK   (1 << SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_SHIFT)
+#define SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ        (1 << SYSREG_CLOCK_CONFIG_CR_ENABLE_1MHZ_SHIFT)
 
-#define SYSREG_SUBBLK_CLOCK_CR_SHIFT   (0) /* Bit: 0-29: Clock enable (17 is reserved) */
-#define SYSREG_SUBBLK_CLOCK_CR_MASK    (0x3ffdffff << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_ENVM    (0 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MAC0    (1 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MAC1    (2 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MMC     (3 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_TIMER   (4 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MMUART0 (5 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MMUART1 (6 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MMUART2 (7 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MMUART3 (8 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_MMUART4 (9 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_SPI0    (10 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_SPI1    (11 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_I2C0    (12 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_I2C1    (13 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_CAN0    (14 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_CAN1    (15 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_USB     (16 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_RTC     (18 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_QSPI    (19 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_GPIO0   (20 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_GPIO1   (21 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_GPIO2   (22 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_DDRC    (23 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_FIC0    (24 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_FIC1    (25 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_FIC2    (26 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_FIC3    (27 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_ATHENA  (28 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SUBBLK_CLOCK_CR_CFM     (29 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
+/* RTC_CLOCK_CR:
+ * RTC clock divider.
+ */
+
+#define SYSREG_RTC_CLOCK_CR_PERIOD_SHIFT          (0) /* Bits: 0-11: period */
+#define SYSREG_RTC_CLOCK_CR_PERIOD_MASK           (0xfff << SYSREG_RTC_CLOCK_CR_PERIOD_SHIFT)
+#define SYSREG_RTC_CLOCK_CR_ENABLE_SHIFT          (16) /* Bit: 16: RTC Clock enable */
+#define SYSREG_RTC_CLOCK_CR_ENABLE_MASK           (1 << SYSREG_RTC_CLOCK_CR_ENABLE_SHIFT)
+#define SYSREG_RTC_CLOCK_CR_ENABLE                (1 << SYSREG_RTC_CLOCK_CR_ENABLE_SHIFT)
+
+/* FABRIC_RESET_CR:
+ * Fabric Reset mask.
+ */
+
+#define SYSREG_FABRIC_RESET_CR_SHIFT              (0) /* Bit: 0: Enable */
+#define SYSREG_FABRIC_RESET_CR_MASK               (1 << SYSREG_FABRIC_RESET_CR_SHIFT)
+#define SYSREG_FABRIC_RESET_CR_ENABLE             (1 << SYSREG_FABRIC_RESET_CR_SHIFT)
+
+/* BOOT_FAIL_CR:
+ * Written by firmware to indicate that the boot process failed,
+ * drives the fab_boot_fail signal to the fabric.
+ * Is cleared by the fabric asserting fab_boot_fail_clear
+ */
+
+#define SYSREG_BOOT_FAIL_CR_SHIFT                 (0) /* Bit: 0: Boot Failed */
+#define SYSREG_BOOT_FAIL_CR_MASK                  (1 << SYSREG_BOOT_FAIL_CR_SHIFT)
+#define SYSREG_BOOT_FAIL_CR_BOOT                  (1 << SYSREG_BOOT_FAIL_CR_SHIFT)
+
+/* MSS_RESET_CR:
+ * Allows the CPU to fully reset the MSS.
+ */
+
+#define SYSREG_MSS_RESET_CR_SHIFT                 (0) /* Bits: 0-15: Reset */
+#define SYSREG_MSS_RESET_CR_MASK                  (0xffff << SYSREG_MSS_RESET_CR_SHIFT)
+#define SYSREG_MSS_RESET_CR_RESET_VALUE           (0xdead << SYSREG_MSS_RESET_CR_SHIFT)
+
+/* CONFIG_LOCK_CR:
+ * Configuration Lock. When written to '1' will cause all RWC registers
+ * to lock until a master reset occurs.
+ */
+
+#define SYSREG_CONFIG_LOCK_CR_SHIFT               (0) /* Bit: 0: Lock */
+#define SYSREG_CONFIG_LOCK_CR_MASK                (1 << SYSREG_CONFIG_LOCK_CR_SHIFT)
+#define SYSREG_CONFIG_LOCK_CR_LOCK                (1 << SYSREG_CONFIG_LOCK_CR_SHIFT)
+
+/* RESET_SR:
+ * Indicates which reset caused the last reset.
+ * After a reset occurs register should be read and then zero written to
+ * allow the next reset event to be correctly captured
+ */
+
+#define SYSREG_RESET_SR_SCB_PERIPH_SHIFT          (0) /* Bit: 0: Reset by SCB */
+#define SYSREG_RESET_SR_SCB_PERIPH_MASK           (1 << SYSREG_RESET_SR_SCB_PERIPH_SHIFT)
+#define SYSREG_RESET_SR_SCB_PERIPH                (1 << SYSREG_RESET_SR_SCB_PERIPH_SHIFT)
+#define SYSREG_RESET_SR_SCB_MSS_SHIFT             (1) /* Bit: 1: Reset by SCB MSS */
+#define SYSREG_RESET_SR_SCB_MSS_MASK              (1 << SYSREG_RESET_SR_SCB_MSS_SHIFT)
+#define SYSREG_RESET_SR_SCB_MSS                   (1 << SYSREG_RESET_SR_SCB_MSS_SHIFT)
+#define SYSREG_RESET_SR_SCB_CPU_SHIFT             (2) /* Bit: 2: Reset by SCB CPU */
+#define SYSREG_RESET_SR_SCB_CPU_MASK              (1 << SYSREG_RESET_SR_SCB_CPU_SHIFT)
+#define SYSREG_RESET_SR_SCB_CPU                   (1 << SYSREG_RESET_SR_SCB_CPU_SHIFT)
+#define SYSREG_RESET_SR_DEBUGGER_SHIFT            (3) /* Bit: 3: Reset by Debugger */
+#define SYSREG_RESET_SR_DEBUGGER_MASK             (1 << SYSREG_RESET_SR_DEBUGGER_SHIFT)
+#define SYSREG_RESET_SR_DEBUGGER                  (1 << SYSREG_RESET_SR_DEBUGGER_SHIFT)
+#define SYSREG_RESET_SR_FABRIC_SHIFT              (4) /* Bit: 4: Reset by Fabric */
+#define SYSREG_RESET_SR_FABRIC_MASK               (1 << SYSREG_RESET_SR_FABRIC_SHIFT)
+#define SYSREG_RESET_SR_FABRIC                    (1 << SYSREG_RESET_SR_FABRIC_SHIFT)
+#define SYSREG_RESET_SR_WDOG_SHIFT                (5) /* Bit: 5: Reset by Watchdog */
+#define SYSREG_RESET_SR_WDOG_MASK                 (1 << SYSREG_RESET_SR_WDOG_SHIFT)
+#define SYSREG_RESET_SR_WDOG                      (1 << SYSREG_RESET_SR_WDOG_SHIFT)
+#define SYSREG_RESET_SR_GPIO_SHIFT                (6) /* Bit: 6: fabric asserted the GPIO reset inputs */
+#define SYSREG_RESET_SR_GPIO_MASK                 (1 << SYSREG_RESET_SR_GPIO_SHIFT)
+#define SYSREG_RESET_SR_GPIO                      (1 << SYSREG_RESET_SR_GPIO_SHIFT)
+#define SYSREG_RESET_SR_SCB_BUS_SHIFT             (7) /* Bit: 6: SCB bus reset occurred */
+#define SYSREG_RESET_SR_SCB_BUS_MASK              (1 << SYSREG_RESET_SR_SCB_BUS_SHIFT)
+#define SYSREG_RESET_SR_SCB_BUS                   (1 << SYSREG_RESET_SR_SCB_BUS_SHIFT)
+#define SYSREG_RESET_SR_CPU_SOFT_SHIFT            (8) /* Bit: 6: CPU reset with soft reset register */
+#define SYSREG_RESET_SR_CPU_SOFT_MASK             (1 << SYSREG_RESET_SR_CPU_SOFT_SHIFT)
+#define SYSREG_RESET_SR_CPU_SOFT                  (1 << SYSREG_RESET_SR_CPU_SOFT_SHIFT)
+
+/* DEVICE_STATUS:
+ * Indicates the device status, in particular the state of
+ * the FPGA fabric and the MSS IO banks
+ */
+
+#define SYSREG_DEVICE_STATUS_CURE_UP_SHIFT        (0) /* Bit: 0: core_up input from G5 Control */
+#define SYSREG_DEVICE_STATUS_CURE_UP_MASK         (1 << SYSREG_DEVICE_STATUS_CURE_UP_SHIFT)
+#define SYSREG_DEVICE_STATUS_CURE_UP              (1 << SYSREG_DEVICE_STATUS_CURE_UP_SHIFT)
+#define SYSREG_DEVICE_STATUS_LP_STATE_SHIFT       (1) /* Bit: 1: lp_state input from G5 Control */
+#define SYSREG_DEVICE_STATUS_LP_STATE_MASK        (1 << SYSREG_DEVICE_STATUS_LP_STATE_SHIFT)
+#define SYSREG_DEVICE_STATUS_LP_STATE             (1 << SYSREG_DEVICE_STATUS_LP_STATE_SHIFT)
+#define SYSREG_DEVICE_STATUS_FF_IN_PROGRESS_SHIFT (2) /* Bit: 2: ff_in_progress input from G5 Control */
+#define SYSREG_DEVICE_STATUS_FF_IN_PROGRESS_MASK  (1 << SYSREG_DEVICE_STATUS_FF_IN_PROGRESS_SHIFT)
+#define SYSREG_DEVICE_STATUS_FF_IN_PROGRESS       (1 << SYSREG_DEVICE_STATUS_FF_IN_PROGRESS_SHIFT)
+#define SYSREG_DEVICE_STATUS_FLASH_VALID_SHIFT    (3) /* Bit: 3: flash_valid input from G5 Control */
+#define SYSREG_DEVICE_STATUS_FLASH_VALID_MASK     (1 << SYSREG_DEVICE_STATUS_FLASH_VALID_SHIFT)
+#define SYSREG_DEVICE_STATUS_FLASH_VALID          (1 << SYSREG_DEVICE_STATUS_FLASH_VALID_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B2_SHIFT     (8) /* Bit: 8: Power status of IO bank 2 */
+#define SYSREG_DEVICE_STATUS_IO_BANK_B2_MASK      (1 << SYSREG_DEVICE_STATUS_IO_BANK_B2_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B2           (1 << SYSREG_DEVICE_STATUS_IO_BANK_B2_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B4_SHIFT     (9) /* Bit: 9: Power status of IO bank 4 */
+#define SYSREG_DEVICE_STATUS_IO_BANK_B4_MASK      (1 << SYSREG_DEVICE_STATUS_IO_BANK_B4_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B4           (1 << SYSREG_DEVICE_STATUS_IO_BANK_B4_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B5_SHIFT     (10) /* Bit: 10: Power status of IO bank 5 */
+#define SYSREG_DEVICE_STATUS_IO_BANK_B5_MASK      (1 << SYSREG_DEVICE_STATUS_IO_BANK_B5_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B5           (1 << SYSREG_DEVICE_STATUS_IO_BANK_B5_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B6_SHIFT     (11) /* Bit: 11: Power status of IO bank 6 */
+#define SYSREG_DEVICE_STATUS_IO_BANK_B6_MASK      (1 << SYSREG_DEVICE_STATUS_IO_BANK_B6_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_BANK_B6           (1 << SYSREG_DEVICE_STATUS_IO_BANK_B6_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_EN_SHIFT          (12) /* Bit: 12: status of the io_en input from G5 Control. */
+#define SYSREG_DEVICE_STATUS_IO_EN_MASK           (1 << SYSREG_DEVICE_STATUS_IO_EN_SHIFT)
+#define SYSREG_DEVICE_STATUS_IO_EN                (1 << SYSREG_DEVICE_STATUS_IO_EN_SHIFT)
+
+/* MSS_BUILD:
+ * SVN revision of the pfsoc_mss_main.sv
+ */
+
+#define SYSREG_MSS_BUILD_REVISION_SHIFT           (0) /* Bits: 0-31: revision */
+
+/* FAB_INTEN_U54_1:
+ * U54-1 Fabric interrupt enable
+ * Enables the F2H_interrupts[31:0] to interrupt U54_1 directly
+ */
+
+#define SYSREG_FAB_INTEN_U54_1_EN(x)              (1 << x)
+
+/* U54-2 Fabric interrupt enable:
+ * Enables the F2H_interrupts[31:0] to interrupt U54_2 directly
+ */
+
+#define SYSREG_FAB_INTEN_U54_2_EN(x)              (1 << x)
+
+/* U54-3 Fabric interrupt enable:
+ * Enables the F2H_interrupts[31:0] to interrupt U54_3 directly
+ */
+
+#define SYSREG_FAB_INTEN_U54_3_EN(x)              (1 << x)
+
+/* U54-4 Fabric interrupt enable:
+ * Enables the F2H_interrupts[31:0] to interrupt U54_4 directly
+ */
+
+#define SYSREG_FAB_INTEN_U54_4_EN(x)              (1 << x)
+
+/* FAB_INTEN_MISC: Allows the Ethernet interrupts to be directly
+ * routed to the U54 CPUS
+ */
+
+#define SYSREG_FAB_INTEN_MISC_MAC0_U54_1_SHIFT    (0) /* Bit: 0: MAC0 to interrupt U54_1 directly */
+#define SYSREG_FAB_INTEN_MISC_MAC0_U54_1_MASK     (1 << SYSREG_FAB_INTEN_MISC_MAC0_U54_1_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC0_U54_1          (1 << SYSREG_FAB_INTEN_MISC_MAC0_U54_1_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC0_U54_2_SHIFT    (1) /* Bit: 1: MAC0 to interrupt U54_2 directly */
+#define SYSREG_FAB_INTEN_MISC_MAC0_U54_2_MASK     (1 << SYSREG_FAB_INTEN_MISC_MAC0_U54_2_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC0_U54_2          (1 << SYSREG_FAB_INTEN_MISC_MAC0_U54_2_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC1_U54_3_SHIFT    (0) /* Bit: 0: MAC0 to interrupt U54_3 directly */
+#define SYSREG_FAB_INTEN_MISC_MAC1_U54_3_MASK     (1 << SYSREG_FAB_INTEN_MISC_MAC1_U54_3_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC1_U54_3          (1 << SYSREG_FAB_INTEN_MISC_MAC1_U54_3_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC1_U54_4_SHIFT    (1) /* Bit: 1: MAC0 to interrupt U54_4 directly */
+#define SYSREG_FAB_INTEN_MISC_MAC1_U54_4_MASK     (1 << SYSREG_FAB_INTEN_MISC_MAC1_U54_4_SHIFT)
+#define SYSREG_FAB_INTEN_MISC_MAC1_U54_4          (1 << SYSREG_FAB_INTEN_MISC_MAC1_U54_4_SHIFT)
+
+/* GPIO_INTERRUPT_FAB_CR: Switches GPIO interrupt from PAD to Fabric GPIO
+ * Setting these bits will disable the Pad interrupt, and enable the fabric
+ * GPIO interrupt for bits 31:0. When the bit is set the Pad interrupt will
+ * be ORED into the GPIO0 & GPIO1 non-direct interrupts. When the bit is not
+ * set the Fabric interrupt is ORED into the GPIO2 non-direct interrupt.
+ * To prevent ORING the interrupt should not be enabled in the GPIO block.
+ */
+
+#define SYSREG_GPIO_INTERRUPT_FAB_CR(x)           (1 << x)
+
+/* APBBUS_CR: AMP Mode peripheral mapping register
+ * When the register bit is '0' the peripheral is mapped into the 0x02000000
+ * address range using AXI bus 5 from the Coreplex.
+ * When the register bit is '1' the peripheral is mapped into the 0x28000000
+ * address range using AXI bus 6 from the Coreplex.
+ */
+
+#define SYSREG_APBBUS_CR_MMUART0_SHIFT            (0)
+#define SYSREG_APBBUS_CR_MMUART0_MASK             (1 << SYSREG_APBBUS_CR_MMUART0_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART0                  (1 << SYSREG_APBBUS_CR_MMUART0_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART1_SHIFT            (1)
+#define SYSREG_APBBUS_CR_MMUART1_MASK             (1 << SYSREG_APBBUS_CR_MMUART1_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART1                  (1 << SYSREG_APBBUS_CR_MMUART1_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART2_SHIFT            (2)
+#define SYSREG_APBBUS_CR_MMUART2_MASK             (1 << SYSREG_APBBUS_CR_MMUART2_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART2                  (1 << SYSREG_APBBUS_CR_MMUART2_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART3_SHIFT            (3)
+#define SYSREG_APBBUS_CR_MMUART3_MASK             (1 << SYSREG_APBBUS_CR_MMUART3_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART3                  (1 << SYSREG_APBBUS_CR_MMUART3_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART4_SHIFT            (4)
+#define SYSREG_APBBUS_CR_MMUART4_MASK             (1 << SYSREG_APBBUS_CR_MMUART4_SHIFT)
+#define SYSREG_APBBUS_CR_MMUART4                  (1 << SYSREG_APBBUS_CR_MMUART4_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG0_SHIFT              (5)
+#define SYSREG_APBBUS_CR_WDOG0_MASK               (1 << SYSREG_APBBUS_CR_WDOG0_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG0                    (1 << SYSREG_APBBUS_CR_WDOG0_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG1_SHIFT              (6)
+#define SYSREG_APBBUS_CR_WDOG1_MASK               (1 << SYSREG_APBBUS_CR_WDOG1_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG1                    (1 << SYSREG_APBBUS_CR_WDOG1_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG2_SHIFT              (7)
+#define SYSREG_APBBUS_CR_WDOG2_MASK               (1 << SYSREG_APBBUS_CR_WDOG2_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG2                    (1 << SYSREG_APBBUS_CR_WDOG2_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG3_SHIFT              (8)
+#define SYSREG_APBBUS_CR_WDOG3_MASK               (1 << SYSREG_APBBUS_CR_WDOG3_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG3                    (1 << SYSREG_APBBUS_CR_WDOG3_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG4_SHIFT              (9)
+#define SYSREG_APBBUS_CR_WDOG4_MASK               (1 << SYSREG_APBBUS_CR_WDOG4_SHIFT)
+#define SYSREG_APBBUS_CR_WDOG4                    (1 << SYSREG_APBBUS_CR_WDOG4_SHIFT)
+#define SYSREG_APBBUS_CR_SPI0_SHIFT               (10)
+#define SYSREG_APBBUS_CR_SPI0_MASK                (1 << SYSREG_APBBUS_CR_SPI0_SHIFT)
+#define SYSREG_APBBUS_CR_SPI0                     (1 << SYSREG_APBBUS_CR_SPI0_SHIFT)
+#define SYSREG_APBBUS_CR_SPI1_SHIFT               (11)
+#define SYSREG_APBBUS_CR_SPI1_MASK                (1 << SYSREG_APBBUS_CR_SPI1_SHIFT)
+#define SYSREG_APBBUS_CR_SPI1                     (1 << SYSREG_APBBUS_CR_SPI1_SHIFT)
+#define SYSREG_APBBUS_CR_I2C0_SHIFT               (12)
+#define SYSREG_APBBUS_CR_I2C0_MASK                (1 << SYSREG_APBBUS_CR_I2C0_SHIFT)
+#define SYSREG_APBBUS_CR_I2C0                     (1 << SYSREG_APBBUS_CR_I2C0_SHIFT)
+#define SYSREG_APBBUS_CR_I2C1_SHIFT               (13)
+#define SYSREG_APBBUS_CR_I2C1_MASK                (1 << SYSREG_APBBUS_CR_I2C1_SHIFT)
+#define SYSREG_APBBUS_CR_I2C1                     (1 << SYSREG_APBBUS_CR_I2C1_SHIFT)
+#define SYSREG_APBBUS_CR_CAN0_SHIFT               (14)
+#define SYSREG_APBBUS_CR_CAN0_MASK                (1 << SYSREG_APBBUS_CR_CAN0_SHIFT)
+#define SYSREG_APBBUS_CR_CAN0                     (1 << SYSREG_APBBUS_CR_CAN0_SHIFT)
+#define SYSREG_APBBUS_CR_CAN1_SHIFT               (15)
+#define SYSREG_APBBUS_CR_CAN1_MASK                (1 << SYSREG_APBBUS_CR_CAN1_SHIFT)
+#define SYSREG_APBBUS_CR_CAN1                     (1 << SYSREG_APBBUS_CR_CAN1_SHIFT)
+#define SYSREG_APBBUS_CR_GEM0_SHIFT               (16)
+#define SYSREG_APBBUS_CR_GEM0_MASK                (1 << SYSREG_APBBUS_CR_GEM0_SHIFT)
+#define SYSREG_APBBUS_CR_GEM0                     (1 << SYSREG_APBBUS_CR_GEM0_SHIFT)
+#define SYSREG_APBBUS_CR_GEM1_SHIFT               (17)
+#define SYSREG_APBBUS_CR_GEM1_MASK                (1 << SYSREG_APBBUS_CR_GEM1_SHIFT)
+#define SYSREG_APBBUS_CR_GEM1                     (1 << SYSREG_APBBUS_CR_GEM1_SHIFT)
+#define SYSREG_APBBUS_CR_TIMER_SHIFT              (18)
+#define SYSREG_APBBUS_CR_TIMER_MASK               (1 << SYSREG_APBBUS_CR_TIMER_SHIFT)
+#define SYSREG_APBBUS_CR_TIMER                    (1 << SYSREG_APBBUS_CR_TIMER_SHIFT)
+#define SYSREG_APBBUS_CR_GPIO0_SHIFT              (19)
+#define SYSREG_APBBUS_CR_GPIO0_MASK               (1 << SYSREG_APBBUS_CR_GPIO0_SHIFT)
+#define SYSREG_APBBUS_CR_GPIO0                    (1 << SYSREG_APBBUS_CR_GPIO0_SHIFT)
+#define SYSREG_APBBUS_CR_GPIO1_SHIFT              (20)
+#define SYSREG_APBBUS_CR_GPIO1_MASK               (1 << SYSREG_APBBUS_CR_GPIO1_SHIFT)
+#define SYSREG_APBBUS_CR_GPIO1                    (1 << SYSREG_APBBUS_CR_GPIO1_SHIFT)
+#define SYSREG_APBBUS_CR_GPIO2_SHIFT              (21)
+#define SYSREG_APBBUS_CR_GPIO2_MASK               (1 << SYSREG_APBBUS_CR_GPIO2_SHIFT)
+#define SYSREG_APBBUS_CR_GPIO2                    (1 << SYSREG_APBBUS_CR_GPIO2_SHIFT)
+#define SYSREG_APBBUS_CR_RTC_SHIFT                (22)
+#define SYSREG_APBBUS_CR_RTC_MASK                 (1 << SYSREG_APBBUS_CR_RTC_SHIFT)
+#define SYSREG_APBBUS_CR_RTC                      (1 << SYSREG_APBBUS_CR_RTC_SHIFT)
+#define SYSREG_APBBUS_H2FINT_SHIFT                (23)
+#define SYSREG_APBBUS_H2FINT_MASK                 (1 << SYSREG_APBBUS_H2FINT_SHIFT)
+#define SYSREG_APBBUS_H2FINT                      (1 << SYSREG_APBBUS_H2FINT_SHIFT)
+
+/* SUBBLK_CLOCK_CR:
+ * Enables the clock to the MSS peripheral.
+ */
+
+#define SYSREG_SUBBLK_CLOCK_CR_SHIFT      (0) /* Bit: 0-29: Clock enable (17 is reserved) */
+#define SYSREG_SUBBLK_CLOCK_CR_MASK       (0x3ffdffff << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
+#define SYSREG_SUBBLK_CLOCK_CR_ENVM       (1 << 0)
+#define SYSREG_SUBBLK_CLOCK_CR_MAC0       (1 << 1)
+#define SYSREG_SUBBLK_CLOCK_CR_MAC1       (1 << 2)
+#define SYSREG_SUBBLK_CLOCK_CR_MMC        (1 << 3)
+#define SYSREG_SUBBLK_CLOCK_CR_TIMER      (1 << 4)
+#define SYSREG_SUBBLK_CLOCK_CR_MMUART0    (1 << 5)
+#define SYSREG_SUBBLK_CLOCK_CR_MMUART1    (1 << 6)
+#define SYSREG_SUBBLK_CLOCK_CR_MMUART2    (1 << 7)
+#define SYSREG_SUBBLK_CLOCK_CR_MMUART3    (1 << 8)
+#define SYSREG_SUBBLK_CLOCK_CR_MMUART4    (1 << 9)
+#define SYSREG_SUBBLK_CLOCK_CR_SPI0       (1 << 10)
+#define SYSREG_SUBBLK_CLOCK_CR_SPI1       (1 << 11)
+#define SYSREG_SUBBLK_CLOCK_CR_I2C0       (1 << 12)
+#define SYSREG_SUBBLK_CLOCK_CR_I2C1       (1 << 13)
+#define SYSREG_SUBBLK_CLOCK_CR_CAN0       (1 << 14)
+#define SYSREG_SUBBLK_CLOCK_CR_CAN1       (1 << 15)
+#define SYSREG_SUBBLK_CLOCK_CR_USB        (1 << 16)
+#define SYSREG_SUBBLK_CLOCK_CR_RTC        (1 << 18)
+#define SYSREG_SUBBLK_CLOCK_CR_QSPI       (1 << 19)
+#define SYSREG_SUBBLK_CLOCK_CR_GPIO0      (1 << 20)
+#define SYSREG_SUBBLK_CLOCK_CR_GPIO1      (1 << 21)
+#define SYSREG_SUBBLK_CLOCK_CR_GPIO2      (1 << 22)
+#define SYSREG_SUBBLK_CLOCK_CR_DDRC       (1 << 23)
+#define SYSREG_SUBBLK_CLOCK_CR_FIC0       (1 << 24)
+#define SYSREG_SUBBLK_CLOCK_CR_FIC1       (1 << 25)
+#define SYSREG_SUBBLK_CLOCK_CR_FIC2       (1 << 26)
+#define SYSREG_SUBBLK_CLOCK_CR_FIC3       (1 << 27)
+#define SYSREG_SUBBLK_CLOCK_CR_ATHENA     (1 << 28)
+#define SYSREG_SUBBLK_CLOCK_CR_CFM        (1 << 29)
 
 /* Holds the MSS peripherals in reset */
 
-#define SYSREG_SOFT_RESET_CR_SHIFT     (0) /* Bit: 0-30: Holds the MSS peripherals in reset */
+#define SYSREG_SOFT_RESET_CR_SHIFT     (0) /* Bits: 0-30: Holds the MSS peripherals in reset */
 #define SYSREG_SOFT_RESET_CR_MASK      (0x7fffffff << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_ENVM      (0 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MAC0      (1 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MAC1      (2 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MMC       (3 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_TIMER     (4 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MMUART0   (5 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MMUART1   (6 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MMUART2   (7 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MMUART3   (8 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_MMUART4   (9 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_SPI0      (10 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_SPI1      (11 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_I2C0      (12 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_I2C1      (13 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_CAN0      (14 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_CAN1      (15 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_USB       (16 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_FPGA      (17 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_RTC       (18 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_QSPI      (19 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_GPIO0     (20 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_GPIO1     (21 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_GPIO2     (22 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_DDRC      (23 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_FIC0      (24 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_FIC1      (25 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_FIC2      (26 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_FIC3      (27 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_ATHENA    (28 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_CFM       (29 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
-#define SYSREG_SOFT_RESET_CR_SGMII     (30 << SYSREG_SUBBLK_CLOCK_CR_SHIFT)
+#define SYSREG_SOFT_RESET_CR_ENVM      (1 << 0)
+#define SYSREG_SOFT_RESET_CR_MAC0      (1 << 1)
+#define SYSREG_SOFT_RESET_CR_MAC1      (1 << 2)
+#define SYSREG_SOFT_RESET_CR_MMC       (1 << 3)
+#define SYSREG_SOFT_RESET_CR_TIMER     (1 << 4)
+#define SYSREG_SOFT_RESET_CR_MMUART0   (1 << 5)
+#define SYSREG_SOFT_RESET_CR_MMUART1   (1 << 6)
+#define SYSREG_SOFT_RESET_CR_MMUART2   (1 << 7)
+#define SYSREG_SOFT_RESET_CR_MMUART3   (1 << 8)
+#define SYSREG_SOFT_RESET_CR_MMUART4   (1 << 9)
+#define SYSREG_SOFT_RESET_CR_SPI0      (1 << 10)
+#define SYSREG_SOFT_RESET_CR_SPI1      (1 << 11)
+#define SYSREG_SOFT_RESET_CR_I2C0      (1 << 12)
+#define SYSREG_SOFT_RESET_CR_I2C1      (1 << 13)
+#define SYSREG_SOFT_RESET_CR_CAN0      (1 << 14)
+#define SYSREG_SOFT_RESET_CR_CAN1      (1 << 15)
+#define SYSREG_SOFT_RESET_CR_USB       (1 << 16)
+#define SYSREG_SOFT_RESET_CR_FPGA      (1 << 17)
+#define SYSREG_SOFT_RESET_CR_RTC       (1 << 18)
+#define SYSREG_SOFT_RESET_CR_QSPI      (1 << 19)
+#define SYSREG_SOFT_RESET_CR_GPIO0     (1 << 20)
+#define SYSREG_SOFT_RESET_CR_GPIO1     (1 << 21)
+#define SYSREG_SOFT_RESET_CR_GPIO2     (1 << 22)
+#define SYSREG_SOFT_RESET_CR_DDRC      (1 << 23)
+#define SYSREG_SOFT_RESET_CR_FIC0      (1 << 24)
+#define SYSREG_SOFT_RESET_CR_FIC1      (1 << 25)
+#define SYSREG_SOFT_RESET_CR_FIC2      (1 << 26)
+#define SYSREG_SOFT_RESET_CR_FIC3      (1 << 27)
+#define SYSREG_SOFT_RESET_CR_ATHENA    (1 << 28)
+#define SYSREG_SOFT_RESET_CR_CFM       (1 << 29)
+#define SYSREG_SOFT_RESET_CR_SGMII     (1 << 30)
 
 /* TODO:
  * AHBAXI_CR
