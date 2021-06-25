@@ -1094,7 +1094,8 @@ static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
    * for this object.
    */
 
-  tmpbuf->tsf_alloc += to->to_alloc;
+  tmpbuf->tsf_alloc += to->to_alloc +
+                       strlen(tdo->tdo_entry[index].tde_name) + 1;
 
   /* Is this directory entry a file object? */
 
@@ -1108,13 +1109,12 @@ static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
 
       tmptfo             = (FAR struct tmpfs_file_s *)to;
       tmpbuf->tsf_alloc += sizeof(struct tmpfs_file_s);
-      tmpbuf->tsf_inuse += tmptfo->tfo_size;
+      tmpbuf->tsf_avail += to->to_alloc - tmptfo->tfo_size;
       tmpbuf->tsf_files++;
     }
   else /* if (to->to_type == TMPFS_DIRECTORY) */
     {
       FAR struct tmpfs_directory_s *tmptdo;
-      size_t inuse;
       size_t avail;
 
       /* It is a directory object.  Update the amount of memory in use
@@ -1122,11 +1122,11 @@ static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
        */
 
       tmptdo = (FAR struct tmpfs_directory_s *)to;
-      inuse  = SIZEOF_TMPFS_DIRECTORY(tmptdo->tdo_nentries);
-      avail  = tmptdo->tdo_alloc - inuse;
+      avail  = tmptdo->tdo_alloc -
+               SIZEOF_TMPFS_DIRECTORY(tmptdo->tdo_nentries);
 
       tmpbuf->tsf_alloc += sizeof(struct tmpfs_directory_s);
-      tmpbuf->tsf_inuse += inuse;
+      tmpbuf->tsf_avail += avail;
       tmpbuf->tsf_ffree += avail / sizeof(struct tmpfs_dirent_s);
     }
 
@@ -2101,10 +2101,9 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   FAR struct tmpfs_s *fs;
   FAR struct tmpfs_directory_s *tdo;
   struct tmpfs_statfs_s tmpbuf;
-  size_t inuse;
   size_t avail;
   off_t blkalloc;
-  off_t blkused;
+  off_t blkavail;
   int ret;
 
   finfo("mountpt: %p buf: %p\n", mountpt, buf);
@@ -2126,13 +2125,13 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   /* Set up the memory use for the file system and root directory object */
 
   tdo              = (FAR struct tmpfs_directory_s *)fs->tfs_root.tde_object;
-  inuse            = sizeof(struct tmpfs_s) +
+  avail            = tdo->tdo_alloc -
                      SIZEOF_TMPFS_DIRECTORY(tdo->tdo_nentries);
-  avail            = sizeof(struct tmpfs_s) +
-                     tdo->tdo_alloc - inuse;
 
-  tmpbuf.tsf_alloc = tdo->tdo_alloc;
-  tmpbuf.tsf_inuse = inuse;
+  tmpbuf.tsf_alloc = sizeof(struct tmpfs_s) +
+                     sizeof(struct tmpfs_directory_s) +
+                     tdo->tdo_alloc;
+  tmpbuf.tsf_avail = avail;
   tmpbuf.tsf_files = 0;
   tmpbuf.tsf_ffree = avail / sizeof(struct tmpfs_dirent_s);
 
@@ -2148,15 +2147,15 @@ static int tmpfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   blkalloc        = (tmpbuf.tsf_alloc + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
                      CONFIG_FS_TMPFS_BLOCKSIZE;
-  blkused         = (tmpbuf.tsf_inuse + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
+  blkavail        = (tmpbuf.tsf_avail + CONFIG_FS_TMPFS_BLOCKSIZE - 1) /
                      CONFIG_FS_TMPFS_BLOCKSIZE;
 
   buf->f_type     = TMPFS_MAGIC;
   buf->f_namelen  = NAME_MAX;
   buf->f_bsize    = CONFIG_FS_TMPFS_BLOCKSIZE;
   buf->f_blocks   = blkalloc;
-  buf->f_bfree    = blkalloc - blkused;
-  buf->f_bavail   = blkalloc - blkused;
+  buf->f_bfree    = blkavail;
+  buf->f_bavail   = blkavail;
   buf->f_files    = tmpbuf.tsf_files;
   buf->f_ffree    = tmpbuf.tsf_ffree;
 
