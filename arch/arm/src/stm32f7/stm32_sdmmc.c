@@ -855,13 +855,9 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 
   flags = enter_critical_section();
 
-#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-  if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
+#if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
+  if ((waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      /* Do not use this in STM32_SDMMC_MASK register */
-
-      waitmask &= ~SDIOWAIT_WRCOMPLETE;
-
       pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK | \
                                 GPIO_PUPD_MASK);
       pinset |= (GPIO_INPUT | GPIO_EXTI);
@@ -1467,8 +1463,13 @@ static void stm32_eventtimeout(wdparm_t arg)
     {
       /* Yes.. wake up any waiting threads */
 
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+      stm32_endwait(priv, SDIOWAIT_TIMEOUT |
+                    (priv->waitevents & SDIOWAIT_WRCOMPLETE));
+#else
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcerr("Timeout: remaining: %d\n", priv->remaining);
+#endif
+      mcerr("Timeout: remaining: %zu\n", priv->remaining);
     }
 }
 
@@ -2723,7 +2724,9 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   if ((eventset & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      waitmask = SDIOWAIT_WRCOMPLETE;
+      /* eventset carries this */
+
+      waitmask = 0;
     }
   else
 #endif
@@ -2834,11 +2837,11 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev)
   if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
       /* Atomically read pin to see if ready (true) and determine if ISR
-       * fired. If Pin is ready and if ISR did NOT fire end the wait here.
+       * fired.  If Pin is ready and if ISR did NOT fire end the wait here.
        */
 
       if (stm32_gpioread(priv->d0_gpio) &&
-         (priv->wkupevent & SDIOWAIT_WRCOMPLETE) == 0)
+          (priv->wkupevent & SDIOWAIT_WRCOMPLETE) == 0)
         {
           stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
         }
@@ -2926,7 +2929,7 @@ static void stm32_callbackenable(FAR struct sdio_dev_s *dev,
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
-  mcinfo("eventset: %02x\n", eventset);
+  mcinfo("eventset: %02" PRIx8 "\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
