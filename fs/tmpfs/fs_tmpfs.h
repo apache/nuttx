@@ -156,7 +156,7 @@ struct tmpfs_s
 struct tmpfs_statfs_s
 {
   size_t tsf_alloc;      /* Total memory allocated */
-  size_t tsf_inuse;      /* Total memory in use */
+  size_t tsf_avail;      /* Total memory available */
   off_t  tsf_files;      /* Total file nodes in the file system */
   off_t  tsf_ffree;      /* Free directory nodes in the file system */
 };
