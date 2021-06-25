@@ -69,8 +69,8 @@
  ****************************************************************************/
 
 static int nxthread_create(FAR const char *name, uint8_t ttype,
-                           int priority, int stack_size, main_t entry,
-                           FAR char * const argv[])
+                           int priority, FAR void *stack_ptr, int stack_size,
+                           main_t entry, FAR char * const argv[])
 {
   FAR struct task_tcb_s *tcb;
   pid_t pid;
@@ -91,7 +91,7 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   /* Initialize the task */
 
-  ret = nxtask_init(tcb, name, priority, NULL, stack_size, entry, argv);
+  ret = nxtask_init(tcb, name, priority, stack_ptr, stack_size, entry, argv);
   if (ret < OK)
     {
       kmm_free(tcb);
@@ -154,8 +154,8 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 int nxtask_create(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
-                         entry, argv);
+  return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority,
+                         NULL, stack_size, entry, argv);
 }
 
 /****************************************************************************
@@ -206,6 +206,39 @@ int task_create(FAR const char *name, int priority,
 #endif
 
 /****************************************************************************
+ * Name: kthread_create_with_stack
+ *
+ * Description:
+ *   This function creates and activates a kernel thread task with
+ *   kernel-mode privileges. It is identical to kthread_create() except
+ *   that it get the stack memory from caller.
+ *
+ * Input Parameters:
+ *   name       - Name of the new task
+ *   priority   - Priority of the new task
+ *   stack_ptr  - Stack buffer of the new task
+ *   stack_size - Stack size of the new task
+ *   entry      - Entry point of a new task
+ *   arg        - A pointer to an array of input parameters.  The array
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
+ *
+ * Returned Value:
+ *   Returns the positive, non-zero process ID of the new task or a negated
+ *   errno value to indicate the nature of any failure.  If memory is
+ *   insufficient or the task cannot be created -ENOMEM will be returned.
+ *
+ ****************************************************************************/
+
+int kthread_create_with_stack(FAR const char *name, int priority,
+                              FAR void *stack_ptr, int stack_size,
+                              main_t entry, FAR char * const argv[])
+{
+  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority,
+                         stack_ptr, stack_size, entry, argv);
+}
+
+/****************************************************************************
  * Name: kthread_create
  *
  * Description:
@@ -232,6 +265,6 @@ int task_create(FAR const char *name, int priority,
 int kthread_create(FAR const char *name, int priority,
                    int stack_size, main_t entry, FAR char * const argv[])
 {
-  return nxthread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size,
-                         entry, argv);
+  return kthread_create_with_stack(name, priority,
+                                   NULL, stack_size, entry, argv);
 }
