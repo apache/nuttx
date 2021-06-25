@@ -157,7 +157,7 @@
 #define STM32_SDMMC_STA_CMDREND               (1 << 6)  /* Bit 6: Command response received  */
 #define STM32_SDMMC_STA_CMDSENT               (1 << 7)  /* Bit 7: Command sent  */
 #define STM32_SDMMC_STA_DATAEND               (1 << 8)  /* Bit 8: Data end */
-#define STM32_SDMMC_STA_STBITERR              (1 << 9)  /* Bit 9: Start bit not detected  */
+                                                        /* Bit 9: Reserved */
 #define STM32_SDMMC_STA_DBCKEND               (1 << 10) /* Bit 10: Data block sent/received  */
 #define STM32_SDMMC_STA_CMDACT                (1 << 11) /* Bit 11: Command transfer in progress */
 #define STM32_SDMMC_STA_TXACT                 (1 << 12) /* Bit 12: Data transmit in progress */
@@ -182,7 +182,7 @@
 #define STM32_SDMMC_ICR_CMDRENDC              (1 << 6)  /* Bit 6: CMDREND flag clear bit */
 #define STM32_SDMMC_ICR_CMDSENTC              (1 << 7)  /* Bit 7: CMDSENT flag clear bit */
 #define STM32_SDMMC_ICR_DATAENDC              (1 << 8)  /* Bit 8: DATAEND flag clear bit */
-#define STM32_SDMMC_ICR_STBITERRC             (1 << 9)  /* Bit 9: STBITERR flag clear bit */
+                                                        /* Bit 9: Reserved */
 #define STM32_SDMMC_ICR_DBCKENDC              (1 << 10) /* Bit 10: DBCKEND flag clear bit */
 #define STM32_SDMMC_ICR_SDIOITC               (1 << 22) /* Bit 22: SDIOIT flag clear bit */
 #define STM32_SDMMC_ICR_CEATAENDC             (1 << 23) /* Bit 23: CEATAEND flag clear bit */
@@ -199,7 +199,7 @@
 #define STM32_SDMMC_MASK_CMDRENDIE            (1 << 6)  /* Bit 6: Command response received interrupt enable */
 #define STM32_SDMMC_MASK_CMDSENTIE            (1 << 7)  /* Bit 7: Command sent interrupt enable */
 #define STM32_SDMMC_MASK_DATAENDIE            (1 << 8)  /* Bit 8: Data end interrupt enable */
-#define STM32_SDMMC_MASK_STBITERRIE           (1 << 9)  /* Bit 9: Start bit error interrupt enable */
+                                                        /* Bit 9: Reserved */
 #define STM32_SDMMC_MASK_DBCKENDIE            (1 << 10) /* Bit 10: Data block end interrupt enable */
 #define STM32_SDMMC_MASK_CMDACTIE             (1 << 11) /* Bit 11: Command acting interrupt enable */
 #define STM32_SDMMC_MASK_TXACTIE              (1 << 12) /* Bit 12: Data transmit acting interrupt enable */

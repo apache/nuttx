@@ -280,27 +280,23 @@
                                    STM32_SDMMC_MASK_DTIMEOUTIE | \
                                    STM32_SDMMC_MASK_DATAENDIE  | \
                                    STM32_SDMMC_MASK_RXOVERRIE  | \
-                                   STM32_SDMMC_MASK_RXFIFOHFIE | \
-                                   STM32_SDMMC_MASK_STBITERRIE)
+                                   STM32_SDMMC_MASK_RXFIFOHFIE)
 
 #define STM32_SDMMC_SEND_MASK     (STM32_SDMMC_MASK_DCRCFAILIE | \
                                    STM32_SDMMC_MASK_DTIMEOUTIE | \
                                    STM32_SDMMC_MASK_DATAENDIE  | \
                                    STM32_SDMMC_MASK_TXUNDERRIE | \
-                                   STM32_SDMMC_MASK_TXFIFOHEIE | \
-                                   STM32_SDMMC_MASK_STBITERRIE)
+                                   STM32_SDMMC_MASK_TXFIFOHEIE)
 
 #define STM32_SDMMC_DMARECV_MASK  (STM32_SDMMC_MASK_DCRCFAILIE | \
                                    STM32_SDMMC_MASK_DTIMEOUTIE | \
                                    STM32_SDMMC_MASK_DATAENDIE  | \
-                                   STM32_SDMMC_MASK_RXOVERRIE | \
-                                   STM32_SDMMC_MASK_STBITERRIE)
+                                   STM32_SDMMC_MASK_RXOVERRIE)
 
 #define STM32_SDMMC_DMASEND_MASK  (STM32_SDMMC_MASK_DCRCFAILIE | \
                                    STM32_SDMMC_MASK_DTIMEOUTIE | \
                                    STM32_SDMMC_MASK_DATAENDIE  | \
-                                   STM32_SDMMC_MASK_TXUNDERRIE | \
-                                   STM32_SDMMC_MASK_STBITERRIE)
+                                   STM32_SDMMC_MASK_TXUNDERRIE)
 
 /* Event waiting interrupt mask bits */
 
@@ -333,7 +329,6 @@
                                    STM32_SDMMC_ICR_DTIMEOUTC | \
                                    STM32_SDMMC_ICR_RXOVERRC  | \
                                    STM32_SDMMC_ICR_TXUNDERRC | \
-                                   STM32_SDMMC_ICR_STBITERRC | \
                                    STM32_SDMMC_ICR_DBCKENDC)
 
 #define STM32_SDMMC_WAITALL_ICR   (STM32_SDMMC_CMDDONE_ICR   | \
@@ -1775,18 +1770,6 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
               /* Terminate the transfer with an error */
 
               mcerr("ERROR: TX FIFO underrun, remaining: %d\n",
-                    priv->remaining);
-              stm32_endtransfer(priv,
-                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
-            }
-
-          /* Handle start bit error */
-
-          else if ((pending & STM32_SDMMC_STA_STBITERR) != 0)
-            {
-              /* Terminate the transfer with an error */
-
-              mcerr("ERROR: Start bit, remaining: %d\n",
                     priv->remaining);
               stm32_endtransfer(priv,
                                 SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
