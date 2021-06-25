@@ -572,8 +572,10 @@ void nx_start(void)
     }
 #endif
 
-#ifdef CONFIG_ARCH_USE_TEXT_HEAP
-  up_textheap_init();
+#ifdef CONFIG_ARCH_HAVE_EXTRA_HEAPS
+  /* Initialize any extra heap. */
+
+  up_extraheaps_init();
 #endif
 
 #ifdef CONFIG_MM_IOB
