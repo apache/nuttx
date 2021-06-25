@@ -67,7 +67,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
+#warning This is really the JH7100 irq.h and not some other arch
 EXTERN irqstate_t  up_irq_save(void);
 EXTERN void up_irq_restore(irqstate_t);
 EXTERN irqstate_t up_irq_enable(void);
