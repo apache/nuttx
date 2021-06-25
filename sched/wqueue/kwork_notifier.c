@@ -33,6 +33,7 @@
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"

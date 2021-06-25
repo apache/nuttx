@@ -224,6 +224,16 @@
 #  endif
 #endif
 
+/* SIGWORK is used to wake up various internal, NuttX worker thread */
+
+#if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_PAGING)
+#  ifndef CONFIG_SIG_SIGWORK
+#    define SIGWORK     17  /* Used to wake up the work queue */
+#  else
+#    define SIGWORK     CONFIG_SIG_SIGWORK
+#  endif
+#endif
+
 /* sigprocmask() "how" definitions. Only one of the following can be specified: */
 
 #define SIG_BLOCK       1  /* Block the given signals */

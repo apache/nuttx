@@ -57,7 +57,6 @@
 int work_signal(int qid)
 {
   FAR struct kwork_wqueue_s *work;
-  int semcount;
   int threads;
   int i;
 
@@ -106,13 +105,7 @@ int work_signal(int qid)
 
   /* Otherwise, signal the first IDLE thread found */
 
-  nxsem_get_value(&work->worker[i].sem, &semcount);
-  if (semcount < 1)
-    {
-      nxsem_post(&work->worker[i].sem);
-    }
-
-  return OK;
+  return nxsig_kill(work->worker[i].pid, SIGWORK);
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
