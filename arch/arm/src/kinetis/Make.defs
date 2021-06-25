@@ -140,8 +140,8 @@ CHIP_CSRCS += kinetis_usbhshost.c
 endif
 endif
 
-ifeq ($(CONFIG_KINETIS_DMA),y)
-CHIP_CSRCS += kinetis_dma.c kinetis_pindma.c
+ifeq ($(CONFIG_KINETIS_EDMA),y)
+CHIP_CSRCS += kinetis_edma.c kinetis_pindma.c
 endif
 
 ifeq ($(CONFIG_PWM),y)

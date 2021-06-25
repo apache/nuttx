@@ -56,7 +56,7 @@
 /* Channel n Configuration Register */
 
 #define DMAMUX_CHCFG_SOURCE_SHIFT       (0)       /* Bits 0-5: DMA Channel Source (slot) */
-#define DMAMUX_CHCFG_SOURCE_MASK        (63 << DMAMUX_CHCFG_SOURCE_SHIFT)
+#define DMAMUX_CHCFG_SOURCE_MASK        (0x3f << DMAMUX_CHCFG_SOURCE_SHIFT)
 #define DMAMUX_CHCFG_TRIG               (1 << 6)  /* Bit 6:  DMA Channel Trigger Enable */
 #define DMAMUX_CHCFG_ENBL               (1 << 7)  /* Bit 7:  DMA Channel Enable */
 
