@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_textheap.c
+ * arch/xtensa/src/esp32/esp32_extraheaps.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 
 #include <sys/types.h>
@@ -41,66 +41,25 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if !defined(CONFIG_ESP32_IRAM_HEAP) && !defined(CONFIG_ESP32_RTC_HEAP)
-#error "No suitable heap available. Enable ESP32_IRAM_HEAP or ESP32_RTC_HEAP"
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_textheap_memalign
+ * Name: up_extraheaps_init
  *
  * Description:
- *   Allocate memory from the text heap with the specified alignment.
+ *   Initialize any extra heap.
  *
  ****************************************************************************/
 
-FAR void *up_textheap_memalign(size_t align, size_t size)
+void up_extraheaps_init(void)
 {
-  FAR void *ret = NULL;
-
-  /* Prioritise allocating from RTC. If that fails, allocate from the
-   * main heap.
-   */
-
 #ifdef CONFIG_ESP32_RTC_HEAP
-  ret = esp32_rtcheap_memalign(align, size);
+  esp32_rtcheap_initialize();
 #endif
 
-  if (ret == NULL)
-    {
-      ret = esp32_iramheap_memalign(align, size);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: up_textheap_free
- *
- * Description:
- *   Free memory from the text heap.
- *
- ****************************************************************************/
-
-void up_textheap_free(FAR void *p)
-{
-  if (p)
-    {
-#ifdef CONFIG_ESP32_RTC_HEAP
-      if (esp32_ptr_rtcslow(p))
-        {
-          esp32_rtcheap_free(p);
-        }
-      else
+#ifdef CONFIG_ESP32_IRAM_HEAP
+  esp32_iramheap_initialize();
 #endif
-        {
-          esp32_iramheap_free(p);
-        }
-    }
 }
+
