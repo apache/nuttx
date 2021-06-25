@@ -754,22 +754,22 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
 #endif
 
 /****************************************************************************
- * Name: up_textheap_init
+ * Name: up_extraheaps_init
  *
  * Description:
- *   Initialize the text heap.
+ *   Initialize any extra heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-void up_textheap_init(void);
+#if defined(CONFIG_ARCH_HAVE_EXTRA_HEAPS)
+void up_extraheaps_init(void);
 #endif
 
 /****************************************************************************
  * Name: up_textheap_memalign
  *
  * Description:
- *   Allocate memory from the text heap with the specified alignment.
+ *   Allocate memory for text sections with the specified alignment.
  *
  ****************************************************************************/
 
@@ -781,7 +781,7 @@ FAR void *up_textheap_memalign(size_t align, size_t size);
  * Name: up_textheap_free
  *
  * Description:
- *   Free memory from the text heap.
+ *   Free memory allocated for text sections.
  *
  ****************************************************************************/
 
