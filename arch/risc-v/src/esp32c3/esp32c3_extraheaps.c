@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_textheap.c
+ * arch/risc-v/src/esp32c3/esp32c3_extraheaps.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -40,73 +40,23 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define D_I_BUS_OFFSET  0x700000
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_textheap_memalign()
+ * Name: up_extraheaps_init
  *
  * Description:
- *   Allocate memory for module text with the specified alignment.
+ *   Initialize any extra heap.
  *
  ****************************************************************************/
 
-FAR void *up_textheap_memalign(size_t align, size_t size)
+void up_extraheaps_init()
 {
-  FAR void *ret = NULL;
-
-  /* Prioritise allocating from RTC. If that fails, allocate from the
-   * main heap.
-   */
-
 #ifdef CONFIG_ESP32C3_RTC_HEAP
-  ret = esp32c3_rtcheap_memalign(align, size);
+  /* Initialize the RTC heap */
+
+  esp32c3_rtcheap_initialize();
 #endif
-
-  if (ret == NULL)
-    {
-      ret = kmm_memalign(align, size);
-      if (ret)
-        {
-          /* kmm_memalign buffer is at the Data bus offset.  Adjust it so we
-           * can access it from the Instruction bus.
-           */
-
-          ret += D_I_BUS_OFFSET;
-        }
-    }
-
-  return ret;
 }
 
-/****************************************************************************
- * Name: up_textheap_free()
- *
- * Description:
- *   Free memory for module text.
- *
- ****************************************************************************/
-
-void up_textheap_free(FAR void *p)
-{
-  if (p)
-    {
-#ifdef CONFIG_ESP32C3_RTC_HEAP
-      if (esp32c3_ptr_rtc(p))
-        {
-          esp32c3_rtcheap_free(p);
-        }
-      else
-#endif
-        {
-          p -= D_I_BUS_OFFSET;
-          kmm_free(p);
-        }
-    }
-}
