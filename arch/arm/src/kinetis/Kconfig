@@ -330,6 +330,11 @@ config KINETIS_HAVE_DMA
 	bool
 	default n
 
+config KINETIS_SPI
+	bool
+	default n
+	select SPI
+
 config KINETIS_HAVE_I2C1
 	bool
 	default n
@@ -536,14 +541,14 @@ config KINETIS_FLEXCAN1
 config KINETIS_SPI0
 	bool "SPI0"
 	default n
-	select SPI
+	select KINETIS_SPI
 	---help---
 		Support SPI0
 
 config KINETIS_SPI1
 	bool "SPI1"
 	default n
-	select SPI
+	select KINETIS_SPI
 	depends on KINETIS_HAVE_SPI1
 	---help---
 		Support SPI1
@@ -551,7 +556,7 @@ config KINETIS_SPI1
 config KINETIS_SPI2
 	bool "SPI2"
 	default n
-	select SPI
+	select KINETIS_SPI
 	depends on KINETIS_HAVE_SPI2
 	---help---
 		Support SPI2
@@ -752,7 +757,7 @@ config KINETIS_FTFL
 		Support FLASH
 
 config KINETIS_EDMA
-	bool "DMA"
+	bool "eDMA"
 	default n
 	depends on KINETIS_HAVE_DMA
 	select ARCH_DMA
@@ -1203,6 +1208,48 @@ config KINETIS_EDMA_EDBG
 		system exits debug mode or the EDBG bit is cleared
 
 endmenu # eDMA Global Configuration
+
+menu "Kinetis SPI Configuration"
+	depends on KINETIS_SPI && KINETIS_EDMA
+
+config KINETIS_SPI_DMA
+	bool "SPI DMA"
+	depends on KINETIS_EDMA
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config KINETIS_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on KINETIS_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config KINETIS_SPI0_DMA
+	bool "SPI0 DMA"
+	default n
+	depends on KINETIS_SPI0 && KINETIS_SPI_DMA
+	---help---
+		Use DMA to improve SPI0 transfer performance.
+
+config KINETIS_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on KINETIS_SPI1 && KINETIS_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+
+config KINETIS_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on KINETIS_SPI2 && KINETIS_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.
+
+endmenu # Kinetis SPI Configuration
 
 if KINETIS_USBHS && USBHOST
 
