@@ -23,9 +23,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdbool.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <syscall.h>
 #include <syslog.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 /****************************************************************************
  * Public Functions
@@ -130,6 +133,74 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 #endif
 }
 
+#ifdef CONFIG_SMP
+void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
+{
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d START\n",
+         tcb->cpu, tcb->name, tcb, cpu);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p CPU%d START\n",
+         tcb->cpu, tcb, cpu);
+#endif
+}
+
+void sched_note_cpu_started(FAR struct tcb_s *tcb)
+{
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d STARTED\n",
+         tcb->cpu, tcb->name, tcb, tcb->cpu);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p CPU%d STARTED\n",
+         tcb->cpu, tcb, tcb->cpu);
+#endif
+}
+
+void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
+{
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d PAUSE\n",
+         tcb->cpu, tcb->name, tcb, cpu);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p CPU%d PAUSE\n",
+         tcb->cpu, tcb, cpu);
+#endif
+}
+
+void sched_note_cpu_paused(FAR struct tcb_s *tcb)
+{
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d PAUSED\n",
+         tcb->cpu, tcb->name, tcb, tcb->cpu);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p CPU%d PAUSED\n",
+         tcb->cpu, tcb, tcb->cpu);
+#endif
+}
+
+void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu)
+{
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d RESUME\n",
+         tcb->cpu, tcb->name, tcb, cpu);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p CPU%d RESUME\n",
+         tcb->cpu, tcb, cpu);
+#endif
+}
+
+void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
+{
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p CPU%d RESUMED\n",
+         tcb->cpu, tcb->name, tcb, tcb->cpu);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p CPU%d RESUMED\n",
+         tcb->cpu, tcb, tcb->cpu);
+#endif
+}
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 /* This does not work well... it interferes with the operation of the
  * simulated /dev/console device which, of course, does disable preemption
@@ -187,5 +258,133 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
          tcb, enter ? "ENTER" : "LEAVE");
 #endif
 #endif
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+void sched_note_spinlock(FAR struct tcb_s *tcb,
+                         FAR volatile void *spinlock)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p LOCK\n",
+         tcb->cpu, tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p LOCK\n",
+         tcb->cpu, tcb, spinlock);
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p LOCK\n",
+         tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "TCB@%p spinlock@%p LOCK\n",
+         tcb, spinlock);
+#endif
+#endif
+}
+
+void sched_note_spinlocked(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p LOCKED\n",
+         tcb->cpu, tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p LOCKED\n",
+         tcb->cpu, tcb, spinlock);
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p LOCKED\n",
+         tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "TCB@%p spinlock@%p LOCKED\n",
+         tcb, spinlock);
+#endif
+#endif
+}
+
+void sched_note_spinunlock(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p UNLOCK\n",
+         tcb->cpu, tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p UNLOCK\n",
+         tcb->cpu, tcb, spinlock);
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p UNLOCK\n",
+         tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "TCB@%p spinlock@%p UNLOCK\n",
+         tcb, spinlock);
+#endif
+#endif
+}
+
+void sched_note_spinabort(FAR struct tcb_s *tcb,
+                          FAR volatile void *spinlock)
+{
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "CPU%d: Task %s TCB@%p spinlock@%p ABORT\n",
+         tcb->cpu, tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "CPU%d: TCB@%p spinlock@%p ABORT\n",
+         tcb->cpu, tcb, spinlock);
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  syslog(LOG_INFO, "Task %s TCB@%p spinlock@%p ABORT\n",
+         tcb->name, tcb, spinlock);
+#else
+  syslog(LOG_INFO, "TCB@%p spinlock@%p ABORT\n",
+         tcb, spinlock);
+#endif
+#endif
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
+void sched_note_syscall_enter(int nr, int argc, ...)
+{
+  char buf[128];
+  FAR char *p = buf;
+  va_list ap;
+
+  va_start(ap, argc);
+  while (argc-- > 0)
+    {
+      if (argc)
+        {
+          p += sprintf(p, "%#"PRIxPTR", ", va_arg(ap, uintptr_t));
+        }
+      else
+        {
+          p += sprintf(p, "%#"PRIxPTR, va_arg(ap, uintptr_t));
+        }
+    }
+
+  va_end(ap);
+  syslog(LOG_INFO, "%s@%d ENTER %s\n", g_funcnames[nr], nr, buf);
+}
+
+void sched_note_syscall_leave(int nr, uintptr_t result)
+{
+  syslog(LOG_INFO, "%s@%d LEAVE %"PRIdPTR"\n", g_funcnames[nr], nr, result);
+}
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
+void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
+{
+  syslog(LOG_INFO, "IRQ%d handler@%p %s\n",
+         irq, handler, enter ? "ENTER" : "LEAVE");
 }
 #endif
