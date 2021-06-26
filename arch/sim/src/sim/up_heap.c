@@ -135,7 +135,8 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
                    size_t heap_size)
 {
   FAR struct mm_heap_impl_s *impl;
-  impl = host_malloc(sizeof(struct mm_heap_impl_s));
+
+  impl = host_memalign(sizeof(FAR void *), sizeof(*impl));
   impl->mm_delaylist = NULL;
   heap->mm_impl = impl;
 }
@@ -176,10 +177,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
-  /* Firstly, free mm_delaylist */
-
-  mm_free_delaylist(heap);
-  return host_malloc(size);
+  return mm_realloc(heap, NULL, size);
 }
 
 /****************************************************************************
@@ -218,8 +216,6 @@ FAR void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       host_free(mem);
     }
-
-  return;
 }
 
 /****************************************************************************
@@ -262,8 +258,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
 FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 {
-  mm_free_delaylist(heap);
-  return host_calloc(n, elem_size);
+  size_t size = n * elem_size;
+
+  if (size < elem_size)
+    {
+      return NULL;
+    }
+
+  return mm_zalloc(heap, size);
 }
 
 /****************************************************************************

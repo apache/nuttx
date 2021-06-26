@@ -158,11 +158,10 @@ void host_abort(int status);
 void *host_alloc_heap(size_t sz);
 void *host_alloc_shmem(const char *name, size_t size, int master);
 void  host_free_shmem(void *mem);
-void *host_malloc(size_t size);
+
+void *host_memalign(size_t alignment, size_t size);
 void host_free(void *mem);
 void *host_realloc(void *oldmem, size_t size);
-void *host_calloc(size_t n, size_t elem_size);
-void *host_memalign(size_t alignment, size_t size);
 
 /* up_hosttime.c ************************************************************/
 
