@@ -46,6 +46,10 @@ ifeq ($(CONFIG_IMXRT_FLEXCAN),y)
 CSRCS += imxrt_flexcan.c
 endif
 
+ifeq ($(CONFIG_IMXRT_FLEXPWM),y)
+CSRCS += imxrt_flexpwm.c
+endif
+
 ifeq ($(CONFIG_IMXRT_ENET),y)
 CSRCS += imxrt_ethernet.c
 endif
@@ -56,6 +60,10 @@ endif
 
 ifeq ($(CONFIG_LCD_ST7789),y)
 CSRCS += imxrt_st7789.c
+endif
+
+ifeq ($(CONFIG_IMXRT_ENC),y)
+CSRCS += imxrt_enc.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

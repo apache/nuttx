@@ -265,10 +265,10 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->textsize > 0)
     {
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
       loadinfo->textalloc = (uintptr_t)
-                            up_module_text_memalign(loadinfo->textalign,
-                                                    loadinfo->textsize);
+                            up_textheap_memalign(loadinfo->textalign,
+                                                 loadinfo->textsize);
 #else
       loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
                                                     loadinfo->textsize);

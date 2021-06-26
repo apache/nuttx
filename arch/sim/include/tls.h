@@ -65,7 +65,7 @@
 #ifdef CONFIG_TLS_ALIGNED
 static inline FAR struct tls_info_s *up_tls_info(void)
 {
-  return TLS_INFO(sim_getsp());
+  return TLS_INFO(up_getsp());
 }
 #else
 #  define up_tls_info() tls_get_info()

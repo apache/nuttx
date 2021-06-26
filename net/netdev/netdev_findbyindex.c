@@ -75,7 +75,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
 #ifdef CONFIG_NETDEV_IFINDEX
   /* Check if this index has been assigned */
 
-  if ((g_devset & (1L << (ifindex - 1))) == 0)
+  if ((g_devset & (1UL << (ifindex - 1))) == 0)
     {
       /* This index has not been assigned */
 
@@ -142,7 +142,7 @@ int netdev_nextindex(int ifindex)
       net_lock();
       for (; ifindex < MAX_IFINDEX; ifindex++)
         {
-          if ((g_devset & (1L << ifindex)) != 0)
+          if ((g_devset & (1UL << ifindex)) != 0)
             {
               /* NOTE that the index + 1 is returned.  Zero is reserved to
                * mean no-index in the POSIX standards.

@@ -33,6 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/drivers/ramdisk.h>
 
+#include "mpfsicicle.h"
 #include "mpfs.h"
 
 /****************************************************************************
@@ -47,6 +48,17 @@ int mpfs_bringup(void)
 {
   int ret = OK;
 
+#if defined(CONFIG_I2C_DRIVER)
+  /* Configure I2C peripheral interfaces */
+
+  ret = mpfs_board_i2c_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -54,6 +66,17 @@ int mpfs_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
+  /* Configure SPI peripheral interfaces */
+
+  ret = mpfs_board_spi_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
     }
 #endif
 

@@ -83,7 +83,7 @@ endif
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
 CPP = $(CROSSDEV)cc -E -P -x c
-LD = $(CROSSDEV)ld
+LD = $(CROSSDEV)cc
 ifeq ($(CONFIG_HOST_MACOS),y)
 STRIP = $(CROSSDEV)strip
 AR = $(TOPDIR)/tools/macar-rcs.sh
@@ -184,11 +184,11 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifeq ($(CONFIG_SIM_M32),y)
-  LDLINKFLAGS += -melf_i386
+  LDLINKFLAGS += -Wl,-melf_i386
   CCLINKFLAGS += -m32
   LDFLAGS += -m32
-  LDMODULEFLAGS += -melf_i386
-  LDELFFLAGS += -melf_i386
+  LDMODULEFLAGS += -Wl,-melf_i386
+  LDELFFLAGS += -Wl,-melf_i386
   HOSTLDFLAGS += -m32
 endif
 
@@ -199,3 +199,5 @@ endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -pipe
+
+LDLINKFLAGS += -nostartfiles -nodefaultlibs

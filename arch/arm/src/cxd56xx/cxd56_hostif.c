@@ -32,6 +32,7 @@
 #include <string.h>
 #include <semaphore.h>
 #include <fcntl.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 

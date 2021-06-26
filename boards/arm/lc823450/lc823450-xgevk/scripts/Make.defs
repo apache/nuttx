@@ -61,8 +61,8 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 # NXFLAT module definitions
 
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+NXFLATLDFLAGS1 = -r -Wl,-d -Wl,-warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -Wl,-no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
 # ELF module definitions
@@ -88,7 +88,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-LDFLAGS += --gc-sections
+LDFLAGS += -Wl,--gc-sections
 
 
 ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
@@ -102,8 +102,8 @@ ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
 else
   ARCH_SYMBOLS = $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld
 endif
-  ARCH_LIBS += $(ARCH_LIBS_OPT) --just-symbols=$(ARCH_SYMBOLS)
-  LDFLAGS += --no-wchar-size-warning
+  ARCH_LIBS += $(ARCH_LIBS_OPT) -Wl,--just-symbols=$(ARCH_SYMBOLS)
+  LDFLAGS += -Wl,--no-wchar-size-warning
 endif
 
 

@@ -90,7 +90,7 @@ void up_assert(const char *filename, int line)
   /* Allow for any board/configuration specific crash information */
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(sim_getsp(), this_task(), filename, line);
+  board_crashdump(up_getsp(), this_task(), filename, line);
 #endif
 
   /* Flush any buffered SYSLOG data */

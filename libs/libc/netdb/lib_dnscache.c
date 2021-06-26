@@ -165,6 +165,31 @@ void dns_save_answer(FAR const char *hostname,
 }
 
 /****************************************************************************
+ * Name: dns_clear_answer
+ *
+ * Description:
+ *   Clear the resolved hostname in the DNS cache
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void dns_clear_answer(void)
+{
+  /* Get exclusive access to the DNS cache */
+
+  dns_semtake();
+
+  /* Reset the circular of DNS cache */
+
+  g_dns_head = 0;
+  g_dns_tail = 0;
+
+  dns_semgive();
+}
+
+/****************************************************************************
  * Name: dns_find_answer
  *
  * Description:

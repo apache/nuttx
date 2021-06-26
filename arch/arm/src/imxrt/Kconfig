@@ -170,6 +170,11 @@ config IMXRT_FLEXCAN
 	default n
 	select ARCH_HAVE_NETDEV_STATISTICS
 
+config IMXRT_FLEXPWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_MULTICHAN
+
 config IMXRT_LPI2C
 	bool
 	default n
@@ -546,6 +551,246 @@ config FLEXCAN3_DATA_SAMPLEP
 	default 90
 
 endmenu # IMXRT_FLEXCAN3
+
+menu "FLEXPWM Peripherals"
+
+config IMXRT_FLEXPWM1
+	bool "FLEXPWM1"
+	default n
+	select IMXRT_FLEXPWM
+
+config IMXRT_FLEXPWM2
+	bool "FLEXPWM2"
+	default n
+	select IMXRT_FLEXPWM
+
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config IMXRT_FLEXPWM3
+	bool "FLEXPWM3"
+	default n
+	select IMXRT_FLEXPWM
+
+config IMXRT_FLEXPWM4
+	bool "FLEXPWM4"
+	default n
+	select IMXRT_FLEXPWM
+
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+endmenu # FLEXPWM Peripherals
+
+menu "FLEXPWM1 Configuration"
+	depends on IMXRT_FLEXPWM1
+
+config IMXRT_FLEXPWM1_MOD1
+	bool "FLEXPWM1 Module 1"
+	default n
+
+if IMXRT_FLEXPWM1_MOD1
+
+config IMXRT_FLEXPWM1_MOD1_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM1_MOD2
+	bool "FLEXPWM1 Module 2"
+	default n
+
+if IMXRT_FLEXPWM1_MOD2
+
+config IMXRT_FLEXPWM1_MOD2_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM1_MOD3
+	bool "FLEXPWM1 Module 3"
+	default n
+
+if IMXRT_FLEXPWM1_MOD3
+
+config IMXRT_FLEXPWM1_MOD3_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM1_MOD4
+	bool "FLEXPWM1 Module 4"
+	default n
+
+if IMXRT_FLEXPWM1_MOD4
+
+config IMXRT_FLEXPWM1_MOD4_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+endmenu # IMXRT_FLEXPWM1
+
+menu "FLEXPWM2 Configuration"
+	depends on IMXRT_FLEXPWM2
+
+config IMXRT_FLEXPWM2_MOD1
+	bool "FLEXPWM2 Module 1"
+	default n
+
+if IMXRT_FLEXPWM2_MOD1
+
+config IMXRT_FLEXPWM2_MOD1_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM2_MOD2
+	bool "FLEXPWM2 Module 2"
+	default n
+
+if IMXRT_FLEXPWM2_MOD2
+
+config IMXRT_FLEXPWM2_MOD2_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM2_MOD3
+	bool "FLEXPWM2 Module 3"
+	default n
+
+if IMXRT_FLEXPWM2_MOD3
+
+config IMXRT_FLEXPWM2_MOD3_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM2_MOD4
+	bool "FLEXPWM2 Module 4"
+	default n
+
+if IMXRT_FLEXPWM2_MOD4
+
+config IMXRT_FLEXPWM2_MOD4_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+endmenu # IMXRT_FLEXPWM2
+
+menu "FLEXPWM3 Configuration"
+	depends on IMXRT_FLEXPWM3
+
+config IMXRT_FLEXPWM3_MOD1
+	bool "FLEXPWM3 Module 1"
+	default n
+
+if IMXRT_FLEXPWM3_MOD1
+
+config IMXRT_FLEXPWM3_MOD1_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM3_MOD2
+	bool "FLEXPWM3 Module 2"
+	default n
+
+if IMXRT_FLEXPWM3_MOD2
+
+config IMXRT_FLEXPWM3_MOD2_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM3_MOD3
+	bool "FLEXPWM3 Module 3"
+	default n
+
+if IMXRT_FLEXPWM3_MOD3
+
+config IMXRT_FLEXPWM3_MOD3_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM3_MOD4
+	bool "FLEXPWM3 Module 4"
+	default n
+
+if IMXRT_FLEXPWM3_MOD4
+
+config IMXRT_FLEXPWM3_MOD4_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+endmenu # IMXRT_FLEXPWM3
+
+menu "FLEXPWM4 Configuration"
+	depends on IMXRT_FLEXPWM4
+
+config IMXRT_FLEXPWM4_MOD1
+	bool "FLEXPWM4 Module 1"
+	default n
+
+if IMXRT_FLEXPWM4_MOD1
+
+config IMXRT_FLEXPWM4_MOD1_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM4_MOD2
+	bool "FLEXPWM4 Module 2"
+	default n
+
+if IMXRT_FLEXPWM4_MOD2
+
+config IMXRT_FLEXPWM4_MOD2_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM4_MOD3
+	bool "FLEXPWM4 Module 3"
+	default n
+
+if IMXRT_FLEXPWM4_MOD3
+
+config IMXRT_FLEXPWM4_MOD3_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+config IMXRT_FLEXPWM4_MOD4
+	bool "FLEXPWM4 Module 4"
+	default n
+
+if IMXRT_FLEXPWM4_MOD4
+
+config IMXRT_FLEXPWM4_MOD4_COMP
+	bool "Use complementary output"
+	default n
+
+endif
+
+endmenu # IMXRT_FLEXPWM4
 
 menu "LPI2C Peripherals"
 

@@ -223,7 +223,7 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
-  } >rtc_iram_seg
+  } >rtc_seg
 
   /* This section is required to skip rtc.text area because the text and
    * data segments reflect the same address space on different buses.
@@ -232,7 +232,14 @@ SECTIONS
   .rtc.dummy :
   {
     . = SIZEOF(.rtc.text);
-  } >rtc_iram_seg
+  } >rtc_seg
+
+  /* RTC BSS section. */
+
+  .rtc.bss (NOLOAD) :
+  {
+    *(.rtc.bss)
+  } >rtc_seg
 
   /* RTC data section holds RTC wake stub data/rodata. */
 
@@ -240,6 +247,11 @@ SECTIONS
   {
     *(.rtc.data)
     *(.rtc.rodata)
-  } >rtc_iram_seg
+
+   /* Whatever is left from the RTC memory is used as a special heap. */
+
+    _srtcheap = ABSOLUTE(.);
+
+  } >rtc_seg
 }
 

@@ -426,6 +426,20 @@ void iob_free_queue(FAR struct iob_queue_s *qhead,
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_free_queue_qentry
+ *
+ * Description:
+ *   Free an iob entire queue of I/O buffer chains.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+void iob_free_queue_qentry(FAR struct iob_s *iob,
+                           FAR struct iob_queue_s *iobq,
+                           enum iob_user_e producerid);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_copyin
  *
  * Description:

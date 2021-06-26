@@ -74,6 +74,10 @@
 #  include "esp32_bmp180.h"
 #endif
 
+#ifdef CONFIG_LCD_HT16K33
+#  include "esp32_ht16k33.h"
+#endif
+
 #ifdef CONFIG_ESP32_AES_ACCELERATOR
 #  include "esp32_aes.h"
 #endif
@@ -84,6 +88,10 @@
 
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp32_rtc_lowerhalf.h"
 #endif
 
 #include "esp32-devkitc.h"
@@ -349,6 +357,18 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LCD_HT16K33
+  /* Try to register HT16K33 in the I2C0 */
+
+  ret = board_ht16k33_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize HT16K33 driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
@@ -356,6 +376,17 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the ESP32 RTC driver */
+
+  ret = esp32_rtc_driverinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
     }
 #endif
 

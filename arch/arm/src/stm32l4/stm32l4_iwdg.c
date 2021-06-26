@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include <stdint.h>
+#include <inttypes.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -314,7 +314,7 @@ static int stm32l4_start(FAR struct watchdog_lowerhalf_s *lower)
     (FAR struct stm32l4_lowerhalf_s *)lower;
   irqstate_t flags;
 
-  wdinfo("Entry: started=%d\n");
+  wdinfo("Entry: started\n");
   DEBUGASSERT(priv);
 
   /* Have we already been started? */
@@ -454,9 +454,9 @@ static int stm32l4_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   status->timeleft = priv->timeout - elapsed;
 
   wdinfo("Status     :\n");
-  wdinfo("  flags    : %08x\n", status->flags);
-  wdinfo("  timeout  : %d\n", status->timeout);
-  wdinfo("  timeleft : %d\n", status->timeleft);
+  wdinfo("  flags    : %08" PRIx32 "\n", status->flags);
+  wdinfo("  timeout  : %" PRId32 "\n", status->timeout);
+  wdinfo("  timeleft : %" PRId32 "\n", status->timeleft);
   return OK;
 }
 
@@ -486,14 +486,14 @@ static int stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   int prescaler;
   int shift;
 
-  wdinfo("Entry: timeout=%d\n", timeout);
+  wdinfo("Entry: timeout=%" PRId32 "\n", timeout);
   DEBUGASSERT(priv);
 
   /* Can this timeout be represented? */
 
   if (timeout < 1 || timeout > IWDG_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%d > %d\n",
+      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %d\n",
             timeout, IWDG_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -575,7 +575,8 @@ static int stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       stm32l4_setprescaler(priv);
     }
 
-  wdinfo("prescaler=%d fiwdg=%d reload=%d\n", prescaler, fiwdg, reload);
+  wdinfo("prescaler=%d fiwdg=%" PRId32 " reload=%" PRId64 "\n",
+         prescaler, fiwdg, reload);
 
   return OK;
 }
@@ -606,7 +607,7 @@ void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 {
   FAR struct stm32l4_lowerhalf_s *priv = &g_wdgdev;
 
-  wdinfo("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
+  wdinfo("Entry: devpath=%s lsifreq=%" PRId32 "\n", devpath, lsifreq);
 
   /* NOTE we assume that clocking to the IWDG has already been provided by
    * the RCC initialization logic.
@@ -626,7 +627,7 @@ void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    */
 
   stm32l4_rcc_enablelsi();
-  wdinfo("RCC CSR: %08x\n", getreg32(STM32L4_RCC_CSR));
+  wdinfo("RCC CSR: %08" PRIx32 "\n", getreg32(STM32L4_RCC_CSR));
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

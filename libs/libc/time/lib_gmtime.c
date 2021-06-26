@@ -48,9 +48,7 @@ FAR struct tm *gmtime(FAR const time_t *timep)
   return gmtime_r(timep, &tm);
 }
 
-#ifndef CONFIG_LIBC_LOCALTIME
 FAR struct tm *localtime(FAR const time_t *timep)
 {
   return gmtime(timep);
 }
-#endif

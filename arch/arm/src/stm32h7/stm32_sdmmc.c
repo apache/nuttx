@@ -1128,9 +1128,11 @@ static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
 #if defined(HAVE_SDMMC_SDIO_MODE)
   if (priv->sdiomode == true)
     {
-      dctrl |= STM32_SDMMC_DCTRL_SDIOEN | STM32_SDMMC_DCTRL_DTMODE_SDIO;
+      dctrl |= STM32_SDMMC_DCTRL_SDIOEN;
     }
 #endif
+
+  dctrl |= STM32_SDMMC_DCTRL_DTMODE_BLOCK;
 
   /* if dlen > priv->blocksize we assume that this is a multi-block transfer
    * and that the len is multiple of priv->blocksize.
@@ -2250,9 +2252,22 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | STM32_SDMMC_CMD_CPSMEN;
 
-  if (cmd & MMCSD_DATAXFR_MASK)
+  switch (cmd & MMCSD_DATAXFR_MASK)
     {
-      regval |= STM32_SDMMC_CMD_CMDTRANS;
+    case MMCSD_RDDATAXFR: /* Read block transfer */
+    case MMCSD_WRDATAXFR: /* Write block transfer */
+    case MMCSD_RDSTREAM:  /* MMC Read stream */
+    case MMCSD_WRSTREAM:  /* MMC Write stream */
+        regval |= STM32_SDMMC_CMD_CMDTRANS;
+        break;
+
+    case MMCSD_NODATAXFR:
+    default:
+      if ((cmd & MMCSD_STOPXFR) != 0)
+        {
+          regval |= STM32_SDMMC_CMD_CMDSTOP;
+        }
+      break;
     }
 
   /* Clear interrupts */

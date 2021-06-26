@@ -1962,16 +1962,7 @@ static void *esp_malloc(unsigned int size)
 
 static void esp_free(void *ptr)
 {
-#ifdef CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP
-  if (xtensa_imm_heapmember(ptr))
-    {
-      xtensa_imm_free(ptr);
-    }
-  else
-#endif
-    {
-      kmm_free(ptr);
-    }
+  kmm_free(ptr);
 }
 
 /****************************************************************************
@@ -2065,6 +2056,7 @@ static void esp_evt_work_cb(FAR void *arg)
   irqstate_t flags;
   struct evt_adpt *evt_adpt;
   struct wifi_notify *notify;
+  wifi_event_sta_disconnected_t *disconnected;
 
   while (1)
     {
@@ -2101,8 +2093,11 @@ static void esp_evt_work_cb(FAR void *arg)
             break;
 
           case WIFI_ADPT_EVT_STA_DISCONNECT:
-            wlinfo("INFO: Wi-Fi sta disconnect\n");
+            disconnected = (wifi_event_sta_disconnected_t *)evt_adpt->buf;
+            wlinfo("INFO: Wi-Fi sta disconnect, reason code: %d\n",
+                                              disconnected->reason);
             g_sta_connected = false;
+#ifdef CONFIG_ESP32C3_WIFI_RECONNECT
             if (g_sta_reconnect)
               {
                 ret = esp_wifi_connect();
@@ -2111,6 +2106,7 @@ static void esp_evt_work_cb(FAR void *arg)
                     wlerr("ERROR: Failed to connect AP error=%d\n", ret);
                   }
               }
+#endif
             break;
 
           case WIFI_ADPT_EVT_STA_STOP:
@@ -5206,6 +5202,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
           return -EINVAL;
         }
 
+      memset(wifi_cfg.sta.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
@@ -5332,6 +5329,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
@@ -6288,8 +6286,8 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
   if (set)
     {
       wifi_cfg.ap.max_connection = ESP_MAX_STA_CONN;
+      memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.ap.password, pdata, len);
-      wifi_cfg.ap.password[len] = '\0';
       if (len)
         {
           wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
@@ -6373,6 +6371,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.ap.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);

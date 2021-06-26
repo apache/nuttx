@@ -56,7 +56,7 @@ endif
 # Additional rules for system call wrapper
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
-  EXTRALINKCMDS += @$(TOPDIR)/syscall/syscall_wraps.ldcmd
+  EXTRALINKCMDS += -Wl,@$(TOPDIR)/syscall/syscall_wraps.ldcmd
 endif
 
 # The "head" object
@@ -93,8 +93,8 @@ LDFLAGS += $(ARCHSCRIPT) $(EXTRALINKCMDS)
 
 # Override in Make.defs if linker is not 'ld'
 
-LDSTARTGROUP ?= --start-group
-LDENDGROUP ?= --end-group
+LDSTARTGROUP ?= -Wl,--start-group
+LDENDGROUP ?= -Wl,--end-group
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
@@ -153,7 +153,7 @@ board$(DELIM)libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) -Wl,--entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)

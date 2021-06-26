@@ -101,7 +101,7 @@ static void xtensa_assert(void)
 #ifdef CONFIG_BOARD_CRASHDUMP
   /* Perform board-specific crash dump */
 
-  board_crashdump(xtensa_getsp(), running_task(), filename, lineno);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */

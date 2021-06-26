@@ -86,12 +86,6 @@ void IRAM_ATTR __start(void)
   uint32_t regval;
   uint32_t sp;
 
-  /* Kill the watchdog timer */
-
-  regval  = getreg32(RTC_CNTL_WDTCONFIG0_REG);
-  regval &= ~RTC_CNTL_WDT_FLASHBOOT_MOD_EN;
-  putreg32(regval, RTC_CNTL_WDTCONFIG0_REG);
-
   /* Make sure that normal interrupts are disabled.  This is really only an
    * issue when we are started in un-usual ways (such as from IRAM).  In this
    * case, we can at least defer some unexpected interrupts left over from
@@ -99,22 +93,6 @@ void IRAM_ATTR __start(void)
    */
 
   up_irq_disable();
-
-#ifdef CONFIG_STACK_COLORATION
-    {
-      register uint32_t *ptr;
-      register int i;
-
-      /* If stack debug is enabled, then fill the stack with a recognizable
-       * value that we can use later to test for high water marks.
-       */
-
-      for (i = 0, ptr = g_idlestack;  i < IDLETHREAD_STACKWORDS; i++)
-        {
-          *ptr++ = STACK_COLOR;
-        }
-    }
-#endif
 
   /* Move the stack to a known location.  Although we were given a stack
    * pointer at start-up, we don't know where that stack pointer is
@@ -142,6 +120,17 @@ void IRAM_ATTR __start(void)
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
   regval &= ~DPORT_APPCPU_CLKGATE_EN;
   putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
+
+  /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
+   * related issues in application. Hence disable that as we are about to
+   * start the NuttX environment.
+   */
+
+  putreg32(RTC_CNTL_WDT_WKEY_VALUE, RTC_CNTL_WDTWPROTECT_REG);
+  regval  = getreg32(RTC_CNTL_WDTCONFIG0_REG);
+  regval &= ~RTC_CNTL_WDT_EN;
+  putreg32(regval, RTC_CNTL_WDTCONFIG0_REG);
+  putreg32(0, RTC_CNTL_WDTWPROTECT_REG);
 
   /* Set CPU frequency configured in board.h */
 

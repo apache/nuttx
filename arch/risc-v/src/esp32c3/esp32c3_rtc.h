@@ -30,6 +30,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/timers/rtc.h>
+#include <sys/types.h>
+#include <time.h>
 #include "hardware/esp32c3_soc.h"
 
 #ifndef __ASSEMBLY__
@@ -136,6 +139,31 @@ struct esp32c3_cpu_freq_config_s
   uint32_t div;                /* Divider, freq_mhz = source_freq_mhz / div */
   uint32_t freq_mhz;           /* CPU clock frequency */
 };
+
+#ifdef CONFIG_RTC_ALARM
+
+/* The form of an alarm callback */
+
+typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+
+enum alm_id_e
+{
+  RTC_ALARM0 = 0,           /* RTC ALARM 0 */
+  RTC_ALARM1 = 1,           /* RTC ALARM 1 */
+  RTC_ALARM_LAST,
+};
+
+/* Structure used to pass parameters to set an alarm */
+
+struct alm_setalarm_s
+{
+  int               as_id;     /* enum alm_id_e */
+  struct timespec   as_time;   /* Alarm expiration time */
+  alm_callback_t    as_cb;     /* Callback (if non-NULL) */
+  FAR void          *as_arg;   /* Argument for callback */
+};
+
+#endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
  * Public Function Prototypes
@@ -443,6 +471,187 @@ void esp32c3_rtc_sleep_set_wakeup_time(uint64_t t);
  ****************************************************************************/
 
 uint64_t esp32c3_rtc_get_time_us(void);
+
+/****************************************************************************
+ * Name: esp32c3_rtc_set_boot_time
+ *
+ * Description:
+ *   Set time to RTC register to replace the original boot time.
+ *
+ * Input Parameters:
+ *   time_us - set time in microseconds.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32c3_rtc_set_boot_time(uint64_t time_us);
+
+/****************************************************************************
+ * Name: esp32c3_rtc_get_boot_time
+ *
+ * Description:
+ *   Get time of RTC register to indicate the original boot time.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   time_us - get time in microseconds.
+ *
+ ****************************************************************************/
+
+uint64_t esp32c3_rtc_get_boot_time(void);
+
+#ifdef CONFIG_RTC_DRIVER
+
+/****************************************************************************
+ * Name: up_rtc_time
+ *
+ * Description:
+ *   Get the current time in seconds.  This is similar to the standard time()
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The current time in seconds
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_RTC_HIRES
+time_t up_rtc_time(void);
+#endif
+
+/****************************************************************************
+ * Name: up_rtc_settime
+ *
+ * Description:
+ *   Set the RTC to the provided time.  All RTC implementations must be
+ *   able to set their time based on a standard timespec.
+ *
+ * Input Parameters:
+ *   tp - the time to use
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_settime(FAR const struct timespec *ts);
+
+/****************************************************************************
+ * Name: up_rtc_initialize
+ *
+ * Description:
+ *   Initialize the hardware RTC per the selected configuration.
+ *   This function is called once during the OS initialization sequence
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_initialize(void);
+
+/****************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC clock/counter.  This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation.  It is used to replace the system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_HIRES
+int up_rtc_gettime(FAR struct timespec *tp);
+#endif
+
+#ifdef CONFIG_RTC_ALARM
+
+/****************************************************************************
+ * Name: up_rtc_setalarm
+ *
+ * Description:
+ *   Set up an alarm.
+ *
+ * Input Parameters:
+ *   alminfo - Information about the alarm configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
+
+/****************************************************************************
+ * Name: up_rtc_cancelalarm
+ *
+ * Description:
+ *   Cancel an alaram.
+ *
+ * Input Parameters:
+ *  alarmid - Identifies the alarm to be cancelled
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_cancelalarm(enum alm_id_e alarmid);
+
+/****************************************************************************
+ * Name: up_rtc_rdalarm
+ *
+ * Description:
+ *   Query an alarm configured in hardware.
+ *
+ * Input Parameters:
+ *  tp      - Location to return the timer match register.
+ *  alarmid - Identifies the alarm to be cancelled
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_rdalarm(FAR struct timespec *tp, uint32_t alarmid);
+
+#endif /* CONFIG_RTC_ALARM */
+
+/****************************************************************************
+ * Name: up_rtc_timer_init
+ *
+ * Description:
+ *   Init RTC timer.
+ *
+ * Input Parameters:
+ *  None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int up_rtc_timer_init(void);
+
+#endif /* CONFIG_RTC_DRIVER */
 
 #ifdef __cplusplus
 }

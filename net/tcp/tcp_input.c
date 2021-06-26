@@ -419,17 +419,13 @@ found:
       (dev->d_len == 0 || dev->d_len == 1) &&
       conn->tx_unacked <= 0)
     {
-      uint32_t ackseq;
+      uint32_t seq;
       uint32_t rcvseq;
 
-      /* Get the sequence number of that has just been acknowledged by this
-       * incoming packet.
-       */
-
-      ackseq = tcp_getsequence(tcp->seqno);
+      seq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
-      if (ackseq < rcvseq)
+      if (TCP_SEQ_LT(seq, rcvseq))
         {
           /* Send a "normal" acknowledgment of the KeepAlive probe */
 
@@ -492,7 +488,7 @@ found:
        * new sequence number.
        */
 
-      if (ackseq <= unackseq)
+      if (TCP_SEQ_LTE(ackseq, unackseq))
         {
           /* Calculate the new number of outstanding, unacknowledged bytes */
 
@@ -708,6 +704,7 @@ found:
 
             conn->tcpstateflags = TCP_ESTABLISHED;
             memcpy(conn->rcvseq, tcp->seqno, 4);
+            conn->rcv_adv = tcp_getsequence(conn->rcvseq);
 
             net_incr32(conn->rcvseq, 1);
             conn->tx_unacked    = 0;

@@ -159,7 +159,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_QENCODER
   /* Initialize and register the qencoder driver */
 
-  ret = board_qencoder_initialize(0, CONFIG_NUCLEO_F401RE_QETIMER);
+  ret = board_qencoder_initialize(0, CONFIG_NUCLEO_F446RE_QETIMER);
   if (ret != OK)
     {
       syslog(LOG_ERR,
@@ -189,6 +189,26 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  /* Initialize GPIO driver */
+
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_gpio_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DAC
+  /* Initialize DAC and register the DAC driver. */
+
+  ret = stm32_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start ADC1: %d\n", ret);
     }
 #endif
 

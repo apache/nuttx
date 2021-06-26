@@ -1232,6 +1232,10 @@ static void stm32_eventtimeout(wdparm_t arg)
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 ||
               priv->wkupevent != 0);
 
+  mcinfo("sta: %08" PRIx32 " enabled irq: %08" PRIx32 "\n",
+         getreg32(STM32_SDIO_STA),
+         getreg32(STM32_SDIO_MASK));
+
   /* Is a data transfer complete event expected? */
 
   if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
@@ -1917,8 +1921,9 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDIO_CMD_CPSMEN;
 
-  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
-         cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32
+         " enabled irq: %08" PRIx32 "\n",
+         cmd, arg, regval, getreg32(STM32_SDIO_MASK));
 
   /* Write the SDIO CMD */
 

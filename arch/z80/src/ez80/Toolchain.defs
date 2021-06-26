@@ -64,7 +64,7 @@ ARCHASMINCLUDES = -include chip/clang-compat.asm
 ARCHASMLIST =
 ARCHASMWARNINGS = -W
 
-LDFLAGS += -gc-sections
+LDFLAGS += -Wl,-gc-sections
 
 # Tool names/paths.
 
@@ -72,7 +72,7 @@ CROSSDEV = ez80-none-elf-
 CC = $(CROSSDEV)clang
 CPP = $(CC) -E -P -x c
 STRIP = $(CROSSDEV)strip --strip-unneeded
-LD = $(CROSSDEV)ld
+LD = $(CROSSDEV)gcc
 AS = $(CROSSDEV)as
 AR = $(CROSSDEV)ar -r
 OBJCOPY= $(CROSSDEV)objcopy

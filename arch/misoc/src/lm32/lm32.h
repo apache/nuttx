@@ -37,14 +37,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is the value used to mark the stack for subsequent stack monitoring
- * logic.
- */
-
-#define STACK_COLOR             0xdeadbeef
-#define INTSTACK_COLOR          0xdeadbeef
-#define HEAP_COLOR              'h'
-
 /* In the LM32 model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
  */
