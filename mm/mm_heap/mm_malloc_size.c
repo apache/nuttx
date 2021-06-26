@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_heap/mm_malloc_usable_size.c
+ * mm/mm_heap/mm_malloc_size.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,7 +36,7 @@
  * Public Functions
  ****************************************************************************/
 
-size_t malloc_usable_size(FAR void *mem)
+size_t malloc_size(FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
 
