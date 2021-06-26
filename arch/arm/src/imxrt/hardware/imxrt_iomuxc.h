@@ -154,6 +154,9 @@
 #define IOMUX_CAN_DEFAULT                     (IOMUX_SLEW_SLOW | \
                                                IOMUX_DRIVE_50OHM | IOMUX_SPEED_LOW )
 
+#define IOMUX_PWM_DEFAULT                     (IOMUX_SLEW_FAST | \
+                                               IOMUX_DRIVE_50OHM | IOMUX_SPEED_LOW )
+
 #define IOMUX_USDHC1_DATAX_DEFAULT            (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
                                                IOMUX_PULL_UP_47K | IOMUX_SCHMITT_TRIGGER)
 #define IOMUX_USDHC1_CMD_DEFAULT              (IOMUX_SLEW_FAST | IOMUX_DRIVE_130OHM | \
