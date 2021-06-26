@@ -52,7 +52,7 @@ ENET        Yes
 FlexIO      No
 GPIO        Yes
 I2S         Yes
-PWM         No
+PWM         Yes
 SAI         No
 SPDIF       No
 SPI         Yes
@@ -150,7 +150,9 @@ as a slave. The lower-half of this driver is initialize by calling :c:func:`imxr
 PWM
 ---
 
-Pulse width modulator supported in i.MX RT1010 and higher.
+Pulse width modulator supported in i.MX RT1010 and higher. Multiple channels option is evailable.
+Output on pin B is currently supported only as a complementary option to pin A.
+The lower-half of this driver is initialize by calling :c:func:`imxrt_pwminitialize`.
 
 SAI
 ---
