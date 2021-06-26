@@ -430,6 +430,15 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 #endif /* CONFIG_DEBUG_MM */
 
 /****************************************************************************
+ * Name: malloc_size
+ ****************************************************************************/
+
+size_t malloc_size(FAR void *mem)
+{
+  return host_malloc_size(mem);
+}
+
+/****************************************************************************
  * Name: up_allocate_heap
  *
  * Description:

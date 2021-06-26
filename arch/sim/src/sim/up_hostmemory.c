@@ -32,6 +32,12 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -117,6 +123,15 @@ void *host_alloc_shmem(const char *name, size_t size, int master)
 void host_free_shmem(void *mem)
 {
   munmap(mem, 0);
+}
+
+size_t host_malloc_size(void *mem)
+{
+#ifdef __APPLE__
+  return malloc_size(mem);
+#else
+  return malloc_usable_size(mem);
+#endif
 }
 
 void *host_memalign(size_t alignment, size_t size)
