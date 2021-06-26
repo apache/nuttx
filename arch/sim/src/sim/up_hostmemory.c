@@ -118,26 +118,6 @@ void host_free_shmem(void *mem)
   munmap(mem, 0);
 }
 
-void *host_malloc(size_t size)
-{
-  return malloc(size);
-}
-
-void host_free(void *mem)
-{
-  free(mem);
-}
-
-void *host_realloc(void *oldmem, size_t size)
-{
-  return realloc(oldmem, size);
-}
-
-void *host_calloc(size_t n, size_t elem_size)
-{
-  return calloc(n , elem_size);
-}
-
 void *host_memalign(size_t alignment, size_t size)
 {
   void *p;
@@ -150,4 +130,14 @@ void *host_memalign(size_t alignment, size_t size)
     }
 
   return p;
+}
+
+void host_free(void *mem)
+{
+  free(mem);
+}
+
+void *host_realloc(void *oldmem, size_t size)
+{
+  return realloc(oldmem, size);
 }
