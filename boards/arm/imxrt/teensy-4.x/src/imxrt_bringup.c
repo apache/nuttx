@@ -163,6 +163,15 @@ int imxrt_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_IMXRT_FLEXPWM
+  ret = imxrt_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imxrt_pwm_setup() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */
 

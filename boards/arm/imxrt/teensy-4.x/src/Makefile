@@ -46,6 +46,10 @@ ifeq ($(CONFIG_IMXRT_FLEXCAN),y)
 CSRCS += imxrt_flexcan.c
 endif
 
+ifeq ($(CONFIG_IMXRT_FLEXPWM),y)
+CSRCS += imxrt_flexpwm.c
+endif
+
 ifeq ($(CONFIG_IMXRT_ENET),y)
 CSRCS += imxrt_ethernet.c
 endif
