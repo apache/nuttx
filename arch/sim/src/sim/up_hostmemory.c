@@ -28,6 +28,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <stdatomic.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -39,6 +40,13 @@
 #endif
 
 #include "up_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static atomic_int g_aordblks;
+static atomic_int g_uordblks;
 
 /****************************************************************************
  * Public Functions
@@ -145,28 +153,59 @@ void *host_memalign(size_t alignment, size_t size)
       return NULL;
     }
 
+  size = host_malloc_size(p);
+  g_aordblks += 1;
+  g_uordblks += size;
+
   return p;
 }
 
 void host_free(void *mem)
 {
+  size_t size;
+
+  if (mem == NULL)
+    {
+      return;
+    }
+
+  size = host_malloc_size(mem);
+  g_aordblks -= 1;
+  g_uordblks -= size;
   free(mem);
 }
 
 void *host_realloc(void *oldmem, size_t size)
 {
-  return realloc(oldmem, size);
+  size_t oldsize;
+  void *mem;
+
+  if (size == 0)
+    {
+      host_free(oldmem);
+      return NULL;
+    }
+  else if (oldmem == NULL)
+    {
+      return host_memalign(sizeof(void *), size);
+    }
+
+  oldsize = host_malloc_size(oldmem);
+  mem = realloc(oldmem, size);
+  if (mem == NULL)
+    {
+      return NULL;
+    }
+
+  size = host_malloc_size(mem);
+  g_uordblks -= oldsize;
+  g_uordblks += size;
+
+  return mem;
 }
 
-void host_mallinfo(struct host_mallinfo *info)
+void host_mallinfo(int *aordblks, int *uordblks)
 {
-  struct mallinfo tmp;
-
-  tmp = mallinfo();
-  info->arena = tmp.arena;
-  info->ordblks = tmp.ordblks;
-  info->aordblks = tmp.hblks;
-  info->mxordblk = tmp.usmblks;
-  info->uordblks = tmp.uordblks;
-  info->fordblks = tmp.fordblks;
+  *aordblks = g_aordblks;
+  *uordblks = g_uordblks;
 }
