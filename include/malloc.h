@@ -31,6 +31,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define malloc_usable_size malloc_size
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -58,7 +60,7 @@ extern "C"
 #endif
 
 struct mallinfo mallinfo(void);
-size_t malloc_usable_size(FAR void *ptr);
+size_t malloc_size(FAR void *ptr);
 
 #if defined(__cplusplus)
 }

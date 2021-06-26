@@ -3645,7 +3645,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
           return NULL;
         }
 
-      old_size = malloc_usable_size(old_ptr);
+      old_size = malloc_size(old_ptr);
       DEBUGASSERT(old_size > 0);
       memcpy(new_ptr, old_ptr, MIN(old_size, size));
       kmm_free(old_ptr);
