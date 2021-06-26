@@ -148,6 +148,7 @@ size_t host_malloc_size(void *mem);
 void *host_memalign(size_t alignment, size_t size);
 void host_free(void *mem);
 void *host_realloc(void *oldmem, size_t size);
+void host_mallinfo(int *aordblks, int *uordblks);
 
 /* up_hosttime.c ************************************************************/
 
