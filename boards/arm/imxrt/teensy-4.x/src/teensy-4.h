@@ -163,6 +163,18 @@ int imxrt_can_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: imxrt_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_FLEXPWM
+int imxrt_pwm_setup(void);
+#endif
+
+/****************************************************************************
  * Name: imxrt_adc_initialize
  *
  * Description:
