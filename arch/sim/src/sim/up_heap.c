@@ -24,11 +24,13 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 
 #include "up_internal.h"
@@ -151,10 +153,10 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
   heap->mm_impl = impl;
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  heap_impl->mm_procfs.name = name;
-  heap_impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
-  heap_impl->mm_procfs.user_data = heap;
-  procfs_register_meminfo(&heap_impl->mm_procfs);
+  impl->mm_procfs.name = name;
+  impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  impl->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&impl->mm_procfs);
 #endif
 }
 
