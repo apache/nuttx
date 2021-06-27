@@ -323,7 +323,7 @@ static void rng_reseed(void)
   g_rng.output_initialized = true;
 }
 
-static void rng_buf_internal(FAR void *bytes, size_t nbytes)
+static void rng_buf_internal(FAR uint8_t *bytes, size_t nbytes)
 {
   if (!g_rng.output_initialized)
     {

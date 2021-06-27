@@ -242,7 +242,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
@@ -253,6 +253,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 #endif
+      tcb->flags |= TCB_FLAG_FREE_STACK;
 
       board_autoled_on(LED_STACKCREATED);
       return OK;
@@ -280,7 +281,8 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
   /* Take extra care that we do not write outside the stack boundaries */
 
   start = STACK_ALIGN_UP((uintptr_t)stackbase);
-  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+  end   = nbytes ? STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
+          up_getsp(); /* 0: colorize the running stack */
 
   /* Get the adjusted size based on the top and bottom of the stack */
 

@@ -754,39 +754,39 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_init
+ * Name: up_textheap_init
  *
  * Description:
- *   Initialize the module text allocator
+ *   Initialize the text heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-void up_module_text_init(void);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+void up_textheap_init(void);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_memalign
+ * Name: up_textheap_memalign
  *
  * Description:
- *   Allocate memory for module text with the specified alignment.
+ *   Allocate memory from the text heap with the specified alignment.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-FAR void *up_module_text_memalign(size_t align, size_t size);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+FAR void *up_textheap_memalign(size_t align, size_t size);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_free
+ * Name: up_textheap_free
  *
  * Description:
- *   Free memory for module text.
+ *   Free memory from the text heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-void up_module_text_free(FAR void *p);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+void up_textheap_free(FAR void *p);
 #endif
 
 /****************************************************************************
@@ -1686,6 +1686,23 @@ int up_timer_cancel(FAR struct timespec *ts);
 #if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
 int up_timer_start(FAR const struct timespec *ts);
 #endif
+
+/****************************************************************************
+ * Name: up_getsp
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current stack pointer.
+ *
+ ****************************************************************************/
+
+/* uintptr_t up_getsp(void);
+ *
+ * The actual declaration or definition is provided in arch/arch.h.
+ * The actual implementation may be a MACRO or an inline function.
+ */
 
 /****************************************************************************
  * TLS support

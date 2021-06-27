@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_modtext.c
+ * boards/arm/stm32/nucleo-f446re/src/stm32_dac.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,61 +23,88 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-#include <string.h>
-#include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/kmalloc.h>
+#include <nuttx/analog/dac.h>
+#include <arch/board/board.h>
+
+#include "stm32_dac.h"
+#include "nucleo-f446re.h"
+
+#ifdef CONFIG_DAC
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-#define D_I_BUS_OFFSET  0x700000
+#ifdef CONFIG_STM32_DAC1CH1
+static struct dac_dev_s *g_dac1;
+#endif
+
+#ifdef CONFIG_STM32_DAC1CH2
+static struct dac_dev_s *g_dac2;
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_module_text_init()
+ * Name: stm32_dac_setup
+ *
+ * Description:
+ *   Initialize and register the DAC driver.
+ *
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/dac0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
-void up_module_text_init()
+int stm32_dac_setup(void)
 {
-}
-
-/****************************************************************************
- * Name: up_module_text_memalign()
- ****************************************************************************/
-
-FAR void *up_module_text_memalign(size_t align, size_t size)
-{
-  FAR void *ret;
-
-  ret = kmm_memalign(align, size);
-  if (ret)
+  int ret;
+#ifdef CONFIG_STM32_DAC1CH1
+  g_dac1 = stm32_dacinitialize(1);
+  if (g_dac1 == NULL)
     {
-      ret += D_I_BUS_OFFSET;
+      aerr("ERROR: Failed to get DAC interface\n");
+      return -ENODEV;
     }
 
-  return ret;
-}
+  /* Register the DAC driver at "/dev/dac0" */
 
-/****************************************************************************
- * Name: up_module_text_free()
- ****************************************************************************/
-
-void up_module_text_free(FAR void *p)
-{
-  if (p)
+  ret = dac_register("/dev/dac0", g_dac1);
+  if (ret < 0)
     {
-      p -= D_I_BUS_OFFSET;
+      aerr("ERROR: dac_register() failed: %d\n", ret);
+      return ret;
     }
 
-  kmm_free(p);
+#endif
+#ifdef CONFIG_STM32_DAC1CH2
+  g_dac2 = stm32_dacinitialize(2);
+  if (g_dac2 == NULL)
+    {
+      aerr("ERROR: Failed to get DAC interface\n");
+      return -ENODEV;
+    }
+
+  /* Register the DAC driver at "/dev/dac1" */
+
+  ret = dac_register("/dev/dac1", g_dac2);
+  if (ret < 0)
+    {
+      aerr("ERROR: dac_register() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  UNUSED(ret);
+  return OK;
 }
+
+#endif  /* CONFIG_DAC */

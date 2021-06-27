@@ -377,6 +377,14 @@
 #  endif
 #endif
 
+/* The number of required injected channels */
+
+#ifdef CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND
+#  define FOC_ADC_INJ_CHAN_REQUIRED (CONFIG_MOTOR_FOC_SHUNTS + 1)
+#else
+#  define FOC_ADC_INJ_CHAN_REQUIRED (CONFIG_MOTOR_FOC_SHUNTS)
+#endif
+
 /* Validate ADC configuration:
  *   1. ADC must be supported by chip,
  *   2. ADC support for injected channels must be enabled,
@@ -393,7 +401,7 @@
 #  if CONFIG_STM32_ADC1_ANIOC_TRIGGER != 1
 #    error CONFIG_STM32_ADC1_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32_ADC1_INJECTED_CHAN != CONFIG_MOTOR_FOC_SHUNTS
+#  if CONFIG_STM32_ADC1_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC1 injected channles
 #  endif
 #endif
@@ -407,7 +415,7 @@
 #  if CONFIG_STM32_ADC2_ANIOC_TRIGGER != 1
 #    error CONFIG_STM32_ADC2_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32_ADC2_INJECTED_CHAN != CONFIG_MOTOR_FOC_SHUNTS
+#  if CONFIG_STM32_ADC2_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC2 injected channles
 #  endif
 #endif
@@ -421,7 +429,7 @@
 #  if CONFIG_STM32_ADC3_ANIOC_TRIGGER != 1
 #    error CONFIG_STM32_ADC3_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32_ADC3_INJECTED_CHAN != CONFIG_MOTOR_FOC_SHUNTS
+#  if CONFIG_STM32_ADC3_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC3 injected channles
 #  endif
 #endif
@@ -435,8 +443,16 @@
 #  if CONFIG_STM32_ADC4_ANIOC_TRIGGER != 1
 #    error CONFIG_STM32_ADC4_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32_ADC4_INJECTED_CHAN != CONFIG_MOTOR_FOC_SHUNTS
+#  if CONFIG_STM32_ADC4_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC4 injected channles
+#  endif
+#endif
+
+/* Max 3 shunts supported if STM32G4 ADC CHAN0 workaround enabled */
+
+#ifdef CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND
+#  if CONFIG_MOTOR_FOC_SHUNTS > 3
+#    error
 #  endif
 #endif
 
@@ -767,6 +783,8 @@ static int stm32_foc_worker_handler(FAR struct foc_dev_s *dev);
 
 /* Helpers */
 
+static void stm32_foc_curr_get(FAR struct foc_dev_s *dev,
+                               FAR int16_t *curr, int shunts);
 static int stm32_foc_notifier_cfg(FAR struct foc_dev_s *dev, uint32_t freq);
 static int stm32_foc_pwm_cfg(FAR struct foc_dev_s *dev, uint32_t freq);
 static int stm32_foc_adc_cfg(FAR struct foc_dev_s *dev);
@@ -1521,21 +1539,16 @@ static int stm32_foc_ioctl(FAR struct foc_dev_s *dev, int cmd,
 static int stm32_foc_adc_calibration_handler(FAR struct foc_dev_s *dev)
 {
   FAR struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
-  FAR struct stm32_adc_dev_s  *adc  = ADC_FROM_FOC_DEV_GET(dev);
   int                          i    = 0;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(priv);
-  DEBUGASSERT(adc);
 
   if (priv->data.adcint_cntr < CAL_SAMPLES)
     {
-      /* Get raw currents */
+      /* Get raw current samples */
 
-      for (i = 0; i < CONFIG_MOTOR_FOC_SHUNTS; i += 1)
-        {
-          priv->data.curr_raw[i] = (int16_t)STM32_ADC_INJDATA_GET(adc, i);
-        }
+      stm32_foc_curr_get(dev, priv->data.curr_raw, CONFIG_MOTOR_FOC_SHUNTS);
 
       /* Get sum */
 
@@ -1677,7 +1690,6 @@ static int stm32_foc_worker_handler(FAR struct foc_dev_s *dev)
   FAR struct stm32_foc_priv_s  *priv  = STM32_FOC_PRIV_FROM_DEV_GET(dev);
   FAR struct stm32_foc_board_s *board = STM32_FOC_BOARD_FROM_DEV_GET(dev);
   FAR struct stm32_adc_dev_s   *adc   = ADC_FROM_FOC_DEV_GET(dev);
-  int                           i     = 0;
   int                           ret   = OK;
 
   DEBUGASSERT(dev);
@@ -1689,16 +1701,9 @@ static int stm32_foc_worker_handler(FAR struct foc_dev_s *dev)
 
   if (priv->data.adcint_cntr % priv->data.notifier_div == 0)
     {
-      for (i = 0; i < CONFIG_MOTOR_FOC_SHUNTS; i += 1)
-        {
-          /* Get raw current samples.
-           * We have ADC offset enabled for injected channels so this
-           * gives us signed values.
-           * NOTE: ADC value is 11 bits + sign.
-           */
+      /* Get raw current samples */
 
-          priv->data.curr_raw[i] = (int16_t)STM32_ADC_INJDATA_GET(adc, i);
-        }
+      stm32_foc_curr_get(dev, priv->data.curr_raw, CONFIG_MOTOR_FOC_SHUNTS);
 
       /* Get phase currents */
 
@@ -1923,6 +1928,44 @@ static void stm32_foc_hw_config_get(FAR struct foc_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: stm32_foc_curr_get
+ *
+ * Description:
+ *   Get current samples from ADC
+ *
+ ****************************************************************************/
+
+static void stm32_foc_curr_get(FAR struct foc_dev_s *dev,
+                               FAR int16_t *curr, int shunts)
+{
+  FAR struct stm32_foc_priv_s *priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+  FAR struct stm32_adc_dev_s  *adc  = ADC_FROM_FOC_DEV_GET(dev);
+  int                          i    = 0;
+
+  DEBUGASSERT(dev);
+  DEBUGASSERT(priv);
+  DEBUGASSERT(adc);
+  DEBUGASSERT(curr);
+
+  for (i = 0; i < shunts; i += 1)
+    {
+      /* Get raw current samples.
+       * We have ADC offset enabled for injected channels so this
+       * gives us signed values.
+       * NOTE: ADC value is 11 bits + sign.
+       */
+
+#ifdef CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND
+      /* Ignore first channel */
+
+      curr[i] = (int16_t)STM32_ADC_INJDATA_GET(adc, (i + 1));
+#else
+      curr[i] = (int16_t)STM32_ADC_INJDATA_GET(adc, i);
+#endif
+    }
+}
+
+/****************************************************************************
  * Name: stm32_foc_notifier_cfg
  *
  * Description:
@@ -2112,7 +2155,11 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
   uint8_t                        pwm_inst  = 0;
   uint8_t                        adc_inst  = 0;
   uint32_t                       pwmfzbit  = 0;
-  int                            j         = 0;
+  int                            i         = 0;
+#ifdef CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND
+  FAR uint8_t                   *adc_chan  = NULL;
+  uint8_t                        adc_nchan = 0;
+#endif
 
   DEBUGASSERT(board != NULL);
   DEBUGASSERT(board->ops != NULL);
@@ -2237,9 +2284,9 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
   DEBUGASSERT(adc_cfg->pins != NULL);
   DEBUGASSERT(adc_cfg->chan != NULL);
 
-  for (j = 0; j < adc_cfg->nchan; j++)
+  for (i = 0; i < adc_cfg->nchan; i++)
     {
-      stm32_configgpio(adc_cfg->pins[j]);
+      stm32_configgpio(adc_cfg->pins[i]);
     }
 
   /* Make sure that we are using the appropriate ADC interface */
@@ -2252,11 +2299,55 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
       goto errout;
     }
 
+  /* STM32G4 ADC channel 0 unwanted conversion workaround */
+
+#ifdef CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND
+  /* Add one dummy channel to conversion */
+
+  adc_nchan = (adc_cfg->nchan + 1);
+
+  /* Allocate memory for the extended list of channels */
+
+  adc_chan = zalloc(adc_nchan);
+  if (adc_chan == NULL)
+    {
+      goto errout;
+    }
+
+  /* Copy regular channels first */
+
+  for (i = 0; i < adc_cfg->regch; i += 1)
+    {
+      adc_chan[i] = adc_cfg->chan[i];
+    }
+
+  /* Add dummy channel at the beginning of injected channels */
+
+  adc_chan[adc_cfg->regch] = 0;
+
+  /* Copy injected channels */
+
+  for (i = (adc_cfg->regch + 1); i < adc_nchan; i += 1)
+    {
+      adc_chan[i] = adc_cfg->chan[i - 1];
+    }
+
+#endif  /* CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND */
+
   /* Get the ADC interface */
 
+#ifdef CONFIG_STM32_FOC_G4_ADCCHAN0_WORKAROUND
+  foc_dev->adc_dev = stm32_adcinitialize(adc_inst,
+                                         adc_chan,
+                                         adc_nchan);
+
+  free(adc_chan);
+#else
   foc_dev->adc_dev = stm32_adcinitialize(adc_inst,
                                          adc_cfg->chan,
                                          adc_cfg->nchan);
+#endif
+
   if (foc_dev->adc_dev == NULL)
     {
       mtrerr("Failed to get ADC%d interface\n", adc_cfg->intf);

@@ -26,12 +26,20 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += mpfs_appinit.c
 endif
 
+ifeq ($(CONFIG_I2C),y)
+CSRCS += mpfs_i2c.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += mpfs_autoleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += mpfs_ostest.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+CSRCS += mpfs_board_spi.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

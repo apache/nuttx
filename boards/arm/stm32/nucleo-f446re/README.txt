@@ -559,6 +559,24 @@ Configurations
     Functionality of CAN driver can be tested by calling application
     "can" in NuttShell. This application sends 100 messages over CAN 1.
 
+  dac:
+  ----
+    This is an nsh configuration (see above) with added support
+    for digital analog converter driver.
+
+    Functionality of DAC driver can be tested by calling application
+    "dac" in NuttShell. GPIO_DAC1_OUT1 pin is set on PA_4.
+
+  gpio:
+  -----
+    This is an nsh configuration (see above) with added support for GPIO
+    driver and GPIO test application "gpio". Three pins are configured for
+    testing purposes:
+
+    PA_7 - GPIO_INPUT
+    PB_6 - GPIO_OUTPUT
+    PC_7 - GPIO_INPUT_INTERRUPT
+
   ihm08m1_f32 and ihm08m1_b16:
   ----------------------------
 

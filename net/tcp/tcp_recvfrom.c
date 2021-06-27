@@ -511,53 +511,6 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: tcp_ackhandler
- *
- * Description:
- *   This function is called with the network locked to send the ACK in
- *   response by the lower, device interfacing layer.
- *
- * Input Parameters:
- *   dev      The structure of the network driver that generated the event.
- *   pvconn   The connection structure associated with the socket
- *   flags    Set of events describing why the callback was invoked
- *
- * Returned Value:
- *   ACK should be send in the response.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static uint16_t tcp_ackhandler(FAR struct net_driver_s *dev,
-                               FAR void *pvconn, FAR void *pvpriv,
-                               uint16_t flags)
-{
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
-
-  ninfo("flags: %04x\n", flags);
-
-  if (conn != NULL && (flags & TCP_POLL) != 0)
-    {
-      /* Indicate that the data has been consumed and that an ACK
-       * should be send.
-       */
-
-      if (tcp_get_recvwindow(dev, conn) != 0 &&
-          conn->rcv_wnd == 0)
-        {
-          flags |= TCP_SNDACK;
-        }
-
-      tcp_callback_free(conn, conn->rcv_ackcb);
-      conn->rcv_ackcb = NULL;
-    }
-
-  return flags;
-}
-
-/****************************************************************************
  * Name: tcp_recvfrom_initialize
  *
  * Description:
@@ -816,15 +769,9 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
    * not only this particular connection.
    */
 
-  if (conn->rcv_wnd == 0 && conn->rcv_ackcb == NULL)
+  if (tcp_should_send_recvwindow(conn))
     {
-      conn->rcv_ackcb = tcp_callback_alloc(conn);
-      if (conn->rcv_ackcb)
-        {
-          conn->rcv_ackcb->flags   = TCP_POLL;
-          conn->rcv_ackcb->event   = tcp_ackhandler;
-          netdev_txnotify_dev(conn->dev);
-        }
+      netdev_txnotify_dev(conn->dev);
     }
 
   net_unlock();

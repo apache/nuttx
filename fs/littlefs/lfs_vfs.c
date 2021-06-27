@@ -926,7 +926,7 @@ static int littlefs_sync_block(FAR const struct lfs_config *c)
 
   if (INODE_IS_MTD(drv))
     {
-      ret = MTD_IOCTL(drv->u.i_mtd, BIOC_FLUSH, 0);
+      ret = MTD_IOCTL(drv->u.i_mtd, MTDIOC_FLUSH, 0);
     }
   else
     {

@@ -88,6 +88,7 @@
 #define RP2040_VREG_AND_CHIP_RESET_BASE  0x40064000  /* control and status for on-chip voltage regulator and chip level reset subsystem */
 #define RP2040_TBMAN_BASE                0x4006c000  /* Testbench manager. Allows the programmer to know what platform their software is running on. */
 #define RP2040_DMA_BASE                  0x50000000  /* DMA with separate read and write masters */
+#define RP2040_USBCTRL_DPSRAM_BASE       0x50100000  /* USB Dual Port SRAM */
 #define RP2040_USBCTRL_REGS_BASE         0x50110000  /* USB FS/LS controller device registers */
 #define RP2040_PIO0_BASE                 0x50200000  /* Programmable IO block */
 #define RP2040_PIO1_BASE                 0x50300000  /* Programmable IO block */

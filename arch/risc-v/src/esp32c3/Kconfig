@@ -151,9 +151,14 @@ config ESP32C3_CPU_FREQ_MHZ
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
+	select ESP32C3_TIMER0
 
 config ESP32C3_DISABLE_STDC_ATOMIC
 	bool "Disable standard C atomic"
+	default n
+
+config ESP32C3_RTC_HEAP
+	bool "Use the RTC memory as a separate heap"
 	default n
 
 menu "ESP32-C3 Peripheral Support"
@@ -179,6 +184,12 @@ config ESP32C3_TIMER
 config ESP32C3_WDT
 	bool
 	default n
+
+config ESP32C3_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32-C3 efuse support.
 
 config ESP32C3_SPI
 	bool
@@ -298,6 +309,23 @@ config ESP32C3_WIRELESS
 config ESP32C3_AES_ACCELERATOR
 	bool "AES Accelerator"
 	default n
+config ESP32C3_SHA_ACCELERATOR
+	bool "SHA Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 SHA accelerator support.
+
+config ESP32C3_BIGNUM_ACCELERATOR
+	bool "BIGNUM Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 BIGNUM accelerator support.
+
+config ESP32C3_RSA_ACCELERATOR
+	bool "RSA Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 RSA accelerator support.
 
 endmenu # ESP32-C3 Peripheral Support
 
@@ -728,6 +756,12 @@ choice EXAMPLE_POWER_SAVE_MODE
 		bool "maximum modem"
 endchoice
 
+config ESP32C3_WIFI_RECONNECT
+	bool "Enable Wi-Fi to reconnect"
+	default n
+	---help---
+		Select this option to enable Wi-Fi to reconnect for station when disconnected.
+
 endmenu # ESP32C3_WIRELESS
 
 menu "SPI Flash configuration"
@@ -811,5 +845,31 @@ config ESP32C3_AES_ACCELERATOR_TEST
 	default n
 
 endmenu # AES accelerator
+menu "SHA accelerator"
+	depends on ESP32C3_SHA_ACCELERATOR
+
+config ESP32C3_SHA_ACCELERATOR_TEST
+	bool "SHA accelerator test"
+	default n
+
+endmenu # ESP32C3_SHA_ACCELERATOR
+
+menu "RSA Accelerate Configuration"
+	depends on ESP32C3_RSA_ACCELERATOR
+
+config ESP32C3_RSA_ACCELERATOR_TEST
+	bool "RSA driver test"
+	default n
+
+menu "BIGNUM"
+	depends on ESP32C3_BIGNUM_ACCELERATOR
+
+config ESP32C3_BIGNUM_ACCELERATOR_TEST
+	bool "BIGNUM driver test"
+	default n
+
+endmenu # ESP32C3_BIGNUM_ACCELERATOR
+
+endmenu # ESP32C3_RSA_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32C3

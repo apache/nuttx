@@ -35,6 +35,7 @@
 
 #  include "imxrt_gpio.h"
 #  include "imxrt_iomuxc.h"
+#  include "hardware/imxrt_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -111,6 +112,12 @@
 #define GPIO_ENET_RST   (GPIO_OUTPUT | GPIO_OUTPUT_ZERO | \
                          GPIO_PORT2 | GPIO_PIN14 | IOMUX_ENET_RST_DEFAULT) /* B0_14 */
 
+/* Quadrature Encoder */
+
+#define GPIO_ENC1_PHASE_A    (GPIO_XBAR1_INOUT09_1|IOMUX_ENC_DEFAULT|PADMUX_MUXMODE_ALT3)  /* EMC_07 */
+#define GPIO_ENC1_PHASE_B    (GPIO_XBAR1_INOUT08_1|IOMUX_ENC_DEFAULT|PADMUX_MUXMODE_ALT3)  /* EMC_06 */
+#define GPIO_ENC1_INDEX      (GPIO_XBAR1_INOUT10_1|IOMUX_ENC_DEFAULT|PADMUX_MUXMODE_ALT1)  /* B0_12 */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -165,6 +172,18 @@ int imxrt_can_setup(void);
 
 #ifdef CONFIG_IMXRT_ADC
 int imxrt_adc_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: imxrt_enc_initialize
+ *
+ * Description:
+ *   Initialize the quadrature encoder driver for the given timer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_ENC
+int imxrt_enc_initialize(void);
 #endif
 
 /****************************************************************************

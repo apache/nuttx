@@ -109,6 +109,18 @@ ifeq ($(CONFIG_ESP32C3_RT_TIMER),y)
 CHIP_CSRCS += esp32c3_rt_timer.c
 endif
 
+ifeq ($(CONFIG_ESP32C3_BIGNUM_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_bignum.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_RSA_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_rsa.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp32c3_sha.c
+endif
+
 ifeq ($(CONFIG_ESP32C3_FREERUN),y)
 CHIP_CSRCS += esp32c3_freerun.c
 endif
@@ -142,8 +154,22 @@ ifeq ($(CONFIG_ESP32C3_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32c3_aes.c
 endif
 
-ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT),y)
-CHIP_CSRCS += esp32c3_modtext.c
+ifeq ($(CONFIG_ESP32C3_EFUSE),y)
+CHIP_CSRCS += esp32c3_efuse.c
+CHIP_CSRCS += esp32c3_efuse_table.c
+CHIP_CSRCS += esp32c3_efuse_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += esp32c3_textheap.c
+endif
+
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += esp32c3_rtc_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_ESP32C3_RTC_HEAP),y)
+CHIP_CSRCS += esp32c3_rtc_heap.c
 endif
 
 ifeq ($(CONFIG_ESP32C3_WIRELESS),y)

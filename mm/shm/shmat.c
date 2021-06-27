@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/shm.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>

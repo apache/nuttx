@@ -97,8 +97,8 @@ CHIP_CSRCS += cxd56_testset.c
 endif
 endif
 
-ifeq ($(CONFIG_ARCH_USE_MODULE_TEXT), y)
-CHIP_CSRCS += cxd56_modtext.c
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP), y)
+CHIP_CSRCS += cxd56_textheap.c
 endif
 
 ifeq ($(CONFIG_CXD56_UART0),y)

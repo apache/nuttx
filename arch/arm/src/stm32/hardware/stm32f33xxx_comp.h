@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_COMP_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_COMP_H
 
 /****************************************************************************
  * Included Files
@@ -32,6 +32,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* This is implementation for STM32 COMP IP version 1. Supported devices
+ *   -  STM32F33XX
+ */
+
+#define HAVE_IP_COMP_V1 1
+
+/* TODO: Undef other STM32 COMP IP versions */
 
 /* Register Offsets *********************************************************/
 
@@ -105,4 +113,4 @@
 #define COMP_CSR_OUT                (1 << 30)                     /* Bit 30: comparator output */
 #define COMP_CSR_LOCK               (1 << 31)                     /* Bit 31: comparator lock */
 
-#endif                          /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_COMP_H */
+#endif                          /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_COMP_H */

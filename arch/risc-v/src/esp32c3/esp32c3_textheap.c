@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_modtext.c
+ * arch/risc-v/src/esp32c3/esp32c3_textheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,73 +33,93 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
+#include "hardware/esp32c3_soc.h"
+
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+#include "esp32c3_rtc_heap.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SYSBUS_ADDRESS_OFFSET 0x20000000
+#define D_I_BUS_OFFSET  0x700000
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_module_text_init()
+ * Name: up_textheap_init()
  ****************************************************************************/
 
-void up_module_text_init()
+void up_textheap_init()
 {
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+  /* Initialize the RTC heap */
+
+  esp32c3_rtc_heap_initialize();
+#endif
 }
 
 /****************************************************************************
- * Name: up_module_text_memalign()
+ * Name: up_textheap_memalign()
+ *
+ * Description:
+ *   Allocate memory for module text with the specified alignment.
+ *
  ****************************************************************************/
 
-FAR void *up_module_text_memalign(size_t align, size_t size)
+FAR void *up_textheap_memalign(size_t align, size_t size)
 {
-  FAR void *ret;
-  ret = (FAR void *)kmm_malloc(size);
+  FAR void *ret = NULL;
 
-#ifdef CONFIG_CXD56_USE_SYSBUS
-  if (ret)
-    {
-      binfo("** ret=%p \n", ret);
+  /* Prioritise allocating from RTC. If that fails, allocate from the
+   * main heap.
+   */
 
-      /* NOTE:
-       * kmm_malloc() will return the address in SYSBUS.
-       * So convert the address to I/D BUS.
-       */
-
-      ret -= SYSBUS_ADDRESS_OFFSET;
-
-      binfo("** mapped to %p \n", ret);
-    }
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+  ret = esp32c3_rtc_heap_memalign(align, size);
 #endif
+
+  if (ret == NULL)
+    {
+      ret = kmm_memalign(align, size);
+      if (ret)
+        {
+          /* kmm_memalign buffer is at the Data bus offset.  Adjust it so we
+           * can access it from the Instruction bus.
+           */
+
+          ret += D_I_BUS_OFFSET;
+        }
+    }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: up_module_text_free()
+ * Name: up_textheap_free()
+ *
+ * Description:
+ *   Free memory for module text.
+ *
  ****************************************************************************/
 
-void up_module_text_free(FAR void *p)
+void up_textheap_free(FAR void *p)
 {
-#ifdef CONFIG_CXD56_USE_SYSBUS
   if (p)
     {
-      binfo("** p=%p \n", p);
-
-      /* NOTE:
-       * The address p will be in I/D BUS.
-       * So convert the address to SYSBUS.
-       */
-
-      p += SYSBUS_ADDRESS_OFFSET;
-
-      binfo("** mapped to %p \n", p);
-    }
+#ifdef CONFIG_ESP32C3_RTC_HEAP
+      if (esp32c3_ptr_rtc(p))
+        {
+          esp32c3_rtc_heap_free(p);
+        }
+      else
 #endif
-
-  kmm_free(p);
+        {
+          p -= D_I_BUS_OFFSET;
+          kmm_free(p);
+        }
+    }
 }

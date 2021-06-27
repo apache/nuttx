@@ -452,13 +452,6 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
 static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
                               FAR const char *name)
 {
-  /* Give a name to the unnamed tasks */
-
-  if (!name)
-    {
-      name = (FAR char *)g_noname;
-    }
-
   /* Copy the name into the TCB */
 
   strncpy(tcb->cmn.name, name, CONFIG_TASK_NAME_SIZE);
@@ -489,25 +482,17 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
  *
  ****************************************************************************/
 
-static inline int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
-                                         FAR char * const argv[])
+static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
+                                  FAR const char *name,
+                                  FAR char * const argv[])
 {
   FAR char **stackargv;
-  FAR const char *name;
   FAR char *str;
   size_t strtablen;
   size_t argvlen;
   int nbytes;
   int argc;
   int i;
-
-  /* Get the name string that we will use as the first argument */
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  name = tcb->cmn.name;
-#else
-  name = (FAR const char *)g_noname;
-#endif /* CONFIG_TASK_NAME_SIZE */
 
   /* Get the size of the task name (including the NUL terminator) */
 
@@ -707,9 +692,16 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
  *
  ****************************************************************************/
 
-int nxtask_setup_arguments(FAR struct task_tcb_s *tcb, FAR const char *name,
-                           FAR char * const argv[])
+int nxtask_setup_arguments(FAR struct task_tcb_s *tcb,
+                           FAR const char *name, FAR char * const argv[])
 {
+  /* Give a name to the unnamed tasks */
+
+  if (!name)
+    {
+      name = (FAR char *)g_noname;
+    }
+
   /* Setup the task name */
 
   nxtask_setup_name(tcb, name);
@@ -719,5 +711,5 @@ int nxtask_setup_arguments(FAR struct task_tcb_s *tcb, FAR const char *name,
    * privilege mode the task runs in.
    */
 
-  return nxtask_setup_stackargs(tcb, argv);
+  return nxtask_setup_stackargs(tcb, name, argv);
 }

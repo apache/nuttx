@@ -112,6 +112,17 @@ void k210_cpu_boot(int cpu)
   showprogress('b');
   DPRINTF("CPU%d Started\n", this_cpu());
 
+#ifdef CONFIG_STACK_COLORATION
+  FAR struct tcb_s *tcb = this_task();
+
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  riscv_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+#endif
+
   /* TODO: Setup FPU */
 
   /* Clear machine software interrupt for CPU(cpu) */

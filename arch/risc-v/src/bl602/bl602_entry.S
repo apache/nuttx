@@ -51,16 +51,6 @@ bl602_start:
     add sp, sp, t0
     andi sp, sp, ~0xF
 
-    la t0, g_idle_stack
-    li t1, CONFIG_IDLETHREAD_STACKSIZE
-    li t2, 0xdeadbeef
-color_idle_stack:
-    addi t1, t1, -4
-    add  t3, t1, t0
-    sw t2, 0(t3)
-    bnez t1, color_idle_stack
-
-
 #ifndef RUN_IN_RAM
 
     /* Load boot2 partition address */

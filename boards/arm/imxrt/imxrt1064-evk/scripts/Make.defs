@@ -29,9 +29,9 @@ else ifeq ($(CONFIG_BOOT_RUNFROMISRAM),y)
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
+  ARCHSCRIPT = -Wl,-T"${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
 else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+  ARCHSCRIPT = -Wl,-T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -55,8 +55,8 @@ CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+NXFLATLDFLAGS1 = -r -Wl,-d -Wl,-warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -Wl,-no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
 # Loadable module definitions
@@ -73,9 +73,9 @@ endif
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
   LDFLAGS += -nostartfiles -nodefaultlibs
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}"
+  LDFLAGS += -Wl,-Map="${shell cygpath -w $(TOPDIR)/nuttx.map}"
 else
-  LDFLAGS += -Map=$(TOPDIR)/nuttx.map
+  LDFLAGS += -Wl,-Map=$(TOPDIR)/nuttx.map
 endif
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)

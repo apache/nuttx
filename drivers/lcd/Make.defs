@@ -146,6 +146,10 @@ endif
 ifeq ($(CONFIG_LCD_ST7032),y)
   CSRCS += st7032.c
 endif
+
+ifeq ($(CONFIG_LCD_HT16K33),y)
+  CSRCS += ht16k33_14seg.c
+endif
 endif # CONFIG_SLCD
 
 # Other LCD-related devices

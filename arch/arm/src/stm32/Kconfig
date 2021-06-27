@@ -1553,6 +1553,7 @@ config STM32_STM32F33XX
 	select STM32_HAVE_IP_DBGMCU_V2
 	select STM32_HAVE_IP_TIMERS_V2
 	select STM32_HAVE_IP_ADC_V2
+	select STM32_HAVE_IP_COMP_V1
 	select STM32_HAVE_IP_DMA_V1
 	select STM32_HAVE_IP_I2C_V2
 
@@ -2615,6 +2616,10 @@ config STM32_HAVE_IP_ADC_V2_BASIC
 	bool
 	default n
 	select STM32_HAVE_IP_ADC_V2
+
+config STM32_HAVE_IP_COMP_V1
+	bool
+	default n
 
 # These are the peripheral selections proper
 
@@ -10901,5 +10906,20 @@ config STM32_FOC_USE_ADC4
        default n
        select STM32_ADC4
        select STM32_ADC3_JEXTSEL
+
+config STM32_FOC_G4_ADCCHAN0_WORKAROUND
+       bool "FOC G4 ADC channel 0 unwanted conversion workaround"
+       default n
+       ---help---
+         Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
+         conversion when a regular conversion is interrupted by an injected conversion.
+         This FOC implementation uses injected conversion to sample phase currents
+         and allows user to use regular conversion as an auxiliary analog conversion.
+         In this case, there is a certain probability that regular conversion will be
+         interrupted by an injected conversion that will lead to an incorrect reading
+         of phase currents.
+
+         This workaround inserts a dummy conversion at the beginning of the injected
+         sequence. For more details look at the chip errata documents.
 
 endif #STM32_FOC

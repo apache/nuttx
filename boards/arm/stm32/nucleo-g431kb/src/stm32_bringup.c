@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_modtext.c
+ * boards/arm/stm32/nucleo-g431kb/src/stm32_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,74 +23,71 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
-#include <nuttx/mm/mm.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <syslog.h>
+
+#include <nuttx/board.h>
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#include "nucleo-g431kb.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-extern uint32_t _smodtext;
-extern uint32_t _emodtext;
+#undef HAVE_LEDS
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct mm_heap_s g_module_text;
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_module_text_init
+ * Name: stm32_bringup
  *
  * Description:
- *   Initialize the module text allocator
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-void up_module_text_init()
+int stm32_bringup(void)
 {
-  mm_initialize(&g_module_text, &_smodtext, &_emodtext - &_smodtext);
+  int ret;
 
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_modtext_procfs;
+#ifdef HAVE_LEDS
+  /* Register the LED driver */
 
-  g_modtext_procfs.name = "modtext";
-  g_modtext_procfs.mallinfo = (void *)mm_mallinfo;
-  g_modtext_procfs.user_data = &g_module_text;
-  procfs_register_meminfo(&g_modtext_procfs);
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
 #endif
-}
 
-/****************************************************************************
- * Name: up_module_text_memalign
- *
- * Description:
- *   Allocate memory for module text with the specified alignment.
- *
- ****************************************************************************/
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM driver. */
 
-FAR void *up_module_text_memalign(size_t align, size_t size)
-{
-  return mm_memalign(&g_module_text, align, size);
-}
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup failed: %d\n", ret);
+    }
+#endif
 
-/****************************************************************************
- * Name: up_module_text_free
- *
- * Description:
- *   Free memory for module text.
- *
- ****************************************************************************/
-
-void up_module_text_free(FAR void *p)
-{
-  return mm_free(&g_module_text, p);
+  UNUSED(ret);
+  return OK;
 }

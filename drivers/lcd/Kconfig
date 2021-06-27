@@ -1451,6 +1451,36 @@ config LCD_ST7032
 		connected to a pull-up resistor and the pin SHLC is connected to
 		the ground. So only I2C pins SDA and SCL are used by NuttX.
 
+config LCD_HT16K33
+	bool "Holtek HT16K32 4 Digits 14-Segment Display"
+	default n
+	depends on I2C
+	---help---
+		Enable support for Holtek HT16K33 (and Vinka VK16K33) 4 Digits
+		14-Segment module: 0.54" 14-segment LED HT16K32 Backpack.
+
+if LCD_HT16K33
+config LCD_HT16K33_MULT_MODULE
+	bool "Enable support to multiple modules as a single display"
+	default n
+	depends on I2C
+	---help---
+		It is possible to connect many HT16K33 modules with sequencial
+		I2C addresses to work as a single display to support lenght
+		text strings. The device at the I2C address 0x70 will display the
+		4 more significant characters, the device 0x71 will display the
+		previous 4 more significant characters and so on.
+
+config LCD_HT16K33_NUMBER_MODULES
+	int "Quantity of HT16K33 modules to be used as a single display"
+	range 1 8
+	depends on LCD_HT16K33_MULT_MODULE
+	---help---
+		Quantity of sequential modules to be used to create a single
+		display. We can have up to 8 to I2C Addresses: 0x70 - 0x77.
+
+endif # LCD_HT16K33
+
 endif # SLCD
 
 comment "Other LCD-related Devices"

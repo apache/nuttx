@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>

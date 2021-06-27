@@ -233,43 +233,44 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   bool throttled = true;
   int ret;
 
-  /* Try to allocate on I/O buffer to start the chain without waiting (and
-   * throttling as necessary).  If we would have to wait, then drop the
-   * packet.
+  /* Try to allocate I/O buffers and copy the data into them
+   * without waiting (and throttling as necessary).
    */
 
-  iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
-  if (iob == NULL)
+  while (true)
     {
+      iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
+      if (iob != NULL)
+        {
+          ret = iob_trycopyin(iob, buffer, buflen, 0, throttled,
+                              IOBUSER_NET_TCP_READAHEAD);
+          if (ret < 0)
+            {
+              /* On a failure, iob_copyin return a negated error value but
+               * does not free any I/O buffers.
+               */
+
+              iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+              iob = NULL;
+            }
+        }
+
 #if CONFIG_IOB_THROTTLE > 0
-      if (IOB_QEMPTY(&conn->readahead))
+      if (iob == NULL && throttled && IOB_QEMPTY(&conn->readahead))
         {
           /* Fallback out of the throttled entry */
 
           throttled = false;
-          iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
+          continue;
         }
 #endif
 
-      if (iob == NULL)
-        {
-          nerr("ERROR: Failed to create new I/O buffer chain\n");
-          return 0;
-        }
+      break;
     }
 
-  /* Copy the new appdata into the I/O buffer chain (without waiting) */
-
-  ret = iob_trycopyin(iob, buffer, buflen, 0, throttled,
-                      IOBUSER_NET_TCP_READAHEAD);
-  if (ret < 0)
+  if (iob == NULL)
     {
-      /* On a failure, iob_copyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+      nerr("ERROR: Failed to create new I/O buffer chain\n");
       return 0;
     }
 

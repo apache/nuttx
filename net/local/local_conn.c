@@ -56,6 +56,33 @@ void local_initialize(void)
 }
 
 /****************************************************************************
+ * Name: local_nextconn
+ *
+ * Description:
+ *   Traverse the list of listened local connections
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn)
+{
+#ifdef CONFIG_NET_LOCAL_STREAM
+  if (!conn)
+    {
+      return (FAR struct local_conn_s *)g_local_listeners.head;
+    }
+  else
+    {
+      return (FAR struct local_conn_s *)conn->lc_node.flink;
+    }
+#else
+  return NULL;
+#endif
+}
+
+/****************************************************************************
  * Name: local_alloc()
  *
  * Description:

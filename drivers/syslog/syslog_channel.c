@@ -243,6 +243,15 @@ int syslog_channel_remove(FAR struct syslog_channel_s *channel)
 
               g_syslog_channel[i] = NULL;
 
+              /* The channel is now removed from the list and its driver
+               * can be safely uninitialized.
+               */
+
+              if (channel->sc_ops->sc_close)
+                {
+                  channel->sc_ops->sc_close(channel);
+                }
+
               return OK;
             }
         }

@@ -26,6 +26,7 @@
 
 #include <sched.h>
 #include <aio.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

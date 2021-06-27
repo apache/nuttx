@@ -60,8 +60,8 @@ int modlib_unload(struct mod_loadinfo_s *loadinfo)
 
   if (loadinfo->textalloc != 0)
     {
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-      up_module_text_free((FAR void *)loadinfo->textalloc);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+      up_textheap_free((FAR void *)loadinfo->textalloc);
 #else
       lib_free((FAR void *)loadinfo->textalloc);
 #endif

@@ -76,10 +76,9 @@ MEMORY
 
   drom0_0_seg (R) :       org = 0x3c000020, len = 0x8000000 - 0x20
 
-  /* RTC fast memory (executable). Persists over deep sleep. */
+  /* RTC fast memory. Persists over deep sleep. */
 
-  rtc_iram_seg(RWX) :     org = 0x50000000, len = 0x2000
-
+  rtc_seg(RWX) :          org = 0x50000000, len = 0x2000
 }
 
 #if CONFIG_ESP32C3_DEVKIT_RUN_IRAM
@@ -90,3 +89,6 @@ MEMORY
   REGION_ALIAS("default_code_seg", iram0_2_seg);
 #endif /* CONFIG_ESP32C3_DEVKIT_RUN_IRAM */
 
+/* Mark the end of the RTC heap (top of the RTC region) */
+
+_ertc_heap = 0x50001fff;

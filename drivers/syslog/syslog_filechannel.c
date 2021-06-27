@@ -32,8 +32,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 
 #include "syslog.h"
 
@@ -58,25 +61,40 @@ FAR static struct syslog_channel_s *g_syslog_file_channel;
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG_FILE_ROTATE
-static void log_rotate(FAR const char *log_file)
+#ifdef CONFIG_SYSLOG_FILE_SEPARATE
+static void log_separate(FAR const char *log_file)
 {
-  int fd;
-  off_t size;
-  struct stat f_stat;
-  char *backup_file;
+  struct file fp;
 
-  /* Get the size of the current log file. */
-
-  fd = open(log_file, O_RDONLY);
-  if (fd < 0)
+  if (file_open(&fp, log_file, O_WRONLY) < 0)
     {
       return;
     }
 
-  fstat(fd, &f_stat);
+  file_write(&fp, "\n\n", 2);
+
+  file_close(&fp);
+}
+#endif
+
+#if CONFIG_SYSLOG_FILE_ROTATIONS > 0
+static void log_rotate(FAR const char *log_file)
+{
+  int i;
+  off_t size;
+  struct stat f_stat;
+  size_t name_size;
+  FAR char *rotate_to;
+  FAR char *rotate_from;
+
+  /* Get the size of the current log file. */
+
+  if (stat(log_file, &f_stat) < 0)
+    {
+      return;
+    }
+
   size = f_stat.st_size;
-  close(fd);
 
   /* If it does not exceed the limit we are OK. */
 
@@ -85,28 +103,34 @@ static void log_rotate(FAR const char *log_file)
       return;
     }
 
-  /* Construct the backup file name. */
+  /* Rotated file names. */
 
-  backup_file = malloc(strlen(log_file) + 3);
-  if (backup_file == NULL)
+  name_size = strlen(log_file) + 8;
+  rotate_to = kmm_malloc(name_size);
+  rotate_from = kmm_malloc(name_size);
+  if ((rotate_to == NULL) || (rotate_from == NULL))
     {
-      return;
+      goto end;
     }
 
-  sprintf(backup_file, "%s.0", log_file);
+  /* Rotate the logs. */
 
-  /* Delete any old backup files. */
-
-  if (access(backup_file, F_OK) == 0)
+  for (i = (CONFIG_SYSLOG_FILE_ROTATIONS - 1); i > 0; i--)
     {
-      remove(backup_file);
+      snprintf(rotate_to, name_size, "%s.%d", log_file, i);
+      snprintf(rotate_from, name_size, "%s.%d", log_file, i - 1);
+
+      rename(rotate_from, rotate_to);
     }
 
-  /* Rotate the log. */
+  snprintf(rotate_to, name_size, "%s.0", log_file);
 
-  rename(log_file, backup_file);
+  rename(log_file, rotate_to);
 
-  free(backup_file);
+end:
+
+  kmm_free(rotate_to);
+  kmm_free(rotate_from);
 }
 #endif
 
@@ -170,8 +194,14 @@ FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath)
 
   /* Rotate the log file, if needed. */
 
-#ifdef CONFIG_SYSLOG_FILE_ROTATE
+#if CONFIG_SYSLOG_FILE_ROTATIONS > 0
   log_rotate(devpath);
+#endif
+
+  /* Separate the old log entries. */
+
+#ifdef CONFIG_SYSLOG_FILE_SEPARATE
+  log_separate(devpath);
 #endif
 
   /* Then initialize the file interface */

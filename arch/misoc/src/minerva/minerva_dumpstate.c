@@ -113,7 +113,7 @@ static inline void up_registerdump(void)
 void minerva_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = misoc_getsp();
+  uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3

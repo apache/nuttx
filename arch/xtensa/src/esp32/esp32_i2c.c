@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -71,6 +72,12 @@
                                               ((_ack_val) << 10) + \
                                               (_bytes))
 
+/* Helper */
+
+#ifdef CONFIG_I2C_POLLED
+#define TIMESPEC_TO_US(sec, nano)  ((sec * USEC_PER_SEC) + (nano / NSEC_PER_USEC))
+#endif
+
 /* Default option */
 
 #define I2C_FIFO_SIZE (255)
@@ -83,6 +90,8 @@
                              I2C_TIME_OUT_INT_ENA | \
                              I2C_ARBITRATION_LOST_INT_ENA | \
                              I2C_RXFIFO_OVF_INT_ENA)
+
+#define I2C_SCL_CYC_NUM_DEF 9
 
 /* I2C event trace logic.
  * NOTE: trace uses the internal, non-standard, low-level debug interface
@@ -107,7 +116,9 @@ enum esp32_i2cstate_e
   I2CSTATE_IDLE = 0,
   I2CSTATE_PROC,
   I2CSTATE_STOP,
+#ifndef CONFIG_I2C_POLLED
   I2CSTATE_FINISH
+#endif
 };
 
 /* I2C hardware command */
@@ -160,9 +171,11 @@ struct esp32_i2c_config_s
   uint8_t scl_pin;            /* GPIO configuration for SCL as SCL */
   uint8_t sda_pin;            /* GPIO configuration for SDA as SDA */
 
+#ifndef CONFIG_I2C_POLLED
   uint8_t cpu;                /* CPU ID */
-  uint8_t periph;             /* peripher ID */
+  uint8_t periph;             /* Peripheral ID */
   uint8_t irq;                /* Interrupt ID */
+#endif
 
   uint32_t clk_bit;           /* Clock enable bit */
   uint32_t rst_bit;           /* I2C reset bit */
@@ -183,9 +196,12 @@ struct esp32_i2c_priv_s
   /* Port configuration */
 
   const struct esp32_i2c_config_s *config;
-  int refs;                    /* Referernce count */
+  int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
+
+#ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
+#endif
 
   /* I2C work state (see enum esp32_i2cstate_e) */
 
@@ -196,11 +212,13 @@ struct esp32_i2c_priv_s
   uint8_t msgid;               /* Current message ID */
   ssize_t bytes;               /* Processed data bytes */
 
+#ifndef CONFIG_I2C_POLLED
   int     cpuint;              /* CPU interrupt assigned to this I2C */
+#endif
 
   uint32_t error;              /* I2C transform error */
 
-  bool ready_read;             /* If I2C has can read date */
+  bool ready_read;             /* If I2C has read data */
 
   uint32_t clk_freq;           /* Current I2C Clock frequency */
 
@@ -227,6 +245,11 @@ static void esp32_i2c_deinit(FAR struct esp32_i2c_priv_s *priv);
 static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs,
                               int count);
+static inline void esp32_i2c_process(struct esp32_i2c_priv_s *priv,
+                                     uint32_t status);
+#ifdef CONFIG_I2C_POLLED
+static int esp32_i2c_polling_waitdone(FAR struct esp32_i2c_priv_s *priv);
+#endif
 #ifdef CONFIG_I2C_RESET
 static int esp32_i2c_reset(FAR struct i2c_master_s *dev);
 #endif
@@ -265,9 +288,11 @@ static const struct esp32_i2c_config_s esp32_i2c0_config =
   .clk_freq   = I2C_CLK_FREQ_DEF,
   .scl_pin    = CONFIG_ESP32_I2C0_SCLPIN,
   .sda_pin    = CONFIG_ESP32_I2C0_SDAPIN,
+#ifndef CONFIG_I2C_POLLED
   .cpu        = 0,
   .periph     = ESP32_PERIPH_I2C_EXT0,
   .irq        = ESP32_IRQ_I2C_EXT0,
+#endif
   .clk_bit    = DPORT_I2C_EXT0_CLK_EN,
   .rst_bit    = DPORT_I2C_EXT0_RST,
   .scl_insig  = I2CEXT0_SCL_IN_IDX,
@@ -296,9 +321,11 @@ static const struct esp32_i2c_config_s esp32_i2c1_config =
   .clk_freq   = I2C_CLK_FREQ_DEF,
   .scl_pin    = CONFIG_ESP32_I2C1_SCLPIN,
   .sda_pin    = CONFIG_ESP32_I2C1_SDAPIN,
+#ifndef CONFIG_I2C_POLLED
   .cpu        = 0,
   .periph     = ESP32_PERIPH_I2C_EXT1,
   .irq        = ESP32_IRQ_I2C_EXT1,
+#endif
   .clk_bit    = DPORT_I2C_EXT1_CLK_EN,
   .rst_bit    = DPORT_I2C_EXT1_RST,
   .scl_insig  = I2CEXT1_SCL_IN_IDX,
@@ -415,16 +442,29 @@ static void esp32_i2c_sendstart(FAR struct esp32_i2c_priv_s *priv)
 {
   struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
 
+  /* Load a start cmd, write and end in controller. */
+
   esp32_i2c_set_reg(priv, I2C_COMD0_OFFSET,
                     I2C_BASE_CMD(I2C_CMD_RESTART, 0));
   esp32_i2c_set_reg(priv, I2C_COMD1_OFFSET,
                     I2C_SEND_CMD(I2C_CMD_WRITE, 1, 1));
   esp32_i2c_set_reg(priv, I2C_COMD2_OFFSET,
                     I2C_BASE_CMD(I2C_CMD_END, 0));
+
+  /* Load the slave address and the flags to the FIFO. */
+
   esp32_i2c_set_reg(priv, I2C_DATA_OFFSET, (msg->addr << 1) |
                                            (msg->flags & I2C_M_READ));
+
+  /* Enable interrupts to detect the execution of an end cmd and
+   * multiple errors.
+   */
+
   esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, I2C_END_DETECT_INT_ENA |
                                               I2C_INT_ERR_EN_BITS);
+
+  /* Start sending the slave address and hold line. */
+
   esp32_i2c_set_reg_bits(priv, I2C_CTR_OFFSET, I2C_TRANS_START_M);
 }
 
@@ -444,10 +484,14 @@ static void esp32_i2c_senddata(FAR struct esp32_i2c_priv_s *priv)
 
   n = n < I2C_FIFO_SIZE ? n : I2C_FIFO_SIZE;
 
+  /* Load a write operation */
+
   esp32_i2c_set_reg(priv, I2C_COMD0_OFFSET,
                     I2C_SEND_CMD(I2C_CMD_WRITE, 1, n));
   esp32_i2c_set_reg(priv, I2C_COMD1_OFFSET,
                     I2C_BASE_CMD(I2C_CMD_END, 0));
+
+  /* Transfer the data from the msg buffer to the TX FIFO */
 
   for (i = 0; i < n; i ++)
     {
@@ -456,6 +500,10 @@ static void esp32_i2c_senddata(FAR struct esp32_i2c_priv_s *priv)
     }
 
   priv->bytes += n;
+
+  /* Enable interrupts to detect the execution of an end cmd and
+   * multiple errors.
+   */
 
   esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, I2C_END_DETECT_INT_ENA |
                                               I2C_INT_ERR_EN_BITS);
@@ -466,7 +514,7 @@ static void esp32_i2c_senddata(FAR struct esp32_i2c_priv_s *priv)
  * Name: esp32_i2c_recvdata
  *
  * Description:
- *   Receive I2C data
+ *   Transfer the received data from the RX FIFO to the message buffer.
  *
  ****************************************************************************/
 
@@ -490,8 +538,9 @@ static void esp32_i2c_recvdata(struct esp32_i2c_priv_s *priv)
  * Name: esp32_i2c_startrecv
  *
  * Description:
- *   Configure I2C to prepare receiving data and it will create an interrupt
- *   to receive real data
+ *   Configure I2C to prepare receiving data and it will enable an interrupt
+ *   to detect the end of the receiving operation and to load the content
+ *   into the RX buffer.
  *
  ****************************************************************************/
 
@@ -512,10 +561,16 @@ static void esp32_i2c_startrecv(struct esp32_i2c_priv_s *priv)
       ack_value = 1;
     }
 
+  /* Load read and end cmds */
+
   esp32_i2c_set_reg(priv, I2C_COMD0_OFFSET,
                     I2C_RECV_CMD(I2C_CMD_READ, ack_value, n));
   esp32_i2c_set_reg(priv, I2C_COMD1_OFFSET,
                     I2C_BASE_CMD(I2C_CMD_END, 0));
+
+  /* Enable interrupts to detect the execution of an end cmd and
+   * multiple errors.
+   */
 
   esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, I2C_END_DETECT_INT_ENA |
                                               I2C_INT_ERR_EN_BITS);
@@ -532,6 +587,10 @@ static void esp32_i2c_startrecv(struct esp32_i2c_priv_s *priv)
 
 static void esp32_i2c_sendstop(struct esp32_i2c_priv_s *priv)
 {
+  /* Load a stop cmd and enable the interrupts that indicate end of a stop
+   * cmd or error.
+   */
+
   esp32_i2c_set_reg(priv, I2C_COMD0_OFFSET, I2C_BASE_CMD(I2C_CMD_STOP, 0));
   esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, I2C_TRANS_COMPLETE_INT_ENA |
                                               I2C_INT_ERR_EN_BITS);
@@ -656,24 +715,146 @@ static void esp32_i2c_reset_fsmc(FAR struct esp32_i2c_priv_s *priv)
  * Name: esp32_i2c_sem_waitdone
  *
  * Description:
- *   Wait for a transfer to complete
+ *    Wait for a transfer to complete using an interruptible semaphore which
+ *    in unlocked from within the ISR context. This function is only used in
+ *    interrupt driven mode.
  *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
  ****************************************************************************/
-
+#ifndef CONFIG_I2C_POLLED
 static int esp32_i2c_sem_waitdone(FAR struct esp32_i2c_priv_s *priv)
 {
   int ret;
   struct timespec abstime;
+
+  /* Get the current absolute time and adds a offset as timeout */
 
   clock_gettime(CLOCK_REALTIME, &abstime);
 
   abstime.tv_sec += 10;
   abstime.tv_nsec += 0;
 
+  /* Wait on ISR semaphore */
+
   ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
 
   return ret;
 }
+#endif
+
+/****************************************************************************
+ * Name: esp32_i2c_polling_waitdone
+ *
+ * Description:
+ *   Wait for a transfer to complete by polling status interrupt registers,
+ *   which indicates the status of the I2C operations. This function is only
+ *   used in polling driven mode.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on successfull transfer. -ETIMEDOUT is returned
+ *   in case a transfer didn't finish within the timeout interval. And ERROR
+ *   is returned in case of any I2C error during the transfer has happened.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_I2C_POLLED
+static int esp32_i2c_polling_waitdone(FAR struct esp32_i2c_priv_s *priv)
+{
+  int ret;
+  struct timespec current_time;
+  struct timespec timeout;
+  uint64_t current_us;
+  uint64_t timeout_us;
+  uint32_t status = 0;
+
+  /* Get the current absolute time and add an offset as timeout.
+   * Preferable to use monotonic, so in case the time changes,
+   * the time reference is kept, i.e., current time can't jump
+   * forward and backwards.
+   */
+
+  #ifdef CONFIG_CLOCK_MONOTONIC
+    clock_gettime(CLOCK_MONOTONIC, &current_time);
+  #else
+    clock_gettime(CLOCK_REALTIME, &current_time);
+  #endif
+
+  timeout.tv_sec  = current_time.tv_sec  + 10;
+  timeout.tv_nsec = current_time.tv_nsec +  0;
+
+  current_us = TIMESPEC_TO_US(current_time.tv_sec, current_time.tv_nsec);
+  timeout_us = TIMESPEC_TO_US(timeout.tv_sec, timeout.tv_nsec);
+
+  /* Loop while a transfer is in progress
+   * and an error didn't occur within the timeout
+   */
+
+  while ((current_us < timeout_us) && (priv->error == 0))
+    {
+      /* Check if any interrupt triggered, clear them
+       * process the operation.
+       */
+
+      status = esp32_i2c_get_reg(priv, I2C_INT_STATUS_OFFSET);
+      if (status != 0)
+        {
+          /* Check if the stop operation ended. Don't use
+           * I2CSTATE_FINISH, because it is set before the stop
+           * signal really ends. This works for interrupts because
+           * the i2c_state is checked in the next interrupt when
+           * stop signal has concluded. This is not the case of
+           * polling.
+           */
+
+          if (status & I2C_TRANS_COMPLETE_INT_ST_M)
+            {
+              esp32_i2c_set_reg(priv, I2C_INT_CLR_OFFSET, status);
+              break;
+            }
+
+          esp32_i2c_set_reg(priv, I2C_INT_CLR_OFFSET, status);
+          esp32_i2c_process(priv, status);
+        }
+
+      /* Update current time */
+
+      #ifdef CONFIG_CLOCK_MONOTONIC
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+      #else
+        clock_gettime(CLOCK_REALTIME, &current_time);
+      #endif
+      current_us = TIMESPEC_TO_US(current_time.tv_sec, current_time.tv_nsec);
+    }
+
+  /* Return a negated value in case of timeout, and in the other scenarios
+   * return a positive value.
+   * The transfer function will check the status of priv to check the other
+   * scenarios.
+   */
+
+  if (current_us >= timeout_us)
+    {
+      ret = -ETIMEDOUT;
+    }
+  else if (priv->error)
+    {
+      ret = ERROR;
+    }
+  else
+    {
+      ret = OK;
+    }
+
+  /* Disable all interrupts */
+
+  esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, 0);
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: esp32_i2c_sem_wait
@@ -712,7 +893,9 @@ static void esp32_i2c_sem_post(struct esp32_i2c_priv_s *priv)
 static void esp32_i2c_sem_destroy(FAR struct esp32_i2c_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
+#ifndef CONFIG_I2C_POLLED
   nxsem_destroy(&priv->sem_isr);
+#endif
 }
 
 /****************************************************************************
@@ -731,8 +914,10 @@ static inline void esp32_i2c_sem_init(FAR struct esp32_i2c_priv_s *priv)
    * priority inheritance enabled.
    */
 
+#ifndef CONFIG_I2C_POLLED
   nxsem_init(&priv->sem_isr, 0, 0);
   nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
+#endif
 }
 
 /****************************************************************************
@@ -763,16 +948,26 @@ static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
       return ret;
     }
 
+  /* If previous state is different than idle,
+   * reset the fsmc to the idle state.
+   */
+
   if (priv->i2cstate != I2CSTATE_IDLE)
     {
       esp32_i2c_reset_fsmc(priv);
       priv->i2cstate = I2CSTATE_IDLE;
     }
 
+  /* Transfer the messages to the internal struct
+   * and loop count times to make all transfers.
+   */
+
   priv->msgv = msgs;
 
   for (i = 0; i < count; i++)
     {
+      /* Clear TX and RX FIFOs. */
+
       esp32_i2c_reset_fifo(priv);
 
       priv->bytes = 0;
@@ -780,6 +975,8 @@ static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
       priv->ready_read = 0;
       priv->error = 0;
       priv->i2cstate = I2CSTATE_PROC;
+
+      /* Set the SCLK frequency for the current msg. */
 
       esp32_i2c_init_clock(priv, msgs[i].frequency);
 
@@ -790,10 +987,15 @@ static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
       esp32_i2c_traceevent(priv, I2CEVENT_SENDADDR, msgs[i].addr,
                            esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
 
+      /* Send the start cmd */
+
       esp32_i2c_sendstart(priv);
 
+#ifndef CONFIG_I2C_POLLED
       if (esp32_i2c_sem_waitdone(priv) < 0)
         {
+          /* Timed out - transfer was not completed within the timeout */
+
           ret = -ETIMEDOUT;
           break;
         }
@@ -801,15 +1003,41 @@ static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
         {
           if (priv->error)
             {
+              /* An error occurred */
+
               ret = -EIO;
               break;
             }
           else
             {
+              /* Successful transfer, update the I2C state to idle */
+
               priv->i2cstate = I2CSTATE_IDLE;
               ret = OK;
             }
         }
+#else
+      ret = esp32_i2c_polling_waitdone(priv);
+      if (ret < 0)
+        {
+          if (ret == -ETIMEDOUT)
+            {
+              break;
+            }
+          else
+            {
+              ret = -EIO;
+              break;
+            }
+        }
+      else
+        {
+          /* Successful transfer, update the I2C state to idle */
+
+          priv->i2cstate = I2CSTATE_IDLE;
+          ret = OK;
+        }
+#endif
     }
 
   /* Dump the trace result */
@@ -820,6 +1048,100 @@ static int esp32_i2c_transfer(FAR struct i2c_master_s *dev,
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: esp32_i2c_clear_bus
+ *
+ * Description:
+ *   Clear I2C bus, when the slave is stuck in a deadlock and keeps pulling
+ *   the bus low, master can control the SCL bus to generate 9 CLKs.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static int esp32_i2c_clear_bus(struct esp32_i2c_priv_s *priv)
+{
+  uint32_t clock_count;
+  uint32_t stretch_count;
+  int ret;
+  const struct esp32_i2c_config_s *config = priv->config;
+
+  /* Use GPIO configuration to un-wedge the bus */
+
+  esp32_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+  esp32_gpio_matrix_out(config->scl_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp32_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+  esp32_gpio_matrix_out(config->sda_pin, SIG_GPIO_OUT_IDX, 0, 0);
+
+  /* Set SDA to high */
+
+  esp32_gpiowrite(config->sda_pin, 1);
+
+  /* Clock the bus until any slaves currently driving it let it go. */
+
+  clock_count = 0;
+  while (!esp32_gpioread(config->sda_pin))
+    {
+      /* Give up if we have tried too hard */
+
+      if (clock_count++ >= I2C_SCL_CYC_NUM_DEF)
+        {
+          ret = -EIO;
+          goto out;
+        }
+
+      /* Sniff to make sure that clock stretching has finished.
+       *
+       * If the bus never relaxes, the reset has failed.
+       */
+
+      stretch_count = 0;
+      while (!esp32_gpioread(config->scl_pin))
+        {
+          /* Give up if we have tried too hard */
+
+          if (stretch_count++ > 10)
+            {
+              ret = -EIO;
+              goto out;
+            }
+
+          up_udelay(10);
+        }
+
+      /* Drive SCL low */
+
+      esp32_gpiowrite(config->scl_pin, 0);
+      up_udelay(10);
+
+      /* Drive SCL high again */
+
+      esp32_gpiowrite(config->scl_pin, 1);
+      up_udelay(10);
+    }
+
+  /* Generate a start followed by a stop to reset slave
+   * state machines.
+   */
+
+  esp32_gpiowrite(config->sda_pin, 0);
+  up_udelay(10);
+  esp32_gpiowrite(config->scl_pin, 0);
+  up_udelay(10);
+  esp32_gpiowrite(config->scl_pin, 1);
+  up_udelay(10);
+  esp32_gpiowrite(config->sda_pin, 1);
+  up_udelay(10);
+
+  ret = OK;
+
+out:
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: esp32_i2c_reset
@@ -847,7 +1169,11 @@ static int esp32_i2c_reset(FAR struct i2c_master_s *dev)
 
   flags = enter_critical_section();
 
-  esp32_i2c_reset_fsmc(priv);
+  esp32_i2c_deinit(priv);
+
+  esp32_i2c_clear_bus(priv);
+
+  esp32_i2c_init(priv);
 
   priv->i2cstate = I2CSTATE_IDLE;
   priv->msgid = 0;
@@ -1048,28 +1374,71 @@ static void esp32_i2c_tracedump(struct esp32_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_I2C_POLLED
 static int esp32_i2c_irq(int cpuint, void *context, FAR void *arg)
 {
   struct esp32_i2c_priv_s *priv = (struct esp32_i2c_priv_s *)arg;
-  struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
-  uint32_t status = esp32_i2c_get_reg(priv, I2C_INT_STATUS_OFFSET);
 
+  /* Get the interrupt status and clear the interrupts that
+   * triggered.
+   */
+
+  uint32_t status = esp32_i2c_get_reg(priv, I2C_INT_STATUS_OFFSET);
   esp32_i2c_set_reg(priv, I2C_INT_CLR_OFFSET, status);
+  esp32_i2c_process(priv, status);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32_i2c_process
+ *
+ * Description:
+ *   This routine manages the transfer. It's called after some specific
+ *   commands from the I2C controller are executed or in case of errors.
+ *   It's responsible for writing/reading operations and transferring data
+ *   from/to FIFO.
+ *   It's called in the interrupt and polled driven mode.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *   status        - The current interrupt status register.
+ *
+ ****************************************************************************/
+
+static inline void esp32_i2c_process(struct esp32_i2c_priv_s *priv,
+                                     uint32_t status)
+{
+  struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
+
+  /* Check for any errors */
 
   if (I2C_INT_ERR_EN_BITS & status)
     {
+      /* Save the errors, register the error event, disable interrupts
+       * and release the semaphore to conclude the transfer.
+       */
+
       priv->error = status & I2C_INT_ERR_EN_BITS;
       esp32_i2c_traceevent(priv, I2CEVENT_ERROR, priv->error,
                            esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
       esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, 0);
+#ifndef CONFIG_I2C_POLLED      
       nxsem_post(&priv->sem_isr);
+#endif
     }
-  else
+  else /* If no error */
     {
+      /* If a transfer has just initialized */
+
       if (priv->i2cstate == I2CSTATE_PROC)
         {
+          /* Check the flags to perform a read or write operation */
+
           if (msg->flags & I2C_M_READ)
             {
+              /* RX FIFO has available data */
+
               if (priv->ready_read)
                 {
                   esp32_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->bytes,
@@ -1079,15 +1448,20 @@ static int esp32_i2c_irq(int cpuint, void *context, FAR void *arg)
                   priv->ready_read = 0;
                 }
 
+              /* Received all data. Finish the transaction
+               * and update the state I2C state.
+               */
+
               if (priv->bytes == msg->length)
                 {
                   esp32_i2c_traceevent(priv, I2CEVENT_STOP, msg->length,
                                      esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
                   esp32_i2c_sendstop(priv);
-
+#ifndef CONFIG_I2C_POLLED
                   priv->i2cstate = I2CSTATE_FINISH;
+#endif
                 }
-              else
+              else /* Start a receive operation */
                 {
                   esp32_i2c_traceevent(priv, I2CEVENT_RCVMODEEN, 0,
                                      esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
@@ -1096,11 +1470,15 @@ static int esp32_i2c_irq(int cpuint, void *context, FAR void *arg)
                   priv->ready_read = 1;
                 }
             }
-          else
+          else /* Write operation */
             {
               esp32_i2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->bytes,
                                    esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
               esp32_i2c_senddata(priv);
+
+              /* Finally sent the entire message. Update the I2C state to
+               * send a stop signal in the next interrupt.
+               */
 
               if (priv->bytes == msg->length)
                 {
@@ -1110,19 +1488,27 @@ static int esp32_i2c_irq(int cpuint, void *context, FAR void *arg)
         }
       else if (priv->i2cstate == I2CSTATE_STOP)
         {
+          /* Transmitted all data. Finish the transaction sending a stop
+           * and update the state I2C state.
+           */
+
           esp32_i2c_traceevent(priv, I2CEVENT_STOP, msg->length,
                                esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
           esp32_i2c_sendstop(priv);
-
+#ifndef CONFIG_I2C_POLLED
           priv->i2cstate = I2CSTATE_FINISH;
+#endif
         }
+#ifndef CONFIG_I2C_POLLED
       else if (priv->i2cstate == I2CSTATE_FINISH)
         {
+          /* Disable all interrupts and release the semaphore */
+
+          esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, 0);
           nxsem_post(&priv->sem_isr);
         }
+#endif
     }
-
-  return 0;
 }
 
 /****************************************************************************
@@ -1139,10 +1525,12 @@ static int esp32_i2c_irq(int cpuint, void *context, FAR void *arg)
 
 FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
 {
-  int ret;
   irqstate_t flags;
   struct esp32_i2c_priv_s *priv;
+#ifndef CONFIG_I2C_POLLED
   const struct esp32_i2c_config_s *config;
+  int ret;
+#endif
 
   switch (port)
     {
@@ -1160,8 +1548,6 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
       return NULL;
     }
 
-  config = priv->config;
-
   flags = enter_critical_section();
 
   if ((volatile int)priv->refs++ != 0)
@@ -1171,6 +1557,8 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
       return (struct i2c_master_s *)priv;
     }
 
+#ifndef CONFIG_I2C_POLLED
+  config = priv->config;
   priv->cpuint = esp32_alloc_levelint(1);
   if (priv->cpuint < 0)
     {
@@ -1196,6 +1584,7 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
     }
 
   up_enable_irq(priv->cpuint);
+#endif
 
   esp32_i2c_sem_init(priv);
 
@@ -1236,11 +1625,13 @@ int esp32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 
   leave_critical_section(flags);
 
+#ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->cpuint);
   esp32_detach_peripheral(priv->config->cpu,
                           priv->config->periph,
                           priv->cpuint);
   esp32_free_cpuint(priv->cpuint);
+#endif
 
   esp32_i2c_deinit(priv);
 

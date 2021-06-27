@@ -55,6 +55,17 @@
 #endif
 
 #include "esp32c3_rtc.h"
+#ifdef CONFIG_ESP32C3_EFUSE
+#  include "esp32c3_efuse.h"
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+#  include "esp32c3_sha.h"
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp32c3_rtc_lowerhalf.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -121,6 +132,23 @@ static int esp32c3_init_wifi_storage(void)
 int esp32c3_bringup(void)
 {
   int ret;
+
+#if defined(CONFIG_ESP32C3_EFUSE)
+  ret = esp32c3_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+  ret = esp32c3_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -327,6 +355,17 @@ int esp32c3_bringup(void)
       return ret;
     }
 #endif /* CONFIG_ESP32C3_ADC */
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the ESP32-C3 RTC driver */
+
+  ret = esp32c3_rtc_driverinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
