@@ -189,7 +189,7 @@ static int get_ifindex(void)
 
   for (ndx = 0; ndx < MAX_IFINDEX; ndx++)
     {
-      uint32_t bit = 1L << ndx;
+      uint32_t bit = 1UL << ndx;
       if ((devset & bit) == 0)
         {
           /* Indicate that this index is in use */

@@ -30,44 +30,27 @@
 #include <sys/types.h>
 #include <debug.h>
 
+#include "hardware/esp32_soc.h"
+
+#ifdef CONFIG_ESP32_IRAM_HEAP
+#include "esp32_iramheap.h"
+#endif
+
+#ifdef CONFIG_ESP32_RTC_HEAP
+#include "esp32_rtcheap.h"
+#endif
+
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-extern uint32_t _stextheap;
-extern uint32_t _etextheap;
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-struct mm_heap_s g_textheap;
+#if !defined(CONFIG_ESP32_IRAM_HEAP) && !defined(CONFIG_ESP32_RTC_HEAP)
+#error "No suitable heap available. Enable ESP32_IRAM_HEAP or ESP32_RTC_HEAP"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_textheap_init
- *
- * Description:
- *   Initialize the text heap.
- *
- ****************************************************************************/
-
-void up_textheap_init()
-{
-  mm_initialize(&g_textheap, &_stextheap, &_etextheap - &_stextheap);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_textheap_procfs;
-
-  g_textheap_procfs.name = "textheap";
-  g_textheap_procfs.mallinfo = (void *)mm_mallinfo;
-  g_textheap_procfs.user_data = &g_textheap;
-  procfs_register_meminfo(&g_textheap_procfs);
-#endif
-}
 
 /****************************************************************************
  * Name: up_textheap_memalign
@@ -79,7 +62,22 @@ void up_textheap_init()
 
 FAR void *up_textheap_memalign(size_t align, size_t size)
 {
-  return mm_memalign(&g_textheap, align, size);
+  FAR void *ret = NULL;
+
+  /* Prioritise allocating from RTC. If that fails, allocate from the
+   * main heap.
+   */
+
+#ifdef CONFIG_ESP32_RTC_HEAP
+  ret = esp32_rtcheap_memalign(align, size);
+#endif
+
+  if (ret == NULL)
+    {
+      ret = esp32_iramheap_memalign(align, size);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -92,5 +90,17 @@ FAR void *up_textheap_memalign(size_t align, size_t size)
 
 void up_textheap_free(FAR void *p)
 {
-  return mm_free(&g_textheap, p);
+  if (p)
+    {
+#ifdef CONFIG_ESP32_RTC_HEAP
+      if (esp32_ptr_rtcslow(p))
+        {
+          esp32_rtcheap_free(p);
+        }
+      else
+#endif
+        {
+          esp32_iramheap_free(p);
+        }
+    }
 }

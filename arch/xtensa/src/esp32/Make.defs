@@ -180,6 +180,18 @@ CHIP_CSRCS += esp32_wdt_lowerhalf.c
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
+CHIP_CSRCS += esp32_extraheaps.c
+endif
+
+ifeq ($(CONFIG_ESP32_RTC_HEAP),y)
+CHIP_CSRCS += esp32_rtcheap.c
+endif
+
+ifeq ($(CONFIG_ESP32_IRAM_HEAP),y)
+CHIP_CSRCS += esp32_iramheap.c
+endif
+
 ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
 CHIP_CSRCS += esp32_textheap.c
 CMN_ASRCS += xtensa_loadstore.S

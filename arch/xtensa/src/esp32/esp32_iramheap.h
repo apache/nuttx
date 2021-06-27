@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_rtc_heap.c
+ * arch/xtensa/src/esp32/esp32_iramheap.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,168 +18,117 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
-#include <nuttx/mm/mm.h>
-#include <malloc.h>
-
-#include "esp32c3_rtc_heap.h"
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_IRAMHEAP_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_IRAMHEAP_H
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
-static struct mm_heap_s g_rtc_heap;
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32c3_rtc_heap_initialize
- *
- * Description:
- *   Initialize the RTC heap.
- *
- ****************************************************************************/
-
-void esp32c3_rtc_heap_initialize(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  void  *start;
-  size_t size;
-
-  /* These values come from the linker scripts (esp32c3.ld and
-   * esp32c3.template.ld.)  Check boards/risc-v/esp32c3.
-   */
-
-  extern uint8_t *_srtc_heap;
-  extern uint8_t *_ertc_heap;
-
-  start = (FAR void *)&_srtc_heap;
-  size  = (size_t)((uintptr_t)&_ertc_heap - (uintptr_t)&_srtc_heap);
-  mm_initialize(&g_rtc_heap, start, size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_imm_procfs;
-
-  g_imm_procfs.name = "rtc_heap";
-  g_imm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_imm_procfs.user_data = &g_rtc_heap;
-  procfs_register_meminfo(&g_imm_procfs);
+#else
+#define EXTERN extern
 #endif
-}
+
+struct mallinfo; /* Forward reference, see malloc.h */
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_malloc
+ * Name: esp32_iramheap_initialize
  *
  * Description:
- *   Allocate memory from the RTC heap.
+ *   Initialize the IRAM heap.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_malloc(size_t size)
-{
-  return mm_malloc(&g_rtc_heap, size);
-}
+void esp32_iramheap_initialize(void);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_calloc
+ * Name: esp32_iramheap_malloc
+ *
+ * Description:
+ *   Allocate memory from the IRAM heap.
+ *
+ ****************************************************************************/
+
+void *esp32_iramheap_malloc(size_t size);
+
+/****************************************************************************
+ * Name: esp32_iramheap_calloc
  *
  * Description:
  *   Calculates the size of the allocation and allocate memory from
- *   the RTC heap.
+ *   the IRAM heap.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_calloc(size_t n, size_t elem_size)
-{
-  return mm_calloc(&g_rtc_heap, n, elem_size);
-}
+void *esp32_iramheap_calloc(size_t n, size_t elem_size);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_realloc
+ * Name: esp32_iramheap_realloc
  *
  * Description:
- *   Reallocate memory from the RTC heap.
+ *   Reallocate memory from the IRAM heap.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_realloc(void *ptr, size_t size)
-{
-  return mm_realloc(&g_rtc_heap, ptr, size);
-}
+void *esp32_iramheap_realloc(void *ptr, size_t size);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_zalloc
+ * Name: esp32_iramheap_zalloc
  *
  * Description:
- *   Allocate and zero memory from the RTC heap.
+ *   Allocate and zero memory from the IRAM heap.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_zalloc(size_t size)
-{
-  return mm_zalloc(&g_rtc_heap, size);
-}
+void *esp32_iramheap_zalloc(size_t size);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_free
+ * Name: esp32_iramheap_free
  *
  * Description:
- *   Free memory from the RTC heap.
+ *   Free memory from the IRAM heap.
  *
  ****************************************************************************/
 
-void esp32c3_rtc_heap_free(FAR void *mem)
-{
-  mm_free(&g_rtc_heap, mem);
-}
+void esp32_iramheap_free(void *mem);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_memalign
+ * Name: esp32_iramheap_memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
  *   within that chunk that meets the alignment request and then frees any
  *   leading or trailing space.
  *
- *   The alignment argument must be a power of two (not checked).  8-byte
+ *   The alignment argument must be a power of two (not checked). 8-byte
  *   alignment is guaranteed by normal malloc calls.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_memalign(size_t alignment, size_t size)
-{
-  return mm_memalign(&g_rtc_heap, alignment, size);
-}
+void *esp32_iramheap_memalign(size_t alignment, size_t size);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_heapmember
+ * Name: esp32_iramheap_heapmember
  *
  * Description:
- *   Check if an address lies in the RTC heap.
+ *   Check if an address lies in the IRAM heap.
  *
  * Parameters:
  *   mem - The address to check
  *
  * Return Value:
- *   true if the address is a member of the RTC heap.  false if not
+ *   true if the address is a member of the IRAM heap. false if not
  *
  ****************************************************************************/
 
-bool esp32c3_rtc_heap_heapmember(FAR void *mem)
-{
-  return mm_heapmember(&g_rtc_heap, mem);
-}
+bool esp32_iramheap_heapmember(void *mem);
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_mallinfo
+ * Name: esp32_iramheap_mallinfo
  *
  * Description:
  *   mallinfo returns a copy of updated current heap information for the
@@ -187,7 +136,11 @@ bool esp32c3_rtc_heap_heapmember(FAR void *mem)
  *
  ****************************************************************************/
 
-int esp32c3_rtc_heap_mallinfo(FAR struct mallinfo *info)
-{
-  return mm_mallinfo(&g_rtc_heap, info);
+int esp32_iramheap_mallinfo(struct mallinfo *info);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_IRAMHEAP_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-wrover-kit/scripts/esp32_flash.ld
+ * boards/xtensa/esp32/esp32-devkitc/scripts/esp32.ld
  ****************************************************************************/
 
 /* Default entry point: */
@@ -54,22 +54,19 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
-    *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
-    *libpp.a:(.literal .text .literal.* .text.*)
-    *libhal.a:(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *(.wifirxiram .wifirxiram.*)
-    *(.wifirxiram .wifi0iram.*)
+    *(.wifi0iram  .wifi0iram.*)
     *(.wifislpiram .wifislpiram.*)
     *(.wifislprxiram .wifislprxiram.*)
     *(.phyiram .phyiram.*)
     _iram_text_end = ABSOLUTE(.);
 
-    /* Text heap starts at the end of iram0_0_seg */
+    /* IRAM heap starts at the end of iram0_0_seg */
 
     . = ALIGN (4);
-    _stextheap = ABSOLUTE(.);
+    _siramheap = ABSOLUTE(.);
   } > iram0_0_seg
 
   /* Shared RAM */
@@ -125,6 +122,7 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
+    *libphy.a:(.rodata  .rodata.*)
     *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
@@ -192,7 +190,7 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >drom0_0_seg
+  } >default_rodata_seg
 
   .flash.text :
   {
@@ -205,7 +203,7 @@ SECTIONS
     *(.gnu.version)
     _text_end = ABSOLUTE(.);
     _etext = .;
-  } >iram0_2_seg
+  } >default_code_seg
 
   .rtc.text :
   {
@@ -217,5 +215,10 @@ SECTIONS
   {
     *(.rtc.data)
     *(.rtc.rodata)
+
+   /* Whatever is left from the RTC memory is used as a special heap. */
+
+    . = ALIGN (4);
+    _srtcheap = ABSOLUTE(.);
   } > rtc_slow_seg
 }

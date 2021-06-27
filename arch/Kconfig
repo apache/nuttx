@@ -259,9 +259,17 @@ config ARCH_NEED_ADDRENV_MAPPING
 	bool
 	default n
 
-config ARCH_HAVE_TEXT_HEAP
-	bool "Special memory region for dynamic code loading"
+config ARCH_HAVE_EXTRA_HEAPS
+	bool
 	default n
+	---help---
+		Special memory regions used as separate heaps
+
+config ARCH_HAVE_TEXT_HEAP
+	bool
+	default n
+	---help---
+		Special memory region for dynamic code loading
 
 config ARCH_HAVE_MULTICPU
 	bool
@@ -372,7 +380,7 @@ config ARCH_USE_MPU
 		selection will always be forced.
 
 config ARCH_USE_TEXT_HEAP
-	bool "Enable separate text heap for dynamic code loading"
+	bool "Enable separate text allocation for dynamic code loading"
 	default n
 	depends on ARCH_HAVE_TEXT_HEAP
 	---help---

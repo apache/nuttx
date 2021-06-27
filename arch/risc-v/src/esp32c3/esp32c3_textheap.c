@@ -36,7 +36,7 @@
 #include "hardware/esp32c3_soc.h"
 
 #ifdef CONFIG_ESP32C3_RTC_HEAP
-#include "esp32c3_rtc_heap.h"
+#include "esp32c3_rtcheap.h"
 #endif
 
 /****************************************************************************
@@ -48,19 +48,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_textheap_init()
- ****************************************************************************/
-
-void up_textheap_init()
-{
-#ifdef CONFIG_ESP32C3_RTC_HEAP
-  /* Initialize the RTC heap */
-
-  esp32c3_rtc_heap_initialize();
-#endif
-}
 
 /****************************************************************************
  * Name: up_textheap_memalign()
@@ -79,7 +66,7 @@ FAR void *up_textheap_memalign(size_t align, size_t size)
    */
 
 #ifdef CONFIG_ESP32C3_RTC_HEAP
-  ret = esp32c3_rtc_heap_memalign(align, size);
+  ret = esp32c3_rtcheap_memalign(align, size);
 #endif
 
   if (ret == NULL)
@@ -113,7 +100,7 @@ void up_textheap_free(FAR void *p)
 #ifdef CONFIG_ESP32C3_RTC_HEAP
       if (esp32c3_ptr_rtc(p))
         {
-          esp32c3_rtc_heap_free(p);
+          esp32c3_rtcheap_free(p);
         }
       else
 #endif

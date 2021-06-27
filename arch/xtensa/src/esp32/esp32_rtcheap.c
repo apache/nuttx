@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_rtc_heap.h
+ * arch/xtensa/src/esp32/esp32_rtcheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,45 +18,79 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_RTC_HEAP_H
-#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_RTC_HEAP_H
-
 /****************************************************************************
- * Public Function Prototypes
+ * Included Files
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include <nuttx/config.h>
 
-struct mallinfo; /* Forward reference, see malloc.h */
+#include <nuttx/arch.h>
+#include <nuttx/fs/procfs.h>
+#include <nuttx/mm/mm.h>
+#include <malloc.h>
+
+#include "esp32_rtcheap.h"
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_initialize
+ * Private Data
+ ****************************************************************************/
+
+static struct mm_heap_s g_rtcheap;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_rtcheap_initialize
  *
  * Description:
  *   Initialize the RTC heap.
  *
  ****************************************************************************/
 
-void esp32c3_rtc_heap_initialize(void);
+void esp32_rtcheap_initialize(void)
+{
+  void  *start;
+  size_t size;
+
+  /* These values come from the linker scripts. Check boards/xtensa/esp32. */
+
+  extern uint8_t *_srtcheap;
+  extern uint8_t *_ertcheap;
+
+  start = (void *)&_srtcheap;
+  size  = (size_t)((uintptr_t)&_ertcheap - (uintptr_t)&_srtcheap);
+  mm_initialize(&g_rtcheap, start, size);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  static struct procfs_meminfo_entry_s g_rtc_procfs;
+
+  g_rtc_procfs.name = "rtcheap";
+  g_rtc_procfs.mallinfo = (void *)mm_mallinfo;
+  g_rtc_procfs.user_data = &g_rtcheap;
+  procfs_register_meminfo(&g_rtc_procfs);
+#endif
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_malloc
+ * Name: esp32_rtcheap_malloc
  *
  * Description:
  *   Allocate memory from the RTC heap.
  *
+ * Parameters:
+ *   size - Size (in bytes) of the memory region to be allocated.
+ *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_malloc(size_t size);
+void *esp32_rtcheap_malloc(size_t size)
+{
+  return mm_malloc(&g_rtcheap, size);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_calloc
+ * Name: esp32_rtcheap_calloc
  *
  * Description:
  *   Calculates the size of the allocation and allocate memory from
@@ -64,83 +98,104 @@ void *esp32c3_rtc_heap_malloc(size_t size);
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_calloc(size_t n, size_t elem_size);
+void *esp32_rtcheap_calloc(size_t n, size_t elem_size)
+{
+  return mm_calloc(&g_rtcheap, n, elem_size);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_realloc
+ * Name: esp32_rtcheap_realloc
  *
  * Description:
  *   Reallocate memory from the RTC heap.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_realloc(void *ptr, size_t size);
+void *esp32_rtcheap_realloc(void *ptr, size_t size)
+{
+  return mm_realloc(&g_rtcheap, ptr, size);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_zalloc
+ * Name: esp32_rtcheap_zalloc
  *
  * Description:
  *   Allocate and zero memory from the RTC heap.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_zalloc(size_t size);
+void *esp32_rtcheap_zalloc(size_t size)
+{
+  return mm_zalloc(&g_rtcheap, size);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_free
+ * Name: esp32_rtcheap_free
  *
  * Description:
  *   Free memory from the RTC heap.
  *
  ****************************************************************************/
 
-void esp32c3_rtc_heap_free(FAR void *mem);
+void esp32_rtcheap_free(void *mem)
+{
+  mm_free(&g_rtcheap, mem);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_memalign
+ * Name: esp32_rtcheap_memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
  *   within that chunk that meets the alignment request and then frees any
  *   leading or trailing space.
  *
- *   The alignment argument must be a power of two (not checked). 8-byte
+ *   The alignment argument must be a power of two (not checked).  8-byte
  *   alignment is guaranteed by normal malloc calls.
+ *
+ * Parameters:
+ *   alignment - Requested alignment.
+ *   size - Size (in bytes) of the memory region to be allocated.
  *
  ****************************************************************************/
 
-void *esp32c3_rtc_heap_memalign(size_t alignment, size_t size);
+void *esp32_rtcheap_memalign(size_t alignment, size_t size)
+{
+  return mm_memalign(&g_rtcheap, alignment, size);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_heapmember
+ * Name: esp32_rtcheap_heapmember
  *
  * Description:
  *   Check if an address lies in the RTC heap.
  *
  * Parameters:
- *   mem - The address to check
+ *   mem - The address to check.
  *
  * Return Value:
- *   true if the address is a member of the RTC heap. false if not
+ *   True if the address is a member of the RTC heap.  False if not.
  *
  ****************************************************************************/
 
-bool esp32c3_rtc_heap_heapmember(FAR void *mem);
+bool esp32_rtcheap_heapmember(void *mem)
+{
+  return mm_heapmember(&g_rtcheap, mem);
+}
 
 /****************************************************************************
- * Name: esp32c3_rtc_heap_mallinfo
+ * Name: esp32_rtcheap_mallinfo
  *
  * Description:
  *   mallinfo returns a copy of updated current heap information for the
  *   user heap.
  *
+ * Parameters:
+ *   info - Where memory information will be copied.
+ *
  ****************************************************************************/
 
-int esp32c3_rtc_heap_mallinfo(FAR struct mallinfo *info);
-
-#undef EXTERN
-#ifdef __cplusplus
+int esp32_rtcheap_mallinfo(struct mallinfo *info)
+{
+  return mm_mallinfo(&g_rtcheap, info);
 }
-#endif
-
-#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_RTC_HEAP_H */
