@@ -64,7 +64,7 @@ tls_ndxset_t tls_get_set(void)
   DEBUGASSERT(group != NULL);
 
   flags = spin_lock_irqsave(NULL);
-  tlsset = group->tg_tlsset;
+  tlsset = group->tg_info->tg_tlsset;
   spin_unlock_irqrestore(NULL, flags);
 
   return tlsset;

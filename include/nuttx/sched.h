@@ -41,6 +41,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/getopt.h>
 #include <nuttx/net/net.h>
 
 #include <arch/arch.h>
@@ -369,6 +370,50 @@ typedef CODE void (*tls_dtor_t)(FAR void *);
 
 #endif
 
+/* struct exitinfo_s ********************************************************/
+
+struct exitinfo_s
+{
+  union
+  {
+#ifdef CONFIG_SCHED_ATEXIT
+    atexitfunc_t at;
+#endif
+#ifdef CONFIG_SCHED_ONEXIT
+    onexitfunc_t on;
+#endif
+  } func;
+#ifdef CONFIG_SCHED_ONEXIT
+  FAR void *arg;
+#endif
+};
+
+/* struct task_info_s *******************************************************/
+
+/* User-accessible per-task storage like TLS (thread local storage)
+ */
+
+struct task_info_s
+{
+  /* Thread local storage ***************************************************/
+
+#if CONFIG_TLS_NELEM > 0
+  tls_ndxset_t tg_tlsset;                   /* Set of TLS indexes allocated */
+
+  tls_dtor_t  tg_tlsdestr[CONFIG_TLS_NELEM];  /* List of TLS destructors    */
+#endif
+
+  /* [at|on]exit support ****************************************************/
+
+#ifdef CONFIG_SCHED_EXIT_MAX
+  struct exitinfo_s tg_exit[CONFIG_SCHED_EXIT_MAX];
+#endif
+
+#ifndef CONFIG_BUILD_KERNEL
+  struct getopt_s   ta_getopt; /* Globals used by getopt() */
+#endif
+};
+
 /* struct dspace_s **********************************************************/
 
 /* This structure describes a reference counted D-Space region.
@@ -410,24 +455,6 @@ struct stackinfo_s
   FAR void *stack_base_ptr;              /* Adjusted initial stack pointer      */
                                          /* after the frame has been removed    */
                                          /* from the stack.                     */
-};
-
-/* struct exitinfo_s ********************************************************/
-
-struct exitinfo_s
-{
-  union
-  {
-#ifdef CONFIG_SCHED_ATEXIT
-    atexitfunc_t at;
-#endif
-#ifdef CONFIG_SCHED_ONEXIT
-    onexitfunc_t on;
-#endif
-  } func;
-#ifdef CONFIG_SCHED_ONEXIT
-  FAR void *arg;
-#endif
 };
 
 /* struct task_group_s ******************************************************/
@@ -488,12 +515,6 @@ struct task_group_s
   FAR pid_t *tg_members;            /* Members of the group                     */
 #endif
 
-  /* [at|on]exit support ****************************************************/
-
-#ifdef CONFIG_SCHED_EXIT_MAX
-  struct exitinfo_s tg_exit[CONFIG_SCHED_EXIT_MAX];
-#endif
-
 #ifdef CONFIG_BINFMT_LOADABLE
   /* Loadable module support ************************************************/
 
@@ -530,14 +551,9 @@ struct task_group_s
   FAR struct join_s *tg_joinhead; /* Head of a list of join data            */
   FAR struct join_s *tg_jointail; /* Tail of a list of join data            */
 #endif
+  /* Task Local Storage *****************************************************/
 
-  /* Thread local storage ***************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-  tls_ndxset_t tg_tlsset;                   /* Set of TLS indexes allocated */
-
-  tls_dtor_t  tg_tlsdestr[CONFIG_TLS_NELEM];  /* List of TLS destructors    */
-#endif
+  FAR struct task_info_s * tg_info;
 
   /* POSIX Signal Control Fields ********************************************/
 

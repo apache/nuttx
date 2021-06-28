@@ -28,7 +28,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/lib/getopt.h>
 #include <sys/types.h>
 
 /****************************************************************************
@@ -111,14 +110,7 @@ struct tls_info_s
 #endif
 
   int tl_errno;                        /* Per-thread error number */
-};
-
-struct task_info_s
-{
-  struct tls_info_s ta_tls;    /* Must be first field */
-#ifndef CONFIG_BUILD_KERNEL
-  struct getopt_s   ta_getopt; /* Globals used by getopt() */
-#endif
+  FAR struct task_info_s *tl_task;
 };
 
 /****************************************************************************

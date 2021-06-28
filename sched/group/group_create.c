@@ -138,6 +138,9 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       return -ENOMEM;
     }
 
+  group->tg_info = (FAR struct task_info_s *)
+    kumm_zalloc(sizeof(struct task_info_s));
+
 #if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
   /* If this group is being created for a privileged thread, then all
    * elements of the group must be created for privileged access.
@@ -161,7 +164,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   if (!group->tg_streamlist)
     {
-      kmm_free(group);
+      group_deallocate(group);
       return -ENOMEM;
     }
 
@@ -183,7 +186,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
       group_free(group, group->tg_streamlist);
 #endif
-      kmm_free(group);
+      group_deallocate(group);
       tcb->cmn.group = NULL;
       return ret;
     }
@@ -204,6 +207,31 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   nxsem_init(&group->tg_exitsem, 0, 0);
   nxsem_set_protocol(&group->tg_exitsem, SEM_PRIO_NONE);
 #endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: group_deallocate
+ *
+ * Description:
+ *   Free a exist task group structure.
+ *
+ * Input Parameters:
+ *   group  = The group structure
+ *
+ * Returned Value:
+ *   0 (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int group_deallocate(FAR struct task_group_s *group)
+{
+  DEBUGASSERT(group);
+  DEBUGASSERT(group->tg_info);
+
+  kumm_free(group->tg_info);
+  kmm_free(group);
 
   return OK;
 }
@@ -245,7 +273,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->tg_members = kmm_malloc(GROUP_INITIAL_MEMBERS * sizeof(pid_t));
   if (!group->tg_members)
     {
-      kmm_free(group);
+      group_deallocate(group);
       tcb->cmn.group = NULL;
       return -ENOMEM;
     }

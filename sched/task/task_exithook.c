@@ -91,18 +91,18 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
 
       for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
         {
-          if (group->tg_exit[index].func.on)
+          if (group->tg_info->tg_exit[index].func.on)
             {
               onexitfunc_t func;
               FAR void    *arg;
 
               /* Nullify the on_exit function to prevent its reuse. */
 
-              func = group->tg_exit[index].func.on;
-              arg  = group->tg_exit[index].arg;
+              func = group->tg_info->tg_exit[index].func.on;
+              arg  = group->tg_info->tg_exit[index].arg;
 
-              group->tg_exit[index].func.on = NULL;
-              group->tg_exit[index].arg     = NULL;
+              group->tg_info->tg_exit[index].func.on = NULL;
+              group->tg_info->tg_exit[index].arg     = NULL;
 
               /* Call the on_exit function */
 

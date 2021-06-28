@@ -97,10 +97,10 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 
       for (index = 0; index < CONFIG_SCHED_EXIT_MAX; index++)
         {
-          if (!group->tg_exit[index].func.on)
+          if (!group->tg_info->tg_exit[index].func.on)
             {
-              group->tg_exit[index].func.on = func;
-              group->tg_exit[index].arg     = arg;
+              group->tg_info->tg_exit[index].func.on = func;
+              group->tg_info->tg_exit[index].arg     = arg;
               ret = OK;
               break;
             }

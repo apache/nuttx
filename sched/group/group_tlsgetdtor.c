@@ -66,7 +66,7 @@ tls_dtor_t tls_get_dtor(int tlsindex)
   DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
 
   flags = spin_lock_irqsave(NULL);
-  destr = group->tg_tlsdestr[tlsindex];
+  destr = group->tg_info->tg_tlsdestr[tlsindex];
   spin_unlock_irqrestore(NULL, flags);
 
   return destr;

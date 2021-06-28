@@ -75,11 +75,11 @@ int tls_alloc(void)
       /* Is this candidate index available? */
 
       tls_ndxset_t mask = (1 << candidate);
-      if ((group->tg_tlsset & mask) == 0)
+      if ((group->tg_info->tg_tlsset & mask) == 0)
         {
           /* Yes.. allocate the index and break out of the loop */
 
-          group->tg_tlsset |= mask;
+          group->tg_info->tg_tlsset |= mask;
           break;
         }
     }

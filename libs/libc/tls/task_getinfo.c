@@ -26,6 +26,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
 
 /****************************************************************************
  * Public Functions
@@ -48,15 +49,7 @@
 
 FAR struct task_info_s *task_get_info(void)
 {
-  FAR struct task_info_s *info = NULL;
-  struct stackinfo_s stackinfo;
-  int ret;
+  FAR struct tls_info_s *info = up_tls_info();
 
-  ret = nxsched_get_stackinfo(-1, &stackinfo);
-  if (ret >= 0)
-    {
-      info = (FAR struct task_info_s *)stackinfo.stack_alloc_ptr;
-    }
-
-  return info;
+  return info->tl_task;
 }
