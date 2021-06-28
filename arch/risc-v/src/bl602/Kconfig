@@ -92,11 +92,14 @@ config BL602_WIRELESS_CONTRY_CODE
 	depends on BL602_WIRELESS
 	default "CN"
 
+config BL602_NET_MULTI_INTERFACE
+	bool "STA and AP as independent interfaces"
+	depends on BL602_WIRELESS
+	default n
+
 config BL602_BLE_CONTROLLER
 	bool "ble controller support"
 	default n
-	depends on PSEUDOTERM
-	depends on PSEUDOTERM_SUSV1
 	depends on !DISABLE_MQUEUE
 	depends on SCHED_HPWORK
 	depends on BL602_WIRELESS
