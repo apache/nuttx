@@ -94,7 +94,7 @@ static struct work_s g_ble_hci_rx_work;
  ****************************************************************************/
 
 #if defined(CONFIG_BL602_WIRELESS)
-extern int bl602_net_initialize(int intf);
+extern int bl602_net_initialize(void);
 #endif
 
 #if defined(CONFIG_BL602_BLE_CONTROLLER)
@@ -274,7 +274,7 @@ int bl602_bringup(void)
 #ifdef CONFIG_BL602_WIRELESS
   bl602_set_em_sel(BL602_GLB_EM_8KB);
 
-  bl602_net_initialize(0);
+  bl602_net_initialize();
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
