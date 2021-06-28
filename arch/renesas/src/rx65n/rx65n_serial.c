@@ -281,6 +281,7 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
+static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_xmtinterrupt(int irq, void *context, FAR void *arg);
 static int  up_rcvinterrupt(int irq, void *context, FAR void *arg);
 static int  up_eriinterrupt(int irq, void *context, FAR void *arg);
@@ -365,6 +366,7 @@ struct uart_ops_s g_sci_ops =
   .attach      =  up_attach,
   .detach      =  up_detach,
   .receive     =  up_receive,
+  .ioctl       =  up_ioctl,
   .rxint       =  up_rxint,
   .rxavailable =  up_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -1280,6 +1282,31 @@ static int  up_xmtinterrupt(int irq, void *context, FAR void *arg)
 
   uart_xmitchars(dev);
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_ioctl
+ *
+ * Description:
+ *   All ioctl calls will be routed through this method
+ *
+ ****************************************************************************/
+
+static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
+{
+    int                ret    = OK;
+
+    switch (cmd)
+    {
+#ifdef CONFIG_SERIAL_TERMIOS
+#error CONFIG_SERIAL_TERMIOS NOT IMPLEMENTED
+#endif /* CONFIG_SERIAL_TERMIOS */
+       default:
+            ret = -ENOTTY;
+            break;
+    }
+
+    return ret;
 }
 
 /****************************************************************************

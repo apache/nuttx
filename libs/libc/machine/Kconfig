@@ -174,5 +174,8 @@ endif
 if ARCH_XTENSA
 source libs/libc/machine/xtensa/Kconfig
 endif
+if ARCH_RENESAS
+source libs/libc/machine/renesas/Kconfig
+endif
 
 endmenu # Architecture-Specific Support
