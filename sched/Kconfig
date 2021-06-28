@@ -268,12 +268,24 @@ config SMP
 	default n
 	depends on ARCH_HAVE_MULTICPU
 	depends on ARCH_HAVE_TESTSET
+	depends on ARCH_INTERRUPTSTACK != 0
 	select SPINLOCK
 	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
 	---help---
 		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
 		platform.
+
+		SMP mode must work with ARCH_INTERRUPTSTACK, here is the fail case:
+
+		CPU0 thread0  ->  IRQ enter -> add thread0 to block_list -> IRQ leave(crash)
+		                                                        ||
+		                                                        /\
+		                                                       /  \
+		CPU1 thread1  ->  block_task -> take thread0 from block_list -> run thread0
+
+		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
+		will caused IRQ handler stack curroption.
 
 if SMP
 
