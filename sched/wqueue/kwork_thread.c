@@ -85,9 +85,11 @@ struct lp_wqueue_s g_lpwork;
 static int work_thread(int argc, char *argv[])
 {
   FAR struct kwork_wqueue_s *queue;
+  int wndx;
 
   queue  = (FAR struct kwork_wqueue_s *)
            ((uintptr_t)strtoul(argv[1], NULL, 0));
+  wndx   = atoi(argv[2]);
 
   /* Loop forever */
 
@@ -98,7 +100,7 @@ static int work_thread(int argc, char *argv[])
        * triggered, or delayed work expires.
        */
 
-      work_process(queue);
+      work_process(queue, wndx);
     }
 
   return OK; /* To keep some compilers happy */
@@ -127,14 +129,14 @@ static int work_thread_create(FAR const char *name, int priority,
                               int stack_size, int nthread,
                               FAR struct kwork_wqueue_s *wqueue)
 {
-  FAR char *argv[2];
-  char args[16];
+  FAR char *argv[3];
+  char args[2][16];
   int wndx;
   int pid;
 
-  snprintf(args, 16, "0x%" PRIxPTR, (uintptr_t)wqueue);
-  argv[0] = args;
-  argv[1] = NULL;
+  snprintf(args[0], 16, "0x%" PRIxPTR, (uintptr_t)wqueue);
+  argv[0] = args[0];
+  argv[2] = NULL;
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_hpwork and g_lpwork.
@@ -144,6 +146,9 @@ static int work_thread_create(FAR const char *name, int priority,
 
   for (wndx = 0; wndx < nthread; wndx++)
     {
+      snprintf(args[1], 16, "%d", wndx);
+      argv[1] = args[1];
+
       pid = kthread_create(name, priority, stack_size,
                            (main_t)work_thread, argv);
 
