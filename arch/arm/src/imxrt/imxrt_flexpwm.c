@@ -711,6 +711,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
   FAR struct imxrt_flexpwm_s *priv = (FAR struct imxrt_flexpwm_s *)dev;
   uint32_t pin = 0;
   uint16_t regval;
+  uint8_t shift;
 
   putreg16(FCTRL0_FLVL(15), priv->base + IMXRT_FLEXPWM_FCTRL0_OFFSET);
   putreg16(0x000f, priv->base + IMXRT_FLEXPWM_FSTS0_OFFSET);
@@ -748,8 +749,10 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
             }
         }
 
+      shift = priv->modules[i].module - 1;
+
       regval = getreg16(priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
-      regval |= MCTRL_CLDOK(1 << i);
+      regval |= MCTRL_CLDOK(1 << shift);
       putreg16(regval, priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
 
       /* Set control registers 1 and 2 */
@@ -760,49 +763,49 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
           regval = SMCTRL2_INDEP;
           putreg16(regval, priv->base + IMXRT_FLEXPWM_SM0CTRL2_OFFSET
-                                    + MODULE_OFFSET * i);
+                                    + MODULE_OFFSET * shift);
         }
 
       regval = SMCTRL_FULL;     /* Enable full read cycle reload */
       putreg16(regval, priv->base + IMXRT_FLEXPWM_SM0CTRL_OFFSET
-                                  + MODULE_OFFSET * i);
+                                  + MODULE_OFFSET * shift);
 
       /* Set output control register */
 
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0OCTRL_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
 
       /* Set deadtime count register 0 */
 
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0DTCNT0_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
 
       /* Set initial count register */
 
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0INIT_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
 
       /* Set value registers */
 
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0VAL0_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
       putreg16(0x82b8, priv->base + IMXRT_FLEXPWM_SM0VAL1_OFFSET
-                                  + MODULE_OFFSET * i);
+                                  + MODULE_OFFSET * shift);
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0VAL2_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0VAL3_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0VAL4_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
       putreg16(0, priv->base + IMXRT_FLEXPWM_SM0VAL5_OFFSET
-                             + MODULE_OFFSET * i);
+                             + MODULE_OFFSET * shift);
 
       regval = getreg16(priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
-      regval |= MCTRL_LDOK(1 << i);
+      regval |= MCTRL_LDOK(1 << shift);
       putreg16(regval, priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
 
       regval = getreg16(priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
-      regval |= MCTRL_RUN(1 << i);
+      regval |= MCTRL_RUN(1 << shift);
       putreg16(regval, priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
     }
 
