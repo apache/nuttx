@@ -167,9 +167,11 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
        */
 
       ctcb = nxsched_get_tcb((pid_t)id);
-      if (ctcb != NULL)
+      if (ctcb && ctcb->group)
         {
-          if (ctcb->group->tg_ppid != rtcb->group->tg_pid)
+          /* Make sure that the thread it is our child. */
+
+          if (ctcb->group->tg_ppid != rtcb->pid)
             {
               ret = -ECHILD;
               goto errout;
@@ -209,7 +211,7 @@ int nx_waitid(int idtype, id_t id, FAR siginfo_t *info, int options)
 
       ctcb = nxsched_get_tcb((pid_t)id);
 
-      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->group->tg_pid)
+      if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
         {
           ret = -ECHILD;
           goto errout;
