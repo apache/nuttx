@@ -115,6 +115,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
           pstate->cl_result = OK;
         }
 
+      nwarn("end_wait for %x\n", (int)flags);
       goto end_wait;
     }
 

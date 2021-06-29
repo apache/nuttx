@@ -82,6 +82,8 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 {
   uint16_t result;
 
+  nwarn("poll %p\n", conn);
+
   /* Discard any currently buffered data */
 
   dev->d_len     = 0;
