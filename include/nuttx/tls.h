@@ -61,6 +61,13 @@
  * Public Types
  ****************************************************************************/
 
+struct task_info_s
+{
+#ifndef CONFIG_BUILD_KERNEL
+  struct getopt_s   ta_getopt; /* Globals used by getopt() */
+#endif
+};
+
 /* When TLS is enabled, up_createstack() will align allocated stacks to the
  * TLS_STACK_ALIGN value.  An instance of the following structure will be
  * implicitly positioned at the "lower" end of the stack.  Assuming a
@@ -78,9 +85,9 @@
  *
  *      Push Down             Push Up
  *   +-------------+      +-------------+ <- Stack memory allocation
- *   |  TLS Data   |      |  TLS Data   |
- *   +-------------+      +-------------+
  *   | Task Data*  |      | Task Data*  |
+ *   +-------------+      +-------------+
+ *   |  TLS Data   |      |  TLS Data   |
  *   +-------------+      +-------------+
  *   |  Arguments  |      |  Arguments  |
  *   +-------------+      +-------------+ |
@@ -92,11 +99,12 @@
  *   |             | ^    |             |
  *   +-------------+ |    +-------------+
  *
- *  Task data is allocated in the main's thread's stack only
+ *  Task data is a pointer that pointed to a user space memory region.
  */
 
 struct tls_info_s
 {
+  FAR struct task_info_s * tl_task;
 #if CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
@@ -111,14 +119,6 @@ struct tls_info_s
 #endif
 
   int tl_errno;                        /* Per-thread error number */
-};
-
-struct task_info_s
-{
-  struct tls_info_s ta_tls;    /* Must be first field */
-#ifndef CONFIG_BUILD_KERNEL
-  struct getopt_s   ta_getopt; /* Globals used by getopt() */
-#endif
 };
 
 /****************************************************************************
