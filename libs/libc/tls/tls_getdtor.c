@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlsfree.c
+ * libs/libc/tls/tls_getdtor.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,15 +24,14 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <errno.h>
+#include <stdint.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
-
-#include "sched/sched.h"
-#include "group/group.h"
+#include <nuttx/sched.h>
+#include <arch/tls.h>
 
 #if CONFIG_TLS_NELEM > 0
 
@@ -41,48 +40,30 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_free
+ * Name: tls_get_dtor
  *
  * Description:
- *   Release a group-unique TLS data index previous obtained by tls_alloc()
+ *   Get the TLS element destructor associated with the 'tlsindex' to 'destr'
  *
  * Input Parameters:
- *   tlsindex - The previously allocated TLS index to be freed
+ *   tlsindex - Index of TLS data destructor to get
  *
  * Returned Value:
- *   OK is returned on success; a negated errno value will be returned on
- *   failure:
- *
- *     -EINVAL - the index to be freed is out of range.
+ *   A non-null destruct function pointer.
  *
  ****************************************************************************/
 
-int tls_free(int tlsindex)
+tls_dtor_t tls_get_dtor(int tlsindex)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  tls_ndxset_t mask;
-  irqstate_t flags;
-  int ret = -EINVAL;
+  FAR struct task_info_s *info = task_get_info();
+  tls_dtor_t dtor;
 
-  DEBUGASSERT((unsigned)tlsindex < CONFIG_TLS_NELEM && group != NULL);
-  if ((unsigned)tlsindex < CONFIG_TLS_NELEM)
-    {
-      /* This is done in a critical section here to avoid concurrent
-       * modification of the group TLS index set.
-       */
+  DEBUGASSERT(info);
+  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
 
-      mask  = (1 << tlsindex);
-      flags = spin_lock_irqsave(NULL);
+  dtor = info->tg_tlsdtor[tlsindex];
 
-      DEBUGASSERT((group->tg_info->tg_tlsset & mask) != 0);
-      group->tg_info->tg_tlsset &= ~mask;
-      spin_unlock_irqrestore(NULL, flags);
-
-      ret = OK;
-    }
-
-  return ret;
+  return dtor;
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */

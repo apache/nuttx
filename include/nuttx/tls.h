@@ -228,7 +228,7 @@ FAR struct tls_info_s *tls_get_info(void);
  *
  * Input Parameters:
  *   tlsindex - Index of TLS data destructor to set
- *   destr    - The destr of TLS data element
+ *   dtor     - The destructor of TLS data element
  *
  * Returned Value:
  *   Zero is returned on success, a negated errno value is return on
@@ -239,7 +239,7 @@ FAR struct tls_info_s *tls_get_info(void);
  ****************************************************************************/
 
 #if CONFIG_TLS_NELEM > 0
-int tls_set_dtor(int tlsindex, tls_dtor_t destr);
+int tls_set_dtor(int tlsindex, tls_dtor_t dtor);
 #endif
 
 /****************************************************************************

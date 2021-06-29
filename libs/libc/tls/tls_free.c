@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlssetdtor.c
+ * libs/libc/tls/tls_free.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,16 +24,13 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sched.h>
+#include <errno.h>
 #include <assert.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
-
-#include "sched/sched.h"
-#include "group/group.h"
+#include <nuttx/sched.h>
 
 #if CONFIG_TLS_NELEM > 0
 
@@ -42,37 +39,52 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_dtor
+ * Name: tls_free
  *
  * Description:
- *   Set the TLS element destructor associated with the 'tlsindex' to 'destr'
+ *   Release a group-unique TLS data index previous obtained by tls_alloc()
  *
  * Input Parameters:
- *   tlsindex - Index of TLS data destructor to set
- *   destr    - The destr of TLS data element
+ *   tlsindex - The previously allocated TLS index to be freed
  *
  * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
+ *   OK is returned on success;
+ *   If unsuccessful an errno value will be returned and set to errno.
+ *     -EINVAL    - the index to be freed is out of range.
+ *     -EINTR     - the wait operation interrupted by signal
+ *     -ECANCELED - the thread was canceled during waiting
  *
  ****************************************************************************/
 
-int tls_set_dtor(int tlsindex, tls_dtor_t destr)
+int tls_free(int tlsindex)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
+  FAR struct task_info_s *info = task_get_info();
+  tls_ndxset_t mask;
+  int ret = -EINVAL;
 
-  DEBUGASSERT(group != NULL);
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
+  DEBUGASSERT((unsigned)tlsindex < CONFIG_TLS_NELEM && info != NULL);
+  if ((unsigned)tlsindex < CONFIG_TLS_NELEM)
+    {
+      /* This is done while holding a semaphore here to avoid concurrent
+       * modification of the group TLS index set.
+       */
 
-  flags = spin_lock_irqsave(NULL);
-  group->tg_info->tg_tlsdestr[tlsindex] = destr;
-  spin_unlock_irqrestore(NULL, flags);
+      mask  = (1 << tlsindex);
 
-  return OK;
+      ret = _SEM_WAIT(&info->tg_sem);
+      if (ret == OK)
+        {
+          DEBUGASSERT((info->tg_tlsset & mask) != 0);
+          info->tg_tlsset &= ~mask;
+          _SEM_POST(&info->tg_sem);
+        }
+      else
+        {
+          ret = _SEM_ERRVAL(ret);
+        }
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */

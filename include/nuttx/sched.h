@@ -390,17 +390,19 @@ struct exitinfo_s
 
 /* struct task_info_s *******************************************************/
 
-/* User-accessible per-task storage like TLS (thread local storage)
+/* User-accessible per-task info like TLS (thread local storage)
  */
 
 struct task_info_s
 {
-  /* Thread local storage ***************************************************/
+  sem_t tg_sem;
+
+  /* Task local storage *****************************************************/
 
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t tg_tlsset;                   /* Set of TLS indexes allocated */
 
-  tls_dtor_t  tg_tlsdestr[CONFIG_TLS_NELEM];  /* List of TLS destructors    */
+  tls_dtor_t tg_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
 #endif
 
   /* [at|on]exit support ****************************************************/

@@ -135,11 +135,25 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   group = (FAR struct task_group_s *)kmm_zalloc(sizeof(struct task_group_s));
   if (!group)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto err_out;
     }
 
   group->tg_info = (FAR struct task_info_s *)
     kumm_zalloc(sizeof(struct task_info_s));
+
+  if (!group->tg_info)
+    {
+      ret = -ENOMEM;
+      goto err_out;
+    }
+
+  ret = _SEM_INIT(&group->tg_info->tg_sem, 0, 1);
+
+  if (ret < 0)
+    {
+      goto err_out;
+    }
 
 #if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
   /* If this group is being created for a privileged thread, then all
@@ -164,8 +178,8 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   if (!group->tg_streamlist)
     {
-      group_deallocate(group);
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto err_out;
     }
 
 #endif
@@ -186,9 +200,8 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
       group_free(group, group->tg_streamlist);
 #endif
-      group_deallocate(group);
       tcb->cmn.group = NULL;
-      return ret;
+      goto err_out;
     }
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -209,6 +222,10 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #endif
 
   return OK;
+
+err_out:
+  group_deallocate(group);
+  return ret;
 }
 
 /****************************************************************************
@@ -227,11 +244,15 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
 int group_deallocate(FAR struct task_group_s *group)
 {
-  DEBUGASSERT(group);
-  DEBUGASSERT(group->tg_info);
+  if (group && group->tg_info)
+    {
+      kumm_free(group->tg_info);
+    }
 
-  kumm_free(group->tg_info);
-  kmm_free(group);
+  if (group)
+    {
+      kmm_free(group);
+    }
 
   return OK;
 }
