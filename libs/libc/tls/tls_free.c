@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlsalloc.c
+ * libs/libc/tls/tls_free.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,13 +27,10 @@
 #include <sched.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
-
-#include "sched/sched.h"
-#include "group/group.h"
+#include <nuttx/sched.h>
 
 #if CONFIG_TLS_NELEM > 0
 
@@ -42,57 +39,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_alloc
+ * Name: tls_free
  *
  * Description:
- *   Allocate a group-unique TLS data index
+ *   Release a group-unique TLS data index previous obtained by tls_alloc()
  *
  * Input Parameters:
- *   None
+ *   tlsindex - The previously allocated TLS index to be freed
  *
  * Returned Value:
- *   A TLS index that is unique for use within this task group.
+ *   OK is returned on success;
+ *   If unsuccessful an errno value will be returned and set to errno.
+ *     -EINVAL    - the index to be freed is out of range.
+ *     -EINTR     - the wait operation interrupted by signal
+ *     -ECANCELED - the thread was canceled during waiting
  *
  ****************************************************************************/
 
-int tls_alloc(void)
+int tls_free(int tlsindex)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
-  int candidate;
-  int ret = -EAGAIN;
+  FAR struct task_info_s *info = task_get_info();
+  tls_ndxset_t mask;
+  int ret = -EINVAL;
 
-  DEBUGASSERT(group != NULL);
-
-  /* Search for an unused index.  This is done in a critical section here to
-   * avoid concurrent modification of the group TLS index set.
-   */
-
-  flags = spin_lock_irqsave(NULL);
-  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
+  DEBUGASSERT((unsigned)tlsindex < CONFIG_TLS_NELEM && info != NULL);
+  if ((unsigned)tlsindex < CONFIG_TLS_NELEM)
     {
-      /* Is this candidate index available? */
+      /* This is done while holding a semaphore here to avoid concurrent
+       * modification of the group TLS index set.
+       */
 
-      tls_ndxset_t mask = (1 << candidate);
-      if ((group->tg_tlsset & mask) == 0)
+      mask  = (1 << tlsindex);
+
+      ret = _SEM_WAIT(&info->ta_sem);
+      if (ret == OK)
         {
-          /* Yes.. allocate the index and break out of the loop */
-
-          group->tg_tlsset |= mask;
-          break;
+          DEBUGASSERT((info->ta_tlsset & mask) != 0);
+          info->ta_tlsset &= ~mask;
+          _SEM_POST(&info->ta_sem);
         }
-    }
-
-  spin_unlock_irqrestore(NULL, flags);
-
-  /* Check if found a valid TLS data index. */
-
-  if (candidate < CONFIG_TLS_NELEM)
-    {
-      /* Yes.. Return the TLS index and success */
-
-      ret = candidate;
+      else
+        {
+          ret = _SEM_ERRVAL(ret);
+        }
     }
 
   return ret;
