@@ -266,19 +266,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   /* If we have a semi-permanent write buffer callback in place, then
    * is needs to be be nullified.
    *
-   * Commit f1ef2c6cdeb032eaa1833cc534a63b50c5058270:
-   * "When a socket is closed, it should make sure that any pending write
-   *  data is sent before the FIN is sent.  It already would wait for all
-   *  sent data to be acked, however it would discard any pending write
-   *  data that had not been sent at least once.
-   *
-   * "This change adds a check for pending write data in addition to unacked
-   *  data.  However, to be able to actually send any new data, the send
-   *  callback must be left.  The callback should be freed later when the
-   *  socket is actually destroyed."
-   *
-   * REVISIT:  Where and how exactly is s_sndcb ever freed?  Is there a
-   * memory leak here?
+   * Note: the callback will be freed by tcp_free.
    */
 
   psock->s_sndcb = NULL;
