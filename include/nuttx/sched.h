@@ -430,6 +430,8 @@ struct exitinfo_s
 #endif
 };
 
+struct task_info_s;
+
 /* struct task_group_s ******************************************************/
 
 /* All threads created by pthread_create belong in the same task group (along
@@ -532,6 +534,8 @@ struct task_group_s
 #endif
 
   /* Thread local storage ***************************************************/
+
+  FAR struct task_info_s *tg_info;
 
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t tg_tlsset;                   /* Set of TLS indexes allocated */

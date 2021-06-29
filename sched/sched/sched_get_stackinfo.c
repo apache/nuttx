@@ -69,16 +69,6 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 
       qtcb = rtcb;
     }
-  else if (pid == -1)
-    {
-      /* We can always query our main thread */
-
-      qtcb = nxsched_get_tcb(rtcb->group->tg_pid);
-      if (qtcb == NULL)
-        {
-          return -ENOENT;
-        }
-    }
   else
     {
       /* Get the task to be queried */
