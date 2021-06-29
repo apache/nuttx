@@ -180,6 +180,10 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       goto errout_with_stream;
     }
 
+  /* Initial user space semaphore */
+
+  nxsem_init(&group->tg_info->ta_sem, 0, 1);
+
   /* Attach the group to the TCB */
 
   tcb->cmn.group = group;
@@ -242,6 +246,7 @@ void group_deallocate(FAR struct task_group_s *group)
     {
       if (group->tg_info)
         {
+          nxsem_destroy(&group->tg_info->ta_sem);
           group_free(group, group->tg_info);
         }
 

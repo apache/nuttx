@@ -294,14 +294,6 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(shmdt,                    1)
 #endif
 
-#if CONFIG_TLS_NELEM > 0
-  SYSCALL_LOOKUP(tls_alloc,                0)
-  SYSCALL_LOOKUP(tls_free,                 1)
-  SYSCALL_LOOKUP(tls_get_set,              1)
-  SYSCALL_LOOKUP(tls_get_dtor,             1)
-  SYSCALL_LOOKUP(tls_set_dtor,             2)
-#endif
-
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD

@@ -53,11 +53,6 @@ ifneq ($(CONFIG_BUILD_FLAT),y)
 CSRCS += group_malloc.c group_zalloc.c group_free.c
 endif
 
-ifneq ($(CONFIG_TLS_NELEM),0)
-CSRCS += group_tlsalloc.c group_tlsfree.c
-CSRCS += group_tlsgetset.c group_tlsgetdtor.c group_tlssetdtor.c
-endif
-
 # Include group build support
 
 DEPPATH += --dep-path group

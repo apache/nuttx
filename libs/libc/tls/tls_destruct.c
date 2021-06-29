@@ -53,14 +53,15 @@
 
 void tls_destruct(void)
 {
-  FAR struct tls_info_s *info = up_tls_info();
+  FAR struct task_info_s *info = task_get_info();
+  FAR struct tls_info_s *tls = up_tls_info();
   FAR void *tls_elem_ptr = NULL;
   tls_dtor_t destructor;
   tls_ndxset_t tlsset;
   int candidate;
 
   DEBUGASSERT(info != NULL);
-  tlsset = tls_get_set();
+  tlsset = info->ta_tlsset;
 
   for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
     {
@@ -69,8 +70,8 @@ void tls_destruct(void)
       tls_ndxset_t mask = (1 << candidate);
       if (tlsset & mask)
         {
-          tls_elem_ptr = (FAR void *)info->tl_elem[candidate];
-          destructor = tls_get_dtor(candidate);
+          tls_elem_ptr = (FAR void *)tls->tl_elem[candidate];
+          destructor = info->ta_tlsdtor[candidate];
           if (tls_elem_ptr && destructor)
             {
               destructor(tls_elem_ptr);

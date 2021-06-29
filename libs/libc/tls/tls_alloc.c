@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_tlssetdtor.c
+ * libs/libc/tls/tls_alloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,16 +24,14 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sched.h>
+#include <errno.h>
 #include <assert.h>
+#include <debug.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
-
-#include "sched/sched.h"
-#include "group/group.h"
+#include <nuttx/sched.h>
 
 #if CONFIG_TLS_NELEM > 0
 
@@ -42,37 +40,61 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_dtor
+ * Name: tls_alloc
  *
  * Description:
- *   Set the TLS element destructor associated with the 'tlsindex' to 'destr'
+ *   Allocate a group-unique TLS data index
  *
  * Input Parameters:
- *   tlsindex - Index of TLS data destructor to set
- *   destr    - The destr of TLS data element
+ *   None
  *
  * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
+ *   A TLS index that is unique for use within this task group.
+ *   If unsuccessful, an errno value will be returned and set to errno.
  *
  ****************************************************************************/
 
-int tls_set_dtor(int tlsindex, tls_dtor_t destr)
+int tls_alloc(CODE void (*dtor)(FAR void *))
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
+  FAR struct task_info_s *info = task_get_info();
+  int candidate;
+  int ret;
 
-  DEBUGASSERT(group != NULL);
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
+  DEBUGASSERT(info);
 
-  flags = spin_lock_irqsave(NULL);
-  group->tg_tlsdestr[tlsindex] = destr;
-  spin_unlock_irqrestore(NULL, flags);
+  /* Search for an unused index.  This is done in a critical section here to
+   * avoid concurrent modification of the group TLS index set.
+   */
 
-  return OK;
+  ret = _SEM_WAIT(&info->ta_sem);
+
+  if (ret < 0)
+    {
+      ret = _SEM_ERRVAL(ret);
+      return ret;
+    }
+
+  ret = -EAGAIN;
+
+  for (candidate = 0; candidate < CONFIG_TLS_NELEM; candidate++)
+    {
+      /* Is this candidate index available? */
+
+      tls_ndxset_t mask = (1 << candidate);
+      if ((info->ta_tlsset & mask) == 0)
+        {
+          /* Yes.. allocate the index and break out of the loop */
+
+          info->ta_tlsset |= mask;
+          info->ta_tlsdtor[candidate] = dtor;
+          ret = candidate;
+          break;
+        }
+    }
+
+  _SEM_POST(&info->ta_sem);
+
+  return ret;
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */
