@@ -510,6 +510,14 @@ void tcp_reset(FAR struct net_driver_s *dev)
   tcp->srcport  = tcp->destport;
   tcp->destport = tmp16;
 
+  /* Initialize the rest of the tcp header to sane values.
+   *
+   * Note: urgp is set by tcp_ipv4_sendcomplete/tcp_ipv6_sendcomplete.
+   */
+
+  tcp->wnd[0] = 0;
+  tcp->wnd[1] = 0;
+
   /* Set the packet length and swap IP addresses. */
 
 #ifdef CONFIG_NET_IPv6
