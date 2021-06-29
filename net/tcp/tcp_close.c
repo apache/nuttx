@@ -262,16 +262,6 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     }
 #endif
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  /* If we have a semi-permanent write buffer callback in place, then
-   * is needs to be be nullified.
-   *
-   * Note: the callback will be freed by tcp_free.
-   */
-
-  psock->s_sndcb = NULL;
-#endif
-
   /* Check for the case where the host beat us and disconnected first */
 
   if (conn->tcpstateflags == TCP_ESTABLISHED &&
