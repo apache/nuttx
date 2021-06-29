@@ -54,6 +54,10 @@ ifeq ($(CONFIG_IMXRT_ENET),y)
 CSRCS += imxrt_ethernet.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += imxrt_gpio.c
+endif
+
 ifeq ($(CONFIG_IMXRT_ADC),y)
 CSRCS += imxrt_adc.c
 endif
