@@ -543,75 +543,7 @@ static ssize_t ramlog_file_write(FAR struct file *filep, FAR const char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct ramlog_dev_s *)inode->i_private;
 
-<<<<<<< HEAD   (d24b87 Revert "net/socketpair: move socketpair implement into socke)
-  /* Loop until all of the bytes have been written.  This function may be
-   * called from an interrupt handler!  Semaphores cannot be used!
-   *
-   * The write logic only needs to modify the rl_head index.  Therefore,
-   * there is a difference in the way that rl_head and rl_tail are protected:
-   * rl_tail is protected with a semaphore; rl_head is protected by disabling
-   * interrupts.
-   */
-
-  for (nwritten = 0; (size_t)nwritten < len; nwritten++)
-    {
-      /* Get the next character to output */
-
-      ch = buffer[nwritten];
-
-      /* Then output the character */
-
-      ret = ramlog_addchar(priv, ch);
-      if (ret < 0)
-        {
-          /* The buffer is full and nothing was saved.  The remaining
-           * data to be written is dropped on the floor.
-           */
-
-          break;
-        }
-    }
-
-  /* Was anything written? */
-
-  if (nwritten > 0)
-    {
-      readers_waken = 0;
-
-#ifndef CONFIG_RAMLOG_NONBLOCKING
-      /* Are there threads waiting for read data? */
-
-      readers_waken = ramlog_readnotify(priv);
-#endif
-
-      /* If there are multiple readers, some of them might block despite
-       * POLLIN because first reader might read all data. Favor readers
-       * and notify poll waiters only if no reader was awaken, even if the
-       * latter may starve.
-       *
-       * This also implies we do not have to make these two notify
-       * operations a critical section.
-       */
-
-      if (readers_waken == 0)
-        {
-          /* Notify all poll/select waiters that they can read from the
-           * FIFO.
-           */
-
-          ramlog_pollnotify(priv, POLLIN);
-        }
-    }
-
-  /* We always have to return the number of bytes requested and NOT the
-   * number of bytes that were actually written.  Otherwise, callers
-   * probably retry, causing same error condition again.
-   */
-
-  return len;
-=======
   return ramlog_addbuf(priv, buffer, len);
->>>>>>> CHANGE (a96a9e syslog/ramlog_channel: fix log confusion when multi task wri)
 }
 
 /****************************************************************************
