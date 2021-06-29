@@ -516,42 +516,6 @@ found:
 
   dev->d_len -= (len + iplen);
 
-#ifdef CONFIG_NET_TCP_KEEPALIVE
-  /* Check for a to KeepAlive probes.  These packets have these properties:
-   *
-   *   - TCP_ACK flag is set.  SYN/FIN/RST never appear in a Keepalive probe.
-   *   - Sequence number is the sequence number of previously ACKed data,
-   *     i.e., the expected sequence number minus one.
-   *   - The data payload is one or two bytes.
-   *
-   * We would expect a KeepAlive only in the ESTABLISHED state and only after
-   * some time has elapsed with no network activity.  If there is un-ACKed
-   * data, then we will let the normal TCP re-transmission logic handle that
-   * case.
-   */
-
-  if ((tcp->flags & TCP_ACK) != 0 &&
-      (tcp->flags & (TCP_SYN | TCP_FIN | TCP_RST)) == 0 &&
-      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED &&
-      (dev->d_len == 0 || dev->d_len == 1) &&
-      conn->tx_unacked <= 0)
-    {
-      uint32_t seq;
-      uint32_t rcvseq;
-
-      seq = tcp_getsequence(tcp->seqno);
-      rcvseq = tcp_getsequence(conn->rcvseq);
-
-      if (TCP_SEQ_LT(seq, rcvseq))
-        {
-          /* Send a "normal" acknowledgment of the KeepAlive probe */
-
-          tcp_send(dev, conn, TCP_ACK, tcpiplen);
-          return;
-        }
-    }
-#endif
-
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
    * in, unless we are in the SYN_RCVD state and receive a SYN, in which
@@ -569,8 +533,7 @@ found:
       seq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
-      if ((dev->d_len > 0 || ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          seq != rcvseq)
+      if (seq != rcvseq)
         {
           /* Trim the head of the segment */
 
@@ -582,6 +545,7 @@ found:
                 {
                   /* The segment was completely out of the window.
                    * E.g. a retransmit which was not necessary.
+                   * E.g. a keep-alive segment.
                    */
 
                   tcp_send(dev, conn, TCP_ACK, tcpiplen);
