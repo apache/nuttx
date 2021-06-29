@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task/task_onexit.c
+ * libs/libc/sched/task_onexit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,10 +30,8 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/fs/fs.h>
-
-#include "sched/sched.h"
-#include "task/task.h"
+#include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 #ifdef CONFIG_SCHED_ONEXIT
 
@@ -76,18 +74,23 @@
 
 int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 {
-  FAR struct tcb_s *tcb = this_task();
-  FAR struct task_group_s *group = tcb->group;
+  FAR struct task_info_s *info = task_get_info();
   int index;
   int ret = ENOSPC;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(info);
 
   /* The following must be atomic */
 
   if (func)
     {
-      sched_lock();
+      ret = _SEM_WAIT(&info->tg_sem);
+
+      if (ERROR == ret)
+        {
+          ret = _SEM_ERRVAL(ret);
+          goto errout_with_errno;
+        }
 
       /* Search for the first available slot.  on_exit() functions are
        * registered from lower to higher array indices; they must be called
@@ -97,18 +100,19 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 
       for (index = 0; index < CONFIG_SCHED_EXIT_MAX; index++)
         {
-          if (!group->tg_info->tg_exit[index].func.on)
+          if (!info->tg_exit[index].func.on)
             {
-              group->tg_info->tg_exit[index].func.on = func;
-              group->tg_info->tg_exit[index].arg     = arg;
+              info->tg_exit[index].func.on = func;
+              info->tg_exit[index].arg     = arg;
               ret = OK;
               break;
             }
         }
 
-      sched_unlock();
+      _SEM_POST(&info->tg_sem);
     }
 
+errout_with_errno:
   return ret;
 }
 

@@ -35,6 +35,7 @@ CSRCS += task_startup.c
 endif
 
 CSRCS += task_atexit.c
+CSRCS += task_onexit.c
 
 # Add the sched directory to the build
 

@@ -105,10 +105,6 @@ SYSCALL_LOOKUP(up_assert,                  2)
   SYSCALL_LOOKUP(vfork,                    0)
 #endif
 
-#ifdef CONFIG_SCHED_ONEXIT
-  SYSCALL_LOOKUP(on_exit,                  2)
-#endif
-
 #ifdef CONFIG_SCHED_WAITPID
   SYSCALL_LOOKUP(waitpid,                  3)
 #ifdef CONFIG_SCHED_HAVE_PARENT
