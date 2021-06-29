@@ -81,7 +81,11 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
   /* Then the task group corresponding to this PID */
 
   group = ctcb->group;
-  DEBUGASSERT(group);
+  if (group == NULL)
+    {
+      ret = -ECHILD;
+      goto errout;
+    }
 
   /* Lock this group so that it cannot be deleted until the wait completes */
 
@@ -230,7 +234,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
        */
 
       ctcb = nxsched_get_tcb(pid);
-      if (ctcb != NULL)
+      if (ctcb && ctcb->group)
         {
           /* Make sure that the thread it is our child. */
 
@@ -273,8 +277,7 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
        */
 
       ctcb = nxsched_get_tcb(pid);
-
-      if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->group->tg_pid)
+      if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
         {
           ret = -ECHILD;
           goto errout;
