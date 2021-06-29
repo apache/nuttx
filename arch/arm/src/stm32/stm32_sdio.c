@@ -2011,7 +2011,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_STM32_STM32_SDIO_DMA
+#ifdef CONFIG_STM32_SDIO_DMA
   priv->dmamode   = false;
 #endif
 
@@ -2076,7 +2076,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_STM32_STM32_SDIO_DMA
+#ifdef CONFIG_STM32_SDIO_DMA
   priv->dmamode   = false;
 #endif
 
