@@ -139,6 +139,22 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        * is set in the response
        */
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      FAR struct socket *psock = pstate->cl_psock;
+
+      /* We don't need the send callback anymore. */
+
+      if (psock->s_sndcb != NULL)
+        {
+          psock->s_sndcb->flags = 0;
+          psock->s_sndcb->event = NULL;
+
+          /* The callback will be freed by tcp_free. */
+
+          psock->s_sndcb = NULL;
+        }
+#endif
+
       dev->d_len = 0;
       flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
     }
