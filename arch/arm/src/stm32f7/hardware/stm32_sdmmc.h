@@ -46,7 +46,7 @@
 #define STM32_SDMMC_ARG_OFFSET                0x0008 /* SDMMC argument register */
 #define STM32_SDMMC_CMD_OFFSET                0x000c /* SDMMC command register */
 #define STM32_SDMMC_RESPCMD_OFFSET            0x0010 /* SDMMC command response register */
-#define STM32_SDMMC_RESP_OFFSET(n)            (0x0010+4*(n))
+#define STM32_SDMMC_RESP_OFFSET(n)            (0x0010 + 4 * (n))
 #define STM32_SDMMC_RESP1_OFFSET              0x0014 /* SDMMC response 1 register */
 #define STM32_SDMMC_RESP2_OFFSET              0x0018 /* SDMMC response 2 register */
 #define STM32_SDMMC_RESP3_OFFSET              0x001c /* SDMMC response 3 register */
