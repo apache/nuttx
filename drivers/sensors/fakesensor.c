@@ -115,8 +115,11 @@ static int fakesensor_read_csv_header(struct fakesensor_s *sensor)
 
   sensor->raw_start =
       fakesensor_read_csv_line(&sensor->data, buffer, sizeof(buffer), 0);
-  sscanf(buffer, "interval:%d\n", &sensor->interval);
-  sensor->interval *= 1000;
+  if (sensor->interval == 0)
+    {
+      sscanf(buffer, "interval:%d\n", &sensor->interval);
+      sensor->interval *= 1000;
+    }
 
   /*  Skip the CSV header */
 
@@ -323,7 +326,6 @@ int fakesensor_init(int type, FAR const char *file_name,
   sensor->lower.type = type;
   sensor->lower.ops = &g_fakesensor_ops;
   sensor->lower.buffer_number = batch_number;
-  sensor->interval = 100000;
   sensor->file_path = file_name;
 
   nxsem_init(&sensor->wakeup, 0, 0);
