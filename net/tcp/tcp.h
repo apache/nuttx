@@ -205,7 +205,7 @@ struct tcp_conn_s
 
   /* Read-ahead buffering.
    *
-   *   readahead - A singly linked list of type struct iob_qentry_s
+   *   readahead - A singly linked list of type struct iob_s
    *               where the TCP/IP read-ahead data is retained.
    */
 
