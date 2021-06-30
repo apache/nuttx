@@ -61,19 +61,9 @@ endif
 
 ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-omit-frame-pointer
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
-<<<<<<< HEAD
-<<<<<<< HEAD
 # -Werror-implicit-function-declaration is used by presubmit tester, but
 # isn't set in all versions of GCC. This is why -Wall is so awkward.
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -Werror-implicit-function-declaration
-=======
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
->>>>>>> 577374631f (Add rest of BeagleV Starlight JH7100 and JH7110 work.)
-=======
-# -Werror-implicit-function-declaration is used by presubmit tester, but
-# isn't set in all versions of GCC. This is why -Wall is so awkward.
-ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -Werror-implicit-function-declaration
->>>>>>> d8bbb70311 (Tweak spelling of board name in configs, fix CFLAGS.)
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
