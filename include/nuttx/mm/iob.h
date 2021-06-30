@@ -479,6 +479,17 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
                 unsigned int len, unsigned int offset);
 
 /****************************************************************************
+ * Name: iob_tailroom
+ *
+ * Description:
+ *  Return the number of bytes at the tail of the I/O buffer chain which
+ *  can be used to append data without additional allocations.
+ *
+ ****************************************************************************/
+
+unsigned int iob_tailroom(FAR struct iob_s *iob);
+
+/****************************************************************************
  * Name: iob_clone
  *
  * Description:
