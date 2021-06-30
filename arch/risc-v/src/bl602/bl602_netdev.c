@@ -229,6 +229,7 @@ static struct
 {
   uint32_t scan_result_status : 2; /* WiFi scan result status */
   uint32_t scan_result_len : 6;
+  uint32_t retry_cnt : 4; /* MAX 16 retries */
 } g_state;
 
 /****************************************************************************
@@ -1494,8 +1495,8 @@ static int bl602_ioctl_wifi_start(FAR struct bl602_net_driver_s *priv,
       int state;
 
       wifi_mgmr_sta_autoconnect_enable();
-      if (wifi_mgmr_api_connect(mgmr->wifi_mgmr_stat_info.ssid,
-                                mgmr->wifi_mgmr_stat_info.psk,
+      if (wifi_mgmr_sta_connect(NULL, mgmr->wifi_mgmr_stat_info.ssid,
+                                mgmr->wifi_mgmr_stat_info.passphr,
                                 NULL,
                                 (uint8_t *)priv->bssid,
                                 0,
@@ -1521,7 +1522,7 @@ static int bl602_ioctl_wifi_start(FAR struct bl602_net_driver_s *priv,
       syslog(LOG_INFO, "current channel:%d\n", channel);
 
       if (wifi_mgmr_api_ap_start(mgmr->wifi_mgmr_stat_info.ssid,
-                                 mgmr->wifi_mgmr_stat_info.psk,
+                                 mgmr->wifi_mgmr_stat_info.passphr,
                                  channel ? channel : 1,
                                  0) < 0)
         {
@@ -1695,7 +1696,7 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
           strncpy(passphrase, (char *)ext->key, ext->key_len);
           passphrase[ext->key_len] = 0;
 
-          wifi_mgmr_sta_psk_set(passphrase);
+          wifi_mgmr_sta_passphr_set(passphrase);
           kmm_free(passphrase);
           return OK;
         }
@@ -1867,6 +1868,7 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
           else if (req->u.essid.flags == 1)
             {
               priv->prev_connectd = 0;
+              g_state.retry_cnt = 0;
               return bl602_ioctl_wifi_start(priv, arg);
             }
           else
@@ -1940,13 +1942,13 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
           ext      = (struct iw_encode_ext *)req->u.encoding.pointer;
           length   = req->u.encoding.length - sizeof(struct iw_encode_ext);
           ext->alg = IW_ENCODE_ALG_NONE;
-          ext->key_len = strlen(mgmr->wifi_mgmr_stat_info.psk);
+          ext->key_len = strlen(mgmr->wifi_mgmr_stat_info.passphr);
           if (ext->key_len > length)
             {
               return -E2BIG;
             }
 
-          memcpy(ext->key, mgmr->wifi_mgmr_stat_info.psk, ext->key_len);
+          memcpy(ext->key, mgmr->wifi_mgmr_stat_info.passphr, ext->key_len);
 
           return OK;
         }
@@ -2094,14 +2096,12 @@ void bl602_net_event(int evt, int val)
       do
         {
           struct bl602_net_driver_s *priv = &g_bl602_net[0];
-          static int retry_cnt = 0;
 
-          wlinfo("retry connect : %d\n", retry_cnt);
+          wlinfo("retry connect : %d\n", g_state.retry_cnt);
           if (!priv->prev_connectd)
             {
-              if (retry_cnt++ > 1)
+              if (g_state.retry_cnt++ > 1)
                 {
-                  retry_cnt = 0;
                   wifi_mgmr_sta_autoconnect_disable();
                   wifi_mgmr_api_idle();
 
