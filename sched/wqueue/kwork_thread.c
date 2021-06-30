@@ -118,6 +118,8 @@ static int work_thread(int argc, FAR char *argv[])
   wqueue = (FAR struct kwork_wqueue_s *)
            ((uintptr_t)strtoul(argv[1], NULL, 0));
 
+  flags = enter_critical_section();
+
   /* Loop forever */
 
   for (; ; )
@@ -129,8 +131,6 @@ static int work_thread(int argc, FAR char *argv[])
 
       nxsem_wait_uninterruptible(&wqueue->sem);
 
-      flags = enter_critical_section();
-
       /* And check each entry in the work queue.  Since we have disabled
        * interrupts we know:  (1) we will not be suspended unless we do
        * so ourselves, and (2) there will be no changes to the work queue
@@ -139,20 +139,14 @@ static int work_thread(int argc, FAR char *argv[])
       /* Remove the ready-to-execute work from the list */
 
       work = (FAR struct work_s *)sq_remfirst(&wqueue->q);
-      DEBUGASSERT(work);
-
-      /* Extract the work description from the entry (in case the work
-       * instance by the re-used after it has been de-queued).
-       */
-
-      worker = work->worker;
-
-      /* Check for a race condition where the work may be nullified
-       * before it is removed from the queue.
-       */
-
-      if (worker != NULL)
+      if (work && work->worker)
         {
+          /* Extract the work description from the entry (in case the work
+           * instance by the re-used after it has been de-queued).
+           */
+
+          worker = work->worker;
+
           /* Extract the work argument (before re-enabling interrupts) */
 
           arg = work->arg;
@@ -167,12 +161,11 @@ static int work_thread(int argc, FAR char *argv[])
 
           leave_critical_section(flags);
           CALL_WORKER(worker, arg);
-        }
-      else
-        {
-          leave_critical_section(flags);
+          flags = enter_critical_section();
         }
     }
+
+  leave_critical_section(flags);
 
   return OK; /* To keep some compilers happy */
 }

@@ -87,6 +87,17 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
         }
       else
         {
+          /* The sem_wait() can't call from interrupt handlers, so worker
+           * thread will still be awakened even if the work cancel is
+           * called in interrupt handlers, but work thread can handle
+           * this case with work empty in the work queue.
+           */
+
+          if (up_interrupt_context() == false)
+            {
+              nxsem_wait(&wqueue->sem);
+            }
+
           sq_rem((FAR sq_entry_t *)work, &wqueue->q);
         }
 
