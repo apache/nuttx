@@ -72,7 +72,8 @@ to match the highest priority client.
 queues:
 
 -  ``CONFIG_SIG_SIGWORK`` The signal number that will be used to
-   wake-up the worker thread. This same signal is used with the
+   wake-up the worker thread. This same signal is used with various
+   internal worker threads.
    Default: 17
 
 Low Priority Kernel Work Queue

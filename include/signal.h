@@ -224,7 +224,7 @@
 #  endif
 #endif
 
-/* SIGWORK is used to wake up various internal, NuttX worker thread */
+/* SIGWORK is used to wake up various internal NuttX worker threads */
 
 #if defined(CONFIG_SCHED_WORKQUEUE) || defined(CONFIG_PAGING)
 #  ifndef CONFIG_SIG_SIGWORK
