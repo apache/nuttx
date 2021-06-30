@@ -110,17 +110,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
   if (conn->readahead != NULL)
     {
-      /* XXX move this to mm/iob */
-
-      const struct iob_s *iob;
-
-      iob = conn->readahead;
-      while (iob->io_flink != NULL)
-        {
-          iob = iob->io_flink;
-        }
-
-      tailroom = CONFIG_IOB_BUFSIZE - (iob->io_offset + iob->io_len);
+      tailroom = iob_tailroom(conn->readahead);
     }
   else
     {
