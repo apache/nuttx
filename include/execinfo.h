@@ -34,7 +34,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_EABI_UNWINDER)
+#if defined(CONFIG_UNWINDER)
 
 /* Store up to SIZE return address of the current program state in
  * ARRAY and return the exact number of values stored.

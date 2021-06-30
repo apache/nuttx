@@ -9,8 +9,8 @@
 
 menu "Library Debugging"
 
-config EABI_UNWINDER
-	bool "EABI Stack Unwinder"
+config UNWINDER
+	bool "Stack Unwinder"
 	default "n"
 	---help---
 		This option enables stack unwinding support in NuttX

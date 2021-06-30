@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_EABI_UNWINDER),y)
+ifeq ($(CONFIG_UNWINDER),y)
 
 CSRCS += lib_backtrace.c lib_dumpstack.c
 
