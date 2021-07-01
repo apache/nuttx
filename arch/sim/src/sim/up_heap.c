@@ -434,7 +434,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
  * Name: malloc_size
  ****************************************************************************/
 
-size_t malloc_size(FAR void *mem)
+size_t mm_malloc_size(FAR void *mem)
 {
   return host_malloc_size(mem);
 }
