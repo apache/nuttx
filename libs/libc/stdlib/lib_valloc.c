@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/umm_heap/umm_valloc.c
+ * libs/libc/stdlib/lib_valloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -49,5 +51,5 @@
 
 FAR void *valloc(size_t size)
 {
-  return memalign(sysconf(_SC_PAGESIZE), size);
+  return lib_memalign(sysconf(_SC_PAGESIZE), size);
 }

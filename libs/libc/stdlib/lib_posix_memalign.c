@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/umm_heap/umm_posix_memalign.c
+ * libs/libc/stdlib/lib_posix_memalign.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,12 +25,14 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include "libc.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 int posix_memalign(FAR void **mem, size_t align, size_t size)
 {
-  *mem = memalign(align, size);
+  *mem = lib_memalign(align, size);
   return *mem ? OK : ENOMEM;
 }
