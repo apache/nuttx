@@ -28,6 +28,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <net/route.h>
 #include <netpacket/netlink.h>
