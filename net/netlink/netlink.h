@@ -34,6 +34,7 @@
 #include <netpacket/netlink.h>
 #include <nuttx/net/netlink.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/wqueue.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"
