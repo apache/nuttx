@@ -375,14 +375,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       /* Set the TCP Window */
 
-      /* hack to trigger:
-       * https://github.com/apache/incubator-nuttx/pull/3919
-       * #issuecomment-868248576
-       */
-
-      if ((tcp->flags & TCP_FIN) != 0)
-          recvwndo = 0;
-
       tcp->wnd[0] = recvwndo >> 8;
       tcp->wnd[1] = recvwndo & 0xff;
     }
