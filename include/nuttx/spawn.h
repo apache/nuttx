@@ -100,6 +100,11 @@ extern "C"
 void add_file_action(FAR posix_spawn_file_actions_t *file_action,
                      FAR struct spawn_general_file_action_s *entry);
 
+int nxtask_spawn(FAR const char *name, main_t entry,
+                 FAR const posix_spawn_file_actions_t *file_actions,
+                 FAR const posix_spawnattr_t *attr,
+                 FAR char * const argv[], FAR char * const envp[]);
+
 #ifdef __cplusplus
 }
 #endif

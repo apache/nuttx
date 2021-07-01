@@ -30,6 +30,7 @@ endif
 CSRCS += lib_psa_getflags.c lib_psa_getschedparam.c lib_psa_getschedpolicy.c
 CSRCS += lib_psa_init.c lib_psa_setflags.c lib_psa_setschedparam.c
 CSRCS += lib_psa_setschedpolicy.c lib_psa_getsigmask.c lib_psa_setsigmask.c
+CSRCS += lib_task_spawn.c
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += lib_psa_getstackaddr.c lib_psa_setstackaddr.c

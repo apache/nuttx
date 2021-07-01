@@ -85,7 +85,7 @@ SYSCALL_LOOKUP(sem_wait,                   1)
 
 #ifndef CONFIG_BUILD_KERNEL
   SYSCALL_LOOKUP(task_create,              5)
-  SYSCALL_LOOKUP(task_spawn,               6)
+  SYSCALL_LOOKUP(nxtask_spawn,             6)
 #else
   SYSCALL_LOOKUP(pgalloc,                  2)
 #endif
