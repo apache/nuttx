@@ -586,6 +586,15 @@ config ESP32_UART0_TXDMA
 	bool "Enable UART0 TX DMA"
 	select ARCH_DMA
 	select UART0_TXDMA
+	depends on EXPERIMENTAL
+	---help---
+		Due to a hardware bug on the DMA used by the UART
+		only TX DMA can be used. RX DMA is not available.
+		And when TX DMA is working, RX can't work properly, even
+		without using DMA.
+		So, it's not possible to have full duplex when TX DMA is enabled
+		and for not losing RX data it's recommended to implement the use
+		of flow control while a TX DMA transfer is ongoing.
 
 endif # ESP32_UART0
 
@@ -617,6 +626,15 @@ config ESP32_UART1_TXDMA
 	bool "Enable UART1 TX DMA"
 	select ARCH_DMA
 	select UART1_TXDMA
+	depends on EXPERIMENTAL
+	---help---
+		Due to a hardware bug on the DMA used by the UART
+		only TX DMA can be used. RX DMA is not available.
+		And when TX DMA is working, RX can't work properly, even
+		without using DMA.
+		So, it's not possible to have full duplex when TX DMA is enabled
+		and for not losing rx data it's recommended to implement the use
+		of flow control while a TX DMA transfer is ongoing.
 
 endif # ESP32_UART1
 
@@ -648,6 +666,15 @@ config ESP32_UART2_TXDMA
 	bool "Enable UART2 TX DMA"
 	select ARCH_DMA
 	select UART2_TXDMA
+	depends on EXPERIMENTAL
+	---help---
+		Due to a hardware bug on the DMA used by the UART
+		only TX DMA can be used. RX DMA is not available.
+		And when TX DMA is working, RX can't work properly simultaneously, even
+		without using DMA.
+		So, it's not possible to have full duplex when TX DMA is enabled
+		and for not losing rx data it's recommended to implement the use
+		of flow control while a TX DMA transfer is ongoing.
 
 endif # ESP32_UART2
 
