@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/execinfo.h
+ * mm/iob/iob_tailroom.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,35 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_EXECINFO_H
-#define __INCLUDE_EXECINFO_H
-
 /****************************************************************************
- * Public Function Prototypes
+ * Included Files
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+#include <nuttx/config.h>
+
+#include <nuttx/mm/iob.h>
+
+#include "iob.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: iob_tailroom
+ *
+ * Description:
+ *  Return the number of bytes at the tail of the I/O buffer chain which
+ *  can be used to append data without additional allocations.
+ *
+ ****************************************************************************/
+
+unsigned int iob_tailroom(FAR struct iob_s *iob)
 {
-#else
-#define EXTERN extern
-#endif
+  while (iob->io_flink != NULL)
+    {
+      iob = iob->io_flink;
+    }
 
-#if defined(CONFIG_UNWINDER)
-
-/* Store up to SIZE return address of the current program state in
- * ARRAY and return the exact number of values stored.
- */
-
-extern int  backtrace(FAR void **buffer, int size);
-extern void dump_stack(void);
-#else
-# define dump_stack()
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  return CONFIG_IOB_BUFSIZE - (iob->io_offset + iob->io_len);
 }
-#endif
-
-#endif /* __INCLUDE_EXECINFO_H */

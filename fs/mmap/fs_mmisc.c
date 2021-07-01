@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/execinfo.h
+ * fs/mmap/fs_mmisc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,37 +18,48 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_EXECINFO_H
-#define __INCLUDE_EXECINFO_H
-
 /****************************************************************************
- * Public Function Prototypes
+ * Included Files
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+#include <sys/mman.h>
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/* The empty implementation is enough since the paging isn't supported yet. */
+
+int mlock(FAR const void *addr, size_t len)
 {
-#else
-#define EXTERN extern
-#endif
-
-#if defined(CONFIG_UNWINDER)
-
-/* Store up to SIZE return address of the current program state in
- * ARRAY and return the exact number of values stored.
- */
-
-extern int  backtrace(FAR void **buffer, int size);
-extern void dump_stack(void);
-#else
-# define dump_stack()
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  return 0;
 }
-#endif
 
-#endif /* __INCLUDE_EXECINFO_H */
+int mlockall(int flags)
+{
+  return 0;
+}
+
+int munlock(FAR const void *addr, size_t len)
+{
+  return 0;
+}
+
+int munlockall(void)
+{
+  return 0;
+}
+
+/* The empty implementation is enough since MMU/MPU mayn't exist. */
+
+int mprotect(FAR void *addr, size_t len, int prot)
+{
+  return 0;
+}
+
+/* Ignore the advice since there is no alternative strategy to select. */
+
+int posix_madvise(FAR void *addr, size_t len, int advice)
+{
+  return 0;
+}

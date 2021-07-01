@@ -703,8 +703,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   DEBUGASSERT(conn->crefs == 0);
   net_lock();
 
-  /* Free remaining callbacks, actually there should be only the close
-   * callback left.
+  /* Free remaining callbacks, actually there should be only the send
+   * callback for CONFIG_NET_TCP_WRITE_BUFFERS is left.
    */
 
   for (cb = conn->list; cb; cb = next)

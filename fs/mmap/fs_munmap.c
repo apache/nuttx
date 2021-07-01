@@ -103,7 +103,6 @@ int munmap(FAR void *start, size_t length)
 
   /* Find a region containing this start and length in the list of regions */
 
-  rammap_initialize();
   ret = nxsem_wait(&g_rammaps.exclsem);
   if (ret < 0)
     {
