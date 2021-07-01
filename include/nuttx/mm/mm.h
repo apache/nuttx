@@ -193,6 +193,16 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size);
 FAR void *kmm_malloc(size_t size);
 #endif
 
+/* Functions contained in mm_malloc_size.c **********************************/
+
+size_t mm_malloc_size(FAR void *mem);
+
+/* Functions contained in kmm_malloc_size.c *********************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+size_t kmm_malloc_size(FAR void *mem);
+#endif
+
 /* Functions contained in mm_free.c *****************************************/
 
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem);

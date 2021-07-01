@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_heap/mm_malloc_size.c
+ * mm/kmm_heap/kmm_malloc_size.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,35 +24,17 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <debug.h>
-
 #include <nuttx/mm/mm.h>
 
-#include "mm_heap/mm.h"
+#ifdef CONFIG_MM_KERNEL_HEAP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-size_t mm_malloc_size(FAR void *mem)
+size_t kmm_malloc_size(FAR void *mem)
 {
-  FAR struct mm_freenode_s *node;
-
-  /* Protect against attempts to query a NULL reference */
-
-  if (!mem)
-    {
-      return 0;
-    }
-
-  /* Map the memory chunk into a free node */
-
-  node = (FAR struct mm_freenode_s *)((FAR char *)mem - SIZEOF_MM_ALLOCNODE);
-
-  /* Sanity check against double-frees */
-
-  DEBUGASSERT(node->preceding & MM_ALLOC_BIT);
-
-  return node->size - SIZEOF_MM_ALLOCNODE;
+  return mm_malloc_size(mem);
 }
+
+#endif /* CONFIG_MM_KERNEL_HEAP */
