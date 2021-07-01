@@ -107,7 +107,7 @@ void efm32_timer_dumpregs(uintptr_t base, FAR const char *msg)
   tmrinfo("DTFAULT: %04x DTFAULTC: %04x  DTLOCK: %04x \n",
           getreg32(base + EFM32_TIMER_CTRL_OFFSET),
           getreg32(base + EFM32_TIMER_STATUS_OFFSET),
-          getreg32(base + EFM32_TIMER_IEN_OFFSET),
+          getreg32(base + EFM32_TIMER_IEN_OFFSET));
 #endif
 }
 
