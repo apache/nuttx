@@ -147,8 +147,10 @@ struct mpfs_spi_priv_s
 
 static int mpfs_spi_lock(struct spi_dev_s *dev, bool lock);
 
+#ifdef CONFIG_SPI_CS_CONTROL
 static void mpfs_spi_select(struct spi_dev_s *dev, uint32_t devid,
                             bool selected);
+#endif
 
 static uint32_t mpfs_spi_setfrequency(struct spi_dev_s *dev,
                                       uint32_t frequency);
@@ -188,10 +190,11 @@ static const struct mpfs_spi_config_s mpfs_spi_config =
     .use_irq  = true,
 };
 
-static const struct spi_ops_s mpfs_spi_ops =
+#ifdef CONFIG_MPFS_SPI0
+static const struct spi_ops_s mpfs_spi0_ops =
 {
     .lock             = mpfs_spi_lock,
-    .select           = mpfs_spi_select,
+    .select           = mpfs_spi0_select,
     .setfrequency     = mpfs_spi_setfrequency,
 #ifdef CONFIG_SPI_DELAY_CONTROL
     .setdelay         = mpfs_spi_setdelay,
@@ -218,12 +221,11 @@ static const struct spi_ops_s mpfs_spi_ops =
     .registercallback = NULL,
 };
 
-#ifdef CONFIG_MPFS_SPI0
 static struct mpfs_spi_priv_s g_mpfs_spi0_priv =
 {
   .spi_dev =
               {
-                .ops = &mpfs_spi_ops
+                .ops = &mpfs_spi0_ops
               },
   .config            = &mpfs_spi_config,
   .hw_base           = MPFS_SPI0_LO_BASE,
@@ -232,12 +234,42 @@ static struct mpfs_spi_priv_s g_mpfs_spi0_priv =
   .devid             = 0
 };
 #endif /* CONFIG_MPFS_SPI0 */
+
 #ifdef CONFIG_MPFS_SPI1
+static const struct spi_ops_s mpfs_spi1_ops =
+{
+    .lock             = mpfs_spi_lock,
+    .select           = mpfs_spi1_select,
+    .setfrequency     = mpfs_spi_setfrequency,
+#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+    .setdelay         = mpfs_spi_setdelay,
+#endif
+    .setmode          = mpfs_spi_setmode,
+    .setbits          = mpfs_spi_setbits,
+#ifdef CONFIG_SPI_HWFEATURES
+    .hwfeatures       = mpfs_spi_hwfeatures,
+#endif
+    .status           = mpfs_spi_status,
+#ifdef CONFIG_SPI_CMDDATA
+    .cmddata          = mpfs_spi_cmddata,
+#endif
+    .send             = mpfs_spi_send,
+#ifdef CONFIG_SPI_EXCHANGE
+    .exchange         = mpfs_spi_exchange,
+#else
+    .sndblock         = mpfs_spi_sndblock,
+    .recvblock        = mpfs_spi_recvblock,
+#endif
+#ifdef CONFIG_SPI_TRIGGER
+    .trigger          = mpfs_spi_trigger,
+#endif
+    .registercallback = NULL,
+};
 static struct mpfs_spi_priv_s g_mpfs_spi1_priv =
 {
   .spi_dev =
               {
-                .ops = &mpfs_spi_ops
+                .ops = &mpfs_spi1_ops
               },
   .config            = &mpfs_spi_config,
   .hw_base           = MPFS_SPI1_LO_BASE,
@@ -355,6 +387,7 @@ static int mpfs_spi_lock(struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SPI_CS_CONTROL
 static void mpfs_spi_select(struct spi_dev_s *dev, uint32_t devid,
                             bool selected)
 {
@@ -373,6 +406,47 @@ static void mpfs_spi_select(struct spi_dev_s *dev, uint32_t devid,
 
   spiinfo("devid: %u, CS: %s\n", devid, selected ? "select" : "free");
 }
+#endif
+
+/****************************************************************************
+ * Name:  mpfs_spi0/1_select
+ *
+ * Description:
+ *   The external function, mpfs_spi0/1_select.
+ *
+ * Input Parameters:
+ *   dev -       Device-specific state data
+ *   devid - The SPI CS or device number
+ *   selected - true: assert CS, false de-assert CS
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MPFS_SPI0
+void weak_function mpfs_spi0_select(FAR struct spi_dev_s *dev,
+                        uint32_t devid, bool selected)
+{
+#ifdef CONFIG_SPI_CS_CONTROL
+  mpfs_spi_select(dev, devid, selected);
+#else
+# warning "Missing logic"
+#endif
+}
+#endif /* CONFIG_MPFS_SPI0 */
+
+#ifdef CONFIG_MPFS_SPI1
+void weak_function mpfs_spi1_select(FAR struct spi_dev_s *dev,
+                        uint32_t devid, bool selected)
+{
+#ifdef CONFIG_SPI_CS_CONTROL
+  mpfs_spi_select(dev, devid, selected);
+#else
+# warning "Missing logic"
+#endif
+}
+#endif /* CONFIG_MPFS_SPI1 */
 
 /****************************************************************************
  * Name: mpfs_spi_setfrequency
