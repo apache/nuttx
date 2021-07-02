@@ -212,21 +212,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 FAR void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  int ret = (int)getpid();
-
-  /* Check current environment */
-
-  if (up_interrupt_context())
+  if (getpid() == -ESRCH)
     {
-      /* We are in ISR, add to mm_delaylist */
-
-      mm_add_delaylist(heap, mem);
-    }
-  else if (ret == -ESRCH || sched_idletask())
-    {
-      /* We are in IDLE task & can't get sem, or meet -ESRCH return,
-       * which means we are in situations during context switching(See
-       * mm_trysemaphore() & getpid()). Then add to mm_delaylist.
+      /* getpid() return -ESRCH, means we are in situations
+       * during context switching(See mm_trysemaphore() & getpid()).
+       * Then add to mm_delaylist.
        */
 
       mm_add_delaylist(heap, mem);
