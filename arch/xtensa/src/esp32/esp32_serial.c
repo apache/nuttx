@@ -739,22 +739,6 @@ static void esp32_reset_rx_fifo(struct esp32_dev_s *priv)
     }
 }
 
-/****************************************************************************
- * Name: esp32_reset_tx_fifo
- *
- * Description:
- *   Resets the TX FIFO.
- *
- * Parameters:
- *   priv        -  Pointer to the serial driver struct.
- *
- ****************************************************************************/
-
-static void esp32_reset_tx_fifo(struct esp32_dev_s *priv)
-{
-  modifyreg32(UART_CONF0_REG(priv->config->id), 0, UART_TXFIFO_RST_M);
-  modifyreg32(UART_CONF0_REG(priv->config->id), UART_TXFIFO_RST_M, 0);
-}
 #endif
 
 /****************************************************************************
@@ -947,7 +931,6 @@ static int esp32_setup(struct uart_dev_s *dev)
   /* Reset the RX and TX FIFO */
 
   esp32_reset_rx_fifo(priv);
-  esp32_reset_tx_fifo(priv);
 
   /* Configure and enable the UART */
 
