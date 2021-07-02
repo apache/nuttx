@@ -30,77 +30,77 @@
 #define PRId32      "ld"
 #define PRId64      "lld"
 
-#define PRIdPTR     "d"
+#define PRIdPTR     "ld"
 
 #define PRIi8       "i"
 #define PRIi16      "i"
 #define PRIi32      "li"
 #define PRIi64      "lli"
 
-#define PRIiPTR     "i"
+#define PRIiPTR     "li"
 
 #define PRIo8       "o"
 #define PRIo16      "o"
 #define PRIo32      "lo"
 #define PRIo64      "llo"
 
-#define PRIoPTR     "o"
+#define PRIoPTR     "lo"
 
 #define PRIu8       "u"
 #define PRIu16      "u"
 #define PRIu32      "lu"
 #define PRIu64      "llu"
 
-#define PRIuPTR     "u"
+#define PRIuPTR     "lu"
 
 #define PRIx8       "x"
 #define PRIx16      "x"
 #define PRIx32      "lx"
 #define PRIx64      "llx"
 
-#define PRIxPTR     "x"
+#define PRIxPTR     "lx"
 
 #define PRIX8       "X"
 #define PRIX16      "X"
 #define PRIX32      "lX"
 #define PRIX64      "llX"
 
-#define PRIXPTR     "X"
+#define PRIXPTR     "lX"
 
 #define SCNd8       "hhd"
 #define SCNd16      "hd"
 #define SCNd32      "ld"
 #define SCNd64      "lld"
 
-#define SCNdPTR     "d"
+#define SCNdPTR     "ld"
 
 #define SCNi8       "hhi"
 #define SCNi16      "hi"
 #define SCNi32      "li"
 #define SCNi64      "lli"
 
-#define SCNiPTR     "i"
+#define SCNiPTR     "li"
 
 #define SCNo8       "hho"
 #define SCNo16      "ho"
 #define SCNo32      "lo"
 #define SCNo64      "llo"
 
-#define SCNoPTR     "o"
+#define SCNoPTR     "lo"
 
 #define SCNu8       "hhu"
 #define SCNu16      "hu"
 #define SCNu32      "lu"
 #define SCNu64      "llu"
 
-#define SCNuPTR     "u"
+#define SCNuPTR     "lu"
 
 #define SCNx8       "hhx"
 #define SCNx16      "hx"
 #define SCNx32      "lx"
 #define SCNx64      "llx"
 
-#define SCNxPTR     "x"
+#define SCNxPTR     "lx"
 
 #define INT8_C(x)   x
 #define INT16_C(x)  x
