@@ -579,7 +579,7 @@ config ESP32_UART0_RTSPIN
 config ESP32_UART0_CTSPIN
 	int "UART0 CTS Pin"
 	depends on SERIAL_OFLOWCONTROL
-	default 19
+	default 23
 	range 0 39
 
 config ESP32_UART0_TXDMA
@@ -624,12 +624,12 @@ if ESP32_UART2
 
 config ESP32_UART2_TXPIN
 	int "UART2 Tx Pin"
-	default 17
+	default 19
 	range 0 39
 
 config ESP32_UART2_RXPIN
 	int "UART2 Rx Pin"
-	default 16
+	default 18
 	range 0 39
 
 config ESP32_UART2_RTSPIN
