@@ -323,7 +323,7 @@ int esp32c3_ble_initialize(void)
     }
 
 #if defined(CONFIG_UART_BTH4)
-  ret = uart_bth4_register(CONFIG_BT_UART_ON_DEV_NAME, &g_ble_priv.drv);
+  ret = uart_bth4_register(CONFIG_ESP32C3_BLE_TTY_NAME, &g_ble_priv.drv);
 #else
   ret = bt_netdev_register(&g_ble_priv.drv);
 #endif

@@ -529,10 +529,6 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
                                               uint32_t core_id)
 {
   int pid;
-#ifdef CONFIG_SMP
-  int ret;
-  cpu_set_t cpuset;
-#endif
 
   pid = kthread_create(name, prio, stack_depth, entry,
                       (char * const *)param);
@@ -542,20 +538,6 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
         {
           *((int *)task_handle) = pid;
         }
-
-#ifdef CONFIG_SMP
-      if (core_id < CONFIG_SMP_NCPUS)
-        {
-          CPU_ZERO(&cpuset);
-          CPU_SET(core_id, &cpuset);
-          ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
-          if (ret)
-            {
-              wlerr("Failed to set affinity error=%d\n", ret);
-              return false;
-            }
-        }
-#endif
     }
   else
     {
@@ -1686,6 +1668,7 @@ static void btdm_controller_mem_init(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ESP32C3_WIFI
 int phy_printf(const char *format, ...)
 {
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
@@ -1698,6 +1681,7 @@ int phy_printf(const char *format, ...)
 
   return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: bt_phy_enable_clock
