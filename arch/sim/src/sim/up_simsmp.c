@@ -148,7 +148,7 @@ static void *sim_host_timer_handler(void *arg)
 
   while (g_nx_initstate < 5)
     {
-      host_sleep(10 * 1000); /* 10ms */
+      host_sleep(10 * 1000 * 1000); /* 10ms */
     }
 
   /* Send a periodic timer event to CPU0 */
@@ -156,7 +156,7 @@ static void *sim_host_timer_handler(void *arg)
   while (1)
     {
       pthread_kill(g_cpu_thread[0], SIGUSR1);
-      host_sleep(10 * 1000); /* 10ms */
+      host_sleep(10 * 1000 * 1000); /* 10ms */
     }
 
   return NULL;
