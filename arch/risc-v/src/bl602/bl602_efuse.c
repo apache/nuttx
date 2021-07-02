@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_systemreset.c
+ * arch/risc-v/src/bl602/bl602_efuse.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,83 +23,110 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
 #include <stdint.h>
+#include <errno.h>
+#include <assert.h>
+
+#include "chip.h"
 #include "riscv_arch.h"
 
-#include "hardware/bl602_glb.h"
-#include "hardware/bl602_hbn.h"
+#include "hardware/bl602_ef.h"
 #include "bl602_romapi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* We choose to use ROM driver here.
- *
- * Because BL602 will reset the XIP Flash controller when performing
- * reset, this part of the code cannot be placed on the XIP Flash.
- */
-
-#define bl602_romapi_reset_system ((void (*)(void))BL602_ROMAPI_RST_SYSTEM)
-#define bl602_romapi_reset_cpu_sw ((void (*)(void))BL602_ROMAPI_RST_CPU_SW)
-#define bl602_romapi_reset_por ((void (*)(void))BL602_ROMAPI_RST_POR)
+#define bl602_romapi_efuse_ctrl_load_r0 \
+  ((void (*)(void))BL602_ROMAPI_EFUSE_CTRL_LOAD_R0)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline uint32_t count_zero_bits_in_byte(uint8_t val)
+{
+  uint32_t cnt = 0;
+  uint32_t i   = 0;
+  for (i = 0; i < 8; i++)
+    {
+      if ((val & (1 << i)) == 0)
+        {
+          cnt += 1;
+        }
+    }
+
+  return cnt;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_systemreset
+ * Name: bl602_efuse_read_mac_address
  *
  * Description:
- *   Internal reset logic.
+ *   Read MAC address from efuse.
+ *
+ * Input Parameters:
+ *   mac: the buffer to hold mac address
+ *
+ * Returned Value:
+ *   0: OK
+ *   ENODATA: Failed
  *
  ****************************************************************************/
 
-void up_systemreset(void)
+int bl602_efuse_read_mac_address(uint8_t mac[6])
 {
-  /* When perform reset before, MUST disable interrupt */
+  DEBUGASSERT(mac != NULL);
 
-  asm volatile("csrci mstatus, 8");
+  uint8_t *maclow  = (uint8_t *)mac;
+  uint8_t *machigh = (uint8_t *)(mac + 4);
+  uint32_t tmp_val;
+  uint32_t i   = 0;
+  uint32_t cnt = 0;
 
-  bl602_romapi_reset_system();
+  /* Trigger read data from efuse */
+
+  bl602_romapi_efuse_ctrl_load_r0();
+
+  tmp_val   = getreg32(BL602_EF_WIFI_MAC_LOW);
+  maclow[0] = tmp_val & 0xff;
+  maclow[1] = (tmp_val >> 8) & 0xff;
+  maclow[2] = (tmp_val >> 16) & 0xff;
+  maclow[3] = (tmp_val >> 24) & 0xff;
+
+  tmp_val    = getreg32(BL602_EF_WIFI_MAC_HIGH);
+  machigh[0] = tmp_val & 0xff;
+  machigh[1] = (tmp_val >> 8) & 0xff;
+
+  /* Check parity */
+
+  for (i = 0; i < 6; i++)
+    {
+      cnt += count_zero_bits_in_byte(mac[i]);
+    }
+
+  if ((cnt & 0x3f) == ((tmp_val >> 16) & 0x3f))
+    {
+      /* Change to network order */
+
+      for (i = 0; i < 3; i++)
+        {
+          tmp_val    = mac[i];
+          mac[i]     = mac[5 - i];
+          mac[5 - i] = tmp_val;
+        }
+
+      return 0;
+    }
+  else
+    {
+      return -ENODATA;
+    }
 }
 
-/****************************************************************************
- * Name: bl602_cpu_reset
- *
- * Description:
- *   Reset only the CPU
- *
- ****************************************************************************/
-
-void bl602_cpu_reset(void)
-{
-  /* When perform reset before, MUST disable interrupt */
-
-  asm volatile("csrci mstatus, 8");
-
-  bl602_romapi_reset_cpu_sw();
-}
-
-/****************************************************************************
- * Name: bl602_por_reset
- *
- * Description:
- *   Trigger Power-on-Reset
- *
- ****************************************************************************/
-
-void bl602_por_reset(void)
-{
-  /* When perform reset before, MUST disable interrupt */
-
-  asm volatile("csrci mstatus, 8");
-
-  bl602_romapi_reset_por();
-}

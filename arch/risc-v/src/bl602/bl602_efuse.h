@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl602/bl602_flash.c
+ * arch/risc-v/src/bl602/bl602_efuse.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,89 +18,56 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_EFUSE_H
+#define __ARCH_RISCV_SRC_BL602_BL602_EFUSE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <stdint.h>
-#include <syslog.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include "bl602_romapi.h"
-
-#ifdef CONFIG_BL602_SPIFLASH
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Data
  ****************************************************************************/
 
-#define bl602_romapi_sflash_erase \
-  ((void (*)(uint8_t *, uint32_t, int))BL602_ROMAPI_SFLASH_EREASE_NEEDLOCK)
+#ifndef __ASSEMBLY__
 
-#define bl602_romapi_sflash_write \
-  ((void (*)(uint8_t *, uint32_t, const uint8_t *, int)) \
-     BL602_ROMAPI_SFLASH_WRITE_NEEDLOCK)
-
-#define bl602_romapi_sflash_read \
-  ((void (*)( \
-    uint8_t *, uint32_t, uint8_t *, int))BL602_ROMAPI_SFLASH_READ_NEEDLOCK)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
-
-static struct bl602_romflash_cfg_desc g_bl602_romflash_cfg;
-
-struct bl602_romflash_cfg_desc
-{
-  uint32_t magic;
-  uint8_t  cfg[84];
-};
 
 /****************************************************************************
- * Public Functions
+ * Name: bl602_efuse_read_mac_address
+ *
+ * Description:
+ *   Read MAC address from efuse.
+ *
+ * Input Parameters:
+ *   mac: the buffer to hold mac address
+ *
+ * Returned Value:
+ *   0: OK
+ *   ENODATA: Failed
+ *
  ****************************************************************************/
 
-int bl602_flash_erase(uint32_t addr, int len)
-{
-  irqstate_t flags;
+int bl602_efuse_read_mac_address(uint8_t mac[6]);
 
-  finfo("addr = %08lx, len = %d\n", addr, len);
-
-  flags = up_irq_save();
-  bl602_romapi_sflash_erase(g_bl602_romflash_cfg.cfg, addr, addr + len - 1);
-  up_irq_restore(flags);
-
-  return 0;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-int bl602_flash_write(uint32_t addr, const uint8_t *src, int len)
-{
-  irqstate_t flags;
-
-  finfo("addr = %08lx, len = %d\n", addr, len);
-
-  flags = up_irq_save();
-  bl602_romapi_sflash_write(g_bl602_romflash_cfg.cfg, addr, src, len);
-  up_irq_restore(flags);
-
-  return 0;
-}
-
-int bl602_flash_read(uint32_t addr, uint8_t *dst, int len)
-{
-  irqstate_t flags;
-
-  finfo("addr = %08lx, len = %d\n", addr, len);
-
-  flags = up_irq_save();
-  bl602_romapi_sflash_read(g_bl602_romflash_cfg.cfg, addr, dst, len);
-  up_irq_restore(flags);
-
-  return 0;
-}
-#endif /* CONFIG_BL602_SPIFLASH */
-
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_EFUSE_H */

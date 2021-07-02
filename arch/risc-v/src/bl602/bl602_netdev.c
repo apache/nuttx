@@ -62,6 +62,7 @@
 #include "wifi_manager/include/wifi_mgmr_ext.h"
 #include "wifi_driver/os_hal.h"
 #include "bl602_netdev.h"
+#include "bl602_efuse.h"
 
 #ifdef CONFIG_BL602_WIRELESS
 
@@ -2177,7 +2178,7 @@ int bl602_net_initialize(void)
    * Applies only if the Wireless MAC has its own internal address.
    */
 
-  bl602_ef_ctrl_read_mac_address(mac);
+  bl602_efuse_read_mac_address(mac);
   wlinfo(":::MAC:%x %x %x %x %x %x\n",
          mac[0],
          mac[1],
