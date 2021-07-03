@@ -98,14 +98,6 @@ static int sim_cpupause_handler(int irq, FAR void *context, FAR void *arg)
 
       leave_critical_section(flags);
     }
-  else
-    {
-      /* NOTE: sim specific logic
-       * In the case of no pause request, call sim_timer_handler()
-       */
-
-      sim_timer_handler();
-    }
 
   return OK;
 }
