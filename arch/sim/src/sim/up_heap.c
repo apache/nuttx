@@ -363,46 +363,6 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
 }
 
 /****************************************************************************
- * Name: mm_sbrk
- *
- * Description:
- *    The sbrk() function is used to change the amount of space allocated
- *    for the calling process. The change is made by resetting the process's
- *    break value and allocating the appropriate amount of space.  The amount
- *    of allocated space increases as the break value increases.
- *
- *    The sbrk() function adds 'incr' bytes to the break value and changes
- *    the allocated space accordingly. If incr is negative, the amount of
- *    allocated space is decreased by incr bytes. The current value of the
- *    program break is returned by sbrk(0).
- *
- * Input Parameters:
- *    heap - A reference to the data structure that defines this heap.
- *    incr - Specifies the number of bytes to add or to remove from the
- *      space allocated for the process.
- *    maxbreak - The maximum permissible break address.
- *
- * Returned Value:
- *    Upon successful completion, sbrk() returns the prior break value.
- *    Otherwise, it returns (void *)-1 and sets errno to indicate the
- *    error:
- *
- *      ENOMEM - The requested change would allocate more space than
- *        allowed under system limits.
- *      EAGAIN - The total amount of system memory available for allocation
- *        to this process is temporarily insufficient. This may occur even
- *        though the space requested was less than the maximum data segment
- *        size.
- *
- ****************************************************************************/
-
-FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
-                  uintptr_t maxbreak)
-{
-  return NULL;
-}
-
-/****************************************************************************
  * Name: mm_extend
  *
  * Description:

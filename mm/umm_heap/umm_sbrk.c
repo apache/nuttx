@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include <nuttx/mm/mm.h>
@@ -70,5 +72,66 @@
 
 FAR void *sbrk(intptr_t incr)
 {
-  return mm_sbrk(USR_HEAP, incr, ARCH_HEAP_VEND);
+  uintptr_t brkaddr;
+  uintptr_t allocbase;
+  unsigned int pgincr;
+  size_t bytesize;
+  int errcode;
+
+  DEBUGASSERT(incr >= 0);
+  if (incr < 0)
+    {
+      errcode = ENOSYS;
+      goto errout;
+    }
+
+  /* Get the current break address (NOTE: assumes region 0).  If
+   * the memory manager is uninitialized, mm_brkaddr() will return
+   * zero.
+   */
+
+  brkaddr = (uintptr_t)mm_brkaddr(USR_HEAP, 0);
+  if (incr > 0)
+    {
+      /* Convert the increment to multiples of the page size */
+
+      pgincr = MM_NPAGES(incr);
+
+      /* Allocate the requested number of pages and map them to the
+       * break address.  If we provide a zero brkaddr to pgalloc(),  it
+       * will create the first block in the correct virtual address
+       * space and return the start address of that block.
+       */
+
+      allocbase = pgalloc(brkaddr, pgincr);
+      if (allocbase == 0)
+        {
+          errcode = EAGAIN;
+          goto errout;
+        }
+
+      /* Has the been been initialized?  brkaddr will be zero if the
+       * memory manager has not yet been initialized.
+       */
+
+      bytesize = pgincr << MM_PGSHIFT;
+      if (brkaddr == 0)
+        {
+          /* No... then initialize it now */
+
+          mm_initialize(USR_HEAP, "Umem", (FAR void *)allocbase, bytesize);
+        }
+      else
+        {
+          /* Extend the heap (region 0) */
+
+          mm_extend(USR_HEAP, (FAR void *)allocbase, bytesize, 0);
+        }
+    }
+
+  return (FAR void *)brkaddr;
+
+errout:
+  set_errno(errcode);
+  return (FAR void *)-1;
 }
