@@ -250,7 +250,7 @@ typedef CODE void (*addrenv_sigtramp_t)(_sa_sigaction_t sighand, int signo,
 struct addrenv_reserve_s
 {
   addrenv_sigtramp_t ar_sigtramp;  /* Signal trampoline */
-  struct mm_heap_s   ar_usrheap;   /* User space heap structure */
+  struct mm_heap_s  *ar_usrheap;   /* User space heap structure */
 };
 
 /* Each instance of this structure resides at the beginning of the user-

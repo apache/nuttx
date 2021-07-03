@@ -44,7 +44,7 @@
 
 FAR void *kmm_brkaddr(int region)
 {
-  return mm_brkaddr(&g_kmmheap, region);
+  return mm_brkaddr(g_kmmheap, region);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

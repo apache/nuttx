@@ -49,7 +49,7 @@
 #else
 /* Otherwise, the user heap data structures are in common .bss */
 
-struct mm_heap_s g_mmheap;
+FAR struct mm_heap_s *g_mmheap;
 #endif
 
 /****************************************************************************

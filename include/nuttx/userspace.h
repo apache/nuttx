@@ -98,7 +98,7 @@ struct userspace_s
 
   /* Memory manager heap structure */
 
-  FAR struct mm_heap_s *us_heap;
+  FAR struct mm_heap_s **us_heap;
 
   /* Task startup routine */
 
