@@ -47,20 +47,37 @@
 
 #include "hardware/rp2040_memorymap.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
+#  include "hardware/rp2040_sio.h"
+#  include "rp2040_irq.h"
+#endif
 
 /****************************************************************************
- * Public Types
+ * Macro Definitions
  ****************************************************************************/
+
+#ifdef __ASSEMBLY__
 
 /****************************************************************************
- * Public Data
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the  "top" the correct interrupt stack
+ *   for the current CPU.
+ *
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
+  .macro  setintstack, tmp1, tmp2
+  ldr  \tmp1, =RP2040_SIO_CPUID
+  ldr  \tmp1, [\tmp1, #0]
+  lsl  \tmp1, \tmp1, #2
+  ldr  \tmp2, =g_cpu_intstack_top
+  add  \tmp2, \tmp2, \tmp1
+  ldr  \tmp2, [\tmp2, #0]
+  mov  sp, \tmp2 /* sp = g_cpu_intstack_top[cpuid] */
+  .endm
+#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
+#endif /* __ASSEMBLY__  */
 #endif /* __ARCH_ARM_SRC_RP2040_CHIP_H */
