@@ -69,7 +69,7 @@
  */
 
 #define dtcm_initialize() \
-  mm_initialize(&g_dtcm_heap, (FAR void *)DTCM_START, DTCM_END-DTCM_START)
+  mm_initialize(&g_dtcm_heap, "dtcm", (FAR void *)DTCM_START, DTCM_END-DTCM_START)
 
 /* The dtcm_addregion interface could be used if, for example, you want to
  * add some other memory region to the DTCM heap.  I don't really know why
@@ -116,18 +116,6 @@ EXTERN struct mm_heap_s g_dtcm_heap;
 #undef EXTERN
 #ifdef __cplusplus
 }
-#endif
-
-/****************************************************************************
- * Name: dtcm_procfs_register
- *
- * Description:
- *   Register the DTCM procfs file system entry
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F7_DTCM_PROCFS
-int dtcm_procfs_register(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -158,8 +158,8 @@ EXTERN struct mm_heap_s g_kmmheap;
 
 /* Functions contained in mm_initialize.c ***********************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
-                   size_t heap_size);
+void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
+                   FAR void *heap_start, size_t heap_size);
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize);
 
