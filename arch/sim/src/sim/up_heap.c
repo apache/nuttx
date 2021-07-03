@@ -53,6 +53,10 @@ struct mm_heap_impl_s
 #else
   struct mm_delaynode_s *mm_delaylist[1];
 #endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  struct procfs_meminfo_entry_s mm_procfs;
+#endif
 };
 
 /****************************************************************************
@@ -135,8 +139,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
-                   size_t heap_size)
+void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
+                   FAR void *heap_start, size_t heap_size)
 {
   FAR struct mm_heap_impl_s *impl;
 
@@ -145,6 +149,13 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
 
   memset(impl, 0, sizeof(struct mm_heap_impl_s));
   heap->mm_impl = impl;
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  heap_impl->mm_procfs.name = name;
+  heap_impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  heap_impl->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&heap_impl->mm_procfs);
+#endif
 }
 
 /****************************************************************************

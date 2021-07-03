@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <malloc.h>
 #include <arch/esp32/memory_layout.h>
@@ -63,16 +62,7 @@ void xtensa_imm_initialize(void)
 
   start = (FAR void *)ESP32_IMEM_START;
   size  = CONFIG_XTENSA_IMEM_REGION_SIZE;
-  mm_initialize(&g_iheap, start, size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_imm_procfs;
-
-  g_imm_procfs.name = "esp32-imem";
-  g_imm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_imm_procfs.user_data = &g_iheap;
-  procfs_register_meminfo(&g_imm_procfs);
-#endif
+  mm_initialize(&g_iheap, "esp32-imem", start, size);
 }
 
 /****************************************************************************

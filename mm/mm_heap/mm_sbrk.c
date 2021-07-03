@@ -130,7 +130,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
         {
           /* No... then initialize it now */
 
-          mm_initialize(heap, (FAR void *)allocbase, bytesize);
+          mm_initialize(heap, "Umem", (FAR void *)allocbase, bytesize);
         }
       else
         {

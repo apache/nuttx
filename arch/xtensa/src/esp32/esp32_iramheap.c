@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <malloc.h>
 
@@ -61,16 +60,7 @@ void esp32_iramheap_initialize(void)
 
   start = (void *)&_siramheap;
   size  = (size_t)((uintptr_t)&_eiramheap - (uintptr_t)&_siramheap);
-  mm_initialize(&g_iramheap, start, size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_iram_procfs;
-
-  g_iram_procfs.name = "iramheap";
-  g_iram_procfs.mallinfo = (void *)mm_mallinfo;
-  g_iram_procfs.user_data = &g_iramheap;
-  procfs_register_meminfo(&g_iram_procfs);
-#endif
+  mm_initialize(&g_iramheap, "iramheap", start, size);
 }
 
 /****************************************************************************

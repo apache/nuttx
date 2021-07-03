@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <malloc.h>
 
@@ -63,16 +62,7 @@ void esp32c3_rtcheap_initialize(void)
 
   start = (FAR void *)&_srtcheap;
   size  = (size_t)((uintptr_t)&_ertcheap - (uintptr_t)&_srtcheap);
-  mm_initialize(&g_rtcheap, start, size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_rtc_procfs;
-
-  g_rtc_procfs.name = "rtcheap";
-  g_rtc_procfs.mallinfo = (void *)mm_mallinfo;
-  g_rtc_procfs.user_data = &g_rtcheap;
-  procfs_register_meminfo(&g_rtc_procfs);
-#endif
+  mm_initialize(&g_rtcheap, "rtcheap", start, size);
 }
 
 /****************************************************************************

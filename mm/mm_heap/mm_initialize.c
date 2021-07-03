@@ -161,14 +161,14 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
  *
  ****************************************************************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
-                   size_t heapsize)
+void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
+                   FAR void *heapstart, size_t heapsize)
 {
   FAR struct mm_heap_impl_s *heap_impl;
   uintptr_t                  heap_adj;
   int                        i;
 
-  minfo("Heap: start=%p size=%zu\n", heapstart, heapsize);
+  minfo("Heap: name=%s, start=%p size=%zu\n", name, heapstart, heapsize);
 
   /* First ensure the memory to be used is aligned */
 
@@ -216,4 +216,13 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Add the initial region of memory to the heap */
 
   mm_addregion(heap, heapstart, heapsize);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  heap_impl->mm_procfs.name = name;
+  heap_impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  heap_impl->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&heap_impl->mm_procfs);
+#endif
+#endif
 }
