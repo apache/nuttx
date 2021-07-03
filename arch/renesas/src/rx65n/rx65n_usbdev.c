@@ -2889,7 +2889,7 @@ static int rx65n_epconfigure(FAR struct usbdev_ep_s *ep,
   if (!ep || !desc)
     {
       usbtrace(TRACE_DEVERROR(RX65N_TRACEERR_INVALIDPARMS), 0);
-      printf("ERROR: ep=%p desc=%p\n");
+      printf("ERROR: ep=%p desc=%p\n", ep, desc);
       return -EINVAL;
     }
 #endif
