@@ -39,19 +39,15 @@
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
 
   /* Delay the deallocation until a more appropriate time. */
 
   flags = enter_critical_section();
 
-  tmp->flink = heap_impl->mm_delaylist[up_cpu_index()];
-  heap_impl->mm_delaylist[up_cpu_index()] = tmp;
+  tmp->flink = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
 }

@@ -34,7 +34,7 @@
 
 /* This is the kernel heap */
 
-struct mm_heap_s g_kmmheap;
+FAR struct mm_heap_s *g_kmmheap;
 
 /****************************************************************************
  * Public Functions
@@ -58,7 +58,7 @@ struct mm_heap_s g_kmmheap;
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  mm_initialize(&g_kmmheap, "Kmem", heap_start, heap_size);
+  g_kmmheap = mm_initialize("Kmem", heap_start, heap_size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

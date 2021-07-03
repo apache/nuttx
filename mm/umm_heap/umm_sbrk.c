@@ -85,10 +85,11 @@ FAR void *sbrk(intptr_t incr)
       goto errout;
     }
 
-  /* Get the current break address (NOTE: assumes region 0).  If
-   * the memory manager is uninitialized, mm_brkaddr() will return
-   * zero.
-   */
+  /* Initialize the user heap if it wasn't yet */
+
+  umm_try_initialize();
+
+  /* Get the current break address (NOTE: assumes region 0). */
 
   brkaddr = (uintptr_t)mm_brkaddr(USR_HEAP, 0);
   if (incr > 0)
@@ -98,9 +99,7 @@ FAR void *sbrk(intptr_t incr)
       pgincr = MM_NPAGES(incr);
 
       /* Allocate the requested number of pages and map them to the
-       * break address.  If we provide a zero brkaddr to pgalloc(),  it
-       * will create the first block in the correct virtual address
-       * space and return the start address of that block.
+       * break address.
        */
 
       allocbase = pgalloc(brkaddr, pgincr);
@@ -110,23 +109,10 @@ FAR void *sbrk(intptr_t incr)
           goto errout;
         }
 
-      /* Has the been been initialized?  brkaddr will be zero if the
-       * memory manager has not yet been initialized.
-       */
+      /* Extend the heap (region 0) */
 
       bytesize = pgincr << MM_PGSHIFT;
-      if (brkaddr == 0)
-        {
-          /* No... then initialize it now */
-
-          mm_initialize(USR_HEAP, "Umem", (FAR void *)allocbase, bytesize);
-        }
-      else
-        {
-          /* Extend the heap (region 0) */
-
-          mm_extend(USR_HEAP, (FAR void *)allocbase, bytesize, 0);
-        }
+      mm_extend(USR_HEAP, (FAR void *)allocbase, bytesize, 0);
     }
 
   return (FAR void *)brkaddr;

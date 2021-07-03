@@ -42,7 +42,7 @@
 
 void kmm_checkcorruption(void)
 {
-  mm_checkcorruption(&g_kmmheap);
+  mm_checkcorruption(g_kmmheap);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

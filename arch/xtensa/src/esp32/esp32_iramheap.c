@@ -34,7 +34,7 @@
  * Private Data
  ****************************************************************************/
 
-static struct mm_heap_s g_iramheap;
+static struct mm_heap_s *g_iramheap;
 
 /****************************************************************************
  * Public Functions
@@ -60,7 +60,7 @@ void esp32_iramheap_initialize(void)
 
   start = (void *)&_siramheap;
   size  = (size_t)((uintptr_t)&_eiramheap - (uintptr_t)&_siramheap);
-  mm_initialize(&g_iramheap, "iramheap", start, size);
+  g_iramheap = mm_initialize("iramheap", start, size);
 }
 
 /****************************************************************************
@@ -73,7 +73,7 @@ void esp32_iramheap_initialize(void)
 
 void *esp32_iramheap_malloc(size_t size)
 {
-  return mm_malloc(&g_iramheap, size);
+  return mm_malloc(g_iramheap, size);
 }
 
 /****************************************************************************
@@ -87,7 +87,7 @@ void *esp32_iramheap_malloc(size_t size)
 
 void *esp32_iramheap_calloc(size_t n, size_t elem_size)
 {
-  return mm_calloc(&g_iramheap, n, elem_size);
+  return mm_calloc(g_iramheap, n, elem_size);
 }
 
 /****************************************************************************
@@ -100,7 +100,7 @@ void *esp32_iramheap_calloc(size_t n, size_t elem_size)
 
 void *esp32_iramheap_realloc(void *ptr, size_t size)
 {
-  return mm_realloc(&g_iramheap, ptr, size);
+  return mm_realloc(g_iramheap, ptr, size);
 }
 
 /****************************************************************************
@@ -113,7 +113,7 @@ void *esp32_iramheap_realloc(void *ptr, size_t size)
 
 void *esp32_iramheap_zalloc(size_t size)
 {
-  return mm_zalloc(&g_iramheap, size);
+  return mm_zalloc(g_iramheap, size);
 }
 
 /****************************************************************************
@@ -126,7 +126,7 @@ void *esp32_iramheap_zalloc(size_t size)
 
 void esp32_iramheap_free(void *mem)
 {
-  mm_free(&g_iramheap, mem);
+  mm_free(g_iramheap, mem);
 }
 
 /****************************************************************************
@@ -144,7 +144,7 @@ void esp32_iramheap_free(void *mem)
 
 void *esp32_iramheap_memalign(size_t alignment, size_t size)
 {
-  return mm_memalign(&g_iramheap, alignment, size);
+  return mm_memalign(g_iramheap, alignment, size);
 }
 
 /****************************************************************************
@@ -163,7 +163,7 @@ void *esp32_iramheap_memalign(size_t alignment, size_t size)
 
 bool esp32_iramheap_heapmember(void *mem)
 {
-  return mm_heapmember(&g_iramheap, mem);
+  return mm_heapmember(g_iramheap, mem);
 }
 
 /****************************************************************************
@@ -177,5 +177,5 @@ bool esp32_iramheap_heapmember(void *mem)
 
 int esp32_iramheap_mallinfo(struct mallinfo *info)
 {
-  return mm_mallinfo(&g_iramheap, info);
+  return mm_mallinfo(g_iramheap, info);
 }

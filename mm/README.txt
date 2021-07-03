@@ -45,11 +45,11 @@ This directory contains the NuttX memory management logic.  This include:
      in memory:
 
        include <nuttx/mm/mm.h>
-       static struct mm_heap_s g_myheap;
+       static struct mm_heap_s *g_myheap;
 
      Then initialize the heap using:
 
-       mm_initialize(&g_myheap, myheap_start, myheap_size);
+       g_myheap = mm_initialize(myheap_start, myheap_size);
 
      Where mm_initialize() and all related interfaces are prototyped in the
      header file include/nuttx/mm/mm.h.
