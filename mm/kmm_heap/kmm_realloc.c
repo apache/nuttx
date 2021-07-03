@@ -49,7 +49,7 @@
 
 FAR void *kmm_realloc(FAR void *oldmem, size_t newsize)
 {
-  return mm_realloc(&g_kmmheap, oldmem, newsize);
+  return mm_realloc(g_kmmheap, oldmem, newsize);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

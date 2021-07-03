@@ -48,19 +48,15 @@
 static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_delaynode_s *tmp;
   irqstate_t flags;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
 
   /* Move the delay list to local */
 
   flags = enter_critical_section();
 
-  tmp = heap_impl->mm_delaylist[up_cpu_index()];
-  heap_impl->mm_delaylist[up_cpu_index()] = NULL;
+  tmp = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
@@ -101,14 +97,10 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_freenode_s *node;
   size_t alignsize;
   FAR void *ret = NULL;
   int ndx;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
 
   /* Firstly, free mm_delaylist */
 
@@ -160,7 +152,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
    * other mm_nodelist[] entries.
    */
 
-  for (node = heap_impl->mm_nodelist[ndx].flink;
+  for (node = heap->mm_nodelist[ndx].flink;
        node && node->size < alignsize;
        node = node->flink)
     {

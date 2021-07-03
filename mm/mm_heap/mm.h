@@ -113,8 +113,6 @@
  * Public Types
  ****************************************************************************/
 
-struct mm_heap_s;
-
 /* Determines the size of the chunk size/offset type */
 
 #ifdef CONFIG_MM_SMALL
@@ -172,7 +170,7 @@ struct mm_delaynode_s
 
 /* This describes one heap (possibly with multiple regions) */
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
    * the following un-named semaphore.

@@ -46,16 +46,12 @@
 void mm_addfreechunk(FAR struct mm_heap_s *heap,
                      FAR struct mm_freenode_s *node)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_freenode_s *next;
   FAR struct mm_freenode_s *prev;
   int ndx;
 
-  DEBUGASSERT(MM_IS_VALID(heap));
   DEBUGASSERT(node->size >= SIZEOF_MM_FREENODE);
   DEBUGASSERT((node->preceding & MM_ALLOC_BIT) == 0);
-
-  heap_impl = heap->mm_impl;
 
   /* Convert the size to a nodelist index */
 
@@ -63,8 +59,8 @@ void mm_addfreechunk(FAR struct mm_heap_s *heap,
 
   /* Now put the new node into the next */
 
-  for (prev = &heap_impl->mm_nodelist[ndx],
-       next = heap_impl->mm_nodelist[ndx].flink;
+  for (prev = &heap->mm_nodelist[ndx],
+       next = heap->mm_nodelist[ndx].flink;
        next && next->size && next->size < node->size;
        prev = next, next = next->flink);
 

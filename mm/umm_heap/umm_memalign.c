@@ -54,6 +54,10 @@ FAR void *memalign(size_t alignment, size_t size)
   FAR void *brkaddr;
   FAR void *mem;
 
+  /* Initialize the user heap if it wasn't yet */
+
+  umm_try_initialize();
+
   /* Loop until we successfully allocate the memory or until an error
    * occurs. If we fail to allocate memory on the first pass, then call
    * sbrk to extend the heap by one page.  This may require several
