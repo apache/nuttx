@@ -72,14 +72,6 @@ int stm32_bringup(void)
   UNUSED(ret);
 
 #ifdef CONFIG_FS_PROCFS
-#ifdef CONFIG_STM32_CCM_PROCFS
-  /* Register the CCM procfs entry.  This must be done before the procfs is
-   * mounted.
-   */
-
-  ccm_procfs_register();
-#endif /* CONFIG_STM32_CCM_PROCFS */
-
   /* Mount the procfs file system */
 
   ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);

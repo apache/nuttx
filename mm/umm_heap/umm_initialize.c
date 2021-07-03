@@ -26,7 +26,6 @@
 
 #include <assert.h>
 
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 
 #include "umm_heap/umm_heap.h"
@@ -82,17 +81,5 @@
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  mm_initialize(USR_HEAP, heap_start, heap_size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_FLAT)
-  static struct procfs_meminfo_entry_s g_umm_procfs;
-
-  g_umm_procfs.name = "Umem";
-  g_umm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_umm_procfs.user_data = USR_HEAP;
-  procfs_register_meminfo(&g_umm_procfs);
-#endif
-#endif
+  mm_initialize(USR_HEAP, "Umem", heap_start, heap_size);
 }

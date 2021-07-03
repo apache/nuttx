@@ -69,7 +69,7 @@
  */
 
 #define ccm_initialize() \
-  mm_initialize(&g_ccm_heap, (FAR void *)CCM_START, CCM_END-CCM_START)
+  mm_initialize(&g_ccm_heap, "ccm", (FAR void *)CCM_START, CCM_END-CCM_START)
 
 /* The ccm_addregion interface could be used if, for example, you want to
  * add some other memory region to the CCM heap.  I don't really know why
@@ -116,18 +116,6 @@ EXTERN struct mm_heap_s g_ccm_heap;
 #undef EXTERN
 #ifdef __cplusplus
 }
-#endif
-
-/****************************************************************************
- * Name: ccm_procfs_register
- *
- * Description:
- *   Register the CCM procfs file system entry
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_CCM_PROCFS
-int ccm_procfs_register(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
