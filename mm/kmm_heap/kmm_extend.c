@@ -43,7 +43,7 @@
 
 void kmm_extend(FAR void *mem, size_t size, int region)
 {
-  mm_extend(&g_kmmheap, mem, size, region);
+  mm_extend(g_kmmheap, mem, size, region);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

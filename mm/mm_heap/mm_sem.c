@@ -72,19 +72,14 @@
 
 void mm_seminitialize(FAR struct mm_heap_s *heap)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
-
   /* Initialize the MM semaphore to one (to support one-at-a-time access to
    * private data sets).
    */
 
-  _SEM_INIT(&heap_impl->mm_semaphore, 0, 1);
+  _SEM_INIT(&heap->mm_semaphore, 0, 1);
 
-  heap_impl->mm_holder      = NO_HOLDER;
-  heap_impl->mm_counts_held = 0;
+  heap->mm_holder      = NO_HOLDER;
+  heap->mm_counts_held = 0;
 }
 
 /****************************************************************************
@@ -100,7 +95,6 @@ void mm_seminitialize(FAR struct mm_heap_s *heap)
 
 int mm_trysemaphore(FAR struct mm_heap_s *heap)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   pid_t my_pid = getpid();
   int ret;
 
@@ -133,9 +127,6 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
    * 'else', albeit with a nonsensical PID value.
    */
 
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
-
   if (my_pid < 0)
     {
       ret = my_pid;
@@ -146,20 +137,20 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
    * task actually running?
    */
 
-  if (heap_impl->mm_holder == my_pid)
+  if (heap->mm_holder == my_pid)
     {
       /* Yes, just increment the number of references held by the current
        * task.
        */
 
-      heap_impl->mm_counts_held++;
+      heap->mm_counts_held++;
       ret = OK;
     }
   else
     {
       /* Try to take the semaphore */
 
-      ret = _SEM_TRYWAIT(&heap_impl->mm_semaphore);
+      ret = _SEM_TRYWAIT(&heap->mm_semaphore);
       if (ret < 0)
         {
           ret = _SEM_ERRVAL(ret);
@@ -168,8 +159,8 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
 
       /* We have it.  Claim the heap for the current task and return */
 
-      heap_impl->mm_holder      = my_pid;
-      heap_impl->mm_counts_held = 1;
+      heap->mm_holder      = my_pid;
+      heap->mm_counts_held = 1;
       ret = OK;
     }
 
@@ -188,21 +179,17 @@ errout:
 
 void mm_takesemaphore(FAR struct mm_heap_s *heap)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   pid_t my_pid = getpid();
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
 
   /* Does the current task already hold the semaphore? */
 
-  if (heap_impl->mm_holder == my_pid)
+  if (heap->mm_holder == my_pid)
     {
       /* Yes, just increment the number of references held by the current
        * task.
        */
 
-      heap_impl->mm_counts_held++;
+      heap->mm_counts_held++;
     }
   else
     {
@@ -213,7 +200,7 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
       mseminfo("PID=%d taking\n", my_pid);
       do
         {
-          ret = _SEM_WAIT(&heap_impl->mm_semaphore);
+          ret = _SEM_WAIT(&heap->mm_semaphore);
 
           /* The only case that an error should occur here is if the wait
            * was awakened by a signal.
@@ -231,12 +218,12 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
        * the semaphore for the current task and return.
        */
 
-      heap_impl->mm_holder      = my_pid;
-      heap_impl->mm_counts_held = 1;
+      heap->mm_holder      = my_pid;
+      heap->mm_counts_held = 1;
     }
 
-  mseminfo("Holder=%d count=%d\n", heap_impl->mm_holder,
-            heap_impl->mm_counts_held);
+  mseminfo("Holder=%d count=%d\n", heap->mm_holder,
+            heap->mm_counts_held);
 }
 
 /****************************************************************************
@@ -249,26 +236,21 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap)
 
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
-
   /* The current task should be holding at least one reference to the
    * semaphore.
    */
 
-  DEBUGASSERT(heap_impl->mm_holder == getpid());
+  DEBUGASSERT(heap->mm_holder == getpid());
 
   /* Does the current task hold multiple references to the semaphore */
 
-  if (heap_impl->mm_counts_held > 1)
+  if (heap->mm_counts_held > 1)
     {
       /* Yes, just release one count and return */
 
-      heap_impl->mm_counts_held--;
-      mseminfo("Holder=%d count=%d\n", heap_impl->mm_holder,
-               heap_impl->mm_counts_held);
+      heap->mm_counts_held--;
+      mseminfo("Holder=%d count=%d\n", heap->mm_holder,
+               heap->mm_counts_held);
     }
   else
     {
@@ -276,8 +258,8 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
 
       mseminfo("PID=%d giving\n", getpid());
 
-      heap_impl->mm_holder      = NO_HOLDER;
-      heap_impl->mm_counts_held = 0;
-      DEBUGVERIFY(_SEM_POST(&heap_impl->mm_semaphore));
+      heap->mm_holder      = NO_HOLDER;
+      heap->mm_counts_held = 0;
+      DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
     }
 }

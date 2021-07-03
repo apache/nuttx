@@ -45,18 +45,14 @@
 
 FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   uintptr_t brkaddr;
 
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
-
 #if CONFIG_MM_REGIONS > 1
-  DEBUGASSERT(heap && region < heap_impl->mm_nregions);
+  DEBUGASSERT(heap && region < heap->mm_nregions);
 #else
   DEBUGASSERT(heap && region == 0);
 #endif
 
-  brkaddr = (uintptr_t)heap_impl->mm_heapend[region];
+  brkaddr = (uintptr_t)heap->mm_heapend[region];
   return brkaddr ? (FAR void *)(brkaddr + SIZEOF_MM_ALLOCNODE) : 0;
 }

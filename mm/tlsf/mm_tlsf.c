@@ -60,7 +60,7 @@ struct mm_delaynode_s
   FAR struct mm_delaynode_s *flink;
 };
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
    * the following un-named semaphore.
@@ -109,19 +109,15 @@ struct mm_heap_impl_s
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  FAR struct mm_heap_impl_s *impl;
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   /* Delay the deallocation until a more appropriate time. */
 
   flags = enter_critical_section();
 
-  tmp->flink = impl->mm_delaylist[up_cpu_index()];
-  impl->mm_delaylist[up_cpu_index()] = tmp;
+  tmp->flink = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
 }
@@ -134,19 +130,15 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  FAR struct mm_heap_impl_s *impl;
   FAR struct mm_delaynode_s *tmp;
   irqstate_t flags;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   /* Move the delay list to local */
 
   flags = enter_critical_section();
 
-  tmp = impl->mm_delaylist[up_cpu_index()];
-  impl->mm_delaylist[up_cpu_index()] = NULL;
+  tmp = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
@@ -198,16 +190,16 @@ static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
  *
  ****************************************************************************/
 
-static void mm_seminitialize(FAR struct mm_heap_impl_s *impl)
+static void mm_seminitialize(FAR struct mm_heap_s *heap)
 {
   /* Initialize the MM semaphore to one (to support one-at-a-time access to
    * private data sets).
    */
 
-  _SEM_INIT(&impl->mm_semaphore, 0, 1);
+  _SEM_INIT(&heap->mm_semaphore, 0, 1);
 
-  impl->mm_holder      = NO_HOLDER;
-  impl->mm_counts_held = 0;
+  heap->mm_holder      = NO_HOLDER;
+  heap->mm_counts_held = 0;
 }
 
 /****************************************************************************
@@ -221,7 +213,7 @@ static void mm_seminitialize(FAR struct mm_heap_impl_s *impl)
  *
  ****************************************************************************/
 
-static int mm_trysemaphore(FAR struct mm_heap_impl_s *impl)
+static int mm_trysemaphore(FAR struct mm_heap_s *heap)
 {
   pid_t my_pid = getpid();
   int ret;
@@ -265,20 +257,20 @@ static int mm_trysemaphore(FAR struct mm_heap_impl_s *impl)
    * task actually running?
    */
 
-  if (impl->mm_holder == my_pid)
+  if (heap->mm_holder == my_pid)
     {
       /* Yes, just increment the number of references held by the current
        * task.
        */
 
-      impl->mm_counts_held++;
+      heap->mm_counts_held++;
       ret = OK;
     }
   else
     {
       /* Try to take the semaphore */
 
-      ret = _SEM_TRYWAIT(&impl->mm_semaphore);
+      ret = _SEM_TRYWAIT(&heap->mm_semaphore);
       if (ret < 0)
         {
           ret = _SEM_ERRVAL(ret);
@@ -287,8 +279,8 @@ static int mm_trysemaphore(FAR struct mm_heap_impl_s *impl)
 
       /* We have it.  Claim the heap for the current task and return */
 
-      impl->mm_holder      = my_pid;
-      impl->mm_counts_held = 1;
+      heap->mm_holder      = my_pid;
+      heap->mm_counts_held = 1;
       ret = OK;
     }
 
@@ -305,19 +297,19 @@ errout:
  *
  ****************************************************************************/
 
-static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
+static void mm_takesemaphore(FAR struct mm_heap__s *heap)
 {
   pid_t my_pid = getpid();
 
   /* Does the current task already hold the semaphore? */
 
-  if (impl->mm_holder == my_pid)
+  if (heap->mm_holder == my_pid)
     {
       /* Yes, just increment the number of references held by the current
        * task.
        */
 
-      impl->mm_counts_held++;
+      heap->mm_counts_held++;
     }
   else
     {
@@ -327,7 +319,7 @@ static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
 
       do
         {
-          ret = _SEM_WAIT(&impl->mm_semaphore);
+          ret = _SEM_WAIT(&heap->mm_semaphore);
 
           /* The only case that an error should occur here is if the wait
            * was awakened by a signal.
@@ -345,8 +337,8 @@ static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
        * the semaphore for the current task and return.
        */
 
-      impl->mm_holder      = my_pid;
-      impl->mm_counts_held = 1;
+      heap->mm_holder      = my_pid;
+      heap->mm_counts_held = 1;
     }
 }
 
@@ -358,29 +350,29 @@ static void mm_takesemaphore(FAR struct mm_heap_impl_s *impl)
  *
  ****************************************************************************/
 
-static void mm_givesemaphore(FAR struct mm_heap_impl_s *impl)
+static void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
   /* The current task should be holding at least one reference to the
    * semaphore.
    */
 
-  DEBUGASSERT(impl->mm_holder == getpid());
+  DEBUGASSERT(heap->mm_holder == getpid());
 
   /* Does the current task hold multiple references to the semaphore */
 
-  if (impl->mm_counts_held > 1)
+  if (heap->mm_counts_held > 1)
     {
       /* Yes, just release one count and return */
 
-      impl->mm_counts_held--;
+      heap->mm_counts_held--;
     }
   else
     {
       /* Nope, this is the last reference held by the current task. */
 
-      impl->mm_holder      = NO_HOLDER;
-      impl->mm_counts_held = 0;
-      DEBUGVERIFY(_SEM_POST(&impl->mm_semaphore));
+      heap->mm_holder      = NO_HOLDER;
+      heap->mm_counts_held = 0;
+      DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
     }
 }
 
@@ -409,13 +401,10 @@ static void mm_givesemaphore(FAR struct mm_heap_impl_s *impl)
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize)
 {
-  FAR struct mm_heap_impl_s *impl;
 #if CONFIG_MM_REGIONS > 1
   int idx;
 
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-  idx = impl->mm_nregions;
+  idx = heap->mm_nregions;
 
   /* Writing past CONFIG_MM_REGIONS would have catastrophic consequences */
 
@@ -427,34 +416,31 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 #else
 # define idx 0
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 #endif
 
-  mm_takesemaphore(impl);
+  mm_takesemaphore(heap);
 
   minfo("Region %d: base=%p size=%zu\n", idx + 1, heapstart, heapsize);
 
   /* Add the size of this region to the total size of the heap */
 
-  impl->mm_heapsize += heapsize;
+  heap->mm_heapsize += heapsize;
 
   /* Save the start and end of the heap */
 
-  impl->mm_heapstart[idx] = heapstart;
-  impl->mm_heapend[idx]   = heapstart + heapsize;
+  heap->mm_heapstart[idx] = heapstart;
+  heap->mm_heapend[idx]   = heapstart + heapsize;
 
 #undef idx
 
 #if CONFIG_MM_REGIONS > 1
-  impl->mm_nregions++;
+  heap->mm_nregions++;
 #endif
 
   /* Add memory to the tlsf pool */
 
-  tlsf_add_pool(impl->mm_tlsf, heapstart, heapsize);
-  mm_givesemaphore(impl);
+  tlsf_add_pool(heap->mm_tlsf, heapstart, heapsize);
+  mm_givesemaphore(heap);
 }
 
 /****************************************************************************
@@ -468,18 +454,13 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
 {
-  FAR struct mm_heap_impl_s *impl;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-
 #if CONFIG_MM_REGIONS > 1
-  DEBUGASSERT(region >= 0 && region < impl->mm_nregions);
+  DEBUGASSERT(region >= 0 && region < heap->mm_nregions);
 #else
   DEBUGASSERT(region == 0);
 #endif
 
-  return impl->mm_heapend[region];
+  return heap->mm_heapend[region];
 }
 
 /****************************************************************************
@@ -524,11 +505,6 @@ FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 
 void mm_checkcorruption(FAR struct mm_heap_s *heap)
 {
-  FAR struct mm_heap_impl_s *impl;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
@@ -538,7 +514,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
   /* Visit each region */
 
 #if CONFIG_MM_REGIONS > 1
-  for (region = 0; region < impl->mm_nregions; region++)
+  for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
       /* Retake the semaphore for each region to reduce latencies */
@@ -549,30 +525,30 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
         }
       else if (sched_idletask())
         {
-          if (mm_trysemaphore(impl))
+          if (mm_trysemaphore(heap))
             {
               return;
             }
         }
       else
         {
-          mm_takesemaphore(impl);
+          mm_takesemaphore(heap);
         }
 
       /* Check tlsf control block in the first pass */
 
       if (region == 0)
         {
-          tlsf_check(impl->mm_tlsf);
+          tlsf_check(heap->mm_tlsf);
         }
 
       /* Check tlsf pool in each iteration temporarily */
 
-      tlsf_check_pool(impl->mm_heapstart[region]);
+      tlsf_check_pool(heap->mm_heapstart[region]);
 
       /* Release the semaphore */
 
-      mm_givesemaphore(impl);
+      mm_givesemaphore(heap);
     }
 #undef region
 }
@@ -590,36 +566,32 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
                int region)
 {
-  FAR struct mm_heap_impl_s *impl;
   size_t oldsize;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   /* Make sure that we were passed valid parameters */
 
 #if CONFIG_MM_REGIONS > 1
-  DEBUGASSERT(region >= 0 && region < impl->mm_nregions);
+  DEBUGASSERT(region >= 0 && region < heap->mm_nregions);
 #else
   DEBUGASSERT(region == 0);
 #endif
-  DEBUGASSERT(mem == impl->mm_heapend[region]);
+  DEBUGASSERT(mem == heap->mm_heapend[region]);
 
   /* Take the memory manager semaphore */
 
-  mm_takesemaphore(impl);
+  mm_takesemaphore(heap);
 
   /* Extend the tlsf pool */
 
-  oldsize = impl->mm_heapend[region] - impl->mm_heapstart[region];
-  tlsf_extend_pool(impl->mm_tlsf, impl->mm_heapstart[region], oldsize, size);
+  oldsize = heap->mm_heapend[region] - heap->mm_heapstart[region];
+  tlsf_extend_pool(heap->mm_tlsf, heap->mm_heapstart[region], oldsize, size);
 
   /* Save the new size */
 
-  impl->mm_heapsize += size;
-  impl->mm_heapend[region] += size;
+  heap->mm_heapsize += size;
+  heap->mm_heapend[region] += size;
 
-  mm_givesemaphore(impl);
+  mm_givesemaphore(heap);
 }
 
 /****************************************************************************
@@ -633,7 +605,6 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  FAR struct mm_heap_impl_s *impl;
   int ret;
 
   UNUSED(ret);
@@ -646,9 +617,6 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
 
@@ -659,7 +627,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       mm_add_delaylist(heap, mem);
       return;
     }
-  else if ((ret = mm_trysemaphore(impl)) == 0)
+  else if ((ret = mm_trysemaphore(heap)) == 0)
     {
       /* Got the sem, do free immediately */
     }
@@ -680,13 +648,13 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        * nodelist.
        */
 
-      mm_takesemaphore(impl);
+      mm_takesemaphore(heap);
     }
 
   /* Return to the tlsf pool */
 
-  tlsf_free(impl->mm_tlsf, mem);
-  mm_givesemaphore(impl);
+  tlsf_free(heap->mm_tlsf, mem);
+  mm_givesemaphore(heap);
 }
 
 /****************************************************************************
@@ -708,11 +676,6 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
 bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  FAR struct mm_heap_impl_s *impl;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-
 #if CONFIG_MM_REGIONS > 1
   int i;
 
@@ -720,10 +683,10 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
    * between the region's two guard nodes.
    */
 
-  for (i = 0; i < impl->mm_nregions; i++)
+  for (i = 0; i < heap->mm_nregions; i++)
     {
-      if (mem >= impl->mm_heapstart[i] &&
-          mem < impl->mm_heapend[i])
+      if (mem >= heap->mm_heapstart[i] &&
+          mem < heap->mm_heapend[i])
         {
           return true;
         }
@@ -738,8 +701,8 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
    * two guard nodes.
    */
 
-  if (mem >= impl->mm_heapstart[0] &&
-      mem < impl->mm_heapend[0])
+  if (mem >= heap->mm_heapstart[0] &&
+      mem < heap->mm_heapend[0])
     {
       return true;
     }
@@ -770,29 +733,25 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
  *
  ****************************************************************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
-                   FAR void *heapstart, size_t heapsize)
+FAR struct mm_heap_s *mm_initialize(FAR const char *name,
+                                    FAR void *heapstart, size_t heapsize)
 {
-  FAR struct mm_heap_impl_s *impl;
+  FAR struct mm_heap_s *heap;
 
-  minfo("Heap: start=%p size=%zu\n", heapstart, heapsize);
+  minfo("Heap: name=%s start=%p size=%zu\n", name, heapstart, heapsize);
 
-  /* Reserve a block space for mm_heap_impl_s context */
+  /* Reserve a block space for mm_heap_s context */
 
-  DEBUGASSERT(heapsize > sizeof(struct mm_heap_impl_s));
-  heap->mm_impl = (FAR struct mm_heap_impl_s *)heapstart;
-  heapstart += sizeof(struct mm_heap_impl_s);
-  heapsize -= sizeof(struct mm_heap_impl_s);
-
-  /* Zero implmeentation context */
-
-  impl = heap->mm_impl;
-  memset(impl, 0, sizeof(struct mm_heap_impl_s));
+  DEBUGASSERT(heapsize > sizeof(struct mm_heap_s));
+  heap = (FAR struct mm_heap_s *)heapstart;
+  memset(heap, 0, sizeof(struct mm_heap_s));
+  heapstart += sizeof(struct mm_heap_s);
+  heapsize -= sizeof(struct mm_heap_s);
 
   /* Allocate and create TLSF context */
 
   DEBUGASSERT(heapsize > tlsf_size());
-  impl->mm_tlsf = tlsf_create(heapstart);
+  heap->mm_tlsf = tlsf_create(heapstart);
   heapstart += tlsf_size();
   heapsize -= tlsf_size();
 
@@ -800,7 +759,7 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
    * a-time access to private data sets).
    */
 
-  mm_seminitialize(impl);
+  mm_seminitialize(heap);
 
   /* Add the initial region of memory to the heap */
 
@@ -808,12 +767,14 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  impl->mm_procfs.name = name;
-  impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
-  impl->mm_procfs.user_data = heap;
-  procfs_register_meminfo(&impl->mm_procfs);
+  heap->mm_procfs.name = name;
+  heap->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  heap->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&heap->mm_procfs);
 #endif
 #endif
+
+  return heap;
 }
 
 /****************************************************************************
@@ -826,7 +787,6 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
 
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
-  FAR struct mm_heap_impl_s *impl;
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
@@ -834,27 +794,25 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 #endif
 
   DEBUGASSERT(info);
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   memset(info, 0, sizeof(struct mallinfo));
 
   /* Visit each region */
 
 #if CONFIG_MM_REGIONS > 1
-  for (region = 0; region < impl->mm_nregions; region++)
+  for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
       /* Retake the semaphore for each region to reduce latencies */
 
-      mm_takesemaphore(impl);
-      tlsf_walk_pool(impl->mm_heapstart[region],
+      mm_takesemaphore(heap);
+      tlsf_walk_pool(heap->mm_heapstart[region],
                      mm_mallinfo_walker, info);
-      mm_givesemaphore(impl);
+      mm_givesemaphore(heap);
     }
 #undef region
 
-  info->arena    = impl->mm_heapsize;
+  info->arena    = heap->mm_heapsize;
   info->uordblks = info->arena - info->fordblks;
 
   return OK;
@@ -882,11 +840,7 @@ size_t mm_malloc_size(FAR void *mem)
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
-  FAR struct mm_heap_impl_s *impl;
   FAR void *ret;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   /* Firstly, free mm_delaylist */
 
@@ -894,9 +848,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Allocate from the tlsf pool */
 
-  mm_takesemaphore(impl);
-  ret = tlsf_malloc(impl->mm_tlsf, size);
-  mm_givesemaphore(impl);
+  mm_takesemaphore(heap);
+  ret = tlsf_malloc(heap->mm_tlsf, size);
+  mm_givesemaphore(heap);
 
   return ret;
 }
@@ -917,11 +871,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
-  FAR struct mm_heap_impl_s *impl;
   FAR void *ret;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   /* Firstly, free mm_delaylist */
 
@@ -929,9 +879,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Allocate from the tlsf pool */
 
-  mm_takesemaphore(impl);
-  ret = tlsf_memalign(impl->mm_tlsf, alignment, size);
-  mm_givesemaphore(impl);
+  mm_takesemaphore(heap);
+  ret = tlsf_memalign(heap->mm_tlsf, alignment, size);
+  mm_givesemaphore(heap);
 
   return ret;
 }
@@ -962,11 +912,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size)
 {
-  FAR struct mm_heap_impl_s *impl;
   FAR void *newmem;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
 
   /* Firstly, free mm_delaylist */
 
@@ -974,9 +920,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Allocate from the tlsf pool */
 
-  mm_takesemaphore(impl);
-  newmem = tlsf_realloc(impl->mm_tlsf, oldmem, size);
-  mm_givesemaphore(impl);
+  mm_takesemaphore(heap);
+  newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
+  mm_givesemaphore(heap);
 
   return newmem;
 }

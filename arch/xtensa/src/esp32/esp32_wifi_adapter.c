@@ -2287,16 +2287,9 @@ int32_t esp_event_post(esp_event_base_t event_base,
 
 uint32_t esp_get_free_heap_size(void)
 {
-  int ret;
   struct mallinfo info;
 
-  ret = mm_mallinfo(&g_mmheap, &info);
-  if (ret)
-    {
-      wlerr("Failed to create task\n");
-      return 0;
-    }
-
+  info = kmm_mallinfo();
   return info.fordblks;
 }
 
