@@ -33,9 +33,9 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fs/procfs.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
-#include <nuttx/pgalloc.h>
 
 #include "tlsf/tlsf.h"
 
@@ -91,6 +91,10 @@ struct mm_heap_impl_s
   struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
 #else
   struct mm_delaynode_s *mm_delaylist[1];
+#endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  struct procfs_meminfo_entry_s mm_procfs;
 #endif
 };
 
@@ -777,8 +781,8 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
  *
  ****************************************************************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
-                   size_t heapsize)
+void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
+                   FAR void *heapstart, size_t heapsize)
 {
   FAR struct mm_heap_impl_s *impl;
 
@@ -812,6 +816,15 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Add the initial region of memory to the heap */
 
   mm_addregion(heap, heapstart, heapsize);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  impl->mm_procfs.name = name;
+  impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  impl->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&impl->mm_procfs);
+#endif
+#endif
 }
 
 /****************************************************************************
