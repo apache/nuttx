@@ -28,6 +28,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1689,7 +1690,7 @@ static int seq_scuirqhandler(int irq, FAR void *context, FAR void *arg)
 
   if (ierr0 != 0)
     {
-      scuerr("err0: %08x\n", ierr0);
+      scuerr("err0: %08" PRIx32 "\n", ierr0);
       ierr0 = (ierr0 >> 9) & 0x3fff;
       for (i = 0; i < 14; i++)
         {
@@ -1711,7 +1712,7 @@ static int seq_scuirqhandler(int irq, FAR void *context, FAR void *arg)
 
   if (ierr1 != 0)
     {
-      scuerr("err1: %08x\n", ierr1);
+      scuerr("err1: %08" PRIx32 "\n", ierr1);
       ierr1 = (ierr1 >> 9) & 0x3fff;
       for (i = 0; i < 14; i++)
         {
@@ -1729,7 +1730,7 @@ static int seq_scuirqhandler(int irq, FAR void *context, FAR void *arg)
 
   if (ierr2 != 0)
     {
-      scuerr("err2: %08x\n", ierr2);
+      scuerr("err2: %08" PRIx32 "\n", ierr2);
 
       for (i = 0; i < 10; i++)
         {
@@ -2982,7 +2983,7 @@ int seq_read(FAR struct seq_s *seq, int fifoid, FAR char *buffer, int length)
   scuinfo("Available %d samples\n", avail);
 #ifdef CONFIG_CXD56_SCU_DEBUG
   status = getreg32(SCUFIFO_R_STATUS1(fifo->rid));
-  scuinfo("Status: %08x\n", status);
+  scuinfo("Status: %08" PRIx32 "\n", status);
 #endif
   avail *= seq->sample;
   length = MIN(avail, length);
@@ -3134,7 +3135,7 @@ int seq_ioctl(FAR struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
       return -EINVAL;
     }
 
-  scuinfo("cmd = %04x, arg = %08x\n", cmd, arg);
+  scuinfo("cmd = %04x, arg = %08" PRIx32 "\n", cmd, arg);
 
   switch (cmd)
     {
