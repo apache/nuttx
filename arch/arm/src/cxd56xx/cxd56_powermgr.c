@@ -84,14 +84,22 @@
 
 #define PM_CPUFREQLOCK_FLAG_INITIALIZED (0x8000)
 
-#ifdef CONFIG_CXD56_PM_DEBUG
-#  define pmerr(format, ...)  _err(format, ##__VA_ARGS__)
-#  define pmwarn(format, ...) _warn(format, ##__VA_ARGS__)
-#  define pminfo(format, ...) _info(format, ##__VA_ARGS__)
+/* Debug */
+
+#ifdef CONFIG_CXD56_PM_DEBUG_ERROR
+#  define pmerr(format, ...)   _err(format, ##__VA_ARGS__)
 #else
-#  define pmerr(x...)
-#  define pmwarn(x...)
-#  define pminfo(x...)
+#  define pmerr(x, ...)
+#endif
+#ifdef CONFIG_CXD56_PM_DEBUG_WARN
+#  define pmwarn(format, ...)  _warn(format, ##__VA_ARGS__)
+#else
+#  define pmwarn(x, ...)
+#endif
+#ifdef CONFIG_CXD56_PM_DEBUG_INFO
+#  define pminfo(format, ...)  _info(format, ##__VA_ARGS__)
+#else
+#  define pminfo(x, ...)
 #endif
 
 void up_cpuctxload(void);
