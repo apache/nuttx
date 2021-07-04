@@ -246,7 +246,7 @@ static int pmic_int_handler(int irq, void *context, void *arg)
   ret = work_queue(LPWORK, &g_irqwork, pmic_int_worker, NULL, 0);
   if (ret < 0)
     {
-      logerr("ERROR: work_queue failed: %d\n", ret);
+      _err("ERROR: work_queue failed: %d\n", ret);
     }
 
   /* Disable any further pmic interrupts */
