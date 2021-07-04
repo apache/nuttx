@@ -25,6 +25,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <queue.h>
 
 /****************************************************************************
@@ -161,7 +162,7 @@ extern "C"
 
 int up_pmramctrl(int cmd, uintptr_t addr, size_t size);
 
-#ifdef CONFIG_DEBUG_PM
+#ifdef CONFIG_CXD56_PM_DEBUG_INFO
 /****************************************************************************
  * Name: up_pmstatdump
  *

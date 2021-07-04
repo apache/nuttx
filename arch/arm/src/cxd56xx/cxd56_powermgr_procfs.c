@@ -46,14 +46,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_CXD56_PM_DEBUG
-#  define pmerr(format, ...)  _err(format, ##__VA_ARGS__)
-#  define pmwarn(format, ...) _warn(format, ##__VA_ARGS__)
-#  define pminfo(format, ...) _info(format, ##__VA_ARGS__)
+/* Debug */
+
+#ifdef CONFIG_CXD56_PM_DEBUG_ERROR
+#  define pmerr(format, ...)   _err(format, ##__VA_ARGS__)
 #else
-#  define pmerr(x...)
-#  define pmwarn(x...)
-#  define pminfo(x...)
+#  define pmerr(x, ...)
+#endif
+#ifdef CONFIG_CXD56_PM_DEBUG_WARN
+#  define pmwarn(format, ...)  _warn(format, ##__VA_ARGS__)
+#else
+#  define pmwarn(x, ...)
+#endif
+#ifdef CONFIG_CXD56_PM_DEBUG_INFO
+#  define pminfo(format, ...)  _info(format, ##__VA_ARGS__)
+#else
+#  define pminfo(x, ...)
 #endif
 
 #define PWD_STAT(val, shift) ((val >> shift) & 0x1)
@@ -280,21 +288,21 @@ static void cxd56_powermgr_procfs_clock(void)
   len = snprintf(g_powermg_procfs_buffer + g_powermg_procfs_len,
                  g_powermg_procfs_size - g_powermg_procfs_len,
                   "Clock Status [Hz]\n"
-                  " |-RTC        : %9d""   |-APP        : %9d\n"
-                  " |-RCOSC      : %9d""   ||-DSP0      : %9d\n"
-                  " |-XOSC       : %9d""   ||-DSP1      : %9d\n"
-                  " |-SYSPLL     : %9d""   ||-DSP2      : %9d\n"
-                  " |-M0P        : %9d""   ||-DSP3      : %9d\n"
-                  " ||-AHB       : %9d""   ||-DSP4      : %9d\n"
-                  " | |-APB      : %9d""   ||-DSP5      : %9d\n"
-                  " |-UART1      : %9d""   ||-UART2     : %9d\n"
-                  " |-SFC        : %9d""   ||-SPI4      : %9d\n"
-                  " |-SCU        : %9d""   ||-SPI5      : %9d\n"
-                  " ||-LPADC     : %9d""   ||-USB       : %9d\n"
-                  " ||-HPADC     : %9d""   ||-EMMC      : %9d\n"
-                  " |-I2C4       : %9d""   ||-SDIO      : %9d\n"
-                  " |-GPS        : %9d""   ||-VSYNC     : %9d\n"
-                  " ||-AHB       : %9d\n",
+                  " |-RTC        : %9ld""   |-APP        : %9ld\n"
+                  " |-RCOSC      : %9ld""   ||-DSP0      : %9ld\n"
+                  " |-XOSC       : %9ld""   ||-DSP1      : %9ld\n"
+                  " |-SYSPLL     : %9ld""   ||-DSP2      : %9ld\n"
+                  " |-M0P        : %9ld""   ||-DSP3      : %9ld\n"
+                  " ||-AHB       : %9ld""   ||-DSP4      : %9ld\n"
+                  " | |-APB      : %9ld""   ||-DSP5      : %9ld\n"
+                  " |-UART1      : %9ld""   ||-UART2     : %9ld\n"
+                  " |-SFC        : %9ld""   ||-SPI4      : %9ld\n"
+                  " |-SCU        : %9ld""   ||-SPI5      : %9ld\n"
+                  " ||-LPADC     : %9ld""   ||-USB       : %9ld\n"
+                  " ||-HPADC     : %9ld""   ||-EMMC      : %9ld\n"
+                  " |-I2C4       : %9ld""   ||-SDIO      : %9ld\n"
+                  " |-GPS        : %9ld""   ||-VSYNC     : %9ld\n"
+                  " ||-AHB       : %9ld\n",
                  cxd56_get_rtc_clock(), cxd56_get_appsmp_baseclock(),
                  cxd56_get_rcosc_clock(), dsptabl[0],
                  cxd56_get_xosc_clock(), dsptabl[1],
