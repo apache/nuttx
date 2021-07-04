@@ -235,6 +235,37 @@ config CXD56_PM_PROCFS
 	---help---
 		Enable the power domain status or the clock frequency monitor.
 
+config CXD56_PM_DEBUG
+	bool "Power Management Debug Features"
+	default n
+	---help---
+		Enable power management debug features.
+
+if CXD56_PM_DEBUG
+
+config CXD56_PM_DEBUG_ERROR
+	bool "Power Management Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable power management error output to SYSLOG.
+
+config CXD56_PM_DEBUG_WARN
+	bool "Power Management Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable power management warning output to SYSLOG.
+
+config CXD56_PM_DEBUG_INFO
+	bool "Power Management Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable power management informational output to SYSLOG.
+
+endif # CXD56_PM_DEBUG
+
 endif # CXD56_PM
 
 config CXD56_GAUGE
