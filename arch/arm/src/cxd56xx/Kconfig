@@ -1234,6 +1234,16 @@ config CXD56_EMMC
 	---help---
 		Emmc driver for cxd56xx chip
 
+if CXD56_EMMC
+
+config CXD56_EMMC_VENDOR_TOSHIBA
+	bool "Toshiba eMMC device"
+	default n
+	---help---
+		Enable vendor-specific commands for Toshiba eMMC device.
+
+endif # CXD56_EMMC
+
 endmenu
 
 config CXD56_GE2D
