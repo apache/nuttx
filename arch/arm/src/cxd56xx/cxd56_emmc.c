@@ -668,11 +668,15 @@ static int emmc_hwinitialize(void)
 
   emmc_changeclock(EMMC_CLKDIV_NON_DIV);
 
+#ifdef CONFIG_CXD56_EMMC_VENDOR_TOSHIBA
+  /* Vendor-specific command */
+
   ret = emmc_switchcmd(EXTCSD_PON, EXTCSD_PON_POWERED_ON);
   if (ret)
     {
       goto errout;
     }
+#endif
 
   return OK;
 
