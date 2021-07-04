@@ -75,6 +75,17 @@ config CXD56_PMIC
 	default y if CXD56_MAINCORE
 	default n if CXD56_SUBCORE
 
+if CXD56_PMIC
+
+config CXD56_PMIC_INT
+	bool "PMIC interrupt"
+	default n
+	depends on SCHED_LPWORK
+	---help---
+		Enable PMIC interrupt.
+
+endif
+
 config CXD56_CPUFIFO
 	bool
 	default y
