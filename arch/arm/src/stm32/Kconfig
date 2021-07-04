@@ -3920,7 +3920,7 @@ config STM32_TIM1_CHANNEL5
 	default n
 	depends on STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Enables channel 5 (no available externaly)
+		Enables channel 5 (not available externally)
 
 if STM32_TIM1_CHANNEL5
 
@@ -3944,7 +3944,7 @@ config STM32_TIM1_CHANNEL6
 	default n
 	depends on STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Enables channel 6 (no available externaly)
+		Enables channel 6 (not available externally)
 
 if STM32_TIM1_CHANNEL6
 
@@ -4950,7 +4950,7 @@ config STM32_TIM8_CHANNEL5
 	default n
 	depends on STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Enables channel 5 (no available externaly)
+		Enables channel 5 (not available externally)
 
 if STM32_TIM8_CHANNEL5
 
@@ -4974,7 +4974,7 @@ config STM32_TIM8_CHANNEL6
 	default n
 	depends on STM32_HAVE_IP_TIMERS_V2
 	---help---
-		Enables channel 6 (no available externaly)
+		Enables channel 6 (not available externally)
 
 if STM32_TIM8_CHANNEL6
 

@@ -96,7 +96,7 @@ OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
 # Note: -fshort-wchar for the case where NuttX and the host OS have
-# differnt wchar_t. On Nuttx, it's uint16_t. On macOS, it's 32-bit.
+# different wchar_t. On NuttX, it's uint16_t. On macOS, it's 32-bit.
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
    -fshort-wchar

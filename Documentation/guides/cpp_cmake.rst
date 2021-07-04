@@ -76,7 +76,7 @@ Creating the project
 
     project(HelloCpp
             VERSION 1.0
-            DESCRIPTION "Hello world C++ Nuttx"
+            DESCRIPTION "Hello world C++ NuttX"
     )
 
     set(CMAKE_CXX_STANDARD 17)

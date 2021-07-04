@@ -416,7 +416,7 @@ endchoice
 if STM32L5_RTC_LSECLOCK
 
 config STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
-	bool "Automaticaly boost the LSE oscillator drive capability level until it starts-up"
+	bool "Automatically boost the LSE oscillator drive capability level until it starts-up"
 	default n
 	---help---
 		This will cycle through the values from low to high. To avoid

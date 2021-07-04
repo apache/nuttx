@@ -1562,7 +1562,7 @@ endchoice #"RTC clock source"
 if STM32H7_RTC_LSECLOCK
 
 config STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
-	bool "Automaticaly boost the LSE oscillator drive capability level until it starts-up"
+	bool "Automatically boost the LSE oscillator drive capability level until it starts-up"
 	default n
 	---help---
 		This will cycle through the correct* values from low to high. To avoid
@@ -1800,7 +1800,8 @@ config STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED
 	---help---
 		This option configures the stm32_dmacapable to not disqualify
 		DMA operations on memory that is not dcache aligned based solely
-		on the starting addresss and byte count.
+		on the starting address and byte count.
+		
 		Use this when ALL buffer extents are known to be aligned, but the
 		the count does not use the complete buffer.
 
@@ -1990,7 +1991,7 @@ config STM32H7_TIM1_CHANNEL5
 	bool "TIM1 Channel 5 (internal)"
 	default n
 	---help---
-		Enables channel 5 (no available externaly)
+		Enables channel 5 (not available externally)
 
 if STM32H7_TIM1_CHANNEL5
 
@@ -2013,7 +2014,7 @@ config STM32H7_TIM1_CHANNEL6
 	bool "TIM1 Channel 6 (internal)"
 	default n
 	---help---
-		Enables channel 6 (no available externaly)
+		Enables channel 6 (not available externally)
 
 if STM32H7_TIM1_CHANNEL6
 
@@ -2993,7 +2994,7 @@ config STM32H7_TIM8_CHANNEL5
 	bool "TIM8 Channel 5 (internal)"
 	default n
 	---help---
-		Enables channel 5 (no available externaly)
+		Enables channel 5 (not available externally)
 
 if STM32H7_TIM8_CHANNEL5
 
@@ -3016,7 +3017,7 @@ config STM32H7_TIM8_CHANNEL6
 	bool "TIM8 Channel 6 (internal)"
 	default n
 	---help---
-		Enables channel 6 (no available externaly)
+		Enables channel 6 (not available externally)
 
 if STM32H7_TIM8_CHANNEL6
 

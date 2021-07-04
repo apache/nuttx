@@ -17,10 +17,10 @@ config FAT_COMPUTE_FSINFO
 	default n
 	---help---
 		Enables the computation of free clusters at mount time as suggested by the
-		white paper for FAT. The standard behavior of Nuttx is to trust the stored
+		white paper for FAT. The standard behavior of NuttX is to trust the stored
 		value and only recompute it once required. This works if the file system
 		is never mounted to another OS. SD-cards which are mounted to Windows to
-		modify the content might report wrong space after reinserting it to Nuttx.
+		modify the content might report wrong space after reinserting it to NuttX.
 		It is recommended to activate this setting if the "SD-Card" is swapped
 		between systems.
 

@@ -263,7 +263,7 @@
 #    error Not supported
 #  endif
 
-/* ADC trigger offset - must be greather than 0! */
+/* ADC trigger offset - must be greater than 0! */
 
 #  define ADC_TRIGGER_OFFSET (1)
 
@@ -402,7 +402,7 @@
 #    error CONFIG_STM32_ADC1_ANIOC_TRIGGER must be 1
 #  endif
 #  if CONFIG_STM32_ADC1_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
-#    error Invalid configuration for ADC1 injected channles
+#    error Invalid configuration for ADC1 injected channels
 #  endif
 #endif
 #ifdef CONFIG_STM32_FOC_USE_ADC2
@@ -416,7 +416,7 @@
 #    error CONFIG_STM32_ADC2_ANIOC_TRIGGER must be 1
 #  endif
 #  if CONFIG_STM32_ADC2_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
-#    error Invalid configuration for ADC2 injected channles
+#    error Invalid configuration for ADC2 injected channels
 #  endif
 #endif
 #ifdef CONFIG_STM32_FOC_USE_ADC3
@@ -430,7 +430,7 @@
 #    error CONFIG_STM32_ADC3_ANIOC_TRIGGER must be 1
 #  endif
 #  if CONFIG_STM32_ADC3_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
-#    error Invalid configuration for ADC3 injected channles
+#    error Invalid configuration for ADC3 injected channels
 #  endif
 #endif
 #ifdef CONFIG_STM32_FOC_USE_ADC4
@@ -444,7 +444,7 @@
 #    error CONFIG_STM32_ADC4_ANIOC_TRIGGER must be 1
 #  endif
 #  if CONFIG_STM32_ADC4_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
-#    error Invalid configuration for ADC4 injected channles
+#    error Invalid configuration for ADC4 injected channels
 #  endif
 #endif
 
@@ -465,7 +465,7 @@
 #  define FOC1_ADC_JEXT (ADC_JEXTREG_JEXTEN_DEFAULT | FOC1_ADC_JEXTSEL)
 #endif
 
-/* Generalize ADC interupt flags */
+/* Generalize ADC interrupt flags */
 
 #if defined(CONFIG_STM32_HAVE_IP_ADC_V2)
 #  define FOC_ADC_ISR_FOC ADC_ISR_JEOS
@@ -2129,11 +2129,11 @@ void stm32_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
  *   Initialize the FOC lower-half.
  *
  * Input Parameters:
- *   inst  - FOC instnace number
+ *   inst  - FOC instance number
  *   board - FOC board-specific data
  *
  * Returned Value:
- *   Valid lower-half FOC controller structure reference on succes;
+ *   Valid lower-half FOC controller structure reference on success;
  *   NULL on failure
  *
  ****************************************************************************/
@@ -2255,7 +2255,7 @@ stm32_foc_initialize(int inst, FAR struct stm32_foc_board_s *board)
   foc_priv->adc_cmn = adc_cmn;
 #endif
 
-  /* Get archspecific devive */
+  /* Get arch-specific device */
 
   foc_dev = (struct stm32_foc_dev_s *)foc_priv->dev;
   DEBUGASSERT(foc_dev);
