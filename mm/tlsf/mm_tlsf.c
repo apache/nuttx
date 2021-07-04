@@ -103,6 +103,94 @@ struct mm_heap_impl_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mm_add_delaylist
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
+{
+  FAR struct mm_heap_impl_s *impl;
+  FAR struct mm_delaynode_s *tmp = mem;
+  irqstate_t flags;
+
+  DEBUGASSERT(MM_IS_VALID(heap));
+  impl = heap->mm_impl;
+
+  /* Delay the deallocation until a more appropriate time. */
+
+  flags = enter_critical_section();
+
+  tmp->flink = impl->mm_delaylist[up_cpu_index()];
+  impl->mm_delaylist[up_cpu_index()] = tmp;
+
+  leave_critical_section(flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: mm_free_delaylist
+ ****************************************************************************/
+
+static void mm_free_delaylist(FAR struct mm_heap_s *heap)
+{
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct mm_heap_impl_s *impl;
+  FAR struct mm_delaynode_s *tmp;
+  irqstate_t flags;
+
+  DEBUGASSERT(MM_IS_VALID(heap));
+  impl = heap->mm_impl;
+
+  /* Move the delay list to local */
+
+  flags = enter_critical_section();
+
+  tmp = impl->mm_delaylist[up_cpu_index()];
+  impl->mm_delaylist[up_cpu_index()] = NULL;
+
+  leave_critical_section(flags);
+
+  /* Test if the delayed is empty */
+
+  while (tmp)
+    {
+      FAR void *address;
+
+      /* Get the first delayed deallocation */
+
+      address = tmp;
+      tmp = tmp->flink;
+
+      /* The address should always be non-NULL since that was checked in the
+       * 'while' condition above.
+       */
+
+      mm_free(heap, address);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: mm_mallinfo_walker
+ ****************************************************************************/
+
+static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
+                               FAR void *user)
+{
+  FAR struct mallinfo *info = user;
+
+  if (!used)
+    {
+      info->ordblks++;
+      info->fordblks += size;
+      if (size > info->mxordblk)
+        {
+          info->mxordblk = size;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: mm_seminitialize
  *
  * Description:
@@ -297,94 +385,6 @@ static void mm_givesemaphore(FAR struct mm_heap_impl_s *impl)
 }
 
 /****************************************************************************
- * Name: mm_add_delaylist
- ****************************************************************************/
-
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
-{
-  FAR struct mm_heap_impl_s *impl;
-  FAR struct mm_delaynode_s *tmp = mem;
-  irqstate_t flags;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-
-  /* Delay the deallocation until a more appropriate time. */
-
-  flags = enter_critical_section();
-
-  tmp->flink = impl->mm_delaylist[up_cpu_index()];
-  impl->mm_delaylist[up_cpu_index()] = tmp;
-
-  leave_critical_section(flags);
-}
-#endif
-
-/****************************************************************************
- * Name: mm_free_delaylist
- ****************************************************************************/
-
-static void mm_free_delaylist(FAR struct mm_heap_s *heap)
-{
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  FAR struct mm_heap_impl_s *impl;
-  FAR struct mm_delaynode_s *tmp;
-  irqstate_t flags;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  impl = heap->mm_impl;
-
-  /* Move the delay list to local */
-
-  flags = enter_critical_section();
-
-  tmp = impl->mm_delaylist[up_cpu_index()];
-  impl->mm_delaylist[up_cpu_index()] = NULL;
-
-  leave_critical_section(flags);
-
-  /* Test if the delayed is empty */
-
-  while (tmp)
-    {
-      FAR void *address;
-
-      /* Get the first delayed deallocation */
-
-      address = tmp;
-      tmp = tmp->flink;
-
-      /* The address should always be non-NULL since that was checked in the
-       * 'while' condition above.
-       */
-
-      mm_free(heap, address);
-    }
-#endif
-}
-
-/****************************************************************************
- * Name: mm_mallinfo_walker
- ****************************************************************************/
-
-static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
-                               FAR void *user)
-{
-  FAR struct mallinfo *info = user;
-
-  if (!used)
-    {
-      info->ordblks++;
-      info->fordblks += size;
-      if (size > info->mxordblk)
-        {
-          info->mxordblk = size;
-        }
-    }
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -541,22 +541,18 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
   for (region = 0; region < impl->mm_nregions; region++)
 #endif
     {
-      irqstate_t flags = 0;
-
       /* Retake the semaphore for each region to reduce latencies */
 
-      if (up_interrupt_context() || sched_idletask())
+      if (up_interrupt_context())
         {
-          if (impl->mm_counts_held)
+          return;
+        }
+      else if (sched_idletask())
+        {
+          if (mm_trysemaphore(impl))
             {
-#if CONFIG_MM_REGIONS > 1
-              continue;
-#else
               return;
-#endif
             }
-
-          flags = enter_critical_section();
         }
       else
         {
@@ -576,14 +572,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       /* Release the semaphore */
 
-      if (up_interrupt_context() || sched_idletask())
-        {
-          leave_critical_section(flags);
-        }
-      else
-        {
-          mm_givesemaphore(impl);
-        }
+      mm_givesemaphore(impl);
     }
 #undef region
 }
