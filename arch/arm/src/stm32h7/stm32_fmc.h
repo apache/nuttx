@@ -49,7 +49,7 @@ extern "C"
  * Name: stm32_fmc_init
  *
  * Description:
- *   Initialize the FMC peripherial. Because FMC initialization is highly
+ *   Initialize the FMC peripheral. Because FMC initialization is highly
  *   dependent on the used parts, definition of the initial values for FMC
  *   registers is mostly left to board designer.
  *

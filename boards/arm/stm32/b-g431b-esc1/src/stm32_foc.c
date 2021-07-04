@@ -203,7 +203,7 @@ static void board_foc_trace(FAR struct foc_dev_s *dev, int type, bool state);
  *   - Current W+ - OPAMP3_VINP0 (PB0)
  *   - Current W- - OPAMP3_VINP0 (PB2)
  *
- * ADC configration:
+ * ADC configuration:
  *    - Current Phase V    -> ADC1 INJ1 -> ADC1_IN3 (OPAMP1_VOUT/PA2)
  *    - Current Phase U    -> Not used, no ADC1 connection
  *    - Current Phase W    -> ADC1 INJ2 -> ADC1_IN12 (OPAMP3_VOUT/PB12)

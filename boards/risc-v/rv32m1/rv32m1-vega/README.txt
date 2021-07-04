@@ -20,7 +20,7 @@ The RV32M1-VEGA board features:
 
 Refer to https://open-isa.org for further information about this board.
 
-Currently Nuttx is ported to RV32M1 RI5CY only. RI5CY is RV32IMC RISC-V CPU
+Currently NuttX is ported to RV32M1 RI5CY only. RI5CY is RV32IMC RISC-V CPU
 with PULP extensions features:
   - Post-Incrementing load and stores,
   - Multiply-Accumulate extenstions,
@@ -210,7 +210,7 @@ by risc64-unknown-elf-* tools.
 Configuration Sub-directories
 ========
 
-Nuttx of All configurations in rv32m1-vega/configs can be compiled by
+NuttX of all configurations in rv32m1-vega/configs can be compiled by
 the generic GNU RVG Toolchain and OPEN ISA Toolchain.
 
 buttons

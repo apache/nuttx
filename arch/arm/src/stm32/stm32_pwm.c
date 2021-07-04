@@ -684,7 +684,7 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32_TIM1_CH5POL,
       .idle    = CONFIG_STM32_TIM1_CH5IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   },
@@ -699,7 +699,7 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32_TIM1_CH6POL,
       .idle    = CONFIG_STM32_TIM1_CH6IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   }
@@ -1244,7 +1244,7 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32_TIM8_CH5POL,
       .idle    = CONFIG_STM32_TIM8_CH5IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   },
@@ -1259,7 +1259,7 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32_TIM8_CH6POL,
       .idle    = CONFIG_STM32_TIM8_CH6IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   }

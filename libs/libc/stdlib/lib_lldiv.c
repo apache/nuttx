@@ -69,7 +69,7 @@
  *   denom - Denominator of the division
  *
  * Returned Value:
- *   The result of the devision represent as values of type lldiv_t
+ *   The result of the division represented as values of type lldiv_t
  *
  ****************************************************************************/
 

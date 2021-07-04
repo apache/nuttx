@@ -2582,7 +2582,7 @@ endchoice #"RTC clock source"
 if STM32F7_RTC_LSECLOCK
 
 config STM32F7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
-	bool "Automaticaly boost the LSE oscillator drive capability level until it starts-up"
+	bool "Automatically boost the LSE oscillator drive capability level until it starts-up"
 	default n
 	---help---
 		This will cycle through the values from low to high. To avoid
@@ -2660,7 +2660,8 @@ config STM32F7_DMACAPABLE_ASSUME_CACHE_ALIGNED
 	---help---
 		This option configures the stm32_dmacapable to not disqualify
 		DMA operations on memory that is not dcache aligned based solely
-		on the starting addresss and byte count.
+		on the starting address and byte count.
+		
 		Use this when ALL buffer extents are known to be aligned, but the
 		the count does not use the complete buffer.
 

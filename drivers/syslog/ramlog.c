@@ -337,8 +337,8 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
 
       /* If there are multiple readers, some of them might block despite
        * POLLIN because first reader might read all data. Favor readers
-       * and notify poll waiters only if no reader was awaken, even if the
-       * latter may starve.
+       * and notify poll waiters only if no reader was awakened, even if
+       * the latter may starve.
        *
        * This also implies we do not have to make these two notify
        * operations a critical section.
@@ -860,8 +860,8 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
 
   /* If there are multiple readers, some of them might block despite
    * POLLIN because first reader might read all data. Favor readers
-   * and notify poll waiters only if no reader was awaken, even if the
-   * latter may starve.
+   * and notify poll waiters only if no reader was awakened, even if
+   * the latter may starve.
    *
    * This also implies we do not have to make these two notify
    * operations a critical section.

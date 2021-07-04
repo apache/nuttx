@@ -5426,7 +5426,7 @@ void usb_pstd_brdy_pipe_process(uint16_t bitsts)
  * Name: usb_pstd_brdy_pipe
  *
  * Description:
- *  Handle BRDY Interupt
+ *  Handle BRDY Interrupt
  *
  ****************************************************************************/
 

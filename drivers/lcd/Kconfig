@@ -1465,8 +1465,8 @@ config LCD_HT16K33_MULT_MODULE
 	default n
 	depends on I2C
 	---help---
-		It is possible to connect many HT16K33 modules with sequencial
-		I2C addresses to work as a single display to support lenght
+		It is possible to connect many HT16K33 modules with sequential
+		I2C addresses to work as a single display to support length
 		text strings. The device at the I2C address 0x70 will display the
 		4 more significant characters, the device 0x71 will display the
 		previous 4 more significant characters and so on.
