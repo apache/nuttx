@@ -386,6 +386,7 @@ config LPC17_40_RTCEV
 config LPC17_40_WDT
 	bool "WDT"
 	default n
+	select WATCHDOG
 
 config LPC17_40_ADC
 	bool "ADC"
