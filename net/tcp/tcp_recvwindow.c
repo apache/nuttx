@@ -42,6 +42,46 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tcp_calc_rcvsize
+ *
+ * Description:
+ *   Calculate the possible max TCP receive buffer size for the connection.
+ *
+ * Input Parameters:
+ *   conn     - The TCP connection.
+ *   recvwndo - The TCP receive window size
+ *
+ * Returned Value:
+ *   The value of the TCP receive buffer size.
+ *
+ ****************************************************************************/
+
+static uint16_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
+                                 uint16_t recvwndo)
+{
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  uint32_t recvsize;
+  uint32_t desire;
+
+  recvsize = conn->readahead ? conn->readahead->io_pktlen : 0;
+  if (conn->rcv_bufs > recvsize)
+    {
+      desire = conn->rcv_bufs - recvsize;
+      if (recvwndo > desire)
+        {
+          recvwndo = desire;
+        }
+    }
+  else
+    {
+      recvwndo = 0;
+    }
+#endif
+
+  return recvwndo;
+}
+
+/****************************************************************************
  * Name: tcp_maxrcvwin
  *
  * Description:
@@ -73,7 +113,7 @@ static uint16_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
       maxwin = maxiob;
     }
 
-  return maxwin;
+  return tcp_calc_rcvsize(conn, maxwin);
 }
 
 /****************************************************************************
@@ -181,7 +221,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
       recvwndo = tailroom;
     }
 
-  return recvwndo;
+  return tcp_calc_rcvsize(conn, recvwndo);
 }
 
 bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)

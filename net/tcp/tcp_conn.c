@@ -673,6 +673,9 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
       conn->keepintvl     = 2 * DSEC_PER_SEC;
       conn->keepcnt       = 3;
 #endif
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      conn->rcv_bufs      = CONFIG_NET_RECV_BUFSIZE;
+#endif
     }
 
   return conn;

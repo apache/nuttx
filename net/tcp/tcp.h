@@ -190,6 +190,9 @@ struct tcp_conn_s
   uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
                            * window update */
   uint32_t rcv_adv;       /* The right edge of the recv window advertized */
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  int32_t  rcv_bufs;      /* Maximum amount of bytes queued in recv */
+#endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
