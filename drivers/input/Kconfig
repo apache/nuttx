@@ -81,6 +81,38 @@ config INPUT_FT5X06
 		Enable support for the FocalTech FT5x06 multi-touch, capacitive
 		touch panel controller
 
+config INPUT_NT38350
+	bool "NovaTek NT38350 multi-touch, capacitive touch panel controller"
+	default n
+	select I2C
+	select INPUT_TOUCHSCREEN
+	depends on SCHED_WORKQUEUE
+	---help---
+		Enable support for the Novatek NT38350 multi-touch, capacitive
+		touch panel controller
+
+if INPUT_NT38350
+
+config NT38350_FW_PATH
+	string "NovaTek NT38350 Firmware path"
+	default "/mnt/data/nt38350_fw.bin"
+	---help---
+		Set up the NT38350 Firmare path
+
+config NT38350_NEED_UPGRADE_FW
+	bool "NovaTek NT38350 Firmware Need Upgrade"
+	default n
+	---help---
+		Say yes here to enable firmware upgrade
+
+config nt38350_NPOLLWAITERS
+	int "Number NT38350 poll waiters"
+	default 4
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # INPUT_NT38350
+
 config INPUT_FT5336
 	bool "FocalTech FT5336 multi-touch, capacitive touch panel controller"
 	default n
