@@ -45,12 +45,12 @@
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be re-queue by calling
+ *   After work has been cancelled, it may be requeued by calling
  *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero (OK) on success, a negated errno on failure.  This error may be
@@ -106,12 +106,12 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
  *
  * Description:
  *   Cancel previously queued user-mode work.  This removes work from the
- *   user mode work queue.  After work has been cancelled, it may be re-queue
- *   by calling work_queue() again.
+ *   user mode work queue.  After work has been cancelled, it may be
+ *   requeued by calling work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero (OK) on success, a negated errno on failure.  This error may be
