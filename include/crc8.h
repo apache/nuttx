@@ -63,6 +63,18 @@ uint8_t crc8part(FAR const uint8_t *src, size_t len, uint8_t crc8val);
 uint8_t crc8(FAR const uint8_t *src, size_t len);
 
 /****************************************************************************
+ * Name: crc8table
+ *
+ * Description:
+ *   Return a 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using a CRC with crc table used for calculation.
+ *
+ ****************************************************************************/
+
+uint8_t crc8table(const uint8_t table[256], const uint8_t *src,
+                  size_t len, uint8_t crc8val);
+
+/****************************************************************************
  * Name: crc8ccitt
  *
  * Description:
