@@ -171,7 +171,7 @@ struct tcp_hdr_s
   uint8_t  wnd[2];
   uint16_t tcpchksum;
   uint8_t  urgp[2];
-  uint8_t  optdata[4];
+  uint8_t  optdata[0];
 };
 
 /* The structure holding the TCP/IP statistics that are gathered if
