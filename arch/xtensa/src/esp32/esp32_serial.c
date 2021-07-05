@@ -857,7 +857,7 @@ static int esp32_setup(struct uart_dev_s *dev)
 
   /* Set up the CONF0 register. */
 
-  conf0 = UART_TICK_REF_ALWAYS_ON;
+  conf0 = UART_TICK_REF_ALWAYS_ON | UART_ERR_WR_MASK_M;
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   /* Check if output flow control is enabled for this UART controller. */
@@ -920,14 +920,6 @@ static int esp32_setup(struct uart_dev_s *dev)
   regval |= (clkdiv & 15) << UART_CLKDIV_FRAG_S;
   putreg32(regval, UART_CLKDIV_REG(priv->config->id));
 
-  /* Enable RX and error interrupts.  Clear and pending interrtupt */
-
-  regval = UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
-           UART_RXFIFO_TOUT_INT_ENA;
-  putreg32(regval, UART_INT_ENA_REG(priv->config->id));
-
-  putreg32(UINT32_MAX, UART_INT_CLR_REG(priv->config->id));
-
   /* Reset the RX and TX FIFO */
 
   esp32_reset_rx_fifo(priv);
@@ -939,6 +931,14 @@ static int esp32_setup(struct uart_dev_s *dev)
            VALUE_TO_FIELD(UART_RX_TOUT_THRHD_VALUE, UART_RX_TOUT_THRHD) |
            UART_RX_TOUT_EN;
   putreg32(regval, UART_CONF1_REG(priv->config->id));
+
+  /* Enable RX and error interrupts.  Clear and pending interrtupt */
+
+  regval = UART_RXFIFO_FULL_INT_ENA | UART_FRM_ERR_INT_ENA |
+           UART_RXFIFO_TOUT_INT_ENA;
+  putreg32(regval, UART_INT_ENA_REG(priv->config->id));
+
+  putreg32(UINT32_MAX, UART_INT_CLR_REG(priv->config->id));
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   /* Check if input flow control is enabled for this UART controller */
@@ -988,13 +988,6 @@ static void esp32_shutdown(struct uart_dev_s *dev)
   /* Disable all UART interrupts */
 
   esp32_disableallints(priv, NULL);
-
-  /* Unconfigure and disable the UART */
-
-  putreg32(0, UART_CONF0_REG(priv->config->id));
-  putreg32(0, UART_CONF1_REG(priv->config->id));
-
-  putreg32(0, UART_INT_ENA_REG(priv->config->id));
   putreg32(UINT32_MAX, UART_INT_CLR_REG(priv->config->id));
 }
 
