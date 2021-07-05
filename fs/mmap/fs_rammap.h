@@ -82,22 +82,6 @@ extern struct fs_allmaps_s g_rammaps;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rammap_initialize
- *
- * Description:
- *   Verified that this capability has been initialized.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void rammap_initialize(void);
-
-/****************************************************************************
  * Name: rammmap
  *
  * Description:
