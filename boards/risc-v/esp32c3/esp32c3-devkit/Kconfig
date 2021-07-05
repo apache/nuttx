@@ -65,6 +65,11 @@ choice
 
 endchoice
 
+config ESP32C3_SPIFLASH_FS_MOUNT_PT
+	string "File-system Mount Point"
+	depends on ESP32C3_SPIFLASH_LITTLEFS
+	default "/data"
+
 config ESP32C3_SPIFLASH_ENCRYPTION_TEST
 	bool "SPI Flash encryption test"
 	default n
