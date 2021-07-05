@@ -46,8 +46,9 @@ endif
 
 # Add the miscellaneous C files to the build
 
-CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
 CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_match.c lib_debug.c
+CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
+CSRCS += lib_crc8table.c
 
 # Keyboard driver encoder/decoder
 
