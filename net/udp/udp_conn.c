@@ -585,6 +585,9 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 #endif
       conn->lport   = 0;
       conn->ttl     = IP_TTL;
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      conn->rcvbufs = CONFIG_NET_RECV_BUFSIZE;
+#endif
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
