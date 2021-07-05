@@ -103,15 +103,7 @@ static const uint8_t crc8_tab[256] =
 
 uint8_t crc8part(FAR const uint8_t *src, size_t len, uint8_t crc8val)
 {
-  size_t i;
-
-  crc8val ^= 0xff;
-  for (i = 0; i < len; i++)
-    {
-      crc8val = crc8_tab[crc8val ^ src[i]];
-    }
-
-  return crc8val ^ 0xff;
+  return crc8table(crc8_tab, src, len, crc8val);
 }
 
 /****************************************************************************
