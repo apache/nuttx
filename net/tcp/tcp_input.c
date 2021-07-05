@@ -375,6 +375,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       /* NOP option. */
 
                       ++i;
+                      continue;
                     }
                   else if (opt == TCP_OPT_MSS &&
                           dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
@@ -386,10 +387,6 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       tmp16 = ((uint16_t)dev->d_buf[hdrlen + 2 + i] << 8) |
                                (uint16_t)dev->d_buf[hdrlen + 3 + i];
                       conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
-
-                      /* And we are done processing options. */
-
-                      break;
                     }
                   else
                     {
@@ -405,9 +402,9 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
                           break;
                         }
-
-                      i += dev->d_buf[hdrlen + 1 + i];
                     }
+
+                  i += dev->d_buf[hdrlen + 1 + i];
                 }
             }
 
@@ -772,6 +769,7 @@ found:
                         /* NOP option. */
 
                         ++i;
+                        continue;
                       }
                     else if (opt == TCP_OPT_MSS &&
                               dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
@@ -784,10 +782,6 @@ found:
                           (dev->d_buf[hdrlen + 2 + i] << 8) |
                           dev->d_buf[hdrlen + 3 + i];
                         conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
-
-                        /* And we are done processing options. */
-
-                        break;
                       }
                     else
                       {
@@ -804,8 +798,9 @@ found:
                             break;
                           }
 
-                        i += dev->d_buf[hdrlen + 1 + i];
                       }
+
+                    i += dev->d_buf[hdrlen + 1 + i];
                   }
               }
 
