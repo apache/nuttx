@@ -365,14 +365,18 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
       uint16_t recvwndo = tcp_get_recvwindow(dev, conn);
 
+      /* Update the Receiver Window */
+
+      conn->rcv_adv = rcvseq + recvwndo;
+
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+      recvwndo >>= conn->rcv_scale;
+#endif
+
       /* Set the TCP Window */
 
       tcp->wnd[0] = recvwndo >> 8;
       tcp->wnd[1] = recvwndo & 0xff;
-
-      /* Update the Receiver Window */
-
-      conn->rcv_adv = rcvseq + recvwndo;
     }
 
   /* Finish the IP portion of the message and calculate checksums */
@@ -674,6 +678,18 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   tcp->optdata[optlen++] = TCP_OPT_MSS_LEN;
   tcp->optdata[optlen++] = tcp_mss >> 8;
   tcp->optdata[optlen++] = tcp_mss & 0xff;
+
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  if (tcp->flags == TCP_SYN ||
+      ((tcp->flags == (TCP_ACK | TCP_SYN)) && (conn->flags & TCP_WSCALE)))
+    {
+      tcp->optdata[optlen++] = TCP_OPT_NOOP;
+      tcp->optdata[optlen++] = TCP_OPT_WS;
+      tcp->optdata[optlen++] = TCP_OPT_WS_LEN;
+      tcp->optdata[optlen++] = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
+    }
+#endif
+
   tcp->tcpoffset         = ((TCP_HDRLEN + optlen) / 4) << 4;
   dev->d_len            += optlen;
 
