@@ -28,20 +28,51 @@
 #include <nuttx/config.h>
 #include "hardware/lpc17_40_wdt.h"
 
+#ifdef CONFIG_LPC17_40_WDT
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: lpc17_40_wdtinitialize
+ *
+ * Description:
+ *   Initialize the watchdog timer.  The watchdog timer is initialized and
+ *   registers as 'devpath.  The initial state of the watchdog timer is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void lpc17_40_wdtinitialize(FAR const char *devpath);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_LPC17_40_WDT */
 #endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_WDT_H */
