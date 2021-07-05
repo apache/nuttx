@@ -331,14 +331,14 @@ int work_usrstart(void);
  *   the caller.  Otherwise, the work structure is completely managed by the
  *   work queue logic.  The caller should never modify the contents of the
  *   work queue structure directly.  If work_queue() is called before the
- *   previous work as been performed and removed from the queue, then any
+ *   previous work has been performed and removed from the queue, then any
  *   pending work will be canceled and lost.
  *
  * Input Parameters:
  *   qid    - The work queue ID
  *   work   - The work structure to queue
- *   worker - The worker callback to be invoked.  The callback will invoked
- *            on the worker thread of execution.
+ *   worker - The worker callback to be invoked.  The callback will be
+ *            invoked on the worker thread of execution.
  *   arg    - The argument that will be passed to the worker callback when
  *            it is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
@@ -357,12 +357,12 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be re-queue by calling
+ *   After work has been cancelled, it may be requeued by calling
  *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero on success, a negated errno on failure
