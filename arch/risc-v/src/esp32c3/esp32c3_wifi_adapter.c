@@ -38,6 +38,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <irq/irq.h>
+#include <sched/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 #include <nuttx/spinlock.h>
@@ -74,6 +75,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_SCHED_ONEXIT
+#  error "on_exit() API must be enabled for deallocating Wi-Fi resources"
+#endif
 
 #define MAC_ADDR0_REG (DR_REG_EFUSE_BASE + 0x044)
 #define MAC_ADDR1_REG (DR_REG_EFUSE_BASE + 0x048)
@@ -395,11 +400,6 @@ uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 /* Wi-Fi interrupt private data */
 
 static bool g_wifi_irq_bind;
-
-/* Wi-Fi thread private data */
-
-static pthread_key_t g_wifi_thread_key;
-static bool g_wifi_tkey_init;
 
 /* Wi-Fi sleep private data */
 
@@ -742,7 +742,7 @@ static int esp_int_adpt_cb(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void esp_thread_semphr_free(void *semphr)
+static void esp_thread_semphr_free(int status, void *semphr)
 {
   if (semphr)
     {
@@ -1250,22 +1250,20 @@ static int IRAM_ATTR wifi_is_in_isr(void)
 static void *esp_thread_semphr_get(void)
 {
   int ret;
+  int i;
   void *sem;
+  struct tcb_s *tcb = this_task();
+  struct task_group_s *group = tcb->group;
 
-  if (g_wifi_tkey_init)
-  {
-    ret = pthread_key_create(&g_wifi_thread_key, esp_thread_semphr_free);
-    if (ret)
-      {
-        wlerr("ERROR: Failed to create pthread key\n");
-        return NULL;
-      }
+  for (i = 0; i < CONFIG_SCHED_EXIT_MAX; i++)
+    {
+      if (group->tg_exit[i].func.on == esp_thread_semphr_free)
+        {
+          break;
+        }
+    }
 
-    g_wifi_tkey_init = true;
-  }
-
-  sem = pthread_getspecific(g_wifi_thread_key);
-  if (!sem)
+  if (i >= CONFIG_SCHED_EXIT_MAX)
     {
       sem = esp_semphr_create(1, 0);
       if (!sem)
@@ -1274,13 +1272,17 @@ static void *esp_thread_semphr_get(void)
           return NULL;
         }
 
-      ret = pthread_setspecific(g_wifi_thread_key, sem);
-      if (ret)
+      ret = on_exit(esp_thread_semphr_free, sem);
+      if (ret < 0)
         {
-          wlerr("ERROR: Failed to set specific\n");
+          wlerr("ERROR: Failed to bind semaphore\n");
           esp_semphr_delete(sem);
           return NULL;
         }
+    }
+  else
+    {
+      sem = group->tg_exit[i].arg;
     }
 
   return sem;
