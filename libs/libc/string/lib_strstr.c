@@ -32,22 +32,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if LONG_MAX == INT32_MAX
-  #define LONG_INT_IS_4_BYTES 1
-  #define LONG_INT_N_BYTES    4
-#else
-  #define LONG_INT_N_BYTES    sizeof(long)
-#endif
-
-/* Determine the size, in bytes, of a long integer. */
-
-#if defined (CONFIG_ENDIAN_BIG)
-  #define ULONG_BIGENDIAN(x) (x)
-#elif defined (LONG_INT_IS_4_BYTES)
-  #define ULONG_BIGENDIAN(x) htonl(x)
-#else
-  #undef ULONG_BIGENDIAN
-#endif
+#define LONG_INT_N_BYTES    sizeof(long)
 
 /****************************************************************************
  * Public Functions
@@ -59,9 +44,7 @@
 
 FAR char *strstr(FAR const char *haystack, FAR const char *needle)
 {
-#ifndef ULONG_BIGENDIAN
   FAR const unsigned char *needle_cmp_end;
-#endif
   FAR const unsigned char *i_haystack;
   const char needle_first = *needle;
   FAR const unsigned char *i_needle;
@@ -126,14 +109,6 @@ FAR char *strstr(FAR const char *haystack, FAR const char *needle)
   needle_cmp_len = (needle_len < LONG_INT_N_BYTES) ?
                     needle_len : LONG_INT_N_BYTES;
 
-#ifdef ULONG_BIGENDIAN
-  last_needle_chars =
-    ULONG_BIGENDIAN(*((FAR unsigned long *)(i_needle - needle_cmp_len)))
-    >> (8 * (LONG_INT_N_BYTES - needle_cmp_len));
-  last_haystack_chars =
-    ULONG_BIGENDIAN(*((FAR unsigned long *)(i_haystack - needle_cmp_len)))
-    >> (8 * (LONG_INT_N_BYTES - needle_cmp_len));
-#else
   needle_cmp_end = i_needle;
 
   i_needle -= needle_cmp_len;
@@ -148,7 +123,6 @@ FAR char *strstr(FAR const char *haystack, FAR const char *needle)
       last_haystack_chars <<= 8;
       last_haystack_chars ^= *i_haystack++;
     }
-#endif
 
   /* At this point:
    * needle is at least two characters long
