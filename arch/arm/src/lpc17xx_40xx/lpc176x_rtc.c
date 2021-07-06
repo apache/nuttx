@@ -176,30 +176,6 @@ static int rtc_setup(void)
 }
 
 /****************************************************************************
- * Name: rtc_resume
- *
- * Description:
- *   Called when the RTC was already initialized on a previous power cycle.
- *   This just brings the RTC back into full operation.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int rtc_resume(void)
-{
-  /* Clear the RTC alarm flags */
-
-#ifdef CONFIG_RTC_ALARM
-#endif
-  return OK;
-}
-
-/****************************************************************************
  * Name: rtc_interrupt
  *
  * Description:
@@ -273,7 +249,7 @@ int up_rtc_initialize(void)
 
   g_rtc_enabled = true;
   rtc_dumpregs("After Initialization");
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
