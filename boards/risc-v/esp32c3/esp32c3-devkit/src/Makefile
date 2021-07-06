@@ -86,6 +86,13 @@ ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
 CSRCS += esp32c3_uid.c
 endif
 
+ifeq ($(CONFIG_NSH_ROMFSETC),y)
+ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
+  RCSRCS = etc/init.d/rcS
+  RCRAWS = etc/group etc/passwd
+endif
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 
