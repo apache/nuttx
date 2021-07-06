@@ -62,6 +62,10 @@ ifeq ($(CONFIG_ENC28J60),y)
   CSRCS += rp2040_enc28j60.c
 endif
 
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += rp2040_lcd_backpack.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
