@@ -406,7 +406,6 @@
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * ETH_MACFFR_PM   Promiscuous mode         0 (disabled)
  * ETH_MACFFR_HU   Hash unicast             0 (perfect dest filtering)
  * ETH_MACFFR_HM   Hash multicast           0 (perfect dest filtering)
  * ETH_MACFFR_DAIF Destination address      0 (normal)
@@ -421,7 +420,11 @@
  * ETH_MACFFR_RA   Receive all              0 (disabled)
  */
 
-#define MACFFR_SET_BITS (ETH_MACFFR_PCF_PAUSE)
+#ifdef CONFIG_NET_PROMISCUOUS
+#  define MACFFR_SET_BITS (ETH_MACFFR_PCF_PAUSE | ETH_MACFFR_PM)
+#else
+#  define MACFFR_SET_BITS (ETH_MACFFR_PCF_PAUSE)
+#endif
 
 /* Clear the MACFCR bits that will be setup during MAC initialization (or
  * that are cleared unconditionally). Per the reference manual, all reserved

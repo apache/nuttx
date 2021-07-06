@@ -196,11 +196,11 @@
 
 /* Ethernet MAC frame filter register */
 
-#define ETH_MACPFR_PR                (1 << 0)  /* Bit 0: Promiscuous mode */
+#define ETH_MACPFR_PM                (1 << 0)  /* Bit 0: Promiscuous mode */
 #define ETH_MACPFR_HUC               (1 << 1)  /* Bit 1: Hash unicast */
 #define ETH_MACPFR_HMC               (1 << 2)  /* Bit 2: Hash multicast */
 #define ETH_MACPFR_DAIF              (1 << 3)  /* Bit 3: Destination address inverse filtering */
-#define ETH_MACPFR_PM                (1 << 4)  /* Bit 4: Pass all multicast */
+#define ETH_MACPFR_PAM               (1 << 4)  /* Bit 4: Pass all multicast */
 #define ETH_MACPFR_DBF               (1 << 5)  /* Bit 5: Disable broadcast packets */
 #define ETH_MACPFR_PCF_SHIFT         (6)       /* Bits 6-7: Pass control frames */
 #define ETH_MACPFR_PCF_MASK          (3 << ETH_MACPFR_PCF_SHIFT)
