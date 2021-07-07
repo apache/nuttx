@@ -56,8 +56,8 @@
  *
  ****************************************************************************/
 
-static uint16_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
-                                 uint16_t recvwndo)
+static uint32_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
+                                 uint32_t recvwndo)
 {
 #if CONFIG_NET_RECV_BUFSIZE > 0
   uint32_t recvsize;
@@ -94,26 +94,31 @@ static uint16_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
  *   The value of the TCP receive window.
  ****************************************************************************/
 
-static uint16_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
+static uint32_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
 {
-  size_t maxiob;
-  uint16_t maxwin;
+  uint32_t recvwndo;
 
   /* Calculate the max possible window size for the connection.
    * This needs to be in sync with tcp_get_recvwindow().
    */
 
-  maxiob = (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE) * CONFIG_IOB_BUFSIZE;
-  if (maxiob >= UINT16_MAX)
+  recvwndo = tcp_calc_rcvsize(conn, (CONFIG_IOB_NBUFFERS -
+                                     CONFIG_IOB_THROTTLE) *
+                                     CONFIG_IOB_BUFSIZE);
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  recvwndo >>= conn->rcv_scale;
+#endif
+
+  if (recvwndo > UINT16_MAX)
     {
-      maxwin = UINT16_MAX;
-    }
-  else
-    {
-      maxwin = maxiob;
+      recvwndo = UINT16_MAX;
     }
 
-  return tcp_calc_rcvsize(conn, maxwin);
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  recvwndo <<= conn->rcv_scale;
+#endif
+
+  return recvwndo;
 }
 
 /****************************************************************************
@@ -127,18 +132,19 @@ static uint16_t tcp_maxrcvwin(FAR struct tcp_conn_s *conn)
  *   Calculate the TCP receive window for the specified device.
  *
  * Input Parameters:
- *   dev - The device whose TCP receive window will be updated.
+ *   dev  - The device whose TCP receive window will be updated.
+ *   conn - The TCP connection structure holding connection information.
  *
  * Returned Value:
  *   The value of the TCP receive window to use.
  *
  ****************************************************************************/
 
-uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
+uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
                             FAR struct tcp_conn_s *conn)
 {
-  uint16_t tailroom;
-  uint16_t recvwndo;
+  uint32_t tailroom;
+  uint32_t recvwndo;
   int niob_avail;
 
   /* Update the TCP received window based on read-ahead I/O buffer
@@ -163,8 +169,6 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
   if (niob_avail > 0)
     {
-      uint32_t rwnd;
-
       /* The optimal TCP window size is the amount of TCP data that we can
        * currently buffer via TCP read-ahead buffering for the device packet
        * buffer.  This logic here assumes that all IOBs are available for
@@ -180,15 +184,7 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
        * buffering for this connection.
        */
 
-      rwnd = tailroom + (niob_avail * CONFIG_IOB_BUFSIZE);
-      if (rwnd > UINT16_MAX)
-        {
-          rwnd = UINT16_MAX;
-        }
-
-      /* Save the new receive window size */
-
-      recvwndo = (uint16_t)rwnd;
+      recvwndo = tailroom + (niob_avail * CONFIG_IOB_BUFSIZE);
     }
 #if CONFIG_IOB_THROTTLE > 0
   else if (conn->readahead == NULL)
@@ -221,17 +217,32 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
       recvwndo = tailroom;
     }
 
-  return tcp_calc_rcvsize(conn, recvwndo);
+  recvwndo = tcp_calc_rcvsize(conn, recvwndo);
+
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  recvwndo >>= conn->rcv_scale;
+#endif
+
+  if (recvwndo > UINT16_MAX)
+    {
+      recvwndo = UINT16_MAX;
+    }
+
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  recvwndo <<= conn->rcv_scale;
+#endif
+
+  return recvwndo;
 }
 
 bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
 {
   FAR struct net_driver_s *dev = conn->dev;
-  uint16_t win;
-  uint16_t maxwin;
-  uint16_t oldwin;
+  uint32_t win;
+  uint32_t maxwin;
+  uint32_t oldwin;
   uint32_t rcvseq;
-  uint16_t adv;
+  uint32_t adv;
   uint16_t mss;
 
   /* Note: rcv_adv can be smaller than rcvseq.
@@ -259,7 +270,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
     {
       ninfo("Returning false: "
             "rcvseq=%" PRIu32 ", rcv_adv=%" PRIu32 ", "
-            "old win=%" PRIu16 ", new win=%" PRIu16 "\n",
+            "old win=%" PRIu32 ", new win=%" PRIu32 "\n",
             rcvseq, conn->rcv_adv, oldwin, win);
       return false;
     }
@@ -278,7 +289,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
   if (2 * adv >= maxwin)
     {
       ninfo("Returning true: "
-            "adv=%" PRIu16 ", maxwin=%" PRIu16 "\n",
+            "adv=%" PRIu32 ", maxwin=%" PRIu32 "\n",
             adv, maxwin);
       return true;
     }
@@ -291,13 +302,13 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn)
   if (adv >= 2 * mss)
     {
       ninfo("Returning true: "
-            "adv=%" PRIu16 ", mss=%" PRIu16 ", maxwin=%" PRIu16 "\n",
+            "adv=%" PRIu32 ", mss=%" PRIu16 ", maxwin=%" PRIu32 "\n",
             adv, mss, maxwin);
       return true;
     }
 
   ninfo("Returning false: "
-        "adv=%" PRIu16 ", mss=%" PRIu16 ", maxwin=%" PRIu16 "\n",
+        "adv=%" PRIu32 ", mss=%" PRIu16 ", maxwin=%" PRIu32 "\n",
         adv, mss, maxwin);
   return false;
 }
