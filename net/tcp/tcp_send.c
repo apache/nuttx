@@ -363,7 +363,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       /* Update the TCP received window based on I/O buffer availability */
 
       uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
-      uint16_t recvwndo = tcp_get_recvwindow(dev, conn);
+      uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
 
       /* Update the Receiver Window */
 

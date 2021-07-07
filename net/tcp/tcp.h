@@ -1475,7 +1475,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
  *
  ****************************************************************************/
 
-uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
+uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
                             FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
