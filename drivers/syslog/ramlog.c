@@ -209,6 +209,60 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: ramlog_initbuf
+ *
+ * Description:
+ *  Initialize g_sysdev based on the current system ramlog buffer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+static void ramlog_initbuf(void)
+{
+  FAR struct ramlog_dev_s *priv = &g_sysdev;
+  bool is_empty = true;
+  char prev;
+  char cur;
+  size_t i;
+
+  if (priv->rl_head != CONFIG_RAMLOG_BUFSIZE ||
+      priv->rl_tail != CONFIG_RAMLOG_BUFSIZE)
+    {
+      return;
+    }
+
+  prev = priv->rl_buffer[priv->rl_bufsize - 1];
+
+  for (i = 0; i < priv->rl_bufsize; i++)
+    {
+      cur = priv->rl_buffer[i];
+
+      if (!isascii(cur))
+        {
+          memset(priv->rl_buffer, 0, priv->rl_bufsize);
+          break;
+        }
+      else if (prev && !cur)
+        {
+          priv->rl_head = i;
+          is_empty = false;
+        }
+      else if (!prev && cur)
+        {
+          priv->rl_tail = i;
+        }
+
+      prev = cur;
+    }
+
+  if (i != priv->rl_bufsize || is_empty)
+    {
+      priv->rl_head = priv->rl_tail = 0;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: ramlog_addchar
  ****************************************************************************/
 
@@ -216,6 +270,13 @@ static int ramlog_addchar(FAR struct ramlog_dev_s *priv, char ch)
 {
   irqstate_t flags;
   size_t nexthead;
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+  if (priv == &g_sysdev)
+    {
+      ramlog_initbuf();
+    }
+#endif
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
@@ -696,60 +757,6 @@ errout:
 }
 
 /****************************************************************************
- * Name: ramlog_initbuf
- *
- * Description:
- *  Initialize g_sysdev based on the current system ramlog buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-static void ramlog_initbuf(void)
-{
-  FAR struct ramlog_dev_s *priv = &g_sysdev;
-  char prev, cur;
-  size_t i;
-
-  if (priv->rl_head != CONFIG_RAMLOG_BUFSIZE ||
-      priv->rl_tail != CONFIG_RAMLOG_BUFSIZE)
-    {
-      return;
-    }
-
-  prev = priv->rl_buffer[priv->rl_bufsize - 1];
-
-  for (i = 0; i < priv->rl_bufsize; i++)
-    {
-      cur = priv->rl_buffer[i];
-
-      if (!isascii(cur))
-        {
-          goto out;
-        }
-
-      if (prev && !cur)
-        {
-          priv->rl_head = i;
-        }
-
-      if (!prev && cur)
-        {
-          priv->rl_tail = i;
-        }
-
-      prev = cur;
-    }
-
-out:
-  if (i != priv->rl_bufsize)
-    {
-      priv->rl_head = priv->rl_tail = 0;
-      memset(priv->rl_buffer, 0, priv->rl_bufsize);
-    }
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -837,8 +844,6 @@ int ramlog_putc(FAR struct syslog_channel_s *channel, int ch)
   int ret;
 
   UNUSED(channel);
-
-  ramlog_initbuf();
 
   /* Add the character to the RAMLOG */
 
