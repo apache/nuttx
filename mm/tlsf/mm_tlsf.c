@@ -40,18 +40,6 @@
 #include "tlsf/tlsf.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This is a special value that indicates that there is no holder of the
- * semaphore.  The valid range of PIDs is 0-32767 and any value outside of
- * that range could be used (except -ESRCH which is a special return value
- * from getpid())
- */
-
-#define NO_HOLDER ((pid_t)-1)
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -67,8 +55,6 @@ struct mm_heap_s
    */
 
   sem_t mm_semaphore;
-  pid_t mm_holder;
-  int mm_counts_held;
 
   /* This is the size of the heap provided to mm */
 
@@ -106,9 +92,9 @@ struct mm_heap_s
  * Name: mm_add_delaylist
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
@@ -120,8 +106,8 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   heap->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
-}
 #endif
+}
 
 /****************************************************************************
  * Name: mm_free_delaylist
@@ -201,120 +187,61 @@ static void mm_seminitialize(FAR struct mm_heap_s *heap)
    */
 
   _SEM_INIT(&heap->mm_semaphore, 0, 1);
-
-  heap->mm_holder      = NO_HOLDER;
-  heap->mm_counts_held = 0;
-}
-
-/****************************************************************************
- * Name: mm_trysemaphore
- *
- * Description:
- *   Try to take the MM mutex.  This is called only from the OS in certain
- *   conditions when it is necessary to have exclusive access to the memory
- *   manager but it is impossible to wait on a semaphore (e.g., the idle
- *   process when it performs its background memory cleanup).
- *
- ****************************************************************************/
-
-static int mm_trysemaphore(FAR struct mm_heap_s *heap)
-{
-  pid_t my_pid = getpid();
-  int ret;
-
-  /* getpid() returns the task ID of the task at the head of the ready-to-
-   * run task list.  mm_trysemaphore() may be called during context
-   * switches.  There are certain situations during context switching when
-   * the OS data structures are in flux and where the current task (i.e.,
-   * the task at the head of the ready-to-run task list) is not actually
-   * running. Granting the semaphore access in that case is known to result
-   * in heap corruption as in the following failure scenario.
-   *
-   * ----------------------------    -------------------------------
-   * TASK A                          TASK B
-   * ----------------------------    -------------------------------
-   *                                 Begins memory allocation.
-   *                                 - Holder is set to TASK B
-   *                             <---- Task B preempted, Task A runs
-   * Task A exits
-   * - Current task set to Task B
-   * Free tcb and stack memory
-   * - Since holder is Task B,
-   *   memory manager is re-
-   *   entered, and
-   * - Heap is corrupted.
-   * ----------------------------    -------------------------------
-   *
-   * This is handled by getpid():  If the case where Task B is not actually
-   * running, then getpid() will return the special value -ESRCH.  That will
-   * avoid taking the fatal 'if' logic and will fall through to use the
-   * 'else', albeit with a nonsensical PID value.
-   */
-
-  if (my_pid < 0)
-    {
-      ret = my_pid;
-      goto errout;
-    }
-
-  /* Does the current task already hold the semaphore?  Is the current
-   * task actually running?
-   */
-
-  if (heap->mm_holder == my_pid)
-    {
-      /* Yes, just increment the number of references held by the current
-       * task.
-       */
-
-      heap->mm_counts_held++;
-      ret = OK;
-    }
-  else
-    {
-      /* Try to take the semaphore */
-
-      ret = _SEM_TRYWAIT(&heap->mm_semaphore);
-      if (ret < 0)
-        {
-          ret = _SEM_ERRVAL(ret);
-          goto errout;
-        }
-
-      /* We have it.  Claim the heap for the current task and return */
-
-      heap->mm_holder      = my_pid;
-      heap->mm_counts_held = 1;
-      ret = OK;
-    }
-
-errout:
-  return ret;
 }
 
 /****************************************************************************
  * Name: mm_takesemaphore
  *
  * Description:
- *   Take the MM mutex.  This is the normal action before all memory
- *   management actions.
+ *   Take the MM mutex. This may be called from the OS in certain conditions
+ *   when it is impossible to wait on a semaphore:
+ *     1.The idle process performs the memory corruption check.
+ *     2.The task/thread free the memory in the exiting process.
+ *
+ * Input Parameters:
+ *   heap  - heap instance want to take semaphore
+ *
+ * Returned Value:
+ *   true if the semaphore can be taken, otherwise false.
  *
  ****************************************************************************/
 
-static void mm_takesemaphore(FAR struct mm_heap__s *heap)
+static bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 {
-  pid_t my_pid = getpid();
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  /* Check current environment */
 
-  /* Does the current task already hold the semaphore? */
-
-  if (heap->mm_holder == my_pid)
+  if (up_interrupt_context())
     {
-      /* Yes, just increment the number of references held by the current
-       * task.
-       */
+      /* Can't take semaphore in the interrupt handler */
 
-      heap->mm_counts_held++;
+      return false;
     }
+  else
+#endif
+
+  /* getpid() returns the task ID of the task at the head of the ready-to-
+   * run task list.  mm_takesemaphore() may be called during context
+   * switches.  There are certain situations during context switching when
+   * the OS data structures are in flux and then can't be freed immediately
+   * (e.g. the running thread stack).
+   *
+   * This is handled by getpid() to return the special value -ESRCH to
+   * indicate this special situation.
+   */
+
+  if (getpid() < 0)
+    {
+      return false;
+    }
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  else if (sched_idletask())
+    {
+      /* Try to take the semaphore */
+
+      return _SEM_TRYWAIT(&heap->mm_semaphore) >= 0;
+    }
+#endif
   else
     {
       int ret;
@@ -335,14 +262,9 @@ static void mm_takesemaphore(FAR struct mm_heap__s *heap)
               DEBUGASSERT(ret == -EINTR || ret == -ECANCELED);
             }
         }
-      while (ret == -EINTR);
+      while (ret < 0);
 
-      /* We have it (or some awful, unexpected error occurred).  Claim
-       * the semaphore for the current task and return.
-       */
-
-      heap->mm_holder      = my_pid;
-      heap->mm_counts_held = 1;
+      return true;
     }
 }
 
@@ -356,28 +278,7 @@ static void mm_takesemaphore(FAR struct mm_heap__s *heap)
 
 static void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
-  /* The current task should be holding at least one reference to the
-   * semaphore.
-   */
-
-  DEBUGASSERT(heap->mm_holder == getpid());
-
-  /* Does the current task hold multiple references to the semaphore */
-
-  if (heap->mm_counts_held > 1)
-    {
-      /* Yes, just release one count and return */
-
-      heap->mm_counts_held--;
-    }
-  else
-    {
-      /* Nope, this is the last reference held by the current task. */
-
-      heap->mm_holder      = NO_HOLDER;
-      heap->mm_counts_held = 0;
-      DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
-    }
+  DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
 }
 
 /****************************************************************************
@@ -422,7 +323,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 # define idx 0
 #endif
 
-  mm_takesemaphore(heap);
+  DEBUGVERIFY(mm_takesemaphore(heap));
 
   minfo("Region %d: base=%p size=%zu\n", idx + 1, heapstart, heapsize);
 
@@ -523,20 +424,9 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
     {
       /* Retake the semaphore for each region to reduce latencies */
 
-      if (up_interrupt_context())
+      if (mm_takesemaphore(heap) == false)
         {
           return;
-        }
-      else if (sched_idletask())
-        {
-          if (mm_trysemaphore(heap))
-            {
-              return;
-            }
-        }
-      else
-        {
-          mm_takesemaphore(heap);
         }
 
       /* Check tlsf control block in the first pass */
@@ -583,7 +473,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* Take the memory manager semaphore */
 
-  mm_takesemaphore(heap);
+  DEBUGVERIFY(mm_takesemaphore(heap));
 
   /* Extend the tlsf pool */
 
@@ -621,44 +511,19 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  /* Check current environment */
-
-  if (up_interrupt_context())
+  if (mm_takesemaphore(heap))
     {
-      /* We are in ISR, add to mm_delaylist */
+      /* Pass, return to the tlsf pool */
 
-      mm_add_delaylist(heap, mem);
-      return;
-    }
-  else if ((ret = mm_trysemaphore(heap)) == 0)
-    {
-      /* Got the sem, do free immediately */
-    }
-  else if (ret == -ESRCH || sched_idletask())
-    {
-      /* We are in IDLE task & can't get sem, or meet -ESRCH return,
-       * which means we are in situations during context switching(See
-       * mm_trysemaphore() & getpid()). Then add to mm_delaylist.
-       */
-
-      mm_add_delaylist(heap, mem);
-      return;
+      tlsf_free(heap->mm_tlsf, mem);
+      mm_givesemaphore(heap);
     }
   else
-#endif
     {
-      /* We need to hold the MM semaphore while we muck with the
-       * nodelist.
-       */
+      /* Add to the delay list(see the comment in mm_takesemaphore) */
 
-      mm_takesemaphore(heap);
+      mm_add_delaylist(heap, mem);
     }
-
-  /* Return to the tlsf pool */
-
-  tlsf_free(heap->mm_tlsf, mem);
-  mm_givesemaphore(heap);
 }
 
 /****************************************************************************
@@ -809,7 +674,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
     {
       /* Retake the semaphore for each region to reduce latencies */
 
-      mm_takesemaphore(heap);
+      DEBUGVERIFY(mm_takesemaphore(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
                      mm_mallinfo_walker, info);
       mm_givesemaphore(heap);
@@ -846,13 +711,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR void *ret;
 
-  /* Firstly, free mm_delaylist */
+  /* Free the delay list first */
 
   mm_free_delaylist(heap);
 
   /* Allocate from the tlsf pool */
 
-  mm_takesemaphore(heap);
+  DEBUGVERIFY(mm_takesemaphore(heap));
   ret = tlsf_malloc(heap->mm_tlsf, size);
   mm_givesemaphore(heap);
 
@@ -877,13 +742,13 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 {
   FAR void *ret;
 
-  /* Firstly, free mm_delaylist */
+  /* Free the delay list first */
 
   mm_free_delaylist(heap);
 
   /* Allocate from the tlsf pool */
 
-  mm_takesemaphore(heap);
+  DEBUGVERIFY(mm_takesemaphore(heap));
   ret = tlsf_memalign(heap->mm_tlsf, alignment, size);
   mm_givesemaphore(heap);
 
@@ -918,13 +783,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 {
   FAR void *newmem;
 
-  /* Firstly, free mm_delaylist */
+  /* Free the delay list first */
 
   mm_free_delaylist(heap);
 
   /* Allocate from the tlsf pool */
 
-  mm_takesemaphore(heap);
+  DEBUGVERIFY(mm_takesemaphore(heap));
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
   mm_givesemaphore(heap);
 
