@@ -653,7 +653,7 @@ int aes_cypher(FAR void *out, FAR const void *in, uint32_t size,
  * Name: esp32_aes_ecb_test
  ****************************************************************************/
 
-static void esp32_aes_ecb_test(void)
+static bool esp32_aes_ecb_test(void)
 {
   int ret;
   int i;
@@ -703,33 +703,46 @@ static void esp32_aes_ecb_test(void)
       keybits = i * 64 + 128;
 
       ret = esp32_aes_setkey(&aes, key, keybits);
-      DEBUGASSERT(ret == 0);
+      if (ret < 0)
+        {
+          return false;
+        }
 
       ret = esp32_aes_ecb_cypher(&aes, 1, input, encrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(encrypt_buf, result[i], size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(encrypt_buf, result[i], size);
+      if (ret)
+        {
+          return false;
         }
 
       ret = esp32_aes_ecb_cypher(&aes, 0, encrypt_buf, decrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(decrypt_buf, input, size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(decrypt_buf, input, size);
+      if (ret)
+        {
+          return false;
         }
 
       syslog(LOG_INFO, "ESP32 AES ECB key=%d bits test: PASS\n", keybits);
     }
+
+  return true;
 }
 
 /****************************************************************************
  * Name: esp32_aes_cbc_test
  ****************************************************************************/
 
-static void esp32_aes_cbc_test(void)
+static bool esp32_aes_cbc_test(void)
 {
   int ret;
   int i;
@@ -786,36 +799,49 @@ static void esp32_aes_cbc_test(void)
       keybits = i * 64 + 128;
 
       ret = esp32_aes_setkey(&aes, key, keybits);
-      DEBUGASSERT(ret == 0);
+      if (ret < 0)
+        {
+          return false;
+        }
 
       memcpy(iv_buf, iv, 16);
       ret = esp32_aes_cbc_cypher(&aes, 1, iv_buf, input, encrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(encrypt_buf, result[i], size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(encrypt_buf, result[i], size);
+      if (ret)
+        {
+          return false;
         }
 
       memcpy(iv_buf, iv, 16);
       ret = esp32_aes_cbc_cypher(&aes, 0, iv_buf, encrypt_buf,
                                  decrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(decrypt_buf, input, size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(decrypt_buf, input, size);
+      if (ret)
+        {
+          return false;
         }
 
       syslog(LOG_INFO, "ESP32 AES CBC key=%d bits test: PASS\n", keybits);
     }
+
+  return true;
 }
 
 /****************************************************************************
- * Name: esp32_aes_cbc_test
+ * Name: esp32_aes_ctr_test
  ****************************************************************************/
 
-static void esp32_aes_ctr_test(void)
+static bool esp32_aes_ctr_test(void)
 {
   int ret;
   int i;
@@ -874,39 +900,52 @@ static void esp32_aes_ctr_test(void)
       keybits = i * 64 + 128;
 
       ret = esp32_aes_setkey(&aes, key, keybits);
-      DEBUGASSERT(ret == 0);
+      if (ret < 0)
+        {
+          return false;
+        }
 
       nc_off = 0;
       memcpy(cnt_buf, cnt, 16);
       ret = esp32_aes_ctr_cypher(&aes, &nc_off, cnt_buf, cache_buf,
                                  input, encrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(encrypt_buf, result[i], size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(encrypt_buf, result[i], size);
+      if (ret)
+        {
+          return false;
         }
 
       nc_off = 0;
       memcpy(cnt_buf, cnt, 16);
       ret = esp32_aes_ctr_cypher(&aes, &nc_off, cnt_buf, cache_buf,
                                  encrypt_buf, decrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(decrypt_buf, input, size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(decrypt_buf, input, size);
+      if (ret)
+        {
+          return false;
         }
 
       syslog(LOG_INFO, "ESP32 AES CTR key=%d bits test: PASS\n", keybits);
     }
+
+  return true;
 }
 
 /****************************************************************************
  * Name: esp32_aes_xts_test
  ****************************************************************************/
 
-static void esp32_aes_xts_test(void)
+static bool esp32_aes_xts_test(void)
 {
   int ret;
   int i;
@@ -975,7 +1014,10 @@ static void esp32_aes_xts_test(void)
       keybits = i * 256 + 256;
 
       ret = esp32_aes_xts_setkey(&aes, key, keybits);
-      DEBUGASSERT(ret == 0);
+      if (ret < 0)
+        {
+          return false;
+        }
 
       /* Encrypt/Decrypt 32 bytes */
 
@@ -984,21 +1026,29 @@ static void esp32_aes_xts_test(void)
       memcpy(unit_buf, unit, 16);
       ret = esp32_aes_xts_cypher(&aes, true, unit_buf, input,
                                  encrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(encrypt_buf, result_in32[i], size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(encrypt_buf, result_in32[i], size);
+      if (ret)
+        {
+          return false;
         }
 
       memcpy(unit_buf, unit, 16);
       ret = esp32_aes_xts_cypher(&aes, false, unit_buf, encrypt_buf,
                                  decrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(decrypt_buf, input, size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(decrypt_buf, input, size);
+      if (ret)
+        {
+          return false;
         }
 
       /* Encrypt/Decrypt 30 bytes */
@@ -1008,25 +1058,35 @@ static void esp32_aes_xts_test(void)
       memcpy(unit_buf, unit, 16);
       ret = esp32_aes_xts_cypher(&aes, true, unit_buf, input,
                                  encrypt_buf, size);
-      DEBUGASSERT(ret == 0);
-
-      if (memcmp(encrypt_buf, result_in30[i], size))
+      if (ret < 0)
         {
-          DEBUGASSERT(0);
+          return false;
+        }
+
+      ret = memcmp(encrypt_buf, result_in30[i], size);
+      if (ret)
+        {
+          return false;
         }
 
       memcpy(unit_buf, unit, 16);
       ret = esp32_aes_xts_cypher(&aes, false, unit_buf, encrypt_buf,
                                  decrypt_buf, size);
-      DEBUGASSERT(ret == 0);
+      if (ret < 0)
+        {
+          return false;
+        }
 
-      if (memcmp(decrypt_buf, input, size))
+      ret = memcmp(decrypt_buf, input, size);
+      if (ret)
         {
           DEBUGASSERT(0);
         }
 
       syslog(LOG_INFO, "ESP32 AES XTS key=%d bits test: PASS\n", keybits);
     }
+
+  return true;
 }
 
 /****************************************************************************
@@ -1035,16 +1095,44 @@ static void esp32_aes_xts_test(void)
 
 int esp32_aes_main(int argc, char *argv[])
 {
+  bool success;
+
+  syslog(LOG_INFO, "----- BEGIN TEST -----\n");
+
   esp32_aes_init();
 
-  esp32_aes_ecb_test();
-  esp32_aes_cbc_test();
-  esp32_aes_ctr_test();
-  esp32_aes_xts_test();
+  success = esp32_aes_ecb_test();
+  if (!success)
+    {
+      goto test_end;
+    }
 
-  syslog(LOG_INFO, "\nESP32 AES hardware accelerate test done.\n");
+  success = esp32_aes_cbc_test();
+  if (!success)
+    {
+      goto test_end;
+    }
+
+  success = esp32_aes_ctr_test();
+  if (!success)
+    {
+      goto test_end;
+    }
+
+  success = esp32_aes_xts_test();
+  if (!success)
+    {
+      goto test_end;
+    }
+
+test_end:
+  syslog(LOG_INFO, "----- END TEST -----\n");
+
+  syslog(LOG_INFO, "\n");
+
+  syslog(LOG_INFO, "----- RESULT: %s -----\n",
+         success ? "SUCCESS" : "FAILED");
 
   return 0;
 }
-
 #endif

@@ -56,7 +56,7 @@ struct stm32_foc_adc_s
 
   uint8_t nchan;
 
-  /* The number of auxliary regular channles (only for DMA transfer) */
+  /* The number of auxiliary regular channels (only for DMA transfer) */
 
   uint8_t regch;
 

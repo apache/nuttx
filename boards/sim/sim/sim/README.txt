@@ -49,13 +49,7 @@ application that I know of.
 
 Timing Fidelity
 ---------------
-NOTE:  In order to facility fast testing, the sim target's IDLE loop, by
-default, calls the system "interrupt handler" as fast as possible.  As a
-result, there really are no noticeable delays when a task sleeps.  However,
-the task really does sleep -- but the time scale is wrong.  If you want
-behavior that is closer to normal timing, then you can define
-CONFIG_SIM_WALLTIME=y in your configuration file.  This configuration setting
-will cause the sim target's IDLE loop to delay on each call so that the system
+NOTE: The sim target's IDLE loop to delay on each call so that the system
 "timer interrupt" is called at a rate approximately correct for the system
 timer tick rate.  This option can be enabled with CONFIG_SIM_WALLTIME_SIGNAL
 which will drive the entire simulation by using a host timer that ticks at
@@ -315,12 +309,6 @@ SMP
     +CONFIG_SPINLOCK=y
     +CONFIG_SMP=y
     +CONFIG_SMP_NCPUS=2
-
-  You also must enable near-realtime-performance otherwise even long timeouts
-  will expire before a CPU thread even has a chance to execute.
-
-    -# CONFIG_SIM_WALLTIME is not set
-    +CONFIG_SIM_WALLTIME=y
 
   And you can enable some additional debug output with:
 

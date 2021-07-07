@@ -54,11 +54,6 @@
 
 bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
-
 #if CONFIG_MM_REGIONS > 1
   int i;
 
@@ -66,10 +61,10 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
    * between the region's two guard nodes.
    */
 
-  for (i = 0; i < heap_impl->mm_nregions; i++)
+  for (i = 0; i < heap->mm_nregions; i++)
     {
-      if (mem > (FAR void *)heap_impl->mm_heapstart[i] &&
-          mem < (FAR void *)heap_impl->mm_heapend[i])
+      if (mem > (FAR void *)heap->mm_heapstart[i] &&
+          mem < (FAR void *)heap->mm_heapend[i])
         {
           return true;
         }
@@ -84,8 +79,8 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
    * two guard nodes.
    */
 
-  if (mem > (FAR void *)heap_impl->mm_heapstart[0] &&
-      mem < (FAR void *)heap_impl->mm_heapend[0])
+  if (mem > (FAR void *)heap->mm_heapstart[0] &&
+      mem < (FAR void *)heap->mm_heapend[0])
     {
       return true;
     }

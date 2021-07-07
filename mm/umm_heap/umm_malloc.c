@@ -52,41 +52,12 @@
 FAR void *malloc(size_t size)
 {
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  FAR void *brkaddr;
-  FAR void *mem;
+  /* Use memalign() because it implements the sbrk() logic */
 
-  if (size < 1)
-    {
-      return NULL;
-    }
-
-  /* Loop until we successfully allocate the memory or until an error
-   * occurs. If we fail to allocate memory on the first pass, then call
-   * sbrk to extend the heap by one page.  This may require several
-   * passes if more the size of the allocation is more than one page.
-   *
-   * An alternative would be to increase the size of the heap by the
-   * full requested allocation in sbrk().  Then the loop should never
-   * execute more than twice (but more memory than we need may be
-   * allocated).
-   */
-
-  do
-    {
-      mem = mm_malloc(USR_HEAP, size);
-      if (!mem)
-        {
-          brkaddr = sbrk(size);
-          if (brkaddr == (FAR void *)-1)
-            {
-              return NULL;
-            }
-        }
-    }
-  while (mem == NULL);
-
-  return mem;
+  return memalign(sizeof(FAR void *), size);
 #else
+  /* Use mm_malloc() because it implements the clear */
+
   return mm_malloc(USR_HEAP, size);
 #endif
 }

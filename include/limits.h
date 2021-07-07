@@ -276,10 +276,10 @@
 #define NL_TEXTMAX _POSIX2_LINE_MAX
 
 /* NZERO
- *   Default process priority. Minimum Acceptable Value: 20
+ *   Default process priority. Minimum Acceptable Value: 128
  */
 
-#define NZERO 20
+#define NZERO 128
 
 /* Required for asynchronous I/O */
 

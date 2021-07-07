@@ -78,7 +78,7 @@ Configurations
 
   jumbo:
 
-    This configuration enables many Apache Nuttx features.  This is
+    This configuration enables many Apache NuttX features.  This is
     mostly to help provide additional code coverage in CI, but also
     allows for a users to see a wide range of features that are
     supported by the OS.

@@ -36,6 +36,7 @@
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/signal.h>
+#include <debug.h>
 
 /****************************************************************************
  * Private Types
@@ -49,7 +50,8 @@ struct fakesensor_s
   unsigned int batch;
   int raw_start;
   FAR const char *file_path;
-  sem_t run;
+  sem_t wakeup;
+  volatile bool running;
 };
 
 /****************************************************************************
@@ -114,8 +116,11 @@ static int fakesensor_read_csv_header(struct fakesensor_s *sensor)
 
   sensor->raw_start =
       fakesensor_read_csv_line(&sensor->data, buffer, sizeof(buffer), 0);
-  sscanf(buffer, "interval:%d\n", &sensor->interval);
-  sensor->interval *= 1000;
+  if (sensor->interval == 0)
+    {
+      sscanf(buffer, "interval:%d\n", &sensor->interval);
+      sensor->interval *= 1000;
+    }
 
   /*  Skip the CSV header */
 
@@ -128,31 +133,17 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
-  int ret;
-
   if (sw)
     {
-      ret = file_open(&sensor->data, sensor->file_path, O_RDONLY);
-      if (ret < 0)
-        {
-          snerr("Failed to open file:%s, err:%d", sensor->file_path, ret);
-          return ret;
-        }
-
-      fakesensor_read_csv_header(sensor);
+      sensor->running = true;
 
       /* Wake up the thread */
 
-      nxsem_post(&sensor->run);
+      nxsem_post(&sensor->wakeup);
     }
   else
     {
-      ret = file_close(&sensor->data);
-      if (ret < 0)
-        {
-          snerr("Failed to close file:%s, err:%d", sensor->file_path, ret);
-          return ret;
-        }
+      sensor->running = false;
     }
 
   return OK;
@@ -236,10 +227,26 @@ static int fakesensor_thread(int argc, char** argv)
 {
   FAR struct fakesensor_s *sensor = (FAR struct fakesensor_s *)
         ((uintptr_t)strtoul(argv[1], NULL, 0));
+  int ret;
 
   while (true)
     {
-      if (sensor->data.f_inode != NULL)
+      /* Waiting to be woken up */
+
+      nxsem_wait_uninterruptible(&sensor->wakeup);
+
+      /* Open csv file and init file handle */
+
+      ret = file_open(&sensor->data, sensor->file_path, O_RDONLY);
+      if (ret < 0)
+        {
+          snerr("Failed to open file:%s, err:%d", sensor->file_path, ret);
+          return ret;
+        }
+
+      fakesensor_read_csv_header(sensor);
+
+      while (sensor->running)
         {
           /* Sleeping thread for interval */
 
@@ -261,11 +268,14 @@ static int fakesensor_thread(int argc, char** argv)
               fakesensor_push_event(&sensor->lower);
             }
         }
-      else
-        {
-          /* Waiting to be woken up */
 
-          nxsem_wait(&sensor->run);
+      /* Close csv file handle when running change true to false */
+
+      ret = file_close(&sensor->data);
+      if (ret < 0)
+        {
+          snerr("Failed to close file:%s, err:%d", sensor->file_path, ret);
+          return ret;
         }
     }
 }
@@ -317,11 +327,10 @@ int fakesensor_init(int type, FAR const char *file_name,
   sensor->lower.type = type;
   sensor->lower.ops = &g_fakesensor_ops;
   sensor->lower.buffer_number = batch_number;
-  sensor->interval = 100000;
   sensor->file_path = file_name;
 
-  nxsem_init(&sensor->run, 0, 0);
-  nxsem_set_protocol(&sensor->run, SEM_PRIO_NONE);
+  nxsem_init(&sensor->wakeup, 0, 0);
+  nxsem_set_protocol(&sensor->wakeup, SEM_PRIO_NONE);
 
   /* Create thread for sensor */
 

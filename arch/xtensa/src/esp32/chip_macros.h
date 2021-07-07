@@ -68,19 +68,14 @@
 #ifdef __ASSEMBLY__
 
 /* Macro to get the current core ID. Only uses the reg given as an argument.
- * Reading PRID on the ESP108 architecture gives us 0xcdcd on the PRO
- * processor and 0xabab on the APP CPU. We distinguish between the two by
- * simply checking bit 1: it's 1 on the APP and 0 on the PRO processor.
+ * Reading PRID on the ESP32 gives us 0xCDCD on the PRO processor (0)
+ * and 0xABAB on the APP CPU (1). We can distinguish between the two by
+ * checking bit 13: it's 1 on the APP and 0 on the PRO processor.
  */
 
-    .macro      getcoreid reg
-    rsr.prid    \reg
-    bbci        \reg, 1, 1f
-    movi        \reg, 1
-    j           2f
-1:
-    movi        \reg, 0
-2:
+    .macro getcoreid reg
+    rsr.prid \reg
+    extui \reg,\reg,13,1
     .endm
 
 /****************************************************************************

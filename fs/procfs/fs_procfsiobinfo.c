@@ -280,7 +280,7 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
 
   /* The first line is the headers */
 
-  linesize  = snprintf(iobfile->line, IOBINFO_LINELEN,
+  linesize  = procfs_snprintf(iobfile->line, IOBINFO_LINELEN,
                        "                           TOTAL           TOTAL\n");
 
   copysize  = procfs_memcpy(iobfile->line, linesize, buffer, buflen,
@@ -292,7 +292,7 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
       buffer    += copysize;
       buflen    -= copysize;
 
-      linesize  = snprintf(iobfile->line, IOBINFO_LINELEN,
+      linesize  = procfs_snprintf(iobfile->line, IOBINFO_LINELEN,
                            "        USER            CONSUMED        "
                            "PRODUCED\n");
 
@@ -311,11 +311,11 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
           buflen    -= copysize;
 
           userstats  = iob_getuserstats(i);
-          linesize   = snprintf(iobfile->line, IOBINFO_LINELEN,
-                                "%-16s%16lu%16lu\n",
-                                g_iob_user_names[i],
-                                (unsigned long)userstats->totalconsumed,
-                                (unsigned long)userstats->totalproduced);
+          linesize   = procfs_snprintf(iobfile->line, IOBINFO_LINELEN,
+                                    "%-16s%16lu%16lu\n",
+                                    g_iob_user_names[i],
+                                    (unsigned long)userstats->totalconsumed,
+                                    (unsigned long)userstats->totalproduced);
 
           copysize   = procfs_memcpy(iobfile->line, linesize, buffer, buflen,
                                      &offset);
@@ -329,11 +329,11 @@ static ssize_t iobinfo_read(FAR struct file *filep, FAR char *buffer,
       buflen    -= copysize;
 
       userstats  = iob_getuserstats(IOBUSER_GLOBAL);
-      linesize   = snprintf(iobfile->line, IOBINFO_LINELEN,
-                            "\n%-16s%16lu%16lu\n",
-                            g_iob_user_names[IOBUSER_GLOBAL],
-                            (unsigned long)userstats->totalconsumed,
-                            (unsigned long)userstats->totalproduced);
+      linesize   = procfs_snprintf(iobfile->line, IOBINFO_LINELEN,
+                                   "\n%-16s%16lu%16lu\n",
+                                   g_iob_user_names[IOBUSER_GLOBAL],
+                                   (unsigned long)userstats->totalconsumed,
+                                   (unsigned long)userstats->totalproduced);
 
       copysize   = procfs_memcpy(iobfile->line, linesize, buffer, buflen,
                                  &offset);

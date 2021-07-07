@@ -76,16 +76,13 @@ int pthread_key_create(FAR pthread_key_t *key,
 
   /* Allocate a TLS index */
 
-  tlsindex = tls_alloc();
+  tlsindex = tls_alloc(destructor);
 
   /* Check if found a TLS index. */
 
   if (tlsindex >= 0)
     {
-      /* Yes.. Return the key value and success */
-
-      *key = (pthread_key_t)tlsindex;
-      tls_set_dtor(tlsindex, destructor);
+      *key = tlsindex;
       return OK;
     }
 

@@ -344,9 +344,7 @@ FAR struct tm *gmtime_r(FAR const time_t *timep, FAR struct tm *result)
   return result;
 }
 
-#ifndef CONFIG_LIBC_LOCALTIME
 FAR struct tm *localtime_r(FAR const time_t *timep, FAR struct tm *result)
 {
   return gmtime_r(timep, result);
 }
-#endif

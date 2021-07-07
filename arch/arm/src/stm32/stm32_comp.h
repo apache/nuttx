@@ -29,15 +29,9 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_STM32_COMP
+#include "hardware/stm32_comp.h"
 
-#if defined(CONFIG_STM32_STM32F30XX)
-#  error "COMP support for STM32F30XX not implemented yet"
-#elif defined(CONFIG_STM32_STM32F33XX)
-#  include "hardware/stm32f33xxx_comp.h"
-#elif defined(CONFIG_STM32_STM32F37XX)
-#  error "COMP support for STM32F37XX not implemented yet"
-#endif
+#ifdef CONFIG_STM32_COMP
 
 /****************************************************************************
  * Pre-processor definitions

@@ -662,12 +662,8 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   flags = enter_critical_section();
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-  if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
+  if ((waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      /* Do not use this in STM32_SDIO_MASK register */
-
-      waitmask &= ~SDIOWAIT_WRCOMPLETE;
-
       pinset = GPIO_SDIO_D0 & (GPIO_PORT_MASK | GPIO_PIN_MASK);
       pinset |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
 
@@ -1232,14 +1228,23 @@ static void stm32_eventtimeout(wdparm_t arg)
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 ||
               priv->wkupevent != 0);
 
+  mcinfo("sta: %08" PRIx32 " enabled irq: %08" PRIx32 "\n",
+         getreg32(STM32_SDIO_STA),
+         getreg32(STM32_SDIO_MASK));
+
   /* Is a data transfer complete event expected? */
 
   if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
     {
       /* Yes.. wake up any waiting threads */
 
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+      stm32_endwait(priv, SDIOWAIT_TIMEOUT |
+                    (priv->waitevents & SDIOWAIT_WRCOMPLETE));
+#else
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcerr("ERROR: Timeout, remaining: %d\n", priv->remaining);
+#endif
+      mcerr("Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1358,7 +1363,14 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
 static int stm32_rdyinterrupt(int irq, void *context, FAR void *arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
-  stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
+
+  /* Avoid noise, check the state */
+
+  if (stm32_gpioread(GPIO_SDIO_D0))
+    {
+      stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
+    }
+
   return OK;
 }
 #endif
@@ -1917,8 +1929,9 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDIO_CMD_CPSMEN;
 
-  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
-         cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32
+         " enabled irq: %08" PRIx32 "\n",
+         cmd, arg, regval, getreg32(STM32_SDIO_MASK));
 
   /* Write the SDIO CMD */
 
@@ -1998,7 +2011,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_STM32_STM32_SDIO_DMA
+#ifdef CONFIG_STM32_SDIO_DMA
   priv->dmamode   = false;
 #endif
 
@@ -2063,7 +2076,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_STM32_STM32_SDIO_DMA
+#ifdef CONFIG_STM32_SDIO_DMA
   priv->dmamode   = false;
 #endif
 
@@ -2469,7 +2482,9 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   if ((eventset & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      waitmask = SDIOWAIT_WRCOMPLETE;
+      /* eventset carries this */
+
+      waitmask = 0;
     }
   else
 #endif

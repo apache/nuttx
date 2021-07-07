@@ -1087,7 +1087,7 @@ void riscv_serialinit(void)
           continue;
         }
 
-      /* OS(Nuttx) is primordial and so many resources are uninitialized
+      /* OS (NuttX) is primordial and so many resources are uninitialized
        * while we are in 'riscv_serialinit'. The high level C lib functions
        * may not work well. Codes such as the following
        * 'snprintf(devpath, "/dev/ttyS%d\n", devno)...'

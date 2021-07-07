@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -77,6 +78,12 @@
 #define I2C_RECV_CMD(_cmd, _ack_val, _bytes) (((_cmd) << 11) + \
                                               ((_ack_val) << 10) + \
                                               (_bytes))
+
+/* Helper */
+
+#ifdef CONFIG_I2C_POLLED
+#define TIMESPEC_TO_US(sec, nano)  ((sec * USEC_PER_SEC) + (nano / NSEC_PER_USEC))
+#endif
 
 /* I2C hardware FIFO depth */
 
@@ -129,7 +136,9 @@ enum esp32c3_i2cstate_e
   I2CSTATE_IDLE = 0,
   I2CSTATE_PROC,
   I2CSTATE_STOP,
+#ifndef CONFIG_I2C_POLLED
   I2CSTATE_FINISH,
+#endif
   I2CSTATE_ERROR
 };
 
@@ -181,8 +190,10 @@ struct esp32c3_i2c_config_s
   uint8_t scl_pin;            /* GPIO configuration for SCL as SCL */
   uint8_t sda_pin;            /* GPIO configuration for SDA as SDA */
 
+#ifndef CONFIG_I2C_POLLED
   uint8_t periph;             /* Peripheral ID */
   uint8_t irq;                /* Interrupt ID */
+#endif
 
   uint32_t clk_bit;           /* Clock enable bit */
   uint32_t rst_bit;           /* I2C reset bit */
@@ -207,7 +218,10 @@ struct esp32c3_i2c_priv_s
   const struct esp32c3_i2c_config_s *config;
   int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
+
+#ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
+#endif
 
   /* I2C work state (see enum esp32c3_i2cstate_e) */
 
@@ -218,7 +232,9 @@ struct esp32c3_i2c_priv_s
   uint8_t msgid;               /* Current message ID */
   ssize_t bytes;               /* Processed data bytes */
 
+#ifndef CONFIG_I2C_POLLED
   int cpuint;                  /* CPU interrupt assigned to this I2C */
+#endif
 
   uint32_t error;              /* I2C transform error */
 
@@ -249,6 +265,12 @@ static void esp32c3_i2c_deinit(struct esp32c3_i2c_priv_s *priv);
 static int  esp32c3_i2c_transfer(struct i2c_master_s *dev,
                                  struct i2c_msg_s *msgs,
                                  int count);
+static inline void esp32c3_i2c_process(struct esp32c3_i2c_priv_s *priv,
+                                       uint32_t status);
+#ifdef CONFIG_I2C_POLLED
+static int esp32c3_i2c_polling_waitdone(FAR struct esp32c3_i2c_priv_s *priv);
+#endif
+
 #ifdef CONFIG_I2C_RESET
 static int  esp32c3_i2c_reset(struct i2c_master_s *dev);
 #endif /* CONFIG_I2C_RESET */
@@ -287,8 +309,10 @@ static const struct esp32c3_i2c_config_s esp32c3_i2c0_config =
   .clk_freq   = I2C_CLK_FREQ_DEF,
   .scl_pin    = CONFIG_ESP32C3_I2C0_SCLPIN,
   .sda_pin    = CONFIG_ESP32C3_I2C0_SDAPIN,
+#ifndef CONFIG_I2C_POLLED
   .periph     = ESP32C3_PERIPH_I2C_EXT0,
   .irq        = ESP32C3_IRQ_I2C_EXT0,
+#endif
   .clk_bit    = SYSTEM_I2C_EXT0_CLK_EN,
   .rst_bit    = SYSTEM_I2C_EXT0_RST,
   .scl_insig  = I2CEXT0_SCL_IN_IDX,
@@ -307,7 +331,9 @@ static struct esp32c3_i2c_priv_s esp32c3_i2c0_priv =
   .msgv       = NULL,
   .msgid      = 0,
   .bytes      = 0,
+#ifndef CONFIG_I2C_POLLED
   .cpuint     = -ENOMEM,
+#endif
   .error      = 0,
   .ready_read = false,
   .clk_freq   = 0
@@ -474,7 +500,7 @@ static void esp32c3_i2c_senddata(struct esp32c3_i2c_priv_s *priv)
  * Name: esp32c3_i2c_recvdata
  *
  * Description:
- *   Receive I2C data.
+ *   Transfer data from the FIFO to the driver buffer.
  *
  * Parameters:
  *   priv          - Pointer to the internal driver state structure.
@@ -746,9 +772,9 @@ static void esp32c3_i2c_deinit(struct esp32c3_i2c_priv_s *priv)
 
 static void esp32c3_i2c_reset_fsmc(struct esp32c3_i2c_priv_s *priv)
 {
-  esp32c3_i2c_deinit(priv);
+  /* Reset FSM machine */
 
-  esp32c3_i2c_init(priv);
+  modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_FSM_RST_M);
 }
 
 /****************************************************************************
@@ -765,7 +791,7 @@ static void esp32c3_i2c_reset_fsmc(struct esp32c3_i2c_priv_s *priv)
  *   failure.
  *
  ****************************************************************************/
-
+#ifndef CONFIG_I2C_POLLED
 static int esp32c3_i2c_sem_waitdone(struct esp32c3_i2c_priv_s *priv)
 {
   int ret;
@@ -780,6 +806,120 @@ static int esp32c3_i2c_sem_waitdone(struct esp32c3_i2c_priv_s *priv)
 
   return ret;
 }
+#endif
+
+/****************************************************************************
+ * Name: esp32c3_i2c_polling_waitdone
+ *
+ * Description:
+ *   Wait for a transfer to complete by polling status interrupt registers,
+ *   which indicates the status of the I2C operations. This function is only
+ *   used in polling driven mode.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned on successfull transfer. -ETIMEDOUT is returned
+ *   in case a transfer didn't finish within the timeout interval. And ERROR
+ *   is returned in case of any I2C error during the transfer has happened.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_I2C_POLLED
+static int esp32c3_i2c_polling_waitdone(FAR struct esp32c3_i2c_priv_s *priv)
+{
+  int ret;
+  struct timespec current_time;
+  struct timespec timeout;
+  uint64_t current_us;
+  uint64_t timeout_us;
+  uint32_t status = 0;
+
+  /* Get the current absolute time and add an offset as timeout.
+   * Preferable to use monotonic, so in case the time changes,
+   * the time reference is kept, i.e., current time can't jump
+   * forward and backwards.
+   */
+
+  #ifdef CONFIG_CLOCK_MONOTONIC
+    clock_gettime(CLOCK_MONOTONIC, &current_time);
+  #else
+    clock_gettime(CLOCK_REALTIME, &current_time);
+  #endif
+
+  timeout.tv_sec  = current_time.tv_sec  + 10;
+  timeout.tv_nsec = current_time.tv_nsec +  0;
+
+  current_us = TIMESPEC_TO_US(current_time.tv_sec, current_time.tv_nsec);
+  timeout_us = TIMESPEC_TO_US(timeout.tv_sec, timeout.tv_nsec);
+
+  /* Loop while a transfer is in progress
+   * and an error didn't occur within the timeout
+   */
+
+  while ((current_us < timeout_us) && (priv->error == 0))
+    {
+      /* Check if any interrupt triggered, clear them
+       * process the operation.
+       */
+
+      status = getreg32(I2C_INT_STATUS_REG(priv->id));
+      if (status != 0)
+        {
+          /* Check if the stop operation ended. Don't use
+           * I2CSTATE_FINISH, because it is set before the stop
+           * signal really ends. This works for interrupts because
+           * the i2c_state is checked in the next interrupt when
+           * stop signal has concluded. This is not the case of
+           * polling.
+           */
+
+          if (status & I2C_TRANS_COMPLETE_INT_ST_M)
+            {
+              putreg32(status, I2C_INT_CLR_REG(priv->id));
+              break;
+            }
+
+          putreg32(status, I2C_INT_CLR_REG(priv->id));
+          esp32c3_i2c_process(priv, status);
+        }
+
+      /* Update current time */
+
+      #ifdef CONFIG_CLOCK_MONOTONIC
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+      #else
+        clock_gettime(CLOCK_REALTIME, &current_time);
+      #endif
+      current_us = TIMESPEC_TO_US(current_time.tv_sec, current_time.tv_nsec);
+    }
+
+  /* Return a negated value in case of timeout, and in the other scenarios
+   * return a positive value.
+   * The transfer function will check the status of priv to check the other
+   * scenarios.
+   */
+
+  if (current_us >= timeout_us)
+    {
+      ret = -ETIMEDOUT;
+    }
+  else if (priv->error)
+    {
+      ret = ERROR;
+    }
+  else
+    {
+      ret = OK;
+    }
+
+  /* Disable all interrupts */
+
+  esp32c3_i2c_intr_disable(priv);
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: esp32c3_i2c_sem_wait
@@ -831,7 +971,9 @@ static void esp32c3_i2c_sem_post(struct esp32c3_i2c_priv_s *priv)
 static void esp32c3_i2c_sem_destroy(struct esp32c3_i2c_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
+#ifndef CONFIG_I2C_POLLED
   nxsem_destroy(&priv->sem_isr);
+#endif
 }
 
 /****************************************************************************
@@ -852,9 +994,10 @@ static inline void esp32c3_i2c_sem_init(struct esp32c3_i2c_priv_s *priv)
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
-
+#ifndef CONFIG_I2C_POLLED
   nxsem_init(&priv->sem_isr, 0, 0);
   nxsem_set_protocol(&priv->sem_isr, SEM_PRIO_NONE);
+#endif
 }
 
 /****************************************************************************
@@ -926,9 +1069,10 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
 
       esp32c3_i2c_sendstart(priv);
 
+#ifndef CONFIG_I2C_POLLED
       if (esp32c3_i2c_sem_waitdone(priv) < 0)
         {
-          i2cinfo("Message %" PRIu8 " timed out.\n", priv->msgid);
+          i2cerr("Message %" PRIu8 " timed out.\n", priv->msgid);
           ret = -ETIMEDOUT;
           break;
         }
@@ -936,7 +1080,7 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
         {
           if (priv->error != 0)
             {
-              i2cinfo("Transfer error %" PRIu32 "\n", priv->error);
+              i2cerr("Transfer error %" PRIu32 "\n", priv->error);
               ret = -EIO;
               break;
             }
@@ -946,6 +1090,28 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
               ret = OK;
             }
         }
+#else
+      ret = esp32c3_i2c_polling_waitdone(priv);
+      if (ret < 0)
+        {
+          if (ret == -ETIMEDOUT)
+            {
+              break;
+            }
+          else
+            {
+              ret = -EIO;
+              break;
+            }
+        }
+      else
+        {
+          /* Successful transfer, update the I2C state to idle */
+
+          priv->i2cstate = I2CSTATE_IDLE;
+          ret = OK;
+        }
+#endif
 
         i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
@@ -974,83 +1140,12 @@ static int esp32c3_i2c_transfer(struct i2c_master_s *dev,
 #ifdef CONFIG_I2C_RESET
 static void esp32c3_i2c_clear_bus(struct esp32c3_i2c_priv_s *priv)
 {
-  uint32_t clock_count;
-  uint32_t stretch_count;
-  int ret;
+  uint32_t value = VALUE_TO_FIELD(I2C_SCL_CYC_NUM_DEF, I2C_SCL_RST_SLV_NUM);
+  modifyreg32(I2C_SCL_SP_CONF_REG(priv->id), I2C_SCL_RST_SLV_NUM_M, value);
 
-  const struct esp32c3_i2c_config_s *config = priv->config;
+  modifyreg32(I2C_SCL_SP_CONF_REG(priv->id), 0, I2C_SCL_RST_SLV_EN_M);
 
-  /* Use GPIO configuration to un-wedge the bus */
-
-  esp32c3_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp32c3_gpio_matrix_out(config->scl_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32c3_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp32c3_gpio_matrix_out(config->sda_pin, SIG_GPIO_OUT_IDX, 0, 0);
-
-  /* Let SDA go high */
-
-  esp32c3_gpiowrite(config->sda_pin, 1);
-
-  /* Clock the bus until any slaves currently driving it let it go. */
-
-  clock_count = 0;
-  while (!esp32c3_gpioread(config->sda_pin))
-    {
-      /* Give up if we have tried too hard */
-
-      if (clock_count++ >= I2C_SCL_CYC_NUM_DEF)
-        {
-          ret = -EIO;
-          goto out;
-        }
-
-      /* Sniff to make sure that clock stretching has finished.
-       *
-       * If the bus never relaxes, the reset has failed.
-       */
-
-      stretch_count = 0;
-      while (!esp32c3_gpioread(config->scl_pin))
-        {
-          /* Give up if we have tried too hard */
-
-          if (stretch_count++ > 10)
-            {
-              ret = -EIO;
-              goto out;
-            }
-
-          up_udelay(10);
-        }
-
-      /* Drive SCL low */
-
-      esp32c3_gpiowrite(config->scl_pin, 0);
-      up_udelay(10);
-
-      /* Drive SCL high again */
-
-      esp32c3_gpiowrite(config->scl_pin, 1);
-      up_udelay(10);
-    }
-
-  /* Generate a start followed by a stop to reset slave
-   * state machines.
-   */
-
-  esp32c3_gpiowrite(config->sda_pin, 0);
-  up_udelay(10);
-  esp32c3_gpiowrite(config->scl_pin, 0);
-  up_udelay(10);
-  esp32c3_gpiowrite(config->scl_pin, 1);
-  up_udelay(10);
-  esp32c3_gpiowrite(config->sda_pin, 1);
-  up_udelay(10);
-
-  ret = OK;
-
-out:
-  return ret;
+  modifyreg32(I2C_CTR_REG(priv->id), 0, I2C_CONF_UPGATE_M);
 }
 #endif
 
@@ -1081,11 +1176,11 @@ static int esp32c3_i2c_reset(struct i2c_master_s *dev)
 
   flags = enter_critical_section();
 
-  esp32c3_i2c_deinit(priv);
+  esp32c3_i2c_reset_fsmc(priv);
+
+  /* Clear bus */
 
   esp32c3_i2c_clear_bus(priv);
-
-  esp32c3_i2c_init(priv);
 
   priv->i2cstate   = I2CSTATE_IDLE;
   priv->msgid      = 0;
@@ -1294,14 +1389,40 @@ static void esp32c3_i2c_tracedump(struct esp32c3_i2c_priv_s *priv)
  *   failure.
  *
  ****************************************************************************/
-
+#ifndef CONFIG_I2C_POLLED
 static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
 {
   struct esp32c3_i2c_priv_s *priv = (struct esp32c3_i2c_priv_s *)arg;
+  uint32_t irq_status = getreg32(I2C_INT_STATUS_REG(priv->id));
+
+  putreg32(irq_status, I2C_INT_CLR_REG(priv->id));
+  esp32c3_i2c_process(priv , irq_status);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32c3_i2c_process
+ *
+ * Description:
+ *   This routine manages the transfer. It's called after some specific
+ *   commands from the I2C controller are executed or in case of errors.
+ *   It's responsible for writing/reading operations and transferring data
+ *   from/to FIFO.
+ *   It's called in the interrupt and polled driven mode.
+ *
+ * Parameters:
+ *   priv          - Pointer to the internal driver state structure.
+ *   status        - The current interrupt status register.
+ *
+ ****************************************************************************/
+
+static inline void esp32c3_i2c_process(struct esp32c3_i2c_priv_s *priv,
+                                       uint32_t irq_status)
+{
   struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
 
-  uint32_t irq_status = getreg32(I2C_INT_STATUS_REG(priv->id));
-  putreg32(irq_status, I2C_INT_CLR_REG(priv->id));
+  /* Check for any errors */
 
   if (I2C_INT_ERR_MASK & irq_status)
     {
@@ -1310,7 +1431,9 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
       esp32c3_i2c_traceevent(priv, I2CEVENT_ERROR, priv->error,
                              getreg32(I2C_SR_REG(priv->id)));
       esp32c3_i2c_intr_disable(priv);
+#ifndef CONFIG_I2C_POLLED
       nxsem_post(&priv->sem_isr);
+#endif
     }
   else
     {
@@ -1332,8 +1455,9 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
                   esp32c3_i2c_traceevent(priv, I2CEVENT_STOP, msg->length,
                                          getreg32(I2C_SR_REG(priv->id)));
                   esp32c3_i2c_sendstop(priv);
-
+#ifndef CONFIG_I2C_POLLED
                   priv->i2cstate = I2CSTATE_FINISH;
+#endif
                 }
               else
                 {
@@ -1362,15 +1486,18 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
                                  getreg32(I2C_SR_REG(priv->id)));
           esp32c3_i2c_sendstop(priv);
 
+#ifndef CONFIG_I2C_POLLED
           priv->i2cstate = I2CSTATE_FINISH;
+#endif
         }
+#ifndef CONFIG_I2C_POLLED
       else if (priv->i2cstate == I2CSTATE_FINISH)
         {
+          esp32c3_i2c_intr_disable(priv);
           nxsem_post(&priv->sem_isr);
         }
+#endif
     }
-
-  return 0;
 }
 
 /****************************************************************************
@@ -1397,10 +1524,12 @@ static int esp32c3_i2c_irq(int cpuint, void *context, void *arg)
 
 struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
 {
-  int ret;
   irqstate_t flags;
   struct esp32c3_i2c_priv_s *priv;
+#ifndef CONFIG_I2C_POLLED
   const struct esp32c3_i2c_config_s *config;
+  int ret;
+#endif
 
   switch (port)
     {
@@ -1412,8 +1541,6 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
     default:
       return NULL;
     }
-
-  config = priv->config;
 
   flags = enter_critical_section();
 
@@ -1427,6 +1554,8 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
       return (struct i2c_master_s *)priv;
     }
 
+#ifndef CONFIG_I2C_POLLED
+  config = priv->config;
   if (priv->cpuint != -ENOMEM)
     {
       /* Disable the provided CPU Interrupt to configure it. */
@@ -1461,6 +1590,7 @@ struct i2c_master_s *esp32c3_i2cbus_initialize(int port)
   /* Enable the CPU interrupt that is linked to the I2C device. */
 
   up_enable_irq(priv->cpuint);
+#endif
 
   esp32c3_i2c_sem_init(priv);
 
@@ -1511,9 +1641,11 @@ int esp32c3_i2cbus_uninitialize(struct i2c_master_s *dev)
 
   leave_critical_section(flags);
 
+#ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->cpuint);
   esp32c3_free_cpuint(priv->config->periph);
   priv->cpuint = -ENOMEM;
+#endif
 
   esp32c3_i2c_deinit(priv);
 

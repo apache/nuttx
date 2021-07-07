@@ -87,7 +87,6 @@ struct tmpfs_dirent_s
 
 struct tmpfs_object_s
 {
-  FAR struct tmpfs_dirent_s *to_dirent;
   struct tmpfs_sem_s to_exclsem;
 
   size_t   to_alloc;     /* Allocated size of the memory object */
@@ -101,7 +100,6 @@ struct tmpfs_directory_s
 {
   /* First fields must match common TMPFS object layout */
 
-  FAR struct tmpfs_dirent_s *tdo_dirent;
   struct tmpfs_sem_s tdo_exclsem;
 
   size_t   tdo_alloc;    /* Allocated size of the directory object */
@@ -111,11 +109,10 @@ struct tmpfs_directory_s
   /* Remaining fields are unique to a directory object */
 
   uint16_t tdo_nentries; /* Number of directory entries */
-  struct tmpfs_dirent_s tdo_entry[1];
+  FAR struct tmpfs_dirent_s *tdo_entry;
 };
 
-#define SIZEOF_TMPFS_DIRECTORY(n) \
-  (sizeof(struct tmpfs_directory_s) + ((n) - 1) * sizeof(struct tmpfs_dirent_s))
+#define SIZEOF_TMPFS_DIRECTORY(n) ((n) * sizeof(struct tmpfs_dirent_s))
 
 /* The form of a regular file memory object
  *
@@ -129,7 +126,6 @@ struct tmpfs_file_s
 {
   /* First fields must match common TMPFS object layout */
 
-  FAR struct tmpfs_dirent_s *tfo_dirent;
   struct tmpfs_sem_s tfo_exclsem;
 
   size_t   tfo_alloc;    /* Allocated size of the file object */
@@ -138,12 +134,10 @@ struct tmpfs_file_s
 
   /* Remaining fields are unique to a directory object */
 
-  uint8_t  tfo_flags;    /* See TFO_FLAG_* definitions */
-  size_t   tfo_size;     /* Valid file size */
-  uint8_t  tfo_data[1];  /* File data starts here */
+  uint8_t       tfo_flags; /* See TFO_FLAG_* definitions */
+  size_t        tfo_size;  /* Valid file size */
+  FAR uint8_t  *tfo_data;  /* File data starts here */
 };
-
-#define SIZEOF_TMPFS_FILE(n) (sizeof(struct tmpfs_file_s) + (n) - 1)
 
 /* This structure represents one instance of a TMPFS file system */
 
@@ -162,7 +156,7 @@ struct tmpfs_s
 struct tmpfs_statfs_s
 {
   size_t tsf_alloc;      /* Total memory allocated */
-  size_t tsf_inuse;      /* Total memory in use */
+  size_t tsf_avail;      /* Total memory available */
   off_t  tsf_files;      /* Total file nodes in the file system */
   off_t  tsf_ffree;      /* Free directory nodes in the file system */
 };

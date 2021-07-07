@@ -560,7 +560,7 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32H7_TIM1_CH5POL,
       .idle    = CONFIG_STM32H7_TIM1_CH5IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   },
@@ -575,7 +575,7 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32H7_TIM1_CH6POL,
       .idle    = CONFIG_STM32H7_TIM1_CH6IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   }
@@ -1120,7 +1120,7 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32H7_TIM8_CH5POL,
       .idle    = CONFIG_STM32H7_TIM8_CH5IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   },
@@ -1135,7 +1135,7 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
       .in_use  = 1,
       .pol     = CONFIG_STM32H7_TIM8_CH6POL,
       .idle    = CONFIG_STM32H7_TIM8_CH6IDLE,
-      .pincfg  = 0,    /* No available externaly */
+      .pincfg  = 0,    /* Not available externally */
     }
 #endif
   }
@@ -1725,7 +1725,7 @@ static void pwm_modifyreg(struct stm32_pwmtimer_s *priv, uint32_t offset,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
+static void pwm_dumpregs(struct pwm_lowerhalf_s *dev, FAR const char *msg)
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
 

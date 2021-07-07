@@ -24,11 +24,13 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 
 #include "up_internal.h"
@@ -46,9 +48,17 @@ struct mm_delaynode_s
   FAR struct mm_delaynode_s *flink;
 };
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
-  struct mm_delaynode_s *mm_delaylist;
+#ifdef CONFIG_SMP
+  struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+#else
+  struct mm_delaynode_s *mm_delaylist[1];
+#endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  struct procfs_meminfo_entry_s mm_procfs;
+#endif
 };
 
 /****************************************************************************
@@ -65,8 +75,8 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = enter_critical_section();
 
-  tmp->flink = heap->mm_impl->mm_delaylist;
-  heap->mm_impl->mm_delaylist = tmp;
+  tmp->flink = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
 }
@@ -83,8 +93,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
   flags = enter_critical_section();
 
-  tmp = heap->mm_impl->mm_delaylist;
-  heap->mm_impl->mm_delaylist = NULL;
+  tmp = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
@@ -131,13 +141,24 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heap_start,
-                   size_t heap_size)
+FAR struct mm_heap_s *mm_initialize(FAR const char *name,
+                                    FAR void *heap_start, size_t heap_size)
 {
-  FAR struct mm_heap_impl_s *impl;
-  impl = host_malloc(sizeof(struct mm_heap_impl_s));
-  impl->mm_delaylist = NULL;
-  heap->mm_impl = impl;
+  FAR struct mm_heap_s *heap;
+
+  heap = host_memalign(sizeof(FAR void *), sizeof(*heap));
+  DEBUGASSERT(heap);
+
+  memset(heap, 0, sizeof(struct mm_heap_s));
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  heap->mm_procfs.name = name;
+  heap->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  heap->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&heap->mm_procfs);
+#endif
+
+  return heap;
 }
 
 /****************************************************************************
@@ -176,10 +197,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
-  /* Firstly, free mm_delaylist */
-
-  mm_free_delaylist(heap);
-  return host_malloc(size);
+  return mm_realloc(heap, NULL, size);
 }
 
 /****************************************************************************
@@ -218,8 +236,6 @@ FAR void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       host_free(mem);
     }
-
-  return;
 }
 
 /****************************************************************************
@@ -262,8 +278,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
 FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 {
-  mm_free_delaylist(heap);
-  return host_calloc(n, elem_size);
+  size_t size = n * elem_size;
+
+  if (size < elem_size)
+    {
+      return NULL;
+    }
+
+  return mm_zalloc(heap, size);
 }
 
 /****************************************************************************
@@ -344,46 +366,6 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
 }
 
 /****************************************************************************
- * Name: mm_sbrk
- *
- * Description:
- *    The sbrk() function is used to change the amount of space allocated
- *    for the calling process. The change is made by resetting the process's
- *    break value and allocating the appropriate amount of space.  The amount
- *    of allocated space increases as the break value increases.
- *
- *    The sbrk() function adds 'incr' bytes to the break value and changes
- *    the allocated space accordingly. If incr is negative, the amount of
- *    allocated space is decreased by incr bytes. The current value of the
- *    program break is returned by sbrk(0).
- *
- * Input Parameters:
- *    heap - A reference to the data structure that defines this heap.
- *    incr - Specifies the number of bytes to add or to remove from the
- *      space allocated for the process.
- *    maxbreak - The maximum permissible break address.
- *
- * Returned Value:
- *    Upon successful completion, sbrk() returns the prior break value.
- *    Otherwise, it returns (void *)-1 and sets errno to indicate the
- *    error:
- *
- *      ENOMEM - The requested change would allocate more space than
- *        allowed under system limits.
- *      EAGAIN - The total amount of system memory available for allocation
- *        to this process is temporarily insufficient. This may occur even
- *        though the space requested was less than the maximum data segment
- *        size.
- *
- ****************************************************************************/
-
-FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
-                  uintptr_t maxbreak)
-{
-  return NULL;
-}
-
-/****************************************************************************
  * Name: mm_extend
  *
  * Description:
@@ -408,6 +390,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   memset(info, 0, sizeof(struct mallinfo));
+  host_mallinfo(&info->aordblks, &info->uordblks);
   return 0;
 }
 
@@ -426,6 +409,15 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 }
 
 #endif /* CONFIG_DEBUG_MM */
+
+/****************************************************************************
+ * Name: malloc_size
+ ****************************************************************************/
+
+size_t mm_malloc_size(FAR void *mem)
+{
+  return host_malloc_size(mem);
+}
 
 /****************************************************************************
  * Name: up_allocate_heap
@@ -454,7 +446,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   /* We make the entire heap executable here to keep
    * the sim simpler. If it turns out to be a problem, the
-   * ARCH_HAVE_MODULE_TEXT mechanism can be an alternative.
+   * ARCH_HAVE_TEXT_HEAP mechanism can be an alternative.
    */
 
   uint8_t *sim_heap = host_alloc_heap(SIM_HEAP_SIZE);

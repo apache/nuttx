@@ -268,12 +268,24 @@ config SMP
 	default n
 	depends on ARCH_HAVE_MULTICPU
 	depends on ARCH_HAVE_TESTSET
+	depends on ARCH_INTERRUPTSTACK != 0
 	select SPINLOCK
 	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
 	---help---
 		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
 		platform.
+
+		N.B. SMP mode requires the use of ARCH_INTERRUPTSTACK:
+
+		CPU0 thread0  ->  IRQ enter -> add thread0 to block_list -> IRQ leave(crash)
+		                                                        ||
+		                                                        /\
+		                                                       /  \
+		CPU1 thread1  ->  block_task -> take thread0 from block_list -> run thread0
+
+		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
+		will caused IRQ handler stack corruption.
 
 if SMP
 
@@ -735,6 +747,58 @@ config SCHED_CRITMONITOR
 
 		The second interface simply converts an elapsed time into well known
 		units for presentation by the ProcFS file system.
+
+if SCHED_CRITMONITOR
+
+config SCHED_CRITMONITOR_MAXTIME_THREAD
+	int "THREAD max execution time"
+	default 0
+	---help---
+		Thread execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_THREAD, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_WQUEUE
+	int "WORK queue max execution time"
+	default SCHED_CRITMONITOR_MAXTIME_THREAD
+	---help---
+		Worker execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_WQUEUE, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+	int "Pre-emption (sched_lock) max holding time"
+	default SCHED_CRITMONITOR_MAXTIME_WQUEUE
+	---help---
+		Pre-emption holding time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_PREEMPTION, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_CSECTION
+	int "Csection (enter_critical_section) max holding time"
+	default SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+	---help---
+		Csection holding time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_CSECTION, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_IRQ
+	int "IRQ max execution time"
+	default SCHED_CRITMONITOR_MAXTIME_CSECTION
+	---help---
+		IRQ handler execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_IRQ, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_WDOG
+	int "WDOG callback max execution time"
+	default SCHED_CRITMONITOR_MAXTIME_IRQ
+	---help---
+		Wdog callback execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_WDOG, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+endif # SCHED_CRITMONITOR
 
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
@@ -1509,9 +1573,9 @@ config SIG_SIGWORK
 	default 17
 	depends on SCHED_WORKQUEUE || LIB_USRWORK
 	---help---
-		SIGWORK is a non-standard signal used to wake up the internal NuttX
-		worker thread.  This setting specifies the signal number that will be
-		used for SIGWORK.  Default: 17
+		SIGWORK is a non-standard signal used to wake up various internal
+		NuttX worker threads.  This setting specifies the signal number
+		that will be used for SIGWORK.  Default: 17
 
 endmenu # Signal Numbers
 endmenu # Signal Configuration
@@ -1545,7 +1609,7 @@ config MODULE
 	bool "Enable loadable OS modules"
 	default n
 	select LIBC_MODLIB
-	select ARCH_USE_MODULE_TEXT if ARCH_HAVE_MODULE_TEXT
+	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 	---help---
 		Enable support for loadable OS modules.  Default: n
 

@@ -35,7 +35,6 @@
 #include <semaphore.h>
 
 #include <nuttx/lib/lib.h>
-#include <nuttx/kmalloc.h>
 #include <nuttx/streams.h>
 
 /****************************************************************************
@@ -50,51 +49,6 @@
 
 #ifndef CONFIG_LIB_HOMEDIR
 # define CONFIG_LIB_HOMEDIR "/"
-#endif
-
-/* The NuttX C library can be built in two modes: (1) as a standard,
- * C-library that can be used by normal, user-space applications, or
- * (2) as a special, kernel-mode C-library only used within the OS.
- * If NuttX is not being built as separated kernel- and user-space modules,
- * then only the first mode is supported.
- */
-
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-
-  /* Domain-specific allocations */
-
-#  define lib_malloc(s)      kmm_malloc(s)
-#  define lib_zalloc(s)      kmm_zalloc(s)
-#  define lib_realloc(p,s)   kmm_realloc(p,s)
-#  define lib_memalign(p,s)  kmm_memalign(p,s)
-#  define lib_free(p)        kmm_free(p)
-
-  /* User-accessible allocations */
-
-#  define lib_umalloc(s)     kumm_malloc(s)
-#  define lib_uzalloc(s)     kumm_zalloc(s)
-#  define lib_urealloc(p,s)  kumm_realloc(p,s)
-#  define lib_umemalign(p,s) kumm_memalign(p,s)
-#  define lib_ufree(p)       kumm_free(p)
-
-#else
-
-  /* Domain-specific allocations */
-
-#  define lib_malloc(s)      malloc(s)
-#  define lib_zalloc(s)      zalloc(s)
-#  define lib_realloc(p,s)   realloc(p,s)
-#  define lib_memalign(p,s)  memalign(p,s)
-#  define lib_free(p)        free(p)
-
-  /* User-accessible allocations */
-
-#  define lib_umalloc(s)     malloc(s)
-#  define lib_uzalloc(s)     zalloc(s)
-#  define lib_urealloc(p,s)  realloc(p,s)
-#  define lib_umemalign(p,s) memalign(p,s)
-#  define lib_ufree(p)       free(p)
-
 #endif
 
 #define LIB_BUFLEN_UNKNOWN INT_MAX

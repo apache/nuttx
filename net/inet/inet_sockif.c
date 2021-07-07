@@ -76,6 +76,8 @@ static ssize_t    inet_sendmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
 static ssize_t    inet_recvmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
+static int        inet_ioctl(FAR struct socket *psock, int cmd,
+                    FAR void *arg, size_t arglen);
 #ifdef CONFIG_NET_SENDFILE
 static ssize_t    inet_sendfile(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
@@ -100,7 +102,8 @@ static const struct sock_intf_s g_inet_sockif =
   inet_poll,        /* si_poll */
   inet_sendmsg,     /* si_sendmsg */
   inet_recvmsg,     /* si_recvmsg */
-  inet_close        /* si_close */
+  inet_close,       /* si_close */
+  inet_ioctl        /* si_ioctl */
 #ifdef CONFIG_NET_SENDFILE
   ,
   inet_sendfile     /* si_sendfile */
@@ -1282,6 +1285,47 @@ static ssize_t inet_sendmsg(FAR struct socket *psock,
   kmm_free(buf);
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: inet_ioctl
+ *
+ * Description:
+ *   This function performs network device specific operations.
+ *
+ * Parameters:
+ *   psock    A reference to the socket structure of the socket
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+static int inet_ioctl(FAR struct socket *psock, int cmd,
+                      FAR void *arg, size_t arglen)
+{
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_conn == NULL)
+    {
+      return -EBADF;
+    }
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return tcp_ioctl(psock->s_conn, cmd, arg, arglen);
+    }
+#endif
+
+#if defined(CONFIG_NET_UDP) && defined(NET_UDP_HAVE_STACK)
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      return udp_ioctl(psock->s_conn, cmd, arg, arglen);
+    }
+#endif
+
+  return -EINVAL;
 }
 
 /****************************************************************************

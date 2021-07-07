@@ -2310,16 +2310,9 @@ int32_t esp_event_post(esp_event_base_t event_base,
 
 uint32_t esp_get_free_heap_size(void)
 {
-  int ret;
   struct mallinfo info;
 
-  ret = mm_mallinfo(&g_mmheap, &info);
-  if (ret)
-    {
-      wlerr("Failed to create task\n");
-      return 0;
-    }
-
+  info = kmm_mallinfo();
   return info.fordblks;
 }
 
@@ -3674,7 +3667,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
           return NULL;
         }
 
-      old_size = malloc_usable_size(old_ptr);
+      old_size = malloc_size(old_ptr);
       DEBUGASSERT(old_size > 0);
       memcpy(new_ptr, old_ptr, MIN(old_size, size));
       kmm_free(old_ptr);
@@ -5231,6 +5224,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.sta.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
@@ -5355,6 +5349,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
@@ -6302,6 +6297,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.ap.password, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
@@ -6381,6 +6377,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.ap.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);

@@ -96,9 +96,16 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgs,
                              int count);
 
+#ifdef CONFIG_I2C_RESET
+static int mpfs_i2c_reset(struct i2c_master_s *dev);
+#endif
+
 static const struct i2c_ops_s mpfs_i2c_ops =
 {
-  .transfer = mpfs_i2c_transfer
+  .transfer = mpfs_i2c_transfer,
+#ifdef CONFIG_I2C_RESET
+  .reset    = mpfs_i2c_reset,
+#endif
 };
 
 struct mpfs_i2c_priv_s
@@ -691,6 +698,41 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: mpfs_i2c_reset
+ *
+ * Description:
+ *   Performs an I2C bus reset. This may be used to recover from a buggy
+ *   situation.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; this should not fail.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_I2C_RESET
+static int mpfs_i2c_reset(struct i2c_master_s *dev)
+{
+  struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
+
+  DEBUGASSERT(priv != NULL);
+
+  up_disable_irq(priv->plic_irq);
+  mpfs_i2c_init(priv);
+
+  priv->tx_size = 0;
+  priv->tx_idx  = 0;
+  priv->rx_size = 0;
+  priv->rx_idx  = 0;
+
+  /* up_enable_irq() will be called at mpfs_i2c_sendstart() */
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

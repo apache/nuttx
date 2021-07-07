@@ -68,6 +68,9 @@
                                            * OUT: None */
 #define MTDIOC_ECCSTATUS  _MTDIOC(0x0008) /* IN:  Pointer to uint8_t
                                            * OUT: ECC status */
+#define MTDIOC_FLUSH      _MTDIOC(0x0009) /* IN:  None
+                                           * OUT: None (ioctl return value provides
+                                           *      success/failure indication). */
 
 /* Macros to hide implementation */
 

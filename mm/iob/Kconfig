@@ -47,6 +47,9 @@ config IOB_NCHAINS
 		I/O buffer chain containers that also carry a payload of usage
 		specific information.
 
+		Note: TCP doesn't use this.
+		Note: UDP and CAN use this.
+
 config IOB_THROTTLE
 	int "I/O buffer throttle value"
 	default 0 if !NET_WRITE_BUFFERS || !NET_READAHEAD

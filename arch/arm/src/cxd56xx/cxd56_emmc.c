@@ -324,7 +324,7 @@ static struct emmc_dma_desc_s *emmc_setupdma(void *buf, unsigned int nbytes)
   descs[ndescs - 1].ctrl |= EMMC_IDMAC_DES0_LD;
   descs[ndescs - 1].next  = 0;
 
-#ifdef CONFIG_DEBUG_VERBOSE
+#ifdef CONFIG_DEBUG_FS_INFO
   for (i = 0, d = descs; i < ndescs; i++, d++)
     {
       finfo("desc %p = ctrl 0x%x, size 0x%x, addr 0x%x, next 0x%x\n",
@@ -668,11 +668,15 @@ static int emmc_hwinitialize(void)
 
   emmc_changeclock(EMMC_CLKDIV_NON_DIV);
 
+#ifdef CONFIG_CXD56_EMMC_VENDOR_TOSHIBA
+  /* Vendor-specific command */
+
   ret = emmc_switchcmd(EXTCSD_PON, EXTCSD_PON_POWERED_ON);
   if (ret)
     {
       goto errout;
     }
+#endif
 
   return OK;
 

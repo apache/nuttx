@@ -197,6 +197,9 @@ static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color);
 
 static int st7789_putrun(fb_coord_t row, fb_coord_t col,
                          FAR const uint8_t *buffer, size_t npixels);
+static int st7789_putarea(fb_coord_t row_start, fb_coord_t row_end,
+                          fb_coord_t col_start, fb_coord_t col_end,
+                          FAR const uint8_t *buffer);
 #ifndef CONFIG_LCD_NOGETRUN
 static int st7789_getrun(fb_coord_t row, fb_coord_t col,
                          FAR uint8_t *buffer, size_t npixels);
@@ -520,6 +523,40 @@ static int st7789_putrun(fb_coord_t row, fb_coord_t col,
 }
 
 /****************************************************************************
+ * Name:  st7789_putarea
+ *
+ * Description:
+ *   This method can be used to write a partial area to the LCD:
+ *
+ *   row_start - Starting row to write to (range: 0 <= row < yres)
+ *   row_end   - Ending row to write to (range: row_start <= row < yres)
+ *   col_start - Starting column to write to (range: 0 <= col <= xres)
+ *   col_end   - Ending column to write to
+ *               (range: col_start <= col_end < xres)
+ *   buffer    - The buffer containing the area to be written to the LCD
+ *
+ ****************************************************************************/
+
+static int st7789_putarea(fb_coord_t row_start, fb_coord_t row_end,
+                          fb_coord_t col_start, fb_coord_t col_end,
+                          FAR const uint8_t *buffer)
+{
+  FAR struct st7789_dev_s *priv = &g_lcddev;
+  FAR const uint16_t *src = (FAR const uint16_t *)buffer;
+
+  ginfo("row_start: %d row_end: %d col_start: %d col_end: %d\n",
+         row_start, row_end, col_start, col_end);
+
+  DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
+
+  st7789_setarea(priv, col_start, row_start, col_end, row_end);
+  st7789_wrram(priv, src,
+               (row_end - row_start + 1) * (col_end - col_start + 1));
+
+  return OK;
+}
+
+/****************************************************************************
  * Name:  st7789_getrun
  *
  * Description:
@@ -590,6 +627,7 @@ static int st7789_getplaneinfo(FAR struct lcd_dev_s *dev,
   lcdinfo("planeno: %d bpp: %d\n", planeno, ST7789_BPP);
 
   pinfo->putrun = st7789_putrun;                  /* Put a run into LCD memory */
+  pinfo->putarea = st7789_putarea;                /* Put an area into LCD */
 #ifndef CONFIG_LCD_NOGETRUN
   pinfo->getrun = st7789_getrun;                  /* Get a run from LCD memory */
 #endif

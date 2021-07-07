@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <malloc.h>
 #include <arch/esp32/memory_layout.h>
@@ -42,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-struct mm_heap_s g_iheap;
+FAR struct mm_heap_s *g_iheap;
 
 /****************************************************************************
  * Public Functions
@@ -63,16 +62,7 @@ void xtensa_imm_initialize(void)
 
   start = (FAR void *)ESP32_IMEM_START;
   size  = CONFIG_XTENSA_IMEM_REGION_SIZE;
-  mm_initialize(&g_iheap, start, size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_imm_procfs;
-
-  g_imm_procfs.name = "esp32-imem";
-  g_imm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_imm_procfs.user_data = &g_iheap;
-  procfs_register_meminfo(&g_imm_procfs);
-#endif
+  g_iheap = mm_initialize("esp32-imem", start, size);
 }
 
 /****************************************************************************
@@ -85,7 +75,7 @@ void xtensa_imm_initialize(void)
 
 void *xtensa_imm_malloc(size_t size)
 {
-  return mm_malloc(&g_iheap, size);
+  return mm_malloc(g_iheap, size);
 }
 
 /****************************************************************************
@@ -99,7 +89,7 @@ void *xtensa_imm_malloc(size_t size)
 
 void *xtensa_imm_calloc(size_t n, size_t elem_size)
 {
-  return mm_calloc(&g_iheap, n, elem_size);
+  return mm_calloc(g_iheap, n, elem_size);
 }
 
 /****************************************************************************
@@ -112,7 +102,7 @@ void *xtensa_imm_calloc(size_t n, size_t elem_size)
 
 void *xtensa_imm_realloc(void *ptr, size_t size)
 {
-  return mm_realloc(&g_iheap, ptr, size);
+  return mm_realloc(g_iheap, ptr, size);
 }
 
 /****************************************************************************
@@ -125,7 +115,7 @@ void *xtensa_imm_realloc(void *ptr, size_t size)
 
 void *xtensa_imm_zalloc(size_t size)
 {
-  return mm_zalloc(&g_iheap, size);
+  return mm_zalloc(g_iheap, size);
 }
 
 /****************************************************************************
@@ -138,7 +128,7 @@ void *xtensa_imm_zalloc(size_t size)
 
 void xtensa_imm_free(FAR void *mem)
 {
-  mm_free(&g_iheap, mem);
+  mm_free(g_iheap, mem);
 }
 
 /****************************************************************************
@@ -156,7 +146,7 @@ void xtensa_imm_free(FAR void *mem)
 
 void *xtensa_imm_memalign(size_t alignment, size_t size)
 {
-  return mm_memalign(&g_iheap, alignment, size);
+  return mm_memalign(g_iheap, alignment, size);
 }
 
 /****************************************************************************
@@ -175,7 +165,7 @@ void *xtensa_imm_memalign(size_t alignment, size_t size)
 
 bool xtensa_imm_heapmember(FAR void *mem)
 {
-  return mm_heapmember(&g_iheap, mem);
+  return mm_heapmember(g_iheap, mem);
 }
 
 /****************************************************************************
@@ -189,7 +179,7 @@ bool xtensa_imm_heapmember(FAR void *mem)
 
 int xtensa_imm_mallinfo(FAR struct mallinfo *info)
 {
-  return mm_mallinfo(&g_iheap, info);
+  return mm_mallinfo(g_iheap, info);
 }
 
 #endif /* CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP */

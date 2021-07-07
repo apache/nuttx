@@ -336,6 +336,10 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   DEBUGASSERT(info == ptcb->cmn.stack_alloc_ptr);
 
+  /* Attach per-task info in group to TLS */
+
+  info->tl_task = ptcb->cmn.group->tg_info;
+
   /* Should we use the priority and scheduler specified in the pthread
    * attributes?  Or should we use the current thread's priority and
    * scheduler?

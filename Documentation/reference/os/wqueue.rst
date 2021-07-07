@@ -10,10 +10,10 @@ for delayed processing, or for serializing activities.
 Classes of Work Queues
 ======================
 
-There are three different classes of
-work queues, each with different properties and intended usage.
-These class of work queues along with the common work queue
-interface are described in the following paragraphs.
+There are three different classes of work queues, each with
+different properties and intended usage. These classes of work
+queues along with the common work queue interface are described in
+the following paragraphs.
 
 High Priority Kernel Work queue
 -------------------------------
@@ -72,7 +72,8 @@ to match the highest priority client.
 queues:
 
 -  ``CONFIG_SIG_SIGWORK`` The signal number that will be used to
-   wake-up the worker thread. This same signal is used with the
+   wake-up the worker thread. This same signal is used with various
+   internal worker threads.
    Default: 17
 
 Low Priority Kernel Work Queue
@@ -88,9 +89,9 @@ work queue runs at a lower priority than the high priority work
 queue, of course, and so is inappropriate to serve as a driver
 *bottom half*. It is, otherwise, very similar to the high priority
 work queue and most of the discussion above for the high priority
-work queue applies equally here. The lower priority work queue
-does have one important, however, that make it better suited for
-some tasks:
+work queue applies equally here. The lower priority work queue does
+have one important property, however, that makes it better suited
+for some tasks:
 
 **Priority Inheritance**. The lower priority worker thread(s)
 support *priority inheritance* (if <config>
@@ -99,8 +100,8 @@ lower priority worker thread can then be adjusted to match the
 highest priority client.
 
    **NOTE:** This priority inheritance feature is not automatic.
-   The lower priority worker thread will always a fixed priority
-   unless additional logic implements that calls
+   The lower priority worker thread will always have a fixed
+   priority unless additional logic calls
    ``lpwork_boostpriority()`` to raise the priority of the lower
    priority worker thread (typically called before scheduling the
    work) and then calls the matching ``lpwork_restorepriority()``
@@ -143,19 +144,18 @@ User-Mode Work Queue
 
 **Work Queue Accessibility**. The high- and low-priority worker
 threads are kernel-mode threads. In the normal, *flat* NuttX
-build, these work queues are are useful to application code and
+build, these work queues are useful to application code and
 may be shared. However, in the NuttX protected and kernel build
 modes, kernel mode code is isolated and cannot be accessed from
 user-mode code.
 
 **User-Mode Work Queue**. if either ``CONFIG_BUILD_PROTECTED`` or
 ``CONFIG_BUILD_KERNEL`` are selected, then the option to enable a
-special user-mode work queue is enable. The interface to the
-user-mode work queue is identical to the interface to the
-kernel-mode work queues and the user-mode work queue is
-functionally equivalent to the high priority work queue. It
-differs in that its implementation does not depend on internal,
-kernel-space facilities.
+special user-mode work queue is enabled. The interface to the user-
+mode work queue is identical to that of the kernel-mode work queues
+and the user-mode work queue is functionally equivalent to the high
+priority work queue. It differs in that its implementation does not
+depend on internal, kernel-space facilities.
 
 **Configuration Options**.
 
@@ -181,10 +181,10 @@ interface function identifies the work queue:
 **Kernel-Mode Work Queue IDs:**
 
 -  ``HPWORK``. This ID of the high priority work queue that should
-   only be used for hi-priority, time-critical, driver bottom-half
+   only be used for high-priority, time-critical, driver bottom-half
    functions.
 -  ``LPWORK``. This is the ID of the low priority work queue that
-   can be used for any purpose. if ``CONFIG_SCHED_LPWORK`` is not
+   can be used for any purpose. If ``CONFIG_SCHED_LPWORK`` is not
    defined, then there is only one kernel work queue and
    ``LPWORK`` is equal to ``HPWORK``.
 
@@ -192,7 +192,7 @@ interface function identifies the work queue:
 
 -  ``USRWORK``. This is the ID of the user-mode work queue that
    can be used for any purpose by applications. In a flat build,
-   ``LPWORK`` is equal to ``LPWORK`` so that user applications
+   ``USRWORK`` is equal to ``LPWORK`` so that user applications
    will use the lower priority work queue (if there is one).
 
 Work Queue Interface Types
@@ -221,14 +221,14 @@ Work Queue Interfaces
   zero by the caller. Otherwise, the work structure is completely
   managed by the work queue logic. The caller should never modify
   the contents of the work queue structure directly. If
-  ``work_queue()`` is called before the previous work as been
+  ``work_queue()`` is called before the previous work has been
   performed and removed from the queue, then any pending work will
   be canceled and lost.
 
   :param qid: The work queue ID.
   :param work: The work structure to queue
   :param worker: The worker callback to be invoked. The callback
-    will invoked on the worker thread of execution.
+    will be invoked on the worker thread of execution.
 
   :param arg: The argument that will be passed to the worker
     callback function when it is invoked.
@@ -243,10 +243,10 @@ Work Queue Interfaces
 
   Cancel previously queued work. This removes work
   from the work queue. After work has been cancelled, it may be
-  re-queue by calling ``work_queue()`` again.
+  re-queued by calling ``work_queue()`` again.
 
   :param qid: The work queue ID.
-  :param work: The previously queue work structure to cancel.
+  :param work: The previously queued work structure to cancel.
 
   :return: Zero is returned on success; a negated ``errno`` is returned on
     failure.

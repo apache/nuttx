@@ -178,8 +178,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = stack_size;
+      tcb->flags |= TCB_FLAG_FREE_STACK;
 
 #if defined(ARCH_HAVE_LEDS)
       board_autoled_on(LED_STACKCREATED);

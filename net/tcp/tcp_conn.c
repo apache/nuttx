@@ -673,6 +673,9 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
       conn->keepintvl     = 2 * DSEC_PER_SEC;
       conn->keepcnt       = 3;
 #endif
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      conn->rcv_bufs      = CONFIG_NET_RECV_BUFSIZE;
+#endif
     }
 
   return conn;
@@ -703,8 +706,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   DEBUGASSERT(conn->crefs == 0);
   net_lock();
 
-  /* Free remaining callbacks, actually there should be only the close
-   * callback left.
+  /* Free remaining callbacks, actually there should be only the send
+   * callback for CONFIG_NET_TCP_WRITE_BUFFERS is left.
    */
 
   for (cb = conn->list; cb; cb = next)
@@ -726,7 +729,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   /* Release any read-ahead buffers attached to the connection */
 
-  iob_free_queue(&conn->readahead, IOBUSER_NET_TCP_READAHEAD);
+  iob_free_chain(conn->readahead, IOBUSER_NET_TCP_READAHEAD);
+  conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
@@ -970,7 +974,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
       /* Initialize the list of TCP read-ahead buffers */
 
-      IOB_QINIT(&conn->readahead);
+      conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
@@ -1244,7 +1248,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* Initialize the list of TCP read-ahead buffers */
 
-  IOB_QINIT(&conn->readahead);
+  conn->readahead = NULL;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Initialize the TCP write buffer lists */

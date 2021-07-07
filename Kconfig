@@ -1758,6 +1758,18 @@ config STACK_COLORATION
 
 		Only supported by a few architectures.
 
+config STACK_USAGE_SAFE_PERCENT
+	int "Stack usage safe precent"
+	default 0
+	range 0 100
+	depends on STACK_COLORATION
+	---help---
+		Stack usage precent = up_check_tcbstack() * 100 / tcb->adj_stack_size,
+		this should lower then STACK_USAGE_SAFE_PERCENT.
+		Idle thread will timely check stack usage when this macro value > 0.
+
+		N.B. This feature should not be used in production code.
+
 config STACK_CANARIES
 	bool "Compiler stack canaries"
 	depends on ARCH_HAVE_STACKCHECK

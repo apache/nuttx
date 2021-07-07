@@ -56,17 +56,21 @@
 #if defined(CONFIG_SYSLOG_DEFAULT)
 static int syslog_default_putc(FAR struct syslog_channel_s *channel,
                                int ch);
+static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
+                                    FAR const char *buffer, size_t buflen);
 #endif
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
 static const struct syslog_channel_ops_s g_ramlog_channel_ops =
 {
   ramlog_putc,
-  ramlog_putc
+  ramlog_putc,
+  NULL,
+  ramlog_write
 };
 
 static struct syslog_channel_s g_ramlog_channel =
@@ -91,10 +95,14 @@ static struct syslog_channel_s g_rpmsg_channel =
 #endif
 
 #if defined(CONFIG_SYSLOG_DEFAULT)
+static sem_t g_syslog_default_sem = SEM_INITIALIZER(1);
+
 static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_default_putc,
-  syslog_default_putc
+  syslog_default_putc,
+  NULL,
+  syslog_default_write
 };
 
 static struct syslog_channel_s g_default_channel =
@@ -126,7 +134,7 @@ FAR struct syslog_channel_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_default_putc and syslog_default_flush
+ * Name: syslog_default_putc
  *
  * Description:
  *   If the arch supports a low-level putc function, output will be
@@ -144,6 +152,24 @@ static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 #endif
 
   return ch;
+}
+
+static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
+                                    FAR const char *buffer, size_t buflen)
+{
+#if defined(CONFIG_ARCH_LOWPUTC)
+  size_t nwritten;
+
+  nxsem_wait(&g_syslog_default_sem);
+  for (nwritten = 0; nwritten < buflen; nwritten++)
+    {
+      up_putc(buffer[nwritten]);
+    }
+
+  nxsem_post(&g_syslog_default_sem);
+#endif
+
+  return OK;
 }
 #endif
 
@@ -242,6 +268,15 @@ int syslog_channel_remove(FAR struct syslog_channel_s *channel)
                 }
 
               g_syslog_channel[i] = NULL;
+
+              /* The channel is now removed from the list and its driver
+               * can be safely uninitialized.
+               */
+
+              if (channel->sc_ops->sc_close)
+                {
+                  channel->sc_ops->sc_close(channel);
+                }
 
               return OK;
             }

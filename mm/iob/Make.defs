@@ -27,7 +27,8 @@ CSRCS += iob_concat.c iob_copyin.c iob_copyout.c iob_contig.c iob_free.c
 CSRCS += iob_free_chain.c iob_free_qentry.c iob_free_queue.c
 CSRCS += iob_initialize.c iob_pack.c iob_peek_queue.c iob_remove_queue.c
 CSRCS += iob_statistics.c iob_trimhead.c iob_trimhead_queue.c iob_trimtail.c
-CSRCS += iob_navail.c iob_free_queue_qentry.c
+CSRCS += iob_navail.c iob_free_queue_qentry.c iob_tailroom.c
+CSRCS += iob_get_queue_size.c
 
 ifeq ($(CONFIG_IOB_NOTIFIER),y)
   CSRCS += iob_notifier.c

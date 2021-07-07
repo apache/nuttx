@@ -120,6 +120,9 @@ struct udp_conn_s
   uint8_t  boundto;       /* Index of the interface we are bound to.
                            * Unbound: 0, Bound: 1-MAX_IFINDEX */
 #endif
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  int32_t  rcvbufs;       /* Maximum amount of bytes queued in recv */
+#endif
 
   /* Read-ahead buffering.
    *
@@ -868,6 +871,23 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout);
 #else
 #  define udp_txdrain(conn, timeout) (0)
 #endif
+
+/****************************************************************************
+ * Name: udp_ioctl
+ *
+ * Description:
+ *   This function performs udp specific ioctl() operations.
+ *
+ * Parameters:
+ *   conn     The TCP connection of interest
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+int udp_ioctl(FAR struct udp_conn_s *conn,
+              int cmd, FAR void *arg, size_t arglen);
 
 #undef EXTERN
 #ifdef __cplusplus

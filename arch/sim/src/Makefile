@@ -98,19 +98,10 @@ ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_cpuidlestack.c
   REQUIREDOBJS += up_smpsignal$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
-ifeq ($(CONFIG_SIM_WALLTIME),y)
-  HOSTCFLAGS += -DCONFIG_SIM_WALLTIME=1
-endif
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
   HOSTCFLAGS += -DCONFIG_SCHED_INSTRUMENTATION=1
 endif
   HOSTSRCS += up_simsmp.c
-endif
-
-ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
-ifneq ($(CONFIG_SCHED_INSTRUMENTATION_BUFFER),y)
-  CSRCS += up_schednote.c
-endif
 endif
 
 ifeq ($(CONFIG_ONESHOT),y)

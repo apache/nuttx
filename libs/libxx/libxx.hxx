@@ -26,29 +26,7 @@
 
 #include <nuttx/config.h>
 
-//***************************************************************************
-// Definitions
-//***************************************************************************
-
-// The NuttX C library an be build in two modes: (1) as a standard, C-libary
-// that can be used by normal, user-space applications, or (2) as a special,
-// kernel-mode C-library only used within the OS.  If NuttX is not being
-// built as separated kernel- and user-space modules, then only the first
-// mode is supported.
-
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  include <nuttx/kmalloc.h>
-#  define lib_malloc(s)    kmm_malloc(s)
-#  define lib_zalloc(s)    kmm_zalloc(s)
-#  define lib_realloc(p,s) kmm_realloc(p,s)
-#  define lib_free(p)      kmm_free(p)
-#else
-#  include <cstdlib>
-#  define lib_malloc(s)    malloc(s)
-#  define lib_zalloc(s)    zalloc(s)
-#  define lib_realloc(p,s) realloc(p,s)
-#  define lib_free(p)      free(p)
-#endif
+#include <nuttx/lib/lib.h>
 
 //***************************************************************************
 // Public Types

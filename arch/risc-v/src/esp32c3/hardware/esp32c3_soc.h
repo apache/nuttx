@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "esp32c3_attr.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -119,12 +121,8 @@
 #define SOC_IRAM_HIGH           0x403e0000
 #define SOC_DRAM_LOW            0x3fc80000
 #define SOC_DRAM_HIGH           0x3fce0000
-#define SOC_RTC_IRAM_LOW        0x50000000 /* ESP32-C3 only has RTC fast memory */
-#define SOC_RTC_IRAM_HIGH       0x50002000
-#define SOC_RTC_DRAM_LOW        0x50000000
-#define SOC_RTC_DRAM_HIGH       0x50002000
-#define SOC_RTC_DATA_LOW        0x50000000
-#define SOC_RTC_DATA_HIGH       0x50002000
+#define SOC_RTC_RAM_LOW         0x50000000 /* ESP32-C3 only has RTC fast memory */
+#define SOC_RTC_RAM_HIGH        0x50002000
 
 /* First and last words of the D/IRAM region, for both the DRAM address as
  * well as the IRAM alias.
@@ -305,5 +303,23 @@
 
 #define SOC_SYSTIMER_BIT_WIDTH_LO (32) /* Bit width of systimer low part */
 #define SOC_SYSTIMER_BIT_WIDTH_HI (20) /* Bit width of systimer high part */
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_ptr_rtc
+ *
+ * Description:
+ *   Check if the buffer comes from the RTC RAM.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32c3_ptr_rtc(const void *p)
+{
+  return ((intptr_t)p >= SOC_RTC_RAM_LOW &&
+          (intptr_t)p < SOC_RTC_RAM_HIGH);
+}
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_SOC_H */

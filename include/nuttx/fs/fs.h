@@ -1169,6 +1169,30 @@ int file_truncate(FAR struct file *filep, off_t length);
 #endif
 
 /****************************************************************************
+ * Name: file_mmap
+ *
+ * Description:
+ *   Equivalent to the standard mmap() function except that is accepts
+ *   a struct file instance instead of a file descriptor and it does not set
+ *   the errno variable.
+ *
+ ****************************************************************************/
+
+int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
+              int prot, int flags, off_t offset, FAR void **mapped);
+
+/****************************************************************************
+ * Name: file_mummap
+ *
+ * Description:
+ *   Equivalent to the standard mummap() function except it does not set
+ *   the errno variable.
+ *
+ ****************************************************************************/
+
+int file_munmap(FAR void *start, size_t length);
+
+/****************************************************************************
  * Name: file_ioctl
  *
  * Description:

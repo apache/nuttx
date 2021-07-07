@@ -73,6 +73,7 @@ extern "C"
 
 #define kumm_calloc(n,s)         calloc(n,s);
 #define kumm_malloc(s)           malloc(s)
+#define kumm_malloc_size(p)      malloc_size(p)
 #define kumm_zalloc(s)           zalloc(s)
 #define kumm_realloc(p,s)        realloc(p,s)
 #define kumm_memalign(a,s)       memalign(a,s)
@@ -92,6 +93,7 @@ extern "C"
 
 #  define kmm_calloc(n,s)        calloc(n,s);
 #  define kmm_malloc(s)          malloc(s)
+#  define kmm_malloc_size(p)     malloc_size(p)
 #  define kmm_zalloc(s)          zalloc(s)
 #  define kmm_realloc(p,s)       realloc(p,s)
 #  define kmm_memalign(a,s)      memalign(a,s)

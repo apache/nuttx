@@ -472,21 +472,19 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
  *   accessible no matter what privilege mode the task runs in.
  *
  * Input Parameters:
- *   tcb         - Address of the new task's TCB
- *   insert_name - Insert name to the first entry
- *   name        - Name of the new task
- *   argv        - A pointer to an array of input parameters. The array
- *                 should be terminated with a NULL argv[] value. If no
- *                 parameters are required, argv may be NULL.
+ *   tcb  - Address of the new task's TCB
+ *   argv - A pointer to an array of input parameters. The arrau should be
+ *          terminated with a NULL argv[] value. If no parameters are
+ *          required, argv may be NULL.
  *
  * Returned Value:
  *  Zero (OK) on success; a negated errno on failure.
  *
  ****************************************************************************/
 
-static inline int
-nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
-                       FAR const char *name, FAR char * const argv[])
+static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
+                                  FAR const char *name,
+                                  FAR char * const argv[])
 {
   FAR char **stackargv;
   FAR char *str;
@@ -498,7 +496,7 @@ nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
 
   /* Get the size of the task name (including the NUL terminator) */
 
-  strtablen = insert_name ? (strlen(name) + 1) : 0;
+  strtablen = (strlen(name) + 1);
 
   /* Count the number of arguments and get the accumulated size of the
    * argument strings (including the null terminators).  The argument count
@@ -541,7 +539,7 @@ nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
    * task name plus a NULL argv[] entry to terminate the list.
    */
 
-  argvlen   = (insert_name + argc + 1) * sizeof(FAR char *);
+  argvlen   = (argc + 2) * sizeof(FAR char *);
   stackargv = (FAR char **)up_stack_frame(&tcb->cmn, argvlen + strtablen);
 
   DEBUGASSERT(stackargv != NULL);
@@ -549,8 +547,6 @@ nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
     {
       return -ENOMEM;
     }
-
-  tcb->argv = stackargv;
 
   /* Get the address of the string table that will lie immediately after
    * the argv[] array and mark it as a null string.
@@ -562,13 +558,10 @@ nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
    * NUL terminator in the string buffer.
    */
 
-  if (insert_name)
-    {
-      *stackargv++ = str;
-      nbytes       = strlen(name) + 1;
-      strcpy(str, name);
-      str         += nbytes;
-    }
+  stackargv[0] = str;
+  nbytes       = strlen(name) + 1;
+  strcpy(str, name);
+  str         += nbytes;
 
   /* Copy each argument */
 
@@ -579,10 +572,10 @@ nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
        * argument and its NUL terminator in the string buffer.
        */
 
-      *stackargv++ = str;
-      nbytes       = strlen(argv[i]) + 1;
+      stackargv[i + 1] = str;
+      nbytes           = strlen(argv[i]) + 1;
       strcpy(str, argv[i]);
-      str         += nbytes;
+      str             += nbytes;
     }
 
   /* Put a terminator entry at the end of the argv[] array.  Then save the
@@ -590,7 +583,8 @@ nxtask_setup_stackargs(FAR struct task_tcb_s *tcb, bool insert_name,
    * nxtask_start().
    */
 
-  *stackargv++ = NULL;
+  stackargv[argc + 1] = NULL;
+  tcb->argv = stackargv;
 
   return OK;
 }
@@ -687,19 +681,18 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
  *   task runs in.
  *
  * Input Parameters:
- *   tcb         - Address of the new task's TCB
- *   insert_name - Insert name to the first argv
- *   name        - Name of the new task
- *   argv        - A pointer to an array of input parameters.  The array
- *                 should be terminated with a NULL argv[] value.  If no
- *                 parameters are required, argv may be NULL.
+ *   tcb  - Address of the new task's TCB
+ *   name - Name of the new task (not used)
+ *   argv - A pointer to an array of input parameters.  The array should be
+ *          terminated with a NULL argv[] value.  If no parameters are
+ *          required, argv may be NULL.
  *
  * Returned Value:
  *  OK
  *
  ****************************************************************************/
 
-int nxtask_setup_arguments(FAR struct task_tcb_s *tcb, bool insert_name,
+int nxtask_setup_arguments(FAR struct task_tcb_s *tcb,
                            FAR const char *name, FAR char * const argv[])
 {
   /* Give a name to the unnamed tasks */
@@ -707,13 +700,6 @@ int nxtask_setup_arguments(FAR struct task_tcb_s *tcb, bool insert_name,
   if (!name)
     {
       name = (FAR char *)g_noname;
-    }
-
-  /* Always insert name if argv equals NULL */
-
-  if (!argv)
-    {
-      insert_name = true;
     }
 
   /* Setup the task name */
@@ -725,5 +711,5 @@ int nxtask_setup_arguments(FAR struct task_tcb_s *tcb, bool insert_name,
    * privilege mode the task runs in.
    */
 
-  return nxtask_setup_stackargs(tcb, insert_name, name, argv);
+  return nxtask_setup_stackargs(tcb, name, argv);
 }

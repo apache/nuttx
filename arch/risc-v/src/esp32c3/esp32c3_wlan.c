@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESP32C3_WIRELESS
+#ifdef CONFIG_ESP32C3_WIFI
 
 #include <queue.h>
 #include <assert.h>
@@ -263,11 +263,6 @@ static int wlan_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #ifdef CONFIG_NETDEV_IOCTL
 static int wlan_ioctl(struct net_driver_s *dev, int cmd,
                       unsigned long arg);
-#endif
-
-#ifdef ESP32C3_WLAN_HAS_STA
-static int wlan_sta_set_linkstatus(FAR struct net_driver_s *dev,
-                                   bool linkstatus);
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
@@ -1536,15 +1531,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                     nerr("ERROR: Failed to connect\n");
                     break;
                   }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-                ret = wlan_sta_set_linkstatus(dev, true);
-                if (ret < 0)
-                  {
-                    nerr("ERROR: Failed to set linkstatus\n");
-                    break;
-                  }
-#endif
               }
           }
         else
@@ -1555,15 +1541,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                 nerr("ERROR: Failed to disconnect\n");
                 break;
               }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-            ret = wlan_sta_set_linkstatus(dev, false);
-            if (ret < 0)
-              {
-                nerr("ERROR: Failed to set linkstatus\n");
-                break;
-              }
-#endif
           }
 
         break;
@@ -1590,15 +1567,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                 nerr("ERROR: Failed to connect\n");
                 break;
               }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-            ret = wlan_sta_set_linkstatus(dev, true);
-            if (ret < 0)
-              {
-                nerr("ERROR: Failed to set linkstatus\n");
-                break;
-              }
-#endif
           }
         else
           {
@@ -1608,15 +1576,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                 nerr("ERROR: Failed to disconnect\n");
                 break;
               }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-            ret = wlan_sta_set_linkstatus(dev, false);
-            if (ret < 0)
-              {
-                nerr("ERROR: Failed to set linkstatus\n");
-                break;
-              }
-#endif
           }
 
         break;
@@ -1814,40 +1773,6 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
   wlan_tx_done(priv);
 }
 
-/****************************************************************************
- * Name: wlan_sta_set_linkstatus
- *
- * Description:
- *   Set Wi-Fi station link status
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   0:Success; negated errno on failure
- *
- ****************************************************************************/
-
-static int wlan_sta_set_linkstatus(FAR struct net_driver_s *dev,
-                                   bool linkstatus)
-{
-  if (dev)
-    {
-      if (linkstatus == true)
-        {
-          dev->d_flags |= IFF_RUNNING;
-        }
-      else
-        {
-          dev->d_flags &= ~IFF_RUNNING;
-        }
-
-      return OK;
-    }
-
-  return -EINVAL;
-}
-
 #endif
 
 /****************************************************************************
@@ -1906,6 +1831,48 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32c3_wlan_sta_set_linkstatus
+ *
+ * Description:
+ *   Set Wi-Fi station link status
+ *
+ * Parameters:
+ *   linkstatus - true Notifies the networking layer about an available
+ *                carrier, false Notifies the networking layer about an
+ *                disappeared carrier.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ESP32C3_WLAN_HAS_STA
+int esp32c3_wlan_sta_set_linkstatus(bool linkstatus)
+{
+  int ret = -EINVAL;
+  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
+
+  if (priv != NULL)
+    {
+      if (linkstatus == true)
+        {
+          ret = netdev_carrier_on(&priv->dev);
+        }
+      else
+        {
+          ret = netdev_carrier_off(&priv->dev);
+        }
+
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to notify the networking layer\n");
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: esp32c3_wlan_sta_initialize
  *
  * Description:
@@ -1919,7 +1886,6 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  ****************************************************************************/
 
-#ifdef ESP32C3_WLAN_HAS_STA
 int esp32c3_wlan_sta_initialize(void)
 {
   int ret;
@@ -2026,4 +1992,4 @@ int esp32c3_wlan_softap_initialize(void)
 }
 #endif
 
-#endif  /* CONFIG_ESP32C3_WIRELESS */
+#endif  /* CONFIG_ESP32C3_WIFI */

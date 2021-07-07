@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-# These are library functions that may be overriden by architecture-
+# These are library functions that may be overridden by architecture-
 # specific implementations.  Not all architectures support implementations
 # for every library function.
 
@@ -173,6 +173,9 @@ source libs/libc/machine/x86/Kconfig
 endif
 if ARCH_XTENSA
 source libs/libc/machine/xtensa/Kconfig
+endif
+if ARCH_RENESAS
+source libs/libc/machine/renesas/Kconfig
 endif
 
 endmenu # Architecture-Specific Support

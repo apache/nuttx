@@ -144,7 +144,9 @@
 #define imxrt_clockoff_wdog3()            imxrt_periphclk_configure(CCM_CCGR_WDOG3, CCM_CG_OFF)
 #define imxrt_clockoff_xbar1()            imxrt_periphclk_configure(CCM_CCGR_XBAR1, CCM_CG_OFF)
 #define imxrt_clockoff_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_OFF)
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
 #define imxrt_clockoff_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_OFF)
+#endif
 
 /* Clock is on in run mode, but off in WAIT and STOP modes. */
 
@@ -255,7 +257,9 @@
 #define imxrt_clockrun_wdog3()            imxrt_periphclk_configure(CCM_CCGR_WDOG3, CCM_CG_RUN)
 #define imxrt_clockrun_xbar1()            imxrt_periphclk_configure(CCM_CCGR_XBAR1, CCM_CG_RUN)
 #define imxrt_clockrun_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_RUN)
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
 #define imxrt_clockrun_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_RUN)
+#endif
 
 /* Clock is on during all modes, except STOP mode. */
 
@@ -366,7 +370,9 @@
 #define imxrt_clockall_wdog3()            imxrt_periphclk_configure(CCM_CCGR_WDOG3, CCM_CG_ALL)
 #define imxrt_clockall_xbar1()            imxrt_periphclk_configure(CCM_CCGR_XBAR1, CCM_CG_ALL)
 #define imxrt_clockall_xbar2()            imxrt_periphclk_configure(CCM_CCGR_XBAR2, CCM_CG_ALL)
+#if (defined(CONFIG_ARCH_FAMILY_IMXRT105x) || defined(CONFIG_ARCH_FAMILY_IMXRT106x))
 #define imxrt_clockall_xbar3()            imxrt_periphclk_configure(CCM_CCGR_XBAR3, CCM_CG_ALL)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -91,6 +91,35 @@ int nxtask_create(FAR const char *name, int priority,
                   int stack_size, main_t entry, FAR char * const argv[]);
 
 /****************************************************************************
+ * Name: kthread_create_with_stack
+ *
+ * Description:
+ *   This function creates and activates a kernel thread task with
+ *   kernel-mode privileges. It is identical to kthread_create() except
+ *   that it get the stack memory from caller.
+ *
+ * Input Parameters:
+ *   name       - Name of the new task
+ *   priority   - Priority of the new task
+ *   stack_ptr  - Stack buffer of the new task
+ *   stack_size - Stack size of the new task
+ *   entry      - Entry point of a new task
+ *   arg        - A pointer to an array of input parameters.  The array
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
+ *
+ * Returned Value:
+ *   Returns the positive, non-zero process ID of the new task or a negated
+ *   errno value to indicate the nature of any failure.  If memory is
+ *   insufficient or the task cannot be created -ENOMEM will be returned.
+ *
+ ****************************************************************************/
+
+int kthread_create_with_stack(FAR const char *name, int priority,
+                              FAR void *stack_ptr, int stack_size,
+                              main_t entry, FAR char * const argv[]);
+
+/****************************************************************************
  * Name: kthread_create
  *
  * Description:

@@ -322,9 +322,9 @@ int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
           finfo("cmd(0x%x) MTDIOC_XIPBASE not support.\n", cmd);
         }
         break;
-      case BIOC_FLUSH:
+      case MTDIOC_FLUSH:
         {
-          finfo("cmd(0x%x) BIOC_FLUSH.\n", cmd);
+          finfo("cmd(0x%x) MTDIOC_FLUSH.\n", cmd);
           ret = OK;
         }
         break;

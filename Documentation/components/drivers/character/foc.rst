@@ -13,7 +13,7 @@ The device on the kernel side is responsible for the following:
 #. return ADC current samples
 #. synchronize user-space with PWM events
 
-The Nuttx FOC driver is split into two parts:
+The NuttX FOC driver is split into two parts:
 
 #. An "upper half", generic driver that provides the common FOC
    interface to application level code,

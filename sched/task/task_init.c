@@ -62,16 +62,15 @@
  *     - Task type may be set in the TCB flags to create kernel thread
  *
  * Input Parameters:
- *   tcb         - Address of the new task's TCB
- *   insert_name - Insert name to the first argv
- *   name        - Name of the new task
- *   priority    - Priority of the new task
- *   stack       - Start of the pre-allocated stack
- *   stack_size  - Size (in bytes) of the stack allocated
- *   entry       - Application start point of the new task
- *   argv        - A pointer to an array of input parameters.  The array
- *                 should be terminated with a NULL argv[] value. If no
- *                 parameters are required, argv may be NULL.
+ *   tcb        - Address of the new task's TCB
+ *   name       - Name of the new task (not used)
+ *   priority   - Priority of the new task
+ *   stack      - Start of the pre-allocated stack
+ *   stack_size - Size (in bytes) of the stack allocated
+ *   entry      - Application start point of the new task
+ *   argv       - A pointer to an array of input parameters.  The array
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
  *
  * Returned Value:
  *   OK on success; negative error value on failure appropriately.  (See
@@ -82,13 +81,12 @@
  *
  ****************************************************************************/
 
-int nxtask_init(FAR struct task_tcb_s *tcb, bool insert_name,
-                const char *name, int priority,
+int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size,
                 main_t entry, FAR char * const argv[])
 {
   uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
-  FAR struct task_info_s *info;
+  FAR struct tls_info_s *info;
   int ret;
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -124,7 +122,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, bool insert_name,
       /* Allocate the stack for the TCB */
 
       ret = up_create_stack(&tcb->cmn,
-                            sizeof(struct task_info_s) + stack_size,
+                            sizeof(struct tls_info_s) + stack_size,
                             ttype);
     }
 
@@ -135,7 +133,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, bool insert_name,
 
   /* Initialize thread local storage */
 
-  info = up_stack_frame(&tcb->cmn, sizeof(struct task_info_s));
+  info = up_stack_frame(&tcb->cmn, sizeof(struct tls_info_s));
   if (info == NULL)
     {
       ret = -ENOMEM;
@@ -143,6 +141,8 @@ int nxtask_init(FAR struct task_tcb_s *tcb, bool insert_name,
     }
 
   DEBUGASSERT(info == tcb->cmn.stack_alloc_ptr);
+
+  info->tl_task = tcb->cmn.group->tg_info;
 
   /* Initialize the task control block */
 
@@ -155,7 +155,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, bool insert_name,
 
   /* Setup to pass parameters to the new task */
 
-  nxtask_setup_arguments(tcb, insert_name, name, argv);
+  nxtask_setup_arguments(tcb, name, argv);
 
   /* Now we have enough in place that we can join the group */
 

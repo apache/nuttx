@@ -49,7 +49,7 @@
 
 void kmm_addregion(FAR void *heap_start, size_t heap_size)
 {
-  return mm_addregion(&g_kmmheap, heap_start, heap_size);
+  mm_addregion(g_kmmheap, heap_start, heap_size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

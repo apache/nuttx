@@ -70,36 +70,20 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_BL602_BLE_CONTROLLER)
-static void bl602_net_poll_work(FAR void *arg);
-static void ble_hci_rx_poll_expiry(wdparm_t arg);
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#if defined(CONFIG_BL602_BLE_CONTROLLER)
-/* BLE HCI timer */
-
-static struct wdog_s g_ble_hci_rx_poll;
-
-/* For deferring poll work to the work queue */
-
-static struct work_s g_ble_hci_rx_work;
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 #if defined(CONFIG_BL602_WIRELESS)
-extern int bl602_net_initialize(int intf);
+extern int bl602_net_initialize(void);
 #endif
 
 #if defined(CONFIG_BL602_BLE_CONTROLLER)
 extern void bl602_hci_uart_init(uint8_t uartid);
-extern int ble_hci_do_rx(void);
 #endif
 
 /****************************************************************************
@@ -274,7 +258,7 @@ int bl602_bringup(void)
 #ifdef CONFIG_BL602_WIRELESS
   bl602_set_em_sel(BL602_GLB_EM_8KB);
 
-  bl602_net_initialize(0);
+  bl602_net_initialize();
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
@@ -306,11 +290,6 @@ int bl602_bringup(void)
 
 #if defined(CONFIG_BL602_BLE_CONTROLLER)
   bl602_hci_uart_init(0);
-
-  /* 50ms interval */
-
-  wd_start(&g_ble_hci_rx_poll,
-      1 * CLOCKS_PER_SEC / 20, ble_hci_rx_poll_expiry, (wdparm_t)NULL);
 #endif /* CONFIG_BL602_BLE_CONTROLLER */
 
 #ifdef CONFIG_FS_ROMFS
@@ -341,29 +320,3 @@ int bl602_bringup(void)
 
   return ret;
 }
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#if defined(CONFIG_BL602_BLE_CONTROLLER)
-static void bl602_net_poll_work(FAR void *arg)
-{
-  ble_hci_do_rx();
-
-  /* 50ms interval */
-
-  wd_start(&g_ble_hci_rx_poll,
-      1 * CLOCKS_PER_SEC / 20, ble_hci_rx_poll_expiry, (wdparm_t)NULL);
-}
-
-static void ble_hci_rx_poll_expiry(wdparm_t arg)
-{
-  UNUSED(arg);
-
-  if (work_available(&g_ble_hci_rx_work))
-    {
-      work_queue(LPWORK, &g_ble_hci_rx_work, bl602_net_poll_work, NULL, 0);
-    }
-}
-#endif

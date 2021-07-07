@@ -226,15 +226,15 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
       if ((SDIO_CAPABILITIES(dev) & SDIO_CAPS_DMABEFOREWRITE) != 0)
         {
           SDIO_DMASENDSETUP(dev, buf, blocklen * nblocks);
-          SDIO_SENDCMD(dev, SD_ACMD53, arg.value);
+          SDIO_SENDCMD(dev, SD_ACMD53WR, arg.value);
 
           wkupevent = SDIO_EVENTWAIT(dev);
-          ret = SDIO_RECVR5(dev, SD_ACMD53, &data);
+          ret = SDIO_RECVR5(dev, SD_ACMD53WR, &data);
         }
       else
         {
-          sdio_sendcmdpoll(dev, SD_ACMD53, arg.value);
-          ret = SDIO_RECVR5(dev, SD_ACMD53, &data);
+          sdio_sendcmdpoll(dev, SD_ACMD53WR, arg.value);
+          ret = SDIO_RECVR5(dev, SD_ACMD53WR, &data);
 
           SDIO_DMASENDSETUP(dev, buf, blocklen * nblocks);
           wkupevent = SDIO_EVENTWAIT(dev);
@@ -244,10 +244,10 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
     {
       wlinfo("prep read %d\n", blocklen * nblocks);
       SDIO_DMARECVSETUP(dev, buf, blocklen * nblocks);
-      SDIO_SENDCMD(dev, SD_ACMD53, arg.value);
+      SDIO_SENDCMD(dev, SD_ACMD53RD, arg.value);
 
       wkupevent = SDIO_EVENTWAIT(dev);
-      ret = SDIO_RECVR5(dev, SD_ACMD53, &data);
+      ret = SDIO_RECVR5(dev, SD_ACMD53RD, &data);
     }
 
   wlinfo("Transaction ends\n");

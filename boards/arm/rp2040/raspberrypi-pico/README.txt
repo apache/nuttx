@@ -83,7 +83,15 @@ Defconfigs
            VCC ----- 3V3 OUT        (Pin 36)
            SDA ----- GP4 (I2C0 SDA) (Pin 6)
            SCL ----- GP5 (I2C0 SCL) (Pin 7)
-
+           
+- lcd1602 
+    LCD 1602 Segment LCD Disaply (I2C)
+    Connection:
+    PCF8574 BackPack Raspberry Pi Pico
+           GND ----- GND            (Pin 3 or 38 or ...)
+           VCC ----- 5V Vbus        (Pin 40)
+           SDA ----- GP4 (I2C0 SDA) (Pin 6)
+           SCL ----- GP5 (I2C0 SCL) (Pin 7)
 - spisd
     SD card support (SPI connection)
     Connection:

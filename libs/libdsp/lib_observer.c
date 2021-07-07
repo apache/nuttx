@@ -440,7 +440,7 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
       so->angle_diff += dir * 2 * M_PI_F;
     }
 
-  /* Get absoulte value */
+  /* Get absolute value */
 
   if (so->angle_diff < 0.0f)
     {

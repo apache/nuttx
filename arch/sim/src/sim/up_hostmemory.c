@@ -27,11 +27,25 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdatomic.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
+
 #include "up_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static atomic_int g_aordblks;
+static atomic_int g_uordblks;
 
 /****************************************************************************
  * Public Functions
@@ -118,24 +132,13 @@ void host_free_shmem(void *mem)
   munmap(mem, 0);
 }
 
-void *host_malloc(size_t size)
+size_t host_malloc_size(void *mem)
 {
-  return malloc(size);
-}
-
-void host_free(void *mem)
-{
-  free(mem);
-}
-
-void *host_realloc(void *oldmem, size_t size)
-{
-  return realloc(oldmem, size);
-}
-
-void *host_calloc(size_t n, size_t elem_size)
-{
-  return calloc(n , elem_size);
+#ifdef __APPLE__
+  return malloc_size(mem);
+#else
+  return malloc_usable_size(mem);
+#endif
 }
 
 void *host_memalign(size_t alignment, size_t size)
@@ -149,5 +152,59 @@ void *host_memalign(size_t alignment, size_t size)
       return NULL;
     }
 
+  size = host_malloc_size(p);
+  g_aordblks += 1;
+  g_uordblks += size;
+
   return p;
+}
+
+void host_free(void *mem)
+{
+  size_t size;
+
+  if (mem == NULL)
+    {
+      return;
+    }
+
+  size = host_malloc_size(mem);
+  g_aordblks -= 1;
+  g_uordblks -= size;
+  free(mem);
+}
+
+void *host_realloc(void *oldmem, size_t size)
+{
+  size_t oldsize;
+  void *mem;
+
+  if (size == 0)
+    {
+      host_free(oldmem);
+      return NULL;
+    }
+  else if (oldmem == NULL)
+    {
+      return host_memalign(sizeof(void *), size);
+    }
+
+  oldsize = host_malloc_size(oldmem);
+  mem = realloc(oldmem, size);
+  if (mem == NULL)
+    {
+      return NULL;
+    }
+
+  size = host_malloc_size(mem);
+  g_uordblks -= oldsize;
+  g_uordblks += size;
+
+  return mem;
+}
+
+void host_mallinfo(int *aordblks, int *uordblks)
+{
+  *aordblks = g_aordblks;
+  *uordblks = g_uordblks;
 }

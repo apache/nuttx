@@ -862,11 +862,11 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
           priv->baud = cfgetispeed(termiosp);
 
+          spin_unlock_irqrestore(&priv->lock, flags);
+
           /* Configure the UART line format and speed. */
 
           up_set_format(dev);
-
-          spin_unlock_irqrestore(&priv->lock, flags);
         }
         break;
 #endif

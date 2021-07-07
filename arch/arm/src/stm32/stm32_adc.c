@@ -101,7 +101,7 @@
 
 /* Supported ADC modes:
  *   - SW triggering with/without DMA transfer
- *   - TIM triggering with/without DMA tranfer
+ *   - TIM triggering with/without DMA transfer
  *   - external triggering with/without DMA transfer
  *
  * (tested with ADC example app from NuttX apps repo).

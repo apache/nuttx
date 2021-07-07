@@ -118,10 +118,16 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  /* Check if all outstanding bytes have been ACKed */
+  /* Check if all outstanding bytes have been ACKed.
+   *
+   * Note: in case of passive close, this ensures our FIN is acked.
+   */
 
-  else if (conn->tx_unacked != 0 || !sq_empty(&conn->write_q))
+  else if (conn->tx_unacked != 0
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+           || !sq_empty(&conn->write_q)
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
+          )
     {
       /* No... we are still waiting for ACKs.  Drop any received data, but
        * do not yet report TCP_CLOSE in the response.
@@ -129,15 +135,46 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
       dev->d_len = 0;
       flags &= ~TCP_NEWDATA;
+      ninfo("waiting for ack\n");
     }
-
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
-
   else
     {
+      /* Note: the following state shouldn't reach here because
+       *
+       * FIN_WAIT_1, CLOSING, LAST_ACK
+       *   should have tx_unacked != 0, already handled above
+       *
+       * CLOSED, TIME_WAIT
+       *   a TCP_CLOSE callback should have already cleared this callback
+       *   when transitioning to these states.
+       *
+       * FIN_WAIT_2
+       *   new data is dropped by tcp_input without invoking tcp_callback.
+       *   timer is handled by tcp_timer without invoking tcp_callback.
+       *   TCP_CLOSE is handled above.
+       */
+
+      DEBUGASSERT(conn->tcpstateflags == TCP_ESTABLISHED);
+
       /* Drop data received in this state and make sure that TCP_CLOSE
        * is set in the response
        */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      FAR struct socket *psock = pstate->cl_psock;
+
+      /* We don't need the send callback anymore. */
+
+      if (psock->s_sndcb != NULL)
+        {
+          psock->s_sndcb->flags = 0;
+          psock->s_sndcb->event = NULL;
+
+          /* The callback will be freed by tcp_free. */
+
+          psock->s_sndcb = NULL;
+        }
+#endif
 
       dev->d_len = 0;
       flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
@@ -262,31 +299,16 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     }
 #endif
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  /* If we have a semi-permanent write buffer callback in place, then
-   * is needs to be be nullified.
+  /* TCP_ESTABLISHED
+   *   We need to initiate an active close and wait for its completion.
    *
-   * Commit f1ef2c6cdeb032eaa1833cc534a63b50c5058270:
-   * "When a socket is closed, it should make sure that any pending write
-   *  data is sent before the FIN is sent.  It already would wait for all
-   *  sent data to be acked, however it would discard any pending write
-   *  data that had not been sent at least once.
-   *
-   * "This change adds a check for pending write data in addition to unacked
-   *  data.  However, to be able to actually send any new data, the send
-   *  callback must be left.  The callback should be freed later when the
-   *  socket is actually destroyed."
-   *
-   * REVISIT:  Where and how exactly is s_sndcb ever freed?  Is there a
-   * memory leak here?
+   * TCP_LAST_ACK
+   *   We still need to wait for the ACK for our FIN, possibly
+   *   retransmitting the FIN, before disposing the connection.
    */
 
-  psock->s_sndcb = NULL;
-#endif
-
-  /* Check for the case where the host beat us and disconnected first */
-
-  if (conn->tcpstateflags == TCP_ESTABLISHED &&
+  if ((conn->tcpstateflags == TCP_ESTABLISHED ||
+       conn->tcpstateflags == TCP_LAST_ACK) &&
       (state.cl_cb = tcp_callback_alloc(conn)) != NULL)
     {
       /* Set up to receive TCP data event callbacks */

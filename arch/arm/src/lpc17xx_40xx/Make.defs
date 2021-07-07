@@ -148,6 +148,10 @@ ifeq ($(CONFIG_LPC17_40_RTC),y)
 CHIP_CSRCS += lpc176x_rtc.c
 endif
 
+ifeq ($(CONFIG_LPC17_40_WDT),y)
+CHIP_CSRCS += lpc17_40_wdt.c
+endif
+
 ifeq ($(CONFIG_LPC17_40_PWM1),y)
 CHIP_CSRCS += lpc17_40_pwm.c
 endif
@@ -160,6 +164,6 @@ ifeq ($(CONFIG_LPC17_40_TMR0),y)
 CHIP_CSRCS += lpc17_40_timer.c
 endif
 
-ifeq ($(CONFIG_MTD_PROGMEM),y)
+ifeq ($(CONFIG_LPC17_40_PROGMEM),y)
 CHIP_CSRCS += lpc17_40_progmem.c
 endif

@@ -61,6 +61,20 @@
  * Public Types
  ****************************************************************************/
 
+struct task_info_s
+{
+  sem_t ta_sem;
+
+#if CONFIG_TLS_NELEM > 0
+  tls_ndxset_t ta_tlsset;                   /* Set of TLS indexes allocated */
+  tls_dtor_t  ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
+#endif
+
+#ifndef CONFIG_BUILD_KERNEL
+  struct getopt_s   ta_getopt; /* Globals used by getopt() */
+#endif
+};
+
 /* When TLS is enabled, up_createstack() will align allocated stacks to the
  * TLS_STACK_ALIGN value.  An instance of the following structure will be
  * implicitly positioned at the "lower" end of the stack.  Assuming a
@@ -78,9 +92,9 @@
  *
  *      Push Down             Push Up
  *   +-------------+      +-------------+ <- Stack memory allocation
- *   |  TLS Data   |      |  TLS Data   |
- *   +-------------+      +-------------+
  *   | Task Data*  |      | Task Data*  |
+ *   +-------------+      +-------------+
+ *   |  TLS Data   |      |  TLS Data   |
  *   +-------------+      +-------------+
  *   |  Arguments  |      |  Arguments  |
  *   +-------------+      +-------------+ |
@@ -92,11 +106,13 @@
  *   |             | ^    |             |
  *   +-------------+ |    +-------------+
  *
- *  Task data is allocated in the main's thread's stack only
+ *  Task data is a pointer that pointed to a user space memory region.
  */
 
 struct tls_info_s
 {
+  FAR struct task_info_s * tl_task;
+
 #if CONFIG_TLS_NELEM > 0
   uintptr_t tl_elem[CONFIG_TLS_NELEM]; /* TLS elements */
 #endif
@@ -113,14 +129,6 @@ struct tls_info_s
   int tl_errno;                        /* Per-thread error number */
 };
 
-struct task_info_s
-{
-  struct tls_info_s ta_tls;    /* Must be first field */
-#ifndef CONFIG_BUILD_KERNEL
-  struct getopt_s   ta_getopt; /* Globals used by getopt() */
-#endif
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -132,7 +140,7 @@ struct task_info_s
  *   Allocate a group-unique TLS data index
  *
  * Input Parameters:
- *   None
+ *   dtor     - The destructor of TLS data element
  *
  * Returned Value:
  *   A TLS index that is unique for use within this task group.
@@ -140,7 +148,7 @@ struct task_info_s
  ****************************************************************************/
 
 #if CONFIG_TLS_NELEM > 0
-int tls_alloc(void);
+int tls_alloc(CODE void (*dtor)(FAR void *));
 #endif
 
 /****************************************************************************
@@ -226,63 +234,6 @@ int tls_set_value(int tlsindex, uintptr_t tlsvalue);
 
 #ifndef CONFIG_TLS_ALIGNED
 FAR struct tls_info_s *tls_get_info(void);
-#endif
-
-/****************************************************************************
- * Name: tls_set_dtor
- *
- * Description:
- *   Set the TLS element destructor associated with the 'tlsindex' to 'destr'
- *
- * Input Parameters:
- *   tlsindex - Index of TLS data destructor to set
- *   destr    - The destr of TLS data element
- *
- * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-int tls_set_dtor(int tlsindex, tls_dtor_t destr);
-#endif
-
-/****************************************************************************
- * Name: tls_get_dtor
- *
- * Description:
- *   Get the TLS element destructor associated with the 'tlsindex' to 'destr'
- *
- * Input Parameters:
- *   tlsindex - Index of TLS data destructor to get
- *
- * Returned Value:
- *   A non-null destruct function pointer.
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-tls_dtor_t tls_get_dtor(int tlsindex);
-#endif
-
-/****************************************************************************
- * Name: tls_get_set
- *
- * Description:
- *   Get the TLS element index set map
- *
- * Input Parameters:
- *
- * Returned Value:
- *   A set of allocated TLS index
- *
- ****************************************************************************/
-
-#if CONFIG_TLS_NELEM > 0
-tls_ndxset_t tls_get_set(void);
 #endif
 
 /****************************************************************************

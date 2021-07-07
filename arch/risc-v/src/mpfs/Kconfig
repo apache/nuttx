@@ -95,15 +95,25 @@ config MPFS_UART4
 
 config MPFS_I2C0
         bool "I2C 0"
+        select ARCH_HAVE_I2CRESET
         default n
 
 config MPFS_I2C1
         bool "I2C 1"
+        select ARCH_HAVE_I2CRESET
         default n
 
 endmenu
 
+config MPFS_DMA
+	bool "MPFS DMA (PDMA)"
+	default n
+	select ARCH_DMA
+	---help---
+		Enable DMA Support. MPFS DMA is Memory-to-Memory only.
+
 menu "MPFS Others"
 
-
 endmenu
+
+

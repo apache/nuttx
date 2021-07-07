@@ -95,7 +95,7 @@ struct elf_loadinfo_s
   uintptr_t         textalloc;   /* .text memory allocated when ELF file was loaded */
   uintptr_t         dataalloc;   /* .bss/.data memory allocated when ELF file was loaded */
   size_t            textsize;    /* Size of the ELF .text memory allocation */
-#ifdef CONFIG_ARCH_USE_MODULE_TEXT
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
   size_t            textalign;   /* Necessary alignment of .text */
 #endif
   size_t            datasize;    /* Size of the ELF .bss/.data memory allocation */
@@ -132,7 +132,7 @@ struct elf_loadinfo_s
   uint16_t           symtabidx;  /* Symbol table section index */
   uint16_t           strtabidx;  /* String table section index */
   uint16_t           buflen;     /* size of iobuffer[] */
-  int                filfd;      /* Descriptor for the file being loaded */
+  struct file        file;       /* Descriptor for the file being loaded */
 };
 
 /****************************************************************************

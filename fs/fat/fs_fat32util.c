@@ -465,7 +465,7 @@ time_t fat_fattime2systime(uint16_t fattime, uint16_t fatdate)
 
   /* Then convert the broken out time into seconds since the epoch */
 
-  return mktime(&tm);
+  return timegm(&tm);
 #else
   return 0;
 #endif
@@ -626,12 +626,22 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
 
   if (fs->fs_type == FSTYPE_FAT32)
     {
-      ret = fat_computefreeclusters(fs);
+      ret = fat_checkfsinfo(fs);
       if (ret != OK)
         {
           goto errout_with_buffer;
         }
     }
+
+  /* Enforce computation of free clusters if configured */
+
+#ifdef CONFIG_FAT_COMPUTE_FSINFO
+  ret = fat_computefreeclusters(fs);
+  if (ret != OK)
+    {
+      goto errout_with_buffer;
+    }
+#endif
 
   /* We did it! */
 
@@ -2028,11 +2038,6 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
 
 int fat_computefreeclusters(struct fat_mountpt_s *fs)
 {
-  if (fat_checkfsinfo(fs) != OK)
-    {
-      return -ENODEV;
-    }
-
   /* We have to count the number of free clusters */
 
   uint32_t nfreeclusters = 0;

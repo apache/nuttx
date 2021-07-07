@@ -238,9 +238,9 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
           fracpart = 0;
         }
 
-      linesize = snprintf(attr->line, CPULOAD_LINELEN,
-                          "%3" PRId32 ".%01" PRId32 "%%\n",
-                          intpart, fracpart);
+      linesize = procfs_snprintf(attr->line, CPULOAD_LINELEN,
+                                 "%3" PRId32 ".%01" PRId32 "%%\n",
+                                 intpart, fracpart);
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 

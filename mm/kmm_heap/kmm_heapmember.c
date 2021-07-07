@@ -52,7 +52,7 @@
 
 bool kmm_heapmember(FAR void *mem)
 {
-  return mm_heapmember(&g_kmmheap, mem);
+  return mm_heapmember(g_kmmheap, mem);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

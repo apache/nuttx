@@ -123,9 +123,6 @@ static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo)
   binfo("  RELOCS:\n");
   binfo("    relocstart:   %08lx\n", loadinfo->relocstart);
   binfo("    reloccount:   %d\n",    loadinfo->reloccount);
-
-  binfo("  HANDLES:\n");
-  binfo("    filfd:        %d\n",    loadinfo->filfd);
 }
 #else
 # define nxflat_dumploadinfo(i)

@@ -104,9 +104,6 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_DTCM),y)
 CHIP_CSRCS += stm32_dtcm.c
-ifeq ($(CONFIG_STM32F7_DTCM_PROCFS),y)
-CHIP_CSRCS += stm32_procfs_dtcm.c
-endif
 endif
 
 ifeq ($(CONFIG_STM32F7_DMA),y)

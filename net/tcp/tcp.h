@@ -93,7 +93,12 @@
 #define TCP_SEQ_LTE(a, b)	(!TCP_SEQ_GT(a, b))
 #define TCP_SEQ_GTE(a, b)	(!TCP_SEQ_LT(a, b))
 
+#define TCP_SEQ_ADD(a, b)	((uint32_t)((a) + (b)))
 #define TCP_SEQ_SUB(a, b)	((uint32_t)((a) - (b)))
+
+/* The TCP options flags */
+
+#define TCP_WSCALE            0x01U /* Window Scale option enabled */
 
 /****************************************************************************
  * Public Type Definitions
@@ -186,14 +191,25 @@ struct tcp_conn_s
   uint16_t rport;         /* The remoteTCP port, in network byte order */
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
+  uint32_t rcv_adv;       /* The right edge of the recv window advertized */
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  uint32_t snd_wnd;       /* Sequence and acknowledgement numbers of last
+                           * window update */
+  uint8_t  snd_scale;     /* Sender window scale factor */
+  uint8_t  rcv_scale;     /* Receiver windows scale factor */
+#else
   uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
                            * window update */
-  uint32_t rcv_adv;       /* The right edge of the recv window advertized */
+#endif
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  int32_t  rcv_bufs;      /* Maximum amount of bytes queued in recv */
+#endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
   uint16_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #endif
+  uint16_t flags;         /* Flags of TCP-specific options */
 
   /* If the TCP socket is bound to a local address, then this is
    * a reference to the device that routes traffic on the corresponding
@@ -204,11 +220,11 @@ struct tcp_conn_s
 
   /* Read-ahead buffering.
    *
-   *   readahead - A singly linked list of type struct iob_qentry_s
+   *   readahead - A singly linked list of type struct iob_s
    *               where the TCP/IP read-ahead data is retained.
    */
 
-  struct iob_queue_s readahead;   /* Read-ahead buffering */
+  struct iob_s *readahead;   /* Read-ahead buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Write buffering
@@ -1459,7 +1475,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
  *
  ****************************************************************************/
 
-uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
+uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
                             FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
@@ -1854,6 +1870,23 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout);
 #else
 #  define tcp_txdrain(conn, timeout) (0)
 #endif
+
+/****************************************************************************
+ * Name: tcp_ioctl
+ *
+ * Description:
+ *   This function performs tcp specific ioctl() operations.
+ *
+ * Parameters:
+ *   conn     The TCP connection of interest
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd,
+              FAR void *arg, size_t arglen);
 
 #ifdef __cplusplus
 }

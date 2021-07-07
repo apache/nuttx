@@ -21,7 +21,7 @@ Configuring NuttX for the EMW3162 board
      $ cd nuttx
      $ make apps_distclean
      $ make distclean
-     $ ./configure.sh emw3162:wlan
+     $ ./tools/configure.sh emw3162:wlan
 
 Configuring NuttX to use your Wireless Router (aka Access Point)
 ================================================================

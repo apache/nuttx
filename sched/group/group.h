@@ -73,6 +73,7 @@ void weak_function task_initialize(void);
 /* Task group data structure management */
 
 int  group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype);
+void group_deallocate(FAR struct task_group_s *group);
 int  group_initialize(FAR struct task_tcb_s *tcb);
 #ifndef CONFIG_DISABLE_PTHREAD
 int  group_bind(FAR struct pthread_tcb_s *tcb);

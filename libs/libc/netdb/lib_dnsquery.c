@@ -518,10 +518,14 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
           nameptr += 10 + 16;
 
           ninfo("IPv6 address: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-                ntohs(ans->u.ipv6.s6_addr[7]), ntohs(ans->u.ipv6.s6_addr[6]),
-                ntohs(ans->u.ipv6.s6_addr[5]), ntohs(ans->u.ipv6.s6_addr[4]),
-                ntohs(ans->u.ipv6.s6_addr[3]), ntohs(ans->u.ipv6.s6_addr[2]),
-                ntohs(ans->u.ipv6.s6_addr[1]), ntohs(*ans->u.ipv6.s6_addr));
+                ntohs(ans->u.ipv6.s6_addr16[0]),
+                ntohs(ans->u.ipv6.s6_addr16[1]),
+                ntohs(ans->u.ipv6.s6_addr16[2]),
+                ntohs(ans->u.ipv6.s6_addr16[3]),
+                ntohs(ans->u.ipv6.s6_addr16[4]),
+                ntohs(ans->u.ipv6.s6_addr16[5]),
+                ntohs(ans->u.ipv6.s6_addr16[6]),
+                ntohs(ans->u.ipv6.s6_addr16[7]));
 
           inaddr                  = &addr[naddr_read].ipv6;
           inaddr->sin6_family     = AF_INET6;

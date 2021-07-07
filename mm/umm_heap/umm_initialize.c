@@ -26,7 +26,6 @@
 
 #include <assert.h>
 
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 
 #include "umm_heap/umm_heap.h"
@@ -82,17 +81,45 @@
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  mm_initialize(USR_HEAP, heap_start, heap_size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_FLAT)
-  static struct procfs_meminfo_entry_s g_umm_procfs;
-
-  g_umm_procfs.name = "Umem";
-  g_umm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_umm_procfs.user_data = USR_HEAP;
-  procfs_register_meminfo(&g_umm_procfs);
-#endif
-#endif
+  USR_HEAP = mm_initialize("Umem", heap_start, heap_size);
 }
+
+/****************************************************************************
+ * Name: umm_try_initialize
+ *
+ * Description:
+ *   Allocate and initialize the user heap if not yet.
+ *
+ * Input Parameters:
+ * None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+void umm_try_initialize(void)
+{
+  uintptr_t allocbase;
+
+  /* Return if the user heap is already initialized. */
+
+  if (USR_HEAP != NULL)
+    {
+      return;
+    }
+
+  /* Allocate one page. If we provide a zero brkaddr to pgalloc(),
+   * it will create the first block in the correct virtual address
+   * space and return the start address of that block.
+   */
+
+  allocbase = pgalloc(0, 1);
+  DEBUGASSERT(allocbase != 0);
+
+  /* Let umm_initialize do the real work. */
+
+  umm_initialize((FAR void *)allocbase, CONFIG_MM_PGSIZE);
+}
+#endif

@@ -572,8 +572,10 @@ void nx_start(void)
     }
 #endif
 
-#ifdef CONFIG_ARCH_USE_MODULE_TEXT
-  up_module_text_init();
+#ifdef CONFIG_ARCH_HAVE_EXTRA_HEAPS
+  /* Initialize any extra heap. */
+
+  up_extraheaps_init();
 #endif
 
 #ifdef CONFIG_MM_IOB
@@ -757,6 +759,13 @@ void nx_start(void)
 
   syslog_initialize();
 
+  /* Disables context switching beacuse we need take the memory manager
+   * semaphore on this CPU so that it will not be available on the other
+   * CPUs until we have finished initialization.
+   */
+
+  sched_lock();
+
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
 
@@ -780,6 +789,10 @@ void nx_start(void)
 
   DEBUGVERIFY(nx_bringup());
 
+  /* Let other threads have access to the memory manager */
+
+  sched_unlock();
+
   /* The IDLE Loop **********************************************************/
 
   /* When control is return to this point, the system is idle. */
@@ -787,16 +800,34 @@ void nx_start(void)
   sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
-      /* Check heap & stack in idle thread */
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_STACK_USAGE_SAFE_PERCENT > 0
+
+      /* Check stack in idle thread */
+
+      for (i = 0; i < CONFIG_MAX_TASKS; i++)
+        {
+          FAR struct tcb_s *tcb;
+          irqstate_t flags;
+
+          flags = enter_critical_section();
+
+          tcb = g_pidhash[i].tcb;
+          if (tcb && (up_check_tcbstack(tcb) * 100 / tcb->adj_stack_size
+                      > CONFIG_STACK_USAGE_SAFE_PERCENT))
+            {
+              _alert("Stack check failed, pid %d, name %s\n",
+                      tcb->pid, tcb->name);
+              PANIC();
+            }
+
+          leave_critical_section(flags);
+        }
+
+#endif
+
+      /* Check heap in idle thread */
 
       kmm_checkcorruption();
-
-#if defined(CONFIG_STACK_COLORATION) && defined(CONFIG_DEBUG_MM)
-      for (i = 0; i < CONFIG_MAX_TASKS && g_pidhash[i].tcb; i++)
-        {
-          assert(up_check_tcbstack_remain(g_pidhash[i].tcb) > 0);
-        }
-#endif
 
       /* Perform any processor-specific idle state operations */
 

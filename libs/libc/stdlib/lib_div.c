@@ -62,7 +62,7 @@
  *   denom - Denominator of the division
  *
  * Returned Value:
- *   The result of the devision represent as values of type div_t
+ *   The result of the division represented as values of type div_t
  *
  ****************************************************************************/
 

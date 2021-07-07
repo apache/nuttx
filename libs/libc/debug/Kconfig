@@ -3,14 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-# These are library functions that may be overriden by architecture-
+# These are library functions that may be overridden by architecture-
 # specific implementations.  Not all architectures support implementations
 # for every library function.
 
 menu "Library Debugging"
 
-config EABI_UNWINDER
-	bool "EABI Stack Unwinder"
+config UNWINDER
+	bool "Stack Unwinder"
 	default "n"
 	---help---
 		This option enables stack unwinding support in NuttX

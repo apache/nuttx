@@ -123,7 +123,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+  tcb->stack_base_ptr = tcb->stack_alloc_ptr;
   tcb->adj_stack_size = size_of_stack;
 
 #if defined(CONFIG_STACK_COLORATION)

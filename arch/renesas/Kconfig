@@ -57,25 +57,32 @@ config ARCH_SH1
 	bool
 	default n
 
+config ARCH_RENESAS_RX
+    bool
+    default n
+    select ARCH_HAVE_SETJMP
+    select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+
 config ARCH_RX65N
 	bool
 	default n
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select ARCH_RENESAS_RX
 
 config ARCH_RX65N_RSK1MB
 	bool
 	default n
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select ARCH_RENESAS_RX
 
 config ARCH_RX65N_RSK2MB
 	bool
 	default n
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select ARCH_RENESAS_RX
+
 
 config ARCH_RX65N_GRROSE
 	bool
 	default n
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select ARCH_RENESAS_RX
 
 config ARCH_M16C
 	bool
@@ -85,10 +92,7 @@ config ARCH_CHIP
 	string
 	default "sh1"		if ARCH_SH1
 	default "m16c"		if ARCH_M16C
-	default "rx65n"		if ARCH_RX65N
-	default "rx65n"		if ARCH_RX65N_RSK1MB
-	default "rx65n"		if ARCH_RX65N_RSK2MB
-	default "rx65n"		if ARCH_RX65N_GRROSE
+	default "rx65n"		if ARCH_RENESAS_RX
 
 source arch/renesas/src/common/Kconfig
 source arch/renesas/src/m16c/Kconfig

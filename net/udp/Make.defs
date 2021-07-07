@@ -48,6 +48,7 @@ endif
 
 NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c
 NET_CSRCS += udp_close.c udp_callback.c udp_ipselect.c udp_netpoll.c
+NET_CSRCS += udp_ioctl.c
 
 # UDP write buffering
 

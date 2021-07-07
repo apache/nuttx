@@ -67,7 +67,9 @@
 #include "arm_arch.h"
 
 #include "kinetis.h"
+#include "kinetis_edma.h"
 #include "kinetis_spi.h"
+#include "hardware/kinetis_dmamux.h"
 #include "hardware/kinetis_memorymap.h"
 #include "hardware/kinetis_sim.h"
 #include "hardware/kinetis_dspi.h"
@@ -83,20 +85,34 @@
 #define KINETIS_SPI_CLK_MAX    (BOARD_BUS_FREQ / 2)
 #define KINETIS_SPI_CLK_INIT   400000
 
+#define  SPI_SR_CLEAR   (SPI_SR_TCF | SPI_SR_EOQF | SPI_SR_TFUF  | \
+                         SPI_SR_TFFF | SPI_SR_RFOF | SPI_SR_RFDF | \
+                         SPI_SR_TXRXS)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct kinetis_spidev_s
 {
-  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
-  uint32_t         spibase;    /* Base address of SPI registers */
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
-  uint32_t         frequency;  /* Requested clock frequency */
-  uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of word in bits (8 to 16) */
-  uint8_t          mode;       /* Mode 0,1,2,3 */
-  uint8_t          ctarsel;    /* Which CTAR */
+  struct spi_dev_s  spidev;     /* Externally visible part of the SPI interface */
+  uint32_t          spibase;    /* Base address of SPI registers */
+  sem_t             exclsem;    /* Held while chip is selected for mutual exclusion */
+  uint32_t          frequency;  /* Requested clock frequency */
+  uint32_t          actual;     /* Actual clock frequency */
+  uint8_t           nbits;      /* Width of word in bits (8 to 16) */
+  uint8_t           mode;       /* Mode 0,1,2,3 */
+  uint8_t           ctarsel;    /* Which CTAR */
+#ifdef CONFIG_KINETIS_SPI_DMA
+  volatile uint32_t rxresult;   /* Result of the RX DMA */
+  volatile uint32_t txresult;   /* Result of the TX DMA */
+  const uint8_t     rxch;       /* The RX DMA channel number */
+  const uint8_t     txch;       /* The TX DMA channel number */
+  DMACH_HANDLE      rxdma;      /* DMA channel handle for RX transfers */
+  DMACH_HANDLE      txdma;      /* DMA channel handle for TX transfers */
+  sem_t             rxsem;      /* Wait for RX DMA to complete */
+  sem_t             txsem;      /* Wait for TX DMA to complete */
+#endif
 };
 
 /****************************************************************************
@@ -131,6 +147,21 @@ static inline void     spi_wait_status(FAR struct kinetis_spidev_s *priv,
                                        uint32_t status);
 static uint16_t        spi_send_data(FAR struct kinetis_spidev_s *priv,
                                      uint16_t wd, bool last);
+
+/* DMA support */
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static int         spi_dmarxwait(FAR struct kinetis_spidev_s *priv);
+static int         spi_dmatxwait(FAR struct kinetis_spidev_s *priv);
+static inline void spi_dmarxwakeup(FAR struct kinetis_spidev_s *priv);
+static inline void spi_dmatxwakeup(FAR struct kinetis_spidev_s *priv);
+static void        spi_dmarxcallback(DMACH_HANDLE handle, void *arg,
+                                     bool done, int result);
+static void        spi_dmatxcallback(DMACH_HANDLE handle, void *arg,
+                                     bool done, int result);
+static inline void spi_dmarxstart(FAR struct kinetis_spidev_s *priv);
+static inline void spi_dmatxstart(FAR struct kinetis_spidev_s *priv);
+#endif
 
 /* SPI methods */
 
@@ -197,6 +228,15 @@ static struct kinetis_spidev_s g_spi0dev =
   },
   .spibase           = KINETIS_SPI0_BASE,
   .ctarsel           = KINETIS_SPI_CTAR0_OFFSET,
+#ifdef CONFIG_KINETIS_SPI_DMA
+#  ifdef CONFIG_KINETIS_SPI0_DMA
+  .rxch     = KINETIS_DMA_REQUEST_SRC_SPI0_RX,
+  .txch     = KINETIS_DMA_REQUEST_SRC_SPI0_TX,
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
+#endif
 };
 #endif
 
@@ -237,6 +277,15 @@ static struct kinetis_spidev_s g_spi1dev =
   },
   .spibase           = KINETIS_SPI1_BASE,
   .ctarsel           = KINETIS_SPI_CTAR0_OFFSET,
+#ifdef CONFIG_KINETIS_SPI_DMA
+#  ifdef CONFIG_KINETIS_SPI1_DMA
+  .rxch     = KINETIS_DMA_REQUEST_SRC_SPI1_RX,
+  .txch     = KINETIS_DMA_REQUEST_SRC_SPI1_TX,
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
+#endif
 };
 #endif
 
@@ -277,12 +326,47 @@ static struct kinetis_spidev_s g_spi2dev =
   },
   .spibase           = KINETIS_SPI2_BASE,
   .ctarsel           = KINETIS_SPI_CTAR0_OFFSET,
+#ifdef CONFIG_KINETIS_SPI_DMA
+#  ifdef CONFIG_KINETIS_SPI2_DMA
+  .rxch     = KINETIS_DMA_REQUEST_SRC_FTM3_CH6__SPI2_RX,
+  .txch     = KINETIS_DMA_REQUEST_SRC_FTM3_CH7__SPI2_TX,
+#  else
+  .rxch     = 0,
+  .txch     = 0,
+#  endif
+#endif
 };
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spi_modifyreg
+ *
+ * Description:
+ *   Atomic modification of the 32-bit contents of the SPI register at offset
+ *
+ * Input Parameters:
+ *   priv      - private SPI device structure
+ *   offset    - offset to the register of interest
+ *   clearbits - bits to clear
+ *   clearbits - bits to set
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static inline void spi_modifyreg(FAR struct kinetis_spidev_s *priv,
+                                 uint8_t offset, uint32_t clearbits,
+                                 uint32_t setbits)
+{
+  modifyreg32(priv->spibase + offset, clearbits, setbits);
+}
+#endif
 
 /****************************************************************************
  * Name: spi_getreg
@@ -946,7 +1030,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 }
 
 /****************************************************************************
- * Name: spi_exchange
+ * Name: spi_exchange (no DMA).  aka spi_exchange_nodma
  *
  * Description:
  *   Exchange a block of data on SPI without using DMA
@@ -955,7 +1039,7 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
  *   rxbuffer - A pointer to a buffer in which to receive data
- *   nwords   - the length of data to be exchaned in units of words.
+ *   nwords   - the length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
  *              packed into uint8_t's; if nbits > 8, the data is packed into
@@ -966,8 +1050,15 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_SPI_DMATHRESHOLD)
+#  if !defined(CONFIG_KINETIS_SPI_DMA)
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
+#  else
+static void spi_exchange_nodma(FAR struct spi_dev_s *dev,
+                               FAR const void *txbuffer,
+                               FAR void *rxbuffer, size_t nwords)
+#  endif
 {
   FAR struct kinetis_spidev_s *priv = (FAR struct kinetis_spidev_s *)dev;
   uint8_t        *brxptr = (uint8_t *)rxbuffer;
@@ -1039,7 +1130,161 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         }
     }
 }
+#endif /* !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_SPI_DMATHRESHOLD) */
 
+/****************************************************************************
+ * Name: spi_exchange (with DMA capability)
+ *
+ * Description:
+ *   Exchange a block of data on SPI using DMA
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   txbuffer - A pointer to the buffer of data to be sent
+ *   rxbuffer - A pointer to a buffer in which to receive data
+ *   nwords   - the length of data to be exchanged in units of words.
+ *              The wordsize is determined by the number of bits-per-word
+ *              selected for the SPI interface.  If nbits <= 8, the data is
+ *              packed into uint8_t's; if nbits > 8, the data is packed into
+ *              uint16_t's
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                         FAR void *rxbuffer, size_t nwords)
+{
+  int                          ret;
+  size_t                       adjust;
+  ssize_t                      nbytes;
+  static uint8_t               rxdummy[4] __attribute__((aligned(4)));
+  static const uint16_t        txdummy = 0xffff;
+  FAR struct kinetis_spidev_s *priv    = (FAR struct kinetis_spidev_s *)dev;
+
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv && priv->spibase);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+  /* Convert the number of word to a number of bytes */
+
+  nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
+
+  /* Invalid DMA channels fall back to non-DMA method. */
+
+  if (priv->rxdma == NULL || priv->txdma == NULL
+#ifdef CONFIG_KINETIS_SPI_DMATHRESHOLD
+      /* If this is a small SPI transfer, then let spi_exchange_nodma()
+       * do the work.
+       */
+
+      || nbytes <= CONFIG_KINETIS_SPI_DMATHRESHOLD
+#endif
+      )
+    {
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+
+  /* Halt the SPI */
+
+  spi_run(priv, false);
+
+  /* Flush FIFOs */
+
+  spi_modifyreg(priv, KINETIS_SPI_MCR_OFFSET,
+                SPI_MCR_CLR_RXF | SPI_MCR_CLR_TXF,
+                SPI_MCR_CLR_RXF | SPI_MCR_CLR_TXF);
+
+  /* Clear all status bits */
+
+  spi_write_status(priv, SPI_SR_CLEAR);
+
+  /* disable DMA */
+
+  spi_modifyreg(priv, KINETIS_SPI_RSER_OFFSET,
+                SPI_RSER_RFDF_RE | SPI_RSER_TFFF_RE |
+                SPI_RSER_RFDF_DIRS | SPI_RSER_TFFF_DIRS,
+                0);
+
+  /* Set up the DMA */
+
+  adjust = (priv->nbits > 8) ? 2 : 1;
+
+  struct kinetis_edma_xfrconfig_s config;
+
+  config.saddr  = priv->spibase + KINETIS_SPI_POPR_OFFSET;
+  config.daddr  = (uint32_t) (rxbuffer ? rxbuffer : rxdummy);
+  config.soff   = 0;
+  config.doff   = rxbuffer ? adjust : 0;
+  config.iter   = nbytes;
+  config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
+  config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
+  config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
+  config.ttype  = EDMA_PERIPH2MEM;
+  config.nbytes = adjust;
+#ifdef CONFIG_KINETIS_EDMA_ELINK
+  config.linkch = NULL;
+#endif
+  kinetis_dmach_xfrsetup(priv->rxdma, &config);
+
+  config.saddr  = (uint32_t) (txbuffer ? txbuffer : &txdummy);
+  config.daddr  = priv->spibase + KINETIS_SPI_PUSHR_OFFSET;
+  config.soff   = txbuffer ? adjust : 0;
+  config.doff   = 0;
+  config.iter   = nbytes;
+  config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
+  config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
+  config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
+  config.ttype  = EDMA_MEM2PERIPH;
+  config.nbytes = adjust;
+#ifdef CONFIG_KINETIS_EDMA_ELINK
+  config.linkch = NULL;
+#endif
+  kinetis_dmach_xfrsetup(priv->txdma, &config);
+
+  spi_modifyreg(priv, KINETIS_SPI_RSER_OFFSET, 0 ,
+                SPI_RSER_RFDF_RE | SPI_RSER_TFFF_RE |
+                SPI_RSER_RFDF_DIRS | SPI_RSER_TFFF_DIRS);
+
+  /* Start the DMAs */
+
+  spi_dmarxstart(priv);
+  spi_run(priv, true);
+
+  spi_putreg(priv, KINETIS_SPI_TCR_OFFSET, 0);
+  spi_write_control(priv, SPI_PUSHR_CTAS_CTAR0);
+
+  spi_dmatxstart(priv);
+
+  /* Then wait for each to complete */
+
+  ret = spi_dmarxwait(priv);
+
+  if (ret < 0)
+    {
+      ret = spi_dmatxwait(priv);
+    }
+
+  /* Reset any status */
+
+  spi_write_status(priv, spi_getreg(priv, KINETIS_SPI_SR_OFFSET));
+
+  /* Halt SPI */
+
+  spi_run(priv, false);
+
+  /* Disable DMA */
+
+  spi_modifyreg(priv, KINETIS_SPI_RSER_OFFSET,
+                SPI_RSER_RFDF_RE | SPI_RSER_TFFF_RE |
+                SPI_RSER_RFDF_DIRS | SPI_RSER_TFFF_DIRS,
+                0);
+}
+
+#endif  /* CONFIG_KINETIS_SPI_DMA */
 /****************************************************************************
  * Name: spi_sndblock
  *
@@ -1096,6 +1341,174 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxwait
+ *
+ * Description:
+ *   Wait for DMA to complete.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static int spi_dmarxwait(FAR struct kinetis_spidev_s *priv)
+{
+  int ret;
+
+  /* Take the semaphore (perhaps waiting).  If the result is zero, then the
+   *  DMA must not really have completed.
+   */
+
+  do
+    {
+      ret = nxsem_wait_uninterruptible(&priv->rxsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (priv->rxresult == 0 && ret == OK);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxwait
+ *
+ * Description:
+ *   Wait for DMA to complete.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static int spi_dmatxwait(FAR struct kinetis_spidev_s *priv)
+{
+  int ret;
+
+  /* Take the semaphore (perhaps waiting).  If the result is zero, then the
+   * DMA must not really have completed.
+   */
+
+  do
+    {
+      ret = nxsem_wait_uninterruptible(&priv->txsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (priv->txresult == 0 && ret == OK);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxwakeup
+ *
+ * Description:
+ *   Signal that DMA is complete
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static inline void spi_dmarxwakeup(FAR struct kinetis_spidev_s *priv)
+{
+  nxsem_post(&priv->rxsem);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxwakeup
+ *
+ * Description:
+ *   Signal that DMA is complete
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static inline void spi_dmatxwakeup(FAR struct kinetis_spidev_s *priv)
+{
+  nxsem_post(&priv->txsem);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxcallback
+ *
+ * Description:
+ *   Called when the RX DMA completes
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static void spi_dmarxcallback(DMACH_HANDLE handle, void *arg, bool done,
+                              int result)
+{
+  FAR struct kinetis_spidev_s *priv = (FAR struct kinetis_spidev_s *)arg;
+
+  priv->rxresult = result | 0x80000000;  /* assure non-zero */
+  spi_dmarxwakeup(priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxcallback
+ *
+ * Description:
+ *   Called when the RX DMA completes
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static void spi_dmatxcallback(DMACH_HANDLE handle, void *arg, bool done,
+                              int result)
+{
+  FAR struct kinetis_spidev_s *priv = (FAR struct kinetis_spidev_s *)arg;
+
+  /* Wake-up the SPI driver */
+
+  priv->txresult = result | 0x80000000;  /* assure non-zero */
+  spi_dmatxwakeup(priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmarxstart
+ *
+ * Description:
+ *   Start RX DMA
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static inline void spi_dmarxstart(FAR struct kinetis_spidev_s *priv)
+{
+  priv->rxresult = 0;
+  kinetis_dmach_start(priv->rxdma, spi_dmarxcallback, priv);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatxstart
+ *
+ * Description:
+ *   Start TX DMA
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_KINETIS_SPI_DMA
+static inline void spi_dmatxstart(FAR struct kinetis_spidev_s *priv)
+{
+  priv->txresult = 0;
+  kinetis_dmach_start(priv->txdma, spi_dmatxcallback, priv);
 }
 #endif
 
@@ -1251,6 +1664,39 @@ FAR struct spi_dev_s *kinetis_spibus_initialize(int port)
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
   nxsem_init(&priv->exclsem, 0, 1);
+#ifdef CONFIG_KINETIS_SPI_DMA
+  /* Initialize the SPI semaphores that is used to wait for DMA completion.
+   * This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  if (priv->rxch && priv->txch)
+    {
+      if (priv->txdma == NULL && priv->rxdma == NULL)
+        {
+          nxsem_init(&priv->rxsem, 0, 0);
+          nxsem_init(&priv->txsem, 0, 0);
+
+          nxsem_set_protocol(&priv->rxsem, SEM_PRIO_NONE);
+          nxsem_set_protocol(&priv->txsem, SEM_PRIO_NONE);
+
+          priv->txdma = kinetis_dmach_alloc(priv->txch | DMAMUX_CHCFG_ENBL,
+                                            0);
+          priv->rxdma = kinetis_dmach_alloc(priv->rxch | DMAMUX_CHCFG_ENBL,
+                                            0);
+          DEBUGASSERT(priv->rxdma && priv->txdma);
+          spi_modifyreg(priv, KINETIS_SPI_MCR_OFFSET,
+                        0,
+                        SPI_MCR_DIS_RXF | SPI_MCR_DIS_TXF
+                        );
+        }
+    }
+  else
+    {
+      priv->rxdma = NULL;
+      priv->txdma = NULL;
+    }
+#endif
 
   return &priv->spidev;
 }

@@ -170,7 +170,7 @@ volatile bool g_rtc_enabled = false;
 static void tm_divider(struct tm *tm, int divn, int divm)
 {
   time_t tt;
-  tt = mktime(tm);
+  tt = timegm(tm);
   tt = (time_t) ((uint64_t)tt * divn / divm);
   gmtime_r(&tt, tm);
 }
@@ -690,7 +690,7 @@ int up_rtc_getrawtime(FAR struct timespec *ts)
 #endif /* CONFIG_RTC_DIV */
 
   ts->tv_nsec = 0;
-  ts->tv_sec = mktime(&tm);
+  ts->tv_sec = timegm(&tm);
   return 0;
 }
 

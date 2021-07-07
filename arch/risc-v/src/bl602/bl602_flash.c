@@ -29,36 +29,36 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include "bl602_romapi.h"
 
 #ifdef CONFIG_BL602_SPIFLASH
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define bl602_romapi_sflash_erase \
+  ((void (*)(uint8_t *, uint32_t, int))BL602_ROMAPI_SFLASH_EREASE_NEEDLOCK)
+
+#define bl602_romapi_sflash_write \
+  ((void (*)(uint8_t *, uint32_t, const uint8_t *, int)) \
+     BL602_ROMAPI_SFLASH_WRITE_NEEDLOCK)
+
+#define bl602_romapi_sflash_read \
+  ((void (*)( \
+    uint8_t *, uint32_t, uint8_t *, int))BL602_ROMAPI_SFLASH_READ_NEEDLOCK)
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static struct bl602_romflash_cfg_desc g_bl602_romflash_cfg;
 
 struct bl602_romflash_cfg_desc
 {
   uint32_t magic;
   uint8_t  cfg[84];
 };
-
-#define ROMAPI_BASE                             (0x21010800)
-#define ROMAPI_SFLASH_EREASE_NEEDLOCK           (ROMAPI_BASE + 163 * 4)
-#define ROMAPI_SFLASH_WRITE_NEEDLOCK            (ROMAPI_BASE + 164 * 4)
-#define ROMAPI_SFLASH_READ_NEEDLOCK             (ROMAPI_BASE + 165 * 4)
-#define ROMAPI_SFLASH_GET_JEDECID_NOLOCK        (ROMAPI_BASE + 166 * 4)
-#define ROMAPI_SFLASH_READ_WITHLOCK             (ROMAPI_BASE + 170 * 4)
-#define ROMAPI_SFLASH_WRITE_WITHLOCK            (ROMAPI_BASE + 171 * 4)
-#define ROMAPI_SFLASH_EREASE_WITHLOCK           (ROMAPI_BASE + 172 * 4)
-
-static struct bl602_romflash_cfg_desc g_bl602_romflash_cfg;
-
-typedef void (*bl602_romdrv_erase_fn) (uint8_t *cfg,
-              uint32_t addr, int len);
-typedef void (*bl602_romdrv_write_fn) (uint8_t *cfg,
-              uint32_t addr, const uint8_t *dst, int len);
-typedef void (*bl602_romdrv_read_fn) (uint8_t *cfg,
-              uint32_t addr, uint8_t *dst, int len);
 
 /****************************************************************************
  * Public Functions
@@ -71,8 +71,7 @@ int bl602_flash_erase(uint32_t addr, int len)
   finfo("addr = %08lx, len = %d\n", addr, len);
 
   flags = up_irq_save();
-  ((bl602_romdrv_erase_fn)(*((uint32_t *)(ROMAPI_SFLASH_EREASE_NEEDLOCK))))
-    (g_bl602_romflash_cfg.cfg, addr, addr + len - 1);
+  bl602_romapi_sflash_erase(g_bl602_romflash_cfg.cfg, addr, addr + len - 1);
   up_irq_restore(flags);
 
   return 0;
@@ -85,8 +84,7 @@ int bl602_flash_write(uint32_t addr, const uint8_t *src, int len)
   finfo("addr = %08lx, len = %d\n", addr, len);
 
   flags = up_irq_save();
-  ((bl602_romdrv_write_fn)(*((uint32_t *)(ROMAPI_SFLASH_WRITE_NEEDLOCK))))
-    (g_bl602_romflash_cfg.cfg, addr, src, len);
+  bl602_romapi_sflash_write(g_bl602_romflash_cfg.cfg, addr, src, len);
   up_irq_restore(flags);
 
   return 0;
@@ -99,8 +97,7 @@ int bl602_flash_read(uint32_t addr, uint8_t *dst, int len)
   finfo("addr = %08lx, len = %d\n", addr, len);
 
   flags = up_irq_save();
-  ((bl602_romdrv_read_fn)(*((uint32_t *)(ROMAPI_SFLASH_READ_NEEDLOCK))))
-    (g_bl602_romflash_cfg.cfg, addr, dst, len);
+  bl602_romapi_sflash_read(g_bl602_romflash_cfg.cfg, addr, dst, len);
   up_irq_restore(flags);
 
   return 0;

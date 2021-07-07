@@ -33,6 +33,70 @@
 #ifdef CONFIG_SCHED_CRITMONITOR
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION 0
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION 0
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD 0
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION > 0
+#  define CHECK_PREEMPTION(pid, elapsed) \
+     do \
+       { \
+         if (pid > 0 && \
+             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION) \
+           { \
+             serr("PID %d hold sched lock too long %"PRIu32"\n", \
+                   pid, elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CHECK_PREEMPTION(pid, elapsed)
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION > 0
+#  define CHECK_CSECTION(pid, elapsed) \
+     do \
+       { \
+         if (pid > 0 && \
+             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) \
+           { \
+             serr("PID %d hold critical section too long %"PRIu32"\n", \
+                   pid, elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CHECK_CSECTION(pid, elapsed)
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD > 0
+#  define CHECK_THREAD(pid, elapsed) \
+     do \
+       { \
+         if (pid > 0 && \
+             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD) \
+           { \
+             serr("PID %d execute too long %"PRIu32"\n", \
+                   pid, elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CHECK_THREAD(pid, elapsed)
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -112,6 +176,7 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
       if (elapsed > tcb->premp_max)
         {
           tcb->premp_max = elapsed;
+          CHECK_PREEMPTION(tcb->pid, elapsed);
         }
 
       /* Check for the global max elapsed time */
@@ -176,6 +241,7 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
       if (elapsed > tcb->crit_max)
         {
           tcb->crit_max = elapsed;
+          CHECK_CSECTION(tcb->pid, elapsed);
         }
 
       /* Check for the global max elapsed time */
@@ -208,10 +274,14 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 
 void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 {
-  uint32_t elapsed;
+  uint32_t current = up_critmon_gettime();
   int cpu = this_cpu();
+  uint32_t elapsed;
 
-  DEBUGASSERT(tcb->premp_start == 0 && tcb->crit_start == 0);
+  DEBUGASSERT(tcb->premp_start == 0 && tcb->crit_start == 0 &&
+              tcb->run_start == 0);
+
+  tcb->run_start = current;
 
   /* Did this task disable pre-emption? */
 
@@ -219,7 +289,7 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
     {
       /* Yes.. Save the start time */
 
-      tcb->premp_start = up_critmon_gettime();
+      tcb->premp_start = current;
       DEBUGASSERT(tcb->premp_start != 0);
 
       /* Zero means that the timer is not ready */
@@ -233,12 +303,13 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
     {
       /* Check for the global max elapsed time */
 
-      elapsed            = up_critmon_gettime() - g_premp_start[cpu];
+      elapsed            = current - g_premp_start[cpu];
       g_premp_start[cpu] = 0;
 
       if (elapsed > g_premp_max[cpu])
         {
           g_premp_max[cpu] = elapsed;
+          CHECK_PREEMPTION(tcb->pid, elapsed);
         }
     }
 
@@ -248,7 +319,7 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
     {
       /* Yes.. Save the start time */
 
-      tcb->crit_start = up_critmon_gettime();
+      tcb->crit_start = current;
       DEBUGASSERT(tcb->crit_start != 0);
 
       if (g_crit_start[cpu] == 0)
@@ -260,12 +331,13 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
     {
       /* Check for the global max elapsed time */
 
-      elapsed      = up_critmon_gettime() - g_crit_start[cpu];
+      elapsed      = current - g_crit_start[cpu];
       g_crit_start[cpu] = 0;
 
       if (elapsed > g_crit_max[cpu])
         {
           g_crit_max[cpu] = elapsed;
+          CHECK_CSECTION(tcb->pid, elapsed);
         }
     }
 }
@@ -285,7 +357,15 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 
 void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 {
-  uint32_t elapsed;
+  uint32_t current = up_critmon_gettime();
+  uint32_t elapsed = current - tcb->run_start;
+
+  tcb->run_start = 0;
+  if (elapsed > tcb->run_max)
+    {
+      tcb->run_max = elapsed;
+      CHECK_THREAD(tcb->pid, elapsed);
+    }
 
   /* Did this task disable preemption? */
 
@@ -293,12 +373,13 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
     {
       /* Possibly re-enabling.. Check for the max elapsed time */
 
-      elapsed = up_critmon_gettime() - tcb->premp_start;
+      elapsed = current - tcb->premp_start;
 
       tcb->premp_start = 0;
       if (elapsed > tcb->premp_max)
         {
           tcb->premp_max = elapsed;
+          CHECK_PREEMPTION(tcb->pid, elapsed);
         }
     }
 
@@ -308,12 +389,13 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
     {
       /* Possibly leaving .. Check for the max elapsed time */
 
-      elapsed = up_critmon_gettime() - tcb->crit_start;
+      elapsed = current - tcb->crit_start;
 
       tcb->crit_start = 0;
       if (elapsed > tcb->crit_max)
         {
           tcb->crit_max = elapsed;
+          CHECK_CSECTION(tcb->pid, elapsed);
         }
     }
 }

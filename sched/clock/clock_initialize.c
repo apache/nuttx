@@ -92,7 +92,7 @@ int clock_basetime(FAR struct timespec *tp)
     {
       /* And use the broken-out time to initialize the system time */
 
-      tp->tv_sec  = mktime(&rtctime);
+      tp->tv_sec  = timegm(&rtctime);
       tp->tv_nsec = nsecs;
     }
 

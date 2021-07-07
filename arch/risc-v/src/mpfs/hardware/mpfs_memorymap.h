@@ -27,8 +27,9 @@
 
 /* Register Base Address ****************************************************/
 
-#define MPFS_PLIC_BASE                 (0x0C000000UL)
 #define MPFS_CLINT_BASE                (0x02000000UL)
+#define MPFS_PDMA_BASE                 (0x03000000UL)
+#define MPFS_PLIC_BASE                 (0x0C000000UL)
 
 #define MPFS_UART0_LO_BASE             (0x20000000UL)
 #define MPFS_WDOG0_LO_BASE             (0x20001000UL)

@@ -779,13 +779,22 @@ static int imxrt_enc_test_gen(FAR struct imxrt_enc_lowerhalf_s *priv,
       return -EINVAL;
     }
 
+  if (value == 0)
+    {
+      imxrt_enc_modifyreg16(priv, IMXRT_ENC_TST_OFFSET,
+                            ENC_TST_TCE | ENC_TST_TEN, 0);
+      return OK;
+    }
+
   if (value & (1 << 8))
     {
-      imxrt_enc_modifyreg16(priv, IMXRT_ENC_TST_OFFSET, 0, ENC_TST_QDN);
+      imxrt_enc_modifyreg16(priv, IMXRT_ENC_TST_OFFSET, 0, ENC_TST_QDN
+                            | ENC_TST_TCE | ENC_TST_TEN);
     }
   else
     {
-      imxrt_enc_modifyreg16(priv, IMXRT_ENC_TST_OFFSET, ENC_TST_QDN, 0);
+      imxrt_enc_modifyreg16(priv, IMXRT_ENC_TST_OFFSET, ENC_TST_QDN,
+                            ENC_TST_TCE | ENC_TST_TEN);
     }
 
   imxrt_enc_modifyreg16(priv, IMXRT_ENC_TST_OFFSET, 0,
@@ -851,8 +860,7 @@ static int imxrt_setup(FAR struct qe_lowerhalf_s *lower)
   /* Test Registers */
 
 #ifdef CONFIG_DEBUG_SENSORS
-  regval = ENC_TST_TCE | ENC_TST_TEN;
-  regval |= config->tst_dir_adv ? ENC_TST_QDN : 0;
+  regval = config->tst_dir_adv ? ENC_TST_QDN : 0;
   regval |= (config->tst_period & ENC_TST_PERIOD_MASK) <<
             ENC_TST_PERIOD_SHIFT;
   imxrt_enc_putreg16(priv, IMXRT_ENC_TST_OFFSET, regval);
@@ -872,6 +880,7 @@ static int imxrt_setup(FAR struct qe_lowerhalf_s *lower)
   imxrt_enc_putreg16(priv, IMXRT_ENC_CTRL2_OFFSET, regval);
 
   imxrt_enc_sem_post(priv);
+
   return OK;
 }
 

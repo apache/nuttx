@@ -795,12 +795,8 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   flags = enter_critical_section();
 
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
-  if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
+  if ((waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      /* Do not use this in STM32_SDMMC_MASK register */
-
-      waitmask &= ~SDIOWAIT_WRCOMPLETE;
-
       pinset = priv->d0_gpio & (GPIO_PORT_MASK | GPIO_PIN_MASK | \
                                 GPIO_PUPD_MASK);
       pinset |= (GPIO_INPUT | GPIO_EXTI);
@@ -1128,9 +1124,11 @@ static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
 #if defined(HAVE_SDMMC_SDIO_MODE)
   if (priv->sdiomode == true)
     {
-      dctrl |= STM32_SDMMC_DCTRL_SDIOEN | STM32_SDMMC_DCTRL_DTMODE_SDIO;
+      dctrl |= STM32_SDMMC_DCTRL_SDIOEN;
     }
 #endif
+
+  dctrl |= STM32_SDMMC_DCTRL_DTMODE_BLOCK;
 
   /* if dlen > priv->blocksize we assume that this is a multi-block transfer
    * and that the len is multiple of priv->blocksize.
@@ -1461,8 +1459,13 @@ static void stm32_eventtimeout(wdparm_t arg)
     {
       /* Yes.. wake up any waiting threads */
 
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+      stm32_endwait(priv, SDIOWAIT_TIMEOUT |
+                    (priv->waitevents & SDIOWAIT_WRCOMPLETE));
+#else
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcerr("Timeout: remaining: %u\n", priv->remaining);
+#endif
+      mcerr("Timeout: remaining: %zu\n", priv->remaining);
     }
 }
 
@@ -2250,9 +2253,22 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | STM32_SDMMC_CMD_CPSMEN;
 
-  if (cmd & MMCSD_DATAXFR_MASK)
+  switch (cmd & MMCSD_DATAXFR_MASK)
     {
-      regval |= STM32_SDMMC_CMD_CMDTRANS;
+    case MMCSD_RDDATAXFR: /* Read block transfer */
+    case MMCSD_WRDATAXFR: /* Write block transfer */
+    case MMCSD_RDSTREAM:  /* MMC Read stream */
+    case MMCSD_WRSTREAM:  /* MMC Write stream */
+        regval |= STM32_SDMMC_CMD_CMDTRANS;
+        break;
+
+    case MMCSD_NODATAXFR:
+    default:
+      if ((cmd & MMCSD_STOPXFR) != 0)
+        {
+          regval |= STM32_SDMMC_CMD_CMDSTOP;
+        }
+      break;
     }
 
   /* Clear interrupts */
@@ -2814,11 +2830,7 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
 
       if (stm32_gpioread(priv->d0_gpio))
         {
-          eventset &= ~SDIOWAIT_TIMEOUT;
-        }
-      else
-        {
-          waitmask = SDIOWAIT_WRCOMPLETE;
+          eventset &= ~(SDIOWAIT_TIMEOUT | SDIOWAIT_WRCOMPLETE);
         }
     }
   else
@@ -2929,7 +2941,7 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev)
   if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
       /* Atomically read pin to see if ready (true) and determine if ISR
-       * fired.  If Pin is ready and if ISR did NOT fire end the wait here
+       * fired.  If Pin is ready and if ISR did NOT fire end the wait here.
        */
 
       if (stm32_gpioread(priv->d0_gpio) &&

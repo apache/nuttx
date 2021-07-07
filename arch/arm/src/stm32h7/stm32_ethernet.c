@@ -371,11 +371,11 @@
  * that are cleared unconditionally).  Per the reference manual, all reserved
  * bits must be retained at their reset value.
  *
- * ETH_MACPFR_PR    Bit 0: Promiscuous mode
+ * ETH_MACPFR_PM    Bit 0: Promiscuous mode
  * ETH_MACPFR_HUC   Bit 1: Hash unicast
  * ETH_MACPFR_HMC   Bit 2: Hash multicast
  * ETH_MACPFR_DAIF  Bit 3: Destination address inverse filtering
- * ETH_MACPFR_PM    Bit 4: Pass all multicast
+ * ETH_MACPFR_PAM   Bit 4: Pass all multicast
  * ETH_MACPFR_DBF   Bit 5: Broadcast frames disable
  * ETH_MACPFR_PCF   Bits 6-7: Pass control frames
  * ETH_MACPFR_SAIF  Bit 8: Source address inverse filtering
@@ -388,20 +388,19 @@
  */
 
 #define MACPFR_CLEAR_BITS                                               \
-  (ETH_MACPFR_PR | ETH_MACPFR_HUC | ETH_MACPFR_HMC | ETH_MACPFR_DAIF |  \
-   ETH_MACPFR_PM | ETH_MACPFR_DBF | ETH_MACPFR_PCF_MASK | ETH_MACPFR_SAIF | \
+  (ETH_MACPFR_PM | ETH_MACPFR_HUC | ETH_MACPFR_HMC | ETH_MACPFR_DAIF |  \
+   ETH_MACPFR_PAM | ETH_MACPFR_DBF | ETH_MACPFR_PCF_MASK | ETH_MACPFR_SAIF | \
    ETH_MACPFR_SAF | ETH_MACPFR_HPF | ETH_MACPFR_VTFE | ETH_MACPFR_IPFE | \
    ETH_MACPFR_DNTU | ETH_MACPFR_RA)
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * ETH_MACPFR_PR    Promiscuous mode                       0 (disabled)
  * ETH_MACPFR_HUC   Hash unicast                           0 (perfect
  *                                                            dest filtering)
  * ETH_MACPFR_HMC   Hash multicast                         0 (perfect
  *                                                            dest filtering)
  * ETH_MACPFR_DAIF  Destination address inverse filtering  0 (normal)
- * ETH_MACPFR_PM    Pass all multicast                     0 (Depends on HMC
+ * ETH_MACPFR_PAM   Pass all multicast                     0 (Depends on HMC
  *                                                            bit)
  * ETH_MACPFR_DBF   Broadcast frames disable               0 (enabled)
  * ETH_MACPFR_PCF   Pass control frames                    1 (block all but
@@ -413,7 +412,11 @@
  * ETH_MACPFR_RA    Receive all                            0 (disabled)
  */
 
-#define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE)
+#ifdef CONFIG_NET_PROMISCUOUS
+#  define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE | ETH_MACPFR_PM)
+#else
+#  define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE)
+#endif
 
 /* Clear the MACQTXFCR and MACRXFCR bits that will be setup during MAC
  * initialization (or that are cleared unconditionally).  Per the reference

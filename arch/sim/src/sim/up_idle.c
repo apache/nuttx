@@ -54,7 +54,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SMP
 void up_idle(void)
 {
 #ifdef CONFIG_PM
@@ -115,30 +114,3 @@ void up_idle(void)
   sim_foc_update();
 #endif
 }
-#endif /* !CONFIG_SMP */
-
-#ifdef CONFIG_SMP
-void up_idle(void)
-{
-  host_sleep(100 * 1000);
-}
-#endif
-
-/****************************************************************************
- * Name: sim_timer_handler
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-void sim_timer_handler(void)
-{
-  /* Handle UART data availability */
-
-  up_uartloop();
-
-#ifdef CONFIG_ONESHOT
-  /* Driver the simulated interval timer */
-
-  up_timer_update();
-#endif
-}
-#endif /* CONFIG_SMP */

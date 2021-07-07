@@ -40,11 +40,31 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_ESP32C3_WIRELESS
+#ifdef CONFIG_ESP32C3_WIFI
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef ESP32C3_WLAN_HAS_STA
+
+/****************************************************************************
+ * Name: esp32c3_wlan_sta_set_linkstatus
+ *
+ * Description:
+ *   Set Wi-Fi station link status
+ *
+ * Parameters:
+ *   linkstatus - true Notifies the networking layer about an available
+ *                carrier, false Notifies the networking layer about an
+ *                disappeared carrier.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+int esp32c3_wlan_sta_set_linkstatus(bool linkstatus);
 
 /****************************************************************************
  * Name: esp32c3_wlan_sta_initialize
@@ -60,7 +80,6 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef ESP32C3_WLAN_HAS_STA
 int esp32c3_wlan_sta_initialize(void);
 #endif
 
@@ -82,7 +101,7 @@ int esp32c3_wlan_sta_initialize(void);
 int esp32c3_wlan_softap_initialize(void);
 #endif
 
-#endif /* CONFIG_ESP32C3_WIRELESS */
+#endif /* CONFIG_ESP32C3_WIFI */
 #ifdef __cplusplus
 }
 #endif

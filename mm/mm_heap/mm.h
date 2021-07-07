@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/fs/procfs.h>
+
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
@@ -111,8 +113,6 @@
  * Public Types
  ****************************************************************************/
 
-struct mm_heap_s;
-
 /* Determines the size of the chunk size/offset type */
 
 #ifdef CONFIG_MM_SMALL
@@ -170,7 +170,7 @@ struct mm_delaynode_s
 
 /* This describes one heap (possibly with multiple regions) */
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
    * the following un-named semaphore.
@@ -202,7 +202,15 @@ struct mm_heap_impl_s
 
   /* Free delay list, for some situation can't do free immdiately */
 
-  FAR struct mm_delaynode_s *mm_delaylist;
+#ifdef CONFIG_SMP
+  FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+#else
+  FAR struct mm_delaynode_s *mm_delaylist[1];
+#endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  struct procfs_meminfo_entry_s mm_procfs;
+#endif
 };
 
 /* Functions contained in mm_sem.c ******************************************/

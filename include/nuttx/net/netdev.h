@@ -624,9 +624,7 @@ int netdev_carrier_off(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_USRSOCK
 ssize_t net_ioctl_arglen(int cmd);
-#endif
 
 /****************************************************************************
  * Name: net_chksum

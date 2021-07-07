@@ -202,5 +202,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DAC
+  /* Initialize DAC and register the DAC driver. */
+
+  ret = stm32_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start ADC1: %d\n", ret);
+    }
+#endif
+
   return ret;
 }

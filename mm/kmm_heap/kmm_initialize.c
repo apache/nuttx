@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 
 #ifdef CONFIG_MM_KERNEL_HEAP
@@ -35,7 +34,7 @@
 
 /* This is the kernel heap */
 
-struct mm_heap_s g_kmmheap;
+FAR struct mm_heap_s *g_kmmheap;
 
 /****************************************************************************
  * Public Functions
@@ -59,16 +58,7 @@ struct mm_heap_s g_kmmheap;
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  mm_initialize(&g_kmmheap, heap_start, heap_size);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  static struct procfs_meminfo_entry_s g_kmm_procfs;
-
-  g_kmm_procfs.name = "Kmem";
-  g_kmm_procfs.mallinfo = (void *)mm_mallinfo;
-  g_kmm_procfs.user_data = &g_kmmheap;
-  procfs_register_meminfo(&g_kmm_procfs);
-#endif
+  g_kmmheap = mm_initialize("Kmem", heap_start, heap_size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

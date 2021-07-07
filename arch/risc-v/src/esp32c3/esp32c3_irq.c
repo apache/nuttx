@@ -88,10 +88,19 @@ void up_irqinitialize(void)
    *   Object  |  CPU INT  |  Peripheral
    *           |           |
    *    Wi-Fi  |     1     |      1
+   *    BT BB  |     5     |      5
+   *    RW BLE |     8     |      8
    */
 
 #ifdef CONFIG_ESP32C3_WIRELESS
+#  ifdef CONFIG_ESP32C3_WIFI
   g_cpuint_map[ESP32C3_CPUINT_WMAC] = ESP32C3_PERIPH_WIFI_MAC_NMI;
+#  endif
+
+#  ifdef CONFIG_ESP32C3_BLE
+  g_cpuint_map[ESP32C3_CPUINT_BT_BB] = ESP32C3_PERIPH_BT_BB;
+  g_cpuint_map[ESP32C3_CPUINT_RWBLE] = ESP32C3_PERIPH_RWBLE_IRQ;
+#  endif
 #endif
 
   /* Clear all peripheral interrupts from "bootloader" */
@@ -415,4 +424,29 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
   board_autoled_off(LED_INIRQ);
 
   return regs;
+}
+
+/****************************************************************************
+ * Name: up_irq_enable
+ *
+ * Description:
+ *   Return the current interrupt state and enable interrupts
+ *
+ ****************************************************************************/
+
+irqstate_t up_irq_enable(void)
+{
+  uint32_t flags;
+
+  /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
+
+  __asm__ __volatile__
+    (
+      "csrrs %0, mstatus, %1\n"
+      : "=r" (flags)
+      : "r"(MSTATUS_MIE)
+      : "memory"
+    );
+
+  return flags;
 }

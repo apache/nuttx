@@ -74,7 +74,7 @@ static void lpc17_40_iap(FAR void *in, FAR void *out)
 
   flags = enter_critical_section();
 
-  ((void *(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
+  ((void (*)(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
 
   leave_critical_section(flags);
 }
