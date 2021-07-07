@@ -87,17 +87,16 @@ void up_timer_initialize(void)
 
   setbits(SYS_TIMER_CLK_EN, SYS_TIMER_SYSTIMER_CONF_REG);
 
-  /* Configure alarm0 counter1 */
+  /* Configure alarm0 (Comparator 0) */
 
   regval = SYS_TIMER_TARGET0_PERIOD_MODE |
-           (1 << SYS_TIMER_TARGET0_TIMER_UNIT_SEL_S) |
            ((ESP32C3_SYSTIMER_TICKS_PER_SEC / CLOCKS_PER_SEC) <<
             SYS_TIMER_TARGET0_PERIOD_S);
   putreg32(regval, SYS_TIMER_SYSTIMER_TARGET0_CONF_REG);
 
   putreg32(SYS_TIMER_TIMER_COMP0_LOAD, SYS_TIMER_SYSTIMER_COMP0_LOAD_REG);
 
-  /* Stall timer when stall CPU, specially when using JTAG to debug */
+  /* Stall systimer 0 when CPU stalls, e.g., when using JTAG to debug */
 
   setbits(SYS_TIMER_TIMER_UNIT0_CORE0_STALL_EN, SYS_TIMER_SYSTIMER_CONF_REG);
 
@@ -109,9 +108,9 @@ void up_timer_initialize(void)
   regval = SYS_TIMER_TARGET0_WORK_EN;
   setbits(regval, SYS_TIMER_SYSTIMER_CONF_REG);
 
-  /* Start alarm0 counter1 */
+  /* Start alarm0 counter0 */
 
-  regval = SYS_TIMER_TIMER_UNIT1_WORK_EN;
+  regval = SYS_TIMER_TIMER_UNIT0_WORK_EN;
   setbits(regval, SYS_TIMER_SYSTIMER_CONF_REG);
 
   cpuint = esp32c3_request_irq(ESP32C3_PERIPH_SYSTIMER_T0,
