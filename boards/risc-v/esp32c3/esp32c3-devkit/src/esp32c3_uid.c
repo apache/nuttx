@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
 #include <errno.h>
 
 #include <nuttx/board.h>
