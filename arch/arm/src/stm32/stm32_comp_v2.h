@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_comp.h
+ * arch/arm/src/stm32/stm32_comp_v2.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,24 +18,14 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_COMP_H
-#define __ARCH_ARM_SRC_STM32_STM32_COMP_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_COMP_V2_H
+#define __ARCH_ARM_SRC_STM32_STM32_COMP_V2_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include "chip.h"
-
-#include "hardware/stm32_comp.h"
-
-#if defined(CONFIG_STM32_HAVE_IP_COMP_V1)
-#  include "stm32_comp_v1.h"
-#elif defined(CONFIG_STM32_HAVE_IP_COMP_V2)
-#  include "stm32_comp_v2.h"
-#endif
+#ifdef CONFIG_STM32_COMP
 
 /****************************************************************************
  * Pre-processor definitions
@@ -45,43 +35,63 @@
  * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/* Inverting input. See Table 196 in RM0440 */
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+enum stm32_comp_inm_e
 {
-#else
-#define EXTERN extern
-#endif
+  COMP_INM_1_4_VREF,
+  COMP_INM_1_2_VREF,
+  COMP_INM_3_4_VREF,
+  COMP_INM_VREF,
+  COMP_INM_DAC_1,
+  COMP_INM_DAC_2,
+  COMP_INM_PIN_1,
+  COMP_INM_PIN_2,
+};
 
-/****************************************************************************
- * Name: stm32_compinitialize
- *
- * Description:
- *   Initialize the COMP.
- *
- * Input Parameters:
- *   intf - The COMP interface number.
- *
- * Returned Value:
- *   Valid COMP device structure reference on success; a NULL on failure.
- *
- * Assumptions:
- *   1. Clock to the COMP block has enabled,
- *   2. Board-specific logic has already configured
- *
- ****************************************************************************/
+/* Non-inverting input. See Table 195 in RM0440 */
 
-FAR struct comp_dev_s *stm32_compinitialize(int intf);
+enum stm32_comp_inp_e
+{
+  COMP_INP_PIN_1,
+  COMP_INP_PIN_2,
+};
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif /* __ASSEMBLY__ */
+/* Output polarity */
 
-#endif /* __ARCH_ARM_SRC_STM32_STM32_COMP_H */
+enum stm32_comp_pol_e
+{
+  COMP_POL_NONINVERT,
+  COMP_POL_INVERTED
+};
+
+/* Hysteresis  */
+
+enum stm32_comp_hyst_e
+{
+  COMP_HYST_DIS,
+  COMP_HYST_10MV,
+  COMP_HYST_20MV,
+  COMP_HYST_30MV,
+  COMP_HYST_40MV,
+  COMP_HYST_50MV,
+  COMP_HYST_60MV,
+  COMP_HYST_70MV,
+};
+
+/* Blanking source */
+
+enum stm32_comp_blanking_e
+{
+  COMP_BLANKING_DIS,
+  COMP_BLANKING_TIMX_OCY_1,
+  COMP_BLANKING_TIMX_OCY_2,
+  COMP_BLANKING_TIMX_OCY_3,
+  COMP_BLANKING_TIMX_OCY_4,
+  COMP_BLANKING_TIMX_OCY_5,
+  COMP_BLANKING_TIMX_OCY_6,
+  COMP_BLANKING_TIMX_OCY_7,
+};
+
+#endif /* CONFIG_STM32_COMP */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_COMP_V2_H */

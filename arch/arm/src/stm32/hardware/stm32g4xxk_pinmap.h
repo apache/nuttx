@@ -65,6 +65,8 @@
 
 /* COMP - Comparator ********************************************************/
 
+/* Comparator Outputs */
+
 #define GPIO_COMP1_OUT_1               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN0)
 #define GPIO_COMP1_OUT_2               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN6)
 #define GPIO_COMP1_OUT_3               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN11)
@@ -74,9 +76,25 @@
 #define GPIO_COMP2_OUT_2               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN7)
 #define GPIO_COMP2_OUT_3               (GPIO_ALT | GPIO_AF8 | GPIO_PORTA | GPIO_PIN12)
 
-#define GPIO_COMP3_OUT                 (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN7)
+#define GPIO_COMP3_OUT_1               (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN7)
 
-#define GPIO_COMP4_OUT                 (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN6)
+#define GPIO_COMP4_OUT_2               (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN6)
+
+/* Comparator Inputs non inverting */
+
+#define GPIO_COMP1_INP_1               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN1)
+#define GPIO_COMP1_INP_2               (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN1)
+
+#define GPIO_COMP2_INP_1               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN3)
+#define GPIO_COMP2_INP_2               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN7)
+
+/* Comparator Inputs non inverting */
+
+#define GPIO_COMP1_INM_1               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_COMP1_INM_2               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN0)
+
+#define GPIO_COMP2_INM_1               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN2)
+#define GPIO_COMP2_INM_2               (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
 
 /* DAC **********************************************************************/
 
