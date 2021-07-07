@@ -102,4 +102,16 @@ int stm32_bringup(void);
 int stm32_pwm_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_comp_setup
+ *
+ * Description:
+ *  Initialize COMP peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_COMP
+int stm32_comp_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431KB_SRC_NUCLEO_G431KB_H */

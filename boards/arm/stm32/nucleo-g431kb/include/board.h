@@ -234,17 +234,23 @@
 #define GPIO_USART2_TX     GPIO_USART2_TX_1 /* PA2 */
 #define GPIO_USART2_RX     GPIO_USART2_RX_1 /* PA3 */
 
+/* PWM configuration ********************************************************/
+
+/* TIM1 PWM */
+
+#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_1  /* PA8 */
+
+/* Comparators configuration ************************************************/
+
+#define GPIO_COMP2_OUT    GPIO_COMP2_OUT_3  /* PA12 */
+#define GPIO_COMP2_INP    GPIO_COMP2_INP_2  /* PA7 */
+#define GPIO_COMP2_INM    GPIO_COMP2_INM_2  /* PA5 check solder bridge SB2 */
+
 /* DMA channels *************************************************************/
 
 /* USART2 */
 
 #define DMACHAN_USART2_TX DMAMAP_DMA12_USART2TX_0 /* DMA1 */
 #define DMACHAN_USART2_RX DMAMAP_DMA12_USART2RX_0 /* DMA1 */
-
-/* PWM configuration ********************************************************/
-
-/* TIM1 PWM */
-
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_1  /* PA8 */
 
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431KB_INCLUDE_BOARD_H */
