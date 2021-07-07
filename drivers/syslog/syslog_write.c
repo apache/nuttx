@@ -62,6 +62,13 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 
   if (up_interrupt_context() || sched_idletask())
     {
+#ifdef CONFIG_SYSLOG_INTBUFFER
+      if (up_interrupt_context())
+        {
+          sched_lock();
+        }
+#endif
+
       for (nwritten = 0; nwritten < buflen; nwritten++)
         {
 #ifdef CONFIG_SYSLOG_INTBUFFER
@@ -85,6 +92,13 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
                 }
             }
         }
+
+#ifdef CONFIG_SYSLOG_INTBUFFER
+      if (up_interrupt_context())
+        {
+          sched_unlock();
+        }
+#endif
     }
   else
     {
