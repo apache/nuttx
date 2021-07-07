@@ -102,7 +102,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   FAR void *ret = NULL;
   int ndx;
 
-  /* Firstly, free mm_delaylist */
+  /* Free the delay list first */
 
   mm_free_delaylist(heap);
 
@@ -130,7 +130,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
-  mm_takesemaphore(heap);
+  DEBUGVERIFY(mm_takesemaphore(heap));
 
   /* Get the location in the node list to start the search. Special case
    * really big allocations

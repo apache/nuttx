@@ -177,8 +177,6 @@ struct mm_heap_s
    */
 
   sem_t mm_semaphore;
-  pid_t mm_holder;
-  int mm_counts_held;
 
   /* This is the size of the heap provided to mm */
 
@@ -216,8 +214,7 @@ struct mm_heap_s
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
-void mm_takesemaphore(FAR struct mm_heap_s *heap);
-int  mm_trysemaphore(FAR struct mm_heap_s *heap);
+bool mm_takesemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
