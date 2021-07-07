@@ -180,6 +180,10 @@ static void mm_mallinfo_walker(FAR void *ptr, size_t size, int used,
           info->mxordblk = size;
         }
     }
+  else
+    {
+      info->aordblks++;
+    }
 }
 
 /****************************************************************************
