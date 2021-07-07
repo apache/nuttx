@@ -65,9 +65,9 @@ struct mm_heap_s
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
@@ -79,9 +79,8 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   heap->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
-}
-
 #endif
+}
 
 static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
@@ -212,17 +211,27 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 FAR void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  if (getpid() == -ESRCH)
+  /* Check current environment */
+
+  if (up_interrupt_context())
     {
-      /* getpid() return -ESRCH, means we are in situations
-       * during context switching(See mm_trysemaphore() & getpid()).
-       * Then add to mm_delaylist.
-       */
+      /* We are in ISR, add to the delay list */
 
       mm_add_delaylist(heap, mem);
     }
   else
 #endif
+
+  if (getpid() < 0)
+    {
+      /* getpid() return -ESRCH, means we are in situations
+       * during context switching(See getpid's comment).
+       * Then add to the delay list.
+       */
+
+      mm_add_delaylist(heap, mem);
+    }
+  else
     {
       host_free(mem);
     }
