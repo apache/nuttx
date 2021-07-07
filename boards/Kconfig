@@ -3373,6 +3373,22 @@ config BOARDCTL_UNIQUEID_SIZE
 		Provides the size of the memory buffer that must be provided by the
 		caller of board_uniqueid() in which to receive the board unique ID.
 
+config BOARDCTL_UNIQUEKEY
+	bool "Return board unique KEY"
+	default n
+	---help---
+		Enables support for the BOARDIOC_UNIQUEKEY boardctl() command.
+		Architecture specific logic must provide the board_uniquekey()
+		interface.
+
+config BOARDCTL_UNIQUEKEY_SIZE
+	int "Size of the board unique KEY (bytes)"
+	default 16
+	depends on BOARDCTL_UNIQUEKEY
+	---help---
+		Provides the size of the memory buffer that must be provided by the
+		caller of board_uniquekey() in which to receive the board unique KEY.
+
 config BOARDCTL_MKRD
 	bool "Enable application space creation of RAM disks"
 	default n

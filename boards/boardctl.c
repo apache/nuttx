@@ -418,6 +418,24 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_UNIQUEKEY
+      /* CMD:           BOARDIOC_UNIQUEKEY
+       * DESCRIPTION:   Return a unique KEY associated with the board (such
+       *                as a trusted key or a private identity).
+       * ARG:           A writable array of size
+       *                CONFIG_BOARDCTL_UNIQUEKEY_SIZE in which to receive
+       *                the board unique KEY.
+       * DEPENDENCIES:  Board logic must provide the board_uniquekey()
+       *                interface.
+       */
+
+      case BOARDIOC_UNIQUEKEY:
+        {
+          ret = board_uniquekey((FAR uint8_t *)arg);
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk
