@@ -26,7 +26,7 @@ CSRCS += lib_getopt_longonly.c lib_getoptvars.c lib_getoptargp.c
 CSRCS += lib_getopterrp.c lib_getoptindp.c lib_getoptoptp.c
 CSRCS += lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c lib_nice.c
 CSRCS += lib_usleep.c lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
-CSRCS += lib_setreuid.c lib_setregid.c lib_getrusage.c lib_utimes.c
+CSRCS += lib_setreuid.c lib_setregid.c lib_getrusage.c lib_utime.c lib_utimes.c
 CSRCS += lib_setrlimit.c lib_getrlimit.c lib_setpriority.c lib_getpriority.c
 CSRCS += lib_futimes.c lib_futimens.c lib_gethostname.c lib_sethostname.c
 
