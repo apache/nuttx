@@ -391,7 +391,6 @@ void nx_start(void)
 
   /* Initialize the logic that determine unique process IDs. */
 
-  g_lastpid = 0;
   for (i = 0; i < CONFIG_MAX_TASKS; i++)
     {
       g_pidhash[i].tcb = NULL;
@@ -401,7 +400,7 @@ void nx_start(void)
   /* Initialize the IDLE task TCB *******************************************/
 
 #ifdef CONFIG_SMP
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++, g_lastpid++)
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
 #endif
     {
       FAR dq_queue_t *tasklist;
@@ -409,9 +408,9 @@ void nx_start(void)
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
-      hashndx                = PIDHASH(g_lastpid);
+      hashndx                = PIDHASH(cpu);
       g_pidhash[hashndx].tcb = &g_idletcb[cpu].cmn;
-      g_pidhash[hashndx].pid = g_lastpid;
+      g_pidhash[hashndx].pid = cpu;
 
       /* Initialize a TCB for this thread of execution.  NOTE:  The default
        * value for most components of the g_idletcb are zero.  The entire
@@ -421,7 +420,7 @@ void nx_start(void)
        */
 
       memset((void *)&g_idletcb[cpu], 0, sizeof(struct task_tcb_s));
-      g_idletcb[cpu].cmn.pid        = g_lastpid;
+      g_idletcb[cpu].cmn.pid        = cpu;
       g_idletcb[cpu].cmn.task_state = TSTATE_TASK_RUNNING;
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
@@ -522,6 +521,8 @@ void nx_start(void)
           up_stack_frame(&g_idletcb[cpu].cmn, sizeof(struct task_info_s));
         }
     }
+
+  g_lastpid = cpu ? cpu -1 : 0;
 
   /* Task lists are initialized */
 
