@@ -65,6 +65,7 @@ enum esp32c3_tim_inst_e
 {
   ESP32C3_TIMER0 = 0,  /* Timer 0 from Timer Group 0 */
   ESP32C3_TIMER1,      /* Timer 0 from Timer Group 1 */
+  ESP32C3_SYSTIM,      /* SYSTIMER 1 */
 };
 
 /* Timer mode */

@@ -57,8 +57,10 @@
 #define RT_TIMER_TASK_PRIORITY    CONFIG_ESP32C3_RT_TIMER_TASK_PRIORITY
 #define RT_TIMER_TASK_STACK_SIZE  CONFIG_ESP32C3_RT_TIMER_TASK_STACK_SIZE
 
-#define ESP32C3_TIMER_PRESCALER     (APB_CLK_FREQ / (1000 * 1000))
-#define ESP32C3_RT_TIMER            0 /* Timer 0 */
+#define CYCLES_PER_USEC           16 /* Timer running at 16 MHz*/
+#define USEC_TO_CYCLES(u)         ((u) * CYCLES_PER_USEC)
+#define CYCLES_TO_USEC(c)         ((c) / CYCLES_PER_USEC)
+#define ESP32C3_RT_TIMER          ESP32C3_SYSTIM /* Systimer 1 */
 
 /****************************************************************************
  * Private Data
@@ -113,6 +115,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
       /* Calculate the timer's alarm value */
 
       ESP32C3_TIM_GETCTR(tim, &counter);
+      counter = CYCLES_TO_USEC(counter);
       timer->timeout = timeout;
       timer->alarm = timer->timeout + counter;
 
@@ -156,7 +159,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
         {
           /* Reset the hardware timer alarm */
 
-          ESP32C3_TIM_SETALRVL(tim, timer->alarm);
+          ESP32C3_TIM_SETALRVL(tim, USEC_TO_CYCLES(timer->alarm));
           ESP32C3_TIM_SETALRM(tim, true);
         }
     }
@@ -228,7 +231,7 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
                                         list);
               alarm = next_timer->alarm;
 
-              ESP32C3_TIM_SETALRVL(tim, alarm);
+              ESP32C3_TIM_SETALRVL(tim, USEC_TO_CYCLES(alarm));
               ESP32C3_TIM_SETALRM(tim, true);
             }
         }
@@ -420,6 +423,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
       timer = container_of(s_runlist.next, struct rt_timer_s, list);
       ESP32C3_TIM_GETCTR(tim, &counter);
+      counter = CYCLES_TO_USEC(counter);
       if (timer->alarm <= counter)
         {
           /* Remove the first timer from the running list and add it to
@@ -443,7 +447,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
               timer = container_of(s_runlist.next, struct rt_timer_s, list);
               alarm = timer->alarm;
 
-              ESP32C3_TIM_SETALRVL(tim, alarm);
+              ESP32C3_TIM_SETALRVL(tim, USEC_TO_CYCLES(alarm));
             }
         }
 
@@ -577,7 +581,7 @@ void rt_timer_delete(FAR struct rt_timer_s *timer)
  * Name: rt_timer_time_us
  *
  * Description:
- *   Get time of the RT timer in microseconds.
+ *   Get current counter value of the RT timer in microseconds.
  *
  * Input Parameters:
  *   None
@@ -593,6 +597,7 @@ uint64_t IRAM_ATTR rt_timer_time_us(void)
   struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
 
   ESP32C3_TIM_GETCTR(tim, &counter);
+  counter = CYCLES_TO_USEC(counter);
 
   return counter;
 }
@@ -601,7 +606,7 @@ uint64_t IRAM_ATTR rt_timer_time_us(void)
  * Name: rt_timer_get_alarm
  *
  * Description:
- *   Get the timestamp when the next timeout is expected to occur.
+ *   Get the remaining time to the next timeout.
  *
  * Input Parameters:
  *   None
@@ -621,7 +626,9 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
   flags = enter_critical_section();
 
   ESP32C3_TIM_GETCTR(tim, &counter);
+  counter = CYCLES_TO_USEC(counter);
   ESP32C3_TIM_GETALRVL(tim, &alarm_value);
+  alarm_value = CYCLES_TO_USEC(alarm_value);
 
   if (alarm_value <= counter)
     {
@@ -659,8 +666,9 @@ void IRAM_ATTR rt_timer_calibration(uint64_t time_us)
 
   flags = enter_critical_section();
   ESP32C3_TIM_GETCTR(tim, &counter);
+  counter = CYCLES_TO_USEC(counter);
   counter += time_us;
-  ESP32C3_TIM_SETCTR(tim, counter);
+  ESP32C3_TIM_SETCTR(tim, USEC_TO_CYCLES(counter));
   ESP32C3_TIM_RLD_NOW(tim);
   leave_critical_section(flags);
 }
@@ -715,19 +723,18 @@ int esp32c3_rt_timer_init(void)
   flags = enter_critical_section();
 
   /* ESP32-C3 hardware timer configuration:
-   *   - 1 counter = 1us
-   *   - Counter increase mode
-   *   - Non-reload mode
+   * 1 count = 1/16 us
+   * Clear the counter.
+   * Set the ISR.
+   * Enable timeout interrupt.
+   * Start the counter.
+   * NOTE: No interrupt will be triggered
+   * until ESP32C3_TIM_SETALRM is set.
    */
 
-  ESP32C3_TIM_SETPRE(tim, ESP32C3_TIMER_PRESCALER);
-  ESP32C3_TIM_SETMODE(tim, ESP32C3_TIM_MODE_UP);
-  ESP32C3_TIM_SETARLD(tim, false);
   ESP32C3_TIM_CLEAR(tim);
-
   ESP32C3_TIM_SETISR(tim, rt_timer_isr, NULL);
   ESP32C3_TIM_ENABLEINT(tim);
-
   ESP32C3_TIM_START(tim);
 
   leave_critical_section(flags);
@@ -756,6 +763,8 @@ void esp32c3_rt_timer_deinit(void)
   flags = enter_critical_section();
 
   ESP32C3_TIM_STOP(s_esp32c3_tim_dev);
+  ESP32C3_TIM_DISABLEINT(s_esp32c3_tim_dev);
+  ESP32C3_TIM_SETISR(s_esp32c3_tim_dev, NULL, NULL);
   esp32c3_tim_deinit(s_esp32c3_tim_dev);
   s_esp32c3_tim_dev = NULL;
 

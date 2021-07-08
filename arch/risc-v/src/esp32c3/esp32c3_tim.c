@@ -36,6 +36,8 @@
 #include "esp32c3_tim.h"
 #include "esp32c3_irq.h"
 #include "esp32c3_gpio.h"
+#include "hardware/esp32c3_system.h"
+#include "hardware/esp32c3_systimer.h"
 
 /****************************************************************************
  * Private Types
@@ -114,6 +116,28 @@ struct esp32c3_tim_ops_s esp32c3_tim_ops =
   .checkint      = esp32c3_tim_checkint
 };
 
+struct esp32c3_tim_ops_s esp32c3_systim_ops =
+{
+  .start         = esp32c3_tim_start,
+  .stop          = esp32c3_tim_stop,
+  .clear         = esp32c3_tim_clear,
+  .setmode       = NULL,
+  .getcounter    = esp32c3_tim_getcounter,
+  .setclksrc     = NULL,
+  .setpre        = NULL,
+  .setcounter    = esp32c3_tim_setcounter,
+  .reloadnow     = esp32c3_tim_reload_now,
+  .getalarmvalue = esp32c3_tim_getalarmvalue,
+  .setalarmvalue = esp32c3_tim_setalarmvalue,
+  .setalarm      = esp32c3_tim_setalarm,
+  .setautoreload = NULL,
+  .setisr        = esp32c3_tim_setisr,
+  .enableint     = esp32c3_tim_enableint,
+  .disableint    = esp32c3_tim_disableint,
+  .ackint        = esp32c3_tim_ackint,
+  .checkint      = esp32c3_tim_checkint
+};
+
 #ifdef CONFIG_ESP32C3_TIMER0
 /* TIMER0 */
 
@@ -142,6 +166,20 @@ struct esp32c3_tim_priv_s g_esp32c3_tim1_priv =
 };
 #endif
 
+#ifdef CONFIG_ESP32C3_RT_TIMER
+/* SYSTIMER */
+
+struct esp32c3_tim_priv_s g_esp32c3_tim2_priv =
+{
+  .ops   = &esp32c3_systim_ops,
+  .id     = ESP32C3_SYSTIM,
+  .periph = ESP32C3_PERIPH_SYSTIMER_T2 ,  /* Peripheral ID */
+  .irq    = ESP32C3_IRQ_SYSTIMER_T2,      /* Interrupt ID */
+  .cpuint = -ENOMEM,                      /* CPU interrupt assigned to this timer */
+  .inuse = false,
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -162,7 +200,17 @@ static void esp32c3_tim_start(FAR struct esp32c3_tim_dev_s *dev)
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
-  modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_EN_M, TIMG_T0_EN_M);
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      /* Start counter 1 */
+
+      modifyreg32(SYS_TIMER_SYSTIMER_CONF_REG, 0,
+                  SYS_TIMER_TIMER_UNIT1_WORK_EN_M);
+    }
+  else
+    {
+      modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_EN_M, TIMG_T0_EN_M);
+    }
 }
 
 /****************************************************************************
@@ -181,7 +229,17 @@ static void esp32c3_tim_stop(FAR struct esp32c3_tim_dev_s *dev)
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
-  modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_EN_M, 0);
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      /* Stop counter 1 */
+
+      modifyreg32(SYS_TIMER_SYSTIMER_CONF_REG,
+                  SYS_TIMER_TIMER_UNIT1_WORK_EN_M, 0);
+    }
+  else
+    {
+      modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_EN_M, 0);
+    }
 }
 
 /****************************************************************************
@@ -304,22 +362,49 @@ static void esp32c3_tim_getcounter(FAR struct esp32c3_tim_dev_s *dev,
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
   *value = 0;
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      /* Trigger an update event */
 
-  /* Dummy value (0 or 1) to latch the counter value to read it */
+      modifyreg32(SYS_TIMER_SYSTIMER_UNIT1_OP_REG, 0,
+                  SYS_TIMER_TIMER_UNIT1_UPDATE_M);
 
-  putreg32(BIT(0), TIMG_T0UPDATE_REG(priv->id));
+      /* Wait until the value is valid */
 
-  /* Read value */
+      while ((getreg32(SYS_TIMER_SYSTIMER_UNIT1_OP_REG) &
+            SYS_TIMER_TIMER_UNIT1_VALUE_VALID_M) !=
+            SYS_TIMER_TIMER_UNIT1_VALUE_VALID_M);
 
-  value_32  = getreg32(TIMG_T0HI_REG(priv->id)); /* High 32 bits */
+      /* Finally read the counter 1 value */
 
-  /* Discard the top 10 bits */
+      value_32 = getreg32(SYS_TIMER_SYSTIMER_UNIT1_VALUE_HI_REG);
 
-  value_32 &= LOW_22_MASK;
-  *value   |= (uint64_t)value_32;
-  *value  <<= SHIFT_32;
-  value_32  = getreg32(TIMG_T0LO_REG(priv->id)); /* Low 32 bits */
-  *value   |= (uint64_t)value_32;
+      /* Discard the top 12 bits */
+
+      value_32 &= LOW_20_MASK;
+      *value   |= (uint64_t)value_32;
+      *value  <<= SHIFT_32;
+      value_32 = getreg32(SYS_TIMER_SYSTIMER_UNIT1_VALUE_LO_REG);
+      *value   |= (uint64_t)value_32;
+    }
+  else
+    {
+      /* Dummy value (0 or 1) to latch the counter value to read it */
+
+      putreg32(BIT(0), TIMG_T0UPDATE_REG(priv->id));
+
+      /* Read value */
+
+      value_32  = getreg32(TIMG_T0HI_REG(priv->id)); /* High 32 bits */
+
+      /* Discard the top 10 bits */
+
+      value_32 &= LOW_22_MASK;
+      *value   |= (uint64_t)value_32;
+      *value  <<= SHIFT_32;
+      value_32  = getreg32(TIMG_T0LO_REG(priv->id)); /* Low 32 bits */
+      *value   |= (uint64_t)value_32;
+    }
 }
 
 /****************************************************************************
@@ -342,18 +427,34 @@ static void esp32c3_tim_setcounter(FAR struct esp32c3_tim_dev_s *dev,
                                   uint64_t value)
 {
   uint64_t low_64 = value & LOW_32_MASK;
-
-  /* Get only the low 22 bits. */
-
-  uint64_t high_64 = (value >> SHIFT_32) & LOW_22_MASK;
+  uint64_t high_64;
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
 
-  /* Set the counter value */
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      high_64 = (value >> SHIFT_32) & LOW_20_MASK;
 
-  putreg32((uint32_t)low_64, TIMG_T0LOADLO_REG(priv->id));
-  putreg32((uint32_t)high_64, TIMG_T0LOADHI_REG(priv->id));
+      /* Set the counter 1 value */
+
+      putreg32((uint32_t)low_64, SYS_TIMER_SYSTIMER_UNIT1_LOAD_LO_REG);
+      putreg32((uint32_t)high_64, SYS_TIMER_SYSTIMER_UNIT1_LOAD_HI_REG);
+
+      /* Synchronize */
+
+      putreg32(SYS_TIMER_TIMER_UNIT1_LOAD_M,
+               SYS_TIMER_SYSTIMER_UNIT1_LOAD_REG);
+    }
+  else
+    {
+      high_64 = (value >> SHIFT_32) & LOW_22_MASK;
+
+      /* Set the counter value */
+
+      putreg32((uint32_t)low_64, TIMG_T0LOADLO_REG(priv->id));
+      putreg32((uint32_t)high_64, TIMG_T0LOADHI_REG(priv->id));
+    }
 }
 
 /****************************************************************************
@@ -374,9 +475,19 @@ static void esp32c3_tim_reload_now(FAR struct esp32c3_tim_dev_s *dev)
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
 
-  /* Dummy value to trigger reloading  */
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      /* Load immediately */
 
-  putreg32(BIT(0), TIMG_T0LOAD_REG(priv->id));
+      putreg32(SYS_TIMER_TIMER_UNIT1_LOAD_M,
+               SYS_TIMER_SYSTIMER_UNIT1_LOAD_REG);
+    }
+  else
+    {
+      /* Dummy value to trigger reloading  */
+
+      putreg32(BIT(0), TIMG_T0LOAD_REG(priv->id));
+    }
 }
 
 /****************************************************************************
@@ -396,22 +507,37 @@ static void esp32c3_tim_getalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
 {
   uint32_t value_32;
   struct esp32c3_tim_priv_s *priv;
-
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
   *value = 0;
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      /* Read value */
 
-  /* Read value */
+      value_32  = getreg32(SYS_TIMER_SYSTIMER_TARGET2_HI_REG); /* High 32 bits */
 
-  value_32  = getreg32(TIMG_T0ALARMHI_REG(priv->id)); /* High 32 bits */
+      /* Get only the 20 low bits. */
 
-  /* Get only the 22 low bits. */
+      value_32 &= LOW_20_MASK;
+      *value   |= (uint64_t)value_32;
+      *value  <<= SHIFT_32;
+      value_32  = getreg32(SYS_TIMER_SYSTIMER_TARGET2_LO_REG); /* Low 32 bits */
+      *value   |= (uint64_t)value_32;
+    }
+  else
+    {
+      /* Read value */
 
-  value_32 &= LOW_22_MASK;
-  *value   |= (uint64_t)value_32;
-  *value  <<= SHIFT_32;
-  value_32  = getreg32(TIMG_T0ALARMLO_REG(priv->id)); /* Low 32 bits */
-  *value   |= (uint64_t)value_32;
+      value_32  = getreg32(TIMG_T0ALARMHI_REG(priv->id)); /* High 32 bits */
+
+      /* Get only the 22 low bits. */
+
+      value_32 &= LOW_22_MASK;
+      *value   |= (uint64_t)value_32;
+      *value  <<= SHIFT_32;
+      value_32  = getreg32(TIMG_T0ALARMLO_REG(priv->id)); /* Low 32 bits */
+      *value   |= (uint64_t)value_32;
+    }
 }
 
 /****************************************************************************
@@ -428,18 +554,37 @@ static void esp32c3_tim_getalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
  ****************************************************************************/
 
 static void esp32c3_tim_setalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
-                                   uint64_t value)
+                                      uint64_t value)
 {
   struct esp32c3_tim_priv_s *priv;
-  uint64_t low_64  = value & LOW_32_MASK;
-  uint64_t high_64 = (value >> SHIFT_32) & LOW_22_MASK;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
 
-  /* Set an alarm value */
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      uint64_t low_64  = value & LOW_32_MASK;
+      uint64_t high_64 = (value >> SHIFT_32) & LOW_20_MASK;
 
-  putreg32((uint32_t)low_64, TIMG_T0ALARMLO_REG(priv->id));
-  putreg32((uint32_t)high_64, TIMG_T0ALARMHI_REG(priv->id));
+      /* Set an alarm value */
+
+      putreg32((uint32_t)low_64, SYS_TIMER_SYSTIMER_TARGET2_LO_REG);
+      putreg32((uint32_t)high_64, SYS_TIMER_SYSTIMER_TARGET2_HI_REG);
+
+      /* Synchronize */
+
+      putreg32(SYS_TIMER_TIMER_COMP2_LOAD_M,
+               SYS_TIMER_SYSTIMER_COMP2_LOAD_REG);
+    }
+  else
+    {
+      uint64_t low_64  = value & LOW_32_MASK;
+      uint64_t high_64 = (value >> SHIFT_32) & LOW_22_MASK;
+
+      /* Set an alarm value */
+
+      putreg32((uint32_t)low_64, TIMG_T0ALARMLO_REG(priv->id));
+      putreg32((uint32_t)high_64, TIMG_T0ALARMHI_REG(priv->id));
+    }
 }
 
 /****************************************************************************
@@ -462,13 +607,33 @@ static void esp32c3_tim_setalarm(FAR struct esp32c3_tim_dev_s *dev,
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
 
-  if (enable)
+  if (priv->id == ESP32C3_SYSTIM)
     {
-      modifyreg32(TIMG_T0CONFIG_REG(priv->id), 0, TIMG_T0_ALARM_EN_M);
+      if (enable)
+        {
+          /* Enable Comparator 2 */
+
+          modifyreg32(SYS_TIMER_SYSTIMER_CONF_REG, 0,
+                      SYS_TIMER_TARGET2_WORK_EN_M);
+        }
+      else
+        {
+          /* Disable Comparator 2 */
+
+          modifyreg32(SYS_TIMER_SYSTIMER_CONF_REG,
+                      SYS_TIMER_TARGET2_WORK_EN_M, 0);
+        }
     }
   else
     {
-      modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_ALARM_EN_M, 0);
+      if (enable)
+        {
+          modifyreg32(TIMG_T0CONFIG_REG(priv->id), 0, TIMG_T0_ALARM_EN_M);
+        }
+      else
+        {
+          modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_ALARM_EN_M, 0);
+        }
     }
 }
 
@@ -617,7 +782,15 @@ static void esp32c3_tim_enableint(FAR struct esp32c3_tim_dev_s *dev)
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
-  modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->id), 0, TIMG_T0_INT_ENA_M);
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      modifyreg32(SYS_TIMER_SYSTIMER_INT_ENA_REG, 0,
+                  SYS_TIMER_TARGET2_INT_ENA_M);
+    }
+  else
+    {
+      modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->id), 0, TIMG_T0_INT_ENA_M);
+    }
 }
 
 /****************************************************************************
@@ -636,7 +809,15 @@ static void esp32c3_tim_disableint(FAR struct esp32c3_tim_dev_s *dev)
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
-  modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->id), TIMG_T0_INT_ENA_M, 0);
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      modifyreg32(SYS_TIMER_SYSTIMER_INT_ENA_REG,
+                  SYS_TIMER_TARGET2_INT_ENA_M, 0);
+    }
+  else
+    {
+      modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->id), TIMG_T0_INT_ENA_M, 0);
+    }
 }
 
 /****************************************************************************
@@ -655,7 +836,15 @@ static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev)
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
   priv = (FAR struct esp32c3_tim_priv_s *)dev;
-  modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->id), 0, TIMG_T0_INT_CLR_M);
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      modifyreg32(SYS_TIMER_SYSTIMER_INT_CLR_REG, 0,
+                  SYS_TIMER_TARGET2_INT_CLR_M);
+    }
+  else
+    {
+      modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->id), 0, TIMG_T0_INT_CLR_M);
+    }
 }
 
 /****************************************************************************
@@ -676,11 +865,23 @@ static int esp32c3_tim_checkint(FAR struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv = (struct esp32c3_tim_priv_s *)dev;
   uint32_t reg_value;
+  int ret;
 
   DEBUGASSERT(dev != NULL);
+  if (priv->id == ESP32C3_SYSTIM)
+    {
+      reg_value = getreg32(SYS_TIMER_SYSTIMER_INT_ST_REG);
+      ret = (reg_value & SYS_TIMER_TARGET2_INT_ST_M) >>
+             SYS_TIMER_TARGET2_INT_ST_S;
+    }
+  else
+    {
+      reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->id));
+      ret = (reg_value & TIMG_T0_INT_ST_M) >>
+             TIMG_T0_INT_ST_S;
+    }
 
-  reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->id));
-  return ((reg_value & TIMG_T0_INT_ST_V) >> TIMG_T0_INT_ST_S);
+  return ret;
 }
 
 /****************************************************************************
@@ -724,6 +925,24 @@ FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
       case 1:
         {
           tim = &g_esp32c3_tim1_priv;
+          break;
+        }
+#endif
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+      case 2:
+        {
+          tim = &g_esp32c3_tim2_priv;
+
+          /* Clock and reset of systimer peripheral is already  performed
+           * either in esp32c3_timerisr.c or in esp32c3_tickless.c.
+           * Set comparator 2 to use counter 1 and set the mode
+           * to oneshot mode, i.e., disable periodic mode.
+           */
+
+          modifyreg32(SYS_TIMER_SYSTIMER_TARGET2_CONF_REG,
+                      SYS_TIMER_TARGET2_PERIOD_MODE_M,
+                      SYS_TIMER_TARGET2_TIMER_UNIT_SEL_M);
           break;
         }
 #endif
