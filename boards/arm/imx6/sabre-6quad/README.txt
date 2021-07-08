@@ -175,30 +175,6 @@ Status
   But this does not completely eliminate instabilities which seem to be
   related to memory corruption -- mm_mallinfo() asserts.
 
-CORTEX-A GIC SGI INTERRUPT MASKING (From the top-level TODO list)
------------------------------------------------------------------
-In the ARMv7-A GICv2 architecture, the inter-processor interrupts (SGIs) are
-non maskable and will occur even if interrupts are disabled.  This adds a
-lot of complexity to the ARMV7-A critical section design.
-
-Masayuki Ishikawa has suggested the use of the GICv2 ICCMPR register to
-control SGI interrupts.  This register (much like the ARMv7-M BASEPRI
-register) can be used to mask interrupts by interrupt priority.  Since SGIs
-may be assigned priorities the ICCMPR should be able to block execution of
-SGIs as well.
-
-Such an implementation would be very similar to the BASEPRI (vs PRIMASK)
-implementation for the ARMv7-M:  (1) The up_irq_save() and up_irq_restore()
-registers would have to set/restore the ICCMPR register, (2) register setup
-logic in arch/arm/src/armv7-a for task start-up and signal dispatch would
-have to set the ICCMPR correctly, and (3) the 'xcp' structure would have to
-be extended to hold the ICCMPR register;  logic would have to added be
-save/restore the ICCMPR register in the 'xcp' structure on each interrupt
-and context switch.
-
-This would also be an essential part of a high priority, nested interrupt
-implementation (unrelated feature).
-
 Platform Features
 =================
 
