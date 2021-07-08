@@ -228,7 +228,8 @@ next_subdir:
 
   /* Remove all of the children from the unlinked inode */
 
-  oldinode->i_child = NULL;
+  oldinode->i_child  = NULL;
+  oldinode->i_parent = NULL;
   ret = OK;
 
 errout_with_sem:

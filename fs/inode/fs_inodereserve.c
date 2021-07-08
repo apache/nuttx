@@ -98,8 +98,9 @@ static void inode_insert(FAR struct inode *node,
 
   if (peer)
     {
-      node->i_peer = peer->i_peer;
-      peer->i_peer = node;
+      node->i_peer   = peer->i_peer;
+      node->i_parent = parent;
+      peer->i_peer   = node;
     }
 
   /* Then it must go at the head of parent's list of children. */
@@ -108,6 +109,7 @@ static void inode_insert(FAR struct inode *node,
     {
       DEBUGASSERT(parent != NULL);
       node->i_peer    = parent->i_child;
+      node->i_parent  = parent;
       parent->i_child = node;
     }
 }
