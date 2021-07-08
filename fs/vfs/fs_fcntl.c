@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#include <sys/ioctl.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>
@@ -205,6 +206,15 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
         ret = -ENOSYS; /* Not implemented */
         break;
+
+      case F_GETPATH:
+        /* Get the path of the file descriptor. The argument must be a buffer
+         * of size PATH_MAX or greater.
+         */
+
+        {
+          ret = file_ioctl(filep, FIOC_FILEPATH, va_arg(ap, FAR char *));
+        }
 
       default:
         break;

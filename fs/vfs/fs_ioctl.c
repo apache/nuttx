@@ -103,6 +103,13 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
         ret = file_fcntl(filep, F_SETFD,
                          file_fcntl(filep, F_GETFD) & ~FD_CLOEXEC);
         break;
+
+      case FIOC_FILEPATH:
+        if (!INODE_IS_MOUNTPT(inode))
+          {
+            ret = inode_getpath(inode, (FAR char *)arg);
+          }
+        break;
     }
 
   return ret;
