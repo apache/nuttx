@@ -3771,7 +3771,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* Set up the MII interface */
 
-#if defined(CONFIG_STM32H7_MII)
+#  if defined(CONFIG_STM32H7_MII)
 
   /* Select the MII interface */
 
@@ -3786,7 +3786,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
    */
 
-# if defined(CONFIG_STM32H7_MII_MCO1)
+#    if defined(CONFIG_STM32H7_MII_MCO1)
   /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
    * info.
    */
@@ -3794,7 +3794,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO1);
   stm32_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_MII_MCO2)
+#    elif defined(CONFIG_STM32H7_MII_MCO2)
   /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
    * info.
    */
@@ -3802,12 +3802,12 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO2);
   stm32_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_MII_MCO)
+#    elif defined(CONFIG_STM32H7_MII_MCO)
   /* Setup MCO pin for alternative usage */
 
   stm32_configgpio(GPIO_MCO);
   stm32_mcoconfig(BOARD_CFGR_MCO_SOURCE);
-# endif
+#    endif
 
   /* MII interface pins (17):
    *
@@ -3833,7 +3833,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* Set up the RMII interface. */
 
-#elif defined(CONFIG_STM32H7_RMII)
+#  elif defined(CONFIG_STM32H7_RMII)
 
   /* Select the RMII interface */
 
@@ -3848,7 +3848,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
    */
 
-# if defined(CONFIG_STM32H7_RMII_MCO1)
+#    if defined(CONFIG_STM32H7_RMII_MCO1)
   /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
    * info.
    */
@@ -3856,7 +3856,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO1);
   stm32_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_RMII_MCO2)
+#    elif defined(CONFIG_STM32H7_RMII_MCO2)
   /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
    * info.
    */
@@ -3864,12 +3864,12 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO2);
   stm32_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_RMII_MCO)
+#    elif defined(CONFIG_STM32H7_RMII_MCO)
   /* Setup MCO pin for alternative usage */
 
   stm32_configgpio(GPIO_MCO);
   stm32_mcoconfig(BOARD_CFGR_MCO_SOURCE);
-# endif
+#    endif
 
   /* RMII interface pins (7):
    *
@@ -3884,7 +3884,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_ETH_RMII_TXD0);
   stm32_configgpio(GPIO_ETH_RMII_TXD1);
   stm32_configgpio(GPIO_ETH_RMII_TX_EN);
-#endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32H7_ETH_PTP
