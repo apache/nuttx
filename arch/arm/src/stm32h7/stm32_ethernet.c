@@ -297,6 +297,10 @@
 #define PHY_WRITE_TIMEOUT (0x0004ffff)
 #define PHY_RETRY_TIMEOUT (0x0004ffff)
 
+/* MAC reset ready delays in loop counts */
+
+#define MAC_READY_USTIMEOUT (200)
+
 /* Register values **********************************************************/
 
 /* Clear the MACCR bits that will be setup during MAC initialization (or that
@@ -3913,6 +3917,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 static void stm32_ethreset(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
+  volatile uint32_t timeout;
 
   /* Reset the Ethernet on the AHB1 bus */
 
@@ -3937,7 +3942,11 @@ static void stm32_ethreset(struct stm32_ethmac_s *priv)
    * core clock domains.
    */
 
-  while ((stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0);
+  timeout = MAC_READY_USTIMEOUT;
+  while (timeout-- && (stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0)
+    {
+      up_udelay(1);
+    }
 
   /* According to the spec, these need to be done before creating
    * the descriptor lists, so initialize these already here
