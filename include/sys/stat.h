@@ -141,14 +141,6 @@ struct stat
   struct timespec  st_ctim;    /* Time of last status change */
   blksize_t        st_blksize; /* Block size used for filesystem I/O */
   blkcnt_t         st_blocks;  /* Number of blocks allocated */
-
-  /* Internal fields.  These are part this specific implementation and
-   * should not referenced by application code for portability reasons.
-   */
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  uint8_t   st_count;   /* Used internally to limit traversal of links */
-#endif
 };
 
 /****************************************************************************

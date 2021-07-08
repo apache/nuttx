@@ -229,9 +229,12 @@ int inode_find(FAR struct inode_search_s *desc);
  *
  * Input Parameters:
  *   inode   - The inode of interest
- *   buf     - The caller provide location in which to return information
+ *   buf     - The caller-provided location in which to return information
  *             about the inode.
- *   resolve - Whether to resolve the symbolic link
+ *   resolve - Whether to resolve the symbolic link:
+ *               0: Don't resolve the symbolic line
+ *               1: Resolve the symbolic link
+ *             >=2: The recursive count in the resolving process
  *
  * Returned Value:
  *   Zero (OK) returned on success.  Otherwise, a negated errno value is
