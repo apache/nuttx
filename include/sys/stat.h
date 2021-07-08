@@ -171,6 +171,7 @@ int lstat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 int chmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
+int futimens(int fd, const struct timespec times[2]);
 
 mode_t umask(mode_t mask);
 
