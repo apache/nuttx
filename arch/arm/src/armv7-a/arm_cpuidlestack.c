@@ -29,6 +29,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 #include "smp.h"
 #include "arm_internal.h"
@@ -121,7 +122,7 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
   stack_alloc          = (uintptr_t)g_cpu_stackalloc[cpu];
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
 
-  tcb->adj_stack_size  = SMP_STACK_SIZE;
+  tcb->adj_stack_size  = SMP_STACK_SIZE - sizeof(struct tls_info_s);
   tcb->stack_alloc_ptr = (FAR void *)stack_alloc;
   tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
 #endif
