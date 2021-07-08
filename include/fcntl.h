@@ -95,6 +95,7 @@
 #define F_SETLKW    12 /* Like F_SETLK, but wait for lock to become available */
 #define F_SETOWN    13 /* Set pid that will receive SIGIO and SIGURG signals for fd */
 #define F_SETSIG    14 /* Set the signal to be sent */
+#define F_GETPATH   15 /* Get the path of the file descriptor(BSD/macOS) */
 
 /* For posix fcntl() and lockf() */
 

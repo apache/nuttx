@@ -243,6 +243,16 @@ struct stat;  /* Forward reference */
 int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve);
 
 /****************************************************************************
+ * Name: inode_getpath
+ *
+ * Description:
+ *   Given the full path from inode.
+ *
+ ****************************************************************************/
+
+int inode_getpath(FAR struct inode *node, FAR char *path);
+
+/****************************************************************************
  * Name: inode_free
  *
  * Description:
