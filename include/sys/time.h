@@ -341,30 +341,32 @@ int setitimer(int which, FAR const struct itimerval *value,
  * Name: utimes
  *
  * Description:
- * The utimes() function shall set the access and modification times of the
- * file pointed to by the path argument to the value of the times argument.
- * utimes() function allows time specifications accurate to the microsecond.
-
- * For utimes(), the times argument is an array of timeval structures. The
- * first array member represents the date and time of last access, and the
- * second member represents the date and time of last modification. The times
- * in the timeval structure are measured in seconds and microseconds since
- * the Epoch, although rounding toward the nearest second may occur.
-
- * If the times argument is a null pointer, the access and modification times
- * of the file shall be set to the current time. The effective user ID of the
- * process shall match the owner of the file, has write access to the file or
- * appropriate privileges to use this call in this manner. Upon completion,
- * utimes() shall mark the time of the last file status change, st_ctime, for
- * update.
+ *   The utimes() function shall set the access and modification times of
+ *   the file pointed to by the path argument to the value of the times
+ *   argument. utimes() function allows time specifications accurate to
+ *   the microsecond.
+ *
+ *   For utimes(), the times argument is an array of timeval structures.
+ *   The first array member represents the date and time of last access,
+ *   and the second member represents the date and time of last
+ *   modification. The times in the timeval structure are measured in
+ *   seconds and microseconds since the Epoch, although rounding toward
+ *   the nearest second may occur.
+ *
+ *   If the times argument is a null pointer, the access and modification
+ *   times of the file shall be set to the current time. The effective
+ *   user ID of the process shall match the owner of the file, has write
+ *   access to the file or appropriate privileges to use this call in this
+ *   manner. Upon completion, utimes() shall mark the time of the last
+ *   file status change, st_ctime, for update.
  *
  * Input Parameters:
  *   path  - Specifies the file to be modified
  *   times - Specifies the time value to set
  *
  * Returned Value:
- *   Upon successful completion, 0 shall be returned. Otherwise, -1 shall be
- *   returned and errno shall be set to indicate the error, and the file
+ *   Upon successful completion, 0 shall be returned. Otherwise, -1 shall
+ *   be returned and errno shall be set to indicate the error, and the file
  *   times shall not be affected.
  *
  ****************************************************************************/
@@ -375,44 +377,21 @@ int utimes(FAR const char *path, const struct timeval times[2]);
  * Name: futimes
  *
  * Description:
- *  futimens() update the timestamps of a file with nanosecond precision.
- *  This contrasts with the historical utime(2) and utimes(2), which permit
- *  only second and microsecond precision, respectively, when setting file
- *  timestamps. With futimens() the file whose timestamps are to be updated
- *  is specified via an open file descriptor, fd.
+ *   futimes() update the timestamps of a file with microsecond precision.
+ *   With futimes() the file whose timestamps are to be updated is specified
+ *   via an open file descriptor, fd.
  *
  * Input Parameters:
  *   fd  - Specifies the fd to be modified
  *   times - Specifies the time value to set
  *
  * Returned Value:
- *   On success, futimens() return 0.
+ *   On success, futimes() return 0.
  *   On error, -1 is returned and errno is set to indicate the error.
  *
  ****************************************************************************/
 
 int futimes(int fd, const struct timeval tv[2]);
-
-/****************************************************************************
- * Name: futimes
- *
- * Description:
- *  futimens() update the timestamps of a file with nanosecond precision.
- *  This contrasts with the historical utime(2) and utimes(2), which permit
- *  only second and microsecond precision, respectively, when setting file
- *  timestamps.
- *
- * Input Parameters:
- *   fd  - Specifies the fd to be modified
- *   times - Specifies the time value to set
- *
- * Returned Value:
- *   On success, futimens() return 0.
- *   On error, -1 is returned and errno is set to indicate the error.
- *
- ****************************************************************************/
-
-int futimens(int fd, const struct timespec times[2]);
 
 /****************************************************************************
  * Name: gethrtime
