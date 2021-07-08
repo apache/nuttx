@@ -151,7 +151,9 @@ config ESP32C3_CPU_FREQ_MHZ
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
-	select ESP32C3_TIMER0
+	select ESP32C3_TIMER
+	---help---
+		Real-time Timer is relying upon the Systimer 1.
 
 config ESP32C3_DISABLE_STDC_ATOMIC
 	bool "Disable standard C atomic"
@@ -166,7 +168,6 @@ config ESP32C3_WIRELESS
 	bool
 	default n
 	select ESP32C3_RT_TIMER
-	select ESP32C3_TIMER0
 
 menu "ESP32-C3 Peripheral Support"
 
@@ -309,7 +310,6 @@ config ESP32C3_WIRELESS
 	select NET
 	select ARCH_PHY_INTERRUPT
 	select ESP32C3_RT_TIMER
-	select ESP32C3_TIMER0
 	---help---
 		Enable Wireless support
 
@@ -876,7 +876,6 @@ config ESP32C3_AUTO_SLEEP
 	default n
 	select PM
 	select ESP32C3_RT_TIMER
-	select ESP32C3_TIMER0
 	select ESP32C3_TICKLESS
 	---help---
 		Enable ESP32-C3 Auto-sleep
