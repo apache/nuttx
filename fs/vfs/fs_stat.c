@@ -348,6 +348,8 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
             {
               RESET_BUF(buf);
             }
+
+          return ret;
         }
       else
         {
@@ -427,6 +429,15 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
       buf->st_mode |= S_IFDIR | S_IROTH | S_IRGRP | S_IRUSR;
     }
+
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
+  buf->st_mode |= inode->i_mode;
+  buf->st_uid   = inode->i_owner;
+  buf->st_gid   = inode->i_group;
+  buf->st_atim  = inode->i_atime;
+  buf->st_mtim  = inode->i_mtime;
+  buf->st_ctim  = inode->i_ctime;
+#endif
 
   return OK;
 }

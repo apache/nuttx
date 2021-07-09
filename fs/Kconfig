@@ -47,6 +47,14 @@ config DISABLE_PSEUDOFS_OPERATIONS
 		However, in practical embedded system, they are seldom needed and
 		you can save a little FLASH space by disabling the capability.
 
+config PSEUDOFS_ATTRIBUTES
+	bool "Pseudo-filesystem attributes"
+	default n
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	---help---
+		Enable support for attributes(e.g. mode, uid, gid and time)
+		in the pseudo file system.
+
 config PSEUDOFS_SOFTLINKS
 	bool "Pseudo-filesystem soft links"
 	default n
