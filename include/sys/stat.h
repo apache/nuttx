@@ -107,6 +107,11 @@
 #define S_TYPEISMQ(buf)  S_ISMQ((buf)->st_mode)
 #define S_TYPEISSHM(buf) S_ISSHM((buf)->st_mode)
 
+/* Special value for tv_nsec field of timespec */
+
+#define UTIME_NOW     ((1l << 30) - 1l)
+#define UTIME_OMIT    ((1l << 30) - 2l)
+
 /* The following macros are required by POSIX to achieve backward
  * compatibility with earlier versions of struct stat.
  */
@@ -162,6 +167,7 @@ int stat(FAR const char *path, FAR struct stat *buf);
 int lstat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 int chmod(FAR const char *path, mode_t mode);
+int lchmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
 int futimens(int fd, const struct timespec times[2]);
 

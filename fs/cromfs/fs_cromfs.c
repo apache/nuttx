@@ -179,6 +179,7 @@ const struct mountpt_operations cromfs_operations =
   NULL,              /* sync */
   cromfs_dup,        /* dup */
   cromfs_fstat,      /* fstat */
+  NULL,              /* fchstat */
   NULL,              /* truncate */
 
   cromfs_opendir,    /* opendir */
@@ -194,7 +195,8 @@ const struct mountpt_operations cromfs_operations =
   NULL,              /* mkdir */
   NULL,              /* rmdir */
   NULL,              /* rename */
-  cromfs_stat        /* stat */
+  cromfs_stat,       /* stat */
+  NULL               /* chstat */
 };
 
 /* The CROMFS uses a global, in-memory instance of the file system image

@@ -168,6 +168,7 @@ const struct mountpt_operations tmpfs_operations =
   NULL,             /* sync */
   tmpfs_dup,        /* dup */
   tmpfs_fstat,      /* fstat */
+  NULL,             /* fchstat */
   tmpfs_truncate,   /* truncate */
 
   tmpfs_opendir,    /* opendir */
@@ -184,6 +185,7 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_rmdir,      /* rmdir */
   tmpfs_rename,     /* rename */
   tmpfs_stat,       /* stat */
+  NULL              /* chstat */
 };
 
 /****************************************************************************

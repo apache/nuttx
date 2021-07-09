@@ -153,6 +153,7 @@ const struct mountpt_operations userfs_operations =
   userfs_sync,       /* sync */
   userfs_dup,        /* dup */
   userfs_fstat,      /* fstat */
+  NULL,              /* fchstat */
   userfs_truncate,   /* truncate */
 
   userfs_opendir,    /* opendir */
@@ -168,7 +169,8 @@ const struct mountpt_operations userfs_operations =
   userfs_mkdir,      /* mkdir */
   userfs_rmdir,      /* rmdir */
   userfs_rename,     /* rename */
-  userfs_stat        /* stat */
+  userfs_stat,       /* stat */
+  NULL               /* chstat */
 };
 
 /****************************************************************************

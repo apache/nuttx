@@ -211,6 +211,7 @@ const struct mountpt_operations unionfs_operations =
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */
   unionfs_fstat,       /* fstat */
+  NULL,                /* fchstat */
   unionfs_truncate,    /* truncate */
 
   unionfs_opendir,     /* opendir */
@@ -226,7 +227,8 @@ const struct mountpt_operations unionfs_operations =
   unionfs_mkdir,       /* mkdir */
   unionfs_rmdir,       /* rmdir */
   unionfs_rename,      /* rename */
-  unionfs_stat         /* stat */
+  unionfs_stat,        /* stat */
+  NULL                 /* chstat */
 };
 
 /****************************************************************************
