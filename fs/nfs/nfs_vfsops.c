@@ -180,6 +180,7 @@ const struct mountpt_operations nfs_operations =
   NULL,                         /* sync */
   nfs_dup,                      /* dup */
   nfs_fstat,                    /* fstat */
+  NULL,                         /* fchstat */
   nfs_truncate,                 /* truncate */
 
   nfs_opendir,                  /* opendir */
@@ -195,7 +196,8 @@ const struct mountpt_operations nfs_operations =
   nfs_mkdir,                    /* mkdir */
   nfs_rmdir,                    /* rmdir */
   nfs_rename,                   /* rename */
-  nfs_stat                      /* stat */
+  nfs_stat,                     /* stat */
+  NULL                          /* chstat */
 };
 
 /****************************************************************************

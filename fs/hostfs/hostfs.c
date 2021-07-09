@@ -131,6 +131,7 @@ const struct mountpt_operations hostfs_operations =
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */
   hostfs_fstat,         /* fstat */
+  NULL,                 /* fchstat */
   hostfs_ftruncate,     /* ftruncate */
 
   hostfs_opendir,       /* opendir */
@@ -146,7 +147,8 @@ const struct mountpt_operations hostfs_operations =
   hostfs_mkdir,         /* mkdir */
   hostfs_rmdir,         /* rmdir */
   hostfs_rename,        /* rename */
-  hostfs_stat           /* stat */
+  hostfs_stat,          /* stat */
+  NULL                  /* chstat */
 };
 
 /****************************************************************************

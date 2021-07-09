@@ -140,6 +140,7 @@ const struct mountpt_operations spiffs_operations =
   spiffs_sync,       /* sync */
   spiffs_dup,        /* dup */
   spiffs_fstat,      /* fstat */
+  NULL,              /* fchstat */
   spiffs_truncate,   /* truncate */
 
   spiffs_opendir,    /* opendir */
@@ -156,6 +157,7 @@ const struct mountpt_operations spiffs_operations =
   spiffs_rmdir,      /* rmdir */
   spiffs_rename,     /* rename */
   spiffs_stat,       /* stat */
+  NULL               /* chstat */
 };
 
 /****************************************************************************

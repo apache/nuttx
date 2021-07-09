@@ -249,6 +249,7 @@ const struct mountpt_operations procfs_operations =
   NULL,              /* sync */
   procfs_dup,        /* dup */
   procfs_fstat,      /* fstat */
+  NULL,              /* fchstat */
   NULL,              /* truncate */
 
   procfs_opendir,    /* opendir */
@@ -264,7 +265,8 @@ const struct mountpt_operations procfs_operations =
   NULL,              /* mkdir */
   NULL,              /* rmdir */
   NULL,              /* rename */
-  procfs_stat        /* stat */
+  procfs_stat,       /* stat */
+  NULL               /* chstat */
 };
 
 /* Level 0 contains the directory of active tasks in addition to other

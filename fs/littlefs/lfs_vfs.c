@@ -141,6 +141,7 @@ const struct mountpt_operations littlefs_operations =
   littlefs_sync,          /* sync */
   littlefs_dup,           /* dup */
   littlefs_fstat,         /* fstat */
+  NULL,                   /* fchstat */
   littlefs_truncate,      /* truncate */
 
   littlefs_opendir,       /* opendir */
@@ -156,7 +157,8 @@ const struct mountpt_operations littlefs_operations =
   littlefs_mkdir,         /* mkdir */
   littlefs_rmdir,         /* rmdir */
   littlefs_rename,        /* rename */
-  littlefs_stat           /* stat */
+  littlefs_stat,          /* stat */
+  NULL                    /* chstat */
 };
 
 /****************************************************************************
