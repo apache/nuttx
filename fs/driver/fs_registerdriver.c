@@ -44,7 +44,7 @@
  * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
- *   mode - inmode privileges (not used)
+ *   mode - inmode privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -75,7 +75,7 @@ int register_driver(FAR const char *path,
       return ret;
     }
 
-  ret = inode_reserve(path, &node);
+  ret = inode_reserve(path, mode, &node);
   if (ret >= 0)
     {
       /* We have it, now populate it with driver specific information.
@@ -85,9 +85,6 @@ int register_driver(FAR const char *path,
       INODE_SET_DRIVER(node);
 
       node->u.i_ops   = fops;
-#ifdef CONFIG_FILE_MODE
-      node->i_mode    = mode;
-#endif
       node->i_private = priv;
       ret             = OK;
     }

@@ -148,7 +148,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
           goto errout_with_search;
         }
 
-      ret = inode_reserve(path2, &inode);
+      ret = inode_reserve(path2, 0777, &inode);
       inode_semgive();
 
       if (ret < 0)

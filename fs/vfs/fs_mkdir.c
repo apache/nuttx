@@ -137,7 +137,7 @@ int mkdir(const char *pathname, mode_t mode)
           goto errout_with_search;
         }
 
-      ret = inode_reserve(pathname, &inode);
+      ret = inode_reserve(pathname, mode, &inode);
       inode_semgive();
 
       if (ret < 0)

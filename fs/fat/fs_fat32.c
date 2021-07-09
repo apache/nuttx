@@ -226,10 +226,6 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_semaphore;
         }
 
-      /* TODO: if CONFIG_FILE_MODE=y, need check for privileges based on
-       * inode->i_mode
-       */
-
       /* Check if the caller has sufficient privileges to open the file */
 
       readonly = ((DIR_GETATTRIBUTES(direntry) & FATATTR_READONLY) != 0);
