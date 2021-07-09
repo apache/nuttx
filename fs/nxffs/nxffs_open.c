@@ -1003,10 +1003,6 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
   volume = (FAR struct nxffs_volume_s *)filep->f_inode->i_private;
   DEBUGASSERT(volume != NULL);
 
-#ifdef CONFIG_FILE_MODE
-#  warning "Missing check for privileges based on inode->i_mode"
-#endif
-
   /* Limitation:  A file must be opened for reading or writing, but not both.
    * There is no general way of extending the size of a file.  Extending the
    * file size of possible if the file to be extended is the last in the

@@ -69,7 +69,7 @@ static void inode_namecpy(char *dest, const char *src)
  * Name: inode_alloc
  ****************************************************************************/
 
-static FAR struct inode *inode_alloc(FAR const char *name)
+static FAR struct inode *inode_alloc(FAR const char *name, mode_t mode)
 {
   FAR struct inode *node;
   int namelen;
@@ -78,6 +78,12 @@ static FAR struct inode *inode_alloc(FAR const char *name)
   node    = (FAR struct inode *)kmm_zalloc(FSNODE_SIZE(namelen));
   if (node)
     {
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
+      node->i_mode  = mode;
+      clock_gettime(CLOCK_REALTIME, &node->i_atime);
+      node->i_mtime = node->i_atime;
+      node->i_ctime = node->i_atime;
+#endif
       inode_namecpy(node->i_name, name);
     }
 
@@ -128,7 +134,7 @@ static void inode_insert(FAR struct inode *node,
 
 void inode_root_reserve(void)
 {
-  g_root_inode = inode_alloc("");
+  g_root_inode = inode_alloc("", 0777);
 }
 
 /****************************************************************************
@@ -140,6 +146,7 @@ void inode_root_reserve(void)
  *
  * Input Parameters:
  *   path - The path to the inode to create
+ *   mode - inmode privileges
  *   inode - The location to return the inode pointer
  *
  * Returned Value:
@@ -155,7 +162,8 @@ void inode_root_reserve(void)
  *
  ****************************************************************************/
 
-int inode_reserve(FAR const char *path, FAR struct inode **inode)
+int inode_reserve(FAR const char *path,
+                  mode_t mode, FAR struct inode **inode)
 {
   struct inode_search_s desc;
   FAR struct inode *left;
@@ -208,7 +216,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
         {
           /* Insert an operationless node */
 
-          node = inode_alloc(name);
+          node = inode_alloc(name, 0777);
           if (node != NULL)
             {
               inode_insert(node, left, parent);
@@ -223,7 +231,7 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode)
         }
       else
         {
-          node = inode_alloc(name);
+          node = inode_alloc(name, mode);
           if (node != NULL)
             {
               inode_insert(node, left, parent);

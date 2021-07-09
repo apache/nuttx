@@ -2633,7 +2633,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
    * for now, however.
    */
 
-  ret = inode_reserve(mountpt, &mpinode);
+  ret = inode_reserve(mountpt, 0777, &mpinode);
   if (ret < 0)
     {
       /* inode_reserve can fail for a couple of reasons, but the most likely
@@ -2652,10 +2652,7 @@ int unionfs_mount(FAR const char *fspath1, FAR const char *prefix1,
 
   INODE_SET_MOUNTPT(mpinode);
 
-  mpinode->u.i_mops  = &unionfs_operations;
-#ifdef CONFIG_FILE_MODE
-  mpinode->i_mode    = 0755;
-#endif
+  mpinode->u.i_mops = &unionfs_operations;
 
   /* Call unionfs_dobind to do the real work. */
 
