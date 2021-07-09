@@ -88,6 +88,7 @@ next_subdir:
 
       if (oldinode == newinode)
         {
+          inode_release(newinode);
           ret = OK;
           goto errout; /* Bad naming, this is not an error case. */
         }
@@ -130,6 +131,7 @@ next_subdir:
 
           if (subdir == NULL)
             {
+              inode_release(newinode);
               ret = -ENOMEM;
               goto errout;
             }
