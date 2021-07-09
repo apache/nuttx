@@ -46,26 +46,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: local_generate_instance_id
- ****************************************************************************/
-
-static int32_t local_generate_instance_id(void)
-{
-  static int32_t g_next_instance_id = 0;
-  int32_t id;
-
-  /* Called from local_connect with net_lock held. */
-
-  id = g_next_instance_id++;
-  if (g_next_instance_id < 0)
-    {
-      g_next_instance_id = 0;
-    }
-
-  return id;
-}
-
-/****************************************************************************
  * Name: _local_semtake() and _local_semgive()
  *
  * Description:
@@ -215,6 +195,30 @@ errout_with_fifos:
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: local_generate_instance_id
+ *
+ * Description:
+ *   Generate instance ID for stream
+ *
+ ****************************************************************************/
+
+int32_t local_generate_instance_id(void)
+{
+  static int32_t g_next_instance_id = 0;
+  int32_t id;
+
+  /* Called from local_connect with net_lock held. */
+
+  id = g_next_instance_id++;
+  if (g_next_instance_id < 0)
+    {
+      g_next_instance_id = 0;
+    }
+
+  return id;
+}
 
 /****************************************************************************
  * Name: psock_local_connect

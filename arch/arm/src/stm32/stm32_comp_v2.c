@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/stm32_comp_v1.c
+ * arch/arm/src/stm32/stm32_comp_v2.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,107 +26,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Some COMP peripheral must be enabled */
+/* Some COMP peripheral must be enabled and the device must be supported */
 
-/* Up to 7 comparators in STM32F3 Series */
+#define DEVICE_NOT_SUPPORTED
 
-#if defined(CONFIG_STM32_COMP1) || defined(CONFIG_STM32_COMP2) || \
-    defined(CONFIG_STM32_COMP3) || defined(CONFIG_STM32_COMP4) || \
-    defined(CONFIG_STM32_COMP5) || defined(CONFIG_STM32_COMP6) || \
-    defined(CONFIG_STM32_COMP7)
+#if defined(CONFIG_STM32_COMP)
 
 #ifndef CONFIG_STM32_SYSCFG
 #  error "SYSCFG clock enable must be set"
 #endif
 
-/* @TODO: support for STM32F30XX and STM32F37XX comparators */
-
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX)
-
-/* Currently only STM32F33XX supported */
-
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
-#  error "Not supported yet"
-#endif
-
-#if defined(CONFIG_STM32_STM32F33XX)
-#  if defined(CONFIG_STM32_COMP1) || defined(CONFIG_STM32_COMP3) || \
-      defined(CONFIG_STM32_COMP5) || defined(CONFIG_STM32_COMP7)
-#    error "STM32F33 supports only COMP2, COMP4 and COMP6"
+#if defined(CONFIG_STM32_STM32G43XX)
+#  undef DEVICE_NOT_SUPPORTED
+#  if defined(CONFIG_STM32_COMP5) || defined(CONFIG_STM32_COMP6) || \
+      defined(CONFIG_STM32_COMP7)
+#    error "STM32G43XX supports only COMP1, COMP2, COMP3 and COMP4"
 #  endif
 #endif
 
-/* COMP2 default configuration **********************************************/
-
-#ifdef CONFIG_STM32_COMP2
-#  ifndef COMP2_BLANLKING
-#    define COMP2_BLANKING COMP_BLANKING_DEFAULT
-#  endif
-#  ifndef COMP2_POL
-#    define COMP2_POL COMP_BLANKING_DEFAULT
-#  endif
-#  ifndef COMP2_INM
-#    define COMP2_INM COMP_INM_DEFAULT
-#  endif
-#  ifndef COMP2_OUTSEL
-#    define COMP2_OUTSEL COMP_OUTSEL_DEFAULT
-#  endif
-#  ifndef COMP2_LOCK
-#    define COMP2_LOCK COMP_LOCK_DEFAULT
-#  endif
-#  ifndef GPIO_COMP2_INM
-#    warning "GPIO_COMP2_INM not selected. Set default value to GPIO_COMP2_INM1"
-#    define GPIO_COMP2_INM GPIO_COMP2_INM_1
-#  endif
+#if defined(DEVICE_NOT_SUPPORTED)
+#  error "Device not supported"
 #endif
 
-/* COMP4 default configuration **********************************************/
-
-#ifdef CONFIG_STM32_COMP4
-#  ifndef COMP4_BLANLKING
-#    define COMP4_BLANKING COMP_BLANKING_DEFAULT
-#  endif
-#  ifndef COMP4_POL
-#    define COMP4_POL COMP_BLANKING_DEFAULT
-#  endif
-#  ifndef COMP4_INM
-#    define COMP4_INM COMP_INM_DEFAULT
-#  endif
-#  ifndef COMP4_OUTSEL
-#    define COMP4_OUTSEL COMP_OUTSEL_DEFAULT
-#  endif
-#  ifndef COMP4_LOCK
-#    define COMP4_LOCK COMP_LOCK_DEFAULT
-#  endif
-#  ifndef GPIO_COMP4_INM
-#    warning "GPIO_COMP4_INM not selected. Set default value to GPIO_COMP4_INM1"
-#    define GPIO_COMP4_INM GPIO_COMP4_INM_1
-#  endif
-#endif
-
-/* COMP6 default configuration **********************************************/
-
-#ifdef CONFIG_STM32_COMP6
-#  ifndef COMP6_BLANLKING
-#    define COMP6_BLANKING COMP_BLANKING_DEFAULT
-#  endif
-#  ifndef COMP6_POL
-#    define COMP6_POL COMP_BLANKING_DEFAULT
-#  endif
-#  ifndef COMP6_INM
-#    define COMP6_INM COMP_INM_DEFAULT
-#  endif
-#  ifndef COMP6_OUTSEL
-#    define COMP6_OUTSEL COMP_OUTSEL_DEFAULT
-#  endif
-#  ifndef COMP6_LOCK
-#    define COMP6_LOCK COMP_LOCK_DEFAULT
-#  endif
-#  ifndef GPIO_COMP6_INM
-#    warning "GPIO_COMP6_INM not selected. Set default value to GPIO_COMP6_INM1"
-#    define GPIO_COMP6_INM GPIO_COMP6_INM_1
-#  endif
+#if defined(CONFIG_STM32_COMP1_OUT) || defined(CONFIG_STM32_COMP2_OUT) || \
+    defined(CONFIG_STM32_COMP3_OUT) || defined(CONFIG_STM32_COMP4_OUT) || \
+    defined(CONFIG_STM32_COMP5_OUT) || defined(CONFIG_STM32_COMP6_OUT) || \
+    defined(CONFIG_STM32_COMP7_OUT)
+#  define COMP_OUT_GPIO
 #endif
 
 /****************************************************************************
@@ -137,17 +63,15 @@
 
 struct stm32_comp_s
 {
-  uint8_t blanking;             /* Blanking source */
-  uint8_t pol;                  /* Output polarity */
   uint8_t inm;                  /* Inverting input selection */
-  uint8_t out;                  /* Comparator output */
+  uint32_t gpio_inm;            /* Inverting input pin */
+  uint8_t inp;                  /* Non inverting input selection */
+  uint32_t gpio_inp;            /* Non-inverting input pin */
+  uint8_t pol;                  /* Output polarity */
+  uint8_t hyst;                 /* Comparator hysteresis */
+  uint8_t blanking;             /* Blanking source */
   uint8_t lock;                 /* Comparator Lock */
   uint32_t csr;                 /* Control and status register */
-#ifndef CONFIG_STM32_STM32F33XX
-  uint8_t mode;                 /* Comparator mode */
-  uint8_t hyst;                 /* Comparator hysteresis */
-                                /* @TODO: Window mode + INP selection */
-#endif
 };
 
 /****************************************************************************
@@ -156,31 +80,38 @@ struct stm32_comp_s
 
 /* COMP Register access */
 
-static inline void comp_modify_csr(FAR struct stm32_comp_s *priv,
+static inline void     comp_modify_csr(FAR struct stm32_comp_s *priv,
                                    uint32_t clearbits, uint32_t setbits);
 static inline uint32_t comp_getreg_csr(FAR struct stm32_comp_s *priv);
-static inline void comp_putreg_csr(FAR struct stm32_comp_s *priv,
+static inline void     comp_putreg_csr(FAR struct stm32_comp_s *priv,
                                    uint32_t value);
-static bool stm32_complock_get(FAR struct stm32_comp_s *priv);
-static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock);
 
 /* COMP Driver Methods */
 
+#if defined (CONFIG_COMP)
 static void comp_shutdown(FAR struct comp_dev_s *dev);
-static int comp_setup(FAR struct comp_dev_s *dev);
-static int comp_read(FAR struct comp_dev_s *dev);
-static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd,
+static int  comp_setup(FAR struct comp_dev_s *dev);
+static int  comp_read(FAR struct comp_dev_s *dev);
+static int  comp_ioctl(FAR struct comp_dev_s *dev, int cmd,
                       unsigned long arg);
+#endif
 
-/* Initialization */
+static int  comp_config(FAR struct stm32_comp_s *priv);
+static int  comp_enable(FAR struct stm32_comp_s *priv, bool enable);
+static bool comp_lock_get(FAR struct stm32_comp_s *priv);
+static int  comp_lock_set(FAR struct stm32_comp_s *priv, bool lock);
 
-static int stm32_compconfig(FAR struct stm32_comp_s *priv);
-static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable);
+static int  comp_config_inmpin(FAR struct stm32_comp_s *priv);
+static int  comp_config_inppin(FAR struct stm32_comp_s *priv);
+#if defined(COMP_OUT_GPIO)
+static int  comp_config_outpin(FAR struct stm32_comp_s *priv);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_COMP
 static const struct comp_ops_s g_compops =
 {
   .ao_shutdown  = comp_shutdown,
@@ -188,25 +119,26 @@ static const struct comp_ops_s g_compops =
   .ao_read      = comp_read,
   .ao_ioctl     = comp_ioctl,
 };
+#endif
 
 #ifdef CONFIG_STM32_COMP1
 static struct stm32_comp_s g_comp1priv =
 {
-  .blanking  = COMP1_BLANKING,
-  .pol  = COMP1_POL,
-  .inm  = COMP1_INM,
-  .out  = COMP1_OUTSEL,
-  .lock = COMP1_LOCK,
-  .csr  = STM32_COMP1_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP1_MODE,
-  .hyst = COMP1_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP1_INM,
+  .inp       = CONFIG_STM32_COMP1_INP,
+  .pol       = CONFIG_STM32_COMP1_POL,
+  .hyst      = CONFIG_STM32_COMP1_HYST,
+  .blanking  = CONFIG_STM32_COMP1_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP1_LOCK,
+  .gpio_inp  = GPIO_COMP1_INP,
+  .csr       = STM32_COMP1_CSR
 };
 
 static struct comp_dev_s g_comp1dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp1priv,
 };
 #endif
@@ -214,21 +146,21 @@ static struct comp_dev_s g_comp1dev =
 #ifdef CONFIG_STM32_COMP2
 static struct stm32_comp_s g_comp2priv =
 {
-  .blanking  = COMP2_BLANKING,
-  .pol  = COMP2_POL,
-  .inm  = COMP2_INM,
-  .out  = COMP2_OUTSEL,
-  .lock = COMP2_LOCK,
-  .csr  = STM32_COMP2_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP2_MODE,
-  .hyst = COMP2_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP2_INM,
+  .inp       = CONFIG_STM32_COMP2_INP,
+  .pol       = CONFIG_STM32_COMP2_POL,
+  .hyst      = CONFIG_STM32_COMP2_HYST,
+  .blanking  = CONFIG_STM32_COMP2_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP2_LOCK,
+  .gpio_inp  = GPIO_COMP2_INP,
+  .csr       = STM32_COMP2_CSR
 };
 
 static struct comp_dev_s g_comp2dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp2priv,
 };
 #endif
@@ -236,21 +168,21 @@ static struct comp_dev_s g_comp2dev =
 #ifdef CONFIG_STM32_COMP3
 static struct stm32_comp_s g_comp3priv =
 {
-  .blanking  = COMP3_BLANKING,
-  .pol  = COMP3_POL,
-  .inm  = COMP3_INM,
-  .out  = COMP3_OUTSEL,
-  .lock = COMP3_LOCK,
-  .csr  = STM32_COMP3_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP3_MODE,
-  .hyst = COMP3_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP3_INM,
+  .inp       = CONFIG_STM32_COMP3_INP,
+  .pol       = CONFIG_STM32_COMP3_POL,
+  .hyst      = CONFIG_STM32_COMP3_HYST,
+  .blanking  = CONFIG_STM32_COMP3_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP3_LOCK,
+  .gpio_inp  = GPIO_COMP3_INP,
+  .csr       = STM32_COMP3_CSR
 };
 
 static struct comp_dev_s g_comp3dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp3priv,
 };
 #endif
@@ -258,21 +190,21 @@ static struct comp_dev_s g_comp3dev =
 #ifdef CONFIG_STM32_COMP4
 static struct stm32_comp_s g_comp4priv =
 {
-  .blanking  = COMP4_BLANKING,
-  .pol  = COMP4_POL,
-  .inm  = COMP4_INM,
-  .out  = COMP4_OUTSEL,
-  .lock = COMP4_LOCK,
-  .csr  = STM32_COMP4_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP4_MODE,
-  .hyst = COMP4_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP4_INM,
+  .inp       = CONFIG_STM32_COMP4_INP,
+  .pol       = CONFIG_STM32_COMP4_POL,
+  .hyst      = CONFIG_STM32_COMP4_HYST,
+  .blanking  = CONFIG_STM32_COMP4_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP4_LOCK,
+  .gpio_inp  = GPIO_COMP4_INP,
+  .csr       = STM32_COMP4_CSR
 };
 
 static struct comp_dev_s g_comp4dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp4priv,
 };
 #endif
@@ -280,21 +212,21 @@ static struct comp_dev_s g_comp4dev =
 #ifdef CONFIG_STM32_COMP5
 static struct stm32_comp_s g_comp5priv =
 {
-  .blanking  = COMP5_BLANKING,
-  .pol  = COMP5_POL,
-  .inm  = COMP5_INM,
-  .out  = COMP5_OUTSEL,
-  .lock = COMP5_LOCK,
-  .csr  = STM32_COMP5_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP5_MODE,
-  .hyst = COMP5_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP5_INM,
+  .inp       = CONFIG_STM32_COMP5_INP,
+  .pol       = CONFIG_STM32_COMP5_POL,
+  .hyst      = CONFIG_STM32_COMP5_HYST,
+  .blanking  = CONFIG_STM32_COMP5_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP5_LOCK,
+  .gpio_inp  = GPIO_COMP5_INP,
+  .csr       = STM32_COMP5_CSR
 };
 
 static struct comp_dev_s g_comp5dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp5priv,
 };
 #endif
@@ -302,21 +234,21 @@ static struct comp_dev_s g_comp5dev =
 #ifdef CONFIG_STM32_COMP6
 static struct stm32_comp_s g_comp6priv =
 {
-  .blanking  = COMP6_BLANKING,
-  .pol  = COMP6_POL,
-  .inm  = COMP6_INM,
-  .out  = COMP6_OUTSEL,
-  .lock = COMP6_LOCK,
-  .csr  = STM32_COMP6_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP6_MODE,
-  .hyst = COMP6_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP6_INM,
+  .inp       = CONFIG_STM32_COMP6_INP,
+  .pol       = CONFIG_STM32_COMP6_POL,
+  .hyst      = CONFIG_STM32_COMP6_HYST,
+  .blanking  = CONFIG_STM32_COMP6_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP6_LOCK,
+  .gpio_inp  = GPIO_COMP6_INP,
+  .csr       = STM32_COMP6_CSR
 };
 
 static struct comp_dev_s g_comp6dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp6priv,
 };
 #endif
@@ -324,21 +256,21 @@ static struct comp_dev_s g_comp6dev =
 #ifdef CONFIG_STM32_COMP7
 static struct stm32_comp_s g_comp7priv =
 {
-  .blanking  = COMP7_BLANKING,
-  .pol  = COMP7_POL,
-  .inm  = COMP7_INM,
-  .out  = COMP7_OUTSEL,
-  .lock = COMP7_LOCK,
-  .csr  = STM32_COMP7_CSR,
-#ifndef CONFIG_STM32_STM32F33XX
-  .mode = COMP7_MODE,
-  .hyst = COMP7_HYST,
-#endif
+  .inm       = CONFIG_STM32_COMP7_INM,
+  .inp       = CONFIG_STM32_COMP7_INP,
+  .pol       = CONFIG_STM32_COMP7_POL,
+  .hyst      = CONFIG_STM32_COMP7_HYST,
+  .blanking  = CONFIG_STM32_COMP7_BLANKSEL,
+  .lock      = CONFIG_STM32_COMP7_LOCK,
+  .gpio_inp  = GPIO_COMP7_INP,
+  .csr       = STM32_COMP7_CSR
 };
 
 static struct comp_dev_s g_comp7dev =
 {
+#ifdef CONFIG_COMP
   .ad_ops  = &g_compops,
+#endif
   .ad_priv = &g_comp7priv,
 };
 #endif
@@ -416,7 +348,7 @@ static inline void comp_putreg_csr(FAR struct stm32_comp_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32_comp_complock_get
+ * Name: comp_lock_get
  *
  * Description:
  *   Get COMP lock bit state
@@ -429,7 +361,7 @@ static inline void comp_putreg_csr(FAR struct stm32_comp_s *priv,
  *
  ****************************************************************************/
 
-static bool stm32_complock_get(FAR struct stm32_comp_s *priv)
+static bool comp_lock_get(FAR struct stm32_comp_s *priv)
 {
   uint32_t regval;
 
@@ -439,7 +371,7 @@ static bool stm32_complock_get(FAR struct stm32_comp_s *priv)
 }
 
 /****************************************************************************
- * Name: stm32_complock
+ * Name: comp_lock_set
  *
  * Description:
  *   Lock comparator CSR register
@@ -453,13 +385,9 @@ static bool stm32_complock_get(FAR struct stm32_comp_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock)
+static int comp_lock_set(FAR struct stm32_comp_s *priv, bool lock)
 {
-  bool current;
-
-  current = stm32_complock_get(priv);
-
-  if (current)
+  if (comp_lock_get(priv))
     {
       if (lock == false)
         {
@@ -474,7 +402,7 @@ static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock)
         {
           comp_modify_csr(priv, 0, COMP_CSR_LOCK);
 
-          priv->lock = COMP_LOCK_RO;
+          priv->lock = 1;
         }
     }
 
@@ -482,10 +410,222 @@ static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock)
 }
 
 /****************************************************************************
- * Name: stm32_compconfig
+ * Name: comp_config_inmpin
  *
  * Description:
- *   Configure comparator and used I/Os
+ *   Configure comparator inverting input pin. The GPIO that COMPx inverting
+ *   input will be assigned is dependent of comparator number and must be
+ *   defined in board.h file. See table 196 in RM0440.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the COMP structure
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int comp_config_inmpin(FAR struct stm32_comp_s *priv)
+{
+#  if defined(CONFIG_STM32_COMP1)
+  if (priv->csr == STM32_COMP1_CSR)
+    {
+      stm32_configgpio(GPIO_COMP1_INM);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP2)
+  if (priv->csr == STM32_COMP2_CSR)
+    {
+      stm32_configgpio(GPIO_COMP2_INM);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP3)
+  if (priv->csr == STM32_COMP3_CSR)
+    {
+      stm32_configgpio(GPIO_COMP3_INM);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP4)
+  if (priv->csr == STM32_COMP4_CSR)
+    {
+      stm32_configgpio(GPIO_COMP4_INM);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP5)
+  if (priv->csr == STM32_COMP5_CSR)
+    {
+      stm32_configgpio(GPIO_COMP5_INM);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP6)
+  if (priv->csr == STM32_COMP6_CSR)
+    {
+      stm32_configgpio(GPIO_COMP6_INM);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP7)
+  if (priv->csr == STM32_COMP7_CSR)
+    {
+      stm32_configgpio(GPIO_COMP7_INM);
+    }
+#  endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: comp_config_inppin
+ *
+ * Description:
+ *   Configure comparator non-inverting input pin. The IO pin that COMPx
+ *   non-inverting input will be assigned is dependent of comparator number
+ *   and must be defined in board.h file.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the COMP structure
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int comp_config_inppin(FAR struct stm32_comp_s *priv)
+{
+#  if defined(CONFIG_STM32_COMP1)
+  if (priv->csr == STM32_COMP1_CSR)
+    {
+      stm32_configgpio(GPIO_COMP1_INP);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP2)
+  if (priv->csr == STM32_COMP2_CSR)
+    {
+      stm32_configgpio(GPIO_COMP2_INP);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP3)
+  if (priv->csr == STM32_COMP3_CSR)
+    {
+      stm32_configgpio(GPIO_COMP3_INP);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP4)
+  if (priv->csr == STM32_COMP4_CSR)
+    {
+      stm32_configgpio(GPIO_COMP4_INP);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP5)
+  if (priv->csr == STM32_COMP5_CSR)
+    {
+      stm32_configgpio(GPIO_COMP5_INP);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP6)
+  if (priv->csr == STM32_COMP6_CSR)
+    {
+      stm32_configgpio(GPIO_COMP6_INP);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP7)
+  if (priv->csr == STM32_COMP7_CSR)
+    {
+      stm32_configgpio(GPIO_COMP7_INP);
+    }
+#  endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: comp_config_outpin
+ *
+ * Description:
+ *   Configure comparator output GPIO pin.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the COMP structure
+ *
+ * Returned Value:
+ *  0 on success, a negated errno value on failure
+ *
+ ****************************************************************************/
+
+#if defined(COMP_OUT_GPIO)
+static int comp_config_outpin(FAR struct stm32_comp_s *priv)
+{
+#  if defined(CONFIG_STM32_COMP1_OUT)
+  if (priv->csr == STM32_COMP1_CSR)
+    {
+      stm32_configgpio(GPIO_COMP1_OUT);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP2_OUT)
+  if (priv->csr == STM32_COMP2_CSR)
+    {
+      ainfo("\tOUT assigned to: GPIO\n");
+      stm32_configgpio(GPIO_COMP2_OUT);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP3_OUT)
+  if (priv->csr == STM32_COMP3_CSR)
+    {
+      stm32_configgpio(GPIO_COMP3_OUT);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP4_OUT)
+  if (priv->csr == STM32_COMP4_CSR)
+    {
+      stm32_configgpio(GPIO_COMP4_OUT);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP5_OUT)
+  if (priv->csr == STM32_COMP5_CSR)
+    {
+      stm32_configgpio(GPIO_COMP5_OUT);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP6_OUT)
+  if (priv->csr == STM32_COMP6_CSR)
+    {
+      stm32_configgpio(GPIO_COMP6_OUT);
+    }
+#  endif
+
+#  if defined(CONFIG_STM32_COMP7_OUT)
+  if (priv->csr == STM32_COMP7_CSR)
+    {
+      stm32_configgpio(GPIO_COMP7_OUT);
+    }
+#  endif
+
+  return OK;
+}
+#endif /* COMP_OUT_GPIO */
+
+/****************************************************************************
+ * Name: comp_config
+ *
+ * Description:
+ *   Configure comparator and used I/Os. The pin configuration and the input
+ *   assignments are COMP index dependent.
  *
  * Input Parameters:
  *   priv   - A reference to the COMP structure
@@ -497,309 +637,109 @@ static int stm32_complock(FAR struct stm32_comp_s *priv, bool lock)
  *
  ****************************************************************************/
 
-static int stm32_compconfig(FAR struct stm32_comp_s *priv)
+static int comp_config(FAR struct stm32_comp_s *priv)
 {
   uint32_t regval = 0;
-  int index;
+  uint32_t value = 0;
 
-  /* Get comparator index */
+  /* Configure COMPx inverting input. */
 
-  switch (priv->csr)
-    {
-#ifdef CONFIG_STM32_COMP1
-    case STM32_COMP1_CSR:
-      index = 1;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP2
-    case STM32_COMP2_CSR:
-      index = 2;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP3
-    case STM32_COMP3_CSR:
-      index = 3;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP4
-    case STM32_COMP4_CSR:
-      index = 4;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP5
-    case STM32_COMP5_CSR:
-      index = 5;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP6
-    case STM32_COMP6_CSR:
-      index = 6;
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP7
-    case STM32_COMP7_CSR:
-      index = 7;
-      break;
-#endif
-
-    default:
-      return -EINVAL;
-    }
-
-  /* Configure non inverting input */
-
-  switch (index)
-    {
-#ifdef CONFIG_STM32_COMP1
-    case 1:
-      stm32_configgpio(GPIO_COMP1_INP);
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP2
-    case 2:
-      stm32_configgpio(GPIO_COMP2_INP);
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP3
-    case 3:
-      stm32_configgpio(GPIO_COMP3_INP);
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP4
-    case 4:
-      stm32_configgpio(GPIO_COMP4_INP);
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP5
-    case 5:
-      stm32_configgpio(GPIO_COMP5_INP);
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP6
-    case 6:
-      stm32_configgpio(GPIO_COMP6_INP);
-      break;
-#endif
-
-#ifdef CONFIG_STM32_COMP7
-    case 7:
-      stm32_configgpio(GPIO_COMP7_INP);
-      break;
-#endif
-
-    default:
-      return -EINVAL;
-    }
-
-  /* Set Comparator inverting input */
+  value = priv->inm << COMP_CSR_INMSEL_SHIFT;
 
   switch (priv->inm)
     {
-    case COMP_INMSEL_1P4VREF:
-      regval |= COMP_CSR_INMSEL_1P4VREF;
-      break;
+      case COMP_INM_1_4_VREF:
+      case COMP_INM_1_2_VREF:
+      case COMP_INM_3_4_VREF:
 
-    case COMP_INMSEL_1P2VREF:
-      regval |= COMP_CSR_INMSEL_1P2VREF;
-      break;
+        value |= COMP_CSR_BRGEN;    /* scaler resistor bridge enable */
 
-    case COMP_INMSEL_3P4VREF:
-      regval |= COMP_CSR_INMSEL_3P4VREF;
-      break;
+      case COMP_INM_VREF:
 
-    case COMP_INMSEL_VREF:
-      regval |= COMP_CSR_INMSEL_VREF;
-      break;
+        value |= COMP_CSR_SCALEN;    /* VREFINT scaler enable */
+        break;
 
-    case COMP_INMSEL_DAC1CH1:
-      regval |= COMP_CSR_INMSEL_DAC1CH1;
-      break;
-
-    case COMP_INMSEL_DAC1CH2:
-      regval |= COMP_CSR_INMSEL_DAC1CH2;
-      break;
-
-    case COMP_INMSEL_PIN:
-      {
-        /* INMSEL PIN configuration dependent on COMP index */
-
-        switch (index)
-          {
-            /* TODO: Inverting input pin configuration for COMP1/3/5/7 */
-
-#ifdef CONFIG_STM32_COMP2
-          case 2:
-            {
-              /* COMP2_INM can be PA2 or PA4 */
-
-              stm32_configgpio(GPIO_COMP2_INM);
-              regval |= (GPIO_COMP2_INM == GPIO_COMP2_INM_1 ?
-                         COMP_CSR_INMSEL_PA2 : COMP_CSR_INMSEL_PA4);
-              break;
-            }
-#endif
-
-#ifdef CONFIG_STM32_COMP4
-          case 4:
-            {
-              /* COMP4_INM can be PB2 or PA4 */
-
-              stm32_configgpio(GPIO_COMP4_INM);
-              regval |= (GPIO_COMP4_INM == GPIO_COMP4_INM_1 ?
-                         COMP_CSR_INMSEL_PB2 : COMP_CSR_INMSEL_PA4);
-              break;
-            }
-#endif
-
-#ifdef CONFIG_STM32_COMP6
-          case 6:
-            {
-              /* COMP6_INM can be PB15 or PA4 */
-
-              stm32_configgpio(GPIO_COMP6_INM);
-              regval |= (GPIO_COMP6_INM == GPIO_COMP6_INM_1 ?
-                         COMP_CSR_INMSEL_PB15 : COMP_CSR_INMSEL_PA4);
-              break;
-            }
-#endif
-
-          default :
-            return -EINVAL;
-          }
+      case COMP_INM_DAC_1:
+      case COMP_INM_DAC_2:
 
         break;
-      }
 
-    default:
-      return -EINVAL;
+      case COMP_INM_PIN_1:
+      case COMP_INM_PIN_2:
+
+        comp_config_inmpin(priv);
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  regval |= value;
+
+  /* Configure COMPx non-inverting input. */
+
+  ainfo("\tINP assigned to GPIO%d\n", priv->inp);
+
+  value = priv->inp << COMP_CSR_INPSEL_SHIFT;
+  regval |= value;
+
+  comp_config_inppin(priv);
+
+  /* Configure COMPx polarity */
+
+  if (priv->pol == COMP_POL_INVERTED)
+    {
+      value = COMP_CSR_POL;
+      regval |= value;
+    }
+
+  /* Configure COMPx hysteresis */
+
+  switch (priv->hyst)
+    {
+      case COMP_HYST_DIS:
+      case COMP_HYST_10MV:
+      case COMP_HYST_20MV:
+      case COMP_HYST_30MV:
+      case COMP_HYST_40MV:
+      case COMP_HYST_50MV:
+      case COMP_HYST_60MV:
+      case COMP_HYST_70MV:
+
+        value = priv->hyst << COMP_CSR_HYST_SHIFT;
+        regval |= value;
+        break;
+
+      default:
+        return -EINVAL;
+    }
+
+  /* Configure COMPx blanking signal source */
+
+  switch (priv->blanking)
+    {
+      case COMP_BLANKING_DIS:
+      case COMP_BLANKING_TIMX_OCY_1:
+      case COMP_BLANKING_TIMX_OCY_2:
+      case COMP_BLANKING_TIMX_OCY_3:
+      case COMP_BLANKING_TIMX_OCY_4:
+      case COMP_BLANKING_TIMX_OCY_5:
+      case COMP_BLANKING_TIMX_OCY_6:
+      case COMP_BLANKING_TIMX_OCY_7:
+
+        value = priv->blanking << COMP_CSR_BLANKING_SHIFT;
+        regval |= value;
+        break;
+
+      default:
+        return -EINVAL;
     }
 
   /* Set Comparator output selection */
 
-  switch (priv->out)
-    {
-    case COMP_OUTSEL_NOSEL:
-      regval |= COMP_CSR_OUTSEL_NOSEL;
-      break;
-
-    case COMP_OUTSEL_BRKACTH:
-      regval |= COMP_CSR_OUTSEL_BRKACTH;
-      break;
-
-    case COMP_OUTSEL_BRK2:
-      regval |= COMP_CSR_OUTSEL_BRK2;
-      break;
-
-    case COMP_OUTSEL_T1OCC:
-      regval |= COMP_CSR_OUTSEL_T1OCC;
-      break;
-
-    case COMP_OUTSEL_T3CAP3:
-      regval |= COMP_CSR_OUTSEL_T3CAP3;
-      break;
-
-    case COMP_OUTSEL_T2CAP2:
-      regval |= COMP_CSR_OUTSEL_T2CAP2;
-      break;
-
-    case COMP_OUTSEL_T1CAP1:
-      regval |= COMP_CSR_OUTSEL_T1CAP1;
-      break;
-
-    case COMP_OUTSEL_T2CAP4:
-      regval |= COMP_CSR_OUTSEL_T2CAP4;
-      break;
-
-    case COMP_OUTSEL_T15CAP2:
-      regval |= COMP_CSR_OUTSEL_T15CAP2;
-      break;
-
-    case COMP_OUTSEL_T2OCC:
-      if (index == 2)
-        {
-          regval |= COMP2_CSR_OUTSEL_T2OCC;
-        }
-      else if (index == 6)
-        {
-          regval |= COMP6_CSR_OUTSEL_T2OCC;
-        }
-
-      break;
-
-    case COMP_OUTSEL_T16OCC:
-      regval |= COMP_CSR_OUTSEL_T16OCC;
-      break;
-
-    case COMP_OUTSEL_T3CAP1:
-      regval |= COMP_CSR_OUTSEL_T3CAP1;
-      break;
-
-    case COMP_OUTSEL_T15OCC:
-      regval |= COMP_CSR_OUTSEL_T15OCC;
-      break;
-
-    case COMP_OUTSEL_T16CAP1:
-      regval |= COMP_CSR_OUTSEL_T16CAP1;
-      break;
-
-    case COMP_OUTSEL_T3OCC:
-      regval |= COMP_CSR_OUTSEL_T3OCC;
-      break;
-
-    default:
-      return -EINVAL;
-    }
-
-  /* Set Comparator output polarity */
-
-  regval |= (priv->pol == COMP_POL_INVERTED ? COMP_CSR_POL : 0);
-
-  /* Set Comparator output blanking source */
-
-  switch (priv->blanking)
-    {
-    case COMP_BLANKING_DIS:
-      regval |= COMP_CSR_BLANKING_DIS;
-      break;
-
-    case COMP_BLANKING_T1OC5:
-      regval |= COMP_CSR_BLANKING_T1OC5;
-      break;
-
-    case COMP_BLANKING_T3OC4:
-      regval |= COMP_CSR_BLANKING_T3OC4;
-      break;
-
-    case COMP_BLANKING_T2OC3:
-      regval |= COMP_CSR_BLANKING_T2OC3;
-      break;
-
-    case COMP_BLANKING_T15OC1:
-      regval |= COMP_CSR_BLANKING_T15OC1;
-      break;
-
-    case COMP_BLANKING_T2OC4:
-      regval |= COMP_CSR_BLANKING_T2OC4;
-      break;
-
-    case COMP_BLANKING_T15OC2:
-      regval |= COMP_CSR_BLANKING_T15OC1;
-      break;
-
-    default:
-      return -EINVAL;
-    }
+#if defined(COMP_OUT_GPIO)
+  comp_config_outpin(priv);
+#endif
 
   /* Save CSR register */
 
@@ -807,20 +747,20 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
 
   /* Enable Comparator */
 
-  stm32_compenable(priv, true);
+  comp_enable(priv, true);
 
   /* Lock Comparator if needed */
 
-  if (priv->lock == COMP_LOCK_RO)
+  if (priv->lock)
     {
-      stm32_complock(priv, true);
+      comp_lock_set(priv, true);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32_compenable
+ * Name: comp_enable
  *
  * Description:
  *   Enable/disable comparator
@@ -834,13 +774,13 @@ static int stm32_compconfig(FAR struct stm32_comp_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
+static int comp_enable(FAR struct stm32_comp_s *priv, bool enable)
 {
   bool lock;
 
   ainfo("enable: %d\n", enable ? 1 : 0);
 
-  lock = stm32_complock_get(priv);
+  lock = comp_lock_get(priv);
 
   if (lock)
     {
@@ -868,12 +808,12 @@ static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
 }
 
 /****************************************************************************
- * Name: adc_setup
+ * Name: comp_setup
  *
  * Description:
  *   Configure the COMP. This method is called the first time that the COMP
- *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching COMP interrupts.
+ *   device is opened. This will occur when the port is first opened. This
+ *   setup includes configuring and attaching COMP interrupts.
  *   Interrupts are all disabled upon return.
  *
  * Input Parameters:
@@ -882,18 +822,20 @@ static int stm32_compenable(FAR struct stm32_comp_s *priv, bool enable)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_COMP
 static int comp_setup(FAR struct comp_dev_s *dev)
 {
 #warning "Missing logic"
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: comp_shutdown
  *
  * Description:
- *   Disable the COMP.  This method is called when the COMP device is closed.
+ *   Disable the COMP. This method is called when the COMP device is closed.
  *   This method reverses the operation the setup method.
  *   Works only if COMP device is not locked.
  *
@@ -904,10 +846,12 @@ static int comp_setup(FAR struct comp_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_COMP
 static void comp_shutdown(FAR struct comp_dev_s *dev)
 {
-#warning "Missing logic"
+#  warning "Missing logic"
 }
+#endif
 
 /****************************************************************************
  * Name: comp_read
@@ -923,6 +867,7 @@ static void comp_shutdown(FAR struct comp_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_COMP
 static int comp_read(FAR struct comp_dev_s *dev)
 {
   FAR struct stm32_comp_s *priv;
@@ -931,8 +876,9 @@ static int comp_read(FAR struct comp_dev_s *dev)
   priv = dev->ad_priv;
   regval = comp_getreg_csr(priv);
 
-  return (((regval & COMP_CSR_OUT) == 0) ? 0 : 1);
+  return (((regval & COMP_CSR_VALUE) == 0) ? 0 : 1);
 }
+#endif
 
 /****************************************************************************
  * Name: comp_ioctl
@@ -950,11 +896,13 @@ static int comp_read(FAR struct comp_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_COMP
 static int comp_ioctl(FAR struct comp_dev_s *dev, int cmd, unsigned long arg)
 {
 #warning "Missing logic"
   return -ENOTTY;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -1044,7 +992,7 @@ FAR struct comp_dev_s *stm32_compinitialize(int intf)
 
   comp = dev->ad_priv;
 
-  ret = stm32_compconfig(comp);
+  ret = comp_config(comp);
   if (ret < 0)
     {
       aerr("ERROR: Failed to initialize COMP%d: %d\n", intf, ret);
@@ -1054,10 +1002,4 @@ FAR struct comp_dev_s *stm32_compinitialize(int intf)
   return dev;
 }
 
-#endif /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX ||
-        * CONFIG_STM32_STM32F37XX
-        */
-
-#endif /* CONFIG_STM32_COMP2 || CONFIG_STM32_COMP4 ||
-        * CONFIG_STM32_COMP6
-        */
+#endif /* CONFIG_STM32_COMP */

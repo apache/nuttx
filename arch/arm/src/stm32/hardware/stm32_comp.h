@@ -43,6 +43,12 @@
 #  else
 #    error "Device not supported."
 #  endif
+#elif defined(CONFIG_STM32_HAVE_IP_COMP_V2)
+#  if defined(CONFIG_STM32_STM32G4XXX)
+#    include "stm32g4xxxx_comp.h"
+#  else
+#    error "Device not supported."
+#  endif
 #else
 #  error "STM32 COMP IP not supported."
 #endif

@@ -24,16 +24,31 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <errno.h>
+#include <assert.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
+#include <nuttx/analog/comp.h>
+#include <nuttx/analog/ioctl.h>
+
+#include "arm_arch.h"
 #include "chip.h"
+#include "stm32_comp.h"
+#include "stm32_gpio.h"
 
 /* This file is only a thin shell that includes the correct COMP
- * implementation. At this moment only STM32 COMP IP version 1 device is
- * suportted.
+ * implementation. At this moment STM32 COMP IP versions 1 and 2 are
+ * supported.
  *   - STM32 COMP IP version 1: SMT32F33XX
+ *   - STM32 COMP IP version 2: SMT32G4XXX
  */
 
 #if defined(CONFIG_STM32_HAVE_IP_COMP_V1)
 #  include "stm32_comp_v1.c"
+#elif defined(CONFIG_STM32_HAVE_IP_COMP_V2)
+#  include "stm32_comp_v2.c"
 #else
 #  error "STM32 COMP IP version not supported."
 #endif

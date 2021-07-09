@@ -43,6 +43,14 @@
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ESP32C3_MTD_PATH      "/dev/esp32c3flash"
+
+#define ESP32C3_FS_MOUNT_PT   CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,6 +97,27 @@ int esp32c3_spiflash_init(void)
       return ret;
     }
 
+#elif defined (CONFIG_ESP32C3_SPIFLASH_LITTLEFS)
+  ret = register_mtddriver(ESP32C3_MTD_PATH, mtd, 0755, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Register MTD failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = mount(ESP32C3_MTD_PATH, ESP32C3_FS_MOUNT_PT,
+              "littlefs", 0, NULL);
+  if (ret < 0)
+    {
+      ret = mount(ESP32C3_MTD_PATH, ESP32C3_FS_MOUNT_PT,
+                  "littlefs", 0, "forceformat");
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 errno);
+          return ret;
+        }
+    }
 #else
   ret = register_mtddriver("/dev/esp32c3flash", mtd, 0755, NULL);
   if (ret < 0)
