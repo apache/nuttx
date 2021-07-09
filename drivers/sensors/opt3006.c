@@ -108,7 +108,6 @@ struct opt3006_dev_s
   bool activated;                           /* Sensor working state */
   uint64_t timestamp;                       /* Units is microseconds */
   unsigned int interval;                    /* Sensor acquisition interval */
-  FAR struct i2c_master_s *i2c;             /* I2C interface */
   FAR struct opt3006_config_s *config;      /* The board config function */
   FAR opt3006_registers_t *devreg;          /* opt3006 device register */
   struct work_s work;                       /* Interrupt handler worker */
@@ -305,7 +304,7 @@ static int opt3006_i2c_read(FAR struct opt3006_dev_s *priv, uint8_t regaddr,
 
   /* Write 8 bits to device, then read 16-bits from the device */
 
-  ret = i2c_writeread(priv->i2c, &config, &regaddr, 1, buffer, 2);
+  ret = i2c_writeread(priv->config->i2c, &config, &regaddr, 1, buffer, 2);
   if (ret < 0)
     {
       snerr("I2C writeread failed: %d\n", ret);
@@ -362,7 +361,7 @@ static int opt3006_i2c_write(FAR struct opt3006_dev_s *priv,
 
   /* Write the Modbus write request. */
 
-  ret = i2c_write(priv->i2c, &config, buf, sizeof(buf));
+  ret = i2c_write(priv->config->i2c, &config, buf, sizeof(buf));
   if (ret < 0)
     {
       snerr("I2C write failed: %d\n", ret);
@@ -1071,7 +1070,6 @@ int opt3006_register(int devno, FAR const struct opt3006_config_s *config)
       return -ENOMEM;
     }
 
-  priv->i2c = config->i2c;
   priv->config = config;
   priv->devreg = &g_opt3006_devreg;
   priv->lower.ops = &g_opt3006_ops;
@@ -1107,14 +1105,14 @@ int opt3006_register(int devno, FAR const struct opt3006_config_s *config)
   /* Interrupt register */
 
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->pin,
-                           IOEXPANDER_DIRECTION_IN);
+                           IOEXPANDER_DIRECTION_IN_PULLUP);
   if (ret < 0)
     {
       snerr("Failed to set direction: %d\n", ret);
       goto err;
     }
 
-  ioephanle = IOEP_ATTACH(priv->config->ioedev, priv->config->pinset,
+  ioephanle = IOEP_ATTACH(priv->config->ioedev, (1 << priv->config->pin),
                           opt3006_interrupt_handler, priv);
   if (ioephanle == NULL)
     {

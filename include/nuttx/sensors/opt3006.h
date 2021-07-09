@@ -46,7 +46,6 @@ struct opt3006_config_s
   int pin;                                /* Interrupt pin */
   FAR struct i2c_master_s *i2c;           /* I2C interface */
   FAR struct ioexpander_dev_s *ioedev;    /* Ioexpander device */
-  uint32_t pinset;                        /* Interrupt pin set */
 };
 
 /****************************************************************************
