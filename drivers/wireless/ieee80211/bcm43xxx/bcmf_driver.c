@@ -1294,6 +1294,10 @@ int bcmf_wl_set_auth_param(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
 
           switch (iwr->u.param.value)
             {
+              case IW_AUTH_CIPHER_NONE:
+                cipher_mode = OPEN_AUTH;
+                break;
+
               case IW_AUTH_CIPHER_WEP40:
               case IW_AUTH_CIPHER_WEP104:
                 cipher_mode = WEP_ENABLED;
