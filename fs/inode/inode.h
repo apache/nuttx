@@ -242,8 +242,33 @@ int inode_find(FAR struct inode_search_s *desc);
  *
  ****************************************************************************/
 
-struct stat;  /* Forward reference */
 int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve);
+
+/****************************************************************************
+ * Name: inode_chstat
+ *
+ * Description:
+ *   The inode_chstat() function will change information about an 'inode'
+ *   in the pseudo file system according the area pointed to by 'buf'.
+ *
+ *   The 'buf' argument is a pointer to a stat structure, as defined in
+ *   <sys/stat.h>, which information is placed concerning the file.
+ *
+ * Input Parameters:
+ *   inode   - The inode of interest
+ *   buf     - The caller provide location in which to apply information
+ *             about the inode.
+ *   flags   - The vaild field in buf
+ *   resolve - Whether to resolve the symbolic link
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int inode_chstat(FAR struct inode *inode,
+                 FAR const struct stat *buf, int flags, int resolve);
 
 /****************************************************************************
  * Name: inode_getpath

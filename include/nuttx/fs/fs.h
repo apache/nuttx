@@ -154,6 +154,16 @@
 #define DIRENT_SETPSEUDONODE(f) do (f) |= DIRENTFLAGS_PSEUDONODE; while (0)
 #define DIRENT_ISPSEUDONODE(f) (((f) & DIRENTFLAGS_PSEUDONODE) != 0)
 
+/* The status change flags.
+ * These should be or-ed together to figure out what want to change.
+ */
+
+#define CH_STAT_MODE       (1 << 0)
+#define CH_STAT_UID        (1 << 1)
+#define CH_STAT_GID        (1 << 2)
+#define CH_STAT_ATIME      (1 << 3)
+#define CH_STAT_MTIME      (1 << 4)
+
 /* nx_umount() is equivalent to nx_umount2() with flags = 0 */
 
 #define umount(t)       umount2(t,0)
@@ -276,6 +286,8 @@ struct mountpt_operations
   int     (*sync)(FAR struct file *filep);
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
   int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
+  int     (*fchstat)(FAR const struct file *filep,
+                     FAR const struct stat *buf, int flags);
   int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* Directory operations */
@@ -307,10 +319,8 @@ struct mountpt_operations
             FAR const char *newrelpath);
   int     (*stat)(FAR struct inode *mountpt, FAR const char *relpath,
             FAR struct stat *buf);
-
-  /* NOTE:  More operations will be needed here to support:  disk usage
-   * stats file stat(), file attributes, file truncation, etc.
-   */
+  int     (*chstat)(FAR struct inode *mountpt, FAR const char *relpath,
+            FAR const struct stat *buf, int flags);
 };
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
@@ -1357,6 +1367,31 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf);
  ****************************************************************************/
 
 int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
+
+/****************************************************************************
+ * Name: file_fchstat
+ *
+ * Description:
+ *   file_fchstat() is an internal OS interface. It is functionally similar
+ *   to the combination of fchmod/fchown/futimens standard interface except:
+ *
+ *    - It does not modify the errno variable,
+ *    - It is not a cancellation point,
+ *    - It does not handle socket descriptors, and
+ *    - It accepts a file structure instance instead of file descriptor.
+ *
+ * Input Parameters:
+ *   filep  - File structure instance
+ *   buf    - The stat to be modified
+ *   flags  - The vaild field in buf
+ *
+ * Returned Value:
+ *   Upon successful completion, 0 shall be returned. Otherwise, the
+ *   negative errno shall be returned to indicate the error.
+ *
+ ****************************************************************************/
+
+int file_fchstat(FAR struct file *filep, FAR struct stat *buf, int flags);
 
 /****************************************************************************
  * Name: nx_unlink
