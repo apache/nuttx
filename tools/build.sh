@@ -37,7 +37,7 @@ function mount_unionfs()
 function build_board()
 {
   echo -e "Build command line:"
-  echo -e "  ${TOOLSDIR}/configure.sh -e $*"
+  echo -e "  ${TOOLSDIR}/configure.sh -e $1"
   echo -e "  make -C ${NUTTXDIR} EXTRAFLAGS=[-Wno-cpp] ${@:2}"
   echo -e "  make -C ${NUTTXDIR} savedefconfig"
 
@@ -51,7 +51,7 @@ function build_board()
   fi
   export PATH=${ROOTDIR}/prebuilts/kconfig-frontends/bin:$PATH
 
-  if ! ${TOOLSDIR}/configure.sh -e $*; then
+  if ! ${TOOLSDIR}/configure.sh -e $1; then
     echo "Error: ############# config ${1} fail ##############"
     exit 1
   fi
