@@ -36,59 +36,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#include <nuttx/config.h>
-
-/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The first 16 sectors are 4kB in size and thus not supported as progmem. */
+/* The first 16 sectors are 4kB in size. */
 
 #define LPC17_40_FLASH_NUM_4K_SECTORS  16
 
-/* The number of 32kB sectors depends on the target device's flash size */
+/* The number of 32kB sectors depends on the target device's flash size. */
 
 #define LPC17_40_FLASH_NUM_32K_SECTORS \
   ((LPC17_40_FLASH_SIZE - LPC17_40_FLASH_NUM_4K_SECTORS * 4096) / 32768)
 
-/* The number of 32kB sectors to be used for progmem is configurable.
- * The sectors at the end of the flash are used for progmem, the rest is
- * left for code and data.
- */
+/* The total number of sectors is the sum of the 4k and 32k sectors. */
 
-#define LPC17_40_PROGMEM_START_SECTOR \
-  (LPC17_40_FLASH_NUM_4K_SECTORS + LPC17_40_FLASH_NUM_32K_SECTORS - \
-   CONFIG_LPC17_40_PROGMEM_NSECTORS)
+#define LPC17_40_FLASH_NUM_SECTORS \
+  (LPC17_40_FLASH_NUM_4K_SECTORS + LPC17_40_FLASH_NUM_32K_SECTORS)
 
-/* Base address of the flash segment used for progmem. */
+/* Size of a write page. */
 
-#define LPC17_40_PROGMEM_START_ADDR \
-  (LPC17_40_FLASH_NUM_4K_SECTORS * 4096 + \
-   (LPC17_40_PROGMEM_START_SECTOR - LPC17_40_FLASH_NUM_4K_SECTORS) * 32768)
-
-/* Size of the flash segment used for progmem. */
-
-#define LPC17_40_PROGMEM_SIZE (CONFIG_LPC17_40_PROGMEM_NSECTORS * 32768)
-
-/* Size of a read/write page. */
-
-#define LPC17_40_PROGMEM_PAGE_SIZE 256
-
-/* Total number of read/write pages. */
-
-#define LPC17_40_PROGMEM_NUM_PAGES (LPC17_40_PROGMEM_SIZE / LPC17_40_PROGMEM_PAGE_SIZE)
-
-/* Size of an erase page.  This driver only supports the 32kB sectors. */
-
-#define LPC17_40_PROGMEM_SECTOR_SIZE 32768
-
-/* Number of read/write pages per erase page. */
-
-#define LPC17_40_PROGMEM_PAGES_PER_SECTOR \
-  (LPC17_40_PROGMEM_SECTOR_SIZE / LPC17_40_PROGMEM_PAGE_SIZE)
+#define LPC17_40_WRITE_SIZE 256
 
 /* LPC17 entry point for In-Application-Programming boot rom service
  * function
