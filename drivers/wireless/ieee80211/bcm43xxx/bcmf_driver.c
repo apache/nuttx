@@ -1066,7 +1066,7 @@ int bcmf_wl_start_scan(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
           /* Scan specific ESSID */
 
           memcpy(scan_params.params.ssid.SSID, req->essid, req->essid_len);
-          scan_params.params.ssid.SSID_len = req->essid_len;
+          scan_params.params.ssid.ssid_len = req->essid_len;
         }
     }
   else
@@ -1428,7 +1428,7 @@ int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
       return -EINVAL;
     }
 
-  ssid.SSID_len = iwr->u.essid.length;
+  ssid.ssid_len = iwr->u.essid.length;
   memcpy(ssid.SSID, iwr->u.essid.pointer, iwr->u.essid.length);
 
   /* Configure AP SSID and trig authentication request */
