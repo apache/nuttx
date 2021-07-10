@@ -247,6 +247,7 @@ SYSCALL_LOOKUP(fstat,                      2)
 SYSCALL_LOOKUP(statfs,                     2)
 SYSCALL_LOOKUP(fstatfs,                    2)
 SYSCALL_LOOKUP(telldir,                    1)
+SYSCALL_LOOKUP(sendfile,                   4)
 
 #if defined(CONFIG_FS_RAMMAP)
   SYSCALL_LOOKUP(munmap,                   2)
@@ -268,10 +269,6 @@ SYSCALL_LOOKUP(telldir,                    1)
 #ifdef CONFIG_FILE_STREAM
   SYSCALL_LOOKUP(fs_fdopen,                4)
   SYSCALL_LOOKUP(nxsched_get_streams,      0)
-#endif
-
-#ifdef CONFIG_NET_SENDFILE
-  SYSCALL_LOOKUP(sendfile,                 4)
 #endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT

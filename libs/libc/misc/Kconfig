@@ -3,12 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIB_SENDFILE_BUFSIZE
-	int "sendfile() buffer size"
-	default 512
-	---help---
-		Size of the I/O buffer to allocate in sendfile().  Default: 512b
-
 comment "Non-standard Library Support"
 
 config LIB_CRC64_FAST
