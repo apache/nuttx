@@ -192,6 +192,15 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
     }
   else
 #endif
+#ifdef CONFIG_NET
+  if (INODE_IS_SOCKET(inode))
+    {
+      /* Let the networking logic handle the fstat() */
+
+      ret = psock_fstat(file_socket(filep), buf);
+    }
+  else
+#endif
     {
       /* Check if the inode is a proxy for a block or MTD driver */
 
@@ -243,21 +252,6 @@ int fstat(int fd, FAR struct stat *buf)
     {
       goto errout;
     }
-
-#ifdef CONFIG_NET
-  if (INODE_IS_SOCKET(filep->f_inode))
-    {
-      /* Let the networking logic handle the fstat() */
-
-      ret = psock_fstat(sockfd_socket(fd), buf);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-
-      return OK;
-    }
-#endif
 
   /* Perform the fstat operation */
 
