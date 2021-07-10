@@ -56,6 +56,20 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
       return -EBADF;
     }
 
+  /* check for operations on a socket descriptor */
+
+#ifdef CONFIG_NET
+  if (INODE_IS_SOCKET(filep->f_inode) &&
+      cmd != F_DUPFD && cmd != F_GETFD && cmd != F_SETFD)
+    {
+      /* Yes.. defer socket descriptor operations to
+       * psock_vfcntl(). The errno is not set on failures.
+       */
+
+      return psock_vfcntl(file_socket(filep), cmd, ap);
+    }
+#endif
+
   switch (cmd)
     {
       case F_DUPFD:
@@ -239,27 +253,11 @@ static int nx_vfcntl(int fd, int cmd, va_list ap)
     {
       DEBUGASSERT(filep != NULL);
 
-      /* check for operations on a socket descriptor */
+      /* Let file_vfcntl() do the real work.  The errno is not set on
+       * failures.
+       */
 
-#ifdef CONFIG_NET
-      if (INODE_IS_SOCKET(filep->f_inode) &&
-          cmd != F_DUPFD && cmd != F_GETFD && cmd != F_SETFD)
-        {
-          /* Yes.. defer socket descriptor operations to
-           * psock_vfcntl(). The errno is not set on failures.
-           */
-
-          ret = psock_vfcntl(sockfd_socket(fd), cmd, ap);
-        }
-      else
-#endif
-        {
-          /* Let file_vfcntl() do the real work.  The errno is not set on
-           * failures.
-           */
-
-          ret = file_vfcntl(filep, cmd, ap);
-        }
+      ret = file_vfcntl(filep, cmd, ap);
     }
 
   return ret;
