@@ -168,6 +168,7 @@ typedef uint8_t sockcaps_t;
  */
 
 struct file;    /* Forward reference */
+struct stat;    /* Forward reference */
 struct socket;  /* Forward reference */
 struct pollfd;  /* Forward reference */
 
@@ -521,6 +522,7 @@ int sockfd_allocate(FAR struct socket *psock, int oflags);
  *
  ****************************************************************************/
 
+FAR struct socket *file_socket(FAR struct file *filep);
 FAR struct socket *sockfd_socket(int sockfd);
 
 /****************************************************************************
@@ -1312,8 +1314,6 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2);
  *
  ****************************************************************************/
 
-struct stat;  /* Forward reference.  See sys/stat.h */
-
 int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
 
 /****************************************************************************
@@ -1379,7 +1379,6 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SENDFILE
-struct file;
 ssize_t psock_sendfile(FAR struct socket *psock, FAR struct file *infile,
                        FAR off_t *offset, size_t count);
 #endif
