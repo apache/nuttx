@@ -63,6 +63,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_SMP_NCPUS
+#  define CONFIG_SMP_NCPUS       1
+#endif
+
 #ifdef CONFIG_SMP
 /* This set of all CPUs */
 
@@ -92,7 +96,6 @@
 
 volatile dq_queue_t g_readytorun;
 
-#ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
  * The g_readytorun is still used but in the SMP case it will contain only:
  *
@@ -123,19 +126,15 @@ volatile dq_queue_t g_readytorun;
  * always the CPU's IDLE task.
  */
 
+#ifdef CONFIG_SMP
 volatile dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+#endif
 
 /* g_running_tasks[] holds a references to the running task for each cpu.
  * It is valid only when up_interrupt_context() returns true.
  */
 
 FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
-
-#else
-
-FAR struct tcb_s *g_running_tasks[1];
-
-#endif
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
@@ -303,11 +302,7 @@ uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  * bringing up the rest of the system.
  */
 
-#ifdef CONFIG_SMP
 static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
-#else
-static struct task_tcb_s g_idletcb[1];
-#endif
 
 /* This is the name of the idle task */
 
@@ -324,11 +319,7 @@ static const char g_idlename[] = "Idle Task";
  * do things s little differently here for the IDLE tasks.
  */
 
-#ifdef CONFIG_SMP
 static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
-#else
-static FAR char *g_idleargv[1][2];
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -352,7 +343,6 @@ static FAR char *g_idleargv[1][2];
 
 void nx_start(void)
 {
-  int cpu = 0;
   int i;
 
   sinfo("Entry\n");
@@ -399,18 +389,16 @@ void nx_start(void)
 
   /* Initialize the IDLE task TCB *******************************************/
 
-#ifdef CONFIG_SMP
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++, g_lastpid++)
-#endif
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       FAR dq_queue_t *tasklist;
       int hashndx;
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
-      hashndx                = PIDHASH(g_lastpid);
-      g_pidhash[hashndx].tcb = &g_idletcb[cpu].cmn;
-      g_pidhash[hashndx].pid = g_lastpid;
+      hashndx                = PIDHASH(i);
+      g_pidhash[hashndx].tcb = &g_idletcb[i].cmn;
+      g_pidhash[hashndx].pid = i;
 
       /* Initialize a TCB for this thread of execution.  NOTE:  The default
        * value for most components of the g_idletcb are zero.  The entire
@@ -419,9 +407,9 @@ void nx_start(void)
        * that has pid == 0 and sched_priority == 0.
        */
 
-      memset((void *)&g_idletcb[cpu], 0, sizeof(struct task_tcb_s));
-      g_idletcb[cpu].cmn.pid        = g_lastpid;
-      g_idletcb[cpu].cmn.task_state = TSTATE_TASK_RUNNING;
+      memset((void *)&g_idletcb[i], 0, sizeof(struct task_tcb_s));
+      g_idletcb[i].cmn.pid        = i;
+      g_idletcb[i].cmn.task_state = TSTATE_TASK_RUNNING;
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
        * the start_t entry point is not saved.  That is acceptable, however,
@@ -430,16 +418,16 @@ void nx_start(void)
        */
 
 #ifdef CONFIG_SMP
-      if (cpu > 0)
+      if (i > 0)
         {
-          g_idletcb[cpu].cmn.start      = nx_idle_trampoline;
-          g_idletcb[cpu].cmn.entry.main = (main_t)nx_idle_trampoline;
+          g_idletcb[i].cmn.start      = nx_idle_trampoline;
+          g_idletcb[i].cmn.entry.main = (main_t)nx_idle_trampoline;
         }
       else
 #endif
         {
-          g_idletcb[cpu].cmn.start      = nx_start;
-          g_idletcb[cpu].cmn.entry.main = (main_t)nx_start;
+          g_idletcb[i].cmn.start      = nx_start;
+          g_idletcb[i].cmn.entry.main = (main_t)nx_start;
         }
 
       /* Set the task flags to indicate that this is a kernel thread and, if
@@ -447,13 +435,13 @@ void nx_start(void)
        */
 
 #ifdef CONFIG_SMP
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
-                                  TCB_FLAG_NONCANCELABLE |
-                                  TCB_FLAG_CPU_LOCKED);
-      g_idletcb[cpu].cmn.cpu   = cpu;
+      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                TCB_FLAG_NONCANCELABLE |
+                                TCB_FLAG_CPU_LOCKED);
+      g_idletcb[i].cmn.cpu   = i;
 #else
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
-                                  TCB_FLAG_NONCANCELABLE);
+      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP
@@ -465,18 +453,18 @@ void nx_start(void)
        * the IDLE task.
        */
 
-      g_idletcb[cpu].cmn.affinity = SCHED_ALL_CPUS;
+      g_idletcb[i].cmn.affinity = SCHED_ALL_CPUS;
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0
       /* Set the IDLE task name */
 
 #  ifdef CONFIG_SMP
-      snprintf(g_idletcb[cpu].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
-               cpu);
+      snprintf(g_idletcb[i].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
+               i);
 #  else
-      strncpy(g_idletcb[cpu].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
-      g_idletcb[cpu].cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
+      strncpy(g_idletcb[i].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
+      g_idletcb[i].cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
 #  endif
 #endif
 
@@ -489,38 +477,40 @@ void nx_start(void)
        */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-      g_idleargv[cpu][0]  = g_idletcb[cpu].cmn.name;
+      g_idleargv[i][0]  = g_idletcb[i].cmn.name;
 #else
-      g_idleargv[cpu][0]  = (FAR char *)g_idlename;
+      g_idleargv[i][0]  = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
-      g_idleargv[cpu][1]  = NULL;
-      g_idletcb[cpu].argv = &g_idleargv[cpu][0];
+      g_idleargv[i][1]  = NULL;
+      g_idletcb[i].argv = &g_idleargv[i][0];
 
       /* Then add the idle task's TCB to the head of the current ready to
        * run list.
        */
 
 #ifdef CONFIG_SMP
-      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, cpu);
+      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, i);
 #else
       tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
 #endif
-      dq_addfirst((FAR dq_entry_t *)&g_idletcb[cpu], tasklist);
+      dq_addfirst((FAR dq_entry_t *)&g_idletcb[i], tasklist);
 
       /* Mark the idle task as the running task */
 
-      g_running_tasks[cpu] = &g_idletcb[cpu].cmn;
+      g_running_tasks[i] = &g_idletcb[i].cmn;
 
       /* Initialize the 1st processor-specific portion of the TCB
        * Note: other idle thread get initialized in nx_smpstart
        */
 
-      if (cpu == 0)
+      if (i == 0)
         {
-          up_initial_state(&g_idletcb[cpu].cmn);
-          up_stack_frame(&g_idletcb[cpu].cmn, sizeof(struct task_info_s));
+          up_initial_state(&g_idletcb[i].cmn);
+          up_stack_frame(&g_idletcb[i].cmn, sizeof(struct task_info_s));
         }
     }
+
+  g_lastpid = CONFIG_SMP_NCPUS - 1;
 
   /* Task lists are initialized */
 
@@ -714,40 +704,36 @@ void nx_start(void)
 
   sched_note_start(&g_idletcb[0].cmn);
 
-#ifdef CONFIG_SMP
   /* Initialize the IDLE group for the IDLE task of each CPU */
 
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-#endif
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       /* Allocate the IDLE group */
 
-      DEBUGVERIFY(group_allocate(&g_idletcb[cpu], g_idletcb[cpu].cmn.flags));
+      DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
 
-#ifdef CONFIG_SMP
-      if (cpu > 0)
+      if (i > 0)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 
-          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[cpu]));
+          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[i]));
         }
       else
-#endif
         {
           /* Create stdout, stderr, stdin on the CPU0 IDLE task.  These
            * will be inherited by all of the threads created by the CPU0
            * IDLE task.
            */
 
-          DEBUGVERIFY(group_setupidlefiles(&g_idletcb[cpu]));
+          DEBUGVERIFY(group_setupidlefiles(&g_idletcb[i]));
         }
 
       /* Complete initialization of the IDLE group.  Suppress retention
        * of child status in the IDLE group.
        */
 
-      DEBUGVERIFY(group_initialize(&g_idletcb[cpu]));
-      g_idletcb[cpu].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
+      DEBUGVERIFY(group_initialize(&g_idletcb[i]));
+      g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
     }
 
   /* Start SYSLOG ***********************************************************/
