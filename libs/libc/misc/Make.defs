@@ -34,8 +34,6 @@ CSRCS += lib_uadd32x64.c lib_uadd64.c lib_usub64x32.c lib_usub64.c
 
 # Add C files that depend on file OR socket descriptors
 
-CSRCS += lib_sendfile.c
-
 ifeq ($(CONFIG_FILE_STREAM),y)
 CSRCS += lib_streamsem.c
 endif

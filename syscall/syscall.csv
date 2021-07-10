@@ -139,7 +139,7 @@
 "sem_unlink","semaphore.h","defined(CONFIG_FS_NAMED_SEMAPHORES)","int","FAR const char *"
 "sem_wait","semaphore.h","","int","FAR sem_t *"
 "send","sys/socket.h","defined(CONFIG_NET)","ssize_t","int","FAR const void *","size_t","int"
-"sendfile","sys/sendfile.h","defined(CONFIG_NET_SENDFILE)","ssize_t","int","int","FAR off_t *","size_t"
+"sendfile","sys/sendfile.h","","ssize_t","int","int","FAR off_t *","size_t"
 "sendmsg","sys/socket.h","defined(CONFIG_NET)","ssize_t","int","FAR struct msghdr *","int"
 "sendto","sys/socket.h","defined(CONFIG_NET)","ssize_t","int","FAR const void *","size_t","int","FAR const struct sockaddr *","socklen_t"
 "setenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char *","FAR const char *","int"

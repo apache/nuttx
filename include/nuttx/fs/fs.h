@@ -978,18 +978,6 @@ int lib_flushall(FAR struct streamlist *list);
 #endif
 
 /****************************************************************************
- * Name: lib_sendfile
- *
- * Description:
- *   Transfer a file
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SENDFILE
-ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
-#endif
-
-/****************************************************************************
  * Name: file_read
  *
  * Description:
@@ -1118,6 +1106,18 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
 
 ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
                     size_t nbytes, off_t offset);
+
+/****************************************************************************
+ * Name: file_sendfile
+ *
+ * Description:
+ *   Equivalent to the standard sendfile function except that is accepts a
+ *   struct file instance instead of a file descriptor.
+ *
+ ****************************************************************************/
+
+ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
+                      off_t *offset, size_t count);
 
 /****************************************************************************
  * Name: file_seek
