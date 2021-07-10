@@ -39,20 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-/* Reset, preserving the number of symbolic links encountered so far */
-
-#  define RESET_BUF(b) \
-  { \
-    uint16_t save = (b)->st_count; \
-    memset((b), 0, sizeof(struct stat)); \
-    (b)->st_count = save; \
-  }
-#else
-/* Reset everything */
-
-#  define RESET_BUF(b) memset((b), 0, sizeof(struct stat));
-#endif
+#define RESET_BUF(b) memset((b), 0, sizeof(struct stat));
 
 /****************************************************************************
  * Private Function Prototypes
@@ -67,6 +54,15 @@ static int stat_recursive(FAR const char *path,
 
 /****************************************************************************
  * Name: stat_recursive
+ *
+ * Input Parameters:
+ *   path    - The inode of interest
+ *   buf     - The caller-provided location in which to return information
+ *             about the inode.
+ *   resolve - Whether to resolve the symbolic link:
+ *               0: Don't resolve the symbolic line
+ *               1: Resolve the symbolic link
+ *             >=2: The recursive count in the resolving process
  *
  * Returned Value:
  *   Zero on success; < 0 on failure:
@@ -178,9 +174,6 @@ int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve)
    * recursive if soft link support is enabled.
    */
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  buf->st_count = 0;
-#endif
   return stat_recursive(path, buf, resolve);
 }
 
@@ -240,9 +233,12 @@ int lstat(FAR const char *path, FAR struct stat *buf)
  *
  * Input Parameters:
  *   inode   - The inode of interest
- *   buf     - The caller provide location in which to return information
+ *   buf     - The caller-provided location in which to return information
  *             about the inode.
- *   resolve - Whether to resolve the symbolic link
+ *   resolve - Whether to resolve the symbolic link:
+ *               0: Don't resolve the symbolic line
+ *               1: Resolve the symbolic link
+ *             >=2: The recursive count in the resolving process
  *
  * Returned Value:
  *   Zero (OK) returned on success.  Otherwise, a negated errno value is
@@ -330,16 +326,14 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
            * will not be included in the total.
            */
 
-          if (++buf->st_count > SYMLOOP_MAX)
+          if (resolve > SYMLOOP_MAX)
             {
               return -ELOOP;
             }
 
-          DEBUGASSERT(buf->st_count > 0);  /* Check for unsigned integer overflow */
-
           /* stat() the target of the soft link. */
 
-          ret = stat_recursive(inode->u.i_link, buf, 1);
+          ret = stat_recursive(inode->u.i_link, buf, ++resolve);
 
           /* If stat() fails, then there is a problem with the target of
            * the symbolic link, but not with the symbolic link itself.
