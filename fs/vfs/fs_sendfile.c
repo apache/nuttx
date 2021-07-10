@@ -26,19 +26,254 @@
 
 #include <sys/sendfile.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
-#include <assert.h>
 
-#include <nuttx/sched.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
-#ifdef CONFIG_NET_SENDFILE
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
+                        off_t *offset, size_t count)
+{
+  FAR uint8_t *iobuffer;
+  FAR uint8_t *wrbuffer;
+  off_t startpos = 0;
+  ssize_t nbytesread;
+  ssize_t nbyteswritten;
+  size_t  ntransferred;
+  bool endxfr;
+
+  /* Get the current file position. */
+
+  if (offset)
+    {
+      off_t newpos;
+
+      /* Use file_seek to get the current file position */
+
+      startpos = file_seek(infile, 0, SEEK_CUR);
+      if (startpos < 0)
+        {
+          return startpos;
+        }
+
+      /* Use file_seek again to set the new file position */
+
+      newpos = file_seek(infile, *offset, SEEK_SET);
+      if (newpos < 0)
+        {
+          return newpos;
+        }
+    }
+
+  /* Allocate an I/O buffer */
+
+  iobuffer = kmm_malloc(CONFIG_SENDFILE_BUFSIZE);
+  if (!iobuffer)
+    {
+      return -ENOMEM;
+    }
+
+  /* Now transfer 'count' bytes from the infile to the outfile */
+
+  for (ntransferred = 0, endxfr = false; ntransferred < count && !endxfr; )
+    {
+      /* Loop until the read side of the transfer comes to some conclusion */
+
+      do
+        {
+          /* Read a buffer of data from the infile */
+
+          nbytesread = count - ntransferred;
+          if (nbytesread > CONFIG_SENDFILE_BUFSIZE)
+            {
+              nbytesread = CONFIG_SENDFILE_BUFSIZE;
+            }
+
+          nbytesread = file_read(infile, iobuffer, nbytesread);
+
+          /* Check for end of file */
+
+          if (nbytesread == 0)
+            {
+              /* End of file.  Break out and return current number of bytes
+               * transferred.
+               */
+
+              endxfr = true;
+              break;
+            }
+
+          /* Check for a read ERROR.  EINTR is a special case.  This function
+           * should break out and return an error if EINTR is returned and
+           * no data has been transferred.  But what should it do if some
+           * data has been transferred?  I suppose just continue?
+           */
+
+          else if (nbytesread < 0)
+            {
+              /* EINTR is not an error (but will still stop the copy) */
+
+              if (nbytesread != -EINTR || ntransferred == 0)
+                {
+                  /* Read error.  Break out and return the error condition. */
+
+                  ntransferred = nbytesread;
+                  endxfr       = true;
+                  break;
+                }
+            }
+        }
+      while (nbytesread < 0);
+
+      /* Was anything read? */
+
+      if (!endxfr)
+        {
+          /* Yes.. Loop until the read side of the transfer comes to some
+           * conclusion.
+           */
+
+          wrbuffer = iobuffer;
+          do
+            {
+              /* Write the buffer of data to the outfile */
+
+              nbyteswritten = file_write(outfile, wrbuffer, nbytesread);
+
+              /* Check for a complete (or partial) write.  write() should not
+               * return zero.
+               */
+
+              if (nbyteswritten >= 0)
+                {
+                  /* Advance the buffer pointer and decrement the number of
+                   * bytes remaining in the iobuffer.  Typically, nbytesread
+                   * will now be zero.
+                   */
+
+                  wrbuffer     += nbyteswritten;
+                  nbytesread   -= nbyteswritten;
+
+                  /* Increment the total number of bytes successfully
+                   * transferred.
+                   */
+
+                  ntransferred += nbyteswritten;
+                }
+
+              /* Otherwise an error occurred */
+
+              else
+                {
+                  /* Check for a write ERROR.  EINTR is a special case.  This
+                   * function should break out and return an error if EINTR
+                   * is returned and no data has been transferred.  But what
+                   * should it do if some data has been transferred?  I
+                   * suppose just continue?
+                   */
+
+                  if (nbyteswritten != -EINTR || ntransferred == 0)
+                    {
+                      /* Write error.  Break out and return the error
+                       * condition.
+                       */
+
+                      ntransferred = nbyteswritten;
+                      endxfr       = true;
+                      break;
+                    }
+                }
+            }
+          while (nbytesread > 0);
+        }
+    }
+
+  /* Release the I/O buffer */
+
+  kmm_free(iobuffer);
+
+  /* Return the current file position */
+
+  if (offset)
+    {
+      /* Use file_seek to get the current file position */
+
+      off_t curpos = file_seek(infile, 0, SEEK_CUR);
+      if (curpos < 0)
+        {
+          return curpos;
+        }
+
+      /* Return the current file position */
+
+      *offset = curpos;
+
+      /* Use file_seek again to restore the original file position */
+
+      startpos = file_seek(infile, startpos, SEEK_SET);
+      if (startpos < 0)
+        {
+          return startpos;
+        }
+    }
+
+  /* Finally return the number of bytes actually transferred (or ERROR
+   * if any failure occurred).
+   */
+
+  return ntransferred;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_sendfile
+ *
+ * Description:
+ *   Equivalent to the standard sendfile function except that is accepts a
+ *   struct file instance instead of a file descriptor.
+ *
+ ****************************************************************************/
+
+ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
+                      off_t *offset, size_t count)
+{
+#ifdef CONFIG_NET_SENDFILE
+  /* Check the destination file descriptor:  Is it a (probable) file
+   * descriptor?  Check the source file:  Is it a normal file?
+   */
+
+  FAR struct socket *psock;
+
+  psock = file_socket(outfile);
+  if (psock != NULL)
+    {
+      /* Then let psock_sendfile do the work. */
+
+      int ret = psock_sendfile(psock, infile, offset, count);
+      if (ret >= 0 || ret != -ENOSYS)
+        {
+          return ret;
+        }
+
+      /* Fall back to the slow path if errno equals ENOSYS,
+       * because psock_sendfile fail to optimize this transfer.
+       */
+    }
+#endif
+
+  /* No... then this is probably a file-to-file transfer.  The generic
+   * copyfile() can handle that case.
+   */
+
+  return copyfile(outfile, infile, offset, count);
+}
 
 /****************************************************************************
  * Name: sendfile
@@ -87,51 +322,31 @@
 
 ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
 {
-#ifdef CONFIG_NET_SENDFILE
-  /* Check the destination file descriptor:  Is it a (probable) file
-   * descriptor?  Check the source file:  Is it a normal file?
-   */
+  FAR struct file *outfile;
+  FAR struct file *infile;
+  int ret;
 
-  FAR struct socket *psock;
-
-  psock = sockfd_socket(outfd);
-  if (psock != NULL)
+  ret = fs_getfilep(outfd, &outfile);
+  if (ret < 0)
     {
-      FAR struct file *filep;
-      int ret;
-
-      /* This appears to be a file-to-socket transfer.  Get the file
-       * structure.
-       */
-
-      ret = fs_getfilep(infd, &filep);
-      if (ret < 0)
-        {
-          set_errno(-ret);
-          return ERROR;
-        }
-
-      DEBUGASSERT(filep != NULL);
-
-      /* Then let psock_sendfile do the work. */
-
-      ret = psock_sendfile(psock, filep, offset, count);
-      if (ret >= 0 || get_errno() != ENOSYS)
-        {
-          return ret;
-        }
-
-      /* Fall back to the slow path if errno equals ENOSYS,
-       * because psock_sendfile fail to optimize this transfer.
-       */
+      goto errout;
     }
-#endif
 
-  /* No... then this is probably a file-to-file transfer.  The generic
-   * lib_sendfile() can handle that case.
-   */
+  ret = fs_getfilep(infd, &infile);
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
-  return lib_sendfile(outfd, infd, offset, count);
+  ret = file_sendfile(outfile, infile, offset, count);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  return ret;
+
+errout:
+  set_errno(-ret);
+  return ERROR;
 }
-
-#endif /* CONFIG_NET_SENDFILE */

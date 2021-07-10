@@ -1334,7 +1334,7 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
+ *   the negative errno is return appropriately:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation
