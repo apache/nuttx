@@ -451,6 +451,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 {
   FAR struct tcp_conn_s *conn;
   struct sendfile_s state;
+  off_t startpos;
   int ret;
 
   /* If this is an un-connected socket, then return ENOTCONN */
@@ -497,6 +498,14 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
+  /* Get the current file position. */
+
+  startpos = file_seek(infile, 0, SEEK_CUR);
+  if (startpos < 0)
+    {
+      return startpos;
+    }
+
   /* Initialize the state structure.  This is done with the network
    * locked because we don't want anything to happen until we are
    * ready.
@@ -509,13 +518,13 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    * priority inheritance enabled.
    */
 
-  nxsem_init(&state.snd_sem, 0, 0);           /* Doesn't really fail */
+  nxsem_init(&state.snd_sem, 0, 0);                /* Doesn't really fail */
   nxsem_set_protocol(&state.snd_sem, SEM_PRIO_NONE);
 
-  state.snd_sock    = psock;                /* Socket descriptor to use */
-  state.snd_foffset = offset ? *offset : 0; /* Input file offset */
-  state.snd_flen    = count;                /* Number of bytes to send */
-  state.snd_file    = infile;               /* File to read from */
+  state.snd_sock    = psock;                       /* Socket descriptor to use */
+  state.snd_foffset = offset ? *offset : startpos; /* Input file offset */
+  state.snd_flen    = count;                       /* Number of bytes to send */
+  state.snd_file    = infile;                      /* File to read from */
 
   /* Allocate resources to receive a callback */
 
@@ -581,9 +590,33 @@ errout_datacb:
   tcp_callback_free(conn, state.snd_datacb);
 
 errout_locked:
-
   nxsem_destroy(&state.snd_sem);
   net_unlock();
+
+  /* Return the current file position */
+
+  if (offset)
+    {
+      /* Use lseek to get the current file position */
+
+      off_t curpos = file_seek(infile, 0, SEEK_CUR);
+      if (curpos < 0)
+        {
+          return curpos;
+        }
+
+      /* Return the current file position */
+
+      *offset = curpos;
+
+      /* Use lseek again to restore the original file position */
+
+      startpos = file_seek(infile, startpos, SEEK_SET);
+      if (startpos < 0)
+        {
+          return startpos;
+        }
+    }
 
   if (ret < 0)
     {
