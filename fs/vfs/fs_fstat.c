@@ -200,7 +200,7 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
         {
           /* The inode is part of the root pseudo file system. */
 
-          ret = inode_stat(inode, buf, 1);
+          ret = inode_stat(inode, buf, 0);
         }
     }
 
