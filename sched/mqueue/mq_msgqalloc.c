@@ -49,50 +49,60 @@
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of
  *            messages that may be placed in the message queue.
+ *   msgq   - This parameter is a address of a pointer
  *
  * Returned Value:
- *   The allocated and initialized message queue structure or NULL in the
- *   event of a failure.
+ *   IF the function runs successfully，will return Zero(OK),else will
+ *   return a error code.
+ *
+ *   EINVAL    attr is a null pointer and attr->mq_mqssize or attr->mq_maxmsg
+ *             is an invalid value.
+ *   ENOMEM    No memery to alloc.
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr)
+int nxmq_alloc_msgq(FAR struct mq_attr *attr,
+                    FAR struct mqueue_inode_s **msgq)
 {
-  FAR struct mqueue_inode_s *msgq;
-
   /* Check if the caller is attempting to allocate a message for messages
    * larger than the configured maximum message size.
    */
 
-  DEBUGASSERT(!attr || attr->mq_msgsize <= MQ_MAX_BYTES);
-  if (attr && attr->mq_msgsize > MQ_MAX_BYTES)
+  DEBUGASSERT((!attr || (attr->mq_msgsize <= MQ_MAX_BYTES &&
+              attr->mq_maxmsg <= MQ_MAX_MSGS)) && msgq);
+  if ((attr && (attr->mq_msgsize > MQ_MAX_BYTES ||
+      attr->mq_maxmsg > MQ_MAX_MSGS)) || !msgq)
     {
-      return NULL;
+      return -EINVAL;
     }
 
   /* Allocate memory for the new message queue. */
 
-  msgq = (FAR struct mqueue_inode_s *)
+  *msgq = (FAR struct mqueue_inode_s *)
     kmm_zalloc(sizeof(struct mqueue_inode_s));
 
-  if (msgq)
+  if (*msgq)
     {
       /* Initialize the new named message queue */
 
-      sq_init(&msgq->msglist);
+      sq_init(&(*msgq)->msglist);
       if (attr)
         {
-          msgq->maxmsgs    = (int16_t)attr->mq_maxmsg;
-          msgq->maxmsgsize = (int16_t)attr->mq_msgsize;
+          (*msgq)->maxmsgs    = (int16_t)attr->mq_maxmsg;
+          (*msgq)->maxmsgsize = (int16_t)attr->mq_msgsize;
         }
       else
         {
-          msgq->maxmsgs    = MQ_MAX_MSGS;
-          msgq->maxmsgsize = MQ_MAX_BYTES;
+          (*msgq)->maxmsgs    = MQ_MAX_MSGS;
+          (*msgq)->maxmsgsize = MQ_MAX_BYTES;
         }
 
-      msgq->ntpid = INVALID_PROCESS_ID;
+      (*msgq)->ntpid = INVALID_PROCESS_ID;
+    }
+  else
+    {
+      return -ENOMEM;
     }
 
-  return msgq;
+  return OK;
 }
