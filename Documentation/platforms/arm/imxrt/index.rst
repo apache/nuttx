@@ -33,6 +33,21 @@ set as write-through but can be changed to write-back via Kconfig. While write-b
 performance than write-through, it is not supported for all peripherals in NuttX yet. Write-back data
 cache can not be selected while running Ethernet or serial port over USB.
 
+Tickless OS
+===========
+
+With Tickless OS, the periodic, timer interrupt is eliminated and replaced with a one-shot,
+interval timer, that becomes event driven instead of polled. This allows to run the MCU with
+higher resolution without using more of the CPU bandwidth processing useless interrupts.
+
+Only tickless via an alarm is currently supported for i.MX RT MCU, which can be selected by
+CONFIG_SCHED_TICKLESS_ALARM option. CONFIG_USEC_PER_TICK option determines the resolution
+of time reported by :c:func:`clock_systime_ticks()` and the resolution of times that can be set
+for certain delays including watchdog timers and delayed work. It is important that value set in
+CONFIG_USEC_PER_TICK represents the frequency of GPT timer that runs the tickless mode. Clock
+source of the timer is 16.6 MHz, which is then devided by the prescaler value from 1 to 4096.
+Possible values for CONFIG_USEC_PER_TICK are 10 or 100 for example.
+
 Peripheral Support
 ==================
 
