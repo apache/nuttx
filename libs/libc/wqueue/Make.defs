@@ -23,7 +23,6 @@ ifeq ($(CONFIG_LIB_USRWORK),y)
 # Add the work queue C files to the build
 
 CSRCS += work_usrthread.c work_queue.c work_cancel.c work_signal.c
-CSRCS += work_lock.c
 
 # Add the wqueue directory to the build
 

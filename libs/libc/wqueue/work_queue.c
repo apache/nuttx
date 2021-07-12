@@ -78,7 +78,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
 
   /* Get exclusive access to the work queue */
 
-  while (work_lock() < 0);
+  while (_SEM_WAIT(&wqueue->lock) < 0);
 
   /* Is there already pending work? */
 
@@ -104,7 +104,7 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
   kill(wqueue->pid, SIGWORK);   /* Wake up the worker thread */
 
-  work_unlock();
+  _SEM_POST(&wqueue->lock);
   return OK;
 }
 
