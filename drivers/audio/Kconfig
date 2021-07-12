@@ -389,4 +389,8 @@ config AUDIO_I2S
 	depends on AUDIO
 	depends on I2S
 
+config AUDIO_AW88266A
+	bool "Audio AWINIC88266A chip"
+	default n
+
 endif # DRIVERS_AUDIO
