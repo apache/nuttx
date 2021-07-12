@@ -57,12 +57,6 @@ ifeq ($(CONFIG_RGBLED),y)
   CSRCS += stm32_rgbled.c
 endif
 
-ifeq ($(CONFIG_NSH_ROMFSETC),y)
-ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
-  RCSRCS = etc/init.d/rcS
-endif
-endif
-
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
 CSRCS += stm32_composite.c
 endif
