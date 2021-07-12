@@ -39,6 +39,6 @@
 
 /* Sizes of things */
 
-#define MAX_MQUEUE_PATH 64
+#define MAX_MQUEUE_PATH (sizeof(CONFIG_FS_MQUEUE_MPATH) + NAME_MAX)
 
 #endif /* __FS_MQUEUE_MQUEUE_H */
