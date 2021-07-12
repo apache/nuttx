@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <syslog.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

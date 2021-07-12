@@ -12,6 +12,7 @@ config EXAMPLES_TOUCHSCREEN_BGCOLOR
 
 config SIM_RPTUN_MASTER
 	bool "Remote Processor Tunneling Role"
+	default n
 	depends on RPTUN
 
 if SIM_TOUCHSCREEN

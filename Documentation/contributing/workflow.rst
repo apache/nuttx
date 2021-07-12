@@ -13,7 +13,7 @@ You should be aware of the following:
     automatically during CI to ensure conformance.
 
     Note that not all existing files in the repository are already adapted to conform to the standard as this is an ongoing effort. Thus,
-    if you're submitting a patch to an existing file you may have to make the file conform to the standard, even if you are not reponsible
+    if you're submitting a patch to an existing file you may have to make the file conform to the standard, even if you are not responsible
     for those standard violations.
 
     It is also appreciated that you separate any styling fixes in a separate commit from the functional changes so that these are more
@@ -37,6 +37,6 @@ You should be aware of the following:
     - If this is from an inactive project, it may be considered for inclusion in NuttX, provided that licensing terms allow to do so
       and it is deemed of sufficient value to be included, considering that this code will have to be maintained in NuttX afterwards.
 
-      Note that it is undesireable to included non Apache 2.0 Licensed code inside the repository, even if the license itself allows it
+      Note that it is undesirable to included non Apache 2.0 Licensed code inside the repository, even if the license itself allows it
       (for example BSD License).
 

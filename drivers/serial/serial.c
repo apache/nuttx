@@ -31,6 +31,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -166,24 +167,15 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
 #endif
           if (fds->revents != 0)
             {
-              irqstate_t flags;
               int semcount;
 
               finfo("Report events: %02x\n", fds->revents);
 
-              /* Limit the number of times that the semaphore is posted.
-               * The critical section is needed to make the following
-               * operation atomic.
-               */
-
-              flags = enter_critical_section();
               nxsem_get_value(fds->sem, &semcount);
               if (semcount < 1)
                 {
                   nxsem_post(fds->sem);
                 }
-
-              leave_critical_section(flags);
             }
         }
     }
@@ -198,10 +190,6 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
   irqstate_t flags;
   int nexthead;
   int ret;
-
-#ifdef CONFIG_SMP
-  irqstate_t flags2 = enter_critical_section();
-#endif
 
   /* Increment to see what the next head pointer will be.
    * We need to use the "next" head pointer to determine when the circular
@@ -226,8 +214,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           dev->xmit.buffer[dev->xmit.head] = ch;
           dev->xmit.head = nexthead;
-          ret = OK;
-          goto err_out;
+          return OK;
         }
 
       /* The TX buffer is full.  Should be block, waiting for the hardware
@@ -301,8 +288,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
           if (dev->disconnected)
             {
-              ret = -ENOTCONN;
-              goto err_out;
+              return -ENOTCONN;
             }
 #endif
 
@@ -314,8 +300,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
                * become non-full will abort the transfer.
                */
 
-              ret = -EINTR;
-              goto err_out;
+              return -EINTR;
             }
         }
 
@@ -325,8 +310,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
 
       else
         {
-          ret = -EAGAIN;
-          goto err_out;
+          return -EAGAIN;
         }
     }
 
@@ -334,15 +318,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
    * unreachable.
    */
 
-  ret = OK;
-
-err_out:
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags2);
-#endif
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -900,17 +876,13 @@ static ssize_t uart_read(FAR struct file *filep,
 
       else
         {
-#ifdef CONFIG_SERIAL_RXDMA
-          /* Disable all interrupts and test again...
-           * uart_disablerxint() is insufficient for the check in DMA mode.
-           */
+          /* Disable all interrupts and test again... */
 
           flags = enter_critical_section();
-#else
+
           /* Disable Rx interrupts and test again... */
 
           uart_disablerxint(dev);
-#endif
 
           /* If the Rx ring buffer still empty?  Bytes may have been added
            * between the last time that we checked and when we disabled
@@ -927,13 +899,11 @@ static ssize_t uart_read(FAR struct file *filep,
               /* Notify DMA that there is free space in the RX buffer */
 
               uart_dmarxfree(dev);
-#else
+#endif
               /* Wait with the RX interrupt re-enabled.  All interrupts are
                * disabled briefly to assure that the following operations
                * are atomic.
                */
-
-              flags = enter_critical_section();
 
               /* Re-enable UART Rx interrupts */
 
@@ -952,7 +922,6 @@ static ssize_t uart_read(FAR struct file *filep,
                   leave_critical_section(flags);
                   continue;
                 }
-#endif
 
 #ifdef CONFIG_SERIAL_REMOVABLE
               /* Check again if the removable device is still connected
@@ -1020,11 +989,9 @@ static ssize_t uart_read(FAR struct file *filep,
                * the loop.
                */
 
-#ifdef CONFIG_SERIAL_RXDMA
               leave_critical_section(flags);
-#else
+
               uart_enablerxint(dev);
-#endif
             }
         }
     }
@@ -1037,11 +1004,9 @@ static ssize_t uart_read(FAR struct file *filep,
   leave_critical_section(flags);
 #endif
 
-#ifndef CONFIG_SERIAL_RXDMA
   /* RX interrupt could be disabled by RX buffer overflow. Enable it now. */
 
   uart_enablerxint(dev);
-#endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 #ifdef CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS
@@ -1420,7 +1385,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               else
                 {
                   dev->pid = (pid_t)arg;
-                  DEBUGASSERT((unsigned long)(dev->pid) == arg);
                   ret = 0;
                 }
             }
@@ -1542,8 +1506,8 @@ static int uart_poll(FAR struct file *filep,
 
       if (i >= CONFIG_SERIAL_NPOLLWAITERS)
         {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -1609,15 +1573,15 @@ static int uart_poll(FAR struct file *filep,
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ret              = -EIO;
+          ret = -EIO;
           goto errout;
         }
 #endif
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

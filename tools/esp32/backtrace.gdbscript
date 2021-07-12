@@ -54,19 +54,19 @@
 #   4.7.1.5 Windowed Procedure-Call Protocol
 
 define esp32_bt
-    set $pc = $arg0
-    set $a0 = $arg1
-    set $a1 = $arg2
-    set $pc_topbits = (int)$pc & 0xc0000000
+    set $x_pc = $arg0
+    set $x_a0 = $arg1
+    set $x_a1 = $arg2
+    set $pc_topbits = (int)$x_pc & 0xc0000000
     # The return address from xtensa_sig_deliver to _xtensa_sig_trampoline
     set $sig_tramp_ra = (int)(_xtensa_sig_trampoline + 2 * 3)
-    print/a $pc
+    print/a $x_pc
     while (1)
         # Note: "- 3" to workaround the case where "call" is
         # the last instruction in the calling function.
-        set $next_pc = (($a0 & 0x3fffffff) | $pc_topbits) - 3
+        set $next_pc = (($x_a0 & 0x3fffffff) | $pc_topbits) - 3
         print/a $next_pc
-        if ($a0 == $sig_tramp_ra)
+        if ($x_a0 == $sig_tramp_ra)
             # A special logic for xtensa_sig_deliver
 
             print "--- SIGNAL ---"
@@ -77,14 +77,14 @@ define esp32_bt
             print/a $next_pc
 
             # XXX local var offset assumption
-            set $regs = (int *)$a1
+            set $regs = (int *)$x_a1
 
             # Note: REG_A0 == 2
             # Note: REG_A1 == 3
             set $next_a0 = $regs[2]
             set $next_a1 = $regs[3]
         else
-            set $next_bsa = (int *)($a1 - 16)
+            set $next_bsa = (int *)($x_a1 - 16)
             set $next_a0 = $next_bsa[0]
             set $next_a1 = $next_bsa[1]
         end
@@ -95,11 +95,11 @@ define esp32_bt
             # on the stack must be explicitly set to zero."
             loop_break
         end
-        if ($next_a1 <= $a1)
+        if ($next_a1 <= $x_a1)
             print "stack went backward. corrupted?"
             loop_break
         end
-        set $a0 = $next_a0
-        set $a1 = $next_a1
+        set $x_a0 = $next_a0
+        set $x_a1 = $next_a1
     end
 end

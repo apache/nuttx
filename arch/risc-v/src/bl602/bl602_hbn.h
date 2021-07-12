@@ -26,7 +26,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
+#include <sys/types.h>
+#include <string.h>
+#include <errno.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -43,6 +47,24 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define BL602_HBN_OUT0_INT_GPIO7 (0)     /* HBN out 0 interrupt type: GPIO7 */
+#define BL602_HBN_OUT0_INT_GPIO8 (1)     /* HBN out 0 interrupt type: GPIO8 */
+#define BL602_HBN_OUT0_INT_RTC   (2)     /* HBN out 0 interrupt type: RTC */
+
+#define BL602_HBN_INT_GPIO7      (0)     /* HBN interrupt type: GPIO7 */
+#define BL602_HBN_INT_GPIO8      (1)     /* HBN interrupt type: GPIO8 */
+#define BL602_HBN_INT_RTC        (16)    /* HBN interrupt type: RTC */
+#define BL602_HBN_INT_PIR        (17)    /* HBN interrupt type: PIR */
+#define BL602_HBN_INT_BOR        (18)    /* HBN interrupt type: BOR */
+#define BL602_HBN_INT_ACOMP0     (20)    /* HBN interrupt type: ACOMP0 */
+#define BL602_HBN_INT_ACOMP1     (22)    /* HBN interrupt type: ACOMP1 */
+
+typedef CODE int (*bl602_hbn_cb_t)(FAR void *arg);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -67,6 +89,107 @@ extern "C"
  ****************************************************************************/
 
 void bl602_set_uart_clk_sel(int clk_sel);
+
+/****************************************************************************
+ * Name: bl602_hbn_get_int_state
+ *
+ * Description:
+ *   HBN get interrupt status.
+ *
+ * Input Parameters:
+ *   irq_type: HBN interrupt type
+ *
+ * Returned Value:
+ *   true or false
+ *
+ ****************************************************************************/
+
+bool bl602_hbn_get_int_state(uint8_t irq_type);
+
+/****************************************************************************
+ * Name: bl602_hbn_clear_irq
+ *
+ * Description:
+ *   HBN clear interrupt status.
+ *
+ * Input Parameters:
+ *   hbn_int_type: HBN interrupt type
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void bl602_hbn_clear_irq(uint8_t hbn_int_type);
+
+/****************************************************************************
+ * Name: bl602_hbn_out0_int_register
+ *
+ * Description:
+ *   HBN out0 interrupt cllback register.
+ *
+ * Input Parameters:
+ *   irq_type: HBN interrupt type
+ *   isr_cb: callback
+ *   arg: callback arg
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int bl602_hbn_out0_int_register(uint8_t irq_type, bl602_hbn_cb_t isr_cb,
+                                void *arg);
+
+/****************************************************************************
+ * Name: bl602_hbn_out0_int_unregister
+ *
+ * Description:
+ *   HBN out0 interrupt cllback unregister.
+ *
+ * Input Parameters:
+ *   irq_type: HBN interrupt type
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int bl602_hbn_out0_int_unregister(uint8_t irq_type);
+
+/****************************************************************************
+ * Name: bl602_hbn_out0_int_enable
+ *
+ * Description:
+ *   HBN out0 interrupt enable.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void bl602_hbn_out0_int_enable(void);
+
+/****************************************************************************
+ * Name: bl602_hbn_out0_int_disable
+ *
+ * Description:
+ *   HBN out0 interrupt disable.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void bl602_hbn_out0_int_disable(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

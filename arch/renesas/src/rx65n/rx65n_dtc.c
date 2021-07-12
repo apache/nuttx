@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -1751,7 +1752,7 @@ void rx65n_dtc_initialize(void)
 
 #if defined(CONFIG_RX65N_DTC_SEQUENCE_TRANSFER_MODE)
 
-      /* In sequence transfer mode, set full addresss mode */
+      /* In sequence transfer mode, set full address mode */
 
       DTC.DTCADMOD.BIT.SHORT = 0;
       dtchandle->addmode = 0;

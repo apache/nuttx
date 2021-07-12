@@ -42,12 +42,33 @@
 #include "esp32c3_partition.h"
 #include "esp32c3-devkit.h"
 
-#ifdef CONFIG_SPI_DRIVER
+#ifdef CONFIG_SPI
 #  include "esp32c3_spi.h"
+#endif
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+#  include "esp32c3_rt_timer.h"
 #endif
 
 #ifdef CONFIG_TIMER
 #  include "esp32c3_tim_lowerhalf.h"
+#endif
+
+#include "esp32c3_rtc.h"
+#ifdef CONFIG_ESP32C3_EFUSE
+#  include "esp32c3_efuse.h"
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+#  include "esp32c3_sha.h"
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp32c3_rtc_lowerhalf.h"
+#endif
+
+#ifdef CONFIG_ESP32C3_BLE
+#  include "esp32c3_ble.h"
 #endif
 
 /****************************************************************************
@@ -116,6 +137,23 @@ int esp32c3_bringup(void)
 {
   int ret;
 
+#if defined(CONFIG_ESP32C3_EFUSE)
+  ret = esp32c3_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+  ret = esp32c3_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -138,6 +176,11 @@ int esp32c3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
+
+#  ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
+  esp32c3_spiflash_encrypt_test();
+#  endif
+
   ret = esp32c3_spiflash_init();
   if (ret)
     {
@@ -170,6 +213,15 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
+             ESP32C3_SPI2, ret);
+    }
+#endif
+
+#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32C3_SPI2)
+  ret = board_spislavedev_initialize(ESP32C3_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
              ESP32C3_SPI2, ret);
     }
 #endif
@@ -250,7 +302,36 @@ int esp32c3_bringup(void)
 
 #endif /* CONFIG_ONESHOT */
 
+#ifdef CONFIG_ESP32C3_RT_TIMER
+  ret = esp32c3_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_ESP32C3_WIRELESS
+
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  ret = esp32c3_wifi_bt_coexist_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT coexist\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_BLE
+  ret = esp32c3_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_WIFI
 
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   ret = esp32c3_init_wifi_storage();
@@ -281,6 +362,36 @@ int esp32c3_bringup(void)
 #endif
 #endif
 
+#endif
+
+#endif /* CONFIG_ESP32C3_WIRELESS */
+
+#ifdef CONFIG_ESP32C3_LEDC
+  ret = esp32c3_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32c3_pwm_setup() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESP32C3_LEDC */
+
+#ifdef CONFIG_ESP32C3_ADC
+  ret = board_adc_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init() failed: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32C3_ADC */
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the ESP32-C3 RTC driver */
+
+  ret = esp32c3_rtc_driverinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

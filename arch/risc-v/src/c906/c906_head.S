@@ -93,33 +93,6 @@ __start:
   la   t0, __trap_vec
   csrw mtvec, t0
 
-#ifdef CONFIG_STACK_COLORATION
-
-  /* Write a known value to the IDLE thread stack to support stack
-   * monitoring logic
-   */
-
-  lui  t0, %hi(C906_IDLESTACK_BASE)
-  addi t0, t0, %lo(C906_IDLESTACK_BASE)
-
-  lui  t1, %hi(C906_IDLESTACK_TOP)
-  addi t1, t1, %lo(C906_IDLESTACK_TOP)
-
-  lui  t2, %hi(STACK_COLOR)
-  addi t2, t2, %lo(STACK_COLOR)
-
-  bgeu t0, t1, 2f
-
-  /* t0 = start of IDLE stack; t1 = Size of tack; t2 = coloration */
-
-1:
-  sw   t2, 0(t0)
-  addi t0, t0, 4
-  bne  t0, t1, 1b
-2:
-
-#endif
-
   /* Jump to __c906_start with mhartid */
 
   j    __c906_start
@@ -191,7 +164,7 @@ exception_common:
 
   mv   a1, sp      /* context = sp */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Load mhartid (cpuid) */
 
   csrr s0, mhartid
@@ -203,7 +176,7 @@ exception_common:
   j    4f
 3:
   la   sp, g_intstacktop
-  addi sp, sp, -(CONFIG_ARCH_INTERRUPTSTACK & ~7)
+  addi sp, sp, -(CONFIG_ARCH_INTERRUPTSTACK & ~15)
 4:
 
 #endif

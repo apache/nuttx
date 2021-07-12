@@ -115,7 +115,7 @@ _interrupt_handler:
   csrr a0,  mcause    /* Handler arg0: Exception cause */
   mv   a1,  sp        /* Handler arg1: Context (saved registers on stack) */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   lui  sp,  %hi(g_intstacktop)
   addi sp,  sp, %lo(g_intstacktop)
 #endif

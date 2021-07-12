@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: socketpair
+ * Name: psock_socketpair
  *
  * Description:
  * Create an unbound pair of connected sockets in a specified domain, of a
@@ -110,7 +110,7 @@ errsock:
  *   type     - (see sys/socket.h)
  *   protocol - (see sys/socket.h)
  *   sv[2]    - The user provided array in which to catch the pair
-                descriptors
+ *              descriptors
  *
  ****************************************************************************/
 
@@ -118,8 +118,10 @@ int socketpair(int domain, int type, int protocol, int sv[2])
 {
   FAR struct socket *psocks[2];
   int oflags = O_RDWR;
-  int i = 0;
   int ret;
+  int i;
+  int j = 0;
+  int k;
 
   if (sv == NULL)
     {
@@ -127,10 +129,10 @@ int socketpair(int domain, int type, int protocol, int sv[2])
       goto errout;
     }
 
-  for (i = 0; i < 2; i++)
+  for (k = 0; k < 2; k++)
     {
-      psocks[i] = kmm_zalloc(sizeof(*psocks[i]));
-      if (psocks[i] == NULL)
+      psocks[k] = kmm_zalloc(sizeof(*psocks[k]));
+      if (psocks[k] == NULL)
         {
           ret = -ENOMEM;
           goto errout_with_alloc;
@@ -150,12 +152,12 @@ int socketpair(int domain, int type, int protocol, int sv[2])
 
   /* Allocate a socket descriptor */
 
-  for (i = 0; i < 2; i++)
+  for (; j < 2; j++)
     {
-      sv[i] = sockfd_allocate(psocks[i], oflags);
-      if (sv[i] < 0)
+      sv[j] = sockfd_allocate(psocks[j], oflags);
+      if (sv[j] < 0)
         {
-          ret = sv[i];
+          ret = sv[j];
           goto errout_with_psock;
         }
     }
@@ -163,14 +165,18 @@ int socketpair(int domain, int type, int protocol, int sv[2])
   return OK;
 
 errout_with_psock:
-  while (i-- > 0)
+  for (i = 0; i < j; i++)
     {
       nx_close(sv[i]);
     }
 
-  i = 2;
+  for (i = j; i < k; i++)
+    {
+      psock_close(psocks[i]);
+    }
+
 errout_with_alloc:
-  while (i-- > 0)
+  for (i = j; i < k; i++)
     {
       kmm_free(psocks[i]);
     }

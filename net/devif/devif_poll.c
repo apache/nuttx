@@ -554,7 +554,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
  * Name: devif_poll_tcp_connections
  *
  * Description:
- *   Poll all UDP connections for available packets to send.
+ *   Poll all TCP connections for available packets to send.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network

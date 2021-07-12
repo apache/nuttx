@@ -26,6 +26,7 @@
 
 #if defined(CONFIG_STM32F7_FMC)
 
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>

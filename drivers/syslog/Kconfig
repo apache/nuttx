@@ -13,6 +13,8 @@ config ARCH_SYSLOG
 
 # Selected if the SYSLOG device supports multi-byte write operations
 
+comment "SYSLOG options"
+
 config SYSLOG_MAX_CHANNELS
 	int "Maximum SYSLOG channels"
 	default 1
@@ -34,6 +36,14 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
+config RAMLOG_BUFFER_SECTION
+	string "The section where ramlog buffer is located"
+	default ".bss"
+	depends on RAMLOG_SYSLOG
+	---help---
+		The section where ramlog buffer is located.
+		The section shall not be initialized on system boot.
+
 config RAMLOG_BUFSIZE
 	int "RAMLOG buffer size"
 	default 1024
@@ -96,6 +106,8 @@ config SYSLOG_INTBUFSIZE
 	depends on SYSLOG_INTBUFFER
 	---help---
 		The size of the interrupt buffer in bytes.
+
+comment "Formatting options"
 
 config SYSLOG_TIMESTAMP
 	bool "Prepend timestamp to syslog message"
@@ -180,9 +192,12 @@ config SYSLOG_COLOR_OUTPUT
 	---help---
 		Enables colored output in syslog, according to message priority.
 
+comment "SYSLOG channels"
+
 if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
+	default n
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
@@ -191,6 +206,7 @@ config SYSLOG_CHAR
 config RAMLOG_SYSLOG
 	bool "Use RAMLOG for SYSLOG"
 	depends on RAMLOG
+	default n
 	---help---
 		Use the RAM logging device for the syslogging interface.  If this
 		feature is enabled (along with SYSLOG), then all debug output (only)
@@ -208,6 +224,7 @@ config SYSLOG_RPMSG
 	bool "Log to RPMSG"
 	depends on OPENAMP
 	depends on SCHED_WORKQUEUE
+	default n
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
@@ -220,17 +237,10 @@ config SYSLOG_DEFAULT
 
 endif
 
-config RAMLOG_BUFFER_SECTION
-	string "The section where ramlog buffer is located"
-	default ".bss"
-	depends on RAMLOG_SYSLOG
-	---help---
-		The section where ramlog buffer is located, this section cannot
-		be initialized each time when the system boot.
-
 config SYSLOG_RPMSG_SERVER_NAME
 	string "The name of Syslog Rpmsg Server"
 	depends on SYSLOG_RPMSG
+	default ""
 	---help---
 		The proc name of rpmsg server. Client sends message to
 		specified name of remote proc.
@@ -247,7 +257,7 @@ config SYSLOG_RPMSG_SERVER
 	---help---
 		Use rpmsg to receive message from remote proc.
 
-config SYSLOG_FILE
+menuconfig SYSLOG_FILE
 	bool "Syslog file output"
 	default n
 	---help---
@@ -260,6 +270,48 @@ config SYSLOG_FILE
 
 		NOTE interrupt level SYSLOG output will be lost in this case unless
 		the interrupt buffer is used.
+
+if SYSLOG_FILE
+
+config SYSLOG_FILE_SEPARATE
+	bool "Log file separation"
+	default n
+	depends on SYSLOG_FILE
+	---help---
+		If enabled, every time the file logger is re-attached, a separator
+		will be printed in the file.
+		
+		This can be useful to easily distinguish between log entries that
+		belong to different log sessions (e.g. system reboot), and to 
+		indicate that between the separated lines there may be more logs
+		that were lost.
+
+config SYSLOG_FILE_ROTATIONS
+	int "Log file rotations"
+	default 0
+	depends on SYSLOG_FILE
+	---help---
+		If enabled (set to a non-zero number), the log file size will be
+		checked before opening. If it is larger than the specified limit
+		it will be "rotated", i.e. the old file will be kept as a backup,
+		and a new empty	file will be created.
+		
+		The number of rotations specifies the number of old log files to
+		keep.
+		
+		This option is useful to ensure that log files do not get
+		huge after prolonged periods of system operation.
+
+config SYSLOG_FILE_SIZE_LIMIT
+	int "Log file size limit"
+	default 524288
+	depends on SYSLOG_FILE_ROTATIONS > 0
+	---help---
+		File size limit when the log is rotated automatically.
+		If a log file is found larger than this limit, it will
+		be rotated.
+
+endif # SYSLOG_FILE
 
 config CONSOLE_SYSLOG
 	bool "Use SYSLOG for /dev/console"

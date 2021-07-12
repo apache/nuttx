@@ -120,7 +120,6 @@
 
 #define STM32L5_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L5_HCLK_FREQUENCY    STM32L5_SYSCLK_FREQUENCY
-#define STM32L5_BOARD_HCLK        STM32L5_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* Configure the APB1 prescaler */
 

@@ -123,7 +123,7 @@
 
 /* Pin muliplexing selecion *************************************************/
 
-#define PINMUX_USART1_RXD     PINMUX_USART1_RXD_1
+#define PINMUX_USART1_RXD     PINMUX_USART1_RXD_2
 #define PINMUX_USART1_TXD     PINMUX_USART1_TXD_1
 
 /* LED definitions **********************************************************/

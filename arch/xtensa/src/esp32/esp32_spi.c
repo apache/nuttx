@@ -26,12 +26,14 @@
 
 #ifdef CONFIG_ESP32_SPI
 
+#include <debug.h>
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>

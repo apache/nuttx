@@ -633,6 +633,16 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
         }
     }
 
+  /* Enforce computation of free clusters if configured */
+
+#ifdef CONFIG_FAT_COMPUTE_FSINFO
+  ret = fat_computefreeclusters(fs);
+  if (ret != OK)
+    {
+      goto errout_with_buffer;
+    }
+#endif
+
   /* We did it! */
 
   finfo("FAT%d:\n", fs->fs_type == 0 ? 12 : fs->fs_type == 1  ? 16 : 32);
@@ -1142,7 +1152,7 @@ int fat_removechain(struct fat_mountpt_s *fs, uint32_t cluster)
       if (fs->fs_fsifreecount != 0xffffffff)
         {
           fs->fs_fsifreecount++;
-          fs->fs_fsidirty = 1;
+          fs->fs_fsidirty = true;
         }
 
       /* Then set up to remove the next cluster */
@@ -1308,7 +1318,7 @@ int32_t fat_extendchain(struct fat_mountpt_s *fs, uint32_t cluster)
   if (fs->fs_fsifreecount != 0xffffffff)
     {
       fs->fs_fsifreecount--;
-      fs->fs_fsidirty = 1;
+      fs->fs_fsidirty = true;
     }
 
   /* Return then number of the new cluster that was added to the chain */
@@ -2019,30 +2029,18 @@ int fat_updatefsinfo(struct fat_mountpt_s *fs)
 }
 
 /****************************************************************************
- * Name: fat_nfreeclusters
+ * Name: fat_computefreeclusters
  *
  * Description:
- *   Get the number of free clusters
+ *   Compute the number of free clusters from scratch
  *
  ****************************************************************************/
 
-int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
+int fat_computefreeclusters(struct fat_mountpt_s *fs)
 {
-  uint32_t nfreeclusters;
+  /* We have to count the number of free clusters */
 
-  /* If number of the first free cluster is valid, then just return that
-   * value.
-   */
-
-  if (fs->fs_fsifreecount <= fs->fs_nclusters - 2)
-    {
-      *pfreeclusters = fs->fs_fsifreecount;
-      return OK;
-    }
-
-  /* Otherwise, we will have to count the number of free clusters */
-
-  nfreeclusters = 0;
+  uint32_t nfreeclusters = 0;
   if (fs->fs_type == FSTYPE_FAT12)
     {
       off_t sector;
@@ -2052,7 +2050,7 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
       for (sector = 2; sector < fs->fs_nclusters; sector++)
         {
           /* If the cluster is unassigned, then increment the count of free
-           * clusters.
+           * clusters
            */
 
           if ((uint16_t)fat_getcluster(fs, sector) == 0)
@@ -2076,12 +2074,12 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
       for (cluster = fs->fs_nclusters; cluster > 0; cluster--)
         {
           /* If we are starting a new sector, then read the new sector in
-           * fs_buffer.
+           * fs_buffer
            */
 
           if (offset >= fs->fs_hwsectorsize)
             {
-              ret = fat_fscacheread(fs, fatsector++);
+              ret = fat_fscacheread(fs, fatsector);
               if (ret < 0)
                 {
                   return ret;
@@ -2126,12 +2124,42 @@ int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
       fs->fs_fsidirty = true;
     }
 
-  *pfreeclusters = nfreeclusters;
   return OK;
 }
 
 /****************************************************************************
  * Name: fat_nfreeclusters
+ *
+ * Description:
+ *   Get the number of free clusters
+ *
+ ****************************************************************************/
+
+int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
+{
+  /* If number of the first free cluster is valid, then just return that
+   * value.
+   */
+
+  if (fs->fs_fsifreecount <= fs->fs_nclusters - 2)
+    {
+      *pfreeclusters = fs->fs_fsifreecount;
+      return OK;
+    }
+
+  /* Otherwise, we will have to compute the number of free clusters */
+
+  int ret = fat_computefreeclusters(fs);
+  if (ret == OK)
+    {
+      *pfreeclusters = fs->fs_fsifreecount;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_currentsector
  *
  * Description:
  *   Given the file position, set the correct current sector to access.
@@ -2142,6 +2170,7 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
                       off_t position)
 {
   int sectoroffset;
+  off_t cluster_start_sector;
 
   if (position <= ff->ff_size)
     {
@@ -2149,12 +2178,18 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
       sectoroffset = SEC_NSECTORS(fs, position) & CLUS_NDXMASK(fs);
 
-      /* The current cluster is the first sector of the cluster plus
+      /* The current sector is the first sector of the cluster plus
        * the sector offset
        */
 
-      ff->ff_currentsector = fat_cluster2sector(fs, ff->ff_currentcluster)
-                           + sectoroffset;
+      cluster_start_sector = fat_cluster2sector(fs, ff->ff_currentcluster);
+
+      if (cluster_start_sector < 0)
+        {
+          return cluster_start_sector;
+        }
+
+      ff->ff_currentsector = cluster_start_sector + sectoroffset;
 
       /* The remainder is the number of sectors left in the cluster to be
        * read/written

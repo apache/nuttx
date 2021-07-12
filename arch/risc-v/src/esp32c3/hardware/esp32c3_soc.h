@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "esp32c3_attr.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -119,12 +121,8 @@
 #define SOC_IRAM_HIGH           0x403e0000
 #define SOC_DRAM_LOW            0x3fc80000
 #define SOC_DRAM_HIGH           0x3fce0000
-#define SOC_RTC_IRAM_LOW        0x50000000 /* ESP32-C3 only has RTC fast memory */
-#define SOC_RTC_IRAM_HIGH       0x50002000
-#define SOC_RTC_DRAM_LOW        0x50000000
-#define SOC_RTC_DRAM_HIGH       0x50002000
-#define SOC_RTC_DATA_LOW        0x50000000
-#define SOC_RTC_DATA_HIGH       0x50002000
+#define SOC_RTC_RAM_LOW         0x50000000 /* ESP32-C3 only has RTC fast memory */
+#define SOC_RTC_RAM_HIGH        0x50002000
 
 /* First and last words of the D/IRAM region, for both the DRAM address as
  * well as the IRAM alias.
@@ -256,5 +254,72 @@
 #define SOC_INTERRUPT_LEVEL_MEDIUM  4
 
 #define BIT(nr)                     (1UL << (nr))
+
+/* Extract the field from the register and shift it to avoid wrong reading */
+
+#define REG_MASK(_reg, _field) (((_reg) & (_field##_M)) >> (_field##_S))
+
+/* Helper to place a value in a field */
+
+#define VALUE_TO_FIELD(_value, _field) (((_value) << (_field##_S)) & (_field##_M))
+#define DPORT_CPUPERIOD_SEL_80      0
+#define DPORT_CPUPERIOD_SEL_160     1
+
+#define DPORT_SOC_CLK_SEL_XTAL    0
+#define DPORT_SOC_CLK_SEL_PLL    1
+#define DPORT_SOC_CLK_SEL_8M     2
+
+/* Write value to register */
+
+#define REG_WRITE(_r, _v)    (*(volatile uint32_t *)(_r)) = (_v)
+
+/* Read value from register */
+
+#define REG_READ(_r) (*(volatile uint32_t *)(_r))
+
+/* Get bit or get bits from register */
+
+#define REG_GET_BIT(_r, _b)  (*(volatile uint32_t*)(_r) & (_b))
+
+/* Set bit or set bits to register */
+
+#define REG_SET_BIT(_r, _b)  (*(volatile uint32_t*)(_r) |= (_b))
+
+/* Clear bit or clear bits of register */
+
+#define REG_CLR_BIT(_r, _b)  (*(volatile uint32_t*)(_r) &= ~(_b))
+
+/* Get field from register,
+ * used when _f is not left shifted by _f##_S
+ */
+
+#define REG_GET_FIELD(_r, _f) ((REG_READ(_r) >> (_f##_S)) & (_f##_V))
+
+/* Set field to register,
+ * used when _f is not left shifted by _f##_S
+ */
+
+#define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f##_V) << (_f##_S)))|(((_v) & (_f##_V))<<(_f##_S)))))
+
+#define SOC_SYSTIMER_BIT_WIDTH_LO (32) /* Bit width of systimer low part */
+#define SOC_SYSTIMER_BIT_WIDTH_HI (20) /* Bit width of systimer high part */
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_ptr_rtc
+ *
+ * Description:
+ *   Check if the buffer comes from the RTC RAM.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32c3_ptr_rtc(const void *p)
+{
+  return ((intptr_t)p >= SOC_RTC_RAM_LOW &&
+          (intptr_t)p < SOC_RTC_RAM_HIGH);
+}
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_SOC_H */

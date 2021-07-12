@@ -42,12 +42,12 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double modfl(long double x, long double *iptr)
 {
-  if (fabs(x) >= 4503599627370496.0)
+  if (fabsl(x) >= 4503599627370496.0)
     {
       *iptr = x;
       return 0.0;
     }
-  else if (fabs(x) < 1.0)
+  else if (fabsl(x) < 1.0)
     {
       *iptr = (x * 0.0);
       return x;

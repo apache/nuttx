@@ -115,7 +115,11 @@
 
 #define REG_INT_CTX_NDX     32
 
-#define INT_XCPT_REGS       33
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
+  #define INT_XCPT_REGS     (33 + CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)
+#else
+  #define INT_XCPT_REGS     33
+#endif
 
 #define INT_XCPT_SIZE       (8 * INT_XCPT_REGS)
 

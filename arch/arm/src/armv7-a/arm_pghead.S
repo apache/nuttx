@@ -668,21 +668,6 @@ __start:
 
 	bl		arm_boot
 
-#ifdef CONFIG_STACK_COLORATION
-	/* Write a known value to the IDLE thread stack to support stack
-	 * monitoring logic
-	 */
-
-	adr		r3, .Lstkinit
-	ldmia		r3, {r0, r1, r2}		/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
-
-1:							/* Top of the loop */
-	sub		r1, r1, #1			/* R1 = Number of words remaining */
-	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4			/* Save stack color word, increment stack address */
-	bne		1b				/* Bottom of the loop */
-#endif
-
 	/* Finally branch to the OS entry point */
 
 	mov		lr, #0				/* LR = return address (none) */
@@ -791,19 +776,6 @@ arm_data_initialize:
 	.long	_sdata					/* Where .data needs to reside in SDRAM */
 	.long	_edata
 	.size	.Ldatainit, . -.Ldatainit
-
-#ifdef CONFIG_STACK_COLORATION
-	.type	.Lstkinit, %object
-.Lstkinit:
-#ifdef CONFIG_BOOT_SDRAM_DATA
-	.long	IDLE_STACK_VBASE			/* Beginning of the IDLE stack, then words of IDLE stack */
-#else
-	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
-#endif
-	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
-	.long	STACK_COLOR				/* Stack coloration word */
-	.size	.Lstkinit, . -.Lstkinit
-#endif
 
 /***************************************************************************
  * Data section variables

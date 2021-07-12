@@ -28,6 +28,8 @@
 
 #include <sched.h>
 #include <stdlib.h>
+#include <assert.h>
+
 #include "sched/sched.h"
 #include "environ/environ.h"
 

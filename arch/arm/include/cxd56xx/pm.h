@@ -25,6 +25,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <queue.h>
 
 /****************************************************************************
@@ -62,8 +63,9 @@
 
 /* FrequencyLock request flag definitions */
 
-#define PM_CPUFREQLOCK_FLAG_HV (0x0001) /* request HV */
-#define PM_CPUFREQLOCK_FLAG_LV (0x4000) /* request LV */
+#define PM_CPUFREQLOCK_FLAG_HV (0x0001)   /* request HV */
+#define PM_CPUFREQLOCK_FLAG_LV (0x4000)   /* request LV */
+#define PM_CPUFREQLOCK_FLAG_HOLD (0x8000) /* hold the current frequency */
 
 /* FrequencyLock identifier tag helper macro function */
 
@@ -160,7 +162,7 @@ extern "C"
 
 int up_pmramctrl(int cmd, uintptr_t addr, size_t size);
 
-#ifdef CONFIG_DEBUG_PM
+#ifdef CONFIG_CXD56_PM_DEBUG_INFO
 /****************************************************************************
  * Name: up_pmstatdump
  *

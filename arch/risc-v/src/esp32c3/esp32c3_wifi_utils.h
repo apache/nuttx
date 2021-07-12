@@ -117,4 +117,4 @@ int esp_wifi_scan_init(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_UTILS_H */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_UTILS_H */

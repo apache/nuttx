@@ -90,7 +90,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
           if ((node->preceding & MM_ALLOC_BIT) != 0)
             {
               DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
-              aordblks ++;
+              aordblks++;
               uordblks += node->size;
             }
           else

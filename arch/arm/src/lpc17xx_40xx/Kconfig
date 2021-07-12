@@ -386,6 +386,7 @@ config LPC17_40_RTCEV
 config LPC17_40_WDT
 	bool "WDT"
 	default n
+	select WATCHDOG
 
 config LPC17_40_ADC
 	bool "ADC"
@@ -1067,20 +1068,5 @@ config LPC17_40_USBHOST_REGDEBUG
 	---help---
 		Output detailed register-level USB host debug information.  Requires
 		also CONFIG_DEBUG_USB_INFO.
-
-endmenu
-
-menu "Memory-Technolgy-Device Options (PROGMEM)"
-	depends on LPC17_40_PROGMEM
-
-config LPC17_40_PROGMEM_NSECTORS
-	int "Size in 32 kB sectors"
-	default 2
-	---help---
-		Number of 32 kB sectors to use as an MTD-device.  This driver
-		will allocate the last n sectors.  Only 32 kB sectors are
-		supported, so this works only on devices with 128 kB, 256 kB and
-		512 kB of flash.  The maximum number of sectors for these
-		devices is 2, 6 and 14, respectively.  Default is 2.
 
 endmenu

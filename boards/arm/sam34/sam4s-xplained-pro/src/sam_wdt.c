@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <sched.h>

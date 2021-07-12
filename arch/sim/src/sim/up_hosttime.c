@@ -66,7 +66,7 @@ uint64_t host_gettime(bool rtc)
 
 void host_sleep(uint64_t nsec)
 {
-  usleep((nsec + 999)/ 1000);
+  usleep((nsec + 999) / 1000);
 }
 
 /****************************************************************************

@@ -227,7 +227,7 @@ bool nuc_gpioread(gpio_cfgset_t pinset);
  *
  * Description:
  *   Dump all GPIO registers associated with the provided pin description
- *   along with a descriptive messasge.
+ *   along with a descriptive message.
  *
  ****************************************************************************/
 

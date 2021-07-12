@@ -151,7 +151,7 @@ static ssize_t ge2d_write(FAR struct file *filep,
    * can't set except 1 in this chip.
    */
 
-  putreg32((uint32_t)(uintptr_t)buffer | 1, GE2D_ADDRESS_DESCRIPTOR_START);
+  putreg32(CXD56_PHYSADDR(buffer) | 1, GE2D_ADDRESS_DESCRIPTOR_START);
   putreg32(GE2D_EXEC, GE2D_CMD_DESCRIPTOR);
 
   /* Enable error and completion interrupts. */

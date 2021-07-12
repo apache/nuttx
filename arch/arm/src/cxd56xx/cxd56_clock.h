@@ -684,6 +684,46 @@ uint32_t cxd56_get_img_vsync_baseclock(void);
 
 uint32_t cxd56_get_appsmp_baseclock(void);
 
+/****************************************************************************
+ * Name: cxd56_hostif_clock_enable
+ *
+ * Description:
+ *   Enable clock of the hostif block
+ *
+ ****************************************************************************/
+
+int cxd56_hostif_clock_enable(void);
+
+/****************************************************************************
+ * Name: cxd56_hostif_clock_disable
+ *
+ * Description:
+ *   Disable clock of the hostif block
+ *
+ ****************************************************************************/
+
+int cxd56_hostif_clock_disable(void);
+
+/****************************************************************************
+ * Name: cxd56_hostseq_clock_enable
+ *
+ * Description:
+ *   Enable clock of the hostif sequencer block
+ *
+ ****************************************************************************/
+
+int cxd56_hostseq_clock_enable(void);
+
+/****************************************************************************
+ * Name: cxd56_hostseq_clock_disable
+ *
+ * Description:
+ *   Disable clock of the hostif sequencer block
+ *
+ ****************************************************************************/
+
+int cxd56_hostseq_clock_disable(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

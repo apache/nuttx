@@ -20,17 +20,10 @@
 
 #include <nuttx/config.h>
 
-set +e
-
 #define CONCAT_(x, y) x##y
 #define CONCAT(x, y)  CONCAT_(x, y)
 
 #ifdef CONFIG_NSH_ROMFSETC
-
-#ifndef CONFIG_NSH_DISABLE_UNAME
-uname -a > /dev/syslog
-#endif /* CONFIG_NSH_DISABLE_UNAME */
-
 #ifdef CONFIG_FS_FAT
 
 /* Create a RAMDISK and mount it at /tmp */
@@ -40,73 +33,4 @@ mkfatfs CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO)
 mount -t vfat CONCAT(/dev/ram, CONFIG_NSH_FATDEVNO) CONFIG_NSH_FATMOUNTPT
 
 #endif /* CONFIG_FS_FAT */
-
-#ifdef CONFIG_FS_HOSTFS
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG
-mount -t hostfs -o fs=/system /system
-mount -t hostfs -o fs=/data /data
-
-  #if defined (CONFIG_NSH_PROC_MOUNTPOINT) && defined (CONFIG_FS_UNIONFS)
-    umount CONFIG_NSH_PROC_MOUNTPOINT
-    mount -t procfs /proc1
-    mount -t hostfs -o fs=/proc/net /net2
-    mount -t unionfs -o fspath1=/proc1,fspath2=/net2,prefix2=net CONFIG_NSH_PROC_MOUNTPOINT
-  #endif
-
-#else
-mount -t hostfs -o fs=../apps /system
-mount -t hostfs -o fs=. /data
-#endif
-
-#ifdef CONFIG_TESTING_TESTRUNNER
-
-testrunner >/system/testing/testrunner.log &
-
-#endif /* CONFIG_TESTING_TESTRUNNER */
-
-#endif /* CONFIG_FS_HOSTFS */
-
 #endif /* CONFIG_NSH_ROMFSETC */
-
-#ifdef CONFIG_KVDB
-#ifndef KVDB_REMOTE_SERVER
-
-kvdbd &
-usleep 10
-
-#endif /* !CONFIG_REMOTE_SERVER */
-#endif /* CONFIG_KVDB */
-
-#ifdef CONFIG_UORB
-
-uorb start &
-
-#endif /* CONFIG_UORB */
-
-#ifdef CONFIG_LIB_FLUORIDE
-fluorided &
-bta bdname
-bta scan 2
-#endif /* CONFIG_LIB_FLUORIDE */
-
-#ifdef CONFIG_BT
-zblue
-
-#ifdef CONFIG_BT_TESTER
-bttester
-#endif /* CONFIG_BT_TESTER */
-
-#endif /* CONFIG_BT */
-
-#ifdef CONFIG_SENSOR_MANAGER
-
-sensor &
-
-#endif /* CONFIG_SENSOR_MANAGER */
-
-#if defined (CONFIG_NET_USRSOCK)
-  usrsock server &
-#elif defined (CONFIG_NETUTILS_USRSOCK_RPMSG)
-  usrsock &
-#endif

@@ -75,6 +75,17 @@ config CXD56_PMIC
 	default y if CXD56_MAINCORE
 	default n if CXD56_SUBCORE
 
+if CXD56_PMIC
+
+config CXD56_PMIC_INT
+	bool "PMIC interrupt"
+	default n
+	depends on SCHED_LPWORK
+	---help---
+		Enable PMIC interrupt.
+
+endif
+
 config CXD56_CPUFIFO
 	bool
 	default y
@@ -190,6 +201,7 @@ config CXD56_WDT_INTERRUPT
 config CXD56_WDT_REGDEBUG
 	bool "Register level debug"
 	default n
+	depends on DEBUG_WATCHDOG_INFO
 	---help---
 		Enable low-level register debug output
 
@@ -222,6 +234,37 @@ config CXD56_PM_PROCFS
 	default n
 	---help---
 		Enable the power domain status or the clock frequency monitor.
+
+config CXD56_PM_DEBUG
+	bool "Power Management Debug Features"
+	default n
+	---help---
+		Enable power management debug features.
+
+if CXD56_PM_DEBUG
+
+config CXD56_PM_DEBUG_ERROR
+	bool "Power Management Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable power management error output to SYSLOG.
+
+config CXD56_PM_DEBUG_WARN
+	bool "Power Management Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable power management warning output to SYSLOG.
+
+config CXD56_PM_DEBUG_INFO
+	bool "Power Management Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable power management informational output to SYSLOG.
+
+endif # CXD56_PM_DEBUG
 
 endif # CXD56_PM
 
@@ -1092,6 +1135,45 @@ config CXD56_CISIF
 	default n
 	---help---
 		CMOS image sensor interface for cx5602 chip
+
+config CXD56_HOSTIF
+	bool "Host interface"
+	default n
+	---help---
+		Host interface supports I2C or SPI slave feature.
+
+config CXD56_HOSTIF_DEBUG
+	bool "Host interface Debug Features"
+	default n
+	depends on CXD56_HOSTIF
+	---help---
+		Enable host interface device debug features.
+
+if CXD56_HOSTIF_DEBUG
+
+config CXD56_HOSTIF_DEBUG_ERROR
+	bool "Host interface Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable host interface error output to SYSLOG.
+
+config CXD56_HOSTIF_DEBUG_WARN
+	bool "Host interface Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable host interface warning output to SYSLOG.
+
+config CXD56_HOSTIF_DEBUG_INFO
+	bool "Host interface Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable host interface informational output to SYSLOG.
+
+endif # CXD56_HOSTIF_DEBUG
+
 endmenu
 
 comment "Storage Options"
@@ -1194,6 +1276,16 @@ config CXD56_EMMC
 	---help---
 		Emmc driver for cxd56xx chip
 
+if CXD56_EMMC
+
+config CXD56_EMMC_VENDOR_TOSHIBA
+	bool "Toshiba eMMC device"
+	default n
+	---help---
+		Enable vendor-specific commands for Toshiba eMMC device.
+
+endif # CXD56_EMMC
+
 endmenu
 
 config CXD56_GE2D
@@ -1286,9 +1378,25 @@ endif
 
 config CXD56_TESTSET
 	bool "Use custom testset for spinlock"
-	default n
-	depends on SPINLOCK
+	default y
+	depends on SMP
 	---help---
-		Use custom testset based on hardware semaphore
+		Use custom testset
 
+if CXD56_TESTSET
+
+config CXD56_TESTSET_WITH_HWSEM
+	bool "Use custom testset based on hardware semaphore"
+	default n if CXD56_USE_SYSBUS
+	default y if !CXD56_USE_SYSBUS
+	---help---
+
+endif
+
+config CXD56_USE_SYSBUS
+	bool "Use the system bus for the data section"
+	default y
+	select ARCH_USE_TEXT_HEAP if ELF
+	---help---
+		To make ldrex/strex work correctly, this option must be enabled
 endmenu

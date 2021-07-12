@@ -89,10 +89,20 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
         result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
 
+  /* Need to update the recv window? */
+
+  if (tcp_should_send_recvwindow(conn))
+    {
+      result |= TCP_SNDACK;
+#ifdef CONFIG_NET_TCP_DELAYED_ACK
+      conn->rx_unackseg = 0;
+#endif
+    }
+
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
   /* Did the caller request that an ACK be sent? */
 
-  if ((result & TCP_SNDACK) != 0)
+  else if ((result & TCP_SNDACK) != 0)
     {
       /* Yes.. Handle delayed acknowledgments */
 

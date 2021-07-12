@@ -19,6 +19,10 @@ as the more advanced NuttX based SDK.
 Refer to https://developer.sony.com/develop/spresense/ for further information
 about this board.
 
+NOTICE:
+
+To run the nuttx, bootloader for Spresense SDK 2.1.0 or later must be installed.
+
 Configuration sub-directories
 -----------------------------
 
@@ -36,9 +40,7 @@ Configuration sub-directories
 
   smp
 
-    This is a configuration to run Spresense in SMP mode. To use this
-    configuration, bootloader for Spresense SDK 1.5.0 or later must be
-    installed.
+    This is a configuration to run Spresense in SMP mode.
 
   wifi
 

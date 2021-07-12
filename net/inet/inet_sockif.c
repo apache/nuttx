@@ -1289,7 +1289,7 @@ static ssize_t inet_sendmsg(FAR struct socket *psock,
 
   for (len = 0, iov = msg->msg_iov; iov != end; iov++)
     {
-      memcpy(buf + len, iov->iov_base, iov->iov_len);
+      memcpy(((unsigned char *)buf) + len, iov->iov_base, iov->iov_len);
       len += iov->iov_len;
     }
 
@@ -1355,8 +1355,11 @@ static int inet_ioctl(FAR struct socket *psock, int cmd,
 
 static int inet_socketpair(FAR struct socket *psocks[2])
 {
-  FAR struct socket *pserver;
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
+  FAR struct socket *pserver = psocks[1];
+#if defined(CONFIG_NET_TCP)
   FAR struct socket server;
+#endif
   union sockaddr_u addr[2];
   socklen_t len;
   int ret;
@@ -1396,6 +1399,7 @@ static int inet_socketpair(FAR struct socket *psocks[2])
    * pserver process, psocks[1] will be replaced with a new accept handle
    */
 
+#if defined(CONFIG_NET_TCP)
   if (psocks[0]->s_type == SOCK_STREAM)
     {
       ret = psock_socket(psocks[1]->s_domain, psocks[1]->s_type,
@@ -1407,10 +1411,7 @@ static int inet_socketpair(FAR struct socket *psocks[2])
 
       pserver = &server;
     }
-  else
-    {
-      pserver = psocks[1];
-    }
+#endif /* CONFIG_NET_TCP */
 
   ret = psock_bind(pserver, &addr[1].addr, len);
   if (ret < 0)
@@ -1420,6 +1421,7 @@ static int inet_socketpair(FAR struct socket *psocks[2])
 
   psock_getsockname(pserver, &addr[1].addr, &len);
 
+#if defined(CONFIG_NET_UDP)
   if (psocks[0]->s_type == SOCK_DGRAM)
     {
       ret = psock_connect(psocks[0], &addr[1].addr, len);
@@ -1434,7 +1436,10 @@ static int inet_socketpair(FAR struct socket *psocks[2])
           goto errout;
         }
     }
-  else
+#endif /* CONFIG_NET_UDP */
+
+#if defined(CONFIG_NET_TCP)
+  if (psocks[0]->s_type == SOCK_STREAM)
     {
       ret = psock_listen(pserver, 2);
       if (ret < 0)
@@ -1456,14 +1461,20 @@ static int inet_socketpair(FAR struct socket *psocks[2])
 
       ret = psock_accept(pserver, &addr[1].addr, &len, psocks[1]);
     }
+#endif /* CONFIG_NET_TCP */
 
 errout:
+#if defined(CONFIG_NET_TCP)
   if (pserver->s_type == SOCK_STREAM)
     {
       psock_close(pserver);
     }
+#endif /* CONFIG_NET_TCP */
 
   return ret;
+#else
+  return -EOPNOTSUPP;
+#endif /* CONFIG_NET_TCP || CONFIG_NET_UDP */
 }
 
 /****************************************************************************

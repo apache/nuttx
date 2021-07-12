@@ -48,17 +48,11 @@
  * Public Data
  ****************************************************************************/
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
- * linker script. _ebss lies at the end of the BSS region. The idle task
- * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
- * The IDLE thread is the thread that the system boots on and, eventually,
- * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory.
- * g_idle_topstack is a read-only variable the provides this computed
- * address.
+/* NOTE: g_idle_topstack needs to point the top of the idle stack
+ * for CPU0 and this value is used in up_initial_state()
  */
 
-uintptr_t g_idle_topstack = K210_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = K210_IDLESTACK0_TOP;
 volatile bool g_serial_ok = false;
 
 extern void k210_cpu_boot(uint32_t);

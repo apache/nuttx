@@ -1,0 +1,883 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESP32S2
+
+comment "ESP32-S2 Configuration Options"
+
+choice
+	prompt "ESP32-S2 Chip Selection"
+	default ARCH_CHIP_ESP32S2WROVER
+	depends on ARCH_CHIP_ESP32S2
+
+config ARCH_CHIP_ESP32S2WROVER
+	bool "ESP32-S2-WROVER"
+	select ESP32S2_ESP32S2DXWDXX
+	select ESP32S2_FLASH_4M
+	select ESP32S2_PSRAM_8M
+	---help---
+		Generic module with an embedded ESP32-S2
+
+endchoice # ESP32S2 Chip Selection
+
+choice
+	prompt "Instruction CACHE Size"
+	default ESP32S2_INSTRUCTION_CACHE_8KB
+	depends on ARCH_CHIP_ESP32S2
+
+config ESP32S2_INSTRUCTION_CACHE_8KB
+	bool "8KB"
+	---help---
+		Use 8KB of SRAM as Instruction Cache
+
+config ESP32S2_INSTRUCTION_CACHE_16KB
+	bool "16KB"
+	---help---
+		Use 16KB of SRAM as Instruction Cache
+
+endchoice # ESP32S2 Instruction CACHE size
+
+choice
+	prompt "Instruction CACHE Size"
+	default ESP32S2_INSTRUCTION_CACHE_8KB
+	depends on ARCH_CHIP_ESP32S2
+
+config ESP32S2_DATA_CACHE_0KB
+	bool "No DATA CACHE"
+	---help---
+		Use 8KB of SRAM as Data Cache
+
+config ESP32S2_DATA_CACHE_8KB
+	bool "8KB"
+	---help---
+		Use 8KB of SRAM as Data Cache
+
+config ESP32S2_DATA_CACHE_16KB
+	bool "16KB"
+	---help---
+		Use 16KB of SRAM as Data Cache
+
+endchoice # ESP32S2 Data CACHE size
+
+config ESP32S2_SINGLE_CPU
+	bool
+	default y
+
+config ESP32S2_FLASH_2M
+	bool
+	default n
+
+config ESP32S2_FLASH_4M
+	bool
+	default n
+
+config ESP32S2_FLASH_8M
+	bool
+	default n
+
+config ESP32S2_FLASH_16M
+	bool
+	default n
+
+config ESP32S2_FLASH_DETECT
+	bool "Auto-detect FLASH size"
+	default y
+	---help---
+		Auto detect flash size when flashing.
+
+config ESP32S2_PSRAM_8M
+	bool
+	default n
+
+config ESP32S2_ESP32S2SXWDXX
+	bool
+	default n
+	select ESP32S2_SINGLE_CPU
+	select ARCH_HAVE_I2CRESET
+
+choice ESP32S2_FLASH_MODE
+	prompt "SPI FLASH mode"
+	default ESP32S2_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication
+		with the attached SPI flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32S2_FLASH_MODE_DIO
+	bool "Dual IO (DIO)"
+
+	config ESP32S2_FLASH_MODE_DOUT
+	bool "Dual Output (DOUT)"
+
+	config ESP32S2_FLASH_MODE_QIO
+	bool "Quad IO (QIO)"
+
+	config ESP32S2_FLASH_MODE_QOUT
+	bool "Quad Output (QOUT)"
+
+endchoice # ESP32S2_FLASH_MODE
+
+choice ESP32S2_FLASH_FREQ
+	prompt "SPI FLASH frequency"
+	default ESP32S2_FLASH_FREQ_40M
+	---help---
+		SPI FLASH frequency
+		
+	config ESP32S2_FLASH_FREQ_80M
+	bool "80 MHz"
+
+	config ESP32S2_FLASH_FREQ_40M
+	bool "40 MHz"
+
+	config ESP32S2_FLASH_FREQ_26M
+	bool "26 MHz"
+
+	config ESP32S2_FLASH_FREQ_20M
+	bool "20 MHz"
+
+endchoice # ESP32S2_FLASH_FREQ
+
+choice ESP32S2_DEFAULT_CPU_FREQ
+	prompt "CPU frequency"
+	default ESP32S2_DEFAULT_CPU_FREQ_240
+	---help---
+		CPU frequency to be set on application startup.
+
+	config ESP32S2_DEFAULT_CPU_FREQ_80
+	bool "80 MHz"
+	config ESP32S2_DEFAULT_CPU_FREQ_160
+	bool "160 MHz"
+	config ESP32S2_DEFAULT_CPU_FREQ_240
+	bool "240 MHz"
+endchoice # CPU frequency
+
+config ESP32S2_DEFAULT_CPU_FREQ_MHZ
+	int
+	default 80 if ESP32S2_DEFAULT_CPU_FREQ_80
+	default 160 if ESP32S2_DEFAULT_CPU_FREQ_160
+	default 240 if ESP32S2_DEFAULT_CPU_FREQ_240
+
+choice
+	prompt "On-board Crystal Frequency"
+	default ESP32S2_XTAL_40MZ
+
+config ESP32S2_XTAL_40MZ
+	bool "40MHz"
+
+config ESP32S2_XTAL_26MHz
+	bool "26MHz"
+
+endchoice # On-board Crystal Frequency
+
+config ESP32S2_RT_TIMER
+	bool "Real-time Timer"
+	default n
+
+config ESP32S2_PARTITION
+	bool "ESP32S2 Partition"
+	default n
+	select ESP32S2_SPIFLASH
+	---help---
+		Decode esp-idf's partition file and initialize
+		partition by nuttx MTD.
+
+config ESP32S2_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+	---help---
+		This loads all of NuttX inside IRAM.  Used to test somewhat small
+		images that can fit entirely in IRAM.
+
+menu "ESP32-S2 Peripheral Selection"
+
+config ESP32S2_UART
+	bool
+	default n
+
+config ESP32S2_UART
+	bool
+	default n
+
+config ESP32S2_TIMER
+	bool
+	default n
+
+config ESP32S2_WDT
+	bool
+	default n
+
+config ESP32S2_BT
+	bool "Bluetooth"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32S2_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32S2 efuse support.
+
+config ESP32S2_I2C
+	bool
+	default n
+
+config ESP32S2_I2S0
+	bool "I2S 0"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32S2_LEDC
+	bool "LED PWM (LEDC)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32S2_PCNT
+	bool "Pulse Count Module (PCNT)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32S2_RMT
+	bool "Remote Control Module (RMT)"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		No yet implemented
+
+config ESP32S2_RNG
+	bool "Random Number Generator (RNG)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		ESP32S2 supports a RNG that passed on Dieharder test suite.
+
+config ESP32S2_SPI
+	bool
+	default n
+
+config ESP32S2_SPIFLASH
+	bool "SPI Flash"
+	default n
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+
+config ESP32S2_SPI2
+	bool "SPI 2"
+	default n
+	select ESP32S2_SPI
+	select ESP32S2_GPIO_IRQ
+	select SPI
+
+config ESP32S2_SPI3
+	bool "SPI 3"
+	default n
+	select ESP32S2_SPI
+	select ESP32S2_GPIO_IRQ
+	select SPI
+
+config ESP32S2_SPIRAM
+	bool "SPI RAM Support"
+	default n
+	select ARCH_HAVE_HEAP2
+	select XTENSA_IMEM_USE_SEPARATE_HEAP
+
+if ESP32S2_SPIRAM && SMP
+
+choice
+	prompt "How does SPIRAM share cache?"
+	default ESP32S2_MEMMAP_SPIRAM_CACHE_EVENODD
+	---help---
+		Selects the cache mode to CPU access the external memory.
+
+	config ESP32S2_MEMMAP_SPIRAM_CACHE_EVENODD
+	bool "Pro CPU uses even 32 byte ranges, App uses odd ones"
+	config ESP32S2_MEMMAP_SPIRAM_CACHE_LOWHIGH
+	bool "Pro CPU uses low 2MB ranges, App uses high ones"
+endchoice # CPU frequency
+
+endif
+
+config XTENSA_TIMER1
+	bool "Xtensa Timer 1"
+	default n
+
+config XTENSA_TIMER2
+	bool "Xtensa Timer 2"
+	default n
+
+config ESP32S2_TIMER0
+	bool "64-bit Timer 0 (Group 0 Timer 0)"
+	default n
+	select ESP32S2_TIMER
+	---help---
+		Enables Timer
+
+config ESP32S2_TIMER1
+	bool "64-bit Timer 1 (Group 0 Timer 1)"
+	default n
+	select ESP32S2_TIMER
+	---help---
+		Enables Timer
+
+config ESP32S2_TIMER2
+	bool "64-bit Timer 2 (Group 1 Timer 0)"
+	default n
+	select ESP32S2_TIMER
+	---help---
+		Enables Timer
+
+config ESP32S2_TIMER3
+	bool "64-bit Timer 3 (Group 1 Timer 1)"
+	default n
+	select ESP32S2_TIMER
+	---help---
+		Enables Timer
+
+config ESP32S2_MWDT0
+	bool "Main System Watchdog Timer (Group 0)"
+	default n
+	select ESP32S2_WDT
+	---help---
+		Includes MWDT0. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32S2_MWDT1
+	bool "Main System Watchdog Timer (Group 1)"
+	default n
+	select ESP32S2_WDT
+	---help---
+		Includes MWDT1. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32S2_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESP32S2_WDT
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
+
+config ESP32S2_UART0
+	bool "UART 0"
+	default n
+	select ESP32S2_UART
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32S2_UART1
+	bool "UART 1"
+	default n
+	select ESP32S2_UART
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+
+config ESP32S2_WIRELESS
+	bool "Wireless"
+	default n
+	select NET
+	select ARCH_PHY_INTERRUPT
+	select ESP32S2_RNG
+	select ESP32S2_RT_TIMER
+	select ESP32S2_TIMER0
+	---help---
+		Enable Wireless support
+
+config ESP32S2_I2C0
+	bool "I2C 0"
+	default n
+	select ESP32S2_I2C
+
+config ESP32S2_I2C1
+	bool "I2C 1"
+	default n
+	select ESP32S2_I2C
+
+config ESP32S2_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+
+endmenu # ESP32S2 Peripheral Selection
+
+menu "Memory Configuration"
+
+config ESP32S2_BT_RESERVE_DRAM
+	int "Reserved BT DRAM"
+	default 0
+
+config ESP32S2_TRACEMEM_RESERVE_DRAM
+	int "Reserved trace memory DRAM"
+	default 0
+
+config ESP32S2_ULP_COPROC_RESERVE_MEM
+	int "Reserved ULP co-processor DRAM"
+	default 0
+
+endmenu # Memory Configuration
+
+config ESP32S2_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+menu "UART configuration"
+	depends on ESP32S2_UART
+
+if ESP32S2_UART0
+
+config ESP32S2_UART0_TXPIN
+	int "UART0 Tx Pin"
+	default 43
+	range 0 46
+
+config ESP32S2_UART0_RXPIN
+	int "UART0 Rx Pin"
+	default 44
+	range 0 46
+
+config ESP32S2_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 16
+	range 0 46
+
+config ESP32S2_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 15
+	range 0 46
+
+endif # ESP32S2_UART0
+
+if ESP32S2_UART1
+
+config ESP32S2_UART1_TXPIN
+	int "UART1 Tx Pin"
+	default 37
+	range 0 46
+
+config ESP32S2_UART1_RXPIN
+	int "UART1 Rx Pin"
+	default 38
+	range 0 46
+
+config ESP32S2_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 35
+	range 0 46
+
+config ESP32S2_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 36
+	range 0 46
+
+endif # ESP32S2_UART1
+
+endmenu # UART configuration
+
+menu "I2C configuration"
+	depends on ESP32S2_I2C
+
+if ESP32S2_I2C0
+
+config ESP32S2_I2C0_SCLPIN
+	int "I2C0 SCL Pin"
+	default 22
+	range 0 39
+
+config ESP32S2_I2C0_SDAPIN
+	int "I2C0 SDA Pin"
+	default 23
+	range 0 39
+
+endif # ESP32S2_I2C0
+
+if ESP32S2_I2C1
+
+config ESP32S2_I2C1_SCLPIN
+	int "I2C1 SCL Pin"
+	default 26
+	range 0 39
+
+config ESP32S2_I2C1_SDAPIN
+	int "I2C1 SDA Pin"
+	default 25
+	range 0 39
+
+endif # ESP32S2_I2C1
+
+endmenu # I2C configuration
+
+menu "SPI configuration"
+	depends on ESP32S2_SPI
+
+config ESP32S2_SPI_SWCS
+	bool "SPI software CS"
+	default y
+	---help---
+		Use SPI software CS.
+
+config ESP32S2_SPI_UDCS
+	bool "User defined CS"
+	default n
+	depends on ESP32S2_SPI_SWCS
+	---help---
+		Use user defined CS.
+
+config ESP32S2_SPI2_DMA
+	bool "SPI2 use DMA"
+	default y
+	depends on ESP32S2_SPI2
+
+config ESP32S2_SPI3_DMA
+	bool "SPI3 use DMA"
+	default y
+	depends on ESP32S2_SPI3
+
+config SPI_DMADESC_NUM
+	int "SPI master DMA description number"
+	default 2
+
+config SPI_SLAVE_BUFSIZE
+	int "SPI slave buffer size"
+	default 2048
+	depends on SPI_SLAVE
+
+config ESP32S2_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 64
+	depends on ESP32S2_SPI2_DMA || ESP32S2_SPI3_DMA
+	---help---
+		When SPI DMA is enabled, DMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
+if ESP32S2_SPI2
+
+config ESP32S2_SPI2_CSPIN
+	int "SPI2 CS Pin"
+	default 15
+	range 0 39
+
+config ESP32S2_SPI2_CLKPIN
+	int "SPI2 CLK Pin"
+	default 14
+	range 0 39
+
+config ESP32S2_SPI2_MOSIPIN
+	int "SPI2 MOSI Pin"
+	default 13
+	range 0 39
+
+config ESP32S2_SPI2_MISOPIN
+	int "SPI2 MISO Pin"
+	default 12
+	range 0 39
+
+endif # ESP32S2_SPI2
+
+if ESP32S2_SPI3
+
+config ESP32S2_SPI3_CSPIN
+	int "SPI3 CS Pin"
+	default 5
+	range 0 39
+
+config ESP32S2_SPI3_CLKPIN
+	int "SPI3 CLK Pin"
+	default 18
+	range 0 39
+
+config ESP32S2_SPI3_MOSIPIN
+	int "SPI3 MOSI Pin"
+	default 23
+	range 0 39
+
+config ESP32S2_SPI3_MISOPIN
+	int "SPI3 MISO Pin"
+	default 19
+	range 0 39
+
+endif # ESP32S2_SPI3
+
+endmenu # ESP32S2_SPI
+
+menu "SPI Flash configuration"
+	depends on ESP32S2_SPIFLASH
+
+config ESP32S2_MTD_OFFSET
+	hex "MTD base address in SPI Flash"
+	default 0x180000
+	---help---
+		MTD base address in SPI Flash.
+
+config ESP32S2_MTD_SIZE
+	hex "MTD size in SPI Flash"
+	default 0x100000
+	---help---
+		MTD size in SPI Flash.
+
+config ESP32S2_SPIFLASH_DEBUG
+	bool "Debug SPI Flash"
+	default n
+	depends on DEBUG_FS_INFO
+	---help---
+		Enable this option, read and write of SPI Flash
+		will show input arguments and result.
+
+endmenu # ESP32S2_SPIFLASH
+
+menu "SPI RAM Config"
+	depends on ESP32S2_SPIRAM
+
+choice ESP32S2_SPIRAM_TYPE
+	prompt "Type of SPI RAM chip in use"
+	default ESP32S2_SPIRAM_TYPE_AUTO
+
+config ESP32S2_SPIRAM_TYPE_AUTO
+	bool "Auto-detect"
+
+config ESP32S2_SPIRAM_TYPE_ESPPSRAM32
+	bool "ESP-PSRAM32 or IS25WP032"
+
+config ESP32S2_SPIRAM_TYPE_ESPPSRAM64
+	bool "ESP-PSRAM64 or LY68L6400"
+endchoice #ESP32S2_SPIRAM_TYPE
+
+config ESP32S2_SPIRAM_SIZE
+	int
+	default -1 if ESP32S2_SPIRAM_TYPE_AUTO
+	default 4194304 if ESP32S2_SPIRAM_TYPE_ESPPSRAM32
+	default 8388608 if ESP32S2_SPIRAM_TYPE_ESPPSRAM64
+	default 0
+
+choice ESP32S2_SPIRAM_SPEED
+	prompt "Set RAM clock speed"
+	default ESP32S2_SPIRAM_SPEED_40M
+	---help---
+	    Select the speed for the SPI RAM chip.
+
+config ESP32S2_SPIRAM_SPEED_40M
+	bool "40MHz clock speed"
+
+config ESP32S2_SPIRAM_SPEED_80M
+	bool "80MHz clock speed"
+
+endchoice # ESP32S2_SPIRAM_SPEED
+
+config ESP32S2_SPIRAM_BOOT_INIT
+	bool "Initialize SPI RAM during startup"
+	depends on ESP32S2_SPIRAM
+	default "y"
+	---help---
+	    If this is enabled, the SPI RAM will be enabled during initial
+	    boot. Unless you have specific requirements, you'll want to leave
+	    this enabled so memory allocated during boot-up can also be
+	    placed in SPI RAM.
+
+config ESP32S2_SPIRAM_IGNORE_NOTFOUND
+	bool "Ignore PSRAM when not found"
+	default "n"
+	depends on ESP32S2_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
+	---help---
+	    Normally, if psram initialization is enabled during compile time
+	    but not found at runtime, it is seen as an error making the CPU
+	    panic. If this is enabled, booting will complete but no PSRAM
+	    will be available.
+
+config ESP32S2_SPIRAM_2T_MODE
+	bool "Enable SPI PSRAM 2T mode"
+	depends on ESP32S2_SPIRAM
+	default "n"
+	---help---
+	    Enable this option to fix single bit errors inside 64Mbit PSRAM.
+	    Some 64Mbit PSRAM chips have a hardware issue in the RAM which
+	    causes bit errors at multiple fixed bit positions.
+	    Note: If this option is enabled, the 64Mbit PSRAM chip will appear
+	    to be 32Mbit in size.
+	    Applications will not be affected unless the use the esp_himem
+	    APIs, which are not supported in 2T mode.
+
+config ESP32S2_SPIRAM_BANKSWITCH_ENABLE
+	bool "Enable bank switching for >4MiB external RAM"
+	default y
+	---help---
+		The ESP32S2 only supports 4MiB of external RAM in its address
+		space. The hardware does support larger memories, but these
+		have to be bank-switched in and out of this address space.
+		Enabling this allows you to reserve some MMU pages for this,
+		which allows the use of the esp_himem api to manage these
+		banks.
+		#Note that this is limited to 62 banks, as
+		#esp_spiram_writeback_cache needs some kind of mapping of
+		#some banks below that mark to work. We cannot at this
+		#moment guarantee this to exist when himem is enabled.
+		If spiram 2T mode is enabled, the size of 64Mbit psram will
+		be changed as 32Mbit, so himem will be unusable.
+
+config SPIRAM_BANKSWITCH_RESERVE
+	int "Amount of 32K pages to reserve for bank switching"
+	depends on ESP32S2_SPIRAM_BANKSWITCH_ENABLE
+	default 8
+	range 1 62
+	---help---
+		Select the amount of banks reserved for bank switching. Note
+		that the amount of RAM allocatable with malloc will decrease
+		by 32K for each page reserved here.
+		Note that this reservation is only actually done if your
+		program actually uses the himem API. Without any himem
+		calls, the reservation is not done and the original amount
+		of memory will be available.
+
+endmenu #SPI RAM Config
+
+menu "WiFi configuration"
+	depends on ESP32S2_WIRELESS
+
+choice
+	prompt "ESP32-S2 WiFi mode"
+	default ESP32S2_WIFI_STATION
+
+config ESP32S2_WIFI_STATION
+	bool "Station mode"
+
+config ESP32S2_WIFI_SOFTAP
+	bool "SoftAP mode"
+
+config ESP32S2_WIFI_STATION_SOFTAP_COEXISTENCE
+	bool "Station + SoftAP coexistence"
+
+endchoice # ESP32S2 WiFi mode
+
+config ESP32S2_WIFI_STATIC_RXBUF_NUM
+    int "WiFi static RX buffer number"
+	default 10
+
+config ESP32S2_WIFI_DYNAMIC_RXBUF_NUM
+    int "WiFi dynamic RX buffer number"
+	default 32
+
+config ESP32S2_WIFI_DYNAMIC_TXBUF_NUM
+    int "WiFi dynamic TX buffer number"
+	default 32
+
+config ESP32S2_WIFI_TX_AMPDU
+	bool "WiFi TX AMPDU"
+	default y
+
+config ESP32S2_WIFI_RX_AMPDU
+	bool "WiFi RX AMPDU"
+	default y
+
+config ESP32S2_WIFI_RXBA_AMPDU_WZ
+    int "WiFi RX BA AMPDU windown size"
+	default 6
+
+config ESP32S2_WLAN_PKTBUF_NUM
+	int "WLAN netcard packet buffer number per netcard"
+	default 16
+
+config ESP32S2_WIFI_CONNECT_TIMEOUT
+	int "Connect timeout by second"
+	default 10
+	---help---
+		Max waiting time of connecting to AP.
+
+config ESP32S2_WIFI_SCAN_RESULT_SIZE
+	int "Scan result buffer"
+	default 4096
+	---help---
+		Maximum scan result buffer size.
+
+config ESP32S2_WIFI_SAVE_PARAM
+	bool "Save WiFi Parameters"
+	default n
+	---help---
+		If you enable this option, WiFi adapter parameters will be saved
+		into the file system instead of computing them each time.
+
+		These parameters mainly contains:
+		  - SSID
+		  - Password
+		  - BSSID
+		  - PMK(compute when connecting)
+		  - Author mode
+		  - MAC address
+		  - WiFi hardware configuration parameters
+
+config ESP32S2_WIFI_FS_MOUNTPT
+	string "Save WiFi Parameters"
+	default "/mnt/esp/wifi"
+	depends on ESP32S2_WIFI_SAVE_PARAM
+	---help---
+		Mount point of WiFi storage file system.
+
+endmenu # ESP32S2_WIRELESS
+
+menu "Real-Time Timer"
+	depends on ESP32S2_RT_TIMER
+
+config ESP32S2_RT_TIMER_TASK_NAME
+	string "Timer task name"
+	default "rt_timer"
+
+config ESP32S2_RT_TIMER_TASK_PRIORITY
+	int "Timer task priority"
+	default 223 # Lower than high priority workqueue
+
+config ESP32S2_RT_TIMER_TASK_STACK_SIZE
+	int "Timer task stack size"
+	default 2048
+
+endmenu # Real-Time Timer
+
+if ESP32S2_TIMER
+menu "Timer/counter Configuration"
+
+config ESP32S2_ONESHOT
+	bool "One-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+endmenu # Timer/counter Configuration
+endif # ESP32S2_TIMER
+
+menu "Partition Configuration"
+	depends on ESP32S2_PARTITION
+
+config ESP32S2_PARTITION_OFFSET
+	hex "Partition offset"
+	default "0x8000"
+
+config ESP32S2_PARTITION_MOUNT
+	string "Partition mount point"
+	default "/dev/esp/partition/"
+
+endmenu # ESP32S2_PARTITION
+
+menu "AES accelerate"
+	depends on ESP32S2_AES_ACCELERATOR
+
+config ESP32S2_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # ESP32S2_AES_ACCELERATOR
+
+endif # ARCH_CHIP_ESP32S2

@@ -100,13 +100,14 @@ void bl602_netdev_free_txbuf(uint8_t *buf);
  *   event: notify type, tx done or received new data
  *   data: The data of the event, may be NULL
  *   len: data length
+ *   opaque: customer data
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int  bl602_net_notify(uint32_t event, uint8_t *data, int len);
+int  bl602_net_notify(uint32_t event, uint8_t *data, int len, void *opaque);
 
 /****************************************************************************
  * Name: bl602_net_event

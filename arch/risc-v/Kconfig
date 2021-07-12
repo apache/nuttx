@@ -50,6 +50,7 @@ config ARCH_CHIP_ESP32C3
 	select LIBC_ARCH_MEMCCMP
 	select LIBC_ARCH_MEMMOVE
 	select LIBC_ARCH_MEMSET
+	select ARCH_HAVE_TEXT_HEAP
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -59,6 +60,20 @@ config ARCH_CHIP_C906
 	select ARCH_HAVE_MPU
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
+
+config ARCH_CHIP_MPFS
+        bool "MicroChip Polarfire (MPFS)"
+        select ARCH_RV64GC
+        select ARCH_HAVE_MPU
+        select ARCH_HAVE_RESET
+        ---help---
+		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
+
+config ARCH_CHIP_RV32M1
+	bool "NXP RV32M1"
+	select ARCH_RV32IM
+	---help---
+		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
@@ -97,6 +112,23 @@ config ARCH_CHIP
 	default "bl602"		if ARCH_CHIP_BL602
 	default "esp32c3"	if ARCH_CHIP_ESP32C3
 	default "c906"		if ARCH_CHIP_C906
+	default "mpfs"		if ARCH_CHIP_MPFS
+	default "rv32m1"	if ARCH_CHIP_RV32M1
+
+config ARCH_RISCV_INTXCPT_EXTENSIONS
+	bool "RISC-V Integer Context Extensions"
+	default n
+	---help---
+		RISC-V could be customized with extensions. Some Integer Context
+		Registers have to be saved and restored when Contexts switch.
+
+if ARCH_RISCV_INTXCPT_EXTENSIONS
+
+config ARCH_RISCV_INTXCPT_EXTREGS
+	int "Number of Extral RISC-V Integer Context Registers"
+	default 0
+
+endif
 
 if ARCH_RV32IM
 source arch/risc-v/src/rv32im/Kconfig
@@ -121,5 +153,11 @@ source arch/risc-v/src/esp32c3/Kconfig
 endif
 if ARCH_CHIP_C906
 source arch/risc-v/src/c906/Kconfig
+endif
+if ARCH_CHIP_MPFS
+source arch/risc-v/src/mpfs/Kconfig
+endif
+if ARCH_CHIP_RV32M1
+source arch/risc-v/src/rv32m1/Kconfig
 endif
 endif

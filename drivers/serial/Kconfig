@@ -190,8 +190,6 @@ config TTY_FORCE_PANIC_CHAR
 config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
-	select SIG_DEFAULT
-	select SIG_SIGKILL_ACTION
 	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-c/x event.  Enabled automatically for console
@@ -236,8 +234,6 @@ config TTY_SIGINT_CHAR
 config TTY_SIGTSTP
 	bool "Support SIGTSTP"
 	default n
-	select SIG_DEFAULT
-	select CONFIG_SIG_SIGSTOP_ACTION
 	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-z event.  Enabled automatically for console

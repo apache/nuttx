@@ -138,7 +138,7 @@ _xtensa_context_save:
 	rsr		a3, SAR
 	s32i	a3, a2, (4 * REG_SAR)
 
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
 	rsr		a3, LBEG
 	s32i	a3, a2, (4 * REG_LBEG)
 	rsr		a3, LEND
@@ -344,7 +344,7 @@ _xtensa_save_hook:
 	rsr		a3, SAR
 	s32i	a3, a2, (4 * REG_SAR)
 
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
 	rsr		a3, LBEG
 	s32i	a3, a2, (4 * REG_LBEG)
 	rsr		a3, LEND
@@ -449,7 +449,7 @@ xtensa_context_save:
 
 _xtensa_context_restore:
 
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
 	l32i	a3, a2, (4 * REG_LBEG)
 	l32i	a4, a2, (4 * REG_LEND)
 	wsr		a3, LBEG

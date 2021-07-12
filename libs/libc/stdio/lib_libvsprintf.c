@@ -375,7 +375,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 }
             }
 
-          /* Note: On Nuttx, ptrdiff_t == intptr_t == ssize_t. */
+          /* Note: On NuttX, ptrdiff_t == intptr_t == ssize_t. */
 
           if (c == 'z' || c == 't')
             {

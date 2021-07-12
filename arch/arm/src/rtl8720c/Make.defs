@@ -1,0 +1,76 @@
+############################################################################
+# arch/arm/src/rtl8720c/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# arch/arm/src/common
+#
+CMN_CSRCS += arm_checkstack.c arm_createstack.c arm_exit.c arm_hostfs.c
+CMN_CSRCS += arm_initialize.c arm_interruptcontext.c arm_modifyreg8.c
+CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_pthread_start.c
+CMN_CSRCS += arm_puts.c arm_releasestack.c arm_semi_syslog.c
+CMN_CSRCS += arm_stackframe.c arm_task_start.c arm_usestack.c arm_vfork.c
+
+CMN_ASRCS += arm_exception.S
+
+# arch/arm/src/armv8-m
+#
+CMN_ASRCS += arm_fetchadd.S arm_fpu.S arm_setjmp.S
+CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
+CMN_ASRCS += arm_switchcontext.S arm_testset.S vfork.S
+
+CMN_UASRCS += arm_signal_handler.S
+
+CMN_CSRCS += arm_assert.c arm_blocktask.c arm_cache.c arm_copyarmstate.c
+CMN_CSRCS += arm_copyfullstate.c arm_doirq.c arm_hardfault.c arm_initialstate.c
+CMN_CSRCS += arm_itm_syslog.c arm_memfault.c arm_mpu.c arm_ramvec_attach.c
+CMN_CSRCS += arm_ramvec_initialize.c arm_releasepending.c arm_reprioritizertr.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_signal_dispatch.c
+CMN_CSRCS += arm_stackcheck.c arm_svcall.c arm_systick.c arm_unblocktask.c
+
+# arch/arm/src/rtl8720c
+#
+CHIP_CSRCS += ameba_nvic.c ameba_heap.c ameba_idle.c ameba_uart.c ameba_start.c ameba_vectors.c
+CHIP_CSRCS += ameba_efuse.c ameba_flash.c ameba_wdt.c ameba_hci.c
+
+CHIP_ASRCS += ameba_lto.S
+
+# arch/arm/src/rtl8720c/8710c/fwlib/source
+#
+CHIP_CSRCS += hal_efuse.c hal_flash.c hal_misc.c hal_spic.c hal_ssi.c hal_uart.c
+
+CFLAGS += -I$(TOPDIR)/arch/arm/include/rtl8720c
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/cmsis/cmsis-core/include
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/cmsis/rtl8710c/include
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/app/rtl_printf/include
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/app/stdio_port
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/misc/utilities/include
+CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/fwlib/include
+
+CFLAGS += -Wno-attributes
+
+ifeq ($(CONFIG_IEEE80211_REALTEK_AMEBAZ),y)
+CHIP_CSRCS += amebaZ.c amebaz_driver.c amebaz_netdev.c amebaz_depend.c amebaz_wlan.c ameba_func.c
+CHIP_CSRCS += amebaz_hci_board.c amebaz_coex.c amebaz_firmware.c
+endif # CONFIG_IEEE80211_REALTEK_AMEBAZ
+
+VPATH += chip/8710c
+VPATH += chip/8710c/fwlib/source/ram
+VPATH += chip/8710c/fwlib/source/ram_s
+VPATH += chip/8710c/fwlib/source/ram_ns

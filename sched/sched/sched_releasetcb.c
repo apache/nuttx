@@ -48,6 +48,7 @@
 
 static void nxsched_releasepid(pid_t pid)
 {
+  irqstate_t flags = enter_critical_section();
   int hash_ndx = PIDHASH(pid);
 
   /* Make any pid associated with this hash available.  Note:
@@ -67,6 +68,8 @@ static void nxsched_releasepid(pid_t pid)
   g_cpuload_total          -= g_pidhash[hash_ndx].ticks;
   g_pidhash[hash_ndx].ticks = 0;
 #endif
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

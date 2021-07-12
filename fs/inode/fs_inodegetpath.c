@@ -53,7 +53,7 @@ int inode_getpath(FAR struct inode *node, FAR char *path)
       path[0] = '\0';
       return OK;
     }
-  else if (node->i_parent)
+  else if (node->i_parent != NULL)
     {
       int ret = inode_getpath(node->i_parent, path);
       if (ret < 0)

@@ -33,6 +33,10 @@
 
 #include "rp2040_pico.h"
 
+#ifdef CONFIG_LCD_BACKPACK
+#   include "rp2040_lcd_backpack.h"
+#endif
+
 #ifdef CONFIG_VIDEO_FB
 #  include <nuttx/video/fb.h>
 #endif
@@ -134,11 +138,31 @@ int rp2040_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LCD_BACKPACK
+  /* slcd:0, i2c:0, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 0, 2, 16);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_RP2040_I2S
   ret = board_i2sdev_initialize(0);
   if (ret < 0)
     {
       _err("ERROR: Failed to initialize I2S.\n");
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = rp2040_dev_gpio_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
     }
 #endif
 

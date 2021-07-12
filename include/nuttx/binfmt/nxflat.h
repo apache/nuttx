@@ -95,7 +95,7 @@ struct nxflat_loadinfo_s
 
   /* File descriptors */
 
-  int filfd;               /* Descriptor for the file being loaded */
+  struct file file;        /* Descriptor for the file being loaded */
 
   /* This is a copy of the NXFLAT header (still in network order) */
 

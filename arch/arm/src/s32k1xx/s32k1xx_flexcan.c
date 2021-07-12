@@ -636,7 +636,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   if (mbi == TXMBCOUNT)
     {
-      nwarn("No TX MB available mbi %" PRIi32 "\n", mbi);
+      nwarn("No TX MB available mbi %" PRIu32 "\n", mbi);
       NETDEV_TXERRORS(&priv->dev);
       return 0;       /* No transmission for you! */
     }
@@ -1006,10 +1006,13 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
           NETDEV_TXDONE(&priv->dev);
 #ifdef TX_TIMEOUT_WQ
           /* We are here because a transmission completed, so the
-           * corresponding watchdog can be canceled.
+           * corresponding watchdog can be canceled
+           * mailbox be set to inactive
            */
 
           wd_cancel(&priv->txtimeout[mbi]);
+          struct mb_s *mb = &priv->tx[mbi];
+          mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
 
@@ -1129,7 +1132,9 @@ static int s32k1xx_flexcan_interrupt(int irq, FAR void *context,
 static void s32k1xx_txtimeout_work(FAR void *arg)
 {
   FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
+  uint32_t flags;
   uint32_t mbi;
+  uint32_t mb_bit;
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
@@ -1140,6 +1145,8 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
    * transmit function transmitted a new frame
    */
 
+  flags  = getreg32(priv->base + S32K1XX_CAN_IFLAG1_OFFSET);
+
   for (mbi = 0; mbi < TXMBCOUNT; mbi++)
     {
       if (priv->txmb[mbi].deadline.tv_sec != 0
@@ -1147,6 +1154,14 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
           || now->tv_usec > priv->txmb[mbi].deadline.tv_usec))
         {
           NETDEV_TXTIMEOUTS(&priv->dev);
+
+          mb_bit = 1 << (RXMBCOUNT +  mbi);
+
+          if (flags & mb_bit)
+            {
+              putreg32(mb_bit, priv->base + S32K1XX_CAN_IFLAG1_OFFSET);
+            }
+
           struct mb_s *mb = &priv->tx[mbi];
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;
@@ -1658,7 +1673,7 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
 
   for (i = 0; i < RXMBCOUNT; i++)
     {
-      ninfo("Set MB%" PRIi32 " to receive %p\n", i, &priv->rx[i]);
+      ninfo("Set MB%" PRIu32 " to receive %p\n", i, &priv->rx[i]);
       priv->rx[i].cs.edl = 0x1;
       priv->rx[i].cs.brs = 0x1;
       priv->rx[i].cs.esi = 0x0;
@@ -1722,8 +1737,8 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
 
   for (i = 0; i < TOTALMBCOUNT; i++)
     {
-      ninfo("MB %" PRIi32 " %p\n", i, &priv->rx[i]);
-      ninfo("MB %" PRIi32 " %p\n", i, &priv->rx[i].id.w);
+      ninfo("MB %" PRIu32 " %p\n", i, &priv->rx[i]);
+      ninfo("MB %" PRIu32 " %p\n", i, &priv->rx[i].id.w);
       priv->rx[i].cs.cs = 0x0;
       priv->rx[i].id.w = 0x0;
       priv->rx[i].data[0].w00 = 0x0;

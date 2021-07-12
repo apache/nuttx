@@ -110,4 +110,8 @@ ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 CSRCS += sam_mrf24j40.c
 endif
 
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += sam_st7789.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

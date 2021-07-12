@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <poll.h>
@@ -215,6 +216,8 @@ static int     gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static int     gs2200m_irq(int irq, FAR void *context, FAR void *arg);
 static void    gs2200m_irq_worker(FAR void *arg);
+
+static void _remove_all_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c);
 
 /****************************************************************************
  * Private Data
@@ -524,7 +527,7 @@ static void _check_pkt_q_empty(FAR struct gs2200m_dev_s *dev, char cid)
           pkt_dat = (FAR struct pkt_dat_s *)pkt_dat->dq.flink;
         }
 
-      ASSERT(false);
+      _remove_all_pkt(dev, c);
     }
 }
 
@@ -2380,6 +2383,7 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
     {
       wlinfo("+++ already closed \n");
       type = TYPE_DISCONNECT;
+      ret = -ENOTCONN;
       goto errout;
     }
 
@@ -2389,7 +2393,7 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
 
 errout:
 
-  if (type != TYPE_OK)
+  if (type != TYPE_OK && type != TYPE_DISCONNECT)
     {
       ret = -EINVAL;
     }

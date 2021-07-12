@@ -29,6 +29,7 @@
 #include <string.h>
 #include <signal.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 #include <unistd.h>
 

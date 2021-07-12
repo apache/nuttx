@@ -573,6 +573,8 @@ f7xx-evalos:
     - Configures nsh with advanced features such as autocompletion.
     - Configures the on-board LEDs to work with the 'leds' example app.
     - Configures the 'helloxx' example app.
+    - Adds character device for i2c1
+    - Tries to register mpu60x0 IMU to i2c1
 
   NOTES:
 

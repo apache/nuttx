@@ -23,13 +23,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_DEBUG_FEATURES
-#include <debug.h>
-#endif
 #include <nuttx/arch.h>
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
@@ -172,7 +171,7 @@ static uint32_t cxd56_getreg(uintptr_t regaddr)
         {
           if (count == 4)
             {
-              logdebug("...\n");
+              wdinfo("...\n");
             }
 
           return regval;
@@ -189,7 +188,7 @@ static uint32_t cxd56_getreg(uintptr_t regaddr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          logdebug("[repeats %d more times]\n", count - 3);
+          wdinfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -201,7 +200,7 @@ static uint32_t cxd56_getreg(uintptr_t regaddr)
 
   /* Show the register value read */
 
-  logdebug("%08x->%08\n", regaddr, regval);
+  wdinfo("%08x->%08\n", regaddr, regval);
   return regval;
 }
 #endif
@@ -219,7 +218,7 @@ static void cxd56_putreg(uint32_t regval, uintptr_t regaddr)
 {
   /* Show the register value being written */
 
-  logdebug("%08x<-%08x\n", regaddr, regval);
+  wdinfo("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 

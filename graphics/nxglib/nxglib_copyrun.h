@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 /****************************************************************************
  * Public Functions Definitions

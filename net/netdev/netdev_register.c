@@ -434,6 +434,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
         {
           last = &((*last)->flink);
         }
+
       *last = dev;
 
       dev->flink = NULL;

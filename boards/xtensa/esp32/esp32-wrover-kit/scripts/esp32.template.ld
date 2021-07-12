@@ -28,17 +28,16 @@ MEMORY
 
   iram0_0_seg (RX) :     org = 0x40080000, len = 0x20000
 
-  /* Even though the segment name is iram, it is actually mapped to flash.
+  /* Flash mapped instruction data.
    *
-   * NOTE: (0x20 offset above is a convenience for the app binary image
-   * generation.
+   * The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
    * header. Setting this offset makes it simple to meet the flash cache MMU's
    * constraint that (paddr % 64KB == vaddr % 64KB).)
    */
 
-  iram0_2_seg (RX) :     org = 0x400d0020, len = 0x330000 - 0x20
+  irom0_0_seg (RX) :     org = 0x400d0020, len = 0x330000 - 0x20
 
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack.
    * Enabling Bluetooth & Trace Memory features in menuconfig will decrease
@@ -74,10 +73,22 @@ MEMORY
   extmem_seg(RWX)  :  org = 0x3f800000, len = 0x400000
 }
 
+#if CONFIG_ESP32_DEVKIT_RUN_IRAM
+  REGION_ALIAS("default_rodata_seg", dram0_0_seg);
+  REGION_ALIAS("default_code_seg", iram0_0_seg);
+#else
+  REGION_ALIAS("default_rodata_seg", drom0_0_seg);
+  REGION_ALIAS("default_code_seg", irom0_0_seg);
+#endif /* CONFIG_ESP32_DEVKIT_RUN_IRAM */
+
 /* Heap ends at top of dram0_0_seg */
 
 _eheap = 0x40000000 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM;
 
-/* Module text area ends at top of dram0_0_seg */
+/* IRAM heap ends at top of dram0_0_seg */
 
-_emodtext = 0x400a0000;
+_eiramheap = 0x400a0000;
+
+/* Mark the end of the RTC heap (top of the RTC region) */
+
+_ertcheap = 0x50001fff;

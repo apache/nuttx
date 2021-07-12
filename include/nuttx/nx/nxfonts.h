@@ -490,7 +490,7 @@ extern "C"
  *   fontid:  Identifies the font set to get
  *
  * Returned Value:
- *   One success, a non-NULL font handle is returned.
+ *   On success, a non-NULL font handle is returned.
  *
  ****************************************************************************/
 
@@ -638,7 +638,7 @@ void nxf_cache_disconnect(FCACHE fhandle);
  *   Zero (OK) is returned if the metrics were
  *
  * Returned Value:
- *   One success, a non-NULL font handle is returned.
+ *   On success, a non-NULL font handle is returned.
  *
  ****************************************************************************/
 

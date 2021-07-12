@@ -604,7 +604,7 @@ static int cisif_set_yuv_sarea(void *s)
   /* must align 32 bytes */
 
   cisif_reg_write(CISIF_YCC_DAREA_SIZE, (ss->strg_size & 0xffffffe0));
-  cisif_reg_write(CISIF_YCC_START_ADDR, (uint32_t)ss->strg_addr);
+  cisif_reg_write(CISIF_YCC_START_ADDR, CXD56_PHYSADDR(ss->strg_addr));
 
   return OK;
 }
@@ -636,7 +636,7 @@ static int cisif_set_jpg_sarea(void *s)
   /* must align 32 bytes */
 
   cisif_reg_write(CISIF_JPG_DAREA_SIZE, (ss->strg_size & 0xffffffe0));
-  cisif_reg_write(CISIF_JPG_START_ADDR, (uint32_t)ss->strg_addr);
+  cisif_reg_write(CISIF_JPG_START_ADDR, CXD56_PHYSADDR(ss->strg_addr));
 
   return OK;
 }

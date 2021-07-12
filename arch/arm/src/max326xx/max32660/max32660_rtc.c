@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <fixedmath.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

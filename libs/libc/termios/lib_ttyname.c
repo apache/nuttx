@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <errno.h>
 #include <limits.h>
 #include <unistd.h>
 
@@ -55,9 +56,12 @@
 FAR char *ttyname(int fd)
 {
   static char name[TTY_NAME_MAX];
+  int ret;
 
-  if (ttyname_r(fd, name, TTY_NAME_MAX) < 0)
+  ret = ttyname_r(fd, name, TTY_NAME_MAX);
+  if (ret != 0)
     {
+      set_errno(ret);
       return NULL;
     }
 

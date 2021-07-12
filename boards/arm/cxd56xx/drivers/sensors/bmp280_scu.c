@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fixedmath.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -464,7 +465,7 @@ static int bmp280_initialize(FAR struct bmp280_dev_s *priv)
 {
   int ret;
 
-  ret = bmp280_set_standby(priv, BMP280_STANDBY_1_MS);
+  ret = bmp280_set_standby(priv, BMP280_STANDBY_05_MS);
 
   if (ret != OK)
     {

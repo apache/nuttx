@@ -25,10 +25,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
+#include <syslog.h>
 
 #ifdef CONFIG_STACK_OVERFLOW_CHECK
 # include "sched/sched.h"

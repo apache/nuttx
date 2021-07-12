@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <sched.h>
+#include <assert.h>
 
 #include "sched/sched.h"
 
@@ -34,6 +35,18 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION 0
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION 0
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD 0
+#endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION > 0
 #  define CHECK_PREEMPTION(pid, elapsed) \

@@ -61,7 +61,7 @@ First, install the following set of system dependencies according to your Operat
 KConfig frontend
 ----------------
 
-NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which is exposed via a series of interactive menu-based *frontends*, part of the ``kconfig-frontends`` package. Depending on your OS you may use a precompiled package or you will have to build it from source:
+NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which is exposed via a series of interactive menu-based *frontends*, part of the ``kconfig-frontends`` package. Depending on your OS you may use a precompiled package or you will have to build it from source, which is available in the `NuttX tools repository <https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/>`_:
 
    .. tabs::
 
@@ -71,12 +71,13 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
 
       .. code-tab:: console MacOS, Ubuntu 18.04 LTS and earlier
 
+         $ git clone https://bitbucket.org/nuttx/tools.git
          $ cd tools/kconfig-frontends
          $ # on MacOS do the following:
          $ patch < ../kconfig-macos.diff -p 1
          $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
          $ # on Linux do the following:
-         $  ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
+         $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
          $ make
          $ make install
 

@@ -30,6 +30,7 @@
 #define CONFIG_DEBUG_INFO 1
 
 #include <sys/types.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>

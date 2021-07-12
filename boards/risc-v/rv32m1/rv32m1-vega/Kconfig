@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_RV32M1_VEGA
+
+config RV32M1_OPENISA_TOOLCHAIN
+	bool "Utilize OPEN ISA Toolchain"
+	default n
+    select ARCH_RISCV_INTXCPT_EXTENSIONS
+	---help---
+		With OPEN ISA Toolchain, RV32M1 RISC-V Core Capability can be exploited.
+
+endif

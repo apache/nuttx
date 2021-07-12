@@ -46,7 +46,7 @@ else
   USER_BINFILE += "$(TOPDIR)$(DELIM)nuttx_user.bin"
 endif
 
-USER_LDFLAGS = --undefined=$(ENTRYPT) --entry=$(ENTRYPT) $(USER_LDSCRIPT)
+USER_LDFLAGS = -Wl,--undefined=$(ENTRYPT) -Wl,--entry=$(ENTRYPT) $(USER_LDSCRIPT) -nostartfiles -nodefaultlibs
 USER_LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(USERLIBS))))
 USER_LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
 
@@ -67,7 +67,7 @@ $(COBJS): %$(OBJEXT): %.c
 # Create the nuttx_user.elf file containing all of the user-mode code
 
 nuttx_user.elf: $(OBJS)
-	$(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) --start-group $(USER_LDLIBS) $(USER_LIBGCC) --end-group
+	$(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) -Wl,--start-group $(USER_LDLIBS) $(USER_LIBGCC) -Wl,--end-group
 
 $(TOPDIR)$(DELIM)nuttx_user.elf: nuttx_user.elf
 	@echo "LD: nuttx_user.elf"

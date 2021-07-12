@@ -70,9 +70,9 @@ int elf_uninit(struct elf_loadinfo_s *loadinfo)
 
   /* Close the ELF file */
 
-  if (loadinfo->filfd >= 0)
+  if (loadinfo->file.f_inode)
     {
-      nx_close(loadinfo->filfd);
+      file_close(&loadinfo->file);
     }
 
   return OK;

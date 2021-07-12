@@ -55,6 +55,7 @@ menuconfig NETDB_DNSCLIENT
 	default n
 	depends on NET && NET_UDP
 	select LIBC_NETDB
+	select NET_SOCKOPTS
 	---help---
 		Enable support for the name resolution; Enable network host
 		resolution via gethostbyname().

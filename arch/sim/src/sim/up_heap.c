@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdbool.h>
@@ -444,7 +445,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   /* We make the entire heap executable here to keep
    * the sim simpler. If it turns out to be a problem, the
-   * ARCH_HAVE_MODULE_TEXT mechanism can be an alternative.
+   * ARCH_HAVE_TEXT_HEAP mechanism can be an alternative.
    */
 
   uint8_t *sim_heap = host_alloc_heap(SIM_HEAP_SIZE);

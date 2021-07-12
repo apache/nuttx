@@ -36,7 +36,7 @@
  * Name: iob_get_queue_size
  *
  * Description:
- *   Queue helper for get the iob entry count.
+ *   Queue helper for get the iob queue buffer size.
  *
  ****************************************************************************/
 
@@ -48,10 +48,8 @@ unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue)
 
   for (iobq = queue->qh_head; iobq != NULL; iobq = iobq->qe_flink)
     {
-      for (iob = iobq->qe_head; iob; iob = iob->io_flink)
-        {
-          total += iob->io_len;
-        }
+      iob = iobq->qe_head;
+      total += iob->io_pktlen;
     }
 
   return total;

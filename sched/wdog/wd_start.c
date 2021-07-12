@@ -50,6 +50,10 @@
 #  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG 0
+#endif
+
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG > 0
 #  define CALL_FUNC(func, arg) \
      do \

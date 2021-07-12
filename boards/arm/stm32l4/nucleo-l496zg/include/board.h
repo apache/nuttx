@@ -148,7 +148,6 @@
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
-#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/1 (80MHz) */
 
@@ -259,7 +258,6 @@
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
-#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/1 (80MHz) */
 
@@ -371,7 +369,6 @@
 
 #define STM32L4_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
 #define STM32L4_HCLK_FREQUENCY    STM32L4_SYSCLK_FREQUENCY
-#define STM32L4_BOARD_HCLK        STM32L4_HCLK_FREQUENCY    /* Same as above, to satisfy compiler */
 
 /* APB1 clock (PCLK1) is HCLK/1 (80MHz) */
 

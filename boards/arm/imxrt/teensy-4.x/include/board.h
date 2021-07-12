@@ -276,6 +276,11 @@
 #define GPIO_FLEXCAN3_TX     (GPIO_FLEXCAN3_TX_3|IOMUX_CAN_DEFAULT) /* GPIO_EMC_36 */
 #define GPIO_FLEXCAN3_RX     (GPIO_FLEXCAN3_RX_3|IOMUX_CAN_DEFAULT) /* GPIO_EMC_37 */
 
+/* FlexPWM */
+
+#define GPIO_FLEXPWM2_MOD1_A (GPIO_FLEXPWM2_PWMA00_1|IOMUX_PWM_DEFAULT) /* GPIO_EMC_06 */
+#define GPIO_FLEXPWM2_MOD2_A (GPIO_FLEXPWM2_PWMA01_1|IOMUX_PWM_DEFAULT) /* GPIO_EMC_08 */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

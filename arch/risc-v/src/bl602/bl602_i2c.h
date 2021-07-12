@@ -89,4 +89,4 @@ int bl602_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_BL602_BL602_HBN_H */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_I2C_H */

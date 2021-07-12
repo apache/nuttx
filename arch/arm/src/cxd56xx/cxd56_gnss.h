@@ -47,19 +47,19 @@ extern "C"
 /* GNSS specific debug */
 
 #ifdef CONFIG_CXD56_GNSS_DEBUG_ERROR
-#  define gnsserr(fmt, ...)  logerr(fmt, ## __VA_ARGS__)
+#  define gnsserr(fmt, ...)   _err(fmt, ## __VA_ARGS__)
 #else
 #  define gnsserr(fmt, ...)
 #endif
 
 #ifdef CONFIG_CXD56_GNSS_DEBUG_WARN
-#  define gnsswarn(fmt, ...)  logwarn(fmt, ## __VA_ARGS__)
+#  define gnsswarn(fmt, ...)  _warn(fmt, ## __VA_ARGS__)
 #else
 #  define gnsswarn(fmt, ...)
 #endif
 
 #ifdef CONFIG_CXD56_GNSS_DEBUG_INFO
-#  define gnssinfo(fmt, ...)  loginfo(fmt, ## __VA_ARGS__)
+#  define gnssinfo(fmt, ...)  _info(fmt, ## __VA_ARGS__)
 #else
 #  define gnssinfo(fmt, ...)
 #endif

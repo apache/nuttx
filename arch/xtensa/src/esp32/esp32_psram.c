@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <strings.h>
+#include <assert.h>
+#include <debug.h>
 #include <nuttx/config.h>
 #include <nuttx/signal.h>
 

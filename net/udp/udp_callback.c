@@ -83,6 +83,14 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
   FAR void  *src_addr;
   uint8_t src_addr_size;
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  while (iob_get_queue_size(&conn->readahead) > conn->rcvbufs)
+    {
+      iob = iob_remove_queue(&conn->readahead);
+      iob_free_chain(iob, IOBUSER_NET_UDP_READAHEAD);
+    }
+#endif
+
   /* Allocate on I/O buffer to start the chain (throttling as necessary).
    * We will not wait for an I/O buffer to become available in this context.
    */
@@ -211,7 +219,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
   /* Add the new I/O buffer chain to the tail of the read-ahead queue */
 
-  ret = iob_tryadd_queue(iob, NULL, &conn->readahead);
+  ret = iob_tryadd_queue(iob, &conn->readahead);
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);

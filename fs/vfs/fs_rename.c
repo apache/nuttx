@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
@@ -113,6 +114,8 @@ next_subdir:
           FAR char *subdirname;
           FAR char *tmp;
 
+          inode_release(newinode);
+
           /* Yes.. In this case, the target of the rename must be a
            * subdirectory of newinode, not the newinode itself.  For
            * example: mv b a/ must move b to a/b.
@@ -131,7 +134,6 @@ next_subdir:
 
           if (subdir == NULL)
             {
-              inode_release(newinode);
               ret = -ENOMEM;
               goto errout;
             }

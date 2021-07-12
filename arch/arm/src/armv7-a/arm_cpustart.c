@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>

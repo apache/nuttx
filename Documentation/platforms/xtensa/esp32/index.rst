@@ -417,7 +417,7 @@ I assume that:
 
   - You did not install OpenOCD; binaries are available at
     openocd-esp32/src and interface scripts are in
-    openocd-eps32/tcl/interface
+    openocd-esp32/tcl/interface
   - I select the configuration for the Olimex ARM-USB-OCD
     debugger.
 

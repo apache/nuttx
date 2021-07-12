@@ -153,7 +153,7 @@
 #  define SDIO_CLKCR_EDGE SDIO_CLKCR_RISINGEDGE
 #endif
 
-/* Mode dependent settings.  These depend on clock devisor settings that must
+/* Mode dependent settings.  These depend on clock divisor settings that must
  * be defined in the board-specific board.h header file: SDIO_INIT_CLKDIV,
  * SDIO_MMCXFR_CLKDIV, and SDIO_SDXFR_CLKDIV.
  */
@@ -172,9 +172,12 @@
 #define SDIO_CMDTIMEOUT          (100000)
 #define SDIO_LONGTIMEOUT         (0x7fffffff)
 
-/* Big DTIMER setting */
+/* DTIMER setting */
 
-#define SDIO_DTIMER_DATATIMEOUT  (0x000fffff)
+/* Assuming Max timeout in bypass 48 Mhz */
+
+#define IP_CLCK_FREQ               UINT32_C(48000000)
+#define SDIO_DTIMER_DATATIMEOUT_MS 250
 
 /* DMA channel/stream configuration register settings.  The following
  * must be selected.  The DMA driver will select the remaining fields.
@@ -659,12 +662,8 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
   flags = enter_critical_section();
 
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
-  if ((waitmask & SDIOWAIT_WRCOMPLETE) != 0)
+  if ((waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      /* Do not use this in STM32_SDIO_MASK register */
-
-      waitmask &= ~SDIOWAIT_WRCOMPLETE;
-
       pinset = GPIO_SDIO_D0 & (GPIO_PORT_MASK | GPIO_PIN_MASK);
       pinset |= (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI);
 
@@ -1016,9 +1015,24 @@ static uint8_t stm32_log2(uint16_t value)
 
 static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
 {
-  uint32_t regval = 0;
+  uint32_t clkdiv;
+  uint32_t regval;
+  uint32_t sdio_clk = IP_CLCK_FREQ;
 
-  /* Enable data path */
+  /* Enable data path using a timeout scaled to the SD_CLOCK (the card
+   * clock).
+   */
+
+  regval = getreg32(STM32_SDIO_CLKCR);
+  clkdiv = (regval & SDIO_CLKCR_CLKDIV_MASK) >> SDIO_CLKCR_CLKDIV_SHIFT;
+  if ((regval & SDIO_CLKCR_BYPASS) == 0)
+    {
+      sdio_clk = sdio_clk / (2 + clkdiv);
+    }
+
+  /*  Convert Timeout in Ms to SD_CLK counts */
+
+  timeout  = timeout * (sdio_clk / 1000);
 
   putreg32(timeout, STM32_SDIO_DTIMER); /* Set DTIMER */
   putreg32(dlen,    STM32_SDIO_DLEN);   /* Set DLEN */
@@ -1049,10 +1063,15 @@ static void stm32_datadisable(void)
 {
   uint32_t regval;
 
-  /* Disable the data path */
+  /* Disable the data path  */
 
-  putreg32(SDIO_DTIMER_DATATIMEOUT, STM32_SDIO_DTIMER); /* Reset DTIMER */
-  putreg32(0,                       STM32_SDIO_DLEN);   /* Reset DLEN */
+  /* Reset DTIMER */
+
+  putreg32(UINT32_MAX, STM32_SDIO_DTIMER);
+
+  /* Reset DLEN */
+
+  putreg32(0, STM32_SDIO_DLEN);
 
   /* Reset DCTRL DTEN, DTDIR, DTMODE, DMAEN, and DBLOCKSIZE fields */
 
@@ -1209,14 +1228,23 @@ static void stm32_eventtimeout(wdparm_t arg)
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 ||
               priv->wkupevent != 0);
 
+  mcinfo("sta: %08" PRIx32 " enabled irq: %08" PRIx32 "\n",
+         getreg32(STM32_SDIO_STA),
+         getreg32(STM32_SDIO_MASK));
+
   /* Is a data transfer complete event expected? */
 
   if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
     {
       /* Yes.. wake up any waiting threads */
 
+#ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
+      stm32_endwait(priv, SDIOWAIT_TIMEOUT |
+                    (priv->waitevents & SDIOWAIT_WRCOMPLETE));
+#else
       stm32_endwait(priv, SDIOWAIT_TIMEOUT);
-      mcerr("ERROR: Timeout, remaining: %d\n", priv->remaining);
+#endif
+      mcerr("Timeout: remaining: %d\n", priv->remaining);
     }
 }
 
@@ -1335,7 +1363,14 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
 static int stm32_rdyinterrupt(int irq, void *context, FAR void *arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
-  stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
+
+  /* Avoid noise, check the state */
+
+  if (stm32_gpioread(GPIO_SDIO_D0))
+    {
+      stm32_endwait(priv, SDIOWAIT_WRCOMPLETE);
+    }
+
   return OK;
 }
 #endif
@@ -1894,8 +1929,9 @@ static int stm32_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   cmdidx  = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
   regval |= cmdidx | SDIO_CMD_CPSMEN;
 
-  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32 "\n",
-         cmd, arg, regval);
+  mcinfo("cmd: %08" PRIx32 " arg: %08" PRIx32 " regval: %08" PRIx32
+         " enabled irq: %08" PRIx32 "\n",
+         cmd, arg, regval, getreg32(STM32_SDIO_MASK));
 
   /* Write the SDIO CMD */
 
@@ -1975,7 +2011,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_STM32_STM32_SDIO_DMA
+#ifdef CONFIG_STM32_SDIO_DMA
   priv->dmamode   = false;
 #endif
 
@@ -1992,7 +2028,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
       dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
     }
 
-  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes,
+  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT_MS, nbytes,
                    dblocksize | SDIO_DCTRL_DTDIR);
 
   /* And enable interrupts */
@@ -2040,7 +2076,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev,
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
-#ifdef CONFIG_STM32_STM32_SDIO_DMA
+#ifdef CONFIG_STM32_SDIO_DMA
   priv->dmamode   = false;
 #endif
 
@@ -2057,7 +2093,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev,
       dblocksize = stm32_log2(nbytes) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
     }
 
-  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, nbytes, dblocksize);
+  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT_MS, nbytes, dblocksize);
 
   /* Enable TX interrupts */
 
@@ -2446,7 +2482,9 @@ static void stm32_waitenable(FAR struct sdio_dev_s *dev,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   if ((eventset & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      waitmask = SDIOWAIT_WRCOMPLETE;
+      /* eventset carries this */
+
+      waitmask = 0;
     }
   else
 #endif
@@ -2800,7 +2838,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
       dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
     }
 
-  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen,
+  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT_MS, buflen,
                    dblocksize | SDIO_DCTRL_DTDIR);
 
   /* Configure the RX DMA */
@@ -2880,7 +2918,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
       dblocksize = stm32_log2(buflen) << SDIO_DCTRL_DBLOCKSIZE_SHIFT;
     }
 
-  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT, buflen, dblocksize);
+  stm32_dataconfig(SDIO_DTIMER_DATATIMEOUT_MS, buflen, dblocksize);
 
   /* Configure the TX DMA */
 

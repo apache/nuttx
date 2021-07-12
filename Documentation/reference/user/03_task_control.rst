@@ -86,15 +86,7 @@ there are three important configuration options that can change that.
      allocations and to improve allocation performance, child task exit
      status structures are pre-allocated when the system boots. This
      setting determines the number of child status structures that will be
-     pre-allocated. If this setting is not defined or if it is defined to
-     be zero then a value of 2\*\ ``MAX_TASKS`` is used.
-
-     Note that there cannot be more that ``CONFIG_MAX_TASKS`` tasks in
-     total. However, the number of child status structures may need to be
-     significantly larger because this number includes the maximum number
-     of tasks that are running PLUS the number of tasks that have exit'ed
-     without having their exit status reaped (via :c:func:`wait`,
-     :c:func:`waitpid` or :c:func:`waitid`).
+     pre-allocated.
 
      Obviously, if tasks spawn children indefinitely and never have the
      exit status reaped, then you may have a memory leak! (See **Warning**

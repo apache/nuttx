@@ -2231,7 +2231,7 @@ static int unionfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
    * read-only and the other is write-able?
    */
 
-  return (ret1 >= 0 || ret2 >= 0) ? OK : ret;
+  return (ret1 >= 0 || ret2 >= 0) ? OK : ret1;
 }
 
 /****************************************************************************

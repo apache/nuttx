@@ -151,12 +151,30 @@ config ESP32C3_CPU_FREQ_MHZ
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
+	select ESP32C3_TIMER0
 
 config ESP32C3_DISABLE_STDC_ATOMIC
 	bool "Disable standard C atomic"
 	default n
 
+config ESP32C3_RTC_HEAP
+	bool "Use the RTC memory as a separate heap"
+	select ARCH_HAVE_EXTRA_HEAPS
+	default n
+
+config ESP32C3_WIRELESS
+	bool
+	default n
+	select ESP32C3_RT_TIMER
+	select ESP32C3_TIMER0
+
 menu "ESP32-C3 Peripheral Support"
+
+config ESP32C3_ADC
+	bool
+	default n
+	select ANALOG
+	select ADC
 
 config ESP32C3_UART
 	bool
@@ -174,9 +192,20 @@ config ESP32C3_WDT
 	bool
 	default n
 
+config ESP32C3_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable ESP32-C3 efuse support.
+
 config ESP32C3_SPI
 	bool
 	default n
+
+config ESP32C3_LEDC
+	bool "LEDC (PWM)"
+	default n
+	select PWM
 
 config ESP32C3_GPIO_IRQ
 	bool "GPIO pin interrupts"
@@ -237,6 +266,11 @@ config ESP32C3_SPI2
 	select ESP32C3_SPI
 	select SPI
 
+config ESP32C3_DMA
+	bool "General DMA (GDMA)"
+	default n
+	select ARCH_DMA
+
 config ESP32C3_MWDT0
 	bool "Main System Watchdog Timer (Group 0)"
 	default n
@@ -264,6 +298,11 @@ config ESP32C3_RWDT
 		to have the RTC module reset, please, use the Timers' Module WDTs.
 		They will only reset Main System.
 
+config ESP32C3_ADC1
+	bool "ADC1"
+	default n
+	select ESP32C3_ADC
+
 config ESP32C3_WIRELESS
 	bool "Wireless"
 	default n
@@ -274,7 +313,49 @@ config ESP32C3_WIRELESS
 	---help---
 		Enable Wireless support
 
+config ESP32C3_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+config ESP32C3_SHA_ACCELERATOR
+	bool "SHA Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 SHA accelerator support.
+
+config ESP32C3_BIGNUM_ACCELERATOR
+	bool "BIGNUM Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 BIGNUM accelerator support.
+
+config ESP32C3_RSA_ACCELERATOR
+	bool "RSA Accelerator"
+	default n
+	---help---
+		Enable ESP32-C3 RSA accelerator support.
+
+config ESP32C3_WIFI
+	bool "Wi-Fi"
+	default n
+	select NET
+	select ARCH_PHY_INTERRUPT
+	select ESP32C3_WIRELESS
+	---help---
+		Enable Wi-Fi support
+
+config ESP32C3_BLE
+	bool "BLE"
+	default n
+	select ESP32C3_WIRELESS
+	---help---
+		Enable BLE support
+
 endmenu # ESP32-C3 Peripheral Support
+
+menuconfig ESP32C3_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default n
+	depends on ESP32C3_WIFI && ESP32C3_BLE
 
 menu "I2C Configuration"
 	depends on ESP32C3_I2C
@@ -313,6 +394,44 @@ config ESP32C3_SPI_UDCS
 
 if ESP32C3_SPI2
 
+config ESP32C3_SPI2_SLAVE
+	bool "SPI2 Slave mode"
+	default n
+	depends on SPI_SLAVE
+	select ESP32C3_GPIO_IRQ
+	---help---
+		Configure SPI2 to operate in Slave mode.
+
+config ESP32C3_SPI2_DMA
+	bool "SPI2 use GDMA"
+	default n
+	depends on ESP32C3_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESP32C3_SPI2_DMADESC_NUM
+	int "SPI2 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESP32C3_SPI2_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESP32C3_SPI2_DMATHRESHOLD
+	int "SPI2 Master GDMA threshold"
+	default 64
+	depends on ESP32C3_SPI2_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
+config ESP32C3_SPI2_SLAVE_BUFSIZE
+	int "SPI2 Slave buffer size"
+	default 2048
+	depends on ESP32C3_SPI2_SLAVE
+	---help---
+		Configure the size of SPI2 Slave controller's internal buffers.
+
 config ESP32C3_SPI2_CSPIN
 	int "SPI2 CS Pin"
 	default 10
@@ -350,17 +469,41 @@ config ESP32C3_UART0_RXPIN
 	int "UART0 RX Pin"
 	default 20
 
+config ESP32C3_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 16
+	range 0 21
+
+config ESP32C3_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 15
+	range 0 21
+
 endif # ESP32C3_UART0
 
 if ESP32C3_UART1
 
 config ESP32C3_UART1_TXPIN
 	int "UART1 TX Pin"
-	default 6
+	default 8
 
 config ESP32C3_UART1_RXPIN
 	int "UART1 RX Pin"
-	default 7
+	default 9
+
+config ESP32C3_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 1
+	range 0 21
+
+config ESP32C3_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 2
+	range 0 21
 
 endif # ESP32C3_UART1
 
@@ -403,11 +546,129 @@ config ESP32C3_ONESHOT
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
+config ESP32C3_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
 endmenu # Timer/counter Configuration
 endif # ESP32C3_TIMER
 
+menu "LEDC configuration"
+	depends on ESP32C3_LEDC
+
+menuconfig ESP32C3_LEDC_TIM0
+	bool "Timer 0"
+	default n
+
+if ESP32C3_LEDC_TIM0
+
+config ESP32C3_LEDC_TIM0_CHANNELS
+	int "Number of Timer 0 channels"
+	default 2
+
+endif # ESP32C3_LEDC_TIM0
+
+menuconfig ESP32C3_LEDC_TIM1
+	bool "Timer 1"
+	default n
+
+if ESP32C3_LEDC_TIM1
+
+config ESP32C3_LEDC_TIM1_CHANNELS
+	int "Number of Timer 1 channels"
+	default 2
+
+endif # ESP32C3_LEDC_TIM1
+
+menuconfig ESP32C3_LEDC_TIM2
+	bool "Timer 2"
+	default n
+
+if ESP32C3_LEDC_TIM2
+
+config ESP32C3_LEDC_TIM2_CHANNELS
+	int "Number of Timer 2 channels"
+	default 2
+
+endif # ESP32C3_LEDC_TIM2
+
+config ESP32C3_LEDC_CHANNEL0_PIN
+	int "Channel 0 pin"
+	default 2
+
+config ESP32C3_LEDC_CHANNEL1_PIN
+	int "Channel 1 pin"
+	default 3
+
+config ESP32C3_LEDC_CHANNEL2_PIN
+	int "Channel 2 pin"
+	default 4
+
+config ESP32C3_LEDC_CHANNEL3_PIN
+	int "Channel 3 pin"
+	default 5
+
+config ESP32C3_LEDC_CHANNEL4_PIN
+	int "Channel 4 pin"
+	default 6
+
+config ESP32C3_LEDC_CHANNEL5_PIN
+	int "Channel 5 pin"
+	default 7
+
+endmenu # LEDC configuration
+
+menu "ADC Configuration"
+	depends on ESP32C3_ADC
+
+if ESP32C3_ADC1
+
+choice ESP32C3_ADC_VOL_RANGES
+	prompt "ADC1 voltage ranges"
+	default ESP32C3_ADC_VOL_750
+
+config ESP32C3_ADC_VOL_750
+	bool "0~750mV"
+
+config ESP32C3_ADC_VOL_1050
+	bool "0~1050mV"
+
+config ESP32C3_ADC_VOL_1300
+	bool "0~1300mV"
+
+config ESP32C3_ADC_VOL_2500
+	bool "0~2500mV"
+
+endchoice
+
+config ESP32C3_ADC1_CHANNEL0
+	bool "ADC1 channel 0"
+	default n
+
+config ESP32C3_ADC1_CHANNEL1
+	bool "ADC1 channel 1"
+	default n
+
+config ESP32C3_ADC1_CHANNEL2
+	bool "ADC1 channel 2"
+	default n
+
+config ESP32C3_ADC1_CHANNEL3
+	bool "ADC1 channel 3"
+	default n
+
+config ESP32C3_ADC1_CHANNEL4
+	bool "ADC1 channel 4"
+	default n
+
+endif # ESP32C3_ADC1
+endmenu # ADC Configuration
+
 menu "Wi-Fi configuration"
-	depends on ESP32C3_WIRELESS
+	depends on ESP32C3_WIFI
 
 choice
 	prompt "ESP32-C3 Wi-Fi mode"
@@ -495,7 +756,63 @@ config ESP32C3_WIFI_STA_DISCONNECT_PM
 		Select this option to enable power management for station when disconnected.
 		Chip will do modem-sleep when RF module is not in use anymore.
 
-endmenu # ESP32C3_WIRELESS
+config EXAMPLE_WIFI_LISTEN_INTERVAL
+	int "Wi-Fi listen interval"
+	default 3
+	---help---
+		Interval for station to listen to beacon from AP. The unit of listen interval is one beacon interval.
+		For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
+		to beacon is 300 ms.
+
+choice EXAMPLE_POWER_SAVE_MODE
+	prompt "Power save mode"
+	default EXAMPLE_POWER_SAVE_NONE
+	---help---
+		Power save mode for the ESP32-C3 to use. Modem sleep mode includes minimum and maximum power save modes.
+		In minimum power save mode, station wakes up every DTIM to receive beacon. Broadcast data will not be
+		lost because it is transmitted after DTIM. However, it can not save much more power if DTIM is short
+		for DTIM is determined by AP.
+		In maximum power save mode, station wakes up every listen interval to receive beacon. Broadcast data
+		may be lost because station may be in sleep state at DTIM time. If listen interval is longer, more power
+		is saved but broadcast data is more easy to lose.
+
+	config EXAMPLE_POWER_SAVE_NONE
+		bool "none"
+	config EXAMPLE_POWER_SAVE_MIN_MODEM
+		bool "minimum modem"
+	config EXAMPLE_POWER_SAVE_MAX_MODEM
+		bool "maximum modem"
+endchoice
+
+config ESP32C3_WIFI_RECONNECT
+	bool "Enable Wi-Fi to reconnect"
+	default n
+	---help---
+		Select this option to enable Wi-Fi to reconnect for station when disconnected.
+
+endmenu # Wi-Fi configuration
+
+menu "BLE Configuration"
+	depends on ESP32C3_BLE
+
+config ESP32C3_BLE_PKTBUF_NUM
+	int "BLE netcard packet buffer number per netcard"
+	default 16
+
+config ESP32C3_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config ESP32C3_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESP32C3_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 110
+
+endmenu # BLE Configuration
 
 menu "SPI Flash configuration"
 	depends on ESP32C3_SPIFLASH
@@ -534,5 +851,75 @@ config ESP32C3_PARTITION_MOUNT
 	default "/dev/esp/partition/"
 
 endmenu # ESP32C3_PARTITION
+
+menu "GDMA Configuration"
+	depends on ESP32C3_DMA
+
+config ESP32C3_DMA_M2M_TEST
+	bool "Test GDMA M2M"
+	default n
+
+config ESP32C3_DMA_M2M_TEST_LOOPS
+	int "Test GDMA M2M loops"
+	default 256
+	depends on ESP32C3_DMA_M2M_TEST
+
+config ESP32C3_DMA_M2M_TEST_BUFSIZE
+	int "Test GDMA M2M buffer size"
+	default 16000
+	depends on ESP32C3_DMA_M2M_TEST
+
+endmenu # GDMA Configuration
+
+config ESP32C3_AUTO_SLEEP
+	bool "Auto-sleep"
+	default n
+	select PM
+	select ESP32C3_RT_TIMER
+	select ESP32C3_TIMER0
+	select ESP32C3_TICKLESS
+	---help---
+		Enable ESP32-C3 Auto-sleep
+
+config ESP32C3_TICKLESS
+	bool "Enable ESP32-C3 tickless OS"
+	default n
+	select ARCH_HAVE_TICKLESS
+	select SCHED_TICKLESS
+
+menu "AES accelerator"
+	depends on ESP32C3_AES_ACCELERATOR
+
+config ESP32C3_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # AES accelerator
+menu "SHA accelerator"
+	depends on ESP32C3_SHA_ACCELERATOR
+
+config ESP32C3_SHA_ACCELERATOR_TEST
+	bool "SHA accelerator test"
+	default n
+
+endmenu # ESP32C3_SHA_ACCELERATOR
+
+menu "RSA Accelerate Configuration"
+	depends on ESP32C3_RSA_ACCELERATOR
+
+config ESP32C3_RSA_ACCELERATOR_TEST
+	bool "RSA driver test"
+	default n
+
+menu "BIGNUM"
+	depends on ESP32C3_BIGNUM_ACCELERATOR
+
+config ESP32C3_BIGNUM_ACCELERATOR_TEST
+	bool "BIGNUM driver test"
+	default n
+
+endmenu # ESP32C3_BIGNUM_ACCELERATOR
+
+endmenu # ESP32C3_RSA_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32C3

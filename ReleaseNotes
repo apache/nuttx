@@ -27123,6 +27123,254 @@ NuttX-9.1.0 Release Notes -------------------------
         - PR-287 PR-290 examples: Update nxflat and thttpd Makefile's to fix
           a build breakage.
 
+  * Compatibility Concerns -- Changes to Build System:
+
+    If you are building NuttX for a custom board, you may need to make
+    some of the following changes in build-related files for your board:
+
+    * Rename EXTRADEFINES to EXTRAFLAGS
+
+      In your custom board's scripts/Make.defs file, rename EXTRADEFINES to
+      EXTRAFLAGS.
+
+      For example, these lines:
+
+      ```
+      CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+      ...
+      CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+      ...
+      CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+      ```
+
+      would change as follows:
+
+      ```
+      CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+      ...
+      CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+      ...
+      CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+      ```
+
+      See git commit # 459ad9937377a42785692098ff0d73baaa9551e6 in the main
+      NuttX repository.
+
+      If you forget to do this, memory allocations on the heap probably won't
+      work and your user tasks won't start.
+
+      To see why, tools/Config.mk assigns a value to KDEFINE such that the
+      preprocessor symbol __KERNEL__ will be defined when certain source
+      files are compiled. KDEFINE is passed to nested invocations of 'make'
+      as EXTRAFLAGS. If your board's scripts/Make.defs still attempts to use
+      EXTRADEFINES, the preprocessor symbol __KERNEL__ will not be defined in
+      some of the places that it should be. Suppose you're building a FLAT
+      build. In this case, include/nuttx/mm/mm.h will not define
+      MM_KERNEL_USRHEAP_INIT like it should, which will cause nx_start.c not
+      to call up_allocate_heap() at startup. Therefore, any attempt to
+      allocate memory on the heap will fail.
+
+    * Rename src/Makefile to src/Make.defs and Modify
+
+      This item pertains only to custom boards that are developed in- tree,
+      meaning under the NuttX boards/ subdirectory. Out-of-tree boards are
+      not affected.
+
+      If your custom board directory is in-tree and in a board family that
+      uses a 'boards/ARCH/FAMILY/common' directory (such as
+      boards/arm/stm32/common, boards/arm/cxd56xx/common, etc), then you'll
+      need to make two minor changes to your custom board's src/Makefile:
+
+      (1) Rename it from src/Makefile to src/Make.defs, and
+
+      (2) Near the end of that file, replace this line, which usually
+          appears at the end:
+
+      ```
+      include $(TOPDIR)/boards/Board.mk
+      ```
+
+      with these three lines:
+
+      ```
+      DEPPATH += --dep-path board
+      VPATH += :board
+      CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+      ```
+
+      See git commit # 6ca46520df38854bf660f9be54957cceede39ded in the main
+      NuttX repository.
+
+      If you forget to do this, 'make' will report an error, "no rule to make
+      libboard.a," and the build will fail.
+
+    * Rename WINTOOL to CONFIG_CYGWIN_WINTOOL
+
+      In your custom board's scripts/Make.defs file, rename any instances of
+      WINTOOL to CONFIG_CYGWIN_WINTOOL.
+
+      For example, change this line:
+
+      ```
+      ifeq ($(WINTOOL),y)
+      ```
+
+      to this:
+
+      ```
+      ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+      ```
+
+      See git commit # bd656888f26c92e8832f0e76b395a5ece7704530 in the main
+      NuttX repository.
+
+    * Remove INCDIROPT
+
+      In your custom board's src/Make.defs file, remove INCDIROPT from CFLAGS.
+
+      For example, change this line:
+
+      ```
+      CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+      ```
+
+      to this:
+
+      ```
+      CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)
+      ```
+
+      This option, which resolves to -w when CONFIG_CYGWIN_WINTOOL is
+      configured, is now appended to INCDIR in tools/Config.mk.
+
+      See git commit # 5eae32577e5d5226e5d3027c169eeb369f83f77d in the main
+      NuttX repository.
+
+    * Remove Unnecessary Variables
+
+      In your custom board's scripts/Make.defs file, It is no longer
+      necessary to define the following variables unless your build requires
+      that you assign special values to them:
+
+      - DIRLINK
+      - DIRUNLINK
+      - MKDEP
+      - ASMEXT
+      - OBJEXT
+      - LIBEXT
+      - EXEEXT
+
+      These variables have been refactored into tools/Config.mk.
+
+      See these git commits in the main NuttX repository:
+      9ec9431706fd0eb7c4c4410d84dafff68ff31366 (DIRLINK and DIRUNLINK),
+      8b42ee421a41214093c0238e479d73a1099b0e82 (MKDEP), and
+      567962bd6263bf8809fb63c739f6ec668c69c416 (ASMEXT, OBJEXT, LIBEXT, EXEEXT)
+
+    * Change ${TOPDIR} to $(TOPDIR)
+
+      In your custom board's scripts/Make.defs file, it is recommended to
+      change ${TOPDIR} to $(TOPDIR) for consistency (change curly braces to
+      parenthesis).
+
+      See git commit # faf3c0254bb63af89f9eb59beefacb4cba26dd9 in the main
+      NuttX repository.
+
+    * Remove Workaround For Missing $(TOPDIR)/Make.defs
+
+      In src/Make.defs or src/Makefile for your custom board or custom apps,
+      the workaround for missing $(TOPDIR)/.config and/or
+      $(TOPDIR)/Make.defs is no longer needed. To remove the workaround,
+      delete the minus sign in front of include .config. This is now handled
+      in the main Makefile and, if those files are missing, will print an
+      error message with hint to run tools/configure.sh <target>.
+
+      Change this line, located near the top of the file:
+
+      ```
+      -include $(TOPDIR)/Make.defs
+      ```
+
+      to this:
+
+      ```
+      include $(TOPDIR)/Make.defs
+      ```
+
+      See git commit # 1a95cce1a3c3ed8b04d1d86b7bd744352cca45a2 in the main
+      NuttX repository, and git commit
+      # ead498a7883a654b1d542da94a5fab3ce163361e in the apps repository.
+
+    * Simplify ARCHINCLUDES and ARCHXXINCLUDES
+
+      In your custom board's scripts/Make.defs, ARCHINCLUDES and
+      ARCHXXINCLUDES can be defined without maintaining two different
+      versions conditioned upon CONFIG_CYGWIN_WINTOOL (renamed from WINTOOL).
+      Replace syntax similar to the following:
+
+      ```
+      ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+      # Windows-native toolchains
+        ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}"
+        ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}" -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include$(DELIM)cxx}"
+      else
+      # Linux/Cygwin-native toolchain
+        ARCHINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include
+        ARCHXXINCLUDES = -I. -isystem $(TOPDIR)$(DELIM)include -isystem $(TOPDIR)$(DELIM)include$(DELIM)cxx
+      endif
+      ```
+
+      with syntax similar to:
+
+      ```
+      ARCHINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+      ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+      ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
+      INCDIR is defined in tools/Config.mk and resolves to a shell script or batch file that constructs the appropriate command line argument string to specify include directories for your compiler.
+      ```
+
+      See git commit # 7e5b0f81e93c7e879ce8434d57e8bf4e2319c1c0 in the main
+      NuttX repository.
+
+    * Simplify Board Directory Handling With BOARD_DIR
+
+      In your custom board's Make.defs or Makefile, when setting up build
+      variables containing paths inside your board directory, a new variable
+      BOARD_DIR has been introduced that simplifies the syntax:
+
+      Replace syntax like this:
+
+      ```
+      $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)
+      ```
+
+      with this variable:
+
+      ```
+      $(BOARD_DIR)
+      ```
+
+      For example, change this:
+
+      ```
+      ARCHSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+      ```
+
+      to this much simpler syntax:
+
+      ```
+      ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+      ```
+
+      You may find the old syntax being used for variables like ARCHSCRIPT,
+      LDELFFLAGS, LINKCMDTEMPLATE, SCRIPTDIR, USER_LDSCRIPT, or others.
+
+      BOARD_DIR is defined in tools/Config.mk.
+
+      See git commit # e83c1400b65c65cbdf59c5abcf2ae368f540faef in the main
+      NuttX repository.
+
+
 NuttX-10.0.0 Release Notes
 ------------------------
 

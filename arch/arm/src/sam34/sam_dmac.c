@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -1148,7 +1149,7 @@ static inline int sam_single(struct sam_dma_s *dmach)
 
   putreg32(dmach->cfg, dmach->base + SAM_DMACHAN_CFG_OFFSET);
 
-  /* Enable the channel by writing a ‘1’ to the CHER enable bit */
+  /* Enable the channel by writing a ï¿½1ï¿½ to the CHER enable bit */
 
   putreg32(DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER);
 
@@ -1212,7 +1213,7 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
 
   putreg32((uint32_t)llhead, dmach->base + SAM_DMACHAN_DSCR_OFFSET);
 
-  /* Finally, enable the channel by writing a ‘1’ to the CHER enable */
+  /* Finally, enable the channel by writing a ï¿½1ï¿½ to the CHER enable */
 
   putreg32(DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER);
 

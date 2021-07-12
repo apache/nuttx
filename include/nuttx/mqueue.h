@@ -360,12 +360,12 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
  * Description:
  *   This function deallocates an initialized message queue structure.
  *   First, it deallocates all of the queued messages in the message
- *   queue.  It is assumed that this message is fully unlinked and
- *   closed so that no thread will attempt access it while it is being
- *   deleted.
+ *   queue.  It is assumed that this message queue is fully unlinked
+ *   and closed so that no thread will attempt to access it while it
+ *   is being deleted.
  *
  * Input Parameters:
- *   msgq - Named essage queue to be freed
+ *   msgq - Named message queue to be freed
  *
  * Returned Value:
  *   None
@@ -400,10 +400,10 @@ FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
  * Name: nxmq_pollnotify
  *
  * Description:
- *   pollnotify, used for notify the poll
+ *   pollnotify, used for notifying the poll
  *
  * Input Parameters:
- *   msgq     - Named essage queue
+ *   msgq     - Named message queue
  *   eventset - evnet
  *
  * Returned Value:

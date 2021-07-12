@@ -276,7 +276,7 @@ config SMP
 		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
 		platform.
 
-		SMP mode must work with ARCH_INTERRUPTSTACK, here is the fail case:
+		N.B. SMP mode requires the use of ARCH_INTERRUPTSTACK:
 
 		CPU0 thread0  ->  IRQ enter -> add thread0 to block_list -> IRQ leave(crash)
 		                                                        ||
@@ -285,7 +285,7 @@ config SMP
 		CPU1 thread1  ->  block_task -> take thread0 from block_list -> run thread0
 
 		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
-		will caused IRQ handler stack curroption.
+		will caused IRQ handler stack corruption.
 
 if SMP
 
@@ -483,13 +483,6 @@ config TASK_NAME_SIZE
 		will be TASK_NAME_SIZE + 1.  The default of 31 then results in
 		a align-able 32-byte allocation.
 
-config MAX_TASKS
-	int "Max number of tasks"
-	default 32
-	---help---
-		The maximum number of simultaneously active tasks. This value must be
-		a power of two.
-
 config SCHED_HAVE_PARENT
 	bool "Support parent/child task relationships"
 	default n
@@ -551,11 +544,8 @@ config PREALLOC_CHILDSTATUS
 		To prevent runaway child status allocations and to improve
 		allocation performance, child task exit status structures are pre-
 		allocated when the system boots.  This setting determines the number
-		of child status structures that will be pre-allocated.  If this
-		setting is not defined or if it is defined to be zero then a value
-		of 2*MAX_TASKS is used.
+		of child status structures that will be pre-allocated.
 
-		Note that there cannot be more than MAX_TASKS tasks in total.
 		However, the number of child status structures may need to be
 		significantly larger because this number includes the maximum number
 		of tasks that are running PLUS the number of tasks that have exit'ed
@@ -1573,9 +1563,9 @@ config SIG_SIGWORK
 	default 17
 	depends on SCHED_WORKQUEUE || LIB_USRWORK
 	---help---
-		SIGWORK is a non-standard signal used to wake up the internal NuttX
-		worker thread.  This setting specifies the signal number that will be
-		used for SIGWORK.  Default: 17
+		SIGWORK is a non-standard signal used to wake up various internal
+		NuttX worker threads.  This setting specifies the signal number
+		that will be used for SIGWORK.  Default: 17
 
 endmenu # Signal Numbers
 endmenu # Signal Configuration
@@ -1609,7 +1599,7 @@ config MODULE
 	bool "Enable loadable OS modules"
 	default n
 	select LIBC_MODLIB
-	select ARCH_USE_MODULE_TEXT if ARCH_HAVE_MODULE_TEXT
+	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 	---help---
 		Enable support for loadable OS modules.  Default: n
 

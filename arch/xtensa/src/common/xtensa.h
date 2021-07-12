@@ -311,8 +311,8 @@ void xtensa_add_region(void);
 /* Serial output */
 
 void up_lowputc(char ch);
-void xtensa_early_serial_initialize(void);
-void xtensa_serial_initialize(void);
+void xtensa_earlyserialinit(void);
+void xtensa_serialinit(void);
 
 void rpmsg_serialinit(void);
 

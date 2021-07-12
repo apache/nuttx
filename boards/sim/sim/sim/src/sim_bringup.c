@@ -47,10 +47,10 @@
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/video/fb.h>
+#include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
-#include <nuttx/wireless/bluetooth/bt_uart_bridge.h>
 #include <nuttx/wireless/ieee802154/ieee802154_loopback.h>
 
 #ifdef CONFIG_LCD_DEV
@@ -366,17 +366,6 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: bthcisock_register() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_BLUETOOTH_UART_BRIDGE
-  /* Register the Bluetooth BT/BLE dual mode bridge driver */
-
-  ret = bt_uart_bridge_register("/dev/ttyHCI0",
-                                "/dev/ttyBT", "/dev/ttyBLE");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: bt_uart_bridge_register() failed: %d\n", ret);
     }
 #endif
 

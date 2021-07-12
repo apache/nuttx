@@ -33,6 +33,7 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/net/net.h>
 
 #include "udp/udp.h"
 
@@ -57,18 +58,30 @@
 int udp_ioctl(FAR struct udp_conn_s *conn,
               int cmd, FAR void *arg, size_t arglen)
 {
+  FAR struct iob_s *iob;
   int ret = OK;
+
+  net_lock();
 
   switch (cmd)
     {
       case FIONREAD:
-        *(FAR int *)((uintptr_t)arg) =
-          iob_get_queue_size(&conn->readahead);
+        iob = iob_peek_queue(&conn->readahead);
+        if (iob)
+          {
+            *(FAR int *)((uintptr_t)arg) = iob->io_pktlen;
+          }
+        else
+          {
+            *(FAR int *)((uintptr_t)arg) = 0;
+          }
         break;
       default:
         ret = -ENOTTY;
         break;
     }
+
+  net_unlock();
 
   return ret;
 }

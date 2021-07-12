@@ -50,6 +50,10 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
 CSRCS += esp32c3_board_spidev.c
 endif
 
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+CSRCS += esp32c3_board_spislavedev.c
+endif
+
 ifeq ($(CONFIG_I2C_DRIVER),y)
 CSRCS += esp32c3_i2c.c
 endif
@@ -64,6 +68,29 @@ endif
 
 ifeq ($(CONFIG_ONESHOT),y)
 CSRCS += esp32c3_oneshot.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += esp32c3_ledc.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CSRCS += esp32c3_adc.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
+CSRCS += esp32c3_ioctl.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += esp32c3_uid.c
+endif
+
+ifeq ($(CONFIG_NSH_ROMFSETC),y)
+ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
+  RCSRCS = etc/init.d/rcS
+  RCRAWS = etc/group etc/passwd
+endif
 endif
 
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld

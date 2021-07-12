@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include "irq/irq.h"
 
 /****************************************************************************

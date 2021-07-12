@@ -27,6 +27,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>

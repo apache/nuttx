@@ -826,6 +826,7 @@
 #  define ATIM_CCER_CC6E          (1 << 20) /* Bit 20: Capture/Compare 6 output enable */
 #  define ATIM_CCER_CC6P          (1 << 21) /* Bit 21: Capture/Compare 6 output Polarity */
 #endif
+#define ATIM_CCER_CCXBASE(ch)     (ch << 2) /* Each channel uses 4-bits */
 
 /* 16-bit counter register */
 
@@ -1198,7 +1199,6 @@
 
 #define GTIM_CCER_CC1E            (1 << 0)  /* Bit 0: Capture/Compare 1 output enable */
 #define GTIM_CCER_CC1P            (1 << 1)  /* Bit 1: Capture/Compare 1 output polarity */
-#define GTIM_CCER_CC1NE           (1 << 2)  /* Bit 2: Capture/Compare 1 complementary output enable (TIM1 and TIM8 only) */
 #ifdef HAVE_GTIM_CCXNP
 #  define GTIM_CCER_CC1NP         (1 << 3)  /* Bit 3: Capture/Compare 1 output Polarity (F2,F3,F4 and TIM15-17) */
 #endif
@@ -1222,6 +1222,7 @@
                                              *   no CC4N output, so it does not make sense!
                                              */
 #endif
+#define GTIM_CCER_CCXBASE(ch)     (ch << 2) /* Each channel uses 4-bits */
 
 /* 16-bit counter register */
 

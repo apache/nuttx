@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

@@ -3,6 +3,10 @@ OUTPUT_ARCH( "riscv" )
 ENTRY( bl602_start )
 
 __EM_SIZE = DEFINED(ble_controller_init) ? 8K : 0K;
+__RFTLV_SIZE_OFFSET = 1K;
+__RFTLV_SIZE_HOLE = 2K;
+__RFTLV_HEAD1_H = (0x46524C42); /* BLRF */
+__RFTLV_HEAD1_L = (0x41524150); /* PAPA */
 
 MEMORY
 {
@@ -21,6 +25,17 @@ SECTIONS
   .init           :
   {
     KEEP (*(SORT_NONE(.init)))
+  } > flash
+
+	/* value for rftlv */
+
+  .rftlv.tool :
+  {
+      . = ORIGIN(flash) + __RFTLV_SIZE_OFFSET;
+      PROVIDE( _ld_symbol_rftlv_address = . );
+      LONG(__RFTLV_HEAD1_H);
+      LONG(__RFTLV_HEAD1_L);
+      . = ORIGIN(flash) + __RFTLV_SIZE_OFFSET + __RFTLV_SIZE_HOLE;
   } > flash
 
   .text           :

@@ -58,7 +58,7 @@ float logf(float x)
 {
   float y;
   float y_old;
-  float ney;
+  float ey;
   float epsilon;
   int   relax_factor;
   int   iter;
@@ -73,8 +73,8 @@ float logf(float x)
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
       y_old = y;
-      ney   = expf(-y);
-      y    -= 1.0F - x * ney;
+      ey    = expf(y);
+      y    -= (ey - x) / ey;
 
       if (y > FLT_MAX_EXP_X)
         {

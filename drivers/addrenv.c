@@ -68,7 +68,7 @@ void simple_addrenv_initialize(FAR const struct simple_addrenv_s *addrenv)
 FAR void *up_addrenv_pa_to_va(uintptr_t pa)
 {
   FAR struct simple_addrenv_node_s *node;
-  FAR struct simple_addrenv_s *addrenv;
+  FAR const struct simple_addrenv_s *addrenv;
   uint32_t i;
 
   list_for_every_entry(&g_addrenv_list, node,
@@ -91,7 +91,7 @@ FAR void *up_addrenv_pa_to_va(uintptr_t pa)
 uintptr_t up_addrenv_va_to_pa(FAR void *va_)
 {
   FAR struct simple_addrenv_node_s *node;
-  FAR struct simple_addrenv_s *addrenv;
+  FAR const struct simple_addrenv_s *addrenv;
   uintptr_t va = C2B((uintptr_t)va_);
   uint32_t i;
 

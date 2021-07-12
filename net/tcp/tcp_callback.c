@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
@@ -84,23 +85,30 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
        * partial packets will not be buffered.
        */
 
-      recvlen = tcp_datahandler(conn, buffer, buflen, NULL,
-                                IOBUSER_NET_TCP_READAHEAD);
+      recvlen = tcp_datahandler(conn, buffer, buflen);
       if (recvlen < buflen)
         {
           /* There is no handler to receive new data and there are no free
            * read-ahead buffers to retain the data -- drop the packet.
            */
 
-         ninfo("Dropped %d bytes\n", dev->d_len);
+          ninfo("Dropped %d/%d bytes\n", buflen - recvlen, buflen);
 
 #ifdef CONFIG_NET_STATISTICS
           g_netstats.tcp.drop++;
 #endif
-          /* Clear the TCP_SNDACK bit so that no ACK will be sent */
+          /* Clear the TCP_SNDACK bit so that no ACK will be sent.
+           * Clear the TCP_CLOSE because we effectively dropped
+           * the FIN as well.
+           *
+           * Revisit: It might make more sense to send a dup ack
+           * to give a hint to the peer.
+           */
 
-          ret &= ~TCP_SNDACK;
+          ret &= ~(TCP_SNDACK | TCP_CLOSE);
         }
+
+      net_incr32(conn->rcvseq, recvlen);
     }
 
   /* In any event, the new data has now been handled */
@@ -224,94 +232,95 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
-                         uint16_t buflen, FAR void *priv,
-                         enum iob_user_e producerid)
+                         uint16_t buflen)
 {
-  FAR struct iob_queue_s *queue;
   FAR struct iob_s *iob;
-  bool throttled = true;
+  uint16_t copied = 0;
   int ret;
+  unsigned int i;
 
-  /* Get the I/O buffer queue from iob producer id */
-
-  if (producerid == IOBUSER_NET_TCP_READAHEAD)
-    {
-      queue = &conn->readahead;
-    }
-  else if (producerid == IOBUSER_NET_TCP_PENDINGAHEAD)
-    {
-      queue = &conn->pendingahead;
-    }
-  else
-    {
-      nwarn("ERROR: Invalid iob produce id\n");
-      return 0;
-    }
-
-  /* Try to allocate on I/O buffer to start the chain without waiting (and
-   * throttling as necessary).  If we would have to wait, then drop the
-   * packet.
+  /* Try to allocate I/O buffers and copy the data into them
+   * without waiting (and throttling as necessary).
    */
 
-  iob = iob_tryalloc(throttled, producerid);
-  if (iob == NULL)
+  iob = conn->readahead;
+  for (i = 0; i < 2; i++)
     {
-#if CONFIG_IOB_THROTTLE > 0
-      if (IOB_QEMPTY(queue))
-        {
-          /* Fallback out of the throttled entry */
+      bool throttled = i == 0; /* try throttled=true first */
 
-          throttled = false;
-          iob = iob_tryalloc(throttled, producerid);
-        }
+      if (!throttled)
+        {
+#if CONFIG_IOB_THROTTLE > 0
+          if (conn->readahead != NULL)
+            {
+              ninfo("Do not use throttled=false because of "
+                    "non-empty readahead\n");
+              break;
+            }
+#else
+          break;
 #endif
+        }
 
       if (iob == NULL)
         {
-          nerr("ERROR: Failed to create new I/O buffer chain\n");
-          return 0;
+          iob = iob_tryalloc(throttled, IOBUSER_NET_TCP_READAHEAD);
+          if (iob == NULL)
+            {
+              continue;
+            }
+
+          iob->io_pktlen = 0;
         }
+
+      if (iob != NULL)
+        {
+          uint32_t olen = iob->io_pktlen;
+
+          ret = iob_trycopyin(iob, buffer + copied, buflen - copied,
+                              olen, throttled,
+                              IOBUSER_NET_TCP_READAHEAD);
+          copied += iob->io_pktlen - olen;
+          if (ret < 0)
+            {
+              /* On a failure, iob_copyin return a negated error value but
+               * does not free any I/O buffers.
+               */
+
+              continue;
+            }
+        }
+
+      break;
     }
 
-  /* Copy the new appdata into the I/O buffer chain (without waiting) */
-
-  ret = iob_trycopyin(iob, buffer, buflen, 0, throttled,
-                      producerid);
-  if (ret < 0)
+  DEBUGASSERT(conn->readahead == iob || conn->readahead == NULL);
+  if (iob == NULL)
     {
-      /* On a failure, iob_copyin return a negated error value but does
-       * not free any I/O buffers.
-       */
-
-      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, producerid);
+      nerr("ERROR: Failed to create new I/O buffer chain\n");
+      DEBUGASSERT(copied == 0);
       return 0;
     }
 
-  /* Add the new I/O buffer chain to the tail of the read-ahead queue (again
-   * without waiting).
-   */
-
-  ret = iob_tryadd_queue(iob, priv, queue);
-  if (ret < 0)
+  if (copied == 0)
     {
-      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, producerid);
+      nerr("ERROR: Failed to append new I/O buffer\n");
+      DEBUGASSERT(conn->readahead == iob);
       return 0;
     }
+
+  conn->readahead = iob;
 
 #ifdef CONFIG_NET_TCP_NOTIFIER
   /* Provide notification(s) that additional TCP read-ahead data is
    * available.
    */
-  if (queue == &conn->readahead)
-    {
-      tcp_readahead_signal(conn);
-    }
+
+  tcp_readahead_signal(conn);
 #endif
 
-  ninfo("Buffered %d bytes\n", buflen);
-  return buflen;
+  ninfo("Buffered %" PRIu16 " bytes\n", copied);
+  return copied;
 }
 
 #endif /* NET_TCP_HAVE_STACK */

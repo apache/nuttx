@@ -42,7 +42,7 @@
  *   timep - The current time represented as seconds since the epoch.
  *
  * Returned Value:
- *   One success a pointer to the string is returned; on failure, NULL is
+ *   On success, a pointer to the string is returned; on failure, NULL is
  *   returned.
  *
  ****************************************************************************/

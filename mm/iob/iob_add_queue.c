@@ -57,13 +57,11 @@
 
 static int iob_add_queue_internal(FAR struct iob_s *iob,
                                   FAR struct iob_queue_s *iobq,
-                                  FAR struct iob_qentry_s *qentry,
-                                  FAR void *priv)
+                                  FAR struct iob_qentry_s *qentry)
 {
   /* Add the I/O buffer chain to the container */
 
   qentry->qe_head = iob;
-  qentry->qe_priv = priv;
 
   /* Add the container to the end of the queue */
 
@@ -96,8 +94,7 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
  *
  ****************************************************************************/
 
-int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
-                  FAR struct iob_queue_s *iobq)
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
   FAR struct iob_qentry_s *qentry;
 
@@ -110,7 +107,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
       return -ENOMEM;
     }
 
-  return iob_add_queue_internal(iob, iobq, qentry, priv);
+  return iob_add_queue_internal(iob, iobq, qentry);
 }
 
 /****************************************************************************
@@ -122,8 +119,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
  *
  ****************************************************************************/
 
-int iob_tryadd_queue(FAR struct iob_s *iob, FAR void *priv,
-                     FAR struct iob_queue_s *iobq)
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
   FAR struct iob_qentry_s *qentry;
 
@@ -136,6 +132,6 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR void *priv,
       return -ENOMEM;
     }
 
-  return iob_add_queue_internal(iob, iobq, qentry, priv);
+  return iob_add_queue_internal(iob, iobq, qentry);
 }
 #endif /* CONFIG_IOB_NCHAINS > 0 */

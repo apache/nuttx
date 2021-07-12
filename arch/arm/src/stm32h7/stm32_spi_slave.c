@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <string.h>
@@ -178,9 +179,10 @@ enum spi_config_e
 
 struct stm32_spidev_s
 {
-  struct spi_sctrlr_s sctrlr;    /* Externally visible part of the
-                                  * SPI slave interface */
-  struct spi_sdev_s *sdev;       /* Bound SPI slave device interface */
+  /* Externally visible part of the SPI slave interface */
+
+  struct spi_slave_ctrlr_s ctrlr;
+  struct spi_slave_dev_s *dev;   /* Bound SPI slave device interface */
   uint32_t         spibase;      /* SPIn base address */
   uint32_t         spiclock;     /* Clocking for the SPI module */
   uint8_t          irq;          /* SPI IRQ number */
@@ -267,16 +269,17 @@ static int  spi_nssinterrupt(int irq, void *context, void *arg);
 
 /* SPI slave methods */
 
-static void     spi_bind(struct spi_sctrlr_s *sctrlr,
-                  struct spi_sdev_s *sdev, enum spi_smode_e mode,
-                  int nbits);
-static void     spi_unbind(struct spi_sctrlr_s *sctrlr);
-static int      spi_enqueue(struct spi_sctrlr_s *sctrlr,
+static void     spi_bind(struct spi_slave_ctrlr_s *ctrlr,
+                         struct spi_slave_dev_s *dev,
+                         enum spi_slave_mode_e mode,
+                         int nbits);
+static void     spi_unbind(struct spi_slave_ctrlr_s *ctrlr);
+static int      spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
                             FAR const void *data,
                             size_t len);
-static bool     spi_qfull(struct spi_sctrlr_s *sctrlr);
-static void     spi_qflush(struct spi_sctrlr_s *sctrlr);
-static size_t   spi_qpoll(struct spi_sctrlr_s *sctrlr);
+static bool     spi_qfull(struct spi_slave_ctrlr_s *ctrlr);
+static void     spi_qflush(struct spi_slave_ctrlr_s *ctrlr);
+static size_t   spi_qpoll(struct spi_slave_ctrlr_s *ctrlr);
 
 /* Initialization */
 
@@ -295,7 +298,7 @@ static int         spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
 /* SPI slave controller driver operations */
 
-static const struct spi_sctrlrops_s g_sctrlr_ops =
+static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
 {
   .bind              = spi_bind,
   .unbind            = spi_unbind,
@@ -326,8 +329,8 @@ static const struct spi_sctrlrops_s g_sctrlr_ops =
 
 #define SPI_SLAVE_INIT(x)                               \
 {                                                       \
-  .sctrlr.ops    = &g_sctrlr_ops,                       \
-  .sdev          = NULL,                                \
+  .ctrlr.ops     = &g_ctrlr_ops,                        \
+  .dev           = NULL,                                \
   .spibase       = STM32_SPI##x##_BASE,                 \
   .spiclock      = SPI45_KERNEL_CLOCK_FREQ,             \
   .irq           = STM32_IRQ_SPI##x,                    \
@@ -345,7 +348,7 @@ __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
 static
 uint8_t SPI_SLAVE_INQ(1)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
 __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
-static struct stm32_spidev_s g_spi1sctrlr = SPI_SLAVE_INIT(1);
+static struct stm32_spidev_s g_spi1ctrlr = SPI_SLAVE_INIT(1);
 
 #endif
 
@@ -357,7 +360,7 @@ __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
 static
 uint8_t SPI_SLAVE_INQ(2)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
 __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
-static struct stm32_spidev_s g_spi2sctrlr = SPI_SLAVE_INIT(2);
+static struct stm32_spidev_s g_spi2ctrlr = SPI_SLAVE_INIT(2);
 
 #endif
 
@@ -369,7 +372,7 @@ __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
 static
 uint8_t SPI_SLAVE_INQ(3)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
 __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
-static struct stm32_spidev_s g_spi3sctrlr = SPI_SLAVE_INIT(3);
+static struct stm32_spidev_s g_spi3ctrlr = SPI_SLAVE_INIT(3);
 
 #endif
 
@@ -381,7 +384,7 @@ __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
 static
 uint8_t SPI_SLAVE_INQ(4)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
 __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
-static struct stm32_spidev_s g_spi4sctrlr = SPI_SLAVE_INIT(4);
+static struct stm32_spidev_s g_spi4ctrlr = SPI_SLAVE_INIT(4);
 
 #endif
 
@@ -393,7 +396,7 @@ __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
 static
 uint8_t SPI_SLAVE_INQ(5)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
 __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
-static struct stm32_spidev_s g_spi5sctrlr = SPI_SLAVE_INIT(5);
+static struct stm32_spidev_s g_spi5ctrlr = SPI_SLAVE_INIT(5);
 
 #endif
 
@@ -407,7 +410,7 @@ __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
 static
 uint8_t SPI_SLAVE_INQ(6)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
 __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
-static struct stm32_spidev_s g_spi6sctrlr = SPI_SLAVE_INIT(6);
+static struct stm32_spidev_s g_spi6ctrlr = SPI_SLAVE_INIT(6);
 
 #endif
 
@@ -897,9 +900,9 @@ static void spi_dmatxstart(FAR struct stm32_spidev_s *priv)
  *
  ****************************************************************************/
 
-static int spi_lock(FAR struct spi_sctrlr_s *sctrlr, bool lock)
+static int spi_lock(FAR struct spi_slave_ctrlr_s *ctrlr, bool lock)
 {
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)sctrlr;
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)ctrlr;
   int ret;
 
   if (lock)
@@ -970,10 +973,10 @@ static inline void spi_enable(FAR struct stm32_spidev_s *priv, bool state)
  *
  ****************************************************************************/
 
-static void spi_setmode(FAR struct spi_sctrlr_s *sctrlr,
+static void spi_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
                         enum spi_mode_e mode)
 {
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)sctrlr;
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)ctrlr;
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
 
@@ -1036,9 +1039,9 @@ static void spi_setmode(FAR struct spi_sctrlr_s *sctrlr,
  *
  ****************************************************************************/
 
-static void spi_setbits(FAR struct spi_sctrlr_s *sctrlr, int nbits)
+static void spi_setbits(FAR struct spi_slave_ctrlr_s *ctrlr, int nbits)
 {
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)sctrlr;
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)ctrlr;
   uint32_t setbits = 0;
   uint32_t clrbits = 0;
 
@@ -1086,37 +1089,37 @@ static void spi_setbits(FAR struct spi_sctrlr_s *sctrlr, int nbits)
  *
  * Description:
  *   Bind the SPI slave device interface to the SPI slave controller
- *   interface and configure the SPI interface.  Upon return, the SPI
+ *   interface and configure the SPI interface. Upon return, the SPI
  *   slave controller driver is fully operational and ready to perform
  *   transfers.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
- *   sdev   - SPI slave device interface instance
- *   mode   - The SPI mode requested
- *   nbits  - The number of bits requests.
- *            If value is greater > 0 then it implies MSB first
- *            If value is below < 0, then it implies LSB first with -nbits
+ *   ctrlr - SPI Slave controller interface instance
+ *   dev   - SPI Slave device interface instance
+ *   mode  - The SPI Slave mode requested
+ *   nbits - The number of bits requested.
+ *           If value is greater than 0, then it implies MSB first
+ *           If value is less than 0, then it implies LSB first with -nbits
  *
  * Returned Value:
- *   none
+ *   None.
  *
  ****************************************************************************/
 
-static void spi_bind(struct spi_sctrlr_s *sctrlr,
-                     struct spi_sdev_s *sdev, enum spi_smode_e mode,
+static void spi_bind(struct spi_slave_ctrlr_s *ctrlr,
+                     struct spi_slave_dev_s *dev, enum spi_slave_mode_e mode,
                      int nbits)
 {
-  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)sctrlr;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
   uint32_t nss_gpio;
 
-  spiinfo("sdev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
+  spiinfo("dev=%p mode=%d nbits=%d\n", sdv, mode, nbits);
 
-  DEBUGASSERT(priv != NULL && priv->sdev == NULL && sdev != NULL);
+  DEBUGASSERT(priv != NULL && priv->dev == NULL && dev != NULL);
 
   /* Get exclusive access to the SPI device */
 
-  spi_lock(sctrlr, true);
+  spi_lock(ctrlr, true);
 
   /* Make sure the spi is disabled */
 
@@ -1136,7 +1139,7 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
    * controller interface.
    */
 
-  priv->sdev = sdev;
+  priv->dev = dev;
 
   /* Initialize the circular buffer head */
 
@@ -1144,8 +1147,8 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
 
   /* Setup to begin normal SPI operation */
 
-  spi_setmode(sctrlr, mode);
-  spi_setbits(sctrlr, nbits);
+  spi_setmode(ctrlr, mode);
+  spi_setbits(ctrlr, nbits);
 
   /* First, configure NSS as GPIO EXTI input */
 
@@ -1166,7 +1169,7 @@ static void spi_bind(struct spi_sctrlr_s *sctrlr,
   UNUSED(ret);
 #endif
 
-  spi_lock(sctrlr, false);
+  spi_lock(ctrlr, false);
 }
 
 /****************************************************************************
@@ -1251,33 +1254,33 @@ static int spi_nssinterrupt(int irq, void *context, void *arg)
  *
  * Description:
  *   Un-bind the SPI slave device interface from the SPI slave controller
- *   interface.  Reset the SPI interface and restore the SPI slave
- *   controller driver to its initial state,
+ *   interface. Reset the SPI interface and restore the SPI slave
+ *   controller driver to its initial state.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
- *   none
+ *   None.
  *
  ****************************************************************************/
 
-static void spi_unbind(struct spi_sctrlr_s *sctrlr)
+static void spi_unbind(struct spi_slave_ctrlr_s *ctrlr)
 {
-  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)sctrlr;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
 
   DEBUGASSERT(priv != NULL);
-  spiinfo("Unbinding %p\n", priv->sdev);
+  spiinfo("Unbinding %p\n", priv->dev);
 
-  DEBUGASSERT(priv->sdev != NULL);
+  DEBUGASSERT(priv->dev != NULL);
 
   /* Get exclusive access to the SPI device */
 
-  spi_lock(sctrlr, true);
+  spi_lock(ctrlr, true);
 
   /* Unbind the SPI slave interface */
 
-  priv->sdev = NULL;
+  priv->dev = NULL;
 
   /* Disable DMA */
 
@@ -1288,22 +1291,25 @@ static void spi_unbind(struct spi_sctrlr_s *sctrlr)
 
   spi_enable(priv, false);
 
-  spi_lock(sctrlr, false);
+  spi_lock(ctrlr, false);
 }
 
 /****************************************************************************
  * Name: spi_enqueue
  *
  * Description:
- *   Enqueue the next value to be shifted out from the interface.  This adds
+ *   Enqueue the next value to be shifted out from the interface. This adds
  *   the word the controller driver for a subsequent transfer but has no
- *   effect on anyin-process or currently "committed" transfers
+ *   effect on any in-process or currently "committed" transfers.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
- *   data   - Command/data mode data value to be shifted out.  The width of
- *            the data must be the same as the nbits parameter previously
- *            provided to the bind() methods.
+ *   ctrlr - SPI Slave controller interface instance
+ *   data  - Pointer to the command/data mode data to be shifted out.
+ *           The data width must be aligned to the nbits parameter which was
+ *           previously provided to the bind() method.
+ *   len   - Number of units of "nbits" wide to enqueue,
+ *           "nbits" being the data width previously provided to the bind()
+ *           method.
  *
  * Returned Value:
  *   Zero if the word was successfully queue; A negated errno valid is
@@ -1312,8 +1318,8 @@ static void spi_unbind(struct spi_sctrlr_s *sctrlr)
  *
  ****************************************************************************/
 
-static int spi_enqueue(struct spi_sctrlr_s *sctrlr, FAR const void *data,
-                       size_t len)
+static int spi_enqueue(struct spi_slave_ctrlr_s *ctrlr,
+                       FAR const void *data, size_t len)
 {
   return 0;
 }
@@ -1326,14 +1332,14 @@ static int spi_enqueue(struct spi_sctrlr_s *sctrlr, FAR const void *data,
  *   additional word to the queue.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
- *   true if the output wueue is full
+ *   true if the output queue is full, false otherwise.
  *
  ****************************************************************************/
 
-static bool spi_qfull(struct spi_sctrlr_s *sctrlr)
+static bool spi_qfull(struct spi_slave_ctrlr_s *ctrlr)
 {
   return false;
 }
@@ -1342,24 +1348,24 @@ static bool spi_qfull(struct spi_sctrlr_s *sctrlr)
  * Name: spi_qflush
  *
  * Description:
- *   Discard all saved values in the output queue.  On return from this
- *   function the output queue will be empty.  Any in-progress or otherwise
+ *   Discard all saved values in the output queue. On return from this
+ *   function the output queue will be empty. Any in-progress or otherwise
  *   "committed" output values may not be flushed.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
- *   None
+ *   None.
  *
  ****************************************************************************/
 
-static void spi_qflush(struct spi_sctrlr_s *sctrlr)
+static void spi_qflush(struct spi_slave_ctrlr_s *ctrlr)
 {
-  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)sctrlr;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
   irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL && priv->sdev != NULL);
+  DEBUGASSERT(priv != NULL && priv->dev != NULL);
 
 #ifdef CONFIG_STM32H7_SPI_DMA
   if (!priv->dmarunning)
@@ -1370,7 +1376,7 @@ static void spi_qflush(struct spi_sctrlr_s *sctrlr)
 
   /* Get exclusive access to the SPI device */
 
-  spi_lock(sctrlr, true);
+  spi_lock(ctrlr, true);
   flags = enter_critical_section();
 
   /* Flush the input buffers */
@@ -1388,7 +1394,7 @@ static void spi_qflush(struct spi_sctrlr_s *sctrlr)
   priv->ohead = 0;
   priv->otail = 0;
   leave_critical_section(flags);
-  spi_lock(sctrlr, false);
+  spi_lock(ctrlr, false);
 }
 
 /****************************************************************************
@@ -1435,21 +1441,21 @@ static inline int spi_rx_buffer_free(uint8_t *ptr, int start, int end)
  *   Tell the controller to output all the receive queue data.
  *
  * Input Parameters:
- *   sctrlr - SPI slave controller interface instance
+ *   ctrlr - SPI Slave controller interface instance
  *
  * Returned Value:
  *   Number of bytes left in the rx queue. If the device accepted all the
  *
  ****************************************************************************/
 
-static size_t spi_qpoll(struct spi_sctrlr_s *sctrlr)
+static size_t spi_qpoll(struct spi_slave_ctrlr_s *ctrlr)
 {
-  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)sctrlr;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)ctrlr;
   int itail;
   int ihead;
   uint16_t bytes_left;
 
-  DEBUGASSERT(priv != NULL && priv->sdev != NULL);
+  DEBUGASSERT(priv != NULL && priv->dev != NULL);
   DEBUGASSERT(priv->ihead < CONFIG_STM32H7_SPI_SLAVE_QSIZE);
 
 #ifdef CONFIG_STM32H7_SPI_DMA
@@ -1461,7 +1467,7 @@ static size_t spi_qpoll(struct spi_sctrlr_s *sctrlr)
 
   /* Get exclusive access to the SPI device */
 
-  spi_lock(sctrlr, true);
+  spi_lock(ctrlr, true);
 
 #ifdef CONFIG_STM32H7_SPI_DMA
   itail = CONFIG_STM32H7_SPI_SLAVE_QSIZE - stm32_dmaresidual(priv->rxdma);
@@ -1476,7 +1482,7 @@ static size_t spi_qpoll(struct spi_sctrlr_s *sctrlr)
     {
       /* Receive the end of receive buffer */
 
-      priv->ihead += SPI_SDEV_RECEIVE(priv->sdev,
+      priv->ihead += SPIS_DEV_RECEIVE(priv->dev,
                                       (const uint16_t *)&priv->inq[ihead],
                                       CONFIG_STM32H7_SPI_SLAVE_QSIZE -
                                         ihead);
@@ -1491,7 +1497,7 @@ static size_t spi_qpoll(struct spi_sctrlr_s *sctrlr)
     {
       /* Receive the data between ihead and itail */
 
-      priv->ihead += SPI_SDEV_RECEIVE(priv->sdev,
+      priv->ihead += SPIS_DEV_RECEIVE(priv->dev,
                                       (const uint16_t *)&priv->inq[ihead],
                                       itail - ihead);
 
@@ -1506,7 +1512,7 @@ static size_t spi_qpoll(struct spi_sctrlr_s *sctrlr)
     ? CONFIG_STM32H7_SPI_SLAVE_QSIZE - priv->ihead + itail
     : itail - priv->ihead;
 
-  spi_lock(sctrlr, false);
+  spi_lock(ctrlr, false);
 
   return bytes_left;
 }
@@ -1731,7 +1737,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
 #define GPIO_SPI_NSS(x) GPIO_SPI##x##_NSS
 
 #define SPI_SLAVE_INIT_BUS(x) \
-  priv = &g_spi##x##sctrlr;                                     \
+  priv = &g_spi##x##ctrlr;                                      \
                                                                 \
   /* Only configure if the bus is not already configured */     \
                                                                 \
@@ -1750,7 +1756,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
       priv->initialized = true;                                 \
     }
 
-FAR struct spi_sctrlr_s *stm32_spi_slave_initialize(int bus)
+FAR struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus)
 {
   FAR struct stm32_spidev_s *priv = NULL;
   irqstate_t flags = enter_critical_section();
@@ -1809,10 +1815,10 @@ FAR struct spi_sctrlr_s *stm32_spi_slave_initialize(int bus)
 
   /* Initialize the SPI operations */
 
-  priv->sctrlr.ops = &g_sctrlr_ops;
+  priv->ctrlr.ops = &g_ctrlr_ops;
 
   leave_critical_section(flags);
-  return (FAR struct spi_sctrlr_s *)priv;
+  return (FAR struct spi_slave_ctrlr_s *)priv;
 }
 
 #endif /* CONFIG_STM32H7_SPI1..6_SLAVE */

@@ -433,7 +433,14 @@ int ipv6_input(FAR struct net_driver_s *dev)
             }
           else
 #endif
-          if (nxthdr != IP_PROTO_UDP)
+#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_UDP_BINDTODEVICE)
+          /* If the UDP protocol specific socket option UDP_BINDTODEVICE
+           * is selected, then we must forward all UDP packets to the bound
+           * socket.
+           */
+
+          if (nxthdr != IP_PROTO_UDP || !IFF_IS_BOUND(dev->d_flags))
+#endif
             {
               /* Not destined for us and not forwardable...
                * drop the packet.

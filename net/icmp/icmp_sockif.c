@@ -161,7 +161,7 @@ static int icmp_setup(FAR struct socket *psock, int protocol)
 
 static sockcaps_t icmp_sockcaps(FAR struct socket *psock)
 {
-  return 0;
+  return SOCKCAP_NONBLOCKING;
 }
 
 /****************************************************************************
@@ -475,7 +475,7 @@ static int icmp_close(FAR struct socket *psock)
     {
       /* Yes... free any read-ahead data */
 
-      iob_destroy_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
 
       /* Then free the connection structure */
 

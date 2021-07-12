@@ -270,6 +270,9 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   g_dns_nservers = nservers;
   dns_semgive();
+#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
+  dns_clear_answer();
+#endif
   dns_notify_nameserver(addr, addrlen);
   return OK;
 }

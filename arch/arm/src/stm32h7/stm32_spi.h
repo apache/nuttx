@@ -79,7 +79,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
  *
  ****************************************************************************/
 
-FAR struct spi_sctrlr_s *stm32_spi_slave_initialize(int bus);
+FAR struct spi_slave_ctrlr_s *stm32_spi_slave_initialize(int bus);
 
 /****************************************************************************
  * Name:  stm32_spi1/2/...select and stm32_spi1/2/...status

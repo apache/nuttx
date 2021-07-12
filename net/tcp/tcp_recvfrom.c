@@ -166,9 +166,13 @@ static size_t tcp_recvfrom_newdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static inline void tcp_newdata(FAR struct net_driver_s *dev,
-                               FAR struct tcp_recvfrom_s *pstate)
+static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
+                                   FAR struct tcp_recvfrom_s *pstate,
+                                   uint16_t flags)
 {
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)
+                                pstate->ir_sock->s_conn;
+
   /* Take as much data from the packet as we can */
 
   size_t recvlen = tcp_recvfrom_newdata(dev, pstate);
@@ -179,41 +183,39 @@ static inline void tcp_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      FAR struct tcp_conn_s *conn =
-        (FAR struct tcp_conn_s *)pstate->ir_sock->s_conn;
       FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
       uint16_t buflen = dev->d_len - recvlen;
-#ifdef CONFIG_DEBUG_NET
       uint16_t nsaved;
 
-      nsaved = tcp_datahandler(conn, buffer, buflen, NULL,
-                               IOBUSER_NET_TCP_READAHEAD);
-#else
-      tcp_datahandler(conn, buffer, buflen, NULL, IOBUSER_NET_TCP_READAHEAD);
-#endif
-
-      /* There are complicated buffering issues that are not addressed fully
-       * here.  For example, what if up_datahandler() cannot buffer the
-       * remainder of the packet?  In that case, the data will be dropped but
-       * still ACKed.  Therefore it would not be resent.
-       *
-       * This is probably not an issue here because we only get here if the
-       * read-ahead buffers are empty and there would have to be something
-       * serioulsy wrong with the configuration not to be able to buffer a
-       * partial packet in this context.
-       */
-
-#ifdef CONFIG_DEBUG_NET
+      nsaved = tcp_datahandler(conn, buffer, buflen);
       if (nsaved < buflen)
         {
-          nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
+          nwarn("WARNING: packet data not fully saved "
+                "(%d/%u/%zu/%u bytes)\n",
+                buflen - nsaved,
+                (unsigned int)nsaved,
+                recvlen,
+                (unsigned int)dev->d_len);
         }
-#endif
+
+      recvlen += nsaved;
     }
+
+  if (recvlen < dev->d_len)
+    {
+      /* Clear the TCP_CLOSE because we effectively dropped the FIN as well.
+       */
+
+      flags &= ~TCP_CLOSE;
+    }
+
+  net_incr32(conn->rcvseq, recvlen);
 
   /* Indicate no data in the buffer */
 
   dev->d_len = 0;
+
+  return flags;
 }
 
 /****************************************************************************
@@ -244,7 +246,7 @@ static inline void tcp_readahead(struct tcp_recvfrom_s *pstate)
    * buffer.
    */
 
-  while ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
+  while ((iob = conn->readahead) != NULL &&
           pstate->ir_buflen > 0)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
@@ -268,29 +270,19 @@ static inline void tcp_readahead(struct tcp_recvfrom_s *pstate)
 
       if (recvlen >= iob->io_pktlen)
         {
-          FAR struct iob_s *tmp;
-
-          /* Remove the I/O buffer chain from the head of the read-ahead
-           * buffer queue.
-           */
-
-          tmp = iob_remove_queue(&conn->readahead);
-          DEBUGASSERT(tmp == iob);
-          UNUSED(tmp);
-
-          /* And free the I/O buffer chain */
+          /* Free free the I/O buffer chain */
 
           iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+          conn->readahead = NULL;
         }
       else
         {
           /* The bytes that we have received from the head of the I/O
-           * buffer chain (probably changing the head of the I/O
-           * buffer queue).
+           * buffer chain.
            */
 
-          iob_trimhead_queue(&conn->readahead, recvlen,
-                             IOBUSER_NET_TCP_READAHEAD);
+          conn->readahead = iob_trimhead(iob, recvlen,
+                                         IOBUSER_NET_TCP_READAHEAD);
         }
     }
 }
@@ -419,7 +411,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
            * packet in the read-ahead buffer).
            */
 
-          tcp_newdata(dev, pstate);
+          flags = tcp_newdata(dev, pstate, flags);
 
           /* Save the sender's address in the caller's 'from' location */
 
@@ -506,53 +498,6 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
 
           nxsem_post(&pstate->ir_sem);
         }
-    }
-
-  return flags;
-}
-
-/****************************************************************************
- * Name: tcp_ackhandler
- *
- * Description:
- *   This function is called with the network locked to send the ACK in
- *   response by the lower, device interfacing layer.
- *
- * Input Parameters:
- *   dev      The structure of the network driver that generated the event.
- *   pvconn   The connection structure associated with the socket
- *   flags    Set of events describing why the callback was invoked
- *
- * Returned Value:
- *   ACK should be send in the response.
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static uint16_t tcp_ackhandler(FAR struct net_driver_s *dev,
-                               FAR void *pvconn, FAR void *pvpriv,
-                               uint16_t flags)
-{
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
-
-  ninfo("flags: %04x\n", flags);
-
-  if (conn != NULL && (flags & TCP_POLL) != 0)
-    {
-      /* Indicate that the data has been consumed and that an ACK
-       * should be send.
-       */
-
-      if (tcp_get_recvwindow(dev, conn) != 0 &&
-          conn->rcv_wnd == 0)
-        {
-          flags |= TCP_SNDACK;
-        }
-
-      tcp_callback_free(conn, conn->rcv_ackcb);
-      conn->rcv_ackcb = NULL;
     }
 
   return flags;
@@ -810,17 +755,16 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
         }
     }
 
-  /* Receive additional data from read-ahead buffer, send the ACK timely. */
+  /* Receive additional data from read-ahead buffer, send the ACK timely.
+   *
+   * Revisit: Because IOBs are system-wide resources, consuming the read
+   * ahead buffer would update recv window of all connections in the system,
+   * not only this particular connection.
+   */
 
-  if (conn->rcv_wnd == 0 && conn->rcv_ackcb == NULL)
+  if (tcp_should_send_recvwindow(conn))
     {
-      conn->rcv_ackcb = tcp_callback_alloc(conn);
-      if (conn->rcv_ackcb)
-        {
-          conn->rcv_ackcb->flags   = TCP_POLL;
-          conn->rcv_ackcb->event   = tcp_ackhandler;
-          netdev_txnotify_dev(conn->dev);
-        }
+      netdev_txnotify_dev(conn->dev);
     }
 
   net_unlock();

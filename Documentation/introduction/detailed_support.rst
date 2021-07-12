@@ -2464,7 +2464,7 @@ Also refer to the NuttX board
 file for further information about the current state of the port.
 
 NuttX-9.0 added basic support for Microchip SAME54 Xplained Pro board.
-An ethernet driver was also added to the SAME5x familly.
+An ethernet driver was also added to the SAME5x family.
 
 STMicro STM32 F72x/F73x
 -----------------------

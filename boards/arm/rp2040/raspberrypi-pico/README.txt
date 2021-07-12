@@ -13,6 +13,9 @@ Currently only the following devices are suppored.
   - I2C
   - SPI
   - DMAC
+  - USB device
+    - MSC, CDC/ACM serial and these composite device are supported.
+    - CDC/ACM serial device can be used for the console.
   - PIO (RP2040 Programmable I/O)
   - Flash ROM Boot
   - SRAM Boot
@@ -56,6 +59,10 @@ Installation
 5. To access the console, GPIO 0 and 1 pins must be connected to the
    device such as USB-serial converter.
 
+   `usbnsh` configuration provides the console access by USB CDC/ACM serial
+   devcice.  The console is available by using a terminal software on the USB
+   host.
+
 Defconfigs
 ==========
 
@@ -76,7 +83,15 @@ Defconfigs
            VCC ----- 3V3 OUT        (Pin 36)
            SDA ----- GP4 (I2C0 SDA) (Pin 6)
            SCL ----- GP5 (I2C0 SCL) (Pin 7)
-
+           
+- lcd1602 
+    LCD 1602 Segment LCD Disaply (I2C)
+    Connection:
+    PCF8574 BackPack Raspberry Pi Pico
+           GND ----- GND            (Pin 3 or 38 or ...)
+           VCC ----- 5V Vbus        (Pin 40)
+           SDA ----- GP4 (I2C0 SDA) (Pin 6)
+           SCL ----- GP5 (I2C0 SCL) (Pin 7)
 - spisd
     SD card support (SPI connection)
     Connection:
@@ -117,6 +132,19 @@ Defconfigs
     See the following page for connection:
       https://shop.pimoroni.com/products/pico-audio-pack
     SD card interface is also enabled.
+
+- usbnsh
+    USB CDC/ACM serial console with NuttShell
+
+- usbmsc
+    USB MSC and CDC/ACM support
+    `msconn` and `sercon` commands enable the MSC and CDC/ACM devices.
+    The MSC support provides the interface to the SD card with SPI,
+    so the SD card slot connection like spisd configuraion is requied.
+
+- composite
+    USB composite device (MSC + CDC/ACM) support
+    `conn` command enables the composite device.
 
 License exceptions
 ==================

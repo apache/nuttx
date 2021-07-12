@@ -1,0 +1,119 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Polarfire Configuration Options"
+
+config MPFS_ENABLE_DPFPU
+	bool "MPFS DP_FPU Support"
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	---help---
+		Enable the RISC-V Double-Precision Floating Point Unit (DP-FPU).
+
+menu "MPFS Peripheral Support"
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+config MPFS_HAVE_UART0
+	bool
+	default n
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MPFS_HAVE_UART1
+	bool
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MPFS_HAVE_UART2
+	bool
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MPFS_HAVE_UART3
+	bool
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config MPFS_HAVE_UART4
+	bool
+	default n
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+# These are the peripheral selections proper
+
+config MPFS_SPI0
+        bool "SPI 0"
+        default n
+
+config MPFS_SPI1
+        bool "SPI 1"
+        default n
+
+config MPFS_UART0
+	bool "UART 0"
+	default n
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART0
+
+config MPFS_UART1
+	bool "UART 1"
+	default n
+	select ARCH_HAVE_UART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART1
+
+config MPFS_UART2
+	bool "UART 2"
+	default n
+	select ARCH_HAVE_UART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART2
+
+config MPFS_UART3
+	bool "UART 3"
+	default n
+	select ARCH_HAVE_UART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART3
+
+config MPFS_UART4
+	bool "UART 4"
+	default n
+	select ARCH_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MPFS_HAVE_UART4
+
+config MPFS_I2C0
+        bool "I2C 0"
+        select ARCH_HAVE_I2CRESET
+        default n
+
+config MPFS_I2C1
+        bool "I2C 1"
+        select ARCH_HAVE_I2CRESET
+        default n
+
+endmenu
+
+config MPFS_DMA
+	bool "MPFS DMA (PDMA)"
+	default n
+	select ARCH_DMA
+	---help---
+		Enable DMA Support. MPFS DMA is Memory-to-Memory only.
+
+menu "MPFS Others"
+
+endmenu
+
+

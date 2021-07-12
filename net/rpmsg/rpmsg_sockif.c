@@ -24,9 +24,11 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <poll.h>
 #include <stdio.h>
 #include <string.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/circbuf.h>
@@ -1082,7 +1084,7 @@ static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
 {
   FAR const struct iovec *buf = msg->msg_iov;
   size_t len = msg->msg_iovlen;
-  FAR struct sockaddr *to = msg->msg_name;
+  FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
   ssize_t ret;
 

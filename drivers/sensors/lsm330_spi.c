@@ -27,6 +27,7 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_LSM330SPI) \
     && defined(CONFIG_SPI_EXCHANGE)
 
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <string.h>

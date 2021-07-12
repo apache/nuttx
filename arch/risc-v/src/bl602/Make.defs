@@ -50,13 +50,13 @@ endif
 CHIP_CSRCS  = bl602_allocateheap.c
 CHIP_CSRCS += bl602_idle.c bl602_irq.c bl602_irq_dispatch.c
 CHIP_CSRCS += bl602_serial.c bl602_lowputc.c bl602_tim.c
-CHIP_CSRCS += bl602_start.c bl602_timerisr.c
+CHIP_CSRCS += bl602_start.c bl602_timerisr.c bl602_efuse.c
 
-ifeq ($(CONFIG_I2C),y)                                                                               
+ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += bl602_i2c.c
 endif
 
-ifeq ($(CONFIG_SPI),y)                                                                               
+ifeq ($(CONFIG_SPI),y)
 CHIP_CSRCS += bl602_spi.c
 endif
 
@@ -75,15 +75,17 @@ endif
 ifeq ($(CONFIG_BL602_SPIFLASH),y)
 CHIP_CSRCS += bl602_flash.c bl602_spiflash.c
 endif
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += bl602_rtc.c bl602_rtc_lowerhalf.c
+endif
 
 CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c bl602_systemreset.c
 
 ifeq ($(CONFIG_BL602_WIRELESS),y)
 WIRELESS_DRV_UNPACK  = bl_blob
-WIRELESS_DRV_VERSION = v1.6.19
-WIRELESS_DRV_ID      = main
-WIRELESS_DRV_ZIP     = $(WIRELESS_DRV_ID).zip
-WIRELESS_DRV_URL     = https://github.com/bouffalolab/bl_blob/archive
+WIRELESS_DRV_VERSION = 1.7.0
+WIRELESS_DRV_ZIP     = v$(WIRELESS_DRV_VERSION).zip
+WIRELESS_DRV_URL     = https://github.com/bouffalolab/bl_blob/archive/refs/heads
 
 $(WIRELESS_DRV_ZIP):
 	$(Q) echo "Downloading: BL602 Wireless Drivers"
@@ -93,7 +95,7 @@ chip/$(WIRELESS_DRV_UNPACK): $(WIRELESS_DRV_ZIP)
 	$(Q) echo "Unpacking: BL602 Wireless Drivers"
 	$(Q) mkdir -p chip/$(WIRELESS_DRV_UNPACK)
 	$(Q) unzip -oqq chip/$(WIRELESS_DRV_ZIP) -d chip/
-	$(Q) mv chip/$(WIRELESS_DRV_UNPACK)-$(WIRELESS_DRV_ID)/* chip/$(WIRELESS_DRV_UNPACK)
+	$(Q) mv chip/$(WIRELESS_DRV_UNPACK)-$(WIRELESS_DRV_VERSION)/* chip/$(WIRELESS_DRV_UNPACK)
 	$(Q) touch chip/$(WIRELESS_DRV_UNPACK)
 
 context:: chip/$(WIRELESS_DRV_UNPACK)
@@ -102,10 +104,10 @@ clean_context::
 	$(call DELFILE, chip/$(WIRELESS_DRV_ZIP))
 	$(call DELDIR, chip/$(WIRELESS_DRV_UNPACK))
 
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(WIRELESS_DRV_UNPACK)$(DELIM)includes$(DELIM)$(WIRELESS_DRV_VERSION)$(DELIM)BL602$(DELIM)nuttx)
+INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(WIRELESS_DRV_UNPACK)$(DELIM)includes$(DELIM)BL602$(DELIM)nuttx)
 CHIP_CSRCS += bl602_netdev.c
 
-EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(WIRELESS_DRV_UNPACK)$(DELIM)libs$(DELIM)$(WIRELESS_DRV_VERSION)$(DELIM)BL602$(DELIM)nuttx
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(WIRELESS_DRV_UNPACK)$(DELIM)libs$(DELIM)BL602$(DELIM)nuttx
 EXTRA_LIBS += -lbl602_wifi -lblecontroller
 
 # Due to some Wi-Fi related libraries, the option is need to avoid linking too much

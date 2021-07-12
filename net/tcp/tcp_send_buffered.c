@@ -1,36 +1,20 @@
 /****************************************************************************
  * net/tcp/tcp_send_buffered.c
  *
- *   Copyright (C) 2007-2014, 2016-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Jason Jiang  <jasonj@live.cn>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -58,8 +42,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 #include <debug.h>
 
 #include <arch/irq.h>
@@ -423,7 +407,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * the write buffer has been ACKed.
            */
 
-          if (ackno > TCP_WBSEQNO(wrb))
+          if (TCP_SEQ_GT(ackno, TCP_WBSEQNO(wrb)))
             {
               /* Get the sequence number at the end of the data */
 
@@ -435,7 +419,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
               /* Has the entire buffer been ACKed? */
 
-              if (ackno >= lastseq)
+              if (TCP_SEQ_GTE(ackno, lastseq))
                 {
                   ninfo("ACK: wrb=%p Freeing write buffer\n", wrb);
 
@@ -465,7 +449,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                    * buffers in the chain.
                    */
 
-                  trimlen = ackno - TCP_WBSEQNO(wrb);
+                  trimlen = TCP_SEQ_SUB(ackno, TCP_WBSEQNO(wrb));
                   if (trimlen > TCP_WBSENT(wrb))
                     {
                       /* More data has been ACKed then we have sent? */
@@ -487,31 +471,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
           else if (ackno == TCP_WBSEQNO(wrb))
             {
+              /* Reset the duplicate ack counter */
+
+              if ((flags & TCP_NEWDATA) != 0)
+                {
+                  TCP_WBNACK(wrb) = 0;
+                }
+
               /* Duplicate ACK? Retransmit data if need */
 
               if (++TCP_WBNACK(wrb) ==
-                  CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
-                {
-                  /* Do fast retransmit */
-
-                  rexmit = true;
-                }
-              else if ((TCP_WBNACK(wrb) >
-                       CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK) &&
-                       TCP_WBNACK(wrb) == sq_count(&conn->unacked_q) - 1)
-                {
-                  /* Reset the duplicate ack counter */
-
-                  TCP_WBNACK(wrb) = 0;
-                }
-            }
-          else if (ackno == TCP_WBSEQNO(wrb))
-            {
-              /* Duplicate ACK? Retransmit data if need */
-
-              TCP_WBNACK(wrb)++;
-
-              if (TCP_WBNACK(wrb) ==
                   CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
                 {
                   /* Do fast retransmit */
@@ -535,13 +504,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
-      if (wrb && TCP_WBSENT(wrb) > 0 && ackno > TCP_WBSEQNO(wrb))
+      if (wrb && TCP_WBSENT(wrb) > 0 && TCP_SEQ_GT(ackno, TCP_WBSEQNO(wrb)))
         {
           uint32_t nacked;
 
           /* Number of bytes that were ACKed */
 
-          nacked = ackno - TCP_WBSEQNO(wrb);
+          nacked = TCP_SEQ_SUB(ackno, TCP_WBSEQNO(wrb));
           if (nacked > TCP_WBSENT(wrb))
             {
               /* More data has been ACKed then we have sent? ASSERT? */
@@ -842,8 +811,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
 
-      if ((predicted_seqno > conn->sndseq_max) ||
-          (tcp_getsequence(conn->sndseq) > predicted_seqno)) /* overflow */
+      if (TCP_SEQ_GT(predicted_seqno, conn->sndseq_max))
         {
            conn->sndseq_max = predicted_seqno;
         }
@@ -890,53 +858,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   /* Continue waiting */
 
   return flags;
-}
-
-/****************************************************************************
- * Name: send_txnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
- *
- * Input Parameters:
- *   psock - Socket state structure
- *   conn  - The TCP connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void send_txnotify(FAR struct socket *psock,
-                                 FAR struct tcp_conn_s *conn)
-{
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver that send data is available */
-
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver that send data is available */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
 }
 
 /****************************************************************************
@@ -1275,7 +1196,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Notify the device driver of the availability of TX data */
 
-      send_txnotify(psock, conn);
+      tcp_send_txnotify(psock, conn);
       net_unlock();
 
       if (chunk_result == 0)

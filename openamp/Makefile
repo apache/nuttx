@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-VERSION ?= 2020.04.0
+VERSION ?= 2021.04.0
 
 include libmetal.defs
 include open-amp.defs

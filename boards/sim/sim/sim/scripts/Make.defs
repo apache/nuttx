@@ -83,7 +83,7 @@ endif
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
 CPP = $(CROSSDEV)cc -E -P -x c
-LD = $(CROSSDEV)ld
+LD = $(CROSSDEV)cc
 ifeq ($(CONFIG_HOST_MACOS),y)
 STRIP = $(CROSSDEV)strip
 AR = $(TOPDIR)/tools/macar-rcs.sh
@@ -96,26 +96,27 @@ OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
 # Note: -fshort-wchar for the case where NuttX and the host OS have
-# differnt wchar_t. On Nuttx, it's uint16_t. On macOS, it's 32-bit.
+# different wchar_t. On NuttX, it's uint16_t. On macOS, it's 32-bit.
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
    -fshort-wchar
 CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
-   -fshort-wchar -std=c++17
+   -fshort-wchar
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) \
    -fshort-wchar
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 ifeq ($(CONFIG_LIBCXX),y)
-  # Why c++14?
+  # Why c++17?
   #  * libcxx seems to require c++11.
   #  * The compiler defaults varies:
   #      clang/macOS (from xcode): 199711L
   #      gcc/ubuntu:               201402L
   #  * There is a precedent to use c++14.
   #    (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
-  CXXFLAGS += -std=c++14
+  #  * libs/libxx/libcxx/src/barrier.cpp depends on aligned new
+  CXXFLAGS += -std=c++17
 
   ifeq ($(CONFIG_HOST_MACOS),y)
     # macOS uses libc++abi
@@ -183,11 +184,11 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifeq ($(CONFIG_SIM_M32),y)
-  LDLINKFLAGS += -melf_i386
+  LDLINKFLAGS += -Wl,-melf_i386
   CCLINKFLAGS += -m32
   LDFLAGS += -m32
-  LDMODULEFLAGS += -melf_i386
-  LDELFFLAGS += -melf_i386
+  LDMODULEFLAGS += -Wl,-melf_i386
+  LDELFFLAGS += -Wl,-melf_i386
   HOSTLDFLAGS += -m32
 endif
 
@@ -198,3 +199,5 @@ endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -pipe
+
+LDLINKFLAGS += -nostartfiles -nodefaultlibs

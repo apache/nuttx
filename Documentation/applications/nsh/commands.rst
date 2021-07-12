@@ -495,8 +495,9 @@ Show Memory Manager Status (free)
 example::
 
   nsh> free
-               total       used       free    largest
-  Mem:       4194288    1591552    2602736    2601584
+               total       used       free    largest  nused  nfree
+  Mem:       5583024    1614784    3968240    3967792    244      4
+
   nsh>
 
 **Where:**
@@ -506,6 +507,8 @@ total 	 This is the total size of memory allocated for use by malloc in bytes.
 used     This is the total size of memory occupied by chunks handed out by malloc.
 free     This is the total size of memory occupied by free (not in use) chunks.
 largest  Size of the largest free (not in use) chunk.
+nused    This is the number of allocated chunks
+nfree    This is the number of free chunks
 =======  ======================================
 
 .. _cmdget:

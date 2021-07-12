@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
@@ -543,6 +545,7 @@ int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
   int ret = -EBUSY;
   int id;
   uint64_t count;
+  uint32_t mask;
 
   ASSERT(alminfo != NULL);
   DEBUGASSERT(RTC_ALARM_LAST > alminfo->as_id);
@@ -565,6 +568,13 @@ int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
         NSEC_TO_PRECNT(alminfo->as_time.tv_nsec);
 
       count -= g_rtc_save->offset;
+
+      /* clear previsous setting */
+
+      mask = RTCREG_ALM0_ERR_FLAG_MASK | RTCREG_ALM0_FLAG_MASK;
+      mask <<= id;
+
+      putreg32(mask, CXD56_RTC0_ALMCLR);
 
       /* wait until previous alarm request is completed */
 
@@ -610,10 +620,11 @@ int cxd56_rtc_cancelalarm(enum alm_id_e alarmid)
   FAR struct alm_cbinfo_s *cbinfo;
   irqstate_t flags;
   int ret = -ENODATA;
+  uint32_t mask;
 
   DEBUGASSERT(RTC_ALARM_LAST > alarmid);
 
-  /* Set the alarm in hardware and enable interrupts */
+  /* Cancel the alarm in hardware and clear interrupts */
 
   cbinfo = &g_alarmcb[alarmid];
 
@@ -628,6 +639,31 @@ int cxd56_rtc_cancelalarm(enum alm_id_e alarmid)
       while (RTCREG_ALM_BUSY_MASK & getreg32(CXD56_RTC0_ALMOUTEN(alarmid)));
 
       putreg32(0, CXD56_RTC0_ALMOUTEN(alarmid));
+
+      while (RTCREG_ALM_BUSY_MASK & getreg32(CXD56_RTC0_ALMOUTEN(alarmid)));
+
+      /* wait until previous alarm request is completed */
+
+      while (RTCREG_ASET_BUSY_MASK &
+             getreg32(CXD56_RTC0_SETALMPRECNT(alarmid)));
+
+      /* clear the alarm counter */
+
+      putreg32(0, CXD56_RTC0_SETALMPOSTCNT(alarmid));
+      putreg32(0, CXD56_RTC0_SETALMPRECNT(alarmid));
+
+      while (RTCREG_ASET_BUSY_MASK &
+             getreg32(CXD56_RTC0_SETALMPRECNT(alarmid)));
+
+      /* wait until the interrupt flag is clear */
+
+      mask = RTCREG_ALM0_ERR_FLAG_MASK | RTCREG_ALM0_FLAG_MASK;
+      mask <<= alarmid;
+
+      while (mask & getreg32(CXD56_RTC0_ALMFLG))
+        {
+          putreg32(mask, CXD56_RTC0_ALMCLR);
+        }
 
       spin_unlock_irqrestore(NULL, flags);
 

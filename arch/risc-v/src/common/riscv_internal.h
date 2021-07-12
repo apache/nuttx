@@ -113,7 +113,7 @@ EXTERN uint32_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
 EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
 EXTERN uint32_t g_intstacktop;   /* Initial top of interrupt stack */
 #endif

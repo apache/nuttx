@@ -21,7 +21,7 @@ a pre-existing configuration. To list all supported configurations you can do:
        $ ./tools/configure.sh -L | less
 
 The output is in the format ``<board name>:<board configuration>``. You will see that
-generally all boards support the ``nsh`` configuration which is a good sarting point
+generally all boards support the ``nsh`` configuration which is a good starting point
 since it enables booting into the interactive command line
 :doc:`/applications/nsh/index`.
 
@@ -43,7 +43,7 @@ configuration system with:
 
    $ cd nuttx/
    $ make menuconfig
-   
+
 Modifying the configuration is covered in :doc:`configuring`.
 
 Build NuttX
@@ -66,7 +66,7 @@ To clean the build, you can do:
   .. code-block:: console
 
      $ make clean
-     
+
 .. tip::
 
   To increase build speed (or of any other target such as ``clean``), you can

@@ -58,13 +58,12 @@ int ttyname_r(int fd, FAR char *buf, size_t buflen)
 {
   if (!isatty(fd))
     {
-      set_errno(ENOTTY);
-      return ERROR;
+      return ENOTTY;
     }
 
   if (buflen >= TTY_NAME_MAX)
     {
-      return fcntl(fd, F_GETPATH, buf);
+      return fcntl(fd, F_GETPATH, buf) < 0 ? get_errno() : 0;
     }
   else
     {
@@ -72,13 +71,12 @@ int ttyname_r(int fd, FAR char *buf, size_t buflen)
 
       if (fcntl(fd, F_GETPATH, name) < 0)
         {
-          return ERROR;
+          return get_errno();
         }
 
       if (strlen(name) >= buflen)
         {
-          set_errno(ERANGE);
-          return ERROR;
+          return ERANGE;
         }
 
       strcpy(buf, name);

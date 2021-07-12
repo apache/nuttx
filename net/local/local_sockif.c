@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -70,6 +71,7 @@ static int        local_poll(FAR struct socket *psock,
 static int        local_close(FAR struct socket *psock);
 static int        local_ioctl(FAR struct socket *psock, int cmd,
                     FAR void *arg, size_t arglen);
+static int        local_socketpair(FAR struct socket *psocks[2]);
 
 /****************************************************************************
  * Public Data
@@ -90,7 +92,8 @@ const struct sock_intf_s g_local_sockif =
   local_sendmsg,     /* si_sendmsg */
   local_recvmsg,     /* si_recvmsg */
   local_close,       /* si_close */
-  local_ioctl        /* si_ioctl */
+  local_ioctl,       /* si_ioctl */
+  local_socketpair   /* si_socketpair */
 };
 
 /****************************************************************************
@@ -715,13 +718,117 @@ static int local_ioctl(FAR struct socket *psock, int cmd,
           {
             ret = file_ioctl(&conn->lc_infile, cmd, arg);
           }
+        else
+          {
+            ret = -ENOTCONN;
+          }
         break;
       default:
-        ret = -EINVAL;
+        ret = -ENOTTY;
         break;
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: local_socketpair
+ *
+ * Description:
+ *   Create a pair of connected sockets between psocks[2]
+ *
+ * Parameters:
+ *   psocks  A reference to the socket structure of the socket pair
+ *
+ ****************************************************************************/
+
+static int local_socketpair(FAR struct socket *psocks[2])
+{
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
+  FAR struct local_conn_s *conns[2];
+#ifdef CONFIG_NET_LOCAL_STREAM
+  bool nonblock;
+  int ret;
+#endif /* CONFIG_NET_LOCAL_STREAM */
+  int i;
+
+  for (i = 0; i < 2; i++)
+    {
+      conns[i] = psocks[i]->s_conn;
+      snprintf(conns[i]->lc_path,
+               sizeof(conns[i]->lc_path), "socketpair%p", psocks[0]);
+
+      conns[i]->lc_proto = psocks[i]->s_type;
+      conns[i]->lc_type  = LOCAL_TYPE_PATHNAME;
+      conns[i]->lc_state = LOCAL_STATE_BOUND;
+    }
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+#ifdef CONFIG_NET_LOCAL_STREAM
+  if (psocks[0]->s_type == SOCK_DGRAM)
+#endif /* CONFIG_NET_LOCAL_STREAM */
+    {
+      return OK;
+    }
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+#ifdef CONFIG_NET_LOCAL_STREAM
+  conns[0]->lc_instance_id = conns[1]->lc_instance_id
+                           = local_generate_instance_id();
+
+  /* Create the FIFOs needed for the connection */
+
+  ret = local_create_fifos(conns[0]);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  nonblock = _SS_ISNONBLOCK(psocks[0]->s_flags);
+
+  /* Open the client-side write-only FIFO. */
+
+  ret = local_open_client_tx(conns[0], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Open the server-side read-only FIFO. */
+
+  ret = local_open_server_rx(conns[1], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Open the server-side write-only FIFO. */
+
+  ret = local_open_server_tx(conns[1], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Open the client-side read-only FIFO */
+
+  ret = local_open_client_rx(conns[0], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  conns[0]->lc_state = conns[1]->lc_state
+                     = LOCAL_STATE_CONNECTED;
+  return OK;
+
+errout:
+  local_release_fifos(conns[0]);
+  return ret;
+#endif /* CONFIG_NET_LOCAL_STREAM */
+#else
+  return -EOPNOTSUPP;
+#endif /* CONFIG_NET_LOCAL_STREAM || CONFIG_NET_LOCAL_DGRAM */
 }
 
 /****************************************************************************

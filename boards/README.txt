@@ -186,6 +186,9 @@ boards/arm/stm32/b-g474e-dpow1
   Initial support for booting NuttX to a functional NSH prompt on the
   STMicro B-G474E-DPOW1 Discovery kit with STM32G474RE MCU.
 
+boards/arm/stm32/nucleo-g431kb
+    STMicro Nucleo G431KB board based on the STMicro STM32G431KB MCU.
+
 boards/arm/stm32/nucleo-g431rb
     STMicro Nucleo G431RB board based on the STMicro STM32G431RB MCU.
 
@@ -254,6 +257,11 @@ boards/arm/efm32/efm32gg-stk3700
 boards/arm/tiva/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
   an EKK-LM3S9B96 which is a Cortex-M3.
+
+boards/arm/stm32/emw3162
+  A configuration for the EMW3162 Wi-Fi board
+  (https://www.waveshare.com/wiki/EMW3162). This board features
+  the STM32F205RGY6 MCU from STMicro.
 
 boards/xtensa/esp32/esp-core
   The ESP32 is a dual-core system from Espressif with two Harvard architecture

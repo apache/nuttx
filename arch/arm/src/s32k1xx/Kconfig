@@ -618,6 +618,15 @@ config S32K1XX_EDMA_EDBG
 
 endmenu # eDMA Global Configuration
 
+menu "LPSPI Configuration"
+	depends on S32K1XX_LPSPI
+	
+config S32K1XX_LPSPI_DWORD
+	bool "DWORD up to 64 bit transfer support"
+	default n
+	
+endmenu # LPSPI Configuration
+
 menu "LPI2C0 Configuration"
 	depends on S32K1XX_LPI2C0
 

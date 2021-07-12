@@ -106,7 +106,7 @@ struct iob_s
   uint16_t io_len;      /* Length of the data in the entry */
   uint16_t io_offset;   /* Data begins at this offset */
 #endif
-  uint16_t io_pktlen;   /* Total length of the packet */
+  unsigned int io_pktlen; /* Total length of the packet */
 
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
 };
@@ -125,10 +125,6 @@ struct iob_qentry_s
   /* Payload -- Head of the I/O buffer chain */
 
   FAR struct iob_s *qe_head;
-
-  /* Private data */
-
-  FAR void *qe_priv;
 };
 
 /* The I/O buffer queue head structure */
@@ -185,7 +181,6 @@ enum iob_user_e
 #endif
 #if defined(CONFIG_NET_TCP) && !defined(NET_TCP_NO_STACK)
   IOBUSER_NET_TCP_READAHEAD,
-  IOBUSER_NET_TCP_PENDINGAHEAD,
 #endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   IOBUSER_NET_TCP_WRITEBUFFER,
@@ -367,8 +362,7 @@ void iob_free_chain(FAR struct iob_s *iob, enum iob_user_e producerid);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
-                  FAR struct iob_queue_s *iobq);
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
@@ -381,8 +375,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-int iob_tryadd_queue(FAR struct iob_s *iob, FAR void *priv,
-                     FAR struct iob_queue_s *iobq);
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
@@ -428,40 +421,29 @@ FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-void iob_free_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq,
+void iob_free_queue(FAR struct iob_queue_s *qhead,
                     enum iob_user_e producerid);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
- * Name: iob_destroy_queue
+ * Name: iob_free_queue_qentry
  *
  * Description:
- *   Destroy all I/O buffer chains from the iob queue.
+ *   Free an iob entire queue of I/O buffer chains.
  *
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-void iob_destroy_queue(FAR struct iob_queue_s *qhead,
-                       enum iob_user_e producerid);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
-
-/****************************************************************************
- * Name: iob_get_queue_count
- *
- * Description:
- *   Queue helper for get the iob entry count.
- *
- ****************************************************************************/
-
-#if CONFIG_IOB_NCHAINS > 0
-int iob_get_queue_count(FAR struct iob_queue_s *queue);
+void iob_free_queue_qentry(FAR struct iob_s *iob,
+                           FAR struct iob_queue_s *iobq,
+                           enum iob_user_e producerid);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_get_queue_size
  *
  * Description:
- *   Queue helper for get the iob entry size.
+ *   Queue helper for get the iob queue buffer size.
  *
  ****************************************************************************/
 
@@ -507,6 +489,17 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
 int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
                 unsigned int len, unsigned int offset);
+
+/****************************************************************************
+ * Name: iob_tailroom
+ *
+ * Description:
+ *  Return the number of bytes at the tail of the I/O buffer chain which
+ *  can be used to append data without additional allocations.
+ *
+ ****************************************************************************/
+
+unsigned int iob_tailroom(FAR struct iob_s *iob);
 
 /****************************************************************************
  * Name: iob_clone

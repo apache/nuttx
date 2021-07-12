@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
+#include <assert.h>
+
 #include "up_internal.h"
 #include "m9s12_serial.h"
 
