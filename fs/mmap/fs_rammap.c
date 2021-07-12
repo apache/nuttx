@@ -106,8 +106,8 @@ int rammap(FAR struct file *filep, size_t length,
 
   /* Allocate a region of memory of the specified size */
 
-  alloc = (FAR uint8_t *)kernel ?
-    kmm_malloc(sizeof(struct fs_rammap_s) + length);
+  alloc = kernel ?
+    kmm_malloc(sizeof(struct fs_rammap_s) + length) :
     kumm_malloc(sizeof(struct fs_rammap_s) + length);
   if (!alloc)
     {
