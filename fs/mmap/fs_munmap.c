@@ -119,9 +119,9 @@ static int file_munmap_(FAR void *start, size_t length, bool kernel)
 
       /* Then free the region */
 
-      if (curr->kernel)
+      if (kernel)
         {
-          kmm_free(curr)
+          kmm_free(curr);
         }
       else
         {
