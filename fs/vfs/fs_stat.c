@@ -120,6 +120,10 @@ static int stat_recursive(FAR const char *path,
 
           ret = inode->u.i_mops->stat(inode, desc.relpath, buf);
         }
+      else
+        {
+          ret = -ENOSYS;
+        }
     }
   else
 #endif
