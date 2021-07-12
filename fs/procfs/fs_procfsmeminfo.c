@@ -171,6 +171,7 @@ static void meminfo_progmem(FAR struct progmem_info_s *progmem)
             }
 
           progmem->fordblks += pagesize;
+          progmem->ordblks++;
         }
       else if (status != 0)
         {
