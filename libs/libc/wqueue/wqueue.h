@@ -47,6 +47,7 @@
 struct usr_wqueue_s
 {
   struct dq_queue_s q;      /* The queue of pending work */
+  sem_t             lock;   /* exclusive access to user-mode work queue */
   pid_t             pid;    /* The task ID of the worker thread(s) */
 };
 
@@ -58,54 +59,9 @@ struct usr_wqueue_s
 
 extern struct usr_wqueue_s g_usrwork;
 
-/* This semaphore/mutex supports exclusive access to the user-mode work
- * queue
- */
-
-#ifdef CONFIG_BUILD_PROTECTED
-extern sem_t g_usrsem;
-#else
-extern pthread_mutex_t g_usrmutex;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: work_lock
- *
- * Description:
- *   Lock the user-mode work queue.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
- *
- *   -EINTR - Wait was interrupted by a signal
- *
- ****************************************************************************/
-
-int work_lock(void);
-
-/****************************************************************************
- * Name: work_unlock
- *
- * Description:
- *   Unlock the user-mode work queue.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void work_unlock(void);
 
 #endif /* CONFIG_LIB_USRWORK && !__KERNEL__*/
 #endif /* __LIBC_WQUEUE_WQUEUE_H */
