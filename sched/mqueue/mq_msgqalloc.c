@@ -49,14 +49,21 @@
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of
  *            messages that may be placed in the message queue.
+ *   pmsgq  - This parameter is a address of a pointer
  *
  * Returned Value:
- *   The allocated and initialized message queue structure or NULL in the
- *   event of a failure.
+ *   Zero (OK) is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ *   EINVAL    attr is NULL or either attr->mq_mqssize or attr->mq_maxmsg
+ *             have an invalid value
+ *   ENOSPC    There is insufficient space for the creation of the new
+ *             message queue
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr)
+int nxmq_alloc_msgq(FAR struct mq_attr *attr,
+                    FAR struct mqueue_inode_s **pmsgq)
 {
   FAR struct mqueue_inode_s *msgq;
 
@@ -64,10 +71,10 @@ FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr)
    * larger than the configured maximum message size.
    */
 
-  DEBUGASSERT(!attr || attr->mq_msgsize <= MQ_MAX_BYTES);
-  if (attr && attr->mq_msgsize > MQ_MAX_BYTES)
+  DEBUGASSERT((!attr || attr->mq_msgsize <= MQ_MAX_BYTES) && pmsgq);
+  if ((attr && attr->mq_msgsize > MQ_MAX_BYTES) || !pmsgq)
     {
-      return NULL;
+      return -EINVAL;
     }
 
   /* Allocate memory for the new message queue. */
@@ -93,6 +100,11 @@ FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr)
 
       msgq->ntpid = INVALID_PROCESS_ID;
     }
+  else
+    {
+      return -ENOSPC;
+    }
 
-  return msgq;
+  *pmsgq = msgq;
+  return OK;
 }

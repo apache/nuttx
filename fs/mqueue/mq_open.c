@@ -177,6 +177,12 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
       goto errout;
     }
 
+  if (strlen(mq_name) > NAME_MAX)
+    {
+      ret = -ENAMETOOLONG;
+      goto errout;
+    }
+
   /* Were we asked to create it? */
 
   if ((oflags & O_CREAT) != 0)
@@ -289,10 +295,9 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
        * be created with a reference count of zero.
        */
 
-      msgq = (FAR struct mqueue_inode_s *)nxmq_alloc_msgq(attr);
-      if (!msgq)
+      ret = nxmq_alloc_msgq(attr, &msgq);
+      if (ret < 0)
         {
-          ret = -ENOSPC;
           goto errout_with_inode;
         }
 
