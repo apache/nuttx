@@ -894,7 +894,7 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
 
   /* Show the stack alloc address */
 
-  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%p\n",
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%p\n",
                                "StackAlloc:", tcb->stack_alloc_ptr);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
@@ -1010,7 +1010,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
                                "Members:", group->tg_nmembers);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
-                            remaining, &offset);
+                             remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
