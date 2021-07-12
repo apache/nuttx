@@ -86,6 +86,8 @@ endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += imxrt_timerisr.c
+else
+CHIP_CSRCS += imxrt_tickless.c
 endif
 
 ifeq ($(CONFIG_IMXRT_GPIO_IRQ),y)
