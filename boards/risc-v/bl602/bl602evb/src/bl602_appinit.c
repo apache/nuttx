@@ -28,11 +28,13 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/board.h>
 
 #include "chip.h"
 #include "bl602evb.h"
+#include "bl602_efuse.h"
 
 /****************************************************************************
  * Public Functions
@@ -67,3 +69,30 @@ int board_app_initialize(uintptr_t arg)
 
   return 0;
 }
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  switch (cmd)
+    {
+      default:
+        return -EINVAL;
+    }
+
+    return OK;
+}
+#endif
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  DEBUGASSERT(CONFIG_BOARDCTL_UNIQUEID_SIZE >= 6);
+  if (uniqueid == NULL)
+    {
+      return -EINVAL;
+    }
+
+  bl602_efuse_read_mac_address(uniqueid);
+  return OK;
+}
+#endif
