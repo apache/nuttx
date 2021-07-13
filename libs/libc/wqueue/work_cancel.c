@@ -48,7 +48,7 @@
  *   work_queue() again.
  *
  * Input Parameters:
- *   qid    - The work queue ID
+ *   wqueue - The work queue
  *   work   - The previously queue work structure to cancel
  *
  * Returned Value:
@@ -63,7 +63,10 @@
 static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
                         FAR struct work_s *work)
 {
+  FAR sq_entry_t *prev = NULL;
+  FAR sq_entry_t *curr;
   int ret = -ENOENT;
+  int semcount;
 
   DEBUGASSERT(work != NULL);
 
@@ -78,18 +81,44 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
 
   if (work->worker != NULL)
     {
-      /* A little test of the integrity of the work queue */
-
-      DEBUGASSERT(work->dq.flink != NULL ||
-                  (FAR dq_entry_t *)work == wqueue->q.tail);
-      DEBUGASSERT(work->dq.blink != NULL ||
-                  (FAR dq_entry_t *)work == wqueue->q.head);
-
-      /* Remove the entry from the work queue and make sure that it is
-       * marked as available (i.e., the worker field is nullified).
+      /* Search the work activelist for the target work. We can't
+       * use sq_rem to do this because there are additional operations that
+       * need to be done.
        */
 
-      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
+      curr = wqueue->q.head;
+      while (curr && curr != &work->sq)
+        {
+          prev = curr;
+          curr = curr->flink;
+        }
+
+      /* Check if the work was found in the list.  If not, then an OS
+       * error has occurred because the work is marked active!
+       */
+
+      DEBUGASSERT(curr);
+
+      /* Now, remove the work from the work queue */
+
+      if (prev)
+        {
+          /* Remove the work from mid- or end-of-queue */
+
+          sq_remafter(prev, &wqueue->q);
+        }
+      else
+        {
+          /* Remove the work at the head of the queue */
+
+          sq_remfirst(&wqueue->q);
+          _SEM_GETVALUE(&wqueue->wake, &semcount);
+          if (semcount < 1)
+            {
+              _SEM_POST(&wqueue->wake);
+            }
+        }
+
       work->worker = NULL;
       ret = OK;
     }

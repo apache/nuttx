@@ -81,9 +81,9 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
        * marked as available (i.e., the worker field is nullified).
        */
 
-      if (WDOG_ISACTIVE(&work->timer))
+      if (WDOG_ISACTIVE(&work->u.timer))
         {
-          wd_cancel(&work->timer);
+          wd_cancel(&work->u.timer);
         }
       else
         {

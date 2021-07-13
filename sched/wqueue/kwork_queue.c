@@ -138,7 +138,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
         }
       else
         {
-          wd_start(&work->timer, delay, hp_work_timer_expiry, (wdparm_t)work);
+          wd_start(&work->u.timer, delay, hp_work_timer_expiry, (wdparm_t)work);
         }
     }
   else
@@ -155,7 +155,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
         }
       else
         {
-          wd_start(&work->timer, delay, lp_work_timer_expiry, (wdparm_t)work);
+          wd_start(&work->u.timer, delay, lp_work_timer_expiry, (wdparm_t)work);
         }
     }
 #endif
