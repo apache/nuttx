@@ -686,5 +686,8 @@ FAR struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void)
 #endif
   memset(&g_rtc_lowerhalf.rtc_base, 0, sizeof(g_rtc_lowerhalf.rtc_base));
 
+  g_rtc_lowerhalf.rtc_base.tm_year = 70;
+  g_rtc_lowerhalf.rtc_base.tm_mday = 1;
+
   return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
