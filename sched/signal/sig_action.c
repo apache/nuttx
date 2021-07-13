@@ -43,6 +43,37 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsig_alloc_actionblock
+ *
+ * Description:
+ *   Allocate a block of signal actions and place them
+ *   on the free list.
+ *
+ ****************************************************************************/
+
+static void nxsig_alloc_actionblock(void)
+{
+  FAR sigactq_t *sigact;
+  irqstate_t flags;
+  int i;
+
+  /* Allocate a block of signal actions */
+
+  sigact = kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
+  if (sigact != NULL)
+    {
+      flags = spin_lock_irqsave(NULL);
+
+      for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
+        {
+          sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
+        }
+
+      spin_unlock_irqrestore(NULL, flags);
+    }
+}
+
+/****************************************************************************
  * Name: nxsig_alloc_action
  *
  * Description:
