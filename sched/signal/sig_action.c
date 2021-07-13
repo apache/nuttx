@@ -43,6 +43,37 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsig_alloc_actionblock
+ *
+ * Description:
+ *   Allocate a block of signal actions and place them
+ *   on the free list.
+ *
+ ****************************************************************************/
+
+static void nxsig_alloc_actionblock(void)
+{
+  FAR sigactq_t *sigact;
+  irqstate_t flags;
+  int i;
+
+  /* Allocate a block of signal actions */
+
+  sigact = kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
+  if (sigact != NULL)
+    {
+      flags = spin_lock_irqsave(NULL);
+
+      for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
+        {
+          sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
+        }
+
+      spin_unlock_irqrestore(NULL, flags);
+    }
+}
+
+/****************************************************************************
  * Name: nxsig_alloc_action
  *
  * Description:
@@ -53,10 +84,13 @@
 static FAR sigactq_t *nxsig_alloc_action(void)
 {
   FAR sigactq_t *sigact;
+  irqstate_t flags;
 
   /* Try to get the signal action structure from the free list */
 
+  flags = spin_lock_irqsave(NULL);
   sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
+  spin_unlock_irqrestore(NULL, flags);
 
   /* Check if we got one. */
 
@@ -68,7 +102,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
       /* And try again */
 
+      flags = spin_lock_irqsave(NULL);
       sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
+      spin_unlock_irqrestore(NULL, flags);
       DEBUGASSERT(sigact);
     }
 
@@ -363,7 +399,11 @@ int sigaction(int signo, FAR const struct sigaction *act,
 
 void nxsig_release_action(FAR sigactq_t *sigact)
 {
+  irqstate_t flags;
+
   /* Just put it back on the free list */
 
+  flags = spin_lock_irqsave(NULL);
   sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
+  spin_unlock_irqrestore(NULL, flags);
 }
