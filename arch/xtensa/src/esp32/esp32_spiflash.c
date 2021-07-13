@@ -69,6 +69,7 @@
 
 #define SPI_FLASH_ENCRYPT_UNIT_SIZE (32)
 #define SPI_FLASH_ENCRYPT_WORDS     (32 / 4)
+#define SPI_FLASH_ERASED_STATE      (0xff)
 
 #define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
 #define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
@@ -1930,6 +1931,15 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
               finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
+        }
+        break;
+
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = SPI_FLASH_ERASED_STATE;
+
+          ret = OK;
         }
         break;
 
