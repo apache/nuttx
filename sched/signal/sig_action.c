@@ -53,10 +53,13 @@
 static FAR sigactq_t *nxsig_alloc_action(void)
 {
   FAR sigactq_t *sigact;
+  irqstate_t flags;
 
   /* Try to get the signal action structure from the free list */
 
+  flags = spin_lock_irqsave();
   sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
+  spin_unlock_irqrestore(flags);
 
   /* Check if we got one. */
 
@@ -68,7 +71,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
       /* And try again */
 
+      flags = spin_lock_irqsave();
       sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
+      spin_unlock_irqrestore(flags);
       DEBUGASSERT(sigact);
     }
 
@@ -363,7 +368,11 @@ int sigaction(int signo, FAR const struct sigaction *act,
 
 void nxsig_release_action(FAR sigactq_t *sigact)
 {
+  irqstate_t flags;
+
   /* Just put it back on the free list */
 
+  flags = spin_lock_irqsave();
   sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
+  spin_unlock_irqrestore(flags);
 }
