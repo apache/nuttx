@@ -52,5 +52,51 @@
 #  endif
 #endif
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: kinetis_serial_dma_poll
+ *
+ * Description:
+ *   Must be called periodically if any Kinetis UART is configured for DMA.
+ *   The DMA callback is triggered for each fifo size/2 bytes, but this can
+ *   result in some bytes being transferred but not collected if the incoming
+ *   data is not a whole multiple of half the FIFO size.
+ *
+ *   May be safely called from either interrupt or thread context.
+ *
+ ****************************************************************************/
+
+#ifdef SERIAL_HAVE_DMA
+void kinetis_serial_dma_poll(void);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* HAVE_UART_DEVICE && USE_SERIALDRIVER) */
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_UART_H */
