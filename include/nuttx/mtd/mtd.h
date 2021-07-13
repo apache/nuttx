@@ -71,6 +71,9 @@
 #define MTDIOC_FLUSH      _MTDIOC(0x0009) /* IN:  None
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
+#define MTDIOC_ERASESTATE _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
+                                           * OUT: Byte value that represents the
+                                           *      erased state of the MTD cell */
 
 /* Macros to hide implementation */
 
