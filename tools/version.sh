@@ -71,12 +71,12 @@ done
 OUTFILE=$1
 
 if [ -z ${VERSION} ] ; then
-  VERSION=`git -C ${WD} describe 2>/dev/null | tail -1 | cut -d'-' -f2`
+  VERSION=`git -C ${WD} describe --match "nuttx-*" 2>/dev/null | tail -1 | cut -d'-' -f2`
 
   # If the VERSION does not match X.Y.Z, retrieve version from the tag
 
   if [[ ! ${VERSION} =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]] ; then
-    VERSION=`git -C ${WD} tag --sort=v:refname | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2-`
+    VERSION=`git -C ${WD} -c 'versionsort.suffix=-' tag --sort=v:refname | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2-`
   fi
 
 fi
