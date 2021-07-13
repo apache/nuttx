@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-ethernet-kit/scripts/esp32.ld
+ * boards/xtensa/esp32/common/scripts/esp32.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -70,13 +70,10 @@ SECTIONS
 
     _iram_text_start = ABSOLUTE(.);
     *(.iram1 .iram1.*)
-    *libphy.a:(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
-    *libpp.a:(.literal .text .literal.* .text.*)
-    *libhal.a:(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *(.wifirxiram .wifirxiram.*)
-    *(.wifirxiram .wifi0iram.*)
+    *(.wifi0iram  .wifi0iram.*)
     *(.wifislpiram .wifislpiram.*)
     *(.wifislprxiram .wifislprxiram.*)
     *(.phyiram .phyiram.*)
@@ -141,6 +138,7 @@ SECTIONS
     KEEP (*(.gnu.linkonce.s2.*))
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
+    *libphy.a:(.rodata  .rodata.*)
     *libarch.a:esp32_spiflash.*(.rodata  .rodata.*)
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
