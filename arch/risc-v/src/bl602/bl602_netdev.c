@@ -107,7 +107,7 @@
 
 #define BL602_NET_WDDELAY (1 * CLOCKS_PER_SEC)
 
-#define BL602_NET_TXBUFF_NUM  6
+#define BL602_NET_TXBUFF_NUM  12
 #define BL602_NET_TXBUFF_SIZE (1650)
 
 #define BL602_TXDESC_THRESHOLD 3
@@ -231,6 +231,7 @@ static struct
   uint32_t scan_result_status : 2; /* WiFi scan result status */
   uint32_t scan_result_len : 6;
   uint32_t retry_cnt : 4; /* MAX 16 retries */
+  uint32_t connected: 1;
 } g_state;
 
 /****************************************************************************
@@ -490,7 +491,7 @@ static void bl602_net_reply(struct bl602_net_driver_s *priv)
       else
 #endif
         {
-          neighbor_out(&bl602_net->net_dev);
+          neighbor_out(&priv->net_dev);
         }
 #endif
 
@@ -968,10 +969,6 @@ static int bl602_net_ifup(FAR struct net_driver_s *dev)
   bl602_net_ipv6multicast(priv);
 #endif
 
-  /* set carrier on */
-
-  netdev_carrier_on(&priv->net_dev);
-
   /* Set and activate a timer process */
 
   wd_start(
@@ -1023,10 +1020,6 @@ static int bl602_net_ifdown(FAR struct net_driver_s *dev)
   irqstate_t flags;
 
   net_lock();
-
-  /* set carrier off */
-
-  netdev_carrier_off(&priv->net_dev);
 
   flags = enter_critical_section();
 
@@ -1241,7 +1234,7 @@ static void bl602_net_ipv6multicast(FAR struct bl602_net_driver_s *priv)
   mac[0] = 0x33;
   mac[1] = 0x33;
 
-  dev    = &priv->dev;
+  dev    = &priv->net_dev;
   tmp16  = dev->d_ipv6addr[6];
   mac[2] = 0xff;
   mac[3] = tmp16 >> 8;
@@ -1624,12 +1617,17 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
             {
               if (priv->channel != 0)
                 {
-                  wifi_mgmr_scan_fixed_channels(para, scan_complete_indicate,
-                      &priv->channel, 1);
+                  const char *ssid = para->flags & IW_SCAN_THIS_ESSID ?
+                    (char *)para->scan_req.essid : NULL;
+                  wifi_mgmr_scan_adv(para, scan_complete_indicate,
+                      &priv->channel, 1, ssid);
                 }
               else
                 {
-                  wifi_mgmr_scan(para, scan_complete_indicate);
+                  const char *ssid = para->flags & IW_SCAN_THIS_ESSID ?
+                    (char *)para->scan_req.essid : NULL;
+                  wifi_mgmr_scan_adv(para, scan_complete_indicate,
+                      NULL, 0, ssid);
                 }
 
               return OK;
@@ -1864,10 +1862,20 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 
           if (req->u.essid.flags == 0)
             {
+              if (g_state.connected == 0)
+                {
+                  return OK;
+                }
+
               return bl602_ioctl_wifi_stop(priv, arg);
             }
           else if (req->u.essid.flags == 1)
             {
+              if (g_state.connected == 1)
+                {
+                  return OK;
+                }
+
               priv->prev_connectd = 0;
               g_state.retry_cnt = 0;
               return bl602_ioctl_wifi_start(priv, arg);
@@ -2086,9 +2094,25 @@ void bl602_net_event(int evt, int val)
         {
           struct bl602_net_driver_s *priv = &g_bl602_net[0];
           priv->prev_connectd = 1;
+          g_state.connected = 1;
+
+          netdev_carrier_on(&priv->net_dev);
 
           wifi_mgmr_sta_autoconnect_disable();
           sem_post(&g_wifi_connect_sem);
+        }
+      while (0);
+      break;
+
+    case CODE_WIFI_ON_DISCONNECT:
+      do
+        {
+          struct bl602_net_driver_s *priv = &g_bl602_net[0];
+          if (g_state.connected == 1)
+            {
+              netdev_carrier_off(&priv->net_dev);
+              g_state.connected = 0;
+            }
         }
       while (0);
       break;
@@ -2101,7 +2125,7 @@ void bl602_net_event(int evt, int val)
           wlinfo("retry connect : %d\n", g_state.retry_cnt);
           if (!priv->prev_connectd)
             {
-              if (g_state.retry_cnt++ > 1)
+              if (g_state.retry_cnt++ > 3)
                 {
                   wifi_mgmr_sta_autoconnect_disable();
                   wifi_mgmr_api_idle();
@@ -2120,6 +2144,28 @@ void bl602_net_event(int evt, int val)
           sem_post(&g_wifi_scan_sem);
         }
       while (0);
+
+    case CODE_WIFI_ON_AP_STARTED:
+      do
+        {
+#ifdef CONFIG_BL602_NET_MULTI_INTERFACE
+          struct bl602_net_driver_s *priv = &g_bl602_net[1];
+          netdev_carrier_on(&priv->net_dev);
+#endif
+        }
+      while (0);
+      break;
+
+    case CODE_WIFI_ON_AP_STOPPED:
+      do
+        {
+#ifdef CONFIG_BL602_NET_MULTI_INTERFACE
+          struct bl602_net_driver_s *priv = &g_bl602_net[1];
+          netdev_carrier_off(&priv->net_dev);
+#endif
+        }
+      while (0);
+      break;
 
     default:
       wlwarn("unhandled msg:%d\n", evt);
@@ -2234,6 +2280,10 @@ int bl602_net_initialize(void)
       bl_wifi_sta_mac_addr_set(priv->net_dev.d_mac.ether.ether_addr_octet);
       bl_wifi_ap_mac_addr_set(priv->net_dev.d_mac.ether.ether_addr_octet);
 #endif
+
+      /* Enable scan hidden SSID */
+
+      wifi_mgmr_scan_filter_hidden_ssid(0);
 
       priv->current_mode    = IW_MODE_AUTO;
 
