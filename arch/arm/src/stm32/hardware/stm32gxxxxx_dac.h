@@ -32,6 +32,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#define HAVE_IP_DAC_V2
+#undef HAVE_IP_DAC_V1           /* No DAC IPv1 */
+
 /* Register Offsets *********************************************************/
 
 #define STM32_DAC_CR_OFFSET            0x0000                         /* DAC control register */
@@ -375,7 +380,7 @@
 
 #define DAC_SR_DACRDY(n)               (1 << ((((n) - 1) << 4) + 11))
 #define DAC_SR_DAC1RDY                 (1 << 11)                      /* Bit 13: DAC channel 1 ready status bit */
-#define DAC_SR_DAC2RDY                 (1 << 27)                      /* Bit 29: DAC channel 2 ready status bit */
+#define DAC_SR_DAC2RDY                 (1 << 27)                      /* Bit 27: DAC channel 2 ready status bit */
 
 #define DAC_SR_DORSTAT(n)              (1 << ((((n) - 1) << 4) + 12))
 #define DAC_SR_DORSTAT1                (1 << 12)                      /* Bit 13: DAC channel 1 output register status bit */
@@ -448,10 +453,10 @@
 
 #define DAC_MCR_HFSEL_SHIFT            (14)                           /* High-frequency interface mode selection */
 #define DAC_MCR_HFSEL_MASK             (0x3 << DAC_MCR_HFSEL_SHIFT)
-#  define DAC_MCR_HFSEL_DISABLED       (0x1 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency disabled */
-#  define DAC_MCR_HFSEL_AHB_80MHz      (0x2 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 80 MHz */
-#  define DAC_MCR_HFSEL_AHB_160MHz     (0x3 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 160 MHz */
-#  define DAC_MCR_HFSEL_RESERVED       (0x4 << DAC_MCR_HFSEL_SHIFT)   /* Reserved */
+#  define DAC_MCR_HFSEL_DISABLED       (0x0 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency disabled */
+#  define DAC_MCR_HFSEL_AHB_80MHz      (0x1 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 80 MHz */
+#  define DAC_MCR_HFSEL_AHB_160MHz     (0x2 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 160 MHz */
+#  define DAC_MCR_HFSEL_RESERVED       (0x3 << DAC_MCR_HFSEL_SHIFT)   /* Reserved */
 
 /* DAC channel 1/2 sample and hold sample time register (SHSR1, SHSR2) */
 
