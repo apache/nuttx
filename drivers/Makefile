@@ -29,6 +29,7 @@ include audio/Make.defs
 include bch/Make.defs
 include can/Make.defs
 include crypto/Make.defs
+include math/Make.defs
 include motor/Make.defs
 include i2c/Make.defs
 include i2s/Make.defs
