@@ -143,4 +143,16 @@ int stm32_adc_setup(void);
 int stm32_foc_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_cordic_setup
+ *
+ * Description:
+ *  Initialize CORDIC peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MATH_CORDIC
+int stm32_cordic_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431RB_SRC_NUCLEO_G431RB_H */
