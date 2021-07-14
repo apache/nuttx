@@ -24,10 +24,10 @@
 
 #include <nuttx/config.h>
 #include <sched/sched.h>
+#include <debug.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/board.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -67,20 +67,30 @@
  *
  ****************************************************************************/
 
-void up_assert(const char *filename, int line)
+void up_assert(const char *filename, int lineno)
 {
-  /* Flush any buffered SYSLOG data (from prior to the assertion) */
+  /* Flush any buffered SYSLOG data (prior to the assertion) */
 
   syslog_flush();
 
   /* Show the location of the failed assertion */
 
 #ifdef CONFIG_SMP
-  syslog(LOG_ERR, "CPU%d: Assertion failed at file:%s line: %d\n",
-          up_cpu_index(), filename, line);
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
+         up_cpu_index(), filename, lineno, running_task()->name);
 #else
-  syslog(LOG_ERR, "Assertion failed at file:%s line: %d\n",
-          filename, line);
+  _alert("Assertion failed CPU%d at file:%s line: %d\n",
+         up_cpu_index(), filename, lineno);
+#endif
+#else
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("Assertion failed at file:%s line: %d task: %s\n",
+         filename, lineno, running_task()->name);
+#else
+  _alert("Assertion failed at file:%s line: %d\n",
+         filename, lineno);
+#endif
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */
@@ -90,7 +100,7 @@ void up_assert(const char *filename, int line)
   /* Allow for any board/configuration specific crash information */
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), this_task(), filename, line);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   /* Flush any buffered SYSLOG data */
