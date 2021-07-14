@@ -267,3 +267,7 @@ endif
 ifeq ($(CONFIG_STM32_FOC),y)
 CHIP_CSRCS += stm32_foc.c
 endif
+
+ifeq ($(CONFIG_STM32_CORDIC),y)
+CHIP_CSRCS += stm32_cordic.c
+endif

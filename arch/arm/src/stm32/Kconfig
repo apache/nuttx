@@ -2752,6 +2752,7 @@ config STM32_CORDIC
 	bool "CORDIC Accelerator"
 	default n
 	depends on STM32_HAVE_CORDIC
+	select MATH_CORDIC_USE_Q31
 
 config STM32_BKP
 	bool "BKP"
