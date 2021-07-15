@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
@@ -101,6 +102,7 @@ static int fakesensor_read_csv_line(FAR struct file *file,
       if (buffer[i] == '\n')
         {
           file_seek(file, i - len + 1, SEEK_CUR);
+          buffer[i + 1] = '\0';
           break;
         }
     }
@@ -108,7 +110,7 @@ static int fakesensor_read_csv_line(FAR struct file *file,
   return i + 1;
 }
 
-static int fakesensor_read_csv_header(struct fakesensor_s *sensor)
+static int fakesensor_read_csv_header(FAR struct fakesensor_s *sensor)
 {
   char buffer[40];
 
@@ -127,6 +129,85 @@ static int fakesensor_read_csv_header(struct fakesensor_s *sensor)
   sensor->raw_start +=
       fakesensor_read_csv_line(&sensor->data, buffer, sizeof(buffer), 0);
   return OK;
+}
+
+static inline void fakesensor_read_accel(FAR struct fakesensor_s *sensor)
+{
+  struct sensor_event_accel accel;
+  char raw[50];
+  fakesensor_read_csv_line(
+          &sensor->data, raw, sizeof(raw), sensor->raw_start);
+  sscanf(raw, "%f,%f,%f\n", &accel.x, &accel.y, &accel.z);
+  accel.temperature = NAN;
+  accel.timestamp = sensor_get_timestamp();
+  sensor->lower.push_event(sensor->lower.priv, &accel,
+                    sizeof(struct sensor_event_accel));
+}
+
+static inline void fakesensor_read_mag(FAR struct fakesensor_s *sensor)
+{
+  struct sensor_event_mag mag;
+  char raw[50];
+  fakesensor_read_csv_line(
+          &sensor->data, raw, sizeof(raw), sensor->raw_start);
+  sscanf(raw, "%f,%f,%f\n", &mag.x, &mag.y, &mag.z);
+  mag.temperature = NAN;
+  mag.timestamp = sensor_get_timestamp();
+  sensor->lower.push_event(sensor->lower.priv, &mag,
+                           sizeof(struct sensor_event_mag));
+}
+
+static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor)
+{
+  struct sensor_event_gyro gyro;
+  char raw[50];
+  fakesensor_read_csv_line(
+          &sensor->data, raw, sizeof(raw), sensor->raw_start);
+  sscanf(raw, "%f,%f,%f\n", &gyro.x, &gyro.y, &gyro.z);
+  gyro.temperature = NAN;
+  gyro.timestamp = sensor_get_timestamp();
+  sensor->lower.push_event(sensor->lower.priv, &gyro,
+                    sizeof(struct sensor_event_gyro));
+}
+
+static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
+{
+  struct sensor_event_gps gps;
+  float time;
+  char latitude;
+  char longitude;
+  int status;
+  int sate_num;
+  float hoop;
+  float altitude;
+  char raw[150];
+  memset(&gps, 0, sizeof(struct sensor_event_gps));
+  read:
+  fakesensor_read_csv_line(
+          &sensor->data, raw, sizeof(raw), sensor->raw_start);
+  FAR char *pos = strstr(raw, "GGA");
+  if (pos == NULL)
+    {
+      goto read;
+    }
+
+  pos += 4;
+  sscanf(pos, "%f,%f,%c,%f,%c,%d,%d,%f,%f,", &time, &gps.latitude, &latitude,
+         &gps.longitude, &longitude, &status, &sate_num, &hoop, &altitude);
+  if (latitude == 'S')
+    {
+      gps.latitude = -gps.latitude;
+    }
+
+  if (longitude == 'W')
+    {
+      gps.longitude = -gps.longitude;
+    }
+
+  gps.height = altitude;
+
+  sensor->lower.push_event(sensor->lower.priv, &gps,
+                           sizeof(struct sensor_event_gps));
 }
 
 static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
@@ -181,46 +262,28 @@ static void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
+  switch (lower->type)
+  {
+    case SENSOR_TYPE_ACCELEROMETER:
+      fakesensor_read_accel(sensor);
+      break;
 
-  if (lower->type == SENSOR_TYPE_ACCELEROMETER)
-    {
-      struct sensor_event_accel accel;
-      char raw[50];
-      fakesensor_read_csv_line(
-          &sensor->data, raw, sizeof(raw), sensor->raw_start);
-      sscanf(raw, "%f,%f,%f\n", &accel.x, &accel.y, &accel.z);
-      accel.temperature = NAN;
-      accel.timestamp = sensor_get_timestamp();
-      lower->push_event(lower->priv, &accel,
-                        sizeof(struct sensor_event_accel));
-    }
-  else if (lower->type == SENSOR_TYPE_MAGNETIC_FIELD)
-    {
-      struct sensor_event_mag mag;
-      char raw[50];
-      fakesensor_read_csv_line(
-          &sensor->data, raw, sizeof(raw), sensor->raw_start);
-      sscanf(raw, "%f,%f,%f\n", &mag.x, &mag.y, &mag.z);
-      mag.temperature = NAN;
-      mag.timestamp = sensor_get_timestamp();
-      lower->push_event(lower->priv, &mag, sizeof(struct sensor_event_mag));
-    }
-  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
-    {
-      struct sensor_event_gyro gyro;
-      char raw[50];
-      fakesensor_read_csv_line(
-          &sensor->data, raw, sizeof(raw), sensor->raw_start);
-      sscanf(raw, "%f,%f,%f\n", &gyro.x, &gyro.y, &gyro.z);
-      gyro.temperature = NAN;
-      gyro.timestamp = sensor_get_timestamp();
-      lower->push_event(lower->priv, &gyro,
-                        sizeof(struct sensor_event_gyro));
-    }
-  else
-    {
+    case SENSOR_TYPE_MAGNETIC_FIELD:
+      fakesensor_read_mag(sensor);
+      break;
+
+    case SENSOR_TYPE_GYROSCOPE:
+      fakesensor_read_gyro(sensor);
+      break;
+
+    case SENSOR_TYPE_GPS:
+      fakesensor_read_gps(sensor);
+      break;
+
+    default:
       snerr("fakesensor: unsupported type sensor type\n");
-    }
+      break;
+  }
 }
 
 static int fakesensor_thread(int argc, char** argv)
@@ -351,3 +414,4 @@ int fakesensor_init(int type, FAR const char *file_name,
 
   return OK;
 }
+
