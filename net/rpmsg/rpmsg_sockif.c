@@ -454,8 +454,8 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_socket_conn_s *server = priv;
   FAR struct rpmsg_socket_conn_s *tmp;
   FAR struct rpmsg_socket_conn_s *new;
+  int cnt = 0;
   int ret;
-  int i = 0;
 
   if (strncmp(name, server->rpaddr.rp_name,
               strlen(server->rpaddr.rp_name)))
@@ -469,14 +469,6 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       /* Bind specific CPU, then only listen that CPU */
 
       return;
-    }
-
-  for (tmp = server; tmp->next; tmp = tmp->next)
-    {
-      if (++i > server->backlog)
-        {
-          return;
-        }
     }
 
   new = rpmsg_socket_alloc();
@@ -505,7 +497,24 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   strcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev));
   strcpy(new->rpaddr.rp_name, name);
 
+  rpmsg_socket_lock(&server->recvlock);
+
+  for (tmp = server; tmp->next; tmp = tmp->next)
+    {
+      if (++cnt >= server->backlog)
+        {
+          /* Reject the connection */
+
+          rpmsg_destroy_ept(&new->ept);
+          rpmsg_socket_free(new);
+          rpmsg_socket_lock(&server->recvlock);
+          return;
+        }
+    }
+
   tmp->next = new;
+
+  rpmsg_socket_unlock(&server->recvlock);
 
   rpmsg_socket_post(&server->recvsem);
   rpmsg_socket_pollnotify(server, POLLIN);
@@ -713,13 +722,21 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
 
   while (1)
     {
+      FAR struct rpmsg_socket_conn_s *conn = NULL;
+
+      rpmsg_socket_lock(&server->recvlock);
+
       if (server->next)
         {
-          FAR struct rpmsg_socket_conn_s *conn = server->next;
-
+          conn = server->next;
           server->next = conn->next;
           conn->next = NULL;
+        }
 
+      rpmsg_socket_unlock(&server->recvlock);
+
+      if (conn)
+        {
           rpmsg_socket_sync(conn, _SO_TIMEOUT(psock->s_rcvtimeo));
 
           rpmsg_register_callback(conn,
