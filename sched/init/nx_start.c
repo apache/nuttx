@@ -67,11 +67,9 @@
 #  define CONFIG_SMP_NCPUS       1
 #endif
 
-#ifdef CONFIG_SMP
 /* This set of all CPUs */
 
-#  define SCHED_ALL_CPUS         ((1 << CONFIG_SMP_NCPUS) - 1)
-#endif /* CONFIG_SMP */
+#define SCHED_ALL_CPUS           ((1 << CONFIG_SMP_NCPUS) - 1)
 
 /****************************************************************************
  * Public Data
@@ -422,12 +420,7 @@ void nx_start(void)
                                 TCB_FLAG_NONCANCELABLE |
                                 TCB_FLAG_CPU_LOCKED);
       g_idletcb[i].cmn.cpu   = i;
-#else
-      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
-                                TCB_FLAG_NONCANCELABLE);
-#endif
 
-#ifdef CONFIG_SMP
       /* Set the affinity mask to allow the thread to run on all CPUs.  No,
        * this IDLE thread can only run on its assigned CPU.  That is
        * enforced by the TCB_FLAG_CPU_LOCKED which overrides the affinity
@@ -437,6 +430,9 @@ void nx_start(void)
        */
 
       g_idletcb[i].cmn.affinity = SCHED_ALL_CPUS;
+#else
+      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                TCB_FLAG_NONCANCELABLE);
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -449,7 +445,6 @@ void nx_start(void)
       strncpy(g_idletcb[i].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
       g_idletcb[i].cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
 #  endif
-#endif
 
       /* Configure the task name in the argument list.  The IDLE task does
        * not really have an argument list, but this name is still useful
@@ -459,7 +454,6 @@ void nx_start(void)
        * stack and there is no support that yet.
        */
 
-#if CONFIG_TASK_NAME_SIZE > 0
       g_idleargv[i][0]  = g_idletcb[i].cmn.name;
 #else
       g_idleargv[i][0]  = (FAR char *)g_idlename;
