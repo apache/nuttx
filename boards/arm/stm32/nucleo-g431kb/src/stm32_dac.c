@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/nucleo-g431kb/src/stm32_bringup.c
+ * boards/arm/stm32/nucleo-g431kb/src/stm32_dac.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,26 +23,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <errno.h>
+#include <debug.h>
 
-#include <sys/types.h>
-#include <syslog.h>
+#include <nuttx/analog/dac.h>
+#include <arch/board/board.h>
 
-#include <nuttx/board.h>
-
-#ifdef CONFIG_USERLED
-#  include <nuttx/leds/userled.h>
-#endif
-
+#include "stm32_dac.h"
 #include "nucleo-g431kb.h"
 
+#ifdef CONFIG_DAC
+
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-#undef HAVE_LEDS
-
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
-#  define HAVE_LEDS 1
+#ifdef CONFIG_STM32_DAC1CH1
+static struct dac_dev_s *g_dac1;
 #endif
 
 /****************************************************************************
@@ -50,64 +47,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Name: stm32_dac_setup
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize and register the DAC driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/dac0"
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
+int stm32_dac_setup(void)
 {
   int ret;
+#ifdef CONFIG_STM32_DAC1CH1
+  g_dac1 = stm32_dacinitialize(1);
+  if (g_dac1 == NULL)
+    {
+      aerr("ERROR: Failed to get DAC interface\n");
+      return -ENODEV;
+    }
 
-#ifdef HAVE_LEDS
-  /* Register the LED driver */
+  /* Register the DAC driver at "/dev/dac0" */
 
-  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  ret = dac_register("/dev/dac0", g_dac1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      aerr("ERROR: dac_register() failed: %d\n", ret);
       return ret;
     }
-#endif
 
-#ifdef CONFIG_PWM
-  /* Initialize PWM and register the PWM driver. */
-
-  ret = stm32_pwm_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_pwm_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_STM32_COMP
-  /* Initialize and register the COMP driver. */
-
-  ret = stm32_comp_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_comp_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_DAC
-  /* Initialize and register the DAC driver. */
-
-  ret = stm32_dac_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_dac_setup failed: %d\n", ret);
-    }
 #endif
 
   UNUSED(ret);
   return OK;
 }
+
+#endif  /* CONFIG_DAC */
