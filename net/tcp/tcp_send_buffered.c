@@ -508,6 +508,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   TCP_WBTRIM(wrb, trimlen);
                   TCP_WBSEQNO(wrb) += trimlen;
                   TCP_WBSENT(wrb) -= trimlen;
+                  TCP_WBNACK(wrb) = 0;
 
                   /* Set the new sequence number for what remains */
 
@@ -573,6 +574,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           TCP_WBTRIM(wrb, nacked);
           TCP_WBSEQNO(wrb) += nacked;
           TCP_WBSENT(wrb) -= nacked;
+          TCP_WBNACK(wrb) = 0;
 
           ninfo("ACK: wrb=%p seqno=%" PRIu32 " pktlen=%u sent=%u\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb));
