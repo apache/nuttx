@@ -475,16 +475,6 @@ void nx_start(void)
       /* Mark the idle task as the running task */
 
       g_running_tasks[i] = &g_idletcb[i].cmn;
-
-      /* Initialize the 1st processor-specific portion of the TCB
-       * Note: other idle thread get initialized in nx_smpstart
-       */
-
-      if (i == 0)
-        {
-          up_initial_state(&g_idletcb[i].cmn);
-          up_stack_frame(&g_idletcb[i].cmn, sizeof(struct task_info_s));
-        }
     }
 
   /* Task lists are initialized */
@@ -566,8 +556,11 @@ void nx_start(void)
       g_pidhash[i].pid = INVALID_PROCESS_ID;
     }
 
+  /* IDLE Group Initialization **********************************************/
+
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
+      FAR struct tls_info_s *info;
       int hashndx;
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
@@ -575,6 +568,39 @@ void nx_start(void)
       hashndx                = PIDHASH(i);
       g_pidhash[hashndx].tcb = &g_idletcb[i].cmn;
       g_pidhash[hashndx].pid = i;
+
+      /* Allocate the IDLE group */
+
+      DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
+
+#ifdef CONFIG_SMP
+      /* Create a stack for all CPU IDLE threads (except CPU0 which already
+       * has a stack).
+       */
+
+      if (i > 0)
+        {
+          DEBUGVERIFY(up_cpu_idlestack(i, &g_idletcb[i].cmn,
+                                       CONFIG_IDLETHREAD_STACKSIZE));
+        }
+#endif
+
+      /* Initialize the processor-specific portion of the TCB */
+
+      up_initial_state(&g_idletcb[i].cmn);
+
+      /* Initialize the thread local storage */
+
+      info = up_stack_frame(&g_idletcb[i].cmn, sizeof(struct tls_info_s));
+      DEBUGASSERT(info == g_idletcb[i].cmn.stack_alloc_ptr);
+      info->tl_task = g_idletcb[i].cmn.group->tg_info;
+
+      /* Complete initialization of the IDLE group.  Suppress retention
+       * of child status in the IDLE group.
+       */
+
+      DEBUGVERIFY(group_initialize(&g_idletcb[i]));
+      g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
     }
 
   g_lastpid = CONFIG_SMP_NCPUS - 1;
@@ -703,20 +729,14 @@ void nx_start(void)
   binfmt_initialize();
 #endif
 
-  /* IDLE Group Initialization **********************************************/
-
   /* Announce that the CPU0 IDLE task has started */
 
   sched_note_start(&g_idletcb[0].cmn);
 
-  /* Initialize the IDLE group for the IDLE task of each CPU */
+  /* Initialize stdio for the IDLE task of each CPU */
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      /* Allocate the IDLE group */
-
-      DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
-
       if (i > 0)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
@@ -732,13 +752,6 @@ void nx_start(void)
 
           DEBUGVERIFY(group_setupidlefiles(&g_idletcb[i]));
         }
-
-      /* Complete initialization of the IDLE group.  Suppress retention
-       * of child status in the IDLE group.
-       */
-
-      DEBUGVERIFY(group_initialize(&g_idletcb[i]));
-      g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
     }
 
   /* Start SYSLOG ***********************************************************/
