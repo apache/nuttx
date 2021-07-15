@@ -63,8 +63,6 @@ int mkdir(const char *pathname, mode_t mode)
   int errcode;
   int ret;
 
-  mode &= ~getumask();
-
   /* Find the inode that includes this path */
 
   SETUP_SEARCH(&desc, pathname, false);
