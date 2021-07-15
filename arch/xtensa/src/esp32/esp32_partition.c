@@ -495,12 +495,6 @@ static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
 
   finfo("INFO: cmd=%d(%x) arg=%x\n", cmd, cmd, arg);
 
-  if (!_MTDIOCVALID(cmd))
-    {
-      finfo("INFO: cmd=%d(%x) is error\n", cmd, cmd);
-      return -ENOTTY;
-    }
-
   switch (_IOC_NR(cmd))
     {
       case OTA_IMG_GET_BOOT:
