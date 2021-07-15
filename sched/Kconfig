@@ -1800,6 +1800,7 @@ config DEFAULT_TASK_STACKSIZE
 
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"
+	default DEFAULT_TASK_STACKSIZE if ARCH_SIM
 	default 1024
 	---help---
 		The size of the initial stack used by the IDLE thread.  The IDLE thread
