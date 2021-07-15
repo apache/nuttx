@@ -165,16 +165,15 @@ void sim_sigdeliver(void);
 
 #ifdef CONFIG_SMP
 void sim_cpu0_start(void);
+int sim_cpu_start(int cpu, void *stack, size_t size);
+void sim_send_ipi(int cpu);
 #endif
 
 /* up_smpsignal.c ***********************************************************/
 
 #ifdef CONFIG_SMP
 void up_cpu_started(void);
-int up_cpu_paused(int cpu);
-struct tcb_s *up_this_task(void);
 int up_cpu_set_pause_handler(int irq);
-void sim_send_ipi(int cpu);
 #endif
 
 /* up_oneshot.c *************************************************************/
