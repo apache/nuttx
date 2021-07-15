@@ -68,10 +68,8 @@ int nxmq_alloc_msgq(FAR struct mq_attr *attr,
    * larger than the configured maximum message size.
    */
 
-  DEBUGASSERT((!attr || (attr->mq_msgsize <= MQ_MAX_BYTES &&
-              attr->mq_maxmsg <= MQ_MAX_MSGS)) && msgq);
-  if ((attr && (attr->mq_msgsize > MQ_MAX_BYTES ||
-      attr->mq_maxmsg > MQ_MAX_MSGS)) || !msgq)
+  DEBUGASSERT((!attr || attr->mq_msgsize <= MQ_MAX_BYTES) && msgq);
+  if ((attr && attr->mq_msgsize > MQ_MAX_BYTES) || !msgq)
     {
       return -EINVAL;
     }
