@@ -327,7 +327,6 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
 int esp32_gpio_init(void)
 {
   int i;
-  int pincount = 0;
 
 #if BOARD_NGPIOOUT > 0
   for (i = 0; i < BOARD_NGPIOOUT; i++)
@@ -337,19 +336,16 @@ int esp32_gpio_init(void)
       g_gpout[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
       g_gpout[i].gpio.gp_ops     = &gpout_ops;
       g_gpout[i].id              = i;
-      gpio_pin_register(&g_gpout[i].gpio, pincount);
+      gpio_pin_register(&g_gpout[i].gpio, i);
 
       /* Configure the pins that will be used as output */
 
       esp32_gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
-      esp32_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_3);
+      esp32_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_3 |
+                       INPUT_FUNCTION_3);
       esp32_gpiowrite(g_gpiooutputs[i], 0);
-
-      pincount++;
     }
 #endif
-
-  pincount = 0;
 
 #if BOARD_NGPIOIN > 0
   for (i = 0; i < BOARD_NGPIOIN; i++)
@@ -359,17 +355,13 @@ int esp32_gpio_init(void)
       g_gpin[i].gpio.gp_pintype = GPIO_INPUT_PIN;
       g_gpin[i].gpio.gp_ops     = &gpin_ops;
       g_gpin[i].id              = i;
-      gpio_pin_register(&g_gpin[i].gpio, pincount);
+      gpio_pin_register(&g_gpin[i].gpio, i);
 
       /* Configure the pins that will be used as INPUT */
 
       esp32_configgpio(g_gpioinputs[i], INPUT_FUNCTION_3);
-
-      pincount++;
     }
 #endif
-
-  pincount = 0;
 
 #if BOARD_NGPIOINT > 0
   for (i = 0; i < BOARD_NGPIOINT; i++)
@@ -379,13 +371,11 @@ int esp32_gpio_init(void)
       g_gpint[i].esp32gpio.gpio.gp_pintype = GPIO_INTERRUPT_PIN;
       g_gpint[i].esp32gpio.gpio.gp_ops     = &gpint_ops;
       g_gpint[i].esp32gpio.id              = i;
-      gpio_pin_register(&g_gpint[i].esp32gpio.gpio, pincount);
+      gpio_pin_register(&g_gpint[i].esp32gpio.gpio, i);
 
       /* Configure the pins that will be used as interrupt input */
 
       esp32_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_3 | PULLDOWN);
-
-      pincount++;
     }
 #endif
 
