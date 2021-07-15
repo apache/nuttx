@@ -166,7 +166,6 @@ int fchmod(int fd, mode_t mode);
 int futimens(int fd, const struct timespec times[2]);
 
 mode_t umask(mode_t mask);
-mode_t getumask(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

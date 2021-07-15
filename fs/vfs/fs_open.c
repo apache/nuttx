@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <stdbool.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -70,8 +69,6 @@ static int file_vopen(FAR struct file *filep,
     {
       mode = va_arg(ap, mode_t);
     }
-
-  mode &= ~getumask();
 #endif
 
   /* Get an inode for this file */

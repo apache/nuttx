@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/stat.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
@@ -87,7 +86,7 @@
  *
  ****************************************************************************/
 
-FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
+FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 {
   FAR struct inode *inode;
   FAR struct nsem_inode_s *nsem;
@@ -175,7 +174,7 @@ FAR sem_t *sem_open(FAR const char *name, int oflags, ...)
        */
 
       va_start(ap, oflags);
-      mode  = va_arg(ap, mode_t) & ~getumask();
+      mode  = va_arg(ap, mode_t);
       value = va_arg(ap, unsigned);
       va_end(ap);
 
