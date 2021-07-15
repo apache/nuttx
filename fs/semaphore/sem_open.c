@@ -74,7 +74,7 @@
  *        unless one of this name already exists.
  *   Optional parameters.  When the O_CREAT flag is specified, two optional
  *     parameters are expected:
- *     1. mode_t mode, and
+ *     1. mode_t mode (ignored), and
  *     2. unsigned int value.  This initial value of the semaphore. Valid
  *        initial values of the semaphore must be less than or equal to
  *        SEM_VALUE_MAX.
@@ -178,6 +178,8 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
       value = va_arg(ap, unsigned);
       va_end(ap);
 
+      UNUSED(mode);
+
       /* Check the semaphore value */
 
       if (value > SEM_VALUE_MAX)
@@ -197,7 +199,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
           goto errout_with_lock;
         }
 
-      ret = inode_reserve(fullpath, mode, &inode);
+      ret = inode_reserve(fullpath, &inode);
       inode_semgive();
 
       if (ret < 0)

@@ -32,7 +32,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <time.h>
 
 #include <nuttx/semaphore.h>
 
@@ -354,13 +353,8 @@ struct inode
   int16_t           i_crefs;    /* References to inode */
   uint16_t          i_flags;    /* Flags for inode */
   union inode_ops_u u;          /* Inode operations */
-#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
+#ifdef CONFIG_FILE_MODE
   mode_t            i_mode;     /* Access mode flags */
-  uid_t             i_owner;    /* Owner */
-  gid_t             i_group;    /* Group */
-  struct timespec   i_atime;    /* Time of last access */
-  struct timespec   i_mtime;    /* Time of last modification */
-  struct timespec   i_ctime;    /* Time of last status change */
 #endif
   FAR void         *i_private;  /* Per inode driver private data */
   char              i_name[1];  /* Name of inode (variable) */
@@ -498,7 +492,7 @@ void fs_initialize(void);
  * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
- *   mode - Access privileges
+ *   mode - Access privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -525,7 +519,7 @@ int register_driver(FAR const char *path,
  * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
- *   mode - Access privileges
+ *   mode - Access privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -603,7 +597,7 @@ int unregister_blockdriver(FAR const char *path);
  * Input Parameters:
  *   path - The path to the inode to create
  *   mtd  - The MTD driver structure
- *   mode - inode privileges
+ *   mode - inode privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:

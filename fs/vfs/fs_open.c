@@ -51,7 +51,7 @@ static int file_vopen(FAR struct file *filep,
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
   mode_t mode = 0666;
 #endif
   int ret;
@@ -61,7 +61,10 @@ static int file_vopen(FAR struct file *filep,
       return -EINVAL;
     }
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FILE_MODE
+#  ifdef CONFIG_CPP_HAVE_WARNING
+#    warning "File creation not implemented"
+#  endif
 
   /* If the file is opened for creation, then get the mode bits */
 

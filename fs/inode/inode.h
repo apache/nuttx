@@ -296,7 +296,6 @@ void inode_root_reserve(void);
  *
  * Input Parameters:
  *   path - The path to the inode to create
- *   mode - inmode privileges
  *   inode - The location to return the inode pointer
  *
  * Returned Value:
@@ -309,8 +308,7 @@ void inode_root_reserve(void);
  *
  ****************************************************************************/
 
-int inode_reserve(FAR const char *path,
-                  mode_t mode, FAR struct inode **inode);
+int inode_reserve(FAR const char *path, FAR struct inode **inode);
 
 /****************************************************************************
  * Name: inode_unlink
