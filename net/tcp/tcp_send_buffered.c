@@ -506,7 +506,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   ninfo("ACK: wrb=%p trim %u bytes\n", wrb, trimlen);
 
                   TCP_WBTRIM(wrb, trimlen);
-                  TCP_WBSEQNO(wrb) = ackno;
+                  TCP_WBSEQNO(wrb) += trimlen;
                   TCP_WBSENT(wrb) -= trimlen;
 
                   /* Set the new sequence number for what remains */
@@ -571,7 +571,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Trim the ACKed bytes from the beginning of the write buffer. */
 
           TCP_WBTRIM(wrb, nacked);
-          TCP_WBSEQNO(wrb) = ackno;
+          TCP_WBSEQNO(wrb) += nacked;
           TCP_WBSENT(wrb) -= nacked;
 
           ninfo("ACK: wrb=%p seqno=%" PRIu32 " pktlen=%u sent=%u\n",
