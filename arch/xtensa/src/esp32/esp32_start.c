@@ -40,6 +40,7 @@
 #include "esp32_region.h"
 #include "esp32_start.h"
 #include "esp32_spiram.h"
+#include "esp32_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -126,11 +127,7 @@ void IRAM_ATTR __start(void)
    * start the NuttX environment.
    */
 
-  putreg32(RTC_CNTL_WDT_WKEY_VALUE, RTC_CNTL_WDTWPROTECT_REG);
-  regval  = getreg32(RTC_CNTL_WDTCONFIG0_REG);
-  regval &= ~RTC_CNTL_WDT_EN;
-  putreg32(regval, RTC_CNTL_WDTCONFIG0_REG);
-  putreg32(0, RTC_CNTL_WDTWPROTECT_REG);
+  esp32_wdt_early_deinit();
 
   /* Set CPU frequency configured in board.h */
 

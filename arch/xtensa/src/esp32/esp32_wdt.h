@@ -99,6 +99,7 @@ struct esp32_wdt_ops_s
  ****************************************************************************/
 
 FAR struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id);
+void esp32_wdt_early_deinit(void);
 int esp32_wdt_deinit(FAR struct esp32_wdt_dev_s *dev);
 bool esp32_wdt_is_running(FAR struct esp32_wdt_dev_s *dev);
 
