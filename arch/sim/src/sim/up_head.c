@@ -38,6 +38,13 @@
 #include "up_internal.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+int g_argc;
+char **g_argv;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -62,6 +69,9 @@ static char g_logbuffer[4096];
 
 int main(int argc, char **argv, char **envp)
 {
+  g_argc = argc;
+  g_argv = argv;
+
 #ifdef CONFIG_SYSLOG_RPMSG
   syslog_rpmsg_init_early(g_logbuffer, sizeof(g_logbuffer));
 #endif
