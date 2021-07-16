@@ -280,7 +280,7 @@ static void svm3_duty_calc_b16(FAR struct svm3_state_b16_s *s,
  *   Voltage vector definitions in 3-phase SVM:
  *
  *  |---------|-----------|--------------------|-----------------|
- *  | Voltage | swithcing | Line to neutral    | Line to line    |
+ *  | Voltage | switching | Line to neutral    | Line to line    |
  *  | vector  | vectors   | voltage            | voltage         |
  *  |         |-----------|--------------------|-----------------|
  *  |         | a | b | c | Van  | Vbn  | Vcn  | Vab | Vbe | Vca |

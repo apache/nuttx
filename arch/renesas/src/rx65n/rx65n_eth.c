@@ -238,7 +238,7 @@
  * interrupt.
  */
 
-#define ETHER_CFG_AL1_INT_PRIORTY                   (15)
+#define ETHER_CFG_AL1_INT_PRIORITY                  (15)
 
 /* Use LINKSTA signal for detect link status changes
  * 0 = unused  (use PHY-LSI status register)
@@ -3114,7 +3114,7 @@ void rx65n_ether_enable_icu(void)
 
   /* Priority to this interrupt should be value 2 */
 
-  ipl = ETHER_CFG_AL1_INT_PRIORTY;
+  ipl = ETHER_CFG_AL1_INT_PRIORITY;
 
   /* Disable group interrupts */
 
