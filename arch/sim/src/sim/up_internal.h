@@ -173,7 +173,7 @@ void sim_send_ipi(int cpu);
 
 #ifdef CONFIG_SMP
 void up_cpu_started(void);
-int up_cpu_set_pause_handler(int irq);
+int up_init_ipi(int irq);
 #endif
 
 /* up_oneshot.c *************************************************************/
