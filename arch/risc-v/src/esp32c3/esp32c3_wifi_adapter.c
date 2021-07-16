@@ -6494,18 +6494,43 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
       return wifi_errno_trans(ret);
     }
 
-  ext   = (struct iw_encode_ext *)(iwr->u.encoding.pointer);
   pdata = (uint8_t *)(ext + 1);
   len   = ext->key_len;
-
   if (set)
     {
       wifi_cfg.ap.max_connection = ESP_MAX_STA_CONN;
       memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
-      memcpy(wifi_cfg.ap.password, pdata, len);
       if (len)
         {
-          wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+          memcpy(wifi_cfg.ap.password, pdata, len);
+          switch (ext->alg)
+            {
+              case IW_ENCODE_ALG_NONE:
+                wifi_cfg.ap.authmode = WIFI_AUTH_OPEN;
+                break;
+
+              case IW_ENCODE_ALG_WEP:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WEP;
+                break;
+
+              case IW_ENCODE_ALG_TKIP:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WPA_PSK;
+                break;
+
+              case IW_ENCODE_ALG_CCMP:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
+                break;
+
+              case IW_ENCODE_ALG_PMK:
+              case IW_ENCODE_ALG_AES_CMAC:
+                wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+                break;
+
+              default:
+                wlerr("ERROR: Failed to transfer wireless authmode: %d",
+                      ext->alg);
+                return -EINVAL;
+            }
         }
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
@@ -6588,7 +6613,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
     {
       memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.ap.ssid, pdata, len);
-
+      wifi_cfg.ap.ssid_len = len;
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
@@ -6808,11 +6833,14 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
             return -EINVAL;
         }
 
-      ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
-      if (ret)
+      if (wifi_cfg.ap.authmode == WIFI_AUTH_OPEN)
         {
-          wlerr("ERROR: Failed to set Wi-Fi config data ret=%d\n", ret);
-          return wifi_errno_trans(ret);
+          ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
+          if (ret)
+            {
+              wlerr("ERROR: Failed to set Wi-Fi config data ret=%d\n", ret);
+              return wifi_errno_trans(ret);
+            }
         }
     }
   else
