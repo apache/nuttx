@@ -202,6 +202,8 @@ struct tcp_conn_s
   uint16_t snd_wnd;       /* Sequence and acknowledgement numbers of last
                            * window update */
 #endif
+  uint32_t snd_wl1;
+  uint32_t snd_wl2;
 #if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t  rcv_bufs;      /* Maximum amount of bytes queued in recv */
 #endif
