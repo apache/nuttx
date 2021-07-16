@@ -962,6 +962,24 @@ FAR struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
 }
 
 /****************************************************************************
+ * Name: esp32_wdt_early_deinit
+ *
+ * Description:
+ *   Disable the WDT(s) that was/were enabled by the bootloader.
+ *
+ ****************************************************************************/
+
+void esp32_wdt_early_deinit(void)
+{
+  uint32_t regval;
+  putreg32(RTC_CNTL_WDT_WKEY_VALUE, RTC_CNTL_WDTWPROTECT_REG);
+  regval  = getreg32(RTC_CNTL_WDTCONFIG0_REG);
+  regval &= ~RTC_CNTL_WDT_EN;
+  putreg32(regval, RTC_CNTL_WDTCONFIG0_REG);
+  putreg32(0, RTC_CNTL_WDTWPROTECT_REG);
+}
+
+/****************************************************************************
  * Name: esp32_wdt_deinit
  *
  * Description:
