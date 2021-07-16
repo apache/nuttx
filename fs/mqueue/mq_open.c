@@ -159,7 +159,7 @@ errout:
 }
 
 static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
-                         int oflags, va_list ap, int *created)
+                         int oflags, mode_t umask, va_list ap, int *created)
 {
   FAR struct inode *inode;
   FAR struct mqueue_inode_s *msgq;
@@ -189,7 +189,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
       attr = va_arg(ap, FAR struct mq_attr *);
     }
 
-  mode &= ~getumask();
+  mode &= ~umask;
 
   /* Skip over any leading '/'.  All message queue paths are relative to
    * CONFIG_FS_MQUEUE_MPATH.
@@ -339,7 +339,7 @@ static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
   int created;
   int ret;
 
-  ret = file_mq_vopen(&mq, mq_name, oflags, ap, &created);
+  ret = file_mq_vopen(&mq, mq_name, oflags, getumask(), ap, &created);
   if (ret < 0)
     {
       return ret;
@@ -430,7 +430,7 @@ int file_mq_open(FAR struct file *mq,
   int ret;
 
   va_start(ap, oflags);
-  ret = file_mq_vopen(mq, mq_name, oflags, ap, NULL);
+  ret = file_mq_vopen(mq, mq_name, oflags, 0, ap, NULL);
   va_end(ap);
 
   return ret;
