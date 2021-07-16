@@ -52,12 +52,6 @@ static pthread_key_t g_cpu_key;
 static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
- * NuttX domain function prototypes
- ****************************************************************************/
-
-void up_irqinitialize(void);
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -95,10 +89,6 @@ static void *sim_idle_trampoline(void *arg)
     {
       return NULL;
     }
-
-  /* Initialize IRQ */
-
-  up_irqinitialize();
 
   /* Let up_cpu_start() continue */
 
