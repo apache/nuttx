@@ -120,6 +120,11 @@ extern volatile void *g_current_regs[1];
 
 #endif
 
+/* The command line  arguments passed to simulator */
+
+extern int g_argc;
+extern char **g_argv;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
