@@ -114,7 +114,7 @@ void up_irqinitialize(void)
 #ifdef CONFIG_SMP
   /* Register the pause handler */
 
-  up_cpu_set_pause_handler(SIGUSR1);
+  up_init_ipi(SIGUSR1);
 #endif
 }
 
