@@ -190,6 +190,77 @@ static bool tcp_trim_head(FAR struct net_driver_s *dev,
   return false;
 }
 
+static void tcp_snd_wnd_init(FAR struct tcp_conn_s *conn,
+                             FAR struct tcp_hdr_s *tcp)
+{
+  /* Just ensure that the next tcp_update_snd_wnd will be accepted. */
+
+  DEBUGASSERT((tcp->flags & TCP_ACK) != 0);
+  conn->snd_wl1 = TCP_SEQ_SUB(tcp_getsequence(tcp->seqno), 1);
+  conn->snd_wl2 = tcp_getsequence(tcp->ackno);
+  conn->snd_wnd = 0;
+  ninfo("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
+}
+
+static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
+                               FAR struct tcp_hdr_s *tcp)
+{
+  uint32_t ackseq = tcp_getsequence(tcp->ackno);
+  uint32_t seq = tcp_getsequence(tcp->seqno);
+  uint16_t unscaled_wnd = ((uint16_t)tcp->wnd[0] << 8) + tcp->wnd[1];
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  uint32_t wnd = (uint32_t)unscaled_wnd << conn->snd_scale;
+#else
+  uint16_t wnd = unscaled_wnd;
+#endif
+  uint32_t wl2 = conn->snd_wl2;
+
+  DEBUGASSERT((tcp->flags & TCP_ACK) != 0);
+
+  if (TCP_SEQ_LT(wl2, ackseq))
+    {
+      uint32_t nacked = TCP_SEQ_SUB(ackseq, wl2);
+
+      ninfo("snd_wnd acked: "
+            "wl2 %" PRIu32 " -> %" PRIu32 " subtracting wnd %" PRIu32
+            " by %" PRIu32 "\n",
+            wl2,
+            ackseq,
+            (uint32_t)conn->snd_wnd,
+            nacked);
+
+      if (nacked > conn->snd_wnd)
+        {
+          conn->snd_wnd = 0;
+        }
+      else
+        {
+          conn->snd_wnd -= nacked;
+        }
+
+      conn->snd_wl2 = ackseq;
+    }
+
+  if (TCP_SEQ_LT(conn->snd_wl1, seq) ||
+      (conn->snd_wl1 == seq && TCP_SEQ_LT(wl2, ackseq)) ||
+      (wl2 == ackseq && conn->snd_wnd < wnd))
+    {
+      ninfo("snd_wnd update: "
+            "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 " -> "
+            "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 "\n",
+            conn->snd_wl1,
+            wl2,
+            (uint32_t)conn->snd_wnd,
+            seq,
+            ackseq,
+            (uint32_t)wnd);
+
+      conn->snd_wl1 = seq;
+      conn->snd_wl2 = ackseq;
+      conn->snd_wnd = wnd;
+    }
+}
+
 /****************************************************************************
  * Name: tcp_input
  *
@@ -447,15 +518,6 @@ reset:
 
 found:
 
-  /* Update the connection's window size */
-
-#ifdef CONFIG_NET_TCP_WINDOW_SCALE
-  conn->snd_wnd = (((uint32_t)tcp->wnd[0] << 8) + (uint32_t)tcp->wnd[1]) <<
-                  conn->snd_scale;
-#else
-  conn->snd_wnd = (((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1]);
-#endif
-
   flags = 0;
 
   /* We do a very naive form of TCP reset processing; we just accept
@@ -680,6 +742,14 @@ found:
       conn->timer = conn->rto;
     }
 
+  /* Update the connection's window size */
+
+  if ((tcp->flags & TCP_ACK) != 0 &&
+      (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD)
+    {
+      tcp_snd_wnd_update(conn, tcp);
+    }
+
   /* Do different things depending on in what state the connection is. */
 
   switch (conn->tcpstateflags & TCP_STATE_MASK)
@@ -736,6 +806,9 @@ found:
             conn->sndseq_max    = 0;
 #endif
             conn->tx_unacked    = 0;
+            tcp_snd_wnd_init(conn, tcp);
+            tcp_snd_wnd_update(conn, tcp);
+
             flags               = TCP_CONNECTED;
             ninfo("TCP state: TCP_ESTABLISHED\n");
 
@@ -834,6 +907,8 @@ found:
             conn->tcpstateflags = TCP_ESTABLISHED;
             memcpy(conn->rcvseq, tcp->seqno, 4);
             conn->rcv_adv = tcp_getsequence(conn->rcvseq);
+            tcp_snd_wnd_init(conn, tcp);
+            tcp_snd_wnd_update(conn, tcp);
 
             net_incr32(conn->rcvseq, 1); /* ack SYN */
             conn->tx_unacked    = 0;
