@@ -45,7 +45,7 @@ endif
 
 # Specify our C code within this directory to be included
 
-CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_idle.c
+CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_wdt.c esp32c3_idle.c
 CHIP_CSRCS += esp32c3_irq.c
 CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c
 CHIP_CSRCS += esp32c3_lowputc.c
@@ -85,11 +85,8 @@ ifeq ($(CONFIG_ESP32C3_PARTITION),y)
 CHIP_CSRCS += esp32c3_partition.c
 endif
 
-ifeq ($(CONFIG_ESP32C3_WDT),y)
-CHIP_CSRCS += esp32c3_wdt.c
 ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += esp32c3_wdt_lowerhalf.c
-endif
 endif
 
 ifeq ($(CONFIG_ESP32C3_TIMER),y)

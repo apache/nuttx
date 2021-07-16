@@ -49,13 +49,13 @@
  * write-enable the wdt registers
  */
 
-#define RTC_CNTL_WDT_WKEY_VALUE 0x50D83AA1
+#define RTC_CNTL_WDT_WKEY_VALUE     0x50d83aa1
 
 /* The value that needs to be written to RTC_CNTL_SWD_WPROTECT_REG
  * to write-enable the wdt registers
  */
 
-#define RTC_CNTL_SWD_WKEY_VALUE 0x8F1D312A
+#define RTC_CNTL_SWD_WKEY_VALUE     0x8f1d312a
 
 /* Possible values for RTC_CNTL_WDT_CPU_RESET_LENGTH
  * and RTC_CNTL_WDT_SYS_RESET_LENGTH
