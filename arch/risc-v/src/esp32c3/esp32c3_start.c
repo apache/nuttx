@@ -34,6 +34,7 @@
 #include "esp32c3_irq.h"
 #include "esp32c3_lowputc.h"
 #include "esp32c3_start.h"
+#include "esp32c3_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,6 +94,10 @@ void __esp32c3_start(void)
     }
 
   showprogress('B');
+
+  /* Disable any wdt enabled by bootloader */
+
+  esp32c3_wdt_early_deinit();
 
   /* Initialize onboard resources */
 
