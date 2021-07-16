@@ -74,6 +74,7 @@
 
 #define SPI_FLASH_BLK_SIZE          256
 #define SPI_FLASH_ERASE_SIZE        4096
+#define SPI_FLASH_ERASED_STATE      (0xff)
 #define SPI_FLASH_SIZE              (4 * 1024 * 1024)
 
 #define ESP32C3_MTD_OFFSET          CONFIG_ESP32C3_MTD_OFFSET
@@ -872,6 +873,15 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                     " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
+        }
+        break;
+
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = SPI_FLASH_ERASED_STATE;
+
+          ret = OK;
         }
         break;
 
