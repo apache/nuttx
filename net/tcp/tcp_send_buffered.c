@@ -707,6 +707,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           TCP_WBSENT(wrb) = 0;
+          TCP_WBNACK(wrb) = 0;
           ninfo("REXMIT: wrb=%p sent=%u, "
                 "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
                 wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
