@@ -1205,6 +1205,15 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = SST25_ERASED_STATE;
+
+          ret = OK;
+        }
+        break;
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
