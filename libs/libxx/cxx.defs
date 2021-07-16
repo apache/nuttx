@@ -23,7 +23,7 @@ CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
 CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_stdthrow.cxx
 
-# Note: Our implmenetations of operator new are not conforming to
+# Note: Our implementations of operator new are not conforming to
 # the standard. (no bad_alloc implementation)
 #
 # libxx_new.cxx:64:11: error: 'operator new' is missing exception specification

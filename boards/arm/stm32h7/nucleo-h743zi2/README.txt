@@ -98,7 +98,7 @@ Configurations
        - Ethernet
        - DHCP Client
        - iperf
-       - telnet deamon
+       - telnet daemon
 
       File Systems:
        - FAT filesystem

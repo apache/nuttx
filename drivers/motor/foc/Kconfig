@@ -20,7 +20,7 @@ config MOTOR_FOC_SHUNTS
        default 3
        ---help---
          Number of shunts supported (or other types of current sensors).
-         Any current recontruction must be done on the lower-half side.
+         Any current reconstruction must be done on the lower-half side.
 
 config MOTOR_FOC_TRACE
        bool "FOC trace support"

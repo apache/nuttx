@@ -44,9 +44,9 @@
  *   the controlling terminal and run in the background as system daemons.
  *
  *   NOTE: daemon() is a non-standard GNU C library interface (based on a
- *   BSD interface of the same way which behaves slightly differently).
+ *   BSD interface of the same name which behaves slightly differently).
  *   The interfaces defined at OpenGroup.org are the interfaces that govern
- *   NuttX.  deamon() is only described in the Linux man pages like:
+ *   NuttX.  daemon() is only described in the Linux man pages like:
  *   http://man7.org/linux/man-pages/man3/daemon.3.html
  *
  * Limitations:
@@ -59,7 +59,7 @@
  *   be translated to NuttX.  The above mentioned web page states:
  *
  *     (This function forks, and if the fork(2) succeeds, the parent calls
- *     _exit(2), so that further errors are seen by the child only.)  On
+ *     _exit(2), so that further errors are seen by the child only.)
  *
  *   So the basic operation of the NuttX daemon() is different.  The GNU C
  *   library daemon() begins will logic like:

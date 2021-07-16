@@ -680,7 +680,7 @@
  ****************************************************************************/
 
 /* STM32 FOC devices.
- * This strucutre gathers all low level drivers required by FOC device.
+ * This structure gathers all low level drivers required by FOC device.
  */
 
 struct stm32_foc_dev_s
