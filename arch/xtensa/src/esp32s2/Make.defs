@@ -22,7 +22,7 @@
 
 HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
 HEAD_ASRC += xtensa_int_handlers.S  xtensa_user_handler.S
-HEAD_CSRC  = esp32s2_start.c
+HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c 
 
 # Common XTENSA files (arch/xtensa/src/common)
 

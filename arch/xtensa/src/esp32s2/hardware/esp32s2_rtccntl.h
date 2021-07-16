@@ -31,6 +31,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The value that needs to be written to RTC_CNTL_WDT_WKEY to
+ * write-enable the wdt registers
+ */
+
+#define RTC_CNTL_WDT_WKEY_VALUE         0x50d83aa1
+
 #define DPORT_CPUPERIOD_SEL_80          0
 #define DPORT_CPUPERIOD_SEL_160         1
 #define DPORT_CPUPERIOD_SEL_240         2
