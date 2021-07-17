@@ -79,6 +79,12 @@ int mkdir(const char *pathname, mode_t mode)
       inode = desc.node;
       DEBUGASSERT(inode != NULL);
 
+      if (desc.relpath[0] == '\0')
+        {
+          errcode = EEXIST;
+          goto errout_with_inode;
+        }
+
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       /* Check if the inode is a valid mountpoint. */
 
