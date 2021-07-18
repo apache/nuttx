@@ -537,12 +537,6 @@ struct task_group_s
 
   FAR struct task_info_s *tg_info;
 
-#if CONFIG_TLS_NELEM > 0
-  tls_ndxset_t tg_tlsset;                   /* Set of TLS indexes allocated */
-
-  tls_dtor_t  tg_tlsdestr[CONFIG_TLS_NELEM];  /* List of TLS destructors    */
-#endif
-
   /* POSIX Signal Control Fields ********************************************/
 
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
