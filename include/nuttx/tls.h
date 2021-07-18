@@ -61,6 +61,27 @@
  * Public Types
  ****************************************************************************/
 
+/* type tls_ndxset_t & tls_dtor_t *******************************************/
+
+/* Smallest addressable type that can hold the entire configured number of
+ * TLS data indexes.
+ */
+
+#if CONFIG_TLS_NELEM > 0
+#  if CONFIG_TLS_NELEM > 32
+#    error Too many TLS elements
+#  elif CONFIG_TLS_NELEM > 16
+     typedef uint32_t tls_ndxset_t;
+#  elif CONFIG_TLS_NELEM > 8
+     typedef uint16_t tls_ndxset_t;
+#  else
+     typedef uint8_t tls_ndxset_t;
+#  endif
+
+typedef CODE void (*tls_dtor_t)(FAR void *);
+
+#endif
+
 struct task_info_s
 {
   sem_t           ta_sem;
