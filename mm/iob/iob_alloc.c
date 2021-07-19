@@ -237,7 +237,8 @@ FAR struct iob_s *iob_tryalloc(bool throttled, enum iob_user_e consumerid)
 #if CONFIG_IOB_THROTTLE > 0
   /* If there are free I/O buffers for this allocation */
 
-  if (sem->semcount > 0)
+  if (sem->semcount > 0 ||
+      (throttled && g_iob_sem.semcount - CONFIG_IOB_THROTTLE > 0))
 #endif
     {
       /* Take the I/O buffer from the head of the free list */
