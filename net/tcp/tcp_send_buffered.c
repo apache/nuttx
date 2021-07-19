@@ -781,6 +781,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
     {
       FAR struct tcp_wrbuffer_s *wrb;
       uint32_t predicted_seqno;
+      uint32_t seq;
+      uint32_t snd_wnd_edge;
       size_t sndlen;
 
       /* Peek at the head of the write queue (but don't remove anything
@@ -790,28 +792,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
       DEBUGASSERT(wrb);
-
-      /* Get the amount of data that we can send in the next packet.
-       * We will send either the remaining data in the buffer I/O
-       * buffer chain, or as much as will fit given the MSS and current
-       * window size.
-       */
-
-      sndlen = TCP_WBPKTLEN(wrb) - TCP_WBSENT(wrb);
-      if (sndlen > conn->mss)
-        {
-          sndlen = conn->mss;
-        }
-
-      if (sndlen > conn->snd_wnd)
-        {
-          sndlen = conn->snd_wnd;
-        }
-
-      ninfo("SEND: wrb=%p pktlen=%u sent=%u sndlen=%zu mss=%u "
-            "snd_wnd=%u\n",
-            wrb, TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb), sndlen, conn->mss,
-            conn->snd_wnd);
 
       /* Set the sequence number for this segment.  If we are
        * retransmitting, then the sequence number will already
@@ -823,88 +803,121 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           TCP_WBSEQNO(wrb) = conn->isn + conn->sent;
         }
 
-      /* The TCP stack updates sndseq on receipt of ACK *before*
-       * this function is called. In that case sndseq will point
-       * to the next unacknowledged byte (which might have already
-       * been sent). We will overwrite the value of sndseq here
-       * before the packet is sent.
+      /* Get the amount of data that we can send in the next packet.
+       * We will send either the remaining data in the buffer I/O
+       * buffer chain, or as much as will fit given the MSS and current
+       * window size.
        */
 
-      tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb));
-
-#ifdef NEED_IPDOMAIN_SUPPORT
-      /* If both IPv4 and IPv6 support are enabled, then we will need to
-       * select which one to use when generating the outgoing packet.
-       * If only one domain is selected, then the setup is already in
-       * place and we need do nothing.
-       */
-
-      send_ipselect(dev, conn);
-#endif
-      /* Then set-up to send that amount of data with the offset
-       * corresponding to the amount of data already sent. (this
-       * won't actually happen until the polling cycle completes).
-       */
-
-      devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, TCP_WBSENT(wrb));
-
-      /* Remember how much data we send out now so that we know
-       * when everything has been acknowledged.  Just increment
-       * the amount of data sent. This will be needed in sequence
-       * number calculations.
-       */
-
-      conn->tx_unacked += sndlen;
-      conn->sent       += sndlen;
-
-      /* Below prediction will become true,
-       * unless retransmission occurrence
-       */
-
-      predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
-
-      if (TCP_SEQ_GT(predicted_seqno, conn->sndseq_max))
+      seq = TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb);
+      snd_wnd_edge = conn->snd_wl2 + conn->snd_wnd;
+      if (TCP_SEQ_LT(seq, snd_wnd_edge))
         {
-           conn->sndseq_max = predicted_seqno;
-        }
+          uint32_t remaining_snd_wnd;
 
-      ninfo("SEND: wrb=%p nrtx=%u tx_unacked=%" PRIu32 " sent=%" PRIu32 "\n",
-            wrb, TCP_WBNRTX(wrb), conn->tx_unacked, conn->sent);
+          sndlen = TCP_WBPKTLEN(wrb) - TCP_WBSENT(wrb);
+          if (sndlen > conn->mss)
+            {
+              sndlen = conn->mss;
+            }
 
-      /* Increment the count of bytes sent from this write buffer */
+          remaining_snd_wnd = TCP_SEQ_SUB(snd_wnd_edge, seq);
+          if (sndlen > remaining_snd_wnd)
+            {
+              sndlen = remaining_snd_wnd;
+            }
 
-      TCP_WBSENT(wrb) += sndlen;
+          ninfo("SEND: wrb=%p seq=%" PRIu32 " pktlen=%u sent=%u sndlen=%zu "
+                "mss=%u snd_wnd=%u seq=%" PRIu32
+                " remaining_snd_wnd=%" PRIu32 "\n",
+                wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb),
+                sndlen, conn->mss,
+                conn->snd_wnd, seq, remaining_snd_wnd);
 
-      ninfo("SEND: wrb=%p sent=%u pktlen=%u\n",
-            wrb, TCP_WBSENT(wrb), TCP_WBPKTLEN(wrb));
-
-      /* Remove the write buffer from the write queue if the
-       * last of the data has been sent from the buffer.
-       */
-
-      DEBUGASSERT(TCP_WBSENT(wrb) <= TCP_WBPKTLEN(wrb));
-      if (TCP_WBSENT(wrb) >= TCP_WBPKTLEN(wrb))
-        {
-          FAR struct tcp_wrbuffer_s *tmp;
-
-          ninfo("SEND: wrb=%p Move to unacked_q\n", wrb);
-
-          tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
-          DEBUGASSERT(tmp == wrb);
-          UNUSED(tmp);
-
-          /* Put the I/O buffer chain in the un-acked queue; the
-           * segment is waiting for ACK again
+          /* The TCP stack updates sndseq on receipt of ACK *before*
+           * this function is called. In that case sndseq will point
+           * to the next unacknowledged byte (which might have already
+           * been sent). We will overwrite the value of sndseq here
+           * before the packet is sent.
            */
 
-          psock_insert_segment(wrb, &conn->unacked_q);
+          tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb) + TCP_WBSENT(wrb));
+
+    #ifdef NEED_IPDOMAIN_SUPPORT
+          /* If both IPv4 and IPv6 support are enabled, then we will need to
+           * select which one to use when generating the outgoing packet.
+           * If only one domain is selected, then the setup is already in
+           * place and we need do nothing.
+           */
+
+          send_ipselect(dev, conn);
+    #endif
+          /* Then set-up to send that amount of data with the offset
+           * corresponding to the amount of data already sent. (this
+           * won't actually happen until the polling cycle completes).
+           */
+
+          devif_iob_send(dev, TCP_WBIOB(wrb), sndlen, TCP_WBSENT(wrb));
+
+          /* Remember how much data we send out now so that we know
+           * when everything has been acknowledged.  Just increment
+           * the amount of data sent. This will be needed in sequence
+           * number calculations.
+           */
+
+          conn->tx_unacked += sndlen;
+          conn->sent       += sndlen;
+
+          /* Below prediction will become true,
+           * unless retransmission occurrence
+           */
+
+          predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
+
+          if (TCP_SEQ_GT(predicted_seqno, conn->sndseq_max))
+            {
+               conn->sndseq_max = predicted_seqno;
+            }
+
+          ninfo("SEND: wrb=%p nrtx=%u tx_unacked=%" PRIu32
+                " sent=%" PRIu32 "\n",
+                wrb, TCP_WBNRTX(wrb), conn->tx_unacked, conn->sent);
+
+          /* Increment the count of bytes sent from this write buffer */
+
+          TCP_WBSENT(wrb) += sndlen;
+
+          ninfo("SEND: wrb=%p sent=%u pktlen=%u\n",
+                wrb, TCP_WBSENT(wrb), TCP_WBPKTLEN(wrb));
+
+          /* Remove the write buffer from the write queue if the
+           * last of the data has been sent from the buffer.
+           */
+
+          DEBUGASSERT(TCP_WBSENT(wrb) <= TCP_WBPKTLEN(wrb));
+          if (TCP_WBSENT(wrb) >= TCP_WBPKTLEN(wrb))
+            {
+              FAR struct tcp_wrbuffer_s *tmp;
+
+              ninfo("SEND: wrb=%p Move to unacked_q\n", wrb);
+
+              tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
+              DEBUGASSERT(tmp == wrb);
+              UNUSED(tmp);
+
+              /* Put the I/O buffer chain in the un-acked queue; the
+               * segment is waiting for ACK again
+               */
+
+              psock_insert_segment(wrb, &conn->unacked_q);
+            }
+
+          /* Only one data can be sent by low level driver at once,
+           * tell the caller stop polling the other connection.
+           */
+
+          flags &= ~TCP_POLL;
         }
-
-      /* Only one data can be sent by low level driver at once,
-       * tell the caller stop polling the other connection.
-       */
-
-      flags &= ~TCP_POLL;
     }
 
   /* Continue waiting */
