@@ -74,7 +74,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int ak09919c_register(int devno, FAR struct ak09919c_config_s *config);
+int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config);
 
 #undef EXTERN
 #ifdef __cplusplus

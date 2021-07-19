@@ -43,6 +43,10 @@
 
 #define AK09919C_RESOLUTION             0.15f        /* uT/LSB. */
 
+/* default ODR */
+
+#define AK09919C_DEFAULT_ODR            20000        /* default 50 ms */
+
 /* Register address. */
 
 #define AK09919C_REG_WIA1               0x00         /* Company ID. */
@@ -107,7 +111,8 @@ struct ak09919c_dev_s
 {
   struct sensor_lowerhalf_s lower;          /* The struct of lower half driver. */
   FAR struct ak09919c_config_s *config;     /* The board config function. */
-  uint64_t timestamp;                       /* Units is microseconds. */
+  uint64_t start_timestamp;                 /* Start timestamp(us). */
+  uint64_t sample_count;                    /* The count of sampling */
   bool activated;                           /* Sensor working state. */
   unsigned int interval;                    /* Sensor acquisition interval. */
   uint8_t workmode;                         /* Sensor work mode. */
@@ -434,7 +439,6 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
   data->x = AK09919C_RESOLUTION * MAKE_S16(buffer[0], buffer[1]);
   data->y = AK09919C_RESOLUTION * MAKE_S16(buffer[2], buffer[3]);
   data->z = AK09919C_RESOLUTION * MAKE_S16(buffer[4], buffer[5]);
-  data->timestamp = priv->timestamp;
 
   return ret;
 }
@@ -749,6 +753,9 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
 
       if (enable)
         {
+          priv->start_timestamp = sensor_get_timestamp();
+          priv->sample_count = 1;
+
           work_queue(HPWORK, &priv->work,
                      ak09919c_worker, priv,
                      priv->interval / USEC_PER_TICK);
@@ -784,12 +791,33 @@ static void ak09919c_worker(FAR void *arg)
 {
   struct sensor_event_mag tmp;
   FAR struct ak09919c_dev_s *priv = arg;
+  int interval;
 
   DEBUGASSERT(priv != NULL);
 
-  priv->timestamp = sensor_get_timestamp();
+  /* Get the timestamp. */
+
+  tmp.timestamp = sensor_get_timestamp();
+
+  /* Update the number of sampling points. */
+
+  priv->sample_count++;
+
+  /* Get fixed interval. */
+
+  interval = priv->start_timestamp +
+             priv->sample_count * priv->interval -
+             tmp.timestamp;
+
+  /* If it is negative, need to start immediately to compensate the time. */
+
+  if (interval < 0)
+    {
+      interval = 0;
+    }
+
   work_queue(HPWORK, &priv->work, ak09919c_worker,
-             priv, priv->interval / USEC_PER_TICK);
+             priv, interval / USEC_PER_TICK);
 
   if (ak09919c_readmag(priv, &tmp) >= 0)
     {
@@ -818,7 +846,7 @@ static void ak09919c_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int ak09919c_register(int devno, FAR struct ak09919c_config_s *config)
+int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
 {
   FAR struct ak09919c_dev_s *priv;
   int ret;
@@ -841,6 +869,7 @@ int ak09919c_register(int devno, FAR struct ak09919c_config_s *config)
   priv->lower.buffer_number = CONFIG_SENSORS_AK09919C_BUFFER_NUMBER;
   priv->lower.ops = &g_ak09919c_ops;
   priv->lower.uncalibrated = true;
+  priv->interval = AK09919C_DEFAULT_ODR;
 
   /* Check Device ID */
 
