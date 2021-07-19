@@ -77,6 +77,21 @@ config SENSORS_AK09919C_BUFFER_NUMBER
 		The number of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
+config SENSORS_SX9373
+	bool "Semtech SX9373 Capacitive Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for SX9373 Capacitive Sensor.
+
+config SENSORS_SX9373_BUFFER_NUMBER
+	int "The nunmber of circular buffer for sensor SX9373"
+	default 1
+	depends on SENSORS_SX9373
+	---help---
+		The number of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
+
 config SENSORS_AS5048B
 	bool "AMS AS5048B Magnetic Rotary Encoder support"
 	default n

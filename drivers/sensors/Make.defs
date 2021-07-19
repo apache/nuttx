@@ -60,6 +60,10 @@ ifeq ($(CONFIG_SENSORS_AK09919C),y)
   CSRCS += ak09919c.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SX9373),y)
+  CSRCS += sx9373.c
+endif
+
 ifeq ($(CONFIG_SENSORS_AS5048B),y)
   CSRCS += as5048b.c
 endif
