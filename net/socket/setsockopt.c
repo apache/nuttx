@@ -196,6 +196,68 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           return OK;
         }
 #endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:     /* Sets send buffer size */
+        {
+          int buffersize;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          buffersize = *(FAR int *)value;
+
+          if (buffersize < 0 || buffersize > INT_MAX)
+            {
+              return -EINVAL;
+            }
+
+          net_lock();
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *conn;
+
+              conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
+              /* Save the send buffer size */
+
+              conn->snd_bufs = buffersize;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *conn;
+
+              conn = (FAR struct udp_conn_s *)psock->s_conn;
+
+              /* Save the send buffer size */
+
+              conn->sndbufs = buffersize;
+            }
+          else
+#endif
+            {
+              net_unlock();
+              return -ENOPROTOOPT;
+            }
+
+          net_unlock();
+
+          return OK;
+        }
+#endif
     }
 
 #ifdef CONFIG_NET_USRSOCK
@@ -337,7 +399,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       /* The following are not yet implemented */
 
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
-      case SO_SNDBUF:     /* Sets send buffer size */
       case SO_SNDLOWAT:   /* Sets the minimum number of bytes to output */
 
       /* There options are only valid when used with getopt */
