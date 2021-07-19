@@ -588,6 +588,12 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 #if CONFIG_NET_RECV_BUFSIZE > 0
       conn->rcvbufs = CONFIG_NET_RECV_BUFSIZE;
 #endif
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+
+      nxsem_init(&conn->sndsem, 0, 0);
+      nxsem_set_protocol(&conn->sndsem, SEM_PRIO_NONE);
+#endif
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
@@ -641,6 +647,13 @@ void udp_free(FAR struct udp_conn_s *conn)
     {
       udp_wrbuffer_release(wrbuffer);
     }
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  /* Notify the send buffer available */
+
+  udp_sendbuffer_notify(conn);
+#endif /* CONFIG_NET_SEND_BUFSIZE */
+
 #endif
 
   /* Free the connection */
