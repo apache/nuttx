@@ -512,7 +512,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
 
           rpmsg_destroy_ept(&new->ept);
           rpmsg_socket_free(new);
-          rpmsg_socket_lock(&server->recvlock);
+          rpmsg_socket_unlock(&server->recvlock);
           return;
         }
     }
