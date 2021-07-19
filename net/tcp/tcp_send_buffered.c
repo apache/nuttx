@@ -555,6 +555,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           uint32_t nacked;
 
+          DEBUGASSERT(TCP_WBSENT(wrb) < TCP_WBPKTLEN(wrb));
+
           /* Number of bytes that were ACKed */
 
           nacked = TCP_SEQ_SUB(ackno, TCP_WBSEQNO(wrb));
@@ -798,6 +800,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
       DEBUGASSERT(wrb);
+      DEBUGASSERT(TCP_WBSENT(wrb) < TCP_WBPKTLEN(wrb));
 
       /* Set the sequence number for this segment.  If we are
        * retransmitting, then the sequence number will already
@@ -1295,6 +1298,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        * conn->write_q
        */
 
+      DEBUGASSERT(TCP_WBSENT(wrb) == 0);
+      DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
       sq_addlast(&wrb->wb_node, &conn->write_q);
       ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
             wrb, TCP_WBPKTLEN(wrb),
