@@ -203,7 +203,7 @@ static void tcp_snd_wnd_init(FAR struct tcp_conn_s *conn,
   ninfo("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
 }
 
-static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
+static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
                                FAR struct tcp_hdr_s *tcp)
 {
   uint32_t ackseq = tcp_getsequence(tcp->ackno);
@@ -215,6 +215,7 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
   uint16_t wnd = unscaled_wnd;
 #endif
   uint32_t wl2 = conn->snd_wl2;
+  bool updated = false;
 
   DEBUGASSERT((tcp->flags & TCP_ACK) != 0);
 
@@ -259,7 +260,10 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
       conn->snd_wl1 = seq;
       conn->snd_wl2 = ackseq;
       conn->snd_wnd = wnd;
+      updated = true;
     }
+
+  return updated;
 }
 
 /****************************************************************************
