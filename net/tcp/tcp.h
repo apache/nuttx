@@ -31,6 +31,7 @@
 #include <queue.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 
@@ -203,6 +204,10 @@ struct tcp_conn_s
 #endif
 #if CONFIG_NET_RECV_BUFSIZE > 0
   int32_t  rcv_bufs;      /* Maximum amount of bytes queued in recv */
+#endif
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  int32_t  snd_bufs;      /* Maximum amount of bytes queued in send */
+  sem_t    snd_sem;       /* Semaphore signals send completion */
 #endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
@@ -1887,6 +1892,24 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout);
 
 int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd,
               FAR void *arg, size_t arglen);
+
+/****************************************************************************
+ * Name: tcp_sendbuffer_notify
+ *
+ * Description:
+ *   Notify the send buffer semaphore
+ *
+ * Input Parameters:
+ *   conn - The TCP connection of interest
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
+#endif /* CONFIG_NET_SEND_BUFSIZE */
 
 #ifdef __cplusplus
 }

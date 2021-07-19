@@ -676,6 +676,12 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 #if CONFIG_NET_RECV_BUFSIZE > 0
       conn->rcv_bufs      = CONFIG_NET_RECV_BUFSIZE;
 #endif
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      conn->snd_bufs      = CONFIG_NET_SEND_BUFSIZE;
+
+      nxsem_init(&conn->snd_sem, 0, 0);
+      nxsem_set_protocol(&conn->snd_sem, SEM_PRIO_NONE);
+#endif
     }
 
   return conn;
@@ -746,6 +752,13 @@ void tcp_free(FAR struct tcp_conn_s *conn)
     {
       tcp_wrbuffer_release(wrbuffer);
     }
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  /* Notify the send buffer available */
+
+  tcp_sendbuffer_notify(conn);
+#endif /* CONFIG_NET_SEND_BUFSIZE */
+
 #endif
 
 #ifdef CONFIG_NET_TCPBACKLOG
