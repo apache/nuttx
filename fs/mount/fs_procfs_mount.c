@@ -246,14 +246,16 @@ static int blocks_entry(FAR const char *mountpoint,
 
   if (!info->header)
     {
-      mount_sprintf(info, "  Block  Number\n");
-      mount_sprintf(info, "  Size   Blocks     Used Available Mounted on\n");
+      mount_sprintf(info,
+                    "  Block    Number\n");
+      mount_sprintf(info,
+                    "  Size     Blocks       Used   Available Mounted on\n");
       info->header = true;
     }
 
   /* Generate blocks list one line at a time */
 
-  mount_sprintf(info, "%6ld %8ld %8ld  %8ld %s\n",
+  mount_sprintf(info, "%6lu %10lu %10lu  %10lu %s\n",
                 statbuf->f_bsize, statbuf->f_blocks,
                 statbuf->f_blocks - statbuf->f_bavail, statbuf->f_bavail,
                 mountpoint);
