@@ -122,7 +122,7 @@ arm_vectorirq:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr	spsr, r0		/* Set the return mode SPSR */
+	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -180,7 +180,7 @@ arm_vectorsvc:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr	spsr, r0		/* Set the return mode SPSR */
+	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
@@ -254,7 +254,7 @@ arm_vectordata:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr	spsr, r0		/* Set the return mode SPSR */
+	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectordata, . - arm_vectordata
 
@@ -324,7 +324,7 @@ arm_vectorprefetch:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr	spsr, r0		/* Set the return mode SPSR */
+	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
@@ -392,7 +392,7 @@ arm_vectorundefinsn:
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
-	msr	spsr, r0		/* Set the return mode SPSR */
+	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 

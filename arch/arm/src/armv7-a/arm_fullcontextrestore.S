@@ -144,7 +144,7 @@ arm_fullcontextrestore:
 	 * disabled.
 	 */
 
-	msr		spsr, r2			/* Set the SPSR */
+	msr		spsr_cxsf, r2			/* Set the SPSR */
 
 	/* Now recover r0-r2, pc and cpsr, destroying the stack frame */
 
