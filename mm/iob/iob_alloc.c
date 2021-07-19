@@ -265,10 +265,12 @@ FAR struct iob_s *iob_tryalloc(bool throttled, enum iob_user_e consumerid)
 #if CONFIG_IOB_THROTTLE > 0
           /* The throttle semaphore is a little more complicated because
            * it can be negative!  Decrementing is still safe, however.
+           *
+           * Note: usually g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE.
+           * But it can be smaller than that if there are blocking threads.
            */
 
           g_throttle_sem.semcount--;
-          DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
 #endif
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS) && \
