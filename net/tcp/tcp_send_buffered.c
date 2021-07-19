@@ -564,9 +564,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               /* More data has been ACKed then we have sent? ASSERT? */
 
-              nwarn("yamt: ackno %" PRIu32 " > wbseqno %" PRIu32
-                    " + wbsent %" PRIu16 "\n",
-                    ackno, TCP_WBSEQNO(wrb), TCP_WBSENT(wrb));
               nacked = TCP_WBSENT(wrb);
             }
 
