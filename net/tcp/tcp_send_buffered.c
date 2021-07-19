@@ -520,14 +520,14 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               /* Reset the duplicate ack counter */
 
-              if ((flags & TCP_NEWDATA) != 0)
+              if ((flags & TCP_PUREACK) == 0)
                 {
                   TCP_WBNACK(wrb) = 0;
                 }
 
               /* Duplicate ACK? Retransmit data if need */
 
-              if (++TCP_WBNACK(wrb) ==
+              else if (++TCP_WBNACK(wrb) ==
                   CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
                 {
                   /* Do fast retransmit */

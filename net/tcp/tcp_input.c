@@ -548,7 +548,7 @@ reset:
 found:
   nwarn("found %x\n", (int)tcp->flags);
 
-  flags = 0;
+  flags = TCP_PUREACK;
 
   /* We do a very naive form of TCP reset processing; we just accept
    * any RST and kill our connection. We should in fact check if the
@@ -637,6 +637,10 @@ found:
    */
 
   dev->d_len -= (len + iplen);
+  if (dev->d_len > 0)
+    {
+      flags &= ~TCP_PUREACK;
+    }
 
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
@@ -796,7 +800,10 @@ found:
   if ((tcp->flags & TCP_ACK) != 0 &&
       (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD)
     {
-      tcp_snd_wnd_update(conn, tcp);
+      if (tcp_snd_wnd_update(conn, tcp))
+        {
+          flags &= ~TCP_PUREACK;
+        }
     }
 
   /* Do different things depending on in what state the connection is. */
