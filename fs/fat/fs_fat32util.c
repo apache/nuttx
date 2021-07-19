@@ -2135,7 +2135,7 @@ int fat_computefreeclusters(struct fat_mountpt_s *fs)
  *
  ****************************************************************************/
 
-int fat_nfreeclusters(struct fat_mountpt_s *fs, off_t *pfreeclusters)
+int fat_nfreeclusters(struct fat_mountpt_s *fs, fsblkcnt_t *pfreeclusters)
 {
   /* If number of the first free cluster is valid, then just return that
    * value.
