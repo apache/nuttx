@@ -128,6 +128,10 @@ static inline int nxspawn_open(FAR struct spawn_open_file_action_s *action)
         {
           serr("ERROR: dup2 failed: %d\n", ret);
         }
+      else
+        {
+          ret = OK;
+        }
 
       sinfo("Closing fd=%d\n", fd);
       nx_close(fd);
