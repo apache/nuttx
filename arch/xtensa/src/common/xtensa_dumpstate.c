@@ -232,7 +232,11 @@ static inline void xtensa_btdump(void)
   int i;
   bool corrupted = false;
 
-  xtensa_backtrace_start(&pc, &sp, &npc);
+  uint32_t *regs = (uint32_t *)CURRENT_REGS;
+
+  pc  = regs[REG_PC];
+  npc = regs[REG_A0]; /* return register */
+  sp  = regs[REG_A1]; /* stack pointer */
 
   _alert("Backtrace0: %x:%x\n", stackpc(pc), sp);
 

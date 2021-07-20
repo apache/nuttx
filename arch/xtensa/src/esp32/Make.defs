@@ -50,10 +50,6 @@ ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
 endif
 
-ifeq ($(CONFIG_XTENSA_DUMPBT_ON_ASSERT),y)
-  CMN_ASRCS += xtensa_backtrace.S
-endif
-
 ifeq ($(CONFIG_SPINLOCK),y)
   CMN_CSRCS += xtensa_testset.c
 endif
