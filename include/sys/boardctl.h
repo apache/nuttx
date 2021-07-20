@@ -209,7 +209,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0012)
+#define BOARDIOC_USER              _BOARDIOC(0x0013)
 
 /****************************************************************************
  * Public Type Definitions
