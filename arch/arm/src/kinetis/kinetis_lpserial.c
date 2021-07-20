@@ -807,7 +807,7 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
     defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
   struct inode           *inode;
   struct uart_dev_s      *dev;
-  uint8_t regval;
+  uint32_t regval;
 #endif
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_KINETIS_SERIALBRK_BSDCOMPAT)
   struct kinetis_dev_s   *priv;
@@ -905,6 +905,8 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
           ((priv->iflow) ? CRTS_IFLOW : 0) |
 #  endif
           CS8;
+
+        cfsetispeed(termiosp, priv->baud);
 
         /* TODO: CCTS_IFLOW, CCTS_OFLOW */
       }
@@ -1042,6 +1044,46 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
       }
       break;
 #endif /* CONFIG_KINETIS_UART_BREAKS */
+
+#ifdef CONFIG_KINETIS_UART_INVERT
+    case TIOCSINVERT:
+      {
+        uint32_t stat;
+        uint32_t ctrl;
+        irqstate_t flags;
+
+        flags = enter_critical_section();
+
+        stat = kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET);
+        ctrl = kinetis_serialin(priv, KINETIS_LPUART_CTRL_OFFSET);
+
+        /* {R|T}XINV bit fields can written any time */
+
+        if (arg & SER_INVERT_ENABLED_RX)
+          {
+            stat |= LPUART_STAT_RXINV;
+          }
+        else
+          {
+            stat &= ~LPUART_STAT_RXINV;
+          }
+
+        if (arg & SER_INVERT_ENABLED_TX)
+          {
+            ctrl |= LPUART_CTRL_TXINV;
+          }
+        else
+          {
+            ctrl &= ~LPUART_CTRL_TXINV;
+          }
+
+        kinetis_serialout(priv, KINETIS_LPUART_STAT_OFFSET, stat);
+        kinetis_serialout(priv, KINETIS_LPUART_CTRL_OFFSET, ctrl);
+
+        leave_critical_section(flags);
+      }
+     break;
+#endif
 
     default:
       ret = -ENOTTY;
