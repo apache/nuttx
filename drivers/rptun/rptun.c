@@ -377,6 +377,31 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
     }
 }
 
+static void rptun_ns_unbind(FAR struct rpmsg_device *rdev,
+                            FAR const char *name, uint32_t dest)
+{
+  FAR struct rptun_priv_s *priv = rptun_get_priv_by_rdev(rdev);
+  FAR struct metal_list *node;
+
+  nxsem_wait(&g_rptun_sem);
+
+  metal_list_for_each(&priv->bind, node)
+    {
+      struct rptun_bind_s *bind;
+
+      bind = metal_container_of(node, struct rptun_bind_s, node);
+
+      if (bind->dest == dest && !strncmp(bind->name, name, RPMSG_NAME_SIZE))
+        {
+          metal_list_del(node);
+          kmm_free(bind);
+          break;
+        }
+    }
+
+  nxsem_post(&g_rptun_sem);
+}
+
 static int rptun_dev_start(FAR struct remoteproc *rproc)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
@@ -493,6 +518,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return ret;
     }
 
+  priv->vdev.rdev.ns_unbind_cb = rptun_ns_unbind;
+
   /* Remote proc start */
 
   ret = remoteproc_start(rproc);
@@ -565,16 +592,6 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
   remoteproc_remove_virtio(rproc, priv->vdev.vdev);
   rpmsg_deinit_vdev(&priv->vdev);
-
-  /* Free bind list */
-
-  metal_list_for_each(&priv->bind, node)
-    {
-      struct rptun_bind_s *bind;
-
-      bind = metal_container_of(node, struct rptun_bind_s, node);
-      kmm_free(bind);
-    }
 
   return 0;
 }
