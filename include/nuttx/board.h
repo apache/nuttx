@@ -311,6 +311,27 @@ int board_uniquekey(FAR uint8_t *uniquekey);
 #endif
 
 /****************************************************************************
+ * Name:  board_switch_boot
+ *
+ * Description:
+ *   BOARDIOC_SWITCH_BOOT is required to communicate the boot partition from
+ *   userspace (OTA subsystem) to board, it can be used to change the system
+ *   boot behavior. It's useful for A/B boot or even in the single boot case.
+ *
+ * Input Parameters:
+ *   system - The boot system updated or specified
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_SWITCH_BOOT
+int board_switch_boot(FAR const char *system);
+#endif
+
+/****************************************************************************
  * Name:  board_timerhook
  *
  * Description:

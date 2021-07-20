@@ -201,6 +201,7 @@
 #define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x0010)
 #define BOARDIOC_TESTSET           _BOARDIOC(0x0011)
 #define BOARDIOC_UNIQUEKEY         _BOARDIOC(0x0012)
+#define BOARDIOC_SWITCH_BOOT       _BOARDIOC(0x0013)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -209,7 +210,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0013)
+#define BOARDIOC_USER              _BOARDIOC(0x0014)
 
 /****************************************************************************
  * Public Type Definitions

@@ -436,6 +436,22 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_SWITCH_BOOT
+      /* CMD:           BOARDIOC_SWITCH_BOOT
+       * DESCRIPTION:   Used to change the system boot behavior. Switch to
+       *                the updated or specified boot system.
+       * ARG:           Boot system updated or specified
+       * DEPENDENCIES:  Board logic must provide the board_switch_boot()
+       *                interface.
+       */
+
+      case BOARDIOC_SWITCH_BOOT:
+        {
+          ret = board_switch_boot((FAR const char *)arg);
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk
