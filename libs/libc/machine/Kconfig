@@ -160,22 +160,22 @@ config LIBM_ARCH_TRUNCF
 # One or more the of above may be selected by architecture specific logic
 
 if ARCH_ARM
-source libs/libc/machine/arm/Kconfig
+source "libs/libc/machine/arm/Kconfig"
 endif
 if ARCH_RISCV
-source libs/libc/machine/risc-v/Kconfig
+source "libs/libc/machine/risc-v/Kconfig"
 endif
 if ARCH_SIM
-source libs/libc/machine/sim/Kconfig
+source "libs/libc/machine/sim/Kconfig"
 endif
 if ARCH_X86
-source libs/libc/machine/x86/Kconfig
+source "libs/libc/machine/x86/Kconfig"
 endif
 if ARCH_XTENSA
-source libs/libc/machine/xtensa/Kconfig
+source "libs/libc/machine/xtensa/Kconfig"
 endif
 if ARCH_RENESAS
-source libs/libc/machine/renesas/Kconfig
+source "libs/libc/machine/renesas/Kconfig"
 endif
 
 endmenu # Architecture-Specific Support

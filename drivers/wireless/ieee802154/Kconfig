@@ -11,7 +11,7 @@ config IEEE802154_MRF24J40
 	---help---
 		This selection enables support for the Microchip MRF24J40 device.
 
-source drivers/wireless/ieee802154/mrf24j40/Kconfig
+source "drivers/wireless/ieee802154/mrf24j40/Kconfig"
 
 config IEEE802154_AT86RF233
 	bool "ATMEL RF233 IEEE 802.15.4 transceiver"
@@ -20,7 +20,7 @@ config IEEE802154_AT86RF233
 	---help---
 		This selection enables support for the Atmel RF233 device.
 
-source drivers/wireless/ieee802154/at86rf23x/Kconfig
+source "drivers/wireless/ieee802154/at86rf23x/Kconfig"
 
 config IEEE802154_XBEE
 	bool "XBee IEEE 802.15.4  Radio (w/ MAC)"
@@ -28,6 +28,6 @@ config IEEE802154_XBEE
 	---help---
 		This selection enables support for the XBee Radio device.
 
-source drivers/wireless/ieee802154/xbee/Kconfig
+source "drivers/wireless/ieee802154/xbee/Kconfig"
 
 endif # DRIVERS_IEEE802154

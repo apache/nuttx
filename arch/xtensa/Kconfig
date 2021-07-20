@@ -172,14 +172,14 @@ config XTENSA_EXTMEM_BSS
 		Adds a section and an attribute that allows to force variables into
 		the external memory.
 
-source arch/xtensa/src/lx6/Kconfig
+source "arch/xtensa/src/lx6/Kconfig"
 if ARCH_CHIP_ESP32
-source arch/xtensa/src/esp32/Kconfig
+source "arch/xtensa/src/esp32/Kconfig"
 endif
 
-source arch/xtensa/src/lx7/Kconfig
+source "arch/xtensa/src/lx7/Kconfig"
 if ARCH_CHIP_ESP32S2
-source arch/xtensa/src/esp32s2/Kconfig
+source "arch/xtensa/src/esp32s2/Kconfig"
 endif
 
 endif # ARCH_XTENSA

@@ -102,23 +102,23 @@ config EVENT_FD_NPOLLWAITERS
 
 endif # EVENT_FD
 
-source fs/aio/Kconfig
-source fs/semaphore/Kconfig
-source fs/mqueue/Kconfig
-source fs/shm/Kconfig
-source fs/mmap/Kconfig
-source fs/partition/Kconfig
-source fs/fat/Kconfig
-source fs/nfs/Kconfig
-source fs/nxffs/Kconfig
-source fs/romfs/Kconfig
-source fs/cromfs/Kconfig
-source fs/tmpfs/Kconfig
-source fs/smartfs/Kconfig
-source fs/binfs/Kconfig
-source fs/procfs/Kconfig
-source fs/spiffs/Kconfig
-source fs/littlefs/Kconfig
-source fs/unionfs/Kconfig
-source fs/userfs/Kconfig
-source fs/hostfs/Kconfig
+source "fs/aio/Kconfig"
+source "fs/semaphore/Kconfig"
+source "fs/mqueue/Kconfig"
+source "fs/shm/Kconfig"
+source "fs/mmap/Kconfig"
+source "fs/partition/Kconfig"
+source "fs/fat/Kconfig"
+source "fs/nfs/Kconfig"
+source "fs/nxffs/Kconfig"
+source "fs/romfs/Kconfig"
+source "fs/cromfs/Kconfig"
+source "fs/tmpfs/Kconfig"
+source "fs/smartfs/Kconfig"
+source "fs/binfs/Kconfig"
+source "fs/procfs/Kconfig"
+source "fs/spiffs/Kconfig"
+source "fs/littlefs/Kconfig"
+source "fs/unionfs/Kconfig"
+source "fs/userfs/Kconfig"
+source "fs/hostfs/Kconfig"

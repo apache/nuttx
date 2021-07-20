@@ -1854,59 +1854,59 @@ source "boards/Kconfig"
 endmenu
 
 menu "RTOS Features"
-source sched/Kconfig
-source syscall/Kconfig
+source "sched/Kconfig"
+source "syscall/Kconfig"
 endmenu
 
 menu "Device Drivers"
-source drivers/Kconfig
+source "drivers/Kconfig"
 endmenu
 
 menu "Networking Support"
-source net/Kconfig
+source "net/Kconfig"
 endmenu
 
 menu "Crypto API"
-source crypto/Kconfig
+source "crypto/Kconfig"
 endmenu
 
 menu "File Systems"
-source fs/Kconfig
+source "fs/Kconfig"
 endmenu
 
 menu "Graphics Support"
-source graphics/Kconfig
-source libs/libnx/Kconfig
+source "graphics/Kconfig"
+source "libs/libnx/Kconfig"
 endmenu
 
 menu "Memory Management"
-source mm/Kconfig
+source "mm/Kconfig"
 endmenu
 
 menu "Audio Support"
-source audio/Kconfig
+source "audio/Kconfig"
 endmenu
 
 menu "Video Support"
-source video/Kconfig
+source "video/Kconfig"
 endmenu
 
 menu "Wireless Support"
-source wireless/Kconfig
+source "wireless/Kconfig"
 endmenu
 
 menu "Binary Loader"
-source binfmt/Kconfig
+source "binfmt/Kconfig"
 endmenu
 
 menu "Library Routines"
-source libs/libc/Kconfig
-source libs/libxx/Kconfig
-source libs/libdsp/Kconfig
+source "libs/libc/Kconfig"
+source "libs/libxx/Kconfig"
+source "libs/libdsp/Kconfig"
 endmenu
 
 menu "Open Asymmetric Multi Processing"
-source openamp/Kconfig
+source "openamp/Kconfig"
 endmenu
 
 menu "Application Configuration"

@@ -4,6 +4,6 @@
 #
 
 if ARCH_RV64GC
-source libs/libc/machine/risc-v/rv64/Kconfig
+source "libs/libc/machine/risc-v/rv64/Kconfig"
 endif
 
