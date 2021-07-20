@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_setvalue.c
+ * sched/task/task_tls_alloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,96 +22,106 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sched.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <nuttx/semaphore.h>
 
-#if CONFIG_TLS_NELEM > 0
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if CONFIG_TLS_TASK_NELEM > 0
+
+static tls_task_ndxset_t g_tlsset;
+static sem_t g_tlssem = SEM_INITIALIZER(1);
+static tls_dtor_t g_tlsdtor[CONFIG_TLS_TASK_NELEM];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tls_set_value
+ * Name: task_tls_allocs
  *
  * Description:
- *   Set the TLS element associated with the 'tlsindex' to 'tlsvalue'
+ *   Allocate a global-unique task local storage data index
  *
  * Input Parameters:
- *   tlsindex - Index of TLS data element to set
- *   tlsvalue - The new value of the TLS data element
+ *   dtor     - The destructor of task local storage data element
  *
  * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
+ *   A TLS index that is unique.
  *
  ****************************************************************************/
 
-int tls_set_value(int tlsindex, uintptr_t tlsvalue)
+int task_tls_alloc(tls_dtor_t dtor)
 {
-  FAR struct tls_info_s *info;
+  int ret;
+  int candidate;
 
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
-  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM)
+  ret = nxsem_wait(&g_tlssem);
+
+  if (ret < 0)
     {
-      /* Get the TLS info structure from the current threads stack */
-
-      info = up_tls_info();
-      DEBUGASSERT(info != NULL);
-
-      /* Set the element value int the TLS info. */
-
-      info->tl_elem[tlsindex] = tlsvalue;
-      return OK;
+      return ret;
     }
 
-  return -EINVAL;
+  ret = -EUSERS;
+
+  for (candidate = 0; candidate < CONFIG_TLS_TASK_NELEM; candidate++)
+    {
+      tls_task_ndxset_t mask = (tls_task_ndxset_t)1 << candidate;
+      if ((g_tlsset & mask) == 0)
+        {
+          g_tlsset |= mask;
+          g_tlsdtor[candidate] = dtor;
+          ret = candidate;
+          break;
+        }
+    }
+
+  nxsem_post(&g_tlssem);
+  return ret;
 }
 
-#endif /* CONFIG_TLS_NELEM > 0 */
-
-#if CONFIG_TLS_TASK_NELEM > 0
-
 /****************************************************************************
- * Name: task_tls_set_value
+ * Name: task_tls_destruct
  *
  * Description:
- *   Set the task local storage element associated with the 'tlsindex' to
- *   'tlsvalue'
+ *   Destruct all TLS data element associated with allocated key
  *
  * Input Parameters:
- *   tlsindex - Index of task local storage data element to set
- *   tlsvalue - The new value of the task local storage data element
+ *    None
  *
  * Returned Value:
- *   Zero is returned on success, a negated errno value is return on
- *   failure:
- *
- *     EINVAL - tlsindex is not in range.
+ *    None
  *
  ****************************************************************************/
 
-int task_tls_set_value(int tlsindex, uintptr_t tlsvalue)
+void task_tls_destruct(void)
 {
+  int candidate;
+  uintptr_t elem;
+  tls_dtor_t dtor;
   FAR struct task_info_s *info = task_get_info();
 
-  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_TASK_NELEM)
+  for (candidate = 0; candidate < CONFIG_TLS_TASK_NELEM; candidate++)
     {
-      info->ta_telem[tlsindex] = tlsvalue;
+      tls_task_ndxset_t mask = (tls_task_ndxset_t)1 << candidate;
+      if ((g_tlsset & mask) != 0)
+        {
+          elem = info->ta_telem[candidate];
+          dtor = g_tlsdtor[candidate];
+          if (dtor != NULL && elem != 0)
+            {
+              dtor((void *)elem);
+            }
+        }
     }
-  else
-    {
-      return -ERANGE;
-    }
-
-  return OK;
 }
 
 #endif
