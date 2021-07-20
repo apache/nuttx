@@ -4,4 +4,4 @@
 #
 
 
-source libs/libc/audio/libsrc/Kconfig
+source "libs/libc/audio/libsrc/Kconfig"

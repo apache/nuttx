@@ -47,7 +47,7 @@ menuconfig 16550_UART
 	default n
 
 if 16550_UART
-source drivers/serial/Kconfig-16550
+source "drivers/serial/Kconfig-16550"
 endif
 
 #
@@ -575,10 +575,10 @@ config UART_RXDMA
 
 endmenu
 
-source drivers/serial/Kconfig-uart
-source drivers/serial/Kconfig-lpuart
-source drivers/serial/Kconfig-usart
-source drivers/serial/Kconfig-sci
+source "drivers/serial/Kconfig-uart"
+source "drivers/serial/Kconfig-lpuart"
+source "drivers/serial/Kconfig-usart"
+source "drivers/serial/Kconfig-sci"
 
 menuconfig PSEUDOTERM
 	bool "Pseudo-Terminal (PTY) support"

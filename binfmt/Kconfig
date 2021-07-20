@@ -43,7 +43,7 @@ config NXFLAT
 		Enable support for the NXFLAT binary format.  Default: n
 
 if NXFLAT
-source binfmt/libnxflat/Kconfig
+source "binfmt/libnxflat/Kconfig"
 endif
 
 config ELF
@@ -55,7 +55,7 @@ config ELF
 		Enable support for the ELF binary format.  Default: n
 
 if ELF
-source binfmt/libelf/Kconfig
+source "binfmt/libelf/Kconfig"
 endif
 endif
 

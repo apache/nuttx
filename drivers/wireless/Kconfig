@@ -65,7 +65,7 @@ config WL_GS2200M_LOGLEVEL
 
 endif
 
-source drivers/wireless/spirit/Kconfig
+source "drivers/wireless/spirit/Kconfig"
 
 menuconfig DRIVERS_IEEE802154
 	bool "IEEE 802.15.4 Device Support"
@@ -73,7 +73,7 @@ menuconfig DRIVERS_IEEE802154
 	---help---
 		Select to enable building of IEEE802.15.4 device drivers.
 
-source drivers/wireless/ieee802154/Kconfig
+source "drivers/wireless/ieee802154/Kconfig"
 
 menuconfig DRIVERS_IEEE80211
 	bool "IEEE 802.11 Device Support"
@@ -81,7 +81,7 @@ menuconfig DRIVERS_IEEE80211
 	---help---
 		Select to enable building of IEEE802.11 device drivers.
 
-source drivers/wireless/ieee80211/Kconfig
+source "drivers/wireless/ieee80211/Kconfig"
 
 menuconfig DRIVERS_BLUETOOTH
 	bool "Bluetooth Device Support"
@@ -89,7 +89,7 @@ menuconfig DRIVERS_BLUETOOTH
 	---help---
 		Select to enable building of Bluetooth device drivers.
 
-source drivers/wireless/bluetooth/Kconfig
+source "drivers/wireless/bluetooth/Kconfig"
 
 menuconfig DRIVERS_LPWAN
 	bool "LPWAN Device Support"
@@ -97,7 +97,7 @@ menuconfig DRIVERS_LPWAN
 	---help---
 		Select to enable building of LPWAN device drivers.
 
-source drivers/wireless/lpwan/Kconfig
+source "drivers/wireless/lpwan/Kconfig"
 
 config WL_NRF24L01
 	bool "nRF24l01+ transceiver support"

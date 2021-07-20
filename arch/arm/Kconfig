@@ -929,142 +929,142 @@ config ARM_SEMIHOSTING_HOSTFS
 		of the limitations of semihosting mechanism.
 
 if ARCH_ARMV6M
-source arch/arm/src/armv6-m/Kconfig
+source "arch/arm/src/armv6-m/Kconfig"
 endif
 if ARCH_ARMV7A
-source arch/arm/src/armv7-a/Kconfig
+source "arch/arm/src/armv7-a/Kconfig"
 endif
 if ARCH_ARMV7M
-source arch/arm/src/armv7-m/Kconfig
+source "arch/arm/src/armv7-m/Kconfig"
 endif
 if ARCH_ARMV7R
-source arch/arm/src/armv7-r/Kconfig
+source "arch/arm/src/armv7-r/Kconfig"
 endif
 if ARCH_ARMV8M
-source arch/arm/src/armv8-m/Kconfig
+source "arch/arm/src/armv8-m/Kconfig"
 endif
 if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
-source arch/arm/src/arm/Kconfig
+source "arch/arm/src/arm/Kconfig"
 endif
 if ARCH_CHIP_A1X
-source arch/arm/src/a1x/Kconfig
+source "arch/arm/src/a1x/Kconfig"
 endif
 if ARCH_CHIP_AM335X
-source arch/arm/src/am335x/Kconfig
+source "arch/arm/src/am335x/Kconfig"
 endif
 if ARCH_CHIP_C5471
-source arch/arm/src/c5471/Kconfig
+source "arch/arm/src/c5471/Kconfig"
 endif
 if ARCH_CHIP_DM320
-source arch/arm/src/dm320/Kconfig
+source "arch/arm/src/dm320/Kconfig"
 endif
 if ARCH_CHIP_EFM32
-source arch/arm/src/efm32/Kconfig
+source "arch/arm/src/efm32/Kconfig"
 endif
 if ARCH_CHIP_EOSS3
-source arch/arm/src/eoss3/Kconfig
+source "arch/arm/src/eoss3/Kconfig"
 endif
 if ARCH_CHIP_IMX1
-source arch/arm/src/imx1/Kconfig
+source "arch/arm/src/imx1/Kconfig"
 endif
 if ARCH_CHIP_IMX6
-source arch/arm/src/imx6/Kconfig
+source "arch/arm/src/imx6/Kconfig"
 endif
 if ARCH_CHIP_IMXRT
-source arch/arm/src/imxrt/Kconfig
+source "arch/arm/src/imxrt/Kconfig"
 endif
 if ARCH_CHIP_KINETIS
-source arch/arm/src/kinetis/Kconfig
+source "arch/arm/src/kinetis/Kconfig"
 endif
 if ARCH_CHIP_KL
-source arch/arm/src/kl/Kconfig
+source "arch/arm/src/kl/Kconfig"
 endif
 if ARCH_CHIP_LC823450
-source arch/arm/src/lc823450/Kconfig
+source "arch/arm/src/lc823450/Kconfig"
 endif
 if ARCH_CHIP_LM || ARCH_CHIP_TIVA || ARCH_CHIP_SIMPLELINK
-source arch/arm/src/tiva/Kconfig
+source "arch/arm/src/tiva/Kconfig"
 endif
 if ARCH_CHIP_LPC17XX_40XX
-source arch/arm/src/lpc17xx_40xx/Kconfig
+source "arch/arm/src/lpc17xx_40xx/Kconfig"
 endif
 if ARCH_CHIP_LPC214X
-source arch/arm/src/lpc214x/Kconfig
+source "arch/arm/src/lpc214x/Kconfig"
 endif
 if ARCH_CHIP_LPC2378
-source arch/arm/src/lpc2378/Kconfig
+source "arch/arm/src/lpc2378/Kconfig"
 endif
 if ARCH_CHIP_LPC31XX
-source arch/arm/src/lpc31xx/Kconfig
+source "arch/arm/src/lpc31xx/Kconfig"
 endif
 if ARCH_CHIP_LPC43XX
-source arch/arm/src/lpc43xx/Kconfig
+source "arch/arm/src/lpc43xx/Kconfig"
 endif
 if ARCH_CHIP_LPC54XX
-source arch/arm/src/lpc54xx/Kconfig
+source "arch/arm/src/lpc54xx/Kconfig"
 endif
 if ARCH_CHIP_S32K1XX
-source arch/arm/src/s32k1xx/Kconfig
+source "arch/arm/src/s32k1xx/Kconfig"
 endif
 if ARCH_CHIP_MAX326XX
-source arch/arm/src/max326xx/Kconfig
+source "arch/arm/src/max326xx/Kconfig"
 endif
 if ARCH_CHIP_MOXART
-source arch/arm/src/moxart/Kconfig
+source "arch/arm/src/moxart/Kconfig"
 endif
 if ARCH_CHIP_NRF52
-source arch/arm/src/nrf52/Kconfig
+source "arch/arm/src/nrf52/Kconfig"
 endif
 if ARCH_CHIP_NUC1XX
-source arch/arm/src/nuc1xx/Kconfig
+source "arch/arm/src/nuc1xx/Kconfig"
 endif
 if ARCH_CHIP_RP2040
-source arch/arm/src/rp2040/Kconfig
+source "arch/arm/src/rp2040/Kconfig"
 endif
 if ARCH_CHIP_SAMA5
-source arch/arm/src/sama5/Kconfig
+source "arch/arm/src/sama5/Kconfig"
 endif
 if ARCH_CHIP_SAMD2X || ARCH_CHIP_SAML2X
-source arch/arm/src/samd2l2/Kconfig
+source "arch/arm/src/samd2l2/Kconfig"
 endif
 if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
-source arch/arm/src/samd5e5/Kconfig
+source "arch/arm/src/samd5e5/Kconfig"
 endif
 if ARCH_CHIP_SAM34
-source arch/arm/src/sam34/Kconfig
+source "arch/arm/src/sam34/Kconfig"
 endif
 if ARCH_CHIP_SAMV7
-source arch/arm/src/samv7/Kconfig
+source "arch/arm/src/samv7/Kconfig"
 endif
 if ARCH_CHIP_STM32
-source arch/arm/src/stm32/Kconfig
+source "arch/arm/src/stm32/Kconfig"
 endif
 if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
-source arch/arm/src/stm32f0l0g0/Kconfig
+source "arch/arm/src/stm32f0l0g0/Kconfig"
 endif
 if ARCH_CHIP_STM32F7
-source arch/arm/src/stm32f7/Kconfig
+source "arch/arm/src/stm32f7/Kconfig"
 endif
 if ARCH_CHIP_STM32H7
-source arch/arm/src/stm32h7/Kconfig
+source "arch/arm/src/stm32h7/Kconfig"
 endif
 if ARCH_CHIP_STM32L4
-source arch/arm/src/stm32l4/Kconfig
+source "arch/arm/src/stm32l4/Kconfig"
 endif
 if ARCH_CHIP_STM32L5
-source arch/arm/src/stm32l5/Kconfig
+source "arch/arm/src/stm32l5/Kconfig"
 endif
 if ARCH_CHIP_STR71X
-source arch/arm/src/str71x/Kconfig
+source "arch/arm/src/str71x/Kconfig"
 endif
 if ARCH_CHIP_TMS570
-source arch/arm/src/tms570/Kconfig
+source "arch/arm/src/tms570/Kconfig"
 endif
 if ARCH_CHIP_XMC4
-source arch/arm/src/xmc4/Kconfig
+source "arch/arm/src/xmc4/Kconfig"
 endif
 if ARCH_CHIP_CXD56XX
-source arch/arm/src/cxd56xx/Kconfig
+source "arch/arm/src/cxd56xx/Kconfig"
 endif
 
 endif # ARCH_ARM

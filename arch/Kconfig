@@ -140,20 +140,20 @@ config ARCH
 	default "z80"     if ARCH_Z80
 	default "or1k"    if ARCH_OR1K
 
-source arch/arm/Kconfig
-source arch/avr/Kconfig
-source arch/hc/Kconfig
-source arch/mips/Kconfig
-source arch/misoc/Kconfig
-source arch/renesas/Kconfig
-source arch/risc-v/Kconfig
-source arch/sim/Kconfig
-source arch/x86/Kconfig
-source arch/x86_64/Kconfig
-source arch/xtensa/Kconfig
-source arch/z16/Kconfig
-source arch/z80/Kconfig
-source arch/or1k/Kconfig
+source "arch/arm/Kconfig"
+source "arch/avr/Kconfig"
+source "arch/hc/Kconfig"
+source "arch/mips/Kconfig"
+source "arch/misoc/Kconfig"
+source "arch/renesas/Kconfig"
+source "arch/risc-v/Kconfig"
+source "arch/sim/Kconfig"
+source "arch/x86/Kconfig"
+source "arch/x86_64/Kconfig"
+source "arch/xtensa/Kconfig"
+source "arch/z16/Kconfig"
+source "arch/z80/Kconfig"
+source "arch/or1k/Kconfig"
 
 config ARCH_CHIP_CUSTOM
 	bool
@@ -191,7 +191,7 @@ config ARCH_CHIP_CUSTOM_DIR_RELPATH
 endmenu # Custom Chip Configuration
 endif #ARCH_CHIP_CUSTOM
 
-source arch/dummy/Kconfig
+source "arch/dummy/Kconfig"
 
 config ARCH_TOOLCHAIN_IAR
 	bool

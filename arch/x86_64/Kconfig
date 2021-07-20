@@ -43,10 +43,10 @@ config ARCH_BOARD_QEMU
 
 endchoice
 
-source arch/x86_64/src/common/Kconfig
+source "arch/x86_64/src/common/Kconfig"
 
 if ARCH_INTEL64
-source arch/x86_64/src/intel64/Kconfig
+source "arch/x86_64/src/intel64/Kconfig"
 
 config ARCH_CHIP
 	string
@@ -55,7 +55,7 @@ config ARCH_CHIP
 endif # ARCH_INTEL64
 
 if ARCH_BOARD_QEMU
-source arch/x86_64/src/qemu/Kconfig
+source "arch/x86_64/src/qemu/Kconfig"
 
 config ARCH_BOARD
 	string

@@ -37,4 +37,4 @@ config WL_SPIRIT_FIFODUMP
 
 endif
 
-source drivers/wireless/spirit/drivers/Kconfig
+source "drivers/wireless/spirit/drivers/Kconfig"

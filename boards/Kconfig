@@ -3261,7 +3261,7 @@ endif
 comment "Board-Common Options"
 
 if ARCH_CHIP_STM32
-source boards/arm/stm32/common/Kconfig
+source "boards/arm/stm32/common/Kconfig"
 endif
 
 config BOARD_CRASHDUMP
