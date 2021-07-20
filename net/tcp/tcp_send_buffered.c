@@ -1163,7 +1163,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             {
               wrb = tcp_wrbuffer_tryalloc();
               ninfo("new wrb %p (non blocking)\n", wrb);
-              DEBUGASSERT(TCP_WBPKTLEN(wrb) == 0);
+              DEBUGASSERT(wrb == NULL || TCP_WBPKTLEN(wrb) == 0);
             }
           else
             {
