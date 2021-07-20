@@ -62,6 +62,8 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   unsigned int avail;
   unsigned int total = len;
 
+  IOB_CHECK(iob);
+
   iobinfo("iob=%p len=%u offset=%u\n", iob, len, offset);
   DEBUGASSERT(iob && src);
 
@@ -200,6 +202,7 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
       offset = 0;
     }
 
+  IOB_CHECK(iob);
   return total;
 }
 

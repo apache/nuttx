@@ -36,6 +36,7 @@ endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
   CSRCS += iob_dump.c
+  CSRCS += iob_check.c
 endif
 
 # Include iob build support

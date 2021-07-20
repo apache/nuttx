@@ -80,6 +80,8 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob,
   int16_t navail;
 #endif
 
+  IOB_CHECK(iob);
+
   iobinfo("iob=%p io_pktlen=%u io_len=%u next=%p\n",
           iob, iob->io_pktlen, iob->io_len, next);
 
@@ -178,5 +180,6 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob,
 
   /* And return the I/O buffer after the one that was freed */
 
+  IOB_CHECK(next);
   return next;
 }
