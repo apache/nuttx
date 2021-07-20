@@ -546,7 +546,6 @@ reset:
   return;
 
 found:
-  nwarn("found %x\n", (int)tcp->flags);
 
   flags = TCP_PUREACK;
 

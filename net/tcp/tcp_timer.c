@@ -103,7 +103,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   uint16_t result;
   uint8_t hdrlen;
 
-  nwarn("timer conn %p start\n", conn);
   /* Set up for the callback.  We can't know in advance if the application
    * is going to send a IPv4 or an IPv6 packet, so this setup may not
    * actually be used.  Furthermore, the TCP logic is required to call
@@ -530,7 +529,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   dev->d_len = 0;
 
 done:
-  nwarn("timer conn %p end\n", conn);
   return;
 }
 
