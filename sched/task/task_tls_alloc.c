@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/tls/tls_getvalue.c
+ * sched/task/task_tls_alloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,72 +22,92 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sched.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <nuttx/semaphore.h>
 
-#if CONFIG_TLS_NELEM > 0
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if CONFIG_TLS_TASK_NELEM > 0
+
+static int g_tlsset = 0;
+static sem_t g_tlssem = SEM_INITIALIZER(1);
+static tls_dtor_t g_tlsdtor[CONFIG_TLS_TASK_NELEM];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: tls_get_value
- *
- * Description:
- *   Return an the TLS data value associated with the 'tlsindx'
- *
- * Input Parameters:
- *   tlsindex - Index of TLS data element to return
- *
- * Returned Value:
- *   The value of TLS element associated with 'tlsindex'. Errors are not
- *   reported.  Zero is returned in the event of an error, but zero may also
- *   be valid value and returned when there is no error.  The only possible
- *   error would be if tlsindex < 0 or tlsindex >=CONFIG_TLS_NELEM.
- *
- ****************************************************************************/
-
-uintptr_t tls_get_value(int tlsindex)
+int task_tls_alloc(tls_dtor_t dtor)
 {
-  FAR struct tls_info_s *info;
-  uintptr_t ret = 0;
+  int ret;
+  int candidate;
 
-  DEBUGASSERT(tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM);
-  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_NELEM)
+  ret = nxsem_wait(&g_tlssem);
+
+  if (ret < 0)
     {
-      /* Get the TLS info structure from the current threads stack */
-
-      info = up_tls_info();
-      DEBUGASSERT(info != NULL);
-
-      /* Get the element value from the TLS info. */
-
-      ret = info->tl_elem[tlsindex];
+      return ret;
     }
 
+  ret = -EAGAIN;
+
+  for (candidate = 0; candidate < CONFIG_TLS_TASK_NELEM; candidate++)
+    {
+      int mask = 1 << candidate;
+      if ((g_tlsset & mask) == 0)
+        {
+          g_tlsset |= mask;
+          g_tlsdtor[candidate] = dtor;
+          ret = candidate;
+          break;
+        }
+    }
+
+  nxsem_post(&g_tlssem);
   return ret;
 }
 
-#endif /* CONFIG_TLS_NELEM > 0 */
+/****************************************************************************
+ * Name: task_tls_destruct
+ *
+ * Description:
+ *   Destruct all TLS data element associated with allocated key
+ *
+ * Input Parameters:
+ *    None
+ *
+ * Returned Value:
+ *   A set of allocated TLS index
+ *
+ ****************************************************************************/
 
-#if CONFIG_TLS_TASK_NELEM > 0
-
-uintptr_t task_tls_get_value(int tlsindex)
+void task_tls_destruct(void)
 {
+  int candidate;
+  uintptr_t elem;
+  tls_dtor_t dtor;
   FAR struct task_info_s *info = task_get_info();
 
-  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_TASK_NELEM)
+  for (candidate = 0; candidate < CONFIG_TLS_TASK_NELEM; candidate++)
     {
-      return info->ta_telem[tlsindex];
+      int mask = 1 << candidate;
+      if (g_tlsset & mask)
+        {
+          elem = info->ta_telem[candidate];
+          dtor = g_tlsdtor[candidate];
+          if (dtor)
+            {
+              dtor((void *)elem);
+            }
+        }
     }
-
-  return 0;
 }
 
 #endif

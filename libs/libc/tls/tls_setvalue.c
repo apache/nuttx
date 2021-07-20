@@ -76,3 +76,23 @@ int tls_set_value(int tlsindex, uintptr_t tlsvalue)
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */
+
+#if CONFIG_TLS_TASK_NELEM > 0
+
+int task_tls_set_value(int tlsindex, uintptr_t tlsvalue)
+{
+  FAR struct task_info_s *info = task_get_info();
+
+  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_TASK_NELEM)
+    {
+      info->ta_telem[tlsindex] = tlsvalue;
+    }
+  else
+    {
+      return -ERANGE;
+    }
+
+  return OK;
+}
+
+#endif

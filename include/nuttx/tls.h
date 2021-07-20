@@ -102,6 +102,9 @@ struct task_info_s
 {
   sem_t           ta_sem;
   FAR char      **argv;                         /* Name+start-up parameters     */
+#if CONFIG_TLS_TASK_NELEM > 0
+  uintptr_t       ta_telem[CONFIG_TLS_TASK_NELEM]; /* Task local storage elements */
+#endif
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t    ta_tlsset;                    /* Set of TLS indexes allocated */
   tls_dtor_t      ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
@@ -265,6 +268,13 @@ uintptr_t tls_get_value(int tlsindex);
 
 #if CONFIG_TLS_NELEM > 0
 int tls_set_value(int tlsindex, uintptr_t tlsvalue);
+#endif
+
+#if CONFIG_TLS_TASK_NELEM > 0
+int task_tls_alloc(tls_dtor_t dtor);
+void task_tls_destruct(void);
+int task_tls_set_value(int tlsindex, uintptr_t tlsvalue);
+uintptr_t task_tls_get_value(int tlsindex);
 #endif
 
 /****************************************************************************
