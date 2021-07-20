@@ -55,7 +55,7 @@
 FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen,
                                enum iob_user_e producerid)
 {
-  uint16_t pktlen;
+  unsigned int pktlen;
 
   iobinfo("iob=%p trimlen=%d\n", iob, trimlen);
 
