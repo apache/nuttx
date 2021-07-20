@@ -47,10 +47,14 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 
-#include "kinetis.h"
+#include "kinetis_config.h"
+#include "chip.h"
 #include "hardware/kinetis_lpuart.h"
 #include "hardware/kinetis_pinmux.h"
-
+#include "hardware/kinetis_dmamux.h"
+#include "kinetis.h"
+#include "kinetis_lpuart.h"
+#include "kinetis_edma.h"
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -69,6 +73,10 @@
 
 #if defined(HAVE_LPUART_DEVICE) && defined(USE_SERIALDRIVER)
 
+/* Assume DMA is not used on the console UART */
+
+#undef SERIAL_HAVE_CONSOLE_DMA
+
 /* Which LPUART with be tty0/console and which tty1?  The console will always
  * be ttyS0.  If there is no console then will use the lowest numbered
  * LPUART.
@@ -80,22 +88,37 @@
 #    define CONSOLE_DEV         g_lpuart0port /* LPUART0 is console */
 #    define TTYS0_DEV           g_lpuart0port /* LPUART0 is ttyS0 */
 #    define LPUART0_ASSIGNED    1
+#  if defined(CONFIG_KINETIS_LPUART0_RXDMA)
+#    define SERIAL_HAVE_CONSOLE_DMA 1
+#  endif
 #elif defined(CONFIG_LPUART1_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_lpuart1port /* LPUART1 is console */
 #    define TTYS0_DEV           g_lpuart1port /* LPUART1 is ttyS0 */
 #    define LPUART1_ASSIGNED    1
+#  if defined(CONFIG_KINETIS_LPUART1_RXDMA)
+#    define SERIAL_HAVE_CONSOLE_DMA 1
+#  endif
 #elif defined(CONFIG_LPUART2_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_lpuart2port /* LPUART2 is console */
 #    define TTYS0_DEV           g_lpuart2port /* LPUART2 is ttyS0 */
 #    define LPUART2_ASSIGNED    1
+#  if defined(CONFIG_KINETIS_LPUART2_RXDMA)
+#    define SERIAL_HAVE_CONSOLE_DMA 1
+#  endif
 #elif defined(CONFIG_LPUART3_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_lpuart3port /* LPUART3 is console */
 #    define TTYS0_DEV           g_lpuart3port /* LPUART3 is ttyS0 */
 #    define LPUART3_ASSIGNED    1
+#  if defined(CONFIG_KINETIS_LPUART3_RXDMA)
+#    define SERIAL_HAVE_CONSOLE_DMA 1
+#  endif
 #elif defined(CONFIG_LPUART4_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_lpuart4port /* LPUART4 is console */
 #    define TTYS0_DEV           g_lpuart4port /* LPUART4 is ttyS0 */
 #    define LPUART4_ASSIGNED    1
+#  if defined(CONFIG_KINETIS_LPUART4_RXDMA)
+#    define SERIAL_HAVE_CONSOLE_DMA 1
+#  endif
 #else
 #  undef CONSOLE_DEV                          /* No console */
 #  if defined(CONFIG_KINETIS_LPUART0)
@@ -182,6 +205,37 @@
 #  define LPUART4_ASSIGNED      1
 #endif
 
+#ifdef LPSERIAL_HAVE_DMA
+
+/* The DMA buffer size when using RX DMA to emulate a FIFO.
+ *
+ * When streaming data, the generic serial layer will be called every time
+ * the FIFO receives half this number of bytes.
+ *
+ * This buffer size should be an even multiple of the Cortex-M7 D-Cache line
+ * size, ARMV7M_DCACHE_LINESIZE, so that it can be individually invalidated.
+ *
+ * Should there be a Cortex-M7 without a D-Cache, ARMV7M_DCACHE_LINESIZE
+ * would be zero!
+ */
+
+#  if !defined(ARMV7M_DCACHE_LINESIZE) || ARMV7M_DCACHE_LINESIZE == 0
+#    undef ARMV7M_DCACHE_LINESIZE
+#    define ARMV7M_DCACHE_LINESIZE 32
+#  endif
+
+#  if !defined(CONFIG_KINETIS_LPUART_RXDMA_BUFFER_SIZE) || \
+      (CONFIG_KINETIS_LPUART_RXDMA_BUFFER_SIZE < ARMV7M_DCACHE_LINESIZE)
+#    undef CONFIG_KINETIS_LPUART_RXDMA_BUFFER_SIZE
+#    define CONFIG_KINETIS_LPUART_RXDMA_BUFFER_SIZE ARMV7M_DCACHE_LINESIZE
+#  endif
+
+#  define RXDMA_BUFFER_MASK   ((uint32_t)(ARMV7M_DCACHE_LINESIZE - 1))
+#  define RXDMA_BUFFER_SIZE   ((CONFIG_KINETIS_LPUART_RXDMA_BUFFER_SIZE \
+                                + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
+
+#endif /* LPSERIAL_HAVE_DMA */
+
 #define LPUART_CTRL_ERROR_INTS  (LPUART_CTRL_ORIE | LPUART_CTRL_FEIE | \
                                  LPUART_CTRL_NEIE | LPUART_CTRL_PEIE)
 
@@ -230,6 +284,12 @@ struct kinetis_dev_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   uint32_t  cts_gpio;  /* UART CTS GPIO pin configuration */
 #endif
+#ifdef LPSERIAL_HAVE_DMA
+  const uint8_t rxdma_reqsrc;
+  DMACH_HANDLE      rxdma;     /* currently-open receive DMA stream */
+  uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
+  char      *const  rxfifo;    /* Receive DMA buffer */
+#endif
 };
 
 /****************************************************************************
@@ -242,9 +302,11 @@ static int  kinetis_attach(struct uart_dev_s *dev);
 static void kinetis_detach(struct uart_dev_s *dev);
 static int  kinetis_interrupt(int irq, void *context, void *arg);
 static int  kinetis_ioctl(struct file *filep, int cmd, unsigned long arg);
-static int  kinetis_receive(struct uart_dev_s *dev, unsigned int *status);
 static void kinetis_rxint(struct uart_dev_s *dev, bool enable);
+#if !defined(LPSERIAL_HAVE_ALL_DMA)
+static int  kinetis_receive(struct uart_dev_s *dev, unsigned int *status);
 static bool kinetis_rxavailable(struct uart_dev_s *dev);
+#endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool kinetis_rxflowcontrol(struct uart_dev_s *dev,
                                   unsigned int nbuffered, bool upper);
@@ -253,10 +315,22 @@ static void kinetis_send(struct uart_dev_s *dev, int ch);
 static void kinetis_txint(struct uart_dev_s *dev, bool enable);
 static bool kinetis_txready(struct uart_dev_s *dev);
 
+#ifdef LPSERIAL_HAVE_DMA
+static int  kinetis_dma_nextrx(struct kinetis_dev_s *priv);
+static int  kinetis_dma_setup(struct uart_dev_s *dev);
+static void kinetis_dma_shutdown(struct uart_dev_s *dev);
+static int  kinetis_dma_receive(struct uart_dev_s *dev,
+                                unsigned int *status);
+static bool kinetis_dma_rxavailable(struct uart_dev_s *dev);
+static uint32_t get_and_clear_uart_status(struct kinetis_dev_s *priv);
+static void kinetis_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
+                                  int result);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
+#if !defined(LPSERIAL_HAVE_ALL_DMA)
 static const struct uart_ops_s g_lpuart_ops =
 {
   .setup          = kinetis_setup,
@@ -275,28 +349,70 @@ static const struct uart_ops_s g_lpuart_ops =
   .txready        = kinetis_txready,
   .txempty        = kinetis_txready,
 };
+#endif
+
+#ifdef LPSERIAL_HAVE_DMA
+static const struct uart_ops_s g_lpuart_dma_ops =
+{
+  .setup          = kinetis_dma_setup,
+  .shutdown       = kinetis_dma_shutdown,
+  .attach         = kinetis_attach,
+  .detach         = kinetis_detach,
+  .ioctl          = kinetis_ioctl,
+  .receive        = kinetis_dma_receive,
+  .rxint          = kinetis_rxint,
+  .rxavailable    = kinetis_dma_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = kinetis_rxflowcontrol,
+#endif
+  .send           = kinetis_send,
+  .txint          = kinetis_txint,
+  .txready        = kinetis_txready,
+  .txempty        = kinetis_txready,
+};
+#endif
 
 /* I/O buffers */
 
 #ifdef CONFIG_KINETIS_LPUART0
 static char g_lpuart0rxbuffer[CONFIG_LPUART0_RXBUFSIZE];
 static char g_lpuart0txbuffer[CONFIG_LPUART0_TXBUFSIZE];
+#  ifdef CONFIG_KINETIS_LPUART0_RXDMA
+static char g_lpuart0rxfifo[RXDMA_BUFFER_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+#  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART1
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
+#  ifdef CONFIG_KINETIS_LPUART1_RXDMA
+static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+#  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART2
 static char g_lpuart2rxbuffer[CONFIG_LPUART2_RXBUFSIZE];
 static char g_lpuart2txbuffer[CONFIG_LPUART2_TXBUFSIZE];
+#  ifdef CONFIG_KINETIS_LPUART2_RXDMA
+static char g_lpuart2rxfifo[RXDMA_BUFFER_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+#  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART3
 static char g_lpuart3rxbuffer[CONFIG_LPUART3_RXBUFSIZE];
 static char g_lpuart3txbuffer[CONFIG_LPUART3_TXBUFSIZE];
+#  ifdef CONFIG_KINETIS_LPUART3_RXDMA
+static char g_lpuart3rxfifo[RXDMA_BUFFER_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+#  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART4
 static char g_lpuart4rxbuffer[CONFIG_LPUART4_RXBUFSIZE];
 static char g_lpuart4txbuffer[CONFIG_LPUART4_TXBUFSIZE];
+#  ifdef CONFIG_KINETIS_LPUART4_RXDMA
+static char g_lpuart4rxfifo[RXDMA_BUFFER_SIZE]
+  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+#  endif
 #endif
 
 /* This describes the state of the Kinetis LPUART0 port. */
@@ -319,6 +435,10 @@ static struct kinetis_dev_s g_lpuart0priv =
   .iflow         = true,
   .rts_gpio      = PIN_LPUART0_RTS,
 #endif
+#ifdef CONFIG_KINETIS_LPUART0_RXDMA
+  .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_LPUART0_RX,
+  .rxfifo         = g_lpuart0rxfifo,
+#endif
 };
 
 static uart_dev_t g_lpuart0port =
@@ -333,7 +453,11 @@ static uart_dev_t g_lpuart0port =
     .size   = CONFIG_LPUART0_TXBUFSIZE,
     .buffer = g_lpuart0txbuffer,
   },
-  .ops      = &g_lpuart_ops,
+#ifdef CONFIG_KINETIS_LPUART0_RXDMA
+  .ops        = &g_lpuart_dma_ops,
+#else
+  .ops        = &g_lpuart_ops,
+#endif
   .priv     = &g_lpuart0priv,
 };
 #endif
@@ -358,6 +482,10 @@ static struct kinetis_dev_s g_lpuart1priv =
   .iflow         = true,
   .rts_gpio      = PIN_LPUART1_RTS,
 #endif
+#ifdef CONFIG_KINETIS_LPUART1_RXDMA
+  .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_LPUART1_RX,
+  .rxfifo         = g_lpuart1rxfifo,
+#endif
 };
 
 static uart_dev_t g_lpuart1port =
@@ -372,7 +500,11 @@ static uart_dev_t g_lpuart1port =
     .size   = CONFIG_LPUART1_TXBUFSIZE,
     .buffer = g_lpuart1txbuffer,
   },
-  .ops      = &g_lpuart_ops,
+#ifdef CONFIG_KINETIS_LPUART1_RXDMA
+  .ops        = &g_lpuart_dma_ops,
+#else
+  .ops        = &g_lpuart_ops,
+#endif
   .priv     = &g_lpuart1priv,
 };
 #endif
@@ -397,6 +529,10 @@ static struct kinetis_dev_s g_lpuart2priv =
   .iflow         = true,
   .rts_gpio      = PIN_LPUART2_RTS,
 #endif
+#ifdef CONFIG_KINETIS_LPUART2_RXDMA
+  .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_LPUART2_RX,
+  .rxfifo         = g_lpuart2rxfifo,
+#endif
 };
 
 static uart_dev_t g_lpuart2port =
@@ -411,7 +547,11 @@ static uart_dev_t g_lpuart2port =
     .size   = CONFIG_LPUART2_TXBUFSIZE,
     .buffer = g_lpuart2txbuffer,
   },
-  .ops      = &g_lpuart_ops,
+#ifdef CONFIG_KINETIS_LPUART2_RXDMA
+  .ops        = &g_lpuart_dma_ops,
+#else
+  .ops        = &g_lpuart_ops,
+#endif
   .priv     = &g_lpuart2priv,
 };
 #endif
@@ -436,6 +576,10 @@ static struct kinetis_dev_s g_lpuart3priv =
   .iflow         = true,
   .rts_gpio      = PIN_LPUART3_RTS,
 #endif
+#ifdef CONFIG_KINETIS_LPUART3_RXDMA
+  .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_LPUART3_RX,
+  .rxfifo         = g_lpuart3rxfifo,
+#endif
 };
 
 static uart_dev_t g_lpuart3port =
@@ -450,7 +594,11 @@ static uart_dev_t g_lpuart3port =
     .size   = CONFIG_LPUART3_TXBUFSIZE,
     .buffer = g_lpuart3txbuffer,
   },
-  .ops      = &g_lpuart_ops,
+#ifdef CONFIG_KINETIS_LPUART3_RXDMA
+  .ops        = &g_lpuart_dma_ops,
+#else
+  .ops        = &g_lpuart_ops,
+#endif
   .priv     = &g_lpuart3priv,
 };
 #endif
@@ -475,6 +623,10 @@ static struct kinetis_dev_s g_lpuart4priv =
   .iflow         = true,
   .rts_gpio      = PIN_LPUART4_RTS,
 #endif
+#ifdef CONFIG_KINETIS_LPUART4_RXDMA
+  .rxdma_reqsrc   = KINETIS_DMA_REQUEST_SRC_LPUART4_RX,
+  .rxfifo         = g_lpuart4rxfifo,
+#endif
 };
 
 static uart_dev_t g_lpuart4port =
@@ -489,7 +641,11 @@ static uart_dev_t g_lpuart4port =
     .size   = CONFIG_LPUART4_TXBUFSIZE,
     .buffer = g_lpuart4txbuffer,
   },
-  .ops      = &g_lpuart_ops,
+#ifdef CONFIG_KINETIS_LPUART4_RXDMA
+  .ops        = &g_lpuart_dma_ops,
+#else
+  .ops        = &g_lpuart_ops,
+#endif
   .priv     = &g_lpuart4priv,
 };
 #endif
@@ -578,6 +734,38 @@ static void kinetis_disableuartint(struct kinetis_dev_s *priv, uint32_t *ie)
 #endif
 
 /****************************************************************************
+ * Name: get_and_clear_uart_status
+ *
+ * Description:
+ *   Clears the error flags of the uart if an error occurred in s1 and
+ *   returns the status
+ *
+ * Input Parameters:
+ *   u_dev_s
+ *
+ * Returns Value:
+ *   Uart status s1
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+static uint32_t get_and_clear_uart_status(struct kinetis_dev_s *priv)
+{
+  uint32_t regval;
+
+  regval = kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET);
+  regval &= LPUART_STAT_ERRORS;
+
+  if (regval != 0)
+    {
+      kinetis_serialout(priv, KINETIS_LPUART_STAT_OFFSET, regval);
+    }
+
+  return regval;
+}
+#endif
+
+/****************************************************************************
  * Name: kinetis_setup
  *
  * Description:
@@ -615,6 +803,83 @@ static int kinetis_setup(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: kinetis_dma_setup
+ *
+ * Description:
+ *   Configure the UART baud, bits, parity, etc. This method is called the
+ *   first time that the serial port is opened.
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+static int kinetis_dma_setup(struct uart_dev_s *dev)
+{
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
+  int result;
+  uint32_t regval;
+  DMACH_HANDLE rxdma = NULL;
+
+  /* Do the basic UART setup first, unless we are the console */
+
+  if (!dev->isconsole)
+    {
+      result = kinetis_setup(dev);
+      if (result != OK)
+        {
+          return result;
+        }
+    }
+
+  /* Acquire the DMA channel. */
+
+  rxdma = kinetis_dmach_alloc(priv->rxdma_reqsrc | DMAMUX_CHCFG_ENBL, 0);
+  if (rxdma == NULL)
+    {
+      return -EBUSY;
+    }
+
+  /* Configure for circular DMA reception into the RX FIFO */
+
+  struct kinetis_edma_xfrconfig_s config;
+  config.saddr  = priv->uartbase + KINETIS_LPUART_DATA_OFFSET;
+  config.daddr  = (uint32_t) priv->rxfifo;
+  config.soff   = 0;
+  config.doff   = 1;
+  config.iter   = RXDMA_BUFFER_SIZE;
+  config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE | EDMA_CONFIG_LOOPDEST;
+  config.ssize  = EDMA_8BIT;
+  config.dsize  = EDMA_8BIT;
+  config.ttype  = EDMA_PERIPH2MEM;
+  config.nbytes = 1;
+#ifdef CONFIG_KINETIS_EDMA_ELINK
+  config.linkch = NULL;
+#endif
+  kinetis_dmach_xfrsetup(rxdma, &config);
+
+  /* Reset our DMA shadow pointer to match the address just programmed
+   * above.
+   */
+
+  priv->rxdmanext = 0;
+
+  /* Enable receive DMA for the UART */
+
+  regval  = kinetis_serialin(priv, KINETIS_LPUART_BAUD_OFFSET);
+  regval |= LPUART_BAUD_RDMAE;
+  kinetis_serialout(priv, KINETIS_LPUART_BAUD_OFFSET, regval);
+
+  /* Start the DMA channel, and arrange for callbacks at the half and
+   * full points in the FIFO.  This ensures that we have half a FIFO
+   * worth of time to claim bytes before they are overwritten.
+   */
+
+  kinetis_dmach_start(rxdma, kinetis_dma_rxcallback, (void *)dev);
+  priv->rxdma = rxdma;
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: kinetis_shutdown
  *
  * Description:
@@ -635,6 +900,37 @@ static void kinetis_shutdown(struct uart_dev_s *dev)
 
   kinetis_lpuartreset(priv->uartbase);
 }
+
+/****************************************************************************
+ * Name: kinetis_dma_shutdown
+ *
+ * Description:
+ *   Disable the UART.  This method is called when the serial
+ *   port is closed
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+static void kinetis_dma_shutdown(struct uart_dev_s *dev)
+{
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
+  DMACH_HANDLE rxdma = priv->rxdma;
+
+  /* Perform the normal UART shutdown */
+
+  kinetis_shutdown(dev);
+
+  /* Stop the DMA channel */
+
+  kinetis_dmach_stop(rxdma);
+
+  /* Release the DMA channel */
+
+  kinetis_dmach_free(rxdma);
+
+  priv->rxdma = NULL;
+}
+#endif
 
 /****************************************************************************
  * Name: kinetis_attach
@@ -1102,7 +1398,7 @@ static int kinetis_ioctl(struct file *filep, int cmd, unsigned long arg)
  *   return 'status'.
  *
  ****************************************************************************/
-
+#if !defined(LPSERIAL_HAVE_ALL_DMA)
 static int kinetis_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
@@ -1143,6 +1439,66 @@ static int kinetis_receive(struct uart_dev_s *dev, unsigned int *status)
 
   return data;
 }
+#endif
+
+/****************************************************************************
+ * Name: kinetis_dma_receive
+ *
+ * Description:
+ *   Called (usually) from the interrupt level to receive one
+ *   character from the UART.  Error bits associated with the
+ *   receipt are provided in the return 'status'.
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+static int kinetis_dma_receive(struct uart_dev_s *dev, unsigned int *status)
+{
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
+  int c = 0;
+  uint32_t stat;
+
+  /* Clear uart errors and return status information */
+
+  stat = get_and_clear_uart_status(priv);
+  if (status)
+    {
+      *status = stat;
+    }
+
+  if (kinetis_dma_nextrx(priv) != priv->rxdmanext)
+    {
+      /* Invalidate the DMA buffer */
+
+      up_invalidate_dcache((uintptr_t)priv->rxfifo,
+                           (uintptr_t)priv->rxfifo + RXDMA_BUFFER_SIZE);
+
+      /* Now read from the DMA buffer */
+
+      c = priv->rxfifo[priv->rxdmanext];
+      priv->rxdmanext++;
+      if (priv->rxdmanext == RXDMA_BUFFER_SIZE)
+        {
+          /* HACK: Skip the first byte since it is duplicate of last one. */
+
+          if (kinetis_dma_nextrx(priv) != 0)
+            {
+              priv->rxdmanext = 1;
+            }
+          else
+            {
+              /* Try to catch race conditions that will spin on the whole
+               * buffer again.
+               */
+
+              priv->rxdmanext = 0;
+            }
+        }
+    }
+
+  return c;
+}
+#endif
 
 /****************************************************************************
  * Name: kinetis_rxint
@@ -1179,13 +1535,34 @@ static void kinetis_rxint(struct uart_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: kinetis_rxavailable
+ * Name: kinetis_dma_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
  *
  ****************************************************************************/
 
+#ifdef LPSERIAL_HAVE_DMA
+static bool kinetis_dma_rxavailable(struct uart_dev_s *dev)
+{
+  struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
+
+  /* Compare our receive pointer to the current DMA pointer, if they
+   * do not match, then there are bytes to be received.
+   */
+
+  return (kinetis_dma_nextrx(priv) != priv->rxdmanext);
+}
+#endif
+
+/****************************************************************************
+ * Name: kinetis_rxavailable
+ *
+ * Description:
+ *   Return true if the receive register is not empty
+ *
+ ****************************************************************************/
+#if !defined(LPSERIAL_HAVE_ALL_DMA)
 static bool kinetis_rxavailable(struct uart_dev_s *dev)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev->priv;
@@ -1195,6 +1572,7 @@ static bool kinetis_rxavailable(struct uart_dev_s *dev)
   return (kinetis_serialin(priv, KINETIS_LPUART_STAT_OFFSET) &
           LPUART_STAT_RDRF) != 0;
 }
+#endif
 
 /****************************************************************************
  * Name: kinetis_rxflowcontrol
@@ -1266,6 +1644,26 @@ static bool kinetis_rxflowcontrol(struct uart_dev_s *dev,
 #endif
 
   return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: kinetis_dma_nextrx
+ *
+ * Description:
+ *   Returns the index into the RX FIFO where the DMA will place the next
+ *   byte that it receives.
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+static int kinetis_dma_nextrx(struct kinetis_dev_s *priv)
+{
+  size_t dmaresidual;
+
+  dmaresidual = kinetis_dmach_getcount(priv->rxdma);
+
+  return (RXDMA_BUFFER_SIZE - (int)dmaresidual) % RXDMA_BUFFER_SIZE;
 }
 #endif
 
@@ -1342,6 +1740,28 @@ static bool kinetis_txready(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: kinetis_dma_rxcallback
+ *
+ * Description:
+ *   This function checks the current DMA state and calls the generic
+ *   serial stack when bytes appear to be available.
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+static void kinetis_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
+                              int result)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+
+  if (kinetis_dma_rxavailable(dev))
+    {
+      uart_recvchars(dev);
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1410,6 +1830,11 @@ unsigned int kinetis_lpuart_serialinit(unsigned int first)
 
 #ifdef HAVE_LPUART_CONSOLE
   uart_register("/dev/console", &CONSOLE_DEV);
+#  ifdef SERIAL_HAVE_CONSOLE_DMA
+  /* If we need to re-initialise the console to enable DMA do that here. */
+
+  kinetis_dma_setup(&CONSOLE_DEV);
+#  endif
 #endif
 #if !defined(CONFIG_KINETIS_MERGE_TTY)
   /* Register all LPUARTs as LPn devices */
@@ -1452,6 +1877,68 @@ unsigned int kinetis_lpuart_serialinit(unsigned int first)
 
   return first;
 }
+
+/****************************************************************************
+ * Name: kinetis_serial_dma_poll
+ *
+ * Description:
+ *   Checks receive DMA buffers for received bytes that have not accumulated
+ *   to the point where the DMA half/full interrupt has triggered.
+ *
+ *   This function should be called from a timer or other periodic context.
+ *
+ ****************************************************************************/
+
+#ifdef LPSERIAL_HAVE_DMA
+void kinetis_lpserial_dma_poll(void)
+{
+    irqstate_t flags;
+
+    flags = enter_critical_section();
+
+#ifdef CONFIG_KINETIS_LPUART0_RXDMA
+  if (g_lpuart0priv.rxdma != NULL)
+    {
+      kinetis_dma_rxcallback(g_lpuart0priv.rxdma, (void *)&g_lpuart0port,
+                             false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_LPUART1_RXDMA
+  if (g_lpuart1priv.rxdma != NULL)
+    {
+      kinetis_dma_rxcallback(g_lpuart1priv.rxdma, (void *)&g_lpuart1port,
+                             false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_LPUART2_RXDMA
+  if (g_lpuart2priv.rxdma != NULL)
+    {
+      kinetis_dma_rxcallback(g_lpuart2priv.rxdma, (void *)&g_lpuart2port,
+                             false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_LPUART3_RXDMA
+  if (g_lpuart3priv.rxdma != NULL)
+    {
+      kinetis_dma_rxcallback(g_lpuart3priv.rxdma, (void *)&g_lpuart3port,
+                             false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_LPUART4_RXDMA
+  if (g_lpuart4priv.rxdma != NULL)
+    {
+      kinetis_dma_rxcallback(g_lpuart4priv.rxdma, (void *)&g_lpuart4port,
+                             false, 0);
+    }
+#endif
+
+  leave_critical_section(flags);
+}
+#endif
 
 /****************************************************************************
  * Name: up_putc

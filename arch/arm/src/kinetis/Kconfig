@@ -1398,6 +1398,62 @@ config KINETIS_SERIAL_RXDMA_BUFFER_SIZE
 
 endmenu # Kinetis UART Configuration
 
+menu "Kinetis LPUART Configuration"
+if KINETIS_SERIALDRIVER || OTHER_SERIALDRIVER
+
+comment "LP Uart Driver Configuration"
+
+config KINETIS_LPUART0_RXDMA
+	bool "LPUART0 Rx DMA"
+	default n
+	depends on KINETIS_LPUART0 && KINETIS_EDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_LPUART1_RXDMA
+	bool "LPUART1 Rx DMA"
+	default n
+	depends on KINETIS_LPUART1 && KINETIS_EDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_LPUART2_RXDMA
+	bool "LPUART2 Rx DMA"
+	default n
+	depends on KINETIS_LPUART2 && KINETIS_EDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_LPUART3_RXDMA
+	bool "LPUART3 Rx DMA"
+	default n
+	depends on KINETIS_LPUART3 && KINETIS_EDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_LPUART4_RXDMA
+	bool "LPUART4 Rx DMA"
+	default n
+	depends on KINETIS_LPUART4 && KINETIS_EDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config KINETIS_LPUART_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on KINETIS_LPUART0_RXDMA || KINETIS_LPUART1_RXDMA || KINETIS_LPUART2_RXDMA || KINETIS_LPUART3_RXDMA || KINETIS_LPUART4_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
+endif # KINETIS_SERIALDRIVER || OTHER_SERIALDRIVER
+
+endmenu # Kinetis LPUART Configuration
+
 config KINETIS_MERGE_TTY
 	bool "Kinetis Merge TTY names for LPUARTS"
 	default n
