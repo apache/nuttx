@@ -107,6 +107,9 @@
                                                     * the incoming packet */
 #define IP_TOS                (__SO_PROTOCOL + 13) /* Access the Type-Of-Service
                                                     * (TOS) field  */
+#define IP_TTL                (__SO_PROTOCOL + 14) /* The IP TTL (time to live)
+                                                    * of IP packets sent by the
+                                                    * network stack */
 
 /* SOL_IPV6 protocol-level socket options. */
 

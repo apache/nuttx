@@ -113,8 +113,6 @@
  * Public Types
  ****************************************************************************/
 
-struct mm_heap_s;
-
 /* Determines the size of the chunk size/offset type */
 
 #ifdef CONFIG_MM_SMALL
@@ -172,15 +170,13 @@ struct mm_delaynode_s
 
 /* This describes one heap (possibly with multiple regions) */
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
    * the following un-named semaphore.
    */
 
   sem_t mm_semaphore;
-  pid_t mm_holder;
-  int mm_counts_held;
 
   /* This is the size of the heap provided to mm */
 
@@ -218,8 +214,7 @@ struct mm_heap_impl_s
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
-void mm_takesemaphore(FAR struct mm_heap_s *heap);
-int  mm_trysemaphore(FAR struct mm_heap_s *heap);
+bool mm_takesemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in mm_shrinkchunk.c **********************************/

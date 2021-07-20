@@ -374,7 +374,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
    */
 
     {
-      ret = inode_reserve(target, &mountpt_inode);
+      ret = inode_reserve(target, 0777, &mountpt_inode);
       if (ret < 0)
         {
           /* inode_reserve can fail for a couple of reasons, but the most
@@ -450,9 +450,6 @@ int nx_mount(FAR const char *source, FAR const char *target,
   INODE_SET_MOUNTPT(mountpt_inode);
 
   mountpt_inode->u.i_mops  = mops;
-#ifdef CONFIG_FILE_MODE
-  mountpt_inode->i_mode    = mode;
-#endif
   mountpt_inode->i_private = fshandle;
   inode_semgive();
 

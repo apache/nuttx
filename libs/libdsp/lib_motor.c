@@ -159,7 +159,7 @@ float motor_openloop_angle_get(FAR struct openloop_data_f32_s *op)
  *   Initialize motor angle structure
  *
  * Input Parameters:
- *   angle - (in/out) pointer to the motor angle strucutre
+ *   angle - (in/out) pointer to the motor angle structure
  *   p     - (in) number of the motor pole pairs
  *
  * Returned Value:

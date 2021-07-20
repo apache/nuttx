@@ -23,16 +23,38 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
-LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
-LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
-LDSCRIPT3 = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
+# Pick the linker scripts from the board level if they exist, if not
+# pick the common linker scripts.
+
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld),)
+	LDSCRIPT_ROM = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
+else
+	LDSCRIPT_ROM = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
+endif
+
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld),)
+	LDSCRIPT_SECT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+else
+	LDSCRIPT_SECT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+endif
+
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
+	LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+else
+	LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+endif
+
+# This is the generated memory layout linker script.  It will always be
+# generated at the board level.
+
+LDSCRIPT_MEMORY = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT2)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT3)}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT_MEMORY)}"
+  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT_SECT)}"
+  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT_ROM)}"
 else
-  ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3)
+  ARCHSCRIPT = -T$(LDSCRIPT_MEMORY) -T$(LDSCRIPT_SECT) -T$(LDSCRIPT_ROM)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)

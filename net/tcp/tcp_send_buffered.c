@@ -1309,7 +1309,7 @@ int psock_tcp_cansend(FAR struct socket *psock)
    * but we don't know how many more.
    */
 
-  if (tcp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
+  if (tcp_wrbuffer_test() < 0 || iob_navail(true) <= 0)
     {
       return -EWOULDBLOCK;
     }

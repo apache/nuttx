@@ -160,13 +160,13 @@ static inline void nxsched_cpu_process_cpuload(int cpu)
 void weak_function nxsched_process_cpuload(void)
 {
   int i;
-
-#ifdef CONFIG_SMP
   irqstate_t flags;
 
   /* Perform scheduler operations on all CPUs. */
 
   flags = enter_critical_section();
+
+#ifdef CONFIG_SMP
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       nxsched_cpu_process_cpuload(i);
@@ -191,7 +191,7 @@ void weak_function nxsched_process_cpuload(void)
        * total.
        */
 
-      for (i = 0; i < CONFIG_MAX_TASKS; i++)
+      for (i = 0; i < g_npidhash; i++)
         {
           g_pidhash[i].ticks >>= 1;
           total += g_pidhash[i].ticks;
@@ -202,9 +202,7 @@ void weak_function nxsched_process_cpuload(void)
       g_cpuload_total = total;
     }
 
-#ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
 }
 
 /****************************************************************************
@@ -230,7 +228,7 @@ void weak_function nxsched_process_cpuload(void)
 int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
 {
   irqstate_t flags;
-  int hash_index = PIDHASH(pid);
+  int hash_index;
   int ret = -ESRCH;
 
   DEBUGASSERT(cpuload);
@@ -241,6 +239,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
    */
 
   flags = enter_critical_section();
+  hash_index = PIDHASH(pid);
 
   /* Make sure that the entry is valid (TCB field is not NULL) and matches
    * the requested PID.  The first check is needed if the thread has exited.

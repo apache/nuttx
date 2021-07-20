@@ -34,7 +34,7 @@
  * Private Data
  ****************************************************************************/
 
-static struct mm_heap_s g_rtcheap;
+static struct mm_heap_s *g_rtcheap;
 
 /****************************************************************************
  * Public Functions
@@ -60,7 +60,7 @@ void esp32_rtcheap_initialize(void)
 
   start = (void *)&_srtcheap;
   size  = (size_t)((uintptr_t)&_ertcheap - (uintptr_t)&_srtcheap);
-  mm_initialize(&g_rtcheap, "rtcheap", start, size);
+  g_rtcheap = mm_initialize("rtcheap", start, size);
 }
 
 /****************************************************************************
@@ -76,7 +76,7 @@ void esp32_rtcheap_initialize(void)
 
 void *esp32_rtcheap_malloc(size_t size)
 {
-  return mm_malloc(&g_rtcheap, size);
+  return mm_malloc(g_rtcheap, size);
 }
 
 /****************************************************************************
@@ -90,7 +90,7 @@ void *esp32_rtcheap_malloc(size_t size)
 
 void *esp32_rtcheap_calloc(size_t n, size_t elem_size)
 {
-  return mm_calloc(&g_rtcheap, n, elem_size);
+  return mm_calloc(g_rtcheap, n, elem_size);
 }
 
 /****************************************************************************
@@ -103,7 +103,7 @@ void *esp32_rtcheap_calloc(size_t n, size_t elem_size)
 
 void *esp32_rtcheap_realloc(void *ptr, size_t size)
 {
-  return mm_realloc(&g_rtcheap, ptr, size);
+  return mm_realloc(g_rtcheap, ptr, size);
 }
 
 /****************************************************************************
@@ -116,7 +116,7 @@ void *esp32_rtcheap_realloc(void *ptr, size_t size)
 
 void *esp32_rtcheap_zalloc(size_t size)
 {
-  return mm_zalloc(&g_rtcheap, size);
+  return mm_zalloc(g_rtcheap, size);
 }
 
 /****************************************************************************
@@ -129,7 +129,7 @@ void *esp32_rtcheap_zalloc(size_t size)
 
 void esp32_rtcheap_free(void *mem)
 {
-  mm_free(&g_rtcheap, mem);
+  mm_free(g_rtcheap, mem);
 }
 
 /****************************************************************************
@@ -151,7 +151,7 @@ void esp32_rtcheap_free(void *mem)
 
 void *esp32_rtcheap_memalign(size_t alignment, size_t size)
 {
-  return mm_memalign(&g_rtcheap, alignment, size);
+  return mm_memalign(g_rtcheap, alignment, size);
 }
 
 /****************************************************************************
@@ -170,7 +170,7 @@ void *esp32_rtcheap_memalign(size_t alignment, size_t size)
 
 bool esp32_rtcheap_heapmember(void *mem)
 {
-  return mm_heapmember(&g_rtcheap, mem);
+  return mm_heapmember(g_rtcheap, mem);
 }
 
 /****************************************************************************
@@ -187,5 +187,5 @@ bool esp32_rtcheap_heapmember(void *mem)
 
 int esp32_rtcheap_mallinfo(struct mallinfo *info)
 {
-  return mm_mallinfo(&g_rtcheap, info);
+  return mm_mallinfo(g_rtcheap, info);
 }

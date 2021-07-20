@@ -89,6 +89,7 @@ next_subdir:
 
       if (oldinode == newinode)
         {
+          inode_release(newinode);
           ret = OK;
           goto errout; /* Bad naming, this is not an error case. */
         }
@@ -112,6 +113,8 @@ next_subdir:
         {
           FAR char *subdirname;
           FAR char *tmp;
+
+          inode_release(newinode);
 
           /* Yes.. In this case, the target of the rename must be a
            * subdirectory of newinode, not the newinode itself.  For
@@ -174,7 +177,7 @@ next_subdir:
       goto errout;
     }
 
-  ret = inode_reserve(newpath, &newinode);
+  ret = inode_reserve(newpath, 0777, &newinode);
   if (ret < 0)
     {
       /* It is an error if a node at newpath already exists in the tree
@@ -191,8 +194,13 @@ next_subdir:
   newinode->i_child   = oldinode->i_child;   /* Link to lower level inode */
   newinode->i_flags   = oldinode->i_flags;   /* Flags for inode */
   newinode->u.i_ops   = oldinode->u.i_ops;   /* Inode operations */
-#ifdef CONFIG_FILE_MODE
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   newinode->i_mode    = oldinode->i_mode;    /* Access mode flags */
+  newinode->i_owner   = oldinode->i_owner;   /* Owner */
+  newinode->i_group   = oldinode->i_group;   /* Group */
+  newinode->i_atime   = oldinode->i_atime;   /* Time of last access */
+  newinode->i_mtime   = oldinode->i_mtime;   /* Time of last modification */
+  newinode->i_ctime   = oldinode->i_ctime;   /* Time of last status change */
 #endif
   newinode->i_private = oldinode->i_private; /* Per inode driver private data */
 
@@ -228,7 +236,8 @@ next_subdir:
 
   /* Remove all of the children from the unlinked inode */
 
-  oldinode->i_child = NULL;
+  oldinode->i_child  = NULL;
+  oldinode->i_parent = NULL;
   ret = OK;
 
 errout_with_sem:

@@ -40,6 +40,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
@@ -295,7 +296,11 @@
 
 #define PHY_READ_TIMEOUT  (0x0004ffff)
 #define PHY_WRITE_TIMEOUT (0x0004ffff)
-#define PHY_RETRY_TIMEOUT (0x0004ffff)
+#define PHY_RETRY_TIMEOUT (0x0001998)
+
+/* MAC reset ready delays in loop counts */
+
+#define MAC_READY_USTIMEOUT (200)
 
 /* Register values **********************************************************/
 
@@ -371,11 +376,11 @@
  * that are cleared unconditionally).  Per the reference manual, all reserved
  * bits must be retained at their reset value.
  *
- * ETH_MACPFR_PR    Bit 0: Promiscuous mode
+ * ETH_MACPFR_PM    Bit 0: Promiscuous mode
  * ETH_MACPFR_HUC   Bit 1: Hash unicast
  * ETH_MACPFR_HMC   Bit 2: Hash multicast
  * ETH_MACPFR_DAIF  Bit 3: Destination address inverse filtering
- * ETH_MACPFR_PM    Bit 4: Pass all multicast
+ * ETH_MACPFR_PAM   Bit 4: Pass all multicast
  * ETH_MACPFR_DBF   Bit 5: Broadcast frames disable
  * ETH_MACPFR_PCF   Bits 6-7: Pass control frames
  * ETH_MACPFR_SAIF  Bit 8: Source address inverse filtering
@@ -388,20 +393,19 @@
  */
 
 #define MACPFR_CLEAR_BITS                                               \
-  (ETH_MACPFR_PR | ETH_MACPFR_HUC | ETH_MACPFR_HMC | ETH_MACPFR_DAIF |  \
-   ETH_MACPFR_PM | ETH_MACPFR_DBF | ETH_MACPFR_PCF_MASK | ETH_MACPFR_SAIF | \
+  (ETH_MACPFR_PM | ETH_MACPFR_HUC | ETH_MACPFR_HMC | ETH_MACPFR_DAIF |  \
+   ETH_MACPFR_PAM | ETH_MACPFR_DBF | ETH_MACPFR_PCF_MASK | ETH_MACPFR_SAIF | \
    ETH_MACPFR_SAF | ETH_MACPFR_HPF | ETH_MACPFR_VTFE | ETH_MACPFR_IPFE | \
    ETH_MACPFR_DNTU | ETH_MACPFR_RA)
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- * ETH_MACPFR_PR    Promiscuous mode                       0 (disabled)
  * ETH_MACPFR_HUC   Hash unicast                           0 (perfect
  *                                                            dest filtering)
  * ETH_MACPFR_HMC   Hash multicast                         0 (perfect
  *                                                            dest filtering)
  * ETH_MACPFR_DAIF  Destination address inverse filtering  0 (normal)
- * ETH_MACPFR_PM    Pass all multicast                     0 (Depends on HMC
+ * ETH_MACPFR_PAM   Pass all multicast                     0 (Depends on HMC
  *                                                            bit)
  * ETH_MACPFR_DBF   Broadcast frames disable               0 (enabled)
  * ETH_MACPFR_PCF   Pass control frames                    1 (block all but
@@ -413,7 +417,11 @@
  * ETH_MACPFR_RA    Receive all                            0 (disabled)
  */
 
-#define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE)
+#ifdef CONFIG_NET_PROMISCUOUS
+#  define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE | ETH_MACPFR_PM)
+#else
+#  define MACPFR_SET_BITS (ETH_MACPFR_PCF_PAUSE)
+#endif
 
 /* Clear the MACQTXFCR and MACRXFCR bits that will be setup during MAC
  * initialization (or that are cleared unconditionally).  Per the reference
@@ -3546,6 +3554,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
         {
           break;
         }
+
+      nxsig_usleep(100);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3578,6 +3588,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
         {
           break;
         }
+
+      nxsig_usleep(100);
     }
 
   if (timeout >= PHY_RETRY_TIMEOUT)
@@ -3768,7 +3780,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* Set up the MII interface */
 
-#if defined(CONFIG_STM32H7_MII)
+#  if defined(CONFIG_STM32H7_MII)
 
   /* Select the MII interface */
 
@@ -3783,7 +3795,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
    */
 
-# if defined(CONFIG_STM32H7_MII_MCO1)
+#    if defined(CONFIG_STM32H7_MII_MCO1)
   /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
    * info.
    */
@@ -3791,7 +3803,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO1);
   stm32_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_MII_MCO2)
+#    elif defined(CONFIG_STM32H7_MII_MCO2)
   /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
    * info.
    */
@@ -3799,12 +3811,12 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO2);
   stm32_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_MII_MCO)
+#    elif defined(CONFIG_STM32H7_MII_MCO)
   /* Setup MCO pin for alternative usage */
 
   stm32_configgpio(GPIO_MCO);
   stm32_mcoconfig(BOARD_CFGR_MCO_SOURCE);
-# endif
+#    endif
 
   /* MII interface pins (17):
    *
@@ -3830,7 +3842,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* Set up the RMII interface. */
 
-#elif defined(CONFIG_STM32H7_RMII)
+#  elif defined(CONFIG_STM32H7_RMII)
 
   /* Select the RMII interface */
 
@@ -3845,7 +3857,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
    */
 
-# if defined(CONFIG_STM32H7_RMII_MCO1)
+#    if defined(CONFIG_STM32H7_RMII_MCO1)
   /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
    * info.
    */
@@ -3853,7 +3865,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO1);
   stm32_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_RMII_MCO2)
+#    elif defined(CONFIG_STM32H7_RMII_MCO2)
   /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
    * info.
    */
@@ -3861,12 +3873,12 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_MCO2);
   stm32_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
 
-# elif defined(CONFIG_STM32H7_RMII_MCO)
+#    elif defined(CONFIG_STM32H7_RMII_MCO)
   /* Setup MCO pin for alternative usage */
 
   stm32_configgpio(GPIO_MCO);
   stm32_mcoconfig(BOARD_CFGR_MCO_SOURCE);
-# endif
+#    endif
 
   /* RMII interface pins (7):
    *
@@ -3881,7 +3893,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_ETH_RMII_TXD0);
   stm32_configgpio(GPIO_ETH_RMII_TXD1);
   stm32_configgpio(GPIO_ETH_RMII_TX_EN);
-#endif
+#  endif
 #endif
 
 #ifdef CONFIG_STM32H7_ETH_PTP
@@ -3910,6 +3922,7 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 static void stm32_ethreset(struct stm32_ethmac_s *priv)
 {
   uint32_t regval;
+  volatile uint32_t timeout;
 
   /* Reset the Ethernet on the AHB1 bus */
 
@@ -3934,7 +3947,11 @@ static void stm32_ethreset(struct stm32_ethmac_s *priv)
    * core clock domains.
    */
 
-  while ((stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0);
+  timeout = MAC_READY_USTIMEOUT;
+  while (timeout-- && (stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0)
+    {
+      up_udelay(1);
+    }
 
   /* According to the spec, these need to be done before creating
    * the descriptor lists, so initialize these already here

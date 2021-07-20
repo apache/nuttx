@@ -32,6 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
+#undef strdup /* See mm/README.txt */
 FAR char *strdup(FAR const char *s)
 {
   FAR char *news = NULL;

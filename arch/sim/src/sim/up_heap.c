@@ -48,7 +48,7 @@ struct mm_delaynode_s
   FAR struct mm_delaynode_s *flink;
 };
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
 #ifdef CONFIG_SMP
   struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
@@ -65,9 +65,9 @@ struct mm_heap_impl_s
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
@@ -75,13 +75,12 @@ static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   flags = enter_critical_section();
 
-  tmp->flink = heap->mm_impl->mm_delaylist[up_cpu_index()];
-  heap->mm_impl->mm_delaylist[up_cpu_index()] = tmp;
+  tmp->flink = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = tmp;
 
   leave_critical_section(flags);
-}
-
 #endif
+}
 
 static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
@@ -93,8 +92,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
   flags = enter_critical_section();
 
-  tmp = heap->mm_impl->mm_delaylist[up_cpu_index()];
-  heap->mm_impl->mm_delaylist[up_cpu_index()] = NULL;
+  tmp = heap->mm_delaylist[up_cpu_index()];
+  heap->mm_delaylist[up_cpu_index()] = NULL;
 
   leave_critical_section(flags);
 
@@ -141,23 +140,24 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
-                   FAR void *heap_start, size_t heap_size)
+FAR struct mm_heap_s *mm_initialize(FAR const char *name,
+                                    FAR void *heap_start, size_t heap_size)
 {
-  FAR struct mm_heap_impl_s *impl;
+  FAR struct mm_heap_s *heap;
 
-  impl = host_memalign(sizeof(FAR void *), sizeof(*impl));
-  DEBUGASSERT(impl);
+  heap = host_memalign(sizeof(FAR void *), sizeof(*heap));
+  DEBUGASSERT(heap);
 
-  memset(impl, 0, sizeof(struct mm_heap_impl_s));
-  heap->mm_impl = impl;
+  memset(heap, 0, sizeof(struct mm_heap_s));
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  impl->mm_procfs.name = name;
-  impl->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
-  impl->mm_procfs.user_data = heap;
-  procfs_register_meminfo(&impl->mm_procfs);
+  heap->mm_procfs.name = name;
+  heap->mm_procfs.mallinfo = (FAR void *)mm_mallinfo;
+  heap->mm_procfs.user_data = heap;
+  procfs_register_meminfo(&heap->mm_procfs);
 #endif
+
+  return heap;
 }
 
 /****************************************************************************
@@ -211,27 +211,27 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 FAR void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  int ret = (int)getpid();
-
   /* Check current environment */
 
   if (up_interrupt_context())
     {
-      /* We are in ISR, add to mm_delaylist */
-
-      mm_add_delaylist(heap, mem);
-    }
-  else if (ret == -ESRCH || sched_idletask())
-    {
-      /* We are in IDLE task & can't get sem, or meet -ESRCH return,
-       * which means we are in situations during context switching(See
-       * mm_trysemaphore() & getpid()). Then add to mm_delaylist.
-       */
+      /* We are in ISR, add to the delay list */
 
       mm_add_delaylist(heap, mem);
     }
   else
 #endif
+
+  if (getpid() < 0)
+    {
+      /* getpid() return -ESRCH, means we are in situations
+       * during context switching(See getpid's comment).
+       * Then add to the delay list.
+       */
+
+      mm_add_delaylist(heap, mem);
+    }
+  else
     {
       host_free(mem);
     }

@@ -40,20 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Although task IDs can take the (positive, non-zero)
- * range of pid_t, the number of tasks that will be supported
- * at any one time is (artificially) limited by the CONFIG_MAX_TASKS
- * configuration setting. Limiting the number of tasks speeds certain
- * OS functions (this is the only limitation in the number of
- * tasks built into the design).
- */
-
-#if CONFIG_MAX_TASKS & (CONFIG_MAX_TASKS - 1)
-#  error CONFIG_MAX_TASKS must be power of 2
-#endif
-
-#define MAX_TASKS_MASK           (CONFIG_MAX_TASKS-1)
-#define PIDHASH(pid)             ((pid) & MAX_TASKS_MASK)
+#define PIDHASH(pid)             ((pid) & (g_npidhash - 1))
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
@@ -254,12 +241,11 @@ extern volatile pid_t g_lastpid;
  * 1. This hash table greatly speeds the determination of a new unique
  *    process ID for a task, and
  * 2. Is used to quickly map a process ID into a TCB.
- *
- * It has the side effects of using more memory and limiting the number
- * of tasks to CONFIG_MAX_TASKS.
  */
 
-extern struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
+extern FAR struct pidhash_s *g_pidhash;
+
+extern volatile int g_npidhash;
 
 /* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated

@@ -455,6 +455,20 @@ static int tmpfs_find_dirent(FAR struct tmpfs_directory_s *tdo,
 {
   int i;
 
+  if (len == 0)
+    {
+      return -EINVAL;
+    }
+  else if (name[len - 1] == '/')
+    {
+      /* Ignore the tail '/' */
+
+      if (--len == 0)
+        {
+          return -EINVAL;
+        }
+    }
+
   /* Search the list of directory entries for a match */
 
   for (i = 0;
@@ -518,13 +532,29 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
   FAR struct tmpfs_dirent_s *tde;
   FAR char *newname;
   unsigned int nentries;
+  size_t namelen;
   int index;
 
   /* Copy the name string so that it will persist as long as the
    * directory entry.
    */
 
-  newname = strdup(name);
+  namelen = strlen(name);
+  if (namelen == 0)
+    {
+      return -EINVAL;
+    }
+  else if (name[namelen - 1] == '/')
+    {
+      /* Don't copy the tail '/' */
+
+      if (--namelen == 0)
+        {
+          return -EINVAL;
+        }
+    }
+
+  newname = strndup(name, namelen);
   if (newname == NULL)
     {
       return -ENOMEM;
@@ -623,7 +653,7 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
 
       parent->tdo_refs++;
     }
-  else
+  else if (name[1] != '\0')
     {
       /* Locate the parent directory that should contain this name.
        * On success, tmpfs_find_directory() will lock the parent
@@ -639,6 +669,10 @@ static int tmpfs_create_file(FAR struct tmpfs_s *fs,
       /* Skip the '/' path separator */
 
       name++;
+    }
+  else
+    {
+      return -EISDIR;
     }
 
   /* Verify that no object of this name already exists in the directory */
@@ -748,6 +782,13 @@ static int tmpfs_create_directory(FAR struct tmpfs_s *fs,
    */
 
   name = strrchr(relpath, '/');
+  if (name && name[1] == '\0')
+    {
+      /* Ignore the tail '/' */
+
+      name = memrchr(relpath, '/', name - relpath);
+    }
+
   if (name == NULL)
     {
       /* No subdirectories... use the root directory */
@@ -909,7 +950,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
         {
           /* No.  Was this the final segment in the path? */
 
-          if (len == 0)
+          if (len == 0 && *next_segment != '/')
             {
               /* Then we can break out of the loop now */
 
@@ -992,14 +1033,25 @@ static int tmpfs_find_file(FAR struct tmpfs_s *fs,
                            FAR struct tmpfs_directory_s **parent)
 {
   FAR struct tmpfs_object_s *to;
+  size_t len;
   int ret;
+
+  len = strlen(relpath);
+  if (len == 0)
+    {
+      return -EINVAL;
+    }
+  else if (relpath[len - 1] == '/')
+    {
+      return -EISDIR;
+    }
 
   /* Find the object at this path.  If successful, tmpfs_find_object() will
    * lock both the object and the parent directory and will increment the
    * reference count on both.
    */
 
-  ret = tmpfs_find_object(fs, relpath, strlen(relpath), &to, parent);
+  ret = tmpfs_find_object(fs, relpath, len, &to, parent);
   if (ret >= 0)
     {
       /* We found it... but is it a regular file? */
@@ -2362,6 +2414,13 @@ static int tmpfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   /* Get the directory name from the relative path */
 
   name = strrchr(relpath, '/');
+  if (name && name[1] == '\0')
+    {
+      /* Ignore the tail '/' */
+
+      name = memrchr(relpath, '/', name - relpath);
+    }
+
   if (name != NULL)
     {
       /* Skip over the fidirectoryle '/' character */
@@ -2447,6 +2506,13 @@ static int tmpfs_rename(FAR struct inode *mountpt,
    */
 
   newname = strrchr(newrelpath, '/');
+  if (newname && newname[1] == '\0')
+    {
+      /* Ignore the tail '/' */
+
+      newname = memrchr(newrelpath, '/', newname - newrelpath);
+    }
+
   if (newname == NULL)
     {
       /* No subdirectories... use the root directory */
@@ -2510,6 +2576,13 @@ static int tmpfs_rename(FAR struct inode *mountpt,
   /* Get the old file name from the relative path */
 
   oldname = strrchr(oldrelpath, '/');
+  if (oldname && oldname[1] == '\0')
+    {
+      /* Ignore the tail '/' */
+
+      oldname = memrchr(oldrelpath, '/', oldname - oldrelpath);
+    }
+
   if (oldname != NULL)
     {
       /* Skip over the file '/' character */

@@ -40,37 +40,28 @@
 #include "gic.h"
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* A bit set of pending, non-maskable SGI interrupts, on bit set for each
- * supported CPU.
- */
-
-#ifdef CONFIG_ARMV7A_HAVE_GICv2
-#ifdef CONFIG_SMP
-static uint16_t g_sgi_pending[CONFIG_SMP_NCPUS];
-#else
-static uint16_t g_sgi_pending[1];
-#endif
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _arm_doirq
+ * Name: arm_doirq
  *
  * Description:
- *   Receives the one decoded interrupt and dispatches control to the
- *   attached interrupt handler.
+ *   Receives the decoded GIC interrupt information and dispatches control
+ *   to the attached interrupt handler.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-static inline uint32_t *_arm_doirq(int irq, uint32_t *regs)
+uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  board_autoled_on(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC();
+#else
+  /* Nested interrupts are not supported */
+
+  DEBUGASSERT(CURRENT_REGS == NULL);
+
   /* Current regs non-zero indicates that we are processing an interrupt;
    * CURRENT_REGS is also used to manage interrupt level context switches.
    */
@@ -115,131 +106,8 @@ static inline uint32_t *_arm_doirq(int irq, uint32_t *regs)
 
   regs         = (uint32_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
-
-  return regs;
-}
-#endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: arm_doirq
- *
- * Description:
- *   Receives the decoded GIC interrupt information and dispatches control
- *   to the attached interrupt handler.  There are two versions:
- *
- *   1) For the simple case where all interrupts are maskable.  In that
- *      simple case, arm_doirq() is simply a wrapper for the inlined
- *      _arm_do_irq() that does the real work.
- *
- *   2) With the GICv2, there are 16 non-maskable software generated
- *      interrupts (SGIs) that also come through arm_doirq().  In that case,
- *      we must avoid nesting interrupt handling and serial the processing.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARMV7A_HAVE_GICv2
-uint32_t *arm_doirq(int irq, uint32_t *regs)
-{
-  board_autoled_on(LED_INIRQ);
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
-  /* Nested interrupts are not supported */
-
-  DEBUGASSERT(CURRENT_REGS == NULL);
-
-  /* Dispatch the interrupt to its attached handler */
-
-  regs = _arm_doirq(irq, regs);
 #endif
 
   board_autoled_off(LED_INIRQ);
   return regs;
 }
-#endif
-
-#ifdef CONFIG_ARMV7A_HAVE_GICv2
-uint32_t *arm_doirq(int irq, uint32_t *regs)
-{
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  uint32_t bit;
-  int cpu;
-  int i;
-#endif
-
-  board_autoled_on(LED_INIRQ);
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-
-#else
-  /* Get the CPU processing the interrupt */
-
-#ifdef CONFIG_SMP
-  cpu = up_cpu_index();
-#else
-  cpu = 0;
-#endif
-
-  /* Non-zero CURRENT_REGS indicates that we are already processing an
-   * interrupt.  This could be a normal event for the case of the GICv2;
-   * Software generated interrupts are non-maskable.
-   *
-   * REVISIT: There is no support for nested SGIs!  That will cause an
-   * assertion below.  There is also no protection for concurrent access
-   * to g_sgi_pending for that case.
-   */
-
-  if (CURRENT_REGS != NULL)
-    {
-      int ndx = irq - GIC_IRQ_SGI0;
-      bit = (1 << (ndx));
-
-      /* Only an SGI should cause this event.  We also cannot support
-       * multiple pending SGI interrupts.
-       */
-
-      DEBUGASSERT((unsigned int)irq <= GIC_IRQ_SGI15 &&
-                  (g_sgi_pending[cpu] & bit) == 0);
-
-      /* Mare the SGI as pending and return immediately */
-
-      sinfo("SGI%d pending\n", ndx);
-      g_sgi_pending[cpu] |= bit;
-      return regs;
-    }
-
-  /* Dispatch the interrupt to its attached handler */
-
-  regs = _arm_doirq(irq, regs);
-
-  /* Then loop dispatching any pending SGI interrupts that occcurred during
-   * processing of the interrupts.
-   */
-
-  for (i = 0; i < 16 && g_sgi_pending[cpu] != 0; i++)
-    {
-      /* Check if this SGI is pending */
-
-      bit = (1 << i);
-      if ((g_sgi_pending[cpu] & bit) != 0)
-        {
-          /* Clear the pending bit */
-
-          g_sgi_pending[cpu] &= ~bit;
-
-          /* And dispatch the SGI */
-
-          sinfo("Dispatching pending SGI%d\n", i + GIC_IRQ_SGI0);
-          regs = _arm_doirq(i + GIC_IRQ_SGI0, regs);
-        }
-    }
-#endif
-
-  board_autoled_off(LED_INIRQ);
-  return regs;
-}
-#endif

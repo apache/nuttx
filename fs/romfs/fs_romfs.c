@@ -225,10 +225,6 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
       goto errout_with_semaphore;
     }
 
-#ifdef CONFIG_FILE_MODE
-# warning "Missing check for privileges based on inode->i_mode"
-#endif
-
   /* Create an instance of the file private data to describe the opened
    * file.
    */

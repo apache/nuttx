@@ -118,6 +118,20 @@ focused on network-related testing.
 This configuration cannot be changed to Teensy 4.0 as this board does
 not have Ethernet capability.
 
+pikron-bb
+---------
+
+This is a configuration that compiles the NuttX for use with
+open source/hardware `Base Board for Teensy 4.1
+<https://gitlab.com/pikron/projects/imxrt-devel/-/wikis/teensy_bb>`_.
+It includes CAN drivers, communication over serial port, Ethernet
+support, support for 240 x 320 pixels LCD display and configuration
+options for using NuttX with pysimCoder. NuttX also runs in
+tickless mode with the resolution 10 usec.
+
+This configuration cannot be changed to Teensy 4.0 as base board
+is not designed for that.
+
 pwm-4.1
 -------
 

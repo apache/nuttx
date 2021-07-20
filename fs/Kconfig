@@ -47,6 +47,14 @@ config DISABLE_PSEUDOFS_OPERATIONS
 		However, in practical embedded system, they are seldom needed and
 		you can save a little FLASH space by disabling the capability.
 
+config PSEUDOFS_ATTRIBUTES
+	bool "Pseudo-filesystem attributes"
+	default n
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	---help---
+		Enable support for attributes(e.g. mode, uid, gid and time)
+		in the pseudo file system.
+
 config PSEUDOFS_SOFTLINKS
 	bool "Pseudo-filesystem soft links"
 	default n
@@ -58,6 +66,12 @@ config PSEUDOFS_SOFTLINKS
 		may be add in the pseudo file system.  This might be useful, for
 		to link a directory in the pseudo-file system, such as /bin, to
 		to a directory in a mounted volume, say /mnt/sdcard/bin.
+
+config SENDFILE_BUFSIZE
+	int "sendfile() buffer size"
+	default 512
+	---help---
+		Size of the I/O buffer to allocate in sendfile().  Default: 512b
 
 config EVENT_FD
 	bool "EventFD"

@@ -286,6 +286,31 @@ int board_uniqueid(FAR uint8_t *uniqueid);
 #endif
 
 /****************************************************************************
+ * Name: board_uniquekey
+ *
+ * Description:
+ *   Return a unique KEY associated with the board.  The meaning of this
+ *   unique KEY is not specified.  It may be a trusted key or a private
+ *   identity, etc.  The only requirement is that the length of the
+ *   unique KEY be exactly CONFIG_BOARDCTL_UNIQUEKEY_SIZE in length.
+ *
+ * Input Parameters:
+ *   uniquekey - A reference to a writable memory location provided by the
+ *     caller to receive the board unique KEY.  The memory memory referenced
+ *     by this pointer must be at least CONFIG_BOARDCTL_UNIQUEKEY_SIZE in
+ *     length.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_UNIQUEKEY
+int board_uniquekey(FAR uint8_t *uniquekey);
+#endif
+
+/****************************************************************************
  * Name:  board_timerhook
  *
  * Description:

@@ -145,7 +145,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_ioballoc(false, IOBUSER_NET_TCP_WRITEBUFFER);
+  wrb->wb_iob = net_ioballoc(true, IOBUSER_NET_TCP_WRITEBUFFER);
 
   /* Did we get an IOB?  We should always get one except under some really
    * weird error conditions.

@@ -39,7 +39,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Protoypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 int cxd56_emmcinitialize(void);

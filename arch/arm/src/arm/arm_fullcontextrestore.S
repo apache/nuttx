@@ -87,7 +87,7 @@ arm_fullcontextrestore:
 	 */
 
 	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
-	msr	spsr, r1		/* Set the SPSR */
+	msr	spsr_cxsf, r1		/* Set the SPSR */
 
 	/* Now recover r0-r1, pc and cpsr, destroying the stack frame */
 

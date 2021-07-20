@@ -375,6 +375,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       /* NOP option. */
 
                       ++i;
+                      continue;
                     }
                   else if (opt == TCP_OPT_MSS &&
                           dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
@@ -386,11 +387,16 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       tmp16 = ((uint16_t)dev->d_buf[hdrlen + 2 + i] << 8) |
                                (uint16_t)dev->d_buf[hdrlen + 3 + i];
                       conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
-
-                      /* And we are done processing options. */
-
-                      break;
                     }
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+                  else if (opt == TCP_OPT_WS &&
+                          dev->d_buf[hdrlen + 1 + i] == TCP_OPT_WS_LEN)
+                    {
+                      conn->snd_scale = dev->d_buf[hdrlen + 2 + i];
+                      conn->rcv_scale = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
+                      conn->flags    |= TCP_WSCALE;
+                    }
+#endif
                   else
                     {
                       /* All other options have a length field, so that we
@@ -405,9 +411,9 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
                           break;
                         }
-
-                      i += dev->d_buf[hdrlen + 1 + i];
                     }
+
+                  i += dev->d_buf[hdrlen + 1 + i];
                 }
             }
 
@@ -443,7 +449,12 @@ found:
 
   /* Update the connection's window size */
 
-  conn->snd_wnd = ((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1];
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  conn->snd_wnd = (((uint32_t)tcp->wnd[0] << 8) + (uint32_t)tcp->wnd[1]) <<
+                  conn->snd_scale;
+#else
+  conn->snd_wnd = (((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1]);
+#endif
 
   flags = 0;
 
@@ -772,6 +783,7 @@ found:
                         /* NOP option. */
 
                         ++i;
+                        continue;
                       }
                     else if (opt == TCP_OPT_MSS &&
                               dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
@@ -784,11 +796,16 @@ found:
                           (dev->d_buf[hdrlen + 2 + i] << 8) |
                           dev->d_buf[hdrlen + 3 + i];
                         conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
-
-                        /* And we are done processing options. */
-
-                        break;
                       }
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+                    else if (opt == TCP_OPT_WS &&
+                            dev->d_buf[hdrlen + 1 + i] == TCP_OPT_WS_LEN)
+                      {
+                        conn->snd_scale = dev->d_buf[hdrlen + 2 + i];
+                        conn->rcv_scale = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
+                        conn->flags    |= TCP_WSCALE;
+                      }
+#endif
                     else
                       {
                         /* All other options have a length field, so that we
@@ -803,9 +820,9 @@ found:
 
                             break;
                           }
-
-                        i += dev->d_buf[hdrlen + 1 + i];
                       }
+
+                    i += dev->d_buf[hdrlen + 1 + i];
                   }
               }
 

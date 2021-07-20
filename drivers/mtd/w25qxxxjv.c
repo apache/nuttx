@@ -1437,6 +1437,15 @@ static int w25qxxxjv_ioctl(FAR struct mtd_dev_s *dev,
         }
         break;
 
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = W25QXXXJV_ERASED_STATE;
+
+          ret = OK;
+        }
+        break;
+
       default:
         ret = -ENOTTY; /* Bad/unsupported command */
         break;

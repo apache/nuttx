@@ -34,7 +34,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/tls.h>
 
 #include "group/group.h"
 #include "sched/sched.h"
@@ -113,31 +112,7 @@ int nx_smp_start(void)
   int ret;
   int cpu;
 
-  /* Create a stack for all CPU IDLE threads (except CPU0 which already has
-   * a stack).
-   */
-
-  for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      FAR struct tcb_s *tcb = current_task(cpu);
-      DEBUGASSERT(tcb != NULL);
-
-      ret = up_cpu_idlestack(cpu, tcb, CONFIG_IDLETHREAD_STACKSIZE);
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to allocate stack for CPU%d\n", cpu);
-          return ret;
-        }
-
-      /* Initialize the processor-specific portion of the TCB */
-
-      up_initial_state(tcb);
-      up_stack_frame(tcb, sizeof(struct task_info_s));
-    }
-
-  /* Then start all of the other CPUs after we have completed the memory
-   * allocations.  CPU0 is already running.
-   */
+  /* Start all of the other CPUs.  CPU0 is already running. */
 
   for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)
     {

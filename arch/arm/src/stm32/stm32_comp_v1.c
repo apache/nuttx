@@ -22,20 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <errno.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <arch/board/board.h>
-#include <nuttx/analog/comp.h>
-#include <nuttx/analog/ioctl.h>
-
-#include "chip.h"
-#include "stm32_gpio.h"
-#include "stm32_comp.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* Some COMP peripheral must be enabled */
 
@@ -67,10 +56,6 @@
 #    error "STM32F33 supports only COMP2, COMP4 and COMP6"
 #  endif
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /* COMP2 default configuration **********************************************/
 

@@ -96,13 +96,7 @@
  * Public Types
  ****************************************************************************/
 
-struct mm_heap_impl_s; /* Forward reference */
-struct mm_heap_s
-{
-  struct mm_heap_impl_s *mm_impl;
-};
-
-#define MM_IS_VALID(heap)    ((heap) != NULL && (heap)->mm_impl != NULL)
+struct mm_heap_s; /* Forward reference */
 
 /****************************************************************************
  * Public Data
@@ -143,13 +137,13 @@ extern "C"
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 /* Otherwise, the user heap data structures are in common .bss */
 
-EXTERN struct mm_heap_s g_mmheap;
+EXTERN FAR struct mm_heap_s *g_mmheap;
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 /* This is the kernel heap */
 
-EXTERN struct mm_heap_s g_kmmheap;
+EXTERN FAR struct mm_heap_s *g_kmmheap;
 #endif
 
 /****************************************************************************
@@ -158,8 +152,8 @@ EXTERN struct mm_heap_s g_kmmheap;
 
 /* Functions contained in mm_initialize.c ***********************************/
 
-void mm_initialize(FAR struct mm_heap_s *heap, FAR const char *name,
-                   FAR void *heap_start, size_t heap_size);
+FAR struct mm_heap_s *mm_initialize(FAR const char *name,
+                                    FAR void *heap_start, size_t heap_size);
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize);
 

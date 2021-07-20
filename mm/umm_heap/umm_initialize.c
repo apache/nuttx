@@ -81,5 +81,45 @@
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  mm_initialize(USR_HEAP, "Umem", heap_start, heap_size);
+  USR_HEAP = mm_initialize("Umem", heap_start, heap_size);
 }
+
+/****************************************************************************
+ * Name: umm_try_initialize
+ *
+ * Description:
+ *   Allocate and initialize the user heap if not yet.
+ *
+ * Input Parameters:
+ * None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+void umm_try_initialize(void)
+{
+  uintptr_t allocbase;
+
+  /* Return if the user heap is already initialized. */
+
+  if (USR_HEAP != NULL)
+    {
+      return;
+    }
+
+  /* Allocate one page. If we provide a zero brkaddr to pgalloc(),
+   * it will create the first block in the correct virtual address
+   * space and return the start address of that block.
+   */
+
+  allocbase = pgalloc(0, 1);
+  DEBUGASSERT(allocbase != 0);
+
+  /* Let umm_initialize do the real work. */
+
+  umm_initialize((FAR void *)allocbase, CONFIG_MM_PGSIZE);
+}
+#endif

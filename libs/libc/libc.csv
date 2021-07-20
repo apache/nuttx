@@ -150,7 +150,6 @@
 "sched_get_priority_min","sched.h","","int","int"
 "sem_getvalue","semaphore.h","","int","FAR sem_t *","FAR int *"
 "sem_init","semaphore.h","","int","FAR sem_t *","int","unsigned int"
-"sendfile","sys/sendfile.h","","ssize_t","int","int","FAR off_t *","size_t"
 "setlocale","locale.h","defined(CONFIG_LIBC_LOCALE)","FAR char *","int","FAR const char *"
 "setlogmask","syslog.h","","int","int"
 "sigaddset","signal.h","","int","FAR sigset_t *","int"

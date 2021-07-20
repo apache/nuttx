@@ -46,7 +46,6 @@
  *   It allocates and initializes a struct mqueue_inode_s structure.
  *
  * Input Parameters:
- *   mode   - mode_t value is ignored
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of
  *            messages that may be placed in the message queue.
@@ -57,8 +56,7 @@
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
-                                           FAR struct mq_attr *attr)
+FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr)
 {
   FAR struct mqueue_inode_s *msgq;
 

@@ -139,7 +139,7 @@ static inline void tcp_ipv4_sendcomplete(FAR struct net_driver_s *dev,
    */
 
   ipv4->proto       = IP_PROTO_TCP;
-  ipv4->ttl         = IP_TTL;
+  ipv4->ttl         = IP_TTL_DEFAULT;
   ipv4->vhl         = 0x45;
 
   /* At this point the TCP header holds the size of the payload, the
@@ -210,7 +210,7 @@ static inline void tcp_ipv6_sendcomplete(FAR struct net_driver_s *dev,
    */
 
   ipv6->proto     = IP_PROTO_TCP;
-  ipv6->ttl       = IP_TTL;
+  ipv6->ttl       = IP_TTL_DEFAULT;
 
   /* At this point the TCP header holds the size of the payload, the
    * TCP header, and the IP header.  For IPv6, the IP length field does
@@ -363,16 +363,20 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       /* Update the TCP received window based on I/O buffer availability */
 
       uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
-      uint16_t recvwndo = tcp_get_recvwindow(dev, conn);
+      uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
+
+      /* Update the Receiver Window */
+
+      conn->rcv_adv = rcvseq + recvwndo;
+
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+      recvwndo >>= conn->rcv_scale;
+#endif
 
       /* Set the TCP Window */
 
       tcp->wnd[0] = recvwndo >> 8;
       tcp->wnd[1] = recvwndo & 0xff;
-
-      /* Update the Receiver Window */
-
-      conn->rcv_adv = rcvseq + recvwndo;
     }
 
   /* Finish the IP portion of the message and calculate checksums */
@@ -628,6 +632,7 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   struct tcp_hdr_s *tcp;
   uint16_t tcp_mss;
+  int16_t optlen = 0;
 
   /* Get values that vary with the underlying IP domain */
 
@@ -642,7 +647,7 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       /* Set the packet length for the TCP Maximum Segment Size */
 
-      dev->d_len  = IPv6TCP_HDRLEN + TCP_OPT_MSS_LEN;
+      dev->d_len  = IPv6TCP_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -657,7 +662,7 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       /* Set the packet length for the TCP Maximum Segment Size */
 
-      dev->d_len  = IPv4TCP_HDRLEN + TCP_OPT_MSS_LEN;
+      dev->d_len  = IPv4TCP_HDRLEN;
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -669,11 +674,24 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* We send out the TCP Maximum Segment Size option with our ACK. */
 
-  tcp->optdata[0] = TCP_OPT_MSS;
-  tcp->optdata[1] = TCP_OPT_MSS_LEN;
-  tcp->optdata[2] = tcp_mss >> 8;
-  tcp->optdata[3] = tcp_mss & 0xff;
-  tcp->tcpoffset  = ((TCP_HDRLEN + TCP_OPT_MSS_LEN) / 4) << 4;
+  tcp->optdata[optlen++] = TCP_OPT_MSS;
+  tcp->optdata[optlen++] = TCP_OPT_MSS_LEN;
+  tcp->optdata[optlen++] = tcp_mss >> 8;
+  tcp->optdata[optlen++] = tcp_mss & 0xff;
+
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  if (tcp->flags == TCP_SYN ||
+      ((tcp->flags == (TCP_ACK | TCP_SYN)) && (conn->flags & TCP_WSCALE)))
+    {
+      tcp->optdata[optlen++] = TCP_OPT_NOOP;
+      tcp->optdata[optlen++] = TCP_OPT_WS;
+      tcp->optdata[optlen++] = TCP_OPT_WS_LEN;
+      tcp->optdata[optlen++] = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
+    }
+#endif
+
+  tcp->tcpoffset         = ((TCP_HDRLEN + optlen) / 4) << 4;
+  dev->d_len            += optlen;
 
   /* Complete the common portions of the TCP message */
 

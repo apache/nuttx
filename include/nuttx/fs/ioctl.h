@@ -180,6 +180,9 @@
 #define FIONCLEX        _FIOC(0x000e)     /* IN:  None
                                            * OUT: None
                                            */
+#define FIOC_FILEPATH   _FIOC(0x000f)     /* IN:  FAR char *(length >= PATH_MAX)
+                                           * OUT: The full file path
+                                           */
 
 /* NuttX file system ioctl definitions **************************************/
 

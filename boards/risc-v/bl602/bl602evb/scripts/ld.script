@@ -12,7 +12,7 @@ MEMORY
 {
   rom       (rxai!w) : ORIGIN = 0x21015000, LENGTH = 44K
   flash     (rxai!w) : ORIGIN = 0x23000000, LENGTH = 4M
-  ram_tcm   (wxa)    : ORIGIN = 0x4200E000, LENGTH = (32K + 48K + 64K - 8K) /* itcm_32 + dtcm_48 + ocram_64 */
+  ram_tcm   (wxa)    : ORIGIN = 0x42010000, LENGTH = (32K + 48K + 64K - 16K) /* itcm_32 + dtcm_48 + ocram_64 */
   ram_wifi  (wxa)    : ORIGIN = 0x42030000, LENGTH = (112K - 8K) /* 8K left for em */
 }
 

@@ -49,6 +49,7 @@
  *
  ****************************************************************************/
 
+#undef strndup /* See mm/README.txt */
 FAR char *strndup(FAR const char *s, size_t size)
 {
   FAR char *news = NULL;

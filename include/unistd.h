@@ -322,6 +322,9 @@ int     ftruncate(int fd, off_t length);
 /* Check if a file descriptor corresponds to a terminal I/O file */
 
 int     isatty(int fd);
+
+FAR char *ttyname(int fd);
+int       ttyname_r(int fd, FAR char *buf, size_t buflen);
 #endif
 
 /* Memory management */

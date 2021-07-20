@@ -23,12 +23,7 @@
  ****************************************************************************/
 
 #include <sys/stat.h>
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static mode_t g_mask;
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Public Functions
@@ -50,8 +45,24 @@ static mode_t g_mask;
 
 mode_t umask(mode_t mask)
 {
-  mode_t prev = g_mask;
+  FAR struct task_info_s *info;
+  mode_t prev;
 
-  g_mask = mask & 0777;
+  info = task_get_info();
+  prev = info->ta_umask;
+  info->ta_umask = mask;
+
   return prev;
+}
+
+/****************************************************************************
+ * Name: getumask
+ ****************************************************************************/
+
+mode_t getumask(void)
+{
+  FAR struct task_info_s *info;
+
+  info = task_get_info();
+  return info->ta_umask;
 }

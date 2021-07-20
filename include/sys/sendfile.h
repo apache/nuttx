@@ -35,8 +35,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_LIB_SENDFILE_BUFSIZE
-#  define CONFIG_LIB_SENDFILE_BUFSIZE 512
+#ifndef CONFIG_SENDFILE_BUFSIZE
+#  define CONFIG_SENDFILE_BUFSIZE 512
 #endif
 
 /****************************************************************************

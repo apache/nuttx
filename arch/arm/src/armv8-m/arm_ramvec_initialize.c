@@ -94,7 +94,7 @@
  *
  * REVISIT: Can this alignment requirement vary from core-to-core?  Yes, it
  * depends on the number of vectors supported by the MCU. The safest thing
- * to do is to put the vector table at the beginning of RAM in order toforce
+ * to do is to put the vector table at the beginning of RAM in order to force
  * the highest alignment possible.
  */
 

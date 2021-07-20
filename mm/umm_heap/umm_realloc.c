@@ -50,6 +50,7 @@
  *
  ****************************************************************************/
 
+#undef realloc /* See mm/README.txt */
 FAR void *realloc(FAR void *oldmem, size_t size)
 {
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -61,6 +62,10 @@ FAR void *realloc(FAR void *oldmem, size_t size)
       mm_free(USR_HEAP, oldmem);
       return NULL;
     }
+
+  /* Initialize the user heap if it wasn't yet */
+
+  umm_try_initialize();
 
   /* Loop until we successfully allocate the memory or until an error
    * occurs. If we fail to allocate memory on the first pass, then call

@@ -32,6 +32,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include <nuttx/semaphore.h>
 
@@ -347,13 +348,19 @@ union inode_ops_u
 
 struct inode
 {
+  FAR struct inode *i_parent;   /* Link to parent level inode */
   FAR struct inode *i_peer;     /* Link to same level inode */
   FAR struct inode *i_child;    /* Link to lower level inode */
   int16_t           i_crefs;    /* References to inode */
   uint16_t          i_flags;    /* Flags for inode */
   union inode_ops_u u;          /* Inode operations */
-#ifdef CONFIG_FILE_MODE
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   mode_t            i_mode;     /* Access mode flags */
+  uid_t             i_owner;    /* Owner */
+  gid_t             i_group;    /* Group */
+  struct timespec   i_atime;    /* Time of last access */
+  struct timespec   i_mtime;    /* Time of last modification */
+  struct timespec   i_ctime;    /* Time of last status change */
 #endif
   FAR void         *i_private;  /* Per inode driver private data */
   char              i_name[1];  /* Name of inode (variable) */
@@ -491,7 +498,7 @@ void fs_initialize(void);
  * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
- *   mode - Access privileges (not used)
+ *   mode - Access privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -518,7 +525,7 @@ int register_driver(FAR const char *path,
  * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
- *   mode - Access privileges (not used)
+ *   mode - Access privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -596,7 +603,7 @@ int unregister_blockdriver(FAR const char *path);
  * Input Parameters:
  *   path - The path to the inode to create
  *   mtd  - The MTD driver structure
- *   mode - inode privileges (not used)
+ *   mode - inode privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -971,18 +978,6 @@ int lib_flushall(FAR struct streamlist *list);
 #endif
 
 /****************************************************************************
- * Name: lib_sendfile
- *
- * Description:
- *   Transfer a file
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SENDFILE
-ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
-#endif
-
-/****************************************************************************
  * Name: file_read
  *
  * Description:
@@ -1111,6 +1106,18 @@ ssize_t file_pread(FAR struct file *filep, FAR void *buf, size_t nbytes,
 
 ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
                     size_t nbytes, off_t offset);
+
+/****************************************************************************
+ * Name: file_sendfile
+ *
+ * Description:
+ *   Equivalent to the standard sendfile function except that is accepts a
+ *   struct file instance instead of a file descriptor.
+ *
+ ****************************************************************************/
+
+ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
+                      off_t *offset, size_t count);
 
 /****************************************************************************
  * Name: file_seek

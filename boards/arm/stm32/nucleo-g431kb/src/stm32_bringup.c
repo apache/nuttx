@@ -88,6 +88,26 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32_COMP
+  /* Initialize and register the COMP driver. */
+
+  ret = stm32_comp_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_comp_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DAC
+  /* Initialize and register the DAC driver. */
+
+  ret = stm32_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_dac_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

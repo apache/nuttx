@@ -94,7 +94,8 @@ FAR struct inode *inode_unlink(FAR const char *path)
           desc.parent->i_child = node->i_peer;
         }
 
-      node->i_peer = NULL;
+      node->i_peer   = NULL;
+      node->i_parent = NULL;
     }
 
   RELEASE_SEARCH(&desc);
