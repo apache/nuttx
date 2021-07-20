@@ -348,9 +348,5 @@ void xtensa_pminitialize(void);
 void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
-#ifdef CONFIG_XTENSA_DUMPBT_ON_ASSERT
-void xtensa_backtrace_start(uint32_t *pc, uint32_t *sp, uint32_t *next_pc);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_H */
