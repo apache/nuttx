@@ -3389,6 +3389,16 @@ config BOARDCTL_UNIQUEKEY_SIZE
 		Provides the size of the memory buffer that must be provided by the
 		caller of board_uniquekey() in which to receive the board unique KEY.
 
+config BOARDCTL_SWITCH_BOOT
+	bool "Enable switch boot system support"
+	default n
+	---help---
+		BOARDIOC_SWITCH_BOOT is required to communicate the boot partition
+		from userspace (OTA subsystem) to board for A/B boot or single boot
+		case. It can be used to change the system boot behavior. For instance,
+		once a firmware updated successfully, this boardctl can be used to
+		modify FLASH bank selection.
+
 config BOARDCTL_MKRD
 	bool "Enable application space creation of RAM disks"
 	default n
