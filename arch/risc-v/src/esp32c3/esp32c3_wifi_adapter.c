@@ -5659,6 +5659,7 @@ int esp_wifi_sta_connect(void)
 {
   int ret;
   uint32_t ticks;
+  wifi_config_t wifi_cfg;
 
   esp_wifi_lock(true);
 
@@ -5697,6 +5698,21 @@ int esp_wifi_sta_connect(void)
     {
       g_sta_reconnect = false;
       wlinfo("INFO: Failed to connect to AP\n");
+      ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("ERROR: Failed to get Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+
+      memset(&wifi_cfg.sta, 0x0, sizeof(wifi_sta_config_t));
+      ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("ERROR: Failed to set Wi-Fi config data ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+
       return -1;
     }
 
@@ -5727,6 +5743,7 @@ errout_wifi_connect:
 int esp_wifi_sta_disconnect(void)
 {
   int ret;
+  wifi_config_t wifi_cfg;
 
   esp_wifi_lock(true);
 
@@ -5741,6 +5758,21 @@ int esp_wifi_sta_disconnect(void)
   else
     {
       wlinfo("INFO: Wi-Fi disconnect complete, success\n");
+    }
+
+  ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("ERROR: Failed to get Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
+  memset(&wifi_cfg.sta, 0x0, sizeof(wifi_sta_config_t));
+  ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("ERROR: Failed to set Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
     }
 
   esp_wifi_lock(false);
