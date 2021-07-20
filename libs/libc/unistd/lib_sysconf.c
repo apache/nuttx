@@ -207,6 +207,9 @@ long sysconf(int name)
 
   switch (name)
     {
+      case _SC_CLK_TCK:
+        return CLOCKS_PER_SEC;
+
       case _SC_OPEN_MAX:
         return _POSIX_OPEN_MAX;
 
