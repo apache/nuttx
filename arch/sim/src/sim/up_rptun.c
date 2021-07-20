@@ -52,6 +52,7 @@ struct sim_rptun_dev_s
   struct sim_rptun_shmem_s *shmem;
   struct simple_addrenv_s   addrenv[2];
   char                      cpuname[RPMSG_NAME_SIZE + 1];
+  char                      shmemname[RPMSG_NAME_SIZE + 1];
 };
 
 /****************************************************************************
@@ -82,9 +83,61 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                                  struct sim_rptun_dev_s, rptun);
-  struct sim_rptun_shmem_s *shmem = priv->shmem;
 
-  return &shmem->rsc;
+  if (priv->shmem)
+    {
+      return &priv->shmem->rsc;
+    }
+
+  while (priv->shmem == NULL)
+    {
+      priv->shmem = host_alloc_shmem(priv->shmemname, sizeof(*priv->shmem),
+                                     priv->master);
+      usleep(1000);
+
+      /* Master isn't ready, sleep and try again */
+    }
+
+  if (priv->master)
+    {
+      struct rptun_rsc_s *rsc = &priv->shmem->rsc;
+
+      rsc->rsc_tbl_hdr.ver          = 1;
+      rsc->rsc_tbl_hdr.num          = 1;
+      rsc->offset[0]                = offsetof(struct rptun_rsc_s,
+                                               rpmsg_vdev);
+      rsc->rpmsg_vdev.type          = RSC_VDEV;
+      rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
+      rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
+                                    | 1 << VIRTIO_RPMSG_F_ACK
+                                    | 1 << VIRTIO_RPMSG_F_BUFSZ;
+      rsc->rpmsg_vdev.num_of_vrings = 2;
+      rsc->rpmsg_vring0.align       = 8;
+      rsc->rpmsg_vring0.num         = 8;
+      rsc->rpmsg_vring1.align       = 8;
+      rsc->rpmsg_vring1.num         = 8;
+      rsc->config.rxbuf_size        = 0x800;
+      rsc->config.txbuf_size        = 0x800;
+
+      priv->shmem->base              = (uintptr_t)priv->shmem;
+    }
+  else
+    {
+      /* Wait untils master is ready */
+
+      while (priv->shmem->base == 0)
+        {
+          usleep(1000);
+        }
+
+      priv->addrenv[0].va          = (uintptr_t)priv->shmem;
+      priv->addrenv[0].pa          = priv->shmem->base;
+      priv->addrenv[0].size        = sizeof(*priv->shmem);
+
+      simple_addrenv_initialize(priv->addrenv);
+    }
+
+  return &priv->shmem->rsc;
 }
 
 static bool sim_rptun_is_autostart(struct rptun_dev_s *dev)
@@ -199,63 +252,16 @@ int up_rptun_init(const char *shmemname, const char *cpuname, bool master)
       return -ENOMEM;
     }
 
-  dev->shmem = host_alloc_shmem(shmemname, sizeof(*dev->shmem),
-                                master);
-  if (dev->shmem == NULL)
-    {
-      kmm_free(dev);
-      return -ENOMEM;
-    }
-
   dev->master = master;
   dev->rptun.ops = &g_sim_rptun_ops;
   strncpy(dev->cpuname, cpuname, RPMSG_NAME_SIZE);
+  strncpy(dev->shmemname, shmemname, RPMSG_NAME_SIZE);
   list_add_tail(&g_dev_list, &dev->node);
-
-  if (master)
-    {
-      struct rptun_rsc_s *rsc = &dev->shmem->rsc;
-
-      rsc->rsc_tbl_hdr.ver          = 1;
-      rsc->rsc_tbl_hdr.num          = 1;
-      rsc->offset[0]                = offsetof(struct rptun_rsc_s,
-                                               rpmsg_vdev);
-      rsc->rpmsg_vdev.type          = RSC_VDEV;
-      rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
-      rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
-                                    | 1 << VIRTIO_RPMSG_F_ACK
-                                    | 1 << VIRTIO_RPMSG_F_BUFSZ;
-      rsc->rpmsg_vdev.num_of_vrings = 2;
-      rsc->rpmsg_vring0.align       = 8;
-      rsc->rpmsg_vring0.num         = 8;
-      rsc->rpmsg_vring1.align       = 8;
-      rsc->rpmsg_vring1.num         = 8;
-      rsc->config.rxbuf_size        = 0x800;
-      rsc->config.txbuf_size        = 0x800;
-
-      dev->shmem->base              = (uintptr_t)dev->shmem;
-    }
-  else
-    {
-      /* Wait untils master is ready */
-
-      while (dev->shmem->base == 0)
-        {
-          host_sleep(1000);
-        }
-
-      dev->addrenv[0].va          = (uintptr_t)dev->shmem;
-      dev->addrenv[0].pa          = dev->shmem->base;
-      dev->addrenv[0].size        = sizeof(*dev->shmem);
-
-      simple_addrenv_initialize(dev->addrenv);
-    }
 
   ret = rptun_initialize(&dev->rptun);
   if (ret < 0)
     {
       list_delete(&dev->node);
-      host_free_shmem(dev->shmem);
       kmm_free(dev);
     }
 
