@@ -267,10 +267,19 @@
 
 /* Accessor functions associated with getopt(). */
 
-#define optarg  (*(getoptargp()))
-#define opterr  (*(getopterrp()))
-#define optind  (*(getoptindp()))
-#define optopt  (*(getoptoptp()))
+#define optarg                           (*(getoptargp()))
+#define opterr                           (*(getopterrp()))
+#define optind                           (*(getoptindp()))
+#define optopt                           (*(getoptoptp()))
+
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define lseek64                        lseek
+#  define pread64                        pread
+#  define pwrite64                       pwrite
+#  define truncate64                     truncate
+#  define ftruncate64                    ftruncate
+#  define lockf64                        lockf
+#endif
 
 /****************************************************************************
  * Public Data
