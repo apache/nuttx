@@ -176,7 +176,6 @@ struct local_conn_s
 
     struct
     {
-      uint16_t lc_remaining;   /* (For binary compatibility with peer) */
       volatile int lc_result;  /* Result of the connection operation (client) */
     } client;
 
