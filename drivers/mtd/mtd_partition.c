@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -430,8 +431,8 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                    * return the sum to the caller.
                    */
 
-                  *ppv = (FAR void *)(base +
-                                      priv->firstblock * priv->blocksize);
+                  *ppv = (FAR void *)(uintptr_t)
+                            (base + priv->firstblock * priv->blocksize);
                 }
             }
         }

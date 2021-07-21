@@ -679,8 +679,9 @@ int lc823450_mtd_initialize(uint32_t devno)
                                    partinfo[i].nblocks);
       if (!g_mtdpart[i])
         {
-          finfo("%s(): mtd_partition failed. startblock=%lu nblocks=%lu\n",
-                __func__, partinfo[i].startblock, partinfo[i].nblocks);
+          finfo("%s(): mtd_partition failed. startblock=%"
+                PRIuOFF " nblocks=%" PRIuOFF "\n", __func__,
+                partinfo[i].startblock, partinfo[i].nblocks);
           mtd_semgive(&g_sem);
           DEBUGASSERT(0);
           return -EIO;

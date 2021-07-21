@@ -2234,7 +2234,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct mmcsd_state_s *)inode->i_private;
-  finfo("startsector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("startsector: %" PRIuOFF " nsectors: %u sectorsize: %d\n",
         startsector, nsectors, priv->blocksize);
 
   if (nsectors > 0)
