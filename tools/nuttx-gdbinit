@@ -65,7 +65,7 @@ define _examine_target
     python if (type(gdb.lookup_global_symbol("g_assignedtasks")) is gdb.Symbol) : \
     gdb.execute("set $_target_has_smp = 1")
 
-    set $_target_max_tasks = sizeof(g_pidhash) / sizeof(struct pidhash_s)
+    set $_target_max_tasks = g_npidhash
 
     python if (type(gdb.lookup_global_symbol("up_check_tcbstack")) is gdb.Symbol) : \
     gdb.execute("set $_target_has_stack_coloration = 1")
