@@ -1083,8 +1083,8 @@ int amebaz_wl_get_freq(FAR struct amebaz_dev_s *priv, struct iwreq *iwr)
 #if defined(CONFIG_WPA3_SUPPORT)
 void amebaz_wl_enable_wpa3(uint8_t enable)
 {
-    extern uint8_t rtw_cmd_tsk_spt_wap3;
-	rtw_cmd_tsk_spt_wap3 = enable; /* 1:enable, 0:disable */
+  extern uint8_t rtw_cmd_tsk_spt_wap3;
+  rtw_cmd_tsk_spt_wap3 = enable; /* 1:enable, 0:disable */
 }
 #endif
 
