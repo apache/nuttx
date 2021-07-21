@@ -172,7 +172,7 @@ chip/$(NRFXLIB_UNPACK): $(NRFXLIB_TGZ)
 
 context:: chip/$(NRFXLIB_UNPACK)
 
-clean_context::
+distclean::
 	$(call DELFILE, chip/$(NRFXLIB_TGZ))
 	$(call DELDIR, chip/$(NRFXLIB_UNPACK))
 

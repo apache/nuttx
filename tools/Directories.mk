@@ -37,7 +37,7 @@
 #   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
 CLEANDIRS :=
-CCLEANDIRS := boards $(APPDIR) graphics $(ARCH_SRC)
+CCLEANDIRS := boards $(APPDIR) graphics
 KERNDEPDIRS :=
 USERDEPDIRS :=
 
