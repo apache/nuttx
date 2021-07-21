@@ -72,15 +72,9 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   struct tcb_s *tcb;
 #endif
 #ifdef CONFIG_SYSLOG_TIMESTAMP
-  struct timespec ts =
-  {
-  };
-
+  struct timespec ts;
 #if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
-  struct tm tm =
-  {
-  };
-
+  struct tm tm;
   char date_buf[CONFIG_SYSLOG_TIMESTAMP_BUFFER];
 #endif
 #endif
@@ -92,6 +86,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   syslogstream_create(&stream);
 
 #ifdef CONFIG_SYSLOG_TIMESTAMP
+  ts.tv_sec = 0;
+  ts.tv_nsec = 0;
+
+#if defined(CONFIG_SYSLOG_TIMESTAMP_FORMATTED)
+  memset(&tm, 0, sizeof(tm));
+#endif
+
   /* Get the current time.  Since debug output may be generated very early
    * in the start-up sequence, hardware timer support may not yet be
    * available.
