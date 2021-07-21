@@ -100,7 +100,7 @@ chip/$(WIRELESS_DRV_UNPACK): $(WIRELESS_DRV_ZIP)
 
 context:: chip/$(WIRELESS_DRV_UNPACK)
 
-clean_context::
+distclean::
 	$(call DELFILE, chip/$(WIRELESS_DRV_ZIP))
 	$(call DELDIR, chip/$(WIRELESS_DRV_UNPACK))
 

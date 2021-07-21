@@ -339,8 +339,6 @@ depend: .depend
 
 context::
 
-clean_context::
-
 clean:
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board clean ; \
@@ -351,7 +349,7 @@ clean:
 	$(call DELFILE, libarch$(LIBEXT))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board distclean ; \
 	fi
