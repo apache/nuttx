@@ -63,10 +63,19 @@ CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/app/stdio_port
 CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/misc/utilities/include
 CFLAGS += -I$(TOPDIR)/arch/arm/src/rtl8720c/8710c/fwlib/include
 
+ifeq ($(CONFIG_WPA3_SUPPORT),y)
+CFLAGS += -I$(TOPDIR)/../external/mbedtls_2.4.0/include
+ifeq ($(CONFIG_REALTEK_SSL_ROM_CODE),y)
+CHIP_CSRCS += amebaz_ssl_func.c
+else
+CHIP_CSRCS += bignum.c ecp.c ecp_curves.c
+endif # CONFIG_REALTEK_SSL_ROM_CODE
+endif # CONFIG_WPA3_SUPPORT
+
 CFLAGS += -Wno-attributes
 
 ifeq ($(CONFIG_IEEE80211_REALTEK_AMEBAZ),y)
-CHIP_CSRCS += amebaZ.c amebaz_driver.c amebaz_netdev.c amebaz_depend.c amebaz_wlan.c ameba_func.c
+CHIP_CSRCS += amebaz.c amebaz_driver.c amebaz_netdev.c amebaz_depend.c amebaz_wlan.c
 CHIP_CSRCS += amebaz_hci_board.c amebaz_coex.c amebaz_firmware.c
 endif # CONFIG_IEEE80211_REALTEK_AMEBAZ
 

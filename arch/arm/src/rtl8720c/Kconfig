@@ -32,6 +32,17 @@ endchoice
 
 config AMEBA_NR_IRQS
 	int "Interrupt Number"
+	
+config WPA3_SUPPORT
+	bool "WPA3 support"
+	select WPA3_SUPPORT
+	default n
+	
+config REALTEK_SSL_ROM_CODE
+	bool "Select using realtek ssl rom code"
+	depends on WPA3_SUPPORT
+	select REALTEK_SSL_ROM_CODE	
+	default y
 
 menuconfig AMEBA_UART
 	bool "AMEBA UART Chip support"

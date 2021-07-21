@@ -1080,6 +1080,14 @@ int amebaz_wl_get_freq(FAR struct amebaz_dev_s *priv, struct iwreq *iwr)
   return ret;
 }
 
+#if defined(CONFIG_WPA3_SUPPORT)
+void amebaz_wl_enable_wpa3(uint8_t enable)
+{
+    extern uint8_t rtw_cmd_tsk_spt_wap3;
+	rtw_cmd_tsk_spt_wap3 = enable; /* 1:enable, 0:disable */
+}
+#endif
+
 static struct amebaz_dev_s *amebaz_allocate_device(int devnum)
 {
   FAR struct amebaz_dev_s *priv;
@@ -1169,6 +1177,10 @@ int amebaz_wl_initialize(unsigned char mode)
 
       gp_wlan_dev[i] = priv;
     }
+
+#if defined(CONFIG_WPA3_SUPPORT)
+  amebaz_wl_enable_wpa3(1);
+#endif
 
   if (mode == RTW_MODE_STA_AP)
     {

@@ -97,5 +97,35 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   LDFLAGS += -Wl,--gc-sections
 endif
 
+LDFLAGS += -Wl,--defsym,netif_is_valid_IP=netif_is_valid_ip
+LDFLAGS += -Wl,--defsym,rtw_timerCreate=rtw_timer_create
+LDFLAGS += -Wl,--defsym,rtw_timerStop=rtw_timer_stop
+LDFLAGS += -Wl,--defsym,rtw_timerDelete=rtw_timer_delete
+LDFLAGS += -Wl,--defsym,rtw_timerIsTimerActive=rtw_timer_is_timer_active
+LDFLAGS += -Wl,--defsym,rtw_timerChangePeriod=rtw_timer_change_period
+LDFLAGS += -Wl,--defsym,rtw_timerGetID=rtw_timer_get_id
+LDFLAGS += -Wl,--defsym,rtw_timerStart=rtw_timer_start
+LDFLAGS += -Wl,--defsym,rtw_timerStartFromISR=rtw_timer_start_from_isr
+LDFLAGS += -Wl,--defsym,rtw_timerStopFromISR=rtw_timer_stop_from_isr
+LDFLAGS += -Wl,--defsym,rtw_timerResetFromISR=rtw_timer_reset_from_isr
+LDFLAGS += -Wl,--defsym,rtw_timerChangePeriodFromISR=rtw_timer_change_period_from_isr
+LDFLAGS += -Wl,--defsym,rtw_timerReset=rtw_timer_reset
+LDFLAGS += -Wl,--defsym,rtw_getFreeHeapSize=rtw_get_free_heap_size
+LDFLAGS += -Wl,--defsym,xTaskGetSchedulerState=xtask_get_scheduler_state
+LDFLAGS += -Wl,--defsym,xTaskGetTickCount=xtask_get_tick_count
+LDFLAGS += -Wl,--defsym,pcTaskGetName=pctask_get_name
+
+LDFLAGS += -Wl,--defsym,aesccmp_construct_mic_iv=aesccmp_construct_mic_iv_ram
+LDFLAGS += -Wl,--defsym,aesccmp_construct_mic_header1=aesccmp_construct_mic_header1_ram
+LDFLAGS += -Wl,--defsym,aesccmp_construct_ctr_preload=aesccmp_construct_ctr_preload_ram
+LDFLAGS += -Wl,--defsym,rom_psk_CalcGTK=ram_patch_rom_psk_CalcGTK
+LDFLAGS += -Wl,--defsym,rom_psk_CalcPTK=ram_patch_rom_psk_CalcPTK
+LDFLAGS += -Wl,--defsym,aes_80211_encrypt=ram_patch_aes_80211_encrypt
+LDFLAGS += -Wl,--defsym,aes_80211_decrypt=ram_patch_aes_80211_decrypt
+
 EXTRA_LIBS += -l_soc_is
+ifeq ($(CONFIG_WPA3_SUPPORT),y)
+EXTRA_LIBS += -l_wlan_wpa3
+else
 EXTRA_LIBS += -l_wlan
+endif
