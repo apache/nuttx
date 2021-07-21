@@ -24,7 +24,8 @@ libcxx-$(VERSION).src.tar.xz:
 	$(Q) curl -O -L https://github.com/llvm/llvm-project/releases/download/llvmorg-$(VERSION)/libcxx-$(VERSION).src.tar.xz
 
 libcxx: libcxx-$(VERSION).src.tar.xz
-	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz
+	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz \
+	         --exclude libcxx-$(VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(VERSION).src libcxx
 	$(Q) touch $@
 
