@@ -1570,7 +1570,7 @@ void spiffs_fobj_event(FAR struct spiffs_s *fs,
 
           if (ev != SPIFFS_EV_NDXDEL)
             {
-              finfo("Setting objid=%d (offset=%" PRIu32 ") objhdr_pgndx "
+              finfo("Setting objid=%d (offset=%" PRIuOFF ") objhdr_pgndx "
                     "to %04x size=%" PRIu32 "\n",
                     fobj->objid, fobj->offset, new_pgndx, new_size);
 
@@ -1737,8 +1737,8 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
   int ret = OK;
   int ret2;
 
-  finfo("Append %zu bytes @ offs=%jd of size=%jd\n",
-        len, (intmax_t)offset, (intmax_t)fobj->size);
+  finfo("Append %zu bytes @ offs=%" PRIdOFF " of size=%" PRIdOFF "\n",
+        len, offset, fobj->size);
 
   if (offset > fobj->size)
     {
@@ -1891,9 +1891,9 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                       return ret;
                     }
 
-                  finfo("objid=%04x store new size I %jd in objhdr, "
-                        "%04x:%04x, nwritten=%zu\n",
-                        fobj->objid, (intmax_t)(offset + nwritten),
+                  finfo("objid=%04x store new size I %" PRIdOFF
+                        " in objhdr, %04x:%04x, nwritten=%zu\n",
+                        fobj->objid, offset + nwritten,
                         new_objhdr_page, 0,
                         nwritten);
                 }
@@ -2008,7 +2008,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                     }
 
                   finfo("objid=%04x found object index at "
-                        "page=%04x [fobj size=%" PRIu32 "]\n",
+                        "page=%04x [fobj size=%" PRIuOFF "]\n",
                         fobj->objid, pgndx, fobj->size);
 
                   ret = spiffs_cache_read(fs,
@@ -2200,9 +2200,9 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
                                        offset + nwritten,
                                        &new_objhdr_page);
 
-      finfo("objid=%04x store new size II %jd in objhdr, %04x:%04x, "
-            "nwritten=%zu, ret=%d\n",
-            fobj->objid, (intmax_t)(offset + nwritten),
+      finfo("objid=%04x store new size II %" PRIdOFF
+            " in objhdr, %04x:%04x, nwritten=%zu, ret=%d\n",
+            fobj->objid, offset + nwritten,
             new_objhdr_page, 0, nwritten,
             ret2);
 

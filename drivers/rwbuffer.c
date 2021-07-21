@@ -540,8 +540,8 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
       off_t wrbend;
       off_t invend;
 
-      finfo("startblock=%jd blockcount=%zu\n",
-            (intmax_t)startblock, blockcount);
+      finfo("startblock=%" PRIdOFF " blockcount=%zu\n",
+            startblock, blockcount);
 
       ret = rwb_semtake(&rwb->wrsem);
       if (ret < 0)
@@ -682,8 +682,8 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
       off_t rhbend;
       off_t invend;
 
-      finfo("startblock=%jd blockcount=%zu\n",
-            (intmax_t)startblock, blockcount);
+      finfo("startblock=%" PRIdOFF " blockcount=%zu\n",
+            startblock, blockcount);
 
       ret = rwb_semtake(&rwb->rhsem);
       if (ret < 0)
@@ -937,7 +937,7 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
 
           if (rwb->rhnblocks > 0)
             {
-              off_t  bufferend;
+              off_t bufferend;
 
               /* How many blocks are available in this buffer? */
 
@@ -1125,7 +1125,7 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 #ifdef CONFIG_DRVR_WRITEBUFFER
   if (rwb->wrmaxblocks > 0)
     {
-      finfo("startblock=%d wrbuffer=%p\n", startblock, wrbuffer);
+      finfo("startblock=%" PRIdOFF " wrbuffer=%p\n", startblock, wrbuffer);
 
       ret = nxsem_wait(&rwb->wrsem);
       if (ret < 0)

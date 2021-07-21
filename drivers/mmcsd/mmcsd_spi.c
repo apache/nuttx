@@ -1167,7 +1167,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   int    i;
   int ret;
 
-  finfo("start_sector=%" PRIu32 " nsectors=%u\n", start_sector, nsectors);
+  finfo("start_sector=%" PRIuOFF " nsectors=%u\n", start_sector, nsectors);
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
@@ -1219,12 +1219,12 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   if (IS_BLOCK(slot->type))
     {
       offset = start_sector;
-      finfo("nbytes=%zu sector offset=%jd\n", nbytes, (intmax_t)offset);
+      finfo("nbytes=%zu sector offset=%" PRIdOFF "\n", nbytes, offset);
     }
   else
     {
       offset = start_sector * SECTORSIZE(slot);
-      finfo("nbytes=%zu byte offset=%jd\n", nbytes, (intmax_t)offset);
+      finfo("nbytes=%zu byte offset=%" PRIdOFF "\n", nbytes, offset);
     }
 
   /* Select the slave */
@@ -1328,7 +1328,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   int i;
   int ret;
 
-  finfo("start_sector=%" PRIu32 " nsectors=%u\n", start_sector, nsectors);
+  finfo("start_sector=%" PRIuOFF " nsectors=%u\n", start_sector, nsectors);
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!buffer)
@@ -1388,12 +1388,12 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   if (IS_BLOCK(slot->type))
     {
       offset = start_sector;
-      finfo("nbytes=%zu sector offset=%jd\n", nbytes, (intmax_t)offset);
+      finfo("nbytes=%zu sector offset=%" PRIdOFF "\n", nbytes, offset);
     }
   else
     {
       offset = start_sector * SECTORSIZE(slot);
-      finfo("nbytes=%zu byte offset=%jd\n", nbytes, (intmax_t)offset);
+      finfo("nbytes=%zu byte offset=%" PRIdOFF "\n", nbytes, offset);
     }
 
   mmcsd_dumpbuffer("Write buffer", buffer, nbytes);
@@ -1594,7 +1594,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
   finfo("geo_available:     %d\n", geometry->geo_available);
   finfo("geo_mediachanged:  %d\n", geometry->geo_mediachanged);
   finfo("geo_writeenabled:  %d\n", geometry->geo_writeenabled);
-  finfo("geo_nsectors:      %" PRIu32 "\n", geometry->geo_nsectors);
+  finfo("geo_nsectors:      %" PRIuOFF "\n", geometry->geo_nsectors);
   finfo("geo_sectorsize:    %" PRIi16 "\n", geometry->geo_sectorsize);
 
   return OK;
