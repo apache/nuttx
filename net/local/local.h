@@ -178,13 +178,6 @@ struct local_conn_s
     {
       volatile int lc_result;  /* Result of the connection operation (client) */
     } client;
-
-    /* Fields common to connected peers (connected or accepted) */
-
-    struct
-    {
-      uint16_t lc_remaining;   /* Bytes remaining in the incoming stream */
-    } peer;
   } u;
 #endif /* CONFIG_NET_LOCAL_STREAM */
 };
@@ -401,6 +394,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
+ *   preamble Flag to indicate the preamble sync header assembly
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -409,7 +403,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  ****************************************************************************/
 
 int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len);
+                      size_t len, bool preamble);
 
 /****************************************************************************
  * Name: local_recvmsg
@@ -450,6 +444,7 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   buf   - Local to store the received data
  *   len   - Length of data to receive [in]
  *           Length of data actually received [out]
+ *   once  - Flag to indicate the buf may only be read once
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -459,7 +454,8 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *
  ****************************************************************************/
 
-int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len);
+int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
+                    size_t *len, bool once);
 
 /****************************************************************************
  * Name: local_getaddr
