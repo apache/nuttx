@@ -9,6 +9,18 @@ config DISABLE_MOUNTPOINT
 	bool "Disable support for mount points"
 	default n
 
+config FS_LARGEFILE
+	bool "Large File Support"
+	default !DEFAULT_SMALL
+	---help---
+		Support files which's length is larger than 4GB:
+		https://www.opengroup.org/platform/lfs.html
+
+		Note: the protected and kernel mode on 32bit platform can't exceed
+		the 4GB limitation since the auto generated proxy and stub still
+		cut 64bit to 32bit value. Please check tools/mksyscall.c for more
+		information.
+
 config FS_AUTOMOUNTER
 	bool "Auto-mounter"
 	default n

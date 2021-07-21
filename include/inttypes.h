@@ -306,6 +306,36 @@
 #define SCNuMAX     "ju"
 #define SCNxMAX     "jx"
 
+/* off_t */
+
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#define PRIdOFF     PRId64
+#define PRIiOFF     PRIi64
+#define PRIoOFF     PRIo64
+#define PRIuOFF     PRIu64
+#define PRIxOFF     PRIx64
+#define PRIXOFF     PRIX64
+
+#define SCNdOFF     SCNd64
+#define SCNiOFF     SCNi64
+#define SCNoOFF     SCNo64
+#define SCNuOFF     SCNu64
+#define SCNxOFF     SCNx64
+#else
+#define PRIdOFF     PRId32
+#define PRIiOFF     PRIi32
+#define PRIoOFF     PRIo32
+#define PRIuOFF     PRIu32
+#define PRIxOFF     PRIx32
+#define PRIXOFF     PRIX32
+
+#define SCNdOFF     SCNd32
+#define SCNiOFF     SCNi32
+#define SCNoOFF     SCNo32
+#define SCNuOFF     SCNu32
+#define SCNxOFF     SCNx32
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/

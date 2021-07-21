@@ -122,6 +122,13 @@
 #define st_ctime     st_ctim.tv_sec
 #define st_mtime     st_mtim.tv_sec
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define stat64     stat
+#  define fstat64    fstat
+#  define lstat64    lstat
+#  define fstatat64  fstatat
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/

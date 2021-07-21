@@ -101,6 +101,18 @@
 #define LIO_NOWAIT      0
 #define LIO_WAIT        1
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define aiocb64       aiocb
+#  define aio_read64    aio_read
+#  define aio_write64   aio_write
+#  define aio_error64   aio_error
+#  define aio_return64  aio_return
+#  define aio_cancel64  aio_cancel
+#  define aio_suspend64 aio_suspend
+#  define aio_fsync64   aio_fsync
+#  define lio_listio64  lio_listio
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
