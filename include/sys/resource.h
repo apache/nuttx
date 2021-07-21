@@ -58,6 +58,22 @@
 #define RLIMIT_STACK    6           /* Limit on stack size */
 #define RLIMIT_AS       7           /* Limit on address space size */
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define RLIM_INFINITY    UINT64_MAX /* No limit */
+#  define RLIM_SAVED_MAX   UINT64_MAX /* Unrepresentable saved hard limit */
+#  define RLIM_SAVED_CUR   UINT64_MAX /* Unrepresentable saved soft limit */
+
+#  define RLIM64_INFINITY  RLIM_INFINITY
+#  define RLIM64_SAVED_MAX RLIM_SAVED_MAX
+#  define RLIM64_SAVED_CUR RLIM_SAVED_CUR
+
+#  define getrlimit64      getrlimit
+#  define setrlimit64      setrlimit
+#  define prlimit64        prlimit
+
+#  define rlimit64         rlimit
+#  define rlim64_t         rlim_t
+#else
 /* The following symbolic constants are defined.  Each is a value of type
  * rlim_t.
  *
@@ -66,9 +82,10 @@
  * distinct from RLIM_INFINITY.
  */
 
-#define RLIM_INFINITY   UINT32_MAX  /* No limit */
-#define RLIM_SAVED_MAX  UINT32_MAX  /* Unrepresentable saved hard limit */
-#define RLIM_SAVED_CUR  UINT32_MAX  /* Unrepresentable saved soft limit */
+#  define RLIM_INFINITY  UINT32_MAX /* No limit */
+#  define RLIM_SAVED_MAX UINT32_MAX /* Unrepresentable saved hard limit */
+#  define RLIM_SAVED_CUR UINT32_MAX /* Unrepresentable saved soft limit */
+#endif
 
 /****************************************************************************
  * Type Definitions
@@ -78,7 +95,11 @@
  * It must be an unsigned integral type.
  */
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+typedef uint64_t rlim_t;
+#else
 typedef uint32_t rlim_t;
+#endif
 
 /* Minimal, compliant rlimit structure */
 

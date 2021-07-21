@@ -66,6 +66,13 @@
 #  define environ get_environ_ptr()
 #endif
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define mkstemp64            mkstemp
+#  define mkostemp64           mkostemp
+#  define mkstemps64           mkstemps
+#  define mkostemps64          mkostemps
+#endif
+
 #define strtof_l(s, e, l)      strtof(s, e)
 #define strtod_l(s, e, l)      strtod(s, e)
 #define strtold_l(s, e, l)     strtold(s, e)

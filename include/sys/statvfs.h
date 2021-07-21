@@ -38,6 +38,11 @@
 #define ST_RDONLY             0x0001 /* Mount read-only.  */
 #define ST_NOSUID             0x0002 /* Ignore suid and sgid bits.  */
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define statvfs64           statvfs
+#  define fstatvfs64          fstatvfs
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
