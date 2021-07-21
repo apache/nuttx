@@ -91,7 +91,7 @@ static ssize_t local_send(FAR struct socket *psock,
 
           /* Send the packet */
 
-          ret = local_send_packet(&peer->lc_outfile, buf, len);
+          ret = local_send_packet(&peer->lc_outfile, buf, len, false);
         }
         break;
 #endif /* CONFIG_NET_LOCAL_STREAM */
@@ -231,7 +231,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
   /* Send the packet */
 
-  ret = local_send_packet(&conn->lc_outfile, buf, len);
+  ret = local_send_packet(&conn->lc_outfile, buf, len, true);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the packet: %zd\n", ret);
