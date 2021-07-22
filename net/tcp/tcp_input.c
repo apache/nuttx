@@ -629,6 +629,17 @@ found:
 
   dev->d_len -= (len + iplen);
 
+  /* d_appdata should remove the tcp specific option field. */
+
+  if ((tcp->tcpoffset & 0xf0) > 0x50)
+    {
+      len = ((tcp->tcpoffset >> 4) - 5) << 2;
+      if (len > 0 && dev->d_len >= len)
+        {
+          dev->d_appdata += len;
+        }
+    }
+
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
    * in, unless we are in the SYN_RCVD state and receive a SYN, in which
