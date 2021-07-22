@@ -1458,6 +1458,30 @@ void up_trigger_irq(int irq);
 int up_prioritize_irq(int irq, int priority);
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+
+/****************************************************************************
+ * Name: up_set_secure_irq
+ *
+ * Description:
+ *   Secure an IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq(int irq, bool secure);
+
+/****************************************************************************
+ * Name: up_secure_irq_all
+ *
+ * Description:
+ *   Secure all IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq_all(bool secure);
+
+#endif
+
 /****************************************************************************
  * Function:  up_timer_initialize
  *
