@@ -143,6 +143,69 @@ static bool tcp_cmpsequence_callback(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Name: tcp_rebuild_sack_callback
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+static bool tcp_rebuild_sack_callback(FAR struct net_driver_s *dev,
+                                      FAR struct tcp_conn_s *conn,
+                                      FAR struct iob_qentry_s *qentry,
+                                      FAR void *data)
+{
+  uint32_t pendseq = tcp_getsequence_from_qentry(dev, qentry);
+  unsigned int iplen = (intptr_t)qentry->qe_priv;
+  unsigned int len = NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN;
+  FAR struct iob_s *iob = qentry->qe_head;
+
+  if (conn->sacks[conn->nsacks].left == 0)
+    {
+      conn->sacks[conn->nsacks].left = pendseq;
+      conn->sacks[conn->nsacks].right = pendseq + iob->io_pktlen - len;
+    }
+  else
+    {
+      if (conn->sacks[conn->nsacks].right != pendseq)
+        {
+          if (conn->nsacks == TCP_SACK_RANGES_MAX - 1)
+            {
+              return true;
+            }
+
+          conn->sacks[++conn->nsacks].left = pendseq;
+        }
+
+      conn->sacks[conn->nsacks].right = pendseq + iob->io_pktlen - len;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: tcp_rebuild_sack
+ ****************************************************************************/
+
+static void tcp_rebuild_sack(FAR struct net_driver_s *dev,
+                             FAR struct tcp_conn_s *conn)
+{
+  conn->nsacks = 0;
+
+  if (IOB_QEMPTY(&conn->ofoahead))
+    {
+      return;
+    }
+
+  memset(conn->sacks, 0, sizeof(conn->sacks));
+
+  tcp_foreach_ofosegment(dev, conn, tcp_rebuild_sack_callback, NULL);
+
+  if (conn->sacks[conn->nsacks].left != conn->sacks[conn->nsacks].right)
+    {
+      conn->nsacks++;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: tcp_reorder_ofosegment
  ****************************************************************************/
 
@@ -238,6 +301,10 @@ static void tcp_input_ofo(FAR struct net_driver_s *dev,
             }
         }
     }
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  tcp_rebuild_sack(dev, conn);
+#endif
 }
 #endif
 
@@ -575,6 +642,14 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       conn->flags    |= TCP_WSCALE;
                     }
 #endif
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+                  else if (opt == TCP_OPT_SACK_PERM &&
+                           dev->d_buf[hdrlen + 1 + i] ==
+                           TCP_OPT_SACK_PERM_LEN)
+                    {
+                      conn->flags    |= TCP_SACK;
+                    }
+#endif
                   else
                     {
                       /* All other options have a length field, so that we
@@ -764,10 +839,21 @@ found:
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
               dev->d_len += hdrlen;
               tcp_input_ofo(dev, conn, iplen);
-#endif
-              /* We never queue out-of-order segments. */
 
-              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+#  ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+              if (conn->flags | TCP_SACK)
+                {
+                  tcp_sack(dev, conn, TCP_ACK);
+                }
+              else
+#  endif
+#endif
+                {
+                  /* We never queue out-of-order segments. */
+
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                }
+
               return;
             }
         }
@@ -1004,6 +1090,14 @@ found:
                         conn->snd_scale = dev->d_buf[hdrlen + 2 + i];
                         conn->rcv_scale = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
                         conn->flags    |= TCP_WSCALE;
+                      }
+#endif
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+                    else if (opt == TCP_OPT_SACK_PERM &&
+                             dev->d_buf[hdrlen + 1 + i] ==
+                             TCP_OPT_SACK_PERM_LEN)
+                      {
+                        conn->flags    |= TCP_SACK;
                       }
 #endif
                     else
@@ -1376,6 +1470,9 @@ static void tcp_process_ofo(FAR struct net_driver_s *dev, uint8_t domain,
   FAR struct iob_qentry_s *qentry;
   FAR uint8_t *reassemble = NULL;
   FAR struct iob_qentry_s *next;
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  bool rebuild_sack = false;
+#endif
   FAR struct iob_s *iob;
   FAR uint8_t *d_buf;
   unsigned int iplen;
@@ -1454,6 +1551,10 @@ static void tcp_process_ofo(FAR struct net_driver_s *dev, uint8_t domain,
           iob_free_queue_qentry(iob, &conn->ofoahead,
                                 IOBUSER_NET_TCP_OFOAHEAD);
 
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+          rebuild_sack = true;
+#endif
+
           /* Re-traverse the pending list */
 
           qentry = conn->ofoahead.qh_head;
@@ -1476,6 +1577,13 @@ static void tcp_process_ofo(FAR struct net_driver_s *dev, uint8_t domain,
     {
       kmm_free(reassemble);
     }
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  if (rebuild_sack)
+    {
+      tcp_rebuild_sack(dev, conn);
+    }
+#endif
 }
 #endif
 

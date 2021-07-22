@@ -690,6 +690,17 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
     }
 #endif
 
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  if (tcp->flags == TCP_SYN ||
+      ((tcp->flags == (TCP_ACK | TCP_SYN)) && (conn->flags & TCP_SACK)))
+    {
+      tcp->optdata[optlen++] = TCP_OPT_NOOP;
+      tcp->optdata[optlen++] = TCP_OPT_NOOP;
+      tcp->optdata[optlen++] = TCP_OPT_SACK_PERM;
+      tcp->optdata[optlen++] = TCP_OPT_SACK_PERM_LEN;
+    }
+#endif
+
   tcp->tcpoffset         = ((TCP_HDRLEN + optlen) / 4) << 4;
   dev->d_len            += optlen;
 
@@ -697,6 +708,85 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   tcp_sendcommon(dev, conn, tcp);
 }
+
+/****************************************************************************
+ * Name: tcp_sack
+ *
+ * Description:
+ *   Setup to send a Selective-ACK packet
+ *
+ * Input Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP connection structure holding connection information
+ *   flags  - flags to apply to the TCP header
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+void tcp_sack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
+              uint16_t flags)
+{
+  FAR struct tcp_hdr_s *tcp = tcp_header(dev);
+  int optlen = 0;
+  int i;
+
+  /* Get values that vary with the underlying IP domain */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  if (IFF_IS_IPv6(dev->d_flags))
+#endif
+    {
+      /* Set the packet length for the TCP Maximum Segment Size */
+
+      dev->d_len  = IPv6TCP_HDRLEN;
+    }
+#endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  else
+#endif
+    {
+      /* Set the packet length for the TCP Maximum Segment Size */
+
+      dev->d_len  = IPv4TCP_HDRLEN;
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+  if (conn->nsacks > 0)
+    {
+      optlen = conn->nsacks * sizeof(struct tcp_sack_s);
+
+      tcp->optdata[0] = TCP_OPT_NOOP;
+      tcp->optdata[1] = TCP_OPT_NOOP;
+      tcp->optdata[2] = TCP_OPT_SACK;
+      tcp->optdata[3] = TCP_OPT_SACK_PERM_LEN + optlen;
+
+      optlen += 4;
+
+      for (i = 0; i < conn->nsacks; i++)
+        {
+          tcp_setsequence(&tcp->optdata[4 + i * 2 * sizeof(uint32_t)],
+                          conn->sacks[i].left);
+          tcp_setsequence(&tcp->optdata[4 + (i * 2 + 1) * sizeof(uint32_t)],
+                          conn->sacks[i].right);
+        }
+    }
+
+  tcp->flags     = flags;
+  dev->d_len    += optlen;
+  tcp->tcpoffset = ((TCP_HDRLEN + optlen) / 4) << 4;
+
+  tcp_sendcommon(dev, conn, tcp);
+}
+#endif
 
 /****************************************************************************
  * Name: tcp_send_txnotify

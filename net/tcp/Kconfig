@@ -143,6 +143,18 @@ config NET_TCP_OUT_OF_ORDER_BUFSIZE
 
 endif # NET_TCP_OUT_OF_ORDER_QUEUE
 
+config NET_TCP_SELECTIVE_ACK
+	bool "Enable TCP/IP Selective Acknowledgment Options"
+	default n
+	select NET_TCP_OUT_OF_ORDER_QUEUE
+	---help---
+		RFC2018:
+			Selective Acknowledgment (SACK) is a strategy which corrects this
+			behavior in the face of multiple dropped segments.  With selective
+			acknowledgments, the data receiver can inform the sender about all
+			segments that have arrived successfully, so the sender need
+			retransmit only the segments that have actually been lost.
+
 config NET_TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n

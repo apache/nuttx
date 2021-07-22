@@ -979,6 +979,10 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
       tcp_initsequence(conn->sndseq);
       conn->tx_unacked    = 1;
+      conn->flags         = 0;
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+      conn->nsacks        = 0;
+#endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->expired       = 0;
       conn->isn           = 0;
@@ -1264,6 +1268,10 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
   conn->lport      = (uint16_t)port;
+  conn->flags      = 0;
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  conn->nsacks     = 0;
+#endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   conn->expired    = 0;
   conn->isn        = 0;

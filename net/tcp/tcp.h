@@ -100,6 +100,11 @@
 /* The TCP options flags */
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */
+#define TCP_SACK              0x02U /* Selective ACKs enabled */
+
+/* The Max Range count of TCP Selective ACKs */
+
+#define TCP_SACK_RANGES_MAX   4
 
 /****************************************************************************
  * Public Type Definitions
@@ -132,6 +137,16 @@ struct tcp_poll_s
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
+
+/* SACK ranges to include in ACK packets. */
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+struct tcp_sack_s
+{
+  uint32_t left;    /* Left edge of the SACK */
+  uint32_t right;   /* Right edge of the SACK */
+};
+#endif
 
 struct tcp_conn_s
 {
@@ -215,6 +230,14 @@ struct tcp_conn_s
   uint16_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #endif
   uint16_t flags;         /* Flags of TCP-specific options */
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+  /* This defines a selective acknowledgement block. */
+
+  struct tcp_sack_s sacks[TCP_SACK_RANGES_MAX];
+
+  uint8_t nsacks;         /* Selective ACK'd packets */
+#endif
 
   /* If the TCP socket is bound to a local address, then this is
    * a reference to the device that routes traffic on the corresponding
@@ -1070,6 +1093,30 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
 void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result);
+
+/****************************************************************************
+ * Name: tcp_sack
+ *
+ * Description:
+ *   Setup to send a Selective-ACK packet
+ *
+ * Input Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP connection structure holding connection information
+ *   flags  - flags to apply to the TCP header
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_SELECTIVE_ACK
+void tcp_sack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
+              uint16_t flags);
+#endif
 
 /****************************************************************************
  * Name: tcp_send_txnotify
