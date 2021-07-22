@@ -212,7 +212,6 @@ int up_cpu_index(void)
 int sim_cpu_start(int cpu, void *stack, size_t size)
 {
   struct sim_cpuinfo_s cpuinfo;
-  pthread_attr_t attr;
   int ret;
 
   /* Initialize the CPU info */
@@ -227,11 +226,19 @@ int sim_cpu_start(int cpu, void *stack, size_t size)
    * in a multi-CPU hardware model.
    */
 
+#ifdef __APPLE__
+  /* NOTE: workaround to make IPI work on macOS */
+
+  ret = pthread_create(&g_cpu_thread[cpu],
+                       NULL, sim_idle_trampoline, &cpuinfo);
+#else
+  pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setstack(&attr, stack, size);
   ret = pthread_create(&g_cpu_thread[cpu],
                        &attr, sim_idle_trampoline, &cpuinfo);
   pthread_attr_destroy(&attr);
+#endif
   if (ret != 0)
     {
       goto errout_with_cond;
