@@ -125,6 +125,10 @@ struct iob_qentry_s
   /* Payload -- Head of the I/O buffer chain */
 
   FAR struct iob_s *qe_head;
+
+  /* Private data */
+
+  FAR void *qe_priv;
 };
 
 /* The I/O buffer queue head structure */
@@ -362,7 +366,8 @@ void iob_free_chain(FAR struct iob_s *iob, enum iob_user_e producerid);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+int iob_add_queue(FAR struct iob_s *iob, FAR void *priv,
+                  FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
@@ -375,7 +380,8 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
-int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+int iob_tryadd_queue(FAR struct iob_s *iob, FAR void *priv,
+                     FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
