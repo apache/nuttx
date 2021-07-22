@@ -2000,7 +2000,6 @@ config STM32_STM32G43XX
 	select STM32_HAVE_CORDIC
 	select STM32_HAVE_CRS
 	select STM32_HAVE_DAC1
-	select STM32_HAVE_DAC2
 	select STM32_HAVE_FMAC
 	select STM32_HAVE_FDCAN1
 	select STM32_HAVE_I2C2
@@ -2027,6 +2026,7 @@ config STM32_STM32G43XX
 config STM32_STM32G431K
 	bool
 	default n
+	select STM32_HAVE_DAC3
 
 config STM32_STM32G431C
 	bool
@@ -2866,11 +2866,35 @@ config STM32_DAC3
 	depends on STM32_HAVE_DAC3
 	select STM32_DAC
 
+if STM32_DAC3
+
+config STM32_DAC3CH1
+	bool "DAC3CH1 Internal"
+	default n
+
+config STM32_DAC3CH2
+	bool "DAC3CH2 Internal"
+	default n
+
+endif #STM32_DAC3
+
 config STM32_DAC4
 	bool "DAC4"
 	default n
 	depends on STM32_HAVE_DAC4
 	select STM32_DAC
+
+if STM32_DAC4
+
+config STM32_DAC4CH1
+	bool "DAC4CH1 Internal"
+	default n
+
+config STM32_DAC4CH2
+	bool "DAC4CH2 Internal"
+	default n
+
+endif #STM32_DAC4
 
 config STM32_DCMI
 	bool "DCMI"
