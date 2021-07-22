@@ -64,6 +64,9 @@ static uint32_t tcp_calc_rcvsize(FAR struct tcp_conn_s *conn,
   uint32_t desire;
 
   recvsize = conn->readahead ? conn->readahead->io_pktlen : 0;
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+  recvsize += iob_get_queue_size(&conn->ofoahead);
+#endif
   if (conn->rcv_bufs > recvsize)
     {
       desire = conn->rcv_bufs - recvsize;
@@ -230,6 +233,13 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
   recvwndo <<= conn->rcv_scale;
+#endif
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+  if (recvwndo < tcp_rx_mss(dev) && !IOB_QEMPTY(&conn->ofoahead))
+    {
+      recvwndo = tcp_rx_mss(dev);
+    }
 #endif
 
   return recvwndo;

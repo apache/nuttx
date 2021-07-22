@@ -53,6 +53,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
+
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
@@ -70,8 +72,174 @@
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+typedef bool (*tcp_ofosegment_callback_t)(FAR struct net_driver_s *dev,
+                                          FAR struct tcp_conn_s *conn,
+                                          FAR struct iob_qentry_s *qentry,
+                                          FAR void *data);
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+/****************************************************************************
+ * Name: tcp_foreach_ofosegment
+ ****************************************************************************/
+
+static bool tcp_foreach_ofosegment(FAR struct net_driver_s *dev,
+                                   FAR struct tcp_conn_s *conn,
+                                   tcp_ofosegment_callback_t callback,
+                                   FAR void *data)
+{
+  FAR struct iob_qentry_s *qentry;
+  bool stop = false;
+
+  for (qentry = conn->ofoahead.qh_head;
+       qentry != NULL; qentry = qentry->qe_flink)
+    {
+      stop = callback(dev, conn, qentry, data);
+      if (stop)
+        {
+          break;
+        }
+    }
+
+  return stop;
+}
+
+/****************************************************************************
+ * Name: tcp_getsequence_from_qentry
+ ****************************************************************************/
+
+static uint32_t tcp_getsequence_from_qentry(FAR struct net_driver_s *dev,
+                                            FAR struct iob_qentry_s *qentry)
+{
+  FAR struct iob_s *iob = qentry->qe_head;
+  unsigned int iplen = (intptr_t)qentry->qe_priv;
+  FAR struct tcp_hdr_s *hdr = (FAR struct tcp_hdr_s *)
+                              &iob->io_data[iplen + NET_LL_HDRLEN(dev)];
+
+  return tcp_getsequence(hdr->seqno);
+}
+
+/****************************************************************************
+ * Name: tcp_cmpsequence_callback
+ ****************************************************************************/
+
+static bool tcp_cmpsequence_callback(FAR struct net_driver_s *dev,
+                                     FAR struct tcp_conn_s *conn,
+                                     FAR struct iob_qentry_s *qentry,
+                                     FAR void *data)
+{
+  FAR struct tcp_hdr_s *incoming = data;
+
+  return tcp_getsequence(incoming->seqno) ==
+         tcp_getsequence_from_qentry(dev, qentry);
+}
+
+/****************************************************************************
+ * Name: tcp_reorder_ofosegment
+ ****************************************************************************/
+
+static void tcp_reorder_ofosegment(FAR struct net_driver_s *dev,
+                                   FAR struct tcp_conn_s *conn,
+                                   FAR struct iob_qentry_s *qentry)
+{
+  FAR struct iob_qentry_s *incom = conn->ofoahead.qh_tail;
+  uint32_t preseq = tcp_getsequence_from_qentry(dev, qentry);
+  uint32_t incseq = tcp_getsequence_from_qentry(dev, incom);
+  FAR struct iob_qentry_s *prev = NULL;
+
+  if (preseq < incseq)
+    {
+      return;
+    }
+
+  conn->ofoahead.qh_tail = qentry;
+  qentry->qe_flink = NULL;
+
+  for (qentry = conn->ofoahead.qh_head;
+       qentry != NULL; qentry = qentry->qe_flink)
+    {
+      preseq = tcp_getsequence_from_qentry(dev, qentry);
+
+      if (preseq > incseq)
+        {
+          if (!prev)
+            {
+              conn->ofoahead.qh_head = incom;
+            }
+          else
+            {
+              prev->qe_flink = incom;
+            }
+
+          incom->qe_flink = qentry;
+          break;
+        }
+
+      prev = qentry;
+    }
+}
+
+/****************************************************************************
+ * Name: tcp_input_ofo
+ ****************************************************************************/
+
+static void tcp_input_ofo(FAR struct net_driver_s *dev,
+                          FAR struct tcp_conn_s *conn, unsigned int iplen)
+{
+  FAR struct tcp_hdr_s *incoming;
+  FAR struct iob_qentry_s *qentry;
+
+  if (dev->d_len < NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN)
+    {
+      return;
+    }
+
+  /* Get a pointer to the TCP header.  The TCP header lies just after the
+   * the link layer header and the IP header.
+   */
+
+  incoming = (FAR struct tcp_hdr_s *)&dev->d_buf[iplen + NET_LL_HDRLEN(dev)];
+  if (TCP_SEQ_LTE(tcp_getsequence(incoming->seqno),
+                  tcp_getsequence(conn->rcvseq)))
+    {
+      return;
+    }
+
+  /* Discard the packet if which already exist in ofoahead */
+
+  if (tcp_foreach_ofosegment(dev, conn,
+                             tcp_cmpsequence_callback, incoming))
+    {
+      return;
+    }
+
+  qentry = conn->ofoahead.qh_tail;
+
+  if (!qentry ||
+      (iob_get_queue_size(&conn->ofoahead) <
+       CONFIG_NET_TCP_OUT_OF_ORDER_BUFSIZE) ||
+      TCP_SEQ_LT(tcp_getsequence(incoming->seqno),
+                 tcp_getsequence_from_qentry(dev, qentry)))
+    {
+      if (tcp_ofo_datahandler(conn, dev->d_buf, dev->d_len,
+                              (void *)(intptr_t)iplen) == dev->d_len)
+        {
+          if (qentry)
+            {
+              tcp_reorder_ofosegment(dev, conn, qentry);
+            }
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: tcp_trim_head
@@ -210,7 +378,7 @@ static bool tcp_trim_head(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
-                      unsigned int iplen)
+                      unsigned int iplen, FAR struct tcp_conn_s **active)
 {
   FAR struct tcp_hdr_s *tcp;
   FAR struct tcp_conn_s *conn = NULL;
@@ -268,6 +436,11 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
   conn = tcp_active(dev, tcp);
   if (conn)
     {
+      if (active)
+        {
+          *active = conn;
+        }
+
       /* We found an active connection.. Check for the subsequent SYN
        * arriving in TCP_SYN_RCVD state after the SYNACK packet was
        * lost.  To avoid other issues,  reset any active connection
@@ -317,6 +490,11 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
           conn = tcp_alloc_accept(dev, tcp);
           if (conn)
             {
+              if (active)
+                {
+                  *active = conn;
+                }
+
               /* The connection structure was successfully allocated and has
                * been initialized in the TCP_SYN_RECVD state.  The expected
                * sequence of events is then the rest of the 3-way handshake:
@@ -431,6 +609,13 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
    */
 
 reset:
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+  if (conn && !IOB_QEMPTY(&conn->ofoahead))
+    {
+      iob_free_queue(&conn->ofoahead, IOBUSER_NET_TCP_OFOAHEAD);
+      IOB_QINIT(&conn->ofoahead);
+    }
+#endif
 
   /* We do not send resets in response to resets. */
 
@@ -565,6 +750,10 @@ found:
             }
           else
             {
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+              dev->d_len += hdrlen;
+              tcp_input_ofo(dev, conn, iplen);
+#endif
               /* We never queue out-of-order segments. */
 
               tcp_send(dev, conn, TCP_ACK, tcpiplen);
@@ -1166,6 +1355,120 @@ drop:
 }
 
 /****************************************************************************
+ * Name: tcp_process_ofo
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+static void tcp_process_ofo(FAR struct net_driver_s *dev, uint8_t domain,
+                            FAR struct tcp_conn_s *conn)
+{
+  FAR struct iob_qentry_s *qentry;
+  FAR uint8_t *reassemble = NULL;
+  FAR struct iob_qentry_s *next;
+  FAR struct iob_s *iob;
+  FAR uint8_t *d_buf;
+  unsigned int iplen;
+  uint32_t ackseq;
+  uint32_t rcvseq;
+  uint16_t d_len;
+
+  if (!conn || IOB_QEMPTY(&conn->ofoahead))
+    {
+      return;
+    }
+
+  d_len = dev->d_len;
+  d_buf = dev->d_buf;
+
+  for (qentry = conn->ofoahead.qh_head; qentry != NULL; qentry = next)
+    {
+      next = qentry->qe_flink;
+      iob = qentry->qe_head;
+      iplen = (intptr_t)qentry->qe_priv;
+
+      rcvseq = tcp_getsequence(conn->rcvseq);
+      ackseq = tcp_getsequence_from_qentry(dev, qentry);
+
+      if (rcvseq == ackseq)
+        {
+          if (iob->io_pktlen > iob->io_len)
+            {
+              if (reassemble == NULL)
+                {
+                  reassemble = kmm_malloc(CONFIG_NET_ETH_PKTSIZE);
+                  if (reassemble == NULL)
+                    {
+                      iob_free_queue(&conn->ofoahead,
+                                     IOBUSER_NET_TCP_OFOAHEAD);
+                      break;
+                    }
+                }
+
+              (void)iob_copyout(reassemble, iob, iob->io_pktlen, 0);
+
+              dev->d_buf = reassemble;
+            }
+          else
+            {
+              dev->d_buf = IOB_DATA(iob);
+            }
+
+          dev->d_len = iob->io_pktlen - NET_LL_HDRLEN(dev);
+
+#ifdef CONFIG_NET_IPv4
+          if (IFF_IS_IPv4(dev->d_flags))
+            {
+              tcp_ipv4_select(dev);
+            }
+#ifdef CONFIG_NET_IPv6
+          else
+#endif
+#endif
+
+#ifdef CONFIG_NET_IPv6
+          if (IFF_IS_IPv6(dev->d_flags))
+            {
+              tcp_ipv6_select(dev);
+            }
+#endif
+
+          tcp_input(dev, domain, iplen, NULL);
+
+          if (dev->d_len > 0)
+            {
+              d_len = dev->d_len;
+              memcpy(d_buf, dev->d_buf, d_len);
+            }
+
+          iob_free_queue_qentry(iob, &conn->ofoahead,
+                                IOBUSER_NET_TCP_OFOAHEAD);
+
+          /* Re-traverse the pending list */
+
+          qentry = conn->ofoahead.qh_head;
+        }
+      else if (TCP_SEQ_LT(ackseq, rcvseq))
+        {
+          iob_free_queue_qentry(iob, &conn->ofoahead,
+                                IOBUSER_NET_TCP_OFOAHEAD);
+        }
+      else
+        {
+          break;
+        }
+    }
+
+  dev->d_len = d_len;
+  dev->d_buf = d_buf;
+
+  if (reassemble)
+    {
+      kmm_free(reassemble);
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1190,6 +1493,7 @@ drop:
 void tcp_ipv4_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+  FAR struct tcp_conn_s *conn = NULL;
   uint16_t iphdrlen;
 
   /* Configure to receive an TCP IPv4 packet */
@@ -1202,7 +1506,16 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
 
   /* Then process in the TCP IPv4 input */
 
-  tcp_input(dev, PF_INET, iphdrlen);
+  tcp_input(dev, PF_INET, iphdrlen, &conn);
+
+  /* Try the out-of-order queue here */
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+  if (conn)
+    {
+      tcp_process_ofo(dev, PF_INET, conn);
+    }
+#endif
 }
 #endif
 
@@ -1229,13 +1542,24 @@ void tcp_ipv4_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
 void tcp_ipv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
+  FAR struct tcp_conn_s *conn = NULL;
+
   /* Configure to receive an TCP IPv6 packet */
 
   tcp_ipv6_select(dev);
 
   /* Then process in the TCP IPv6 input */
 
-  tcp_input(dev, PF_INET6, iplen);
+  tcp_input(dev, PF_INET6, iplen, &conn);
+
+  /* Try the out-of-order queue here */
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+  if (conn)
+    {
+      tcp_process_ofo(dev, PF_INET6, conn);
+    }
+#endif
 }
 #endif
 

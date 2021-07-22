@@ -323,4 +323,83 @@ uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
   return copied;
 }
 
+/****************************************************************************
+ * Name: tcp_ofo_datahandler
+ *
+ * Description:
+ *   Handle data that is not accepted by the application.  This may be called
+ *   either (1) from the data receive logic if it cannot buffer the data, or
+ *   (2) from the TCP event logic is there is no listener in place ready to
+ *   receive the data.
+ *
+ * Input Parameters:
+ *   conn   - A pointer to the TCP connection structure
+ *   buffer - A pointer to the buffer to be copied to the ofo-ahead
+ *            buffers
+ *   buflen - The number of bytes to copy to the read-ahead buffer.
+ *   priv   - Private data of the out-of-order segment.
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
+ *
+ * Assumptions:
+ * - The caller has checked that TCP_NEWDATA is set in flags and that is no
+ *   other handler available to process the incoming data.
+ * - This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_OUT_OF_ORDER_QUEUE
+uint16_t tcp_ofo_datahandler(FAR struct tcp_conn_s *conn,
+                             FAR uint8_t *buffer,
+                             uint16_t buflen, FAR void *priv)
+{
+  FAR struct iob_s *iob;
+  int ret;
+
+  /* Try to allocate on I/O buffer to start the chain without waiting (and
+   * throttling as necessary).  If we would have to wait, then drop the
+   * packet.
+   */
+
+  iob = iob_tryalloc(true, IOBUSER_NET_TCP_OFOAHEAD);
+  if (iob == NULL)
+    {
+      nwarn("ERROR: Failed to create new I/O buffer chain\n");
+      return 0;
+    }
+
+  /* Copy the new appdata into the I/O buffer chain (without waiting) */
+
+  ret = iob_trycopyin(iob, buffer, buflen, 0,
+                      true, IOBUSER_NET_TCP_OFOAHEAD);
+  if (ret < 0)
+    {
+      /* On a failure, iob_copyin return a negated error value but does
+       * not free any I/O buffers.
+       */
+
+      nerr("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
+      iob_free_chain(iob, IOBUSER_NET_TCP_OFOAHEAD);
+      return 0;
+    }
+
+  /* Add the new I/O buffer chain to the tail of the ofo-ahead queue (again
+   * without waiting).
+   */
+
+  ret = iob_tryadd_queue(iob, priv, &conn->ofoahead);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      iob_free_chain(iob, IOBUSER_NET_TCP_OFOAHEAD);
+      return 0;
+    }
+
+  ninfo("Buffered %d bytes\n", buflen);
+  return buflen;
+}
+#endif
+
 #endif /* NET_TCP_HAVE_STACK */
