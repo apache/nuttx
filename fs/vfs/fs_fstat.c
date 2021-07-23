@@ -169,7 +169,13 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf)
   /* Get the inode from the file structure */
 
   inode = filep->f_inode;
-  DEBUGASSERT(inode != NULL);
+
+  /* Was this file opened ? */
+
+  if (!inode)
+    {
+      return -EBADF;
+    }
 
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.

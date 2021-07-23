@@ -106,11 +106,10 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
     }
 
   inode = filep->f_inode;
-  msgq  = inode->i_private;
 
   /* Was a valid message queue descriptor provided? */
 
-  if (!msgq)
+  if (!inode || !inode->i_private)
     {
       /* No.. return EBADF */
 
@@ -128,6 +127,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 
   /* Is there already a notification attached */
 
+  msgq = inode->i_private;
   if (msgq->ntpid == INVALID_PROCESS_ID)
     {
       /* No... Have we been asked to establish one? */
