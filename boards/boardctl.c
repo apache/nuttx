@@ -452,6 +452,31 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+      /* CMD:           BOARDIOC_BOOT_IMAGE
+       * DESCRIPTION:   Boot a new application firmware image.
+       *                Execute the required actions for booting a new
+       *                application firmware image (e.g. deinitialize
+       *                peripherals, load the Program Counter register with
+       *                the application firmware image entry point address).
+       * ARG:           Pointer to a read-only instance of struct
+       *                boardioc_boot_info_s.
+       * DEPENDENCIES:  Board logic must provide the board_boot_image()
+       *                interface.
+       */
+
+      case BOARDIOC_BOOT_IMAGE:
+        {
+          FAR const struct boardioc_boot_info_s *info =
+            (FAR const struct boardioc_boot_info_s *)arg;
+
+          DEBUGASSERT(info != NULL);
+
+          ret = board_boot_image(info->path, info->header_size);
+        }
+        break;
+#endif
+
 #ifdef CONFIG_BOARDCTL_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk
