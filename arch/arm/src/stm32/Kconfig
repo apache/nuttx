@@ -8244,7 +8244,7 @@ config STM32_ADC_MAX_SAMPLES
 		responsibility to correctly select this value.
 		Since the interfece to update the sampling time is available
 		for all supported devices, the user can change the default
-		vaules in the board initialization logic and avoid ADC overrun.
+		values in the board initialization logic and avoid ADC overrun.
 
 config STM32_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
@@ -11258,7 +11258,7 @@ config STM32_FOC_HAS_PWM_COMPLEMENTARY
        ---help---
          Enable complementary outputs for the FOC PWM (sometimes called 6-PWM mode)
 
-# hiden variables and automatic configuration
+# hidden variables and automatic configuration
 
 config STM32_FOC_USE_TIM1
        bool

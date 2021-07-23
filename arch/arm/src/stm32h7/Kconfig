@@ -303,7 +303,7 @@ config STM32H7_FLASH_CR_PSIZE
 	range 0 3
 	---help---
 		On some hardware the fastest 64 bit wide flash writes cause too
-		high power consumption which may compromize the system stability.
+		high power consumption which may compromise the system stability.
 		This option can be used to reduce the program size. The options are:
 		0: 8 bits
 		1: 16 bits
@@ -1565,18 +1565,18 @@ config STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	bool "Automatically boost the LSE oscillator drive capability level until it starts-up"
 	default n
 	---help---
-		This will cycle through the correct* values from low to high. To avoid
-		damaging the the crystal. We want to use the lowest setting that gets
-		the OSC running. See app note AN2867
+		This will cycle through the correct* values from low to high. To
+		avoid damaging the crystal, we want to use the lowest setting that
+		gets the OSC running. See app note AN2867
 
 			0 = Low drive capability (default)
 			1 = Medium low drive capability
 			2 = Medium high drive capability
 			3 = High drive capability
 
-		*It will take into account the rev of the silicon and use
-		the correct code points to achive the drive strength.
-		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		*It will take into account the revision of the silicon and use
+		the correct code points to achieve the drive strength.
+		See Errata ES0392 Rev 7 2.2.14 LSE oscillator driving capability
 		selection bits are swapped.
 
 config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
@@ -1590,9 +1590,9 @@ config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
 		2 = Medium high drive capability
 		3 = High drive capability
 
-		It will take into account the rev of the silicon and use
-		the correct code points tp achive the drive strength.
-		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		It will take into account the revision of the silicon and use
+		the correct code points to achieve the drive strength.
+		See Errata ES0392 Rev 7 2.2.14 LSE oscillator driving capability
 		selection bits are swapped.
 
 config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
@@ -1606,14 +1606,13 @@ config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 		2 = Medium high drive capability
 		3 = High drive capability
 
-		It will take into account the rev of the silicon and use
-		the correct code points tp achive the drive strength.
-		See Eratta ES0392 Rev 7 2.2.14 LSE oscillator driving capability
+		It will take into account the revision of the silicon and use
+		the correct code points to achieve the drive strength.
+		See Errata ES0392 Rev 7 2.2.14 LSE oscillator driving capability
 		selection bits are swapped.
 
-		WARNING this RUN setting does not apear to work!
-		it apears that the LSEDRV bits can not be changes once the OSC
-		is running.
+		WARNING this RUN setting does not appear to work! It appears
+		that the LSEDRV bits cannot be changed once the OSC is running.
 
 endif # STM32H7_RTC_LSECLOCK
 
