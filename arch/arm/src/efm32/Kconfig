@@ -129,17 +129,17 @@ config EFM32_DMA
 	select ARCH_DMA
 
 config EFM32_RMU
-	bool "Reset Management Unit (RMU) "
+	bool "Reset Management Unit (RMU)"
 	default n
 
 config EFM32_FLASHPROG
-	bool "Enable Erase/Write flash function (MSC) "
+	bool "Enable Erase/Write flash function (MSC)"
 	default n
 	select ARCH_HAVE_PROGMEM
 	select ARCH_HAVE_RAMFUNCS
 
 config EFM32_RMU_DEBUG
-	bool "Reset Management Unit (RMU) DEBUG "
+	bool "Reset Management Unit (RMU) DEBUG"
 	default n
 	depends on EFM32_RMU && DEBUG_FEATURES
 

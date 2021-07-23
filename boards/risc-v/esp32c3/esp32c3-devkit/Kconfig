@@ -40,7 +40,6 @@ endif # PM
 config ESP32C3_DEVKIT_RUN_IRAM
 	bool "Run from IRAM"
 	default n
-	---help---
 
 choice
   prompt "SPIFLASH File System"

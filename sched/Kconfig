@@ -1131,7 +1131,7 @@ config PATH_MAX
 endmenu # Files and I/O
 
 menuconfig PRIORITY_INHERITANCE
-	bool "Enable priority inheritance "
+	bool "Enable priority inheritance"
 	default n
 	---help---
 		Set to enable support for priority inheritance on mutexes and semaphores.

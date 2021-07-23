@@ -10161,7 +10161,7 @@ config STM32_I2CTIMEOTICKS
 	depends on STM32_I2C && !STM32_I2C_DYNTIMEO
 
 config STM32_I2C_DUTY16_9
-	bool "Frequency with Tlow/Thigh = 16/9 "
+	bool "Frequency with Tlow/Thigh = 16/9"
 	default n
 	depends on STM32_I2C
 

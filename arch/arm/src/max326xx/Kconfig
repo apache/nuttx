@@ -226,7 +226,7 @@ config MAX326XX_WDOG
 	depends on MAX326XX_HAVE_WDOG
 
 config MAX326XX_WWDOG0
-	bool "Windowed Watchdog Timer (WDT0) "
+	bool "Windowed Watchdog Timer (WDT0)"
 	default n
 	depends on MAX326XX_HAVE_WWDOG
 
