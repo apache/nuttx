@@ -198,9 +198,9 @@ void stm32l5_clockconfig(void)
  *   operation
  *   re-enable/re-start the PLL
  *
- *   This functional performs a subset of the operations performed by
+ *   This function performs a subset of the operations performed by
  *   stm32l5_clockconfig()
- *   reset the currenlty enabled peripheral clocks.
+ *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific

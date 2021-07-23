@@ -1620,7 +1620,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
    *   Mode 0:                        CFG2.CPHA=0 and CFG2.CPOL=0
    *   Master:                        CFG2.MSTR=1
    *   8-bit:                         CFG1.DSIZE=7
-   *   MSB tranmitted first:          CFG2.LSBFRST=0
+   *   MSB transmitted first:         CFG2.LSBFRST=0
    *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CFG2.SSM=1 (prevent MODF err)
    *   Two lines full duplex:         CFG2.COMM=0
    */
@@ -1673,7 +1673,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
   nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_STM32H7_SPI_DMA
-  /* DMA will be started in the interrupt handler, syncronized to the master
+  /* DMA will be started in the interrupt handler, synchronized to the master
    * nss
    */
 
@@ -1722,10 +1722,10 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
  *   Initialize the selected SPI port(bus) to operate as spi slave
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
