@@ -106,7 +106,7 @@ static FAR struct epoll_head *epoll_head_from_fd(int fd)
 
   /* Check fd come from us */
 
-  if (filep->f_inode->u.i_ops != &g_epoll_ops)
+  if (!filep->f_inode || filep->f_inode->u.i_ops != &g_epoll_ops)
     {
       set_errno(EBADF);
       return NULL;
