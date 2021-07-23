@@ -1440,12 +1440,12 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
   switch (port)
     {
 #ifdef CONFIG_ESP32_SPI2
-      case 2:
+      case ESP32_SPI2:
         priv = &esp32_spi2_priv;
         break;
 #endif
 #ifdef CONFIG_ESP32_SPI3
-      case 3:
+      case ESP32_SPI3:
         priv = &esp32_spi3_priv;
         break;
 #endif
