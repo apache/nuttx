@@ -1653,7 +1653,7 @@ static int stm32_foc_adc_handler(int irq, FAR void *context, FAR void *arg)
 
           STM32_ADC_INT_ACK(adc, pending);
 
-          /* Call interrupt handler if registerd */
+          /* Call interrupt handler if registered */
 
           if (foc_dev->adc_isr != NULL)
             {

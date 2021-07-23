@@ -1132,7 +1132,7 @@
 
 #ifdef CONFIG_STM32L4_ADC_LL_OPS
 
-/* This structure provides the publicly visable representation of the
+/* This structure provides the publicly visible representation of the
  * "lower-half" ADC driver structure.
  */
 
