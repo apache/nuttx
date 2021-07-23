@@ -163,6 +163,18 @@ static int gpio_interrupt(int irq, FAR void *context, FAR void *arg)
  * Description:
  *   Configure a GPIO pin based on encoded pin attributes.
  *
+ * Input Parameters:
+ *   pin  - GPIO pin to be configured
+ *   attr - Attributes to be configured for the selected GPIO pin.
+ *          The following attributes are accepted:
+ *          - Direction (OUTPUT or INPUT)
+ *          - Pull (PULLUP, PULLDOWN or OPENDRAIN)
+ *          - Function (if not provided, assume function GPIO by default)
+ *          - Drive strength (if not provided, assume DRIVE_2 by default)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
  ****************************************************************************/
 
 int esp32_configgpio(int pin, gpio_pinattr_t attr)
@@ -281,21 +293,32 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
         }
     }
 
-  /* Add drivers */
-
-  func |= (uint32_t)(2ul << FUN_DRV_S);
-
-  /* Select the pad's function.  If no function was given, consider it a
-   * normal input or output (i.e. function3).
-   */
+  /* Configure the pad's function */
 
   if ((attr & FUNCTION_MASK) != 0)
     {
-      func |= (uint32_t)(((attr >> FUNCTION_SHIFT) - 1) << MCU_SEL_S);
+      uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
+      func |= val << MCU_SEL_S;
     }
   else
     {
+      /* Function not provided, assuming function GPIO by default */
+
       func |= (uint32_t)(PIN_FUNC_GPIO << MCU_SEL_S);
+    }
+
+  /* Configure the pad's drive strength */
+
+  if ((attr & DRIVE_MASK) != 0)
+    {
+      uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
+      func |= val << FUN_DRV_S;
+    }
+  else
+    {
+      /* Drive strength not provided, assuming strength 2 by default */
+
+      func |= UINT32_C(2) << FUN_DRV_S;
     }
 
   if ((attr & OPEN_DRAIN) != 0)

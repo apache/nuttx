@@ -56,6 +56,7 @@
 #define PULLUP              (1 << 3)
 #define PULLDOWN            (1 << 4)
 #define OPEN_DRAIN          (1 << 5)
+
 #define FUNCTION_SHIFT      6
 #define FUNCTION_MASK       (7 << FUNCTION_SHIFT)
 #  define FUNCTION_1        (1 << FUNCTION_SHIFT)
@@ -64,6 +65,13 @@
 #  define FUNCTION_4        (4 << FUNCTION_SHIFT)
 #  define FUNCTION_5        (5 << FUNCTION_SHIFT)
 #  define FUNCTION_6        (6 << FUNCTION_SHIFT)
+
+#define DRIVE_SHIFT         9
+#define DRIVE_MASK          (7 << DRIVE_SHIFT)
+#  define DRIVE_0           (1 << DRIVE_SHIFT)
+#  define DRIVE_1           (2 << DRIVE_SHIFT)
+#  define DRIVE_2           (3 << DRIVE_SHIFT)
+#  define DRIVE_3           (4 << DRIVE_SHIFT)
 
 #define INPUT_PULLUP        (INPUT | PULLUP)
 #define INPUT_PULLDOWN      (INPUT | PULLDOWN)
@@ -146,6 +154,18 @@ void esp32_gpioirqinitialize(void);
  *
  * Description:
  *   Configure a GPIO pin based on encoded pin attributes.
+ *
+ * Input Parameters:
+ *   pin  - GPIO pin to be configured
+ *   attr - Attributes to be configured for the selected GPIO pin.
+ *          The following attributes are accepted:
+ *          - Direction (OUTPUT or INPUT)
+ *          - Pull (PULLUP, PULLDOWN or OPENDRAIN)
+ *          - Function (if not provided, assume function GPIO by default)
+ *          - Drive strength (if not provided, assume DRIVE_2 by default)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
  *
  ****************************************************************************/
 
