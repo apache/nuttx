@@ -136,5 +136,24 @@ void esp32_spiflash_encrypt_test(void);
 int esp32_gpio_init(void);
 #endif
 
+/****************************************************************************
+ * Name: board_spidev_initialize
+ *
+ * Description:
+ *   Initialize SPI driver and register the /dev/spi device.
+ *
+ * Input Parameters:
+ *   bus - The SPI bus number, used to build the device path as /dev/spiN
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DRIVER
+int board_spidev_initialize(int bus);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H */
