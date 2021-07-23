@@ -3399,6 +3399,17 @@ config BOARDCTL_SWITCH_BOOT
 		once a firmware updated successfully, this boardctl can be used to
 		modify FLASH bank selection.
 
+config BOARDCTL_BOOT_IMAGE
+	bool "Boot a new application firmware image"
+	default n
+	---help---
+		Boot a new application firmware image.
+		Architecture-specific logic must provide the board_boot_image()
+		interface for executing the required actions for booting a new
+		application firmware image (e.g. deinitialize peripherals, load the
+		Program Counter register with the application firmware image entry
+		point address).
+
 config BOARDCTL_MKRD
 	bool "Enable application space creation of RAM disks"
 	default n
