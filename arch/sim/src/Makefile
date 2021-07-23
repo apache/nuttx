@@ -176,6 +176,10 @@ ifeq ($(CONFIG_SIM_I2CBUS_LINUX),y)
   HOSTSRCS += up_i2cbuslinux.c
 endif
 
+ifeq ($(CONFIG_SIM_SPI_LINUX),y)
+  HOSTSRCS += up_spilinux.c
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
 endif

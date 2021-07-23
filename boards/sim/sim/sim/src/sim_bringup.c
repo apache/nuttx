@@ -36,6 +36,7 @@
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
 #include <nuttx/sensors/fakesensor.h>
@@ -100,6 +101,9 @@ int sim_bringup(void)
 #endif
 #ifdef CONFIG_MPU60X0_I2C
   FAR struct mpu_config_s *mpu_config;
+#endif
+#ifdef CONFIG_SIM_SPI
+  FAR struct spi_dev_s *spidev;
 #endif
 
   int ret = OK;
@@ -404,6 +408,26 @@ int sim_bringup(void)
     }
 #endif
 #endif
+
+#ifdef CONFIG_SIM_SPI
+  spidev = sim_spi_initialize(CONFIG_SIM_SPIDEV_NAME);
+  if (spidev == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: sim_spi_initialize failed.\n");
+    }
+#ifdef CONFIG_SYSTEM_SPITOOL
+  else
+    {
+      ret = spi_register(spidev, 0);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register SPI%d driver: %d\n",
+                 0, ret);
+          sim_spi_uninitialize(spidev);
+        }
+    }
+#endif /* CONFIG_SYSTEM_SPITOOL */
+#endif /* CONFIG_SIM_SPI */
 
 #if defined(CONFIG_INPUT_BUTTONS_LOWER) && defined(CONFIG_SIM_BUTTONS)
   ret = btn_lower_initialize("/dev/buttons");
