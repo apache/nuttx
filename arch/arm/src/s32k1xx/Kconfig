@@ -329,7 +329,7 @@ config S32K1XX_RTC
 	default n
 
 config S32K1XX_PROGMEM
-    bool PROGMEM
+    bool "PROGMEM"
     default n
     select ARCH_HAVE_PROGMEM
     depends on (ARCH_CHIP_S32K11X || (ARCH_CHIP_S32K14X && !ARCH_CHIP_S32K148) )
