@@ -574,6 +574,13 @@ static int nrf52_pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #ifdef CONFIG_PWM_MULTICHAN
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
         {
+          /* Break the loop if all following channels are not configured */
+
+          if (info->channels[i].channel == -1)
+            {
+              break;
+            }
+
           /* Set output if channel configured */
 
           if (info->channels[i].channel != 0)

@@ -1375,6 +1375,13 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
       enum stm32_chanmode_e mode;
 
 #ifdef CONFIG_PWM_MULTICHAN
+      /* Break the loop if all following channels are not configured */
+
+      if (info->channels[i].channel == -1)
+        {
+          break;
+        }
+
       duty = info->channels[i].duty;
       channel = info->channels[i].channel;
 
@@ -2187,6 +2194,13 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
         {
+          /* Break the loop if all following channels are not configured */
+
+          if (info->channels[i].channel == -1)
+            {
+              break;
+            }
+
           /* Set output if channel configured */
 
           if (info->channels[i].channel != 0)
