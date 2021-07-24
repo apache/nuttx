@@ -49,7 +49,7 @@
  *
  *   This implementation is non-reentrant and is prone to deadlocks in
  *   the case that any logic on the same CPU attempts to take the lock
- *   more than one
+ *   more than once.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
