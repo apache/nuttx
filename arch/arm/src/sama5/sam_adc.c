@@ -1258,10 +1258,20 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
         break;
 #endif
 
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = SAMA5_NCHANNELS;
+        }
+        break;
+
       /* Unsupported or invalid command */
 
       default:
-        ret = -ENOTTY;
+        {
+          ret = -ENOTTY;
+        }
         break;
     }
 

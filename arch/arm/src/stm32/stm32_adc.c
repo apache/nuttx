@@ -3871,6 +3871,14 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
           break;
         }
 
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = priv->rnchannels;
+        }
+        break;
+
       case IO_TRIGGER_REG:
         {
           /* Start regular conversion if regular channels configured */

@@ -1760,7 +1760,17 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
   switch (cmd)
     {
       case ANIOC_TRIGGER:
-        adc_startconv(priv, true);
+        {
+          adc_startconv(priv, true);
+        }
+        break;
+
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = priv->cchannels;
+        }
         break;
 
       case ANIOC_WDOG_UPPER: /* Set watchdog upper threshold */

@@ -929,6 +929,14 @@ static int cxd56_adc_ioctl(FAR struct file *filep, int cmd,
           }
         break;
 
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = 1;
+        }
+        break;
+
       default:
         {
           if (adc_validcheck(cmd))
