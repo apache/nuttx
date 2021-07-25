@@ -63,7 +63,7 @@ extern "C"
  * Name: board_ht16k33_initialize
  *
  * Description:
- *   Initialize and register the HT16K32 LED Display.
+ *   Initialize and register the HT16K33 LED Display.
  *
  * Input Parameters:
  *   devno - The device number, used to build the device path as /dev/slcdN

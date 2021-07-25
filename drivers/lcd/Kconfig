@@ -1452,12 +1452,12 @@ config LCD_ST7032
 		the ground. So only I2C pins SDA and SCL are used by NuttX.
 
 config LCD_HT16K33
-	bool "Holtek HT16K32 4 Digits 14-Segment Display"
+	bool "Holtek HT16K33 4 Digits 14-Segment Display"
 	default n
 	depends on I2C
 	---help---
 		Enable support for Holtek HT16K33 (and Vinka VK16K33) 4 Digits
-		14-Segment module: 0.54" 14-segment LED HT16K32 Backpack.
+		14-Segment module: 0.54" 14-segment LED HT16K33 Backpack.
 
 if LCD_HT16K33
 config LCD_HT16K33_MULT_MODULE
