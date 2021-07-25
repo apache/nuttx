@@ -7209,7 +7209,7 @@ static int rx65n_usbhost_ctrlout(struct usbhost_driver_s *drvr,
   static int dev_addressed_state = 0;
 
   /* Assumption : This control out is called first time for
-   * set address command. Just reseting the bus after the
+   * set address command. Just resetting the bus after the
    * set address command
    */
 

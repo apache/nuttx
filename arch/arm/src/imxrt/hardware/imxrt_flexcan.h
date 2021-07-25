@@ -418,11 +418,11 @@
 
 /* CAN FD CRC register */
 
-#define CAN_FDCRC_FD_TXCRC_SHIFT   (0)      /* Bits 0-20: Extended Tranmitted CRC value */
+#define CAN_FDCRC_FD_TXCRC_SHIFT   (0)      /* Bits 0-20: Extended Transmitted CRC value */
 #define CAN_FDCRC_FD_TXCRC_MASK    (0x1fffff << CAN_FDCRC_FD_TXCRC_SHIFT)
 #define CAN_FDCRC_FD_TXCRC(x)      (((uint32_t)(((uint32_t)(x)) << CAN_FDCRC_FD_TXCRC_SHIFT)) & CAN_FDCRC_FD_TXCRC_MASK)
                                             /* Bits 21-23: Reserved */
-#define CAN_FDCRC_FD_MBCRC_SHIFT   (24)     /* Bits 24-30: Extended Tranmitted CRC value */
+#define CAN_FDCRC_FD_MBCRC_SHIFT   (24)     /* Bits 24-30: Extended Transmitted CRC value */
 #define CAN_FDCRC_FD_MBCRC_MASK    (0x7f << CAN_FDCRC_FD_MBCRC_SHIFT)
 #define CAN_FDCRC_FD_MBCRC(x)      (((uint32_t)(((uint32_t)(x)) << CAN_FDCRC_FD_MBCRC_SHIFT)) & CAN_FDCRC_FD_MBCRC_MASK)
                                             /* Bit 31: Reserved */

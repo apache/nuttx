@@ -354,7 +354,7 @@ static inline uint32_t arm_lsb(unsigned int value)
  *            classical can timings
  *
  * Returned Value:
- *   return 1 on succes, return 0 on failure
+ *   return 1 on success, return 0 on failure
  *
  ****************************************************************************/
 

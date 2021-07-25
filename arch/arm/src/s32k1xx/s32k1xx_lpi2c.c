@@ -1238,7 +1238,7 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
         {
           s32k1xx_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
-          /* No interrupts or contex switches should occur in the following
+          /* No interrupts or context switches should occur in the following
            * sequence. Otherwise, additional bytes may be sent by the device.
            */
 

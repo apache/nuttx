@@ -725,7 +725,7 @@ static int sam_transmit(struct sam_gmac_s *priv)
   up_clean_dcache((uint32_t)txdesc,
                   (uint32_t)txdesc + sizeof(struct gmac_txdesc_s));
 
-  /* Setup/Copy data to transmition buffer */
+  /* Setup/Copy data to transmission buffer */
 
   if (dev->d_len > 0)
     {
