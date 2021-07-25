@@ -90,7 +90,7 @@ struct imxrt_flexpwm_s
   FAR struct imxrt_flexpwm_module_s *modules;
   uint8_t modules_num;            /* Number of modules */
   uint32_t frequency;             /* PWM frequency */
-  uint32_t base;                  /* Base addres of peripheral register */
+  uint32_t base;                  /* Base address of peripheral register */
 };
 
 /* PWM driver methods */

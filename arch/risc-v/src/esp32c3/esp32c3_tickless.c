@@ -247,7 +247,7 @@ static void IRAM_ATTR up_tmr_setcounter(uint64_t ticks)
   putreg32(alarm_ticks & 0xffffffff, SYS_TIMER_SYSTIMER_TARGET0_LO_REG);
   putreg32((alarm_ticks >> 32) & 0xfffff, SYS_TIMER_SYSTIMER_TARGET0_HI_REG);
 
-  /* apply alarm vaule */
+  /* apply alarm value */
 
   REG_SET_BIT(SYS_TIMER_SYSTIMER_COMP0_LOAD_REG, SYS_TIMER_TIMER_COMP0_LOAD);
 

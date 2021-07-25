@@ -55,7 +55,7 @@
 void nrf52_clockconfig(void)
 {
 #ifdef CONFIG_NRF52_HFCLK_XTAL
-  /* Initilize HFCLK crystal oscillator */
+  /* Initialize HFCLK crystal oscillator */
 
   putreg32(0x0, NRF52_CLOCK_EVENTS_HFCLKSTARTED);
   putreg32(0x1, NRF52_CLOCK_TASKS_HFCLKSTART);

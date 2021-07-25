@@ -304,7 +304,7 @@
       (FMC_SDCR_COLBITS_9 | FMC_SDCR_ROWBITS_12 | FMC_SDCR_WIDTH_32 |\
        FMC_SDCR_BANKS_4 | FMC_SDCR_CASLAT_2)
 
-/* BOARD_FMC_SDTR[1..2] - Initial value for SDRAM timing registeres for SDRAM
+/* BOARD_FMC_SDTR[1..2] - Initial value for SDRAM timing registers for SDRAM
  *      bank 1-2. Note that some bits in SDTR1 influence both SDRAM banks and
  *      are unused in SDTR2!
  */

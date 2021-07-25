@@ -478,8 +478,8 @@ static void eoss3_send(struct uart_dev_s *dev, int ch)
  * Name: eoss3_txint
  *
  * Description:
- *   Normally would turn on and off the tx empty interrupt instead we are
- *   enableing a kernel worker because there is no interrupt. This worker
+ *   Normally would turn on and off the tx empty interrupt; instead, we are
+ *   enabling a kernel worker because there is no interrupt. This worker
  *   will requeue and dequeue itself as needed.
  *
  ****************************************************************************/
