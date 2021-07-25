@@ -37,6 +37,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 #include <nuttx/kmalloc.h>
 
 #include <arch/chip/sam_adc.h>
@@ -387,35 +388,51 @@ static int sam_adc_ioctl(FAR struct adc_dev_s *dev,
   struct sam_adc_param_s *params = (struct sam_adc_param_s *)arg;
 
   switch (cmd)
-  {
-    case SAMD_ADC_IOCTL_START:
-      sam_adc_setup(dev);
-      sam_adc_rxint(dev, true);
-      break;
-
-    case SAMD_ADC_IOCTL_STOP:
-      sam_adc_rxint(dev, false);
-      sam_adc_shutdown(dev);
-      break;
-
-    case SAMD_ADC_IOCTL_SET_PARAMS:
-      if ((getreg8(SAM_ADC_CTRLA) & ADC_CTRLA_ENABLE) != 0)
+    {
+      case SAMD_ADC_IOCTL_START:
         {
-          ret = -EBUSY;
+          sam_adc_setup(dev);
+          sam_adc_rxint(dev, true);
           break;
         }
 
-      priv->averaging = params->averaging;
-      priv->prescaler = params->prescaler;
-      priv->samplen = params->samplen;
-      break;
+      case SAMD_ADC_IOCTL_STOP:
+        {
+          sam_adc_rxint(dev, false);
+          sam_adc_shutdown(dev);
+          break;
+        }
 
-    case SAMD_ADC_IOCTL_GET_PARAMS:
-      params->averaging = priv->averaging;
-      params->prescaler = priv->prescaler;
-      params->samplen = priv->samplen;
-      break;
-  }
+      case SAMD_ADC_IOCTL_SET_PARAMS:
+        {
+          if ((getreg8(SAM_ADC_CTRLA) & ADC_CTRLA_ENABLE) != 0)
+            {
+              ret = -EBUSY;
+              break;
+            }
+
+          priv->averaging = params->averaging;
+          priv->prescaler = params->prescaler;
+          priv->samplen = params->samplen;
+          break;
+        }
+
+      case SAMD_ADC_IOCTL_GET_PARAMS:
+        {
+          params->averaging = priv->averaging;
+          params->prescaler = priv->prescaler;
+          params->samplen = priv->samplen;
+          break;
+        }
+
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = priv->num_channels;
+        }
+        break;
+    }
 
   return ret;
 }

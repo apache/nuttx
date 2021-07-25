@@ -666,16 +666,27 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
   switch (cmd)
     {
       case ANIOC_TRIGGER:
+        {
+          /* Start sampling and read ADC value here */
 
-        /* Start sampling and read ADC value here */
+          adc_read_work(dev);
+          ret = OK;
+        }
+      break;
 
-        adc_read_work(dev);
-        ret = OK;
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = 1;
+        }
         break;
 
       default:
-        aerr("ERROR: Unknown cmd: %d\n", cmd);
-        ret = -ENOTTY;
+        {
+          aerr("ERROR: Unknown cmd: %d\n", cmd);
+          ret = -ENOTTY;
+        }
         break;
     }
 
