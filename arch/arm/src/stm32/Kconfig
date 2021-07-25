@@ -8242,7 +8242,7 @@ config STM32_ADC_MAX_SAMPLES
 		The maximum number of samples which can be handled without
 		overrun depends on various factors. This is the user's
 		responsibility to correctly select this value.
-		Since the interfece to update the sampling time is available
+		Since the interface to update the sampling time is available
 		for all supported devices, the user can change the default
 		values in the board initialization logic and avoid ADC overrun.
 
