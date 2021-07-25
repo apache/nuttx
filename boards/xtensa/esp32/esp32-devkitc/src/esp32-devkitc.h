@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H
-#define __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H
+#ifndef __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H
+#define __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H
 
 /****************************************************************************
  * Included Files
@@ -137,4 +137,4 @@ int esp32_gpio_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H */
+#endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H */
