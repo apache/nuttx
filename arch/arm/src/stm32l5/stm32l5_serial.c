@@ -1797,7 +1797,7 @@ static int stm32l5serial_interrupt(int irq, FAR void *context, FAR void *arg)
        *
        * NOTE: Some of these status bits must be cleared by explicitly
        * writing one to the ICR register: USART_ICR_CTSCF, USART_ICR_LBDCF.
-       * Note of those are currently being used.
+       * None of those are currently being used.
        */
 
 #ifdef HAVE_RS485
