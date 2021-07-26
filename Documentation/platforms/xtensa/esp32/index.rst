@@ -580,11 +580,6 @@ See:
   - https://github.com/espressif/esp-idf/tree/master/components/bootloader
   - https://github.com/espressif/esp-idf/tree/master/components/partition_table .
 
-The secondary boot loader by default programs a RTC watchdog timer.
-As NuttX doesn't know the timer, it reboots every ~9 seconds. You can
-disable the timer by tweaking sdkconfig CONFIG_BOOTLOADER_WDT_ENABLE
-and rebuild the boot loader.
-
 Running from IRAM with OpenOCD
 ------------------------------
 
