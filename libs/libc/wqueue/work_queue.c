@@ -32,6 +32,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 
 #include "wqueue/wqueue.h"
 
@@ -56,7 +57,7 @@
  *   and remove it from the work queue.
  *
  * Input Parameters:
- *   qid    - The work queue ID (index)
+ *   wqueue - The work queue
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will be
  *            invoked on the worker thread of execution.
@@ -74,35 +75,72 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR struct work_s *work, worker_t worker,
                        FAR void *arg, clock_t delay)
 {
-  DEBUGASSERT(work != NULL);
+  FAR sq_entry_t *prev = NULL;
+  FAR sq_entry_t *curr;
+  sclock_t delta;
+  int semcount;
 
   /* Get exclusive access to the work queue */
 
   while (_SEM_WAIT(&wqueue->lock) < 0);
 
-  /* Is there already pending work? */
-
-  if (work->worker != NULL)
-    {
-      /* Remove the entry from the work queue.  It will be requeued at the
-       * end of the work queue.
-       */
-
-      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-    }
-
   /* Initialize the work structure */
 
-  work->worker = worker;           /* Work callback. non-NULL means queued */
-  work->arg    = arg;              /* Callback argument */
-  work->delay  = delay;            /* Delay until work performed */
+  work->worker = worker;             /* Work callback. non-NULL means queued */
+  work->arg    = arg;                /* Callback argument */
+  work->u.s.qtime = clock() + delay; /* Delay until work performed */
 
-  /* Now, time-tag that entry and put it in the work queue. */
+  /* Do the easy case first -- when the work queue is empty. */
 
-  work->qtime  = clock(); /* Time work queued */
+  if (wqueue->q.head == NULL)
+    {
+      /* Add the watchdog to the head == tail of the queue. */
 
-  dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
-  kill(wqueue->pid, SIGWORK);   /* Wake up the worker thread */
+      sq_addfirst(&work->u.s.sq, &wqueue->q);
+      _SEM_POST(&wqueue->wake);
+    }
+
+  /* There are other active watchdogs in the timer queue */
+
+  else
+    {
+      curr = wqueue->q.head;
+
+      /* Check if the new work must be inserted before the curr. */
+
+      do
+        {
+          delta = work->u.s.qtime - ((FAR struct work_s *)curr)->u.s.qtime;
+          if (delta < 0)
+            {
+              break;
+            }
+
+          prev = curr;
+          curr = curr->flink;
+        }
+      while (curr != NULL);
+
+      /* Insert the new watchdog in the list */
+
+      if (prev == NULL)
+        {
+          /* Insert the watchdog at the head of the list */
+
+          sq_addfirst(&work->u.s.sq, &wqueue->q);
+          _SEM_GETVALUE(&wqueue->wake, &semcount);
+          if (semcount < 1)
+            {
+              _SEM_POST(&wqueue->wake);
+            }
+        }
+      else
+        {
+          /* Insert the watchdog in mid- or end-of-queue */
+
+          sq_addafter(prev, &work->u.s.sq, &wqueue->q);
+        }
+    }
 
   _SEM_POST(&wqueue->lock);
   return OK;
@@ -146,6 +184,10 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   if (qid == USRWORK)
     {
+      /* Is there already pending work? */
+
+      work_cancel(qid, work);
+
       return work_qqueue(&g_usrwork, work, worker, arg, delay);
     }
   else
