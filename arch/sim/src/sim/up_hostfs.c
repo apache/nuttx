@@ -126,7 +126,7 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
  * Name: host_open
  ****************************************************************************/
 
-int host_open(const char *pathname, int flags, int mode)
+int host_open(const char *pathname, int flags, nuttx_mode_t mode)
 {
   int mapflags = 0;
 
@@ -212,11 +212,11 @@ int host_close(int fd)
  * Name: host_read
  ****************************************************************************/
 
-ssize_t host_read(int fd, void *buf, size_t count)
+nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count)
 {
   /* Just call the read routine */
 
-  ssize_t ret = read(fd, buf, count);
+  nuttx_ssize_t ret = read(fd, buf, count);
   if (ret == -1)
     {
       ret = -errno;
@@ -229,11 +229,11 @@ ssize_t host_read(int fd, void *buf, size_t count)
  * Name: host_write
  ****************************************************************************/
 
-ssize_t host_write(int fd, const void *buf, size_t count)
+nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
 {
   /* Just call the write routine */
 
-  ssize_t ret = write(fd, buf, count);
+  nuttx_ssize_t ret = write(fd, buf, count);
   if (ret == -1)
     {
       ret = -errno;
@@ -246,12 +246,12 @@ ssize_t host_write(int fd, const void *buf, size_t count)
  * Name: host_lseek
  ****************************************************************************/
 
-off_t host_lseek(int fd, off_t offset, int whence)
+nuttx_off_t host_lseek(int fd, nuttx_off_t offset, int whence)
 {
   /* Just call the lseek routine */
 
-  off_t ret = lseek(fd, offset, whence);
-  if (ret == (off_t)-1)
+  nuttx_off_t ret = lseek(fd, offset, whence);
+  if (ret == (nuttx_off_t)-1)
     {
       ret = -errno;
     }
@@ -317,7 +317,7 @@ int host_fstat(int fd, struct nuttx_stat_s *buf)
  * Name: host_truncate
  ****************************************************************************/
 
-int host_ftruncate(int fd, off_t length)
+int host_ftruncate(int fd, nuttx_off_t length)
 {
   int ret = ftruncate(fd, length);
   if (ret < 0)
