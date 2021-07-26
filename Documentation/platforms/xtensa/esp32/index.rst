@@ -37,7 +37,7 @@ build the toolchain with crosstool-NG on Linux are as follows
 
   $ git clone https://github.com/espressif/crosstool-NG.git
   $ cd crosstool-NG
-  $ git checkout esp-2019r2
+  $ git checkout esp-2021r1
   $ git submodule update --init
 
   $ ./bootstrap && ./configure --enable-local && make
@@ -49,8 +49,8 @@ build the toolchain with crosstool-NG on Linux are as follows
 
   $ export PATH="crosstool-NG/builds/xtensa-esp32-elf/bin:$PATH"
 
-These steps are given in setup guide in
-`ESP-IDF repository <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
+These steps are given in the setup guide in
+`ESP-IDF documentation <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
 
 Flashing
 ========
