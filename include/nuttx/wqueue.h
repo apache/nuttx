@@ -245,14 +245,17 @@ typedef CODE void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
-  struct sq_entry_s sq;  /* Implements a single linked list */
   union
   {
-    struct wdog_s timer; /* Delay expiry timer */
-    clock_t qtime;       /* Time work queued */
+    struct
+    {
+      struct sq_entry_s sq; /* Implements a single linked list */
+      clock_t qtime;        /* Time work queued */
+    } s;
+    struct wdog_s timer;    /* Delay expiry timer */
   } u;
-  worker_t  worker;      /* Work callback */
-  FAR void *arg;         /* Callback argument */
+  worker_t  worker;         /* Work callback */
+  FAR void *arg;            /* Callback argument */
 };
 
 /* This is an enumeration of the various events that may be

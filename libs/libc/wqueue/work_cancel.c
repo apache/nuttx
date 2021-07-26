@@ -87,7 +87,7 @@ static int work_qcancel(FAR struct usr_wqueue_s *wqueue,
        */
 
       curr = wqueue->q.head;
-      while (curr && curr != &work->sq)
+      while (curr && curr != &work->u.s.sq)
         {
           prev = curr;
           curr = curr->flink;
