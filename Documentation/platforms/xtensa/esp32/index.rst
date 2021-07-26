@@ -587,8 +587,7 @@ Running from IRAM is a good debug option.  You should be able to load the
 ELF directly via JTAG in this case, and you may not need the bootloader.
 
 NuttX supports a configuration option, CONFIG_ESP32_DEVKITC_RUN_IRAM, that may be
-selected for execution from IRAM.  This option simply selects the correct
-linker script for IRAM execution.
+selected for execution from IRAM.
 
 Skipping the Secondary Bootloader
 ---------------------------------
