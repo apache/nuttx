@@ -55,7 +55,10 @@ These steps are given in the setup guide in
 Flashing
 ========
 
-Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool. To flash your NuttX firmware simply run::
+Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool. 
+It's a two step process where the first converts the ELF file into a ESP32-compatible binary 
+and the second flashes it to the board.  These steps are included into the build system and you can
+flash your NuttX firmware simply by running::
 
     make download ESPTOOL_PORT=<port>
 
@@ -533,133 +536,6 @@ the 20-pin connector:
 20 GND   N/A          GND
 ===================== ===============
 
-Executing and Debugging from FLASH and IRAM
-===========================================
-
-FLASH
------
-
-OpenOCD currently doesn't have a FLASH driver for ESP32, so you can load
-code into IRAM only via JTAG. FLASH-resident sections like .FLASH.rodata
-will fail to load.  The bootloader in ROM doesn't parse ELF, so any image
-which is bootloaded from FLASH has to be converted into a custom image
-format first.
-
-The tool esp-idf uses for flashing is a command line Python tool called
-"esptool.py" which talks to a serial bootloader in ROM.  A version is
-supplied in the esp-idf codebase in components/esptool_py/esptool, the
-"upstream" for that tool is here and now supports ESP32::
-
-  https://github.com/espressif/esptool/
-
-To FLASH an ELF via the command line is a two step process, something like
-this::
-
-  esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o nuttx.bin nuttx
-  esptool.py --chip esp32 --port COMx write_flash 0x1000 bootloader.bin 0x8000 partition_table.bin 0x10000 nuttx.bin
-
-The first step converts an ELF image into an ESP32-compatible binary
-image format, and the second step flashes it (along with bootloader image and
-partition table binary.)
-The offset for the partition table may vary, depending on ESP-IDF
-configuration, ``CONFIG_PARTITION_TABLE_OFFSET``, which is by default 0x8000
-as of writing this.
-
-To put the ESP32 into serial flashing mode, it needs to be reset with IO0 held
-low.  On the Core boards this can be accomplished by holding the button marked
-"Boot" and pressing then releasing the button marked "EN".  Actually, esptool.py
-can enter bootloader mode automatically (via RTS/DTR control lines), but
-unfortunately a timing interaction between the Windows CP2012 driver and the
-hardware means this doesn't currently work on Windows.
-
-Secondary Boot Loader / Partition Table
----------------------------------------
-
-See:
-
-  - https://github.com/espressif/esp-idf/tree/master/components/bootloader
-  - https://github.com/espressif/esp-idf/tree/master/components/partition_table .
-
-Running from IRAM with OpenOCD
-------------------------------
-
-Running from IRAM is a good debug option.  You should be able to load the
-ELF directly via JTAG in this case, and you may not need the bootloader.
-
-NuttX supports a configuration option, CONFIG_ESP32_DEVKITC_RUN_IRAM, that may be
-selected for execution from IRAM.
-
-Skipping the Secondary Bootloader
----------------------------------
-
-It is possible to skip the secondary bootloader and run out of IRAM using
-only the primary bootloader if your application of small enough (< 128KiB code,
-<180KiB data), then you can simplify initial bring-up by avoiding second stage
-bootloader. Your application will be loaded into IRAM using first stage
-bootloader present in ESP32 ROM. To achieve this, you need two things:
-
-  1. Have a linker script which places all code into IRAM and all data into
-     IRAM/DRAM
-
-  2. Use "esptool.py" utility to convert application .elf
-     file into binary format which can be loaded by first stage bootloader.
-
-Again you would need to link the ELF file and convert it to binary format suitable
-for flashing into the board.  The command should to convert ELF file to binary
-image looks as follows::
-
-  esptool.py --chip esp32 elf2image --flash_mode "dio" --flash_freq "40m" --flash_size "2MB" -o nuttx.bin nuttx
-
-To flash binary image to your development board, use the same esptool.py utility::
-
-  esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600 write_flash -z --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 nuttx.bin
-
-The argument before app.bin (0x1000) indicates the offset in flash where binary
-will be written. ROM bootloader expects to find an application (or second stage
-bootloader) image at offset 0x1000, so we are writing the binary there.
-
-Sample OpenOCD Debug Steps
---------------------------
-
-I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
-is a synopsis of my debug steps:
-
-boards/xtensa/esp32/esp32-devkitc/configs/nsh with::
-
-  CONFIG_DEBUG_ASSERTIONS=y
-  CONFIG_DEBUG_FEATURES=y
-  CONFIG_DEBUG_SYMBOLS=y
-  CONFIG_ESP32_DEVKITC_RUN_IRAM=y
-
-I also made this change configuration which will eliminate all attempts to
-re-configure serial. It will just use the serial settings as they were left
-by the bootloader::
-
-  CONFIG_SUPPRESS_UART_CONFIG=y
-
-Start OpenOCD::
-
-  cd ../openocde-esp32
-  cp ../nuttx/boards/xtensa/esp32/esp32-devkitc/scripts/esp32.cfg .
-  sudo ./src/openocd -s ./tcl/ -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
-
-Start GDB and load code::
-
-  cd ../nuttx
-  xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' nuttx
-  (gdb) load nuttx
-  (gdb) mon reg pc [value report by load for entry point]
-  (gdb) s
-
-Single stepping works fine for me as do breakpoints::
-
-  Breakpoint 1, up_timer_initialize () at chip/esp32_timerisr.c:172
-  72 {
-  (gdb) n
-  esp32.cpu0: Target halted, pc=0x400835BF
-  187 g_tick_divisor = divisor;
-  (gdb) ...
-
 Using QEMU
 ==========
 
@@ -697,8 +573,6 @@ Things to Do
    But the performance improvement might be worth the effort.
 
 3. See SMP-related issues above
-
-4. See OpenOCD for the ESP32 above
 
 Supported Boards
 ================
