@@ -666,6 +666,12 @@ errout:
 
       memcpy(&msg->addr, &pkt_dat->addr, sizeof(pkt_dat->addr));
 
+      /* Set the address family
+       * NOTE: gs2200m only supports IPv4
+       */
+
+      msg->addr.sin_family = AF_INET;
+
       /* In udp case, treat the packet separately */
 
       ret = false;
