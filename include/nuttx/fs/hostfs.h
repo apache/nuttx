@@ -110,6 +110,7 @@ typedef int32_t      nuttx_off_t;
 typedef uint32_t     nuttx_blkcnt_t;
 typedef unsigned int nuttx_mode_t;
 typedef uintptr_t    nuttx_size_t;
+typedef intptr_t     nuttx_ssize_t;
 
 /* These must match the definition in include/time.h */
 
@@ -169,16 +170,16 @@ struct nuttx_stat_s
  ****************************************************************************/
 
 #ifdef __SIM__
-int           host_open(const char *pathname, int flags, int mode);
+int           host_open(const char *pathname, int flags, nuttx_mode_t mode);
 int           host_close(int fd);
-ssize_t       host_read(int fd, void *buf, nuttx_size_t count);
-ssize_t       host_write(int fd, const void *buf, nuttx_size_t count);
-off_t         host_lseek(int fd, off_t offset, int whence);
+nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count);
+nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count);
+nuttx_off_t   host_lseek(int fd, nuttx_off_t offset, int whence);
 int           host_ioctl(int fd, int request, unsigned long arg);
 void          host_sync(int fd);
 int           host_dup(int fd);
 int           host_fstat(int fd, struct nuttx_stat_s *buf);
-int           host_ftruncate(int fd, off_t length);
+int           host_ftruncate(int fd, nuttx_off_t length);
 void         *host_opendir(const char *name);
 int           host_readdir(void *dirp, struct nuttx_dirent_s *entry);
 void          host_rewinddir(void *dirp);
