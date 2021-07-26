@@ -75,7 +75,6 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTCFLAGS += -DCONFIG_USEC_PER_TICK=$(CONFIG_USEC_PER_TICK)
 HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
@@ -97,7 +96,6 @@ endif
 ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_cpuidlestack.c
   REQUIREDOBJS += up_smpsignal$(OBJEXT)
-  HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
   HOSTSRCS += up_simsmp.c
 endif
 
@@ -118,22 +116,16 @@ else
 endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
-ifeq ($(CONFIG_SIM_X11NOSHM),y)
-  HOSTCFLAGS += -DCONFIG_SIM_X11NOSHM=1
-endif
   HOSTSRCS += up_x11framebuffer.c
   STDLIBS += -lX11 -lXext
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += up_touchscreen.c
   REQUIREDOBJS += up_touchscreen$(OBJEXT)
-  HOSTCFLAGS += -DCONFIG_SIM_TOUCHSCREEN=1
   HOSTSRCS += up_x11eventloop.c
 else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
-  HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
 else ifeq ($(CONFIG_SIM_BUTTONS),y)
-  HOSTCFLAGS += -DCONFIG_SIM_BUTTONS=1
   HOSTSRCS += up_x11eventloop.c
 endif
 endif
@@ -165,23 +157,14 @@ endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += up_netdriver.c
-  HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
 ifneq ($(CONFIG_WINDOWS_CYGWIN),y)
   HOSTSRCS += up_tapdev.c
-ifeq ($(CONFIG_SIM_NET_BRIDGE),y)
-  HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE
-  HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE_DEVICE=\"$(CONFIG_SIM_NET_BRIDGE_DEVICE)\"
-endif
-ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
-  HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
-endif
 else # CONFIG_WINDOWS_CYGWIN != y
   HOSTSRCS += up_wpcap.c
   STDLIBS = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
 endif # CONFIG_WINDOWS_CYGWIN != y
 else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   CSRCS += up_netdriver.c
-  HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT_PATH=\"$(CONFIG_SIM_NETDEV_VPNKIT_PATH)\"
   HOSTSRCS += up_vpnkit.c
   VPATH += :sim/vpnkit
   HOSTSRCS += protocol.c negotiate.c
@@ -190,10 +173,6 @@ endif
 ifeq ($(CONFIG_SIM_HCISOCKET),y)
   HOSTSRCS += up_hcisocket_host.c
   CSRCS += up_hcisocket.c
-endif
-
-ifeq ($(CONFIG_I2C_RESET),y)
-  HOSTCFLAGS += -DCONFIG_I2C_RESET=1
 endif
 
 ifeq ($(CONFIG_SIM_I2CBUS_LINUX),y)
@@ -212,13 +191,12 @@ endif
 ifeq ($(CONFIG_FS_HOSTFS),y)
 ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
   HOSTSRCS += up_hostfs.c
-  HOSTCFLAGS += -DCONFIG_NAME_MAX=$(CONFIG_NAME_MAX)
-
-up_hostfs.c: hostfs.h
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	@echo "CP:  $<"
 	$(Q) cp $< $@
+
+up_hostfs.c: hostfs.h
 endif
 endif
 
@@ -325,7 +303,11 @@ makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(HOSTSRCS:.c=.ddh)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
 
-.depend: Makefile $(SRCS) $(TOPDIR)$(DELIM).config
+config.h: $(TOPDIR)/include/nuttx/config.h
+	@echo "CP:  $<"
+	$(Q) cp $< $@
+
+.depend: Makefile config.h $(SRCS) $(TOPDIR)$(DELIM).config
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board depend ; \
 	fi
@@ -352,6 +334,7 @@ distclean:: clean
 	fi
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
+	$(call DELFILE, config.h)
 	$(call DELFILE, hostfs.h)
 
 -include Make.dep

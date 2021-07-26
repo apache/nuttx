@@ -40,10 +40,7 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
-
-#if defined(CONFIG_UART_BTH4)
-  #include <nuttx/serial/uart_bth4.h>
-#endif
+#include <nuttx/serial/uart_bth4.h>
 
 #include "up_internal.h"
 #include "up_hcisocket_host.h"

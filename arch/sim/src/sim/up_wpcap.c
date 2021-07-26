@@ -54,6 +54,8 @@
 #include <syslog.h>
 #include <malloc.h>
 
+#include "up_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -174,7 +176,8 @@ static void init_pcap(struct in_addr addr)
       error_exit("No interface found with IP address");
     }
 
-  pcap = pcap_open_live(interfaces->name, NETDEV_BUFSIZE, 0, -1, error);
+  pcap = pcap_open_live(interfaces->name,
+                        CONFIG_NET_ETH_PKTSIZE, 0, -1, error);
   if (pcap == NULL)
     {
       error_exit(error);
