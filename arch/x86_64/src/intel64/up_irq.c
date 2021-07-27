@@ -329,8 +329,8 @@ static void up_apic_init(void)
  *
  ****************************************************************************/
 
-static int __attribute__((unused))
-  legacy_pic_irq_handler(int irq, uint32_t *regs, void *arg)
+static int unused_code
+legacy_pic_irq_handler(int irq, uint32_t *regs, void *arg)
 {
   return 0;
 }
