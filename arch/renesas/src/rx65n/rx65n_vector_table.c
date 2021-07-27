@@ -30,13 +30,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define OFS_REG     __attribute__ ((section (".ofs1"))) /* 0xfe7f5d00 */
-#define OFS_TMINF   __attribute__ ((section (".ofs2"))) /* 0xfe7f5d10 */
-#define OFS_SPCC    __attribute__ ((section (".ofs3"))) /* 0xfe7f5d40 */
-#define OFS_TMEF    __attribute__ ((section (".ofs4"))) /* 0xfe7f5d48 */
-#define OFS_OSIS    __attribute__ ((section (".ofs5"))) /* 0xfe7f5d50 */
-#define OFS_FAW     __attribute__ ((section (".ofs6"))) /* 0xfe7f5d64 */
-#define OFS_ROMCODE __attribute__ ((section (".ofs7"))) /* 0xfe7f5d70 */
+#define OFS_REG     locate_data(".ofs1") /* 0xfe7f5d00 */
+#define OFS_TMINF   locate_data(".ofs2") /* 0xfe7f5d10 */
+#define OFS_SPCC    locate_data(".ofs3") /* 0xfe7f5d40 */
+#define OFS_TMEF    locate_data(".ofs4") /* 0xfe7f5d48 */
+#define OFS_OSIS    locate_data(".ofs5") /* 0xfe7f5d50 */
+#define OFS_FAW     locate_data(".ofs6") /* 0xfe7f5d64 */
+#define OFS_ROMCODE locate_data(".ofs7") /* 0xfe7f5d70 */
 
 /* SPCC register */
 
@@ -181,7 +181,7 @@ void r_floatingpoint_exception(void)
 #endif
 }
 
-#define EXVECT_SECT    __attribute__ ((section (".exvectors")))
+#define EXVECT_SECT    locate_data(".exvectors")
 
 const void *except_vectors[] EXVECT_SECT  =
 {
@@ -218,7 +218,7 @@ const void *except_vectors[] EXVECT_SECT  =
     r_nmi_exception            /* 0xfffffff8  NMI       */
 };
 
-#define FVECT_SECT    __attribute__ ((section (".fvectors")))
+#define FVECT_SECT    locate_data(".fvectors")
 extern void _start(void); /* defined in rx65n_head.S */
 const  void *hardware_vectors[] FVECT_SECT =
 {
@@ -227,7 +227,7 @@ const  void *hardware_vectors[] FVECT_SECT =
   _start      /* Power On Reset PC */
 };
 
-#define RVECT_SECT __attribute__ ((section (".rvectors")))
+#define RVECT_SECT locate_data(".rvectors")
 const void *relocatable_vectors[256] RVECT_SECT  =
 {
   0

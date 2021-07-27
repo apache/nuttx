@@ -207,7 +207,7 @@ struct bl602_net_driver_s g_bl602_net[BL602_NET_NINTERFACES];
 static struct tx_buf_ind_s g_tx_buf_indicator =
   BITSET_T_INITIALIZER((1 << BL602_NET_TXBUFF_NUM) - 1);
 
-static uint8_t __attribute__((section(".wifi_ram.txbuff")))
+static uint8_t locate_data(".wifi_ram.txbuff")
 g_tx_buff[BL602_NET_TXBUFF_NUM][BL602_NET_TXBUFF_SIZE];
 
 static sem_t g_wifi_scan_sem; /* wifi scan complete semaphore */

@@ -81,7 +81,7 @@ SECTIONS
 
     /* Emit the the D3 power domain section for locating BDMA data
      *
-     * Static data with __attribute__ ((section (".sram4"))) will be located
+     * Static data with locate_data(".sram4") will be located
      * at start of SRAM4; the rest of SRAM4 will be added to the heap.
      */
 

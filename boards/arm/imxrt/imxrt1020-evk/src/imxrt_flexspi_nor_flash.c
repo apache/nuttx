@@ -58,7 +58,7 @@
  */
 
 #if defined (CONFIG_IMXRT1020_EVK_HYPER_FLASH)
-__attribute__((section(".boot_hdr.conf")))
+locate_data(".boot_hdr.conf")
 const struct flexspi_nor_config_s g_flash_config =
 {
   .mem_config                =
@@ -115,7 +115,7 @@ const struct flexspi_nor_config_s g_flash_config =
   .is_uniform_blocksize      = 1,
 };
 #elif defined (CONFIG_IMXRT1020_EVK_QSPI_FLASH)
-__attribute__((section(".boot_hdr.conf")))
+locate_data(".boot_hdr.conf")
 const struct flexspi_nor_config_s g_flash_config =
 {
   .mem_config =

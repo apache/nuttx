@@ -57,7 +57,7 @@
 /* Address of the CPU0 IDLE thread */
 
 uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
-  aligned_data(16) __attribute__((section(".noinit")));
+  aligned_data(16) locate_data(".noinit");
 
 /****************************************************************************
  * Public Functions
