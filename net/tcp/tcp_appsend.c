@@ -319,11 +319,18 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   if (dev->d_sndlen > 0 && conn->tx_unacked > 0)
 #endif
     {
+      uint32_t seq;
+
       /* We always set the ACK flag in response packets adding the length of
        * the IP and TCP headers.
        */
 
       tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+
+      /* Advance sndseq */
+
+      seq = tcp_getsequence(conn->sndseq);
+      tcp_setsequence(conn->sndseq, seq + dev->d_sndlen);
     }
 
   /* If there is no data to send, just send out a pure ACK if one is
