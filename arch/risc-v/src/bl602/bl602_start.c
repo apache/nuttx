@@ -70,7 +70,7 @@
  */
 
 uint8_t g_idle_stack[BL602_IDLESTACK_SIZE]
-  __attribute__((section(".noinit_idle_stack")));
+  locate_data(".noinit_idle_stack");
 
 /* Dont change the name of variable, since we refer this
  * g_boot2_partition_table in linker script
@@ -107,7 +107,7 @@ uint32_t __attribute__((no_instrument_function)) boot2_get_flash_addr(void)
 }
 
 #ifdef CONFIG_STACK_OVERFLOW_CHECK
-void __attribute__((no_instrument_function, section(".tcm_code")))
+void __attribute__(((no_instrument_function))) locate_code(".tcm_code")
 __cyg_profile_func_enter(void *this_fn, void *call_site)
 {
   register uintptr_t *sp;
@@ -149,7 +149,7 @@ __cyg_profile_func_enter(void *this_fn, void *call_site)
   return;
 }
 
-void __attribute__((no_instrument_function, section(".tcm_code")))
+void __attribute__((no_instrument_function)) locate_code(".tcm_code")
 __cyg_profile_func_exit(void *this_fn, void *call_site)
 {
   return;

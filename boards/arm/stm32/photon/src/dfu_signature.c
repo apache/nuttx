@@ -65,8 +65,8 @@ extern uint32_t _firmware_end;
  * Private Data
  ****************************************************************************/
 
-__attribute__((externally_visible, section(".dfu_signature")))
-  const struct dfu_signature dfu_sign =
+__attribute__((externally_visible)) locate_data(".dfu_signature")
+const struct dfu_signature dfu_sign =
 {
   (uint32_t)&_firmware_start, /* Flash image start address */
   (uint32_t)&_firmware_end,   /* Flash image end address */

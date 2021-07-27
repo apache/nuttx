@@ -62,7 +62,7 @@
  */
 
 extern up_vector_t g_ram_vectors[ARMV8M_VECTAB_SIZE]
-  __attribute__ ((section (".ram_vectors"))) aligned_data(128);
+  locate_data(".ram_vectors") aligned_data(128);
 
 /****************************************************************************
  * Public Function Prototypes

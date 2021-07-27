@@ -28,7 +28,7 @@
  * Public Data
  ****************************************************************************/
 
-__attribute__((section(".boot_hdr.ivt")))
+locate_data(".boot_hdr.ivt")
 const struct ivt_s g_image_vector_table =
 {
   IVT_HEADER,                         /* IVT Header */
@@ -41,7 +41,7 @@ const struct ivt_s g_image_vector_table =
   IVT_RSVD                            /* Reserved = 0 */
 };
 
-__attribute__((section(".boot_hdr.boot_data")))
+locate_data(".boot_hdr.boot_data")
 const struct boot_data_s g_boot_data =
 {
   IMAGE_DEST,                         /* boot start location */

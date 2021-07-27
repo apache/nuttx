@@ -53,7 +53,7 @@
 /* Address of the IDLE thread */
 
 uint8_t g_idlestack[CONFIG_IDLETHREAD_STACKSIZE]
-  aligned_data(16) __attribute__((section(".noinit")));
+  aligned_data(16) locate_data(".noinit");
 uint32_t g_idle_topstack = ESP32C3_IDLESTACK_TOP;
 
 /****************************************************************************
