@@ -147,6 +147,11 @@
 
 #  define noinstrument_function __attribute__ ((no_instrument_function))
 
+/* The unsued code or data */
+
+#  define unused_code __attribute__((unused))
+#  define unused_data __attribute__((unused))
+
 /* Some versions of GCC have a separate __syslog__ format.
  * http://mail-index.netbsd.org/source-changes/2015/10/14/msg069435.html
  * Use it if available. Otherwise, assume __printf__ accepts %m.
@@ -404,6 +409,9 @@
 #  define noinline_function
 #  define noinstrument_function
 
+#  define unused_code
+#  define unused_data
+
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -536,6 +544,8 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define unused_code
+#  define unused_data
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -641,6 +651,8 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define unused_code
+#  define unused_data
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -701,6 +713,8 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define unused_code
+#  define unused_data
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)

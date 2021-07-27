@@ -76,8 +76,7 @@ uint8_t g_idle_stack[BL602_IDLESTACK_SIZE]
  * g_boot2_partition_table in linker script
  */
 
-static struct boot2_partition_table_s g_boot2_partition_table
-  __attribute__((used));
+static struct boot2_partition_table_s g_boot2_partition_table unused_data;
 
 /****************************************************************************
  * Public Data
