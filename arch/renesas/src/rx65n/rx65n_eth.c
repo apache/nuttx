@@ -336,7 +336,7 @@
 
 /* DMA descriptor buffer alignment to 32 bytes */
 
-#define NX_ALIGN32 __attribute__((aligned(32)))
+#define NX_ALIGN32 aligned_data(32)
 
 /****************************************************************************
  * Public Variables

@@ -409,7 +409,7 @@ static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART0_RXDMA
 static char g_uart0rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -418,7 +418,7 @@ static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART1_RXDMA
 static char g_uart1rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -427,7 +427,7 @@ static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART2_RXDMA
 static char g_uart2rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -436,7 +436,7 @@ static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART3_RXDMA
 static char g_uart3rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -445,7 +445,7 @@ static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART4_RXDMA
 static char g_uart4rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -454,7 +454,7 @@ static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART5_RXDMA
 static char g_uart5rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 

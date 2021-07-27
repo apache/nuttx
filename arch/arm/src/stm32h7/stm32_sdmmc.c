@@ -372,7 +372,7 @@ struct stm32_dev_s
   struct work_s      cbfifo;          /* Monitor for Lame FIFO */
 #endif
   uint8_t            rxfifo[FIFO_SIZE_IN_BYTES] /* To offload with IDMA */
-                     __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+                     aligned_data(ARMV7M_DCACHE_LINESIZE);
 #if defined(CONFIG_ARMV7M_DCACHE) && defined(CONFIG_STM32H7_SDMMC_IDMA)
   bool               unaligned_rx; /* read buffer is not cache-line aligned */
 #endif
@@ -649,7 +649,7 @@ static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
 /* Input dma buffer for unaligned transfers */
 #if defined(CONFIG_ARMV7M_DCACHE) && defined(CONFIG_STM32H7_SDMMC_IDMA)
 static uint8_t sdmmc_rxbuffer[SDMMC_MAX_BLOCK_SIZE]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 #endif
 
 /****************************************************************************

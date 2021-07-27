@@ -379,7 +379,7 @@
 
 #if defined(CONFIG_ARMV7M_DCACHE)
 #  define TXDMA_BUF_SIZE(b) (((b) + TXDMA_BUFFER_MASK) & ~TXDMA_BUFFER_MASK)
-#  define TXDMA_BUF_ALIGN   aligned_data(ARMV7M_DCACHE_LINESIZE);
+#  define TXDMA_BUF_ALIGN   aligned_data(ARMV7M_DCACHE_LINESIZE)
 #else
 #  define TXDMA_BUF_SIZE(b)  (b)
 #  define TXDMA_BUF_ALIGN

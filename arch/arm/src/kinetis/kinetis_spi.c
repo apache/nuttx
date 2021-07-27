@@ -1160,7 +1160,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   int                          ret;
   size_t                       adjust;
   ssize_t                      nbytes;
-  static uint8_t               rxdummy[4] __attribute__((aligned(4)));
+  static uint8_t               rxdummy[4] aligned_data(4);
   static const uint16_t        txdummy = 0xffff;
   FAR struct kinetis_spidev_s *priv    = (FAR struct kinetis_spidev_s *)dev;
 

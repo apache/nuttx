@@ -334,12 +334,12 @@ static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 /* TX descriptors list */
 
 static struct emac_txdesc_s g_txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* RX descriptors list */
 
 static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* Transmit Buffers
  *
@@ -348,13 +348,13 @@ static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS]
  * lsb bits of the address shall be set to 0
  */
 
-static uint8_t g_txbuffer[CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE];
-               __attribute__((aligned(8)))
+static uint8_t g_txbuffer[CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE]
+               aligned_data(8);
 
 /* Receive Buffers */
 
 static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
-               __attribute__((aligned(8)));
+               aligned_data(8);
 
 #endif
 

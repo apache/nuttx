@@ -194,7 +194,7 @@ struct ftmac100_register_s
 
 /* Transmit descriptor, aligned to 16 bytes */
 
-struct __attribute__ ((aligned(16))) ftmac100_txdes_s
+struct aligned_data(16) ftmac100_txdes_s
 {
   uint32_t txdes0;
   uint32_t txdes1;
@@ -204,7 +204,7 @@ struct __attribute__ ((aligned(16))) ftmac100_txdes_s
 
 /* Receive descriptor, aligned to 16 bytes */
 
-struct __attribute__ ((aligned(16))) ftmac100_rxdes_s
+struct aligned_data(16) ftmac100_rxdes_s
 {
   uint32_t rxdes0;
   uint32_t rxdes1;

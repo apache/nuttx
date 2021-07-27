@@ -114,7 +114,7 @@ static struct dma_channel_s g_dmach[CXD56_DMA_NCHANNELS];
 #endif
 
 static struct dma_descriptor_s g_descriptors[CXD56_DMA_NCHANNELS]
-  __attribute__((aligned(DESC_TABLE_ALIGN)));
+  aligned_data(DESC_TABLE_ALIGN);
 
 /****************************************************************************
  * Public Data

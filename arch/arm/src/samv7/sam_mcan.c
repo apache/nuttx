@@ -991,7 +991,7 @@ static const struct can_ops_s g_mcanops =
 
 static uint32_t g_mcan0_msgram[MCAN0_MSGRAM_WORDS]
 #ifdef CONFIG_ARMV7M_DCACHE
-  __attribute__((aligned(MCAN_ALIGN)));
+  aligned_data(MCAN_ALIGN);
 #else
   ;
 #endif
@@ -1071,7 +1071,7 @@ static struct can_dev_s g_mcan0dev;
 
 static uint32_t g_mcan1_msgram[MCAN1_MSGRAM_WORDS]
 #ifdef CONFIG_ARMV7M_DCACHE
-  __attribute__((aligned(MCAN_ALIGN)));
+  aligned_data(MCAN_ALIGN);
 #else
   ;
 #endif

@@ -1841,7 +1841,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     {
       /* The dummy buffer is used to DMA with out increment into  */
 
-      static uint8_t rxdummy[4] __attribute__((aligned(4)));
+      static uint8_t rxdummy[4] aligned_data(4);
       static const uint16_t txdummy = 0xffff;
 
       spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
