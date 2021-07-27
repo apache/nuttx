@@ -43,7 +43,7 @@
  * Private Types
  ****************************************************************************/
 
-__attribute__((packed)) struct dfu_signature
+begin_packed_struct struct dfu_signature
 {
   uint32_t linker_start_address;
   uint32_t linker_end_address;
@@ -52,7 +52,7 @@ __attribute__((packed)) struct dfu_signature
   uint8_t  firmware_type1;
   uint8_t  firmware_type2;
   uint8_t  reserved2[8];
-};
+} end_packed_struct;
 
 /****************************************************************************
  * Public Data
