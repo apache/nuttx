@@ -416,6 +416,13 @@ _xtensa_level2_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	2 a0
@@ -480,6 +487,13 @@ _xtensa_level3_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -546,6 +560,13 @@ _xtensa_level4_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	4 a0
@@ -611,6 +632,13 @@ _xtensa_level5_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	5 a0
@@ -675,6 +703,13 @@ _xtensa_level6_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
