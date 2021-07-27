@@ -97,7 +97,7 @@ extern void bl602_boardinitialize(void);
  * Name: boot2_get_flash_addr
  ****************************************************************************/
 
-uint32_t __attribute__((no_instrument_function)) boot2_get_flash_addr(void)
+uint32_t noinstrument_function boot2_get_flash_addr(void)
 {
   extern uint8_t __boot2_flash_cfg_src;
 
@@ -107,7 +107,7 @@ uint32_t __attribute__((no_instrument_function)) boot2_get_flash_addr(void)
 }
 
 #ifdef CONFIG_STACK_OVERFLOW_CHECK
-void __attribute__(((no_instrument_function))) locate_code(".tcm_code")
+void noinstrument_function locate_code(".tcm_code")
 __cyg_profile_func_enter(void *this_fn, void *call_site)
 {
   register uintptr_t *sp;
@@ -149,7 +149,7 @@ __cyg_profile_func_enter(void *this_fn, void *call_site)
   return;
 }
 
-void __attribute__((no_instrument_function)) locate_code(".tcm_code")
+void noinstrument_function locate_code(".tcm_code")
 __cyg_profile_func_exit(void *this_fn, void *call_site)
 {
   return;
