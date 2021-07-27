@@ -174,7 +174,7 @@ static sq_queue_t g_tcd_free;
 /* This is a pool of pre-allocated TCDs */
 
 static struct kinetis_edmatcd_s g_tcd_pool[CONFIG_KINETIS_EDMA_NTCD]
-              __attribute__((aligned(EDMA_ALIGN)));
+              aligned_data(EDMA_ALIGN);
 #endif
 
 /****************************************************************************

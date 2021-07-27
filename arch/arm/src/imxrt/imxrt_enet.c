@@ -288,7 +288,7 @@ static struct imxrt_driver_s g_enet[CONFIG_IMXRT_ENET_NETHIFS];
  */
 
 static uint8_t g_desc_pool[NENET_NBUFFERS * sizeof(struct enet_desc_s)]
-               __attribute__((aligned(ENET_ALIGN)));
+               aligned_data(ENET_ALIGN);
 
 /* The DMA buffers.  Again, A unaligned uint8_t is used to allocate the
  * memory; 16 is added to assure that we can meet the descriptor alignment
@@ -296,7 +296,7 @@ static uint8_t g_desc_pool[NENET_NBUFFERS * sizeof(struct enet_desc_s)]
  */
 
 static uint8_t g_buffer_pool[NENET_NBUFFERS * IMXRT_BUF_SIZE]
-               __attribute__((aligned(ENET_ALIGN)));
+               aligned_data(ENET_ALIGN);
 
 /****************************************************************************
  * Private Function Prototypes

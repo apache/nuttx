@@ -199,7 +199,7 @@ static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 /* Driver state structure. */
 
 static struct ftmac100_driver_s g_ftmac100[CONFIG_FTMAC100_NINTERFACES]
-  __attribute__((aligned(16)));
+  aligned_data(16);
 
 /****************************************************************************
  * Private Function Prototypes

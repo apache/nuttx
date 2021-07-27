@@ -461,7 +461,7 @@ static const uint32_t g_lcdpin[] =
  */
 
 static uint16_t g_runbuffer[LCD_RUNBUFFER_BYTES]
-  __attribute__((aligned(LCD_ALIGN)));
+  aligned_data(LCD_ALIGN);
 
 /* This structure describes the overall LCD video controller */
 

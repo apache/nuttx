@@ -64,7 +64,7 @@ extern void exception_common(void);
  */
 
 unsigned _vectors[] __attribute__((section(".vectors"))) \
-                    __attribute__((aligned(0x100))) =
+                    aligned_data(0x100) =
 {
   /* Initial stack */
 

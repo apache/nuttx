@@ -450,9 +450,9 @@ static int  lpc31_pullup(struct usbdev_s *dev, bool enable);
 static struct lpc31_usbdev_s g_usbdev;
 
 static struct
-lpc31_dqh_s __attribute__((aligned(2048))) g_qh[LPC31_NPHYSENDPOINTS];
+lpc31_dqh_s aligned_data(2048) g_qh[LPC31_NPHYSENDPOINTS];
 static struct
-lpc31_dtd_s __attribute__((aligned(32)))   g_td[LPC31_NPHYSENDPOINTS];
+lpc31_dtd_s aligned_data(32)   g_td[LPC31_NPHYSENDPOINTS];
 
 static const struct usbdev_epops_s g_epops =
 {

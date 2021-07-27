@@ -63,10 +63,10 @@ static inline void up_idtinit(void);
 
 volatile uint64_t *g_current_regs;
 
-uint8_t g_interrupt_stack[IRQ_STACK_SIZE] __attribute__ ((aligned (16)));
+uint8_t g_interrupt_stack[IRQ_STACK_SIZE] aligned_data(16);
 uint8_t *g_interrupt_stack_end = g_interrupt_stack + IRQ_STACK_SIZE - 16;
 
-uint8_t g_isr_stack[IRQ_STACK_SIZE] __attribute__ ((aligned (16)));
+uint8_t g_isr_stack[IRQ_STACK_SIZE] aligned_data(16);
 uint8_t *g_isr_stack_end = g_isr_stack + IRQ_STACK_SIZE - 16;
 
 /****************************************************************************

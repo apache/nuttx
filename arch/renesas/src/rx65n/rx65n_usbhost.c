@@ -250,12 +250,12 @@ struct rx65n_usbhost_list_s
   /* Variable length buffer data follows */
 };
 
-struct rx65n_usbhost_ed_s  __attribute__ ((aligned (32)));
-struct rx65n_usbhost_gtd_s  __attribute__ ((aligned (32)));
+struct rx65n_usbhost_ed_s  aligned_data(32);
+struct rx65n_usbhost_gtd_s  aligned_data(32);
 
 /* This must be aligned to a 256-byte boundary */
 
-static struct ohci_hcca_s g_hcca        __attribute__ ((aligned (256)));
+static struct ohci_hcca_s g_hcca        aligned_data(256);
 static struct ohci_hcca_s *HCCA;
 
 static struct rx65n_usbhost_gtd_s       *TDTAIL;

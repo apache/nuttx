@@ -563,7 +563,7 @@ static const struct usb_epdesc_s g_ep0desc =
 /* This is a properly aligned pool of preallocated DMA transfer descriptors */
 
 static struct sam_dtd_s g_dtdpool[CONFIG_SAMA5_UDPHS_NDTDS]
-                        __attribute__ ((aligned(16)));
+                        aligned_data(16);
 #endif
 #endif
 

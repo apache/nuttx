@@ -379,7 +379,7 @@ static char g_lpuart0rxbuffer[CONFIG_LPUART0_RXBUFSIZE];
 static char g_lpuart0txbuffer[CONFIG_LPUART0_TXBUFSIZE];
 #  ifdef CONFIG_KINETIS_LPUART0_RXDMA
 static char g_lpuart0rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 #  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART1
@@ -387,7 +387,7 @@ static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
 #  ifdef CONFIG_KINETIS_LPUART1_RXDMA
 static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 #  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART2
@@ -395,7 +395,7 @@ static char g_lpuart2rxbuffer[CONFIG_LPUART2_RXBUFSIZE];
 static char g_lpuart2txbuffer[CONFIG_LPUART2_TXBUFSIZE];
 #  ifdef CONFIG_KINETIS_LPUART2_RXDMA
 static char g_lpuart2rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 #  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART3
@@ -403,7 +403,7 @@ static char g_lpuart3rxbuffer[CONFIG_LPUART3_RXBUFSIZE];
 static char g_lpuart3txbuffer[CONFIG_LPUART3_TXBUFSIZE];
 #  ifdef CONFIG_KINETIS_LPUART3_RXDMA
 static char g_lpuart3rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 #  endif
 #endif
 #ifdef CONFIG_KINETIS_LPUART4
@@ -411,7 +411,7 @@ static char g_lpuart4rxbuffer[CONFIG_LPUART4_RXBUFSIZE];
 static char g_lpuart4txbuffer[CONFIG_LPUART4_TXBUFSIZE];
 #  ifdef CONFIG_KINETIS_LPUART4_RXDMA
 static char g_lpuart4rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 #  endif
 #endif
 
