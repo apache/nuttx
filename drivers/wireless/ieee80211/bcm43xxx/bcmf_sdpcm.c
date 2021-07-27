@@ -58,7 +58,7 @@
  * Private Types
  ****************************************************************************/
 
-struct __attribute__((packed)) bcmf_sdpcm_header
+begin_packed_struct struct bcmf_sdpcm_header
 {
   uint16_t size;
   uint16_t checksum;
@@ -69,7 +69,7 @@ struct __attribute__((packed)) bcmf_sdpcm_header
   uint8_t  flow_control;
   uint8_t  credit;
   uint16_t padding;
-};
+} end_packed_struct;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -153,9 +153,13 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
 
   header = (struct bcmf_sdpcm_header *)sframe->data;
 
-  /* Read header */
+  /* Read the first 4 bytes of sdpcm header
+   * to get the length of the following data to be read
+   */
 
-  ret = bcmf_transfer_bytes(sbus, false, 2, 0, (uint8_t *)header, 4);
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0,
+                            (uint8_t *)header,
+                            FIRST_WORD_SIZE);
   if (ret != OK)
     {
       wlinfo("failread size\n");
@@ -188,10 +192,11 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       goto exit_abort;
     }
 
-  /* Read remaining frame data */
+  /* Read the remaining frame data (the buffer is DMA aligned here) */
 
   ret = bcmf_transfer_bytes(sbus, false, 2, 0,
-                           (uint8_t *)header + 4, len - 4);
+                           (uint8_t *)header + FIRST_WORD_SIZE,
+                           len - FIRST_WORD_SIZE);
   if (ret != OK)
     {
       ret = -EIO;
@@ -319,8 +324,25 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
                (unsigned long)sframe->header.base);
 #endif
 
-  ret = bcmf_transfer_bytes(sbus, true, 2, 0, sframe->header.base,
-                            sframe->header.len);
+  /* Write the first 4 bytes of sdpcm header */
+
+  ret = bcmf_transfer_bytes(sbus, true, 2, 0,
+                            sframe->header.base,
+                            FIRST_WORD_SIZE);
+  if (ret != OK)
+    {
+      /* TODO handle retry count and remove frame from queue + abort TX */
+
+      wlinfo("fail send frame %d\n", ret);
+      ret = -EIO;
+      goto exit_abort;
+    }
+
+  /* Write the remaining frame data (the buffer is DMA aligned here) */
+
+  ret = bcmf_transfer_bytes(sbus, true, 2, 0,
+                            sframe->header.base + FIRST_WORD_SIZE,
+                            sframe->header.len - FIRST_WORD_SIZE);
   if (ret != OK)
     {
       /* TODO handle retry count and remove frame from queue + abort TX */
@@ -364,7 +386,7 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
   struct bcmf_sdio_frame *sframe = (struct bcmf_sdio_frame *)frame;
   struct bcmf_sdpcm_header *header =
-                           (struct bcmf_sdpcm_header *)sframe->data;
+    (struct bcmf_sdpcm_header *)sframe->data;
 
   /* Prepare sw header */
 

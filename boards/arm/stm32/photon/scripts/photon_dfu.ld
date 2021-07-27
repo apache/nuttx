@@ -48,11 +48,10 @@ SECTIONS
         *(.fixup)
         *(.gnu.warning)
 
-        . = ALIGN(0x4);
         wlan_firmware_image_location = .;
         *(.wlan_firmware_image .wlan_firmware_image.*)
         wlan_firmware_image_end = .;
-        . = ALIGN(0x4);
+
         wlan_nvram_image_location = .;
         *(.wlan_nvram_image .wlan_nvram_image.*)
         wlan_nvram_image_end = .;

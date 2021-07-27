@@ -101,4 +101,12 @@ config IEEE80211_BROADCOM_NINTERFACES
 	default 1
 	depends on EXPERIMENTAL
 
+config IEEE80211_BROADCOM_DMABUF_ALIGNMENT
+	int "DMA buffer address alignment boundary"
+	default 4
+	range 4 64
+	---help---
+		This parameter should be set depending on
+		the used SOC DMA configuration.
+
 endif # IEEE80211_BROADCOM_FULLMAC

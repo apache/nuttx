@@ -54,13 +54,13 @@
  * Private Types
  ****************************************************************************/
 
-struct __attribute__((packed)) bcmf_cdc_header
+begin_packed_struct struct bcmf_cdc_header
 {
   uint32_t cmd;    /* Command to be sent */
   uint32_t len;    /* Size of command data */
   uint32_t flags;  /* cdc request flags, see above */
   uint32_t status; /* Returned status code from chip */
-};
+} end_packed_struct;
 
 /****************************************************************************
  * Private Function Prototypes
