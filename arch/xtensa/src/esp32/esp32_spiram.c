@@ -90,7 +90,7 @@ static bool spiram_inited = false;
  * no memory is reserved if no himem function is used.
  */
 
-size_t __attribute__((weak)) esp_himem_reserved_area_size(void)
+size_t weak_function esp_himem_reserved_area_size(void)
 {
   return 0;
 }

@@ -59,7 +59,7 @@ extern uint32_t __sram_end__;
  * address.
  */
 
-const uintptr_t __attribute__((weak)) g_idle_topstack =
+const uintptr_t weak_data g_idle_topstack =
   ((uintptr_t)&__stack);
 
 /****************************************************************************
