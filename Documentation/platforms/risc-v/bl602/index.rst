@@ -40,7 +40,7 @@ nsh
 First make sure the ``riscv-gnu-toolchain`` has been installed
 correctly.
 
-Configure the NUttX project: ``./tools/configure.sh bl602evb:nsh``. Run
+Configure the NuttX project: ``./tools/configure.sh bl602evb:nsh``. Run
 ``make`` to build the project.
 
 .. code:: shell
@@ -52,7 +52,7 @@ Configure the NUttX project: ``./tools/configure.sh bl602evb:nsh``. Run
 wifi
 ----
 
-Configure the NUttX project: ``./tools/configure.sh bl602evb:wifi``. Run
+Configure the NuttX project: ``./tools/configure.sh bl602evb:wifi``. Run
 ``make`` to build the project.
 
 .. code:: shell
@@ -101,14 +101,16 @@ Config download
 
 **Configuration parameters include:**
 
+-  **Factory Params**: Use the dts file in the device_tree folder of the
+   corresponding chip model in the Dev Cube directory. The default
+   selection is 40M.
+
 -  **Partition Table**: Use the partition table in the partition folder
    of the corresponding chip model in the Dev Cube directory, and 2M
    files are selected by default for BL602
 
-..
-
-   For the nuttx operating system, BL602 has a dedicated partition file.
-   For details, please contact us.
+   **For the nuttx, BL602 has a dedicated partition file. It is placed
+   in** ``nuttx/tools/bl602``
 
 -  **Boot2 Bin**: It is the first Flash program that runs after the
    system is started. It is responsible for establishing the BLSP
