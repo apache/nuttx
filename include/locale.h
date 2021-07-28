@@ -51,6 +51,8 @@
                           LC_MONETARY_MASK | LC_NUMERIC_MASK | \
                           LC_TIME_MASK     | LC_MESSAGES_MASK)
 
+#define LC_GLOBAL_LOCALE ((locale_t)-1)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
