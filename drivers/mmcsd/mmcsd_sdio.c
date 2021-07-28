@@ -3096,9 +3096,8 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
   up_udelay(MMCSD_POWERUP_DELAY);
 
-  /* Then send CMD0 (twice just to be sure) */
+  /* Then send CMD0 just once is standard procedure */
 
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
   mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
   up_udelay(MMCSD_IDLE_DELAY);
 
