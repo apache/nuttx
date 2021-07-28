@@ -40,6 +40,13 @@
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
+#define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -55,7 +62,7 @@ int esp32_spiflash_init(void)
   FAR struct mtd_dev_s *mtd;
   int ret = ERROR;
 
-  mtd = esp32_spiflash_alloc_mtdpart();
+  mtd = esp32_spiflash_alloc_mtdpart(ESP32_MTD_OFFSET, ESP32_MTD_SIZE);
 
 #if defined (CONFIG_ESP32_SPIFLASH_SMARTFS)
   ret = smart_initialize(0, mtd, NULL);
