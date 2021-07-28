@@ -33,6 +33,26 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define isalnum_l(c, l)  isalnum(c)
+#define isalpha_l(c, l)  isalpha(c)
+#define isascii_l(c, l)  isascii(c)
+#define isblank_l(c, l)  isblank(c)
+#define iscntrl_l(c, l)  iscntrl(c)
+#define isdigit_l(c, l)  isdigit(c)
+#define isgraph_l(c, l)  isgraph(c)
+#define islower_l(c, l)  islower(c)
+#define isprint_l(c, l)  isprint(c)
+#define ispunct_l(c, l)  ispunct(c)
+#define isspace_l(c, l)  isspace(c)
+#define isupper_l(c, l)  isupper(c)
+#define isxdigit_l(c, l) isxdigit(c)
+#define tolower_l(c, l)  tolower(c)
+#define toupper_l(c, l)  toupper(c)
+
+/****************************************************************************
  * Inline Functions
  ****************************************************************************/
 

@@ -91,9 +91,10 @@
 
 #define TIME_UTC           1
 
-/* Redirect the timelocal */
+/* Redirect the timelocal and strftime_l */
 
-#define timelocal         mktime
+#define timelocal                 mktime
+#define strftime_l(s, m, f, t, l) strftime(s, m, f, t)
 
 /********************************************************************************
  * Public Types

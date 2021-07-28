@@ -65,6 +65,14 @@
 #  define NULL ((FAR void *)0)
 #endif
 
+#define wcsftime_l(s, m, f, t, l)   wcsftime(s, m, f, t)
+#define wcscasecmp_l(s1, s2, l)     wcscasecmp(s1, s2)
+#define wcsncasecmp_l(s1, s2, n, l) wcsncasecmp(s1, s2, n)
+#define wcscoll_l(s1, s2, l)        wcscoll(s1, s2)
+#define wcstold_l(s, e, l)          wcstold(s, e)
+#define wcstoull_l(s, e, l)         wcstoull(s, e)
+#define wcsxfrm_l(s1, s2, n, l)     wcsxfrm(s1, s2, n)
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
