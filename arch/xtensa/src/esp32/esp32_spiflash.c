@@ -71,9 +71,6 @@
 #define SPI_FLASH_ENCRYPT_WORDS     (32 / 4)
 #define SPI_FLASH_ERASED_STATE      (0xff)
 
-#define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
-#define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
-
 #define MTD2PRIV(_dev)              ((FAR struct esp32_spiflash_s *)_dev)
 #define MTD_SIZE(_priv)             ((_priv)->chip->chip_size)
 #define MTD_BLKSIZE(_priv)          ((_priv)->chip->page_size)
@@ -1960,17 +1957,19 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  * Name: esp32_spiflash_alloc_mtdpart
  *
  * Description:
- *   Alloc ESP32 SPI Flash MTD
+ *   Allocate an MTD partition from the ESP32 SPI Flash.
  *
  * Input Parameters:
- *   None
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
  *
  * Returned Value:
  *   ESP32 SPI Flash MTD data pointer if success or NULL if fail
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
+FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                                   uint32_t mtd_size)
 {
   struct esp32_spiflash_s *priv = &g_esp32_spiflash1;
   esp32_spiflash_chip_t *chip = priv->chip;
@@ -1979,9 +1978,9 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
   uint32_t startblock;
   uint32_t size;
 
-  ASSERT((ESP32_MTD_OFFSET + ESP32_MTD_SIZE) <= chip->chip_size);
-  ASSERT((ESP32_MTD_OFFSET % chip->sector_size) == 0);
-  ASSERT((ESP32_MTD_SIZE % chip->sector_size) == 0);
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
   finfo("ESP32 SPI Flash information:\n");
   finfo("\tID = 0x%x\n", chip->device_id);
@@ -1991,16 +1990,19 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void)
   finfo("\tSector size = %d KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %d KB\n", chip->block_size / 1024);
 
-#if ESP32_MTD_SIZE == 0
-  size = chip->chip_size - ESP32_MTD_OFFSET;
-#else
-  size = ESP32_MTD_SIZE;
-#endif
+  if (mtd_size == 0)
+    {
+      size = chip->chip_size - mtd_offset;
+    }
+  else
+    {
+      size = mtd_size;
+    }
 
-  finfo("\tMTD offset = 0x%x\n", ESP32_MTD_OFFSET);
+  finfo("\tMTD offset = 0x%x\n", mtd_offset);
   finfo("\tMTD size = 0x%x\n", size);
 
-  startblock = MTD_SIZE2BLK(priv, ESP32_MTD_OFFSET);
+  startblock = MTD_SIZE2BLK(priv, mtd_offset);
   blocks = MTD_SIZE2BLK(priv, size);
 
   mtd_part = mtd_partition(&priv->mtd, startblock, blocks);

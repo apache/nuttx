@@ -49,20 +49,22 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_spiflash_init
+ * Name: esp32_spiflash_alloc_mtdpart
  *
  * Description:
- *   Alloc ESP32 SPI Flash MTD.
+ *   Allocate an MTD partition from the ESP32 SPI Flash.
  *
  * Input Parameters:
- *   None
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
  *
  * Returned Value:
  *   ESP32 SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void);
+FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                                   uint32_t mtd_size);
 
 /****************************************************************************
  * Name: esp32_spiflash_get_mtd
@@ -81,7 +83,7 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(void);
 FAR struct mtd_dev_s *esp32_spiflash_get_mtd(void);
 
 /****************************************************************************
- * Name: esp32_spiflash_get_mtd
+ * Name: esp32_spiflash_encrypt_get_mtd
  *
  * Description:
  *   Get ESP32 SPI Flash encryption raw MTD.

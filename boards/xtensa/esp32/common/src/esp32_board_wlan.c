@@ -37,6 +37,13 @@
 #include "esp32_wlan.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
+#define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -47,7 +54,7 @@ static int esp32_init_wifi_storage(void)
   const char *path = "/dev/mtdblock1";
   FAR struct mtd_dev_s *mtd_part;
 
-  mtd_part = esp32_spiflash_alloc_mtdpart();
+  mtd_part = esp32_spiflash_alloc_mtdpart(ESP32_MTD_OFFSET, ESP32_MTD_SIZE);
   if (!mtd_part)
     {
       syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
