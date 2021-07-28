@@ -70,9 +70,7 @@
 void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
 {
   bool mmc = (cardtype == MMCSD_CARDTYPE_MMC);
-#if defined(CONFIG_DEBUG_FS_INFO)
   bool sd2 = (MMCSD_CSD_CSDSTRUCT(csd) == 1);
-#endif
 
   finfo("CSD\n");
   finfo("  CSD_STRUCTURE:           1.%d\n",   MMCSD_CSD_CSDSTRUCT(csd));
