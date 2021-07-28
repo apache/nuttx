@@ -52,6 +52,25 @@
 #define WC_UPPER        11
 #define WC_XDIGIT       12
 
+#define iswalnum_l(c, l)     iswalnum(c)
+#define iswalpha_l(c, l)     iswalpha(c)
+#define iswblank_l(c, l)     iswblank(c)
+#define iswcntrl_l(c, l)     iswcntrl(c)
+#define iswdigit_l(c, l)     iswdigit(c)
+#define iswgraph_l(c, l)     iswgraph(c)
+#define iswlower_l(c, l)     iswlower(c)
+#define iswprint_l(c, l)     iswprint(c)
+#define iswpunct_l(c, l)     iswpunct(c)
+#define iswspace_l(c, l)     iswspace(c)
+#define iswupper_l(c, l)     iswupper(c)
+#define iswxdigit_l(c, l)    iswxdigit(c)
+#define iswctype_l(c, d, l)  iswctype(c, d)
+#define towlower_l(c, l)     towlower(c)
+#define towupper_l(c, l)     towupper(c)
+#define towctrans_l(c, d, l) towctrans(c, d)
+#define wctrans_l(p, l)      wctrans(p)
+#define wctype_l(p, l)       wctype(p)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -53,6 +53,9 @@
 #define bzero(s,n)       (void)memset(s,0,n)
 #endif
 
+#define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)
+#define strncasecmp_l(s1, s2, n, l) strncasecmp(s1, s2, n)
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
