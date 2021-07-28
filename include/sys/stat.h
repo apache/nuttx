@@ -110,7 +110,9 @@
 /* Special value for tv_nsec field of timespec */
 
 #define UTIME_NOW     ((1l << 30) - 1l)
-#define UTIME_OMIT    ((1l << 30) - 2l)
+#ifndef __cplusplus
+#  define UTIME_OMIT  ((1l << 30) - 2l)
+#endif
 
 /* The following macros are required by POSIX to achieve backward
  * compatibility with earlier versions of struct stat.
