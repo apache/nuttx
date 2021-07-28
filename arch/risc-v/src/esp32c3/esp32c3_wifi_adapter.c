@@ -424,6 +424,14 @@ static sem_t g_wifiexcl_sem = SEM_INITIALIZER(1);
 
 static int g_wifi_ref = 0;
 
+/* Memory to store PHY digital registers */
+
+static uint32_t *g_phy_digital_regs_mem = NULL;
+
+/* Indicate PHY is calibrated or not */
+
+static bool g_is_phy_calibrated = false;
+
 #ifdef ESP32C3_WLAN_HAS_STA
 
 /* If reconnect automatically */
@@ -2190,6 +2198,7 @@ static void esp_evt_work_cb(void *arg)
               {
                 wlerr("ERROR: Failed to close PS\n");
               }
+
             break;
 
           case WIFI_ADPT_EVT_STA_CONNECT:
@@ -2492,6 +2501,43 @@ static void wifi_apb80m_release(void)
 }
 
 /****************************************************************************
+ * Name: phy_digital_regs_store
+ *
+ * Description:
+ *    Store  PHY digital registers.
+ *
+ ****************************************************************************/
+
+static inline void phy_digital_regs_store(void)
+{
+  if (g_phy_digital_regs_mem == NULL)
+    {
+      g_phy_digital_regs_mem = (uint32_t *)
+                    kmm_malloc(SOC_PHY_DIG_REGS_MEM_SIZE);
+    }
+
+  DEBUGASSERT(g_phy_digital_regs_mem != NULL);
+
+  phy_dig_reg_backup(true, g_phy_digital_regs_mem);
+}
+
+/****************************************************************************
+ * Name: phy_digital_regs_load
+ *
+ * Description:
+ *   Load  PHY digital registers.
+ *
+ ****************************************************************************/
+
+static inline void phy_digital_regs_load(void)
+{
+  if (g_phy_digital_regs_mem != NULL)
+    {
+      phy_dig_reg_backup(false, g_phy_digital_regs_mem);
+    }
+}
+
+/****************************************************************************
  * Name: wifi_phy_disable
  *
  * Description:
@@ -2514,9 +2560,15 @@ static void wifi_phy_disable(void)
 
   if (g_phy_access_ref == 0)
     {
+      /* Store  PHY digital register. */
+
+      phy_digital_regs_store();
+
       /* Disable PHY and RF. */
 
       phy_close_rf();
+
+      phy_xpd_tsens();
 
       /* Disable Wi-Fi/BT common peripheral clock.
        * Do not disable clock for hardware RNG.
@@ -2544,8 +2596,15 @@ static void wifi_phy_disable(void)
 
 static void wifi_phy_enable(void)
 {
+  static bool debug = false;
   irqstate_t flags;
   esp_phy_calibration_data_t *cal_data;
+  char *phy_version = get_phy_version_str();
+  if (debug == false)
+    {
+      debug = true;
+      wlinfo("phy_version %s\n", phy_version);
+    }
 
   cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
   if (!cal_data)
@@ -2563,8 +2622,17 @@ static void wifi_phy_enable(void)
       g_phy_rf_en_ts = esp_timer_get_time();
 
       esp_phy_enable_clock();
-      phy_set_wifi_mode_only(0);
-      register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
+      if (g_is_phy_calibrated == false)
+        {
+          register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_FULL);
+          g_is_phy_calibrated = true;
+        }
+      else
+        {
+          phy_wakeup_init();
+          phy_digital_regs_load();
+        }
+
 #ifdef CONFIG_ESP32C3_BLE
       coex_pti_v2();
 #endif
