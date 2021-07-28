@@ -59,7 +59,7 @@ typedef enum
 {
   DEFAULT_OUTPUT_SPEAKER = 0,
   SCO_OUTPUT,
-  VoIP,
+  VOIP,
 }aw88266a_dev_t;
 
 typedef struct
@@ -123,6 +123,12 @@ struct aw88266a_dev_s
   bool                    paused;           /* True: Playing is paused */
   bool                    mute;             /* True: Output is muted */
 };
+
+typedef struct
+{
+  aw88266a_dev_t dev;       /* aw88266a device type */
+  FAR char       *dev_str;  /* aw88266a device string */
+}aw88266a_dev_info_t;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -337,6 +343,13 @@ static const struct audio_ops_s g_audioops =
   .write          = NULL,
   .reserve        = aw88266a_reserve,
   .release        = aw88266a_release,
+};
+
+static const aw88266a_dev_info_t g_aw88266a_device_mode[] =
+{
+  {DEFAULT_OUTPUT_SPEAKER,  "speaker"},
+  {SCO_OUTPUT,              "sco"},
+  {VOIP,                    "voip"}
 };
 
 /****************************************************************************
@@ -1146,6 +1159,36 @@ static int aw88266a_resume(FAR struct audio_lowerhalf_s *dev)
 static int aw88266a_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                           unsigned long arg)
 {
+  FAR const char *ptr = (FAR const char *)arg;
+  uint8_t i;
+  FAR struct aw88266a_dev_s *priv = (FAR struct aw88266a_dev_s *)dev;
+
+  switch (cmd)
+    {
+      case AUDIOIOC_SETPARAMTER:
+        if ((strncmp(ptr, "mode=", 5)) == 0)
+          {
+            ptr = ptr + 5;
+
+            for (i = 0; i < ARRAY_SIZE(g_aw88266a_device_mode); i++)
+              {
+                if (strncmp(ptr, g_aw88266a_device_mode[i].dev_str,
+                            strlen(g_aw88266a_device_mode[i].dev_str)) == 0)
+                  {
+                    aw88266a_set_device(priv, g_aw88266a_device_mode[i].dev);
+                  }
+              }
+          }
+        break;
+
+      case AUDIOIOC_HWRESET:
+        audinfo("AUDIOIOC_HWRESET\n");
+        break;
+
+      default:
+        break;
+    }
+
   audinfo("Return OK\n");
   return OK;
 }
