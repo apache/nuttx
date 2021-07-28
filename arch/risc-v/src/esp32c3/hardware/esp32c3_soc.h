@@ -304,6 +304,10 @@
 #define SOC_SYSTIMER_BIT_WIDTH_LO (32) /* Bit width of systimer low part */
 #define SOC_SYSTIMER_BIT_WIDTH_HI (20) /* Bit width of systimer high part */
 
+/*  phy registers and memory size */
+
+#define SOC_PHY_DIG_REGS_MEM_SIZE (21*4)
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
