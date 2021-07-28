@@ -66,6 +66,12 @@
 #  define environ get_environ_ptr()
 #endif
 
+#define strtof_l(s, e, l)      strtof(s, e)
+#define strtod_l(s, e, l)      strtod(s, e)
+#define strtold_l(s, e, l)     strtold(s, e)
+#define strtoll_l(s, e, b, l)  strtoll(s, e, b)
+#define strtoull_l(s, e, b, l) strtoull(s, e, b)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
