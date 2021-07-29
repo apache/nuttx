@@ -28,6 +28,7 @@
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -75,7 +76,7 @@ static void lp_work_timer_expiry(wdparm_t arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_queue
+ * Name: work_queue_nt
  *
  * Description:
  *   Queue kernel-mode work to be performed at a later time.  All queued
@@ -98,14 +99,15 @@ static void lp_work_timer_expiry(wdparm_t arg)
  *            int is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
+ *   name_tag - The work callback name tag.
  *
  * Returned Value:
  *   Zero on success, a negated errno on failure
  *
  ****************************************************************************/
 
-int work_queue(int qid, FAR struct work_s *work, worker_t worker,
-               FAR void *arg, clock_t delay)
+int work_queue_nt(int qid, FAR struct work_s *work, worker_t worker,
+                  FAR void *arg, clock_t delay, FAR const char *name_tag)
 {
   irqstate_t flags;
 
@@ -123,6 +125,9 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 
   work->worker = worker;           /* Work callback. non-NULL means queued */
   work->arg = arg;                 /* Callback argument */
+#ifdef CONFIG_WQUEUE_TAG_WORKER_NAME
+  work->name_tag = name_tag;       /* Work callback name tag */
+#endif
 
   /* Queue the new work */
 

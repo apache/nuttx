@@ -115,6 +115,9 @@ static int work_thread(int argc, FAR char *argv[])
   worker_t  worker;
   irqstate_t flags;
   FAR void *arg;
+#ifdef CONFIG_WQUEUE_TAG_WORKER_NAME
+  FAR const char *name_tag;
+#endif
 
   wqueue = (FAR struct kwork_wqueue_s *)
            ((uintptr_t)strtoul(argv[1], NULL, 0));
@@ -152,6 +155,12 @@ static int work_thread(int argc, FAR char *argv[])
 
           arg = work->arg;
 
+#ifdef CONFIG_WQUEUE_TAG_WORKER_NAME
+          /* Extract the worker name tag */
+
+          name_tag = work->name_tag;
+#endif
+
           /* Mark the work as no longer being queued */
 
           work->worker = NULL;
@@ -161,7 +170,15 @@ static int work_thread(int argc, FAR char *argv[])
            */
 
           leave_critical_section(flags);
+
+#ifdef CONFIG_WQUEUE_TAG_WORKER_NAME
+          sinfo("WORKER %s started\n", name_tag);
+#endif
           CALL_WORKER(worker, arg);
+
+#ifdef CONFIG_WQUEUE_TAG_WORKER_NAME
+          sinfo("WORKER %s finished\n", name_tag);
+#endif
           flags = enter_critical_section();
         }
     }

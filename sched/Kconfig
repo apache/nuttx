@@ -1787,6 +1787,14 @@ config SCHED_LPWORKSTACKSIZE
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
 endif # SCHED_LPWORK
+
+config WQUEUE_TAG_WORKER_NAME
+	bool "Enable worker name tag for debug"
+	default n
+	depends on SCHED_WORKQUEUE && DEBUG_SCHED_INFO
+	---help---
+		Enables printing worker name to the informational debug output.
+
 endmenu # Work Queue Support
 
 menu "Stack and heap information"
