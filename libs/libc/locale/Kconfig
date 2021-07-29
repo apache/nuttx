@@ -20,9 +20,16 @@ config LIBC_LOCALE_CATALOG
 	---help---
 		Enable catopen, catgets and catclose support.
 
+config LIBC_LOCALE_GETTEXT
+	bool "Enable GNU gettext(libintl)"
+	depends on !DISABLE_ENVIRON
+	default n
+	---help---
+		Enable gettext, textdomain and bindtextdomain support.
+
 config LIBC_LOCALE_PATH
 	string "The default search path for message catalog file"
-	depends on LIBC_LOCALE_CATALOG
+	depends on LIBC_LOCALE_CATALOG || LIBC_LOCALE_GETTEXT
 	default "/etc/locale"
 	---help---
 		This is the default search path to the location where
