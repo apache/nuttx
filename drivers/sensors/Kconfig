@@ -142,6 +142,22 @@ config SENSORS_OPT3006_BUFFER_NUMBER
 		The number of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
+config SENSORS_OPT3007
+	bool "TI OPT3007 Ambient Light Sensor support"
+	default n
+	select I2C
+	select IOEXPANDER
+	---help---
+		Enable driver support for the TI OPT3007 Ambient light sensor.
+
+config SENSORS_OPT3007_BUFFER_NUMBER
+	int "The number of circular buffer for sensor OPT3007"
+	default 1
+	depends on SENSORS_OPT3007
+	---help---
+		The number of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
+
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
 	default n
