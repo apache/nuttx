@@ -29,10 +29,18 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NL_SETD       1
+#define NL_CAT_LOCALE 1
+
+/****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
 typedef int       nl_item;
+typedef FAR void *nl_catd;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -45,6 +53,10 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+nl_catd catopen(FAR const char *name, int oflag);
+FAR char *catgets(nl_catd catd, int set_id, int msg_id, FAR const char *s);
+int catclose(nl_catd catd);
 
 #undef EXTERN
 #ifdef __cplusplus
