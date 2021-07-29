@@ -522,6 +522,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
               if ((flags & TCP_PUREACK) == 0)
                 {
+                  nwarn("fast retransmit: non pure ack, seq=%" PRIu32
+                        ", nack was %u\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_WBNACK(wrb));
                   TCP_WBNACK(wrb) = 0;
                 }
 
@@ -533,6 +537,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   /* Do fast retransmit */
 
                   rexmit = true;
+                  nwarn("fast retransmit: start, seq=%" PRIu32 "\n",
+                        TCP_WBSEQNO(wrb));
                 }
               else if ((TCP_WBNACK(wrb) >
                        CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK) &&
@@ -540,6 +546,18 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                 {
                   /* Reset the duplicate ack counter */
 
+                  nwarn("fast retransmit: reset, seq=%" PRIu32
+                        ", nack was %u\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_WBNACK(wrb));
+                  TCP_WBNACK(wrb) = 0;
+                }
+              else
+                {
+                  nwarn("fast retransmit: dupack, seq=%" PRIu32
+                        ", nack incremented to %u\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_WBNACK(wrb));
                   TCP_WBNACK(wrb) = 0;
                 }
             }
