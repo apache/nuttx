@@ -210,12 +210,16 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               /* Will not yet decrement to zero */
 
               conn->timer -= hsec;
+              nwarn("conn %p, timer %u, rto %u, hsec %d\n",
+                    conn, conn->timer, conn->rto, hsec);
             }
           else
             {
               /* Will decrement to zero */
 
               conn->timer = 0;
+              nwarn("conn %p, timer expired, rto %u, hsec %d\n",
+                    conn, conn->rto, hsec);
 
               /* The TCP is connected and, hence, should be bound to a
                * device. Make sure that the polling device is the one that

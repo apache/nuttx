@@ -606,6 +606,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   else if ((flags & TCP_REXMIT) != 0)
     {
       rexmit = true;
+      nwarn("slow retrasmit: %04x\n", flags);
     }
 
   if (rexmit)

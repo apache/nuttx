@@ -792,6 +792,8 @@ found:
       /* Reset the retransmission timer. */
 
       conn->timer = conn->rto;
+      nwarn("conn %p, timer reset to rto %u\n",
+            conn, conn->rto);
     }
 
   /* Update the connection's window size */
