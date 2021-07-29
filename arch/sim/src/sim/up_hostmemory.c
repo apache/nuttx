@@ -92,8 +92,6 @@ void *host_alloc_shmem(const char *name, size_t size, int master)
       return NULL;
     }
 
-  fchown(fd, getuid(), getgid());
-
   if (!master)
     {
       /* Avoid the second slave instance open successfully */
