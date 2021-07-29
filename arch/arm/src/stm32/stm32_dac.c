@@ -101,8 +101,6 @@
 #  undef CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY
 #endif
 
-#if defined(CONFIG_STM32_DAC1) || defined(CONFIG_STM32_DAC2)
-
 /* Sanity checking */
 
 #ifdef CONFIG_STM32_DAC1
@@ -114,6 +112,18 @@
 #ifdef CONFIG_STM32_DAC2
 #  if !defined(CONFIG_STM32_DAC2CH1)
 #    error "DAC2 enabled but no channel was selected"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_DAC3
+#  if !defined(CONFIG_STM32_DAC3CH1) && !defined(CONFIG_STM32_DAC3CH2)
+#    error "DAC3 enabled but no channel was selected"
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_DAC4
+#  if !defined(CONFIG_STM32_DAC4CH1) && !defined(CONFIG_STM32_DAC4CH2)
+#    error "DAC4 enabled but no channel was selected"
 #  endif
 #endif
 
@@ -555,6 +565,9 @@ struct stm32_chan_s
 #endif
   uint8_t    intf;       /* DAC zero-based interface number (0 or 1) */
   uint32_t   pin;        /* Pin configuration */
+#ifdef HAVE_IP_DAC_V2
+  uint32_t   mode;       /* DAC channel mode */
+#endif
   uint32_t   dro;        /* Data output register */
   uint32_t   cr;         /* Control register */
   uint32_t   tsel;       /* CR trigger select value */
@@ -642,6 +655,9 @@ static struct stm32_chan_s g_dac1ch1priv =
 {
   .intf       = 0,
   .pin        = GPIO_DAC1_OUT1,
+#ifdef HAVE_IP_DAC_V2
+  .mode       = CONFIG_STM32_DAC1CH1_MODE;
+#endif
   .dro        = STM32_DAC1_DHR12R1,
   .cr         = STM32_DAC1_CR,
 #ifdef HAVE_IP_DAC_V2
@@ -687,6 +703,9 @@ static struct stm32_chan_s g_dac1ch2priv =
 {
   .intf       = 1,
   .pin        = GPIO_DAC1_OUT2,
+#ifdef HAVE_IP_DAC_V2
+  .mode       = CONFIG_STM32_DAC1CH2_MODE << 16;
+#endif
   .dro        = STM32_DAC1_DHR12R2,
   .cr         = STM32_DAC1_CR,
 #ifdef HAVE_IP_DAC_V2
@@ -735,6 +754,9 @@ static struct stm32_chan_s g_dac2ch1priv =
 {
   .intf       = 2,
   .pin        = GPIO_DAC2_OUT1,
+#ifdef HAVE_IP_DAC_V2
+  .mode       = CONFIG_STM32_DAC2CH1_MODE;
+#endif
   .dro        = STM32_DAC2_DHR12R1,
   .cr         = STM32_DAC2_CR,
 #ifdef HAVE_IP_DAC_V2
@@ -769,6 +791,64 @@ static struct dac_dev_s g_dac2ch1dev =
 };
 #endif /* CONFIG_STM32_DAC2CH1 */
 #endif /* CONFIG_STM32_DAC2 */
+
+#ifdef CONFIG_STM32_DAC3
+#ifdef CONFIG_STM32_DAC3CH1
+/* Channel 4: DAC3 channel 1 */
+
+#ifdef CONFIG_STM32_DAC3CH1_DMA
+#  error "STM32_DAC3 DMA not supported"
+#endif
+
+static struct stm32_chan_s g_dac3ch1priv =
+{
+  .intf       = 4,
+  .dro        = STM32_DAC3_DHR12R1,
+#ifdef HAVE_IP_DAC_V2
+  .mode       = CONFIG_STM32_DAC3CH1_MODE;
+#endif
+  .cr         = STM32_DAC3_CR,
+#ifdef HAVE_IP_DAC_V2
+  .sr         = STM32_DAC3_SR,
+  .mcr        = STM32_DAC3_MCR,
+#endif
+};
+
+static struct dac_dev_s g_dac3ch1dev =
+{
+  .ad_ops  = &g_dacops,
+  .ad_priv = &g_dac3ch1priv,
+};
+#endif /* CONFIG_STM32_DAC3CH1 */
+
+#ifdef CONFIG_STM32_DAC3CH2
+/* Channel 5: DAC3 channel 1 */
+
+#ifdef CONFIG_STM32_DAC3CH2_DMA
+#  error "STM32_DAC3 DMA not supported"
+#endif
+
+static struct stm32_chan_s g_dac3ch2priv =
+{
+  .intf       = 5,
+  .dro        = STM32_DAC3_DHR12R2,
+#ifdef HAVE_IP_DAC_V2
+  .mode       = CONFIG_STM32_DAC3CH2_MODE << 16,
+#endif
+  .cr         = STM32_DAC3_CR,
+#ifdef HAVE_IP_DAC_V2
+  .sr         = STM32_DAC3_SR,
+  .mcr        = STM32_DAC3_MCR,
+#endif
+};
+
+static struct dac_dev_s g_dac3ch2dev =
+{
+  .ad_ops  = &g_dacops,
+  .ad_priv = &g_dac3ch2priv,
+};
+#endif /* CONFIG_STM32_DAC3CH2 */
+#endif /* CONFIG_STM32_DAC3 */
 
 static struct stm32_dac_s g_dacblock;
 
@@ -1051,7 +1131,7 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
     {
       regval = getreg32(chan->sr);
     }
-  while (!(regval & DAC_SR_DACRDY(dac + 1)));
+  while (!(regval & DAC_SR_DACRDY(dac)));
 #endif
 
 #ifdef HAVE_DMA
@@ -1425,6 +1505,9 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
 {
   uint16_t clearbits;
   uint16_t setbits;
+#if defined(HAVE_IP_DAC_V2)
+  uint32_t regval;
+#endif
 #ifdef HAVE_TIMER
   int ret;
 #endif
@@ -1446,7 +1529,12 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
    * should first be configured to analog (AIN)".
    */
 
-  stm32_configgpio(chan->pin);
+  /* Only DAC1 and DAC2 have external pins */
+
+  if (chan->intf < 4)
+    {
+      stm32_configgpio(chan->pin);
+    }
 
   /* DAC channel configuration:
    *
@@ -1479,7 +1567,6 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
 #if defined(HAVE_IP_DAC_V2)
   /* High frequency interface mode selection */
 
-  uint32_t regval;
   if (STM32_SYSCLK_FREQUENCY > 160000000)
     {
       regval = DAC_MCR_HFSEL_AHB_160MHz;
@@ -1493,7 +1580,11 @@ static int dac_chaninit(FAR struct stm32_chan_s *chan)
       regval = DAC_MCR_HFSEL_DISABLED;
     }
 
-  putreg32(regval, STM32_DAC1_MCR);
+  /* DAC mode selection */
+
+  regval |= chan->mode;
+
+  putreg32(regval, chan->mcr);
 #endif
 
 #ifdef HAVE_DMA
@@ -1583,6 +1674,9 @@ static int dac_blockinit(void)
 #ifdef CONFIG_STM32_DAC2
   regval |= RCC_RSTR_DAC2RST;
 #endif
+#ifdef CONFIG_STM32_DAC3
+  regval |= RCC_RSTR_DAC3RST;
+#endif
   putreg32(regval, STM32_RCC_RSTR);
 
   /* Take the DAC out of reset state */
@@ -1592,6 +1686,9 @@ static int dac_blockinit(void)
 #endif
 #ifdef CONFIG_STM32_DAC2
   regval &= ~RCC_RSTR_DAC2RST;
+#endif
+#ifdef CONFIG_STM32_DAC3
+  regval &= ~RCC_RSTR_DAC3RST;
 #endif
   putreg32(regval, STM32_RCC_RSTR);
   leave_critical_section(flags);
@@ -1654,6 +1751,22 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
     }
   else
 #endif /* CONFIG_STM32_DAC2CH1 */
+#ifdef CONFIG_STM32_DAC3CH1
+  if (intf == 4)
+    {
+      ainfo("DAC3-1 Selected\n");
+      dev = &g_dac3ch1dev;
+    }
+  else
+#endif /* CONFIG_STM32_DAC3CH1 */
+#ifdef CONFIG_STM32_DAC3CH2
+  if (intf == 5)
+    {
+      ainfo("DAC3-2 Selected\n");
+      dev = &g_dac3ch2dev;
+    }
+  else
+#endif /* CONFIG_STM32_DAC3CH2 */
     {
       aerr("ERROR: No such DAC interface: %d\n", intf);
       return NULL;
@@ -1681,5 +1794,4 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
   return dev;
 }
 
-#endif /* CONFIG_STM32_DAC1 || CONFIG_STM32_DAC2 */
 #endif /* CONFIG_DAC */
