@@ -834,6 +834,12 @@ config ARM_HAVE_FPU_D32
 		FPU implemented in the VFPv3-D32 format that supports
 		32 double-precision floating-point registers.
 
+config ARM_HAVE_NEON
+	bool
+	default n
+	---help---
+		Decide whether support NEON instruction
+
 config ARM_HAVE_MPU_UNIFIED
 	bool
 	default n
