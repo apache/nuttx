@@ -224,6 +224,24 @@ struct geometry
   blksize_t geo_sectorsize;   /* Size of one sector */
 };
 
+struct partition_info_s
+{
+  uint32_t        magic;        /* File system magic, 0 for RAW
+                                 * (see <sys/statfs.h>) */
+  size_t          numsectors;   /* Number of sectors in the partition */
+  size_t          sectorsize;   /* Size in bytes of a single sector */
+  off_t           startsector;  /* Offset to the first section/block of the
+                                 * managed sub-region */
+  off_t           endsector;    /* Offset to the last section/block of the
+                                 * managed sub-region */
+
+  /* NULL-terminated string representing the name of the parent node of the
+   * partition.
+   */
+
+  char            parent[NAME_MAX + 1];
+};
+
 /* This structure is provided by block devices when they register with the
  * system.  It is used by file systems to perform filesystem transfers.  It
  * differs from the normal driver vtable in several ways -- most notably in
