@@ -25,7 +25,6 @@ include assert/Make.defs
 include audio/Make.defs
 include builtin/Make.defs
 include ctype/Make.defs
-include debug/Make.defs
 include dirent/Make.defs
 include dlfcn/Make.defs
 include endian/Make.defs
