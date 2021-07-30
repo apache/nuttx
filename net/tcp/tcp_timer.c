@@ -209,17 +209,18 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
             {
               /* Will not yet decrement to zero */
 
+              nwarn("conn %p, timer %u -> %u, rto %u, hsec %d\n",
+                    conn, conn->timer, conn->timer - hsec,
+                    conn->rto, hsec);
               conn->timer -= hsec;
-              nwarn("conn %p, timer %u, rto %u, hsec %d\n",
-                    conn, conn->timer, conn->rto, hsec);
             }
           else
             {
               /* Will decrement to zero */
 
+              nwarn("conn %p, timer expired, timer %u, rto %u, hsec %d\n",
+                    conn, conn->timer, conn->rto, hsec);
               conn->timer = 0;
-              nwarn("conn %p, timer expired, rto %u, hsec %d\n",
-                    conn, conn->rto, hsec);
 
               /* The TCP is connected and, hence, should be bound to a
                * device. Make sure that the polling device is the one that
@@ -315,6 +316,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
               conn->timer = TCP_RTO << (conn->nrtx > 4 ? 4: conn->nrtx);
               (conn->nrtx)++;
+              nwarn("conn %p, timer backoff, timer %u, rto %u, hsec %d\n",
+                    conn, conn->timer, conn->rto, hsec);
 
               /* Ok, so we need to retransmit. We do this differently
                * depending on which state we are in. In ESTABLISHED, we
