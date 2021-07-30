@@ -28,6 +28,10 @@
 #include <execinfo.h>
 #include <unwind.h>
 
+#include <nuttx/irq.h>
+
+#if !defined(CONFIG_ARCH_HAVE_BACKTRACE)
+
 /****************************************************************************
  * Private Data Types
  ****************************************************************************/
@@ -95,13 +99,22 @@ backtrace_helper(FAR struct _Unwind_Context *ctx, FAR void *a)
  * Public Functions
  ****************************************************************************/
 
-/* Store up to SIZE return address of the current program state in
- * ARRAY and return the exact number of values stored.
- */
+/****************************************************************************
+ * Name: sched_backtrace
+ *
+ * Description:
+ *  Get thread backtrace from specified tid.
+ *
+ ****************************************************************************/
 
-int backtrace(FAR void **buffer, int size)
+int sched_backtrace(pid_t tid, FAR void **buffer, int size)
 {
   struct trace_arg arg;
+
+  if (tid != gettid())
+    {
+      return 0;
+    }
 
   arg.array = buffer;
   arg.cfa = 0;
@@ -126,3 +139,5 @@ int backtrace(FAR void **buffer, int size)
 
   return arg.cnt != -1 ? arg.cnt : 0;
 }
+
+#endif /* !CONFIG_ARCH_HAVE_BACKTRACE */
