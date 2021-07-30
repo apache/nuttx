@@ -45,10 +45,6 @@
  * The remaining bits of the EXC_RETURN value should be set to 1.
  */
 
-/* EXC_RETURN_BASE: Bits that are always set in an EXC_RETURN value. */
-
-#define EXC_RETURN_BASE          0xffffff80
-
 /* EXC_RETURN_EXC_SECURE: Exception Secure.  The security domain the
  * exception was taken to.  If this bit is clear non-secure, else secure.
  */
@@ -91,6 +87,15 @@
  */
 
 #define EXC_RETURN_SECURE_STACK  (1 << 6)
+
+/* EXC_RETURN_BASE: Bits that are always set in an EXC_RETURN value. */
+
+#if !defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+#define EXC_RETURN_BASE          (0xffffff80 | EXC_RETURN_EXC_SECURE | \
+                                  EXC_RETURN_SECURE_STACK)
+#else
+#define EXC_RETURN_BASE          (0xffffff80)
+#endif
 
 /* EXC_RETURN_HANDLER: Return to handler mode. Exception return gets state
  * from the main stack. Execution uses MSP after return.
