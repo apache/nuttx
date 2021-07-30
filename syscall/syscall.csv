@@ -134,6 +134,7 @@
 "sched_setscheduler","sched.h","","int","pid_t","int","const struct sched_param *"
 "sched_unlock","sched.h","","int"
 "sched_yield","sched.h","","int"
+"sched_backtrace","sched.h","defined(CONFIG_SCHED_BACKTRACE)","int","pid_t","FAR void **","int"
 "seekdir","dirent.h","","void","FAR DIR *","off_t"
 "select","sys/select.h","","int","int","FAR fd_set *","FAR fd_set *","FAR fd_set *","FAR struct timeval *"
 "sem_clockwait","semaphore.h","","int","FAR sem_t *","clockid_t","FAR const struct timespec *"
