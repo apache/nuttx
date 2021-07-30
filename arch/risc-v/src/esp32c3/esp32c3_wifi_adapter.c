@@ -390,6 +390,7 @@ static int esp_wifi_lock(bool lock);
 #ifdef ESP32C3_WLAN_HAS_STA
 static int esp_wifi_sta_connect_wrapper(void);
 #endif
+static void esp_wifi_set_debug_log(void);
 
 /****************************************************************************
  * Extern Functions declaration
@@ -719,6 +720,32 @@ static int esp_wifi_sta_connect_wrapper(void)
 }
 
 #endif
+
+/****************************************************************************
+ * Name: esp_wifi_set_debug_log
+ *
+ * Description:
+ *   Set Wi-Fi log level and module
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp_wifi_set_debug_log(void)
+{
+  uint32_t g_wifi_log_submodule = WIFI_LOG_SUBMODULE_CONN;
+  wifi_log_level_t level = WIFI_LOG_INFO;
+#ifdef CONFIG_WIFI_LOG_LEVEL
+  level = CONFIG_WIFI_LOG_LEVEL;
+#endif
+  esp_wifi_internal_set_log_level(level);
+  esp_wifi_internal_set_log_mod(WIFI_LOG_MODULE_WIFI,
+                                g_wifi_log_submodule, true);
+}
 
 /****************************************************************************
  * Name: osi_errno_trans
@@ -5106,6 +5133,8 @@ esp_err_t esp_wifi_init(const wifi_init_config_t *config)
 #endif
       return ret;
     }
+
+  esp_wifi_set_debug_log();
 
   ret = esp_supplicant_init();
   if (ret)
