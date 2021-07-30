@@ -48,9 +48,6 @@ char **g_argv;
  * Private Data
  ****************************************************************************/
 
-static jmp_buf g_simabort;
-static int g_exitcode = EXIT_SUCCESS;
-
 #ifdef CONFIG_SYSLOG_RPMSG
 static char g_logbuffer[4096];
 #endif
@@ -78,37 +75,16 @@ int main(int argc, char **argv, char **envp)
 
   /* Start NuttX */
 
-  if (setjmp(g_simabort) == 0)
-    {
 #ifdef CONFIG_SMP
-      /* Start the CPU0 emulation.  This should not return. */
+  /* Start the CPU0 emulation.  This should not return. */
 
-      sim_cpu0_start();
+  sim_cpu0_start();
 #endif
-      /* Start the NuttX emulation.  This should not return. */
+  /* Start the NuttX emulation.  This should not return. */
 
-      nx_start();
-    }
+  nx_start();
 
-  return g_exitcode;
-}
-
-/****************************************************************************
- * Name: host_abort
- *
- * Description:
- *   Abort the simulation
- *
- * Input Parameters:
- *   status - Exit status to set
- ****************************************************************************/
-
-void host_abort(int status)
-{
-  /* Save the return code and exit the simulation */
-
-  g_exitcode = status;
-  longjmp(g_simabort, 1);
+  return EXIT_FAILURE;
 }
 
 /****************************************************************************
