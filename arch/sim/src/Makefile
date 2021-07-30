@@ -75,7 +75,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c
+HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_host_abort.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
 ifeq ($(CONFIG_LIBCXX),y)
