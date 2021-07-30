@@ -1817,19 +1817,28 @@ static FAR struct tm *localsub(FAR const time_t *timep,
 static FAR struct tm *gmtsub(FAR const time_t *timep,
                              int_fast32_t offset, FAR struct tm *tmp)
 {
-  tz_semtake(&g_gmt_sem);
-
   if (!g_gmt_isset)
     {
-      g_gmt_ptr = lib_malloc(sizeof *g_gmt_ptr);
-      if (g_gmt_ptr != NULL)
+#ifndef __KERNEL__
+      if (up_interrupt_context())
         {
-          gmtload(g_gmt_ptr);
-          g_gmt_isset = 1;
+          return NULL;
         }
-    }
+#endif
 
-  tz_semgive(&g_gmt_sem);
+      tz_semtake(&g_gmt_sem);
+      if (!g_gmt_isset)
+        {
+          g_gmt_ptr = lib_malloc(sizeof *g_gmt_ptr);
+          if (g_gmt_ptr != NULL)
+            {
+              gmtload(g_gmt_ptr);
+              g_gmt_isset = 1;
+            }
+        }
+
+      tz_semgive(&g_gmt_sem);
+    }
 
   tmp->tm_zone = GMT;
   return timesub(timep, offset, g_gmt_ptr, tmp);
@@ -2528,8 +2537,14 @@ void tzset(void)
 {
   FAR const char *name;
 
-  tz_semtake(&g_lcl_sem);
+#ifndef __KERNEL__
+  if (up_interrupt_context())
+    {
+      return;
+    }
+#endif
 
+  tz_semtake(&g_lcl_sem);
   name = getenv("TZ");
   if (name == NULL)
     {
