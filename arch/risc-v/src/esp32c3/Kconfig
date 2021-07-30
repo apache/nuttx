@@ -807,6 +807,36 @@ config ESP32C3_WIFI_RECONNECT
 	---help---
 		Select this option to enable Wi-Fi to reconnect for station when disconnected.
 
+choice ESP32C3_WIFI_LOG_LEVEL
+	depends on DEBUG_INFO
+	prompt "WiFi debug log level"
+	default WIFI_LOG_LEVEL_INFO
+	help
+		The WiFi log is divided into the following levels: ERROR,WARNING,INFO,DEBUG,VERBOSE.
+
+	config WIFI_LOG_LEVEL_NONE
+		bool "No output"
+	config WIFI_LOG_LEVEL_ERROR
+		bool "Error"
+	config WIFI_LOG_LEVEL_WARN
+		bool "Warning"
+	config WIFI_LOG_LEVEL_INFO
+		bool "Info"
+	config WIFI_LOG_LEVEL_DEBUG
+		bool "Debug"
+	config WIFI_LOG_LEVEL_VERBOSE
+		bool "Verbose"
+endchoice
+
+config WIFI_LOG_LEVEL
+	int
+	default 0 if WIFI_LOG_LEVEL_NONE
+	default 1 if WIFI_LOG_LEVEL_ERROR
+	default 2 if WIFI_LOG_LEVEL_WARN
+	default 3 if WIFI_LOG_LEVEL_INFO
+	default 4 if WIFI_LOG_LEVEL_DEBUG
+	default 5 if WIFI_LOG_LEVEL_VERBOSE
+
 endmenu # Wi-Fi configuration
 
 menu "BLE Configuration"
