@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/execinfo.h
+ * sched/sched/sched_backtrace.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,50 +18,45 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_EXECINFO_H
-#define __INCLUDE_EXECINFO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <sched.h>
+#include <nuttx/config.h>
+
+#include "sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-#if defined(CONFIG_SCHED_BACKTRACE)
-
-/* Store up to SIZE return address of the current back trace in
- * ARRAY and return the exact number of values stored.
- */
-
-#define backtrace(buffer, size) sched_backtrace(gettid(), buffer, size)
-#define dump_stack()            sched_dumpstack(gettid())
-
-#else
-# define backtrace(buffer, size) 0
-# define dump_stack()
-#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: sched_backtrace
+ *
+ * Description:
+ *  Get thread backtrace from specified tid.
+ *  Store up to SIZE return address of the current program state in
+ *  ARRAY and return the exact number of values stored.
+ *
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+int sched_backtrace(pid_t tid, FAR void **buffer, int size)
 {
-#else
-#define EXTERN extern
-#endif
+  FAR struct tcb_s *rtcb;
 
-#undef EXTERN
-#if defined(__cplusplus)
+  if (tid < 0)
+    {
+      rtcb = running_task();
+    }
+  else
+    {
+      rtcb = nxsched_get_tcb(tid);
+    }
+
+  if (rtcb == NULL)
+    {
+      return 0;
+    }
+
+  return up_backtrace(rtcb, buffer, size);
 }
-#endif
-
-#endif /* __INCLUDE_EXECINFO_H */

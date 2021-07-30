@@ -262,6 +262,11 @@ int    sched_lockcount(void);
 
 bool   sched_idletask(void);
 
+/* Task Backtrace */
+
+int    sched_backtrace(pid_t tid, FAR void **buffer, int size);
+void   sched_dumpstack(pid_t tid);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

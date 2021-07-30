@@ -44,6 +44,10 @@ SYSCALL_LOOKUP(sched_unlock,               0)
 SYSCALL_LOOKUP(sched_yield,                0)
 SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 
+#ifdef CONFIG_SCHED_BACKTRACE
+  SYSCALL_LOOKUP(sched_backtrace,          3)
+#endif
+
 #ifdef CONFIG_SMP
   SYSCALL_LOOKUP(sched_getaffinity,        3)
   SYSCALL_LOOKUP(sched_getcpu,             0)

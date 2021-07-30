@@ -35,7 +35,7 @@ CSRCS += task_startup.c
 endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
-CSRCS += lib_dumpstack.c lib_backtrace.c
+CSRCS += sched_dumpstack.c sched_backtrace.c
 endif
 
 # Add the sched directory to the build
