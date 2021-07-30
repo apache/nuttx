@@ -1,0 +1,55 @@
+From fdc60516f58633382ae5d73256a99c7737b174e5 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Fri, 30 Jul 2021 17:24:51 +0800
+Subject: [PATCH] Remove the locale fallback for NuttX
+
+since these functions can handled by NuttX's libc now
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: I68c9f6a690313748e030510d391170d8ca83ee7d
+---
+ include/__locale                  |  2 --
+ include/__support/nuttx/xlocale.h | 18 ------------------
+ 2 files changed, 20 deletions(-)
+ delete mode 100644 include/__support/nuttx/xlocale.h
+
+diff --git libcxx/include/__locale libcxx/include/__locale
+index 77e5faab2..054973e9f 100644
+--- libcxx/include/__locale
++++ libcxx/include/__locale
+@@ -22,8 +22,6 @@
+ #if defined(_LIBCPP_MSVCRT_LIKE)
+ # include <cstring>
+ # include <__support/win32/locale_win32.h>
+-#elif defined(__NuttX__)
+-# include <__support/nuttx/xlocale.h>
+ #elif defined(_AIX) || defined(__MVS__)
+ # include <__support/ibm/xlocale.h>
+ #elif defined(__ANDROID__)
+diff --git libcxx/include/__support/nuttx/xlocale.h libcxx/include/__support/nuttx/xlocale.h
+deleted file mode 100644
+index be738e3b6..000000000
+--- libcxx/include/__support/nuttx/xlocale.h
++++ /dev/null
+@@ -1,18 +0,0 @@
+-// -*- C++ -*-
+-//===-----------------------------------------------------------------------===//
+-//
+-// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+-// See https://llvm.org/LICENSE.txt for license information.
+-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+-//
+-//===----------------------------------------------------------------------===//
+-
+-#ifndef _LIBCPP_SUPPORT_NUTTX_XLOCALE_H
+-#define _LIBCPP_SUPPORT_NUTTX_XLOCALE_H
+-
+-#if defined(__NuttX__)
+-#include <__support/xlocale/__posix_l_fallback.h>
+-#include <__support/xlocale/__strtonum_fallback.h>
+-#endif // __NuttX__
+-
+-#endif
+-- 
+2.17.1
+

@@ -27,6 +27,7 @@ libcxx: libcxx-$(VERSION).src.tar.xz
 	$(Q) tar -xf libcxx-$(VERSION).src.tar.xz \
 	         --exclude libcxx-$(VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(VERSION).src libcxx
+	$(Q) patch -p0 < 0001-Remove-the-locale-fallback-for-NuttX.patch
 	$(Q) touch $@
 
 $(TOPDIR)/include/libcxx: libcxx
