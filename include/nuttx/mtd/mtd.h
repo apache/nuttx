@@ -74,6 +74,12 @@
 #define MTDIOC_ERASESTATE _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
                                            * OUT: Byte value that represents the
                                            *      erased state of the MTD cell */
+#define MTDIOC_PARTINFO   _MTDIOC(0x000b) /* IN:  Pointer to writable struct
+                                           *      partition_info_s in which to
+                                           *      receive partition information data
+                                           * OUT: Partition information structure
+                                           *      populated with data from the MTD
+                                           *      partition */
 
 /* Macros to hide implementation */
 
