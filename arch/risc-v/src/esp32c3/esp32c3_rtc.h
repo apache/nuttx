@@ -50,6 +50,14 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Number of cycles to wait from the 32k XTAL oscillator to
+ * consider it running. Larger values increase startup delay.
+ * Smaller values may cause false positive detection
+ * (i.e. oscillator runs for a few cycles and then stops).
+ */
+
+#define SLOW_CLK_CAL_CYCLES         1024
+
 /* Cycles for RTC Timer clock source (internal oscillator) calibrate */
 
 #define RTC_CLK_SRC_CAL_CYCLES           (10)

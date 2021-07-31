@@ -32,13 +32,20 @@
 #include "riscv_arch.h"
 #include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_tim.h"
+#include "hardware/esp32c3_efuse.h"
 
-#include "esp32c3_wdt.h"
 #include "esp32c3_irq.h"
+#include "esp32c3_rtc.h"
+#include "esp32c3_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Helpers for converting from Q13.19 fixed-point format to float */
+
+#define N 19
+#define Q_TO_FLOAT(x) ((float)x/(float)(1<<N))
 
 /* Check whether the provided device is a RTC Watchdog Timer */
 
@@ -91,6 +98,7 @@ static int32_t esp32c3_wdt_config_stage(struct esp32c3_wdt_dev_s *dev,
                                         enum esp32c3_wdt_stage_e stage,
                                         enum esp32c3_wdt_stage_action_e cfg);
 static void esp32c3_wdt_update_conf(struct esp32c3_wdt_dev_s *dev);
+static uint16_t esp32c3_wdt_rtc_clk(FAR struct esp32c3_wdt_dev_s *dev);
 static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
                                   xcpt_t handler, void *arg);
 static void esp32c3_wdt_enableint(struct esp32c3_wdt_dev_s *dev);
@@ -132,7 +140,7 @@ struct esp32c3_wdt_ops_s esp32c3_rwdt_ops =
   .feed          = esp32c3_wdt_feed,
   .stg_conf      = esp32c3_wdt_config_stage,
   .upd_conf      = NULL,
-  .rtc_clk       = NULL,
+  .rtc_clk       = esp32c3_wdt_rtc_clk,
   .setisr        = esp32c3_wdt_setisr,
   .enableint     = esp32c3_wdt_enableint,
   .disableint    = esp32c3_wdt_disableint,
@@ -540,6 +548,14 @@ static int32_t esp32c3_wdt_settimeout(struct esp32c3_wdt_dev_s *dev,
       {
         if (IS_RWDT(dev))
           {
+            /* The timeout of only stage 0 happens at:
+             * Thold0 = RTC_CNTL_WDT_STG0_HOLD << (EFUSE_WDT_DELAY_SEL + 1)
+             */
+
+            uint32_t delay;
+            delay = REG_GET_FIELD(EFUSE_RD_REPEAT_DATA1_REG,
+                                  EFUSE_WDT_DELAY_SEL);
+            value = value >> (delay + 1);
             esp32c3_wdt_putreg(dev, RWDT_STAGE0_TIMEOUT_OFFSET, value);
           }
         else
@@ -624,6 +640,72 @@ static void esp32c3_wdt_feed(struct esp32c3_wdt_dev_s *dev)
     {
       esp32c3_wdt_putreg(dev, MWDT_FEED_OFFSET, TIMG_WDT_FEED);
     }
+}
+
+/****************************************************************************
+ * Name: esp32c3_wdt_rtc_clk
+ *
+ * Description:
+ *   Calculate the necessary cycles of RTC SLOW_CLK to complete
+ *   1 ms.
+ *
+ * Parameters:
+ *   dev           - Pointer to the driver state structure.
+ *
+ * Returned Values:
+ *   Return the number of cycles that completes 1 ms.
+ *
+ ****************************************************************************/
+
+static uint16_t esp32c3_wdt_rtc_clk(FAR struct esp32c3_wdt_dev_s *dev)
+{
+  enum esp32c3_rtc_slow_freq_e slow_clk_rtc;
+  uint32_t period_13q19;
+  float period;
+  float cycles_ms;
+  uint16_t cycles_ms_int;
+
+  /* Calibration map: Maps each RTC SLOW_CLK source to the number
+   * used to calibrate this source.
+   */
+
+  static const enum esp32c3_rtc_cal_sel_e cal_map[] =
+  {
+    RTC_CAL_RTC_MUX,
+    RTC_CAL_32K_XTAL,
+    RTC_CAL_8MD256
+  };
+
+  DEBUGASSERT(dev);
+
+  /* Check which clock is sourcing the slow_clk_rtc */
+
+  slow_clk_rtc = esp32c3_rtc_clk_slow_freq_get();
+
+  /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
+
+  period_13q19 = esp32c3_rtc_clk_cal(cal_map[slow_clk_rtc],
+                                     SLOW_CLK_CAL_CYCLES);
+
+  /* Assert no error happened during the calibration */
+
+  DEBUGASSERT(period_13q19 != 0);
+
+  /* Convert from Q13.19 format to float */
+
+  period = Q_TO_FLOAT(period_13q19);
+
+  wdinfo("PERIOD: %f  %" PRIu32"\n", period, period_13q19);
+
+  /* Get the number of cycles necessary to count 1 ms */
+
+  cycles_ms = 1000.0f / period;
+
+  /* Get the integer number of cycles */
+
+  cycles_ms_int = (uint16_t)cycles_ms;
+
+  return cycles_ms_int;
 }
 
 /****************************************************************************
@@ -846,6 +928,18 @@ struct esp32c3_wdt_dev_s *esp32c3_wdt_init(enum esp32c3_wdt_inst_e wdt_id)
       case ESP32C3_WDT_RWDT:
         {
           wdt = &g_esp32c3_rwdt_priv;
+
+  /* If RTC was not initialized in a previous
+   * stage by the PM or by clock_initialize()
+   * Then, init the RTC clock configuration here.
+   */
+
+#if !defined(CONFIG_PM) && !defined(CONFIG_RTC)
+  /* Initialize RTC controller parameters */
+
+  esp32c3_rtc_init();
+  esp32c3_rtc_clk_set();
+#endif
           break;
         }
 
