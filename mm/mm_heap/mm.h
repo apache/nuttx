@@ -42,12 +42,12 @@
 
 /* Chunk Header Definitions *************************************************/
 
-/* These definitions define the characteristics of allocator
+/* These definitions define the characteristics of the allocator:
  *
  * MM_MIN_SHIFT is used to define MM_MIN_CHUNK.
- * MM_MIN_CHUNK - is the smallest physical chunk that can be allocated.  It
- *   must be at least a large as sizeof(struct mm_freenode_s).  Larger values
- *   may improve performance slightly, but will waste memory due to
+ * MM_MIN_CHUNK - is the smallest physical chunk that can be allocated.
+ *   It must be at least as large as sizeof(struct mm_freenode_s). Larger
+ *   values may improve performance slightly, but will waste memory due to
  *   quantization losses.
  *
  * MM_MAX_SHIFT is used to define MM_MAX_CHUNK
@@ -198,7 +198,9 @@ struct mm_heap_s
 
   struct mm_freenode_s mm_nodelist[MM_NNODES];
 
-  /* Free delay list, for some situation can't do free immdiately */
+  /* Free delay list, for some situations where we can't do free
+   * immdiately.
+   */
 
 #ifdef CONFIG_SMP
   FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];

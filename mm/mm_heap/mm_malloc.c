@@ -160,7 +160,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 
   /* If we found a node with non-zero size, then this is one to use. Since
-   * the list is ordered, we know that is must be best fitting chunk
+   * the list is ordered, we know that it must be the best fitting chunk
    * available.
    */
 
