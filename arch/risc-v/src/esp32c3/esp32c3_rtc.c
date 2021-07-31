@@ -80,14 +80,6 @@
 
 #define EXT_OSC_FLAG    BIT(3)
 
-/* Number of cycles to wait from the 32k XTAL oscillator to
- * consider it running. Larger values increase startup delay.
- * Smaller values may cause false positive detection
- * (i.e. oscillator runs for a few cycles and then stops).
- */
-
-#define SLOW_CLK_CAL_CYCLES         1024
-
 #define RTC_FAST_CLK_FREQ_8M        8500000
 
 /* With the default value of CK8M_DFREQ,
