@@ -85,13 +85,13 @@ typedef CODE void (*tls_dtor_t)(FAR void *);
 struct task_info_s
 {
   sem_t           ta_sem;
-  mode_t          ta_umask; /* File mode creation mask */
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t    ta_tlsset;                    /* Set of TLS indexes allocated */
   tls_dtor_t      ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
 #endif
 #ifndef CONFIG_BUILD_KERNEL
   struct getopt_s ta_getopt; /* Globals used by getopt() */
+  mode_t          ta_umask;  /* File mode creation mask */
 #endif
 };
 
