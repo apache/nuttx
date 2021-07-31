@@ -26,6 +26,14 @@
 #include <nuttx/tls.h>
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+static mode_t g_umask;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -45,12 +53,17 @@
 
 mode_t umask(mode_t mask)
 {
-  FAR struct task_info_s *info;
   mode_t prev;
+#ifndef CONFIG_BUILD_KERNEL
+  FAR struct task_info_s *info;
 
   info = task_get_info();
   prev = info->ta_umask;
   info->ta_umask = mask;
+#else
+  prev = g_umask;
+  g_umask = mask;
+#endif
 
   return prev;
 }
@@ -61,8 +74,12 @@ mode_t umask(mode_t mask)
 
 mode_t getumask(void)
 {
+#ifndef CONFIG_BUILD_KERNEL
   FAR struct task_info_s *info;
 
   info = task_get_info();
   return info->ta_umask;
+#else
+  return g_umask;
+#endif
 }
