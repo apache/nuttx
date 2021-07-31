@@ -306,6 +306,17 @@ config ARCH_BOARD_FIRE_STM32
 		and 3 of the boards are supported but only version 2 has been
 		tested.
 
+config ARCH_BOARD_CHIPKIT_WIFIRE
+    bool "chipKIT Wi-FIRE"
+    depends on ARCH_CHIP_PIC32MZ2048EFG
+    select ARCH_HAVE_LEDS
+    select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
+    ---help---
+        This options selects the chipKIT Wi-FIRE board. This
+        board is a chipKIT Arduino-compatible board. This board
+        features the Microchip PIC32MZ2048EFG100 MCU running at 200 MHz.
+
 config ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	bool "Mikroe Flip&Click PIC32MZ"
 	depends on ARCH_CHIP_PIC32MZ2048EFH
@@ -2340,6 +2351,7 @@ config ARCH_BOARD
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
+	default "chipkit-wifire"           if ARCH_BOARD_CHIPKIT_WIFIRE
 	default "flipnclick-pic32mz"       if ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	default "flipnclick-sam3x"         if ARCH_BOARD_FLIPNCLICK_SAM3X
 	default "freedom-k28f"             if ARCH_BOARD_FREEDOM_K28F
@@ -3151,6 +3163,9 @@ source "boards/mips/pic32mx/sure-pic32mx/Kconfig"
 endif
 if ARCH_BOARD_UBW32
 source "boards/mips/pic32mx/ubw32/Kconfig"
+endif
+if ARCH_BOARD_CHIPKIT_WIFIRE
+source "boards/mips/pic32mz/chipkit-wifire/Kconfig"
 endif
 if ARCH_BOARD_FLIPNCLICK_PIC32MZ
 source "boards/mips/pic32mz/flipnclick-pic32mz/Kconfig"

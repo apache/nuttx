@@ -3,8 +3,8 @@ README
 
   EMW3162 board (https://www.waveshare.com/EMW3162.htm) features the
   STM32F205RG MCU and Broadcom BCM43362KUBG Wi-Fi chip.
-  The STM32F205RG is a 120 MHz Cortex-M3 operation with 1Mbit Flash
-  memory and 128kbytes.
+  The STM32F205RG is a 120 MHz Cortex-M3 operation with 1MB Flash
+  memory and 128KB RAM.
 
 Contents
 ========

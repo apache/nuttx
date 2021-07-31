@@ -292,6 +292,11 @@ boards/mips/pic32mz/flipnclick-pic32mz
   standard Arduino connectors.  This board features the Microchip
   PIC32MZ2048EFH100 MCU running at 200 MHz (252 MHz capable).
 
+boards/mips/pic32mz/chipkit-wifire
+  Board support for the chipKIT Wi-FIRE board. This board is a chipKIT
+  Arduino-compatible board. This board features
+  the Microchip PIC32MZ2048EFG100 MCU running at 200 MHz.
+
 boards/arm/sam34/flipnclick-sam3x
   Board support for the Mikroe Flip&Click STM32X board.  This board is an
   Arduino-Due work-alike with four Mikroe Click bus interfaces.  Like the

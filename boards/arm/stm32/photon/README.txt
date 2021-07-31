@@ -3,8 +3,8 @@ README
 
   This README discusses issues unique to NuttX configurations for the
   Particle.io Photon board featuring the STM32F205RG MCU.
-  The STM32F205RG is a 120 MHz Cortex-M3 operation with 1Mbit Flash
-  memory and 128kbytes. The board includes a Broadcom BCM43362 WiFi.
+  The STM32F205RG is a 120 MHz Cortex-M3 operation with 1MB Flash
+  memory and 128KB RAM. The board includes a Broadcom BCM43362 WiFi.
 
 Contents
 ========
@@ -18,8 +18,8 @@ Selecting the Photon board on NuttX
 ===================================
 
   NOTICE: We will not discuss about toolchains and environment configuration
-  here, please take a look at STM32F4Discory board README or other STM32 board
-  because it should work for Photon board as well.
+  here, please take a look at STM32F4Discovery board README or other
+  STM32 board because it should work for Photon board as well.
 
   Let us to consider that you cloned the nuttx and apps repositories, then
   follow these steps:
