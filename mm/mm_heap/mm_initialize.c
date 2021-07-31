@@ -88,7 +88,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   DEBUGVERIFY(mm_takesemaphore(heap));
 
-  /* Adjust the provide heap start and size so that they are both aligned
+  /* Adjust the provided heap start and size so that they are both aligned
    * with the MM_MIN_CHUNK size.
    */
 
