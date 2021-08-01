@@ -56,7 +56,7 @@
  *     child task in the variable pointed to by a non-NULL 'pid' argument.|
  *
  *   path - The 'path' argument identifies the file to execute.  If
- *     CONFIG_LIB_ENVPATH is defined, this may be either a relative or
+ *     CONFIG_LIBC_ENVPATH is defined, this may be either a relative or
  *     or an absolute path.  Otherwise, it must be an absolute path.
  *
  *   attr - If the value of the 'attr' parameter is NULL, the all default
@@ -240,7 +240,7 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
  *     directories passed as the environment variable PATH.
  *
  *     NOTE: NuttX provides only one implementation:  If
- *     CONFIG_LIB_ENVPATH is defined, then only posix_spawnp() behavior
+ *     CONFIG_LIBC_ENVPATH is defined, then only posix_spawnp() behavior
  *     is supported; otherwise, only posix_spawn behavior is supported.
  *
  *   file_actions - If 'file_actions' is a null pointer, then file
@@ -292,8 +292,8 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
  *
  * Assumptions/Limitations:
  *   - NuttX provides only posix_spawn() or posix_spawnp() behavior
- *     depending upon the setting of CONFIG_LIB_ENVPATH: If
- *     CONFIG_LIB_ENVPATH is defined, then only posix_spawnp() behavior
+ *     depending upon the setting of CONFIG_LIBC_ENVPATH: If
+ *     CONFIG_LIBC_ENVPATH is defined, then only posix_spawnp() behavior
  *     is supported; otherwise, only posix_spawn behavior is supported.
  *   - The 'envp' argument is not used and the 'environ' variable is not
  *     altered (NuttX does not support the 'environ' variable).
@@ -310,7 +310,7 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
 int posix_spawnp(FAR pid_t *pid, FAR const char *path,
                  FAR const posix_spawn_file_actions_t *file_actions,
                  FAR const posix_spawnattr_t *attr,

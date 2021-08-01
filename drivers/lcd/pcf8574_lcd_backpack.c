@@ -36,7 +36,7 @@
 #include <nuttx/lcd/slcd_codec.h>
 #include <nuttx/lcd/pcf8574_lcd_backpack.h>
 
-#ifndef CONFIG_LIB_SLCDCODEC
+#ifndef CONFIG_LIBC_SLCDCODEC
 #  error please also select Library Routines, Segment LCD CODEC
 #endif
 

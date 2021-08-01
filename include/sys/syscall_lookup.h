@@ -140,7 +140,7 @@ SYSCALL_LOOKUP(up_assert,                  2)
   SYSCALL_LOOKUP(exec,                     4)
 #endif
 #ifdef CONFIG_LIBC_EXECFUNCS
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
   SYSCALL_LOOKUP(posix_spawnp,             6)
 #else
   SYSCALL_LOOKUP(posix_spawn,              6)

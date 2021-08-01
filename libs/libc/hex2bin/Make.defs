@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIB_HEX2BIN),y)
+ifeq ($(CONFIG_LIBC_HEX2BIN),y)
 
 # Add the hex2bin sources to the build
 

@@ -36,7 +36,7 @@
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Private Functions
@@ -196,4 +196,4 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     }
 }
 
-#endif /* CONFIG_LIB_USRWORK && !__KERNEL__ */
+#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__ */

@@ -67,8 +67,8 @@
 
 /* Define CONFIG_DEBUG_LCD_INFO to enable detailed LCD debug output. */
 
-#ifndef CONFIG_LIB_SLCDCODEC
-#  error "This SLCD driver requires CONFIG_LIB_SLCDCODEC"
+#ifndef CONFIG_LIBC_SLCDCODEC
+#  error "This SLCD driver requires CONFIG_LIBC_SLCDCODEC"
 #endif
 
 /* The ever-present MIN/MAX macros ******************************************/

@@ -15,7 +15,7 @@ if !BINFMT_DISABLE
 config PATH_INITIAL
 	string "Initial PATH Value"
 	default ""
-	depends on LIB_ENVPATH
+	depends on LIBC_ENVPATH
 	---help---
 		The initial value of the PATH variable.  This is the colon-separated
 		list of absolute paths.  E.g., "/bin:/usr/bin:/sbin"
