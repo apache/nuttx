@@ -1357,7 +1357,7 @@ config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
 	depends on !BUILD_KERNEL && SCHED_WORKQUEUE
-	select LIB_USRWORK if BUILD_PROTECTED
+	select LIBC_USRWORK if BUILD_PROTECTED
 	---help---
 		Built in support for the SIGEV_THREAD signal deliver method.
 
@@ -1562,7 +1562,7 @@ config SIG_SIGCONDTIMEDOUT
 config SIG_SIGWORK
 	int "SIGWORK"
 	default 17
-	depends on SCHED_WORKQUEUE || LIB_USRWORK
+	depends on SCHED_WORKQUEUE || LIBC_USRWORK
 	---help---
 		SIGWORK is a non-standard signal used to wake up various internal
 		NuttX worker threads.  This setting specifies the signal number

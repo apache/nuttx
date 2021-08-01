@@ -102,7 +102,7 @@ const struct userspace_s userspace locate_data(".userspace") =
 
   /* User-space work queue support (declared in include/nuttx/wqueue.h) */
 
-#ifdef CONFIG_LIB_USRWORK
+#ifdef CONFIG_LIBC_USRWORK
   .work_usrstart    = work_usrstart,
 #endif
 };

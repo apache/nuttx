@@ -98,7 +98,7 @@ FAR char *getcwd(FAR char *buf, size_t size)
   pwd = getenv("PWD");
   if (pwd == NULL)
     {
-      pwd = CONFIG_LIB_HOMEDIR;
+      pwd = CONFIG_LIBC_HOMEDIR;
     }
 
   /* Verify that the cwd will fit into the user-provided buffer */

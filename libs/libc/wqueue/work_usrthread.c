@@ -38,7 +38,7 @@
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -294,8 +294,8 @@ int work_usrstart(void)
   /* Start a user-mode worker thread for use by applications. */
 
   ret = task_create("uwork",
-                    CONFIG_LIB_USRWORKPRIORITY,
-                    CONFIG_LIB_USRWORKSTACKSIZE,
+                    CONFIG_LIBC_USRWORKPRIORITY,
+                    CONFIG_LIBC_USRWORKSTACKSIZE,
                     (main_t)work_usrthread,
                     ((FAR char * const *)NULL));
   if (ret < 0)
@@ -310,10 +310,10 @@ int work_usrstart(void)
   /* Start a user-mode worker thread for use by applications. */
 
   pthread_attr_init(&attr);
-  pthread_attr_setstacksize(&attr, CONFIG_LIB_USRWORKSTACKSIZE);
+  pthread_attr_setstacksize(&attr, CONFIG_LIBC_USRWORKSTACKSIZE);
 
   pthread_attr_getschedparam(&attr, &param);
-  param.sched_priority = CONFIG_LIB_USRWORKPRIORITY;
+  param.sched_priority = CONFIG_LIBC_USRWORKPRIORITY;
   pthread_attr_setschedparam(&attr, &param);
 
   ret = pthread_create(&usrwork, &attr, work_usrthread, NULL);
@@ -332,4 +332,4 @@ int work_usrstart(void)
 #endif
 }
 
-#endif /* CONFIG_LIB_USRWORK && !__KERNEL__*/
+#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__*/

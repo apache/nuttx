@@ -19705,7 +19705,7 @@ Additional new features and extended functionality:
         stack info is very useful to find the backtrace  From Xiang Xiao.
       - binfmt/ and libs/libc:  Make exepath_*() more common:  Move
         exepath_*() related code to libc/misc, rename exepath_ to envpath_,
-        and rename BINFMT_EXEPATH to LIB_ENVPATH.  From nchao.
+        and rename BINFMT_EXEPATH to LIBC_ENVPATH.  From nchao.
       - CLOCK:  Support CLOCK_MONOTONIC in clock_getres.c.  From Xiang Xiao.
       - Clock Timekeeping:  Use clock_basetime() to initialize
         g_clock_wall_time to get the best initial RTC value and initialize
@@ -22222,7 +22222,7 @@ Additional new features and extended functionality:
       - strsep():  Add strsep BSD/Linux function.  From Xiang Xiao.
       - netdb:  Hostname support no longer depends on CONFIG_NET since the
         host name is also useful in the non-network environment.
-        CONFIG_NET_HOSTNAME changed to CONFIG_LIB_HOSTNAME.  From Xiang Xiao.
+        CONFIG_NET_HOSTNAME changed to CONFIG_LIBC_HOSTNAME.  From Xiang Xiao.
       - netdb:  Support the nameserver change notification then we can pass
         DNS info from server to client in usrsock case.  From Xiang Xiao.
       - include/fixedmath.h:  Add macros for conversion between types

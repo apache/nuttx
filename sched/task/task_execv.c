@@ -94,7 +94,7 @@
  *   task.
  *
  * Input Parameters:
- *   path - The path to the program to be executed.  If CONFIG_LIB_ENVPATH
+ *   path - The path to the program to be executed.  If CONFIG_LIBC_ENVPATH
  *     is defined in the configuration, then this may be a relative path
  *     from the current working directory.  Otherwise, path must be the
  *     absolute path to the program.

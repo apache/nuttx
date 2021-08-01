@@ -178,7 +178,7 @@ int load_module(FAR struct binary_s *bin, FAR const char *filename,
        * be loaded?  Absolute paths start with '/'.
        */
 
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
       if (filename[0] != '/')
         {
           FAR char *fullpath;
