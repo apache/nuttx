@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -45,7 +46,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
-#include <nuttx/lib/regex.h>
 
 #include "mount/mount.h"
 
@@ -351,7 +351,7 @@ static int procfs_open(FAR struct file *filep, FAR const char *relpath,
     {
       /* Test if the path matches this entry's specification */
 
-      if (match(g_procfs_entries[x].pathpattern, relpath))
+      if (fnmatch(g_procfs_entries[x].pathpattern, relpath, 0) == 0)
         {
           /* Match found!  Stat using this procfs entry */
 
@@ -594,7 +594,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
         {
           /* Test if the path matches this entry's specification */
 
-          if (match(g_procfs_entries[x].pathpattern, relpath))
+          if (fnmatch(g_procfs_entries[x].pathpattern, relpath, 0) == 0)
             {
               /* Match found!  Call the handler's opendir routine.  If
                * successful, this opendir routine will create an entry
@@ -1041,7 +1041,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
         {
           /* Test if the path matches this entry's specification */
 
-          if (match(g_procfs_entries[x].pathpattern, relpath))
+          if (fnmatch(g_procfs_entries[x].pathpattern, relpath, 0) == 0)
             {
               /* Match found!  Stat using this procfs entry */
 
