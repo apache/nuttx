@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#ifdef CONFIG_LIB_HEX2BIN
+#ifdef CONFIG_LIBC_HEX2BIN
 
 /****************************************************************************
  * Pre-processor Definitions

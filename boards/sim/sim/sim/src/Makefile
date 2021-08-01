@@ -34,12 +34,12 @@ endif
 
 ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
   CSRCS += sim_bringup.c
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
   CSRCS += sim_zoneinfo.c
 endif
 else ifeq ($(CONFIG_LIB_BOARDCTL),y)
   CSRCS += sim_bringup.c
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
   CSRCS += sim_zoneinfo.c
 endif
 endif

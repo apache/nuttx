@@ -2327,7 +2327,7 @@ Configuration Sub-directories
        Further, the configuration assumes that executable files reside on the
        remotely mounted file system:
 
-       CONFIG_LIB_ENVPATH=y
+       CONFIG_LIBC_ENVPATH=y
        CONFIG_PATH_INITIAL="/mnt/nfs/bin"
 
     3 'ping' support

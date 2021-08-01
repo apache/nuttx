@@ -527,7 +527,7 @@ Configuration sub-directories
          CONFIG_ARCH_LEDS=n                      : Disable board LED support
 
        Library Routines:
-         CONFIG_LIB_SLCDCODEC=y                  : Enable the SLCD CODEC
+         CONFIG_LIBC_SLCDCODEC=y                  : Enable the SLCD CODEC
 
        System Type -> STM32 Peripheral Support:
          CONFIG_STM32_LCD=y                      : Enable the Segment LCD

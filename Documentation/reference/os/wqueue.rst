@@ -159,11 +159,11 @@ depend on internal, kernel-space facilities.
 
 **Configuration Options**.
 
--  ``CONFIG_LIB_USRWORK``. If CONFIG_LIB_USRWORK is also defined
+-  ``CONFIG_LIBC_USRWORK``. If CONFIG_LIBC_USRWORK is also defined
    then the user-mode work queue will be enabled.
--  ``CONFIG_LIB_USRWORKPRIORITY``. The execution priority of the
+-  ``CONFIG_LIBC_USRWORKPRIORITY``. The execution priority of the
    user-mode priority worker thread. Default: 100
--  ``CONFIG_LIB_USRWORKSTACKSIZE``. The stack size allocated for
+-  ``CONFIG_LIBC_USRWORKSTACKSIZE``. The stack size allocated for
    the lower priority worker thread. Default: 2048.
 
 

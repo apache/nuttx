@@ -333,7 +333,7 @@ config HIDKBD_RAWSCANCODES
 config HIDKBD_ENCODED
 	bool "Encode Special Keys"
 	default n
-	depends on !HIDKBD_RAWSCANCODES && LIB_KBDCODEC
+	depends on !HIDKBD_RAWSCANCODES && LIBC_KBDCODEC
 	---help---
 		Encode special key press events in the user buffer.  In this case,
 		the user end must decode the encoded special key values using the

@@ -11,7 +11,7 @@ choice
 
 config Z20X_SDBOOT
 	bool "SD boot loader"
-	select LIB_HEX2BIN
+	select LIBC_HEX2BIN
 	select EZ80_BOOTLOADER
 	depends on EZ80_SPI && MMCSD_SPI
 	---help---
@@ -22,7 +22,7 @@ config Z20X_SDBOOT
 config Z20X_W25BOOT
 	bool "W25 boot loader"
 	select Z20X_W25_CHARDEV
-	select LIB_HEX2BIN
+	select LIBC_HEX2BIN
 	select EZ80_BOOTLOADER
 	depends on EZ80_SPI && MTD_W25
 	---help---

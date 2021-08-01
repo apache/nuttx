@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIB_USRWORK),y)
+ifeq ($(CONFIG_LIBC_USRWORK),y)
 
 # Add the work queue C files to the build
 

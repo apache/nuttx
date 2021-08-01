@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -140,5 +140,5 @@ void envpath_release(ENVPATH_HANDLE handle);
 }
 #endif
 
-#endif /* CONFIG_LIB_ENVPATH */
+#endif /* CONFIG_LIBC_ENVPATH */
 #endif /* INCLUDE_NUTTX_ENVPATH_H */

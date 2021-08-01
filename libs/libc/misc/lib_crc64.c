@@ -104,7 +104,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_CRC64_FAST
+#ifdef CONFIG_LIBC_CRC64_FAST
 static const uint64_t crc64_tab[256] =
 {
   0x0000000000000000, 0x42f0e1eba9ea3693,
@@ -250,7 +250,7 @@ static const uint64_t crc64_tab[256] =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_CRC64_FAST
+#ifdef CONFIG_LIBC_CRC64_FAST
 uint64_t crc64part(FAR const uint8_t *src, size_t len, uint64_t crc64val)
 {
   size_t i;

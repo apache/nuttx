@@ -45,7 +45,7 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_LIB_HEX2BIN
+#ifdef CONFIG_LIBC_HEX2BIN
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -710,4 +710,4 @@ exit_with_buffers:
   return ret;
 }
 
-#endif /* CONFIG_LIB_HEX2BIN */
+#endif /* CONFIG_LIBC_HEX2BIN */

@@ -119,7 +119,7 @@
  * CODEC is enabled.
  */
 
-#ifndef CONFIG_LIB_KBDCODEC
+#ifndef CONFIG_LIBC_KBDCODEC
 #  undef CONFIG_HIDKBD_ENCODED
 #endif
 

@@ -59,8 +59,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_LIB_SLCDCODEC
-#  error This SLCD driver requires CONFIG_LIB_SLCDCODEC
+#ifndef CONFIG_LIBC_SLCDCODEC
+#  error This SLCD driver requires CONFIG_LIBC_SLCDCODEC
 #endif
 
 #if !defined(CONFIG_SAM34_OSC32K) && !defined(CONFIG_SAM34_RC32K)

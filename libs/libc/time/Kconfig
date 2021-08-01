@@ -51,21 +51,21 @@ config LIBC_TZDIR
 		This is the full path to the location where the TZ database is expected
 		to be found.
 
-config LIB_ZONEINFO
+config LIBC_ZONEINFO
 	bool "TZ database"
 	default n
 	---help---
 		Download and build the TZ/Olson database.
 
-if LIB_ZONEINFO
+if LIBC_ZONEINFO
 
-config LIB_ZONEINFO_ROMFS
+config LIBC_ZONEINFO_ROMFS
 	bool "Build ROMFS filesystem"
 	default n
 	depends on FS_ROMFS
 	---help---
 		Build a mountable ROMFS filesystem containing the TZ/Olson database
 
-endif # LIB_ZONEINFO
+endif # LIBC_ZONEINFO
 endif # LIBC_LOCALTIME
 endmenu # Time/Time Zone Support

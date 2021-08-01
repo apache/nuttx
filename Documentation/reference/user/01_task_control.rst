@@ -405,7 +405,7 @@ Functions
   exits.
 
   :param filename: The path to the program to be executed. If
-     ``CONFIG_LIB_ENVPATH`` is defined in the configuration, then this may
+     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
      be a relative path from the current working directory. Otherwise,
      ``path`` must be the absolute path to the program.
   :param argv: A pointer to an array of string arguments. The end of the
@@ -469,7 +469,7 @@ Functions
   task.
 
   :param path: The path to the program to be executed. If
-     ``CONFIG_LIB_ENVPATH`` is defined in the configuration, then this may
+     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
      be a relative path from the current working directory. Otherwise,
   :param path: must be the absolute path to the program.
 
@@ -489,7 +489,7 @@ Functions
   information.
 
   :param path: The path to the program to be executed. If
-     ``CONFIG_LIB_ENVPATH`` is defined in the configuration, then this may
+     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
      be a relative path from the current working directory. Otherwise,
   :param path: must be the absolute path to the program.
 
@@ -530,7 +530,7 @@ Functions
     variable PATH.
 
     NOTE: NuttX provides only one implementation: If
-    ``CONFIG_LIB_ENVPATH`` is defined, then only ``posix_spawnp()``
+    ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
     behavior is supported; otherwise, only ``posix_spawn`` behavior is
     supported.
 
@@ -584,8 +584,8 @@ Functions
   **Assumptions/Limitations:**
 
   -  NuttX provides only ``posix_spawn()`` or ``posix_spawnp()`` behavior
-     depending upon the setting of ``CONFIG_LIB_ENVPATH``: If
-     ``CONFIG_LIB_ENVPATH`` is defined, then only ``posix_spawnp()``
+     depending upon the setting of ``CONFIG_LIBC_ENVPATH``: If
+     ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
      behavior is supported; otherwise, only ``posix_spawn()`` behavior is
      supported.
   -  The ``envp`` argument is not used and the ``environ`` variable is not

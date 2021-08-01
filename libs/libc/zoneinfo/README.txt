@@ -54,8 +54,8 @@ modifications to the configuration that I used for testing:
   CONFIG_LIBC_TZ_MAX_TIMES=370
   CONFIG_LIBC_TZ_MAX_TYPES=20
 
-  CONFIG_LIB_ZONEINFO=y
-  CONFIG_LIB_ZONEINFO_ROMFS=y
+  CONFIG_LIBC_ZONEINFO=y
+  CONFIG_LIBC_ZONEINFO_ROMFS=y
 
 NOTE:  The full TZ database is quite large.  To create a reasonable sized
 ROMFS image, I had to trim some of the files like this:

@@ -29,7 +29,7 @@
 #include <nuttx/config.h>
 #include <nuttx/streams.h>
 
-#ifdef CONFIG_LIB_SLCDCODEC
+#ifdef CONFIG_LIBC_SLCDCODEC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -188,5 +188,5 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 }
 #endif
 
-#endif /* CONFIG_LIB_SLCDCODEC */
+#endif /* CONFIG_LIBC_SLCDCODEC */
 #endif /* __INCLUDE_NUTTX_LCD_SLCD_CODEC_H */

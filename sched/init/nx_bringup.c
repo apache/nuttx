@@ -105,7 +105,7 @@ extern const int             CONFIG_INIT_NEXPORTS;
 /* In the protected build (only) we also need to start the user work queue */
 
 #if !defined(CONFIG_BUILD_PROTECTED)
-#  undef CONFIG_LIB_USRWORK
+#  undef CONFIG_LIBC_USRWORK
 #endif
 
 #if !defined(CONFIG_USERMAIN_PRIORITY)
@@ -170,7 +170,7 @@ static inline void nx_pgworker(void)
 #ifdef CONFIG_SCHED_WORKQUEUE
 static inline void nx_workqueues(void)
 {
-#ifdef CONFIG_LIB_USRWORK
+#ifdef CONFIG_LIBC_USRWORK
   pid_t pid;
 #endif
 
@@ -192,7 +192,7 @@ static inline void nx_workqueues(void)
 
 #endif /* CONFIG_SCHED_LPWORK */
 
-#ifdef CONFIG_LIB_USRWORK
+#ifdef CONFIG_LIBC_USRWORK
   /* Start the user-space work queue */
 
   DEBUGASSERT(USERSPACE->work_usrstart != NULL);
@@ -403,8 +403,8 @@ int nx_bringup(void)
    * by all of the threads created by the IDLE task.
    */
 
-#ifdef CONFIG_LIB_HOMEDIR
-  setenv("PWD", CONFIG_LIB_HOMEDIR, 1);
+#ifdef CONFIG_LIBC_HOMEDIR
+  setenv("PWD", CONFIG_LIBC_HOMEDIR, 1);
 #endif
 
 #ifdef CONFIG_PATH_INITIAL
