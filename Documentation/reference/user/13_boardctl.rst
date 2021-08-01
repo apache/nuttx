@@ -183,7 +183,7 @@ USB
    
    :Argument: A pointer to an instance of :c:struct:`boardioc_usbdev_ctrl_s`.
    
-   :configuration: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
+   :configuration: CONFIG_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
    
    :dependencies: Board logic must provide ``board_<usbdev>_initialize()`.
    

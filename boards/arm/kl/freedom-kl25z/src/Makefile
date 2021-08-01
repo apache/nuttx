@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = kl_boardinitialize.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += kl_appinit.c
 endif
 

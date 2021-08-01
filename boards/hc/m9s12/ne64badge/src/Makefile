@@ -21,7 +21,7 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = m9s12_boot.c m9s12_leds.c m9s12_buttons.c m9s12_spi.c
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += m9s12_appinit.c
 endif
 

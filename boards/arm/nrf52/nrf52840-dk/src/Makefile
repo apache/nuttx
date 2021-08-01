@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = nrf52_boot.c nrf52_bringup.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += nrf52_appinit.c
 endif
 

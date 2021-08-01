@@ -33,7 +33,7 @@
 #include "stm32.h"
 #include "olimex-stm32-p107.h"
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -47,7 +47,7 @@
  *   called directly from application code, but only indirectly via the
  *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *   CONFIG_LIB_BOARDCTL=y:
+ *   CONFIG_BOARDCTL=y:
  *     If CONFIG_NSH_ARCHINITIALIZE=y:
  *       Called from the NSH library (or other application)
  *     Otherse, assumed to be called from some other application.
@@ -87,4 +87,4 @@ int board_app_initialize(uintptr_t arg)
   return OK;
 }
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

@@ -63,7 +63,7 @@
 
 /* Make sure that the NSH configuration will support the SD card */
 
-#if defined(PIC32MZ_HAVE_MMCSD) && defined(CONFIG_LIB_BOARDCTL)
+#if defined(PIC32MZ_HAVE_MMCSD) && defined(CONFIG_BOARDCTL)
 
 /* Make sure that the NSH configuration uses the correct SPI */
 

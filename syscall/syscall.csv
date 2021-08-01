@@ -8,7 +8,7 @@
 "arc4random_buf","stdlib.h","defined(CONFIG_CRYPTO_RANDOM_POOL)","void","FAR void *","size_t"
 "atexit","stdlib.h","defined(CONFIG_SCHED_ATEXIT)","int","void (*)(void)"
 "bind","sys/socket.h","defined(CONFIG_NET)","int","int","FAR const struct sockaddr *","socklen_t"
-"boardctl","sys/boardctl.h","defined(CONFIG_LIB_BOARDCTL)","int","unsigned int","uintptr_t"
+"boardctl","sys/boardctl.h","defined(CONFIG_BOARDCTL)","int","unsigned int","uintptr_t"
 "chmod","sys/stat.h","","int","FAR const char *","mode_t"
 "chown","unistd.h","","int","FAR const char *","uid_t","gid_t"
 "clearenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int"

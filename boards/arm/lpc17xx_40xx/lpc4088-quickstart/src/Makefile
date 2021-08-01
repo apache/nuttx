@@ -37,7 +37,7 @@ ifeq ($(CONFIG_LPC17_40_EXTNAND),y)
   CSRCS += lpc17_40_nandinitialize.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
   CSRCS += lpc17_40_appinit.c
 endif
 

@@ -40,7 +40,7 @@ ifeq ($(CONFIG_SENSORS_MAX6675),y)
 CSRCS += xmc4_max6675.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += xmc4_appinit.c
 endif
 

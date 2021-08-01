@@ -32,7 +32,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += k66_buttons.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += k66_appinit.c k66_bringup.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += k66_reset.c

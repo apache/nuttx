@@ -22,7 +22,7 @@ CSRCS += cxd56_main.c
 CSRCS += cxd56_clock.c
 CSRCS += cxd56_bringup.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += cxd56_appinit.c
 CSRCS += cxd56_power.c
 endif

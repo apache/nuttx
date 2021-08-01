@@ -33,7 +33,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  s32k1xx_buttons.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += s32k1xx_appinit.c
 endif
 

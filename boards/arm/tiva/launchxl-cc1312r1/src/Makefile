@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = cc1312_boot.c cc1312_pinconfig.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += cc1312_appinit.c cc1312_bringup.c
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += cc1312_bringup.c

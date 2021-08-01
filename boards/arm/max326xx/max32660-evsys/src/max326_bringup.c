@@ -57,7 +57,7 @@
  *   from board_late_initialize().
  *
  *   If CONFIG_BOARD_LATE_INITIALIZE is not selected,
- *   but CONFIG_LIB_BOARDCTL=y
+ *   but CONFIG_BOARDCTL=y
  *   then this function will *probably* be called from application logic via
  *   boardctl().
  *

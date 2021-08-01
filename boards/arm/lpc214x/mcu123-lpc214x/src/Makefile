@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = lpc2148_spi1.c lpc2148_leds.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += lpc2148_appinit.c
 endif
 
