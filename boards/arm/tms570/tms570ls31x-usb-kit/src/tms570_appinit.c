@@ -54,7 +54,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
 #ifndef CONFIG_BOARD_LATE_INITIALIZE
@@ -67,4 +67,4 @@ int board_app_initialize(uintptr_t arg)
 
   return 0;
 }
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

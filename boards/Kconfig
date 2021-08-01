@@ -3316,14 +3316,14 @@ config BOARD_INITRNGSEED
 		can then provide early entropy seed to the pool through
 		entropy injection APIs provided at 'nuttx/random.h'.
 
-config LIB_BOARDCTL
+config BOARDCTL
 	bool "Enable boardctl() interface"
 	default n
 	---help---
 		Enables support for the boardctl() interface.  Architecture
 		specific logic must provide board_app_initialize() interface.
 
-if LIB_BOARDCTL
+if BOARDCTL
 
 config BOARDCTL_FINALINIT
 	bool "Enable board app final init"
@@ -3474,4 +3474,4 @@ config BOARDCTL_IOCTL
 		Enables support for board-specific boardctl() commands.
 		Architecture specific logic must provide board_ioctl() interface.
 
-endif # LIB_BOARDCTL
+endif # BOARDCTL

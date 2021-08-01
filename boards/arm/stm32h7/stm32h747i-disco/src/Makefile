@@ -48,7 +48,7 @@ ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
 CSRCS += stm32_uid.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 

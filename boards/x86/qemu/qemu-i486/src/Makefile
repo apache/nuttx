@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = qemu_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
   CSRCS += qemu_appinit.c
 endif
 

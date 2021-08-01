@@ -30,7 +30,7 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += lpc17_40_adc.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += lpc17_40_appinit.c
 endif
 

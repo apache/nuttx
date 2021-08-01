@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = moxart_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += moxart_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += moxart_reset.c

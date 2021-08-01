@@ -58,7 +58,7 @@ CSRCS += sam_usb.c
 endif
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += sam_appinit.c
 CSRCS += sam_bringup.c
 endif

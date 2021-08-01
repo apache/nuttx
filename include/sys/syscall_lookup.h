@@ -224,7 +224,7 @@ SYSCALL_LOOKUP(pwrite,                     4)
 
 /* Board support */
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
   SYSCALL_LOOKUP(boardctl,                 2)
 #endif
 

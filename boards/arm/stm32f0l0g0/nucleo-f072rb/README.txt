@@ -312,7 +312,7 @@ Configurations
          CONFIG_FS_PROCFS=y
          CONFIG_NSH_PROC_MOUNTPOINT="/proc"
 
-         CONFIG_LIB_BOARDCTL=y
+         CONFIG_BOARDCTL=y
          CONFIG_NSH_ARCHINIT=y
          CONFIG_NSH_BUILTIN_APPS=y
 

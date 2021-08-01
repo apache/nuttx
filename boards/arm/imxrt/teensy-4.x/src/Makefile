@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += imxrt_appinit.c imxrt_bringup.c
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += imxrt_bringup.c

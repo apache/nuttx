@@ -67,7 +67,7 @@ int lc823450_adc_setup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int lc823450_bringup(void);
 #endif
 

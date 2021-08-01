@@ -30,7 +30,7 @@ else
 CSRCS += esp32_userleds.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += esp32_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += esp32_reset.c

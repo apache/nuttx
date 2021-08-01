@@ -37,7 +37,7 @@
 #include "lc823450_i2c.h"
 #include "lc823450-xgevk.h"
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Private Functions
@@ -174,4 +174,4 @@ int board_app_initialize(uintptr_t arg)
 #endif
 }
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

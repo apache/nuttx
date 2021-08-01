@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = rv32m1_bringup.c rv32m1_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += rv32m1_appinit.c
 endif
 

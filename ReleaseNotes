@@ -16670,7 +16670,7 @@ detailed bugfix information):
 
       - All configurations that use NXIMAGE or NXHELLO must select
         NX_MULTIUSER.  All configurations that use examples/nxterm must
-        enable CONFIG_LIB_BOARDCTL.
+        enable CONFIG_BOARDCTL.
       - All configurations that use NXLINES must select NX_MULTIUSER.  All
         configurations that use the NX server need to have larger POSIX
         messages.
@@ -26284,7 +26284,7 @@ information):
     * Atmel SAMA5Dx Boards:
 
       - SAMA5D4-EK:  Fix bad conditional compilation for
-        board_app_initialize().  Should depend only on CONFIG_LIB_BOARDCTL,
+        board_app_initialize().  Should depend only on CONFIG_BOARDCTL,
         CONFIG_BUILD_KERNEL is irrelevant.  From Gregory Nutt.
 
     * Microchip i.MXRT:

@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = k28_boot.c k28_bringup.c k28_spi.c k28_i2c.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += k28_appinit.c
 endif
 

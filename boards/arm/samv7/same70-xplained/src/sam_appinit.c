@@ -33,7 +33,7 @@
 #include "sam_uid.h"
 #include "same70-xplained.h"
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -102,4 +102,4 @@ int board_uniqueid(uint8_t *uniqueid)
 }
 #endif
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */
