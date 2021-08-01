@@ -42,6 +42,7 @@
 "fgetpos","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *","FAR fpos_t *"
 "fgets","stdio.h","defined(CONFIG_FILE_STREAM)","FAR char *","FAR char *","int","FAR FILE *"
 "fileno","stdio.h","","int","FAR FILE *"
+"fnmatch","fnmatch.h","","int","FAR const char *","FAR const char *","int"
 "fopen","stdio.h","defined(CONFIG_FILE_STREAM)","FAR FILE *","FAR const char *","FAR const char *"
 "fprintf","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *","FAR const IPTR char *","..."
 "fputc","stdio.h","defined(CONFIG_FILE_STREAM)","int","int","FAR FILE *"

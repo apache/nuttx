@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <libgen.h>
 #include <assert.h>
 #include <errno.h>
@@ -40,7 +41,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
-#include <nuttx/lib/regex.h>
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
@@ -185,7 +185,7 @@ static int netprocfs_open(FAR struct file *filep, FAR const char *relpath,
    * table support is initialized.
    */
 
-  if (match("net/route/**", relpath))
+  if (fnmatch("net/route/**", relpath, 0) == 0)
     {
       /* Use the /net/route directory */
 
@@ -393,7 +393,8 @@ static int netprocfs_opendir(FAR const char *relpath,
    */
 
 #ifdef CONFIG_NET_ROUTE
-  if (match("net/route", relpath) || match("net/route/**", relpath))
+  if (fnmatch("net/route", relpath, 0) == 0 ||
+      fnmatch("net/route/**", relpath, 0) == 0)
     {
       /* Use the /net/route directory */
 
