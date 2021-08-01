@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = mpfs_bringup.c mpfs_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += mpfs_appinit.c
 endif
 

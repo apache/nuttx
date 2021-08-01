@@ -26,7 +26,7 @@ ifeq ($(CONFIG_SAMV7_SDRAMC),y)
 CSRCS += sam_sdram.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += sam_appinit.c sam_bringup.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += sam_reset.c

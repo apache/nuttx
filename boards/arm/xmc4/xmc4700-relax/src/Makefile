@@ -32,7 +32,7 @@ else
 CSRCS += xmc4_userleds.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += xmc4_appinit.c
 endif
 

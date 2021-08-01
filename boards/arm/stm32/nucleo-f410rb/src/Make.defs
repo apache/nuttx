@@ -36,7 +36,7 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS +=  stm32_adc.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

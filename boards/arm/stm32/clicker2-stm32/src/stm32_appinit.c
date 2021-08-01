@@ -35,7 +35,7 @@
 
 #include "clicker2-stm32.h"
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -49,11 +49,11 @@
  *   called directly from application code, but only indirectly via the
  *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *   CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  *   CONFIG_BOARD_LATE_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
- *   CONFIG_LIB_BOARDCTL=n :
+ *   CONFIG_BOARDCTL=n :
  *     Called from board_late_initialize().
  *
  * Input Parameters:
@@ -109,4 +109,4 @@ int board_app_initialize(uintptr_t arg)
   return OK;
 }
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

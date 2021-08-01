@@ -81,7 +81,7 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
        * DESCRIPTION:   Set signal id for notify USB device connection status
        *                and supply current value.
        * ARG:           None
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL
+       * CONFIGURATION: CONFIG_BOARDCTL
        * DEPENDENCIES:  Board logic must provide board_app_initialization
        */
 

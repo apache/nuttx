@@ -39,7 +39,7 @@
 #include "rx65n_usbhost.h"
 #include "rx65n_rsk2mb.h"
 #include <rx65n_definitions.h>
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 #ifdef HAVE_RTC_DRIVER
 #  include <nuttx/timers/rtc.h>
@@ -344,7 +344,7 @@ static int rtc_driver_initialize(void)
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/

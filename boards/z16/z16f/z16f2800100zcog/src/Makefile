@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = z16f_boot.c z16f_leds.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += z16f_appinit.c
 endif
 

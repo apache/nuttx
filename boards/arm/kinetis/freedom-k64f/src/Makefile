@@ -32,7 +32,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += k64_buttons.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += k64_appinit.c k64_bringup.c
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += k64_bringup.c

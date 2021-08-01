@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = ez80_boot.c ez80_bringup.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += ez80_appinit.c
 endif
 

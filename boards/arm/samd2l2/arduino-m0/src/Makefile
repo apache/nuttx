@@ -40,7 +40,7 @@ ifeq ($(CONFIG_SAMD2L2_ADC),y)
 CSRCS += sam_adc.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += sam_appinit.c
 endif
 

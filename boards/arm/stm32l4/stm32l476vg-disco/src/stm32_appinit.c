@@ -106,7 +106,7 @@ FAR struct mtd_dev_s *g_mtd_fs;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
 #ifdef HAVE_RTC_DRIVER
@@ -295,7 +295,7 @@ int board_app_initialize(uintptr_t arg)
 
   return ret;
 }
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */
 
 #ifdef CONFIG_BOARDCTL_IOCTL
 int board_ioctl(unsigned int cmd, uintptr_t arg)

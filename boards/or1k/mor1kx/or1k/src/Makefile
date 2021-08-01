@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = or1k_boot.c or1k_bringup.c or1k_autoled.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += or1k_appinit.c
 endif
 
