@@ -1473,6 +1473,9 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
           return NULL;
         }
 
+      /* Set up to receive peripheral interrupts on the current CPU */
+
+      priv->config->cpu = up_cpu_index();
       up_disable_irq(priv->cpuint);
       esp32_attach_peripheral(priv->config->cpu,
                               priv->config->periph,
