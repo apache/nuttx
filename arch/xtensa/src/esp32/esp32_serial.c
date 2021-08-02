@@ -227,6 +227,7 @@ struct esp32_dmadesc_s s_dma_txdesc[UART_DMA_CONTROLLERS_NUM]
 struct esp32_config_s
 {
   const uint8_t id;             /* UART id */
+  uint8_t  cpu;                 /* CPU ID */
   uint8_t  periph;              /* UART peripheral ID */
   uint8_t  irq;                 /* IRQ number assigned to the peripheral */
   uint8_t  txpin;               /* Tx pin number (0-39) */
@@ -1010,7 +1011,6 @@ static void esp32_shutdown(struct uart_dev_s *dev)
 static int esp32_attach(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  int cpu;
   int ret = OK;
 
   /* Allocate a level-sensitive, priority 1 CPU interrupt for the UART */
@@ -1025,12 +1025,13 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  cpu = up_cpu_index();
+  priv->config->cpu = up_cpu_index();
 
   /* Attach the GPIO peripheral to the allocated CPU interrupt */
 
   up_disable_irq(priv->cpuint);
-  esp32_attach_peripheral(cpu, priv->config->periph, priv->cpuint);
+  esp32_attach_peripheral(priv->config->cpu, priv->config->periph,
+                          priv->cpuint);
 
   /* Attach and enable the IRQ */
 
@@ -1060,7 +1061,6 @@ static int esp32_attach(struct uart_dev_s *dev)
 static void esp32_detach(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  int cpu;
 
   /* Disable and detach the CPU interrupt */
 
@@ -1069,8 +1069,8 @@ static void esp32_detach(struct uart_dev_s *dev)
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
 
-  cpu = up_cpu_index();
-  esp32_detach_peripheral(cpu, priv->config->periph, priv->cpuint);
+  esp32_detach_peripheral(priv->config->cpu, priv->config->periph,
+                          priv->cpuint);
 
   /* And release the CPU interrupt */
 
