@@ -76,7 +76,7 @@ if [ -z ${VERSION} ] ; then
   # If the VERSION does not match X.Y.Z, retrieve version from the tag
 
   if [[ ! ${VERSION} =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]] ; then
-    VERSION=`git -C ${WD} -c 'versionsort.suffix=-' tag --sort=v:refname | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2-`
+    VERSION=`git -C ${WD} tag --sort=creatordate | grep -E "nuttx-[0-9]+\.[0-9]+\.[0-9]+" | tail -1 | cut -d'-' -f2-`
   fi
 
 fi
