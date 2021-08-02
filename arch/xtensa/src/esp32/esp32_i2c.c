@@ -1569,6 +1569,9 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
       return NULL;
     }
 
+  /* Set up to receive peripheral interrupts on the current CPU */
+
+  config->cpu = up_cpu_index();
   up_disable_irq(priv->cpuint);
   esp32_attach_peripheral(config->cpu, config->periph, priv->cpuint);
 
