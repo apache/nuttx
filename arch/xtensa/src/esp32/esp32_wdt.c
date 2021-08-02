@@ -51,6 +51,7 @@ struct esp32_wdt_priv_s
   {
     FAR struct esp32_wdt_ops_s *ops;
     uint32_t                    base;    /* WDT register base address */
+    uint8_t                     cpu;     /* CPU ID */
     uint8_t                     periph;  /* Peripheral ID */
     uint8_t                     irq;     /* Interrupt ID */
     int                         cpuint;  /* CPU interrupt assigned to this wdt */
@@ -696,7 +697,6 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
 {
   FAR struct esp32_wdt_priv_s *wdt = NULL;
   int ret = OK;
-  uint8_t cpu;
 
   DEBUGASSERT(dev);
 
@@ -715,8 +715,7 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
            */
 
           up_disable_irq(wdt->cpuint);
-          cpu = up_cpu_index();
-          esp32_detach_peripheral(cpu, wdt->periph, wdt->cpuint);
+          esp32_detach_peripheral(wdt->cpu, wdt->periph, wdt->cpuint);
           esp32_free_cpuint(wdt->cpuint);
           irq_detach(wdt->irq);
         }
@@ -739,6 +738,8 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
           goto errout;
         }
 
+      wdt->cpu = up_cpu_index();
+
       /* Disable the provided CPU Interrupt to configure it */
 
       up_disable_irq(wdt->cpuint);
@@ -747,8 +748,7 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
        * the current core
        */
 
-      cpu = up_cpu_index();
-      esp32_attach_peripheral(cpu, wdt->periph, wdt->cpuint);
+      esp32_attach_peripheral(wdt->cpu, wdt->periph, wdt->cpuint);
 
       /* Associate an IRQ Number (from the WDT) to an ISR */
 
@@ -756,7 +756,7 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
 
       if (ret != OK)
         {
-          esp32_detach_peripheral(cpu, wdt->periph, wdt->cpuint);
+          esp32_detach_peripheral(wdt->cpu, wdt->periph, wdt->cpuint);
           esp32_free_cpuint(wdt->cpuint);
           tmrerr("ERROR: Failed to associate an IRQ Number");
           goto errout;
