@@ -125,6 +125,13 @@
 
 #define SYS_pthread_start         (5)
 
+/* SYS call 8:
+ *
+ * void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
+ */
+
+#define SYS_pthread_exit         (8)
+
 #endif /* !CONFIG_BUILD_FLAT */
 #endif /* CONFIG_LIB_SYSCALL */
 
