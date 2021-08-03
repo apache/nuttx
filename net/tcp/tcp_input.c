@@ -200,7 +200,7 @@ static void tcp_snd_wnd_init(FAR struct tcp_conn_s *conn,
   conn->snd_wl1 = TCP_SEQ_SUB(tcp_getsequence(tcp->seqno), 1);
   conn->snd_wl2 = tcp_getsequence(tcp->ackno);
   conn->snd_wnd = 0;
-  ninfo("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
+  nwarn("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
 }
 
 static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
@@ -223,7 +223,7 @@ static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
     {
       uint32_t nacked = TCP_SEQ_SUB(ackseq, wl2);
 
-      ninfo("snd_wnd acked: "
+      nwarn("snd_wnd acked: "
             "wl2 %" PRIu32 " -> %" PRIu32 " subtracting wnd %" PRIu32
             " by %" PRIu32 "\n",
             wl2,
@@ -247,7 +247,7 @@ static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
       (conn->snd_wl1 == seq && TCP_SEQ_LT(wl2, ackseq)) ||
       (wl2 == ackseq && conn->snd_wnd < wnd))
     {
-      ninfo("snd_wnd update: "
+      nwarn("snd_wnd update: "
             "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 " -> "
             "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 "\n",
             conn->snd_wl1,
