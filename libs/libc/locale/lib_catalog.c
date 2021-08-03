@@ -79,14 +79,14 @@ struct catmsg_s
 static nl_catd catmap(FAR const char *path)
 {
   FAR const struct cathdr_s *hdr;
+  nl_catd catd = MAP_FAILED;
   struct stat st;
-  nl_catd catd;
   int fd;
 
   fd = open(path, O_RDONLY | O_CLOEXEC);
   if (fd < 0)
     {
-      return MAP_FAILED;
+      return catd;
     }
 
   if (fstat(fd, &st) >= 0)
