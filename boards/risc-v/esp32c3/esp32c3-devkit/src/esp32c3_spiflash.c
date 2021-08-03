@@ -50,6 +50,9 @@
 
 #define ESP32C3_FS_MOUNT_PT   CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT
 
+#define ESP32C3_MTD_OFFSET            CONFIG_ESP32C3_MTD_OFFSET
+#define ESP32C3_MTD_SIZE              CONFIG_ESP32C3_MTD_SIZE
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -66,7 +69,8 @@ int esp32c3_spiflash_init(void)
   FAR struct mtd_dev_s *mtd;
   int ret = ERROR;
 
-  mtd = esp32c3_spiflash_alloc_mtdpart();
+  mtd = esp32c3_spiflash_alloc_mtdpart(ESP32C3_MTD_OFFSET,
+                                       ESP32C3_MTD_SIZE);
 
 #if defined (CONFIG_ESP32C3_SPIFLASH_SMARTFS)
   ret = smart_initialize(0, mtd, NULL);

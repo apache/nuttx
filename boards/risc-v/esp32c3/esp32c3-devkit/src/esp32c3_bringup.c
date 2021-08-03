@@ -75,6 +75,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ESP32C3_MTD_OFFSET            CONFIG_ESP32C3_MTD_OFFSET
+#define ESP32C3_MTD_SIZE              CONFIG_ESP32C3_MTD_SIZE
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -94,7 +97,8 @@ static int esp32c3_init_wifi_storage(void)
   const char *path = "/dev/mtdblock1";
   FAR struct mtd_dev_s *mtd_part;
 
-  mtd_part = esp32c3_spiflash_alloc_mtdpart();
+  mtd_part = esp32c3_spiflash_alloc_mtdpart(ESP32C3_MTD_OFFSET,
+                                            ESP32C3_MTD_SIZE);
   if (!mtd_part)
     {
       syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
