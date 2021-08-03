@@ -932,6 +932,18 @@ FAR struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
       case 2:
         {
           wdt = &g_esp32_rwdt_priv;
+
+          /* If RTC was not initialized in a previous
+           * stage by the PM or by clock_initialize()
+           * Then, init the RTC clock configuration here.
+           */
+
+#if !defined(CONFIG_PM) && !defined(CONFIG_RTC)
+          /* Initialize RTC controller parameters */
+
+          esp32_rtc_init();
+          esp32_rtc_clk_set();
+#endif
           break;
         }
 
