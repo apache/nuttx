@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
+CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
 CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
@@ -29,6 +29,7 @@ CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_releasepending.c
 CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_schedulesigaction.c
 CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_svcall.c arm_systemreset.c
 CMN_CSRCS += arm_trigger_irq.c arm_udelay.c arm_unblocktask.c arm_usestack.c arm_vfork.c
+CMN_CSRCS += arm_switchcontext.c
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += arm_lazyexception.S
