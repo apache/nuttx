@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_systemreset.c
+ * arch/risc-v/src/esp32c3/esp32c3_systemreset.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,35 +18,36 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SYSTEMRESET_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SYSTEMRESET_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stdint.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
+#ifndef __ASSEMBLY__
 
-#include "hardware/esp32c3_rtccntl.h"
-#include "esp32c3.h"
-#include "esp32c3_systemreset.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
-#define SHUTDOWN_HANDLERS_NO 4
+/* Shutdown handler type */
+
+typedef void (*shutdown_handler_t)(void);
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,23 +66,7 @@ static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
  *
  ****************************************************************************/
 
-int esp32c3_register_shutdown_handler(shutdown_handler_t handler)
-{
-  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
-    {
-      if (shutdown_handlers[i] == handler)
-        {
-          return -EEXIST;
-        }
-      else if (shutdown_handlers[i] == NULL)
-        {
-          shutdown_handlers[i] = handler;
-          return OK;
-        }
-    }
-
-  return -ENOMEM;
-}
+int esp32c3_register_shutdown_handler(shutdown_handler_t handler);
 
 /****************************************************************************
  * Name: esp32c3_unregister_shutdown_handler
@@ -99,41 +84,12 @@ int esp32c3_register_shutdown_handler(shutdown_handler_t handler)
  *
  ****************************************************************************/
 
-int esp32c3_unregister_shutdown_handler(shutdown_handler_t handler)
-{
-  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
-    {
-      if (shutdown_handlers[i] == handler)
-        {
-          shutdown_handlers[i] = NULL;
-          return OK;
-        }
-    }
+int esp32c3_unregister_shutdown_handler(shutdown_handler_t handler);
 
-  return -EINVAL;
+#ifdef __cplusplus
 }
+#endif
+#undef EXTERN
 
-/****************************************************************************
- * Name: up_systemreset
- *
- * Description:
- *   Internal reset logic.
- *
- ****************************************************************************/
-
-void up_systemreset(void)
-{
-  for (int i = SHUTDOWN_HANDLERS_NO - 1; i >= 0; i--)
-    {
-      if (shutdown_handlers[i])
-        {
-          shutdown_handlers[i]();
-        }
-    }
-
-  putreg32(RTC_CNTL_SW_SYS_RST, RTC_CNTL_OPTIONS0_REG);
-
-  /* Wait for the reset */
-
-  for (; ; );
-}
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SYSTEMRESET_H */

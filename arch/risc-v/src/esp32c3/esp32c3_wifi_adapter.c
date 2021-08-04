@@ -50,7 +50,8 @@
 #include <nuttx/signal.h>
 #include <nuttx/arch.h>
 #include <nuttx/wireless/wireless.h>
-
+#include "hardware/esp32c3_system.h"
+#include "hardware/wdev_reg.h"
 #include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_syscon.h"
 #include "esp32c3.h"
@@ -60,6 +61,8 @@
 #include "esp32c3_rt_timer.h"
 #include "esp32c3_wifi_utils.h"
 #include "esp32c3_wlan.h"
+#include "esp32c3_ble_adapter.h"
+#include "esp32c3_clockconfig.h"
 
 #ifdef CONFIG_PM
 #include "esp32c3_pm.h"
@@ -445,6 +448,10 @@ static bool g_sta_started;
 /* If Wi-Fi sta connected */
 
 static bool g_sta_connected;
+
+/* If Wi-Fi sta connect blocking */
+
+static bool g_sta_block = false;
 
 /* Wi-Fi station TX done callback function */
 
@@ -2167,6 +2174,7 @@ static void esp_evt_work_cb(void *arg)
 {
   int ret;
   irqstate_t flags;
+  wifi_ps_type_t ps_type = DEFAULT_PS_MODE;
   struct evt_adpt *evt_adpt;
   struct wifi_notify *notify;
   wifi_event_sta_disconnected_t *disconnected;
@@ -2193,10 +2201,24 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_START:
             wlinfo("INFO: Wi-Fi sta start\n");
             g_sta_connected = false;
-            ret = esp_wifi_set_ps(DEFAULT_PS_MODE);
+#ifdef CONFIG_ESP32C3_BLE
+            if (esp32c3_bt_controller_get_status() !=
+                  ESP_BT_CONTROLLER_STATUS_IDLE)
+              {
+                if (ps_type == WIFI_PS_NONE)
+                  {
+                    ps_type = WIFI_PS_MIN_MODEM;
+                  }
+              }
+#endif
+            ret = esp_wifi_set_ps(ps_type);
             if (ret)
               {
                 wlerr("ERROR: Failed to close PS\n");
+              }
+            else
+              {
+                wlinfo("INFO: Set ps type=%d\n", ps_type);
               }
 
             break;
@@ -2216,6 +2238,11 @@ static void esp_evt_work_cb(void *arg)
             disconnected = (wifi_event_sta_disconnected_t *)evt_adpt->buf;
             wlinfo("INFO: Wi-Fi sta disconnect, reason code: %d\n",
                                               disconnected->reason);
+            if (g_sta_block)
+              {
+                g_sta_block = false;
+              }
+
             g_sta_connected = false;
             ret = esp32c3_wlan_sta_set_linkstatus(false);
             if (ret < 0)
@@ -2237,6 +2264,11 @@ static void esp_evt_work_cb(void *arg)
           case WIFI_ADPT_EVT_STA_STOP:
             wlinfo("INFO: Wi-Fi sta stop\n");
             g_sta_connected = false;
+            if (g_sta_block)
+              {
+                g_sta_block = false;
+              }
+
             break;
 #endif
 
@@ -3559,7 +3591,7 @@ void esp_fill_random(void *buf, size_t len)
 
   while (len > 0)
     {
-      tmp = random();
+      tmp = esp_rand();
       n = len < 4 ? len : 4;
 
       memcpy(p, &tmp, n);
@@ -3649,6 +3681,11 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
           SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH));
 }
 
+static inline uint32_t IRAM_ATTR esp_cpu_ll_get_cycle_count(void)
+{
+  return (uint32_t)READ_CSR(CSR_PCCR_MACHINE);
+}
+
 /****************************************************************************
  * Name: esp_rand
  *
@@ -3665,7 +3702,35 @@ static uint32_t esp_clk_slowclk_cal_get_wrapper(void)
 
 static uint32_t esp_rand(void)
 {
-  return random();
+  /* The PRNG which implements WDEV_RANDOM register gets 2 bits of extra
+   * entropy from a hardware randomness source every APB clock cycle
+   * (provided WiFi or BT are enabled). To make sure entropy is not drained
+   * faster than it is added, this function needs to wait for at least 16 APB
+   * clock cycles after reading previous word. This implementation may
+   * actually wait a bit longer due to extra time spent in arithmetic and
+   * branch statements. As a (probably unncessary) precaution to avoid
+   * returning the RNG state as-is, the result is XORed with additional
+   * WDEV_RND_REG reads while waiting.
+   * This code does not run in a critical section, so CPU frequency switch
+   * may happens while this code runs (this will not happen in the current
+   * implementation, but possible in the future). However if that happens,
+   * the number of cycles spent on frequency switching will certainly be more
+   * than the number of cycles we need to wait here.
+   */
+
+  uint32_t ccount;
+  uint32_t result = 0;
+  static uint32_t last_ccount = 0;
+  uint32_t cpu_to_apb_freq_ratio =
+           esp32c3_clk_cpu_freq() / esp32c3_clk_apb_freq();
+  do
+    {
+      ccount = esp_cpu_ll_get_cycle_count();
+      result ^= getreg32(WDEV_RND_REG);
+    }
+  while (ccount - last_ccount < cpu_to_apb_freq_ratio * 16);
+  last_ccount = ccount;
+  return result ^ getreg32(WDEV_RND_REG);
 }
 
 /****************************************************************************
@@ -4292,7 +4357,7 @@ static int wifi_coex_get_schm_curr_phase_idx(void)
 
 static unsigned long esp_random_ulong(void)
 {
-  return random();
+  return esp_rand();
 }
 
 /****************************************************************************
@@ -5134,6 +5199,13 @@ int esp_wifi_adapter_init(void)
 {
   int ret;
   wifi_init_config_t wifi_cfg = WIFI_INIT_CONFIG_DEFAULT();
+  wifi_country_t country =
+    {
+      .cc = "CN",
+      .schan = 1,
+      .nchan = 13,
+      .policy = WIFI_COUNTRY_POLICY_MANUAL
+    };
 
   esp_wifi_lock(true);
 
@@ -5201,6 +5273,12 @@ int esp_wifi_adapter_init(void)
       return ret;
     }
 
+  ret = esp_wifi_set_country(&country);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to configure country info: %d\n", ret);
+    }
+
   g_wifi_ref++;
 
   wlinfo("INFO: OK to initialize Wi-Fi adapter\n");
@@ -5254,6 +5332,10 @@ int esp_wifi_sta_start(void)
   if (g_softap_started)
     {
       mode = WIFI_MODE_APSTA;
+    }
+  else
+    {
+      mode = WIFI_MODE_STA;
     }
 #else
   mode = WIFI_MODE_STA;
@@ -5344,7 +5426,7 @@ int esp_wifi_sta_stop(void)
 
 #ifdef ESP32C3_WLAN_HAS_SOFTAP
 errout_set_mode:
-  esp_wifi_lock(true);
+  esp_wifi_lock(false);
   return ret;
 #endif
 }
@@ -5489,7 +5571,10 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
-      wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
+      if (DEFAULT_PS_MODE != WIFI_PS_NONE)
+        {
+          wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
+        }
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
@@ -5751,17 +5836,19 @@ int esp_wifi_sta_connect(void)
   esp_wifi_lock(false);
 
   ticks = SEC2TICK(WIFI_CONNECT_TIMEOUT);
+  g_sta_block = true;
   do
     {
-      if (g_sta_connected)
+      if (g_sta_connected || (!g_sta_block))
         {
           break;
         }
 
-      esp_task_delay(1);
+      esp_task_delay(10);
     }
   while (ticks--);
 
+  g_sta_block = false;
   if (!g_sta_connected)
     {
       g_sta_reconnect = false;
@@ -5901,7 +5988,7 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
     }
   else
     {
-      if (g_sta_connected == false)
+      if (!g_sta_connected)
         {
           return -ENOTCONN;
         }
@@ -6045,7 +6132,7 @@ int esp_wifi_sta_bitrate(struct iwreq *iwr, bool set)
     }
   else
     {
-      if (g_sta_connected == false)
+      if (!g_sta_connected)
         {
           iwr->u.bitrate.fixed = IW_FREQ_AUTO;
           return OK;
@@ -6241,7 +6328,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
     {
       memset(&country, 0x00, sizeof(wifi_country_t));
       country.schan  = 1;
-      country.policy = 0;
+      country.policy = WIFI_COUNTRY_POLICY_MANUAL;
 
       country_code = (char *)iwr->u.data.pointer;
       if (strlen(country_code) != 2)
@@ -6307,7 +6394,7 @@ int esp_wifi_sta_rssi(struct iwreq *iwr, bool set)
     }
   else
     {
-      if (g_sta_connected == false)
+      if (!g_sta_connected)
         {
           iwr->u.sens.value = 128;
           return OK;
@@ -6365,6 +6452,10 @@ int esp_wifi_softap_start(void)
   if (g_sta_started)
     {
       mode = WIFI_MODE_APSTA;
+    }
+  else
+    {
+      mode = WIFI_MODE_AP;
     }
 #else
   mode = WIFI_MODE_AP;
@@ -6455,7 +6546,7 @@ int esp_wifi_softap_stop(void)
 
 #ifdef ESP32C3_WLAN_HAS_STA
 errout_set_mode:
-  esp_wifi_lock(true);
+  esp_wifi_lock(false);
   return ret;
 #endif
 }
@@ -7133,3 +7224,30 @@ int esp32c3_wifi_bt_coexist_init(void)
   return 0;
 }
 #endif
+
+/****************************************************************************
+ * Name: esp_wifi_stop_callback
+ *
+ * Description:
+ *   Callback to stop Wi-Fi
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_stop_callback(void)
+{
+  int ret = esp_wifi_stop();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to stop Wi-Fi ret=%d\n", ret);
+    }
+  else
+    {
+      nxsig_sleep(1);
+    }
+}
