@@ -84,7 +84,11 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
     {
       /* Read the full sector into the sector buffer */
 
-      bchlib_readsector(bch, sector);
+      ret = bchlib_readsector(bch, sector);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Copy the tail end of the sector from the user buffer */
 
@@ -166,7 +170,11 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
     {
       /* Read the sector into the sector buffer */
 
-      bchlib_readsector(bch, sector);
+      ret = bchlib_readsector(bch, sector);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Copy the head end of the sector from the user buffer */
 
