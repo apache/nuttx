@@ -41,9 +41,12 @@
 #include <nuttx/kmalloc.h>
 
 #include "../../include/samv7/sam_adc.h"
+#include "sam_gpio.h"
+
 
 #include "arm_arch.h"
 #include "sam_adc.h"
+#include "sam_periphclks.h"
 
 #include <arch/board/board.h>
 
@@ -111,7 +114,9 @@ static int sam_adc_interrupt(int irq, FAR void *context, FAR void *arg)
   struct adc_dev_s    *dev = (struct adc_dev_s *)arg;
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
 
-  result = 0xDBDB;
+  sam_gpiowrite((GPIO_OUTPUT | GPIO_PORT_PIOC | GPIO_PIN0), 1);
+
+  result = getreg32(SAM_AFEC1_LCDR) & 0xFFFF;
 
   ainfo("ADC Result = %d:\n", result);
 
@@ -125,6 +130,7 @@ static int sam_adc_interrupt(int irq, FAR void *context, FAR void *arg)
       priv->cur_channel = 0;
     }
 
+  sam_gpiowrite((GPIO_OUTPUT | GPIO_PORT_PIOC | GPIO_PIN0), 0);
 
   return 0;
 }
@@ -134,6 +140,8 @@ static int sam_adc_init_clock(struct adc_dev_s *dev)
   uint16_t regval;
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
 
+  sam_afec0_enableclk();
+  sam_afec1_enableclk();
 
   return 0;
 }
@@ -177,11 +185,9 @@ static int sam_adc_bind(FAR struct adc_dev_s *dev,
 
 static void sam_adc_reset(FAR struct adc_dev_s *dev)
 {
-  /* Disable ADC */
-
-
-  /* Reset ADC */
-
+  /* Reset ADC simulating a hardware reset*/
+  //putreg32(AFEC_CR_SWRST, SAM_AFEC0_CR);
+  //putreg32(AFEC_CR_SWRST, SAM_AFEC1_CR);
 }
 
 /****************************************************************************
@@ -209,13 +215,12 @@ static int sam_adc_setup(FAR struct adc_dev_s *dev)
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
 
 
-  /* ADC continues normal operation during debug mode */
-
   priv->cur_channel = 0;
 
 
   /* Enable ADC */
-
+  putreg32(AFEC_CR_START, SAM_AFEC0_CR);
+  putreg32(AFEC_CR_START, SAM_AFEC1_CR);
 
   return 0;
 }
@@ -238,7 +243,7 @@ static int sam_adc_setup(FAR struct adc_dev_s *dev)
 static void sam_adc_shutdown(FAR struct adc_dev_s *dev)
 {
   /* Disable ADC */
-
+  putreg32(0, SAM_AFEC0_CR);
 }
 
 /****************************************************************************
@@ -262,12 +267,14 @@ static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
   if (enable)
     {
       priv->cur_channel = 0;
-
-
+      //putreg32(AFEC_INT_DRDY, SAM_AFEC0_IER);
+      putreg32(AFEC_INT_ALL, SAM_AFEC1_IDR);
+      putreg32(AFEC_INT_DRDY, SAM_AFEC1_IER);
     }
   else
     {
-
+	  putreg32(0, SAM_AFEC0_IER);
+	  putreg32(0, SAM_AFEC1_IER);
     }
 }
 
@@ -294,21 +301,21 @@ static int sam_adc_ioctl(FAR struct adc_dev_s *dev,
 
   switch (cmd)
     {
-      case 0://SAMD_ADC_IOCTL_START:
+      case SAMD_ADC_IOCTL_START:
         {
           sam_adc_setup(dev);
           sam_adc_rxint(dev, true);
           break;
         }
 
-      case 1://SAMD_ADC_IOCTL_STOP:
+      case SAMD_ADC_IOCTL_STOP:
         {
           sam_adc_rxint(dev, false);
           sam_adc_shutdown(dev);
           break;
         }
 
-      case 2://SAMD_ADC_IOCTL_SET_PARAMS:
+      case SAMD_ADC_IOCTL_SET_PARAMS:
         {
           if (0)
             {
@@ -322,7 +329,7 @@ static int sam_adc_ioctl(FAR struct adc_dev_s *dev,
           break;
         }
 
-      case 3://SAMD_ADC_IOCTL_GET_PARAMS:
+      case SAMD_ADC_IOCTL_GET_PARAMS:
         {
           params->averaging = priv->averaging;
           params->prescaler = priv->prescaler;
@@ -330,13 +337,18 @@ static int sam_adc_ioctl(FAR struct adc_dev_s *dev,
           break;
         }
 
-      case 4://ANIOC_GET_NCHANNELS:
+      case ANIOC_GET_NCHANNELS:
         {
           /* Return the number of configured channels */
 
           ret = priv->num_channels;
         }
         break;
+      case ANIOC_TRIGGER:
+		  {
+			  /* to be implemented */
+			  break;
+		  }
     }
 
   return ret;
@@ -373,26 +385,42 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
   g_sam_adc_dev.ad_priv = priv;
   g_sam_adc_dev.ad_ops = &sam_adc_ops;
 
-  priv->num_channels = 4;//BOARD_ADC_NUM_CHANNELS;
+  priv->num_channels = 5;//BOARD_ADC_NUM_CHANNELS;
   priv->channels = (int *)kmm_malloc(priv->num_channels * sizeof(int));
 
-  sam_adc_enableperiph();
   sam_adc_init_clock(&g_sam_adc_dev);
+
+  /* disable writeproteciton of afec registers */
+  putreg32(AFEC_WPMR_WPKEY, SAM_AFEC0_WPMR);
+  putreg32(AFEC_WPMR_WPKEY, SAM_AFEC1_WPMR);
+
+  putreg32(AFEC_MR_FREERUN|AFEC_MR_PRESCAL(200),SAM_AFEC0_MR);
+  putreg32(AFEC_MR_FREERUN|AFEC_MR_PRESCAL(200),SAM_AFEC1_MR);
+
+  putreg32(AFEC_CH4|AFEC_CH5|AFEC_CH6|AFEC_CH7|AFEC_CH8,SAM_AFEC1_CHER);
 
   flags = enter_critical_section();
 
   /* Attach Interrupt Handler */
 
-  ret = irq_attach(SAM_PID_DACC, sam_adc_interrupt, &g_sam_adc_dev);
+  ret = irq_attach(SAM_IRQ_AFEC1, sam_adc_interrupt, &g_sam_adc_dev);
   if (ret < 0)
     {
-      aerr("ERROR: Failed to attach irq %d\n", SAM_PID_DACC);
+      aerr("ERROR: Failed to attach irq %d\n", SAM_IRQ_AFEC1);
       leave_critical_section(flags);
       return NULL;
     }
 
-  up_enable_irq(SAM_PID_DACC);
+  up_enable_irq(SAM_IRQ_AFEC1);
+
   leave_critical_section(flags);
+
+  /* enable writeproteciton of afec registers */
+  putreg32(AFEC_WPMR_WPKEY | AFEC_WPMR_WPEN, SAM_AFEC0_WPMR);
+  putreg32(AFEC_WPMR_WPKEY | AFEC_WPMR_WPEN, SAM_AFEC1_WPMR);
+
+
+
 
   return (struct adc_dev_s *)&g_sam_adc_dev;
 }

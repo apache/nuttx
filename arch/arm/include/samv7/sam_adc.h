@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/samd2l2/sam_adc.h
+ * arch/arm/include/same70/sam_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,4 +43,4 @@ struct sam_adc_param_s
   uint8_t averaging;    /* number of samples to be collected */
 };
 
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H */
+#endif /* __ARCH_ARM_SRC_SAME70_SAM_ADC_H */
