@@ -59,6 +59,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 #include <nuttx/random.h>
 
 #include <nuttx/irq.h>
@@ -78,6 +79,8 @@ static int     adc_receive(FAR struct adc_dev_s *dev, uint8_t ch,
 static void    adc_notify(FAR struct adc_dev_s *dev);
 static int     adc_poll(FAR struct file *filep, struct pollfd *fds,
                         bool setup);
+static int     adc_reset_fifo(FAR struct adc_dev_s *dev);
+static int     adc_samples_on_read(FAR struct adc_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -431,7 +434,29 @@ static int adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct adc_dev_s *dev = inode->i_private;
   int ret;
 
-  ret = dev->ad_ops->ao_ioctl(dev, cmd, arg);
+  switch (cmd)
+    {
+      case ANIOC_RESET_FIFO:
+        {
+          ret = adc_reset_fifo(dev);
+        }
+        break;
+
+      case ANIOC_SAMPLES_ON_READ:
+        {
+          ret = adc_samples_on_read(dev);
+        }
+        break;
+
+      default:
+        {
+          /* Those IOCTLs might be used in arch specific section */
+
+          ret = dev->ad_ops->ao_ioctl(dev, cmd, arg);
+        }
+        break;
+    }
+
   return ret;
 }
 
@@ -610,6 +635,54 @@ static int adc_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 
 return_with_irqdisabled:
   leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: adc_reset_fifo
+ ****************************************************************************/
+
+static int adc_reset_fifo(FAR struct adc_dev_s *dev)
+{
+  irqstate_t flags;
+  FAR struct adc_fifo_s *fifo = &dev->ad_recv;
+
+  /* Interrupts must be disabled while accessing the ad_recv FIFO */
+
+  flags = enter_critical_section();
+
+  fifo->af_head = fifo->af_tail;
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: adc_samples_on_read
+ ****************************************************************************/
+
+static int adc_samples_on_read(FAR struct adc_dev_s *dev)
+{
+  irqstate_t flags;
+  FAR struct adc_fifo_s *fifo = &dev->ad_recv;
+  int16_t ret;
+
+  /* Interrupts must be disabled while accessing the ad_recv FIFO */
+
+  flags = enter_critical_section();
+
+  ret = fifo->af_tail - fifo->af_head;
+
+  leave_critical_section(flags);
+
+  if (ret < 0)
+    {
+      /* Increment return value by the size of FIFO */
+
+      ret += CONFIG_ADC_FIFOSIZE;
+    }
+
   return ret;
 }
 
