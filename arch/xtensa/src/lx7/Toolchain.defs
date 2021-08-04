@@ -29,21 +29,42 @@
 #                   reliable code generation.
 #
 
-CROSSDEV = xtensa-esp32s2-elf-
+
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+  CROSSDEV = xt-
+endif
+
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
+  CROSSDEV = xt-
+endif
+
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
+  CROSSDEV = xtensa-esp32-elf-
+endif
 
 ARCHCPUFLAGS =
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 else
- MAXOPTIMIZATION := -Os
+  MAXOPTIMIZATION := -Os
 endif
 
 # Default toolchain
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+  CC = $(CROSSDEV)xcc
+  CXX = $(CROSSDEV)xc++
+  CPP = $(CROSSDEV)xcc -E -P -x c
+else ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
+  CC = $(CROSSDEV)clang
+  CXX = $(CROSSDEV)clang++
+  CPP = $(CROSSDEV)clang -E -P -x c
+else
+  CC = $(CROSSDEV)gcc
+  CXX = $(CROSSDEV)g++
+  CPP = $(CROSSDEV)gcc -E -P -x c
+endif
 
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
