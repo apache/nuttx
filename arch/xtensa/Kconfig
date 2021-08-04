@@ -17,7 +17,6 @@ config ARCH_CHIP_ESP32
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDRAM
 	select ARCH_HAVE_RESET
-	select ARCH_TOOLCHAIN_GNU
 	select ARCH_VECNOTIRQ
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
@@ -44,7 +43,6 @@ config ARCH_CHIP_ESP32S2
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDRAM
 	select ARCH_HAVE_RESET
-	select ARCH_TOOLCHAIN_GNU
 	select ARCH_VECNOTIRQ
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
@@ -172,7 +170,25 @@ config XTENSA_EXTMEM_BSS
 		Adds a section and an attribute that allows to force variables into
 		the external memory.
 
-source "arch/xtensa/src/lx6/Kconfig"
+choice
+	prompt "Toolchain Selection"
+	default XTENSA_TOOLCHAIN_ESP
+
+config XTENSA_TOOLCHAIN_XCC
+	bool "Xtensa Toolchain use GCC as front end"
+	select ARCH_TOOLCHAIN_GNU
+
+config XTENSA_TOOLCHAIN_XCLANG
+	bool "Xtensa Toolchain use CLANG as front end"
+	select ARCH_TOOLCHAIN_GNU
+
+config XTENSA_TOOLCHAIN_ESP
+	bool "ESP toolchain for xtensa"
+	select ARCH_TOOLCHAIN_GNU
+
+endchoice
+
+source arch/xtensa/src/lx6/Kconfig
 if ARCH_CHIP_ESP32
 source "arch/xtensa/src/esp32/Kconfig"
 endif
