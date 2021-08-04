@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/spinlock.h>
-#include <arch/spinlock.h>
 
 #include "xtensa.h"
 
