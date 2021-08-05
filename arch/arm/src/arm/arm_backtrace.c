@@ -298,11 +298,22 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 
   if (rtcb == tcb)
     {
-      pc = (FAR uint8_t *)up_backtrace + 0x10;
-      sp = (FAR void *)up_getsp();
-      ip = (FAR void *)up_backtrace;
+      if (up_interrupt_context() == false)
+        {
+          pc = (FAR uint8_t *)up_backtrace + 0x10;
+          sp = (FAR void *)up_getsp();
+          ip = (FAR void *)up_backtrace;
 
-      buffer[i++] = up_backtrace;
+          buffer[i++] = up_backtrace;
+        }
+      else
+        {
+          pc = (FAR void *)CURRENT_REGS[REG_PC];
+          sp = (FAR void *)CURRENT_REGS[REG_SP];
+          ip = (FAR void *)CURRENT_REGS[REG_IP];
+
+          buffer[i++] = (FAR void *)CURRENT_REGS[REG_PC];
+        }
     }
   else
     {
