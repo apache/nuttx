@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
@@ -253,7 +254,7 @@ static int blocks_entry(FAR const char *mountpoint,
 
   /* Generate blocks list one line at a time */
 
-  mount_sprintf(info, "%6ld %8ld %8ld  %8ld %s\n",
+  mount_sprintf(info, "%6ld %8" PRIdOFF " %8" PRIdOFF "  %8" PRIdOFF " %s\n",
                 statbuf->f_bsize, statbuf->f_blocks,
                 statbuf->f_blocks - statbuf->f_bavail, statbuf->f_bavail,
                 mountpoint);
