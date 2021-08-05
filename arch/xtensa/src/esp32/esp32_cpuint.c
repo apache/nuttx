@@ -492,7 +492,7 @@ void esp32_free_cpuint(int cpuint)
   flags = enter_critical_section();
 
 #ifdef CONFIG_SMP
-  if (this_cpu() != 0)
+  if (up_cpu_index() != 0)
     {
       freeints = &g_cpu1_freeints;
     }
