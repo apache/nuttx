@@ -426,7 +426,7 @@ void esp32_gpioirqinitialize(void)
   /* Attach and enable the interrupt handler */
 
   DEBUGVERIFY(irq_attach(ESP32_IRQ_CPU_GPIO, gpio_interrupt, NULL));
-  up_enable_irq(g_gpio_cpuint);
+  up_enable_irq(ESP32_IRQ_CPU_GPIO);
 }
 #endif
 
@@ -456,7 +456,7 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 
   /* Get the address of the GPIO PIN register for this pin */
 
-  up_disable_irq(g_gpio_cpuint);
+  up_disable_irq(ESP32_IRQ_CPU_GPIO);
 
   regaddr = GPIO_REG(pin);
   regval  = getreg32(regaddr);
@@ -490,7 +490,7 @@ void esp32_gpioirqenable(int irq, gpio_intrtype_t intrtype)
   regval |= (intrtype << GPIO_PIN_INT_TYPE_S);
   putreg32(regval, regaddr);
 
-  up_enable_irq(g_gpio_cpuint);
+  up_enable_irq(ESP32_IRQ_CPU_GPIO);
 }
 #endif
 
@@ -517,14 +517,14 @@ void esp32_gpioirqdisable(int irq)
 
   /* Get the address of the GPIO PIN register for this pin */
 
-  up_disable_irq(g_gpio_cpuint);
+  up_disable_irq(ESP32_IRQ_CPU_GPIO);
 
   regaddr = GPIO_REG(pin);
   regval  = getreg32(regaddr);
   regval &= ~(GPIO_PIN_INT_ENA_M | GPIO_PIN_INT_TYPE_M);
   putreg32(regval, regaddr);
 
-  up_enable_irq(g_gpio_cpuint);
+  up_enable_irq(ESP32_IRQ_CPU_GPIO);
 }
 #endif
 

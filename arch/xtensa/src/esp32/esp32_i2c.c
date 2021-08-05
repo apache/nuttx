@@ -1580,7 +1580,7 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
       return NULL;
     }
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(config->irq);
 #endif
 
   esp32_i2c_sem_init(priv);
@@ -1623,7 +1623,7 @@ int esp32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
   leave_critical_section(flags);
 
 #ifndef CONFIG_I2C_POLLED
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(priv->config->irq);
   esp32_detach_peripheral(priv->cpu,
                           priv->config->periph,
                           priv->cpuint);

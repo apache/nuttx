@@ -135,5 +135,5 @@ void up_timer_initialize(void)
 
   /* Enable the timer 0 CPU interrupt. */
 
-  up_enable_irq(ESP32_CPUINT_TIMER0);
+  up_enable_irq(XTENSA_IRQ_TIMER0);
 }
