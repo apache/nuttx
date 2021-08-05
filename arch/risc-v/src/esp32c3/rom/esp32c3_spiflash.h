@@ -154,6 +154,57 @@ struct spiflash_legacy_data_s
   uint8_t sig_matrix;
 };
 
+/**
+ * Structure holding SPI flash access critical sections management functions.
+ *
+ * Flash API uses two types of functions for flash access management:
+ * 1) Functions which prepare/restore flash cache and interrupts before
+ *    calling appropriate ROM functions (SPIWrite, SPIRead and
+ *    SPIEraseBlock):
+ *   - 'start' function should disable flash cache and non-IRAM interrupts
+ *      and is invoked before the call to one of ROM functions from
+ *      "struct spiflash_guard_funcs_s".
+ *   - 'end' function should restore state of flash cache and non-IRAM
+ *      interrupts and is invoked after the call to one of ROM
+ *      functions from "struct spiflash_guard_funcs_s".
+ *    These two functions are not reentrant.
+ * 2) Functions which synchronizes access to internal data used by flash API.
+ *    These functions are mostly intended to synchronize access to flash API
+ *    internal data in multithreaded environment and use OS primitives:
+ *   - 'op_lock' locks access to flash API internal data.
+ *   - 'op_unlock' unlocks access to flash API internal data.
+ *   These two functions are reentrant and can be used around the outside of
+ *   multiple calls to 'start' & 'end', in order to create atomic multi-part
+ *   flash operations.
+ *
+ * Different versions of the guarding functions should be used depending on
+ * the context of execution (with or without functional OS). In normal
+ * conditions when flash API is called from task the functions use OS
+ * primitives.
+ * When there is no OS at all or when it is not guaranteed that OS is
+ * functional (accessing flash from exception handler) these functions cannot
+ * use OS primitives or even does not need them (multithreaded access is
+ * not possible).
+ *
+ * @note Structure and corresponding guard functions should not reside
+ *       in flash. For example structure can be placed in DRAM and functions
+ *       in IRAM sections.
+ */
+
+struct spiflash_guard_funcs
+{
+  void (*start)(void);      /* critical section start function */
+  void (*end)(void);        /* critical section end function */
+  void (*op_lock)(void);    /* flash access API lock function */
+  void (*op_unlock)(void);  /* flash access API unlock function */
+
+  /* checks flash write addresses */
+
+  bool (*address_is_safe)(size_t addr, size_t size);
+
+  void (*yield)(void);      /* yield to the OS during flash erase */
+};
+
 /*****************************************************************************
  * Public Function Prototypes
  *****************************************************************************/
@@ -791,6 +842,168 @@ esp_rom_spiflash_result_t esp_rom_spiflash_wait_idle(esp32c3_spiflash_chip_t
 
 void esp_rom_spiflash_select_qio_pins(uint8_t wp_gpio_num,
                                       uint32_t spiconfig);
+
+/*****************************************************************************
+ * Name: spi_flash_guard_set
+ *
+ * Description:
+ *   Sets guard functions to access flash.
+ *
+ * Input Parameters:
+ *   funcs - funcs pointer to structure holding flash access guard functions
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+void spi_flash_guard_set(const struct spiflash_guard_funcs *funcs);
+
+/*****************************************************************************
+ * Name: spi_flash_write_encrypted
+ *
+ * Description:
+ *   Write data encrypted to Flash.
+ *
+ *   Flash encryption must be enabled for this function to work.
+ *
+ *   Flash encryption must be enabled when calling this function.
+ *   If flash encryption is disabled, the function returns
+ *   ESP_ERR_INVALID_STATE.  Use esp_flash_encryption_enabled()
+ *   function to determine if flash encryption is enabled.
+ *
+ *   Both dest_addr and size must be multiples of 16 bytes. For
+ *   absolute best performance, both dest_addr and size arguments should
+ *   be multiples of 32 bytes.
+ *
+ * Input Parameters:
+ *   dest_addr - Destination address in Flash. Must be a multiple of 16
+ *               bytes.
+ *   src       - Pointer to the source buffer.
+ *   size      - Length of data, in bytes. Must be a multiple of 16 bytes.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ *****************************************************************************/
+
+int spi_flash_write_encrypted(uint32_t dest_addr, const void *src,
+                              uint32_t size);
+
+/*****************************************************************************
+ * Name: spi_flash_write
+ *
+ * Description:
+ *
+ *   Write data to Flash.
+ *
+ *   Note: For fastest write performance, write a 4 byte aligned size at a
+ *   4 byte aligned offset in flash from a source buffer in DRAM. Varying
+ *   any of these parameters will still work, but will be slower due to
+ *   buffering.
+ *
+ *   Writing more than 8KB at a time will be split into multiple
+ *   write operations to avoid disrupting other tasks in the system.
+ *
+ * Parameters:
+ *   dest_addr - Destination address in Flash.
+ *   src       - Pointer to the source buffer.
+ *   size      - Length of data, in bytes.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ *****************************************************************************/
+
+int spi_flash_write(uint32_t dest_addr, const void *src, uint32_t size);
+
+/*****************************************************************************
+ * Name: spi_flash_read
+ *
+ * Description:
+ *   Read data from Flash.
+ *
+ *   Note: For fastest read performance, all parameters should be
+ *   4 byte aligned. If source address and read size are not 4 byte
+ *   aligned, read may be split into multiple flash operations. If
+ *   destination buffer is not 4 byte aligned, a temporary buffer will
+ *   be allocated on the stack.
+ *
+ *   Reading more than 16KB of data at a time will be split
+ *   into multiple reads to avoid disruption to other tasks in the
+ *   system. Consider using spi_flash_mmap() to read large amounts
+ *   of data.
+ *
+ * Parameters:
+ *   src_addr - source address of the data in Flash.
+ *   dest     - pointer to the destination buffer
+ *   size     - length of data
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ *****************************************************************************/
+
+int spi_flash_read(uint32_t src_addr, void *dest, uint32_t size);
+
+/*****************************************************************************
+ * Name: spi_flash_erase_sector
+ *
+ * Description:
+ *   Erase the Flash sector.
+ *
+ * Parameters:
+ *   sector - Sector number, the count starts at sector 0, 4KB per sector.
+ *
+ * Returned Values: esp_err_t
+ *   Zero (OK) is returned or a negative error.
+ *
+ *****************************************************************************/
+
+int spi_flash_erase_sector(uint32_t sector);
+
+/*****************************************************************************
+ * Name: spi_flash_erase_range
+ *
+ * Description:
+ *   Erase a range of flash sectors
+ *
+ * Parameters:
+ *   start_address - Address where erase operation has to start.
+ *                   Must be 4kB-aligned
+ *   size          - Size of erased range, in bytes. Must be divisible by
+ *                   4kB.
+ *
+ * Returned Values:
+ *   Zero (OK) is returned or a negative error.
+ *
+ *****************************************************************************/
+
+int spi_flash_erase_range(uint32_t start_address, uint32_t size);
+
+/*****************************************************************************
+ * Name: spi_flash_cache_enabled
+ *
+ * Description:
+ *   Check at runtime if flash cache is enabled on both CPUs.
+ *
+ * Returned Values:
+ *   Return true if both CPUs have flash cache enabled, false otherwise.
+ */
+
+bool spi_flash_cache_enabled(void);
+
+/*****************************************************************************
+ * Name: spi_flash_enable_cache
+ *
+ * Description:
+ *   Re-enable cache for the core defined as cpuid parameter.
+ *
+ * Parameters:
+ *   cpuid - core number to enable instruction cache for.
+ */
+
+void spi_flash_enable_cache(uint32_t cpuid);
 
 /* Global esp32c3_spiflash_chip_t structure used by ROM functions */
 

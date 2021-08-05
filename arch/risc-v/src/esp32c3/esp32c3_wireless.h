@@ -26,6 +26,35 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <semaphore.h>
+#include <nuttx/list.h>
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Pre-processor Macros
+ ****************************************************************************/
+
+/* Semaphore Cache Data */
+
+struct esp32c3_wl_semcache_s
+{
+  struct list_node node;
+
+  sem_t *sem;
+  uint32_t count;
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -63,4 +92,78 @@ void esp32c3_phy_enable(void);
 
 void esp32c3_phy_disable(void);
 
+/****************************************************************************
+ * Name: esp32c3_wl_init_semcache
+ *
+ * Description:
+ *   Initialize semaphore cache.
+ *
+ * Parameters:
+ *   sc  - Semaphore cache data pointer
+ *   sem - Semaphore data pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32c3_wl_init_semcache(struct esp32c3_wl_semcache_s *sc,
+                              sem_t *sem);
+
+/****************************************************************************
+ * Name: esp32c3_wl_post_semcache
+ *
+ * Description:
+ *   Store posting semaphore action into semaphore cache.
+ *
+ * Parameters:
+ *   sc  - Semaphore cache data pointer
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32c3_wl_post_semcache(struct esp32c3_wl_semcache_s *sc);
+
+/****************************************************************************
+ * Name: esp32c3_wl_init
+ *
+ * Description:
+ *   Initialize ESP32-C3 wireless common components for both BT and Wi-Fi.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int esp32c3_wl_init(void);
+
+/****************************************************************************
+ * Name: esp32c3_wl_deinit
+ *
+ * Description:
+ *   De-initialize ESP32-C3 wireless common components.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int esp32c3_wl_deinit(void);
+
+#ifdef __cplusplus
+}
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_WIRELESS_H */

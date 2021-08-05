@@ -169,6 +169,14 @@ config ESP32C3_WIRELESS
 	default n
 	select ESP32C3_RT_TIMER
 
+config ESP32C3_EXCEPTION_ENABLE_CACHE
+	bool
+	default y
+	depends on ESP32C3_SPIFLASH
+	---help---
+		When exception triggers, panic function enables SPI Flash cache to
+		let functions be able to call functions which locate in SPI Flash.
+
 menu "ESP32-C3 Peripheral Support"
 
 config ESP32C3_ADC
@@ -264,9 +272,6 @@ config ESP32C3_TIMER1
 config ESP32C3_SPIFLASH
 	bool "SPI Flash"
 	default n
-	select MTD
-	select MTD_BYTE_WRITE
-	select MTD_PARTITION
 
 config ESP32C3_SPI2
 	bool "SPI 2"
@@ -856,10 +861,6 @@ endmenu # Wi-Fi configuration
 menu "BLE Configuration"
 	depends on ESP32C3_BLE
 
-config ESP32C3_BLE_PKTBUF_NUM
-	int "BLE netcard packet buffer number per netcard"
-	default 16
-
 config ESP32C3_BLE_TTY_NAME
 	string "BLE TTY device name"
 	default "/dev/ttyHCI0"
@@ -871,7 +872,7 @@ config ESP32C3_BLE_TASK_STACK_SIZE
 
 config ESP32C3_BLE_TASK_PRIORITY
 	int "Controller task priority"
-	default 110
+	default 253
 
 endmenu # BLE Configuration
 
@@ -918,25 +919,42 @@ endif
 
 comment "General storage MTD configuration"
 
+config ESP32C3_MTD
+	bool "MTD driver"
+	default y
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	---help---
+	       Initialize an MTD driver for the ESP32-C3 SPI Flash, which will
+               add an entry at /dev for application access from userspace.
+
+config ESP32C3_STORAGE_MTD_BLKSIZE
+	int "Storage MTD block size"
+	default 64
+	depends on ESP32C3_MTD
+
 config ESP32C3_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32C3_HAVE_OTA_PARTITION
 	default 0x250000 if ESP32C3_HAVE_OTA_PARTITION
+	depends on ESP32C3_MTD
 	---help---
 		MTD base address in SPI Flash.
 
 config ESP32C3_STORAGE_MTD_SIZE
 	hex "Storage MTD size in SPI Flash"
 	default 0x100000
+	depends on ESP32C3_MTD
 	---help---
 		MTD size in SPI Flash.
 
-config ESP32C3_SPIFLASH_DEBUG
-	bool "Debug SPI Flash"
+config ESP32C3_STORAGE_MTD_DEBUG
+	bool "Storage MTD Debug"
 	default n
-	depends on DEBUG_FS_INFO
+	depends on ESP32C3_MTD && DEBUG_FS_INFO
 	---help---
-		If this option is enabled, SPI Flash driver read and write functions
+		If this option is enabled, Storage MTD driver read and write functions
 		will output input parameters and return values (if applicable).
 
 if ESP32C3_APP_FORMAT_LEGACY

@@ -205,7 +205,7 @@ int board_wlan_init(void);
 #endif
 
 /****************************************************************************
- * Name: esp32c3_spiflash_init
+ * Name: board_spiflash_init
  *
  * Description:
  *   Initialize the SPIFLASH and register the MTD device.
@@ -213,7 +213,7 @@ int board_wlan_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
-int esp32c3_spiflash_init(void);
+int board_spiflash_init(void);
 #endif
 
 /****************************************************************************

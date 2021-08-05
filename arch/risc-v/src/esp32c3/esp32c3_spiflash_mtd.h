@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/esp32c3/esp32c3_spiflash.h
+ * arch/risc-v/src/esp32c3/esp32c3_spiflash_mtd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SPIFLASH_H
-#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SPIFLASH_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SPIFLASH_MTD_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SPIFLASH_MTD_H
 
 /****************************************************************************
  * Included Files
@@ -47,81 +47,54 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spi_flash_read_encrypted
+ * Name: esp32c3_spiflash_mtd
  *
  * Description:
- *
- *   Read data from Encrypted Flash.
- *
- *   If flash encryption is enabled, this function will transparently
- *   decrypt data as it is read.
- *   If flash encryption is not enabled, this function behaves the same as
- *   spi_flash_read().
- *
- *   See esp_flash_encryption_enabled() for a function to check if flash
- *   encryption is enabled.
- *
- * Parameters:
- *   addr   - source address of the data in Flash.
- *   buffer - pointer to the destination buffer
- *   size   - length of data
- *
- * Returned Values: esp_err_t
- *
- ****************************************************************************/
-
-int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size);
-
-/****************************************************************************
- * Name: esp32c3_spiflash_unmask_cpuint
- *
- * Description:
- *   Unmask CPU interrupt and keep this interrupt work when read, write,
- *   erase SPI Flash.
- *
- *   By default, all CPU interrupts are masked.
+ *   Get SPI Flash MTD.
  *
  * Input Parameters:
- *   cpuint - CPU interrupt ID
+ *   None
  *
  * Returned Value:
- *   None.
+ *   ESP32-C3 SPI Flash MTD pointer.
  *
  ****************************************************************************/
 
-void esp32c3_spiflash_unmask_cpuint(int cpuint);
+struct mtd_dev_s *esp32c3_spiflash_mtd(void);
 
 /****************************************************************************
- * Name: esp32c3_spiflash_unmask_cpuint
+ * Name: esp32c3_spiflash_encrypt_mtd
  *
  * Description:
- *   Mask CPU interrupt and disable this interrupt when read, write,
- *   erase SPI Flash.
- *
- *   By default, all CPU interrupts are masked.
+ *   Get SPI Flash encryption MTD.
  *
  * Input Parameters:
- *   cpuint - CPU interrupt ID
+ *   None
  *
  * Returned Value:
- *   None.
+ *   SPI Flash encryption MTD pointer.
  *
  ****************************************************************************/
 
-void esp32c3_spiflash_mask_cpuint(int cpuint);
+struct mtd_dev_s *esp32c3_spiflash_encrypt_mtd(void);
 
 /****************************************************************************
- * Name: esp32c3_spiflash_init
+ * Name: esp32c3_spiflash_alloc_mtdpart
  *
  * Description:
- *   Initialize ESP32-C3 SPI flash driver.
+ *   Allocate an MTD partition from the ESP32-C3 SPI Flash.
+ *
+ * Input Parameters:
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
  *
  * Returned Value:
- *   OK if success or a negative value if fail.
+ *   SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
-int esp32c3_spiflash_init(void);
+struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                                 uint32_t mtd_size);
 
 #ifdef __cplusplus
 }
@@ -129,4 +102,4 @@ int esp32c3_spiflash_init(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SPIFLASH_H */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_SPIFLASH_MTD_H */

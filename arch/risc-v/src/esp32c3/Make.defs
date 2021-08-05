@@ -81,6 +81,9 @@ endif
 
 ifeq ($(CONFIG_ESP32C3_SPIFLASH),y)
 CHIP_CSRCS += esp32c3_spiflash.c
+  ifeq ($(CONFIG_ESP32C3_MTD),y)
+    CHIP_CSRCS += esp32c3_spiflash_mtd.c
+  endif
 endif
 
 ifeq ($(CONFIG_ESP32C3_PARTITION_TABLE),y)
