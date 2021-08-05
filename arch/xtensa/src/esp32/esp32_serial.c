@@ -1029,7 +1029,6 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Attach the GPIO peripheral to the allocated CPU interrupt */
 
-  up_disable_irq(priv->cpuint);
   esp32_attach_peripheral(priv->cpu, priv->config->periph,
                           priv->cpuint);
 
@@ -1157,8 +1156,6 @@ static void dma_attach(uint8_t dma_chan)
   /* Attach the UHCI interrupt to the allocated CPU interrupt
    * and attach and enable the IRQ.
    */
-
-  up_disable_irq(dma_cpuint);
 
   if (dma_chan == 0)
     {

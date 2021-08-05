@@ -139,7 +139,6 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
 
   /* Connect all CPU peripheral source to allocated CPU interrupt */
 
-  up_disable_irq(cpuint);
   esp32_attach_peripheral(0, ESP32_PERIPH_CPU_CPU1, cpuint);
 
   /* Attach the inter-CPU interrupt. */

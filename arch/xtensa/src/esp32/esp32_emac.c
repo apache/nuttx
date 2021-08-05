@@ -2196,7 +2196,6 @@ int esp32_emac_init(void)
       goto error;
     }
 
-  up_disable_irq(priv->cpuint);
   esp32_attach_peripheral(0, ESP32_PERIPH_EMAC, priv->cpuint);
 
   ret = irq_attach(ESP32_IRQ_EMAC, emac_interrupt, priv);
