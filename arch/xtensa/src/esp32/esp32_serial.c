@@ -1041,7 +1041,7 @@ static int esp32_attach(struct uart_dev_s *dev)
        * in the UART
        */
 
-      up_enable_irq(priv->cpuint);
+      up_enable_irq(priv->config->irq);
     }
 
   return ret;
@@ -1063,7 +1063,7 @@ static void esp32_detach(struct uart_dev_s *dev)
 
   /* Disable and detach the CPU interrupt */
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(priv->config->irq);
   irq_detach(priv->config->irq);
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
@@ -1133,6 +1133,8 @@ static void dma_attach(uint8_t dma_chan)
   int dma_cpuint;
   int cpu;
   int ret;
+  int periph;
+  int irq;
 
   /* Clear the interrupts */
 
@@ -1159,20 +1161,22 @@ static void dma_attach(uint8_t dma_chan)
 
   if (dma_chan == 0)
     {
-      esp32_attach_peripheral(cpu, ESP32_PERIPH_UHCI0, dma_cpuint);
-      ret = irq_attach(ESP32_IRQ_UHCI0, esp32_interrupt_dma, NULL);
+      periph = ESP32_PERIPH_UHCI0;
+      irq = ESP32_IRQ_UHCI0;
     }
   else
     {
-      esp32_attach_peripheral(cpu, ESP32_PERIPH_UHCI1, dma_cpuint);
-      ret = irq_attach(ESP32_IRQ_UHCI1, esp32_interrupt_dma, NULL);
+      periph = ESP32_PERIPH_UHCI1;
+      irq = ESP32_IRQ_UHCI1;
     }
 
+  esp32_attach_peripheral(cpu, periph, dma_cpuint);
+  ret = irq_attach(irq, esp32_interrupt_dma, NULL);
   if (ret == OK)
     {
       /* Enable the CPU interrupt */
 
-      up_enable_irq(dma_cpuint);
+      up_enable_irq(irq);
     }
   else
     {

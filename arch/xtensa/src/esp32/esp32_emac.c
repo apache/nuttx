@@ -1315,7 +1315,7 @@ static void emac_txtimeout_expiry(wdparm_t arg)
    * Interrupts will be re-enabled when emac_ifup() is called.
    */
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(ESP32_IRQ_EMAC);
 
   /* Schedule to perform the TX timeout processing on the worker thread,
    * perhaps canceling any pending IRQ processing.
@@ -1904,7 +1904,7 @@ static int emac_ifup(struct net_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(ESP32_IRQ_EMAC);
 
   leave_critical_section(flags);
 

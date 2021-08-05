@@ -528,7 +528,7 @@ static int esp32_tim_setisr(FAR struct esp32_tim_dev_s *dev, xcpt_t handler,
            * CPU Interrupt
            */
 
-          up_disable_irq(tim->cpuint);
+          up_disable_irq(tim->irq);
           esp32_detach_peripheral(tim->core, tim->periph, tim->cpuint);
           esp32_free_cpuint(tim->cpuint);
           irq_detach(tim->irq);
@@ -545,7 +545,7 @@ static int esp32_tim_setisr(FAR struct esp32_tim_dev_s *dev, xcpt_t handler,
         {
           /* Disable the previous CPU Interrupt */
 
-          up_disable_irq(tim->cpuint);
+          up_disable_irq(tim->irq);
 
           /* Free cpu interrupt
            * because we will get another from esp32_alloc_levelint
@@ -585,7 +585,7 @@ static int esp32_tim_setisr(FAR struct esp32_tim_dev_s *dev, xcpt_t handler,
 
       /* Enable the CPU Interrupt that is linked to the timer */
 
-      up_enable_irq(tim->cpuint);
+      up_enable_irq(tim->irq);
     }
 
 errout:
