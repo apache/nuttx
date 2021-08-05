@@ -1186,7 +1186,7 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len)
 
       spiffs_gcinfo("#%d: run gc free_blocks=%" PRIu32 " pfree="
                     "%" PRIu32 " pallo=%" PRIu32 " pdele=%" PRIu32 ""
-                    " [%" PRIu32 "] len=%" PRIu32 " of %" PRIu32 "\n",
+                    " [%" PRIu32 "] len=%" PRIuOFF " of %" PRIu32 "\n",
                     tries, fs->free_blocks, free_pages,
                     fs->alloc_pages, fs->deleted_pages,
                     (free_pages + fs->alloc_pages + fs->deleted_pages),

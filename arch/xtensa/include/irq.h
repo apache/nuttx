@@ -42,29 +42,17 @@
 #include <arch/xtensa/xtensa_corebits.h>
 #include <arch/xtensa/xtensa_coproc.h>
 
+/* Include chip-specific IRQ definitions (including IRQ numbers) */
+
+#include <arch/chip/irq.h>
+
 /* Include architecture-specific IRQ definitions */
 
 #ifdef CONFIG_ARCH_FAMILY_LX6
 #  include <arch/lx6/irq.h>
 
-/* Include implementation-specific IRQ definitions (including IRQ numbers) */
-
-#  ifdef CONFIG_ARCH_CHIP_ESP32
-#    include <arch/esp32/irq.h>
-#  else
-#    error Unknown LX6 implementation
-#  endif
-
 #elif CONFIG_ARCH_FAMILY_LX7
 #  include <arch/lx7/irq.h>
-
-/* Include implementation-specific IRQ definitions (including IRQ numbers) */
-
-#  ifdef CONFIG_ARCH_CHIP_ESP32S2
-#    include <arch/esp32s2/irq.h>
-#  else
-#    error Unknown LX7 implementation
-#  endif
 
 #else
 #  error Unknown XTENSA architecture
@@ -238,7 +226,7 @@ static inline uint32_t up_irq_save(void)
 
   __asm__ __volatile__
   (
-    "rsil %0, %1" : "=r"(ps) : "I"(XCHAL_EXCM_LEVEL)
+    "rsil %0, %1" : "=r"(ps) : "i"(XCHAL_EXCM_LEVEL)
   );
 
   /* Return the previous PS value so that it can be restored with

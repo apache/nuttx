@@ -42,6 +42,10 @@
 static struct dac_dev_s *g_dac1;
 #endif
 
+#ifdef CONFIG_STM32_DAC3CH2
+static struct dac_dev_s *g_dac5;
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -74,6 +78,25 @@ int stm32_dac_setup(void)
   /* Register the DAC driver at "/dev/dac0" */
 
   ret = dac_register("/dev/dac0", g_dac1);
+  if (ret < 0)
+    {
+      aerr("ERROR: dac_register() failed: %d\n", ret);
+      return ret;
+    }
+
+#endif
+
+#ifdef CONFIG_STM32_DAC3CH2
+  g_dac5 = stm32_dacinitialize(5);
+  if (g_dac5 == NULL)
+    {
+      aerr("ERROR: Failed to get DAC interface\n");
+      return -ENODEV;
+    }
+
+  /* Register the DAC driver at "/dev/dac5" */
+
+  ret = dac_register("/dev/dac5", g_dac5);
   if (ret < 0)
     {
       aerr("ERROR: dac_register() failed: %d\n", ret);

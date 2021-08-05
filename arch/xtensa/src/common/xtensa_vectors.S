@@ -109,13 +109,13 @@ _xtensa_level3_vector:
 
 _xtensa_level4_vector:
 	wsr			a0, EXCSAVE_4			/* Preserve a0 */
-	call0		_xtensa_level4_handler	/* Call level 5 interrupt handling */
+	call0		_xtensa_level4_handler	/* Call level 4 interrupt handling */
 
 	/* Never returns here - call0 is used as a jump */
 
 	.end		literal_prefix
 
-	.size	_xtensa_level5_vector, . - _xtensa_level5_vector
+	.size	_xtensa_level4_vector, . - _xtensa_level4_vector
 #endif
 
 #if XCHAL_EXCM_LEVEL >= 5

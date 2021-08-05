@@ -87,7 +87,7 @@ static inline uint32_t xtensa_getcompare(void)
 
   __asm__ __volatile__
   (
-    "rsr %0, %1"  : "=r"(compare) : "I"(XT_CCOMPARE)
+    "rsr %0, %1"  : "=r"(compare) : "i"(XT_CCOMPARE)
   );
 
   return compare;
@@ -105,7 +105,7 @@ static inline void xtensa_setcompare(uint32_t compare)
 {
   __asm__ __volatile__
   (
-    "wsr %0, %1" : : "r"(compare), "I"(XT_CCOMPARE)
+    "wsr %0, %1" : : "r"(compare), "i"(XT_CCOMPARE)
   );
 }
 

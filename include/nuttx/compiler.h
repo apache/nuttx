@@ -161,6 +161,7 @@
 #    define __syslog__ __printf__
 #  endif
 
+#  define formatlike(a) __attribute__((__format_arg__ (a)))
 #  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
 #  define sysloglike(a, b) __attribute__((__format__ (__syslog__, a, b)))
 #  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
@@ -412,6 +413,7 @@
 #  define unused_code
 #  define unused_data
 
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -546,6 +548,7 @@
 #  define noinstrument_function
 #  define unused_code
 #  define unused_data
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -653,6 +656,7 @@
 #  define noinstrument_function
 #  define unused_code
 #  define unused_data
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -715,6 +719,7 @@
 #  define noinstrument_function
 #  define unused_code
 #  define unused_data
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)

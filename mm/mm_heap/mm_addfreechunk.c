@@ -38,8 +38,8 @@
  * Name: mm_addfreechunk
  *
  * Description:
- *   Add a free chunk to the node next.  It is assumed that the caller holds
- *   the mm semaphore
+ *   Add a free chunk to the nodes list.  It is assumed that the caller holds
+ *   the mm semaphore.
  *
  ****************************************************************************/
 

@@ -417,11 +417,7 @@ void esp32_gpioirqinitialize(void)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-#ifdef CONFIG_SMP
   cpu = up_cpu_index();
-#else
-  cpu = 0;
-#endif
 
   /* Attach the GPIO peripheral to the allocated CPU interrupt */
 

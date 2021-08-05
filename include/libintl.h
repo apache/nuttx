@@ -1,6 +1,5 @@
 /****************************************************************************
- * include/nuttx/lib/regex.h
- * Non-standard, pattern-matching APIs available in lib/.
+ * include/libintl.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -19,19 +18,15 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LIB_REGEX_H
-#define __INCLUDE_NUTTX_LIB_REGEX_H
+#ifndef __INCLUDE_LIBINTL_H
+#define __INCLUDE_LIBINTL_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -45,24 +40,35 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Name: match
- *
- * Description:
- *   Simple shell-style filename pattern matcher written by Jef Poskanzer
- *   (See copyright notice in lib/lib_match.c).  This pattern matcher only
- *   handles '?', '*' and '**', and  multiple patterns separated by '|'.
- *
- * Returned Value:
- *   Returns 1 (match) or 0 (no-match).
- *
- ****************************************************************************/
+FAR char *gettext(FAR const char *msgid) formatlike(1);
+FAR char *dgettext(FAR const char *domainname,
+                   FAR const char *msgid) formatlike(2);
+FAR char *dcgettext(FAR const char *domainname,
+                    FAR const char *msgid,
+                    int category) formatlike(2);
+FAR char *ngettext(FAR const char *msgid1,
+                   FAR const char *msgid2,
+                   unsigned long int n) formatlike(1) formatlike(2);
+FAR char *dngettext(FAR const char *domainname,
+                    FAR const char *msgid1,
+                    FAR const char *msgid2,
+                    unsigned long int n) formatlike(2) formatlike(3);
+FAR char *dcngettext(FAR const char *domainname,
+                     FAR const char *msgid1,
+                     FAR const char *msgid2,
+                     unsigned long int n,
+                     int category) formatlike(2) formatlike(3);
 
-int match(FAR const char *pattern, FAR const char *string);
+FAR char *textdomain(FAR const char *domainname);
+
+FAR char *bindtextdomain(FAR const char *domainname,
+                         FAR const char *dirname);
+FAR char *bind_textdomain_codeset(FAR const char *domainname,
+                                  FAR const char *codeset);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_LIB_REGEX_H */
+#endif /* __INCLUDE_LIBINTL_H */
