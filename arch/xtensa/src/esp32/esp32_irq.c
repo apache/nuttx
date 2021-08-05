@@ -59,16 +59,6 @@
  * Public Data
  ****************************************************************************/
 
-/* g_intenable[] is a shadow copy of the per-CPU INTENABLE register
- * content.
- */
-
-#ifdef CONFIG_SMP
-static uint32_t g_intenable[CONFIG_SMP_NCPUS];
-#else
-static uint32_t g_intenable[1];
-#endif
-
 /* g_current_regs[] holds a reference to the current interrupt level
  * register storage structure.  It is non-NULL only during interrupt
  * processing.  Access to g_current_regs[] must be through the macro
