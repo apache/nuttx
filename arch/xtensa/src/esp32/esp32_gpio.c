@@ -421,7 +421,6 @@ void esp32_gpioirqinitialize(void)
 
   /* Attach the GPIO peripheral to the allocated CPU interrupt */
 
-  up_disable_irq(g_gpio_cpuint);
   esp32_attach_peripheral(cpu, ESP32_PERIPH_CPU_GPIO, g_gpio_cpuint);
 
   /* Attach and enable the interrupt handler */

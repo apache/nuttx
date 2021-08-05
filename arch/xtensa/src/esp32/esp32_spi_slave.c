@@ -1307,7 +1307,6 @@ FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = up_cpu_index();
-  up_disable_irq(priv->cpuint);
   esp32_attach_peripheral(priv->cpu,
                           priv->config->periph,
                           priv->cpuint);
