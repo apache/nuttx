@@ -1489,7 +1489,7 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
           return NULL;
         }
 
-      up_enable_irq(priv->cpuint);
+      up_enable_irq(priv->config->irq);
     }
 
   esp32_spi_init(spi_dev);
@@ -1533,7 +1533,7 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev)
 
   if (priv->config->use_dma)
     {
-      up_disable_irq(priv->cpuint);
+      up_disable_irq(priv->config->irq);
       esp32_detach_peripheral(priv->cpu,
                               priv->config->periph,
                               priv->cpuint);
