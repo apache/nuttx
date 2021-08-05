@@ -1356,7 +1356,8 @@ config SIG_PREALLOC_IRQ_ACTIONS
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
-	depends on BUILD_FLAT && SCHED_WORKQUEUE
+	depends on !BUILD_KERNEL && SCHED_WORKQUEUE
+	select LIB_USRWORK if BUILD_PROTECTED
 	---help---
 		Built in support for the SIGEV_THREAD signal deliver method.
 
