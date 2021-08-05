@@ -154,6 +154,16 @@ uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
 uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
 #endif
 
+/* g_intenable[] is a shadow copy of the per-CPU INTENABLE register
+ * content.
+ */
+
+#ifdef CONFIG_SMP
+uint32_t g_intenable[CONFIG_SMP_NCPUS];
+#else
+uint32_t g_intenable[1];
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
