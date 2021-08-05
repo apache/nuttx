@@ -167,6 +167,14 @@ void up_irqinitialize(void)
       g_irqmap[i] = IRQ_UNMAPPED;
     }
 
+  /* Hard code special cases. */
+
+  g_irqmap[XTENSA_IRQ_TIMER0] = IRQ_MKMAP(0, ESP32_CPUINT_TIMER0);
+
+#ifdef CONFIG_ESP32_WIRELESS
+  g_irqmap[ESP32_IRQ_MAC] = IRQ_MKMAP(0, ESP32_CPUINT_MAC);
+#endif
+
   /* Initialize CPU interrupts */
 
   esp32_cpuint_initialize();
@@ -286,18 +294,6 @@ void up_enable_irq(int irq)
 {
   int cpu = IRQ_GETCPU(g_irqmap[irq]);
   int cpuint = IRQ_GETCPUINT(g_irqmap[irq]);
-
-  /* The internal Timer 0 interrupt is not attached to any peripheral, and
-   * thus has no mapping, it has to be handled separately.
-   * We know it's enabled early before the second CPU has started, so we don't
-   * need any IPC call.
-   */
-
-  if (irq == XTENSA_IRQ_TIMER0)
-    {
-      cpu = 0;
-      cpuint = ESP32_CPUINT_TIMER0;
-    }
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
 #ifdef CONFIG_SMP
