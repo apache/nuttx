@@ -41,7 +41,6 @@
 #include <nuttx/mqueue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/kthread.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
@@ -49,11 +48,15 @@
 #include <nuttx/signal.h>
 
 #include "hardware/esp32c3_syscon.h"
+#include "hardware/wdev_reg.h"
+#include "rom/esp32c3_spiflash.h"
 #include "espidf_wifi.h"
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
 #include "esp32c3_irq.h"
 #include "esp32c3_rt_timer.h"
+#include "esp32c3_spiflash.h"
+#include "esp32c3_wireless.h"
 #include "esp32c3_ble_adapter.h"
 #include "esp32c3_wireless.h"
 
@@ -131,6 +134,14 @@ typedef struct btdm_lpstat_s
   bool phy_enabled;             /* whether phy is switched on */
   bool wakeup_timer_started;    /* whether wakeup timer is started */
 } btdm_lpstat_t;
+
+struct bt_sem_s
+{
+  sem_t sem;
+#ifdef CONFIG_ESP32C3_SPIFLASH
+  struct esp32c3_wl_semcache_s sc;
+#endif
+};
 
 #ifdef CONFIG_PM
 /* wakeup request sources */
@@ -238,37 +249,37 @@ static void interrupt_set_wrapper(int cpu_no, int intr_source,
                                   int intr_num, int intr_prio);
 static void interrupt_clear_wrapper(int intr_source, int intr_num);
 static void interrupt_handler_set_wrapper(int n, void *fn, void *arg);
-static void IRAM_ATTR interrupt_disable(void);
-static void IRAM_ATTR interrupt_restore(void);
-static void IRAM_ATTR task_yield_from_isr(void);
+static void interrupt_disable(void);
+static void interrupt_restore(void);
+static void task_yield_from_isr(void);
 static void *semphr_create_wrapper(uint32_t max, uint32_t init);
 static void semphr_delete_wrapper(void *semphr);
-static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw);
-static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw);
-static int  semphr_take_wrapper(void *semphr, uint32_t block_time_ms);
-static int  semphr_give_wrapper(void *semphr);
+static int semphr_take_from_isr_wrapper(void *semphr, void *hptw);
+static int semphr_give_from_isr_wrapper(void *semphr, void *hptw);
+static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms);
+static int semphr_give_wrapper(void *semphr);
 static void *mutex_create_wrapper(void);
 static void mutex_delete_wrapper(void *mutex);
 static int mutex_lock_wrapper(void *mutex);
 static int mutex_unlock_wrapper(void *mutex);
-static int IRAM_ATTR queue_send_from_isr_wrapper(void *queue, void *item,
+static int queue_send_from_isr_wrapper(void *queue, void *item,
                                                  void *hptw);
-static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue, void *item,
-                                                 void *hptw);
+static int queue_recv_from_isr_wrapper(void *queue, void *item,
+                                       void *hptw);
 static int task_create_wrapper(void *task_func, const char *name,
                                uint32_t stack_depth, void *param,
                                uint32_t prio, void *task_handle,
                                uint32_t core_id);
 static void task_delete_wrapper(void *task_handle);
-static bool IRAM_ATTR is_in_isr_wrapper(void);
+static bool is_in_isr_wrapper(void);
 static void *malloc_wrapper(size_t size);
 static void *malloc_internal_wrapper(size_t size);
-static int IRAM_ATTR read_mac_wrapper(uint8_t mac[6]);
-static void IRAM_ATTR srand_wrapper(unsigned int seed);
-static int IRAM_ATTR rand_wrapper(void);
-static uint32_t IRAM_ATTR btdm_lpcycles_2_hus(uint32_t cycles,
+static int read_mac_wrapper(uint8_t mac[6]);
+static void srand_wrapper(unsigned int seed);
+static int rand_wrapper(void);
+static uint32_t btdm_lpcycles_2_hus(uint32_t cycles,
                                               uint32_t *error_corr);
-static uint32_t IRAM_ATTR btdm_hus_2_lpcycles(uint32_t us);
+static uint32_t btdm_hus_2_lpcycles(uint32_t us);
 static void coex_wifi_sleep_set_hook(bool sleep);
 static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status);
 static void coex_schm_status_bit_clear_wrapper(uint32_t type,
@@ -283,7 +294,7 @@ static int queue_recv_wrapper(void *queue, void *item,
 static void queue_delete_wrapper(void *queue);
 
 #ifdef CONFIG_PM
-static bool IRAM_ATTR btdm_sleep_check_duration(int32_t *half_slot_cnt);
+static bool btdm_sleep_check_duration(int32_t *half_slot_cnt);
 static void btdm_sleep_enter_phase1_wrapper(uint32_t lpcycles);
 static void btdm_sleep_enter_phase2_wrapper(void);
 static void btdm_sleep_exit_phase3_wrapper(void);
@@ -570,6 +581,9 @@ static void interrupt_set_wrapper(int cpu_no,
     wlinfo("cpu_no=%d , intr_source=%d , intr_num=%d, intr_prio=%d\n",
                         cpu_no, intr_source, intr_num, intr_prio);
     esp32c3_bind_irq(intr_num, intr_source, intr_prio, ESP32C3_INT_LEVEL);
+#ifdef CONFIG_ESP32C3_SPIFLASH
+    esp32c3_spiflash_unmask_cpuint(intr_num);
+#endif
 }
 
 /****************************************************************************
@@ -580,7 +594,7 @@ static void interrupt_set_wrapper(int cpu_no,
  *
  ****************************************************************************/
 
-static void interrupt_clear_wrapper(int intr_source, int intr_num)
+static void IRAM_ATTR interrupt_clear_wrapper(int intr_source, int intr_num)
 {
 }
 
@@ -598,7 +612,7 @@ static void interrupt_clear_wrapper(int intr_source, int intr_num)
  *
  ****************************************************************************/
 
-static int esp_int_adpt_cb(int irq, void *context, void *arg)
+static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, FAR void *arg)
 {
   struct irq_adpt_s *adapter = (struct irq_adpt_s *)arg;
 
@@ -628,10 +642,10 @@ static void interrupt_handler_set_wrapper(int n, void *fn, void *arg)
   int ret;
   struct irq_adpt_s *adapter;
 
-    if (g_ble_irq_bind)
-      {
-        return;
-      }
+  if (g_ble_irq_bind)
+    {
+      return;
+    }
 
   adapter = kmm_malloc(sizeof(struct irq_adpt_s));
   DEBUGASSERT(adapter);
@@ -700,7 +714,7 @@ static void interrupt_off_wrapper(int intr_num)
 
 static void IRAM_ATTR interrupt_disable(void)
 {
-  enter_critical_section();
+  g_inter_flags = enter_critical_section();
 }
 
 /****************************************************************************
@@ -737,7 +751,7 @@ static void IRAM_ATTR interrupt_restore(void)
  *
  ****************************************************************************/
 
-static void IRAM_ATTR task_yield_from_isr(void)
+static void task_yield_from_isr(void)
 {
 }
 
@@ -759,17 +773,21 @@ static void IRAM_ATTR task_yield_from_isr(void)
 static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 {
   int ret;
-  sem_t *sem;
+  struct bt_sem_s *bt_sem;
   int tmp;
 
-  tmp = sizeof(sem_t);
-  sem = kmm_malloc(tmp);
-  DEBUGASSERT(sem);
+  tmp = sizeof(struct bt_sem_s);
+  bt_sem = kmm_malloc(tmp);
+  DEBUGASSERT(bt_sem);
 
-  ret = sem_init(sem, 0, init);
+  ret = sem_init(&bt_sem->sem, 0, init);
   DEBUGASSERT(ret == OK);
 
-  return sem;
+#ifdef CONFIG_ESP32C3_SPIFLASH
+  esp32c3_wl_init_semcache(&bt_sem->sc, &bt_sem->sem);
+#endif
+
+  return bt_sem;
 }
 
 /****************************************************************************
@@ -788,16 +806,16 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
 
 static void semphr_delete_wrapper(void *semphr)
 {
-  sem_t *sem = (sem_t *)semphr;
-  sem_destroy(sem);
-  kmm_free(sem);
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
+  sem_destroy(&bt_sem->sem);
+  kmm_free(bt_sem);
 }
 
 /****************************************************************************
  * Name: semphr_take_from_isr_wrapper
  *
  * Description:
- *   take a semaphore from an ISR
+ *   Take a semaphore from an ISR.
  *
  * Input Parameters:
  *   semphr - Semaphore data pointer
@@ -807,9 +825,10 @@ static void semphr_delete_wrapper(void *semphr)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
+static int semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 {
-  return semphr_take_wrapper(semphr, 0);
+  DEBUGASSERT(0);
+  return false;
 }
 
 /****************************************************************************
@@ -828,7 +847,26 @@ static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
 
 static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw)
 {
-  return semphr_give_wrapper(semphr);
+  int ret;
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
+
+#ifdef CONFIG_ESP32C3_SPIFLASH
+  if (spi_flash_cache_enabled())
+    {
+      ret = semphr_give_wrapper(&bt_sem->sem);
+      ret = esp_errno_trans(ret);
+    }
+  else
+    {
+      esp32c3_wl_post_semcache(&bt_sem->sc);
+      ret = true;
+    }
+#else
+  ret = semphr_give_wrapper(&bt_sem->sem);
+  ret = esp_errno_trans(ret);
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -878,11 +916,11 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
   struct timespec timeout;
-  sem_t *sem = (sem_t *)semphr;
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
   if (block_time_ms == OSI_FUNCS_TIME_BLOCKING)
     {
-      ret = sem_wait(sem);
+      ret = sem_wait(&bt_sem->sem);
       if (ret)
         {
           wlerr("Failed to wait sem\n");
@@ -890,19 +928,21 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
     }
   else
     {
-      ret = clock_gettime(CLOCK_REALTIME, &timeout);
-      if (ret < 0)
+      if (block_time_ms > 0)
         {
-          wlerr("Failed to get time\n");
-          return false;
-        }
-
-      if (block_time_ms)
-        {
+          ret = clock_gettime(CLOCK_REALTIME, &timeout);
+          if (ret < 0)
+            {
+              wlerr("Failed to get time\n");
+              return false;
+            }
           esp_update_time(&timeout, MSEC2TICK(block_time_ms));
+          ret = sem_timedwait(&bt_sem->sem, &timeout);
         }
-
-      ret = sem_timedwait(sem, &timeout);
+      else
+        {
+          ret = sem_trywait(&bt_sem->sem);
+        }
     }
 
   return esp_errno_trans(ret);
@@ -925,9 +965,9 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 static int semphr_give_wrapper(void *semphr)
 {
   int ret;
-  sem_t *sem = (sem_t *)semphr;
+  struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-  ret = sem_post(sem);
+  ret = sem_post(&bt_sem->sem);
   if (ret)
     {
       wlerr("Failed to post sem error=%d\n", ret);
@@ -1149,11 +1189,10 @@ static int IRAM_ATTR queue_send_from_isr_wrapper(void *queue,
  *
  ****************************************************************************/
 
-static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
-                                                 void *item,
-                                                 void *hptw)
+static int queue_recv_from_isr_wrapper(void *queue, void *item, void *hptw)
 {
-  return 0;
+  DEBUGASSERT(0);
+  return false;
 }
 
 /****************************************************************************
@@ -1287,7 +1326,7 @@ static void *malloc_internal_wrapper(size_t size)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR read_mac_wrapper(uint8_t mac[6])
+static int read_mac_wrapper(uint8_t mac[6])
 {
   return 0;
 }
@@ -1305,7 +1344,7 @@ static int IRAM_ATTR read_mac_wrapper(uint8_t mac[6])
  *
  ****************************************************************************/
 
-static void IRAM_ATTR srand_wrapper(unsigned int seed)
+static void srand_wrapper(unsigned int seed)
 {
   /* empty function */
 }
@@ -1323,9 +1362,9 @@ static void IRAM_ATTR srand_wrapper(unsigned int seed)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR rand_wrapper(void)
+static IRAM_ATTR int rand_wrapper(void)
 {
-  return random();
+  return getreg32(WDEV_RND_REG);
 }
 
 /****************************************************************************
@@ -2053,6 +2092,13 @@ int esp32c3_bt_controller_init(void)
     }
 
   btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
+
+#ifdef CONFIG_ESP32C3_SPIFLASH
+  if (esp32c3_wl_init() < 0)
+    {
+      return -EIO;
+    }
+#endif
 
   return 0;
 

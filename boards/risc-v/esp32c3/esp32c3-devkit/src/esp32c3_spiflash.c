@@ -43,6 +43,7 @@
 #endif
 
 #include "esp32c3_spiflash.h"
+#include "esp32c3_spiflash_mtd.h"
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
@@ -497,15 +498,17 @@ static int init_storage_partition(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spiflash_init
+ * Name: board_spiflash_init
  *
  * Description:
  *   Initialize the SPIFLASH and register the MTD device.
  ****************************************************************************/
 
-int esp32c3_spiflash_init(void)
+int board_spiflash_init(void)
 {
   int ret = OK;
+
+  esp32c3_spiflash_init();
 
 #ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
   ret = init_ota_partitions();

@@ -31,7 +31,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "esp32c3_spiflash.h"
+#include "esp32c3_spiflash_mtd.h"
 
 /****************************************************************************
  * Pre-processor Definitions
