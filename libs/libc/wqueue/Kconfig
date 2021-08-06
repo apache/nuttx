@@ -6,26 +6,26 @@
 menu "User Work Queue Support"
 	depends on !BUILD_FLAT
 
-config LIB_USRWORK
+config LIBC_USRWORK
 	bool "User mode worker thread"
 	default n
 	---help---
 		User space work queues can also be made available for deferred
 		processing in the NuttX kernel build.
 
-if LIB_USRWORK
+if LIBC_USRWORK
 
-config LIB_USRWORKPRIORITY
+config LIBC_USRWORKPRIORITY
 	int "User mode priority worker thread priority"
 	default 100
 	---help---
 		The execution priority of the user-mode priority worker thread.  Default: 100
 
-config LIB_USRWORKSTACKSIZE
+config LIBC_USRWORKSTACKSIZE
 	int "User mode worker thread stack size"
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
-endif # LIB_USRWORK
+endif # LIBC_USRWORK
 endmenu # User Work Queue Support

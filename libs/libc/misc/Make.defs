@@ -50,19 +50,19 @@ CSRCS += lib_crc8table.c
 
 # Keyboard driver encoder/decoder
 
-ifeq ($(CONFIG_LIB_KBDCODEC),y)
+ifeq ($(CONFIG_LIBC_KBDCODEC),y)
 CSRCS += lib_kbdencode.c lib_kbddecode.c
 endif
 
 # SLCD driver encoder/decoder
 
-ifeq ($(CONFIG_LIB_SLCDCODEC),y)
+ifeq ($(CONFIG_LIBC_SLCDCODEC),y)
 CSRCS += lib_slcdencode.c lib_slcddecode.c
 endif
 
 # Environment search path support
 
-ifeq ($(CONFIG_LIB_ENVPATH),y)
+ifeq ($(CONFIG_LIBC_ENVPATH),y)
 CSRCS += lib_envpath.c
 endif
 

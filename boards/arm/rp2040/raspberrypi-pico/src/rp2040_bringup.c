@@ -49,6 +49,16 @@
 #include <nuttx/video/fb.h>
 #endif
 
+#ifdef CONFIG_SENSORS_INA219
+#include <nuttx/sensors/ina219.h>
+#include "rp2040_ina219.h"
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+#include <nuttx/sensors/bmp180.h>
+#include "rp2040_bmp180.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

@@ -730,7 +730,7 @@ Where <subdir> is one of the following:
          CONFIG_LCD_MAXPOWER=255    : (Or any large-ish value that you prefer)
 
        Library Routines:
-         CONFIG_LIB_SLCDCODEC=y     : Enable the SLCD CODEC
+         CONFIG_LIBC_SLCDCODEC=y     : Enable the SLCD CODEC
 
        NOTE that is is not necessary to select the PMP peripheral; this LCD
        driver is a bit-bang driver that just happens to use the PMP pins as

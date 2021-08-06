@@ -33,7 +33,7 @@
 #include <nuttx/drivers/ramdisk.h>
 #include <nuttx/zoneinfo.h>
 
-#ifdef CONFIG_LIB_ZONEINFO_ROMFS
+#ifdef CONFIG_LIBC_ZONEINFO_ROMFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -131,4 +131,4 @@ int sim_zoneinfo(int minor)
   return OK;
 }
 
-#endif /* CONFIG_LIB_ZONEINFO_ROMFS */
+#endif /* CONFIG_LIBC_ZONEINFO_ROMFS */

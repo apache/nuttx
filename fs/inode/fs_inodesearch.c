@@ -431,7 +431,7 @@ static FAR const char *_inode_getcwd(void)
   pwd = getenv("PWD");
   if (pwd == NULL)
     {
-      pwd = CONFIG_LIB_HOMEDIR;
+      pwd = CONFIG_LIBC_HOMEDIR;
     }
 #endif
 

@@ -18,7 +18,7 @@ if LIBC_DLFCN
 config LDPATH_INITIAL
 	string "Initial LD_LIBRARY_PATH Value"
 	default ""
-	depends on LIB_ENVPATH
+	depends on LIBC_ENVPATH
 	---help---
 		The initial value of the LD_LIBRARY_PATH variable.  This is the
 		colon-separated list of absolute paths.  E.g., "/lib:/usr/lib:/system/lib"

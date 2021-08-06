@@ -137,7 +137,7 @@ $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo all BIN=$(BIN)
 endif
 
@@ -151,7 +151,7 @@ endif
 # Context
 
 context::
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo context BIN=$(BIN)
 endif
 
@@ -170,7 +170,7 @@ makekdepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MAKE) makekdepfile CFLAGS="$(CFLAGS) $(KDEFINE)" OBJPATH="kbin"
 endif
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo depend BIN=$(BIN)
 endif
 	$(Q) touch $@

@@ -32,7 +32,7 @@
 
 #include <nuttx/wqueue.h>
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,5 +63,5 @@ extern struct usr_wqueue_s g_usrwork;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* CONFIG_LIB_USRWORK && !__KERNEL__*/
+#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__*/
 #endif /* __LIBC_WQUEUE_WQUEUE_H */

@@ -136,7 +136,7 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_LIB_ZONEINFO_ROMFS
+#ifdef CONFIG_LIBC_ZONEINFO_ROMFS
   /* Mount the TZ database */
 
   sim_zoneinfo(3);

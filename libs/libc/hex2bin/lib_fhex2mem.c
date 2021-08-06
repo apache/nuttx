@@ -30,7 +30,7 @@
 
 #include <nuttx/streams.h>
 
-#ifdef CONFIG_LIB_HEX2BIN
+#ifdef CONFIG_LIBC_HEX2BIN
 
 /****************************************************************************
  * Public Functions
@@ -85,4 +85,4 @@ int fhex2mem(FAR FILE *instream, uint32_t baseaddr, uint32_t endpaddr,
                  (enum hex2bin_swap_e)swap);
 }
 
-#endif /* CONFIG_LIB_HEX2BIN */
+#endif /* CONFIG_LIBC_HEX2BIN */

@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_LIB_ZONEINFO_ROMFS
+#ifdef CONFIG_LIBC_ZONEINFO_ROMFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,5 +64,5 @@ EXTERN unsigned int  romfs_zoneinfo_img_len;
 }
 #endif
 
-#endif /* CONFIG_LIB_ZONEINFO_ROMFS */
+#endif /* CONFIG_LIBC_ZONEINFO_ROMFS */
 #endif /* __INCLUDE_NUTTX_ZONEINFO_H */
