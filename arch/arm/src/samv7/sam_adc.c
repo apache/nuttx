@@ -121,6 +121,10 @@ static int sam_adc_interrupt(int irq, FAR void *context, FAR void *arg)
    * should be a better mapping method! */
 
   priv->cur_channel = peripheral_channel - 4;
+  /* Last conversion data register: check if that means that all channels are
+   * converted but only the last one is represented. There is a mulitplexed
+   * single data channel register availible. Maybe this is not complete correct.
+   */
   result = getreg32(SAM_AFEC1_LCDR) & AFEC_LCDR_LDATA_MASK;
 
   ainfo("ADC Result = %d:\n", result);
