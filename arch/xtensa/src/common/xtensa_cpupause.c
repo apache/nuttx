@@ -44,6 +44,74 @@
 static spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
 static spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
+static volatile int g_irq_to_handle[CONFIG_SMP_NCPUS][2];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: handle_irqreq
+ *
+ * Description:
+ *   If an irq handling request is found on cpu, call up_enable_irq() or
+ *   up_disable_irq(), then return true.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be queried
+ *
+ * Returned Value:
+ *   true  = an irq handling request is found
+ *   false = no irq handling request is found
+ *
+ ****************************************************************************/
+
+static bool handle_irqreq(int cpu)
+{
+  int i;
+  bool handled = false;
+
+  /* Check both cases */
+
+  for (i = 0; i < 2; i++)
+    {
+      int irqreq = g_irq_to_handle[cpu][i];
+
+      if (irqreq)
+        {
+          /* Unlock the spinlock first */
+
+          spin_unlock(&g_cpu_paused[cpu]);
+
+          /* Then wait for the spinlock to be released */
+
+          spin_lock(&g_cpu_wait[cpu]);
+
+          /* Clear g_irq_to_handle[cpu][i] */
+
+          g_irq_to_handle[cpu][i] = 0;
+
+          if (0 == i)
+            {
+              up_enable_irq(irqreq);
+            }
+          else
+            {
+              up_disable_irq(irqreq);
+            }
+
+          /* Finally unlock the spinlock */
+
+          spin_unlock(&g_cpu_wait[cpu]);
+          handled = true;
+
+          break;
+        }
+    }
+
+  return handled;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -97,6 +165,13 @@ bool up_cpu_pausereq(int cpu)
 
 int up_cpu_paused(int cpu)
 {
+  /* Fistly, check if this request is to enable/disable IRQ */
+
+  if (handle_irqreq(cpu))
+    {
+      return OK;
+    }
+
   FAR struct tcb_s *tcb = this_task();
 
   /* Update scheduler parameters */
@@ -187,9 +262,21 @@ void xtensa_pause_handler(void)
 
       irqstate_t flags = enter_critical_section();
 
-      /* NOTE: the pause request should not exist here */
+      /* NOTE: Normally, we do not call up_cpu_paused() here because
+       * the above enter_critical_setion() would call up_cpu_paused()
+       * inside because the caller holds a crtical section.
+       * However, chips' IRQ control logic also uses this handler and a
+       * caller might not take a critical section to avoid a deadlock
+       * during up_enable_irq() and up_disable_irq(). This is allowed
+       * because IRQ control logic does not interact wtih the scheduler.
+       * This means that if the request was not handled above, we need
+       * to call up_cpu_paused() here again.
+       */
 
-      DEBUGVERIFY(!up_cpu_pausereq(cpu));
+      if (up_cpu_pausereq(cpu))
+        {
+          up_cpu_paused(cpu);
+        }
 
       leave_critical_section(flags);
     }
@@ -306,6 +393,67 @@ int up_cpu_resume(int cpu)
 
   spin_unlock(&g_cpu_wait[cpu]);
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_send_irqreq()
+ *
+ * Description:
+ *   Send up_enable_irq() / up_disable_irq() request to the specified cpu
+ *
+ *   This function is called from up_enable_irq() or up_disable_irq()
+ *   to be handled on specified CPU. Locking protocol in the sequence is
+ *   the same as up_pause_cpu() plus up_resume_cpu().
+ *
+ * Input Parameters:
+ *   idx - The request index (0: enable, 1: disable)
+ *   irq - The IRQ number to be handled
+ *   cpu - The index of the CPU which will handle the request
+ *
+ ****************************************************************************/
+
+void up_send_irqreq(int idx, int irq, int cpu)
+{
+  int ret;
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+
+  /* Wait for the spinlocks to be released */
+
+  spin_lock(&g_cpu_wait[cpu]);
+  spin_lock(&g_cpu_paused[cpu]);
+
+  /* Set irq for the cpu */
+
+  g_irq_to_handle[cpu][idx] = irq;
+
+  /* Execute the intercpu interrupt */
+
+  ret = xtensa_intercpu_interrupt(cpu, CPU_INTCODE_NONE);
+  if (ret < 0)
+    {
+      /* What happened?  Unlock the g_cpu_wait spinlock */
+
+      spin_unlock(&g_cpu_wait[cpu]);
+    }
+  else
+    {
+      /* Wait for the other CPU to unlock g_cpu_paused meaning that
+       * it is fully paused and ready for up_cpu_resume();
+       */
+
+      spin_lock(&g_cpu_paused[cpu]);
+    }
+
+  /* Wait for the handler is executed on cpu */
+
+  spin_lock(&g_cpu_paused[cpu]);
+  spin_unlock(&g_cpu_paused[cpu]);
+
+  /* Finally unlock the spinlock to proceed the handler */
+
+  spin_unlock(&g_cpu_wait[cpu]);
+
+  return;
 }
 
 #endif /* CONFIG_SMP */

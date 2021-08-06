@@ -288,6 +288,9 @@ void up_disable_irq(int irq)
   if (cpu != irqcpu)
     {
       /* It was the other CPU that enabled this interrupt. */
+
+      up_send_irqreq(1, irq, irqcpu);
+      return;
     }
 #endif
 
