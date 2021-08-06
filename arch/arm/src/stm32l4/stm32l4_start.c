@@ -147,7 +147,7 @@ static inline void stm32l4_fpuconfig(void)
    */
 
   regval = getcontrol();
-  regval |= (1 << 2);
+  regval |= CONTROL_FPCA;
   setcontrol(regval);
 
   /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
@@ -177,7 +177,7 @@ static inline void stm32l4_fpuconfig(void)
    */
 
   regval = getcontrol();
-  regval &= ~(1 << 2);
+  regval &= ~CONTROL_FPCA;
   setcontrol(regval);
 
   /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
