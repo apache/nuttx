@@ -82,6 +82,18 @@ You need to enable these options in the menuconfig:
             [*]   Support SIGINT
             (0x03)  Serial parse SIGINT characters
 
+Why isn't /dev/ttySx created when using USB Console even when UART is enabled?
+==============================================================================
+
+If you don't use serial console then /dev/ttyS0 will not be created,
+even if you enable the UART peripheral at "System Type".
+
+You can fix it enabling the Serial Upper-Half Driver:
+
+    Device Drivers --->
+        Serial Driver Support --->
+            [*]   Enable standard "upper-half" serial driver
+
 Network
 =======
 
