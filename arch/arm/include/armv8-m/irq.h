@@ -87,6 +87,17 @@
 
 #define REG_PIC             REG_R10
 
+/* CONTROL register */
+
+#define CONTROL_UPAC_EN     (1 << 7) /* Bit 7: Unprivileged pointer authentication enable */
+#define CONTROL_PAC_EN      (1 << 6) /* Bit 6: Privileged pointer authentication enable */
+#define CONTROL_UBTI_EN     (1 << 5) /* Bit 5: Unprivileged branch target identification enable */
+#define CONTROL_BTI_EN      (1 << 4) /* Bit 4: Privileged branch target identification enable */
+#define CONTROL_SFPA        (1 << 3) /* Bit 3: Secure Floating-point active */
+#define CONTROL_FPCA        (1 << 2) /* Bit 2: Floating-point context active */
+#define CONTROL_SPSEL       (1 << 1) /* Bit 1: Stack-pointer select */
+#define CONTROL_NPRIV       (1 << 0) /* Bit 0: Not privileged */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
