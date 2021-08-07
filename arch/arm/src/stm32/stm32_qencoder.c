@@ -306,6 +306,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower);
 static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower);
 static int stm32_position(FAR struct qe_lowerhalf_s *lower,
                           FAR int32_t *pos);
+static int stm32_setposmax(FAR struct qe_lowerhalf_s *lower, uint32_t pos);
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
 static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
                        unsigned long arg);
@@ -318,11 +319,12 @@ static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
 
 static const struct qe_ops_s g_qecallbacks =
 {
-  .setup    = stm32_setup,
-  .shutdown = stm32_shutdown,
-  .position = stm32_position,
-  .reset    = stm32_reset,
-  .ioctl    = stm32_ioctl,
+  .setup     = stm32_setup,
+  .shutdown  = stm32_shutdown,
+  .position  = stm32_position,
+  .setposmax = stm32_setposmax,
+  .reset     = stm32_reset,
+  .ioctl     = stm32_ioctl,
 };
 
 /* Per-timer state structures */
@@ -1105,9 +1107,47 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 #else
   /* Return the counter value */
 
+#  if defined(HAVE_32BIT_TIMERS)
   *pos = (int32_t)stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET);
+#  else
+  *pos = (int32_t)stm32_getreg16(priv, STM32_GTIM_CNT_OFFSET);
+#  endif
 #endif
   return OK;
+}
+
+/****************************************************************************
+ * Name: stm32_setposmax
+ *
+ * Description:
+ *   Set the maximum encoder position.
+ *
+ ****************************************************************************/
+
+static int stm32_setposmax(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
+{
+#ifdef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
+  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+
+#if defined(HAVE_MIXEDWIDTH_TIMERS)
+  if (priv->config->width == 32)
+    {
+      stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, pos);
+    }
+  else
+    {
+      stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, pos);
+    }
+#elif defined(HAVE_32BIT_TIMERS)
+  stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, pos);
+#else
+  stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, pos);
+#endif
+
+  return OK;
+#else
+  return -ENOTTY;
+#endif
 }
 
 /****************************************************************************
