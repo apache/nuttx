@@ -313,7 +313,7 @@ struct stm32_lowerhalf_s
 
   bool             inuse;    /* True: The lower-half driver is in-use */
 
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   volatile int32_t position; /* The current position offset */
 #endif
 };
@@ -344,7 +344,7 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim);
 
 /* Interrupt handling */
 
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 static int stm32_interrupt(int irq, FAR void *context, FAR void *arg);
 #endif
 
@@ -724,7 +724,7 @@ static FAR struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
  *
  ****************************************************************************/
 
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)arg;
@@ -777,7 +777,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   uint32_t ccmr1;
   uint16_t ccer;
   uint16_t cr1;
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   uint16_t regval;
   int ret;
 #endif
@@ -941,7 +941,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* There is no need for interrupts with 32-bit timers */
 
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   if (priv->config->width != 32)
 #endif
@@ -974,7 +974,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* There is no need for interrupts with 32-bit timers */
 
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   if (priv->config->width != 32)
 #endif
@@ -1132,7 +1132,7 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   int32_t position;
   int32_t verify;
   uint32_t count;
@@ -1177,7 +1177,7 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
 {
   FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
-#ifdef HAVE_16BIT_TIMERS
+#ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   irqstate_t flags;
 
   sninfo("Resetting position to zero\n");
