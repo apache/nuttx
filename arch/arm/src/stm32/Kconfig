@@ -11162,6 +11162,10 @@ menu "STM32 QEncoder Driver"
 	depends on SENSORS_QENCODER
 	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
 
+config STM32_QENCODER_DISABLE_EXTEND16BTIMERS
+	bool "Disable QEncoder timers extension from 16-bit to 32-bit"
+	default n
+
 config STM32_TIM1_QE
 	bool "TIM1 QE"
 	default n
