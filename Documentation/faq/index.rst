@@ -82,8 +82,43 @@ You need to enable these options in the menuconfig:
             [*]   Support SIGINT
             (0x03)  Serial parse SIGINT characters
 
+Board Initialization
+====================
+
+How to start directly my application instead starting NSH?
+----------------------------------------------------------
+
+You can start you application directly instead of starting the default
+NSH terminal. Lets support your application is called "hello", then you
+will modify the ENTRYPOINT to call "hello_main" instead of "nsh_main":
+
+    RTOS Features --->
+        Tasks and Scheduling  --->
+            (hello_main) Application entry point
+
+Why after putting my application on ENTRYPOINT it stops to work?
+----------------------------------------------------------------
+
+When you replace the ENTRYPOINT from "nsh_main" to your application some
+initialization flow are changed, for instace the NSH_ARCHINIT is not
+executed anymore and so some drivers initialiation that are called from
+it also stops to work.
+
+You can fix it enabling the Board Late Initialization that will replace the
+NSH_ARCHINIT to call those drivers initialization. Just enable it:
+
+    RTOS Features --->
+        RTOS hooks --->
+            [*] Custom board late initialization
+
+Also you need to disable the architecture-specific initialization:
+
+    Application Configuration --->
+        NSH Library --->
+            [ ] Have architecture-specific initialization
+
 Why isn't /dev/ttySx created when using USB Console even when UART is enabled?
-==============================================================================
+------------------------------------------------------------------------------
 
 If you don't use serial console then /dev/ttyS0 will not be created,
 even if you enable the UART peripheral at "System Type".
