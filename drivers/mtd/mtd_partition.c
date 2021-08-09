@@ -579,7 +579,7 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
                   MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
           if (ret < 0)
             {
-              ferr("ERROR: mtd->ioctl failed: %d\n", ret);
+              ferr("ERROR: mtd->ioctl failed: %zd\n", ret);
               return 0;
             }
 

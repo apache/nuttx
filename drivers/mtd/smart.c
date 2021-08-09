@@ -856,7 +856,8 @@ static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
 
   /* Read the full erase block into the buffer */
 
-  finfo("Read %d blocks starting at block %d\n", mtdblocks, mtdstartblock);
+  finfo("Read %zu blocks starting at block %zu\n",
+        mtdblocks, mtdstartblock);
   nread = MTD_BREAD(dev->mtd, mtdstartblock, mtdblocks, buffer);
   if (nread != mtdblocks)
     {
@@ -1408,7 +1409,7 @@ static ssize_t smart_bytewrite(FAR struct smart_struct_s *dev, size_t offset,
                       (FAR uint8_t *)dev->rwbuffer);
       if (ret < 0)
         {
-          ferr("ERROR: Error %d reading from device\n", -ret);
+          ferr("ERROR: Error %zd reading from device\n", -ret);
           goto errout;
         }
 
@@ -1423,7 +1424,7 @@ static ssize_t smart_bytewrite(FAR struct smart_struct_s *dev, size_t offset,
                        (FAR uint8_t *) dev->rwbuffer);
       if (ret < 0)
         {
-          ferr("ERROR: Error %d writing to device\n", -ret);
+          ferr("ERROR: Error %zd writing to device\n", -ret);
           goto errout;
         }
     }
@@ -3213,7 +3214,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev,
     {
       /* The block is not empty!!  What to do? */
 
-      ferr("ERROR: Write block 0 failed: %d.\n", wrcount);
+      ferr("ERROR: Write block 0 failed: %zu.\n", wrcount);
 
       /* Unlock the mutex if we add one */
 
@@ -4560,7 +4561,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
       /* Subtract dev->minwearlevel from all wear levels */
 
       offset = dev->minwearlevel;
-      finfo("Reducing wear level bits by %d\n", offset);
+      finfo("Reducing wear level bits by %zu\n", offset);
 
       for (x = 0; x < dev->geo.neraseblocks; x++)
         {
