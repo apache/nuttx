@@ -178,6 +178,8 @@ int fstat(int fd, FAR struct stat *buf);
 int chmod(FAR const char *path, mode_t mode);
 int lchmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
+int utimens(FAR const char *path, const struct timespec times[2]);
+int lutimens(FAR const char *path, const struct timespec times[2]);
 int futimens(int fd, const struct timespec times[2]);
 
 mode_t umask(mode_t mask);
