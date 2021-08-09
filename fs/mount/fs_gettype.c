@@ -105,6 +105,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
         break;
 #endif
 
+#ifdef CONFIG_FS_EXFAT
+      case EXFAT_SUPER_MAGIC:
+        fstype = "exfatfs";
+        break;
+#endif
+
 #ifdef CONFIG_NFS
       case NFS_SUPER_MAGIC:
         fstype = "nfs";

@@ -279,6 +279,9 @@ struct fs_dirent_s
 #ifdef CONFIG_FS_LITTLEFS
       FAR void              *littlefs;
 #endif
+#ifdef CONFIG_FS_EXFAT
+      FAR void              *exfat;
+#endif
 #ifdef CONFIG_FS_UNIONFS
       struct fs_unionfsdir_s unionfs;
 #endif
