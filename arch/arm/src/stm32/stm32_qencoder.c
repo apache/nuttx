@@ -824,7 +824,11 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Select the Polarity=rising and set the CC1E Bit */
 
+#ifdef HAVE_GTIM_CCXNP
   ccer &= ~(GTIM_CCER_CC1P | GTIM_CCER_CC1NP);
+#else
+  ccer &= ~(GTIM_CCER_CC1P);
+#endif
   ccer |= GTIM_CCER_CC1E;
 
   /* Write to TIM CCMR1 and CCER registers */
@@ -860,7 +864,11 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   /* Select the Polarity=rising and set the CC2E Bit */
 
+#ifdef HAVE_GTIM_CCXNP
   ccer &= ~(GTIM_CCER_CC2P | GTIM_CCER_CC2NP);
+#else
+  ccer &= ~(GTIM_CCER_CC2P);
+#endif
   ccer |= GTIM_CCER_CC2E;
 
   /* Write to TIM CCMR1 and CCER registers */
