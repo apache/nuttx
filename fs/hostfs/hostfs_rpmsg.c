@@ -111,6 +111,8 @@ static const rpmsg_ept_cb g_hostfs_rpmsg_handler[] =
   [HOSTFS_RPMSG_RMDIR]     = hostfs_rpmsg_default_handler,
   [HOSTFS_RPMSG_RENAME]    = hostfs_rpmsg_default_handler,
   [HOSTFS_RPMSG_STAT]      = hostfs_rpmsg_stat_handler,
+  [HOSTFS_RPMSG_FCHSTAT]   = hostfs_rpmsg_default_handler,
+  [HOSTFS_RPMSG_CHSTAT]    = hostfs_rpmsg_default_handler,
 };
 
 /****************************************************************************
@@ -719,6 +721,45 @@ int host_stat(FAR const char *path, FAR struct stat *buf)
 
   return hostfs_rpmsg_send_recv(HOSTFS_RPMSG_STAT, false,
           (struct hostfs_rpmsg_header_s *)msg, len, buf);
+}
+
+int host_fchstat(int fd, const struct stat *buf, int flags)
+{
+  struct hostfs_rpmsg_fchstat_s msg =
+  {
+    .flags = flags,
+    .buf = *buf,
+    .fd = fd,
+  };
+
+  return hostfs_rpmsg_send_recv(HOSTFS_RPMSG_FCHSTAT, true,
+          (struct hostfs_rpmsg_header_s *)&msg, sizeof(msg), NULL);
+}
+
+int host_chstat(FAR const char *path, const FAR struct stat *buf, int flags)
+{
+  FAR struct hostfs_rpmsg_s *priv = &g_hostfs_rpmsg;
+  FAR struct hostfs_rpmsg_chstat_s *msg;
+  uint32_t space;
+  size_t len;
+
+  len  = sizeof(*msg);
+  len += B2C(strlen(path) + 1);
+
+  msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+  if (!msg)
+    {
+      return -ENOMEM;
+    }
+
+  DEBUGASSERT(len <= space);
+
+  msg->flags = flags;
+  memcpy(&msg->buf, buf, sizeof(*buf));
+  cstr2bstr(msg->pathname, path);
+
+  return hostfs_rpmsg_send_recv(HOSTFS_RPMSG_CHSTAT, false,
+          (struct hostfs_rpmsg_header_s *)msg, len, NULL);
 }
 
 int hostfs_rpmsg_init(FAR const char *cpuname)

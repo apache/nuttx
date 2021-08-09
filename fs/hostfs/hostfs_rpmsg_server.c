@@ -116,6 +116,12 @@ static int hostfs_rpmsg_rename_handler(FAR struct rpmsg_endpoint *ept,
 static int hostfs_rpmsg_stat_handler(FAR struct rpmsg_endpoint *ept,
                                      FAR void *data, size_t len,
                                      uint32_t src, FAR void *priv);
+static int hostfs_rpmsg_fchstat_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv);
+static int hostfs_rpmsg_chstat_handler(FAR struct rpmsg_endpoint *ept,
+                                       FAR void *data, size_t len,
+                                       uint32_t src, FAR void *priv);
 
 static void hostfs_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
                                  FAR void *priv_, FAR const char *name,
@@ -151,6 +157,8 @@ static const rpmsg_ept_cb g_hostfs_rpmsg_handler[] =
   [HOSTFS_RPMSG_RMDIR]     = hostfs_rpmsg_rmdir_handler,
   [HOSTFS_RPMSG_RENAME]    = hostfs_rpmsg_rename_handler,
   [HOSTFS_RPMSG_STAT]      = hostfs_rpmsg_stat_handler,
+  [HOSTFS_RPMSG_FCHSTAT]   = hostfs_rpmsg_fchstat_handler,
+  [HOSTFS_RPMSG_CHSTAT]    = hostfs_rpmsg_chstat_handler,
 };
 
 /****************************************************************************
@@ -700,6 +708,87 @@ static int hostfs_rpmsg_stat_handler(FAR struct rpmsg_endpoint *ept,
       msg->buf = buf;
     }
 
+  msg->header.result = ret;
+  return rpmsg_send(ept, msg, sizeof(*msg));
+}
+
+static int hostfs_rpmsg_fchstat_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv)
+{
+  FAR struct hostfs_rpmsg_fchstat_s *msg = data;
+  FAR struct file *filep;
+  int ret = -ENOENT;
+  struct stat buf;
+
+  filep = hostfs_rpmsg_get_file(priv, msg->fd);
+  if (filep != NULL)
+    {
+      buf = msg->buf;
+      ret = file_fchstat(filep, &buf, msg->flags);
+    }
+
+  msg->header.result = ret;
+  return rpmsg_send(ept, msg, sizeof(*msg));
+}
+
+static int hostfs_rpmsg_chstat_handler(FAR struct rpmsg_endpoint *ept,
+                                       FAR void *data, size_t len,
+                                       uint32_t src, FAR void *priv)
+{
+  FAR struct hostfs_rpmsg_chstat_s *msg = data;
+  struct timespec times[2];
+  int ret = 0;
+
+  if (msg->flags & CH_STAT_MODE)
+    {
+      ret = chmod(msg->pathname, msg->buf.st_mode);
+      if (ret < 0)
+        {
+          ret = -get_errno();
+          goto out;
+        }
+    }
+
+  if (msg->flags & (CH_STAT_UID | CH_STAT_GID))
+    {
+      ret = chown(msg->pathname, msg->buf.st_uid, msg->buf.st_gid);
+      if (ret < 0)
+        {
+          ret = -get_errno();
+          goto out;
+        }
+    }
+
+  if (msg->flags & (CH_STAT_ATIME | CH_STAT_MTIME))
+    {
+      if (msg->flags & CH_STAT_ATIME)
+        {
+          times[0] = msg->buf.st_atim;
+        }
+      else
+        {
+          times[0].tv_nsec = UTIME_OMIT;
+        }
+
+      if (msg->flags & CH_STAT_MTIME)
+        {
+          times[1] = msg->buf.st_mtim;
+        }
+      else
+        {
+          times[1].tv_nsec = UTIME_OMIT;
+        }
+
+      ret = utimens(msg->pathname, times);
+      if (ret < 0)
+        {
+          ret = -get_errno();
+          goto out;
+        }
+    }
+
+out:
   msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
