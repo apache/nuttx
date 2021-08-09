@@ -313,6 +313,65 @@ int host_fstat(int fd, struct nuttx_stat_s *buf)
 }
 
 /****************************************************************************
+ * Name: host_fchstat
+ ****************************************************************************/
+
+int host_fchstat(int fd, const struct nuttx_stat_s *buf, int flags)
+{
+  struct timespec times[2];
+  int ret;
+
+  if (flags & NUTTX_CH_STAT_MODE)
+    {
+      ret = fchmod(fd, buf->st_mode);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_UID | NUTTX_CH_STAT_GID))
+    {
+      ret = fchown(fd, buf->st_uid, buf->st_gid);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_ATIME | NUTTX_CH_STAT_MTIME))
+    {
+      if (flags & NUTTX_CH_STAT_ATIME)
+        {
+          times[0].tv_sec  = buf->st_atim.tv_sec;
+          times[0].tv_nsec = buf->st_atim.tv_nsec;
+        }
+      else
+        {
+          times[0].tv_nsec = UTIME_OMIT;
+        }
+
+      if (flags & NUTTX_CH_STAT_MTIME)
+        {
+          times[1].tv_sec  = buf->st_mtim.tv_sec;
+          times[1].tv_nsec = buf->st_mtim.tv_nsec;
+        }
+      else
+        {
+          times[1].tv_nsec = UTIME_OMIT;
+        }
+
+      ret = futimens(fd, times);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: host_truncate
  ****************************************************************************/
 
@@ -537,4 +596,63 @@ int host_stat(const char *path, struct nuttx_stat_s *buf)
 
   host_stat_convert(&hostbuf, buf);
   return ret;
+}
+
+/****************************************************************************
+ * Name: host_chstat
+ ****************************************************************************/
+
+int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
+{
+  struct timespec times[2];
+  int ret;
+
+  if (flags & NUTTX_CH_STAT_MODE)
+    {
+      ret = chmod(path, buf->st_mode);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_UID | NUTTX_CH_STAT_GID))
+    {
+      ret = chown(path, buf->st_uid, buf->st_gid);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_ATIME | NUTTX_CH_STAT_MTIME))
+    {
+      if (flags & NUTTX_CH_STAT_ATIME)
+        {
+          times[0].tv_sec  = buf->st_atim.tv_sec;
+          times[0].tv_nsec = buf->st_atim.tv_nsec;
+        }
+      else
+        {
+          times[0].tv_nsec = UTIME_OMIT;
+        }
+
+      if (flags & NUTTX_CH_STAT_MTIME)
+        {
+          times[1].tv_sec  = buf->st_mtim.tv_sec;
+          times[1].tv_nsec = buf->st_mtim.tv_nsec;
+        }
+      else
+        {
+          times[1].tv_nsec = UTIME_OMIT;
+        }
+
+      ret = utimensat(AT_FDCWD, path, times, 0);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  return 0;
 }

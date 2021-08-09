@@ -221,6 +221,11 @@ int host_fstat(int fd, struct stat *buf)
   return buf->st_size < 0 ? buf->st_size : 0;
 }
 
+int host_fchstat(int fd, const struct stat *buf, int flags)
+{
+  return -ENOSYS;
+}
+
 int host_ftruncate(int fd, off_t length)
 {
   return -ENOSYS;
@@ -314,4 +319,9 @@ int host_stat(const char *path, struct stat *buf)
     }
 
   return ret;
+}
+
+int host_chstat(const char *path, const struct stat *buf, int flags)
+{
+  return -ENOSYS;
 }
