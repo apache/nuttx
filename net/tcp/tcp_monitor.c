@@ -41,9 +41,9 @@
  ****************************************************************************/
 
 static void tcp_close_connection(FAR struct socket *psock, uint16_t flags);
-static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
-                                 FAR void *pvconn, FAR void *pvpriv,
-                                 uint16_t flags);
+static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
+                                  FAR void *pvconn, FAR void *pvpriv,
+                                  uint16_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -106,7 +106,7 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
 }
 
 /****************************************************************************
- * Name: tcp_disconnect_event
+ * Name: tcp_monitor_event
  *
  * Description:
  *   Some connection related event has occurred
@@ -124,9 +124,9 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
  *
  ****************************************************************************/
 
-static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
-                                     FAR void *pvconn, FAR void *pvpriv,
-                                     uint16_t flags)
+static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
+                                  FAR void *pvconn, FAR void *pvpriv,
+                                  uint16_t flags)
 {
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
@@ -164,9 +164,13 @@ static uint16_t tcp_disconnect_event(FAR struct net_driver_s *dev,
            * TODO: Implement this.
            */
 
+          /* Clear the socket error */
+
+          _SO_SETERRNO(psock, OK);
+
           /* Indicate that the socket is now connected */
 
-          psock->s_flags |= _SF_CONNECTED;
+          psock->s_flags |= (_SF_BOUND | _SF_CONNECTED);
           psock->s_flags &= ~_SF_CLOSED;
         }
     }
@@ -242,20 +246,27 @@ static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
 
 int tcp_start_monitor(FAR struct socket *psock)
 {
-  FAR struct tcp_conn_s *conn;
   FAR struct devif_callback_s *cb;
+  FAR struct tcp_conn_s *conn;
+  bool nonblock_conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
+  net_lock();
+
+  /* Non-blocking connection ? */
+
+  nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
+                   _SS_ISNONBLOCK(psock->s_flags));
 
   /* Check if the connection has already been closed before any callbacks
    * have been registered. (Maybe the connection is lost before accept has
    * registered the monitoring callback.)
    */
 
-  net_lock();
   if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
-        conn->tcpstateflags == TCP_SYN_RCVD))
+        conn->tcpstateflags == TCP_SYN_RCVD || nonblock_conn))
     {
       /* Invoke the TCP_CLOSE connection event now */
 
@@ -276,9 +287,16 @@ int tcp_start_monitor(FAR struct socket *psock)
   cb = devif_callback_alloc(conn->dev, &conn->connevents);
   if (cb != NULL)
     {
-      cb->event = tcp_disconnect_event;
+      cb->event = tcp_monitor_event;
       cb->priv  = (FAR void *)psock;
       cb->flags = TCP_DISCONN_EVENTS;
+
+      /* Monitor the connected event */
+
+      if (nonblock_conn)
+        {
+          cb->flags |= TCP_CONNECTED;
+        }
     }
 
   net_unlock();

@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/tcp.h>
 #include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
@@ -67,6 +68,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
                                       FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_poll_s *info = (FAR struct tcp_poll_s *)pvpriv;
+  int reason;
 
   ninfo("flags: %04x\n", flags);
 
@@ -85,10 +87,50 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= POLLIN & info->fds->events;
         }
 
+      /* Non-blocking connection */
+
+      if ((flags & TCP_CONNECTED) != 0)
+        {
+          eventset |= POLLOUT & info->fds->events;
+        }
+
       /* Check for a loss of connection events. */
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
+          /* TCP_TIMEDOUT: Connection aborted due to too many
+           *               retransmissions.
+           */
+
+          if ((flags & TCP_TIMEDOUT) != 0)
+            {
+              /* Indicate that the connection timedout?) */
+
+              reason = ETIMEDOUT;
+            }
+
+          else if ((flags & NETDEV_DOWN) != 0)
+            {
+              /* The network device went down.  Indicate that the remote host
+               * is unreachable.
+               */
+
+              reason = ENETUNREACH;
+            }
+
+          /* TCP_CLOSE: The remote host has closed the connection
+           * TCP_ABORT: The remote host has aborted the connection
+           */
+
+          else
+            {
+              /* Indicate that remote host refused the connection */
+
+              reason = ECONNREFUSED;
+            }
+
+          _SO_SETERRNO(info->psock, reason);
+
           /* Mark that the connection has been lost */
 
           tcp_lost_connection(info->psock, info->cb, flags);
@@ -156,6 +198,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct tcp_poll_s *info;
   FAR struct devif_callback_s *cb;
+  bool nonblock_conn;
   int ret = OK;
 
   /* Sanity check */
@@ -170,6 +213,11 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Some of the  following must be atomic */
 
   net_lock();
+
+  /* Non-blocking connection ? */
+
+  nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
+                   _SS_ISNONBLOCK(psock->s_flags));
 
   /* Find a container to hold the poll information */
 
@@ -214,6 +262,13 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
                    | TCP_ACKDATA
 #endif
                    ;
+
+      /* Monitor the connected event */
+
+      if (nonblock_conn)
+        {
+          cb->flags |= TCP_CONNECTED;
+        }
     }
 
   if ((fds->events & POLLIN) != 0)
@@ -276,7 +331,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    *    Action: Return with POLLHUP|POLLERR events
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags) && !_SS_ISLISTENING(psock->s_flags))
+  if (!nonblock_conn && !_SS_ISCONNECTED(psock->s_flags) &&
+      !_SS_ISLISTENING(psock->s_flags))
     {
       /* We were previously connected but lost the connection either due
        * to a graceful shutdown by the remote peer or because of some
