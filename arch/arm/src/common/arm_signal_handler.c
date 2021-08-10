@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_signal_handler.S
+ * arch/arm/src/common/arm_signal_handler.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,22 +23,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#include <arch/syscall.h>
+#include <assert.h>
+
+#include "svcall.h"
+#include "arm_internal.h"
 
 #if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
-
-/****************************************************************************
- * File info
- ****************************************************************************/
-
-	.syntax		unified
-	.thumb
-	.file		"arm_signal_handler.S"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -48,55 +40,31 @@
  * Name: up_signal_handler
  *
  * Description:
- *   This function is the user-space, signal handler trampoline function.  It
- *   is called from up_signal_dispatch() in user-mode.
- *
- *     R0-R3, R11 - volatile registers need not be preserved.
- *     R4-R10 - static registers must be preserved
- *     R12-R14 - LR and SP must be preserved
+ *   This function is the user-space, signal handler trampoline function that
+ *   must be provided by architecture-specific logic.  It is called from
+ *   up_signal_dispatch() in user-mode.
  *
  * Input Parameters:
- *   R0 = sighand
- *     The address user-space signal handling function
- *   R1-R3 = signo, info, and ucontext
- *     Standard arguments to be passed to the signal handling function.
+ *   sighand - The address user-space signal handling function
+ *   signo, info, and ucontext - Standard arguments to be passed to the
+ *     signal handling function.
  *
  * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_signal_handler_return (see svcall.h)
+ *   via an architecture specific system call.
  *
  ****************************************************************************/
 
-	.text
-	.thumb_func
-	.globl	up_signal_handler
-	.type	up_signal_handler, function
-up_signal_handler:
+void up_signal_handler(_sa_sigaction_t sighand, int signo,
+                       FAR siginfo_t *info, FAR void *ucontext)
+{
+  /* Call the signal handler */
 
-	/* Save some register */
+  sighand(signo, info, ucontext);
 
-	push		{lr}			/* Save LR on the stack */
+  /* Return to kernel space */
 
-	/* Call the signal handler */
-
-	mov		ip, r0			/* IP=sighand */
-	mov		r0, r1			/* R0=signo */
-	mov		r1, r2			/* R1=info */
-	mov		r2, r3			/* R2=ucontext */
-	blx		ip			/* Call the signal handler */
-
-	/* Restore the registers */
-
-	pop		{r2}			/* Recover LR in R2 */
-	mov		lr, r2			/* Restore LR */
-
-	/* Execute the SYS_signal_handler_return SVCall (will not return) */
-
-	mov		r0, #SYS_signal_handler_return
-	svc		#SYS_syscall
-	nop
-
-	.size	up_signal_handler, .-up_signal_handler
-	.end
+  sys_call0(SYS_signal_handler_return);
+}
 
 #endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

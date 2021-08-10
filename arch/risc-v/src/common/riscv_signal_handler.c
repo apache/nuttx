@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_signal_handler.S
+ * arch/risc-v/src/common/riscv_signal_handler.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,20 +23,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#include <arch/syscall.h>
+#include <assert.h>
+
+#include "svcall.h"
+#include "riscv_internal.h"
 
 #if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
-
-/****************************************************************************
- * File info
- ****************************************************************************/
-
-  .file   "up_signal_handler.S"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -46,52 +40,31 @@
  * Name: up_signal_handler
  *
  * Description:
- *   This function is the user-space, signal handler trampoline function.  It
- *   is called from up_signal_dispatch() in user-mode.
+ *   This function is the user-space, signal handler trampoline function that
+ *   must be provided by architecture-specific logic.  It is called from
+ *   up_signal_dispatch() in user-mode.
  *
  * Input Parameters:
- *   a0 = sighand
- *     The address user-space signal handling function
- *   a1-a3 = signo, info, and ucontext
- *     Standard arguments to be passed to the signal handling function.
+ *   sighand - The address user-space signal handling function
+ *   signo, info, and ucontext - Standard arguments to be passed to the
+ *     signal handling function.
  *
  * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_signal_handler_return (see svcall.h)
+ *   via an architecture specific system call.
  *
  ****************************************************************************/
 
-  .text
-  .globl up_signal_handler
-  .type  up_signal_handler, function
-
-up_signal_handler:
-
-  /* Save ra on the stack */
-
-  addi sp, sp, -16
-  sd   ra, 8(sp)
-
+void up_signal_handler(_sa_sigaction_t sighand, int signo,
+                       FAR siginfo_t *info, FAR void *ucontext)
+{
   /* Call the signal handler */
 
-  mv   t0, a0  /* t0=sighand */
-  mv   a0, a1  /* a0=signo */
-  mv   a1, a2  /* a1=info */
-  mv   a2, a3  /* a2=ucontext */
-  jalr t0      /* Call the signal handler (modifies ra) */
+  sighand(signo, info, ucontext);
 
-  /* Restore the register */
+  /* Return to kernel space */
 
-  ld   ra, 8(sp)  /* Restore ra in sp */
-  addi sp, sp, 16
-
-  /* Execute the SYS_signal_handler_return SVCall (will not return) */
-
-  li   a0, SYS_signal_handler_return
-  ecall
-  nop
-
-  .size up_signal_handler, .-up_signal_handler
-  .end
+  sys_call0(SYS_signal_handler_return);
+}
 
 #endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

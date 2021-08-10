@@ -31,7 +31,7 @@ CMN_CSRCS += arm_vectors.c arm_switchcontext.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
+CMN_UCSRCS += arm_signal_handler.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)

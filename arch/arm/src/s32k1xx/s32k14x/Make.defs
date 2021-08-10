@@ -42,7 +42,7 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_mpu.c arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
+CMN_UCSRCS += arm_signal_handler.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

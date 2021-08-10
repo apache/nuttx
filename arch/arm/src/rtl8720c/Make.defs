@@ -34,7 +34,7 @@ CMN_ASRCS += arm_fetchadd.S arm_fpu.S arm_setjmp.S
 CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
 CMN_ASRCS += arm_testset.S vfork.S
 
-CMN_UASRCS += arm_signal_handler.S
+CMN_UCSRCS += arm_signal_handler.c
 
 CMN_CSRCS += arm_assert.c arm_blocktask.c arm_cache.c arm_copyarmstate.c
 CMN_CSRCS += arm_copyfullstate.c arm_doirq.c arm_hardfault.c arm_initialstate.c

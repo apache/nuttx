@@ -57,7 +57,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS  += riscv_task_start.c riscv_pthread_start.c
 CMN_CSRCS  += riscv_pthread_exit.c
 CMN_CSRCS  += riscv_signal_dispatch.c riscv_pmp.c
-CMN_UASRCS += riscv_signal_handler.S
+CMN_UCSRCS += riscv_signal_handler.c
 
 CHIP_CSRCS += c906_userspace.c
 endif
