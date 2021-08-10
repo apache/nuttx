@@ -242,7 +242,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
           if (writefds)
             {
-              if (pollset[ndx].revents & POLLOUT)
+              if (pollset[ndx].revents & (POLLOUT | POLLHUP))
                 {
                   FD_SET(pollset[ndx].fd, writefds);
                   ret++;
