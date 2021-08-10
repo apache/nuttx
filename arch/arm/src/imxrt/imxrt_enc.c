@@ -336,11 +336,12 @@ static int imxrt_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
 
 static const struct qe_ops_s g_qecallbacks =
 {
-  .setup    = imxrt_setup,
-  .shutdown = imxrt_shutdown,
-  .position = imxrt_position,
-  .reset    = imxrt_reset,
-  .ioctl    = imxrt_ioctl,
+  .setup     = imxrt_setup,
+  .shutdown  = imxrt_shutdown,
+  .position  = imxrt_position,
+  .setposmax = NULL,            /* not supported yet */
+  .reset     = imxrt_reset,
+  .ioctl     = imxrt_ioctl,
 };
 
 /* Per-timer state structures */

@@ -263,11 +263,12 @@ static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
 
 static const struct qe_ops_s g_qecallbacks =
 {
-  .setup    = stm32_setup,
-  .shutdown = stm32_shutdown,
-  .position = stm32_position,
-  .reset    = stm32_reset,
-  .ioctl    = stm32_ioctl,
+  .setup     = stm32_setup,
+  .shutdown  = stm32_shutdown,
+  .position  = stm32_position,
+  .setposmax = NULL,            /* not supported yet */
+  .reset     = stm32_reset,
+  .ioctl     = stm32_ioctl,
 };
 
 /* Per-timer state structures */
