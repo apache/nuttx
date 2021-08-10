@@ -1227,9 +1227,9 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Extract time values as type time_t in units of seconds. */
 
-  buf->st_atime = np->n_atime;
-  buf->st_mtime = np->n_mtime;
-  buf->st_ctime = np->n_ctime;
+  buf->st_atim = np->n_atime;
+  buf->st_mtim = np->n_mtime;
+  buf->st_ctim = np->n_ctime;
 
   nfs_semgive(nmp);
   return OK;
