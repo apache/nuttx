@@ -116,7 +116,7 @@ static int     nfs_filecreate(FAR struct nfsmount *nmp,
                    FAR struct nfsnode *np, FAR const char *relpath,
                    mode_t mode);
 static int     nfs_filetruncate(FAR struct nfsmount *nmp,
-                   FAR struct nfsnode *np, uint32_t length);
+                   FAR struct nfsnode *np, off_t length);
 static int     nfs_fileopen(FAR struct nfsmount *nmp,
                    FAR struct nfsnode *np, FAR const char *relpath,
                    int oflags, mode_t mode);
@@ -389,7 +389,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
  ****************************************************************************/
 
 static int nfs_filetruncate(FAR struct nfsmount *nmp,
-                            FAR struct nfsnode *np, uint32_t length)
+                            FAR struct nfsnode *np, off_t length)
 {
   FAR uint32_t *ptr;
   int           reqlen;
@@ -417,8 +417,8 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp,
   *ptr++  = nfs_false;                        /* Don't change uid */
   *ptr++  = nfs_false;                        /* Don't change gid */
   *ptr++  = nfs_true;                         /* Use the following size */
-  *ptr++  = 0;
-  *ptr++  = txdr_unsigned(length);            /* Truncate to the specified length */
+  *ptr++  = txdr_unsigned(length >> 32);      /* Truncate to the specified length */
+  *ptr++  = txdr_unsigned(length);
   *ptr++  = HTONL(NFSV3SATTRTIME_TOSERVER);   /* Use the server's time */
   *ptr++  = HTONL(NFSV3SATTRTIME_TOSERVER);   /* Use the server's time */
   *ptr++  = nfs_false;                        /* No guard value */
