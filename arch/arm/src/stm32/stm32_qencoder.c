@@ -71,39 +71,12 @@
 #  define TIM5_BITWIDTH         16
 #  define TIM8_BITWIDTH         16
 
-/* On the F3 series, TIM5 is 32-bit.  All of the rest are 16-bit */
-
-#elif defined(CONFIG_STM32_STM32F30XX)
-
-  /* If TIM5 is enabled, then we have 32-bit timers */
-
-#  if defined(CONFIG_STM32_TIM5_QE)
-#    define HAVE_32BIT_TIMERS   1
-#  endif
-
-  /* If TIM1,2,3,4, or 8 are enabled, then we have 16-bit timers */
-
-#  if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM2_QE) || \
-      defined(CONFIG_STM32_TIM3_QE) || defined(CONFIG_STM32_TIM4_QE) || \
-      defined(CONFIG_STM32_TIM8_QE)
-#    define HAVE_16BIT_TIMERS   1
-#  endif
-
-  /* The width in bits of each timer */
-
-#  define TIM1_BITWIDTH         16
-#  define TIM2_BITWIDTH         16
-#  define TIM3_BITWIDTH         16
-#  define TIM4_BITWIDTH         16
-#  define TIM5_BITWIDTH         32
-#  define TIM8_BITWIDTH         16
-
-/* On the F4, F2 and G4 series, TIM2 and TIM5 are 32-bit.
+/* On the F2, F3, F4 and G4 series, TIM2 and TIM5 are 32-bit.
  * All of the rest are 16-bit
  */
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) || \
-      defined(CONFIG_STM32_STM32G4XXX)
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32G4XXX)
 
   /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
 
