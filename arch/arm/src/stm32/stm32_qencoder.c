@@ -98,9 +98,12 @@
 #  define TIM5_BITWIDTH         32
 #  define TIM8_BITWIDTH         16
 
-/* On the F4 series, TIM2 and TIM5 are 32-bit.  All of the rest are 16-bit */
+/* On the F4, F2 and G4 series, TIM2 and TIM5 are 32-bit.
+ * All of the rest are 16-bit
+ */
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G4XXX)
 
   /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
 
@@ -197,8 +200,80 @@
                                   GPIO_MODE_INPUT)
 #elif defined(CONFIG_STM32_STM32F20XX) || \
       defined(CONFIG_STM32_STM32F30XX) || \
-      defined(CONFIG_STM32_STM32F4XXX)
+      defined(CONFIG_STM32_STM32F4XXX) || \
+      defined(CONFIG_STM32_STM32G4XXX)
 #  define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
+#else
+#  error "Unrecognized STM32 chip"
+#endif
+
+/* RCC definitions */
+
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F4XXX)
+
+#  define TIMRCCEN_TIM1    STM32_RCC_APB2ENR
+#  define TIMEN_TIM1       RCC_APB2ENR_TIM1EN
+#  define TIMRCCRST_TIM1   STM32_RCC_APB2RSTR
+#  define TIMRST_TIM1      RCC_APB2RSTR_TIM1RST
+
+#  define TIMRCCEN_TIM2    STM32_RCC_APB1ENR
+#  define TIMEN_TIM2       RCC_APB1ENR_TIM2EN
+#  define TIMRCCRST_TIM2   STM32_RCC_APB1RSTR
+#  define TIMRST_TIM2      RCC_APB1RSTR_TIM2RST
+
+#  define TIMRCCEN_TIM3    STM32_RCC_APB1ENR
+#  define TIMEN_TIM3       RCC_APB1ENR_TIM3EN
+#  define TIMRCCRST_TIM3   STM32_RCC_APB1RSTR
+#  define TIMRST_TIM3      RCC_APB1RSTR_TIM3RST
+
+#  define TIMRCCEN_TIM4    STM32_RCC_APB1ENR
+#  define TIMEN_TIM4       RCC_APB1ENR_TIM4EN
+#  define TIMRCCRST_TIM4   STM32_RCC_APB1RSTR
+#  define TIMRST_TIM4      RCC_APB1RSTR_TIM4RST
+
+#  define TIMRCCEN_TIM5    STM32_RCC_APB1ENR
+#  define TIMEN_TIM5       RCC_APB1ENR_TIM5EN
+#  define TIMRCCRST_TIM5   STM32_RCC_APB1RSTR
+#  define TIMRST_TIM5      RCC_APB1RSTR_TIM5RST
+
+#  define TIMRCCEN_TIM8    STM32_RCC_APB2ENR
+#  define TIMEN_TIM8       RCC_APB2ENR_TIM8EN
+#  define TIMRCCRST_TIM8   STM32_RCC_APB2RSTR
+#  define TIMRST_TIM8      RCC_APB2RSTR_TIM8RST
+
+#elif defined(CONFIG_STM32_STM32G4XXX)
+
+#  define TIMRCCEN_TIM1    STM32_RCC_APB2ENR
+#  define TIMEN_TIM1       RCC_APB2ENR_TIM1EN
+#  define TIMRCCRST_TIM1   STM32_RCC_APB2RSTR
+#  define TIMRST_TIM1      RCC_APB2RSTR_TIM1RST
+
+#  define TIMRCCEN_TIM2    STM32_RCC_APB1ENR1
+#  define TIMEN_TIM2       RCC_APB1ENR1_TIM2EN
+#  define TIMRCCRST_TIM2   STM32_RCC_APB1RSTR1
+#  define TIMRST_TIM2      RCC_APB1RSTR1_TIM2RST
+
+#  define TIMRCCEN_TIM3    STM32_RCC_APB1ENR1
+#  define TIMEN_TIM3       RCC_APB1ENR1_TIM3EN
+#  define TIMRCCRST_TIM3   STM32_RCC_APB1RSTR1
+#  define TIMRST_TIM3      RCC_APB1RSTR1_TIM3RST
+
+#  define TIMRCCEN_TIM4    STM32_RCC_APB1ENR1
+#  define TIMEN_TIM4       RCC_APB1ENR1_TIM4EN
+#  define TIMRCCRST_TIM4   STM32_RCC_APB1RSTR1
+#  define TIMRST_TIM4      RCC_APB1RSTR1_TIM4RST
+
+#  define TIMRCCEN_TIM5    STM32_RCC_APB1ENR1
+#  define TIMEN_TIM5       RCC_APB1ENR1_TIM5EN
+#  define TIMRCCRST_TIM5   STM32_RCC_APB1RSTR1
+#  define TIMRST_TIM5      RCC_APB1RSTR1_TIM5RST
+
+#  define TIMRCCEN_TIM8    STM32_RCC_APB2ENR
+#  define TIMEN_TIM8       RCC_APB2ENR_TIM8EN
+#  define TIMRCCRST_TIM8   STM32_RCC_APB2RSTR
+#  define TIMRST_TIM8      RCC_APB2RSTR_TIM8RST
+
 #else
 #  error "Unrecognized STM32 chip"
 #endif
@@ -335,8 +410,8 @@ static const struct stm32_qeconfig_s g_tim1config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM1_BITWIDTH,
 #endif
-  .regaddr  = STM32_RCC_APB2ENR,
-  .enable   = RCC_APB2ENR_TIM1EN,
+  .regaddr  = TIMRCCEN_TIM1,
+  .enable   = TIMEN_TIM1,
   .base     = STM32_TIM1_BASE,
   .psc      = CONFIG_STM32_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
@@ -360,8 +435,8 @@ static const struct stm32_qeconfig_s g_tim2config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM2_BITWIDTH,
 #endif
-  .regaddr  = STM32_RCC_APB1ENR,
-  .enable   = RCC_APB1ENR_TIM2EN,
+  .regaddr  = TIMRCCEN_TIM2,
+  .enable   = TIMEN_TIM2,
   .base     = STM32_TIM2_BASE,
   .psc      = CONFIG_STM32_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
@@ -385,8 +460,8 @@ static const struct stm32_qeconfig_s g_tim3config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM3_BITWIDTH,
 #endif
-  .regaddr  = STM32_RCC_APB1ENR,
-  .enable   = RCC_APB1ENR_TIM3EN,
+  .regaddr  = TIMRCCEN_TIM3,
+  .enable   = TIMEN_TIM3,
   .base     = STM32_TIM3_BASE,
   .psc      = CONFIG_STM32_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
@@ -410,8 +485,8 @@ static const struct stm32_qeconfig_s g_tim4config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM4_BITWIDTH,
 #endif
-  .regaddr  = STM32_RCC_APB1ENR,
-  .enable   = RCC_APB1ENR_TIM4EN,
+  .regaddr  = TIMRCCEN_TIM4,
+  .enable   = TIMEN_TIM4,
   .base     = STM32_TIM4_BASE,
   .psc      = CONFIG_STM32_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
@@ -435,8 +510,8 @@ static const struct stm32_qeconfig_s g_tim5config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM5_BITWIDTH,
 #endif
-  .regaddr  = STM32_RCC_APB1ENR,
-  .enable   = RCC_APB1ENR_TIM5EN,
+  .regaddr  = TIMRCCEN_TIM5,
+  .enable   = TIMEN_TIM5,
   .base     = STM32_TIM5_BASE,
   .psc      = CONFIG_STM32_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
@@ -460,8 +535,8 @@ static const struct stm32_qeconfig_s g_tim8config =
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM8_BITWIDTH,
 #endif
-  .regaddr  = STM32_RCC_APB2ENR,
-  .enable   = RCC_APB2ENR_TIM8EN,
+  .regaddr  = TIMRCCEN_TIM8,
+  .enable   = TIMEN_TIM8,
   .base     = STM32_TIM8_BASE,
   .psc      = CONFIG_STM32_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
@@ -998,38 +1073,38 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
     {
 #ifdef CONFIG_STM32_TIM1_QE
       case 1:
-        regaddr  = STM32_RCC_APB2RSTR;
-        resetbit = RCC_APB2RSTR_TIM1RST;
+        regaddr  = TIMRCCRST_TIM1;
+        resetbit = TIMRST_TIM1;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM2_QE
       case 2:
-        regaddr  = STM32_RCC_APB1RSTR;
-        resetbit = RCC_APB1RSTR_TIM2RST;
+        regaddr  = TIMRCCRST_TIM2;
+        resetbit = TIMRST_TIM2;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM3_QE
       case 3:
-        regaddr  = STM32_RCC_APB1RSTR;
-        resetbit = RCC_APB1RSTR_TIM3RST;
+        regaddr  = TIMRCCRST_TIM3;
+        resetbit = TIMRST_TIM3;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM4_QE
       case 4:
-        regaddr  = STM32_RCC_APB1RSTR;
-        resetbit = RCC_APB1RSTR_TIM4RST;
+        regaddr  = TIMRCCRST_TIM4;
+        resetbit = TIMRST_TIM4;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM5_QE
       case 5:
-        regaddr  = STM32_RCC_APB1RSTR;
-        resetbit = RCC_APB1RSTR_TIM5RST;
+        regaddr  = TIMRCCRST_TIM5;
+        resetbit = TIMRST_TIM5;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM8_QE
       case 8:
-        regaddr  = STM32_RCC_APB2RSTR;
-        resetbit = RCC_APB2RSTR_TIM8RST;
+        regaddr  = TIMRCCRST_TIM8;
+        resetbit = TIMRST_TIM8;
         break;
 #endif
       default:
