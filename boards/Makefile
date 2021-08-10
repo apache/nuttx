@@ -51,7 +51,7 @@ CONFIG_CSRCS = dummy.c
 
 # boardctl support
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CONFIG_CSRCS += boardctl.c
 endif
 

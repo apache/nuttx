@@ -582,6 +582,7 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
+      uint32_t sndseq;
 
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
@@ -639,11 +640,15 @@ found:
        * be beyond ackseq.
        */
 
-      ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
-            " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
-            tcp_getsequence(conn->sndseq), ackseq, unackseq,
-            (uint32_t)conn->tx_unacked);
-      tcp_setsequence(conn->sndseq, ackseq);
+      sndseq = tcp_getsequence(conn->sndseq);
+      if (TCP_SEQ_LT(sndseq, ackseq))
+        {
+          ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
+                " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
+                tcp_getsequence(conn->sndseq), ackseq, unackseq,
+                (uint32_t)conn->tx_unacked);
+          tcp_setsequence(conn->sndseq, ackseq);
+        }
 
       /* Do RTT estimation, unless we have done retransmissions. */
 

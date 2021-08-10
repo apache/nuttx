@@ -519,6 +519,17 @@ static uint16_t esp32_rtc_clk(FAR struct esp32_wdt_dev_s *dev)
   float cycles_ms;
   uint16_t cycles_ms_int;
 
+  /* Calibration map: Maps each RTC SLOW_CLK source to the number
+   * used to calibrate this source.
+   */
+
+  static const enum esp32_rtc_cal_sel_e cal_map[] =
+  {
+    RTC_CAL_RTC_MUX,
+    RTC_CAL_32K_XTAL,
+    RTC_CAL_8MD256
+  };
+
   DEBUGASSERT(dev);
 
   /* Check which clock is sourcing the slow_clk_rtc */
@@ -527,7 +538,8 @@ static uint16_t esp32_rtc_clk(FAR struct esp32_wdt_dev_s *dev)
 
   /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
 
-  period_13q19 = esp32_rtc_clk_cal(slow_clk_rtc, SLOW_CLK_CAL_CYCLES);
+  period_13q19 = esp32_rtc_clk_cal(cal_map[slow_clk_rtc],
+                                   SLOW_CLK_CAL_CYCLES);
 
   /* Assert no error happened during the calibration */
 
@@ -932,6 +944,18 @@ FAR struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
       case 2:
         {
           wdt = &g_esp32_rwdt_priv;
+
+          /* If RTC was not initialized in a previous
+           * stage by the PM or by clock_initialize()
+           * Then, init the RTC clock configuration here.
+           */
+
+#if !defined(CONFIG_PM) && !defined(CONFIG_RTC)
+          /* Initialize RTC controller parameters */
+
+          esp32_rtc_init();
+          esp32_rtc_clk_set();
+#endif
           break;
         }
 

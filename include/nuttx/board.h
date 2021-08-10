@@ -454,7 +454,7 @@ FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
  * Name: board_ioctl
  *
  * Description:
- *   If CONFIG_LIB_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
+ *   If CONFIG_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
  *   enable board specific commands.  In this case, all commands not
  *   recognized by boardctl() will be forwarded to the board-provided
  *   board_ioctl() function.

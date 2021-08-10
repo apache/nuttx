@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = k210_bringup.c k210_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += k210_appinit.c
 endif
 

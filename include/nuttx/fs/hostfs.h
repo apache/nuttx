@@ -87,9 +87,13 @@
 
 #define NUTTX_O_RDWR            (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
 
-/* Should match definition in include/limits.h */
+/* Should match definition in include/nuttx/fs/fs.h */
 
-#define NUTTX_NAME_MAX          CONFIG_NAME_MAX
+#define NUTTX_CH_STAT_MODE      (1 << 0)
+#define NUTTX_CH_STAT_UID       (1 << 1)
+#define NUTTX_CH_STAT_GID       (1 << 2)
+#define NUTTX_CH_STAT_ATIME     (1 << 3)
+#define NUTTX_CH_STAT_MTIME     (1 << 4)
 
 #endif /* __SIM__ */
 
@@ -132,8 +136,8 @@ struct nuttx_timespec
 
 struct nuttx_dirent_s
 {
-  uint8_t      d_type;                     /* type of file */
-  char         d_name[NUTTX_NAME_MAX + 1]; /* filename */
+  uint8_t      d_type;                      /* type of file */
+  char         d_name[CONFIG_NAME_MAX + 1]; /* filename */
 };
 
 /* These must exactly match the definition from include/sys/statfs.h: */
@@ -185,6 +189,8 @@ int           host_ioctl(int fd, int request, unsigned long arg);
 void          host_sync(int fd);
 int           host_dup(int fd);
 int           host_fstat(int fd, struct nuttx_stat_s *buf);
+int           host_fchstat(int fd, const struct nuttx_stat_s *buf,
+                           int flags);
 int           host_ftruncate(int fd, nuttx_off_t length);
 void         *host_opendir(const char *name);
 int           host_readdir(void *dirp, struct nuttx_dirent_s *entry);
@@ -196,6 +202,8 @@ int           host_mkdir(const char *pathname, mode_t mode);
 int           host_rmdir(const char *pathname);
 int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct nuttx_stat_s *buf);
+int           host_chstat(const char *path,
+                          const struct nuttx_stat_s *buf, int flags);
 #else
 int           host_open(const char *pathname, int flags, int mode);
 int           host_close(int fd);
@@ -206,6 +214,7 @@ int           host_ioctl(int fd, int request, unsigned long arg);
 void          host_sync(int fd);
 int           host_dup(int fd);
 int           host_fstat(int fd, struct stat *buf);
+int           host_fchstat(int fd, const struct stat *buf, int flags);
 int           host_ftruncate(int fd, off_t length);
 void         *host_opendir(const char *name);
 int           host_readdir(void *dirp, struct dirent *entry);
@@ -217,7 +226,8 @@ int           host_mkdir(const char *pathname, mode_t mode);
 int           host_rmdir(const char *pathname);
 int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct stat *buf);
-
+int           host_chstat(const char *path,
+                          const struct stat *buf, int flags);
 #endif /* __SIM__ */
 
 #endif /* __INCLUDE_NUTTX_FS_HOSTFS_H */

@@ -30,7 +30,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += k60_buttons.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += k60_appinit.c
 endif
 

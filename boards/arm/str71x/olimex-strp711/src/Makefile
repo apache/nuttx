@@ -21,7 +21,7 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = str71_spi.c str71_leds.c str71_buttons.c
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += str71_appinit.c
 endif
 ifeq ($(CONFIG_ENC28J60),y)

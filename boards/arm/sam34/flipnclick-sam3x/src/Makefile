@@ -28,7 +28,7 @@ else
 CSRCS += sam_userleds.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += sam_appinit.c
 endif
 

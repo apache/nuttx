@@ -87,6 +87,12 @@
 
 #define REG_PIC             REG_R10
 
+/* CONTROL register */
+
+#define CONTROL_FPCA        (1 << 2) /* Bit 2: Floating-point context active */
+#define CONTROL_SPSEL       (1 << 1) /* Bit 1: Stack-pointer select */
+#define CONTROL_NPRIV       (1 << 0) /* Bit 0: Not privileged */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

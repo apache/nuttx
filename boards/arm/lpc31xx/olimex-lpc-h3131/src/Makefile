@@ -38,7 +38,7 @@ ifeq ($(CONFIG_LPC31_MCI),y)
 CSRCS += lpc31_mmcsd.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += lpc31_appinit.c
 endif
 

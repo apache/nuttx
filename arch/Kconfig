@@ -102,6 +102,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_STDARG_H
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 

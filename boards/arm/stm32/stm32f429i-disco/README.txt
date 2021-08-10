@@ -849,7 +849,7 @@ Where <subdir> is one of the following:
          CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
 
        Board Selection ->
-         CONFIG_LIB_BOARDCTL=y    : Needed for CONFIG_NSH_ARCHINIT
+         CONFIG_BOARDCTL=y    : Needed for CONFIG_NSH_ARCHINIT
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization

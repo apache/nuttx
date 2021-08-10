@@ -261,7 +261,7 @@ extern struct sdio_dev_s *g_sdio;
  * Description:
  *   Perform architecture specific initialization
  *
- *   CONFIG_LIB_BOARDCTL=y:
+ *   CONFIG_BOARDCTL=y:
  *     If CONFIG_NSH_ARCHINITIALIZE=y:
  *       Called from the NSH library (or other application)
  *     Otherwise, assumed to be called from some other application.

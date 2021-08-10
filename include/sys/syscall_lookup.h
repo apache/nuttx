@@ -224,7 +224,7 @@ SYSCALL_LOOKUP(pwrite,                     4)
 
 /* Board support */
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
   SYSCALL_LOOKUP(boardctl,                 2)
 #endif
 
@@ -254,8 +254,8 @@ SYSCALL_LOOKUP(fchmod,                     2)
 SYSCALL_LOOKUP(chown,                      3)
 SYSCALL_LOOKUP(lchown,                     3)
 SYSCALL_LOOKUP(fchown,                     3)
-SYSCALL_LOOKUP(utimes,                     2)
-SYSCALL_LOOKUP(lutimes,                    2)
+SYSCALL_LOOKUP(utimens,                    2)
+SYSCALL_LOOKUP(lutimens,                   2)
 SYSCALL_LOOKUP(futimens,                   2)
 
 #if defined(CONFIG_FS_RAMMAP)

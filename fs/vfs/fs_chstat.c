@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
@@ -301,15 +300,15 @@ int lchown(FAR const char *path, uid_t owner, gid_t group)
 }
 
 /****************************************************************************
- * Name: utimes
+ * Name: utimens
  *
  * Description:
- *   The utimes() function shall set the access and modification times of
+ *   The utimens() function shall set the access and modification times of
  *   the file pointed to by the path argument to the value of the times
- *   argument. utimes() function allows time specifications accurate to
+ *   argument. utimens() function allows time specifications accurate to
  *   the microsecond.
  *
- *   For utimes(), the times argument is an array of timeval structures.
+ *   For utimens(), the times argument is an array of timeval structures.
  *   The first array member represents the date and time of last access,
  *   and the second member represents the date and time of last
  *   modification. The times in the timeval structure are measured in
@@ -320,7 +319,7 @@ int lchown(FAR const char *path, uid_t owner, gid_t group)
  *   times of the file shall be set to the current time. The effective
  *   user ID of the process shall match the owner of the file, has write
  *   access to the file or appropriate privileges to use this call in this
- *   manner. Upon completion, utimes() shall mark the time of the last
+ *   manner. Upon completion, utimens() shall mark the time of the last
  *   file status change, st_ctime, for update.
  *
  * Input Parameters:
@@ -334,14 +333,14 @@ int lchown(FAR const char *path, uid_t owner, gid_t group)
  *
  ****************************************************************************/
 
-int utimes(FAR const char *path, const struct timeval times[2])
+int utimens(FAR const char *path, const struct timespec times[2])
 {
   struct stat buf;
 
   if (times != NULL)
     {
-      TIMEVAL_TO_TIMESPEC(&times[0], &buf.st_atim);
-      TIMEVAL_TO_TIMESPEC(&times[1], &buf.st_mtim);
+      buf.st_atim = times[0];
+      buf.st_mtim = times[1];
     }
   else
     {
@@ -353,10 +352,10 @@ int utimes(FAR const char *path, const struct timeval times[2])
 }
 
 /****************************************************************************
- * Name: lutimes
+ * Name: lutimens
  *
  * Description:
- *   The lutimes() system call is similar to utimes() but does not follow
+ *   The lutimens() system call is similar to utimens() but does not follow
  *   the symbolic links.
  *
  * Input Parameters:
@@ -370,14 +369,14 @@ int utimes(FAR const char *path, const struct timeval times[2])
  *
  ****************************************************************************/
 
-int lutimes(FAR const char *path, const struct timeval times[2])
+int lutimens(FAR const char *path, const struct timespec times[2])
 {
   struct stat buf;
 
   if (times != NULL)
     {
-      TIMEVAL_TO_TIMESPEC(&times[0], &buf.st_atim);
-      TIMEVAL_TO_TIMESPEC(&times[1], &buf.st_mtim);
+      buf.st_atim = times[0];
+      buf.st_mtim = times[1];
     }
   else
     {

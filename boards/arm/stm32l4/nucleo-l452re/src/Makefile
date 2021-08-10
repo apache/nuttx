@@ -40,7 +40,7 @@ ifeq ($(CONFIG_DAC),y)
 CSRCS += stm32_dac.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 

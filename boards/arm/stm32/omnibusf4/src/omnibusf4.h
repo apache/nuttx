@@ -110,7 +110,7 @@
  *   CONFIG_BOARD_INITIALIZE=y :
  *     Called from board_initialize().
  *
- *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/

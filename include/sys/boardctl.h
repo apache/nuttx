@@ -42,7 +42,7 @@
 #  include <nuttx/nx/nxterm.h>
 #endif
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,7 +63,7 @@
  *                whatever you would like to do with it.  Every
  *                implementation should accept zero/NULL as a default
  *                configuration.
- * CONFIGURATION: CONFIG_LIB_BOARDCTL
+ * CONFIGURATION: CONFIG_BOARDCTL
  * DEPENDENCIES:  Board logic must provide board_app_initialize()
  *
  * CMD:           BOARDIOC_POWEROFF
@@ -141,7 +141,7 @@
  * CMD:           BOARDIOC_USBDEV_CONTROL
  * DESCRIPTION:   Manage USB device classes
  * ARG:           A pointer to an instance of struct boardioc_usbdev_ctrl_s
- * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
+ * CONFIGURATION: CONFIG_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
  * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
  *
  * CMD:           BOARDIOC_NX_START
@@ -457,5 +457,5 @@ int boardctl(unsigned int cmd, uintptr_t arg);
 }
 #endif
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */
 #endif /* __INCLUDE_SYS_BOARDCTL_H */

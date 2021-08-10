@@ -9,7 +9,7 @@ menu "pthread support"
 config PTHREAD_SPINLOCKS
 	bool "pthread spinlock support"
 	default n
-	depends on SPINLOCK && LIB_BOARDCTL
+	depends on SPINLOCK && BOARDCTL
 	select BOARDCTL_TESTSET
 	---help---
 		Enable support for pthread spinlocks.

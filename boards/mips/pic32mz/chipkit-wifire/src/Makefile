@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = pic32mz_boot.c pic32mz_bringup.c pic32mz_userleds.c pic32mz_spi.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += pic32mz_appinit.c
 endif
 

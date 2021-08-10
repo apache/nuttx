@@ -45,11 +45,11 @@
 #  warning I2C support is required (CONFIG_I2C)
 #endif
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#if (!defined CONFIG_SCHED_WORKQUEUE) && (defined CONFIG_MCP23X17_INT_ENABLE)
 #  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
-#ifndef CONFIG_SCHED_HPWORK
+#if (!defined CONFIG_SCHED_HPWORK) && (defined CONFIG_MCP23X17_INT_ENABLE)
 #  error High-Priority Work support is required (CONFIG_SCHED_HPWORK)
 #endif
 
@@ -950,7 +950,6 @@ FAR struct ioexpander_dev_s *mcp23x17_initialize(
                               FAR struct mcp23x17_config_s *config)
 {
   FAR struct mcp23x17_dev_s *priv;
-  int ret;
 
   DEBUGASSERT(i2cdev != NULL && config != NULL);
 

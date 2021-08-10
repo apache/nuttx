@@ -30,7 +30,7 @@
 
 #include "stm32f429i-disco.h"
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Public Functions
@@ -74,4 +74,4 @@ int board_app_initialize(uintptr_t arg)
 #endif
 }
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = fe310_bringup.c fe310_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += fe310_appinit.c
 endif
 
