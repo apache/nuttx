@@ -131,6 +131,11 @@ static int     userfs_rename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath);
 static int     userfs_stat(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct stat *buf);
+static int     userfs_fchstat(FAR const struct file *filep,
+                 FAR const struct stat *buf, int flags);
+static int     userfs_chstat(FAR struct inode *mountpt,
+                 FAR const char *relpath,
+                 FAR const struct stat *buf, int flags);
 
 /****************************************************************************
  * Public Data
@@ -153,7 +158,7 @@ const struct mountpt_operations userfs_operations =
   userfs_sync,       /* sync */
   userfs_dup,        /* dup */
   userfs_fstat,      /* fstat */
-  NULL,              /* fchstat */
+  userfs_fchstat,    /* fchstat */
   userfs_truncate,   /* truncate */
 
   userfs_opendir,    /* opendir */
@@ -170,7 +175,7 @@ const struct mountpt_operations userfs_operations =
   userfs_rmdir,      /* rmdir */
   userfs_rename,     /* rename */
   userfs_stat,       /* stat */
-  NULL               /* chstat */
+  userfs_chstat      /* chstat */
 };
 
 /****************************************************************************
@@ -896,6 +901,85 @@ static int userfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   DEBUGASSERT(buf != NULL);
   memcpy(buf, &resp->buf, sizeof(struct stat));
+  return resp->ret;
+}
+
+/****************************************************************************
+ * Name: userfs_fchstat
+ *
+ * Description:
+ *   Change information about an open file associated with the file
+ *   descriptor 'filep'.
+ *
+ ****************************************************************************/
+
+static int userfs_fchstat(FAR const struct file *filep,
+                          FAR const struct stat *buf, int flags)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_fchstat_request_s *req;
+  FAR struct userfs_fchstat_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int ret;
+
+  DEBUGASSERT(filep != NULL &&
+              filep->f_inode != NULL &&
+              filep->f_inode->i_private != NULL);
+  priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = nxsem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req           = (FAR struct userfs_fchstat_request_s *)priv->iobuffer;
+  req->req      = USERFS_REQ_FCHSTAT;
+  req->openinfo = filep->f_priv;
+  req->buf      = *buf;
+  req->flags    = flags;
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       sizeof(struct userfs_fchstat_request_s), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxsem_post(&priv->exclsem);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxsem_post(&priv->exclsem);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_fchstat_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_fchstat_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_FCHSTAT)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
   return resp->ret;
 }
 
@@ -1983,6 +2067,94 @@ static int userfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   DEBUGASSERT(buf != NULL);
   memcpy(buf, &resp->buf, sizeof(struct stat));
+  return resp->ret;
+}
+
+/****************************************************************************
+ * Name: userfs_chstat
+ *
+ * Description:
+ *   Change information about a file or directory
+ *
+ ****************************************************************************/
+
+static int userfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
+                         FAR const struct stat *buf, int flags)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_chstat_request_s *req;
+  FAR struct userfs_chstat_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int pathlen;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL &&
+              mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Check the path length */
+
+  DEBUGASSERT(relpath != NULL);
+  pathlen = strlen(relpath);
+  if (pathlen > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = nxsem_wait(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req        = (FAR struct userfs_chstat_request_s *)priv->iobuffer;
+  req->req   = USERFS_REQ_CHSTAT;
+  req->buf   = *buf;
+  req->flags = flags;
+
+  strncpy(req->relpath, relpath, priv->mxwrite);
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       SIZEOF_USERFS_CHSTAT_REQUEST_S(pathlen + 1), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxsem_post(&priv->exclsem);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxsem_post(&priv->exclsem);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_chstat_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_chstat_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_STAT)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
   return resp->ret;
 }
 
