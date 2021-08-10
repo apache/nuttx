@@ -68,7 +68,7 @@ int mkrd(int minor, uint32_t nsectors, uint16_t sectsize, uint8_t rdflags)
   buffer = (FAR uint8_t *)kmm_malloc(sectsize * nsectors);
   if (buffer == NULL)
     {
-      ferr("ERROR: kmm_malloc() failed: %d\n", ret);
+      ferr("ERROR: kmm_malloc() failed, enable DEBUG_MM for more info!\n");
       return -ENOMEM;
     }
 
