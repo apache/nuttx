@@ -318,52 +318,66 @@ int psock_tcp_connect(FAR struct socket *psock,
 
   if (ret >= 0)
     {
-      /* Set up the callbacks in the connection */
+      /* Notify the device driver that new connection is available. */
 
-      ret = psock_setup_callbacks(psock, &state);
-      if (ret >= 0)
+      netdev_txnotify_dev(((FAR struct tcp_conn_s *)psock->s_conn)->dev);
+
+      /* Non-blocking connection ? set the socket error
+       * and start the monitor
+       */
+
+      if (_SS_ISNONBLOCK(psock->s_flags))
         {
-          /* Notify the device driver that new connection is available. */
+          ret = -EINPROGRESS;
+        }
+      else
+        {
+          /* Set up the callbacks in the connection */
 
-          netdev_txnotify_dev(((FAR struct tcp_conn_s *)psock->s_conn)->dev);
-
-          /* Wait for either the connect to complete or for an error/timeout
-           * to occur. NOTES:  net_lockedwait will also terminate if a signal
-           * is received.
-           */
-
-          ret = net_lockedwait(&state.tc_sem);
-
-          /* Uninitialize the state structure */
-
-          nxsem_destroy(&state.tc_sem);
-
-          /* If net_lockedwait failed, negated errno was returned. */
-
+          ret = psock_setup_callbacks(psock, &state);
           if (ret >= 0)
             {
-              /* If the wait succeeded, then get the new error value from
-               * the state structure
+              /* Wait for either the connect to complete or for an
+               * error/timeout to occur.
+               * NOTES:  net_lockedwait will also terminate if a
+               * signal is received.
                */
 
-              ret = state.tc_result;
+              ret = net_lockedwait(&state.tc_sem);
+
+              /* Uninitialize the state structure */
+
+              nxsem_destroy(&state.tc_sem);
+
+              /* If net_lockedwait failed, negated errno was returned. */
+
+              if (ret >= 0)
+                {
+                  /* If the wait succeeded, then get the new error
+                   * value from the state structure
+                   */
+
+                  ret = state.tc_result;
+                }
+
+              /* Make sure that no further events are processed */
+
+              psock_teardown_callbacks(&state, ret);
             }
-
-          /* Make sure that no further events are processed */
-
-          psock_teardown_callbacks(&state, ret);
         }
 
       /* Check if the socket was successfully connected. */
 
-      if (ret >= 0)
+      if (ret >= 0 || ret == -EINPROGRESS)
         {
+          int ret2;
+
           /* Yes... Now that we are connected, we need to set up to monitor
            * the state of the connection up the connection event monitor.
            */
 
-          ret = tcp_start_monitor(psock);
-          if (ret < 0)
+          ret2 = tcp_start_monitor(psock);
+          if (ret2 < 0)
             {
               /* tcp_start_monitor() can only fail on certain race
                * conditions where the connection was lost just before
@@ -372,6 +386,7 @@ int psock_tcp_connect(FAR struct socket *psock,
                */
 
               tcp_stop_monitor(psock->s_conn, TCP_ABORT);
+              ret = ret2;
             }
         }
     }
