@@ -107,11 +107,12 @@ static int tiva_qe_resetatindex(FAR struct tiva_qe_s *qe);
 
 static const struct qe_ops_s g_qe_ops =
 {
-  .setup    = tiva_qe_setup,
-  .shutdown = tiva_qe_shutdown,
-  .position = tiva_qe_position,
-  .reset    = tiva_qe_reset,
-  .ioctl    = tiva_qe_ioctl,
+  .setup     = tiva_qe_setup,
+  .shutdown  = tiva_qe_shutdown,
+  .position  = tiva_qe_position,
+  .setposmax = NULL,            /* not supported yet */
+  .reset     = tiva_qe_reset,
+  .ioctl     = tiva_qe_ioctl,
 };
 
 #ifdef CONFIG_TIVA_QEI0
