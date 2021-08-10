@@ -1938,7 +1938,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
   char      devname[22];
   FAR struct smart_multiroot_device_s *rootdirdev;
 #endif
-  static const short sizetbl[8] =
+  static const uint16_t sizetbl[8] =
   {
     CONFIG_MTD_SMART_SECTOR_SIZE,
     512, 1024, 4096, 2048, 8192, 16384, 32768
