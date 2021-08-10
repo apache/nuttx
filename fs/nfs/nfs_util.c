@@ -514,8 +514,6 @@ int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
 
 void nfs_attrupdate(FAR struct nfsnode *np, FAR struct nfs_fattr *attributes)
 {
-  struct timespec ts;
-
   /* Save a few of the files attribute values in file structure (host
    * order).
    */
@@ -524,12 +522,7 @@ void nfs_attrupdate(FAR struct nfsnode *np, FAR struct nfs_fattr *attributes)
   np->n_mode   = fxdr_unsigned(uint16_t, attributes->fa_mode);
   np->n_size   = fxdr_hyper(&attributes->fa_size);
 
-  fxdr_nfsv3time(&attributes->fa_atime, &ts);
-  np->n_atime  = ts.tv_sec;
-
-  fxdr_nfsv3time(&attributes->fa_mtime, &ts);
-  np->n_mtime  = ts.tv_sec;
-
-  fxdr_nfsv3time(&attributes->fa_ctime, &ts);
-  np->n_ctime  = ts.tv_sec;
+  fxdr_nfsv3time(&attributes->fa_atime, &np->n_atime);
+  fxdr_nfsv3time(&attributes->fa_mtime, &np->n_mtime);
+  fxdr_nfsv3time(&attributes->fa_ctime, &np->n_ctime);
 }
