@@ -5,4 +5,12 @@
 
 if ARCH_BOARD_NUCLEO_G431RB
 
+if SENSORS_QENCODER
+
+config NUCLEO_G431RB_QETIMER
+	int "Timer to use with QE encoder"
+	default 2
+
+endif # SENSORS_QENCODER
+
 endif # ARCH_BOARD_NUCLEO_G431RB
