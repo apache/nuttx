@@ -118,8 +118,8 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
  * Name: xtensa_appcpu_start
  *
  * Description:
- *   This is the entry point used with the APP CPU was started  via
- *   up_cpu_start().  The actually start-up logic in in ROM and we boot up
+ *   This is the entry point used for the APP CPU when it's started  via
+ *   up_cpu_start().  The actual start-up logic is in ROM and we boot up
  *   in C code.
  *
  * Input Parameters:
@@ -229,14 +229,14 @@ void xtensa_appcpu_start(void)
  * Name: up_cpu_start
  *
  * Description:
- *   In an SMP configution, only one CPU is initially active (CPU 0). System
- *   initialization occurs on that single thread. At the completion of the
- *   initialization of the OS, just before beginning normal multitasking,
+ *   In an SMP configuration, only one CPU is initially active (CPU 0).
+ *   System initialization occurs on that single thread. At the completion of
+ *   the initialization of the OS, just before beginning normal multitasking,
  *   the additional CPUs would be started by calling this function.
  *
- *   Each CPU is provided the entry point to is IDLE task when started.  A
+ *   Each CPU is provided the entry point to its IDLE task when started.  A
  *   TCB for each CPU's IDLE task has been initialized and placed in the
- *   CPU's g_assignedtasks[cpu] list.  Not stack has been allocated or
+ *   CPU's g_assignedtasks[cpu] list.  No stack has been allocated or
  *   initialized.
  *
  *   The OS initialization logic calls this function repeatedly until each
@@ -244,8 +244,8 @@ void xtensa_appcpu_start(void)
  *
  * Input Parameters:
  *   cpu - The index of the CPU being started.  This will be a numeric
- *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
- *         0 is already active)
+ *         value in the range of one to (CONFIG_SMP_NCPUS-1).
+ *         (CPU 0 is already active)
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
