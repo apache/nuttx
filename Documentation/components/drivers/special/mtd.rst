@@ -28,8 +28,6 @@ Memory Technology Device Drivers
    Support other, less frequently used commands:
 
    -  ``MTDIOC_GEOMETRY``: Get MTD geometry
-   -  ``MTDIOC_XIPBASE:``: Convert block to physical address for
-      eXecute-In-Place
    -  ``MTDIOC_BULKERASE``: Erase the entire device
 
    is provided via a single ``ioctl`` method (see

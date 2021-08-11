@@ -723,7 +723,7 @@ static int sst39vf_ioctl(FAR struct mtd_dev_s *dev,
         }
         break;
 
-      case MTDIOC_XIPBASE:
+      case BIOC_XIPBASE:
         {
           FAR void **ppv = (FAR void **)arg;
           if (ppv)
