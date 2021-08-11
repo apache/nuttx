@@ -478,6 +478,8 @@ static int ftl_geometry(FAR struct inode *inode,
       geometry->geo_nsectors      = dev->geo.neraseblocks * dev->blkper;
       geometry->geo_sectorsize    = dev->geo.blocksize;
 
+      strcpy(geometry->geo_model, dev->geo.model);
+
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
       finfo("nsectors: %" PRIuOFF " sectorsize: %u\n",

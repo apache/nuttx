@@ -947,6 +947,8 @@ static int gd25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               geo->blocksize    = GD25_PAGE_SIZE;
               geo->erasesize    = GD25_SECTOR_SIZE;
               geo->neraseblocks = priv->nsectors;

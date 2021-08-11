@@ -236,6 +236,8 @@ static int ameba_flash_ioctl(struct mtd_dev_s *dev,
         (struct mtd_geometry_s *)((uintptr_t)arg);
       if (geo)
         {
+          memset(geo, 0, sizeof(*geo));
+
           geo->blocksize    = AMEBA_PAGE_SIZE;
           geo->erasesize    = AMEBA_SECTOR_SIZE;
           geo->neraseblocks = priv->nsectors;

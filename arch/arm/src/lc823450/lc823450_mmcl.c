@@ -192,6 +192,9 @@ static int mmcl_geometry(struct inode *inode, struct geometry *geometry)
   if (geometry)
     {
       dev = (struct mmcl_dev_s *)inode->i_private;
+
+      memset(geometry, 0, sizeof(*geometry));
+
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
       geometry->geo_writeenabled  = true;

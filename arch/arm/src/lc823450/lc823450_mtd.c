@@ -314,6 +314,8 @@ static int lc823450_ioctl(struct mtd_dev_s *dev, int cmd,
         geo = (struct mtd_geometry_s *)arg;
         if (geo)
           {
+            memset(geo, 0, sizeof(*geo));
+
             /* Populate the geometry structure with information needed to
              * know the capacity and how to access the device.
              */

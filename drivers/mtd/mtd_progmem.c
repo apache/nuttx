@@ -310,6 +310,8 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               /* Populate the geometry structure with information needed to
                * know the capacity and how to access the device.
                *

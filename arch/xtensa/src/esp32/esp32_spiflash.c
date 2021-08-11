@@ -1990,6 +1990,8 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               geo->blocksize    = MTD_BLKSIZE(priv);
               geo->erasesize    = MTD_ERASESIZE(priv);
               geo->neraseblocks = MTD_SIZE(priv) / MTD_ERASESIZE(priv);
@@ -2066,6 +2068,8 @@ static int esp32_ioctl_encrypt(struct mtd_dev_s *dev, int cmd,
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               geo->blocksize    = SPI_FLASH_ENCRYPT_MIN_SIZE;
               geo->erasesize    = MTD_ERASESIZE(priv);
               geo->neraseblocks = MTD_SIZE(priv) / geo->erasesize;

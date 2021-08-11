@@ -871,6 +871,8 @@ static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                                            ((uintptr_t)arg);
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               /* Populate the geometry structure with information need to
                * know the capacity and how to access the device.
                *
