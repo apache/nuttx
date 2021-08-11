@@ -43,12 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is the name of the section containing the Xtensa low level handlers
- * that is used by the board linker scripts.
- */
-
-#define HANDLER_SECTION .iram1
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
