@@ -432,7 +432,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
+      case BIOC_XIPBASE:
         {
           FAR void **ppv = (FAR void**)arg;
           unsigned long base;
@@ -441,7 +441,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             {
               /* Get the XIP base of the entire FLASH */
 
-              ret = priv->parent->ioctl(priv->parent, MTDIOC_XIPBASE,
+              ret = priv->parent->ioctl(priv->parent, BIOC_XIPBASE,
                                         (unsigned long)((uintptr_t)&base));
               if (ret == OK)
                 {
