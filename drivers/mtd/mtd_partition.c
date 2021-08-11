@@ -414,7 +414,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_PARTINFO:
+      case BIOC_PARTINFO:
         {
           FAR struct partition_info_s *info =
             (FAR struct partition_info_s *)arg;
