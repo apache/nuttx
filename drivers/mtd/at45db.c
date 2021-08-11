@@ -822,7 +822,6 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd,
         }
         break;
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

@@ -973,7 +973,6 @@ static int ramtron_ioctl(FAR struct mtd_dev_s *dev,
         break;
 #endif
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

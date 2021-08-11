@@ -308,26 +308,6 @@ int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
             }
         }
         break;
-      case MTDIOC_BULKERASE:
-        {
-          /* Erase the entire partition */
-
-          finfo("cmd(0x%x) MTDIOC_BULKERASE not support.\n", cmd);
-        }
-        break;
-      case MTDIOC_XIPBASE:
-        {
-          /* Get the XIP base of the entire FLASH */
-
-          finfo("cmd(0x%x) MTDIOC_XIPBASE not support.\n", cmd);
-        }
-        break;
-      case MTDIOC_FLUSH:
-        {
-          finfo("cmd(0x%x) MTDIOC_FLUSH.\n", cmd);
-          ret = OK;
-        }
-        break;
       default:
         {
           finfo("cmd(0x%x) not support.\n", cmd);

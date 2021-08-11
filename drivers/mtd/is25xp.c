@@ -964,7 +964,6 @@ static int is25xp_ioctl(FAR struct mtd_dev_s *dev,
         }
         break;
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;
