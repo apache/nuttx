@@ -292,7 +292,7 @@ WiFi
 A standard network interface will be configured and can be initialized such as::
 
     ifup wlan0
-    wapi psk wlan0 mypasswd 1
+    wapi psk wlan0 mypasswd 3
     wapi essid wlan0 myssid 1
     renew wlan0
 
