@@ -40,6 +40,12 @@
 
 /* Ioctl commands */
 
+/* Note, the following ioctl existed in the past and was removed:
+ * #define MTDIOC_PARTINFO   _MTDIOC(0x000b)
+ * try to avoid adding a new ioctl with the same ioctl number and
+ * replace with BIOC_PARTINFO instead.
+ */
+
 #define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
                                            *      mtd_geometry_s in which to receive
                                            *      receive geometry data (see mtd.h)
@@ -74,12 +80,6 @@
 #define MTDIOC_ERASESTATE _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
                                            * OUT: Byte value that represents the
                                            *      erased state of the MTD cell */
-#define MTDIOC_PARTINFO   _MTDIOC(0x000b) /* IN:  Pointer to writable struct
-                                           *      partition_info_s in which to
-                                           *      receive partition information data
-                                           * OUT: Partition information structure
-                                           *      populated with data from the MTD
-                                           *      partition */
 
 /* Macros to hide implementation */
 
