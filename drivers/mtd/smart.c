@@ -5466,27 +5466,6 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-    case BIOC_XIPBASE:
-      /* The argument accompanying the BIOC_XIPBASE should be non-NULL.  If
-       * DEBUG is enabled, we will catch it here instead of in the MTD
-       * driver.
-       */
-
-#ifdef CONFIG_DEBUG_FEATURES
-      if (arg == 0)
-        {
-          ferr("ERROR: BIOC_XIPBASE argument is NULL\n");
-          return -EINVAL;
-        }
-#endif
-
-      /* Just change the BIOC_XIPBASE command to the MTDIOC_XIPBASE
-       * command.
-       */
-
-      cmd = MTDIOC_XIPBASE;
-      break;
-
     case BIOC_GETFORMAT:
 
       /* Return the format information for the device */

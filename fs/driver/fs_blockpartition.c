@@ -227,7 +227,7 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
       ret = parent->u.i_bops->ioctl(parent, cmd, arg);
       if (ret >= 0)
         {
-          if (cmd == BIOC_XIPBASE || cmd == MTDIOC_XIPBASE)
+          if (cmd == BIOC_XIPBASE)
             {
               FAR void **base = (FAR void **)ptr_arg;
               struct geometry geo;
