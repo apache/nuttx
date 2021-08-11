@@ -535,10 +535,6 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 #ifdef CONFIG_FTL_WRITEBUFFER
       rwb_flush(&dev->rwb);
 #endif
-
-      /* Change the BIOC_FLUSH command to the MTDIOC_FLUSH command. */
-
-      cmd = MTDIOC_FLUSH;
     }
 
   /* No other block driver ioctl commands are not recognized by this

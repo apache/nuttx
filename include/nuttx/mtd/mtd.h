@@ -41,9 +41,10 @@
 /* Ioctl commands */
 
 /* Note, the following ioctl existed in the past and was removed:
+ * #define MTDIOC_FLUSH      _MTDIOC(0x0009)
  * #define MTDIOC_PARTINFO   _MTDIOC(0x000b)
  * try to avoid adding a new ioctl with the same ioctl number and
- * replace with BIOC_PARTINFO instead.
+ * replace with BIOC_FLUSH and BIOC_PARTINFO instead.
  */
 
 #define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
@@ -74,9 +75,6 @@
                                            * OUT: None */
 #define MTDIOC_ECCSTATUS  _MTDIOC(0x0008) /* IN:  Pointer to uint8_t
                                            * OUT: ECC status */
-#define MTDIOC_FLUSH      _MTDIOC(0x0009) /* IN:  None
-                                           * OUT: None (ioctl return value provides
-                                           *      success/failure indication). */
 #define MTDIOC_ERASESTATE _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
                                            * OUT: Byte value that represents the
                                            *      erased state of the MTD cell */
