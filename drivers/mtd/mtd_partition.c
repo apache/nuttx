@@ -424,7 +424,6 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
               info->numsectors  = priv->neraseblocks * priv->blkpererase;
               info->sectorsize  = priv->blocksize;
               info->startsector = priv->firstblock;
-              info->endsector   = priv->firstblock + info->numsectors;
 
               strncpy(info->parent, priv->parent->name, NAME_MAX);
 
