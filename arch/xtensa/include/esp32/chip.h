@@ -58,6 +58,11 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+uintptr_t xtensa_intstack_alloc(void);
+uintptr_t xtensa_intstack_top(void);
+#endif
+
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
