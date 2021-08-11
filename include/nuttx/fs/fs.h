@@ -232,8 +232,6 @@ struct partition_info_s
   size_t          sectorsize;   /* Size in bytes of a single sector */
   off_t           startsector;  /* Offset to the first section/block of the
                                  * managed sub-region */
-  off_t           endsector;    /* Offset to the last section/block of the
-                                 * managed sub-region */
 
   /* NULL-terminated string representing the name of the parent node of the
    * partition.
