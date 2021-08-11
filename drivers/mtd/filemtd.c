@@ -436,10 +436,6 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         }
         break;
 
-      case MTDIOC_XIPBASE:
-        ret = -ENOTTY; /* Bad command */
-        break;
-
       case MTDIOC_BULKERASE:
         {
           /* Erase the entire device */
