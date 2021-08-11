@@ -540,12 +540,6 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
       cmd = MTDIOC_FLUSH;
     }
-  else if (cmd == BIOC_PARTINFO)
-    {
-      /* Change the BIOC_PARTINFO command to the MTDIOC_PARTINFO command. */
-
-      cmd = MTDIOC_PARTINFO;
-    }
 
   /* No other block driver ioctl commands are not recognized by this
    * driver.  Other possible MTD driver ioctl commands are passed through
