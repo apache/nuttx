@@ -556,6 +556,8 @@ static int imxrt_flexspi_nor_ioctl(struct mtd_dev_s *dev,
 
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               /* Populate the geometry structure with information need to
                * know the capacity and how to access the device.
                *

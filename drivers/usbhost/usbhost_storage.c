@@ -2220,6 +2220,8 @@ static int usbhost_geometry(FAR struct inode *inode,
       ret = nxmutex_lock(&priv->lock);
       if (ret >= 0)
         {
+          memset(geometry, 0, sizeof(*geometry));
+
           geometry->geo_available     = true;
           geometry->geo_mediachanged  = false;
           geometry->geo_writeenabled  = true;

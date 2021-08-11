@@ -288,6 +288,9 @@ static int loop_geometry(FAR struct inode *inode,
   if (geometry)
     {
       dev = (FAR struct loop_struct_s *)inode->i_private;
+
+      memset(geometry, 0, sizeof(*geometry));
+
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
       geometry->geo_writeenabled  = dev->writeenabled;

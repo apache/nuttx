@@ -1611,6 +1611,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   /* Then return the card geometry */
 
+  memset(geometry, 0, sizeof(*geometry));
+
   geometry->geo_available =
     ((slot->state & (MMCSD_SLOTSTATUS_NOTREADY |
                      MMCSD_SLOTSTATUS_NODISK)) == 0);

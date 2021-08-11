@@ -1010,6 +1010,8 @@ static int is25xp_ioctl(FAR struct mtd_dev_s *dev,
                               (FAR struct mtd_geometry_s *)((uintptr_t)arg);
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               /* Populate the geometry structure with information need to
                * know the capacity and how to access the device.
                *

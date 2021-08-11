@@ -1066,6 +1066,8 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
                                     dev->sectorsize;
       geometry->geo_sectorsize    = dev->sectorsize;
 
+      strcpy(geometry->geo_model, dev->geo.model);
+
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
       finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIi16 "\n",
