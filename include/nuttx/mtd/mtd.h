@@ -110,6 +110,10 @@ struct mtd_geometry_s
   uint32_t erasesize;     /* Size of one erase blocks -- must be a multiple
                            * of blocksize. */
   uint32_t neraseblocks;  /* Number of erase blocks */
+
+  /* NULL-terminated string representing the device model */
+
+  char     model[NAME_MAX + 1];
 };
 
 /* This structure describes a range of sectors to be protected or
