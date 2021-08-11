@@ -65,7 +65,6 @@
 
 #include "xtensa.h"
 #include "xtensa_abi.h"
-#include "chip_macros.h"
 #include "xtensa_timer.h"
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15

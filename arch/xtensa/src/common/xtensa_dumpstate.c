@@ -38,7 +38,6 @@
 #include "sched/sched.h"
 #include "xtensa.h"
 #include "chip_memory.h"
-#include "chip_macros.h"
 
 #ifdef CONFIG_DEBUG_ALERT
 

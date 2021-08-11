@@ -35,7 +35,6 @@
 
 #include "xtensa.h"
 #include "sched/sched.h"
-#include "chip_macros.h"
 
 #ifdef CONFIG_STACK_COLORATION
 
