@@ -190,6 +190,8 @@ static int cxd56_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
           finfo("cmd: GEOM\n");
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               /* Populate the geometry structure with information need to
                * know the capacity and how to access the device.
                *

@@ -920,6 +920,8 @@ static int cxd56_emmc_geometry(struct inode *inode,
   DEBUGASSERT(inode && inode->i_private);
   priv = (struct cxd56_emmc_state_s *)inode->i_private;
 
+  memset(geometry, 0, sizeof(*geometry));
+
   geometry->geo_available = true;
   geometry->geo_mediachanged = false;
 #if !defined(CONFIG_MMCSD_READONLY)

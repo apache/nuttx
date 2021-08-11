@@ -456,6 +456,8 @@ static int rp2040_flash_ioctl(struct mtd_dev_s *dev,
 
           if (geo != NULL)
             {
+              memset(geo, 0, sizeof(*geo));
+
               geo->blocksize    = FLASH_SECTOR_SIZE;
               geo->erasesize    = FLASH_BLOCK_SIZE;
               geo->neraseblocks = FLASH_BLOCK_COUNT;

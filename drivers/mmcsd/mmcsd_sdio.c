@@ -2245,6 +2245,8 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   if (geometry)
     {
+      memset(geometry, 0, sizeof(*geometry));
+
       /* Is there a (supported) card inserted in the slot? */
 
       priv = (FAR struct mmcsd_state_s *)inode->i_private;

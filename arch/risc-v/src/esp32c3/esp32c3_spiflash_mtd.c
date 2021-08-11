@@ -577,6 +577,8 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               geo->blocksize    = MTD_BLK_SIZE;
               geo->erasesize    = MTD_ERASE_SIZE;
               geo->neraseblocks = MTD_SIZE(priv) / MTD_ERASE_SIZE;

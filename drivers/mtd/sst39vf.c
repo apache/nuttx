@@ -710,6 +710,8 @@ static int sst39vf_ioctl(FAR struct mtd_dev_s *dev,
           FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
+              memset(geo, 0, sizeof(*geo));
+
               /* Populate the geometry structure with information need to
                * know the capacity and how to access the device.
                */
