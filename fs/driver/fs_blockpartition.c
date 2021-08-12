@@ -43,6 +43,7 @@
 struct part_struct_s
 {
   FAR struct inode *parent;
+  size_t sectorsize;
   size_t firstsector;
   size_t nsectors;
 };
@@ -214,40 +215,58 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
   FAR struct inode *parent = dev->parent;
   int ret = -ENOTTY;
 
-  if (parent->u.i_bops->ioctl)
+  switch (cmd)
     {
-      if (cmd == MTDIOC_PROTECT || cmd == MTDIOC_UNPROTECT)
+      case BIOC_PARTINFO:
         {
-          FAR struct mtd_protect_s *prot =
-            (FAR struct mtd_protect_s *)ptr_arg;
-
-          prot->startblock += dev->firstsector;
-        }
-
-      ret = parent->u.i_bops->ioctl(parent, cmd, arg);
-      if (ret >= 0)
-        {
-          if (cmd == BIOC_XIPBASE)
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)ptr_arg;
+          if (info != NULL)
             {
-              FAR void **base = (FAR void **)ptr_arg;
-              struct geometry geo;
+              info->magic       = 0;
+              info->numsectors  = dev->nsectors;
+              info->sectorsize  = dev->sectorsize;
+              info->startsector = dev->firstsector;
 
-              ret = parent->u.i_bops->geometry(parent, &geo);
-              if (ret >= 0)
-                {
-                  *(FAR uint8_t *)base +=
-                    dev->firstsector * geo.geo_sectorsize;
-                }
-            }
-          else if (cmd == MTDIOC_GEOMETRY)
-            {
-              FAR struct mtd_geometry_s *mgeo =
-                (FAR struct mtd_geometry_s *)ptr_arg;
-              uint32_t blkper = mgeo->erasesize / mgeo->blocksize;
+              strncpy(info->parent, dev->parent->i_name, NAME_MAX);
 
-              mgeo->neraseblocks = dev->nsectors / blkper;
-            }
+              ret = OK;
+          }
         }
+        break;
+
+      default:
+        if (parent->u.i_bops->ioctl)
+          {
+            if (cmd == MTDIOC_PROTECT || cmd == MTDIOC_UNPROTECT)
+              {
+                FAR struct mtd_protect_s *prot =
+                  (FAR struct mtd_protect_s *)ptr_arg;
+
+                prot->startblock += dev->firstsector;
+              }
+
+            ret = parent->u.i_bops->ioctl(parent, cmd, arg);
+            if (ret >= 0)
+              {
+                if (cmd == BIOC_XIPBASE)
+                  {
+                    FAR void **base = (FAR void **)ptr_arg;
+
+                    *(FAR uint8_t *)base +=
+                          dev->firstsector * dev->sectorsize;
+                  }
+                else if (cmd == MTDIOC_GEOMETRY)
+                  {
+                    FAR struct mtd_geometry_s *mgeo =
+                      (FAR struct mtd_geometry_s *)ptr_arg;
+                    uint32_t blkper = mgeo->erasesize / mgeo->blocksize;
+
+                    mgeo->neraseblocks = dev->nsectors / blkper;
+                  }
+              }
+          }
+        break;
     }
 
   return ret;
@@ -302,6 +321,7 @@ int register_blockpartition(FAR const char *partition,
                             size_t firstsector, size_t nsectors)
 {
   FAR struct part_struct_s *dev;
+  struct geometry geo;
   int ret;
 
   /* Allocate a partition device structure */
@@ -330,6 +350,16 @@ int register_blockpartition(FAR const char *partition,
     {
       goto errout_free;
     }
+
+  /* Get sector size */
+
+  ret = dev->parent->u.i_bops->geometry(dev->parent, &geo);
+  if (ret < 0)
+    {
+      goto errout_free;
+    }
+
+  dev->sectorsize = geo.geo_sectorsize;
 
   /* Inode private data is a reference to the partition device structure */
 
