@@ -571,6 +571,7 @@ config STM32L4_STM32L4X3
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select STM32L4_HAVE_LPUART1
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3 if !(STM32L4_STM32L432XX || STM32L4_STM32L442XX)
@@ -586,6 +587,7 @@ config STM32L4_STM32L4X5
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select STM32L4_HAVE_LPUART1
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
@@ -616,6 +618,7 @@ config STM32L4_STM32L4X6
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select STM32L4_HAVE_LPUART1
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
@@ -646,6 +649,7 @@ config STM32L4_STM32L4XR
 	bool
 	default n
 	select ARCH_HAVE_FPU
+	select STM32L4_HAVE_LPUART1
 	select STM32L4_HAVE_USART1
 	select STM32L4_HAVE_USART2
 	select STM32L4_HAVE_USART3
@@ -1127,6 +1131,10 @@ config STM32L4_HAVE_TIM17
 	bool
 	default n
 
+config STM32L4_HAVE_LPUART1
+	bool
+	default n
+
 config STM32L4_HAVE_USART1
 	bool
 	default n
@@ -1490,6 +1498,13 @@ config STM32L4_SPI3
 	default n
 	select SPI
 	select STM32L4_SPI
+
+config STM32L4_LPUART1
+	bool "LPUART1"
+	default n
+	depends on STM32L4_HAVE_LPUART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32L4_USART
 
 config STM32L4_USART2
 	bool "USART2"
@@ -5486,8 +5501,53 @@ config STM32L4_SERIALDRIVER
 config STM32L4_1WIREDRIVER
 	bool
 
-menu "U[S]ART Configuration"
+menu "[LP]U[S]ART Configuration"
 	depends on STM32L4_USART
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	default STM32L4_LPUART1_SERIALDRIVER
+	depends on STM32L4_LPUART1
+
+config STM32L4_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select STM32L4_SERIALDRIVER
+
+config STM32L4_LPUART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32L4_1WIREDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+if LPUART1_SERIALDRIVER
+
+config LPUART1_RS485
+	bool "RS-485 on LPUART1"
+	default n
+	depends on STM32L4_LPUART1
+	---help---
+		Enable RS-485 interface on LPUART1. Your board config will have to
+		provide GPIO_LPUART1_RS485_DIR pin definition. Currently it cannot be
+		used with LPUART1_RXDMA.
+
+config LPUART1_RS485_DIR_POLARITY
+	int "LPUART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on LPUART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on LPUART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config LPUART1_RXDMA
+	bool "LPUART1 Rx DMA"
+	default n
+	depends on STM32L4_LPUART1 && (STM32L4_DMA1 || STM32L4_DMA2 || STM32L4_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # LPUART1_SERIALDRIVER
 
 choice
 	prompt "USART1 Driver Configuration"

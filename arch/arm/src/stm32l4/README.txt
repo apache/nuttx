@@ -46,8 +46,8 @@ MSI      : OK
 LSE      : OK
 RCC      : All registers defined, peripherals enabled, basic clock working
 SYSCTL   : All registers defined
-USART    : Working in normal mode (no DMA, to be tested, code is written)
-DMA      : works; at least tested with QSPI
+USART    : OK
+DMA      : OK
 SRAM2    : OK; can be included in MM region or left separate for special app
          : purposes
 SPI      : OK, tested (including DMA)
@@ -81,7 +81,8 @@ FIREWALL : Code written, to be tested, requires support from ldscript
 TSC      : TODO (Touch Screen Controller)
 SWP      : TODO (Single wire protocol master, to connect with NFC enabled
          : SIM cards)
-LPUART   : TODO (Low power UART working with LSE at low baud rates)
+LPUART   : Experimental support (Low power UART working with LSE at low
+         : baud rates)
 LPTIM    : Code written, to be tested (Low power TIMER)
 OPAMP    : TODO (Analog operational amplifier)
 COMP     : There is some code (Analog comparators)
@@ -94,7 +95,7 @@ DCMI     : TODO (Digital Camera interfaces)
 
 New peripherals only in STM32L4+:
 
-DMAMUX1    : TODO
+DMAMUX1    : OK
 DSI        : TODO
 GFXMMU     : TODO
 LTDC       : TODO
