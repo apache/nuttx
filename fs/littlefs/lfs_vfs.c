@@ -1019,12 +1019,14 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
   fs->cfg.prog           = littlefs_write_block;
   fs->cfg.erase          = littlefs_erase_block;
   fs->cfg.sync           = littlefs_sync_block;
-  fs->cfg.read_size      = fs->geo.blocksize;
+  fs->cfg.read_size      = fs->geo.blocksize *
+                           CONFIG_FS_LITTLEFS_BLOCK_FACTOR;
   fs->cfg.prog_size      = fs->geo.blocksize;
   fs->cfg.block_size     = fs->geo.erasesize;
   fs->cfg.block_count    = fs->geo.neraseblocks;
-  fs->cfg.block_cycles   = 500;
-  fs->cfg.cache_size     = fs->geo.blocksize;
+  fs->cfg.block_cycles   = CONFIG_FS_LITTLEFS_BLOCK_CYCLE;
+  fs->cfg.cache_size     = fs->geo.blocksize *
+                           CONFIG_FS_LITTLEFS_BLOCK_FACTOR;
   fs->cfg.lookahead_size = lfs_min(lfs_alignup(fs->cfg.block_count, 64) / 8,
                                    fs->cfg.read_size);
 
