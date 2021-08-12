@@ -44,8 +44,8 @@ struct part_struct_s
 {
   FAR struct inode *parent;
   size_t sectorsize;
-  size_t firstsector;
-  size_t nsectors;
+  off_t firstsector;
+  off_t nsectors;
 };
 
 /****************************************************************************
@@ -318,7 +318,7 @@ static int part_unlink(FAR struct inode *inode)
 
 int register_blockpartition(FAR const char *partition,
                             mode_t mode, FAR const char *parent,
-                            size_t firstsector, size_t nsectors)
+                            off_t firstsector, off_t nsectors)
 {
   FAR struct part_struct_s *dev;
   struct geometry geo;
