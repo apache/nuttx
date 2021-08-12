@@ -64,7 +64,7 @@
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#include "chip_macros.h"
+#include "chip.h"
 
 /****************************************************************************
  * Assembly Language Macros
