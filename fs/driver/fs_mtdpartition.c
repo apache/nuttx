@@ -61,7 +61,7 @@
 
 int register_mtdpartition(FAR const char *partition,
                           mode_t mode, FAR const char *parent,
-                          off_t firstblock, size_t nblocks)
+                          off_t firstblock, off_t nblocks)
 {
   FAR struct mtd_dev_s *part;
   FAR struct inode *mtd;
