@@ -4,3 +4,13 @@ config FS_LITTLEFS
 	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the LITTLEFS file system. https://github.com/ARMmbed/littlefs.
+
+config FS_LITTLEFS_BLOCK_SIZE_MULTIPLE_FACTOR
+	int "LITTLEFS Block size multiple factor"
+	default 4
+	depends on FS_LITTLEFS
+
+config FS_LITTLEFS_BLOCK_CYCLE
+	int "LITTLEFS Block Cycle"
+	default 200
+	depends on FS_LITTLEFS
