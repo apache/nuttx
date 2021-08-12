@@ -294,6 +294,10 @@ endif
 
 endif # CONFIG_1WIRE
 
+ifeq ($(CONFIG_SENSORS_MAX86178),y)
+  CSRCS += max86178.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MPU60X0),y)
   CSRCS += mpu60x0.c
 endif
