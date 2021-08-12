@@ -726,6 +726,16 @@ static int local_ioctl(FAR struct socket *psock, int cmd,
             ret = -ENOTCONN;
           }
         break;
+      case FIONSPACE:
+        if (conn->lc_outfile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_outfile, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTCONN;
+          }
+        break;
       default:
         ret = -ENOTTY;
         break;
