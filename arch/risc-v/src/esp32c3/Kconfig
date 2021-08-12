@@ -261,6 +261,10 @@ config ESP32C3_SPIFLASH
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
 
+config ESP32C3_SPIFLASH_BLOCK_SIZE
+	int "SPI FLASH BLOCK SIZE"
+	default 64
+
 config ESP32C3_SPI2
 	bool "SPI 2"
 	default n

@@ -72,7 +72,7 @@
 #define MMU_BYTES2PAGES(_n)         (((_n) + SPI_FLASH_MMU_PAGE_SIZE - 1) / \
                                      SPI_FLASH_MMU_PAGE_SIZE)
 
-#define SPI_FLASH_BLK_SIZE          256
+#define SPI_FLASH_BLK_SIZE          CONFIG_ESP32C3_SPIFLASH_BLOCK_SIZE
 #define SPI_FLASH_ERASE_SIZE        4096
 #define SPI_FLASH_ERASED_STATE      (0xff)
 #define SPI_FLASH_SIZE              (4 * 1024 * 1024)
