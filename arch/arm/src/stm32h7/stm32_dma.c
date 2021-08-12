@@ -1350,7 +1350,7 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
   scr    &=  (DMA_SCR_PFCTRL | DMA_SCR_DIR_MASK | DMA_SCR_PINC |
               DMA_SCR_MINC | DMA_SCR_PSIZE_MASK | DMA_SCR_MSIZE_MASK |
               DMA_SCR_PINCOS | DMA_SCR_DBM | DMA_SCR_CIRC |
-              DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK);
+              DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK | DMA_TRBUFF);
   regval |= scr;
   dmachan_putreg(dmachan, STM32_DMA_SCR_OFFSET, regval);
 }

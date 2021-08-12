@@ -467,7 +467,8 @@
                DMA_SCR_MSIZE_8BITS    | \
                DMA_SCR_PBURST_SINGLE  | \
                DMA_SCR_MBURST_SINGLE  | \
-               CONFIG_USART_TXDMAPRIO)
+               CONFIG_USART_TXDMAPRIO | \
+               DMA_TRBUFF)
 
 #endif /* SERIAL_HAVE_TXDMA */
 
