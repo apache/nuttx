@@ -58,41 +58,45 @@ else
 	ESPTOOL_WRITEFLASH_OPTS := -fs $(FLASH_SIZE) -fm dio -ff $(FLASH_FREQ)
 endif
 
-# ESPTOOL_BINDIR -- Directory for the Bootloader and Partition Table binary
-#                   files. If not provided, assume the current directory.
-
-ESPTOOL_BINDIR ?= .
-
 # Configure the variables according to build environment
 
-ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
-	BL_OFFSET       := 0x1000
-	PT_OFFSET       := 0x8000
-	APP_OFFSET      := 0x10000
-	BOOTLOADER      := $(ESPTOOL_BINDIR)/bootloader-esp32.bin
-	PARTITION_TABLE := $(ESPTOOL_BINDIR)/partition-table-esp32.bin
-	APP_IMAGE       := nuttx.bin
-	FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
-	FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
-	FLASH_APP       := $(APP_OFFSET) $(APP_IMAGE)
-	ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT) $(FLASH_APP)
-else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-	BL_OFFSET       := 0x1000
-	BOOTLOADER      := $(ESPTOOL_BINDIR)/mcuboot-esp32.bin
-	FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
+ifdef ESPTOOL_BINDIR
+	ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+		BL_OFFSET       := 0x1000
+		PT_OFFSET       := 0x8000
+		APP_OFFSET      := 0x10000
+		BOOTLOADER      := $(ESPTOOL_BINDIR)/bootloader-esp32.bin
+		PARTITION_TABLE := $(ESPTOOL_BINDIR)/partition-table-esp32.bin
+		APP_IMAGE       := nuttx.bin
+		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
+		FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
+		ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT)
+	else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+		BL_OFFSET       := 0x1000
+		BOOTLOADER      := $(ESPTOOL_BINDIR)/mcuboot-esp32.bin
+		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
+		ESPTOOL_BINS    := $(FLASH_BL)
+	endif
+endif
 
+ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+	APP_OFFSET     := 0x10000
+	APP_IMAGE      := nuttx.bin
+	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
+else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 	ifeq ($(CONFIG_ESP32_ESPTOOL_TARGET_PRIMARY),y)
-		VERIFIED    := --confirm
-		APP_OFFSET  := $(CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET)
+		VERIFIED   := --confirm
+		APP_OFFSET := $(CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET)
 	else ifeq ($(CONFIG_ESP32_ESPTOOL_TARGET_SECONDARY),y)
-		VERIFIED    :=
-		APP_OFFSET  := $(CONFIG_ESP32_OTA_SECONDARY_SLOT_OFFSET)
+		VERIFIED   :=
+		APP_OFFSET := $(CONFIG_ESP32_OTA_SECONDARY_SLOT_OFFSET)
 	endif
 
-	APP_IMAGE       := nuttx_signed.bin
-	FLASH_APP       := $(APP_OFFSET) $(APP_IMAGE)
-	ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_APP)
+	APP_IMAGE      := nuttx_signed.bin
+	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 endif
+
+ESPTOOL_BINS += $(FLASH_APP)
 
 ifeq ($(CONFIG_ESP32_QEMU_IMAGE),y)
 	MK_QEMU_IMG=$(TOPDIR)/tools/esp32/mk_qemu_img.sh -b $(BOOTLOADER) -p $(PARTITION_TABLE)
