@@ -449,8 +449,7 @@ void up_release_pending(void);
  *   1) The priority of the currently running task drops and the next
  *      task in the ready to run list has priority.
  *   2) An idle, ready to run task's priority has been raised above the
- *      the priority of the current, running task and it now has the
- *      priority.
+ *      priority of the current, running task and it now has the priority.
  *
  *   This function is called only from the NuttX scheduling
  *   logic.  Interrupts will always be disabled when this
