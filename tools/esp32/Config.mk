@@ -65,12 +65,7 @@ ESPTOOL_BINDIR ?= .
 
 # Configure the variables according to build environment
 
-ifeq ($(CONFIG_ESP32_BOOTLOADER_BUILD),y)
-	BL_OFFSET       := 0x1000
-	BOOTLOADER      := nuttx.bin
-	FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
-	ESPTOOL_BINS    := $(FLASH_BL)
-else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 	BL_OFFSET       := 0x1000
 	PT_OFFSET       := 0x8000
 	APP_OFFSET      := 0x10000
