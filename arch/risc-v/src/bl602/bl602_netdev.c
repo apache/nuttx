@@ -60,7 +60,7 @@
 #include "wifi_manager/wifi_mgmr_api.h"
 #include "wifi_manager/bl_wifi.h"
 #include "wifi_manager/include/wifi_mgmr_ext.h"
-#include "wifi_driver/os_hal.h"
+#include "bl602_os_hal.h"
 #include "bl602_netdev.h"
 #include "bl602_efuse.h"
 
@@ -248,6 +248,7 @@ extern void wifi_mgmr_tsk_init(void);
 extern int bl602_ef_ctrl_read_mac_address(uint8_t mac[6]);
 extern void wifi_main(int argc, char *argv[]);
 extern void wifi_mgmr_start_background(wifi_conf_t *conf);
+extern int bl_pm_init(void);
 extern struct net_device bl606a0_sta;
 
 /* Common TX logic */
@@ -2004,6 +2005,7 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 
 static int wifi_manager_process(int argc, FAR char *argv[])
 {
+  bl_pm_init();
   wifi_main_init();
   ipc_emb_notify();
 
@@ -2120,10 +2122,12 @@ void bl602_net_event(int evt, int val)
     case CODE_WIFI_ON_DISCONNECT:
       do
         {
-          struct bl602_net_driver_s *priv = &g_bl602_net[0];
+          /* struct bl602_net_driver_s *priv = &g_bl602_net[0]; */
+
           if (g_state.sta_connected == 1)
             {
-              netdev_carrier_off(&priv->net_dev);
+              /* netdev_carrier_off(&priv->net_dev); */
+
               g_state.sta_connected = 0;
             }
         }
