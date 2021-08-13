@@ -68,6 +68,7 @@ int local_release(FAR struct local_conn_s *conn)
   /* If the socket is connected (SOCK_STREAM client), then disconnect it */
 
   if (conn->lc_state == LOCAL_STATE_CONNECTED ||
+      conn->lc_state == LOCAL_STATE_CONNECTING ||
       conn->lc_state == LOCAL_STATE_DISCONNECTED)
     {
       DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
@@ -92,6 +93,7 @@ int local_release(FAR struct local_conn_s *conn)
         {
           client->u.client.lc_result = -ENOTCONN;
           nxsem_post(&client->lc_waitsem);
+          local_event_pollnotify(client, POLLOUT);
         }
 
       conn->u.server.lc_pending = 0;

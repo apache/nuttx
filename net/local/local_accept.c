@@ -163,6 +163,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               conn->lc_proto  = SOCK_STREAM;
               conn->lc_type   = LOCAL_TYPE_PATHNAME;
               conn->lc_state  = LOCAL_STATE_CONNECTED;
+              conn->lc_psock  = psock;
 
               strncpy(conn->lc_path, client->lc_path, UNIX_PATH_MAX - 1);
               conn->lc_path[UNIX_PATH_MAX - 1] = '\0';
@@ -228,6 +229,13 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           /* Signal the client with the result of the connection */
 
           client->u.client.lc_result = ret;
+          if (client->lc_state == LOCAL_STATE_CONNECTING)
+            {
+              client->lc_state = LOCAL_STATE_CONNECTED;
+              _SO_SETERRNO(client->lc_psock, ret);
+              local_event_pollnotify(client, POLLOUT);
+            }
+
           nxsem_post(&client->lc_waitsem);
           return ret;
         }
