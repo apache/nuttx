@@ -131,6 +131,7 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
+  conn->lc_psock = psock;
   return OK;
 }
 #endif
