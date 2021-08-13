@@ -243,7 +243,8 @@ int pipecommon_open(FAR struct file *filep)
   sched_lock();
   nxsem_post(&dev->d_bfsem);
 
-  if ((filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
+  if (!(filep->f_oflags & O_NONBLOCK) &&         /* Non-blocking */
+      (filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
       dev->d_nwriters < 1 &&                     /* No writers on the pipe */
       dev->d_wrndx == dev->d_rdndx)              /* Buffer is empty */
     {
