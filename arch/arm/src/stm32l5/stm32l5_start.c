@@ -165,7 +165,7 @@ static inline void stm32l5_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
+  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -195,7 +195,7 @@ static inline void stm32l5_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
+  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
   putreg32(regval, NVIC_CPACR);
 }
 
