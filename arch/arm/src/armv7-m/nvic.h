@@ -632,6 +632,14 @@
 #define NVIC_CSSELR_LEVEL_MASK          (7 << NVIC_CSSELR_LEVEL_SHIFT)
   #define NVIC_CSSELR_LEVEL_1           (0 << NVIC_CSSELR_LEVEL_SHIFT)
 
+/* Coprocessor Access Control Register (CPACR) */
+
+#define NVIC_CPACR_CP_SHIFT(n)          (2 * (n))
+#define NVIC_CPACR_CP_MASK(n)           (3 << NVIC_CPACR_CP_SHIFT(n))
+#  define NVIC_CPACR_CP_DENY(n)         (0 << NVIC_CPACR_CP_SHIFT(n))
+#  define NVIC_CPACR_CP_PRIV(n)         (1 << NVIC_CPACR_CP_SHIFT(n))
+#  define NVIC_CPACR_CP_FULL(n)         (3 << NVIC_CPACR_CP_SHIFT(n))
+
 /* Debug Exception and Monitor Control Register (DEMCR) */
 
 #define NVIC_DEMCR_VCCORERESET          (1 << 0)  /* Bit 0:  Reset Vector Catch */
