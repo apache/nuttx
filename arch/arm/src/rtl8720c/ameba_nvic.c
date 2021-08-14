@@ -401,7 +401,7 @@ void up_irqinitialize(void)
    */
 
   modifyreg32(NVIC_AIRCR, NVIC_AIRCR_VECTKEY_MASK | NVIC_AIRCR_PRIGROUP_MASK,
-  (0x5fa << NVIC_AIRCR_VECTKEY_SHIFT) | (0x5 << NVIC_AIRCR_PRIGROUP_SHIFT));
+              NVIC_AIRCR_VECTKEY | (0x5 << NVIC_AIRCR_PRIGROUP_SHIFT));
 
   /* Set all interrupts (and exceptions) to the default priority */
 

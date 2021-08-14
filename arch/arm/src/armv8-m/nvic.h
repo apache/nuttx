@@ -578,8 +578,10 @@
 #define NVIC_AIRCR_ENDIANNESS           (1 << 15) /* Bit 15: 1=Big endian */
 #define NVIC_AIRCR_VECTKEY_SHIFT        (16)      /* Bits 16-31: VECTKEY */
 #define NVIC_AIRCR_VECTKEY_MASK         (0xffff << NVIC_AIRCR_VECTKEY_SHIFT)
+#define NVIC_AIRCR_VECTKEY              (0x05fa << NVIC_AIRCR_VECTKEY_SHIFT)
 #define NVIC_AIRCR_VECTKEYSTAT_SHIFT    (16)      /* Bits 16-31: VECTKEYSTAT */
 #define NVIC_AIRCR_VECTKEYSTAT_MASK     (0xffff << NVIC_AIRCR_VECTKEYSTAT_SHIFT)
+#define NVIC_AIRCR_VECTKEYSTAT          (0xfa05 << NVIC_AIRCR_VECTKEYSTAT_SHIFT)
 
 /* System handler control and state register (SYSHCON) */
 
