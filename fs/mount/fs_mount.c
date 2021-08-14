@@ -476,8 +476,8 @@ int nx_mount(FAR const char *source, FAR const char *target,
   /* A lot of goto's!  But they make the error handling much simpler */
 
 errout_with_mountpt:
-  inode_remove(target);
   inode_release(mountpt_inode);
+  inode_remove(target);
 
 errout_with_semaphore:
   inode_semgive();
