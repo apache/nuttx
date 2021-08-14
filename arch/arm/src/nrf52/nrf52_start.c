@@ -116,7 +116,7 @@ static inline void nrf52_fpuconfig(void)
    */
 
   regval = getreg32(NVIC_FPCCR);
-  regval &= ~((1 << 31) | (1 << 30));
+  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
   putreg32(regval, NVIC_FPCCR);
 
   /* Enable full access to CP10 and CP11 */
@@ -144,7 +144,7 @@ static inline void nrf52_fpuconfig(void)
    */
 
   regval = getreg32(NVIC_FPCCR);
-  regval &= ~((1 << 31) | (1 << 30));
+  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
   putreg32(regval, NVIC_FPCCR);
 
   /* Enable full access to CP10 and CP11 */
