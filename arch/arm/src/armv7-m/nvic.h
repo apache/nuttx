@@ -417,6 +417,11 @@
 #define NVIC_DEMCR                      (ARMV7M_NVIC_BASE + NVIC_DEMCR_OFFSET)
 #define NVIC_STIR                       (ARMV7M_NVIC_BASE + NVIC_STIR_OFFSET)
 #define NVIC_FPCCR                      (ARMV7M_NVIC_BASE + NVIC_FPCCR_OFFSET)
+#define NVIC_FPCAR                      (ARMV8M_NVIC_BASE + NVIC_FPCAR_OFFSET)
+#define NVIC_FPDSCR                     (ARMV8M_NVIC_BASE + NVIC_FPDSCR_OFFSET)
+#define NVIC_MVFR0                      (ARMV8M_NVIC_BASE + NVIC_MVFR0_OFFSET)
+#define NVIC_MVFR1                      (ARMV8M_NVIC_BASE + NVIC_MVFR1_OFFSET)
+#define NVIC_MVFR2                      (ARMV8M_NVIC_BASE + NVIC_MVFR2_OFFSET)
 #define NVIC_ICIALLU                    (ARMV7M_NVIC_BASE + NVIC_ICIALLU_OFFSET)
 #define NVIC_ICIMVAU                    (ARMV7M_NVIC_BASE + NVIC_ICIMVAU_OFFSET)
 #define NVIC_DCIMVAU                    (ARMV7M_NVIC_BASE + NVIC_DCIMVAU_OFFSET)
@@ -655,6 +660,21 @@
 #define NVIC_DEMCR_MONSTEP              (1 << 18) /* Bit 18: Steps the core */
 #define NVIC_DEMCR_MONREQ               (1 << 19) /* Bit 19: Monitor wake-up mode */
 #define NVIC_DEMCR_TRCENA               (1 << 24) /* Bit 24: Enable trace and debug blocks */
+
+/*  Floating-Point Context Control Register (FPCCR) */
+
+#define NVIC_FPCCR_LSPACT               (1 << 0)  /* Bit 0:  Lazy state preservation active */
+#define NVIC_FPCCR_USER                 (1 << 1)  /* Bit 1:  User privilege */
+#define NVIC_FPCCR_THREAD               (1 << 3)  /* Bit 3:  Thread mode */
+#define NVIC_FPCCR_HFRDY                (1 << 4)  /* Bit 4:  HardFault ready */
+#define NVIC_FPCCR_MMRDY                (1 << 5)  /* Bit 5:  MemManage ready */
+#define NVIC_FPCCR_BFRDY                (1 << 6)  /* Bit 6:  BusFault ready */
+#define NVIC_FPCCR_MONRDY               (1 << 8)  /* Bit 8:  DebugMonitor ready */
+#define NVIC_FPCCR_SPLIMVIOL            (1 << 9)  /* Bit 9:  Stack pointer limit violation */
+#define NVIC_FPCCR_UFRDY                (1 << 10) /* Bit 10: UsageFault ready */
+#define NVIC_FPCCR_CLRONRET             (1 << 28) /* Bit 28: Clear on return */
+#define NVIC_FPCCR_LSPEN                (1 << 30) /* Bit 30: Lazy state preservation enable */
+#define NVIC_FPCCR_ASPEN                (1 << 31) /* Bit 31: Automatic state preservation enable */
 
 /* Instruction Tightly-Coupled Memory Control Register (ITCMCR) */
 
