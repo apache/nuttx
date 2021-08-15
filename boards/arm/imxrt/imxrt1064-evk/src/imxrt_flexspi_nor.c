@@ -578,6 +578,22 @@ static int imxrt_flexspi_nor_ioctl(FAR struct mtd_dev_s *dev,
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = 32768; /* 8MB only */
+              info->sectorsize  = NOR_PAGE_SIZE;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
           /* Erase the entire device */

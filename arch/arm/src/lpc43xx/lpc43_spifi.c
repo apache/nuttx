@@ -887,6 +887,28 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+#ifdef CONFIG_SPIFI_SECTOR512
+              info->numsectors  = priv->nblocks <<
+                                  (SPIFI_BLKSHIFT - SPIFI_512SHIFT);
+              info->sectorsize  = 512;
+#else
+              info->numsectors  = priv->nblocks;
+              info->sectorsize  = SPIFI_BLKSIZE;
+#endif
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
             /* Erase the entire device */

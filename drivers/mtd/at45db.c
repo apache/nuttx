@@ -22,7 +22,7 @@
 
 /* Ordering Code Detail:
  *
- * AT 45DB 16 1 D – SS U
+ * AT 45DB 16 1 D   SS U
  * |  |    |  | |   |  `- Device grade
  * |  |    |  | |   `- Package Option
  * |  |    |  | `- Device revision
@@ -801,6 +801,22 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd,
 
               finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
+            }
+        }
+        break;
+
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = priv->npages;
+              info->sectorsize  = 1 << priv->pageshift;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
             }
         }
         break;

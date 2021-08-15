@@ -1195,6 +1195,28 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+#ifdef CONFIG_SST25_SECTOR512
+              info->numsectors  = priv->nsectors <<
+                               (priv->sectorshift - SST25_SECTOR_SHIFT);
+              info->sectorsize  = 1 << SST25_SECTOR_SHIFT;
+#else
+              info->numsectors  = priv->nsectors;
+              info->sectorsize  = 1 << priv->sectorshift;
+#endif
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
             /* Erase the entire device */

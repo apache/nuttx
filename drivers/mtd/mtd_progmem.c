@@ -326,6 +326,23 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = up_progmem_neraseblocks() <<
+                                  (priv->ersshift - priv->blkshift);
+              info->sectorsize  = 1 << priv->blkshift;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case BIOC_XIPBASE:
         {
           FAR void **ppv = (FAR void**)arg;
