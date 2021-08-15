@@ -1909,7 +1909,6 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 {
   int ret = -EINVAL;
   FAR struct esp32_spiflash_s *priv = MTD2PRIV(dev);
-  FAR struct mtd_geometry_s *geo;
 
   finfo("cmd: %d \n", cmd);
 
@@ -1917,7 +1916,7 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
     {
       case MTDIOC_GEOMETRY:
         {
-          geo = (FAR struct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
               geo->blocksize    = MTD_BLKSIZE(priv);
@@ -1927,6 +1926,22 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
               finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
+            }
+        }
+        break;
+
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = MTD_SIZE(priv) / MTD_BLKSIZE(priv);
+              info->sectorsize  = MTD_BLKSIZE(priv);
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
             }
         }
         break;

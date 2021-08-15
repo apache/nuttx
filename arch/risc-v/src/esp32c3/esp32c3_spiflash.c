@@ -853,7 +853,6 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg)
 {
   int ret = OK;
-  struct mtd_geometry_s *geo;
 
   finfo("cmd: %d \n", cmd);
 
@@ -861,7 +860,7 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
     {
       case MTDIOC_GEOMETRY:
         {
-          geo = (struct mtd_geometry_s *)arg;
+          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               geo->blocksize    = SPI_FLASH_BLK_SIZE;
@@ -876,9 +875,23 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          struct partition_info_s *info = (struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = SPI_FLASH_SIZE / SPI_FLASH_BLK_SIZE;
+              info->sectorsize  = SPI_FLASH_BLK_SIZE;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+            }
+        }
+        break;
+
       case MTDIOC_ERASESTATE:
         {
-          FAR uint8_t *result = (FAR uint8_t *)arg;
+          uint8_t *result = (uint8_t *)arg;
           *result = SPI_FLASH_ERASED_STATE;
 
           ret = OK;
