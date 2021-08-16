@@ -91,6 +91,7 @@ struct rpmsg_socket_conn_s
   uint32_t                       recvlen;
   FAR struct circbuf_s           recvbuf;
 
+  FAR struct socket              *psock;
   FAR struct rpmsg_socket_conn_s *next;
 
   /* server listen-scoket listening: backlog > 0;
@@ -292,6 +293,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       conn->sendsize = head->size;
       rpmsg_socket_post(&conn->sendsem);
+      rpmsg_socket_pollnotify(conn, POLLOUT);
     }
   else
     {
@@ -434,11 +436,17 @@ static void rpmsg_socket_device_connect(FAR struct rpmsg_device *rdev,
                                         uint32_t dest)
 {
   FAR struct rpmsg_socket_conn_s *conn = priv;
+  struct rpmsg_socket_sync_s msg;
 
   msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
   msg.size = circbuf_size(&conn->recvbuf);
 
-  rpmsg_send(&conn->ept, &msg, sizeof(msg));
+  if (rpmsg_send(&conn->ept, &msg, sizeof(msg)) > 0)
+    {
+      conn->psock->s_flags |= _SF_CONNECTED;
+      _SO_SETERRNO(conn->psock, OK);
+      rpmsg_socket_pollnotify(conn, POLLOUT);
+    }
 }
 
 static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
@@ -507,6 +515,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   tmp->next = new;
+  new->psock = server->psock;
 
   rpmsg_socket_unlock(&server->recvlock);
 
@@ -567,6 +576,7 @@ static int rpmsg_socket_setup(FAR struct socket *psock, int protocol)
     }
 
   psock->s_conn = conn;
+  conn->psock = psock;
   return 0;
 }
 
@@ -646,16 +656,21 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
 
   if (conn->sendsize == 0)
     {
+      if (_SS_ISNONBLOCK(psock->s_flags))
+        {
+          return -EINPROGRESS;
+        }
+
       ret = net_timedwait(&conn->sendsem,
                           _SO_TIMEOUT(psock->s_rcvtimeo));
-    }
 
-  if (ret < 0)
-    {
-      rpmsg_unregister_callback(conn,
-                                rpmsg_socket_device_created,
-                                rpmsg_socket_device_destroy,
-                                rpmsg_socket_device_connect);
+      if (ret < 0)
+        {
+          rpmsg_unregister_callback(conn,
+                                    rpmsg_socket_device_created,
+                                    rpmsg_socket_device_destroy,
+                                    rpmsg_socket_device_connect);
+        }
     }
 
   return ret;
@@ -834,6 +849,11 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
             }
 
           rpmsg_socket_unlock(&conn->recvlock);
+        }
+      else if (!_SS_ISCONNECTED(psock->s_flags) &&
+               _SS_ISNONBLOCK(psock->s_flags))
+        {
+          ret = OK;
         }
       else
         {
@@ -1124,8 +1144,6 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
         {
           return ret;
         }
-
-      psock->s_flags |= _SF_CONNECTED;
     }
 
   if (!_SS_ISCONNECTED(psock->s_flags))
