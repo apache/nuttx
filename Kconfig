@@ -9,6 +9,19 @@ config APPSDIR
 	string
 	option env="APPSDIR"
 
+menu "License Setup"
+config ALLOW_GPL_COMPONENTS
+	bool "Use components that have GPL/LGPL licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have GPL/LGPL licenses.
+
+		NOTE: Please check that the license for each enabled
+		component matches your project license.
+
+endmenu # License Setup
+
 menu "Build Setup"
 
 config EXPERIMENTAL
