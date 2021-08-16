@@ -113,13 +113,8 @@ static void netdriver_reply(FAR struct net_driver_s *dev)
     }
 }
 
-static void netdriver_recv_work(FAR void *arg)
+static void netdriver_recv_one(FAR struct net_driver_s *dev)
 {
-  FAR struct net_driver_s *dev = arg;
-  FAR struct eth_hdr_s *eth;
-
-  net_lock();
-
   /* netdev_read will return 0 on a timeout event and > 0
    * on a data received event
    */
@@ -128,6 +123,8 @@ static void netdriver_recv_work(FAR void *arg)
                            dev->d_pktsize);
   if (dev->d_len > 0)
     {
+      FAR struct eth_hdr_s *eth;
+
       NETDEV_RXPACKETS(dev);
 
       /* Data received event.  Check for valid Ethernet header with
@@ -214,7 +211,19 @@ static void netdriver_recv_work(FAR void *arg)
           NETDEV_RXERRORS(dev);
         }
     }
+}
 
+static void netdriver_recv_work(FAR void *arg)
+{
+  FAR struct net_driver_s *dev = arg;
+  unsigned int n = 8;
+
+  net_lock();
+  do
+    {
+      netdriver_recv_one(dev);
+    }
+  while (netdev_avail() && n-- > 0);
   net_unlock();
 }
 
