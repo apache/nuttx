@@ -292,6 +292,8 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
   if (head->cmd == RPMSG_SOCKET_CMD_SYNC)
     {
       conn->sendsize = head->size;
+      conn->psock->s_flags |= _SF_CONNECTED;
+      _SO_SETERRNO(conn->psock, OK);
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_pollnotify(conn, POLLOUT);
     }
@@ -441,12 +443,7 @@ static void rpmsg_socket_device_connect(FAR struct rpmsg_device *rdev,
   msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
   msg.size = circbuf_size(&conn->recvbuf);
 
-  if (rpmsg_send(&conn->ept, &msg, sizeof(msg)) > 0)
-    {
-      conn->psock->s_flags |= _SF_CONNECTED;
-      _SO_SETERRNO(conn->psock, OK);
-      rpmsg_socket_pollnotify(conn, POLLOUT);
-    }
+  rpmsg_send(&conn->ept, &msg, sizeof(msg));
 }
 
 static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
