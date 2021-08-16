@@ -324,7 +324,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
 
               if (len == msg->len)
                 {
-                  /* SOCOK_STREAM */
+                  /* SOCK_STREAM */
 
                   conn->recvpos += conn->recvlen;
                   memcpy(conn->recvdata, buf, conn->recvlen);
@@ -333,7 +333,7 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
                 }
               else
                 {
-                  /* SOCOK_DGRAM */
+                  /* SOCK_DGRAM */
 
                   conn->recvpos += len;
                   memcpy(conn->recvdata, buf + sizeof(uint32_t),
