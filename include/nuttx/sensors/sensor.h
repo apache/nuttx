@@ -217,9 +217,37 @@
 
 #define SENSOR_TYPE_HEART_BEAT                      24
 
+/* ECG (Electrocardiogram)
+ * A sensor of this type returns the ECG voltage in μV. Sensors may amplify
+ * the input ECG signal. Here the ECG voltage is the un-amplified ECG
+ * voltage.
+ */
+
+#define SENSOR_TYPE_ECG                             25
+
+/* PPG (Photoplethysmography)
+ * A sensor of this type returns the PPG measurements in counts. The PPG
+ * measurements come from photodiode and following current amplifiers, where
+ * the photodiode switches reflected light intensity to current. Here the PPG
+ * value means the ADC counts, since the LED lightness, the photodiode model,
+ * the reflect-ratio, and the integration time of ADC varies with different
+ * measurements, while the useful information of PPG is the not the magnitude
+ * but the shape of the waveform.
+ */
+
+#define SENSOR_TYPE_PPG                             26
+
+/* Imdepance
+ * A sensor of this type returns the impedance measurements. An impedance
+ * is a complex number, which consists of a real part(resistance) and an
+ * imaginary part(reactance). Both of them are in uint Ohm(Ω).
+ */
+
+#define SENSOR_TYPE_IMPEDANCE                       27
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           25
+#define SENSOR_TYPE_COUNT                           28
 
 /****************************************************************************
  * Inline Functions
@@ -412,6 +440,25 @@ struct sensor_event_hbeat   /* Type: Heart Beat */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float beat;               /* Units is times/minutes */
+};
+
+struct sensor_event_ecg     /* Type: ECG */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  float ecg;                /* Unit is μV */
+};
+
+struct sensor_event_ppg     /* Type: PPG */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  uint32_t ppg;             /* Unit is ADC counts */
+};
+
+struct sensor_event_impd    /* Type: Impedance */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  float real;               /* Real part, unit is Ohm(Ω) */
+  float imag;               /* Imaginary part, unit is Ohm(Ω) */
 };
 
 /* The sensor lower half driver interface */
