@@ -290,6 +290,8 @@ static int rpmsg_socket_sync(FAR struct rpmsg_socket_conn_s *conn,
       return ret;
     }
 
+  ret = OK;
+
   if (conn->sendsize == 0)
     {
       ret = net_timedwait(&conn->sendsem, timeout);
@@ -638,7 +640,6 @@ static int rpmsg_socket_listen(FAR struct socket *psock, int backlog)
 static int rpmsg_socket_connect_internal(FAR struct socket *psock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-  unsigned int timeout;
   unsigned int tc;
   int ret;
 
@@ -657,22 +658,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
       return ret;
     }
 
-  ret     = -ETIMEDOUT;
-  timeout = _SO_TIMEOUT(psock->s_rcvtimeo);
-
-  for (tc = 0; tc < timeout * 1000; )
-    {
-      ret = rpmsg_socket_sync(conn, timeout);
-      if (ret != RPMSG_ERR_ADDR)
-        {
-          break;
-        }
-
-      if (timeout != UINT_MAX)
-        {
-          tc += RPMSG_TICK_COUNT;
-        }
-    }
+  ret = rpmsg_socket_sync(conn, _SO_TIMEOUT(psock->s_rcvtimeo));
 
   if (ret < 0)
     {
