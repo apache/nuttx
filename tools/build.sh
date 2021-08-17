@@ -56,6 +56,7 @@ function build_board()
   fi
 
   ARCH=`sed -n 's/CONFIG_ARCH="\(.*\)"/\1/p' ${NUTTXDIR}/.config`
+  TOOLCHAIN="gcc"
 
   EXTRAFLAGS=-Wno-cpp
   if [ $ARCH = "xtensa" ]; then
@@ -63,7 +64,11 @@ function build_board()
     EXTRAFLAGS=""
   fi
 
-  export PATH=${ROOTDIR}/prebuilts/gcc/linux/$ARCH/bin:$PATH
+  if [ `grep -nR "TOOLCHAIN.*CLANG" ${NUTTXDIR}/.config` ]; then
+    TOOLCHAIN="clang"
+  fi
+
+  export PATH=${ROOTDIR}/prebuilts/$TOOLCHAIN/linux/$ARCH/bin:$PATH
 
   if ! make -C ${NUTTXDIR} EXTRAFLAGS=$EXTRAFLAGS ${@:2}; then
     echo "Error: ############# build ${1} fail ##############"
