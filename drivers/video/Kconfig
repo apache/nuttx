@@ -63,6 +63,7 @@ config VIDEO_MAX7456
 config VIDEO_OV2640
 	bool "OV2640 camera chip"
 	default n
+	depends on ALLOW_GPL_COMPONENTS
 	select I2C
 
 if VIDEO_OV2640
