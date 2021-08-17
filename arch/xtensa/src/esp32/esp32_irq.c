@@ -132,14 +132,10 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
 {
   int cpuint;
 
-  /* Allocate a level-sensitive, priority 1 CPU interrupt for the UART */
-
-  cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
-  DEBUGASSERT(cpuint >= 0);
-
   /* Connect all CPU peripheral source to allocated CPU interrupt */
 
-  esp32_attach_peripheral(0, ESP32_PERIPH_CPU_CPU1, cpuint);
+  cpuint = esp32_setup_irq(0, ESP32_PERIPH_CPU_CPU1, 1, ESP32_CPUINT_LEVEL);
+  DEBUGASSERT(cpuint >= 0);
 
   /* Attach the inter-CPU interrupt. */
 

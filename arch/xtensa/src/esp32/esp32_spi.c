@@ -1464,27 +1464,23 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
 
   if (priv->config->use_dma)
     {
-      priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
+      /* Set up to receive peripheral interrupts on the current CPU */
+
+      priv->cpu = up_cpu_index();
+      priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
+                                     1, ESP32_CPUINT_LEVEL);
       if (priv->cpuint < 0)
         {
           leave_critical_section(flags);
           return NULL;
         }
 
-      /* Set up to receive peripheral interrupts on the current CPU */
-
-      priv->cpu = up_cpu_index();
-      esp32_attach_peripheral(priv->cpu,
-                              priv->config->periph,
-                              priv->cpuint);
       ret = irq_attach(priv->config->irq, esp32_spi_interrupt, priv);
       if (ret != OK)
         {
-          esp32_detach_peripheral(priv->cpu,
-                                  priv->config->periph,
-                                  priv->cpuint);
-          esp32_free_cpuint(priv->cpuint);
-
+          esp32_teardown_irq(priv->cpu,
+                             priv->config->periph,
+                             priv->cpuint);
           leave_critical_section(flags);
           return NULL;
         }
@@ -1534,10 +1530,9 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev)
   if (priv->config->use_dma)
     {
       up_disable_irq(priv->config->irq);
-      esp32_detach_peripheral(priv->cpu,
-                              priv->config->periph,
-                              priv->cpuint);
-      esp32_free_cpuint(priv->cpuint);
+      esp32_teardown_irq(priv->cpu,
+                         priv->config->periph,
+                         priv->cpuint);
 
       nxsem_destroy(&priv->sem_isr);
     }
