@@ -864,6 +864,78 @@ static inline int userfs_destroy_dispatch(FAR struct userfs_info_s *info,
   return resp.ret < 0 ? OK : -ENOTCONN;
 }
 
+static inline int userfs_fchstat_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_fchstat_request_s *req, size_t reqlen)
+{
+  struct userfs_fchstat_response_s resp;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen != sizeof(struct userfs_fchstat_request_s))
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  DEBUGASSERT(info->userops != NULL && info->userops->fchstat != NULL);
+  resp.ret  = info->userops->fchstat(info->volinfo, req->openinfo,
+                                     &req->buf, req->flags);
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_FCHSTAT;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_fchstat_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
+static inline int userfs_chstat_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_chstat_request_s *req, size_t reqlen)
+{
+  struct userfs_chstat_response_s resp;
+  int pathlen;
+  size_t expected;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen < SIZEOF_USERFS_CHSTAT_REQUEST_S(0))
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strlen(req->relpath);
+  if (pathlen > info->mxwrite)
+    {
+      return -EINVAL;
+    }
+
+  expected = SIZEOF_USERFS_CHSTAT_REQUEST_S(pathlen);
+  if (expected >= reqlen)
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  DEBUGASSERT(info->userops != NULL && info->userops->chstat != NULL);
+  resp.ret  = info->userops->chstat(info->volinfo, req->relpath,
+                                    &req->buf, req->flags);
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_CHSTAT;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_chstat_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1133,6 +1205,18 @@ int userfs_run(FAR const char *mountpt,
           case USERFS_REQ_DESTROY:
             ret = userfs_destroy_dispatch(info,
                    (FAR struct userfs_destroy_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+          case USERFS_REQ_FCHSTAT:
+            ret = userfs_fchstat_dispatch(info,
+                   (FAR struct userfs_fchstat_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+          case USERFS_REQ_CHSTAT:
+            ret = userfs_chstat_dispatch(info,
+                   (FAR struct userfs_chstat_request_s *)info->iobuffer,
                    nread);
             break;
 

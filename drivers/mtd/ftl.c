@@ -506,39 +506,11 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   dev = (struct ftl_struct_s *)inode->i_private;
 
-  /* Only one block driver ioctl command is supported by this driver (and
-   * that command is just passed on to the MTD driver in a slightly
-   * different form).
-   */
-
-  if (cmd == BIOC_XIPBASE)
-    {
-      /* The argument accompanying the BIOC_XIPBASE should be non-NULL.  If
-       * DEBUG is enabled, we will catch it here instead of in the MTD
-       * driver.
-       */
-
-#ifdef CONFIG_DEBUG_FEATURES
-      if (arg == 0)
-        {
-          ferr("ERROR: BIOC_XIPBASE argument is NULL\n");
-          return -EINVAL;
-        }
-#endif
-
-      /* Change the BIOC_XIPBASE command to the MTDIOC_XIPBASE command. */
-
-      cmd = MTDIOC_XIPBASE;
-    }
-  else if (cmd == BIOC_FLUSH)
+  if (cmd == BIOC_FLUSH)
     {
 #ifdef CONFIG_FTL_WRITEBUFFER
       rwb_flush(&dev->rwb);
 #endif
-
-      /* Change the BIOC_FLUSH command to the MTDIOC_FLUSH command. */
-
-      cmd = MTDIOC_FLUSH;
     }
 
   /* No other block driver ioctl commands are not recognized by this

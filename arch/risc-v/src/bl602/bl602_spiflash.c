@@ -287,14 +287,13 @@ int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 {
   int ret = -EINVAL;
   FAR struct bl602_spiflash_s *priv = MTD2PRIV(dev);
-  FAR struct mtd_geometry_s *geo;
 
   switch (cmd)
     {
       case MTDIOC_GEOMETRY:
         {
           finfo("cmd(0x%x) MTDIOC_GEOMETRY.\n", cmd);
-          geo = (FAR struct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
           if (geo)
             {
               geo->blocksize    = SPIFLASH_BLOCKSIZE;
@@ -308,24 +307,20 @@ int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
             }
         }
         break;
-      case MTDIOC_BULKERASE:
+      case BIOC_PARTINFO:
         {
-          /* Erase the entire partition */
-
-          finfo("cmd(0x%x) MTDIOC_BULKERASE not support.\n", cmd);
-        }
-        break;
-      case MTDIOC_XIPBASE:
-        {
-          /* Get the XIP base of the entire FLASH */
-
-          finfo("cmd(0x%x) MTDIOC_XIPBASE not support.\n", cmd);
-        }
-        break;
-      case MTDIOC_FLUSH:
-        {
-          finfo("cmd(0x%x) MTDIOC_FLUSH.\n", cmd);
-          ret = OK;
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = priv->config->flash_size /
+                                  SPIFLASH_BLOCKSIZE;
+              info->sectorsize  = SPIFLASH_BLOCKSIZE;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
         }
         break;
       default:

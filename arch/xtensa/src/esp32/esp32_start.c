@@ -47,9 +47,79 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_puts(c)
+#  define showprogress(c)     up_puts(c)
 #else
 #  define showprogress(c)
+#endif
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+
+#define PRIMARY_SLOT_OFFSET   CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET
+
+#define HDR_ATTR              __attribute__((section(".entry_addr"))) \
+                                __attribute__((used))
+
+/* Cache MMU block size */
+
+#define MMU_BLOCK_SIZE        0x00010000  /* 64 KB */
+
+/* Cache MMU address mask (MMU tables ignore bits which are zero) */
+
+#define MMU_FLASH_MASK        (~(MMU_BLOCK_SIZE - 1))
+
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+extern uint32_t _image_irom_vma;
+extern uint32_t _image_irom_lma;
+extern uint32_t _image_irom_size;
+
+extern uint32_t _image_drom_vma;
+extern uint32_t _image_drom_lma;
+extern uint32_t _image_drom_size;
+#endif
+
+/****************************************************************************
+ * ROM Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+extern int ets_printf(const char *fmt, ...);
+extern void cache_read_enable(int cpu);
+extern void cache_read_disable(int cpu);
+extern void cache_flush(int cpu);
+extern unsigned int cache_flash_mmu_set(int cpu_no, int pid,
+                                        unsigned int vaddr,
+                                        unsigned int paddr,
+                                        int psize, int num);
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+noreturn_function void __start(void);
+#endif
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+extern void esp32_lowsetup(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+HDR_ATTR static void (*_entry_point)(void) = &__start;
 #endif
 
 /****************************************************************************
@@ -62,27 +132,10 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
   aligned_data(16) locate_data(".noinit");
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
-extern void esp32_lowsetup(void);
-#endif
-
-/****************************************************************************
- * Name: __start
- *
- * Description:
- *   We arrive here after the bootloader finished loading the program from
- *   flash. The hardware is mostly uninitialized, and the app CPU is in
- *   reset. We do have a stack, so we can do the initialization in C.
- *
- *   The app CPU will remain in reset unless CONFIG_SMP is selected and
- *   up_cpu_start() is called later in the bring-up sequeuence.
- *
- ****************************************************************************/
-
-void IRAM_ATTR __start(void)
+static noreturn_function void __esp32_start(void)
 {
   uint32_t regval;
   uint32_t sp;
@@ -177,4 +230,137 @@ void IRAM_ATTR __start(void)
 
   nx_start();
   for (; ; ); /* Should not return */
+}
+
+/****************************************************************************
+ * Name: calc_mmu_pages
+ *
+ * Description:
+ *   Calculate the number of cache pages to map.
+ *
+ * Input Parameters:
+ *   size  - Size of data to map
+ *   vaddr - Virtual address where data will be mapped
+ *
+ * Returned Value:
+ *   Number of cache MMU pages required to do the mapping.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+static inline uint32_t calc_mmu_pages(uint32_t size, uint32_t vaddr)
+{
+  return (size + (vaddr - (vaddr & MMU_FLASH_MASK)) + MMU_BLOCK_SIZE - 1) /
+    MMU_BLOCK_SIZE;
+}
+#endif
+
+/****************************************************************************
+ * Name: map_rom_segments
+ *
+ * Description:
+ *   Configure the MMU and Cache peripherals for accessing ROM code and data.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+static int map_rom_segments(void)
+{
+  uint32_t rc = 0;
+  uint32_t regval;
+  uint32_t drom_lma_aligned;
+  uint32_t drom_vma_aligned;
+  uint32_t drom_page_count;
+  uint32_t irom_lma_aligned;
+  uint32_t irom_vma_aligned;
+  uint32_t irom_page_count;
+
+  size_t partition_offset = PRIMARY_SLOT_OFFSET;
+  uint32_t app_irom_lma = partition_offset + (uint32_t)&_image_irom_lma;
+  uint32_t app_irom_size = (uint32_t)&_image_irom_size;
+  uint32_t app_irom_vma = (uint32_t)&_image_irom_vma;
+  uint32_t app_drom_lma = partition_offset + (uint32_t)&_image_drom_lma;
+  uint32_t app_drom_size = (uint32_t)&_image_drom_size;
+  uint32_t app_drom_vma = (uint32_t)&_image_drom_vma;
+
+  volatile uint32_t *pro_flash_mmu_table =
+    (volatile uint32_t *)DPORT_PRO_FLASH_MMU_TABLE_REG;
+
+  cache_read_disable(0);
+  cache_flush(0);
+
+  /* Clear the MMU entries that are already set up, so the new app only has
+   * the mappings it creates.
+   */
+
+  for (int i = 0; i < DPORT_FLASH_MMU_TABLE_SIZE; i++)
+    {
+      putreg32(DPORT_FLASH_MMU_TABLE_INVALID_VAL, pro_flash_mmu_table++);
+    }
+
+  drom_lma_aligned = app_drom_lma & MMU_FLASH_MASK;
+  drom_vma_aligned = app_drom_vma & MMU_FLASH_MASK;
+  drom_page_count = calc_mmu_pages(app_drom_size, app_drom_vma);
+  rc  = cache_flash_mmu_set(0, 0, drom_vma_aligned, drom_lma_aligned, 64,
+                            (int)drom_page_count);
+  rc |= cache_flash_mmu_set(1, 0, drom_vma_aligned, drom_lma_aligned, 64,
+                            (int)drom_page_count);
+
+  irom_lma_aligned = app_irom_lma & MMU_FLASH_MASK;
+  irom_vma_aligned = app_irom_vma & MMU_FLASH_MASK;
+  irom_page_count = calc_mmu_pages(app_irom_size, app_irom_vma);
+  rc |= cache_flash_mmu_set(0, 0, irom_vma_aligned, irom_lma_aligned, 64,
+                            (int)irom_page_count);
+  rc |= cache_flash_mmu_set(1, 0, irom_vma_aligned, irom_lma_aligned, 64,
+                            (int)irom_page_count);
+
+  regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
+  regval &= ~(DPORT_PRO_CACHE_MASK_IRAM0 | DPORT_PRO_CACHE_MASK_DROM0 |
+              DPORT_PRO_CACHE_MASK_DRAM1);
+  putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
+
+  regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
+  regval &= ~(DPORT_APP_CACHE_MASK_IRAM0 | DPORT_APP_CACHE_MASK_DROM0 |
+              DPORT_APP_CACHE_MASK_DRAM1);
+  putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
+
+  cache_read_enable(0);
+  return (int)rc;
+}
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: __start
+ *
+ * Description:
+ *   We arrive here after the bootloader finished loading the program from
+ *   flash. The hardware is mostly uninitialized, and the app CPU is in
+ *   reset. We do have a stack, so we can do the initialization in C.
+ *
+ *   The app CPU will remain in reset unless CONFIG_SMP is selected and
+ *   up_cpu_start() is called later in the bring-up sequence.
+ *
+ ****************************************************************************/
+
+void __start(void)
+{
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
+  if (map_rom_segments() != 0)
+    {
+      ets_printf("Failed to setup XIP, aborting\n");
+      while (true);
+    }
+
+#endif
+  __esp32_start();
 }

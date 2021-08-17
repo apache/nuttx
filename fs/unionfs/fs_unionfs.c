@@ -121,6 +121,9 @@ static int     unionfs_tryrename(FAR struct inode *mountpt,
 static int     unionfs_trystat(FAR struct inode *inode,
                  FAR const char *relpath, FAR const char *prefix,
                  FAR struct stat *buf);
+static int     unionfs_trychstat(FAR struct inode *inode,
+                 FAR const char *relpath, FAR const char *prefix,
+                 FAR const struct stat *buf, int flags);
 static int     unionfs_trystatdir(FAR struct inode *inode,
                  FAR const char *relpath, FAR const char *prefix);
 static int     unionfs_trystatfile(FAR struct inode *inode,
@@ -149,6 +152,8 @@ static int     unionfs_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 static int     unionfs_fstat(FAR const struct file *filep,
                  FAR struct stat *buf);
+static int     unionfs_fchstat(FAR const struct file *filep,
+                 FAR const struct stat *buf, int flags);
 static int     unionfs_truncate(FAR struct file *filep, off_t length);
 
 /* Operations on directories */
@@ -181,6 +186,9 @@ static int     unionfs_rename(FAR struct inode *mountpt,
                  FAR const char *oldrelpath, FAR const char *newrelpath);
 static int     unionfs_stat(FAR struct inode *mountpt,
                  FAR const char *relpath, FAR struct stat *buf);
+static int     unionfs_chstat(FAR struct inode *mountpt,
+                 FAR const char *relpath,
+                 FAR const struct stat *buf, int flags);
 
 /* Initialization */
 
@@ -211,7 +219,7 @@ const struct mountpt_operations unionfs_operations =
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */
   unionfs_fstat,       /* fstat */
-  NULL,                /* fchstat */
+  unionfs_fchstat,     /* fchstat */
   unionfs_truncate,    /* truncate */
 
   unionfs_opendir,     /* opendir */
@@ -228,7 +236,7 @@ const struct mountpt_operations unionfs_operations =
   unionfs_rmdir,       /* rmdir */
   unionfs_rename,      /* rename */
   unionfs_stat,        /* stat */
-  NULL                 /* chstat */
+  unionfs_chstat       /* chstat */
 };
 
 /****************************************************************************
@@ -560,6 +568,38 @@ static int unionfs_trystat(FAR struct inode *inode, FAR const char *relpath,
     }
 
   return ops->stat(inode, trypath, buf);
+}
+
+/****************************************************************************
+ * Name: unionfs_trychstat
+ ****************************************************************************/
+
+static int unionfs_trychstat(FAR struct inode *inode,
+                             FAR const char *relpath, FAR const char *prefix,
+                             FAR const struct stat *buf, int flags)
+{
+  FAR const struct mountpt_operations *ops;
+  FAR const char *trypath;
+
+  /* Is this path valid on this file system? */
+
+  trypath = unionfs_offsetpath(relpath, prefix);
+  if (trypath == NULL)
+    {
+      /* No.. return -ENOENT */
+
+      return -ENOENT;
+    }
+
+  /* Yes.. Try to change the status */
+
+  ops = inode->u.i_mops;
+  if (!ops->chstat)
+    {
+      return -ENOSYS;
+    }
+
+  return ops->chstat(inode, trypath, buf, flags);
 }
 
 /****************************************************************************
@@ -1283,6 +1323,45 @@ static int unionfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   /* Perform the lower level write operation */
 
   return ops->fstat ? ops->fstat(&uf->uf_file, buf) : -EPERM;
+}
+
+/****************************************************************************
+ * Name: unionfs_fchstat
+ *
+ * Description:
+ *   Change information about an open file associated with the file
+ *   descriptor 'filep'.
+ *
+ ****************************************************************************/
+
+static int unionfs_fchstat(FAR const struct file *filep,
+                           FAR const struct stat *buf, int flags)
+{
+  FAR struct unionfs_inode_s *ui;
+  FAR struct unionfs_file_s *uf;
+  FAR struct unionfs_mountpt_s *um;
+  FAR const struct mountpt_operations *ops;
+
+  finfo("filep=%p buf=%p\n", filep, buf);
+
+  /* Recover the open file data from the struct file instance */
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  ui = (FAR struct unionfs_inode_s *)filep->f_inode->i_private;
+
+  DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
+  uf = (FAR struct unionfs_file_s *)filep->f_priv;
+
+  DEBUGASSERT(uf->uf_ndx == 0 || uf->uf_ndx == 1);
+  um = &ui->ui_fs[uf->uf_ndx];
+
+  DEBUGASSERT(um != NULL && um->um_node != NULL &&
+              um->um_node->u.i_mops != NULL);
+  ops = um->um_node->u.i_mops;
+
+  /* Perform the lower level change operation */
+
+  return ops->fchstat ? ops->fchstat(&uf->uf_file, buf, flags) : -EPERM;
 }
 
 /****************************************************************************
@@ -2436,6 +2515,50 @@ static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
         {
           ret = -ENOENT;
         }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: unionfs_chstat
+ ****************************************************************************/
+
+static int unionfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
+                          FAR const struct stat *buf, int flags)
+{
+  FAR struct unionfs_inode_s *ui;
+  FAR struct unionfs_mountpt_s *um;
+  int ret;
+
+  finfo("relpath: %s\n", relpath);
+
+  /* Recover the union file system data from the struct inode instance */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL &&
+              relpath != NULL);
+  ui = (FAR struct unionfs_inode_s *)mountpt->i_private;
+
+  /* chstat this path on file system 1 */
+
+  um  = &ui->ui_fs[0];
+  ret = unionfs_trychstat(um->um_node, relpath, um->um_prefix, buf, flags);
+  if (ret >= 0)
+    {
+      /* Return on the first success.  The first instance of the file will
+       * shadow the second anyway.
+       */
+
+      return OK;
+    }
+
+  /* chstat failed on the file system 1.  Try again on file system 2. */
+
+  um  = &ui->ui_fs[1];
+  ret = unionfs_trychstat(um->um_node, relpath, um->um_prefix, buf, flags);
+  if (ret >= 0)
+    {
+      return OK;
     }
 
   return ret;

@@ -437,6 +437,11 @@
 #define NVIC_DEMCR                      (ARMV8M_NVIC_BASE + NVIC_DEMCR_OFFSET)
 #define NVIC_STIR                       (ARMV8M_NVIC_BASE + NVIC_STIR_OFFSET)
 #define NVIC_FPCCR                      (ARMV8M_NVIC_BASE + NVIC_FPCCR_OFFSET)
+#define NVIC_FPCAR                      (ARMV8M_NVIC_BASE + NVIC_FPCAR_OFFSET)
+#define NVIC_FPDSCR                     (ARMV8M_NVIC_BASE + NVIC_FPDSCR_OFFSET)
+#define NVIC_MVFR0                      (ARMV8M_NVIC_BASE + NVIC_MVFR0_OFFSET)
+#define NVIC_MVFR1                      (ARMV8M_NVIC_BASE + NVIC_MVFR1_OFFSET)
+#define NVIC_MVFR2                      (ARMV8M_NVIC_BASE + NVIC_MVFR2_OFFSET)
 #define NVIC_ICIALLU                    (ARMV8M_NVIC_BASE + NVIC_ICIALLU_OFFSET)
 #define NVIC_ICIMVAU                    (ARMV8M_NVIC_BASE + NVIC_ICIMVAU_OFFSET)
 #define NVIC_DCIMVAC                    (ARMV8M_NVIC_BASE + NVIC_DCIMVAC_OFFSET)
@@ -578,8 +583,10 @@
 #define NVIC_AIRCR_ENDIANNESS           (1 << 15) /* Bit 15: 1=Big endian */
 #define NVIC_AIRCR_VECTKEY_SHIFT        (16)      /* Bits 16-31: VECTKEY */
 #define NVIC_AIRCR_VECTKEY_MASK         (0xffff << NVIC_AIRCR_VECTKEY_SHIFT)
+#define NVIC_AIRCR_VECTKEY              (0x05fa << NVIC_AIRCR_VECTKEY_SHIFT)
 #define NVIC_AIRCR_VECTKEYSTAT_SHIFT    (16)      /* Bits 16-31: VECTKEYSTAT */
 #define NVIC_AIRCR_VECTKEYSTAT_MASK     (0xffff << NVIC_AIRCR_VECTKEYSTAT_SHIFT)
+#define NVIC_AIRCR_VECTKEYSTAT          (0xfa05 << NVIC_AIRCR_VECTKEYSTAT_SHIFT)
 
 /* System handler control and state register (SYSHCON) */
 
@@ -649,6 +656,14 @@
 #define NVIC_CSSELR_LEVEL_MASK          (7 << NVIC_CSSELR_LEVEL_SHIFT)
   #define NVIC_CSSELR_LEVEL_1           (0 << NVIC_CSSELR_LEVEL_SHIFT)
 
+/* Coprocessor Access Control Register (CPACR) */
+
+#define NVIC_CPACR_CP_SHIFT(n)          (2 * (n))
+#define NVIC_CPACR_CP_MASK(n)           (3 << NVIC_CPACR_CP_SHIFT(n))
+#  define NVIC_CPACR_CP_DENY(n)         (0 << NVIC_CPACR_CP_SHIFT(n))
+#  define NVIC_CPACR_CP_PRIV(n)         (1 << NVIC_CPACR_CP_SHIFT(n))
+#  define NVIC_CPACR_CP_FULL(n)         (3 << NVIC_CPACR_CP_SHIFT(n))
+
 /* Debug Exception and Monitor Control Register (DEMCR) */
 
 #define NVIC_DEMCR_VCCORERESET          (1 << 0)  /* Bit 0:  Reset Vector Catch */
@@ -664,6 +679,26 @@
 #define NVIC_DEMCR_MONSTEP              (1 << 18) /* Bit 18: Steps the core */
 #define NVIC_DEMCR_MONREQ               (1 << 19) /* Bit 19: Monitor wake-up mode */
 #define NVIC_DEMCR_TRCENA               (1 << 24) /* Bit 24: Enable trace and debug blocks */
+
+/*  Floating-Point Context Control Register (FPCCR) */
+
+#define NVIC_FPCCR_LSPACT               (1 << 0)  /* Bit 0:  Lazy state preservation active */
+#define NVIC_FPCCR_USER                 (1 << 1)  /* Bit 1:  User privilege */
+#define NVIC_FPCCR_SECURE               (1 << 2)  /* Bit 2:  Security status */
+#define NVIC_FPCCR_THREAD               (1 << 3)  /* Bit 3:  Thread mode */
+#define NVIC_FPCCR_HFRDY                (1 << 4)  /* Bit 4:  HardFault ready */
+#define NVIC_FPCCR_MMRDY                (1 << 5)  /* Bit 5:  MemManage ready */
+#define NVIC_FPCCR_BFRDY                (1 << 6)  /* Bit 6:  BusFault ready */
+#define NVIC_FPCCR_SFRDY                (1 << 7)  /* Bit 7:  SecureFault ready */
+#define NVIC_FPCCR_MONRDY               (1 << 8)  /* Bit 8:  DebugMonitor ready */
+#define NVIC_FPCCR_SPLIMVIOL            (1 << 9)  /* Bit 9:  Stack pointer limit violation */
+#define NVIC_FPCCR_UFRDY                (1 << 10) /* Bit 10: UsageFault ready */
+#define NVIC_FPCCR_TS                   (1 << 26) /* Bit 26: Treat as Secure */
+#define NVIC_FPCCR_CLRONRETS            (1 << 27) /* Bit 27: Clear on return, Secure only */
+#define NVIC_FPCCR_CLRONRET             (1 << 28) /* Bit 28: Clear on return */
+#define NVIC_FPCCR_LSPENS               (1 << 29) /* Bit 29: Lazy state preservation enable Secure */
+#define NVIC_FPCCR_LSPEN                (1 << 30) /* Bit 30: Lazy state preservation enable */
+#define NVIC_FPCCR_ASPEN                (1 << 31) /* Bit 31: Automatic state preservation enable */
 
 /* Instruction Tightly-Coupled Memory Control Register (ITCMCR) */
 
