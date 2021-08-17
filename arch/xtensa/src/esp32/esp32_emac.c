@@ -2187,7 +2187,7 @@ int esp32_emac_init(void)
 
   /* Allocate and register interrupt */
 
-  priv->cpuint = esp32_alloc_levelint(1);
+  priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       nerr("ERROR: Failed alloc interrupt\n");
