@@ -178,6 +178,9 @@
 #  define SER_SINGLEWIRE_PULLDOWN     (2 << SER_SINGLEWIRE_PULL_SHIFT) /* Enable Pull down the RX/TX Line */
 #  define SER_SINGLEWIRE_PUSHPULL     (1 << 3)                         /* Use PUSH/PULL not Open Drain with Single wire */
 
+/* LIN support */
+#define TIOCSLIN  _TIOC(0x0040)       /* issue one lin header */
+
 /* Debugging */
 
 #define TIOCSERGSTRUCT  _TIOC(0x0032) /* Get device TTY structure */

@@ -266,6 +266,8 @@
 #  define UART_MR_MODE_RS485         (1  << UART_MR_MODE_SHIFT) /* RS485 */
 #  define UART_MR_MODE_HWHS          (2  << UART_MR_MODE_SHIFT) /* Hardware Handshaking */
 #  define UART_MR_MODE_LON           (9  << UART_MR_MODE_SHIFT) /* LON */
+#  define UART_MR_MODE_LIN_MSTR      (10  << UART_MR_MODE_SHIFT) /* Lin Master */
+#  define UART_MR_MODE_LIN_SLV       (11  << UART_MR_MODE_SHIFT) /* Lin Slave */
 #  define UART_MR_MODE_SPIMSTR       (14 << UART_MR_MODE_SHIFT) /* SPI Master (SPI mode only) */
 #  define UART_MR_MODE_SPISLV        (15 << UART_MR_MODE_SHIFT) /* SPI Slave (SPI mode only) */
 
