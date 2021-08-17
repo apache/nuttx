@@ -412,7 +412,7 @@ void esp32_gpioirqinitialize(void)
 
   /* Allocate a level-sensitive, priority 1 CPU interrupt */
 
-  g_gpio_cpuint = esp32_alloc_levelint(1);
+  g_gpio_cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
   DEBUGASSERT(g_gpio_cpuint >= 0);
 
   /* Set up to receive peripheral interrupts on the current CPU */

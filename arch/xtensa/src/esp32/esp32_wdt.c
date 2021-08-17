@@ -742,7 +742,7 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
     {
       /* Verify the available CPU Interrupt */
 
-      wdt->cpuint = esp32_alloc_levelint(1);
+      wdt->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
       if (wdt->cpuint < 0)
         {
           tmrerr("ERROR: No CPU Interrupt available");

@@ -1296,7 +1296,7 @@ FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
                          esp32_io_interrupt,
                          priv));
 
-  priv->cpuint = esp32_alloc_levelint(1);
+  priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       leave_critical_section(flags);

@@ -556,7 +556,7 @@ static int esp32_tim_setisr(FAR struct esp32_tim_dev_s *dev, xcpt_t handler,
 
       /* Verify the available level CPU Interrupt */
 
-      tim->cpuint = esp32_alloc_levelint(tim->priority);
+      tim->cpuint = esp32_alloc_cpuint(tim->priority, ESP32_CPUINT_LEVEL);
       if (tim->cpuint < 0)
         {
           tmrerr("ERROR: No CPU Interrupt available");

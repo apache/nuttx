@@ -1554,7 +1554,7 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
 
 #ifndef CONFIG_I2C_POLLED
   config = priv->config;
-  priv->cpuint = esp32_alloc_levelint(1);
+  priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */

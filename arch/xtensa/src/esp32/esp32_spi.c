@@ -1464,7 +1464,7 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
 
   if (priv->config->use_dma)
     {
-      priv->cpuint = esp32_alloc_levelint(1);
+      priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
       if (priv->cpuint < 0)
         {
           leave_critical_section(flags);

@@ -1015,7 +1015,7 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Allocate a level-sensitive, priority 1 CPU interrupt for the UART */
 
-  priv->cpuint = esp32_alloc_levelint(1);
+  priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */

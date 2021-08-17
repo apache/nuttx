@@ -209,11 +209,11 @@ static inline void xtensa_disable_all(void)
 }
 
 /****************************************************************************
- * Name:  esp32_alloc_cpuint
+ * Name:  esp32_getcpuint
  *
  * Description:
- *   Allocate a CPU interrupt for a peripheral device.  This function will
- *   not allocate any of the pre-allocated CPU interrupts for internal
+ *   Get a free CPU interrupt for a peripheral device.  This function will
+ *   not ignore all of the pre-allocated CPU interrupts for internal
  *   devices.
  *
  * Input Parameters:
@@ -221,14 +221,12 @@ static inline void xtensa_disable_all(void)
  *             be allocated from free interrupts within this set
  *
  * Returned Value:
- *   On success, the allocated level-sensitive, CPU interrupt number is
- *   returned.  A negated errno is returned on failure.  The only possible
- *   failure is that all level-sensitive CPU interrupts have already been
- *   allocated.
+ *   On success, a CPU interrupt number is returned.
+ *   A negated errno is returned on failure.
  *
  ****************************************************************************/
 
-static int esp32_alloc_cpuint(uint32_t intmask)
+static int esp32_getcpuint(uint32_t intmask)
 {
   irqstate_t flags;
   uint32_t *freeints;
@@ -401,7 +399,7 @@ int esp32_cpuint_initialize(void)
 }
 
 /****************************************************************************
- * Name:  esp32_alloc_levelint
+ * Name:  esp32_alloc_cpuint
  *
  * Description:
  *   Allocate a level CPU interrupt
@@ -410,58 +408,40 @@ int esp32_cpuint_initialize(void)
  *   priority - Priority of the CPU interrupt (1-5)
  *
  * Returned Value:
- *   On success, the allocated level-sensitive, CPU interrupt number is
- *   returned.  A negated errno is returned on failure.  The only possible
- *   failure is that all level-sensitive CPU interrupts have already been
+ *   On success, the allocated CPU interrupt number is returned.
+ *   A negated errno is returned on failure.  The only possible failure
+ *   is that all CPU interrupts of the requested type have already been
  *   allocated.
  *
  ****************************************************************************/
 
-int esp32_alloc_levelint(int priority)
+int esp32_alloc_cpuint(int priority, int type)
 {
-  uint32_t intmask;
+  uint32_t mask;
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
               priority <= ESP32_MAX_PRIORITY);
+  DEBUGASSERT(type == ESP32_CPUINT_LEVEL ||
+              type == ESP32_CPUINT_EDGE);
 
-  /* Check if there are any level CPU interrupts available at the requested
-   * interrupt priority.
-   */
+  if (type == ESP32_CPUINT_LEVEL)
+    {
+      /* Check if there are any level CPU interrupts available at the
+       * requested interrupt priority.
+       */
 
-  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_LEVELSET;
-  return esp32_alloc_cpuint(intmask);
-}
+      mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_LEVELSET;
+    }
+  else
+    {
+      /* Check if there are any edge CPU interrupts available at the
+       * requested interrupt priority.
+       */
 
-/****************************************************************************
- * Name:  esp32_alloc_edgeint
- *
- * Description:
- *   Allocate an edge CPU interrupt
- *
- * Input Parameters:
- *   priority - Priority of the CPU interrupt (1-5)
- *
- * Returned Value:
- *   On success, the allocated edge-sensitive, CPU interrupt numbr is
- *   returned.  A negated errno is returned on failure.  The only possible
- *   failure is that all edge-sensitive CPU interrupts have already been
- *   allocated.
- *
- ****************************************************************************/
+      mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_EDGESET;
+    }
 
-int esp32_alloc_edgeint(int priority)
-{
-  uint32_t intmask;
-
-  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
-              priority <= ESP32_MAX_PRIORITY);
-
-  /* Check if there are any edge CPU interrupts available at the requested
-   * interrupt priority.
-   */
-
-  intmask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_EDGESET;
-  return esp32_alloc_cpuint(intmask);
+  return esp32_getcpuint(mask);
 }
 
 /****************************************************************************
