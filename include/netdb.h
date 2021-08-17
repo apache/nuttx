@@ -277,6 +277,12 @@ EXTERN int h_errno;
  * Public Function Prototypes
  ****************************************************************************/
 
+int rexec(FAR char **ahost, int inport, FAR const char *user,
+          FAR const char *passwd, FAR const char *cmd, FAR int *fd2p);
+int rexec_af(FAR char **ahost, int inport, FAR const char *user,
+             FAR const char *passwd, FAR const char *cmd, FAR int *fd2p,
+             sa_family_t af);
+
 #ifdef CONFIG_LIBC_NETDB
 #if 0 /* None of these are yet supported */
 
