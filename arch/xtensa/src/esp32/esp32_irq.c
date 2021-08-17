@@ -122,28 +122,28 @@ uintptr_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
 };
 #endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
-static volatile uint8_t g_irqmap[NR_IRQS];
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
 
-uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
+static uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
 #ifdef CONFIG_SMP
-uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
+static uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
 #endif
+
+static volatile uint8_t g_irqmap[NR_IRQS];
 
 /* g_intenable[] is a shadow copy of the per-CPU INTENABLE register
  * content.
  */
 
 #ifdef CONFIG_SMP
-uint32_t g_intenable[CONFIG_SMP_NCPUS];
+static uint32_t g_intenable[CONFIG_SMP_NCPUS];
 #else
-uint32_t g_intenable[1];
+static uint32_t g_intenable[1];
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /* Bitsets for free, unallocated CPU interrupts available to peripheral
  * devices.
@@ -227,6 +227,19 @@ static inline void xtensa_disable_all(void)
     "movi a2, 0\n"
     "xsr a2, INTENABLE\n"
     : : : "a2"
+  );
+}
+
+/****************************************************************************
+ * Name: xtensa_intclear
+ ****************************************************************************/
+
+static inline void xtensa_intclear(uint32_t mask)
+{
+  __asm__ __volatile__
+  (
+    "wsr %0, INTCLEAR\n"
+    : "=r"(mask) : :
   );
 }
 
@@ -826,5 +839,87 @@ void esp32_teardown_irq(int cpu, int periphid, int cpuint)
   putreg32(NO_CPUINT, regaddr);
 
   leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name: xtensa_int_decode
+ *
+ * Description:
+ *   Determine the peripheral that generated the interrupt and dispatch
+ *   handling to the registered interrupt handler via xtensa_irq_dispatch().
+ *
+ * Input Parameters:
+ *   cpuints - Set of pending interrupts valid for this level
+ *   regs    - Saves processor state on the stack
+ *
+ * Returned Value:
+ *   Normally the same value as regs is returned.  But, in the event of an
+ *   interrupt level context switch, the returned value will, instead point
+ *   to the saved processor state in the TCB of the newly started task.
+ *
+ ****************************************************************************/
+
+uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
+{
+  uint8_t *intmap;
+  uint32_t mask;
+  int bit;
+#ifdef CONFIG_SMP
+  int cpu;
+#endif
+
+#ifdef CONFIG_SMP
+  /* Select PRO or APP CPU interrupt mapping table */
+
+  cpu = up_cpu_index();
+  if (cpu != 0)
+    {
+      intmap = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      intmap = g_cpu0_intmap;
+    }
+
+  /* Skip over zero bits, eight at a time */
+
+  for (bit = 0, mask = 0xff;
+       bit < ESP32_NCPUINTS && (cpuints & mask) == 0;
+       bit += 8, mask <<= 8);
+
+  /* Process each pending CPU interrupt */
+
+  for (; bit < ESP32_NCPUINTS && cpuints != 0; bit++)
+    {
+      mask = (1 << bit);
+      if ((cpuints & mask) != 0)
+        {
+          /* Extract the IRQ number from the mapping table */
+
+          uint8_t irq = intmap[bit];
+          DEBUGASSERT(irq != CPUINT_UNASSIGNED);
+
+          /* Clear software or edge-triggered interrupt */
+
+           xtensa_intclear(mask);
+
+          /* Dispatch the CPU interrupt.
+           *
+           * NOTE that regs may be altered in the case of an interrupt
+           * level context switch.
+           */
+
+          regs = xtensa_irq_dispatch((int)irq, regs);
+
+          /* Clear the bit in the pending interrupt so that perhaps
+           * we can exit the look early.
+           */
+
+          cpuints &= ~mask;
+        }
+    }
+
+  return regs;
 }
 

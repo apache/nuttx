@@ -54,27 +54,6 @@ extern "C"
 #define ESP32_CPUINT_EDGE    1
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
-
-extern uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
-#ifdef CONFIG_SMP
-extern uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
-#endif
-
-/* g_intenable[] is a shadow copy of the per-CPU INTENABLE register
- * content.
- */
-
-#ifdef CONFIG_SMP
-extern uint32_t g_intenable[CONFIG_SMP_NCPUS];
-#else
-extern uint32_t g_intenable[1];
-#endif
-
-/****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
 
