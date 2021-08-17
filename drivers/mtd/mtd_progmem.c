@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include <nuttx/progmem.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
