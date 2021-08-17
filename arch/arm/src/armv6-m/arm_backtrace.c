@@ -66,6 +66,12 @@
 #define IMASK_T_SUB_W_SP_32 0xfbff8f00  /* sub.w sp, sp, # */
 #define IOP_T_SUB_W_SP_32   0xf1ad0d00
 
+#define IMASK_T_BLX         0xff80      /* blx */
+#define IOP_T_BLX           0x4780
+
+#define IMASK_T_BL          0xf800      /* blx */
+#define IOP_T_BL            0xf000
+
 #define INSTR_LIMIT         0x2000
 
 /****************************************************************************
@@ -365,6 +371,8 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 {
   FAR struct tcb_s *rtcb;
   irqstate_t flags;
+  uint16_t ins16;
+  uint32_t addr;
   FAR void *sp;
   FAR void *pc;
   FAR void *ip;
@@ -444,6 +452,45 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
             }
 
           break;
+        }
+    }
+
+  /* Phase 2: The instruction tacking may fail in some scenarios,
+   * try stack pointer further to locate the program counter and
+   * check the disassembly instruction is 'BL' or 'BLX'
+   */
+
+  for (; i < size && sp < tcb->stack_alloc_ptr + tcb->adj_stack_size;
+      sp += sizeof(size_t))
+    {
+      addr = *(uint32_t *)sp;
+      if (!verify_address_executable(addr))
+        {
+          continue;
+        }
+
+      addr = (addr & ~1) - 2;
+      ins16 = *(uint16_t *)addr;
+      if (INSTR_IS(ins16, T_BLX))
+        {
+          buffer[i++] = addr;
+        }
+
+      /* BL Instruction
+       * OFFSET: 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16
+       * VALUE :  1  1  1  1  0  -  -  -  -  -  -  -  -  -  -  -
+       * OFFSET: 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+       * VALUE :  1  1  -  1  -  -  -  -  -  -  -  -  -  -  -  -
+       */
+
+      else if ((ins16 & 0xd000) == 0xd000)
+        {
+          addr -= 2;
+          ins16 = *(uint16_t *)addr;
+          if (INSTR_IS(ins16, T_BL))
+            {
+              buffer[i++] = addr;
+            }
         }
     }
 
