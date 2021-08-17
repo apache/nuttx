@@ -251,7 +251,6 @@ static int ameba_flash_ioctl(FAR struct mtd_dev_s *dev,
         (FAR struct partition_info_s *)arg;
       if (info != NULL)
         {
-          info->magic       = 0;
           info->numsectors  = priv->nsectors *
                               AMEBA_SECTOR_SIZE / AMEBA_PAGE_SIZE;
           info->sectorsize  = AMEBA_PAGE_SIZE;

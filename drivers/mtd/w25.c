@@ -1329,7 +1329,6 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #ifdef CONFIG_W25_SECTOR512
               info->numsectors  = priv->nsectors <<
                                   (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
