@@ -893,7 +893,6 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #ifdef CONFIG_SPIFI_SECTOR512
               info->numsectors  = priv->nblocks <<
                                   (SPIFI_BLKSHIFT - SPIFI_512SHIFT);

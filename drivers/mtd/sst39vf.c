@@ -742,7 +742,6 @@ static int sst39vf_ioctl(FAR struct mtd_dev_s *dev,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->chip->nsectors;
               info->sectorsize  = priv->chip->sectorsize;
               info->startsector = 0;

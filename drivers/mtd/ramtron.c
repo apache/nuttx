@@ -960,7 +960,6 @@ static int ramtron_ioctl(FAR struct mtd_dev_s *dev,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->nsectors *
                                   (priv->sectorshift - priv->pageshift);
               info->sectorsize  = 1 << priv->pageshift;

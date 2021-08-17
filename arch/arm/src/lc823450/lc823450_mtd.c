@@ -355,7 +355,6 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->nblocks;
               info->sectorsize  = priv->blocksize;
               info->startsector = 0;

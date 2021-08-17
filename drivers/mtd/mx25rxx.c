@@ -759,7 +759,6 @@ int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #ifdef CONFIG_MX25RXX_SECTOR512
               info->numsectors  = priv->nsectors <<
                                (priv->sectorshift - MX25RXX_SECTOR512_SHIFT);

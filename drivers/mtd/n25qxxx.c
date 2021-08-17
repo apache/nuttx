@@ -1407,7 +1407,6 @@ static int n25qxxx_ioctl(FAR struct mtd_dev_s *dev,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #ifdef CONFIG_N25QXXX_SECTOR512
               info->numsectors  = priv->nsectors <<
                                (priv->sectorshift - N25QXXX_SECTOR512_SHIFT);

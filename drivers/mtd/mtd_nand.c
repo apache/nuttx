@@ -812,7 +812,6 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = nandmodel_getdevblocks(model) *
                                   nandmodel_getbyteblocksize(model) /
                                   model->pagesize;

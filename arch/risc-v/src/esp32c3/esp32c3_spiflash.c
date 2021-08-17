@@ -880,7 +880,6 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
           struct partition_info_s *info = (struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = SPI_FLASH_SIZE / SPI_FLASH_BLK_SIZE;
               info->sectorsize  = SPI_FLASH_BLK_SIZE;
               info->startsector = 0;
