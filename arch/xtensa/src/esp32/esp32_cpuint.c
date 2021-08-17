@@ -228,7 +228,6 @@ static inline void xtensa_disable_all(void)
 
 static int esp32_getcpuint(uint32_t intmask)
 {
-  irqstate_t flags;
   uint32_t *freeints;
   uint32_t bitmask;
   uint32_t intset;
@@ -239,8 +238,6 @@ static int esp32_getcpuint(uint32_t intmask)
   /* Check if there are CPU interrupts with the requested properties
    * available.
    */
-
-  flags = enter_critical_section();
 
   cpu = up_cpu_index();
 #ifdef CONFIG_SMP
@@ -294,8 +291,94 @@ static int esp32_getcpuint(uint32_t intmask)
       xtensa_disable_cpuint(&g_intenable[cpu], (1ul << ret));
     }
 
-  leave_critical_section(flags);
   return ret;
+}
+
+/****************************************************************************
+ * Name:  esp32_alloc_cpuint
+ *
+ * Description:
+ *   Allocate a level CPU interrupt
+ *
+ * Input Parameters:
+ *   priority - Priority of the CPU interrupt (1-5)
+ *   type     - Interrupt type (level or edge).
+ *
+ * Returned Value:
+ *   On success, the allocated CPU interrupt number is returned.
+ *   A negated errno is returned on failure.  The only possible failure
+ *   is that all CPU interrupts of the requested type have already been
+ *   allocated.
+ *
+ ****************************************************************************/
+
+static int esp32_alloc_cpuint(int priority, int type)
+{
+  uint32_t mask;
+
+  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
+              priority <= ESP32_MAX_PRIORITY);
+  DEBUGASSERT(type == ESP32_CPUINT_LEVEL ||
+              type == ESP32_CPUINT_EDGE);
+
+  if (type == ESP32_CPUINT_LEVEL)
+    {
+      /* Check if there are any level CPU interrupts available at the
+       * requested interrupt priority.
+       */
+
+      mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_LEVELSET;
+    }
+  else
+    {
+      /* Check if there are any edge CPU interrupts available at the
+       * requested interrupt priority.
+       */
+
+      mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_EDGESET;
+    }
+
+  return esp32_getcpuint(mask);
+}
+
+/****************************************************************************
+ * Name:  esp32_free_cpuint
+ *
+ * Description:
+ *   Free a previously allocated CPU interrupt
+ *
+ * Input Parameters:
+ *   The CPU interrupt number to be freed
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32_free_cpuint(int cpuint)
+{
+  uint32_t *freeints;
+  uint32_t bitmask;
+
+  DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
+
+  /* Mark the CPU interrupt as available */
+
+  bitmask  = (1ul << cpuint);
+
+#ifdef CONFIG_SMP
+  if (up_cpu_index() != 0)
+    {
+      freeints = &g_cpu1_freeints;
+    }
+  else
+#endif
+    {
+      freeints = &g_cpu0_freeints;
+    }
+
+  DEBUGASSERT((*freeints & bitmask) == 0);
+  *freeints |= bitmask;
 }
 
 /****************************************************************************
@@ -399,117 +482,50 @@ int esp32_cpuint_initialize(void)
 }
 
 /****************************************************************************
- * Name:  esp32_alloc_cpuint
+ * Name:  esp32_setup_irq
  *
  * Description:
- *   Allocate a level CPU interrupt
- *
- * Input Parameters:
- *   priority - Priority of the CPU interrupt (1-5)
- *
- * Returned Value:
- *   On success, the allocated CPU interrupt number is returned.
- *   A negated errno is returned on failure.  The only possible failure
- *   is that all CPU interrupts of the requested type have already been
- *   allocated.
- *
- ****************************************************************************/
-
-int esp32_alloc_cpuint(int priority, int type)
-{
-  uint32_t mask;
-
-  DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
-              priority <= ESP32_MAX_PRIORITY);
-  DEBUGASSERT(type == ESP32_CPUINT_LEVEL ||
-              type == ESP32_CPUINT_EDGE);
-
-  if (type == ESP32_CPUINT_LEVEL)
-    {
-      /* Check if there are any level CPU interrupts available at the
-       * requested interrupt priority.
-       */
-
-      mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_LEVELSET;
-    }
-  else
-    {
-      /* Check if there are any edge CPU interrupts available at the
-       * requested interrupt priority.
-       */
-
-      mask = g_priority[ESP32_PRIO_INDEX(priority)] & ESP32_CPUINT_EDGESET;
-    }
-
-  return esp32_getcpuint(mask);
-}
-
-/****************************************************************************
- * Name:  esp32_free_cpuint
- *
- * Description:
- *   Free a previously allocated CPU interrupt
- *
- * Input Parameters:
- *   The CPU interrupt number to be freed
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_free_cpuint(int cpuint)
-{
-  irqstate_t flags;
-  uint32_t *freeints;
-  uint32_t bitmask;
-
-  DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-
-  /* Mark the CPU interrupt as available */
-
-  bitmask  = (1ul << cpuint);
-  flags = enter_critical_section();
-
-#ifdef CONFIG_SMP
-  if (up_cpu_index() != 0)
-    {
-      freeints = &g_cpu1_freeints;
-    }
-  else
-#endif
-    {
-      freeints = &g_cpu0_freeints;
-    }
-
-  DEBUGASSERT((*freeints & bitmask) == 0);
-  *freeints |= bitmask;
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name:  esp32_attach_peripheral
- *
- * Description:
- *   Attach a peripheral interrupt to a CPU interrupt.
+ *   This function sets up the IRQ. It allocates a CPU interrupt of the given
+ *   priority and type and attaches it to the given peripheral.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
  *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
- *   cpuint   - The CPU interrupt to receive the peripheral interrupt
- *              assignment.
+ *   priority - Interrupt's priority (1 - 5).
+ *   type     - Interrupt's type (level or edge).
  *
  * Returned Value:
- *   None
+ *   The allocated CPU interrupt on success, a negated errno value on
+ *   failure.
  *
  ****************************************************************************/
 
-void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
+int esp32_setup_irq(int cpu, int periphid, int priority, int type)
 {
+  irqstate_t irqstate;
   uintptr_t regaddr;
   uint8_t *intmap;
   int irq;
+  int cpuint;
+
+  irqstate = enter_critical_section();
+
+  /* Setting up an IRQ includes the following steps:
+   *    1. Allocate a CPU interrupt.
+   *    2. Attach that CPU interrup to the peripheral.
+   *    3. Map the CPU interrupt to the IRQ to ease searching later.
+   */
+
+  cpuint = esp32_alloc_cpuint(priority, type);
+  if (cpuint < 0)
+    {
+      irqerr("Unable to allocate CPU interrupt for priority=%d and type=%d",
+             priority, type);
+      leave_critical_section(irqstate);
+
+      return cpuint;
+    }
 
   irq = ESP32_PERIPH2IRQ(periphid);
 
@@ -531,17 +547,24 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
     }
 
   DEBUGASSERT(intmap[cpuint] == CPUINT_UNASSIGNED);
+
   intmap[cpuint] = periphid + XTENSA_IRQ_FIRSTPERIPH;
   esp32_mapirq(irq, cpu, cpuint);
 
   putreg32(cpuint, regaddr);
+
+  leave_critical_section(irqstate);
+
+  return cpuint;
 }
 
 /****************************************************************************
- * Name:  esp32_detach_peripheral
+ * Name:  esp32_teardown_irq
  *
  * Description:
- *   Detach a peripheral interrupt from a CPU interrupt.
+ *   This function undoes the operations done by esp32_setup_irq.
+ *   It detaches a peripheral interrupt from a CPU interrupt and frees the
+ *   CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
@@ -555,11 +578,22 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
  *
  ****************************************************************************/
 
-void esp32_detach_peripheral(int cpu, int periphid, int cpuint)
+void esp32_teardown_irq(int cpu, int periphid, int cpuint)
 {
+  irqstate_t irqstate;
   uintptr_t regaddr;
   uint8_t *intmap;
   int irq;
+
+  irqstate = enter_critical_section();
+
+  /* Tearing down an IRQ includes the following steps:
+   *   1. Free the previously allocated CPU interrupt.
+   *   2. Detach the interrupt from the peripheral.
+   *   3. Unmap the IRQ from the IRQ-to-cpuint map.
+   */
+
+  esp32_free_cpuint(cpuint);
 
   irq = ESP32_PERIPH2IRQ(periphid);
 
@@ -584,4 +618,6 @@ void esp32_detach_peripheral(int cpu, int periphid, int cpuint)
   esp32_unmapirq(irq);
 
   putreg32(NO_CPUINT, regaddr);
+
+  leave_critical_section(irqstate);
 }

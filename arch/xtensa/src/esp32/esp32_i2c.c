@@ -1554,7 +1554,12 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
 
 #ifndef CONFIG_I2C_POLLED
   config = priv->config;
-  priv->cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
+
+  /* Set up to receive peripheral interrupts on the current CPU */
+
+  priv->cpu = up_cpu_index();
+  priv->cpuint = esp32_setup_irq(priv->cpu, config->periph,
+                                 1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -1564,16 +1569,10 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port)
       return NULL;
     }
 
-  /* Set up to receive peripheral interrupts on the current CPU */
-
-  priv->cpu = up_cpu_index();
-  esp32_attach_peripheral(priv->cpu, config->periph, priv->cpuint);
-
   ret = irq_attach(config->irq, esp32_i2c_irq, priv);
   if (ret != OK)
     {
-      esp32_detach_peripheral(priv->cpu, config->periph, priv->cpuint);
-      esp32_free_cpuint(priv->cpuint);
+      esp32_teardown_irq(priv->cpu, config->periph, priv->cpuint);
 
       leave_critical_section(flags);
 
@@ -1624,10 +1623,7 @@ int esp32_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->config->irq);
-  esp32_detach_peripheral(priv->cpu,
-                          priv->config->periph,
-                          priv->cpuint);
-  esp32_free_cpuint(priv->cpuint);
+  esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
 #endif
 
   esp32_i2c_deinit(priv);

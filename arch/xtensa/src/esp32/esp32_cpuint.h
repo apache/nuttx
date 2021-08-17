@@ -85,65 +85,34 @@ extern uint32_t g_intenable[1];
 int esp32_cpuint_initialize(void);
 
 /****************************************************************************
- * Name:  esp32_alloc_cpuint
+ * Name:  esp32_setup_irq
  *
  * Description:
- *   Allocate a level CPU interrupt
- *
- * Input Parameters:
- *   priority - Priority of the CPU interrupt (1-5)
- *
- * Returned Value:
- *   On success, the allocated CPU interrupt number is returned.
- *   A negated errno is returned on failure.  The only possible failure
- *   is that all CPU interrupts of the requested type have already been
- *   allocated.
- *
- ****************************************************************************/
-
-int esp32_alloc_cpuint(int priority, int type);
-
-/****************************************************************************
- * Name:  esp32_free_cpuint
- *
- * Description:
- *   Free a previoulsy allocated CPU interrupt
- *
- * Input Parameters:
- *   cpuint - The CPU interrupt number to be freed
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_free_cpuint(int cpuint);
-
-/****************************************************************************
- * Name:  esp32_attach_peripheral
- *
- * Description:
- *   Attach a peripheral interrupt to a CPU interrupt.
+ *   This function sets up the IRQ. It allocates a CPU interrupt of the given
+ *   priority and type and attaches it to the given peripheral.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
  *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
- *   cpuint   - The CPU interrupt to receive the peripheral interrupt
- *              assignment.
+ *   priority - Interrupt's priority (1 - 5).
+ *   type     - Interrupt's type (level or edge).
  *
  * Returned Value:
- *   None
+ *   The allocated CPU interrupt on success, a negated errno value on
+ *   failure.
  *
  ****************************************************************************/
 
-void esp32_attach_peripheral(int cpu, int periphid, int cpuint);
+int esp32_setup_irq(int cpu, int periphid, int priority, int type);
 
 /****************************************************************************
- * Name:  esp32_detach_peripheral
+ * Name:  esp32_teardown_irq
  *
  * Description:
- *   Detach a peripheral interrupt from a CPU interrupt.
+ *   This function undoes the operations done by esp32_setup_irq.
+ *   It detaches a peripheral interrupt from a CPU interrupt and frees the
+ *   CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
@@ -157,6 +126,6 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint);
  *
  ****************************************************************************/
 
-void esp32_detach_peripheral(int cpu, int periphid, int cpuint);
+void esp32_teardown_irq(int cpu, int periphid, int cpuint);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H */

@@ -410,18 +410,13 @@ void esp32_gpioirqinitialize(void)
 {
   int cpu;
 
-  /* Allocate a level-sensitive, priority 1 CPU interrupt */
-
-  g_gpio_cpuint = esp32_alloc_cpuint(1, ESP32_CPUINT_LEVEL);
-  DEBUGASSERT(g_gpio_cpuint >= 0);
-
-  /* Set up to receive peripheral interrupts on the current CPU */
+  /* Setup the GPIO interrupt. */
 
   cpu = up_cpu_index();
 
-  /* Attach the GPIO peripheral to the allocated CPU interrupt */
-
-  esp32_attach_peripheral(cpu, ESP32_PERIPH_CPU_GPIO, g_gpio_cpuint);
+  g_gpio_cpuint = esp32_setup_irq(cpu, ESP32_PERIPH_CPU_GPIO,
+                                  1, ESP32_CPUINT_LEVEL);
+  DEBUGASSERT(g_gpio_cpuint >= 0);
 
   /* Attach and enable the interrupt handler */
 
