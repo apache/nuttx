@@ -45,7 +45,7 @@
 
 #include "esp32_spi.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_dma.h"
 
 #include "xtensa.h"

@@ -53,7 +53,7 @@
 #include "hardware/esp32_dma.h"
 #include "esp32_config.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_dma.h"
 #include "hardware/esp32_dport.h"
 

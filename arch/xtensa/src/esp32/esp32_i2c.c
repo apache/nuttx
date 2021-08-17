@@ -47,7 +47,7 @@
 
 #include "esp32_i2c.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 
 #include "xtensa.h"
 #include "hardware/esp32_gpio_sigmap.h"

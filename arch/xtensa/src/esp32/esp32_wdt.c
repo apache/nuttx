@@ -31,7 +31,7 @@
 #include "hardware/esp32_tim.h"
 #include "hardware/esp32_rtccntl.h"
 #include "esp32_wdt.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_rtc.h"
 
 /****************************************************************************
