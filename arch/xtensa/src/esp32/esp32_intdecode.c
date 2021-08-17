@@ -31,7 +31,7 @@
 #include <arch/irq.h>
 
 #include "xtensa.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 
 /****************************************************************************
  * Private Functions

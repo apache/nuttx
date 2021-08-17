@@ -33,8 +33,9 @@
 
 #include "hardware/esp32_tim.h"
 
+#include "esp32_irq.h"
+
 #include "esp32_tim.h"
-#include "esp32_cpuint.h"
 
 /****************************************************************************
  * Private Types

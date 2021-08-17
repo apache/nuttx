@@ -56,7 +56,7 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
 #include "hardware/esp32_soc.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_wifi_adapter.h"
 #include "esp32_rt_timer.h"
 #include "esp32_wifi_utils.h"

@@ -61,7 +61,7 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 
 #include <arch/board/board.h>
 
