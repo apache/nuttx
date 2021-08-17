@@ -69,6 +69,13 @@
 #define INSTR_LIMIT         0x2000
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static FAR void **g_backtrace_program_regions;
+static FAR size_t g_backtrace_program_count;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -96,6 +103,44 @@ static int getlroffset(FAR uint8_t *lr)
     }
 
   return (*(FAR uint16_t *)(lr - 4) & 0xf000) == 0xf000 ? 5 : 3;
+}
+
+/****************************************************************************
+ * Name: verify_address_executable
+ *
+ * Description:
+ *  verify_address_executable()  check if the program counter is
+ *  in the program section, program counter should always be within
+ *  the view of executable sections.
+ *
+ * Input Parameters:
+ *   pc    - Program counter address
+ *
+ * Returned Value:
+ *   A boolean value: true the counter is vaild
+ *
+ ****************************************************************************/
+
+static bool verify_address_executable(FAR void *pc)
+{
+  int i;
+
+  if ((uintptr_t)pc >= (uintptr_t)_START_TEXT &&
+      (uintptr_t)pc <  (uintptr_t)_END_TEXT)
+    {
+      return true;
+    }
+
+  for (i = 0; i < g_backtrace_program_count * 2; i += 2)
+    {
+      if (g_backtrace_program_regions[i] <= pc &&
+          g_backtrace_program_regions[i + 1] > pc)
+        {
+          return true;
+        }
+    }
+
+  return false;
 }
 
 /****************************************************************************
@@ -231,7 +276,7 @@ static FAR void *backtrace_internal(FAR void **psp, FAR void **ppc,
     }
 
   lr = (FAR uint8_t *)*((FAR uint32_t *)sp + frame - offset);
-  if (lr == NULL)
+  if (!verify_address_executable(lr))
     {
       return NULL;
     }
@@ -251,6 +296,46 @@ static FAR void *backtrace_internal(FAR void **psp, FAR void **ppc,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_backtrace_init_program_regions
+ *
+ * Description:
+ *  The up call up_backtrace_init_program_regions() will set the start
+ *  and end addresses of the customized program sections, this method
+ *  will help the different boards to configure the current text
+ *  sections for some complicate platfroms
+ *
+ * Input Parameters:
+ *   addr   - The start and end address of the text segment
+ *            This interface supports the input of multiple
+ *            groups of sections, Each set of the sections
+ *            must be a pair, e.g :
+ *
+ *            static void *g_program_regions[] =
+ *              {
+ *                _START_TEXT, _END_TEXT,
+ *                _START2_TEXT, _END2_TEXT,
+ *                _START3_TEXT, _END3_TEXT,
+ *                ...
+ *              };
+ *
+ *              up_backtrace_init_program_regions(g_program_regions,
+ *                                                sizeof(g_program_regions) /
+ *                                                sizeof(void *) / 2);
+ *
+ *   count  - Maximum count of the program sections
+ *
+ * Returned Value:
+ *   up_backtrace() returns the number of addresses returned in buffer
+ *
+ ****************************************************************************/
+
+void up_backtrace_init_program_regions(FAR void **addr, size_t count)
+{
+  g_backtrace_program_regions = addr;
+  g_backtrace_program_count   = count;
+}
 
 /****************************************************************************
  * Name: up_backtrace

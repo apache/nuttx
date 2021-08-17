@@ -492,6 +492,44 @@ void up_exit() noreturn_function;
 
 void up_assert(FAR const char *filename, int linenum);
 
+#ifdef CONFIG_ARCH_HAVE_BACKTRACE
+
+/****************************************************************************
+ * Name: up_backtrace_init_program_regions
+ *
+ * Description:
+ *  The up call up_backtrace_init_program_regions() will set the start
+ *  and end addresses of the customized program sections, this method
+ *  will help the different boards to configure the current text
+ *  sections for some complicate platfroms
+ *
+ * Input Parameters:
+ *   addr   - The start and end address of the text segment
+ *            This interface supports the input of multiple
+ *            groups of sections, Each set of the sections
+ *            must be a pair, e.g :
+ *
+ *            static void *g_program_regions[] =
+ *              {
+ *                _START_TEXT, _END_TEXT,
+ *                _START2_TEXT, _END2_TEXT,
+ *                _START3_TEXT, _END3_TEXT,
+ *                ...
+ *              };
+ *
+ *              up_backtrace_init_program_regions(g_program_regions,
+ *                                                sizeof(g_program_regions) /
+ *                                                sizeof(void *) / 2);
+ *
+ *   count  - Maximum count of the program sections
+ *
+ * Returned Value:
+ *   up_backtrace() returns the number of addresses returned in buffer
+ *
+ ****************************************************************************/
+
+void up_backtrace_init_program_regions(FAR void **addr, size_t count);
+
 /****************************************************************************
  * Name: up_backtrace
  *
@@ -516,7 +554,6 @@ void up_assert(FAR const char *filename, int linenum);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_BACKTRACE
 int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size);
 #endif /* CONFIG_ARCH_HAVE_BACKTRACE */
 
