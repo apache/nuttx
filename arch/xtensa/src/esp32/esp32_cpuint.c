@@ -209,6 +209,34 @@ static inline void xtensa_disable_all(void)
 }
 
 /****************************************************************************
+ * Name: esp32_intinfo
+ *
+ * Description:
+ *    Return the CPU interrupt map of the given CPU and the register map
+ *    of the given peripheral.
+ *
+ ****************************************************************************/
+
+static void esp32_intinfo(int cpu, int periphid,
+                          uintptr_t *regaddr, uint8_t **intmap)
+{
+#ifdef CONFIG_SMP
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+
+  if (cpu != 0)
+    {
+      *regaddr = DPORT_APP_MAP_REGADDR(periphid);
+      *intmap  = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      *regaddr = DPORT_PRO_MAP_REGADDR(periphid);
+      *intmap  = g_cpu0_intmap;
+    }
+}
+
+/****************************************************************************
  * Name:  esp32_getcpuint
  *
  * Description:
@@ -531,20 +559,8 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int type)
 
   DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-#ifdef CONFIG_SMP
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
-  if (cpu != 0)
-    {
-      regaddr = DPORT_APP_MAP_REGADDR(periphid);
-      intmap  = g_cpu1_intmap;
-    }
-  else
-#endif
-    {
-      regaddr = DPORT_PRO_MAP_REGADDR(periphid);
-      intmap  = g_cpu0_intmap;
-    }
+  esp32_intinfo(cpu, periphid, &regaddr, &intmap);
 
   DEBUGASSERT(intmap[cpuint] == CPUINT_UNASSIGNED);
 
@@ -598,20 +614,8 @@ void esp32_teardown_irq(int cpu, int periphid, int cpuint)
   irq = ESP32_PERIPH2IRQ(periphid);
 
   DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
-#ifdef CONFIG_SMP
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
-  if (cpu != 0)
-    {
-      regaddr = DPORT_APP_MAP_REGADDR(periphid);
-      intmap  = g_cpu1_intmap;
-    }
-  else
-#endif
-    {
-      regaddr = DPORT_PRO_MAP_REGADDR(periphid);
-      intmap  = g_cpu0_intmap;
-    }
+  esp32_intinfo(cpu, periphid, &regaddr, &intmap);
 
   DEBUGASSERT(intmap[cpuint] != CPUINT_UNASSIGNED);
   intmap[cpuint] = CPUINT_UNASSIGNED;
