@@ -549,7 +549,6 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->neblocks * priv->stdperblock;
               info->sectorsize  = SECTOR_512;
               info->startsector = 0;

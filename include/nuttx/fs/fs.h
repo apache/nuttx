@@ -226,8 +226,6 @@ struct geometry
 
 struct partition_info_s
 {
-  uint32_t        magic;        /* File system magic, 0 for RAW
-                                 * (see <sys/statfs.h>) */
   size_t          numsectors;   /* Number of sectors in the partition */
   size_t          sectorsize;   /* Size in bytes of a single sector */
   off_t           startsector;  /* Offset to the first section/block of the

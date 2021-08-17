@@ -638,7 +638,6 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
               info->numsectors  = (CONFIG_AT24XX_SIZE * 1024 / 8) /
                                   CONFIG_AT24XX_MTD_BLOCKSIZE;

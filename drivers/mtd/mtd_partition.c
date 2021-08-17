@@ -420,7 +420,6 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->neraseblocks * priv->blkpererase;
               info->sectorsize  = priv->blocksize;
               info->startsector = priv->firstblock;

@@ -1453,7 +1453,6 @@ static int s25fl1_ioctl(FAR struct mtd_dev_s *dev,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #ifdef CONFIG_S25FL1_SECTOR512
               info->numsectors  = priv->nsectors <<
                                 (priv->sectorshift - S25FL1_SECTOR512_SHIFT);

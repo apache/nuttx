@@ -1936,7 +1936,6 @@ static int esp32_ioctl(FAR struct mtd_dev_s *dev, int cmd,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = MTD_SIZE(priv) / MTD_BLKSIZE(priv);
               info->sectorsize  = MTD_BLKSIZE(priv);
               info->startsector = 0;

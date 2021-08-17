@@ -223,7 +223,6 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)ptr_arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = dev->nsectors;
               info->sectorsize  = dev->sectorsize;
               info->startsector = dev->firstsector;
