@@ -854,6 +854,39 @@ arch/arm/src/armv8-m/arm_exception.S
 
 arch/arm/src/armv7-m/etm.h
 arch/arm/src/armv8-m/etm.h
+arch/arm/src/efm32/efm32_flash.c
+arch/arm/src/efm32/hardware/efm32_acmp.h
+arch/arm/src/efm32/hardware/efm32_adc.h
+arch/arm/src/efm32/hardware/efm32_aes.h
+arch/arm/src/efm32/hardware/efm32_burtc.h
+arch/arm/src/efm32/hardware/efm32_calibrate.h
+arch/arm/src/efm32/hardware/efm32_cmu.h
+arch/arm/src/efm32/hardware/efm32_dac.h
+arch/arm/src/efm32/hardware/efm32_devinfo.h
+arch/arm/src/efm32/hardware/efm32_dma.h
+arch/arm/src/efm32/hardware/efm32_emu.h
+arch/arm/src/efm32/hardware/efm32_flash.h
+arch/arm/src/efm32/hardware/efm32gg_memorymap.h
+arch/arm/src/efm32/hardware/efm32g_memorymap.h
+arch/arm/src/efm32/hardware/efm32_gpio.h
+arch/arm/src/efm32/hardware/efm32_i2c.h
+arch/arm/src/efm32/hardware/efm32_lcd.h
+arch/arm/src/efm32/hardware/efm32_lesense.h
+arch/arm/src/efm32/hardware/efm32_letimer.h
+arch/arm/src/efm32/hardware/efm32_leuart.h
+arch/arm/src/efm32/hardware/efm32_memorymap.h
+arch/arm/src/efm32/hardware/efm32_msc.h
+arch/arm/src/efm32/hardware/efm32_pcnt.h
+arch/arm/src/efm32/hardware/efm32_prs.h
+arch/arm/src/efm32/hardware/efm32_rmu.h
+arch/arm/src/efm32/hardware/efm32_romtable.h
+arch/arm/src/efm32/hardware/efm32_rtc.h
+arch/arm/src/efm32/hardware/efm32tg_memorymap.h
+arch/arm/src/efm32/hardware/efm32_timer.h
+arch/arm/src/efm32/hardware/efm32_usart.h
+arch/arm/src/efm32/hardware/efm32_usb.h
+arch/arm/src/efm32/hardware/efm32_vcmp.h
+arch/arm/src/efm32/hardware/efm32_wdog.h
 ==========================
 
   Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com</b>
