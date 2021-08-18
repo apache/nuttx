@@ -232,6 +232,10 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
 
+ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)
+CHIP_CSRCS += stm32_hall3ph.c
+endif
+
 ifeq ($(CONFIG_STM32_CAN),y)
 CHIP_CSRCS += stm32_can.c
 endif
