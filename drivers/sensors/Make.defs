@@ -280,6 +280,12 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += qencoder.c
 endif
 
+# 3-phase Hall effect sensor upper half
+
+ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)
+  CSRCS += hall3ph.c
+endif
+
 # Vishay VEML6070
 
 ifeq ($(CONFIG_SENSORS_VEML6070),y)
