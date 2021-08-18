@@ -108,6 +108,7 @@ EXTERN volatile uint64_t *g_current_regs[1];
 EXTERN uintptr_t g_idle_topstack;
 #else
 EXTERN volatile uint32_t *g_current_regs;
+#  define CURRENT_REGS (g_current_regs)
 EXTERN uint32_t g_idle_topstack;
 #endif
 
