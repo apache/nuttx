@@ -58,40 +58,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_mapirq
- *
- * Description:
- *   Map the given IRQ to the CPU and allocated CPU interrupt.
- *
- * Input Parameters:
- *   irq      - IRQ number (see esp32/include/irq.h)
- *   cpu      - The CPU receiving the interrupt 0=PRO CPU 1=APP CPU
- *   cpuint   - The allocated CPU interrupt.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_mapirq(int irq, int cpu, int cpuint);
-
-/****************************************************************************
- * Name:  esp32_unmapirq
- *
- * Description:
- *   Unmap the given IRQ.
- *
- * Input Parameters:
- *   irq      - IRQ number (see esp32/include/irq.h)
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_unmapirq(int irq);
-
-/****************************************************************************
  * Name:  esp32_cpuint_initialize
  *
  * Description:
