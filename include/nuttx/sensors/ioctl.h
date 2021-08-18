@@ -284,4 +284,8 @@
 
 #define SNIOC_SET_BUFFER_NUMBER    _SNIOC(0x0084)
 
+/* IOCTL commands unique to the Hall effect sensor */
+
+#define SNIOC_GET_POSITION         _SNIOC(0x0085)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

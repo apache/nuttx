@@ -927,6 +927,10 @@ config SENSORS_QENCODER
 	bool "Qencoder"
 	default n
 
+config SENSORS_HALL3PHASE
+	bool "3-phase Hall effect sensor"
+	default n
+
 config SENSORS_VEML6070
 	bool "Vishay VEML6070 UV-A Light Sensor support"
 	default n
