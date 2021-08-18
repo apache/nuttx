@@ -84,7 +84,11 @@
 #define REG_V7              REG_R10
 #define REG_SB              REG_R9
 #define REG_SL              REG_R10
-#define REG_FP              REG_R11
+#ifdef CONFIG_ARM_THUMB
+  #define REG_FP            REG_R7
+#else
+  #define REG_FP            REG_R11
+#endif /* CONFIG_ARM_THUMB */
 #define REG_IP              REG_R12
 #define REG_SP              REG_R13
 #define REG_LR              REG_R14
