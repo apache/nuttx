@@ -83,9 +83,9 @@ config ARCH_CHIP
 	default "pic32mx"	if ARCH_CHIP_PIC32MX
 	default "pic32mz"	if ARCH_CHIP_PIC32MZ
 
-source arch/mips/src/common/Kconfig
-source arch/mips/src/mips32/Kconfig
-source arch/mips/src/pic32mx/Kconfig
-source arch/mips/src/pic32mz/Kconfig
+source "arch/mips/src/common/Kconfig"
+source "arch/mips/src/mips32/Kconfig"
+source "arch/mips/src/pic32mx/Kconfig"
+source "arch/mips/src/pic32mz/Kconfig"
 
 endif

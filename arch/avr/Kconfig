@@ -57,17 +57,17 @@ config ARCH_CHIP
 	default "at90usb"	if ARCH_CHIP_AT90USB
 	default "at32uc3"	if ARCH_CHIP_AT32UC3
 
-source arch/avr/src/common/Kconfig
+source "arch/avr/src/common/Kconfig"
 
 if ARCH_FAMILY_AVR
-source arch/avr/src/avr/Kconfig
-source arch/avr/src/at90usb/Kconfig
-source arch/avr/src/atmega/Kconfig
+source "arch/avr/src/avr/Kconfig"
+source "arch/avr/src/at90usb/Kconfig"
+source "arch/avr/src/atmega/Kconfig"
 endif
 
 if ARCH_FAMILY_AVR32
-source arch/avr/src/avr32/Kconfig
-source arch/avr/src/at32uc3/Kconfig
+source "arch/avr/src/avr32/Kconfig"
+source "arch/avr/src/at32uc3/Kconfig"
 endif
 
 endif # ARCH_AVR

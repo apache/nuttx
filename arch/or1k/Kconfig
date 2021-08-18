@@ -25,6 +25,6 @@ config ARCH_CHIP
 	string
 	default "mor1kx"	if ARCH_CHIP_MOR1KX
 
-source arch/or1k/src/mor1kx/Kconfig
+source "arch/or1k/src/mor1kx/Kconfig"
 
 endif # ARCH_OR1K

@@ -94,9 +94,9 @@ config ARCH_CHIP
 	default "m16c"		if ARCH_M16C
 	default "rx65n"		if ARCH_RENESAS_RX
 
-source arch/renesas/src/common/Kconfig
-source arch/renesas/src/m16c/Kconfig
-source arch/renesas/src/sh1/Kconfig
-source arch/renesas/src/rx65n/Kconfig
+source "arch/renesas/src/common/Kconfig"
+source "arch/renesas/src/m16c/Kconfig"
+source "arch/renesas/src/sh1/Kconfig"
+source "arch/renesas/src/rx65n/Kconfig"
 
 endif # ARCH_RENESAS

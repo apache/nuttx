@@ -77,10 +77,10 @@ config MISOC_UART_TX_BUF_SIZE
 		Size of TX buffers for MISOC UARTs
 
 if ARCH_CHIP_LM32
-source arch/misoc/src/lm32/Kconfig
+source "arch/misoc/src/lm32/Kconfig"
 endif
 if ARCH_CHIP_MINERVA
-source arch/misoc/src/minerva/Kconfig
+source "arch/misoc/src/minerva/Kconfig"
 endif
 
 endif # ARCH_MISOC

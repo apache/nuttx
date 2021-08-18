@@ -5,6 +5,6 @@
 
 if DRIVERS_IEEE80211
 
-source drivers/wireless/ieee80211/bcm43xxx/Kconfig
+source "drivers/wireless/ieee80211/bcm43xxx/Kconfig"
 
 endif # DRIVERS_IEEE80211

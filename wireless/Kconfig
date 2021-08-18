@@ -11,8 +11,8 @@ config WIRELESS
 
 if WIRELESS
 
-source wireless/bluetooth/Kconfig
-source wireless/ieee802154/Kconfig
-source wireless/pktradio/Kconfig
+source "wireless/bluetooth/Kconfig"
+source "wireless/ieee802154/Kconfig"
+source "wireless/pktradio/Kconfig"
 
 endif # WIRELESS

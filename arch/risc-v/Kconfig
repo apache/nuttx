@@ -131,33 +131,33 @@ config ARCH_RISCV_INTXCPT_EXTREGS
 endif
 
 if ARCH_RV32IM
-source arch/risc-v/src/rv32im/Kconfig
+source "arch/risc-v/src/rv32im/Kconfig"
 endif
 if ARCH_RV64GC
-source arch/risc-v/src/rv64gc/Kconfig
+source "arch/risc-v/src/rv64gc/Kconfig"
 endif
 if ARCH_CHIP_FE310
-source arch/risc-v/src/fe310/Kconfig
+source "arch/risc-v/src/fe310/Kconfig"
 endif
 if ARCH_CHIP_K210
-source arch/risc-v/src/k210/Kconfig
+source "arch/risc-v/src/k210/Kconfig"
 endif
 if ARCH_CHIP_LITEX
-source arch/risc-v/src/litex/Kconfig
+source "arch/risc-v/src/litex/Kconfig"
 endif
 if ARCH_CHIP_BL602
-source arch/risc-v/src/bl602/Kconfig
+source "arch/risc-v/src/bl602/Kconfig"
 endif
 if ARCH_CHIP_ESP32C3
-source arch/risc-v/src/esp32c3/Kconfig
+source "arch/risc-v/src/esp32c3/Kconfig"
 endif
 if ARCH_CHIP_C906
-source arch/risc-v/src/c906/Kconfig
+source "arch/risc-v/src/c906/Kconfig"
 endif
 if ARCH_CHIP_MPFS
-source arch/risc-v/src/mpfs/Kconfig
+source "arch/risc-v/src/mpfs/Kconfig"
 endif
 if ARCH_CHIP_RV32M1
-source arch/risc-v/src/rv32m1/Kconfig
+source "arch/risc-v/src/rv32m1/Kconfig"
 endif
 endif

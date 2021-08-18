@@ -4,6 +4,6 @@
 #
 
 #if ARCH_RENESAS_RX
-#source libs/libc/machine/renesas/rx/Kconfig
+#source "libs/libc/machine/renesas/rx/Kconfig"
 #endif
 

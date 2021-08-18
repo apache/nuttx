@@ -48,11 +48,11 @@ config ARCH_X86_M32
 		32-bit target.  Selecting this option will add the -m32 option to
 		the compiler command line.
 
-source arch/x86/src/common/Kconfig
+source "arch/x86/src/common/Kconfig"
 if ARCH_I486
-source arch/x86/src/i486/Kconfig
+source "arch/x86/src/i486/Kconfig"
 endif # ARCH_I486
 if ARCH_CHIP_QEMU
-source arch/x86/src/qemu/Kconfig
+source "arch/x86/src/qemu/Kconfig"
 endif # ARCH_CHIP_QEMU
 endif # ARCH_X86
