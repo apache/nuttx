@@ -217,33 +217,6 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
 #endif
 
 /****************************************************************************
- * Name: xtensa_disable_all
- ****************************************************************************/
-
-static inline void xtensa_disable_all(void)
-{
-  __asm__ __volatile__
-  (
-    "movi a2, 0\n"
-    "xsr a2, INTENABLE\n"
-    : : : "a2"
-  );
-}
-
-/****************************************************************************
- * Name: xtensa_intclear
- ****************************************************************************/
-
-static inline void xtensa_intclear(uint32_t mask)
-{
-  __asm__ __volatile__
-  (
-    "wsr %0, INTCLEAR\n"
-    : "=r"(mask) : :
-  );
-}
-
-/****************************************************************************
  * Name: esp32_intinfo
  *
  * Description:
