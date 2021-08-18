@@ -28,7 +28,7 @@ $(TOPDIR)/include/uClibc++:
 	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/include $(TOPDIR)/include/uClibc++
 	$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
 
-dirlinks:: $(TOPDIR)/include/uClibc++
+context:: $(TOPDIR)/include/uClibc++
 
 distclean::
 	$(Q) $(DELFILE) $(TOPDIR)/include/uClibc++/system_configuration.h
