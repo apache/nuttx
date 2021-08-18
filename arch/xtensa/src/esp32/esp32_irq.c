@@ -496,56 +496,6 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name:  esp32_mapirq
- *
- * Description:
- *   Map the given IRQ to the CPU and allocated CPU interrupt.
- *
- * Input Parameters:
- *   irq      - IRQ number (see esp32/include/irq.h)
- *   cpu      - The CPU receiving the interrupt 0=PRO CPU 1=APP CPU
- *   cpuint   - The allocated CPU interrupt.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_mapirq(int irq, int cpu, int cpuint)
-{
-  DEBUGASSERT(irq >= 0 && irq < NR_IRQS);
-  DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-#ifdef CONFIG_SMP
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
-#else
-  DEBUGASSERT(cpu == 0);
-#endif
-
-  g_irqmap[irq] = IRQ_MKMAP(cpu, cpuint);
-}
-
-/****************************************************************************
- * Name:  esp32_unmapirq
- *
- * Description:
- *   Unmap the given IRQ.
- *
- * Input Parameters:
- *   irq      - IRQ number (see esp32/include/irq.h)
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_unmapirq(int irq)
-{
-  DEBUGASSERT(irq >= 0 && irq < NR_IRQS);
-
-  g_irqmap[irq] = IRQ_UNMAPPED;
-}
-
-/****************************************************************************
  * Name: up_disable_irq
  *
  * Description:
@@ -780,7 +730,7 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int type)
   DEBUGASSERT(intmap[cpuint] == CPUINT_UNASSIGNED);
 
   intmap[cpuint] = periphid + XTENSA_IRQ_FIRSTPERIPH;
-  esp32_mapirq(irq, cpu, cpuint);
+  g_irqmap[irq] = IRQ_MKMAP(cpu, cpuint);
 
   putreg32(cpuint, regaddr);
 
@@ -834,7 +784,7 @@ void esp32_teardown_irq(int cpu, int periphid, int cpuint)
 
   DEBUGASSERT(intmap[cpuint] != CPUINT_UNASSIGNED);
   intmap[cpuint] = CPUINT_UNASSIGNED;
-  esp32_unmapirq(irq);
+  g_irqmap[irq] = IRQ_UNMAPPED;
 
   putreg32(NO_CPUINT, regaddr);
 
