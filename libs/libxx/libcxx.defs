@@ -33,7 +33,7 @@ VERSION=12.0.0
 $(TOPDIR)/include/libcxx: libcxx
 	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
 
-dirlinks:: $(TOPDIR)/include/libcxx
+context:: $(TOPDIR)/include/libcxx
 
 distclean::
 #	$(Q) $(DELFILE) libcxx-$(VERSION).src.tar.xz

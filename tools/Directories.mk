@@ -97,6 +97,9 @@ endif
 endif
 
 CONTEXTDIRS += libs$(DELIM)libc
+ifeq ($(CONFIG_HAVE_CXX),y)
+CONTEXTDIRS += libs$(DELIM)libxx
+endif
 
 ifeq ($(CONFIG_NX),y)
 KERNDEPDIRS += graphics
