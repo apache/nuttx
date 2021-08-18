@@ -265,7 +265,6 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs);
 /* Software interrupt handler */
 
 #ifdef CONFIG_SMP
-void __cpu1_start(void) noreturn_function;
 int xtensa_intercpu_interrupt(int tocpu, int intcode);
 void xtensa_pause_handler(void);
 #endif
