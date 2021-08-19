@@ -1,3 +1,5 @@
 /uClibc++
 /libcxx
+/libcxxabi
 /libcxx-*.src.tar.xz
+/libcxxabi-*.src.tar.xz
