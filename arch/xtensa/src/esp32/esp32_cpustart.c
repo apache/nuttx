@@ -44,6 +44,7 @@
 #include "esp32_region.h"
 #include "esp32_irq.h"
 #include "esp32_smp.h"
+#include "esp32_gpio.h"
 
 #ifdef CONFIG_SMP
 
@@ -207,6 +208,12 @@ void xtensa_appcpu_start(void)
   /* Dump registers so that we can see what is going to happen on return */
 
   xtensa_registerdump(tcb);
+
+#ifdef CONFIG_ESP32_GPIO_IRQ
+  /* Initialize GPIO interrupt support */
+
+  esp32_gpioirqinitialize(1);
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And Enable interrupts */
