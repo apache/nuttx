@@ -53,10 +53,31 @@
 #  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
 #endif
 
+/* IRQ to CPU and CPU interrupts mapping:
+ *
+ * Encoding: CIIIIIII
+ *  C: CPU that enabled the interrupt (0 = PRO, 1 = APP).
+ *  I: Associated CPU interrupt.
+ */
+
 #define IRQ_UNMAPPED      0xff
 #define IRQ_GETCPU(m)     (((m) & 0x80) >> 0x07)
 #define IRQ_GETCPUINT(m)  ((m) & 0x7f)
 #define IRQ_MKMAP(c, i)   (((c) << 0x07) | (i))
+
+/* CPU interrupts to peripheral mapping:
+ *
+ * Encoding: EPPPPPPP
+ *  E: CPU interrupt status (0 = Disabled, 1 = Enabled).
+ *  P: Attached peripheral.
+ */
+
+#define CPUINT_UNASSIGNED     0x7f
+#define CPUINT_GETEN(m)       (((m) & 0x80) >> 0x07)
+#define CPUINT_GETIRQ(m)      ((m) & 0x7f)
+#define CPUINT_ASSIGN(c)      (((c) & 0x7f) | 0x80)
+#define CPUINT_DISABLE(m)     ((m) & 0x7f)
+#define CPUINT_ENABLE(m)      ((m) | 0x80)
 
 /* Mapping Peripheral IDs to map register addresses. */
 
@@ -68,10 +89,6 @@
  */
 
 #define NO_CPUINT  ESP32_CPUINT_TIMER0
-
-/* No peripheral assigned to this CPU interrupt */
-
-#define CPUINT_UNASSIGNED    0xff
 
 /* Priority range is 1-5 */
 
@@ -530,6 +547,7 @@ void up_disable_irq(int irq)
       DEBUGASSERT(periph >= 0 && periph < ESP32_NPERIPHERALS);
       esp32_intinfo(cpu, periph, &regaddr, &intmap);
 
+      intmap[cpuint] = CPUINT_DISABLE(intmap[cpuint]);
       putreg32(NO_CPUINT, regaddr);
     }
 }
@@ -574,6 +592,7 @@ void up_enable_irq(int irq)
 
       esp32_intinfo(cpu, periph, &regaddr, &intmap);
 
+      intmap[cpuint] = CPUINT_ENABLE(intmap[cpuint]);
       putreg32(cpuint, regaddr);
     }
 }
@@ -691,14 +710,15 @@ int esp32_cpuint_initialize(void)
    *   ESP32_CPUINT_SOFTWARE1  29  Not yet defined
    */
 
-  intmap[ESP32_CPUINT_TIMER0] = XTENSA_IRQ_TIMER0;
-  intmap[ESP32_CPUINT_TIMER1] = XTENSA_IRQ_TIMER1;
-  intmap[ESP32_CPUINT_TIMER2] = XTENSA_IRQ_TIMER2;
+  intmap[ESP32_CPUINT_TIMER0] = CPUINT_ASSIGN(XTENSA_IRQ_TIMER0);
+  intmap[ESP32_CPUINT_TIMER1] = CPUINT_ASSIGN(XTENSA_IRQ_TIMER1);
+  intmap[ESP32_CPUINT_TIMER2] = CPUINT_ASSIGN(XTENSA_IRQ_TIMER2);
 
   /* Reserve CPU interrupt for some special drivers */
 
 #ifdef CONFIG_ESP32_WIRELESS
-  intmap[ESP32_CPUINT_MAC]    = ESP32_IRQ_MAC;
+  intmap[ESP32_CPUINT_MAC]    = CPUINT_ASSIGN(ESP32_IRQ_MAC);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
 #endif
 
   return OK;
@@ -759,7 +779,7 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int type)
 
   DEBUGASSERT(intmap[cpuint] == CPUINT_UNASSIGNED);
 
-  intmap[cpuint] = periphid + XTENSA_IRQ_FIRSTPERIPH;
+  intmap[cpuint] = CPUINT_ASSIGN(periphid + XTENSA_IRQ_FIRSTPERIPH);
   g_irqmap[irq] = IRQ_MKMAP(cpu, cpuint);
 
   putreg32(cpuint, regaddr);
@@ -877,7 +897,9 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
         {
           /* Extract the IRQ number from the mapping table */
 
-          uint8_t irq = intmap[bit];
+          uint8_t irq = CPUINT_GETIRQ(intmap[bit]);
+
+          DEBUGASSERT(CPUINT_GETEN(intmap[bit]));
           DEBUGASSERT(irq != CPUINT_UNASSIGNED);
 
           /* Clear software or edge-triggered interrupt */
