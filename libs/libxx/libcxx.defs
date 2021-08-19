@@ -38,8 +38,14 @@ distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
 #	$(call DELDIR, libcxx)
 
-CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
+
+ifeq ($(CONFIG_LIBCXXABI), y)
+CXXFLAGS += ${shell $(DEFINE) "$(CC)" LIBCXX_BUILDING_LIBCXXABI}
+CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/include
+else
+CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
+endif
 
 # Workaround the following warning with "c++ (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 #
