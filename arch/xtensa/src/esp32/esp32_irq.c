@@ -69,6 +69,10 @@
 
 #define NO_CPUINT  ESP32_CPUINT_TIMER0
 
+/* No peripheral assigned to this CPU interrupt */
+
+#define CPUINT_UNASSIGNED    0xff
+
 /* Priority range is 1-5 */
 
 #define ESP32_MIN_PRIORITY     1
@@ -320,11 +324,13 @@ static int esp32_getcpuint(uint32_t intmask)
         }
     }
 
-  /* Make sure the CPU interrupt is disabled. */
+  /* Enable the CPU interrupt now.  The interrupt is still not attached
+   * to any peripheral and thus has no effect.
+   */
 
   if (ret >= 0)
     {
-      xtensa_disable_cpuint(&g_intenable[cpu], (1ul << ret));
+      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << ret));
     }
 
   return ret;
@@ -478,7 +484,7 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  int cpu = up_cpu_index();
+  int cpu = IRQ_GETCPU(g_irqmap[irq]);
   int cpuint = IRQ_GETCPUINT(g_irqmap[irq]);
 
   if (g_irqmap[irq] == IRQ_UNMAPPED)
@@ -495,7 +501,37 @@ void up_disable_irq(int irq)
   DEBUGASSERT(cpu == 0);
 #endif
 
-  xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+  if (irq < XTENSA_NIRQ_INTERNAL)
+    {
+      /* This is an internal CPU interrupt, it cannot be disabled using
+       * the Interrupt Matrix.
+       */
+
+#ifdef CONFIG_SMP
+      int me = up_cpu_index();
+      if (me != cpu)
+        {
+          /* It was the other CPU that enabled this interrupt. */
+
+          return;
+        }
+#endif
+
+      xtensa_disable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+    }
+  else
+    {
+      /* A peripheral interrupt, use the Interrupt Matrix to disable it. */
+
+      int periph = ESP32_IRQ2PERIPH(irq);
+      uintptr_t regaddr;
+      uint8_t *intmap;
+
+      DEBUGASSERT(periph >= 0 && periph < ESP32_NPERIPHERALS);
+      esp32_intinfo(cpu, periph, &regaddr, &intmap);
+
+      putreg32(NO_CPUINT, regaddr);
+    }
 }
 
 /****************************************************************************
@@ -518,7 +554,28 @@ void up_enable_irq(int irq)
   DEBUGASSERT(cpu == 0);
 #endif
 
-  xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+  if (irq < XTENSA_NIRQ_INTERNAL)
+    {
+      /* Enable the CPU interrupt now for internal CPU. */
+
+      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+    }
+  else
+    {
+      /* For peripheral interrupts, attach the interrupt to the peripheral;
+       * the CPU interrupt was already enabled when allocated.
+       */
+
+      int periph = ESP32_IRQ2PERIPH(irq);
+      uintptr_t regaddr;
+      uint8_t *intmap;
+
+      DEBUGASSERT(periph >= 0 && periph < ESP32_NPERIPHERALS);
+
+      esp32_intinfo(cpu, periph, &regaddr, &intmap);
+
+      putreg32(cpuint, regaddr);
+    }
 }
 
 /****************************************************************************
