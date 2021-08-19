@@ -44,10 +44,6 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* No peripheral assigned to this CPU interrupt */
-
-#define CPUINT_UNASSIGNED    0xff
-
 /* CPU interrupt types. */
 
 #define ESP32_CPUINT_LEVEL   0
