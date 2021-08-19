@@ -31,5 +31,7 @@ CXXSRCS += libxx_stdthrow.cxx
 # FAR void *operator new(std::size_t nbytes)
 #           ^
 #                                            throw(std::bad_alloc)
-libxx_new.cxx_CXXFLAGS += -Wno-missing-exception-spec
-libxx_newa.cxx_CXXFLAGS += -Wno-missing-exception-spec
+ifneq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+  libxx_new.cxx_CXXFLAGS += -Wno-missing-exception-spec
+  libxx_newa.cxx_CXXFLAGS += -Wno-missing-exception-spec
+endif

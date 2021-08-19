@@ -278,6 +278,14 @@
                                            * IN:  None
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
+#define BIOC_PARTINFO   _BIOC(0x000e)     /* Retrieve partition information from the
+                                           * block device.
+                                           * IN:  Pointer to writable struct
+                                           *      partition_info_s in which to
+                                           *      receive partition information data
+                                           * OUT: Partition information structure
+                                           *      populated with data from the block
+                                           *      device partition */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 

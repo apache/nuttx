@@ -787,7 +787,7 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               /* Populate the geometry structure with information needed to
@@ -806,6 +806,24 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->magic       = 0;
+              info->numsectors  = nandmodel_getdevblocks(model) *
+                                  nandmodel_getbyteblocksize(model) /
+                                  model->pagesize;
+              info->sectorsize  = model->pagesize;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
           /* Erase the entire device */
@@ -814,7 +832,6 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

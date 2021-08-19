@@ -63,9 +63,9 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "chip.h"
 #include "xtensa.h"
 #include "xtensa_abi.h"
-#include "chip_macros.h"
 #include "xtensa_timer.h"
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -209,7 +209,7 @@ g_intstacktop:
   or a0, a0, a4               /* set top 2 bits */
   addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
 #endif
-  
+
 	/* Call xtensa_int_decode passing the address of the register save area
 	 * as a parameter (A7).
 	 */

@@ -224,6 +224,22 @@ struct geometry
   blksize_t geo_sectorsize;   /* Size of one sector */
 };
 
+struct partition_info_s
+{
+  uint32_t        magic;        /* File system magic, 0 for RAW
+                                 * (see <sys/statfs.h>) */
+  size_t          numsectors;   /* Number of sectors in the partition */
+  size_t          sectorsize;   /* Size in bytes of a single sector */
+  off_t           startsector;  /* Offset to the first section/block of the
+                                 * managed sub-region */
+
+  /* NULL-terminated string representing the name of the parent node of the
+   * partition.
+   */
+
+  char            parent[NAME_MAX + 1];
+};
+
 /* This structure is provided by block devices when they register with the
  * system.  It is used by file systems to perform filesystem transfers.  It
  * differs from the normal driver vtable in several ways -- most notably in
@@ -581,7 +597,7 @@ int register_blockdriver(FAR const char *path,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 int register_blockpartition(FAR const char *partition,
                             mode_t mode, FAR const char *parent,
-                            size_t firstsector, size_t nsectors);
+                            off_t firstsector, off_t nsectors);
 #endif
 
 /****************************************************************************
@@ -658,7 +674,7 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
 #ifdef CONFIG_MTD
 int register_mtdpartition(FAR const char *partition,
                           mode_t mode, FAR const char *parent,
-                          off_t firstblock, size_t nblocks);
+                          off_t firstblock, off_t nblocks);
 #endif
 
 /****************************************************************************

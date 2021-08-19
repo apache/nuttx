@@ -40,16 +40,19 @@
 
 /* Ioctl commands */
 
+/* Note, the following ioctl existed in the past and was removed:
+ * #define MTDIOC_XIPBASE    _MTDIOC(0x0002)
+ * #define MTDIOC_FLUSH      _MTDIOC(0x0009)
+ * #define MTDIOC_PARTINFO   _MTDIOC(0x000b)
+ * try to avoid adding a new ioctl with the same ioctl number and
+ * replace with BIOC_XIPBASE, BIOC_FLUSH and BIOC_PARTINFO instead.
+ */
+
 #define MTDIOC_GEOMETRY   _MTDIOC(0x0001) /* IN:  Pointer to write-able struct
                                            *      mtd_geometry_s in which to receive
                                            *      receive geometry data (see mtd.h)
                                            * OUT: Geometry structure is populated
                                            *      with data for the MTD */
-#define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
-                                           *      which to received the XIP base.
-                                           * OUT: If media is directly accessible,
-                                           *      return (void *) base address
-                                           *      of device memory */
 #define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
                                            * OUT: None */
 #define MTDIOC_PROTECT    _MTDIOC(0x0004) /* IN:  Pointer to read-able struct
@@ -68,9 +71,6 @@
                                            * OUT: None */
 #define MTDIOC_ECCSTATUS  _MTDIOC(0x0008) /* IN:  Pointer to uint8_t
                                            * OUT: ECC status */
-#define MTDIOC_FLUSH      _MTDIOC(0x0009) /* IN:  None
-                                           * OUT: None (ioctl return value provides
-                                           *      success/failure indication). */
 #define MTDIOC_ERASESTATE _MTDIOC(0x000a) /* IN:  Pointer to uint8_t
                                            * OUT: Byte value that represents the
                                            *      erased state of the MTD cell */

@@ -56,7 +56,7 @@
 
 /* A set of all co-processors */
 
-#define XTENSA_CP_ALLSET     ((1 << XCHAL_CP_NUM) - 1)
+#define XTENSA_CP_ALLSET     XCHAL_CP_MASK
 
 /* CO-PROCESSOR STATE SAVE AREA FOR A THREAD
  *

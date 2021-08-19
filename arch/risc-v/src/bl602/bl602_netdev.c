@@ -231,7 +231,8 @@ static struct
   uint32_t scan_result_status : 2; /* WiFi scan result status */
   uint32_t scan_result_len : 6;
   uint32_t retry_cnt : 4; /* MAX 16 retries */
-  uint32_t connected: 1;
+  uint32_t sta_connected: 1;
+  uint32_t ap_stared: 1;
 } g_state;
 
 /****************************************************************************
@@ -1488,6 +1489,14 @@ static int bl602_ioctl_wifi_start(FAR struct bl602_net_driver_s *priv,
     {
       int state;
 
+      if (g_state.sta_connected == 1)
+        {
+          return OK;
+        }
+
+      priv->prev_connectd = 0;
+      g_state.retry_cnt = 0;
+
       wifi_mgmr_sta_autoconnect_enable();
       if (wifi_mgmr_sta_connect(NULL, mgmr->wifi_mgmr_stat_info.ssid,
                                 mgmr->wifi_mgmr_stat_info.passphr,
@@ -1512,8 +1521,14 @@ static int bl602_ioctl_wifi_start(FAR struct bl602_net_driver_s *priv,
   else if (priv->current_mode == IW_MODE_MASTER)
     {
       int channel;
+
+      if (g_state.ap_stared == 1)
+        {
+          return OK;
+        }
+
       wifi_mgmr_channel_get(&channel);
-      syslog(LOG_INFO, "current channel:%d\n", channel);
+      wlinfo("AP channel:%d\n", channel);
 
       if (wifi_mgmr_api_ap_start(mgmr->wifi_mgmr_stat_info.ssid,
                                  mgmr->wifi_mgmr_stat_info.passphr,
@@ -1540,12 +1555,22 @@ static int bl602_ioctl_wifi_stop(FAR struct bl602_net_driver_s *priv,
 
   if (priv->current_mode == IW_MODE_INFRA)
     {
+      if (g_state.sta_connected == 0)
+        {
+          return OK;
+        }
+
       wifi_mgmr_sta_disconnect();
       nxsig_sleep(1);
       wifi_mgmr_api_idle();
     }
   else if (priv->current_mode == IW_MODE_MASTER)
     {
+      if (g_state.ap_stared == 0)
+        {
+          return OK;
+        }
+
       wifi_mgmr_api_ap_stop();
       nxsig_sleep(1);
       wifi_mgmr_api_idle();
@@ -1862,22 +1887,10 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 
           if (req->u.essid.flags == 0)
             {
-              if (g_state.connected == 0)
-                {
-                  return OK;
-                }
-
               return bl602_ioctl_wifi_stop(priv, arg);
             }
           else if (req->u.essid.flags == 1)
             {
-              if (g_state.connected == 1)
-                {
-                  return OK;
-                }
-
-              priv->prev_connectd = 0;
-              g_state.retry_cnt = 0;
               return bl602_ioctl_wifi_start(priv, arg);
             }
           else
@@ -2094,7 +2107,7 @@ void bl602_net_event(int evt, int val)
         {
           struct bl602_net_driver_s *priv = &g_bl602_net[0];
           priv->prev_connectd = 1;
-          g_state.connected = 1;
+          g_state.sta_connected = 1;
 
           netdev_carrier_on(&priv->net_dev);
 
@@ -2108,10 +2121,10 @@ void bl602_net_event(int evt, int val)
       do
         {
           struct bl602_net_driver_s *priv = &g_bl602_net[0];
-          if (g_state.connected == 1)
+          if (g_state.sta_connected == 1)
             {
               netdev_carrier_off(&priv->net_dev);
-              g_state.connected = 0;
+              g_state.sta_connected = 0;
             }
         }
       while (0);
@@ -2152,6 +2165,7 @@ void bl602_net_event(int evt, int val)
           struct bl602_net_driver_s *priv = &g_bl602_net[1];
           netdev_carrier_on(&priv->net_dev);
 #endif
+          g_state.ap_stared = 1;
         }
       while (0);
       break;
@@ -2163,6 +2177,7 @@ void bl602_net_event(int evt, int val)
           struct bl602_net_driver_s *priv = &g_bl602_net[1];
           netdev_carrier_off(&priv->net_dev);
 #endif
+          g_state.ap_stared = 0;
         }
       while (0);
       break;

@@ -75,15 +75,16 @@ static int  sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
 struct sam_adc_priv
 {
-  int                    genclk;             /* clock generator */
-  const struct adc_callback_s *adc_callback; /* callback for upper driver */
-  uint8_t                cur_channel;        /* current channel in progress */
+  int                    genclk;                /* clock generator */
+  const struct adc_callback_s *adc_callback;    /* callback for upper driver */
+  uint8_t                cur_channel;           /* current channel in progress */
+  uint8_t                logic2physicalCHmap[BOARD_ADC_NUM_CHANNELS];   /* mapping of logical to physical channels */
   uint8_t                num_channels;       /* number of channels */
-  uint8_t                ref;                /* reference selection */
-  uint32_t               neg;                /* negative input selection */
-  uint8_t                samplen;            /* sampling time length */
-  uint32_t               prescaler;          /* prescaler configuration */
-  uint8_t                averaging;          /* number of samples to be collected */
+  uint8_t                ref;                   /* reference selection */
+  uint32_t               neg;                   /* negative input selection */
+  uint8_t                samplen;               /* sampling time length */
+  uint32_t               prescaler;             /* prescaler configuration */
+  uint8_t                averaging;             /* number of samples to be collected */
 };
 
 /****************************************************************************
@@ -109,28 +110,25 @@ static struct adc_dev_s g_sam_adc_dev;
 
 static int sam_adc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  uint8_t peripheral_channel;
   uint32_t result;
+  uint32_t regval;
   struct adc_dev_s    *dev = (struct adc_dev_s *)arg;
   struct sam_adc_priv *priv = (struct sam_adc_priv *)dev->ad_priv;
 
-  peripheral_channel = (getreg32(SAM_AFEC1_LCDR) & AFEC_LCDR_CHANB_MASK) \
-                       >> AFEC_LCDR_CHANB_SHIFT;
+  regval = 0;
+  for (priv->cur_channel=0;priv->cur_channel<priv->num_channels; priv->cur_channel++)
+    {
+      regval = AFEC_CSELR_CSEL(priv->logic2physicalCHmap[priv->cur_channel]);
+      putreg32(regval,SAM_AFEC1_CSELR);
 
-  /* because I have only channel 4-8, I can simply subtract 4... there
-   * should be a better mapping method! */
+      result = getreg32(SAM_AFEC1_CDR) & AFEC_CDR_MASK;
 
-  priv->cur_channel = peripheral_channel - 4;
-  /* Last conversion data register: check if that means that all channels are
-   * converted but only the last one is represented. There is a mulitplexed
-   * single data channel register availible. Maybe this is not complete correct.
-   */
-  result = getreg32(SAM_AFEC1_LCDR) & AFEC_LCDR_LDATA_MASK;
+      ainfo("ADC CH %d Result = %d:\n", priv->cur_channel, result);
 
-  ainfo("ADC Result = %d:\n", result);
-
-  priv->adc_callback->au_receive(dev, priv->cur_channel,
-                                 result);
+      priv->adc_callback->au_receive(dev, priv->cur_channel,
+                                     result);
+    }
+  result = getreg32(SAM_AFEC1_LCDR); /* read this register to clear drdy interrupt bit */
 
   return 0;
 }
@@ -338,8 +336,8 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
 {
   irqstate_t flags;
   uint32_t regval;
+  uint8_t iii = 0;
   int ret;
-  int ch_pos = 0;
 
   struct sam_adc_priv *priv = (struct sam_adc_priv *)
                               kmm_malloc(sizeof(struct sam_adc_priv));
@@ -348,12 +346,16 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
   g_sam_adc_dev.ad_priv = priv;
   g_sam_adc_dev.ad_ops = &sam_adc_ops;
 
-  priv->num_channels = 5;//BOARD_ADC_NUM_CHANNELS;
+  priv->num_channels = BOARD_ADC_NUM_CHANNELS;
+  priv->logic2physicalCHmap[0] = 4;
+  priv->logic2physicalCHmap[1] = 5;
+  priv->logic2physicalCHmap[2] = 6;
+  priv->logic2physicalCHmap[3] = 7;
+  priv->logic2physicalCHmap[4] = 8;
 
   sam_adc_init_clock(&g_sam_adc_dev);
 
   /* disable writeproteciton of afec registers */
-  putreg32(AFEC_WPMR_WPKEY, SAM_AFEC0_WPMR);
   putreg32(AFEC_WPMR_WPKEY, SAM_AFEC1_WPMR);
 
   regval = AFEC_MR_TRANSFER(2)|  \
@@ -362,15 +364,17 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
            AFEC_MR_FREERUN|      \
            AFEC_MR_STARTUP_0|    \
            AFEC_MR_PRESCAL(0xFF);
-  putreg32(regval,SAM_AFEC0_MR);
   putreg32(regval,SAM_AFEC1_MR);
 
-  putreg32(AFEC_EMR_TAG,SAM_AFEC0_EMR);
   putreg32(AFEC_EMR_TAG,SAM_AFEC1_EMR);
 
-  putreg32(AFEC_CH4|AFEC_CH5|AFEC_CH6|AFEC_CH7|AFEC_CH8,SAM_AFEC1_CHER);
+  regval = 0;
+  for (iii=0;iii<priv->num_channels; iii++)
+    {
+      regval |= AFEC_CH(priv->logic2physicalCHmap[iii]);
+    }
+  putreg32(regval,SAM_AFEC1_CHER);
 
-  putreg32(AFEC_ACR_PGA0EN|AFEC_ACR_PGA1EN, SAM_AFEC0_ACR);
   putreg32(AFEC_ACR_PGA0EN|AFEC_ACR_PGA1EN, SAM_AFEC1_ACR);
 
   flags = enter_critical_section();
@@ -390,10 +394,7 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
   leave_critical_section(flags);
 
   /* enable writeproteciton of afec registers */
-  putreg32(AFEC_WPMR_WPKEY | AFEC_WPMR_WPEN, SAM_AFEC0_WPMR);
   putreg32(AFEC_WPMR_WPKEY | AFEC_WPMR_WPEN, SAM_AFEC1_WPMR);
-
-
 
 
   return (struct adc_dev_s *)&g_sam_adc_dev;

@@ -37,6 +37,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_SENSORS_QENCODER
+#  include "board_qencoder.h"
+#endif
+
 #include "nucleo-f103rb.h"
 
 /****************************************************************************
@@ -119,6 +123,19 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, CONFIG_NUCLEO_F103RB_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
     }
 #endif
 
