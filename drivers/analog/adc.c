@@ -514,6 +514,10 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
 
       errcode = OK;
     }
+  else
+    {
+      awarn("Analog FIFO overflow");
+    }
 
   return errcode;
 }
