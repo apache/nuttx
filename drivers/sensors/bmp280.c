@@ -506,7 +506,9 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned int *period_us)
 {
-  FAR struct bmp280_dev_s *priv = (FAR struct bmp280_dev_s *)lower->priv;
+  FAR struct bmp280_dev_s *priv = container_of(lower,
+                                               FAR struct bmp280_dev_s,
+                                               sensor_lower);
   int ret = 0;
 
   uint8_t regval;
@@ -653,7 +655,7 @@ static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
 
   memcpy(buffer, &baro_data, sizeof(baro_data));
 
-  return ret;
+  return buflen;
 }
 
 /****************************************************************************
