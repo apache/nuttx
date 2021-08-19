@@ -45,6 +45,10 @@ else
 include cxx.defs
 endif
 
+ifeq ($(CONFIG_LIBCXXABI),y)
+include libcxxabi.defs
+endif
+
 # Object Files
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
