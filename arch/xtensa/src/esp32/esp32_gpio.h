@@ -144,9 +144,9 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
-void esp32_gpioirqinitialize(void);
+void esp32_gpioirqinitialize(int c);
 #else
-#  define esp32_gpioirqinitialize()
+#  define esp32_gpioirqinitialize(c)
 #endif
 
 /****************************************************************************

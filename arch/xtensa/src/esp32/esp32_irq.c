@@ -481,7 +481,7 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ESP32_GPIO_IRQ
   /* Initialize GPIO interrupt support */
 
-  esp32_gpioirqinitialize();
+  esp32_gpioirqinitialize(0);
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -544,6 +544,17 @@ void up_disable_irq(int irq)
       uintptr_t regaddr;
       uint8_t *intmap;
 
+#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_SMP
+      /* The APP's CPU GPIO is a special case. See esp32/irq.h */
+
+      if (periph == ESP32_IRQ_APPCPU_GPIO)
+        {
+          periph = ESP32_IRQ_CPU_GPIO;
+        }
+#endif
+#endif
+
       DEBUGASSERT(periph >= 0 && periph < ESP32_NPERIPHERALS);
       esp32_intinfo(cpu, periph, &regaddr, &intmap);
 
@@ -587,6 +598,17 @@ void up_enable_irq(int irq)
       int periph = ESP32_IRQ2PERIPH(irq);
       uintptr_t regaddr;
       uint8_t *intmap;
+
+#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_SMP
+      /* The APP's CPU GPIO is a special case. See esp32/irq.h */
+
+      if (periph == ESP32_IRQ_APPCPU_GPIO)
+        {
+          periph = ESP32_IRQ_CPU_GPIO;
+        }
+#endif
+#endif
 
       DEBUGASSERT(periph >= 0 && periph < ESP32_NPERIPHERALS);
 
