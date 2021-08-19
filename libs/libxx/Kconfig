@@ -50,6 +50,25 @@ config UCLIBCXX
 
 endchoice
 
+choice
+	prompt "C++ low level library select"
+	default CXX_LIBSUPCXX
+
+config LIBCXXABI
+	bool "LLVM low level C++ Library"
+	---help---
+		LLVM "libc++abi" C++ Standard Library
+		https://libcxxabi.llvm.org/
+		Select if your use libc++abi as lower level c++ library
+
+config CXX_LIBSUPCXX
+	bool "GNU low level libsupc++"
+	---help---
+		Select if your toolchain provides libsupc++ and use libsupc++ as lower
+		level c++ library.
+
+endchoice
+
 config HAVE_CXXINITIALIZE
 	bool "Have C++ initialization"
 	default LIBCXX || UCLIBCXX
@@ -61,13 +80,6 @@ config HAVE_CXXINITIALIZE
 config CXX_EXCEPTION
 	bool "Enable Exception Support"
 	default LIBCXX || UCLIBCXX
-
-config CXX_LIBSUPCXX
-	bool "Have libsupc++ (required)"
-	default LIBCXX || UCLIBCXX
-	---help---
-		Select if your toolchain provides libsupc++.  This option is required
-		at present because the built-in libsupc++ support is incomplete.
 
 if UCLIBCXX
 
