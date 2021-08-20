@@ -88,6 +88,7 @@ enum local_state_s
   /* SOCK_STREAM peers only */
 
   LOCAL_STATE_ACCEPT,          /* Client waiting for a connection */
+  LOCAL_STATE_CONNECTING,      /* Non-blocking connect */
   LOCAL_STATE_CONNECTED,       /* Peer connected */
   LOCAL_STATE_DISCONNECTED     /* Peer disconnected */
 };
@@ -149,12 +150,13 @@ struct local_conn_s
   /* SOCK_STREAM fields common to both client and server */
 
   sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
+  FAR struct socket *lc_psock; /* A reference to the socket structure */
 
   /* The following is a list if poll structures of threads waiting for
    * socket events.
    */
 
-  struct pollfd *lc_accept_fds[LOCAL_NPOLLWAITERS];
+  struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
   struct pollfd lc_inout_fds[2*LOCAL_NPOLLWAITERS];
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
@@ -617,11 +619,11 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
 #endif
 
 /****************************************************************************
- * Name: local_accept_pollnotify
+ * Name: local_event_pollnotify
  ****************************************************************************/
 
-void local_accept_pollnotify(FAR struct local_conn_s *conn,
-                             pollevent_t eventset);
+void local_event_pollnotify(FAR struct local_conn_s *conn,
+                            pollevent_t eventset);
 
 /****************************************************************************
  * Name: local_pollsetup

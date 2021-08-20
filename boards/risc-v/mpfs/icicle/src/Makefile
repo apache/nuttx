@@ -42,4 +42,8 @@ ifeq ($(CONFIG_SPI),y)
 CSRCS += mpfs_board_spi.c
 endif
 
+ifeq ($(CONFIG_MPFS_HAVE_COREPWM),y)
+CSRCS += mpfs_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

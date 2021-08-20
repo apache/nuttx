@@ -1201,7 +1201,6 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
 #ifdef CONFIG_SST25_SECTOR512
               info->numsectors  = priv->nsectors <<
                                (priv->sectorshift - SST25_SECTOR_SHIFT);

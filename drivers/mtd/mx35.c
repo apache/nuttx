@@ -817,7 +817,6 @@ static int mx35_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->nsectors <<
                                   (priv->sectorshift - priv->pageshift);
               info->sectorsize  = 1 << priv->pageshift;

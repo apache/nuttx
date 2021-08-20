@@ -22,6 +22,31 @@
 #define __INCLUDE_EXECINFO_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+#include <sched.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_BACKTRACE)
+
+/* Store up to SIZE return address of the current back trace in
+ * ARRAY and return the exact number of values stored.
+ */
+
+#define backtrace(buffer, size) sched_backtrace(gettid(), buffer, size)
+#define dump_stack()            sched_dumpstack(gettid())
+
+#else
+# define backtrace(buffer, size) 0
+# define dump_stack()
+#endif
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -32,18 +57,6 @@ extern "C"
 {
 #else
 #define EXTERN extern
-#endif
-
-#if defined(CONFIG_UNWINDER)
-
-/* Store up to SIZE return address of the current program state in
- * ARRAY and return the exact number of values stored.
- */
-
-extern int  backtrace(FAR void **buffer, int size);
-extern void dump_stack(void);
-#else
-# define dump_stack()
 #endif
 
 #undef EXTERN

@@ -110,6 +110,11 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   struct iovec iov;
   struct msghdr msg;
 
+  if (tolen != 0 && to == NULL)
+    {
+      return -EINVAL;
+    }
+
   iov.iov_base = (FAR void *)buf;
   iov.iov_len = len;
   msg.msg_name = (FAR struct sockaddr *)to;

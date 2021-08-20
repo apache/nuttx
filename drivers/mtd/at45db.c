@@ -811,7 +811,6 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd,
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->npages;
               info->sectorsize  = 1 << priv->pageshift;
               info->startsector = 0;

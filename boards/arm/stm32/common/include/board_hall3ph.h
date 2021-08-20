@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/debug/lib_dumpstack.c
+ * boards/arm/stm32/common/include/board_hall3ph.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,51 +18,50 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARD_HALL3PH_H
+#define __BOARD_HALL3PH_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-
-#include <stdio.h>
-#include <syslog.h>
-#include <execinfo.h>
-
-#define DUMP_FORMAT "%*p"
-#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 3)
-
-#define DUMP_DEPTH  16
-#define DUMP_NITEM  8
-#define DUMP_LINESIZE (DUMP_NITEM * DUMP_WIDTH)
-
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
-void dump_stack(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  FAR void *address[DUMP_DEPTH];
-  char line[DUMP_LINESIZE + 1];
-  int ret = 0;
-  int size;
-  int i;
+#else
+#define EXTERN extern
+#endif
 
-  size = backtrace(address, DUMP_DEPTH);
-  if (size <= 0)
-    {
-      return;
-    }
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  for (i = 0; i < size; i++)
-    {
-      ret += snprintf(line + ret, sizeof(line) - ret,
-                      DUMP_FORMAT, DUMP_WIDTH, address[i]);
-      if (i == size - 1 || ret % DUMP_LINESIZE == 0)
-        {
-          syslog(LOG_INFO, "[CallStack %d]: %s\n", i / DUMP_NITEM, line);
-          ret = 0;
-        }
-    }
+/****************************************************************************
+ * Name: board_hall3ph_initialize
+ *
+ * Description:
+ *   Initialize the 3-phase Hall effect sensor driver for the given timer
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/hallN
+ *   pha   - phase A Hall effect sensor pin configuration
+ *   phb   - phase B Hall effect sensor pin configuration
+ *   phc   - phase C Hall effect sensor pin configuration
+ *
+ ****************************************************************************/
+
+int board_hall3ph_initialize(int devno, int pha, int phb, int phc);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif // __BOARD_HALL3PH_H

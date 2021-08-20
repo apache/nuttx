@@ -93,7 +93,6 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   if (server->lc_state != LOCAL_STATE_LISTENING ||
       server->u.server.lc_pending >= server->u.server.lc_backlog)
     {
-      net_unlock();
       nerr("ERROR: Server is not listening: lc_state=%d\n",
            server->lc_state);
       nerr("   OR: The backlog limit was reached: %d or %d\n",
@@ -114,7 +113,6 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
       nerr("ERROR: Failed to create FIFOs for %s: %d\n",
            client->lc_path, ret);
 
-      net_unlock();
       return ret;
     }
 
@@ -128,7 +126,6 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
       nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
 
-      net_unlock();
       goto errout_with_fifos;
     }
 
@@ -137,35 +134,36 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   /* Set the busy "result" before giving the semaphore. */
 
   client->u.client.lc_result = -EBUSY;
+  client->lc_state = LOCAL_STATE_ACCEPT;
 
   /* Add ourself to the list of waiting connections and notify the server. */
 
   dq_addlast(&client->lc_node, &server->u.server.lc_waiters);
-  client->lc_state = LOCAL_STATE_ACCEPT;
-  local_accept_pollnotify(server, POLLIN);
+  local_event_pollnotify(server, POLLIN);
 
   if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
     {
       _local_semgive(&server->lc_waitsem);
     }
 
-  net_unlock();
-
   /* Wait for the server to accept the connections */
 
-  do
+  if (!nonblock)
     {
-      _local_semtake(&client->lc_waitsem);
-      ret = client->u.client.lc_result;
-    }
-  while (ret == -EBUSY);
+      do
+        {
+          _local_semtake(&client->lc_waitsem);
+          ret = client->u.client.lc_result;
+        }
+      while (ret == -EBUSY);
 
-  /* Did we successfully connect? */
+      /* Did we successfully connect? */
 
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to connect: %d\n", ret);
-      goto errout_with_outfd;
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to connect: %d\n", ret);
+          goto errout_with_outfd;
+        }
     }
 
   /* Yes.. open the read-only FIFO */
@@ -179,8 +177,15 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
     }
 
   DEBUGASSERT(client->lc_infile.f_inode != NULL);
-  client->lc_state = LOCAL_STATE_CONNECTED;
-  return OK;
+
+  if (!nonblock)
+    {
+      client->lc_state = LOCAL_STATE_CONNECTED;
+      return ret;
+    }
+
+  client->lc_state = LOCAL_STATE_CONNECTING;
+  return -EINPROGRESS;
 
 errout_with_outfd:
   file_close(&client->lc_outfile);
@@ -291,6 +296,7 @@ int psock_local_connect(FAR struct socket *psock,
 
                 /* Bind the address and protocol */
 
+                client->lc_type  = conn->lc_type;
                 client->lc_proto = conn->lc_proto;
                 strncpy(client->lc_path, unaddr->sun_path,
                         UNIX_PATH_MAX - 1);
@@ -309,11 +315,8 @@ int psock_local_connect(FAR struct socket *psock,
                       local_stream_connect(client, conn,
                                            _SS_ISNONBLOCK(psock->s_flags));
                   }
-                else
-                  {
-                    net_unlock();
-                  }
 
+                net_unlock();
                 return ret;
               }
           }

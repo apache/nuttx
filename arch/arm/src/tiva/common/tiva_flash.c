@@ -400,7 +400,6 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = TIVA_VIRTUAL_NPAGES;
               info->sectorsize  = TIVA_FLASH_PAGESIZE;
               info->startsector = 0;

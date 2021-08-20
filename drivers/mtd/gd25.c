@@ -951,7 +951,6 @@ static int gd25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = priv->nsectors *
                                   GD25_SECTOR_SIZE / GD25_PAGE_SIZE;
               info->sectorsize  = GD25_PAGE_SIZE;

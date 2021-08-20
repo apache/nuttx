@@ -265,7 +265,6 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             (FAR struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->magic       = 0;
               info->numsectors  = 8192;
               info->sectorsize  = 512;
               info->startsector = 0;
