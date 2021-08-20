@@ -42,20 +42,15 @@
 
 int sched_backtrace(pid_t tid, FAR void **buffer, int size)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *rtcb = NULL;
 
-  if (tid < 0)
-    {
-      rtcb = running_task();
-    }
-  else
+  if (tid >= 0)
     {
       rtcb = nxsched_get_tcb(tid);
-    }
-
-  if (rtcb == NULL)
-    {
-      return 0;
+      if (rtcb == NULL)
+        {
+          return 0;
+        }
     }
 
   return up_backtrace(rtcb, buffer, size);
