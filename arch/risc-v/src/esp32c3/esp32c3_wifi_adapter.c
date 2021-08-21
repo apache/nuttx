@@ -99,6 +99,7 @@
 #endif
 
 #define WIFI_CONNECT_TIMEOUT  CONFIG_ESP32C3_WIFI_CONNECT_TIMEOUT
+#define WIFI_RECONNECT_COUNT  (10)
 
 #define TIMER_INITIALIZED_VAL (0x5aa5a55a)
 
@@ -130,6 +131,8 @@
 #define RTC_CLK_CAL_FRACT               (19)
 #define SOC_WIFI_LIGHT_SLEEP_CLK_WIDTH  (12)
 
+#define DEFAULT_RSSI                    (-127)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -143,6 +146,17 @@ enum wifi_sta_state
   WIFI_STA_STATE_CONNECT,
   WIFI_STA_STATE_DISCONNECT,
   WIFI_STA_STATE_STOP
+};
+
+/* Wi-Fi Station connect state */
+
+enum wifi_sta_connect_state
+{
+  WIFI_STA_STATE_OK,
+  WIFI_STA_STATE_FAIL,
+  WIFI_STA_STATE_PENDING,
+  WIFI_STA_STATE_BUSY,
+  WIFI_STA_STATE_CANCEL
 };
 
 /* Wi-Fi SoftAP state */
@@ -371,6 +385,11 @@ static uint8_t wifi_coex_get_schm_curr_period(void);
 static void *wifi_coex_get_schm_curr_phase(void);
 static int wifi_coex_set_schm_curr_phase_idx(int idx);
 static int wifi_coex_get_schm_curr_phase_idx(void);
+static int32_t wifi_errno_trans(int ret);
+static int esp_wifi_lock(bool lock);
+#ifdef ESP32C3_WLAN_HAS_STA
+static int esp_wifi_sta_connect_wrapper(void);
+#endif
 
 /****************************************************************************
  * Extern Functions declaration
@@ -452,6 +471,10 @@ static bool g_sta_connected;
 /* If Wi-Fi sta connect blocking */
 
 static bool g_sta_block = false;
+
+static int g_retry_cnt = 0;
+
+static int g_channel = 0;
 
 /* Wi-Fi station TX done callback function */
 
@@ -629,6 +652,73 @@ ESP_EVENT_DEFINE_BASE(WIFI_EVENT);
 /****************************************************************************
  * Private Functions and Public Functions only used by libraries
  ****************************************************************************/
+
+#ifdef ESP32C3_WLAN_HAS_STA
+
+/****************************************************************************
+ * Name: esp_wifi_sta_connect_wrapper
+ *
+ * Description:
+ *   Trigger Wi-Fi station connection action
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+static int esp_wifi_sta_connect_wrapper(void)
+{
+  int ret;
+  wifi_config_t wifi_cfg;
+  memset(&wifi_cfg, 0x0, sizeof(wifi_config_t));
+  ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("ERROR: Failed to get Wi-Fi config data ret=%d\n", ret);
+    }
+
+  wifi_cfg.sta.listen_interval = 1;
+  wifi_cfg.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;
+  wifi_cfg.sta.threshold.rssi = DEFAULT_RSSI;
+  if (g_channel > 0 && g_channel <= 14)
+    {
+      wifi_cfg.sta.channel = g_channel;
+      wifi_cfg.sta.scan_method = WIFI_FAST_SCAN;
+    }
+
+  if (strlen((const char *)wifi_cfg.sta.password) == 0)
+    {
+      wifi_cfg.sta.threshold.authmode = WIFI_AUTH_OPEN;
+    }
+  else
+    {
+      wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WEP;
+    }
+
+  wifi_cfg.sta.pmf_cfg.capable = true;
+  wifi_cfg.sta.pmf_cfg.required = false;
+  ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+  if (ret)
+    {
+      wlerr("ERROR: Failed to set Wi-Fi config data ret=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
+  ret = esp_wifi_connect();
+  if ((ret != WIFI_STA_STATE_OK) && (ret != WIFI_STA_STATE_PENDING))
+    {
+      wlerr("ERROR: Failed to reconnect AP error=%d\n", ret);
+      return wifi_errno_trans(ret);
+    }
+
+  return OK;
+}
+
+#endif
 
 /****************************************************************************
  * Name: osi_errno_trans
@@ -2224,6 +2314,7 @@ static void esp_evt_work_cb(void *arg)
             break;
 
           case WIFI_ADPT_EVT_STA_CONNECT:
+            g_channel = 0;
             wlinfo("INFO: Wi-Fi sta connect\n");
             g_sta_connected = true;
             ret = esp32c3_wlan_sta_set_linkstatus(true);
@@ -2238,27 +2329,47 @@ static void esp_evt_work_cb(void *arg)
             disconnected = (wifi_event_sta_disconnected_t *)evt_adpt->buf;
             wlinfo("INFO: Wi-Fi sta disconnect, reason code: %d\n",
                                               disconnected->reason);
-            if (g_sta_block)
+            if ((disconnected->reason == WIFI_REASON_CONNECTION_FAIL ||
+                 disconnected->reason == WIFI_REASON_NO_AP_FOUND ||
+                 disconnected->reason == WIFI_REASON_AUTH_EXPIRE ||
+                 disconnected->reason == WIFI_REASON_ASSOC_EXPIRE ||
+                 disconnected->reason == WIFI_REASON_AUTH_FAIL) &&
+                 g_sta_block && (g_retry_cnt++ < WIFI_RECONNECT_COUNT))
               {
-                g_sta_block = false;
-              }
-
-            g_sta_connected = false;
-            ret = esp32c3_wlan_sta_set_linkstatus(false);
-            if (ret < 0)
-              {
-                wlerr("ERROR: Failed to set Wi-Fi station link status\n");
-              }
-#ifdef CONFIG_ESP32C3_WIFI_RECONNECT
-            if (g_sta_reconnect)
-              {
-                ret = esp_wifi_connect();
+                ret = esp_wifi_sta_connect_wrapper();
                 if (ret)
                   {
-                    wlerr("ERROR: Failed to connect AP error=%d\n", ret);
+                    wlerr("ERROR: Failed to reconnect AP error=%d\n", ret);
                   }
               }
+            else
+              {
+                if (g_sta_block)
+                  {
+                    g_sta_block = false;
+                  }
+
+                g_channel = 0;
+                g_sta_connected = false;
+                ret = esp32c3_wlan_sta_set_linkstatus(false);
+                if (ret < 0)
+                  {
+                    wlerr("ERROR: Failed to set Wi-Fi\
+                           station link status\n");
+                  }
+#ifdef CONFIG_ESP32C3_WIFI_RECONNECT
+                if (g_sta_reconnect)
+                  {
+                    ret = esp_wifi_connect();
+                    if ((ret != WIFI_STA_STATE_OK) &&
+                       (ret != WIFI_STA_STATE_PENDING))
+                      {
+                        wlerr("ERROR: Failed to connect AP error=%d\n", ret);
+                      }
+                  }
 #endif
+              }
+
             break;
 
           case WIFI_ADPT_EVT_STA_STOP:
@@ -5777,7 +5888,6 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
     {
       wifi_cfg.sta.bssid_set = true;
       memcpy(wifi_cfg.sta.bssid, pdata, MAC_LEN);
-
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
@@ -5813,6 +5923,8 @@ int esp_wifi_sta_connect(void)
   int ret;
   uint32_t ticks;
   wifi_config_t wifi_cfg;
+  uint16_t bss_total = 0;
+  wifi_scan_config_t  config ;
 
   esp_wifi_lock(true);
 
@@ -5824,9 +5936,52 @@ int esp_wifi_sta_connect(void)
     }
 
   g_sta_reconnect = true;
+  g_retry_cnt = 0;
+  if (g_channel > 0 && g_channel <= 14)
+    {
+      memset(&wifi_cfg.sta, 0x0, sizeof(wifi_sta_config_t));
+      ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("ERROR: Failed to get Wi-Fi config data ret=%d\n", ret);
+          esp_wifi_lock(false);
+          return wifi_errno_trans(ret);
+        }
 
-  ret = esp_wifi_connect();
-  if (ret)
+      wifi_cfg.sta.channel = g_channel;
+      if ((wifi_cfg.sta.ssid[0] != 0x0) && ((wifi_cfg.sta.bssid[0] != 0x0) ||
+          (wifi_cfg.sta.bssid[1] != 0x0) || (wifi_cfg.sta.bssid[2] != 0x0)))
+        {
+          int scan_retry = 3;
+          int retry_cnt =  0;
+          memset(&config, 0x0, sizeof(wifi_scan_config_t));
+          config.scan_type  = IW_SCAN_TYPE_ACTIVE;
+          config.channel = g_channel;
+          config.show_hidden = true;
+          config.ssid = wifi_cfg.sta.ssid;
+          for (retry_cnt =  0; retry_cnt < scan_retry; retry_cnt++)
+            {
+              esp_wifi_scan_start(&config, true);
+              esp_wifi_scan_get_ap_num(&bss_total);
+              esp_wifi_scan_stop();
+              if (bss_total > 0)
+                {
+                  break;
+                }
+            }
+        }
+
+      ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
+      if (ret)
+        {
+          wlerr("ERROR: Failed to set Wi-Fi config data ret=%d\n", ret);
+          esp_wifi_lock(false);
+          return wifi_errno_trans(ret);
+        }
+    }
+
+  ret = esp_wifi_sta_connect_wrapper();
+  if ((ret != WIFI_STA_STATE_OK) && (ret != WIFI_STA_STATE_PENDING))
     {
       wlerr("ERROR: Failed to connect ret=%d\n", ret);
       ret = wifi_errno_trans(ret);
@@ -6064,8 +6219,7 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
           return wifi_errno_trans(ret);
         }
 
-      wifi_cfg.sta.channel = esp_freq_to_channel(iwr->u.freq.m);
-
+      g_channel = wifi_cfg.sta.channel = esp_freq_to_channel(iwr->u.freq.m);
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {

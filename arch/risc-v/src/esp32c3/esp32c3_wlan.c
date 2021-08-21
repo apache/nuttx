@@ -1522,6 +1522,10 @@ static int wlan_ioctl(struct net_driver_s *dev,
   struct iwreq *iwr = (struct iwreq *)arg;
   struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
   const struct wlan_ops_s *ops = priv->ops;
+  const uint8_t mac_zero[MAC_LEN] =
+    {
+      0x0
+    };
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -1588,9 +1592,7 @@ static int wlan_ioctl(struct net_driver_s *dev,
         break;
 
       case SIOCSIWAP:       /* Set access point MAC addresses */
-        if (iwr->u.ap_addr.sa_data[0] != 0 &&
-            iwr->u.ap_addr.sa_data[1] != 0 &&
-            iwr->u.ap_addr.sa_data[2] != 0)
+        if (memcmp(iwr->u.ap_addr.sa_data, mac_zero, MAC_LEN) != 0)
           {
             ret = ops->bssid(iwr, true);
             if (ret < 0)
