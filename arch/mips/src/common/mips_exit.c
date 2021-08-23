@@ -175,12 +175,4 @@ void up_exit(int status)
   /* Then switch contexts */
 
   up_fullcontextrestore(tcb->xcp.regs);
-
-  /* up_fullcontextrestore() should not return but could if software
-   * interrupts are disabled.  NOTE:  Can't use DEBUGPANIC here because
-   * that results in a GCC compilation warning: "No return function does
-   * return"
-   */
-
-  PANIC();
 }

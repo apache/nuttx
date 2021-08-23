@@ -187,10 +187,4 @@ void up_exit(int status)
   /* Then switch contexts */
 
   xtensa_context_restore(tcb->xcp.regs);
-
-  /* xtensa_full_context_restore() should not return but could if the
-   * software interrupts are disabled.
-   */
-
-  DEBUGPANIC();
 }

@@ -70,8 +70,6 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
 
   sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
             (uintptr_t)arg);
-
-  PANIC();
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */

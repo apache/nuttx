@@ -175,10 +175,4 @@ void up_exit(int status)
   /* Then switch contexts */
 
   riscv_fullcontextrestore(tcb->xcp.regs);
-
-  /* riscv_fullcontextrestore() should not return but could if the software
-   * interrupts are disabled.
-   */
-
-  PANIC();
 }
