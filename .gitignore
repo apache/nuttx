@@ -46,3 +46,4 @@ Make*.dep
 uImage
 /external
 .config-works
+boards/arm/sama5/jti-toucan2/src/sam_can_not_needed.c
