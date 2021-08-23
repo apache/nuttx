@@ -36,6 +36,8 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include "arm_arch.h"
+#include "hardware/sam_sfr.h"
 
 #include "jti-toucan2.h"
 
@@ -59,6 +61,10 @@
 #ifdef CONFIG_MMCSD
 #  include <nuttx/mmcsd.h>
 #  include "sam_sdmmc.h"
+#endif
+
+#if defined (CONFIG_SAMA5_MCAN0) || (CONFIG_SAMA5_MCAN1)
+# include "sam_mcan.h"
 #endif
 
 
@@ -149,9 +155,22 @@ static void sam_i2ctool(void)
 int sam_bringup(void)
 {
   int ret;
-
-  /* Register I2C drivers on behalf of the I2C tool */
-
+  
+//#if 0
+  /*
+  Initial porting had issues with the 24MHz crystal as u-boot was not setting 
+  the SFR register to indicate the correct crystal frequency
+  */
+  uint32_t regval;
+  /* get UTMI timing register */
+  regval = getreg32(SAM_SFR_VBASE + SAM_SFR_UTMICKTRIM_OFFSET);
+  printf("clock reg says %lx\n", regval);
+  regval &= 0xFFFFFFFC;
+  regval |= BOARD_CRYSTAL_FREQUENCY;
+  putreg32(regval, (SAM_SFR_VBASE + SAM_SFR_UTMICKTRIM_OFFSET));
+ /* Register I2C drivers on behalf of the I2C tool */
+ //#endif
+ 
   sam_i2ctool();
 
 
@@ -286,15 +305,17 @@ int sam_bringup(void)
     }
 #endif
 
-#if defined (CONFIG_SAMA5_CAN0) || defined(CONFIG_SAMA5_CAN1)
-  /* Initialize CAN and register the CAN driver. */
-
+#if defined(CONFIG_SAMA5_MCAN0) || defined(CONFIG_SAMA5_MCAN1)
+  /* Initialize CAN and register the  driver(s). */
+  //sam_configpio(PIO_MCAN0_SILENT_MODE);
+  //sam_piowrite(PIO_MCAN0_SILENT_MODE, false);
   ret = sam_can_setup();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_can_setup failed: %d\n", ret);
     }
 #endif
+
 
 #if defined(CONFIG_RNDIS)
   /* Set up a MAC address for the RNDIS device. */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/sama5/jti-toucan2/src/giant-board.h
+ * boards/arm/sama5/jti-toucan2/src/jti-toucan.h
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +35,7 @@
 #include <nuttx/irq.h>
 
 #include "hardware/sam_pinmap.h"
+#include "sam_pio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,6 +50,12 @@
 //#define HAVE_CAN		1
 //#define HAVE_PWM		1
 
+#define BOARD_CRYSTAL_FREQUENCY_12MHZ  0
+#define BOARD_CRYSTAL_FREQUENCY_16MHZ  1
+#define BOARD_CRYSTAL_FREQUENCY_24MHZ  2
+#define BOARD_CRYSTAL_FREQUENCY_48MHZ  2
+
+#define BOARD_CRYSTAL_FREQUENCY BOARD_CRYSTAL_FREQUENCY_24MHZ
 
 /* AT25 Serial FLASH */
 
@@ -154,11 +161,6 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Networking */
-
-#if !defined(CONFIG_NET)
-#  undef HAVE_NETWORK
-#endif
 
 /* procfs File System */
 
@@ -169,6 +171,10 @@
 #    define SAMA5_PROCFS_MOUNTPOINT "/proc"
 #  endif
 #endif
+
+/* Board-specific PIO */
+
+
 
 /* JTi Toucan2 pinout
  *
@@ -205,37 +211,6 @@
 */ 
 
 
-//#define SDMMC_INIT_CLKDIV          (119 << SDMMC_MR_CLKDIV_SHIFT)
-
-/* MCK = 96MHz, CLKDIV = 3, MCI_SPEED = 96MHz / 2 * (3+1) = 12 MHz */
-
-//#define SDMMC_MMCXFR_CLKDIV        (3 << SDMMC_MR_CLKDIV_SHIFT)
-
-/* MCK = 96MHz, CLKDIV = 1, MCI_SPEED = 96MHz / 2 * (1+1) = 24 MHz */
-
-//#define SDMMC_SDXFR_CLKDIV         (1 << SDMMC_MR_CLKDIV_SHIFT)
-//#define SDMMC_SDWIDEXFR_CLKDIV     SDMMC_SDXFR_CLKDIV
-
-/* SDMMC Card Slots *********************************************************/
-
-/* The Giant Board provides a SD memory card slot:
- *  a full size SD card slot (J6)
- *
- * The full size SD card slot connects via SDMMC1.  The card detect discrete
- * is available on PA21 (pulled high) and shared with DAT3.  The write
- * protect discrete is not connected and not available to software.  The
- * slot only supports 4-bit wide transfer mode, and the NuttX driver
- * currently uses only the 4-bit wide transfer mode.
- *
- *   PA18 SDMMC1_DAT0
- *   PA19 SDMMC1_DAT1
- *   PA20 SDMMC1_DAT2
- *   PA21 SDMMC1_DAT3/SDMMC1_CD
- *   PA22 SDMMC1_CK
- *   PA28 SDMMC1_CMD
- */
-
-//#define IRQ_SDMMC1_CD   SAM_IRQ_PA30
 
 
 /****************************************************************************
@@ -290,7 +265,19 @@ int sam_usbhost_initialize(void);
 int sam_pwm_setup(int pwm_channel);
 #endif
 
-#if defined (CONFIG_CAN)
+#if defined(CONFIG_SAMA5_MCAN0) || defined(CONFIG_SAMA5_MCAN1)
+void board_can_pio_control_initialize(void);
+#define PIO_MCAN0_SILENT_MODE (PIO_OUTPUT |  PIO_CFG_DEFAULT | \
+        PIO_OUTPUT_CLEAR | PIO_PORT_PIOC | PIO_PIN22)
+
+#define PIO_MCAN1_SILENT_MODE (PIO_OUTPUT |  PIO_CFG_DEFAULT | \
+        PIO_OUTPUT_CLEAR | PIO_PORT_PIOD | PIO_PIN13)
+
+#define PIO_MCAN0_TERMINATION_ENABLE (PIO_OUTPUT | \
+       PIO_CFG_DEFAULT | PIO_OUTPUT_SET | PIO_PORT_PIOA | PIO_PIN12)
+
+#define PIO_MCAN1_TERMINATION_ENABLE (PIO_OUTPUT | \
+       PIO_CFG_DEFAULT | PIO_OUTPUT_SET | PIO_PORT_PIOA | PIO_PIN13)
 int sam_can_setup(void);
 #endif
 

@@ -67,6 +67,7 @@ void sam_boardinitialize(void)
       sam_usbinitialize();
     }
 #endif
+  board_can_pio_control_initialize();
 
 }
 /****************************************************************************

@@ -28,7 +28,7 @@
 
 MEMORY
 {
-    isram (W!RX) : ORIGIN = 0x00200000, LENGTH = 128K - 16K
+    isram (wrx) : ORIGIN = 0x00200000, LENGTH = 128K - 16K
     sdram (W!RX) : ORIGIN = 0x20000000, LENGTH = 64M
 }
 
@@ -86,6 +86,11 @@ SECTIONS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
     } > sdram
+    
+    .isramdata (NOLOAD) :
+    {
+        *(.isramdata)
+    } > isram
 
     .bss :
     {

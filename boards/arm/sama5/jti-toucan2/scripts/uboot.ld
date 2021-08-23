@@ -98,6 +98,11 @@ SECTIONS
         _ebss = ABSOLUTE(.);
     } > sdram
 
+    .isramdata (NOLOAD) :
+    {
+        *(.isramdata)
+    } > isram
+
     /* Uninitialized data */
 
     .noinit :

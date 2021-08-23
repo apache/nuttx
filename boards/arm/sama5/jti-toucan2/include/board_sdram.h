@@ -34,7 +34,7 @@
 
 /* Clocking *****************************************************************/
 
-/* After power-on reset, the SAMA5 device is running on a 24MHz internal RC.
+/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
  * When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate
  * bootloader.  That bootloader had to have already configured the PLL
  * and SDRAM for proper operation.
@@ -42,15 +42,21 @@
  * In this case, we do not reconfigure the clocking.
  * Rather, we need to query the register settings to determine the clock
  * frequencies.
- * We can only assume that the Main clock source is the on-board 12MHz
+ * We can only assume that the Main clock source is the on-board 24MHz
  * crystal.
  */
+#define BOARD_CRYSTAL_FREQUENCY_12MHZ  0
+#define BOARD_CRYSTAL_FREQUENCY_16MHZ  1
+#define BOARD_CRYSTAL_FREQUENCY_24MHZ  2
+
+#define BOARD_CRYSTAL_FREQUENCY BOARD_CRYSTAL_FREQUENCY_24MHZ
 
 #define BOARD_MAINCK_FREQUENCY     BOARD_MAINOSC_FREQUENCY
 #define BOARD_PLLA_FREQUENCY       (sam_pllack_frequency(BOARD_MAINOSC_FREQUENCY))
 #define BOARD_PLLADIV2_FREQUENCY   (sam_plladiv2_frequency(BOARD_MAINOSC_FREQUENCY))
 #define BOARD_PCK_FREQUENCY        (sam_pck_frequency(BOARD_MAINOSC_FREQUENCY))
 #define BOARD_MCK_FREQUENCY        (sam_mck_frequency(BOARD_MAINOSC_FREQUENCY))
+#define BOARD_UPLL_FREQUENCY       (480000000)
 
 /* Clocking to certain peripherals may be MCK/2.
  *
@@ -67,7 +73,7 @@
 /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the embedded
  * High-speed transceivers. UPLLCK is the output of the 480 MHz UTMI PLL
  * (UPLL).  The source clock of the UTMI PLL is the Main OSC output:  Either
- * the 12MHz internal RC oscillator on a an external 12MHz crystal.  The
+ * the 12MHz internal RC oscillator on a an external 24MHz crystal.  The
  * Main OSC must be 12MHz because the UPLL has a built-in 40x multiplier.
  *
  * For High-speed operations, the user has to perform the following:
@@ -92,8 +98,9 @@
 #  define BOARD_USE_UPLL             1     /* Use UPLL for clock source */
 #  define BOARD_CKGR_UCKR_UPLLCOUNT  (15)  /* Maximum value */
 #  define BOARD_CKGR_UCKR_BIASCOUNT  (15)  /* Maximum value */
-#  define BOARD_UPLL_OHCI_DIV        (10)  /* Divide by 10 */
+#  define BOARD_UPLL_OHCI_DIV        (5)  /* Divide by 10 */
 #endif
+
 
 /* ADC Configuration
  *

@@ -44,7 +44,7 @@
 
 /* On-board crystal frequencies */
 
-#define BOARD_MAINOSC_FREQUENCY    (24000000)  /* MAINOSC: 12MHz crystal on-board */
+#define BOARD_MAINOSC_FREQUENCY    (24000000)  /* MAINOSC: 24MHz crystal on-board */
 #define BOARD_SLOWCLK_FREQUENCY    (32768)     /* Slow Clock: 32.768KHz */
 
 #if defined(CONFIG_SAMA5_BOOT_SDRAM)
@@ -70,7 +70,7 @@
  */
 
 #  include <arch/board/board_492mhz.h>
-
+SAM_PIOA_VBASE
 #endif
 
 /* DBGU  */
@@ -199,14 +199,14 @@
 #define PIO_TWI1_D PIO_TWI1_D_1
 #define PIO_TWI1_CK PIO_TWI1_CK_1
 
-/*CAN0 IOSET2*/
+/*MCAN0 IOSET2*/
 
-#define PIO_CAN0_RX PIO_CAN0_RX_2
-#define PIO_CAN0_TX PIO_CAN0_TX_2
-#define SAM_PID_CAN0 SAM_PID_MCAN00 
+#define PIO_MCAN0_RX PIO_MCAN0_RX_2
+#define PIO_MCAN0_TX PIO_MCAN0_TX_2
+#define SAM_PID_MCAN0 SAM_PID_MCAN00
 
-/*CAN1 default IOSET */
-#define SAM_PID_CAN1 SAM_PID_MCAN10 
+/*MCAN1 default IOSET */
+#define SAM_PID_MCAN1 SAM_PID_MCAN10 
 
 /* LCDC  */
 #define PIO_LCD_DAT2      PIO_LCD_DAT2_1

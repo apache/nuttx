@@ -451,7 +451,7 @@ static void can_putreg(FAR struct sam_can_s *priv, int offset,
 static void can_putreg(FAR struct sam_can_s *priv, int offset,
                        uint32_t regval)
 {
-  FAR const struct sam_config_s *config = priv->config;
+   FAR const struct sam_config_s *config = priv->config;
   putreg32(regval, config->base + offset);
 }
 
@@ -1612,7 +1612,7 @@ static int can_interrupt(int irq, void *context, FAR void *arg)
  *      (1 x tCAN).
  *   2. Propagation segment (PROP_SEG):  This part of the bit time is used
  *      to compensate for the physical delay times within the network. It is
- *      twice the sum of the signal’s propagation time on the bus line, the
+ *      twice the sum of the signalï¿½s propagation time on the bus line, the
  *      input comparator delay, and the output driver delay. It is
  *      programmable to be 1 to 8 Tq long.  This parameter is defined in the
  *      PROPAG field of the CAN Baudrate Register.
@@ -1900,7 +1900,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
   /* Set the maximum CAN peripheral clock frequency */
 
   regval |= PMC_PCR_PID(config->pid) | PMC_PCR_CMD | PMC_PCR_EN;
-  can_putreg(priv, SAM_PMC_PCR, regval);
+  can_putreg(priv, SAM_PMC_PCR_OFFSET, regval);
 
   /* Enable peripheral clocking */
 

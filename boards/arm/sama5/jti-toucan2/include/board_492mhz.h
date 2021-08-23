@@ -108,6 +108,7 @@
 #define BOARD_PCK_FREQUENCY        (492000000) /* CPU:  PLLACK / 2 / 1  */
 #define BOARD_MCK_FREQUENCY        (164000000) /* MCK:  PLLACK / 1 / 1 / 3 */
 #define BOARD_ADCCLK_FREQUENCY     (10250000)  /* ADCCLK: MCK / ((7+1)*2) */
+#define BOARD_UPLL_FREQUENCY       (480000000)
 
 /* Clocking to certain peripherals may be MCK/2.
  *

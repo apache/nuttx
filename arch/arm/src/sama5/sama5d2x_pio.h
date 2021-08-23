@@ -64,16 +64,16 @@
 
 #define PIO_MODE_SHIFT            (22)        /* Bits 22-26: PIO mode */
 #define PIO_MODE_MASK             (15 << PIO_MODE_SHIFT)
-#  define PIO_INPUT               (0 << PIO_MODE_SHIFT) /* Input */
-#  define PIO_OUTPUT              (1 << PIO_MODE_SHIFT) /* Output */
-#  define PIO_ANALOG              (2 << PIO_MODE_SHIFT) /* Analog */
-#  define PIO_PERIPHA             (3 << PIO_MODE_SHIFT) /* Controlled by periph A signal */
-#  define PIO_PERIPHB             (4 << PIO_MODE_SHIFT) /* Controlled by periph B signal */
-#  define PIO_PERIPHC             (5 << PIO_MODE_SHIFT) /* Controlled by periph C signal */
-#  define PIO_PERIPHD             (6 << PIO_MODE_SHIFT) /* Controlled by periph D signal */
-#  define PIO_PERIPHE             (7 << PIO_MODE_SHIFT) /* Controlled by periph E signal */
-#  define PIO_PERIPHF             (8 << PIO_MODE_SHIFT) /* Controlled by periph F signal */
-#  define PIO_PERIPHG             (9 << PIO_MODE_SHIFT) /* Controlled by periph G signal */
+#define PIO_INPUT               (0 << PIO_MODE_SHIFT) /* Input */
+#define PIO_OUTPUT              (1 << PIO_MODE_SHIFT) /* Output */
+#define PIO_ANALOG              (2 << PIO_MODE_SHIFT) /* Analog */
+#define PIO_PERIPHA             (3 << PIO_MODE_SHIFT) /* Controlled by periph A signal */
+#define PIO_PERIPHB             (4 << PIO_MODE_SHIFT) /* Controlled by periph B signal */
+#define PIO_PERIPHC             (5 << PIO_MODE_SHIFT) /* Controlled by periph C signal */
+#define PIO_PERIPHD             (6 << PIO_MODE_SHIFT) /* Controlled by periph D signal */
+#define PIO_PERIPHE             (7 << PIO_MODE_SHIFT) /* Controlled by periph E signal */
+#define PIO_PERIPHF             (8 << PIO_MODE_SHIFT) /* Controlled by periph F signal */
+#define PIO_PERIPHG             (9 << PIO_MODE_SHIFT) /* Controlled by periph G signal */
 
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
@@ -83,13 +83,13 @@
 
 #define PIO_CFG_SHIFT             (15)        /* Bits 15-20: PIO configuration bits */
 #define PIO_CFG_MASK              (0x3f << PIO_CFG_SHIFT)
-#  define PIO_CFG_DEFAULT         (0x00 << PIO_CFG_SHIFT) /* Default, no attribute */
-#  define PIO_CFG_PULLUP          (0x01 << PIO_CFG_SHIFT) /* Bit 15: Internal pull-up */
-#  define PIO_CFG_PULLDOWN        (0x02 << PIO_CFG_SHIFT) /* Bit 16: Internal pull-down */
-#  define PIO_CFG_DEGLITCH        (0x04 << PIO_CFG_SHIFT) /* Bit 17: Internal input filter (Tmck/2)*/
-#  define PIO_CFG_SLOWCLK         (0x0c << PIO_CFG_SHIFT) /* Bits 17+18: Internal input filter (Tslwclk/2)*/
-#  define PIO_CFG_OPENDRAIN       (0x10 << PIO_CFG_SHIFT) /* Bit 19: Open drain */
-#  define PIO_CFG_SCHMITT         (0x20 << PIO_CFG_SHIFT) /* Bit 20: Schmitt trigger */
+#define PIO_CFG_DEFAULT         (0x00 << PIO_CFG_SHIFT) /* Default, no attribute */
+#define PIO_CFG_PULLUP          (0x01 << PIO_CFG_SHIFT) /* Bit 15: Internal pull-up */
+#define PIO_CFG_PULLDOWN        (0x02 << PIO_CFG_SHIFT) /* Bit 16: Internal pull-down */
+#define PIO_CFG_DEGLITCH        (0x04 << PIO_CFG_SHIFT) /* Bit 17: Internal input filter (Tmck/2)*/
+#define PIO_CFG_SLOWCLK         (0x0c << PIO_CFG_SHIFT) /* Bits 17+18: Internal input filter (Tslwclk/2)*/
+#define PIO_CFG_OPENDRAIN       (0x10 << PIO_CFG_SHIFT) /* Bit 19: Open drain */
+#define PIO_CFG_SCHMITT         (0x20 << PIO_CFG_SHIFT) /* Bit 20: Schmitt trigger */
 
 /* Drive Strength:
  *
@@ -98,9 +98,9 @@
 
 #define PIO_DRIVE_SHIFT           (13)        /* Bits 13-14: Drive strength */
 #define PIO_DRIVE_MASK            (7 << PIO_DRIVE_SHIFT)
-#  define PIO_DRIVE_LOW           (0 << PIO_DRIVE_SHIFT)
-#  define PIO_DRIVE_MEDIUM        (2 << PIO_DRIVE_SHIFT)
-#  define PIO_DRIVE_HIGH          (3 << PIO_DRIVE_SHIFT)
+#define PIO_DRIVE_LOW           (0 << PIO_DRIVE_SHIFT)
+#define PIO_DRIVE_MEDIUM        (2 << PIO_DRIVE_SHIFT)
+#define PIO_DRIVE_HIGH          (3 << PIO_DRIVE_SHIFT)
 
 /* Additional interrupt modes:
  *
@@ -109,12 +109,12 @@
 
 #define PIO_INT_SHIFT             (10)        /* Bits 9-12: PIO interrupt bits */
 #define PIO_INT_MASK              (7 << PIO_INT_SHIFT)
-#  define PIO_INT_NONE            (0 << PIO_INT_SHIFT)
-#  define PIO_INT_FALLING         (1 << PIO_INT_SHIFT)
-#  define PIO_INT_RISING          (2 << PIO_INT_SHIFT)
-#  define PIO_INT_BOTHEDGES       (3 << PIO_INT_SHIFT)
-#  define PIO_INT_LOWLEVEL        (4 << PIO_INT_SHIFT)
-#  define PIO_INT_HIGHLEVEL       (5 << PIO_INT_SHIFT)
+#define PIO_INT_NONE            (0 << PIO_INT_SHIFT)
+#define PIO_INT_FALLING         (1 << PIO_INT_SHIFT)
+#define PIO_INT_RISING          (2 << PIO_INT_SHIFT)
+#define PIO_INT_BOTHEDGES       (3 << PIO_INT_SHIFT)
+#define PIO_INT_LOWLEVEL        (4 << PIO_INT_SHIFT)
+#define PIO_INT_HIGHLEVEL       (5 << PIO_INT_SHIFT)
 
 /* If the pin is an interrupt, then this determines if the pin is a secure:
  *
@@ -140,10 +140,10 @@
 
 #define PIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
 #define PIO_PORT_MASK             (3 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOA           (0 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOB           (1 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOC           (2 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOD           (3 << PIO_PORT_SHIFT)
+#define PIO_PORT_PIOA           (0 << PIO_PORT_SHIFT)
+#define PIO_PORT_PIOB           (1 << PIO_PORT_SHIFT)
+#define PIO_PORT_PIOC           (2 << PIO_PORT_SHIFT)
+#define PIO_PORT_PIOD           (3 << PIO_PORT_SHIFT)
 
 /* This identifies the bit in the port:
  *

@@ -63,8 +63,8 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += sam_pwm.c
 endif
 
-ifeq ($(CONFIG_CAN),y)
-CSRCS += sam_can.c
+ifeq ($(CONFIG_SAMA5_MCAN),y)
+CSRCS += sam_mcan.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
