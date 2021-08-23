@@ -113,10 +113,4 @@ void minerva_sigdeliver(void)
 
   board_autoled_off(LED_SIGNAL);
   up_fullcontextrestore(regs);
-
-  /* up_fullcontextrestore() should not return but could if the software
-   * interrupts are disabled.
-   */
-
-  DEBUGPANIC();
 }

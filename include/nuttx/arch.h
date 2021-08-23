@@ -582,8 +582,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
  ****************************************************************************/
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-void up_task_start(main_t taskentry, int argc, FAR char *argv[])
-       noreturn_function;
+void up_task_start(main_t taskentry, int argc, FAR char *argv[]);
 #endif
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
@@ -615,7 +614,6 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
 
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg);
-       noreturn_function;
 
 /****************************************************************************
  * Name: up_pthread_exit
@@ -634,7 +632,6 @@ void up_pthread_start(pthread_trampoline_t startup,
  ****************************************************************************/
 
 void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value);
-        noreturn_function;
 #endif
 
 /****************************************************************************
@@ -691,8 +688,7 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
 
 #if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 void up_signal_handler(_sa_sigaction_t sighand, int signo,
-                       FAR siginfo_t *info, FAR void *ucontext)
-       noreturn_function;
+                       FAR siginfo_t *info, FAR void *ucontext);
 #endif
 
 /****************************************************************************

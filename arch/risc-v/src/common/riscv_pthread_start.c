@@ -69,8 +69,6 @@ void up_pthread_start(pthread_trampoline_t startup,
 
   sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
             (uintptr_t)arg);
-
-  PANIC();
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */
