@@ -46,6 +46,10 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "esp32s2_tim_lowerhalf.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -99,6 +103,56 @@ int esp32s2_bringup(void)
       return ret;
     }
 #endif
+
+  /* Register the timer drivers */
+
+#ifdef CONFIG_TIMER
+
+#ifdef CONFIG_ESP32S2_TIMER0
+  ret = esp32s2_timer_initialize("/dev/timer0", TIMER0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_TIMER1
+  ret = esp32s2_timer_initialize("/dev/timer1", TIMER1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_TIMER2
+  ret = esp32s2_timer_initialize("/dev/timer2", TIMER2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_TIMER3
+  ret = esp32s2_timer_initialize("/dev/timer3", TIMER3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#endif /* CONFIG_TIMER */
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
