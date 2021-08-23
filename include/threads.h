@@ -76,7 +76,7 @@
 
 /* thrd_start_t: function pointer type passed to thrd_create */
 
-typedef CODE int (*thrd_start_t)(FAR void *arg)
+typedef CODE int (*thrd_start_t)(FAR void *arg);
 
 /* mtx_t : mutex identifier */
 
