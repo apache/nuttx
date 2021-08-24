@@ -144,7 +144,7 @@ endif
 
 LD = $(CROSSDEV)gcc
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
+AR = $(CROSSDEV)ar rcsP
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
