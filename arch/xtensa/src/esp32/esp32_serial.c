@@ -41,6 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
@@ -268,6 +269,7 @@ struct esp32_dev_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   bool oflow;                          /* Output flow control (CTS) enabled */
 #endif
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -816,7 +818,7 @@ static void esp32_disableallints(struct esp32_dev_s *priv, uint32_t *intena)
 
   /* The following must be atomic */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (intena)
     {
@@ -828,7 +830,7 @@ static void esp32_disableallints(struct esp32_dev_s *priv, uint32_t *intena)
   /* Disable all interrupts */
 
   putreg32(0, UART_INT_ENA_REG(priv->config->id));
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -953,7 +955,7 @@ static int esp32_setup(struct uart_dev_s *dev)
       modifyreg32(UART_CONF1_REG(priv->config->id), 0, regval);
     }
 
-#endif 
+#endif
 
 #endif
   return OK;
@@ -1641,7 +1643,7 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
   irqstate_t flags;
   int regval;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (enable)
     {
@@ -1666,7 +1668,7 @@ static void esp32_rxint(struct uart_dev_s *dev, bool enable)
       putreg32(regval, UART_INT_ENA_REG(priv->config->id));
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1714,7 +1716,7 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
   if (priv->txdma == false)
     {
 #endif
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
 
       if (enable)
         {
@@ -1742,7 +1744,7 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
                       (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA), 0);
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 #ifdef CONFIG_SERIAL_TXDMA
     }
 #endif
