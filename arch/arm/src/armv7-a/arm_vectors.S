@@ -342,10 +342,24 @@ arm_vectorsvc:
 
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_syscall() on the interrupt stack */
+
+	setirqstack	r1, r3				/* SP = interrupt stack top */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
+	bl		arm_syscall			/* Call the handler */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
+#else
+	/* Call arm_syscall() on the user stack */
+
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_syscall			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
 
 	/* Upon return from arm_syscall, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -482,12 +496,28 @@ arm_vectordata:
 
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_dataabort() on the interrupt stack */
+
+	setirqstack	r1, r3				/* SP = interrupt stack top */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
+	mrc		CP15_DFAR(r1)			/* Get R1=DFAR */
+	mrc		CP15_DFSR(r2)			/* Get r2=DFSR */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
+	bl		arm_dataabort			/* Call the handler */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
+#else
+	/* Call arm_dataabort() on the user stack */
+
 	mrc		CP15_DFAR(r1)			/* Get R1=DFAR */
 	mrc		CP15_DFSR(r2)			/* Get r2=DFSR */
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_dataabort			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
 
 	/* Upon return from arm_dataabort, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -624,12 +654,28 @@ arm_vectorprefetch:
 
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_prefetchabort() on the interrupt stack */
+
+	setirqstack	r1, r3				/* SP = interrupt stack top */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
+	mrc		CP15_IFAR(r1)			/* Get R1=IFAR */
+	mrc		CP15_IFSR(r2)			/* Get r2=IFSR */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
+	bl		arm_prefetchabort		/* Call the handler */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
+#else
+	/* Call arm_prefetchabort() on the user stack */
+
 	mrc		CP15_IFAR(r1)			/* Get R1=IFAR */
 	mrc		CP15_IFSR(r2)			/* Get r2=IFSR */
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_prefetchabort		/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
 
 	/* Upon return from arm_prefetchabort, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -764,10 +810,24 @@ arm_vectorundefinsn:
 
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_undefinedinsn() on the interrupt stack */
+
+	setirqstack	r1, r3				/* SP = interrupt stack top */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
+	bl		arm_undefinedinsn		/* Call the handler */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
+#else
+	/* Call arm_undefinedinsn() on the user stack */
+
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_undefinedinsn		/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
 
 	/* Upon return from arm_undefinedinsn, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
@@ -903,6 +963,8 @@ arm_vectorfiq:
 	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_decodefiq() on the interrupt stack */
+
 	setfiqstack	r1, r4				/* SP = interrupt stack top */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp				/* Save the SP in a preserved register */
@@ -910,6 +972,8 @@ arm_vectorfiq:
 	bl		arm_decodefiq			/* Call the handler */
 	ldr		sp, [r4]			/* Restore the user stack pointer */
 #else
+	/* Call arm_decodefiq() on the user stack */
+
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
