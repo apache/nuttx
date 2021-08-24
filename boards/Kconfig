@@ -1430,7 +1430,6 @@ config ARCH_BOARD_GIANT_BOARD
 config ARCH_BOARD_JTI_TOUCAN2
 	bool "JT Innovations Ltd. Toucan2 Board (SAMA5D27C-D5M)"
 	depends on ARCH_CHIP_ATSAMA5D27
-    select SAMA5D27_JTI_TOUCAN2_492MHZ
 	---help---
 	    This options selects support for NuttX on the JT Innovations Ltd. Toucan2 Board,
 	    using the SAMA5D27C-D5M SiP with 64MB DDR2 RAM
@@ -2720,7 +2719,7 @@ endif
 if ARCH_BOARD_GIANT_BOARD
 source "boards/arm/sama5/giant-board/Kconfig"
 endif
-if ARCH_JTI_TOUCAN2_BOARD
+if ARCH_BOARD_JTI_TOUCAN2
 source "boards/arm/sama5/jti-toucan2/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
