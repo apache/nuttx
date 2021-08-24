@@ -2485,6 +2485,20 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
   *latency_us = sensor->fifowtm * sensor->interval;
   sensor->batch = *latency_us;
 
+  if (lower->type == SENSOR_TYPE_ACCELEROMETER)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_XL_IDX);
+    }
+  else if(lower->type == SENSOR_TYPE_GYROSCOPE)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
+    }
+  else
+    {
+      snerr("Failed to match sensor type.\n");
+      return -EINVAL;
+    }
+
   if (sensor->fifowtm > 1)
     {
       sensor->fifoen = true;
@@ -2497,13 +2511,10 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
 
       if (lower->type == SENSOR_TYPE_ACCELEROMETER)
         {
-          priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_XL_IDX);
-
           lsm6dso_fifo_xl_setbatch(priv, g_lsm6dso_xl_bdr[idx].regval);
         }
       else if(lower->type == SENSOR_TYPE_GYROSCOPE)
         {
-          priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
           lsm6dso_fifo_gy_setbatch(priv, g_lsm6dso_gy_bdr[idx].regval);
         }
       else
