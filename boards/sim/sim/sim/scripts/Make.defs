@@ -52,7 +52,7 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ifeq ($(CONFIG_SIM_SANITIZE),y)
-  ARCHOPTIMIZATION += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+  ARCHOPTIMIZATION += -fsanitize=address -fno-omit-frame-pointer
 endif
 
 ARCHCPUFLAGS = -fno-builtin
@@ -180,8 +180,8 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 ifeq ($(CONFIG_SIM_SANITIZE),y)
-  CCLINKFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
-  HOSTLDFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  HOSTLDFLAGS += -fsanitize=address -fno-omit-frame-pointer
 endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
