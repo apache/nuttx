@@ -175,7 +175,19 @@ arm_vectorsvc:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	/* Call arm_syscall() on the interrupt stack */
+
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
+	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_syscall		/* Call the handler */
+	ldr	sp, [sp]		/* Restore the user stack pointer */
+#else
+	/* Call arm_syscall() on the user stack */
+
+	bl	arm_syscall		/* Call the handler */
+#endif
 
 	/* Restore the CPSR, SVC mode registers and return */
 
@@ -245,11 +257,27 @@ arm_vectordata:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	/* Call arm_dataabort() on the interrupt stack */
+
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
+	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 #ifdef CONFIG_PAGING
 	mrc	p15, 0, r1, c6, c0, 0	/* Get R1=FAR */
 	mrc	p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
 #endif
 	bl	arm_dataabort		/* Call the handler */
+	ldr	sp, [sp]		/* Restore the user stack pointer */
+#else
+	/* Call arm_dataabort() on the user stack */
+
+#ifdef CONFIG_PAGING
+	mrc	p15, 0, r1, c6, c0, 0	/* Get R1=FAR */
+	mrc	p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
+#endif
+	bl	arm_dataabort		/* Call the handler */
+#endif
 
 	/* Restore the CPSR, SVC mode registers and return */
 
@@ -319,7 +347,19 @@ arm_vectorprefetch:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	/* Call arm_prefetchabort() on the interrupt stack */
+
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
+	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_prefetchabort	/* Call the handler */
+	ldr	sp, [sp]		/* Restore the user stack pointer */
+#else
+	/* Call arm_prefetchabort() on the user stack */
+
+	bl	arm_prefetchabort	/* Call the handler */
+#endif
 
 	/* Restore the CPSR, SVC mode registers and return */
 
@@ -387,7 +427,19 @@ arm_vectorundefinsn:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	/* Call arm_undefinedinsn() on the interrupt stack */
+
+	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
+	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_undefinedinsn	/* Call the handler */
+	ldr	sp, [sp]		/* Restore the user stack pointer */
+#else
+	/* Call arm_undefinedinsn() on the user stack */
+
+	bl	arm_undefinedinsn	/* Call the handler */
+#endif
 
 	/* Restore the CPSR, SVC mode registers and return */
 
