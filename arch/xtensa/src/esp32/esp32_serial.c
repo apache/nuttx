@@ -1733,6 +1733,7 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
            * interrupts disabled (note this may recurse).
            */
 
+          spin_unlock_irqrestore(&priv->lock, flags);
           uart_xmitchars(dev);
     #endif
         }
