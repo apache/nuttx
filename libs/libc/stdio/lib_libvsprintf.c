@@ -117,6 +117,8 @@
 #  define fmt_char(fmt)   (*(fmt)++)
 #endif
 
+#define fmt_ungetc(fmt)   ((fmt)--)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -459,6 +461,17 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
       if (c == 'p')
         {
+          if (fmt_char(fmt) == 'V')
+            {
+              FAR struct va_format *vaf = va_arg(ap, void *);
+              vsprintf_internal(stream, NULL, 0, vaf->fmt, *vaf->va);
+              continue;
+            }
+          else
+            {
+              fmt_ungetc(fmt);
+            }
+
           /* Determine size of pointer and set flags accordingly */
 
           flags &= ~(FL_LONG | FL_REPD_TYPE);
