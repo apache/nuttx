@@ -1726,6 +1726,7 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
           modifyreg32(UART_INT_ENA_REG(priv->config->id),
                       0, (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA));
 
+    #else
           /* Fake a TX interrupt here by just calling uart_xmitchars() with
            * interrupts disabled (note this may recurse).
            */
