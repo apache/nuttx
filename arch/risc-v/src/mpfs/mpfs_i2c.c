@@ -235,25 +235,21 @@ static void mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 
   if (priv->id == 0)
     {
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0,
-                  (1 << SYSREG_SOFT_RESET_CR_I2C0));
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_I2C0);
 
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-                  (1 << SYSREG_SOFT_RESET_CR_I2C0), 0);
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_I2C0, 0);
 
       modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  (1 << SYSREG_SUBBLK_CLOCK_CR_I2C0));
+                  SYSREG_SUBBLK_CLOCK_CR_I2C0);
     }
   else
     {
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0,
-                  (1 << SYSREG_SOFT_RESET_CR_I2C1));
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_I2C1);
 
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-                  (1 << SYSREG_SOFT_RESET_CR_I2C1), 0);
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_I2C1, 0);
 
       modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  (1 << SYSREG_SUBBLK_CLOCK_CR_I2C1));
+                  SYSREG_SUBBLK_CLOCK_CR_I2C1);
     }
 
   clock_speed = priv->bus_divider;
