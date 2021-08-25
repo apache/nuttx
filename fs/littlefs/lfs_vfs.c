@@ -30,6 +30,7 @@
 
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/semaphore.h>
@@ -37,6 +38,7 @@
 #include <sys/stat.h>
 #include <sys/statfs.h>
 
+#include "inode/inode.h"
 #include "littlefs/lfs.h"
 #include "littlefs/lfs_util.h"
 
@@ -483,23 +485,59 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
 static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct littlefs_mountpt_s *fs;
+  FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
   FAR struct inode *drv;
+  int ret;
 
   /* Recover our private data from the struct file instance */
 
+  priv  = filep->f_priv;
   inode = filep->f_inode;
   fs    = inode->i_private;
   drv   = fs->drv;
 
-  if (INODE_IS_MTD(drv))
+  ret = littlefs_semtake(fs);
+  if (ret < 0)
     {
-      return MTD_IOCTL(drv->u.i_mtd, cmd, arg);
+      return ret;
     }
-  else
+
+  switch (cmd)
     {
-      return drv->u.i_bops->ioctl(drv, cmd, arg);
+      case FIOC_FILEPATH:
+        {
+          FAR char *path = (FAR char *)(uintptr_t)arg;
+          ret = inode_getpath(inode, path);
+          if (ret >= 0)
+            {
+              size_t len = strlen(path);
+              if (path[len - 1] != '/')
+                {
+                  path[len++] = '/';
+                }
+
+              ret = lfs_file_path(&fs->lfs, &priv->file,
+                                  path + len, PATH_MAX - len);
+            }
+        }
+        break;
+
+      default:
+        {
+          if (INODE_IS_MTD(drv))
+            {
+              ret = MTD_IOCTL(drv->u.i_mtd, cmd, arg);
+            }
+          else
+            {
+              ret = drv->u.i_bops->ioctl(drv, cmd, arg);
+            }
+        }
     }
+
+  littlefs_semgive(fs);
+  return ret;
 }
 
 /****************************************************************************
