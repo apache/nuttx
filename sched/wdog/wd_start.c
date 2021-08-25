@@ -367,24 +367,8 @@ int wd_start(FAR struct wdog_s *wdog, int32_t delay,
 unsigned int wd_timer(int ticks, bool noswitches)
 {
   FAR struct wdog_s *wdog;
-#ifdef CONFIG_SMP
-  irqstate_t flags;
-#endif
   unsigned int ret;
   int decr;
-
-#ifdef CONFIG_SMP
-  /* We are in an interrupt handler as, as a consequence, interrupts are
-   * disabled.  But in the SMP case, interrupts MAY be disabled only on
-   * the local CPU since most architectures do not permit disabling
-   * interrupts on other CPUS.
-   *
-   * Hence, we must follow rules for critical sections even here in the
-   * SMP case.
-   */
-
-  flags = enter_critical_section();
-#endif
 
   /* Check if there are any active watchdogs to process */
 
@@ -428,10 +412,6 @@ unsigned int wd_timer(int ticks, bool noswitches)
   ret = g_wdactivelist.head ?
         MAX(((FAR struct wdog_s *)g_wdactivelist.head)->lag, 1) : 0;
 
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
-
   /* Return the delay for the next watchdog to expire */
 
   return ret;
@@ -440,21 +420,6 @@ unsigned int wd_timer(int ticks, bool noswitches)
 #else
 void wd_timer(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags;
-
-  /* We are in an interrupt handler as, as a consequence, interrupts are
-   * disabled.  But in the SMP case, interrupts MAY be disabled only on
-   * the local CPU since most architectures do not permit disabling
-   * interrupts on other CPUS.
-   *
-   * Hence, we must follow rules for critical sections even here in the
-   * SMP case.
-   */
-
-  flags = enter_critical_section();
-#endif
-
   /* Check if there are any active watchdogs to process */
 
   if (g_wdactivelist.head)
@@ -467,9 +432,5 @@ void wd_timer(void)
 
       wd_expiration();
     }
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
 }
 #endif /* CONFIG_SCHED_TICKLESS */
