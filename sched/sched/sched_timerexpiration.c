@@ -344,7 +344,7 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
 
   /* Process watchdogs */
 
-  tmp = wd_timer(ticks);
+  tmp = wd_timer(ticks, noswitches);
   if (tmp > 0)
     {
       cmptime = tmp;

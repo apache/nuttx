@@ -351,6 +351,7 @@ int wd_start(FAR struct wdog_s *wdog, int32_t delay,
  *     in the interval that just expired is provided.  Otherwise,
  *     this function is called on each timer interrupt and a value of one
  *     is implicit.
+ *   noswitches - True: Can't do context switches now.
  *
  * Returned Value:
  *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
@@ -363,7 +364,7 @@ int wd_start(FAR struct wdog_s *wdog, int32_t delay,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
-unsigned int wd_timer(int ticks)
+unsigned int wd_timer(int ticks, bool noswitches)
 {
   FAR struct wdog_s *wdog;
 #ifdef CONFIG_SMP
@@ -387,12 +388,9 @@ unsigned int wd_timer(int ticks)
 
   /* Check if there are any active watchdogs to process */
 
-  while (g_wdactivelist.head != NULL && ticks > 0)
+  wdog = (FAR struct wdog_s *)g_wdactivelist.head;
+  while (wdog != NULL && ticks > 0)
     {
-      /* Get the watchdog at the head of the list */
-
-      wdog = (FAR struct wdog_s *)g_wdactivelist.head;
-
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
       /* There is logic to handle the case where ticks is greater than
        * the watchdog lag, but if the scheduling is working properly
@@ -411,8 +409,13 @@ unsigned int wd_timer(int ticks)
       ticks        -= decr;
       g_wdtickbase += decr;
 
-      /* Check if the watchdog at the head of the list is ready to run */
+      wdog = wdog->next;
+    }
 
+  /* Check if the watchdog at the head of the list is ready to run */
+
+  if (!noswitches)
+    {
       wd_expiration();
     }
 
@@ -423,7 +426,7 @@ unsigned int wd_timer(int ticks)
   /* Return the delay for the next watchdog to expire */
 
   ret = g_wdactivelist.head ?
-          ((FAR struct wdog_s *)g_wdactivelist.head)->lag : 0;
+        MAX(((FAR struct wdog_s *)g_wdactivelist.head)->lag, 1) : 0;
 
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
