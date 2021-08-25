@@ -98,7 +98,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
       nwritten += ret;
     }
 
-  return nwritten;
+  return nwritten > 0 ? nwritten : ret;
 }
 
 /****************************************************************************
