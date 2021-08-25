@@ -24,14 +24,14 @@ if HAVE_CXX
 
 choice
 	prompt "C++ Library"
-	default NUTTX_LIBXX
+	default NOCXXLIB
 
-config NUTTX_LIBXX
-	bool "NuttX C++ library"
+config NOCXXLIB
+	bool "NuttX Basic C++ support"
 	---help---
 		A fragmentary C++ library that will allow to build only
-		the simplest of C++ applications.  In the deeply embedded world,
-		that is probably all that is necessary.
+		the simplest of C++ applications. Only contain basic C++
+		runtime support function.
 
 config LIBCXX
 	bool "LLVM libc++ C++ Standard Library"
@@ -49,6 +49,8 @@ config UCLIBCXX
 		https://cxx.uclibc.org/
 
 endchoice
+
+if LIBCXX || UCLIBCXX
 
 choice
 	prompt "C++ low level library select"
@@ -68,6 +70,8 @@ config CXX_LIBSUPCXX
 		level c++ library.
 
 endchoice
+
+endif
 
 config HAVE_CXXINITIALIZE
 	bool "Have C++ initialization"
