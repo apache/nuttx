@@ -45,14 +45,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: motor_observer_init
+ * Name: motor_sobserver_init
  *
  * Description:
- *   Initialize motor observer
+ *   Initialize motor speed observer
  *
  * Input Parameters:
- *   observer - pointer to the common observer data
- *   ao       - pointer to the angle specific observer data
+ *   observer - pointer to the speed observer data
  *   so       - pointer to the speed specific observer data
  *   per      - observer execution period
  *
@@ -61,17 +60,52 @@
  *
  ****************************************************************************/
 
-void motor_observer_init(FAR struct motor_observer_f32_s *observer,
-                         FAR void *ao, FAR void *so, float per)
+void motor_sobserver_init(FAR struct motor_sobserver_f32_s *observer,
+                         FAR void *so, float per)
 {
   LIBDSP_DEBUGASSERT(observer != NULL);
-  LIBDSP_DEBUGASSERT(ao != NULL);
   LIBDSP_DEBUGASSERT(so != NULL);
   LIBDSP_DEBUGASSERT(per > 0.0f);
 
   /* Reset observer data */
 
-  memset(observer, 0, sizeof(struct motor_observer_f32_s));
+  memset(observer, 0, sizeof(struct motor_sobserver_f32_s));
+
+  /* Set observer period */
+
+  observer->per = per;
+
+  /* Connect speed estimation observer data */
+
+  observer->so = so;
+}
+
+/****************************************************************************
+ * Name: motor_aobserver_init
+ *
+ * Description:
+ *   Initialize motor angle observer
+ *
+ * Input Parameters:
+ *   observer - pointer to the angle observer data
+ *   ao       - pointer to the angle specific observer data
+ *   per      - observer execution period
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void motor_aobserver_init(FAR struct motor_aobserver_f32_s *observer,
+                          FAR void *ao, float per)
+{
+  LIBDSP_DEBUGASSERT(observer != NULL);
+  LIBDSP_DEBUGASSERT(ao != NULL);
+  LIBDSP_DEBUGASSERT(per > 0.0f);
+
+  /* Reset observer data */
+
+  memset(observer, 0, sizeof(struct motor_aobserver_f32_s));
 
   /* Set observer period */
 
@@ -80,14 +114,10 @@ void motor_observer_init(FAR struct motor_observer_f32_s *observer,
   /* Connect angle estimation observer data */
 
   observer->ao = ao;
-
-  /* Connect speed estimation observer data */
-
-  observer->so = so;
 }
 
 /****************************************************************************
- * Name: motor_observer_smo_init
+ * Name: motor_aobserver_smo_init
  *
  * Description:
  *   Initialize motor sliding mode observer.
@@ -102,8 +132,8 @@ void motor_observer_init(FAR struct motor_observer_f32_s *observer,
  *
  ****************************************************************************/
 
-void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
-                             float kslide, float err_max)
+void motor_aobserver_smo_init(FAR struct motor_aobserver_smo_f32_s *smo,
+                              float kslide, float err_max)
 {
   LIBDSP_DEBUGASSERT(smo != NULL);
   LIBDSP_DEBUGASSERT(kslide > 0.0f);
@@ -111,7 +141,7 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
 
   /* Reset structure */
 
-  memset(smo, 0, sizeof(struct motor_observer_smo_f32_s));
+  memset(smo, 0, sizeof(struct motor_aobserver_smo_f32_s));
 
   /* Initialize structure */
 
@@ -124,7 +154,7 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
 }
 
 /****************************************************************************
- * Name: motor_observer_smo
+ * Name: motor_aobserver_smo
  *
  * Description:
  *  One step of the SMO observer.
@@ -169,29 +199,32 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_f32_s *smo,
  *    z    - output correction factor voltage
  *
  * Input Parameters:
- *   o      - (in/out) pointer to the common observer data
+ *   o      - (in/out) pointer to the angle observer data
  *   i_ab   - (in) inverter alpha-beta current
  *   v_ab   - (in) inverter alpha-beta voltage
  *   phy    - (in) pointer to the motor physical parameters
  *   dir    - (in) rotation direction (1.0 for CCW, -1.0 for CW)
  *            NOTE: (mechanical dir) = -(electrical dir)
+ *   speed  - (in) electrical speed
+ *            TODO: pass rotation direction with speed sign
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void motor_observer_smo(FAR struct motor_observer_f32_s *o,
-                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
-                        FAR struct motor_phy_params_f32_s *phy, float dir)
+void motor_aobserver_smo(FAR struct motor_aobserver_f32_s *o,
+                         FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                         FAR struct motor_phy_params_f32_s *phy, float dir,
+                         float speed)
 {
   LIBDSP_DEBUGASSERT(o != NULL);
   LIBDSP_DEBUGASSERT(i_ab != NULL);
   LIBDSP_DEBUGASSERT(v_ab != NULL);
   LIBDSP_DEBUGASSERT(phy != NULL);
 
-  FAR struct motor_observer_smo_f32_s *smo =
-    (FAR struct motor_observer_smo_f32_s *)o->ao;
+  FAR struct motor_aobserver_smo_f32_s *smo =
+    (FAR struct motor_aobserver_smo_f32_s *)o->ao;
   FAR ab_frame_f32_t *emf    = &smo->emf;
   FAR ab_frame_f32_t *emf_f  = &smo->emf_f;
   FAR ab_frame_f32_t *z      = &smo->z;
@@ -203,6 +236,8 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
   float i_err_b_abs  = 0.0f;
   float angle        = 0.0f;
   float filter       = 0.0f;
+
+  LIBDSP_DEBUGASSERT(smo != NULL);
 
   /* REVISIT: observer works only when IQ current is high enough
    * Lower IQ current -> lower K_SLIDE
@@ -255,7 +290,7 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
    *
    */
 
-  filter = o->per * o->speed * phy->p;
+  filter = o->per * speed * phy->p;
 
   /* Limit SMO filters
    * REVISIT: lowest filter limit should depend on minimum speed:
@@ -416,14 +451,14 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
  *   difference.
  *
  * Input Parameters:
- *   o      - (in/out) pointer to the common observer data
+ *   o      - (in/out) pointer to the speed observer data
  *   angle  - (in) mechanical angle normalized to <0.0, 2PI>
  *   dir    - (in) mechanical rotation direction. Valid values:
  *                 DIR_CW (1.0f) or DIR_CCW(-1.0f)
  *
  ****************************************************************************/
 
-void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
+void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o,
                          float angle, float dir)
 {
   LIBDSP_DEBUGASSERT(o != NULL);
@@ -433,6 +468,8 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
   FAR struct motor_sobserver_div_f32_s *so =
     (FAR struct motor_sobserver_div_f32_s *)o->so;
   volatile float omega = 0.0f;
+
+  LIBDSP_DEBUGASSERT(so != NULL);
 
   /* Get angle diff */
 
@@ -505,7 +542,7 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
 }
 
 /****************************************************************************
- * Name: motor_observer_nfo_init
+ * Name: motor_aobserver_nfo_init
  *
  * Description:
  *   Initialize motor nolinear fluxlink observer.
@@ -518,17 +555,17 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
  *
  ****************************************************************************/
 
-void motor_observer_nfo_init(FAR struct motor_observer_nfo_f32_s *nfo)
+void motor_aobserver_nfo_init(FAR struct motor_aobserver_nfo_f32_s *nfo)
 {
-  LIBDSP_DEBUGASSERT(smo != NULL);
+  LIBDSP_DEBUGASSERT(nfo != NULL);
 
   /* Reset structure */
 
-  memset(nfo, 0, sizeof(struct motor_observer_nfo_f32_s));
+  memset(nfo, 0, sizeof(struct motor_aobserver_nfo_f32_s));
 }
 
 /****************************************************************************
- * Name: motor_observer_nfo
+ * Name: motor_aobserver_nfo
  *
  * Description:
  *  nolinear fluxlink observer.
@@ -536,7 +573,7 @@ void motor_observer_nfo_init(FAR struct motor_observer_nfo_f32_s *nfo)
  *  2010-IEEE_TPEL-Lee-Hong-Nam-Ortega-Praly-Astolfi.pdf
  *
  * Input Parameters:
- *   o      - (in/out) pointer to the common observer data
+ *   o      - (in/out) pointer to the angle observer data
  *   i_ab   - (in) inverter alpha-beta current
  *   v_ab   - (in) inverter alpha-beta voltage
  *   phy    - (in) pointer to the motor physical parameters
@@ -547,12 +584,12 @@ void motor_observer_nfo_init(FAR struct motor_observer_nfo_f32_s *nfo)
  *
  ****************************************************************************/
 
-void motor_observer_nfo(FAR struct motor_observer_f32_s *o,
+void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
                         FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
                         FAR struct motor_phy_params_f32_s *phy, float gain)
 {
-  FAR struct motor_observer_nfo_f32_s *nfo =
-                               (FAR struct motor_observer_nfo_f32_s *)o->ao;
+  FAR struct motor_aobserver_nfo_f32_s *nfo =
+                               (FAR struct motor_aobserver_nfo_f32_s *)o->ao;
   float angle;
   float err;
   float x1_dot;
@@ -562,6 +599,8 @@ void motor_observer_nfo(FAR struct motor_observer_f32_s *o,
   float l_ib = (3.0 / 2.0) * phy->ind * i_ab->b;
   float r_ia = (3.0 / 2.0) * phy->res * i_ab->a;
   float r_ib = (3.0 / 2.0) * phy->res * i_ab->b;
+
+  LIBDSP_DEBUGASSERT(nfo != NULL);
 
   err = SQ(phy->flux_link) - (SQ(nfo->x1 - l_ia) + SQ(nfo->x2 - l_ib));
 
@@ -649,19 +688,21 @@ void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
  *   difference.
  *
  * Input Parameters:
- *   o      - (in/out) pointer to the common observer data
+ *   o      - (in/out) pointer to the speed observer data
  *   angle  - (in) electrical angle normalized to <0.0, 2PI>
  *   dir    - (in) electrical rotation direction. Valid values:
  *                 DIR_CW (1.0f) or DIR_CCW(-1.0f)
  *
  ****************************************************************************/
 
-void motor_sobserver_pll(FAR struct motor_observer_f32_s *o,
+void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o,
                          float angle, float dir)
 {
   FAR struct motor_sobserver_pll_f32_s *so =
       (FAR struct motor_sobserver_pll_f32_s *)o->so;
   float delta_theta = 0.0;
+
+  LIBDSP_DEBUGASSERT(so != NULL);
 
   NAN_ZERO(so->pll_phase);
 
@@ -687,20 +728,20 @@ void motor_sobserver_pll(FAR struct motor_observer_f32_s *o,
 }
 
 /****************************************************************************
- * Name: motor_observer_speed_get
+ * Name: motor_sobserver_speed_get
  *
  * Description:
  *   Get the estmiated motor mechanical speed from the observer
  *
  * Input Parameters:
- *   o      - (in/out) pointer to the common observer data
+ *   o      - (in/out) pointer to the speed observer data
  *
  * Returned Value:
  *   Return estimated motor mechanical speed from observer
  *
  ****************************************************************************/
 
-float motor_observer_speed_get(FAR struct motor_observer_f32_s *o)
+float motor_sobserver_speed_get(FAR struct motor_sobserver_f32_s *o)
 {
   LIBDSP_DEBUGASSERT(o != NULL);
 
@@ -708,20 +749,20 @@ float motor_observer_speed_get(FAR struct motor_observer_f32_s *o)
 }
 
 /****************************************************************************
- * Name: motor_observer_angle_get
+ * Name: motor_aobserver_angle_get
  *
  * Description:
  *   Get the estmiated motor electrical angle from the observer
  *
  * Input Parameters:
- *   o      - (in/out) pointer to the common observer data
+ *   o      - (in/out) pointer to the angle observer data
  *
  * Returned Value:
  *   Return estimated motor mechanical angle from observer
  *
  ****************************************************************************/
 
-float motor_observer_angle_get(FAR struct motor_observer_f32_s *o)
+float motor_aobserver_angle_get(FAR struct motor_aobserver_f32_s *o)
 {
   LIBDSP_DEBUGASSERT(o != NULL);
 
