@@ -54,5 +54,5 @@ FAR char *strchrnul(FAR const char *s, int c)
         }
     }
 
-  return s;
+  return (FAR char *)s;
 }
