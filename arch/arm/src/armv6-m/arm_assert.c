@@ -89,50 +89,12 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
 #endif
 
 /****************************************************************************
- * Name: up_taskdump
- ****************************************************************************/
-
-#ifdef CONFIG_STACK_COLORATION
-static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
-{
-  /* Dump interesting properties of this task */
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("%s: PID=%d Stack Used=%lu of %lu\n",
-        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
-#else
-  _alert("PID: %d Stack Used=%lu of %lu\n",
-        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
-#endif
-}
-#endif
-
-/****************************************************************************
- * Name: up_showtasks
- ****************************************************************************/
-
-#ifdef CONFIG_STACK_COLORATION
-static inline void up_showtasks(void)
-{
-  /* Dump interesting properties of each task in the crash environment */
-
-  nxsched_foreach(up_taskdump, NULL);
-}
-#else
-#  define up_showtasks()
-#endif
-
-/****************************************************************************
  * Name: up_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static inline void up_registerdump(void)
+static inline void up_registerdump(FAR volatile uint32_t *regs)
 {
-  volatile uint32_t *regs = CURRENT_REGS;
-
   /* Are user registers available from interrupt processing? */
 
   if (regs == NULL)
@@ -160,7 +122,60 @@ static inline void up_registerdump(void)
 #endif
 }
 #else
-# define up_registerdump()
+# define up_registerdump(regs)
+#endif
+
+/****************************************************************************
+ * Name: up_taskdump
+ ****************************************************************************/
+
+#if defined(CONFIG_STACK_COLORATION) || defined(CONFIG_SCHED_BACKTRACE)
+static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  /* Dump interesting properties of this task */
+
+  _alert(
+#if CONFIG_TASK_NAME_SIZE > 0
+         "%s: "
+#endif
+         "PID=%d "
+#ifdef CONFIG_STACK_COLORATION
+         "Stack Used=%lu of %lu\n",
+#else
+         "Stack=%lu\n",
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+        tcb->name,
+#endif
+        tcb->pid,
+#ifdef CONFIG_STACK_COLORATION
+        (unsigned long)up_check_tcbstack(tcb),
+#endif
+        (unsigned long)tcb->adj_stack_size);
+
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(tcb->pid);
+#endif
+
+  /* Dump the registers */
+
+  up_registerdump(tcb->xcp.regs);
+}
+
+/****************************************************************************
+ * Name: up_showtasks
+ ****************************************************************************/
+
+static inline void up_showtasks(void)
+{
+  /* Dump interesting properties of each task in the crash environment */
+
+  nxsched_foreach(up_taskdump, NULL);
+}
+#else
+#  define up_showtasks()
 #endif
 
 /****************************************************************************
@@ -203,9 +218,15 @@ static void up_dumpstate(void)
   uint32_t istacksize;
 #endif
 
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(rtcb->pid);
+#endif
+
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  up_registerdump(CURRENT_REGS);
 
   /* Get the limits on the user stack memory */
 
