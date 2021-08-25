@@ -6297,8 +6297,16 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      /* Clear the password field and copy the user password to it */
+
       memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.ap.password, pdata, len);
+
+      /* Enable the WPA2 password by default */
+
+      wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+
+      /* Setup the config to the SoftAP */
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
