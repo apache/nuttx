@@ -121,6 +121,7 @@ void weak_function wd_initialize(void);
  *     in the interval that just expired is provided.  Otherwise,
  *     this function is called on each timer interrupt and a value of one
  *     is implicit.
+ *   noswitches - True: Can't do context switches now.
  *
  * Returned Value:
  *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
@@ -133,7 +134,7 @@ void weak_function wd_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
-unsigned int wd_timer(int ticks);
+unsigned int wd_timer(int ticks, bool noswitches);
 #else
 void wd_timer(void);
 #endif
