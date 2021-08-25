@@ -79,7 +79,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
                             size_t len)
 {
   ssize_t nwritten = 0;
-  ssize_t ret;
+  ssize_t ret = 0;
 
   while (len != nwritten)
     {
@@ -98,7 +98,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
       nwritten += ret;
     }
 
-  return nwritten;
+  return nwritten > 0 ? nwritten : ret;
 }
 
 /****************************************************************************
