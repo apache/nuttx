@@ -429,6 +429,13 @@ config SENSORS_LSM9DS1
 	---help---
 		Enable driver support for the STMicro LSM9DS1.
 
+config SENSORS_MSA301
+	bool "MSA301 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MSA301.
+
 config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
