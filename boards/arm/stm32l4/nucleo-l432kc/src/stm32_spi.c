@@ -58,6 +58,32 @@ struct spi_dev_s *g_spi2;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32l4_spiregister
+ *
+ * Description:
+ *   Called to register spi character driver of initialized spi device for the Nucleo-L432KC board.
+ *
+ ****************************************************************************/
+
+void stm32l4_spiregister(void)
+{
+#ifdef CONFIG_STM32L4_SPI1
+      int ret = spi_register(g_spi1, 1);
+      if (ret < 0)
+      {
+        spierr("ERROR: FAILED to register driver of SPI port 1\n");
+      }
+#endif
+#ifdef CONFIG_STM32L4_SPI2
+      int ret = spi_register(g_spi2, 2);
+      if (ret < 0)
+      {
+        spierr("ERROR: FAILED to register driver of SPI port 2\n");
+      }
+#endif
+}
+
+/****************************************************************************
  * Name: stm32l4_spiinitialize
  *
  * Description:
@@ -79,13 +105,6 @@ void stm32l4_spiinitialize(void)
   else
     {
       spiinfo("INFO: SPI port 1 initialized\n");
-#ifdef CONFIG_SPI_DRIVER
-      ret = spi_register(g_spi1, 1);
-      if (ret < 0)
-      {
-        spierr("ERROR: FAILED to register driver of SPI port 1\n");
-      }
-#endif
     }
 
   /* Setup CS, EN & IRQ line IOs */
@@ -106,13 +125,6 @@ void stm32l4_spiinitialize(void)
   else
     {
       spiinfo("INFO: SPI port 2 initialized\n");
-#ifdef CONFIG_SPI_DRIVER
-      ret = spi_register(g_spi2, 2);
-      if (ret < 0)
-      {
-        spierr("ERROR: FAILED to register driver of SPI port 2\n");
-      }
-#endif
     }
 
   /* Setup CS, EN & IRQ line IOs */
