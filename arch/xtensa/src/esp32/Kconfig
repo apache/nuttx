@@ -1089,6 +1089,7 @@ config ESP32_WIFI_SCAN_RESULT_SIZE
 config ESP32_WIFI_SAVE_PARAM
 	bool "Save WiFi Parameters"
 	default n
+	depends on ESP32_SPIFLASH
 	---help---
 		If you enable this option, WiFi adapter parameters will be saved
 		into the file system instead of computing them each time.
@@ -1108,6 +1109,21 @@ config ESP32_WIFI_FS_MOUNTPT
 	depends on ESP32_WIFI_SAVE_PARAM
 	---help---
 		Mount point of WiFi storage file system.
+
+config ESP32_WIFI_MTD_OFFSET
+	hex "Wi-Fi MTD partition offset"
+	default 0x280000 if !ESP32_HAVE_OTA_PARTITION
+	default 0x350000 if ESP32_HAVE_OTA_PARTITION
+	depends on ESP32_WIFI_SAVE_PARAM
+	---help---
+		This is the base address of the Wi-Fi MTD partition.
+
+config ESP32_WIFI_MTD_SIZE
+	hex "Wi-Fi MTD partition size"
+	default 0xb0000
+	depends on ESP32_WIFI_SAVE_PARAM
+	---help---
+		This is the size of the Wi-Fi MTD partition.
 
 config ESP32_WIFI_STA_DISCONNECT_PM
 	bool "Power Management for station when disconnected"
