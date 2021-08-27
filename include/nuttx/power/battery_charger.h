@@ -324,6 +324,44 @@ FAR struct battery_charger_dev_s *bq25618_initialize(
                                      int current);
 #endif
 
+/****************************************************************************
+ * Name: sc8551_initialize
+ *
+ * Description:
+ *   Initialize the SC8551 (pump charger) charger driver and return
+ *   an instance of the lower-half interface that may be used with
+ *   battery_charger_register().
+ *
+ * This is for:
+ *   SC8551
+ *
+ *   This driver requires:
+ *
+ *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
+ *   CONFIG_I2C - I2C support
+ *   CONFIG_I2C_SC8551 - And the driver must be explicitly selected.
+ *
+ * Input Parameters:
+ *   i2c       - An instance of the I2C interface to use to communicate with
+ *               the SC8551
+ *   addr      - The I2C address of the SC8551 (Better be 0x66).
+ *   frequency - The I2C frequency
+ *   current   - The input current our power-supply can offer to charger
+ *
+ * Returned Value:
+ *   A pointer to the initialized battery driver instance.  A NULL pointer
+ *   is returned on a failure to initialize the SC8551 lower half.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_SC8551)
+
+struct i2c_master_s;
+FAR struct battery_charger_dev_s *
+  sc8551_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
+                    uint32_t frequency, int current);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
