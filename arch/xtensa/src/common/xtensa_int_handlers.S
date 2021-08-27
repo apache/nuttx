@@ -784,7 +784,7 @@ _xtensa_level6_handler:
  *
  ****************************************************************************/
 
-#if XCHAL_INT_NLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2
+#if XCHAL_NUM_INTLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level2_handler, @function
 	.global		_xtensa_level2_handler
@@ -816,9 +816,9 @@ _xtensa_level2_handler:
 	rfi		2
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2 */
+#endif /* XCHAL_NUM_INTLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2 */
 
-#if XCHAL_INT_NLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3
+#if XCHAL_NUM_INTLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level3_handler, @function
 	.global		_xtensa_level3_handler
@@ -852,9 +852,9 @@ _xtensa_level3_handler:
 	rfi		3
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3 */
+#endif /* XCHAL_NUM_INTLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3 */
 
-#if XCHAL_INT_NLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4
+#if XCHAL_NUM_INTLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level4_handler, @function
 	.global		_xtensa_level4_handler
@@ -888,9 +888,9 @@ _xtensa_level4_handler:
 	rfi		4
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4 */
+#endif /* XCHAL_NUM_INTLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4 */
 
-#if XCHAL_INT_NLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5
+#if XCHAL_NUM_INTLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level5_handler, @function
 	.global		_xtensa_level5_handler
@@ -924,9 +924,9 @@ _xtensa_level5_handler:
 	rfi		5
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5 */
+#endif /* XCHAL_NUM_INTLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5 */
 
-#if XCHAL_INT_NLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6
+#if XCHAL_NUM_INTLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level6_handler, @function
 	.global		_xtensa_level6_handler
@@ -960,4 +960,4 @@ _xtensa_level6_handler:
 	rfi		6
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6 */
+#endif /* XCHAL_NUM_INTLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6 */
