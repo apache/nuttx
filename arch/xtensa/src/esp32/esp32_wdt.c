@@ -31,7 +31,7 @@
 #include "hardware/esp32_tim.h"
 #include "hardware/esp32_rtccntl.h"
 #include "esp32_wdt.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_rtc.h"
 
 /****************************************************************************
@@ -726,9 +726,8 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
            * CPU Interrupt
            */
 
-          up_disable_irq(wdt->cpuint);
-          esp32_detach_peripheral(wdt->cpu, wdt->periph, wdt->cpuint);
-          esp32_free_cpuint(wdt->cpuint);
+          up_disable_irq(wdt->irq);
+          esp32_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
           irq_detach(wdt->irq);
         }
 
@@ -740,9 +739,11 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
 
   else
     {
-      /* Verify the available CPU Interrupt */
+      /* Set up to receive peripheral interrupts on the current CPU */
 
-      wdt->cpuint = esp32_alloc_levelint(1);
+      wdt->cpu = up_cpu_index();
+      wdt->cpuint = esp32_setup_irq(wdt->cpu, wdt->periph,
+                                    1, ESP32_CPUINT_LEVEL);
       if (wdt->cpuint < 0)
         {
           tmrerr("ERROR: No CPU Interrupt available");
@@ -750,33 +751,20 @@ static int esp32_wdt_setisr(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
           goto errout;
         }
 
-      wdt->cpu = up_cpu_index();
-
-      /* Disable the provided CPU Interrupt to configure it */
-
-      up_disable_irq(wdt->cpuint);
-
-      /* Attach a peripheral interrupt to the available CPU interrupt in
-       * the current core
-       */
-
-      esp32_attach_peripheral(wdt->cpu, wdt->periph, wdt->cpuint);
-
       /* Associate an IRQ Number (from the WDT) to an ISR */
 
       ret = irq_attach(wdt->irq, handler, arg);
 
       if (ret != OK)
         {
-          esp32_detach_peripheral(wdt->cpu, wdt->periph, wdt->cpuint);
-          esp32_free_cpuint(wdt->cpuint);
+          esp32_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
           tmrerr("ERROR: Failed to associate an IRQ Number");
           goto errout;
         }
 
       /* Enable the CPU Interrupt that is linked to the wdt */
 
-      up_enable_irq(wdt->cpuint);
+      up_enable_irq(wdt->irq);
     }
 
 errout:

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_cpuint.h
+ * boards/xtensa/esp32/ttgo_lora_esp32/src/ttgo_lora_esp32.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,147 +18,142 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H
+#ifndef __BOARDS_XTENSA_ESP32_TTGO_LORA_ESP32_SRC_TTGO_LORA_ESP32_H
+#define __BOARDS_XTENSA_ESP32_TTGO_LORA_ESP32_SRC_TTGO_LORA_ESP32_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <arch/irq.h>
+#include <nuttx/compiler.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CPUINT_UNASSIGNED 0xff  /* No peripheral assigned to this CPU interrupt */
+/* TTGO-LoRa-SX1276-ESP32 GPIOs *********************************************/
+
+/* BOOT Button */
+
+#define BUTTON_BOOT  0
+
+/* LED
+ *
+ * This is an externally connected LED used for testing.
+ */
+
+#define GPIO_LED1             2
+
+/* MCP2515 Interrupt pin */
+
+#define GPIO_MCP2515_IRQ      22
+
+/* TIMERS */
+
+#define TIMER0 0
+#define TIMER1 1
+#define TIMER2 2
+#define TIMER3 3
+
+/* ONESHOT */
+
+#define ONESHOT_TIMER         1
+#define ONESHOT_RESOLUTION_US 1
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
-
-extern uint8_t g_cpu0_intmap[ESP32_NCPUINTS];
-#ifdef CONFIG_SMP
-extern uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
-#endif
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_cpuint_initialize
+ * Name: esp32_bringup
  *
  * Description:
- *   Initialize CPU interrupts
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
+ *     Called from the NSH library via board_app_initialize()
+ *
+ ****************************************************************************/
+
+int esp32_bringup(void);
+
+/****************************************************************************
+ * Name: esp32_mmcsd_initialize
+ *
+ * Description:
+ *   Initialize SPI-based SD card and card detect thread.
+ ****************************************************************************/
+
+int esp32_mmcsd_initialize(int minor);
+
+/****************************************************************************
+ * Name: esp32_spiflash_init
+ *
+ * Description:
+ *   Initialize the SPIFLASH and register the MTD device.
+ ****************************************************************************/
+
+int esp32_spiflash_init(void);
+
+/****************************************************************************
+ * Name: esp32_spiflash_encrypt_test
+ *
+ * Description:
+ *   Test ESP32 SPI Flash driver read/write with encryption.
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
+ *   None.
  *
  ****************************************************************************/
 
-int esp32_cpuint_initialize(void);
+#ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
+void esp32_spiflash_encrypt_test(void);
+#endif
 
 /****************************************************************************
- * Name:  esp32_alloc_levelint
- *
- * Description:
- *   Allocate a level CPU interrupt
- *
- * Input Parameters:
- *   priority - Priority of the CPU interrupt (1-5)
- *
- * Returned Value:
- *   On success, the allocated level-sensitive, CPU interrupt numbr is
- *   returned.  A negated errno is returned on failure.  The only possible
- *   failure is that all level-sensitive CPU interrupts have already been
- *   allocated.
- *
+ * Name: esp32_gpio_init
  ****************************************************************************/
 
-int esp32_alloc_levelint(int priority);
+#ifdef CONFIG_DEV_GPIO
+int esp32_gpio_init(void);
+#endif
 
 /****************************************************************************
- * Name:  esp32_alloc_edgeint
+ * Name: board_spidev_initialize
  *
  * Description:
- *   Allocate an edge CPU interrupt
+ *   Initialize SPI driver and register the /dev/spi device.
  *
  * Input Parameters:
- *   priority - Priority of the CPU interrupt (1-5)
+ *   bus - The SPI bus number, used to build the device path as /dev/spiN
  *
  * Returned Value:
- *   On success, the allocated edge-sensitive, CPU interrupt numbr is
- *   returned.  A negated errno is returned on failure.  The only possible
- *   failure is that all edge-sensitive CPU interrupts have already been
- *   allocated.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32_alloc_edgeint(int priority);
+#ifdef CONFIG_SPI_DRIVER
+int board_spidev_initialize(int bus);
+#endif
 
-/****************************************************************************
- * Name:  esp32_free_cpuint
- *
- * Description:
- *   Free a previoulsy allocated CPU interrupt
- *
- * Input Parameters:
- *   cpuint - The CPU interrupt number to be freed
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_free_cpuint(int cpuint);
-
-/****************************************************************************
- * Name:  esp32_attach_peripheral
- *
- * Description:
- *   Attach a peripheral interrupt to a CPU interrupt.
- *
- * Input Parameters:
- *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from irq.h to be assigned to
- *              a CPU interrupt.
- *   cpuint   - The CPU interrupt to receive the peripheral interrupt
- *              assignment.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_attach_peripheral(int cpu, int periphid, int cpuint);
-
-/****************************************************************************
- * Name:  esp32_detach_peripheral
- *
- * Description:
- *   Detach a peripheral interrupt from a CPU interrupt.
- *
- * Input Parameters:
- *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
- *   periphid - The peripheral number from irq.h to be detached from the
- *              CPU interrupt.
- *   cpuint   - The CPU interrupt from which the peripheral interrupt will
- *              be detached.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_detach_peripheral(int cpu, int periphid, int cpuint);
-
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_XTENSA_ESP32_TTGO_LORA_ESP32_SRC_TTGO_LORA_ESP32_H */

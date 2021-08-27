@@ -48,7 +48,7 @@
 
 #include "esp32_spi.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_dma.h"
 
 #include "xtensa.h"
@@ -1027,7 +1027,7 @@ static void esp32_spislv_bind(struct spi_slave_ctrlr_s *ctrlr,
   esp32_spislv_setmode(ctrlr, mode);
   esp32_spislv_setbits(ctrlr, nbits);
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(priv->config->irq);
 
   esp32_spi_set_regbits(priv, SPI_CMD_OFFSET, SPI_USR_M);
 
@@ -1063,7 +1063,7 @@ static void esp32_spislv_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   flags = enter_critical_section();
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(priv->config->irq);
 
   esp32_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
@@ -1296,29 +1296,16 @@ FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
                          esp32_io_interrupt,
                          priv));
 
-  priv->cpuint = esp32_alloc_levelint(1);
-  if (priv->cpuint < 0)
-    {
-      leave_critical_section(flags);
-
-      return NULL;
-    }
-
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = up_cpu_index();
-  up_disable_irq(priv->cpuint);
-  esp32_attach_peripheral(priv->cpu,
-                          priv->config->periph,
-                          priv->cpuint);
+  priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
+                                 1, ESP32_CPUINT_LEVEL);
 
   ret = irq_attach(priv->config->irq, esp32_spislv_interrupt, priv);
   if (ret != OK)
     {
-      esp32_detach_peripheral(priv->cpu,
-                              priv->config->periph,
-                              priv->cpuint);
-      esp32_free_cpuint(priv->cpuint);
+      esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
 
       leave_critical_section(flags);
 
@@ -1366,12 +1353,8 @@ int esp32_spislv_ctrlr_uninitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
       return OK;
     }
 
-  up_disable_irq(priv->cpuint);
-  esp32_detach_peripheral(priv->cpu,
-                          priv->config->periph,
-                          priv->cpuint);
-  esp32_free_cpuint(priv->cpuint);
-
+  up_disable_irq(priv->config->irq);
+  esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
   esp32_spislv_deinit(ctrlr);
 
   leave_critical_section(flags);

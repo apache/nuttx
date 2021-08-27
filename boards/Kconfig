@@ -249,6 +249,18 @@ config ARCH_BOARD_ESP32_WROVERKIT
   			LCD screen
   			MicroSD card slot
 
+config ARCH_BOARD_TTGO_LORA_ESP32
+	bool "TTGO LoRa SX1276 ESP32"
+	depends on ARCH_CHIP_ESP32WROOM32
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		TTGO-LoRa-SX1276-ESP32 is an ESP32 board with LoRa. Usually it
+		comes with an OLED display, but there are options without
+		display. This port is for board version 1.0, more info:
+		https://github.com/Xinyuan-LilyGO/TTGO-LoRa-Series
+
 config ARCH_BOARD_ESP32C3_DEVKIT
 	bool "Espressif ESP32-C3 DevKit"
 	depends on ARCH_CHIP_ESP32C3MINI1 || ARCH_CHIP_ESP32C3WROOM02
@@ -2528,6 +2540,7 @@ config ARCH_BOARD
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "tms570ls31x-usb-kit"      if ARCH_BOARD_TMS570LS31X_USB_KIT
+	default "ttgo_lora_esp32"          if ARCH_BOARD_TTGO_LORA_ESP32
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
 	default "twr-k64f120m"             if ARCH_BOARD_TWR_K64F120M
 	default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
@@ -3241,6 +3254,9 @@ source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_WROVERKIT
 source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
+endif
+if ARCH_BOARD_TTGO_LORA_ESP32
+source "boards/xtensa/esp32/ttgo_lora_esp32/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
 source "boards/z16/z16f/z16f2800100zcog/Kconfig"

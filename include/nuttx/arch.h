@@ -492,6 +492,35 @@ void up_exit() noreturn_function;
 
 void up_assert(FAR const char *filename, int linenum);
 
+#ifdef CONFIG_ARCH_HAVE_BACKTRACE
+
+/****************************************************************************
+ * Name: up_backtrace
+ *
+ * Description:
+ *  up_backtrace()  returns  a backtrace for the TCB, in the array
+ *  pointed to by buffer.  A backtrace is the series of currently active
+ *  function calls for the program.  Each item in the array pointed to by
+ *  buffer is of type void *, and is the return address from the
+ *  corresponding stack frame.  The size argument specifies the maximum
+ *  number of addresses that can be stored in buffer.   If  the backtrace is
+ *  larger than size, then the addresses corresponding to the size most
+ *  recent function calls are returned; to obtain the complete backtrace,
+ *  make sure that buffer and size are large enough.
+ *
+ * Input Parameters:
+ *   tcb    - Address of the task's TCB, NULL means dump the running task
+ *   buffer - Return address from the corresponding stack frame
+ *   size   - Maximum number of addresses that can be stored in buffer
+ *
+ * Returned Value:
+ *   up_backtrace() returns the number of addresses returned in buffer
+ *
+ ****************************************************************************/
+
+int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size);
+#endif /* CONFIG_ARCH_HAVE_BACKTRACE */
+
 /****************************************************************************
  * Name: up_schedule_sigaction
  *

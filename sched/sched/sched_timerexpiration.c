@@ -314,6 +314,47 @@ static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches)
 #endif
 
 /****************************************************************************
+ * Name: nxsched_process_wdtimer
+ *
+ * Description:
+ *   Wdog timer process, should with critical_section when SMP mode.
+ *
+ * Input Parameters:
+ *   ticks - The number of ticks that have elapsed on the interval timer.
+ *   noswitches - True: Can't do context switches now.
+ *
+ * Returned Value:
+ *   The number of ticks for the next delay is provided (zero if no delay).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline unsigned int nxsched_process_wdtimer(uint32_t ticks,
+                                                   bool noswitches)
+{
+  unsigned int ret;
+  irqstate_t flags;
+
+  /* We are in an interrupt handler and, as a consequence, interrupts are
+   * disabled.  But in the SMP case, interrupts MAY be disabled only on
+   * the local CPU since most architectures do not permit disabling
+   * interrupts on other CPUS.
+   *
+   * Hence, we must follow rules for critical sections even here in the
+   * SMP case.
+   */
+
+  flags = enter_critical_section();
+  ret = wd_timer(ticks, noswitches);
+  leave_critical_section(flags);
+
+  return ret;
+}
+#else
+#  define nxsched_process_wdtimer(t,n) wd_timer(t,n)
+#endif
+
+/****************************************************************************
  * Name:  nxsched_timer_process
  *
  * Description:
@@ -344,7 +385,7 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
 
   /* Process watchdogs */
 
-  tmp = wd_timer(ticks);
+  tmp = nxsched_process_wdtimer(ticks, noswitches);
   if (tmp > 0)
     {
       cmptime = tmp;

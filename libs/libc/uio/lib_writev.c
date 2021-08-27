@@ -123,7 +123,7 @@ ssize_t writev(int fildes, FAR const struct iovec *iov, int iovcnt)
                       set_errno(save);
                     }
 
-                  return ERROR;
+                  return ntotal ? ntotal : ERROR;
                 }
 
               /* Update pointers and counts in order to handle partial

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_switchcontext.S
+ * boards/xtensa/esp32/ttgo_lora_esp32/src/esp32_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,25 +23,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
-#include "nvic.h"
-#include "svcall.h"
+#include <sys/types.h>
+#include <nuttx/board.h>
+
+#include "ttgo_lora_esp32.h"
+
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
-	.syntax	unified
-	.thumb
-	.file	"arm_switchcontext.S"
-
-/****************************************************************************
- * Macros
  ****************************************************************************/
 
 /****************************************************************************
@@ -49,33 +40,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_switchcontext
+ * Name: board_app_initialize
  *
  * Description:
- *   Save the current thread context and restore the specified context.
- *   Full prototype is:
+ *   Perform application specific initialization.  This function is never
+ *   called directly from application code, but only indirectly via the
+ *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
  *
- *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value could be such things as a
+ *         mode enumeration value, a set of DIP switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-	.thumb_func
-	.globl	arm_switchcontext
-	.type	arm_switchcontext, function
-arm_switchcontext:
+int board_app_initialize(uintptr_t arg)
+{
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
 
-	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
+  return OK;
+#else
+  /* Perform board-specific initialization */
 
-	mov		r2, r1					/* R2: restoreregs */
-	mov		r1, r0					/* R1: saveregs */
-	mov		r0, #SYS_switch_context			/* R0: context switch */
-	svc		#SYS_syscall				/* Force synchronous SVCall (or Hard Fault) */
+  return esp32_bringup();
+#endif
+}
 
-	/* We will get here only after the rerturn from the context switch */
-
-	bx		lr
-	.size	arm_switchcontext, .-arm_switchcontext
-	.end
+#endif /* CONFIG_BOARDCTL */

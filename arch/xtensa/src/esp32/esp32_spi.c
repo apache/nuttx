@@ -45,7 +45,7 @@
 
 #include "esp32_spi.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_dma.h"
 
 #include "xtensa.h"
@@ -1464,33 +1464,28 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port)
 
   if (priv->config->use_dma)
     {
-      priv->cpuint = esp32_alloc_levelint(1);
+      /* Set up to receive peripheral interrupts on the current CPU */
+
+      priv->cpu = up_cpu_index();
+      priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
+                                     1, ESP32_CPUINT_LEVEL);
       if (priv->cpuint < 0)
         {
           leave_critical_section(flags);
           return NULL;
         }
 
-      /* Set up to receive peripheral interrupts on the current CPU */
-
-      priv->cpu = up_cpu_index();
-      up_disable_irq(priv->cpuint);
-      esp32_attach_peripheral(priv->cpu,
-                              priv->config->periph,
-                              priv->cpuint);
       ret = irq_attach(priv->config->irq, esp32_spi_interrupt, priv);
       if (ret != OK)
         {
-          esp32_detach_peripheral(priv->cpu,
-                                  priv->config->periph,
-                                  priv->cpuint);
-          esp32_free_cpuint(priv->cpuint);
-
+          esp32_teardown_irq(priv->cpu,
+                             priv->config->periph,
+                             priv->cpuint);
           leave_critical_section(flags);
           return NULL;
         }
 
-      up_enable_irq(priv->cpuint);
+      up_enable_irq(priv->config->irq);
     }
 
   esp32_spi_init(spi_dev);
@@ -1534,11 +1529,10 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev)
 
   if (priv->config->use_dma)
     {
-      up_disable_irq(priv->cpuint);
-      esp32_detach_peripheral(priv->cpu,
-                              priv->config->periph,
-                              priv->cpuint);
-      esp32_free_cpuint(priv->cpuint);
+      up_disable_irq(priv->config->irq);
+      esp32_teardown_irq(priv->cpu,
+                         priv->config->periph,
+                         priv->cpuint);
 
       nxsem_destroy(&priv->sem_isr);
     }

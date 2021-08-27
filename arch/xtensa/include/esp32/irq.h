@@ -279,12 +279,27 @@
 
 #define ESP32_NIRQ_PERIPH           ESP32_NPERIPHERALS
 
+#ifdef CONFIG_ESP32_GPIO_IRQ
+
+/* The PRO and APP CPU have different interrupts sources for the GPIO
+ * peripheral.  Each CPU needs to allocate a separate interrupt and attach
+ * it to its peripheral.
+ * Here we add a separate IRQ to differentiate between each interrupt.
+ * When enabling/disabling the IRQ we handle the APP's GPIO separately
+ * to correctly retrieve the peripheral.
+ */
+
+#  ifdef CONFIG_SMP
+#    define ESP32_IRQ_APPCPU_GPIO     ESP32_NPERIPHERALS
+#    undef  ESP32_NIRQ_PERIPH
+#    define ESP32_NIRQ_PERIPH         ESP32_NPERIPHERALS + 1
+#  endif
+
 /* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
  * as a second level of decoding:  The first level dispatches to the GPIO
  * interrupt handler.  The second to the decoded GPIO interrupt handler.
  */
 
-#ifdef CONFIG_ESP32_GPIO_IRQ
 #  define ESP32_NIRQ_GPIO           40
 #  define ESP32_FIRST_GPIOIRQ       (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH)
 #  define ESP32_LAST_GPIOIRQ        (ESP32_FIRST_GPIOIRQ+ESP32_NIRQ_GPIO-1)
@@ -408,6 +423,24 @@
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_SMP
+static inline int esp32_irq_gpio(int cpu)
+{
+  if (cpu == 0)
+    {
+      return ESP32_IRQ_CPU_GPIO;
+    }
+  else
+    {
+      return ESP32_IRQ_APPCPU_GPIO;
+    }
+}
+#else
+#  define esp32_irq_gpio(c)   (UNUSED(c), ESP32_IRQ_CPU_GPIO)
+#endif
+#endif
 
 /****************************************************************************
  * Public Data

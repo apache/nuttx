@@ -20,6 +20,10 @@ config ALLOW_BSD_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+		NOTE: If this option is not set the following components
+		are not included in the setup menu:
+		    Bluetooth LE support
+
 config ALLOW_GPL_COMPONENTS
 	bool "Use components that have GPL/LGPL licenses"
 	default n

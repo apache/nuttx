@@ -87,31 +87,89 @@ static void up_stackdump(uint64_t sp, uintptr_t stack_top)
 }
 
 /****************************************************************************
+ * Name: up_registerdump
+ ****************************************************************************/
+
+static inline void up_registerdump(FAR volatile uintptr_t *regs)
+{
+  /* Are user registers available from interrupt processing? */
+
+  _alert("EPC:%016" PRIx64 " \n", regs[REG_EPC]);
+  _alert("A0:%016" PRIx64 " A1:%01" PRIx64 "6 A2:%016" PRIx64
+         " A3:%016" PRIx64 " \n",
+         regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3]);
+  _alert("A4:%016" PRIx64 " A5:%016" PRIx64 "A6:%016" PRIx64
+         " A7:%016" PRIx64 " \n",
+         regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
+  _alert("T0:%016" PRIx64 " T1:%016" PRIx64 " T2:%016" PRIx64
+         " T3:%016" PRIx64 " \n",
+         regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3]);
+  _alert("T4:%016" PRIx64 " T5:%016" PRIx64 " T6:%016" PRIx64 " \n",
+         regs[REG_T4], regs[REG_T5], regs[REG_T6]);
+  _alert("S0:%016" PRIx64 " S1:%016" PRIx64 " S2:%016" PRIx64
+         " S3:%016" PRIx64 " \n",
+         regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3]);
+  _alert("S4:%016" PRIx64 " S5:%016" PRIx64 " S6:%016" PRIx64
+         " S7:%016" PRIx64 " \n",
+         regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
+  _alert("S8:%016" PRIx64 " S9:%016" PRIx64 " S10:%016" PRIx64
+         " S11:%016" PRIx64 " \n",
+         regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
+#ifdef RISCV_SAVE_GP
+  _alert("GP:%016" PRIx64 " SP:%016" PRIx64 " FP:%016" PRIx64
+         " TP:%016" PRIx64 " RA:%016" PRIx64 " \n",
+         regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
+         regs[REG_RA]);
+#else
+  _alert("SP:%016" PRIx64 " FP:%016" PRIx64 " TP:%016" PRIx64
+         " RA:%016" PRIx64 " \n",
+         regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
+#endif
+}
+
+/****************************************************************************
  * Name: up_taskdump
  ****************************************************************************/
 
-#ifdef CONFIG_STACK_COLORATION
+#if defined(CONFIG_STACK_COLORATION) || defined(CONFIG_SCHED_BACKTRACE)
 static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 {
   /* Dump interesting properties of this task */
 
+  _alert(
 #if CONFIG_TASK_NAME_SIZE > 0
-  _alert("%s: PID=%d Stack Used=%lu of %lu\n",
-        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         "%s: "
+#endif
+         "PID=%d "
+#ifdef CONFIG_STACK_COLORATION
+         "Stack Used=%lu of %lu\n",
 #else
-  _alert("PID: %d Stack Used=%lu of %lu\n",
-        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+         "Stack=%lu\n",
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+        tcb->name,
+#endif
+        tcb->pid,
+#ifdef CONFIG_STACK_COLORATION
+        (unsigned long)up_check_tcbstack(tcb),
+#endif
         (unsigned long)tcb->adj_stack_size);
+
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(tcb->pid);
 #endif
+
+  /* Dump the registers */
+
+  up_registerdump(tcb->xcp.regs);
 }
-#endif
 
 /****************************************************************************
  * Name: up_showtasks
  ****************************************************************************/
 
-#ifdef CONFIG_STACK_COLORATION
 static inline void up_showtasks(void)
 {
   /* Dump interesting properties of each task in the crash environment */
@@ -121,68 +179,6 @@ static inline void up_showtasks(void)
 #else
 #  define up_showtasks()
 #endif
-
-/****************************************************************************
- * Name: up_registerdump
- ****************************************************************************/
-
-static inline void up_registerdump(void)
-{
-  /* Are user registers available from interrupt processing? */
-
-  if (CURRENT_REGS)
-    {
-      _alert("EPC:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_EPC]);
-
-      _alert("A0:%016" PRIx64 " A1:%01" PRIx64 "6 A2:%016" PRIx64
-             " A3:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_A0], CURRENT_REGS[REG_A1],
-             CURRENT_REGS[REG_A2], CURRENT_REGS[REG_A3]);
-
-      _alert("A4:%016" PRIx64 " A5:%016" PRIx64 "A6:%016" PRIx64
-             " A7:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_A4], CURRENT_REGS[REG_A5],
-             CURRENT_REGS[REG_A6], CURRENT_REGS[REG_A7]);
-
-      _alert("T0:%016" PRIx64 " T1:%016" PRIx64 " T2:%016" PRIx64
-             " T3:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
-             CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3]);
-
-      _alert("T4:%016" PRIx64 " T5:%016" PRIx64 " T6:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
-             CURRENT_REGS[REG_T6]);
-
-      _alert("S0:%016" PRIx64 " S1:%016" PRIx64 " S2:%016" PRIx64
-             " S3:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
-             CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3]);
-
-      _alert("S4:%016" PRIx64 " S5:%016" PRIx64 " S6:%016" PRIx64
-             " S7:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
-             CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
-
-      _alert("S8:%016" PRIx64 " S9:%016" PRIx64 " S10:%016" PRIx64
-             " S11:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_S8], CURRENT_REGS[REG_S9],
-             CURRENT_REGS[REG_S10], CURRENT_REGS[REG_S11]);
-
-#ifdef RISCV_SAVE_GP
-      _alert("GP:%016" PRIx64 " SP:%016" PRIx64 " FP:%016" PRIx64
-             " TP:%016" PRIx64 " RA:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
-             CURRENT_REGS[REG_FP], CURRENT_REGS[REG_TP],
-             CURRENT_REGS[REG_RA]);
-#else
-      _alert("SP:%016" PRIx64 " FP:%016" PRIx64 " TP:%016" PRIx64
-             " RA:%016" PRIx64 " \n",
-             CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
-             CURRENT_REGS[REG_TP], CURRENT_REGS[REG_RA]);
-#endif
-    }
-}
 
 /****************************************************************************
  * Name: up_dumpstate
@@ -199,9 +195,15 @@ static void up_dumpstate(void)
   uintptr_t istacksize;
 #endif
 
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(rtcb->pid);
+#endif
+
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  up_registerdump(CURRENT_REGS);
 
   /* Get the limits on the user stack memory */
 

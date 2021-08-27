@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/gnu/arm_switchcontext.S
+ * boards/xtensa/esp32/ttgo_lora_esp32/src/esp32_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,59 +23,41 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
-#include "nvic.h"
-#include "svcall.h"
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
-	.syntax	unified
-	.thumb
-	.file	"arm_switchcontext.S"
-
-/****************************************************************************
- * Macros
- ****************************************************************************/
+#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_switchcontext
+ * Name: board_reset
  *
  * Description:
- *   Save the current thread context and restore the specified context.
- *   Full prototype is:
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
  *
- *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * Input Parameters:
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
  *
  * Returned Value:
- *   None
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value in this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-	.thumb_func
-	.globl	arm_switchcontext
-	.type	arm_switchcontext, function
-arm_switchcontext:
+int board_reset(int status)
+{
+  up_systemreset();
 
-	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
+  return 0;
+}
 
-	mov		r2, r1					/* R2: restoreregs */
-	mov		r1, r0					/* R1: saveregs */
-	mov		r0, #SYS_switch_context			/* R0: context switch */
-	svc		#SYS_syscall				/* Force synchronous SVCall (or Hard Fault) */
-
-	/* We will get here only after the rerturn from the context switch */
-
-	bx		lr
-	.size	arm_switchcontext, .-arm_switchcontext
-	.end
+#endif /* CONFIG_BOARDCTL_RESET */

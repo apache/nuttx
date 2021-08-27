@@ -70,38 +70,35 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
  *   len      Length of data to send
  *
  * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
+ *   On success, the number of bytes written are returned (zero indicates
+ *   nothing was written).  On any failure, a negated errno value is returned
  *
  ****************************************************************************/
 
 static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
                             size_t len)
 {
-  ssize_t nwritten;
+  ssize_t nwritten = 0;
+  ssize_t ret = 0;
 
-  while (len > 0)
+  while (len != nwritten)
     {
-      nwritten = file_write(filep, buf, len);
-      if (nwritten < 0)
+      ret = file_write(filep, buf + nwritten, len - nwritten);
+      if (ret < 0)
         {
-          if (nwritten != -EINTR)
+          if (ret != -EINTR)
             {
-              nerr("ERROR: file_write failed: %zd\n", nwritten);
-              return (int)nwritten;
+              nerr("ERROR: file_write failed: %zd\n", ret);
+              break;
             }
 
-          ninfo("Ignoring signal\n");
+          continue;
         }
-      else
-        {
-          DEBUGASSERT(nwritten > 0 && nwritten <= len);
-          len -= nwritten;
-          buf += nwritten;
-        }
+
+      nwritten += ret;
     }
 
-  return OK;
+  return nwritten > 0 ? nwritten : ret;
 }
 
 /****************************************************************************
@@ -139,21 +136,23 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
       /* Send the packet preamble */
 
       ret = local_fifo_write(filep, g_preamble, LOCAL_PREAMBLE_SIZE);
-      if (ret == OK)
+      if (ret != LOCAL_PREAMBLE_SIZE)
         {
-          /* Send the packet length */
+          return ret;
+        }
 
-          for (len16 = 0, iov = buf; iov != end; iov++)
-            {
-              len16 += iov->iov_len;
-            }
+      /* Send the packet length */
 
-          ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
-                                 sizeof(uint16_t));
-          if (ret != OK)
-            {
-              return ret;
-            }
+      for (len16 = 0, iov = buf; iov != end; iov++)
+        {
+          len16 += iov->iov_len;
+        }
+
+      ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
+                             sizeof(uint16_t));
+      if (ret != sizeof(uint16_t))
+        {
+          return ret;
         }
     }
 
@@ -165,10 +164,17 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
           break;
         }
 
-      len16 += iov->iov_len;
+      if (ret > 0)
+        {
+          len16 += ret;
+          if (ret != iov->iov_len)
+            {
+              break;
+            }
+        }
     }
 
-  return (ret == OK) ? len16 : ret;
+  return (len16 > 0) ? len16 : ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */

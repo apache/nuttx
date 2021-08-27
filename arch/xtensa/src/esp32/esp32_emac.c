@@ -61,7 +61,7 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 
 #include <arch/board/board.h>
 
@@ -1315,7 +1315,7 @@ static void emac_txtimeout_expiry(wdparm_t arg)
    * Interrupts will be re-enabled when emac_ifup() is called.
    */
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(ESP32_IRQ_EMAC);
 
   /* Schedule to perform the TX timeout processing on the worker thread,
    * perhaps canceling any pending IRQ processing.
@@ -1904,7 +1904,7 @@ static int emac_ifup(struct net_driver_s *dev)
 
   /* Enable the Ethernet interrupt */
 
-  up_enable_irq(priv->cpuint);
+  up_enable_irq(ESP32_IRQ_EMAC);
 
   leave_critical_section(flags);
 
@@ -2185,9 +2185,8 @@ int esp32_emac_init(void)
 
   memset(priv, 0, sizeof(struct esp32_emac_s));
 
-  /* Allocate and register interrupt */
-
-  priv->cpuint = esp32_alloc_levelint(1);
+  priv->cpuint = esp32_setup_irq(0, ESP32_PERIPH_EMAC,
+                                 1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       nerr("ERROR: Failed alloc interrupt\n");
@@ -2195,9 +2194,6 @@ int esp32_emac_init(void)
       ret = -ENOMEM;
       goto error;
     }
-
-  up_disable_irq(priv->cpuint);
-  esp32_attach_peripheral(0, ESP32_PERIPH_EMAC, priv->cpuint);
 
   ret = irq_attach(ESP32_IRQ_EMAC, emac_interrupt, priv);
   if (ret != 0)
@@ -2240,8 +2236,7 @@ int esp32_emac_init(void)
   return 0;
 
 errout_with_attachirq:
-  esp32_detach_peripheral(0, ESP32_PERIPH_EMAC, priv->cpuint);
-  esp32_free_cpuint(priv->cpuint);
+  esp32_teardown_irq(0, ESP32_PERIPH_EMAC, priv->cpuint);
 
 error:
   return ret;

@@ -25,7 +25,7 @@ for ESP32 by Espressif.
 
 For flashing firmware, you will need to install ``esptool.py`` by running::
 
-    pip install esptool
+    $ pip install esptool
 
 Building from source
 --------------------
@@ -60,7 +60,7 @@ It's a two step process where the first converts the ELF file into a ESP32-compa
 and the second flashes it to the board.  These steps are included into the build system and you can
 flash your NuttX firmware simply by running::
 
-    make download ESPTOOL_PORT=<port>
+    $ make download ESPTOOL_PORT=<port>
 
 where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
 
@@ -291,16 +291,34 @@ WiFi
 
 A standard network interface will be configured and can be initialized such as::
 
-    ifup wlan0
-    wapi psk wlan0 mypasswd 3
-    wapi essid wlan0 myssid 1
-    renew wlan0
+    nsh> ifup wlan0
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
 
 In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd`` as
 password. IP address is obtained via DHCP using ``renew`` command. You can check
 the result by running ``ifconfig`` afterwards.
 
 .. tip:: Boards usually expose a ``wapi`` defconfig which enables WiFi
+
+WiFi SoftAP
+===========
+
+It is possible to use ESP32 as an Access Point (SoftAP). Actually there are some
+boards with a ``sta_softap`` which enables this support.
+
+If you are using this board config profile you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+    nsh> ifup wlan1
+    nsh> dhcpd_start wlan1
+    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``.
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Bluetooth
 =========

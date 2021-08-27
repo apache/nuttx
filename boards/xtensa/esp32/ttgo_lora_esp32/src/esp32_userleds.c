@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_switchcontext.S
+ * boards/xtensa/esp32/ttgo_lora_esp32/src/esp32_userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,59 +23,73 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
-#include "nvic.h"
-#include "svcall.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
-	.file	"arm_switchcontext.S"
+#include "esp32_gpio.h"
+#include "ttgo_lora_esp32.h"
 
 /****************************************************************************
- * Macros
+ * Private Data
  ****************************************************************************/
+
+/* This array maps an LED number to GPIO pin configuration */
+
+static const uint32_t g_ledcfg[BOARD_NLEDS] =
+{
+  GPIO_LED1,
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_switchcontext
- *
- * Description:
- *   Save the current thread context and restore the specified context.
- *   Full prototype is:
- *
- *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
- *
- * Returned Value:
- *   None
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-	.align	2
-	.code	16
-	.thumb_func
-	.globl	arm_switchcontext
-	.type	arm_switchcontext, function
-arm_switchcontext:
+uint32_t board_userled_initialize(void)
+{
+  uint8_t i;
 
-	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      esp32_configgpio(g_ledcfg[i], OUTPUT);
+    }
 
-	mov		r2, r1					/* R2: restoreregs */
-	mov		r1, r0					/* R1: saveregs */
-	mov		r0, #SYS_switch_context			/* R0: context switch */
-	svc		#SYS_syscall				/* Force synchronous SVCall (or Hard Fault) */
+  return BOARD_NLEDS;
+}
 
-	/* We will get here only after the rerturn from the context switch */
+/****************************************************************************
+ * Name: board_userled
+ ****************************************************************************/
 
-	bx		lr
-	.size	arm_switchcontext, .-arm_switchcontext
-	.end
+void board_userled(int led, bool ledon)
+{
+  if ((unsigned)led < BOARD_NLEDS)
+    {
+      esp32_gpiowrite(g_ledcfg[led], ledon);
+    }
+}
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint32_t ledset)
+{
+  uint8_t i;
+
+  /* Configure LED1-8 GPIOs for output */
+
+  for (i = 0; i < BOARD_NLEDS; i++)
+    {
+      esp32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+    }
+}
+

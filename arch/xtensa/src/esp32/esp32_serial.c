@@ -53,7 +53,7 @@
 #include "hardware/esp32_dma.h"
 #include "esp32_config.h"
 #include "esp32_gpio.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_dma.h"
 #include "hardware/esp32_dport.h"
 
@@ -1013,25 +1013,17 @@ static int esp32_attach(struct uart_dev_s *dev)
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
   int ret = OK;
 
-  /* Allocate a level-sensitive, priority 1 CPU interrupt for the UART */
+  /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpuint = esp32_alloc_levelint(1);
+  priv->cpu = up_cpu_index();
+  priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
+                                 1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
 
       return priv->cpuint;
     }
-
-  /* Set up to receive peripheral interrupts on the current CPU */
-
-  priv->cpu = up_cpu_index();
-
-  /* Attach the GPIO peripheral to the allocated CPU interrupt */
-
-  up_disable_irq(priv->cpuint);
-  esp32_attach_peripheral(priv->cpu, priv->config->periph,
-                          priv->cpuint);
 
   /* Attach and enable the IRQ */
 
@@ -1042,7 +1034,7 @@ static int esp32_attach(struct uart_dev_s *dev)
        * in the UART
        */
 
-      up_enable_irq(priv->cpuint);
+      up_enable_irq(priv->config->irq);
     }
 
   return ret;
@@ -1064,17 +1056,12 @@ static void esp32_detach(struct uart_dev_s *dev)
 
   /* Disable and detach the CPU interrupt */
 
-  up_disable_irq(priv->cpuint);
+  up_disable_irq(priv->config->irq);
   irq_detach(priv->config->irq);
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
 
-  esp32_detach_peripheral(priv->cpu, priv->config->periph,
-                          priv->cpuint);
-
-  /* And release the CPU interrupt */
-
-  esp32_free_cpuint(priv->cpuint);
+  esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
   priv->cpuint = -1;
 }
 
@@ -1134,14 +1121,32 @@ static void dma_attach(uint8_t dma_chan)
   int dma_cpuint;
   int cpu;
   int ret;
+  int periph;
+  int irq;
 
   /* Clear the interrupts */
 
   putreg32(UINT32_MAX, UHCI_INT_CLR_REG(dma_chan));
 
-  /* Allocate a level-sensitive, priority 1 CPU interrupt for the DMA */
+  /* Attach the UHCI interrupt to the allocated CPU interrupt
+   * and attach and enable the IRQ.
+   */
 
-  dma_cpuint = esp32_alloc_levelint(1);
+  if (dma_chan == 0)
+    {
+      periph = ESP32_PERIPH_UHCI0;
+      irq = ESP32_IRQ_UHCI0;
+    }
+  else
+    {
+      periph = ESP32_PERIPH_UHCI1;
+      irq = ESP32_IRQ_UHCI1;
+    }
+
+  /* Set up to receive peripheral interrupts on the current CPU */
+
+  cpu = up_cpu_index();
+  dma_cpuint = esp32_setup_irq(cpu, periph, 1, ESP32_CPUINT_LEVEL);
   if (dma_cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -1150,32 +1155,12 @@ static void dma_attach(uint8_t dma_chan)
       return;
     }
 
-  /* Set up to receive peripheral interrupts on the current CPU */
-
-  cpu = up_cpu_index();
-
-  /* Attach the UHCI interrupt to the allocated CPU interrupt
-   * and attach and enable the IRQ.
-   */
-
-  up_disable_irq(dma_cpuint);
-
-  if (dma_chan == 0)
-    {
-      esp32_attach_peripheral(cpu, ESP32_PERIPH_UHCI0, dma_cpuint);
-      ret = irq_attach(ESP32_IRQ_UHCI0, esp32_interrupt_dma, NULL);
-    }
-  else
-    {
-      esp32_attach_peripheral(cpu, ESP32_PERIPH_UHCI1, dma_cpuint);
-      ret = irq_attach(ESP32_IRQ_UHCI1, esp32_interrupt_dma, NULL);
-    }
-
+  ret = irq_attach(irq, esp32_interrupt_dma, NULL);
   if (ret == OK)
     {
       /* Enable the CPU interrupt */
 
-      up_enable_irq(dma_cpuint);
+      up_enable_irq(irq);
     }
   else
     {
