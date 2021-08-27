@@ -54,7 +54,7 @@ if LIBCXX || UCLIBCXX
 
 choice
 	prompt "C++ low level library select"
-	default CXX_LIBSUPCXX
+	default LIBSUPCXX
 
 config LIBCXXABI
 	bool "LLVM low level C++ Library"
@@ -63,7 +63,7 @@ config LIBCXXABI
 		https://libcxxabi.llvm.org/
 		Select if your use libc++abi as lower level c++ library
 
-config CXX_LIBSUPCXX
+config LIBSUPCXX
 	bool "GNU low level libsupc++"
 	---help---
 		Select if your toolchain provides libsupc++ and use libsupc++ as lower

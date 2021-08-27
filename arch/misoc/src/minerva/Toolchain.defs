@@ -49,7 +49,7 @@ ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
 endif
 
-ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += -lsupc++
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif
