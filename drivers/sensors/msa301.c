@@ -1,43 +1,33 @@
 /****************************************************************************
  * drivers/sensors/msa301.c
- *   Author:  <davie08@qq.com>
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <errno.h>
-#include <assert.h>
 #include <debug.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
@@ -45,6 +35,10 @@
 #include <nuttx/sensors/msa301.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MSA301)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 struct msa301_dev_s
 {
@@ -114,7 +108,8 @@ static int msa301_register(FAR const char *               devpath,
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations g_fops = {
+static const struct file_operations g_fops =
+{
   msa301_open,
   msa301_close,
   msa301_read,
@@ -128,7 +123,8 @@ static const struct file_operations g_fops = {
 #  endif
 };
 
-static const struct msa301_ops_s g_msa301_sensor_ops = {
+static const struct msa301_ops_s g_msa301_sensor_ops =
+{
   msa301_sensor_config,
   msa301_sensor_start,
   msa301_sensor_stop,
@@ -176,6 +172,7 @@ static int msa301_readreg(FAR struct msa301_dev_s *priv,
 
   return OK;
 }
+
 /****************************************************************************
  * Name: msa301_readreg8
  *
@@ -268,7 +265,8 @@ static int msa301_writereg8(FAR struct msa301_dev_s *priv,
   return OK;
 }
 
-static int msa301_set_range(FAR struct msa301_dev_s *priv, msa301_range_t range)
+static int msa301_set_range(FAR struct msa301_dev_s *priv,
+                            msa301_range_t range)
 {
   uint8_t ctl;
 
@@ -299,7 +297,8 @@ static int msa301_set_rate(FAR struct msa301_dev_s *priv, msa301_rate_t rate)
   return OK;
 }
 
-static int msa301_set_powermode(FAR struct msa301_dev_s *priv, msa301_powermode_t mode)
+static int msa301_set_powermode(FAR struct msa301_dev_s *priv,
+                                msa301_powermode_t mode)
 {
   uint8_t ctl;
 
@@ -311,7 +310,8 @@ static int msa301_set_powermode(FAR struct msa301_dev_s *priv, msa301_powermode_
   return OK;
 }
 
-static int msa301_set_resolution(FAR struct msa301_dev_s *priv, msa301_resolution_t resolution)
+static int msa301_set_resolution(FAR struct msa301_dev_s *priv,
+                                 msa301_resolution_t resolution)
 {
   uint8_t ctl;
 
@@ -346,6 +346,7 @@ static int msa301_set_axis(FAR struct msa301_dev_s *priv, uint8_t enable)
 static int msa301_sensor_config(FAR struct msa301_dev_s *priv)
 {
   /* Sanity check */
+
   DEBUGASSERT(priv != NULL);
 
   msa301_set_resolution(priv, MSA301_RESOLUTION_14);
@@ -367,12 +368,15 @@ static int msa301_sensor_config(FAR struct msa301_dev_s *priv)
 static int msa301_sensor_start(FAR struct msa301_dev_s *priv)
 {
   /* Sanity check */
+
   DEBUGASSERT(priv != NULL);
 
-  // Power normal
+  /* Power normal */
+
   msa301_set_powermode(priv, MSA301_NORMALMODE);
 
   /* Enable the accelerometer */
+
   msa301_set_axis(priv, 1);
 
   up_mdelay(5);
@@ -393,12 +397,15 @@ static int msa301_sensor_start(FAR struct msa301_dev_s *priv)
 static int msa301_sensor_stop(FAR struct msa301_dev_s *priv)
 {
   /* Sanity check */
+
   DEBUGASSERT(priv != NULL);
 
   /* Disable the accelerometer */
+
   msa301_set_axis(priv, 0);
 
-  // Power suspend
+  /* Power suspend */
+
   msa301_set_powermode(priv, MSA301_SUSPENDMODE);
 
   sninfo("Stoping....");
@@ -420,9 +427,11 @@ static int msa301_sensor_stop(FAR struct msa301_dev_s *priv)
 
 static int msa301_sensor_read(FAR struct msa301_dev_s *priv)
 {
+  uint8_t xyz_value[6];
+  float scale = 1;
+
   DEBUGASSERT(priv != NULL);
 
-  uint8_t xyz_value[6] = { 0 };
   if (msa301_readreg(priv, MSA301_REG_OUT_X_L, xyz_value, 6) < 0)
     {
       return -EIO;
@@ -433,11 +442,11 @@ static int msa301_sensor_read(FAR struct msa301_dev_s *priv)
   priv->sensor_data.z_data = xyz_value[5] << 8 | xyz_value[4];
 
   /* 14 bit resolution */
+
   priv->sensor_data.x_data >>= 2;
   priv->sensor_data.y_data >>= 2;
   priv->sensor_data.z_data >>= 2;
 
-  float scale = 1;
   if (priv->range == MSA301_RANGE_2_G)
     {
       scale = 4096;
@@ -531,6 +540,7 @@ static ssize_t msa301_read(FAR struct file *filep,
 {
   FAR struct inode *       inode;
   FAR struct msa301_dev_s *priv;
+  int datalen = sizeof(struct msa301_sensor_data_s);
 
   /* Sanity check */
 
@@ -553,7 +563,6 @@ static ssize_t msa301_read(FAR struct file *filep,
       return -EIO;
     }
 
-  int datalen = sizeof(struct msa301_sensor_data_s);
   memcpy(buffer, &priv->sensor_data, datalen);
 
   return datalen;
@@ -618,6 +627,7 @@ static int msa301_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
         /* Unrecognized commands */
+
       default:
         snerr("ERROR: Unrecognized cmd: %d arg: %lu\n", cmd, arg);
         ret = -ENOTTY;
@@ -652,7 +662,8 @@ static int msa301_register(FAR const char *               devpath,
                            FAR const struct msa301_ops_s *ops)
 {
   FAR struct msa301_dev_s *priv;
-  int                      ret;
+  int ret;
+  uint8_t id = 0;
 
   /* Sanity check */
 
@@ -673,7 +684,7 @@ static int msa301_register(FAR const char *               devpath,
   priv->ops  = ops;
 
   /* ID check */
-  uint8_t id = 0;
+
   msa301_readreg8(priv, MSA301_REG_PARTID, &id);
   if (id != 0x13)
     {
@@ -683,6 +694,7 @@ static int msa301_register(FAR const char *               devpath,
     }
 
   /* Configure the device */
+
   ret = priv->ops->config(priv);
   if (ret < 0)
     {
@@ -694,6 +706,7 @@ static int msa301_register(FAR const char *               devpath,
   nxsem_init(&priv->exclsem, 0, 1);
 
   /* Register the character driver */
+
   ret = register_driver(devpath, &g_fops, 0666, priv);
   if (ret < 0)
     {
@@ -730,6 +743,8 @@ static int msa301_register(FAR const char *               devpath,
 int msa301_sensor_register(FAR const char *         devpath,
                            FAR struct i2c_master_s *i2c)
 {
-  return msa301_register(devpath, i2c, MSA301_ACCEL_ADDR0, &g_msa301_sensor_ops);
+  return msa301_register(devpath, i2c,
+            MSA301_ACCEL_ADDR0, &g_msa301_sensor_ops);
 }
+
 #endif /* CONFIG_I2C && CONFIG_SENSORS_MSA301 */
