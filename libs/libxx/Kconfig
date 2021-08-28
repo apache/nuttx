@@ -83,7 +83,6 @@ config HAVE_CXXINITIALIZE
 
 config CXX_EXCEPTION
 	bool "Enable Exception Support"
-	default LIBCXX || UCLIBCXX
 
 if UCLIBCXX
 
