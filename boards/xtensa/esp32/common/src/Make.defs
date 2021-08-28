@@ -58,6 +58,10 @@ ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += esp32_ili9341.c
 endif
 
+ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
+  CSRCS += esp32_ssd1306.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
