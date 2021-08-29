@@ -470,9 +470,6 @@ static void imxrt_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t imxrt_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
-static uint32_t imxrt_waitesr2_change(uint32_t base,
-                                       uint32_t mask,
-                                       uint32_t target_state);
 static struct mb_s *flexcan_get_mb(FAR struct imxrt_driver_s *priv,
                                     uint32_t mbi);
 
@@ -531,10 +528,10 @@ static void imxrt_reset(struct imxrt_driver_s *priv);
 
 static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv)
 {
-  uint32_t mbi = RXMBCOUNT;
+  uint32_t mbi = RXMBCOUNT + 1;
   struct mb_s *mb;
 
-  while (mbi < TXMBCOUNT)
+  while (mbi < TOTALMBCOUNT)
     {
       mb = flexcan_get_mb(priv, mbi);
       if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
@@ -583,18 +580,13 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
   int32_t timeout;
 #endif
 
-  if ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
-      (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-      (CAN_ESR2_IMB | CAN_ESR2_VPS))
-    {
-      mbi  = ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
-        CAN_ESR2_LPTM_MASK) >> CAN_ESR2_LPTM_SHIFT);
-    }
-
+  mbi = RXMBCOUNT + 1;
   mb_bit = 1 << mbi;
 
   while (mbi < TOTALMBCOUNT)
     {
+      /* Check whether message buffer is not currently transmitting */
+
       struct mb_s *mb = flexcan_get_mb(priv, mbi);
       if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
         {
@@ -771,10 +763,13 @@ static int imxrt_txpoll(struct net_driver_s *dev)
 {
   FAR struct imxrt_driver_s *priv =
     (FAR struct imxrt_driver_s *)dev->d_private;
+  irqstate_t flags;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
+
+  flags = spin_lock_irqsave(NULL);
 
   if (priv->dev.d_len > 0)
     {
@@ -790,14 +785,15 @@ static int imxrt_txpoll(struct net_driver_s *dev)
            * not, return a non-zero value to terminate the poll.
            */
 
-          if (!((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
-              (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-              (CAN_ESR2_IMB | CAN_ESR2_VPS)) || (imxrt_txringfull(priv)))
-                {
-                  return -EBUSY;
-                }
+          if (imxrt_txringfull(priv))
+            {
+              spin_unlock_irqrestore(NULL, flags);
+              return -EBUSY;
+            }
         }
     }
+
+  spin_unlock_irqrestore(NULL, flags);
 
   /* If zero is returned, the polling will continue until all connections
    * have been examined.
@@ -1268,26 +1264,6 @@ static uint32_t imxrt_waitfreezeack_change(uint32_t base,
   return imxrt_waitmcr_change(base, CAN_MCR_FRZACK, target_state);
 }
 
-static uint32_t imxrt_waitesr2_change(uint32_t base, uint32_t mask,
-                                       uint32_t target_state)
-{
-  const uint32_t timeout = 1000;
-  uint32_t wait_ack;
-
-  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
-    {
-      uint32_t state = (getreg32(base + IMXRT_CAN_ESR2_OFFSET) & mask);
-      if (state == target_state)
-        {
-          return true;
-        }
-
-      up_udelay(10);
-    }
-
-  return false;
-}
-
 static struct mb_s *flexcan_get_mb(FAR struct imxrt_driver_s *priv,
                                     uint32_t mbi)
 {
@@ -1401,9 +1377,7 @@ static void imxrt_txavail_work(FAR void *arg)
        * packet.
        */
 
-      if (imxrt_waitesr2_change(priv->base,
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS),
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS)))
+      if (!imxrt_txringfull(priv))
         {
           /* No, there is space for another transfer.  Poll the network for
            * new XMIT data.
