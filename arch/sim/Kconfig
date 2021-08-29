@@ -127,14 +127,27 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+choice
+	prompt "Simulated Network Interface"
+	default SIM_NETDEV
+	depends on NET
+	optional
+
 config SIM_NETDEV
 	bool "Simulated Network Device"
-	default y
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
-	depends on NET_ETHERNET
+	select NET_ETHERNET
 	---help---
 		Build in support for a simulated network device.
+
+config SIM_NETUSRSOCK
+	bool "Simulated Network Device with Native Stack via usrsock"
+	select NET_USRSOCK
+	---help---
+		Built-in support for a simulated network device using native stack via usrsock
+
+endchoice
 
 if SIM_NETDEV
 
