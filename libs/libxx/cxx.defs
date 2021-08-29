@@ -21,7 +21,6 @@
 CXXSRCS += libxx_cxa_guard.cxx libxx_cxapurevirtual.cxx
 CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
 CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
-CXXSRCS += libxx_stdthrow.cxx
 
 # Note: Our implmenetations of operator new are not conforming to
 # the standard. (no bad_alloc implementation)
