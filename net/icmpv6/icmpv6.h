@@ -48,9 +48,9 @@
 /* Allocate a new ICMPv6 data callback */
 
 #define icmpv6_callback_alloc(dev, conn) \
-  devif_callback_alloc((dev), &(conn)->list)
+  devif_callback_alloc((dev), &(conn)->list, &(conn)->list_tail)
 #define icmpv6_callback_free(dev, conn, cb) \
-  devif_conn_callback_free((dev), (cb), &(conn)->list)
+  devif_conn_callback_free((dev), (cb), &(conn)->list, &(conn)->list_tail)
 
 /****************************************************************************
  * Public Type Definitions
@@ -86,6 +86,7 @@ struct icmpv6_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
   /* ICMPv6-specific content follows */
 
