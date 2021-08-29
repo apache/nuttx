@@ -42,9 +42,9 @@
 /* Allocate a new Bluetooth socket data callback */
 
 #define bluetooth_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->bc_list)
+  devif_callback_alloc(dev, &conn->bc_list, &conn->bc_list_tail)
 #define bluetooth_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->bc_list)
+  devif_conn_callback_free(dev, cb, &conn->bc_list, &conn->bc_list_tail)
 
 /* Memory Pools */
 
@@ -85,6 +85,7 @@ struct bluetooth_conn_s
    */
 
   FAR struct devif_callback_s *bc_list;       /* Bluetooth callbacks */
+  FAR struct devif_callback_s *bc_list_tail;  /* Bluetooth callbacks */
 
   /* Bluetooth-specific content follows. */
 

@@ -254,7 +254,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 
   /* Set up the callback in the connection */
 
-  pstate->cb = devif_callback_alloc(NULL, &conn->list);
+  pstate->cb = devif_callback_alloc(NULL, &conn->list, &conn->list_tail);
   if (pstate->cb)
     {
       /* Take a lock since only one outstanding request is allowed */
@@ -308,7 +308,7 @@ void usrsock_teardown_request_callback(FAR struct usrsock_reqstate_s *pstate)
 
   /* Make sure that no further events are processed */
 
-  devif_conn_callback_free(NULL, pstate->cb, &conn->list);
+  devif_conn_callback_free(NULL, pstate->cb, &conn->list, &conn->list_tail);
   nxsem_destroy(&pstate->recvsem);
 
   pstate->cb = NULL;

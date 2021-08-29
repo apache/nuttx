@@ -198,7 +198,9 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    * want anything to happen until we are ready.
    */
 
-  state.snd_cb = devif_callback_alloc(dev, &dev->d_conncb);
+  state.snd_cb = devif_callback_alloc(dev,
+                                      &dev->d_conncb,
+                                      &dev->d_conncb_tail);
   if (!state.snd_cb)
     {
       nerr("ERROR: Failed to allocate a cllback\n");

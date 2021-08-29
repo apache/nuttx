@@ -54,9 +54,9 @@
  */
 
 #define tcp_callback_alloc(conn) \
-  devif_callback_alloc((conn)->dev, &(conn)->list)
+  devif_callback_alloc((conn)->dev, &(conn)->list, &(conn)->list_tail)
 #define tcp_callback_free(conn,cb) \
-  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list)
+  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list, &(conn)->list_tail)
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
@@ -164,6 +164,7 @@ struct tcp_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
   /* TCP-specific content follows */
 
@@ -289,6 +290,7 @@ struct tcp_conn_s
    */
 
   FAR struct devif_callback_s *connevents;
+  FAR struct devif_callback_s *connevents_tail;
 
   /* accept() is called when the TCP logic has created a connection
    *
