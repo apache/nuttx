@@ -24,4 +24,10 @@ config TEENSY_41
 
 endchoice # Board configuration
 
+config IMXRT_FLEXCAN3_AS_CAN0
+	bool "Initialize CAN3 bus as can0"
+	---help---
+		This configuration option ensures that if more that one CAN bus is set on
+		that CAN 3 (with FD capability) will be initialized as can0.
+
 endif
