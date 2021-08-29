@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libxx/cxx.defs
+# libs/libxx/libcxxmini.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -34,3 +34,6 @@ ifneq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   libxx_new.cxx_CXXFLAGS += -Wno-missing-exception-spec
   libxx_newa.cxx_CXXFLAGS += -Wno-missing-exception-spec
 endif
+
+DEPPATH += --dep-path libcxxmini
+VPATH += libcxxmini
