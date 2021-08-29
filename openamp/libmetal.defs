@@ -76,7 +76,7 @@ libmetal.zip:
 	)
 	touch $@
 
-dirlinks:: .libmetal_headers
+context:: .libmetal_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)metal)

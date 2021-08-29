@@ -159,6 +159,7 @@ endif
 
 ifeq ($(CONFIG_OPENAMP),y)
 KERNDEPDIRS += openamp
+CONTEXTDIRS += openamp
 else
 CLEANDIRS += openamp
 endif

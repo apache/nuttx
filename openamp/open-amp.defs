@@ -43,7 +43,7 @@ open-amp.zip:
 	$(foreach header,$(headers),$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
 	touch $@
 
-dirlinks:: .openamp_headers
+context:: .openamp_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
