@@ -316,6 +316,13 @@ void netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_setmtu(int mtu);
 void netdriver_loop(void);
 
+/* up_usrsock.c *************************************************************/
+
+#ifdef CONFIG_SIM_NETUSRSOCK
+int usrsock_init(void);
+void usrsock_loop(void);
+#endif
+
 /* up_rptun.c ***************************************************************/
 
 #ifdef CONFIG_RPTUN
