@@ -382,7 +382,8 @@ struct net_driver_s
    *        NETDEV_DOWN - The network is down
    */
 
-  FAR struct devif_callback_s *d_conncb;
+  FAR struct devif_callback_s *d_conncb;      /* This is the list head */
+  FAR struct devif_callback_s *d_conncb_tail; /* This is the list tail */
   FAR struct devif_callback_s *d_devcb;
 
   /* Driver callbacks */

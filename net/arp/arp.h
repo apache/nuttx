@@ -75,7 +75,9 @@
 
 /* Allocate a new ARP data callback */
 
-#define arp_callback_alloc(dev)   devif_callback_alloc(dev, &(dev)->d_conncb)
+#define arp_callback_alloc(dev)   devif_callback_alloc(dev, \
+                                                       &(dev)->d_conncb, \
+                                                       &(dev)->d_conncb_tail)
 #define arp_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
 
 /****************************************************************************

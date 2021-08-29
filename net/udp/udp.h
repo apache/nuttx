@@ -61,9 +61,9 @@
 /* Allocate a new UDP data callback */
 
 #define udp_callback_alloc(dev,conn) \
-  devif_callback_alloc((dev), &(conn)->list)
+  devif_callback_alloc((dev), &(conn)->list, &(conn)->list_tail)
 #define udp_callback_free(dev,conn,cb) \
-  devif_conn_callback_free((dev), (cb), &(conn)->list)
+  devif_conn_callback_free((dev), (cb), &(conn)->list, &(conn)->list_tail)
 
 /* Definitions for the UDP connection struct flag field */
 
@@ -106,6 +106,7 @@ struct udp_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
   /* UDP-specific content follows */
 

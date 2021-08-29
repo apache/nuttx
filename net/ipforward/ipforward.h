@@ -44,7 +44,9 @@
 
 /* Allocate a new IP forwarding data callback */
 
-#define ipfwd_callback_alloc(dev)   devif_callback_alloc(dev, &(dev)->d_conncb)
+#define ipfwd_callback_alloc(dev)   devif_callback_alloc(dev, \
+                                                         &(dev)->d_conncb, \
+                                                         &(dev)->d_conncb_tail)
 #define ipfwd_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
 
 /****************************************************************************

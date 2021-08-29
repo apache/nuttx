@@ -213,7 +213,8 @@ static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
   while (conn->connevents != NULL)
     {
       devif_conn_callback_free(conn->dev, conn->connevents,
-                               &conn->connevents);
+                               &conn->connevents,
+                               &conn->connevents_tail);
     }
 
   net_unlock();
@@ -284,7 +285,9 @@ int tcp_start_monitor(FAR struct socket *psock)
    * the network goes down.
    */
 
-  cb = devif_callback_alloc(conn->dev, &conn->connevents);
+  cb = devif_callback_alloc(conn->dev,
+                            &conn->connevents,
+                            &conn->connevents_tail);
   if (cb != NULL)
     {
       cb->event = tcp_monitor_event;
@@ -372,7 +375,10 @@ void tcp_close_monitor(FAR struct socket *psock)
 
   if (cb != NULL)
     {
-      devif_conn_callback_free(conn->dev, cb, &conn->connevents);
+      devif_conn_callback_free(conn->dev,
+                               cb,
+                               &conn->connevents,
+                               &conn->connevents_tail);
     }
 
   /* Make sure that this socket is explicitly marked as closed */
