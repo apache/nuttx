@@ -24,10 +24,10 @@ if HAVE_CXX
 
 choice
 	prompt "C++ Library"
-	default NOCXXLIB
+	default LIBCXXMINI
 
-config NOCXXLIB
-	bool "NuttX Basic C++ support"
+config LIBCXXMINI
+	bool "Basic C++ support"
 	---help---
 		A fragmentary C++ library that will allow to build only
 		the simplest of C++ applications. Only contain basic C++

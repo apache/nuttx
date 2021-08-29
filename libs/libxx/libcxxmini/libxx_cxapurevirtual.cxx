@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libxx_newa.cxx
+// libs/libxx/libcxxmini/libxx_cxapurevirtual.cxx
 //
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
@@ -21,11 +21,7 @@
 // Included Files
 //***************************************************************************
 
-#include <nuttx/config.h>
-#include <cstddef>
-#include <debug.h>
-
-#include "libxx.hxx"
+#include <cassert>
 
 //***************************************************************************
 // Pre-processor Definitions
@@ -40,58 +36,17 @@
 //***************************************************************************
 
 //***************************************************************************
-// Name: new
+// Name:  __cxa_pure_virtual
 //
-// NOTE:
-//   This should take a type of size_t.  But size_t has an unknown underlying
-//   type.  In the nuttx sys/types.h header file, size_t is typed as uint32_t
-//   (which is determined by architecture-specific logic).  But the C++
-//   compiler may believe that size_t is of a different type resulting in
-//   compilation errors in the operator.  Using the underlying integer type
-//   instead of size_t seems to resolve the compilation issues. Need to
-//   REVISIT this.
+// Description:
+//    Crash when an un-implemented pure virtual function is called
 //
 //***************************************************************************
 
-FAR void *operator new[](std::size_t nbytes)
+extern "C"
 {
-  // We have to allocate something
-
-  if (nbytes < 1)
-    {
-      nbytes = 1;
-    }
-
-  // Perform the allocation
-
-  FAR void *alloc = lib_malloc(nbytes);
-
-#ifdef CONFIG_DEBUG_ERROR
-  if (alloc == 0)
-    {
-      // Oh my.. we are required to return a valid pointer and
-      // we cannot throw an exception!  We are bad.
-
-      _err("ERROR: Failed to allocate\n");
-    }
-#endif
-
-  // Return the allocated value
-
-  return alloc;
-}
-
-FAR void *operator new[](std::size_t nbytes, FAR void *ptr)
-{
-
-#ifdef CONFIG_DEBUG_ERROR
-  if (ptr == 0)
-    {
-      _err("ERROR: Failed to placement new[]\n");
-    }
-#endif
-
-  // Return the ptr pointer
-
-  return ptr;
+  void __cxa_pure_virtual(void)
+  {
+    DEBUGPANIC();
+  }
 }
