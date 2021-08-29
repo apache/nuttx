@@ -246,6 +246,12 @@ void up_initialize(void)
   netdriver_init();         /* Our "real" network driver */
 #endif
 
+#ifdef CONFIG_SIM_NETUSRSOCK
+  /* Register the usrsock native socket device */
+
+  usrsock_init();
+#endif
+
 #ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
