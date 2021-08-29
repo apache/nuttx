@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libxx_delete.cxx
+// libs/libxx/libcxxmini/libxx_deletea.cxx
 //
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
@@ -23,17 +23,17 @@
 
 #include <nuttx/config.h>
 
-#include "libxx.hxx"
+#include <nuttx/lib/lib.h>
 
 //***************************************************************************
 // Operators
 //***************************************************************************
 
 //***************************************************************************
-// Name: delete
+// Name: delete[]
 //***************************************************************************
 
-void operator delete(FAR void *ptr) throw()
+void operator delete[](FAR void *ptr) throw()
 {
   lib_free(ptr);
 }

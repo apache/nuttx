@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/lib/lib.h>
+#include <nuttx/compiler.h>
 
 //***************************************************************************
 // Public Types

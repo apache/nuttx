@@ -24,6 +24,7 @@
 #include <nuttx/config.h>
 
 #include <cassert>
+#include <nuttx/lib/lib.h>
 
 #include "libxx.hxx"
 

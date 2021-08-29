@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libxx_delete_sized.cxx
+// libs/libxx/libcxxmini/libxx_newa.cxx
 //
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
@@ -21,20 +21,26 @@
 // Included Files
 //***************************************************************************
 
-#include <nuttx/compiler.h>
-
+#include <nuttx/config.h>
 #include <cstddef>
+#include <debug.h>
 
-#include "libxx.hxx"
+#include <nuttx/lib/lib.h>
 
-#ifdef CONFIG_HAVE_CXX14
+//***************************************************************************
+// Pre-processor Definitions
+//***************************************************************************
+
+//***************************************************************************
+// Private Data
+//***************************************************************************
 
 //***************************************************************************
 // Operators
 //***************************************************************************
 
 //***************************************************************************
-// Name: delete
+// Name: new
 //
 // NOTE:
 //   This should take a type of size_t.  But size_t has an unknown underlying
@@ -47,9 +53,45 @@
 //
 //***************************************************************************
 
-void operator delete(FAR void *ptr, std::size_t size)
+FAR void *operator new[](std::size_t nbytes)
 {
-  lib_free(ptr);
+  // We have to allocate something
+
+  if (nbytes < 1)
+    {
+      nbytes = 1;
+    }
+
+  // Perform the allocation
+
+  FAR void *alloc = lib_malloc(nbytes);
+
+#ifdef CONFIG_DEBUG_ERROR
+  if (alloc == 0)
+    {
+      // Oh my.. we are required to return a valid pointer and
+      // we cannot throw an exception!  We are bad.
+
+      _err("ERROR: Failed to allocate\n");
+    }
+#endif
+
+  // Return the allocated value
+
+  return alloc;
 }
 
-#endif /* CONFIG_HAVE_CXX14 */
+FAR void *operator new[](std::size_t nbytes, FAR void *ptr)
+{
+
+#ifdef CONFIG_DEBUG_ERROR
+  if (ptr == 0)
+    {
+      _err("ERROR: Failed to placement new[]\n");
+    }
+#endif
+
+  // Return the ptr pointer
+
+  return ptr;
+}
