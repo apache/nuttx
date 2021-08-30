@@ -183,7 +183,7 @@ static inline int mtx_init(FAR mtx_t *mutex, int type)
 
   if (type & mtx_recursive)
     {
-      pthread_attr_init(&attr);
+      pthread_mutexattr_init(&attr);
       pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
       pattr = &attr;
     }
