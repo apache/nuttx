@@ -57,7 +57,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
   if (!stream || (stream->fs_oflags & O_RDOK) == 0)
     {
-      set_errno(EBADF);
+      _NX_SETERRNO(EBADF);
+      return ERROR;
     }
   else
     {
@@ -97,8 +98,15 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
           ret = lib_wrflush(stream);
           if (ret < 0)
             {
-              lib_give_semaphore(stream);
-              return ret;
+              if (count - remaining > 0)
+                {
+                  goto shortread;
+                }
+              else
+                {
+                  _NX_SETERRNO(ret);
+                  goto errout_with_errno;
+                }
             }
 
           /* Now get any other needed chars from the buffer or the file. */
@@ -148,10 +156,17 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                       bytes_read = _NX_READ(stream->fs_fd, dest, remaining);
                       if (bytes_read < 0)
                         {
-                          /* An error occurred on the read. */
+                          if (count - remaining > 0)
+                            {
+                              goto shortread;
+                            }
+                          else
+                            {
+                              /* An error occurred on the read. */
 
-                          _NX_SETERRNO(bytes_read);
-                          goto errout_with_errno;
+                              _NX_SETERRNO(bytes_read);
+                              goto errout_with_errno;
+                            }
                         }
                       else if (bytes_read == 0)
                         {
@@ -186,12 +201,19 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                                             buffer_available);
                       if (bytes_read < 0)
                         {
-                          /* An error occurred on the read.  The error code
-                           * is in the 'errno' variable.
-                           */
+                          if (count - remaining > 0)
+                            {
+                              goto shortread;
+                            }
+                          else
+                            {
+                              /* An error occurred on the read.  The error
+                               * code is in the 'errno' variable.
+                               */
 
-                          _NX_SETERRNO(bytes_read);
-                          goto errout_with_errno;
+                              _NX_SETERRNO(bytes_read);
+                              goto errout_with_errno;
+                            }
                         }
                       else if (bytes_read == 0)
                         {
@@ -222,12 +244,19 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
               bytes_read = _NX_READ(stream->fs_fd, dest, remaining);
               if (bytes_read < 0)
                 {
-                  /* An error occurred on the read.  The error code is
-                   * in the 'errno' variable.
-                   */
+                  if (count - remaining > 0)
+                    {
+                      break;
+                    }
+                  else
+                    {
+                      /* An error occurred on the read.  The error code is
+                       * in the 'errno' variable.
+                       */
 
-                  _NX_SETERRNO(bytes_read);
-                  goto errout_with_errno;
+                      _NX_SETERRNO(bytes_read);
+                      goto errout_with_errno;
+                    }
                 }
               else if (bytes_read == 0)
                 {
@@ -270,14 +299,13 @@ shortread:
         }
 
       lib_give_semaphore(stream);
+      return count - remaining;
     }
-
-  return count - remaining;
 
   /* Error exits */
 
 errout_with_errno:
   stream->fs_flags |= __FS_FLAG_ERROR;
   lib_give_semaphore(stream);
-  return -get_errno();
+  return ERROR;
 }
