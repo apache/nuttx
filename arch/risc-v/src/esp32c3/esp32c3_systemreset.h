@@ -86,6 +86,16 @@ int esp32c3_register_shutdown_handler(shutdown_handler_t handler);
 
 int esp32c3_unregister_shutdown_handler(shutdown_handler_t handler);
 
+/****************************************************************************
+ * Name: up_shutdown_handler
+ *
+ * Description:
+ *   Process all registered shutdown callback functions.
+ *
+ ****************************************************************************/
+
+void up_shutdown_handler(void);
+
 #ifdef __cplusplus
 }
 #endif
