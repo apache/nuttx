@@ -22,6 +22,9 @@ config ALLOW_BSD_COMPONENTS
 
 		NOTE: If this option is not set the following components
 		are not included in the setup menu:
+		FS
+		    NFS client file system
+		Wireless
 		    Bluetooth LE support
 
 config ALLOW_GPL_COMPONENTS
