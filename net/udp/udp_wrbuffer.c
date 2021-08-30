@@ -226,13 +226,16 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
 
 void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
 {
-  DEBUGASSERT(wrb && wrb->wb_iob);
+  DEBUGASSERT(wrb);
 
   /* To avoid deadlocks, we must following this ordering:  Release the I/O
    * buffer chain first, then the write buffer structure.
    */
 
-  iob_free_chain(wrb->wb_iob, IOBUSER_NET_UDP_WRITEBUFFER);
+  if (wrb->wb_iob)
+    {
+      iob_free_chain(wrb->wb_iob, IOBUSER_NET_UDP_WRITEBUFFER);
+    }
 
   /* Then free the write buffer structure */
 
