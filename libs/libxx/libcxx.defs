@@ -43,10 +43,7 @@ distclean::
 
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" _LIBCPP_BUILDING_LIBRARY}
 
-ifeq ($(CONFIG_LIBCXXABI), y)
-CXXFLAGS += ${shell $(DEFINE) "$(CC)" LIBCXX_BUILDING_LIBCXXABI}
-CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/include
-else
+ifeq ($(CONFIG_LIBSUPCXX), y)
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" __GLIBCXX__}
 endif
 
