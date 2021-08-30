@@ -104,66 +104,73 @@ static void stm32_dumpnvic(const char *msg, int irq)
   flags = enter_critical_section();
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
-  irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
+  irqinfo("  INTCTRL:    %08" PRIx32 " VECTAB:  %08" PRIx32 "\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x "
-          "SYSTICK: %08x\n",
+  irqinfo("  SYSH ENABLE MEMFAULT: %08" PRIx32 " BUSFAULT: %08" PRIx32 " "
+          "USGFAULT: %08" PRIx32 " SYSTICK: %08" PRIx32 "\n",
           getreg32(NVIC_SYSHCON_MEMFAULTENA),
           getreg32(NVIC_SYSHCON_BUSFAULTENA),
           getreg32(NVIC_SYSHCON_USGFAULTENA),
           getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
+  irqinfo("  IRQ ENABLE: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_IRQ0_31_ENABLE),
           getreg32(NVIC_IRQ32_63_ENABLE),
           getreg32(NVIC_IRQ64_95_ENABLE));
-  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+  irqinfo("  SYSH_PRIO:  %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_SYSH4_7_PRIORITY),
           getreg32(NVIC_SYSH8_11_PRIORITY),
           getreg32(NVIC_SYSH12_15_PRIORITY));
-  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+  irqinfo("  IRQ PRIO:   %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ0_3_PRIORITY),
           getreg32(NVIC_IRQ4_7_PRIORITY),
           getreg32(NVIC_IRQ8_11_PRIORITY),
           getreg32(NVIC_IRQ12_15_PRIORITY));
 #if STM32_IRQ_NEXTINTS > 15
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ16_19_PRIORITY),
           getreg32(NVIC_IRQ20_23_PRIORITY),
           getreg32(NVIC_IRQ24_27_PRIORITY),
           getreg32(NVIC_IRQ28_31_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 31
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ32_35_PRIORITY),
           getreg32(NVIC_IRQ36_39_PRIORITY),
           getreg32(NVIC_IRQ40_43_PRIORITY),
           getreg32(NVIC_IRQ44_47_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 47
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ48_51_PRIORITY),
           getreg32(NVIC_IRQ52_55_PRIORITY),
           getreg32(NVIC_IRQ56_59_PRIORITY),
           getreg32(NVIC_IRQ60_63_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 63
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ64_67_PRIORITY),
           getreg32(NVIC_IRQ68_71_PRIORITY),
           getreg32(NVIC_IRQ72_75_PRIORITY),
           getreg32(NVIC_IRQ76_79_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 79
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ80_83_PRIORITY),
           getreg32(NVIC_IRQ84_87_PRIORITY),
           getreg32(NVIC_IRQ88_91_PRIORITY),
           getreg32(NVIC_IRQ92_95_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 95
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " "
+          "%08" PRIx32 "\n",
           getreg32(NVIC_IRQ96_99_PRIORITY),
           getreg32(NVIC_IRQ100_103_PRIORITY),
           getreg32(NVIC_IRQ104_107_PRIORITY),
@@ -202,7 +209,8 @@ static int stm32_nmi(int irq, FAR void *context, FAR void *arg)
 static int stm32_busfault(int irq, FAR void *context, FAR void *arg)
 {
   up_irq_save();
-  _err("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Bus fault received: %08" PRIx32 "\n",
+       getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -210,7 +218,8 @@ static int stm32_busfault(int irq, FAR void *context, FAR void *arg)
 static int stm32_usagefault(int irq, FAR void *context, FAR void *arg)
 {
   up_irq_save();
-  _err("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
+  _err("PANIC!!! Usage fault received: %08" PRIx32 "\n",
+       getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
