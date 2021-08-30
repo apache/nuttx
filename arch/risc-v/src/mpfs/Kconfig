@@ -103,6 +103,15 @@ config MPFS_I2C1
         select ARCH_HAVE_I2CRESET
         default n
 
+config MPFS_EMMCSD
+        bool "EMMCSD"
+        select ARCH_HAVE_SDIO
+        select SDIO_BLOCKSETUP
+        select SDIO_DMA
+        default n
+        ---help---
+                Selects the MPFS eMMCSD driver.
+
 comment "CorePWM Options"
 
 config MPFS_HAVE_COREPWM

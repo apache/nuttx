@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_bringup.c
+ * boards/risc-v/mpfs/icicle/src/mpfs_emmcsd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,82 +24,65 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <debug.h>
 #include <errno.h>
+#include <nuttx/mmcsd.h>
 
-#include <nuttx/board.h>
-#include <nuttx/drivers/ramdisk.h>
-
+#include "mpfs_emmcsd.h"
 #include "mpfsicicle.h"
-#include "mpfs_corepwm.h"
-#include "mpfs.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static FAR struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpfs_bringup
+ * Name: board_emmcsd_init
+ *
+ * Description:
+ *   Configure the eMMCSD driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-int mpfs_bringup(void)
+int mpfs_board_emmcsd_init(void)
 {
-  int ret = OK;
+  int ret;
 
-#if defined(CONFIG_I2C_DRIVER)
-  /* Configure I2C peripheral interfaces */
+  /* Mount the SDIO-based MMC/SD block driver */
 
-  ret = mpfs_board_i2c_init();
+  /* First, get an instance of the SDIO interface */
 
-  if (ret < 0)
+  finfo("Initializing SDIO slot %d\n", CONFIG_NSH_MMCSDSLOTNO);
+
+  g_sdio_dev = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdio_dev)
     {
-      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+      ferr("ERROR: Failed to initialize SDIO slot %d\n",
+           CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
     }
-#endif
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", CONFIG_NSH_MMCSDMINOR);
+
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio_dev);
+  if (ret != OK)
     {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
     }
-#endif
 
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  /* Configure SPI peripheral interfaces */
+  sdio_mediachange(g_sdio_dev, true);
 
-  ret = mpfs_board_spi_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MPFS_HAVE_COREPWM
-  /* Configure PWM peripheral interfaces */
-
-  ret = mpfs_pwm_setup();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize CorePWM driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MPFS_EMMCSD
-  ret = mpfs_board_emmcsd_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to init eMMCSD driver: %d\n", ret);
-    }
-#endif
-
-  return ret;
+  return OK;
 }
