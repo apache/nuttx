@@ -24,6 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
+#include <debug.h>
+#include <assert.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
@@ -55,6 +58,23 @@
 
 int board_reset(int status)
 {
+#ifdef CONFIG_BOARD_ASSERT_RESET_VALUE
+  syslog(LOG_INFO, "reboot status=%d\n", status);
+
+  switch (status)
+    {
+      case EXIT_SUCCESS:
+        up_shutdown_handler();
+        break;
+      case CONFIG_BOARD_ASSERT_RESET_VALUE:
+        break;
+      default:
+        break;
+    }
+#else
+  up_shutdown_handler();
+#endif
+
   up_systemreset();
 
   return 0;

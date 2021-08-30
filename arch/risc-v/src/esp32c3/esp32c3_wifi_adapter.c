@@ -7192,6 +7192,8 @@ int esp32c3_wifi_bt_coexist_init(void)
 
 void esp_wifi_stop_callback(void)
 {
+  wlinfo("Trying to stop Wi-Fi...");
+
   int ret = esp_wifi_stop();
   if (ret)
     {

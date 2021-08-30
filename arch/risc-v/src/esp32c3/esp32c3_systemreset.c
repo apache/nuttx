@@ -114,6 +114,25 @@ int esp32c3_unregister_shutdown_handler(shutdown_handler_t handler)
 }
 
 /****************************************************************************
+ * Name: up_shutdown_handler
+ *
+ * Description:
+ *   Process all registered shutdown callback functions.
+ *
+ ****************************************************************************/
+
+void up_shutdown_handler(void)
+{
+  for (int i = SHUTDOWN_HANDLERS_NO - 1; i >= 0; i--)
+    {
+      if (shutdown_handlers[i])
+        {
+          shutdown_handlers[i]();
+        }
+    }
+}
+
+/****************************************************************************
  * Name: up_systemreset
  *
  * Description:
@@ -123,14 +142,6 @@ int esp32c3_unregister_shutdown_handler(shutdown_handler_t handler)
 
 void up_systemreset(void)
 {
-  for (int i = SHUTDOWN_HANDLERS_NO - 1; i >= 0; i--)
-    {
-      if (shutdown_handlers[i])
-        {
-          shutdown_handlers[i]();
-        }
-    }
-
   putreg32(RTC_CNTL_SW_SYS_RST, RTC_CNTL_OPTIONS0_REG);
 
   /* Wait for the reset */
