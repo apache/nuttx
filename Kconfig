@@ -24,6 +24,7 @@ config ALLOW_BSD_COMPONENTS
 		are not included in the setup menu:
 		FS
 		    NFS client file system
+		    SPIFFS File System
 		Wireless
 		    Bluetooth LE support
 
