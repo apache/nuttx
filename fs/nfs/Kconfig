@@ -6,7 +6,7 @@
 config NFS
 	bool "NFS client file system"
 	default n
-	depends on !DISABLE_MOUNTPOINT
+	depends on !DISABLE_MOUNTPOINT && ALLOW_BSD_COMPONENTS
 	---help---
 		Enable network file system (NFS) client file system
 
