@@ -159,7 +159,7 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
 
 static inline int thrd_join(thrd_t thr, int *res)
 {
-  pthread_addr_t *value;
+  pthread_addr_t value;
   int ret = pthread_join(thr, &value);
   if (res)
     {
