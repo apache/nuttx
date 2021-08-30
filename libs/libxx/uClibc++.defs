@@ -18,13 +18,13 @@
 #
 ###########################################################################
 
-VERSION=0.2.5
+UCLIBCXX_VERSION=0.2.5
 
 $(TOPDIR)/include/uClibc++:
-	$(Q) curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(VERSION).tar.bz2
-	$(Q) tar -xf uClibc++-$(VERSION).tar.bz2
-	$(Q) $(DELFILE) uClibc++-$(VERSION).tar.bz2
-	$(Q) mv uClibc++-$(VERSION) uClibc++
+	curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) tar -xf uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) $(DELFILE) uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) uClibc++
 	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/include $(TOPDIR)/include/uClibc++
 	$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
 
