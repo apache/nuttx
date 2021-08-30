@@ -269,6 +269,9 @@ RUN pip3 install esptool
 COPY --from=nuttx-toolchain-renesas /tools/renesas-toolchain/rx-elf-gcc/ renesas-toolchain/rx-elf-gcc/
 ENV PATH="/tools/renesas-toolchain/rx-elf-gcc/bin:$PATH"
 
+# MCUboot's tool for image signing and key management
+RUN pip3 install imgtool
+
 # Configure ccache
 RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/cc && \
