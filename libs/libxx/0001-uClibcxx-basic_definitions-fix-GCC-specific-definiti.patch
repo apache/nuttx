@@ -1,0 +1,56 @@
+From 41db6b7fa6b9a62ba2679f42a94af8663849a740 Mon Sep 17 00:00:00 2001
+From: zhuyanlin <zhuyanlin1@xiaomi.com>
+Date: Mon, 30 Aug 2021 14:11:53 +0800
+Subject: [PATCH 1/2] uClibcxx:basic_definitions: fix GCC-specific definitions
+
+gcc use  __GNUC__ instead off __GCC__
+
+Change-Id: I63aeb2118f45a981653553c8a3721a9d9c7ccaaa
+---
+ include/basic_definitions | 4 ++--
+ include/cstddef           | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/include/basic_definitions b/include/basic_definitions
+index 9936563..1a8dc31 100644
+--- a/include/basic_definitions
++++ b/include/basic_definitions
+@@ -33,13 +33,13 @@
+ 
+ #endif
+ 
+-#ifdef __GCC__
++#ifdef __GNUC__
+ #define __UCLIBCXX_NORETURN __attribute__ ((__noreturn__))
+ #else
+ #define __UCLIBCXX_NORETURN
+ #endif
+ 
+-#ifdef __GCC__
++#ifdef __GNUC__
+ # ifndef _UCXX_NOTHROW
+ #  ifndef __cplusplus
+ #   define _UCXX_NOTHROW __attribute__((__nothrow__))
+diff --git a/include/cstddef b/include/cstddef
+index d44834b..de48d11 100644
+--- a/include/cstddef
++++ b/include/cstddef
+@@ -43,13 +43,13 @@
+ #ifndef _CPP_CSTDDEF
+ #define _CPP_CSTDDEF 1
+ 
+-#ifdef __GCC__
++#ifdef __GNUC__
+ #pragma GCC system_header
+ #endif
+ 
+ #include <stddef.h>
+ 
+-namespace std 
++namespace std
+ {
+   using ::ptrdiff_t;
+   using ::size_t;
+-- 
+2.25.1
+
