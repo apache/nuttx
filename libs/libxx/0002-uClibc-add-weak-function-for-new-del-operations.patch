@@ -1,0 +1,174 @@
+From ecfcd061549a1dd3c034a06f48d3b4343ba01e93 Mon Sep 17 00:00:00 2001
+From: zhuyanlin <zhuyanlin1@xiaomi.com>
+Date: Mon, 30 Aug 2021 14:13:16 +0800
+Subject: [PATCH 2/2] uClibc++: add weak function for new/del operations.
+
+Let compiler could select function from cxx library
+or toolchain library.
+
+Change-Id: I85de5b0384ccdc231d76cf72e044ef42bb951fac
+---
+ include/basic_definitions | 2 ++
+ src/del_op.cpp            | 1 +
+ src/del_opnt.cpp          | 1 +
+ src/del_ops.cpp           | 1 +
+ src/del_opv.cpp           | 1 +
+ src/del_opvnt.cpp         | 1 +
+ src/del_opvs.cpp          | 1 +
+ src/new_handler.cpp       | 1 +
+ src/new_op.cpp            | 1 +
+ src/new_opnt.cpp          | 1 +
+ src/new_opv.cpp           | 1 +
+ src/new_opvnt.cpp         | 1 +
+ 13 files changed, 15 insertions(+)
+
+diff --git a/uClibc++/include/basic_definitions uClibc++/include/basic_definitions
+index 1a8dc31..d3d9fce 100644
+--- a/uClibc++/include/basic_definitions
++++ uClibc++/include/basic_definitions
+@@ -35,8 +35,10 @@
+
+ #ifdef __GNUC__
+ #define __UCLIBCXX_NORETURN __attribute__ ((__noreturn__))
++#define __UCLIBCXX_WEAK __attribute__ ((__weak__))
+ #else
+ #define __UCLIBCXX_NORETURN
++#define __UCLIBCXX_WEAK
+ #endif
+
+ #ifdef __GNUC__
+diff --git a/uClibc++/src/del_op.cpp uClibc++/src/del_op.cpp
+index 9485cee..3f52a0d 100644
+--- a/uClibc++/src/del_op.cpp
++++ uClibc++/src/del_op.cpp
+@@ -21,6 +21,7 @@
+ #include <cstdlib>
+ #include <func_exception>
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void operator delete(void* ptr) _UCXX_USE_NOEXCEPT{
+ 	free(ptr);
+ }
+diff --git a/uClibc++/src/del_opnt.cpp uClibc++/src/del_opnt.cpp
+index 4825912..a5284c6 100644
+--- a/uClibc++/src/del_opnt.cpp
++++ uClibc++/src/del_opnt.cpp
+@@ -22,6 +22,7 @@
+ #include <func_exception>
+
+ #ifndef NO_NOTHROW
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void operator delete(void* ptr, const std::nothrow_t& ) _UCXX_USE_NOEXCEPT {
+ 	free(ptr);
+ }
+diff --git a/uClibc++/src/del_ops.cpp uClibc++/src/del_ops.cpp
+index b914fc5..bce186f 100644
+--- a/uClibc++/src/del_ops.cpp
++++ uClibc++/src/del_ops.cpp
+@@ -22,6 +22,7 @@
+ #include <cstdlib>
+ #include <func_exception>
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void operator delete(void* ptr, std::size_t) _UCXX_USE_NOEXCEPT{
+ 	::operator delete (ptr);
+ }
+diff --git a/uClibc++/src/del_opv.cpp uClibc++/src/del_opv.cpp
+index deaad78..e7d60b7 100644
+--- a/uClibc++/src/del_opv.cpp
++++ uClibc++/src/del_opv.cpp
+@@ -21,6 +21,7 @@
+ #include <cstdlib>
+ #include <func_exception>
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void operator delete[](void * ptr) _UCXX_USE_NOEXCEPT{
+ 	free(ptr);
+ }
+diff --git a/uClibc++/src/del_opvnt.cpp uClibc++/src/del_opvnt.cpp
+index 71b7631..f1f0d62 100644
+--- a/uClibc++/src/del_opvnt.cpp
++++ uClibc++/src/del_opvnt.cpp
+@@ -22,6 +22,7 @@
+ #include <func_exception>
+
+ #ifndef NO_NOTHROW
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void operator delete[](void* ptr, const std::nothrow_t& ) _UCXX_USE_NOEXCEPT{
+ 	free(ptr);
+ }
+diff --git a/uClibc++/src/del_opvs.cpp uClibc++/src/del_opvs.cpp
+index 53ab7cc..709ef72 100644
+--- a/uClibc++/src/del_opvs.cpp
++++ uClibc++/src/del_opvs.cpp
+@@ -22,6 +22,7 @@
+ #include <cstdlib>
+ #include <func_exception>
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void operator delete[](void * ptr, std::size_t) _UCXX_USE_NOEXCEPT{
+ 	::operator delete[] (ptr);
+ }
+diff --git a/uClibc++/src/new_handler.cpp uClibc++/src/new_handler.cpp
+index a6efb9c..1001daa 100644
+--- a/uClibc++/src/new_handler.cpp
++++ uClibc++/src/new_handler.cpp
+@@ -24,6 +24,7 @@ const std::nothrow_t std::nothrow = { };
+ //Name selected to be compatable with g++ code
+ std::new_handler __new_handler;
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT std::new_handler std::set_new_handler(std::new_handler new_p) _UCXX_USE_NOEXCEPT{
+ 	std::new_handler retval = __new_handler;
+ 	__new_handler = new_p;
+diff --git a/uClibc++/src/new_op.cpp uClibc++/src/new_op.cpp
+index b0d2b78..bda66f0 100644
+--- a/uClibc++/src/new_op.cpp
++++ uClibc++/src/new_op.cpp
+@@ -21,6 +21,7 @@
+ #include <cstdlib>
+ #include <func_exception>
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void* operator new(std::size_t numBytes) _UCXX_THROW(std::bad_alloc)
+ {
+ 	//C++ stardard 5.3.4.8 requires that a valid pointer be returned for
+diff --git a/uClibc++/src/new_opnt.cpp uClibc++/src/new_opnt.cpp
+index c37903e..85069a8 100644
+--- a/uClibc++/src/new_opnt.cpp
++++ uClibc++/src/new_opnt.cpp
+@@ -22,6 +22,7 @@
+ #include <func_exception>
+
+ #ifndef NO_NOTHROW
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void* operator new(std::size_t numBytes, const std::nothrow_t& ) _UCXX_USE_NOEXCEPT{
+ 	return malloc(numBytes);
+ }
+diff --git a/uClibc++/src/new_opv.cpp uClibc++/src/new_opv.cpp
+index e39d5e5..72ee41f 100644
+--- a/uClibc++/src/new_opv.cpp
++++ uClibc++/src/new_opv.cpp
+@@ -21,6 +21,7 @@
+ #include <cstdlib>
+ #include <func_exception>
+
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void* operator new[](std::size_t numBytes)_UCXX_THROW(std::bad_alloc){
+ 	//C++ stardard 5.3.4.8 requires that a valid pointer be returned for
+ 	//a call to new(0). Thus:
+diff --git a/uClibc++/src/new_opvnt.cpp uClibc++/src/new_opvnt.cpp
+index 4874a7f..2247ebc 100644
+--- a/uClibc++/src/new_opvnt.cpp
++++ uClibc++/src/new_opvnt.cpp
+@@ -22,6 +22,7 @@
+ #include <func_exception>
+
+ #ifndef NO_NOTHROW
++__UCLIBCXX_WEAK
+ _UCXXEXPORT void* operator new[](std::size_t numBytes, const std::nothrow_t& ) _UCXX_USE_NOEXCEPT{
+ 	return malloc(numBytes);
+ }
+--
+2.25.1
+
