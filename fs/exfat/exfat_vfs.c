@@ -463,16 +463,23 @@ static off_t exfatfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   switch (whence)
     {
-      case SEEK_SET:
-          filep->f_pos = offset;
-          break;
-
       case SEEK_CUR:
           offset += filep->f_pos;
+
+      case SEEK_SET:
+          if (offset >= 0)
+            {
+              filep->f_pos = offset;
+            }
+          else
+            {
+              ret = -EINVAL;
+            }
+
           break;
 
       case SEEK_END:
-          filep->f_pos = priv->node->size;
+          filep->f_pos = priv->node->size + offset;
           break;
 
       default:
