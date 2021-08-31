@@ -92,7 +92,7 @@ else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 		APP_OFFSET := $(CONFIG_ESP32_OTA_SECONDARY_SLOT_OFFSET)
 	endif
 
-	APP_IMAGE      := nuttx_signed.bin
+	APP_IMAGE      := nuttx.signed.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 endif
 
@@ -113,14 +113,14 @@ define POSTBUILD
 		echo ""; \
 		echo "imgtool not found.  Please run: \"pip install imgtool\""; \
 		echo ""; \
-		echo "Run make again to create the nuttx_signed.bin image."; \
+		echo "Run make again to create the nuttx.signed.bin image."; \
 		exit 1; \
 	fi
 	imgtool sign --pad --pad-sig $(VERIFIED) --align 4 -v 0 \
 		-H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header \
 		-S $(CONFIG_ESP32_OTA_SLOT_SIZE) \
-		nuttx.bin nuttx_signed.bin
-	$(Q) echo "Generated: nuttx_signed.bin (MCUboot compatible)"
+		nuttx.bin nuttx.signed.bin
+	$(Q) echo "Generated: nuttx.signed.bin (MCUboot compatible)"
 endef
 else
 define POSTBUILD
