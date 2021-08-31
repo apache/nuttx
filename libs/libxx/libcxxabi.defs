@@ -55,6 +55,9 @@ else
 CPPSRCS += cxa_noexception.cpp
 endif
 
+# RTTI is required for building the libcxxabi library
+CXXFLAGS += -frtti
+
 DEPPATH += --dep-path libcxxabi/src
 VPATH += libcxxabi/src
 
