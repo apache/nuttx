@@ -163,6 +163,29 @@
 
 #  define noinstrument_function __attribute__ ((no_instrument_function))
 
+/* The nostackprotect_function attribute disables stack protection in
+ * sensitive functions, e.g., stack coloration routines.
+ */
+
+#if defined(__has_attribute)
+#  if __has_attribute(no_stack_protector)
+#    define nostackprotect_function __attribute__ ((no_stack_protector))
+#  endif
+#endif
+
+/* nostackprotect_function definition for older versions of GCC and Clang.
+ * Note that Clang does not support setting per-function optimizations,
+ * simply disable the entire optimization pass for the required function.
+ */
+
+#ifndef nostackprotect_function
+#  if defined(__clang__)
+#    define nostackprotect_function __attribute__ ((optnone))
+#  else
+#    define nostackprotect_function __attribute__ ((__optimize__ ("-fno-stack-protector")))
+#  endif
+#endif
+
 /* The unsued code or data */
 
 #  define unused_code __attribute__((unused))
@@ -425,6 +448,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 
 #  define unused_code
 #  define unused_data
@@ -564,6 +588,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 #  define unused_code
 #  define unused_data
 #  define formatlike(a)
@@ -674,6 +699,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 #  define unused_code
 #  define unused_data
 #  define formatlike(a)
@@ -739,6 +765,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 #  define unused_code
 #  define unused_data
 #  define formatlike(a)
