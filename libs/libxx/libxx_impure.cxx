@@ -22,7 +22,8 @@
 // Included Files
 //***************************************************************************
 
-#if defined(__has_include) && __has_include(<reent.h>)
+#if defined(__has_include)
+#if __has_include(<reent.h>)
 
 #include <reent.h>
 
@@ -58,4 +59,5 @@ extern "C"
    struct _reent *const __ATTRIBUTE_IMPURE_PTR__ _global_impure_ptr = &impure_data;
 }
 
+#  endif
 #endif
