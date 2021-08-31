@@ -250,6 +250,10 @@ endif # CONFIG_I2C
 
 ifeq ($(CONFIG_SPI),y)
 
+ifeq ($(CONFIG_SENSORS_AD5940),y)
+  CSRCS += ad5940.c
+endif
+
 ifeq ($(CONFIG_ADXL345_SPI),y)
   CSRCS += adxl345_spi.c
 endif

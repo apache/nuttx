@@ -43,6 +43,13 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
+config SENSORS_AD5940
+	bool "Analog Device AD5940 AFE Support"
+	default n
+	---help---
+		Enable support for the Analog Device AD5940 impedance and
+		electrochemical analog front end.
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
