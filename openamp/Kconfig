@@ -6,6 +6,7 @@
 config OPENAMP
 	bool "Open Asymmetric Multi Processing support"
 	default n
+	select DEV_SIMPLE_ADDRENV
 	---help---
 		Enable or disable Open Asymmetric Multi Processing features
 
