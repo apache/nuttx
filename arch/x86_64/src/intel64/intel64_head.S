@@ -290,8 +290,7 @@ clear_bss:
     jne     clear_bss
 
     // Properly setup RSP to idle stack
-    movabs  $idle_stack,    %rbx
-    add     $CONFIG_IDLETHREAD_STACKSIZE,   %rbx
+    movabs  $g_idle_topstack,    %rbx
     mov     %rbx,   %rsp
 
 
@@ -468,35 +467,3 @@ pt_low:
     .fill X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
     .fill X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
-/****************************************************************************
- * .bss
- ****************************************************************************/
-
-/* The stack for the IDLE task thread is declared in .bss.  NuttX boots and
- * initializes on the IDLE thread, then at the completion of OS startup, this
- * thread becomes the thread that executes when there is nothing else to
- * do in the system (see up_idle()).
- */
-
-    .section    .bss
-
-    .type    idle_stack, @object
-    .comm    idle_stack, CONFIG_IDLETHREAD_STACKSIZE, 32
-    .size    idle_stack, CONFIG_IDLETHREAD_STACKSIZE
-
-/****************************************************************************
- * .rodata
- ****************************************************************************/
-
-    .section    .rodata, "a"
-
-/* HEAP BASE: _sbss is the start of the BSS region (see ld.script) _ebss is
- * the end of the BSS region (see liker script). The heap continues from there
- * until the end of memory.
- */
-
-    .type    g_idle_topstack, @object
-g_idle_topstack:
-    .quad    _ebss
-    .size    g_idle_topstack, . - g_idle_topstack
-    .end
