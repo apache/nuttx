@@ -21,10 +21,10 @@
 UCLIBCXX_VERSION=0.2.5
 
 $(TOPDIR)/include/uClibc++:
-	curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(UCLIBCXX_VERSION).tar.bz2
-	$(Q) tar -xf uClibc++-$(UCLIBCXX_VERSION).tar.bz2
-	$(Q) $(DELFILE) uClibc++-$(UCLIBCXX_VERSION).tar.bz2
-	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) uClibc++
+#	curl -O -L https://git.busybox.net/uClibc++/snapshot/uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+#	$(Q) tar -xf uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+#	$(Q) $(DELFILE) uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+#	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) uClibc++
 	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/include $(TOPDIR)/include/uClibc++
 	$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
 
@@ -33,7 +33,7 @@ context:: $(TOPDIR)/include/uClibc++
 distclean::
 	$(Q) $(DELFILE) $(TOPDIR)/include/uClibc++/system_configuration.h
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/uClibc++
-	$(call DELDIR, uClibc++)
+#	$(call DELDIR, uClibc++)
 
 CPPSRCS += algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
 CPPSRCS += complex.cpp del_op.cpp del_opnt.cpp del_ops.cpp del_opv.cpp

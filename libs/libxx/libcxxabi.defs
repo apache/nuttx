@@ -29,11 +29,11 @@ libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) patch -p0 < 0001-libc-abi-avoid-the-waring-__EXCEPTIONS-is-not-define.patch
 	$(Q) touch $@
 
-distclean::
-	$(Q) $(DELFILE) libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
-	$(call DELDIR, libcxxabi)
+#distclean::
+#	$(Q) $(DELFILE) libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
+#	$(call DELDIR, libcxxabi)
 
-context:: libcxxabi
+#context:: libcxxabi
 
 ifeq ($(CONFIG_LIBCXXABI), y)
 CXXFLAGS += ${shell $(DEFINE) "$(CC)" LIBCXX_BUILDING_LIBCXXABI}
