@@ -30,6 +30,7 @@
 
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 
@@ -199,6 +200,33 @@ static void exfatfs_release_node(FAR struct exfat *ef,
     {
       exfat_cleanup_node(ef, node);
     }
+}
+
+static int exfatfs_getpath(FAR struct inode *inode,
+                           FAR struct exfat_node *node,
+                           FAR char *path)
+{
+  int ret;
+
+  if (node == NULL)
+    {
+      return inode_getpath(inode, path);
+    }
+
+  ret = exfatfs_getpath(inode, node->parent, path);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  path += strlen(path);
+  exfat_get_name(node, path);
+  if (node->child)
+    {
+      strcat(path, "/");
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -497,14 +525,21 @@ static off_t exfatfs_seek(FAR struct file *filep, off_t offset, int whence)
 static int exfatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct exfatfs_mountpt_s *fs;
+  FAR struct exfatfs_file_s *file;
   FAR struct inode *inode;
   FAR struct inode *drv;
 
   /* Recover our private data from the struct file instance */
 
+  file  = filep->f_priv;
   inode = filep->f_inode;
   fs    = inode->i_private;
   drv   = fs->drv;
+
+  if (cmd == FIOC_FILEPATH)
+    {
+      return exfatfs_getpath(inode, file->node, (FAR char *)(uintptr_t)arg);
+    }
 
   return drv->u.i_bops->ioctl(drv, cmd, arg);
 }
