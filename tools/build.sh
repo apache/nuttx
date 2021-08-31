@@ -69,6 +69,7 @@ function build_board()
   fi
 
   export PATH=${ROOTDIR}/prebuilts/$TOOLCHAIN/linux/$ARCH/bin:$PATH
+  export WASI_SDK_ROOT=${ROOTDIR}/prebuilts/clang/linux/wasm
 
   if ! make -C ${NUTTXDIR} EXTRAFLAGS=$EXTRAFLAGS ${@:2}; then
     echo "Error: ############# build ${1} fail ##############"
