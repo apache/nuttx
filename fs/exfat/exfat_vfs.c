@@ -588,6 +588,7 @@ static int exfatfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   FAR struct exfatfs_mountpt_s *fs;
   FAR struct exfatfs_file_s *priv;
+  FAR struct exfatfs_file_s *newpriv;
   FAR struct inode *inode;
   int ret;
 
@@ -597,14 +598,22 @@ static int exfatfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   inode = oldp->f_inode;
   fs    = inode->i_private;
 
+  newpriv = kmm_malloc(sizeof(*newpriv));
+  if (newpriv == NULL)
+    {
+      return -ENOMEM;
+    }
+
   ret = exfatfs_semtake(fs);
   if (ret < 0)
     {
+      kmm_free(newpriv);
       return ret;
     }
 
   exfat_get_node(priv->node);
-  newp->f_priv = priv;
+  newpriv->node = priv->node;
+  newp->f_priv = newpriv;
   exfatfs_semgive(fs);
 
   return ret;
