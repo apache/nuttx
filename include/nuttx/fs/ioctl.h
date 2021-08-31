@@ -139,10 +139,8 @@
                                            *      (ignored on most file systems)
                                            * OUT: None
                                            */
-#define FIOC_FILENAME   _FIOC(0x0004)     /* IN:  FAR const char ** pointer
-                                           * OUT: Pointer to a persistent file name
-                                           *      (Guaranteed to persist while the
-                                           *      file is open).
+#define FIOC_FILEPATH   _FIOC(0x0004)     /* IN:  FAR char *(length >= PATH_MAX)
+                                           * OUT: The full file path
                                            */
 #define FIOC_INTEGRITY  _FIOC(0x0005)     /* Run a consistency check on the
                                            *      file system media.
@@ -179,9 +177,6 @@
                                            */
 #define FIONCLEX        _FIOC(0x000e)     /* IN:  None
                                            * OUT: None
-                                           */
-#define FIOC_FILEPATH   _FIOC(0x000f)     /* IN:  FAR char *(length >= PATH_MAX)
-                                           * OUT: The full file path
                                            */
 
 /* NuttX file system ioctl definitions **************************************/

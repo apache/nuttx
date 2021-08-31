@@ -42,6 +42,8 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/lib/builtin.h>
 
+#include "inode/inode.h"
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_BINFS)
 
 /****************************************************************************
@@ -196,22 +198,27 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Only one IOCTL command is supported */
 
-  if (cmd == FIOC_FILENAME)
+  if (cmd == FIOC_FILEPATH)
     {
-      /* IN:  FAR char const ** pointer
-       * OUT: Pointer to a persistent file name (Guaranteed to persist while
-       *      the file is open).
-       */
+     /* IN:  FAR char *(length >= PATH_MAX)
+      * OUT: The full file path
+      */
 
-      FAR const char **ptr = (FAR const char **)((uintptr_t)arg);
+      FAR char *ptr = (FAR char *)((uintptr_t)arg);
       if (ptr == NULL)
         {
           ret = -EINVAL;
         }
       else
         {
-          *ptr = builtin_getname((int)((uintptr_t)filep->f_priv));
-          ret = OK;
+          ret = inode_getpath(filep->f_inode, ptr);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          strcat(ptr, "/");
+          strcat(ptr, builtin_getname((int)((uintptr_t)filep->f_priv)));
         }
     }
   else
