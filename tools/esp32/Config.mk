@@ -104,6 +104,30 @@ else
 	MK_QEMU_IMG=
 endif
 
+# MERGEBIN -- Merge raw binary files into a single file
+
+ifeq ($(CONFIG_ESP32_MERGE_BINS),y)
+define MERGEBIN
+	$(Q) if [ -z $(ESPTOOL_BINDIR) ]; then \
+		echo "MERGEBIN error: Missing argument for binary files directory."; \
+		echo "USAGE: make ESPTOOL_BINDIR=<dir>"; \
+		exit 1; \
+	fi
+	$(Q) if [ -z $(FLASH_SIZE) ]; then \
+		echo "Missing Flash memory size configuration for the ESP32 chip."; \
+		exit 1; \
+	fi
+	$(eval ESPTOOL_MERGEBIN_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
+	esptool.py -c esp32 merge_bin --output nuttx.merged.bin $(ESPTOOL_MERGEBIN_OPTS) $(ESPTOOL_BINS)
+	$(Q) echo nuttx.merged.bin >> nuttx.manifest
+	$(Q) echo "Generated: nuttx.merged.bin"
+endef
+else
+define MERGEBIN
+
+endef
+endif
+
 # POSTBUILD -- Perform post build operations
 
 ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
@@ -121,6 +145,7 @@ define POSTBUILD
 		-S $(CONFIG_ESP32_OTA_SLOT_SIZE) \
 		nuttx.bin nuttx.signed.bin
 	$(Q) echo "Generated: nuttx.signed.bin (MCUboot compatible)"
+	$(call MERGEBIN)
 endef
 else
 define POSTBUILD
@@ -139,6 +164,7 @@ define POSTBUILD
 	$(eval ESPTOOL_ELF2IMG_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
 	esptool.py -c esp32 elf2image $(ESPTOOL_ELF2IMG_OPTS) -o nuttx.bin nuttx
 	$(Q) echo "Generated: nuttx.bin (ESP32 compatible)"
+	$(call MERGEBIN)
 	$(Q) $(MK_QEMU_IMG)
 endef
 endif
