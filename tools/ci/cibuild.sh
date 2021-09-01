@@ -71,7 +71,7 @@ function python-tools {
 }
 
 function u-boot-tools {
-  if ! type mkimage > /dev/null; then
+  if ! type mkimage &> /dev/null; then
     case ${os} in
       Darwin)
         brew install u-boot-tools
@@ -81,7 +81,7 @@ function u-boot-tools {
 }
 
 function elf-toolchain {
-  if ! type x86_64-elf-gcc > /dev/null; then
+  if ! type x86_64-elf-gcc &> /dev/null; then
     case ${os} in
       Darwin)
         brew install x86_64-elf-gcc
@@ -228,7 +228,7 @@ function xtensa-esp32-gcc-toolchain {
 }
 
 function avr-gcc-toolchain {
-  if ! type avr-gcc > /dev/null; then
+  if ! type avr-gcc &> /dev/null; then
     case ${os} in
       Darwin)
         brew tap osx-cross/avr
@@ -291,7 +291,7 @@ function rx-gcc-toolchain {
 function c-cache {
   add_path "${prebuilt}"/ccache/bin
 
-  if ! type ccache > /dev/null; then
+  if ! type ccache &> /dev/null; then
     case ${os} in
       Darwin)
         brew install ccache
@@ -330,7 +330,7 @@ function binutils {
   mkdir -p "${prebuilt}"/bintools/bin
   add_path "${prebuilt}"/bintools/bin
 
-  if ! type objcopy > /dev/null; then
+  if ! type objcopy &> /dev/null; then
     case ${os} in
       Darwin)
         brew install binutils
