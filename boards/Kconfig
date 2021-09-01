@@ -3219,6 +3219,9 @@ endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
 endif
+if ARCH_CHIP_ESP32S2 && !ARCH_BOARD_CUSTOM
+source "boards/xtensa/esp32s2/common/Kconfig"
+endif
 if ARCH_BOARD_ESP32S2_SAOLA_1
 source "boards/xtensa/esp32s2/esp32s2-saola-1/Kconfig"
 endif
