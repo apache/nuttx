@@ -1,18 +1,6 @@
 /****************************************************************************
  * include/nuttx/mtd/nand_model.h
  *
- * ONFI Support.  The Open NAND Flash Interface (ONFI) is an industry
- * Workgroup made up of more than 100 companies that build, design-in, or
- * enable NAND Flash memory. This file provides definitions for standardized
- * ONFI NAND interfaces.
- *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This logic was based largely on Atmel sample code for the SAMA5D3x with
- * modifications for better integration with NuttX.  The Atmel sample code
- * has a BSD compatible license that requires this copyright notice:
- *
  *   Copyright (c) 2012, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
