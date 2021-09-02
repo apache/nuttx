@@ -116,6 +116,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 
+#ifdef CONFIG_RPTUN_LOADER
 static int rptun_store_open(FAR void *store_, FAR const char *path,
                             FAR const void **img_data);
 static void rptun_store_close(FAR void *store_);
@@ -124,6 +125,7 @@ static int rptun_store_load(FAR void *store_, size_t offset,
                             metal_phys_addr_t pa,
                             FAR struct metal_io_region *io,
                             char is_blocking);
+#endif
 
 static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t pa);
@@ -150,6 +152,7 @@ static const struct file_operations g_rptun_devops =
   .ioctl = rptun_dev_ioctl,
 };
 
+#ifdef CONFIG_RPTUN_LOADER
 static struct image_store_ops g_rptun_storeops =
 {
   .open     = rptun_store_open,
@@ -157,6 +160,7 @@ static struct image_store_ops g_rptun_storeops =
   .load     = rptun_store_load,
   .features = SUPPORT_SEEK,
 };
+#endif
 
 static sem_t g_rptun_sem = SEM_INITIALIZER(1);
 
@@ -389,6 +393,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return ret;
     }
 
+#ifdef CONFIG_RPTUN_LOADER
   if (RPTUN_GET_FIRMWARE(priv->dev))
     {
       struct rptun_store_s store =
@@ -406,6 +411,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       rsc = rproc->rsc_table;
     }
   else
+#endif
     {
       rsc = RPTUN_GET_RESOURCE(priv->dev);
       if (!rsc)
@@ -596,6 +602,7 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
   return ret;
 }
 
+#ifdef CONFIG_RPTUN_LOADER
 static int rptun_store_open(FAR void *store_,
                             FAR const char *path,
                             FAR const void **img_data)
@@ -662,6 +669,7 @@ static int rptun_store_load(FAR void *store_, size_t offset,
   file_seek(&store->file, offset, SEEK_SET);
   return file_read(&store->file, tmp, size);
 }
+#endif
 
 static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t pa)
